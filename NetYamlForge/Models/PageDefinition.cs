@@ -55,9 +55,9 @@ public class SectionConfirmationDef
 // ── セクションフック定義 ─────────────────────────────────────────────────
 /// <summary>
 /// セクション CRUD フック定義。entities の EntityHooksDefinition に相当。
-/// YAML キーは camelCase（beforeCreate / afterCreate 等）を使用します。
-/// snake_case（before_create 等）も受け付けます（SectionHooksConverter が処理）。
+/// YAML キーは camelCase（beforeCreate / afterCreate 等）を使用します（entities と統一）。
 /// フック名は EntityHookRegistry に登録された IEntityHook.Name と一致する必要があります。
+/// @presetName 形式で presets に定義したフックリストを参照できます（entities と同様）。
 /// </summary>
 public class SectionHooksDefinition
 {
@@ -67,26 +67,65 @@ public class SectionHooksDefinition
     public List<string> AfterUpdate  { get; set; } = new();
     public List<string> BeforeDelete { get; set; } = new();
     public List<string> AfterDelete  { get; set; } = new();
+    /// <summary>
+    /// 再利用可能なフックリスト。entities の hooks.presets に相当。
+    /// YAML: hooks: { presets: { common: [trim, audit_log] }, beforeCreate: [@common] }
+    /// </summary>
+    public Dictionary<string, List<string>>? Presets { get; set; }
+
+    /// <summary>@preset 参照を展開した実行順リストを返す（entities の GetExpandedHookList と統一動作）。</summary>
+    public List<string> GetExpandedHooks(List<string> hooks, Action<string>? onWarning = null)
+    {
+        if (hooks.Count == 0) return hooks;
+        var result = new List<string>();
+        var visiting = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var h in hooks)
+            ExpandEntry(h, result, visiting, onWarning);
+        return result;
+    }
+
+    private void ExpandEntry(string name, List<string> output, HashSet<string> visiting, Action<string>? onWarning)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return;
+        if (!name.StartsWith('@')) { output.Add(name); return; }
+
+        var presetName = name[1..].Trim();
+        if (Presets == null || !Presets.TryGetValue(presetName, out var preset))
+        { onWarning?.Invoke($"Hook preset '{presetName}' が定義されていません。"); return; }
+        if (!visiting.Add(presetName))
+        { onWarning?.Invoke($"Hook preset '{presetName}' に循環参照があります。"); return; }
+        foreach (var h in preset) ExpandEntry(h, output, visiting, onWarning);
+        visiting.Remove(presetName);
+    }
 }
 
 // ── セクション列定義 ─────────────────────────────────────────────────────
 /// <summary>
 /// セクション列定義。entities の ColumnDefinition に相当。
 /// YAML: columns: { col_name: { label: "表示名", type: string, hidden: false, ... } }
+/// type の有効値: string | int | long | decimal | double | bool | date | datetime |
+///               textarea | email | select | radio | color | money | rating | file
 /// </summary>
 public class SectionColumnDef : IColumnDef
 {
     public string? Label { get; set; }
-    /// <summary>string | int | decimal | bool | date | datetime | select</summary>
+    public string? LabelKey { get; set; }
+    public Dictionary<string, string>? LabelI18n { get; set; }
     public string Type { get; set; } = "string";
     public bool Hidden { get; set; }
     public bool Sortable { get; set; }
     public bool Searchable { get; set; }
-    /// <summary>type=select のときの選択肢。key=保存値/value=表示名。IColumnDef.OptionLabels として公開。</summary>
+    /// <summary>
+    /// 選択肢。リスト形式（保存値のみ）または辞書形式（key=保存値/value=表示名）の両方を受け付ける。
+    /// 辞書形式の場合は OptionLabels としても参照される。
+    /// YAML: options: [a, b] または options: { a: "Label A", b: "Label B" }
+    /// </summary>
     public Dictionary<string, string>? Options { get; set; }
     // IColumnDef.OptionLabels は Options にマップ
     Dictionary<string, string>? IColumnDef.OptionLabels => Options;
-    public string GetLabel(string fallback) => Label ?? fallback;
+    /// <summary>entities.ColumnDefinition.ForeignKey に相当。</summary>
+    public ForeignKeyDefinition? ForeignKey { get; set; }
+    public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
 // ── セクションフォーム定義 ───────────────────────────────────────────────
@@ -100,17 +139,28 @@ public class SectionFormGroupDef
     public List<string> Fields { get; set; } = new();
 }
 
-/// <summary>フォームフィールド個別定義。forms.field_defs 配下。</summary>
+/// <summary>
+/// フォームフィールド個別定義。forms の fieldDefs 配下。entities の FormDefinition に相当。
+/// type の有効値: string | int | long | decimal | double | bool | date | datetime |
+///               textarea | email | select | radio | color | money | rating | file
+/// </summary>
 public class SectionFormFieldDef
 {
     public string? Label { get; set; }
-    /// <summary>string | int | decimal | bool | date | datetime | select | textarea</summary>
+    public string? LabelKey { get; set; }
+    public Dictionary<string, string>? LabelI18n { get; set; }
     public string Type { get; set; } = "string";
     public bool Required { get; set; }
-    /// <summary>type=select のときの選択肢。key: 表示値</summary>
+    public bool Editable { get; set; } = true;
+    /// <summary>
+    /// 選択肢。リスト形式（保存値のみ）または辞書形式（key=保存値/value=表示名）の両方を受け付ける。
+    /// YAML: options: [a, b] または options: { a: "Label A", b: "Label B" }
+    /// </summary>
     public Dictionary<string, string>? Options { get; set; }
     public string? Placeholder { get; set; }
-    public string GetLabel(string fallback) => Label ?? fallback;
+    /// <summary>entities.FormDefinition.ForeignKey に相当。</summary>
+    public ForeignKeyDefinition? ForeignKey { get; set; }
+    public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
 // ── セクションページング定義 ──────────────────────────────────────────────
@@ -130,14 +180,18 @@ public class SectionPagingDef
 /// <summary>
 /// セクションフィルター定義。entities の FilterDefinition に相当。
 /// YAML: filters: { col: { label: "ラベル", type: like, options: { k: v } } }
+/// type の有効値 (entities.FilterDefinition と統一):
+///   like | eq | dropdown | date-range | range | toggle-group | bool-toggle |
+///   multi-select | checkbox | entity-picker | entity-multi-picker | gte | lte
 /// </summary>
 public class PageFilterDefinition
 {
     public string? Label { get; set; }
-    /// <summary>like | eq | select | dropdown | toggle_group | bool_toggle | date_range | range | gte | lte</summary>
+    public string? LabelKey { get; set; }
+    public Dictionary<string, string>? LabelI18n { get; set; }
     public string Type { get; set; } = "like";
     public Dictionary<string, string>? Options { get; set; }
-    public string GetLabel(string fallback) => Label ?? fallback;
+    public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
 /// <summary>ページのセクション（データグリッド）定義</summary>

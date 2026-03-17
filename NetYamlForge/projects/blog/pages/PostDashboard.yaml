@@ -7,7 +7,7 @@ sections:
   - id: drafts
     title: 下書き
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT post_id, title, author, created_at, updated_at
       FROM posts
@@ -19,19 +19,19 @@ sections:
       - author
       - created_at
       - updated_at
-    target_table: posts
-    target_primary_key: post_id
-    updatable_fields:
+    targetTable: posts
+    targetPrimaryKey: post_id
+    updatableFields:
       - status
       - published_at
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: published
     title: 公開中
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT post_id, title, author, published_at, view_count
       FROM posts
@@ -43,18 +43,18 @@ sections:
       - author
       - published_at
       - view_count
-    target_table: posts
-    target_primary_key: post_id
-    updatable_fields:
+    targetTable: posts
+    targetPrimaryKey: post_id
+    updatableFields:
       - status
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: archived
     title: アーカイブ
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT post_id, title, author, updated_at
       FROM posts
@@ -65,10 +65,10 @@ sections:
       - title
       - author
       - updated_at
-    target_table: posts
-    target_primary_key: post_id
-    updatable_fields:
+    targetTable: posts
+    targetPrimaryKey: post_id
+    updatableFields:
       - status
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

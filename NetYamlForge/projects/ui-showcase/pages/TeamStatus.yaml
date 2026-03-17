@@ -5,7 +5,7 @@ sections:
   - id: task_progress
     title: タスク達成率（progress_bars）
     component: progress_bars
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT member_name, completed_tasks, total_tasks,
              ROUND(completed_tasks * 100.0 / total_tasks, 1) AS achievement_rate,
@@ -13,33 +13,33 @@ sections:
       FROM team_performance
       ORDER BY achievement_rate DESC
     columns: [member_name, completed_tasks, total_tasks, achievement_rate, department]
-    label_field: member_name
-    progress_field: achievement_rate
-    sub_value_field: department
-    page_size: 20
+    labelField: member_name
+    progressField: achievement_rate
+    subValueField: department
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: pts_bar
     title: 今月獲得ポイント（bar_chart）
     component: bar_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT member_name, this_month_pts
       FROM team_performance
       ORDER BY this_month_pts DESC
     columns: [member_name, this_month_pts]
-    x_field: member_name
-    y_field: this_month_pts
+    xField: member_name
+    yField: this_month_pts
     color: "rgba(168,85,247,0.75)"
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: team_table
     title: チーム詳細（table）
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT member_name AS メンバー, department AS 部署,
              completed_tasks AS 完了, total_tasks AS 合計,
@@ -48,6 +48,6 @@ sections:
       FROM team_performance
       ORDER BY achievement_rate DESC
     columns: [メンバー, 部署, 完了, 合計, 達成率, 今月Pt]
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

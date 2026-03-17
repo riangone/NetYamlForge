@@ -6,7 +6,7 @@ template: UserRoleProfile
 sections:
   - id: user_directory
     title: User Directory
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id AS UserId,
@@ -30,12 +30,12 @@ sections:
       - Locale
       - LastLoginAt
       - CreatedAt
-    page_size: 40
+    pageSize: 40
     editable: true
-    read_only: false
-    target_table: AppUser
-    target_primary_key: Id
-    updatable_fields:
+    readOnly: false
+    targetTable: AppUser
+    targetPrimaryKey: Id
+    updatableFields:
       - DisplayName
       - Email
       - IsAdmin
@@ -57,7 +57,7 @@ sections:
 
   - id: user_activity
     title: User Activity Snapshot
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(a.UserName, ''), 'system') AS UserName,
@@ -72,6 +72,6 @@ sections:
       - EventCount
       - LastEventAt
       - LoginEvents
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true

@@ -5,7 +5,7 @@ sections:
   - id: kpi_cards
     title: 今月のKPI
     component: stat_cards
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT metric_name, metric_value, metric_icon, metric_delta, metric_sub
       FROM kpi_metrics
@@ -16,19 +16,19 @@ sections:
       - metric_icon
       - metric_delta
       - metric_sub
-    label_field: metric_name
-    value_field: metric_value
-    icon_field: metric_icon
-    delta_field: metric_delta
-    sub_value_field: metric_sub
-    page_size: 20
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    subValueField: metric_sub
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: kpi_table
     title: KPI詳細テーブル（table コンポーネント）
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT metric_name AS 指標, metric_value AS 値,
              metric_icon AS アイコン, metric_delta AS 前期比, metric_sub AS 補足
@@ -40,6 +40,6 @@ sections:
       - アイコン
       - 前期比
       - 補足
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

@@ -4,7 +4,7 @@ description: End-to-end order execution board with shipment state, ownership, an
 sections:
   - id: order_board
     title: Order Board
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId,
@@ -32,6 +32,6 @@ sections:
       - Status
       - Freight
       - Amount
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true

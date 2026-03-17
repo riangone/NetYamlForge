@@ -1,13 +1,13 @@
 title: 顧客リスク監視 / Customer Risk Radar
 description: 遅延比率・受注金額をもとに優先フォロー顧客を抽出します。
 
-main_table: Customers
+mainTable: Customers
 
 sections:
   - id: risk_customer
     title: フォロー優先顧客
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId,
@@ -43,9 +43,9 @@ sections:
       - DelayRate
       - Revenue
       - RiskLevel
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       CompanyName:
         label: 顧客名

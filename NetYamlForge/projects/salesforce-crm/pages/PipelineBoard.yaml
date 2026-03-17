@@ -4,7 +4,7 @@ description: Board-ready stage distribution and top deals similar to Salesforce 
 sections:
   - id: stage_board
     title: Stage Board
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.Status AS Stage,
@@ -20,13 +20,13 @@ sections:
       - DealCount
       - TotalValue
       - AvgDealValue
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: top_deals
     title: Top Deals
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS OpportunityId,
@@ -45,9 +45,9 @@ sections:
       - Stage
       - Amount
       - TargetCloseDate
-    page_size: 25
+    pageSize: 25
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Stage:
         label: Stage

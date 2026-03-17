@@ -1,13 +1,13 @@
 title: 出荷優先度キュー / Fulfillment Queue
 description: 納期超過リスクの高い受注を優先順で可視化します。
 
-main_table: Orders
+mainTable: Orders
 
 sections:
   - id: queue
     title: 優先対応受注
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId,
@@ -44,9 +44,9 @@ sections:
       - Revenue
       - Status
       - ShipCountry
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Priority:
         label: 優先度

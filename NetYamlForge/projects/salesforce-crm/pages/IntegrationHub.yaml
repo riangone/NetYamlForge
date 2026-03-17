@@ -4,7 +4,7 @@ description: Central registry of integration endpoints, data contracts, and sync
 sections:
   - id: integration_endpoints
     title: Integration Endpoints
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         'CustomerSync' AS IntegrationName,
@@ -44,9 +44,9 @@ sections:
       - Status
       - Schedule
       - LastRunAt
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       IntegrationName:
         label: Integration
@@ -60,7 +60,7 @@ sections:
 
   - id: sync_health
     title: Sync Health
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(Entity, ''), 'system') AS Domain,
@@ -77,9 +77,9 @@ sections:
       - ErrorEvents
       - WebhookEvents
       - LastEventAt
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Domain:
         label: Domain

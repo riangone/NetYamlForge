@@ -6,7 +6,7 @@ template: ExecutiveCockpit
 sections:
   - id: kpi_strip
     title: KPI Strip
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 'Open Pipeline' AS Metric, CAST(COUNT(*) AS TEXT) AS Value, 'Orders.Status = Open' AS Note
       FROM Orders WHERE Status = 'Open'
@@ -23,13 +23,13 @@ sections:
       - Metric
       - Value
       - Note
-    page_size: 10
+    pageSize: 10
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: stage_mix
     title: Stage Mix
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Status AS Stage,
@@ -42,13 +42,13 @@ sections:
       - Stage
       - Deals
       - WeightedValue
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: strategic_accounts
     title: Strategic Accounts
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId,
@@ -70,6 +70,6 @@ sections:
       - DealCount
       - Revenue
       - RiskSignals
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

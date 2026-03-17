@@ -4,7 +4,7 @@ description: Case-like operational cockpit for delayed and canceled opportunitie
 sections:
   - id: case_backlog
     title: Case Backlog
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS CaseId,
@@ -30,9 +30,9 @@ sections:
       - RequiredDate
       - CaseStatus
       - Severity
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Account:
         label: Account
@@ -46,7 +46,7 @@ sections:
 
   - id: service_health
     title: Service Health by Region
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.Country,
@@ -62,6 +62,6 @@ sections:
       - TotalCases
       - CriticalCases
       - HighCases
-    page_size: 25
+    pageSize: 25
     editable: false
-    read_only: true
+    readOnly: true

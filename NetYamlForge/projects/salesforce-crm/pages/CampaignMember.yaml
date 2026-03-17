@@ -4,7 +4,7 @@ description: Campaign member progression and response metrics by account segment
 sections:
   - id: campaign_members
     title: Campaign Members
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS MemberId,
@@ -28,6 +28,6 @@ sections:
       - MemberState
       - RelatedDeals
       - LastResponseAt
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true

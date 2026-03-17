@@ -2,7 +2,7 @@ title: Starter Overview
 titleKey: projects.tmp-mode-raw.pages.starterOverview.title
 description: Auto-generated starter page
 descriptionKey: projects.tmp-mode-raw.pages.starterOverview.description
-main_table: customers
+mainTable: customers
 
 
 ui:
@@ -14,11 +14,11 @@ sections:
   - id: customer_list
     title: Customer List
     titleKey: projects.tmp-mode-raw.pages.starterOverview.sections.0.title
-    source_type: table
+    sourceType: table
     source: customers
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     ui:
       component: DataTable
       selectable: none

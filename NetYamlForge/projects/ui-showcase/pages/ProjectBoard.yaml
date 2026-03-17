@@ -5,7 +5,7 @@ sections:
   - id: task_board
     title: タスクボード（kanban）
     component: kanban
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, title, assignee, status, priority, due_date
       FROM tasks
@@ -19,17 +19,17 @@ sections:
           ELSE 6
         END, id
     columns: [id, title, assignee, status, priority, due_date]
-    group_by: status
-    card_title: title
-    card_subtitle: assignee
-    page_size: 50
+    groupBy: status
+    cardTitle: title
+    cardSubtitle: assignee
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: task_table
     title: タスク一覧（table）
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, title, assignee AS 担当, status AS ステータス,
              priority AS 優先度, due_date AS 期限
@@ -39,6 +39,6 @@ sections:
       ステータス:
         label: ステータス
         type: eq
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

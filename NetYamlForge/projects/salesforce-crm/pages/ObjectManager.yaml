@@ -4,7 +4,7 @@ description: Metadata inventory for CRM objects, lifecycle status, and governanc
 sections:
   - id: object_catalog
     title: Object Catalog
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         m.name AS ObjectName,
@@ -30,9 +30,9 @@ sections:
       - DefinitionSize
       - Domain
       - GovernanceState
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       ObjectName:
         label: Object Name
@@ -46,7 +46,7 @@ sections:
 
   - id: object_activity
     title: Object Activity
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
@@ -61,9 +61,9 @@ sections:
       - EventCount
       - FirstSeenAt
       - LastSeenAt
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Entity:
         label: Entity

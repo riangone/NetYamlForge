@@ -4,7 +4,7 @@ description: Build and compare quote bundles from opportunity lines with discoun
 sections:
   - id: quote_candidates
     title: Quote Candidates
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS QuoteId,
@@ -27,13 +27,13 @@ sections:
       - GrossAmount
       - DiscountAmount
       - NetAmount
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: quote_lines
     title: Quote Lines
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         od.OrderDetailId AS LineId,
@@ -54,6 +54,6 @@ sections:
       - Quantity
       - Discount
       - NetValue
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true

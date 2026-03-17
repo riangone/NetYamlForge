@@ -4,13 +4,13 @@ description: ブログ記事の詳細とコメントを表示します
 
 template: BlogDetail
 
-main_table: posts
+mainTable: posts
 
 sections:
   - id: posts
     title: ""
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT p.post_id, p.title, p.slug, p.content, p.excerpt, p.author,
              p.published_at, p.view_count,
@@ -29,9 +29,9 @@ sections:
       - view_count
       - category_name
       - category_color
-    page_size: 1
+    pageSize: 1
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       post_id:
         label: Post ID
@@ -40,7 +40,7 @@ sections:
   - id: comments
     title: コメント
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT comment_id, author_name, content, created_at
       FROM comments
@@ -51,8 +51,8 @@ sections:
       - author_name
       - content
       - created_at
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     foreign_key: post_id
-    local_foreign_key: post_id
+    localForeignKey: post_id

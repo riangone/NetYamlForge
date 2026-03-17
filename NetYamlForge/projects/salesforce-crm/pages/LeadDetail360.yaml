@@ -4,7 +4,7 @@ description: 360-degree lead profile with qualification, touch history, and acco
 sections:
   - id: lead_profile
     title: Lead Profile
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS LeadId,
@@ -36,9 +36,9 @@ sections:
       - OpportunityCount
       - LastActivityDate
       - LifetimeValue
-    page_size: 35
+    pageSize: 35
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       LeadName:
         label: Lead Name
@@ -52,7 +52,7 @@ sections:
 
   - id: lead_timeline
     title: Lead Timeline
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS TimelineId,
@@ -80,9 +80,9 @@ sections:
       - EventType
       - EventValue
       - Note
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       LeadName:
         label: Lead Name

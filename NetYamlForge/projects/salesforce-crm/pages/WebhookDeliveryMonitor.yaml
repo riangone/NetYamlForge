@@ -6,7 +6,7 @@ template: WebhookDeliveryMonitor
 sections:
   - id: webhook_events
     title: Webhook Events
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id AS EventId,
@@ -35,9 +35,9 @@ sections:
       - DeliveryStatus
       - RetryCount
       - CreatedAt
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Domain:
         label: Domain
@@ -48,7 +48,7 @@ sections:
 
   - id: endpoint_reliability
     title: Endpoint Reliability
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(Entity, ''), 'system') AS Endpoint,
@@ -72,6 +72,6 @@ sections:
       - RetryCount
       - SuccessRate
       - LastEventAt
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true

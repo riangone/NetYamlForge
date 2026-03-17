@@ -4,7 +4,7 @@ description: Flow-style automation registry for event triggers, conditions, and 
 sections:
   - id: rules
     title: Automation Rules
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         RuleId,
@@ -22,6 +22,6 @@ sections:
       - Action
       - State
       - UpdatedAt
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true

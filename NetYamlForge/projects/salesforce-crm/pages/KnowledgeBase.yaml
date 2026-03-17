@@ -4,7 +4,7 @@ description: Curated service knowledge articles with lifecycle state and effecti
 sections:
   - id: knowledge_articles
     title: Knowledge Articles
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 1001 AS ArticleId, 'Order Delay Resolution Playbook' AS Title, 'Service' AS Domain, 'Published' AS State, 92 AS UsefulnessScore, datetime('now', '-2 day') AS UpdatedAt
       UNION ALL
@@ -22,6 +22,6 @@ sections:
       - State
       - UsefulnessScore
       - UpdatedAt
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true

@@ -9,7 +9,7 @@ ui:
 sections:
   - id: kpi_snapshot
     title: 今日概览
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT '今日打卡人数' AS Metric, CAST((SELECT COUNT(*) FROM AttendanceRecord WHERE WorkDate = date('now','localtime')) AS TEXT) AS Value
       UNION ALL
@@ -21,13 +21,13 @@ sections:
     columns:
       - Metric
       - Value
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: pending_todos
     title: 待办事项
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         lr.Id AS RequestId,
@@ -60,13 +60,13 @@ sections:
       - StartOrWorkDate
       - EndDateOrHours
       - Status
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: today_attendance
     title: 今日打卡记录
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         ar.Id AS RecordId,
@@ -92,6 +92,6 @@ sections:
       - CheckInTime
       - CheckOutTime
       - AttendanceStatus
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

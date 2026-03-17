@@ -4,7 +4,7 @@ description: Operational tracker for bulk data import/export jobs and validation
 sections:
   - id: data_jobs
     title: Data Jobs
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 5001 AS JobId, 'Import' AS JobType, 'Customer Master' AS Dataset, 'Completed' AS Status, 120 AS ProcessedRows, 2 AS ErrorRows, datetime('now', '-3 hour') AS ExecutedAt
       UNION ALL
@@ -21,6 +21,6 @@ sections:
       - ProcessedRows
       - ErrorRows
       - ExecutedAt
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true

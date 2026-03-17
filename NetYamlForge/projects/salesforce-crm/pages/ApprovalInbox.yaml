@@ -6,7 +6,7 @@ template: ApprovalInbox
 sections:
   - id: pending_approvals
     title: Pending Approvals
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS ApprovalId,
@@ -40,12 +40,12 @@ sections:
       - Status
       - ApprovalRisk
       - ApprovalReason
-    page_size: 50
+    pageSize: 50
     editable: true
-    read_only: false
-    target_table: Orders
-    target_primary_key: OrderId
-    updatable_fields:
+    readOnly: false
+    targetTable: Orders
+    targetPrimaryKey: OrderId
+    updatableFields:
       - Status
     filters:
       Account:

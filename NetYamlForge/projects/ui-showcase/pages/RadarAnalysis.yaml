@@ -5,27 +5,27 @@ sections:
   - id: team_radar
     title: チームスキルレーダー（radar_chart — 多系列）
     component: radar_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT skill_axis, alice_score, bob_score, carol_score
       FROM team_radar
       ORDER BY id
     columns: [skill_axis, alice_score, bob_score, carol_score]
-    label_field: skill_axis
-    y_field: "alice_score,bob_score,carol_score"
-    page_size: 20
+    labelField: skill_axis
+    yField: "alice_score,bob_score,carol_score"
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: single_radar
     title: Alice のスキルプロファイル（radar_chart — 単系列）
     component: radar_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT skill_axis, alice_score FROM team_radar ORDER BY id
     columns: [skill_axis, alice_score]
-    label_field: skill_axis
-    y_field: alice_score
-    page_size: 20
+    labelField: skill_axis
+    yField: alice_score
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

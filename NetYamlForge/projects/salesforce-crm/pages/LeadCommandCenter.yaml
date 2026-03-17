@@ -4,7 +4,7 @@ description: Qualification-first page that mirrors Salesforce lead operation rhy
 sections:
   - id: fresh_leads
     title: Fresh Leads
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS LeadId,
@@ -26,9 +26,9 @@ sections:
       - Country
       - City
       - LeadStage
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Country:
         label: Country
@@ -39,7 +39,7 @@ sections:
 
   - id: follow_up_queue
     title: Follow-up Queue
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS LeadId,
@@ -63,6 +63,6 @@ sections:
       - LastActivityDate
       - OpportunityTouches
       - Temperature
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true

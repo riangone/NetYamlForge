@@ -4,7 +4,7 @@ description: Rule recommendations for routing leads and cases to owners based on
 sections:
   - id: owner_capacity
     title: Owner Capacity
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         e.EmployeeId AS OwnerId,
@@ -26,13 +26,13 @@ sections:
       - ActiveWorkload
       - HighRiskLoad
       - CapacityState
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: assignment_candidates
     title: Assignment Candidates
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS QueueId,
@@ -62,6 +62,6 @@ sections:
       - CurrentOwnerId
       - SuggestedTier
       - RuleHint
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true

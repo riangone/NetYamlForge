@@ -9,7 +9,7 @@ ui:
 sections:
   - id: department_kpi
     title: 部门人力概览
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         d.Id AS DepartmentId,
@@ -29,13 +29,13 @@ sections:
       - DepartmentStatus
       - EmployeeCount
       - ActiveEmployeeCount
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: shift_load_today
     title: 今日班次覆盖
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         s.Id AS ShiftId,
@@ -59,13 +59,13 @@ sections:
       - EndTime
       - Status
       - AssignedToday
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: attendance_trend
     title: 最近7天出勤与加班申请
-    source_type: custom
+    sourceType: custom
     source: |
       WITH RECURSIVE days(day) AS (
         SELECT date('now','localtime','-6 day')
@@ -96,6 +96,6 @@ sections:
       - WorkDate
       - AttendanceCount
       - OvertimeRequestCount
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

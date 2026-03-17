@@ -6,7 +6,7 @@ template: AttributionDashboard
 sections:
   - id: attribution_summary
     title: Attribution Summary
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         CASE
@@ -31,13 +31,13 @@ sections:
       - AttributedWon
       - AttributedPipeline
       - AttributedRisk
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: attribution_deals
     title: Attributed Deals
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS OpportunityId,
@@ -64,9 +64,9 @@ sections:
       - CreatedDate
       - Amount
       - AttributedSource
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Account:
         label: Account

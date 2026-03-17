@@ -4,7 +4,7 @@ description: Contact intelligence workspace with engagement, account links, and 
 sections:
   - id: contacts
     title: Contacts
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS ContactId,
@@ -28,6 +28,6 @@ sections:
       - Phone
       - Touchpoints
       - LastTouchDate
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true

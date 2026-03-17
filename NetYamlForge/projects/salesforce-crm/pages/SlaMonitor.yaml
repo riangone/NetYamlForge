@@ -6,7 +6,7 @@ template: SlaMonitor
 sections:
   - id: sla_watchlist
     title: SLA Watchlist
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS SlaId,
@@ -48,12 +48,12 @@ sections:
       - DelayDays
       - SlaState
       - ActionHint
-    page_size: 60
+    pageSize: 60
     editable: true
-    read_only: false
-    target_table: Orders
-    target_primary_key: OrderId
-    updatable_fields:
+    readOnly: false
+    targetTable: Orders
+    targetPrimaryKey: OrderId
+    updatableFields:
       - Status
     filters:
       Account:

@@ -6,7 +6,7 @@ template: CaseDetail
 sections:
   - id: case_detail
     title: Case Detail
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS CaseId,
@@ -49,12 +49,12 @@ sections:
       - Freight
       - Severity
       - OpenDays
-    page_size: 40
+    pageSize: 40
     editable: true
-    read_only: false
-    target_table: Orders
-    target_primary_key: OrderId
-    updatable_fields:
+    readOnly: false
+    targetTable: Orders
+    targetPrimaryKey: OrderId
+    updatableFields:
       - Status
       - EmployeeId
       - RequiredDate
@@ -75,7 +75,7 @@ sections:
 
   - id: case_activity
     title: Case Activity
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id,
@@ -92,6 +92,6 @@ sections:
       - Action
       - Detail
       - CreatedAt
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true

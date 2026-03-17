@@ -6,7 +6,7 @@ template: AuditTrail
 sections:
   - id: recent_events
     title: Recent Events
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id,
@@ -24,9 +24,9 @@ sections:
       - Entity
       - Detail
       - CreatedAt
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       UserName:
         label: User
@@ -43,7 +43,7 @@ sections:
 
   - id: activity_by_user
     title: Activity by User
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(UserName, ''), 'system') AS UserName,
@@ -56,13 +56,13 @@ sections:
       - UserName
       - EventCount
       - LastEventAt
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: activity_by_entity
     title: Activity by Entity
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
@@ -75,13 +75,13 @@ sections:
       - Entity
       - EventCount
       - LastEventAt
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: hook_rejected_events
     title: Hook Rejected Events
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id,
@@ -123,6 +123,6 @@ sections:
       - ReasonCode
       - RawDetail
       - CreatedAt
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

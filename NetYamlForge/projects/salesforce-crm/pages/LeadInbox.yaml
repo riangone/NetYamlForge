@@ -4,7 +4,7 @@ description: Operational lead queue for triage, qualification, and next-touch pr
 sections:
   - id: lead_queue
     title: Lead Queue
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         l.LeadId AS LeadId,
@@ -31,9 +31,9 @@ sections:
       - OpportunityTouches
       - LastActivityDate
       - LeadScore
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       LeadName:
         label: Lead Name

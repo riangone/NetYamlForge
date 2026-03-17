@@ -4,7 +4,7 @@ description: Billing and collection visibility for invoiced amounts, outstanding
 sections:
   - id: invoices
     title: Invoices
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS InvoiceId,
@@ -29,6 +29,6 @@ sections:
       - InvoiceAmount
       - PaidAmount
       - OutstandingAmount
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true

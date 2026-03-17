@@ -2,13 +2,13 @@ title: 配送遅延監視
 title_en: Shipping Delay Monitor
 description: 出荷遅延と期限超過受注を確認します。
 
-main_table: Orders
+mainTable: Orders
 
 sections:
   - id: delayed_orders
     title: 遅延受注
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId,
@@ -35,9 +35,9 @@ sections:
       - Status
       - ShipCountry
       - DelayDays
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Customer:
         label: 顧客

@@ -4,13 +4,13 @@ description: 公開されているブログ記事の一覧です
 
 template: BlogList
 
-main_table: posts
+mainTable: posts
 
 sections:
   - id: posts
     title: 記事一覧
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT p.post_id, p.title, p.slug, p.excerpt, p.author,
              p.published_at, p.view_count,
@@ -29,9 +29,9 @@ sections:
       - view_count
       - category_name
       - category_color
-    page_size: 9
+    pageSize: 9
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       title:
         label: タイトルで検索

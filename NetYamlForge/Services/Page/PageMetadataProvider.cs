@@ -26,8 +26,10 @@ public class PageMetadataProvider : IPageMetadataProvider
         if (!Directory.Exists(pagesDir)) return;
         var loadErrors = new List<string>();
 
+        // pages/*.yaml は entities/*.yml と同じ camelCase 規約を使用します。
+        // 旧 snake_case キー（source_type, page_size 等）は廃止。camelCase（sourceType, pageSize）を使用してください。
         var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(UnderscoredNamingConvention.Instance)
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .WithTypeConverter(new SectionColumnsConverter())
             .WithTypeConverter(new SectionHooksConverter())
             .IgnoreUnmatchedProperties()
@@ -115,28 +117,23 @@ public class SectionColumnsConverter : IYamlTypeConverter
 }
 
 /// <summary>
-/// pages/*.yaml の hooks フィールドを camelCase キーでデシリアライズするコンバーター。
-/// entities YAML と同様に beforeCreate / afterCreate 等の camelCase キーを使用します。
-/// snake_case (before_create) も受け付けます（大文字小文字・アンダースコア無視）。
-/// 各値は単一文字列またはリスト両形式をサポートします。
+/// pages/*.yaml の hooks フィールドをデシリアライズするコンバーター。
+/// camelCase キー（beforeCreate / afterCreate 等）が正規形式。entities YAML と統一。
+/// 旧 snake_case (before_create) も後方互換として受け付ける。
+/// 各値は単一文字列またはリスト両形式をサポート。
+/// presets キーで @presetName 形式の再利用フックリストを定義可能（entities と統一）。
 /// </summary>
 public class SectionHooksConverter : IYamlTypeConverter
 {
-    // camelCase / snake_case → プロパティセッター名の正規化マップ
+    // camelCase / snake_case → プロパティ名の正規化マップ（後方互換）
     private static readonly Dictionary<string, string> _keyMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["beforecreate"]  = nameof(SectionHooksDefinition.BeforeCreate),
-        ["before_create"] = nameof(SectionHooksDefinition.BeforeCreate),
         ["aftercreate"]   = nameof(SectionHooksDefinition.AfterCreate),
-        ["after_create"]  = nameof(SectionHooksDefinition.AfterCreate),
         ["beforeupdate"]  = nameof(SectionHooksDefinition.BeforeUpdate),
-        ["before_update"] = nameof(SectionHooksDefinition.BeforeUpdate),
         ["afterupdate"]   = nameof(SectionHooksDefinition.AfterUpdate),
-        ["after_update"]  = nameof(SectionHooksDefinition.AfterUpdate),
         ["beforedelete"]  = nameof(SectionHooksDefinition.BeforeDelete),
-        ["before_delete"] = nameof(SectionHooksDefinition.BeforeDelete),
         ["afterdelete"]   = nameof(SectionHooksDefinition.AfterDelete),
-        ["after_delete"]  = nameof(SectionHooksDefinition.AfterDelete),
     };
 
     public bool Accepts(Type type) => type == typeof(SectionHooksDefinition);
@@ -149,29 +146,27 @@ public class SectionHooksConverter : IYamlTypeConverter
         while (!parser.TryConsume<MappingEnd>(out _))
         {
             var key = parser.Consume<Scalar>().Value;
-
-            // 値を List<string> としてパース（単一文字列 or シーケンス）
-            List<string> hookList;
-            if (parser.TryConsume<SequenceStart>(out _))
-            {
-                hookList = new List<string>();
-                while (!parser.TryConsume<SequenceEnd>(out _))
-                    hookList.Add(parser.Consume<Scalar>().Value);
-            }
-            else if (parser.Current is Scalar { Value: "" or "~" or "null" })
-            {
-                parser.MoveNext();
-                hookList = new List<string>();
-            }
-            else
-            {
-                hookList = new List<string> { parser.Consume<Scalar>().Value };
-            }
-
-            // 正規化キーでプロパティに設定
             var normalizedKey = key.Replace("_", "").ToLowerInvariant();
-            if (_keyMap.TryGetValue(normalizedKey, out var propName) ||
-                _keyMap.TryGetValue(key, out propName))
+
+            if (normalizedKey == "presets")
+            {
+                // presets: { presetName: [hook1, hook2], ... }
+                var presets = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                if (parser.TryConsume<MappingStart>(out _))
+                {
+                    while (!parser.TryConsume<MappingEnd>(out _))
+                    {
+                        var presetName = parser.Consume<Scalar>().Value;
+                        presets[presetName] = ReadHookList(parser);
+                    }
+                }
+                result.Presets = presets;
+                continue;
+            }
+
+            var hookList = ReadHookList(parser);
+
+            if (_keyMap.TryGetValue(normalizedKey, out var propName))
             {
                 var prop = typeof(SectionHooksDefinition).GetProperty(propName);
                 prop?.SetValue(result, hookList);
@@ -179,6 +174,23 @@ public class SectionHooksConverter : IYamlTypeConverter
         }
 
         return result;
+    }
+
+    private static List<string> ReadHookList(IParser parser)
+    {
+        if (parser.TryConsume<SequenceStart>(out _))
+        {
+            var list = new List<string>();
+            while (!parser.TryConsume<SequenceEnd>(out _))
+                list.Add(parser.Consume<Scalar>().Value);
+            return list;
+        }
+        if (parser.Current is Scalar { Value: "" or "~" or "null" })
+        {
+            parser.MoveNext();
+            return new List<string>();
+        }
+        return new List<string> { parser.Consume<Scalar>().Value };
     }
 
     public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)

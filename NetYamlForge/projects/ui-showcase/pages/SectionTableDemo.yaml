@@ -7,7 +7,7 @@ sections:
   - id: task_columns
     title: "① columns 定義（ラベル・型・非表示・sortable）"
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, title, assignee, status, priority, due_date
       FROM tasks
@@ -47,15 +47,15 @@ sections:
         type: date
         sortable: true
     paging:
-      page_size: 8
+      pageSize: 8
       mode: numbered
-      enable_count: true
+      enableCount: true
 
   # ② filters に複数タイプを定義
   - id: task_filters
     title: "② filters 定義（like / select / toggle_group / date_range）"
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, title, assignee, status, priority, due_date
       FROM tasks
@@ -84,7 +84,7 @@ sections:
         type: like
       status:
         label: ステータス
-        type: toggle_group
+        type: toggle-group
         options:
           todo: "Todo"
           in_progress: "In Progress"
@@ -100,15 +100,15 @@ sections:
           Low: "🟢 Low"
       due_date:
         label: 期限日
-        type: date_range
+        type: date-range
     paging:
-      page_size: 8
+      pageSize: 8
 
   # ③ paging を小さく設定してページネーションを確認
   - id: catalog_paging
     title: "③ paging 定義（3件/ページ）"
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, item_name, category, quantity, unit_price, supplier
       FROM catalog_items
@@ -136,7 +136,7 @@ sections:
     filters:
       category:
         label: カテゴリ
-        type: toggle_group
+        type: toggle-group
         options:
           Electronics: Electronics
           Furniture: Furniture
@@ -145,13 +145,13 @@ sections:
         label: 単価
         type: range
     paging:
-      page_size: 3
+      pageSize: 3
 
   # ④ forms の create と update を個別定義（共通フックあり）
   - id: catalog_crud
     title: "④ forms: create / update を別定義 + 共通フック"
     component: table
-    source_type: table
+    sourceType: table
     source: catalog_items
     columns:
       id:
@@ -196,7 +196,7 @@ sections:
       update:                        # "edit" と "update" は相互エイリアス
         title: "商品を編集"
         fields: [category, quantity, unit_price]  # 編集時は名前・仕入先を変更不可
-    field_defs:
+    fieldDefs:
       item_name:
         label: 商品名
         type: string
@@ -229,17 +229,17 @@ sections:
       beforeUpdate: [validate_required]
       afterUpdate:  [audit_log]
     paging:
-      page_size: 5
+      pageSize: 5
     editable: true
-    read_only: false
-    target_table: catalog_items
-    target_primary_key: id
+    readOnly: false
+    targetTable: catalog_items
+    targetPrimaryKey: id
 
   # ⑤ カスタムフック（ui-showcase プロジェクト固有）
   - id: catalog_custom_hooks
     title: "⑤ カスタムフック（validate_quantity_positive / validate_price_positive / normalize_item_name）"
     component: table
-    source_type: table
+    sourceType: table
     source: catalog_items
     columns:
       id:
@@ -273,7 +273,7 @@ sections:
       update:
         title: "商品を編集（カスタムバリデーション付き）"
         fields: [category, quantity, unit_price]
-    field_defs:
+    fieldDefs:
       item_name:
         label: 商品名
         type: string
@@ -312,7 +312,7 @@ sections:
         - validate_price_positive
       afterUpdate:  [audit_log]
     paging:
-      page_size: 5
+      pageSize: 5
     editable: true
-    target_table: catalog_items
-    target_primary_key: id
+    targetTable: catalog_items
+    targetPrimaryKey: id

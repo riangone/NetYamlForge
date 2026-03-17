@@ -4,7 +4,7 @@ description: Unified queue combining lead, case, and order signals for frontline
 sections:
   - id: omni_queue
     title: Omni Queue
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         'Case' AS QueueType,
@@ -36,6 +36,6 @@ sections:
       - QueueState
       - DueRef
       - Priority
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true

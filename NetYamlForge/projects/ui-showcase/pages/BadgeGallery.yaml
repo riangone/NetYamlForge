@@ -5,7 +5,7 @@ sections:
   - id: skill_badges
     title: スキルタグ一覧（badge_list）
     component: badge_list
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT skill_name, level, category, years
       FROM skill_tags
@@ -13,22 +13,22 @@ sections:
         CASE level WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
         skill_name
     columns: [skill_name, level, category, years]
-    label_field: skill_name
-    value_field: level
-    page_size: 50
+    labelField: skill_name
+    valueField: level
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: by_category
     title: カテゴリ別スキル数（bar_chart）
     component: bar_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT category, COUNT(*) AS count FROM skill_tags GROUP BY category ORDER BY count DESC
     columns: [category, count]
-    x_field: category
-    y_field: count
+    xField: category
+    yField: count
     color: "rgba(14,165,233,0.75)"
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

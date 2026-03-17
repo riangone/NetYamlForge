@@ -4,7 +4,7 @@ description: Potential duplicate detection for account and contact records with 
 sections:
   - id: duplicate_candidates
     title: Duplicate Candidates
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         a.CustomerId AS SourceId,
@@ -38,6 +38,6 @@ sections:
       - SourcePhone
       - CandidatePhone
       - DuplicateConfidence
-    page_size: 80
+    pageSize: 80
     editable: false
-    read_only: true
+    readOnly: true

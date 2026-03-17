@@ -12,24 +12,25 @@
     "description": {
       "type": "string"
     },
-    "main_table": {
+    "mainTable": {
       "type": "string"
     },
-    "ui": {
+    "template": {
+      "type": "string"
+    },
+    "calendarUi": {
       "type": "object",
       "properties": {
-        "page": {
-          "type": "object",
-          "properties": {
-            "layout": {
-              "enum": ["single", "two-pane", "stack"]
-            },
-            "density": {
-              "enum": ["compact", "comfortable", "spacious"]
-            }
-          },
-          "additionalProperties": true
-        }
+        "mobileMonthCount":       { "type": "integer", "minimum": 1 },
+        "desktopMinMonthCount":   { "type": "integer", "minimum": 1 },
+        "desktopMaxMonthCount":   { "type": "integer", "minimum": 1 },
+        "showJapanHolidays":      { "type": "boolean" },
+        "japanHolidayProvider":   { "enum": ["hybrid", "api", "builtin"] },
+        "japanHolidayApiUrlTemplate": { "type": "string" },
+        "japanHolidayApiTimeoutMs":   { "type": "integer", "minimum": 0 },
+        "showChineseLunar":       { "type": "boolean" },
+        "thirdPartyHolidays":     { "type": "array" },
+        "customHolidays":         { "type": "array" }
       },
       "additionalProperties": true
     },
@@ -38,7 +39,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "source_type", "source"],
+        "required": ["id", "sourceType", "source"],
         "properties": {
           "id": {
             "type": "string",
@@ -47,12 +48,15 @@
           "title": {
             "type": "string"
           },
-          "source_type": {
+          "sourceType": {
             "enum": ["table", "custom"]
           },
           "source": {
             "type": "string",
             "minLength": 1
+          },
+          "component": {
+            "type": "string"
           },
           "columns": {
             "anyOf": [
@@ -61,11 +65,30 @@
                 "items": { "type": "string" }
               },
               {
-                "type": "object"
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "label":      { "type": "string" },
+                    "labelKey":   { "type": "string" },
+                    "labelI18n":  { "type": "object" },
+                    "type": {
+                      "enum": ["string", "int", "long", "decimal", "double", "bool",
+                               "date", "datetime", "textarea", "email", "select",
+                               "radio", "color", "money", "rating", "file"]
+                    },
+                    "hidden":     { "type": "boolean" },
+                    "sortable":   { "type": "boolean" },
+                    "searchable": { "type": "boolean" },
+                    "options":    {},
+                    "foreignKey": { "type": "object" }
+                  },
+                  "additionalProperties": true
+                }
               }
             ]
           },
-          "page_size": {
+          "pageSize": {
             "type": "integer",
             "minimum": 1,
             "maximum": 200
@@ -73,16 +96,43 @@
           "editable": {
             "type": "boolean"
           },
-          "read_only": {
+          "readOnly": {
             "type": "boolean"
+          },
+          "size": {
+            "enum": ["xs", "sm", "md", "lg"]
+          },
+          "foreignKey": {
+            "type": "string"
+          },
+          "localForeignKey": {
+            "type": "string"
+          },
+          "targetTable": {
+            "type": "string"
+          },
+          "targetPrimaryKey": {
+            "type": "string"
+          },
+          "updatableFields": {
+            "type": "array",
+            "items": { "type": "string" }
           },
           "filters": {
             "type": "object",
             "additionalProperties": {
               "type": "object",
               "properties": {
-                "label": { "type": "string" },
-                "type": { "enum": ["like", "eq", "select", "gte", "lte", "toggle_group", "bool_toggle", "date_range", "date-range", "range"] }
+                "label":     { "type": "string" },
+                "labelKey":  { "type": "string" },
+                "labelI18n": { "type": "object" },
+                "type": {
+                  "enum": ["like", "eq", "dropdown", "date-range", "range",
+                           "toggle-group", "bool-toggle", "multi-select",
+                           "checkbox", "entity-picker", "entity-multi-picker",
+                           "gte", "lte", "select"]
+                },
+                "options": {}
               },
               "additionalProperties": true
             }
@@ -90,9 +140,9 @@
           "paging": {
             "type": "object",
             "properties": {
-              "page_size": { "type": "integer", "minimum": 1 },
-              "mode": { "enum": ["offset", "cursor", "numbered"] },
-              "enable_count": { "type": "boolean" }
+              "pageSize":    { "type": "integer", "minimum": 1 },
+              "mode":        { "enum": ["offset", "cursor", "numbered", "keyset"] },
+              "enableCount": { "type": "boolean" }
             },
             "additionalProperties": true
           },
@@ -101,35 +151,97 @@
             "additionalProperties": {
               "type": "object",
               "properties": {
+                "title":  { "type": "string" },
                 "fields": { "type": "array", "items": { "type": "string" } }
               },
               "additionalProperties": true
             }
           },
-          "field_defs": {
+          "fieldDefs": {
             "type": "object",
             "additionalProperties": {
               "type": "object",
               "properties": {
-                "label": { "type": "string" },
-                "type": { "type": "string" },
-                "required": { "type": "boolean" }
+                "label":       { "type": "string" },
+                "labelKey":    { "type": "string" },
+                "labelI18n":   { "type": "object" },
+                "type": {
+                  "enum": ["string", "int", "long", "decimal", "double", "bool",
+                           "date", "datetime", "textarea", "email", "select",
+                           "radio", "color", "money", "rating", "file"]
+                },
+                "required":    { "type": "boolean" },
+                "editable":    { "type": "boolean" },
+                "options":     {},
+                "placeholder": { "type": "string" },
+                "foreignKey":  { "type": "object" }
               },
               "additionalProperties": true
             }
           },
-          "ui": {
+          "hooks": {
             "type": "object",
             "properties": {
-              "component": {
-                "enum": ["DataTable", "StatsCard", "Chart", "FormPanel", "ActionBar"]
-              },
-              "selectable": {
-                "enum": ["none", "single", "multi"]
-              }
+              "presets":      { "type": "object" },
+              "beforeCreate": {},
+              "afterCreate":  {},
+              "beforeUpdate": {},
+              "afterUpdate":  {},
+              "beforeDelete": {},
+              "afterDelete":  {}
             },
             "additionalProperties": true
-          }
+          },
+          "confirmation": {
+            "type": "object",
+            "properties": {
+              "create": { "type": "string" },
+              "update": { "type": "string" },
+              "delete": { "type": "string" }
+            }
+          },
+          "xField":            { "type": "string" },
+          "yField":            { "type": "string" },
+          "colorField":        { "type": "string" },
+          "valueField":        { "type": "string" },
+          "labelField":        { "type": "string" },
+          "iconField":         { "type": "string" },
+          "deltaField":        { "type": "string" },
+          "subValueField":     { "type": "string" },
+          "groupBy":           { "type": "string" },
+          "cardTitle":         { "type": "string" },
+          "cardSubtitle":      { "type": "string" },
+          "dateField":         { "type": "string" },
+          "eventField":        { "type": "string" },
+          "descField":         { "type": "string" },
+          "progressField":     { "type": "string" },
+          "maxField":          { "type": "string" },
+          "titleField":        { "type": "string" },
+          "subtitleField":     { "type": "string" },
+          "descriptionField":  { "type": "string" },
+          "imageField":        { "type": "string" },
+          "actionUrl":         { "type": "string" },
+          "contentField":      { "type": "string" },
+          "expandedByDefault": { "type": "boolean" },
+          "nameField":         { "type": "string" },
+          "avatarField":       { "type": "string" },
+          "trendField":        { "type": "string" },
+          "parentField":       { "type": "string" },
+          "emailField":        { "type": "string" },
+          "typeField":         { "type": "string" },
+          "userField":         { "type": "string" },
+          "currentField":      { "type": "string" },
+          "targetField":       { "type": "string" },
+          "unitField":         { "type": "string" },
+          "deadlineField":     { "type": "string" },
+          "uploadUrl":         { "type": "string" },
+          "maxFileSize":       { "type": "integer", "minimum": 0 },
+          "allowedTypes":      { "type": "string" },
+          "multiple":          { "type": "boolean" },
+          "startDateField":    { "type": "string" },
+          "endDateField":      { "type": "string" },
+          "color":             { "type": "string" },
+          "icon":              { "type": "string" }
         },
         "additionalProperties": true
       }

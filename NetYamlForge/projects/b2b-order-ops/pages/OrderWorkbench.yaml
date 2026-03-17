@@ -1,7 +1,7 @@
 title: 受発注ワークベンチ
 description: 受注ヘッダと受注明細を同一画面で確認する実装例です。
 
-main_table: Orders
+mainTable: Orders
 
 ui:
   page:
@@ -11,7 +11,7 @@ ui:
 sections:
   - id: orders
     title: 受注一覧
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId,
@@ -32,9 +32,9 @@ sections:
       - RequiredDate
       - Status
       - TotalAmount
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Customer:
         label: 顧客
@@ -48,7 +48,7 @@ sections:
 
   - id: order_details
     title: 受注明細
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         od.OrderDetailId,
@@ -69,9 +69,9 @@ sections:
       - Quantity
       - Discount
       - LineTotal
-    page_size: 25
+    pageSize: 25
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       OrderId:
         label: 受注ID

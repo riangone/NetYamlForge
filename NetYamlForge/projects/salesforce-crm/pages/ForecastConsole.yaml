@@ -4,7 +4,7 @@ description: Team-level pipeline and revenue forecast by stage, period, and conf
 sections:
   - id: forecast_summary
     title: Forecast Summary
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         strftime('%Y-%m', o.OrderDate) AS Period,
@@ -24,9 +24,9 @@ sections:
       - CommittedAmount
       - BestCaseAmount
       - RiskAmount
-    page_size: 24
+    pageSize: 24
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Period:
         label: Period
@@ -34,7 +34,7 @@ sections:
 
   - id: forecast_by_owner
     title: Forecast by Owner
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         e.EmployeeId AS OwnerId,
@@ -55,9 +55,9 @@ sections:
       - ForecastAmount
       - ClosedAmount
       - PipelineAmount
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       OwnerName:
         label: Owner

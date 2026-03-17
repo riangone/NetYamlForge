@@ -9,7 +9,7 @@ ui:
 sections:
   - id: employee_overview
     title: 员工总览
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         e.Id AS EmployeeId,
@@ -48,9 +48,9 @@ sections:
       - Status
       - LastWorkDate
       - LastAttendanceStatus
-    page_size: 100
+    pageSize: 100
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       EmployeeNo:
         label: 工号
@@ -67,7 +67,7 @@ sections:
 
   - id: employee_distribution
     title: 部门与状态分布
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         d.Name AS DepartmentName,
@@ -81,6 +81,6 @@ sections:
       - DepartmentName
       - Status
       - EmployeeCount
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

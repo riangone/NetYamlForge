@@ -6,7 +6,7 @@ template: CaseQueue
 sections:
   - id: case_queue
     title: Case Queue
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         cse.OrderId AS CaseId,
@@ -36,12 +36,12 @@ sections:
       - OwnerId
       - OwnerName
       - Severity
-    page_size: 50
+    pageSize: 50
     editable: true
-    read_only: false
-    target_table: Orders
-    target_primary_key: OrderId
-    updatable_fields:
+    readOnly: false
+    targetTable: Orders
+    targetPrimaryKey: OrderId
+    updatableFields:
       - Status
       - EmployeeId
     filters:

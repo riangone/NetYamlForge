@@ -4,7 +4,7 @@ description: KPI dashboard for rejection rate, automation executions, and role-l
 sections:
   - id: rejection_kpi
     title: Rejection KPI
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         CAST(SUM(CASE WHEN Action = 'hook_rejected' THEN 1 ELSE 0 END) AS INTEGER) AS RejectedEvents,
@@ -24,13 +24,13 @@ sections:
       - MutationEvents
       - RejectionRatePct
       - AutomationRuns
-    page_size: 1
+    pageSize: 1
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: reject_reason_breakdown
     title: Rejection Reason Breakdown
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         CASE
@@ -51,13 +51,13 @@ sections:
       - ReasonCode
       - RejectCount
       - LastSeenAt
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: reject_by_role
     title: Rejection by Role
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         COALESCE(r.RoleName, CASE WHEN u.IsAdmin = 1 THEN 'AdminOps' ELSE 'User' END) AS RoleName,
@@ -73,6 +73,6 @@ sections:
       - RoleName
       - RejectCount
       - LastSeenAt
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true

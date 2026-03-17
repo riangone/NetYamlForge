@@ -5,7 +5,7 @@ sections:
   - id: catalog_table
     title: 商品カタログ（table — デフォルトコンポーネント）
     component: table
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT id, item_name, category, quantity, unit_price, supplier,
              CASE in_stock WHEN 1 THEN '✓ In Stock' ELSE '✗ Out' END AS stock_status,
@@ -13,27 +13,27 @@ sections:
       FROM catalog_items
       ORDER BY category, item_name
     columns: [id, item_name, category, quantity, unit_price, supplier, stock_status, last_updated]
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: profiles_detail
     title: チームプロフィール（detail_card）
     component: detail_card
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT full_name, email, department, role, hire_date, location, bio, skills
       FROM detail_profiles
       ORDER BY id
     columns: [full_name, email, department, role, hire_date, location, bio, skills]
-    page_size: 10
+    pageSize: 10
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: component_summary
     title: コンポーネント統計（stat_cards）
     component: stat_cards
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT '合計アイテム' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '📦' AS metric_icon, NULL AS metric_delta
         FROM catalog_items
@@ -44,10 +44,10 @@ sections:
       UNION ALL
       SELECT '平均単価', CAST(ROUND(AVG(unit_price)) AS TEXT) || '円', '💴', NULL FROM catalog_items
     columns: [metric_name, metric_value, metric_icon, metric_delta]
-    label_field: metric_name
-    value_field: metric_value
-    icon_field: metric_icon
-    delta_field: metric_delta
-    page_size: 10
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
     editable: false
-    read_only: true
+    readOnly: true

@@ -6,7 +6,7 @@ sections:
   - id: area_chart_demo
     title: 面積グラフデモ (AreaChart)
     component: area_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         month AS label,
@@ -26,15 +26,15 @@ sections:
         SELECT '12 月', 650000
       ) ORDER BY rowid
     columns: [label, value]
-    label_field: label
-    value_field: value
+    labelField: label
+    valueField: value
     editable: false
 
   # 2. ドーナツグラフ
   - id: donut_chart_demo
     title: ドーナツグラフデモ (DonutChart)
     component: donut_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         category AS label,
@@ -47,15 +47,15 @@ sections:
         SELECT 'その他', 50000
       )
     columns: [label, value]
-    label_field: label
-    value_field: value
+    labelField: label
+    valueField: value
     editable: false
 
   # 3. カードリスト
   - id: card_list_demo
     title: カードリストデモ (CardList)
     component: card_list
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         product_name AS title,
@@ -77,17 +77,17 @@ sections:
                'https://via.placeholder.com/300x200?text=Keyboard'
       )
     columns: [title, subtitle, description, image]
-    title_field: title
-    subtitle_field: subtitle
-    description_field: description
-    image_field: image
+    titleField: title
+    subtitleField: subtitle
+    descriptionField: description
+    imageField: image
     editable: false
 
   # 4. アコーディオン
   - id: accordion_demo
     title: アコーディオンデモ (Accordion)
     component: accordion
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         question AS title,
@@ -106,16 +106,16 @@ sections:
                '全ての商品に 1 年間のメーカー保証が付いております。'
       )
     columns: [title, content]
-    title_field: title
-    content_field: content
-    expanded_by_default: false
+    titleField: title
+    contentField: content
+    expandedByDefault: false
     editable: false
 
   # 5. ランキング
   - id: leaderboard_demo
     title: ランキングデモ (Leaderboard)
     component: leaderboard
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         salesperson AS name,
@@ -135,17 +135,17 @@ sections:
         SELECT '高橋健一', 850000, 'https://via.placeholder.com/50?text=K', '+2%'
       ) ORDER BY amount DESC
     columns: [name, value, avatar, trend]
-    name_field: name
-    value_field: value
-    avatar_field: avatar
-    trend_field: trend
+    nameField: name
+    valueField: value
+    avatarField: avatar
+    trendField: trend
     editable: false
 
   # 6. アクティビティフィード
   - id: activity_feed_demo
     title: アクティビティフィードデモ (ActivityFeed)
     component: activity_feed
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         action AS title,
@@ -165,17 +165,17 @@ sections:
         SELECT 'タスクを完了しました', '2025-03-12 14:00', 'update', '高橋健一'
       ) ORDER BY timestamp DESC
     columns: [title, date, type, user]
-    title_field: title
-    date_field: date
-    type_field: type
-    user_field: user
+    titleField: title
+    dateField: date
+    typeField: type
+    userField: user
     editable: false
 
   # 7. 目標追跡
   - id: goal_tracker_demo
     title: 目標追跡デモ (GoalTracker)
     component: goal_tracker
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         goal_name AS name,
@@ -194,18 +194,18 @@ sections:
         SELECT 'コスト削減', 180000, 200000, '円', '2025-04-30'
       )
     columns: [name, current, target, unit, deadline]
-    name_field: name
-    current_field: current
-    target_field: target
-    unit_field: unit
-    deadline_field: deadline
+    nameField: name
+    currentField: current
+    targetField: target
+    unitField: unit
+    deadlineField: deadline
     editable: false
 
   # 8. ファイルアップロード
   - id: file_upload_demo
     title: ファイルアップロードデモ (FileUpload)
     component: file_upload
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         file_name AS FileName,
@@ -221,9 +221,9 @@ sections:
         SELECT '製品カタログ 2025.pdf', 5242880, '2025-03-08', '/files/catalog.pdf'
       )
     columns: [FileName, FileSize, UploadDate, FileUrl]
-    upload_url: /api/upload
-    max_file_size: 10485760
-    allowed_types: ".pdf,.xlsx,.docx,.png,.jpg"
+    uploadUrl: /api/upload
+    maxFileSize: 10485760
+    allowedTypes: ".pdf,.xlsx,.docx,.png,.jpg"
     multiple: true
     editable: false
 
@@ -231,7 +231,7 @@ sections:
   - id: calendar_demo
     title: カレンダーデモ (Calendar)
     component: calendar
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         event_name AS title,
@@ -253,17 +253,17 @@ sections:
         SELECT '製品リリース', '2025-03-31', '2025-03-31', 'milestone', 'bg-accent'
       )
     columns: [title, start_date, end_date, type, color]
-    title_field: title
-    start_date_field: start_date
-    end_date_field: end_date
-    color_field: color
+    titleField: title
+    startDateField: start_date
+    endDateField: end_date
+    colorField: color
     editable: false
 
   # 10. 組織図
   - id: org_chart_demo
     title: 組織図デモ (OrgChart)
     component: org_chart
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT 
         name AS name,
@@ -284,9 +284,9 @@ sections:
         SELECT '高橋健一', '営業部長', 'sales@company.com', '佐藤次郎', 'https://via.placeholder.com/50?text=K'
       )
     columns: [name, title, email, parent, avatar]
-    name_field: name
-    title_field: title
-    email_field: email
-    parent_field: parent
-    avatar_field: avatar
+    nameField: name
+    titleField: title
+    emailField: email
+    parentField: parent
+    avatarField: avatar
     editable: false

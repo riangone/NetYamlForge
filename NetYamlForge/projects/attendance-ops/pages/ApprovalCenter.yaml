@@ -10,7 +10,7 @@ ui:
 sections:
   - id: pending_leave
     title: 待审批请假
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         lr.Id AS LeaveRequestId,
@@ -41,12 +41,12 @@ sections:
       - Status
       - AppliedAt
       - Reason
-    page_size: 100
+    pageSize: 100
     editable: false
-    read_only: true
-    target_table: LeaveRequest
-    target_primary_key: Id
-    updatable_fields:
+    readOnly: true
+    targetTable: LeaveRequest
+    targetPrimaryKey: Id
+    updatableFields:
       - Status
     filters:
       EmployeeNo:
@@ -61,7 +61,7 @@ sections:
 
   - id: pending_overtime
     title: 待审批加班
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         ot.Id AS OvertimeRequestId,
@@ -90,12 +90,12 @@ sections:
       - Hours
       - Status
       - Reason
-    page_size: 100
+    pageSize: 100
     editable: false
-    read_only: true
-    target_table: OvertimeRequest
-    target_primary_key: Id
-    updatable_fields:
+    readOnly: true
+    targetTable: OvertimeRequest
+    targetPrimaryKey: Id
+    updatableFields:
       - Status
     filters:
       EmployeeNo:
@@ -110,7 +110,7 @@ sections:
 
   - id: recent_approved
     title: 最近已审批记录
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         lr.Id AS RequestId,
@@ -146,6 +146,6 @@ sections:
       - Status
       - Approver
       - ApprovedAt
-    page_size: 100
+    pageSize: 100
     editable: false
-    read_only: true
+    readOnly: true

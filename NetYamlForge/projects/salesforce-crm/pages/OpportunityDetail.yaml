@@ -4,7 +4,7 @@ description: Full lifecycle view for a selected opportunity with financial lines
 sections:
   - id: opportunity_detail
     title: Opportunity Detail
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS OpportunityId,
@@ -42,9 +42,9 @@ sections:
       - Amount
       - Probability
       - NextAction
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       OpportunityId:
         label: Opportunity ID
@@ -58,7 +58,7 @@ sections:
 
   - id: opportunity_lines
     title: Opportunity Lines
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         od.OrderDetailId AS LineId,
@@ -79,9 +79,9 @@ sections:
       - Quantity
       - Discount
       - NetValue
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       OpportunityId:
         label: Opportunity ID

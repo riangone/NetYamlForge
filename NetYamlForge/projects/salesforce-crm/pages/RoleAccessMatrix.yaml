@@ -4,7 +4,7 @@ description: User-role access visibility for admin governance, activation state,
 sections:
   - id: role_matrix
     title: User Role Matrix
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id AS UserId,
@@ -24,13 +24,13 @@ sections:
       - UserState
       - Locale
       - CreatedAt
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: permission_matrix
     title: Permission Matrix
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         RoleName,
@@ -49,6 +49,6 @@ sections:
       - CanRead
       - CanWrite
       - UpdatedAt
-    page_size: 120
+    pageSize: 120
     editable: false
-    read_only: true
+    readOnly: true

@@ -2,13 +2,13 @@ title: 低在庫アラート
 title_en: Low Stock Alert
 description: 再発注レベルを下回る商品を監視します。
 
-main_table: Products
+mainTable: Products
 
 sections:
   - id: low_stock
     title: 要対応商品
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         p.ProductId,
@@ -31,9 +31,9 @@ sections:
       - UnitsInStock
       - ReorderLevel
       - Shortage
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       ProductName:
         label: 商品名

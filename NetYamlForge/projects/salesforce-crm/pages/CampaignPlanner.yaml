@@ -4,7 +4,7 @@ description: Campaign planning workspace for budget allocation, target segmentat
 sections:
   - id: campaign_overview
     title: Campaign Overview
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.Country AS Segment,
@@ -23,9 +23,9 @@ sections:
       - OpenPipelineImpact
       - WonImpact
       - EstimatedBudget
-    page_size: 30
+    pageSize: 30
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Segment:
         label: Segment
@@ -33,7 +33,7 @@ sections:
 
   - id: campaign_actions
     title: Campaign Actions
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         c.CustomerId AS ActionId,
@@ -59,9 +59,9 @@ sections:
       - CampaignMotion
       - Priority
       - NextTouchDate
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Account:
         label: Account

@@ -4,7 +4,7 @@ description: Unified timeline for calls, follow-ups, and execution tasks across 
 sections:
   - id: activity_feed
     title: Activity Feed
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         'Opportunity' AS ActivityType,
@@ -58,9 +58,9 @@ sections:
       - Subject
       - Stage
       - Priority
-    page_size: 60
+    pageSize: 60
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       ActivityType:
         label: Activity Type
@@ -74,7 +74,7 @@ sections:
 
   - id: overdue_actions
     title: Overdue Actions
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS ActionId,
@@ -100,9 +100,9 @@ sections:
       - Status
       - Amount
       - ActionHint
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Account:
         label: Account

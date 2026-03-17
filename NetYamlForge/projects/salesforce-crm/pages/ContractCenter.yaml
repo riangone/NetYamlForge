@@ -4,7 +4,7 @@ description: Contract lifecycle center covering active terms, renewal windows, a
 sections:
   - id: contracts
     title: Contracts
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS ContractId,
@@ -34,6 +34,6 @@ sections:
       - ContractState
       - RenewalState
       - ContractValue
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

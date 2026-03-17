@@ -5,7 +5,7 @@ template: OperationWorkbench
 sections:
   - id: workload_snapshot
     title: Workload Snapshot
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         SUM(CASE WHEN o.Status = 'Open' THEN 1 ELSE 0 END) AS OpenDeals,
@@ -19,13 +19,13 @@ sections:
       - DelayedDeals
       - ActiveCases
       - ActiveAccounts
-    page_size: 1
+    pageSize: 1
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: user_directory
     title: User Directory
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         Id AS UserId,
@@ -45,6 +45,6 @@ sections:
       - State
       - Locale
       - LastLoginAt
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true

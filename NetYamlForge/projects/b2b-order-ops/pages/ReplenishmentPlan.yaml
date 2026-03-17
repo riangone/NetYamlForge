@@ -1,13 +1,13 @@
 title: 在庫補充計画 / Replenishment Plan
 description: 欠品リスクに対して推奨補充数量と仕入先を提示します。
 
-main_table: Products
+mainTable: Products
 
 sections:
   - id: product_replenishment
     title: 補充対象商品
     type: custom
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         p.ProductId,
@@ -40,9 +40,9 @@ sections:
       - ReorderLevel
       - PendingQty
       - SuggestedOrderQty
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Supplier:
         label: 仕入先

@@ -1,12 +1,12 @@
 title: Opportunity Workspace
 description: Deal review page inspired by Salesforce opportunity and account tabs.
 
-main_table: Orders
+mainTable: Orders
 
 sections:
   - id: opportunities
     title: Opportunities
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         o.OrderId AS OpportunityId,
@@ -27,9 +27,9 @@ sections:
       - TargetCloseDate
       - Stage
       - Amount
-    page_size: 25
+    pageSize: 25
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       Account:
         label: Account
@@ -40,7 +40,7 @@ sections:
 
   - id: quote_lines
     title: Quote Lines
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         od.OrderDetailId AS QuoteLineId,
@@ -61,9 +61,9 @@ sections:
       - Quantity
       - Discount
       - NetValue
-    page_size: 40
+    pageSize: 40
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       OpportunityId:
         label: Opportunity ID

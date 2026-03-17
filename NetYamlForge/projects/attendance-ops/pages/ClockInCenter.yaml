@@ -9,7 +9,7 @@ ui:
 sections:
   - id: today_clockin
     title: 今日打卡总览
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         ar.Id AS RecordId,
@@ -37,9 +37,9 @@ sections:
       - CheckOutTime
       - AttendanceStatus
       - Source
-    page_size: 100
+    pageSize: 100
     editable: false
-    read_only: true
+    readOnly: true
     filters:
       EmployeeNo:
         label: 工号
@@ -53,7 +53,7 @@ sections:
 
   - id: pending_checkout
     title: 未签退人员
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         ar.Id AS RecordId,
@@ -76,13 +76,13 @@ sections:
       - DepartmentName
       - CheckInTime
       - AttendanceStatus
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
 
   - id: attendance_exceptions
     title: 异常打卡
-    source_type: custom
+    sourceType: custom
     source: |
       SELECT
         ar.Id AS RecordId,
@@ -106,6 +106,6 @@ sections:
       - WorkDate
       - AttendanceStatus
       - Remark
-    page_size: 50
+    pageSize: 50
     editable: false
-    read_only: true
+    readOnly: true
