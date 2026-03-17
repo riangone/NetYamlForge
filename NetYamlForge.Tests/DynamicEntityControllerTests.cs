@@ -36,9 +36,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Create(
             "customer",
@@ -57,9 +55,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (_, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Create(
             "customer",
@@ -78,9 +74,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Create(
             "customer",
@@ -98,9 +92,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Create(
             "customer",
@@ -120,9 +112,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (_, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Edit(
             "customer",
@@ -141,9 +131,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Edit(
             "customer",
@@ -163,9 +151,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Edit(
             "customer",
@@ -207,9 +193,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Delete("customer", id: "12");
 
@@ -223,9 +207,8 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo { NextDeleteAffectedRows = 0 };
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
+        repo.NextDeleteAffectedRows = 0;
 
         var result = await controller.Delete("customer", id: "12");
 
@@ -274,9 +257,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (_, controller) = CreateDefaultSetup(db);
         controller.HttpContext.Request.QueryString = new QueryString("?entity=customer&search=abc&sort=Amount&dir=asc");
 
         var result = await controller.ListPartial(
@@ -299,9 +280,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.Index(entity: "customer", search: "abc", count: "0");
 
@@ -318,9 +297,7 @@ public class DynamicEntityControllerTests
     {
         await using var db = new SqliteConnection("Data Source=:memory:");
         await db.OpenAsync();
-        var repo = new FakeRepo();
-        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta());
-        var controller = CreateController(db, repo, metaProvider);
+        var (repo, controller) = CreateDefaultSetup(db);
 
         var result = await controller.ListPartial(
             entity: "customer",
@@ -331,6 +308,19 @@ public class DynamicEntityControllerTests
         var partial = Assert.IsType<PartialViewResult>(result);
         Assert.Equal("_List", partial.ViewName);
         Assert.Null(repo.LastSearch);
+    }
+
+    /// <summary>
+    /// 最も一般的なテストシナリオ向けの簡易セットアップ。
+    /// db は呼び出し元で await using 管理すること。
+    /// </summary>
+    private static (FakeRepo repo, DynamicEntityController controller) CreateDefaultSetup(
+        System.Data.IDbConnection db,
+        EntityHooksDefinition? hooks = null)
+    {
+        var repo = new FakeRepo();
+        var metaProvider = new StubEntityMetadataProvider(CreateEntityMeta(hooks));
+        return (repo, CreateController(db, repo, metaProvider));
     }
 
     private static DynamicEntityController CreateController(

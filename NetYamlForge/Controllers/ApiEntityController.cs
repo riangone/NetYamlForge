@@ -13,7 +13,7 @@ namespace NetYamlForge.Controllers;
 [Authorize]
 [ApiController]
 [Route("{project}/api/entities")]
-public class ApiEntityController : ControllerBase
+public class ApiEntityController : BaseProjectController
 {
     private readonly IDynamicCrudRepository              _repo;
     private readonly IEntityMetadataProvider             _meta;
@@ -268,9 +268,6 @@ public class ApiEntityController : ControllerBase
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
-
-    private IActionResult? RejectIfNotVisible(EntityDefinition meta) =>
-        meta.IsPublic || User?.IsInRole("Admin") == true ? null : Forbid();
 
     private static ApiDto ToApiDto(IDictionary<string, object?> item, EntityDefinition meta)
     {

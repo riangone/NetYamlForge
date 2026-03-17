@@ -211,15 +211,7 @@ public class PageController : BaseProjectController
         }
 
         await TryWritePageAuditAsync("page_insert", section.TargetTable, $"Page={pageName},Section={sectionId}");
-
-        if (IsHtmxRequest())
-        {
-            Response.Headers["HX-Retarget"] = $"#section-{sectionId}";
-            Response.Headers["HX-Reswap"] = "innerHTML";
-            return PartialView("Components/_SectionTable",
-                await BuildSectionRenderModelAsync(proj, section, pageName, GetFiltersFromHtmxCurrentUrl()));
-        }
-        return Redirect($"/{proj.Name}/Page/{pageName}");
+        return await ReturnSectionOrRedirectAsync(proj, section, pageName, sectionId);
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/update-all-fields
@@ -261,15 +253,7 @@ public class PageController : BaseProjectController
         }
 
         await TryWritePageAuditAsync("page_update_all", section.TargetTable, $"Page={pageName},Section={sectionId},RowId={rowIdInt}");
-
-        if (IsHtmxRequest())
-        {
-            Response.Headers["HX-Retarget"] = $"#section-{sectionId}";
-            Response.Headers["HX-Reswap"] = "innerHTML";
-            return PartialView("Components/_SectionTable",
-                await BuildSectionRenderModelAsync(proj, section, pageName, GetFiltersFromHtmxCurrentUrl()));
-        }
-        return Redirect($"/{proj.Name}/Page/{pageName}");
+        return await ReturnSectionOrRedirectAsync(proj, section, pageName, sectionId);
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/update-row
@@ -427,10 +411,7 @@ public class PageController : BaseProjectController
             entity: section.TargetTable,
             detail: $"Page={pageName},Section={sectionId},RowId={rowIdInt}");
 
-        if (IsHtmxRequest())
-            return PartialView("Components/_SectionTable",
-                await BuildSectionRenderModelAsync(proj, section, pageName, GetFiltersFromHtmxCurrentUrl()));
-        return Redirect($"/{proj.Name}/Page/{pageName}");
+        return await ReturnSectionOrRedirectAsync(proj, section, pageName, sectionId);
     }
 
     private async Task TryWritePageAuditAsync(string action, string? entity, string detail)
@@ -506,6 +487,23 @@ public class PageController : BaseProjectController
             PageName = pageName,
             AllQueryParams = allFilters
         };
+    }
+
+    /// <summary>
+    /// HTMX リクエストならセクションを部分更新して返し、通常リクエストならページ全体にリダイレクトする。
+    /// InsertRow / UpdateAllFields / DeleteRow で共通して使用する。
+    /// </summary>
+    private async Task<IActionResult> ReturnSectionOrRedirectAsync(
+        ProjectInfo proj, SectionDefinition section, string pageName, string sectionId)
+    {
+        if (IsHtmxRequest())
+        {
+            Response.Headers["HX-Retarget"] = $"#section-{sectionId}";
+            Response.Headers["HX-Reswap"] = "innerHTML";
+            return PartialView("Components/_SectionTable",
+                await BuildSectionRenderModelAsync(proj, section, pageName, GetFiltersFromHtmxCurrentUrl()));
+        }
+        return Redirect($"/{proj.Name}/Page/{pageName}");
     }
 
     private static bool IsAdminOnlyMutation(string pageName, string? targetTable)

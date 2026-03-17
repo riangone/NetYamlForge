@@ -66,24 +66,6 @@ public class DynamicEntityController : BaseProjectController
         _logger = logger;
     }
 
-    // クエリ重複時（例: entity=a&entity=a）に "a,a" になるケースを吸収して先頭値を使う
-    private static string? NormalizeSingleValue(string? raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw))
-        {
-            return raw;
-        }
-
-        var first = raw.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .FirstOrDefault();
-        return string.IsNullOrWhiteSpace(first) ? raw : first;
-    }
-
-    private IActionResult? RejectIfNotVisible(EntityDefinition meta) =>
-        meta.IsPublic || UserIsAdmin()
-            ? null
-            : Forbid();
-
     public async Task<IActionResult> Index(
         string entity = "customer",
         string? search = null,
@@ -252,11 +234,7 @@ public class DynamicEntityController : BaseProjectController
         var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
 
         if (errors.Any())
-        {
-            var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
-            var vm = _formVmFactory.Build(entity, meta, null, fkData, errors, mode, submittedValues: form);
-            return RenderFormByMode(isPageMode, vm);
-        }
+            return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors);
 
         var beforeCreateHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg));
         var afterCreateHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg));
@@ -269,36 +247,12 @@ public class DynamicEntityController : BaseProjectController
         if (!createResult.Ok)
         {
             errors["__hook"] = createResult.Error?.Message ?? "前処理によりキャンセルされました。";
-            var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
-            var vm = _formVmFactory.Build(entity, meta, null, fkData, errors, mode, submittedValues: form);
-            return RenderFormByMode(isPageMode, vm);
+            return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors);
         }
         if (isPageMode)
-        {
-            // returnUrl が指定されている場合は検索・ソート状態を維持して戻る
             return Redirect(returnUrl ?? Url.Action(nameof(Index), new { entity })!);
-        }
 
-        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
-        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
-        return PartialView("_List",
-            CreateListViewModel(
-                entity,
-                meta,
-                items,
-                null,
-                null,
-                null,
-                new(),
-                1,
-                total,
-                null,
-                5,
-                true,
-                false,
-                null,
-                null,
-                returnUrl));
+        return await ReturnListAfterSaveAsync(entity, meta, returnUrl);
     }
 
     public async Task<IActionResult> EditForm(string entity, string? id = null, string mode = "modal")
@@ -362,12 +316,7 @@ public class DynamicEntityController : BaseProjectController
         var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
 
         if (errors.Any())
-        {
-            var item = await _repo.GetByIdAsync(entity, keyValue ?? "");
-            var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
-            var vm = _formVmFactory.Build(entity, meta, item, fkData, errors, mode, submittedValues: form);
-            return RenderFormByMode(isPageMode, vm);
-        }
+            return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors, keyValue);
 
         var beforeUpdateHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg));
         var afterUpdateHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg));
@@ -382,37 +331,12 @@ public class DynamicEntityController : BaseProjectController
         if (!updateResult.Ok)
         {
             errors["__hook"] = updateResult.Error?.Message ?? "前処理によりキャンセルされました。";
-            var item = await _repo.GetByIdAsync(entity, keyValue ?? "");
-            var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
-            var vm = _formVmFactory.Build(entity, meta, item, fkData, errors, mode, submittedValues: form);
-            return RenderFormByMode(isPageMode, vm);
+            return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors, keyValue);
         }
         if (isPageMode)
-        {
-            // returnUrl が指定されている場合は検索・ソート状態を維持して戻る
             return Redirect(returnUrl ?? Url.Action(nameof(Index), new { entity })!);
-        }
 
-        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
-        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
-        return PartialView("_List",
-            CreateListViewModel(
-                entity,
-                meta,
-                items,
-                null,
-                null,
-                null,
-                new(),
-                1,
-                total,
-                null,
-                5,
-                true,
-                false,
-                null,
-                null,
-                returnUrl));
+        return await ReturnListAfterSaveAsync(entity, meta, returnUrl);
     }
 
     [HttpPost]
@@ -607,8 +531,39 @@ public class DynamicEntityController : BaseProjectController
     }
 
     private IActionResult RenderFormByMode(bool isPageMode, DynamicFormViewModel vm)
+        => isPageMode ? View("FormPage", vm) : PartialView("_Form", vm);
+
+    /// <summary>
+    /// バリデーション/フックエラー時にフォームを再描画する共通処理。
+    /// keyValue が指定されている場合は既存レコードを読み込んで渡す（Edit 用）。
+    /// </summary>
+    private async Task<IActionResult> RenderFormWithErrorsAsync(
+        string entity,
+        EntityDefinition meta,
+        string mode,
+        Dictionary<string, string?> form,
+        Dictionary<string, string> errors,
+        string? keyValue = null)
     {
-        return isPageMode ? View("FormPage", vm) : PartialView("_Form", vm);
+        var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
+        dynamic? item = keyValue != null ? await _repo.GetByIdAsync(entity, keyValue) : null;
+        var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
+        var vm = _formVmFactory.Build(entity, meta, item, fkData, errors, mode, submittedValues: form);
+        return RenderFormByMode(isPageMode, vm);
+    }
+
+    /// <summary>
+    /// Create/Edit 成功後にリスト先頭ページを返す共通処理（モーダルモード用）。
+    /// </summary>
+    private async Task<IActionResult> ReturnListAfterSaveAsync(
+        string entity,
+        EntityDefinition meta,
+        string? returnUrl)
+    {
+        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
+        return PartialView("_List",
+            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
     }
 
 }

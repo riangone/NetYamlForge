@@ -181,9 +181,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         }
         
         if (meta.SoftDelete)
-        {
-            sql.AppendLine($"AND ({meta.Table}.IsDeleted = 0 OR {meta.Table}.IsDeleted IS NULL)");
-        }
+            sql.Append($" AND {SoftDeleteClause(meta.Table)}");
 
         _logger.LogInformation("GetByIdAsync entity={Entity} id={Id}", entity, id);
         var statement = sql.ToString();
@@ -197,26 +195,12 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var sql = new StringBuilder();
-        
-        var pkColumns = meta.GetPrimaryKeyColumns();
-        var whereParts = new List<string>();
         var param = new DynamicParameters();
-        
-        for (var i = 0; i < pkColumns.Count; i++)
-        {
-            var col = pkColumns[i];
-            var paramName = $"Pk{i}";
-            whereParts.Add($"{col} = @{paramName}");
-            param.Add(paramName, keyValues.TryGetValue(col, out var val) ? val : null);
-        }
-        
-        sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {string.Join(" AND ", whereParts)}");
-        
+        var pkColumns = meta.GetPrimaryKeyColumns();
+        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
+        var sql = new StringBuilder($"SELECT * FROM {meta.Table} WHERE {whereClause}");
         if (meta.SoftDelete)
-        {
-            sql.AppendLine($"AND ({meta.Table}.IsDeleted = 0 OR {meta.Table}.IsDeleted IS NULL)");
-        }
+            sql.Append($" AND {SoftDeleteClause(meta.Table)}");
 
         _logger.LogInformation("GetByIdAsync entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
         var statement = sql.ToString();
@@ -290,20 +274,10 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             .ToArray();
 
         var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
-        
         var pkColumns = meta.GetPrimaryKeyColumns();
-        var whereParts = new List<string>();
         var param = new DynamicParameters(values);
-        
-        for (var i = 0; i < pkColumns.Count; i++)
-        {
-            var col = pkColumns[i];
-            var paramName = $"Pk{i}";
-            whereParts.Add($"{col} = @{paramName}");
-            param.Add(paramName, keyValues.TryGetValue(col, out var val) ? val : null);
-        }
-        
-        var sql = $"UPDATE {meta.Table} SET {setClause} WHERE {string.Join(" AND ", whereParts)}";
+        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
+        var sql = $"UPDATE {meta.Table} SET {setClause} WHERE {whereClause}";
 
         _logger.LogInformation("UpdateAsync entity={Entity} keys={Keys} sql={Sql}", entity, string.Join(",", pkColumns), sql);
         return await TimedAsync("UpdateAsync.Composite", entity, sql, () => _db.ExecuteAsync(sql, param, tx));
@@ -314,38 +288,24 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // softDelete=trueなら論理削除、falseなら物理削除を実行します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        
         var pkColumns = meta.GetPrimaryKeyColumns();
+
+        // 単一主鍵: @Id で直接バインド。複合主鍵: @Id0, @Id1... で展開。
+        var whereClause = pkColumns.Count == 1
+            ? $"{pkColumns[0]} = @Id"
+            : string.Join(" AND ", pkColumns.Select((col, i) => $"{col} = @Id{i}"));
+        var args = new { Id = id };
+
         if (meta.SoftDelete)
         {
-            if (pkColumns.Count == 1)
-            {
-                var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {pkColumns[0]} = @Id";
-                _logger.LogInformation("SoftDelete entity={Entity} id={Id}", entity, id);
-                return await TimedAsync("SoftDelete", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, new { Id = id }, tx));
-            }
-            else
-            {
-                var whereParts = pkColumns.Select((col, i) => $"{col} = @Id{i}");
-                var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {string.Join(" AND ", whereParts)}";
-                _logger.LogInformation("SoftDelete entity={Entity} id={Id}", entity, id);
-                return await TimedAsync("SoftDelete.Composite", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, new { Id = id }, tx));
-            }
+            var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
+            _logger.LogInformation("SoftDelete entity={Entity} id={Id}", entity, id);
+            return await TimedAsync("SoftDelete", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, args, tx));
         }
 
-        if (pkColumns.Count == 1)
-        {
-            var sql = $"DELETE FROM {meta.Table} WHERE {pkColumns[0]} = @Id";
-            _logger.LogInformation("Delete entity={Entity} id={Id}", entity, id);
-            return await TimedAsync("Delete", entity, sql, () => _db.ExecuteAsync(sql, new { Id = id }, tx));
-        }
-        else
-        {
-            var whereParts = pkColumns.Select((col, i) => $"{col} = @Id{i}");
-            var sql = $"DELETE FROM {meta.Table} WHERE {string.Join(" AND ", whereParts)}";
-            _logger.LogInformation("Delete entity={Entity} id={Id}", entity, id);
-            return await TimedAsync("Delete.Composite", entity, sql, () => _db.ExecuteAsync(sql, new { Id = id }, tx));
-        }
+        var sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
+        _logger.LogInformation("Delete entity={Entity} id={Id}", entity, id);
+        return await TimedAsync("Delete", entity, sql, () => _db.ExecuteAsync(sql, args, tx));
     }
 
     /// <summary>
@@ -355,27 +315,18 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        
         var pkColumns = meta.GetPrimaryKeyColumns();
-        var whereParts = new List<string>();
         var param = new DynamicParameters();
-        
-        for (var i = 0; i < pkColumns.Count; i++)
-        {
-            var col = pkColumns[i];
-            var paramName = $"Pk{i}";
-            whereParts.Add($"{col} = @{paramName}");
-            param.Add(paramName, keyValues.TryGetValue(col, out var val) ? val : null);
-        }
+        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
 
         if (meta.SoftDelete)
         {
-            var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {string.Join(" AND ", whereParts)}";
+            var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
             _logger.LogInformation("SoftDelete entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
             return await TimedAsync("SoftDelete.Composite", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, param, tx));
         }
 
-        var sql = $"DELETE FROM {meta.Table} WHERE {string.Join(" AND ", whereParts)}";
+        var sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
         _logger.LogInformation("Delete entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
         return await TimedAsync("Delete.Composite", entity, sql, () => _db.ExecuteAsync(sql, param, tx));
     }
@@ -559,6 +510,31 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             string.Join(", ", snapshot));
     }
 
+    /// <summary>
+    /// 複合主キーの WHERE 句（col0 = @Pk0 AND col1 = @Pk1 ...）を組み立て、
+    /// DynamicParameters にバインド値を追加する。
+    /// </summary>
+    private static string BuildCompositeKeyWhere(
+        IReadOnlyList<string> pkColumns,
+        IDictionary<string, object?> keyValues,
+        DynamicParameters param,
+        string paramPrefix = "Pk")
+    {
+        var whereParts = new List<string>(pkColumns.Count);
+        for (var i = 0; i < pkColumns.Count; i++)
+        {
+            var col = pkColumns[i];
+            var paramName = $"{paramPrefix}{i}";
+            whereParts.Add($"{col} = @{paramName}");
+            param.Add(paramName, keyValues.TryGetValue(col, out var val) ? val : null);
+        }
+        return string.Join(" AND ", whereParts);
+    }
+
+    /// <summary>論理削除フィルター条件を返す。</summary>
+    private static string SoftDeleteClause(string tableName) =>
+        $"({tableName}.IsDeleted = 0 OR {tableName}.IsDeleted IS NULL)";
+
     private static void ApplyFilters(
         EntityDefinition meta,
         Dictionary<string, string?>? filters,
@@ -626,9 +602,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         }
 
         if (meta.SoftDelete)
-        {
-            where.Add($"( {meta.Table}.IsDeleted = 0 OR {meta.Table}.IsDeleted IS NULL )");
-        }
+            where.Add(SoftDeleteClause(meta.Table));
 
         return where;
     }
