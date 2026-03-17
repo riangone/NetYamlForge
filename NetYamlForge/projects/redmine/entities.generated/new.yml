@@ -1,0 +1,40 @@
+entities:
+  new:
+    table: 'news'
+    key: 'id'
+    displayName: 'New'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['project_id', 'title', 'summary', 'description', 'author', 'created_on']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      project_id: { type: int, required: true, label: 'Project Id', sortable: true }
+      title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
+      summary: { type: string, label: 'Summary', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      author: { type: string, required: true, label: 'Author', searchable: true, sortable: true }
+      created_on: { type: string, label: 'Created On', searchable: true, sortable: true }
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: rm_project
+          displayColumn: 'name'
+      title: { type: string, required: true, label: 'Title', editable: true }
+      summary: { type: string, label: 'Summary', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      author: { type: string, required: true, label: 'Author', editable: true }
+      created_on: { type: string, label: 'Created On', editable: true }
+    filters: {}
+    links: {}

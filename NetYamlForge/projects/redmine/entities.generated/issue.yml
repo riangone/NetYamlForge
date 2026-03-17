@@ -1,0 +1,95 @@
+entities:
+  issue:
+    table: 'issue'
+    key: 'id'
+    displayName: 'Issue'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['project_id', 'tracker_id', 'status_id', 'priority_id', 'subject', 'description', 'assigned_to', 'category_id', 'version_id', 'author', 'start_date', 'due_date', 'done_ratio', 'estimated_hours', 'created_on', 'updated_on', 'closed_on']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      project_id: { type: int, required: true, label: 'Project Id', sortable: true }
+      tracker_id: { type: int, required: true, label: 'Tracker Id', sortable: true }
+      status_id: { type: int, required: true, label: 'Status Id', sortable: true }
+      priority_id: { type: int, required: true, label: 'Priority Id', sortable: true }
+      subject: { type: string, required: true, label: 'Subject', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      assigned_to: { type: string, label: 'Assigned To', searchable: true, sortable: true }
+      category_id: { type: int, label: 'Category Id', sortable: true }
+      version_id: { type: int, label: 'Version Id', sortable: true }
+      author: { type: string, required: true, label: 'Author', searchable: true, sortable: true }
+      start_date: { type: string, label: 'Start Date', searchable: true, sortable: true }
+      due_date: { type: string, label: 'Due Date', searchable: true, sortable: true }
+      done_ratio: { type: int, label: 'Done Ratio', sortable: true }
+      estimated_hours: { type: decimal, label: 'Estimated Hours', sortable: true }
+      created_on: { type: string, label: 'Created On', searchable: true, sortable: true }
+      updated_on: { type: string, label: 'Updated On', searchable: true, sortable: true }
+      closed_on: { type: string, label: 'Closed On', searchable: true, sortable: true }
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: rm_project
+          displayColumn: 'name'
+      tracker_id:
+        type: int
+        required: true
+        label: 'Tracker Id'
+        editable: true
+        foreignKey:
+          entity: tracker
+          displayColumn: 'name'
+      status_id:
+        type: int
+        required: true
+        label: 'Status Id'
+        editable: true
+        foreignKey:
+          entity: issue_statu
+          displayColumn: 'name'
+      priority_id:
+        type: int
+        required: true
+        label: 'Priority Id'
+        editable: true
+        foreignKey:
+          entity: issue_priority
+          displayColumn: 'name'
+      subject: { type: string, required: true, label: 'Subject', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      assigned_to: { type: string, label: 'Assigned To', editable: true }
+      category_id:
+        type: int
+        label: 'Category Id'
+        editable: true
+        foreignKey:
+          entity: issue_category
+          displayColumn: 'name'
+      version_id:
+        type: int
+        label: 'Version Id'
+        editable: true
+        foreignKey:
+          entity: version
+          displayColumn: 'name'
+      author: { type: string, required: true, label: 'Author', editable: true }
+      start_date: { type: string, label: 'Start Date', editable: true }
+      due_date: { type: string, label: 'Due Date', editable: true }
+      done_ratio: { type: int, label: 'Done Ratio', editable: true }
+      estimated_hours: { type: decimal, label: 'Estimated Hours', editable: true }
+      created_on: { type: string, label: 'Created On', editable: true }
+      updated_on: { type: string, label: 'Updated On', editable: true }
+      closed_on: { type: string, label: 'Closed On', editable: true }
+    filters: {}
+    links: {}

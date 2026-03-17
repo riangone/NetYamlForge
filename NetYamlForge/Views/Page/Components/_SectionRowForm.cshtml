@@ -1,0 +1,73 @@
+@using NetYamlForge.Models
+@model SectionRowFormModel
+@{
+    var sec = Model.Sec;
+    var row = Model.Row;
+    var isEdit = row != null;
+    var mode = isEdit ? "edit" : "create";
+    var pkCol = sec.TargetPrimaryKey ?? "id";
+    var pkVal = isEdit && row!.TryGetValue(pkCol, out var pk) ? pk?.ToString() : null;
+    var formFields = sec.GetFormFields(mode);
+    var formGroupDef = sec.Forms != null && sec.Forms.TryGetValue(mode, out var fg) ? fg : null;
+    var formTitle = formGroupDef?.Title ?? (isEdit ? "Edit" : "New");
+    var actionUrl = isEdit
+        ? $"/{Model.Project}/Page/{Model.PageName}/section/{sec.Id}/update-all-fields"
+        : $"/{Model.Project}/Page/{Model.PageName}/section/{sec.Id}/insert-row";
+    var confirmMsg = isEdit ? sec.Confirmation?.Update : sec.Confirmation?.Create;
+}
+
+<div class="flex justify-between items-center mb-4">
+    <h3 class="font-bold text-lg">@(sec.Title ?? sec.Id) — @formTitle</h3>
+    <button type="button" class="btn btn-sm btn-ghost"
+            onclick="document.getElementById('section-modal-@sec.Id').close()">✕</button>
+</div>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-error text-sm p-2 mb-3">@Model.ErrorMessage</div>
+}
+
+<form method="post" action="@actionUrl"
+      hx-post="@actionUrl"
+      hx-target="#section-modal-content-@sec.Id"
+      hx-swap="innerHTML"
+      hx-confirm="@confirmMsg">
+    @Html.AntiForgeryToken()
+    @if (isEdit && pkVal != null)
+    {
+        <input type="hidden" name="rowId" value="@pkVal" />
+    }
+    <div class="space-y-3">
+        @foreach (var field in formFields)
+        {
+            var fieldDef = sec.GetFieldDef(field);
+            var currentVal = Model.SubmittedValues != null && Model.SubmittedValues.TryGetValue(field, out var sv)
+                ? sv ?? ""
+                : (isEdit && row!.TryGetValue(field, out var fv) ? fv?.ToString() ?? "" : "");
+            var label = fieldDef.GetLabel(field);
+
+            var colDef = new ColumnDefinition
+            {
+                Type = fieldDef.Type,
+                Label = fieldDef.Label,
+                Required = fieldDef.Required,
+                OptionLabels = fieldDef.Options,
+                Placeholder = fieldDef.Placeholder
+            };
+            var formDef = new FormDefinition
+            {
+                Type = fieldDef.Type,
+                Label = fieldDef.Label,
+                Required = fieldDef.Required
+            };
+
+            @await Html.PartialAsync("_FormField",
+                new DynamicFormFieldViewModel(field, formDef, currentVal, label, null, new(), colDef))
+        }
+    </div>
+    <div class="modal-action mt-4">
+        <button type="button" class="btn btn-ghost btn-sm"
+                onclick="document.getElementById('section-modal-@sec.Id').close()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">@(isEdit ? "Update" : "Create")</button>
+    </div>
+</form>

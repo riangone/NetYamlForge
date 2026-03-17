@@ -1,0 +1,74 @@
+stats:
+- label: "商品総数"
+  labelKey: "projects.inventory.dashboard.stats.0.label"
+  entity: product
+  aggregate: count
+  icon: "📦"
+  color: "badge-primary"
+
+- label: "在庫切れ商品"
+  labelKey: "projects.inventory.dashboard.stats.1.label"
+  entity: product
+  aggregate: count
+  column: id
+  filter: "stock_qty = 0"
+  icon: "⚠️"
+  color: "badge-error"
+
+- label: "発注点以下"
+  labelKey: "projects.inventory.dashboard.stats.2.label"
+  entity: product
+  aggregate: count
+  column: id
+  filter: "stock_qty <= reorder_level AND stock_qty > 0"
+  icon: "🔔"
+  color: "badge-warning"
+
+- label: "仕入先数"
+  labelKey: "projects.inventory.dashboard.stats.3.label"
+  entity: supplier
+  aggregate: count
+  column: id
+  filter: "status = 'active'"
+  icon: "🏭"
+  color: "badge-success"
+
+- label: "処理中発注書"
+  labelKey: "projects.inventory.dashboard.stats.4.label"
+  entity: purchase_order
+  aggregate: count
+  column: id
+  filter: "status = 'ordered'"
+  icon: "📋"
+  color: "badge-info"
+
+charts:
+- title: "カテゴリ別商品数"
+  titleKey: "projects.inventory.dashboard.charts.0.title"
+  type: bar
+  entity: product
+  groupExpression: "category_id"
+  valueAggregate: count
+  valueColumn: id
+  colorBg: "rgba(54, 162, 235, 0.7)"
+  colorBorder: "rgb(54, 162, 235)"
+
+- title: "在庫移動種別"
+  titleKey: "projects.inventory.dashboard.charts.1.title"
+  type: doughnut
+  entity: stock_movement
+  groupExpression: "movement_type"
+  valueAggregate: count
+  valueColumn: id
+  colorsJson: |
+    ["rgba(76, 175, 80, 0.8)", "rgba(244, 67, 54, 0.8)", "rgba(255, 193, 7, 0.8)"]
+
+- title: "発注書ステータス"
+  titleKey: "projects.inventory.dashboard.charts.2.title"
+  type: doughnut
+  entity: purchase_order
+  groupExpression: "status"
+  valueAggregate: count
+  valueColumn: id
+  colorsJson: |
+    ["rgba(158, 158, 158, 0.8)", "rgba(33, 150, 243, 0.8)", "rgba(76, 175, 80, 0.8)", "rgba(244, 67, 54, 0.8)"]

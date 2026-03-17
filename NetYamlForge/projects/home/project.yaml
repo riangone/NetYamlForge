@@ -1,0 +1,9 @@
+name: home
+displayName: Enterprise Product Portal
+version: 1.0.0
+database:
+  type: sqlite
+  path: database/home.db
+features:
+  multiLanguage: true
+  userAuthentication: true

@@ -1,0 +1,40 @@
+entities:
+  stock_movement:
+    table: 'stock_movement'
+    key: 'id'
+    displayName: 'Stock Movement'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['product_id', 'quantity', 'movement_type', 'reason', 'created_at', 'created_by']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      product_id: { type: int, required: true, label: 'Product Id', sortable: true }
+      quantity: { type: int, required: true, label: 'Quantity', sortable: true }
+      movement_type: { type: string, required: true, label: 'Movement Type', searchable: true, sortable: true }
+      reason: { type: string, label: 'Reason', searchable: true, sortable: true }
+      created_at: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+      created_by: { type: string, label: 'Created By', searchable: true, sortable: true }
+    forms:
+      product_id:
+        type: int
+        required: true
+        label: 'Product Id'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      quantity: { type: int, required: true, label: 'Quantity', editable: true }
+      movement_type: { type: string, required: true, label: 'Movement Type', editable: true }
+      reason: { type: string, label: 'Reason', editable: true }
+      created_at: { type: string, required: true, label: 'Created At', editable: true }
+      created_by: { type: string, label: 'Created By', editable: true }
+    filters: {}
+    links: {}

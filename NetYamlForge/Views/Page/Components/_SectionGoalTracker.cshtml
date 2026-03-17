@@ -1,0 +1,68 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var nameField = sec.NameField ?? (sec.GetColumnAt(0));
+    var currentField = sec.CurrentField ?? (sec.GetColumnAt(1));
+    var targetField = sec.TargetField ?? (sec.GetColumnAt(2));
+    var unitField = sec.UnitField;
+    var deadlineField = sec.DeadlineField;
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+
+<div class="goal-tracker-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    @foreach (var row in rows)
+    {
+        var name = row.TryGetValue(nameField, out var n) ? n?.ToString() ?? "" : "";
+        var current = row.TryGetValue(currentField, out var c) ? Convert.ToDouble(c) : 0;
+        var target = row.TryGetValue(targetField, out var t) ? Convert.ToDouble(t) : 100;
+        var unit = !string.IsNullOrEmpty(unitField) && row.TryGetValue(unitField, out var u) ? u?.ToString() ?? "" : "";
+        var deadline = !string.IsNullOrEmpty(deadlineField) && row.TryGetValue(deadlineField, out var d) ? d?.ToString() ?? "" : "";
+        var percent = target > 0 ? Math.Min((current / target) * 100, 100) : 0;
+        var isAchieved = current >= target;
+        var daysLeft = !string.IsNullOrEmpty(deadline) && DateTime.TryParse(deadline, out var dl) 
+            ? (dl - DateTime.Now).Days 
+            : -1;
+        
+        <div class="card bg-base-100 shadow @(isAchieved ? "border-2 border-success" : "")">
+            <div class="card-body">
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-bold text-lg">@name</h3>
+                    @if (isAchieved)
+                    {
+                        <span class="badge badge-success">✓ 達成</span>
+                    }
+                </div>
+                
+                <div class="flex items-baseline gap-1 mb-2">
+                    <span class="text-3xl font-bold">@current.ToString("N0")</span>
+                    <span class="text-gray-500">/ @target.ToString("N0") @unit</span>
+                </div>
+                
+                <div class="w-full bg-base-300 rounded-full h-4 mb-2">
+                    <div class="bg-@(percent >= 100 ? "success" : percent >= 75 ? "primary" : percent >= 50 ? "warning" : "error") h-4 rounded-full transition-all"
+                         style="width: @percent%"></div>
+                </div>
+                
+                <div class="flex justify-between text-sm">
+                    <span class="font-bold">@percent.ToString("F1")%</span>
+                    @if (daysLeft >= 0)
+                    {
+                        <span class="@(daysLeft <= 7 ? "text-error" : "text-gray-500")">
+                            残り @(daysLeft) 日
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (!rows.Any())
+    {
+        <div class="col-span-full text-center text-gray-400 py-8">No goals available</div>
+    }
+</div>

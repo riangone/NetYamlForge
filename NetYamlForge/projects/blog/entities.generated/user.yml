@@ -1,0 +1,49 @@
+entities:
+  user:
+    table: 'User'
+    key: 'UserId'
+    displayName: 'User'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Username', 'Email', 'PasswordHash', 'DisplayName', 'Role', 'Avatar', 'Bio', 'IsActive', 'LastLoginAt', 'LastLoginIP', 'CreatedAt', 'UpdatedAt', 'CreatedBy', 'UpdatedBy']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      UserId: { type: int, identity: true, label: 'User Id', sortable: true }
+      Username: { type: string, required: true, label: 'Username', searchable: true, sortable: true }
+      Email: { type: string, required: true, label: 'Email', searchable: true, sortable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', searchable: true, sortable: true }
+      DisplayName: { type: string, label: 'Display Name', searchable: true, sortable: true }
+      Role: { type: string, label: 'Role', searchable: true, sortable: true }
+      Avatar: { type: string, label: 'Avatar', searchable: true, sortable: true }
+      Bio: { type: string, label: 'Bio', searchable: true, sortable: true }
+      IsActive: { type: int, label: 'Is Active', sortable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', searchable: true, sortable: true }
+      LastLoginIP: { type: string, label: 'Last Login Ip', searchable: true, sortable: true }
+      CreatedAt: { type: string, label: 'Created At', searchable: true, sortable: true }
+      UpdatedAt: { type: string, label: 'Updated At', searchable: true, sortable: true }
+      CreatedBy: { type: string, label: 'Created By', searchable: true, sortable: true }
+      UpdatedBy: { type: string, label: 'Updated By', searchable: true, sortable: true }
+    forms:
+      Username: { type: string, required: true, label: 'Username', editable: true }
+      Email: { type: string, required: true, label: 'Email', editable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', editable: true }
+      DisplayName: { type: string, label: 'Display Name', editable: true }
+      Role: { type: string, label: 'Role', editable: true }
+      Avatar: { type: string, label: 'Avatar', editable: true }
+      Bio: { type: string, label: 'Bio', editable: true }
+      IsActive: { type: int, label: 'Is Active', editable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', editable: true }
+      LastLoginIP: { type: string, label: 'Last Login Ip', editable: true }
+      CreatedAt: { type: string, label: 'Created At', editable: true }
+      UpdatedAt: { type: string, label: 'Updated At', editable: true }
+      CreatedBy: { type: string, label: 'Created By', editable: true }
+      UpdatedBy: { type: string, label: 'Updated By', editable: true }
+    filters: {}
+    links: {}

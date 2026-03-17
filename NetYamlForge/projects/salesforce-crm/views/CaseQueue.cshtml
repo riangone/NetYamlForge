@@ -1,0 +1,105 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath ?? "_Layout";
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    var currentProject = ViewData["Project"] as string ?? "salesforce-crm";
+    var pageName = ViewData["PageName"] as string ?? "CaseQueue";
+    ViewData["Title"] = T("projects.salesforce-crm.pages.CaseQueue.title", "Case Queue");
+
+    var queueRows = Model.TryGetValue("case_queue", out var queueData)
+        ? queueData.Rows.ToList()
+        : new List<Dictionary<string, object>>();
+}
+
+<div class="space-y-6">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <h1 class="text-2xl font-bold">@T("projects.salesforce-crm.pages.CaseQueue.title", "Case Queue")</h1>
+        <p class="mt-1 text-sm opacity-70">@T("projects.salesforce-crm.pages.CaseQueue.description", "Service case queue with agent assignment and status transitions for frontline operations.")</p>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.CaseId", "Case ID")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.Account", "Account")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.Contact", "Contact")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.CaseStatus", "Case Status")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.OwnerName", "Owner")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.sections.case_queue.columns.Severity", "Severity")</th>
+                        <th>@T("projects.salesforce-crm.pages.CaseQueue.actions", "Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!queueRows.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-base-content/50">@T("projects.salesforce-crm.pages.CaseQueue.empty", "No cases in queue.")</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var row in queueRows)
+                        {
+                            var caseId = row.TryGetValue("CaseId", out var c0) ? c0?.ToString() ?? "" : "";
+                            var account = row.TryGetValue("Account", out var c1) ? c1?.ToString() ?? "" : "";
+                            var contact = row.TryGetValue("Contact", out var c2) ? c2?.ToString() ?? "" : "";
+                            var status = row.TryGetValue("CaseStatus", out var c3) ? c3?.ToString() ?? "" : "";
+                            var owner = row.TryGetValue("OwnerName", out var c4) ? c4?.ToString() ?? "" : "";
+                            var severity = row.TryGetValue("Severity", out var c5) ? c5?.ToString() ?? "" : "";
+
+                            <tr id="case-@caseId">
+                                <td>@caseId</td>
+                                <td>@account</td>
+                                <td>@contact</td>
+                                <td>@status</td>
+                                <td>@owner</td>
+                                <td>
+                                    <span class="badge @(severity == "Critical" ? "badge-error" : severity == "High" ? "badge-warning" : "badge-info")">@severity</span>
+                                </td>
+                                <td>
+                                    <div class="flex flex-wrap gap-1">
+                                        <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/case_queue/update-row"
+                                              hx-target="#case-@caseId"
+                                              hx-swap="outerHTML"
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="rowId" value="@caseId" />
+                                            <input type="hidden" name="field" value="Status" />
+                                            <input type="hidden" name="value" value="Open" />
+                                            <button type="submit" class="btn btn-xs btn-outline">@T("projects.salesforce-crm.pages.CaseQueue.action.open", "Open")</button>
+                                        </form>
+                                        <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/case_queue/update-row"
+                                              hx-target="#case-@caseId"
+                                              hx-swap="outerHTML"
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="rowId" value="@caseId" />
+                                            <input type="hidden" name="field" value="Status" />
+                                            <input type="hidden" name="value" value="Delayed" />
+                                            <button type="submit" class="btn btn-xs btn-warning">@T("projects.salesforce-crm.pages.CaseQueue.action.escalate", "Escalate")</button>
+                                        </form>
+                                        <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/case_queue/update-row"
+                                              hx-target="#case-@caseId"
+                                              hx-swap="outerHTML"
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="rowId" value="@caseId" />
+                                            <input type="hidden" name="field" value="Status" />
+                                            <input type="hidden" name="value" value="Shipped" />
+                                            <button type="submit" class="btn btn-xs btn-success">@T("projects.salesforce-crm.pages.CaseQueue.action.resolve", "Resolve")</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

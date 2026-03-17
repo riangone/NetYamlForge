@@ -1,0 +1,313 @@
+translations:
+  home.actions.openWorkspace:
+    en-US: Open Workspace
+    zh-CN: 进入工作区
+    ja-JP: ワークスペースを開く
+  home.capabilities.analyticsReady.badge:
+    en-US: Analytics
+    zh-CN: 分析
+    ja-JP: 分析
+  home.capabilities.analyticsReady.description:
+    en-US: Build operational dashboards and monitoring views rapidly with configuration-driven components.
+    zh-CN: Dashboard 与运营页面由配置驱动，快速搭建管理视图与监控面板。
+    ja-JP: 設定駆動コンポーネントで運用ダッシュボードや監視画面を迅速に構築できます。
+  home.capabilities.analyticsReady.title:
+    en-US: Operational Analytics
+    zh-CN: 运营指标可视化
+    ja-JP: 運用分析可視化
+  home.capabilities.enterpriseAccessControl.badge:
+    en-US: Security
+    zh-CN: 安全
+    ja-JP: セキュリティ
+  home.capabilities.enterpriseAccessControl.description:
+    en-US: Built-in authentication, role authorization, and audit logging for enterprise security requirements.
+    zh-CN: 内置认证、角色授权与审计日志，适配企业内部系统安全要求。
+    ja-JP: 認証・ロール認可・監査ログを標準搭載し、企業セキュリティ要件に対応します。
+  home.capabilities.enterpriseAccessControl.title:
+    en-US: Enterprise Access Control
+    zh-CN: 企业级访问控制
+    ja-JP: エンタープライズアクセス制御
+  home.capabilities.pluggableExtensions.badge:
+    en-US: Extensibility
+    zh-CN: 可扩展
+    ja-JP: 拡張性
+  home.capabilities.pluggableExtensions.description:
+    en-US: Extend with hooks and business logic while keeping the platform stable and reusable.
+    zh-CN: 支持 Hook 与业务逻辑扩展，保持平台稳定同时满足项目定制化。
+    ja-JP: Hook と業務ロジックで拡張しつつ、プラットフォームの安定性と再利用性を維持します。
+  home.capabilities.pluggableExtensions.title:
+    en-US: Pluggable Business Extensions
+    zh-CN: 可插拔业务扩展
+    ja-JP: プラガブル拡張
+  home.capabilities.yamlCentered.badge:
+    en-US: Core
+    zh-CN: 核心
+    ja-JP: コア
+  home.capabilities.yamlCentered.description:
+    en-US: Manage page structure, field presentation, navigation entries, and copy from YAML in one place.
+    zh-CN: 页面结构、字段呈现、导航入口与文案统一由 YAML 管理，降低维护复杂度。
+    ja-JP: 画面構成・項目表示・ナビゲーション・文言を YAML で一元管理し、保守負荷を低減します。
+  home.capabilities.yamlCentered.title:
+    en-US: YAML-Centered Configuration
+    zh-CN: YAML 中心化配置
+    ja-JP: YAML 中心の設定管理
+  home.hero.description:
+    en-US: Build dashboards, operational workbenches, and CRUD pages consistently through metadata-driven design.
+    zh-CN: 通过元数据驱动的方式统一构建 Dashboard、运营工作台与 CRUD 页面，减少重复开发并提升交付一致性。
+    ja-JP: メタデータ駆動で Dashboard・運用ワークベンチ・CRUD 画面を統一構築し、重複開発を削減して提供品質を高めます。
+  home.hero.eyebrow:
+    en-US: Enterprise Product Platform
+    zh-CN: 企业产品平台
+    ja-JP: エンタープライズ製品プラットフォーム
+  home.hero.highlights.builtInAuthAudit:
+    en-US: Built-in Auth and Audit
+    zh-CN: 内建认证与审计
+    ja-JP: 認証・監査を標準搭載
+  home.hero.highlights.multiProjectGovernance:
+    en-US: Multi-Project Governance
+    zh-CN: 多项目治理
+    ja-JP: マルチプロジェクト統制
+  home.hero.highlights.sqlProviderAbstraction:
+    en-US: SQL Provider Abstraction
+    zh-CN: SQL 提供方抽象
+    ja-JP: SQL プロバイダ抽象化
+  home.hero.highlights.yamlFirstUiDefinition:
+    en-US: YAML-first UI Definition
+    zh-CN: YAML 优先 UI 定义
+    ja-JP: YAML 優先の UI 定義
+  home.hero.primaryActionLabel:
+    en-US: Browse Product Workspaces
+    zh-CN: 浏览产品工作区
+    ja-JP: 製品ワークスペースを見る
+  home.hero.secondaryActionLabel:
+    en-US: View Platform Notes
+    zh-CN: 查看平台说明
+    ja-JP: プラットフォーム説明を見る
+  home.hero.title:
+    en-US: Build enterprise products faster with unified YAML definitions
+    zh-CN: 统一 YAML 定义，快速交付企业业务产品
+    ja-JP: YAML 定義を統一し、企業向け製品を迅速に提供
+  home.messages.noProjects:
+    en-US: No projects found. Please check the projects directory.
+    zh-CN: 未发现项目，请检查 projects 目录。
+    ja-JP: プロジェクトが見つかりません。projects ディレクトリを確認してください。
+  home.metrics.activeWorkspaces.label:
+    en-US: Active Workspaces
+    zh-CN: 活跃工作区
+    ja-JP: 稼働中ワークスペース
+  home.metrics.activeWorkspaces.trend:
+    en-US: Multiple industry templates connected
+    zh-CN: 已接入多个行业模板
+    ja-JP: 複数業種テンプレートを接続済み
+  home.metrics.deploymentReadiness.label:
+    en-US: Deployment Readiness
+    zh-CN: 部署就绪度
+    ja-JP: デプロイ準備度
+  home.metrics.deploymentReadiness.trend:
+    en-US: Supports environment-specific expansion
+    zh-CN: 支持分环境配置与扩展
+    ja-JP: 環境別設定と拡張に対応
+  home.metrics.localizationKeys.label:
+    en-US: Localization Keys
+    zh-CN: 多语言键数量
+    ja-JP: 多言語キー数
+  home.metrics.localizationKeys.trend:
+    en-US: YAML primary, resx fallback
+    zh-CN: YAML 为主，resx 兜底
+    ja-JP: YAML 優先、resx フォールバック
+  home.metrics.yamlDefinitions.label:
+    en-US: YAML Definitions
+    zh-CN: YAML 定义数
+    ja-JP: YAML 定義数
+  home.metrics.yamlDefinitions.trend:
+    en-US: Unified management of pages and fields
+    zh-CN: 统一管理页面与字段
+    ja-JP: 画面と項目を一元管理
+  home.projects.b2bOrderOps.tagline:
+    en-US: Enterprise operations product for fulfillment and supply-chain collaboration
+    zh-CN: 面向履约与供应链协同的企业运营产品
+    ja-JP: 履行とサプライチェーン連携に特化した運用製品
+  home.projects.blog.tagline:
+    en-US: Lightweight enterprise solution for content production and review workflows
+    zh-CN: 内容生产与审核流程的轻量化企业方案
+    ja-JP: コンテンツ制作と審査フロー向けの軽量エンタープライズ構成
+  home.projects.chinook.tagline:
+    en-US: Reference implementation with localization, audit, and metadata-driven CRUD
+    zh-CN: 多语言 + 审计 + 元数据驱动 CRUD 的参考实现
+    ja-JP: 多言語・監査・メタデータ駆動 CRUD のリファレンス実装
+  home.projects.default.tagline:
+    en-US: Configurable enterprise business workspace
+    zh-CN: 可配置的企业业务工作区
+    ja-JP: 設定可能な企業向け業務ワークスペース
+  home.projects.northwindSqlite3.tagline:
+    en-US: Standard sample-data environment for business validation
+    zh-CN: 标准化样本数据驱动的业务验证环境
+    ja-JP: 標準サンプルデータによる業務検証環境
+  home.projects.northwindSqlite3Ops.tagline:
+    en-US: Enhanced operations scenario focused on anomaly monitoring and action closure
+    zh-CN: 运营场景增强版，聚焦异常监控与行动闭环
+    ja-JP: 異常監視とアクション完結に注力した運用強化版
+  home.projects.tags.alerting:
+    en-US: Alerting
+    zh-CN: 告警
+    ja-JP: アラート
+  home.projects.tags.analytics:
+    en-US: Analytics
+    zh-CN: 分析
+    ja-JP: 分析
+  home.projects.tags.b2b:
+    en-US: B2B
+    zh-CN: B2B
+    ja-JP: B2B
+  home.projects.tags.cms:
+    en-US: CMS
+    zh-CN: 内容管理
+    ja-JP: CMS
+  home.projects.tags.collaboration:
+    en-US: Collaboration
+    zh-CN: 协同
+    ja-JP: コラボレーション
+  home.projects.tags.configurable:
+    en-US: Configurable
+    zh-CN: 可配置
+    ja-JP: 設定可能
+  home.projects.tags.demo:
+    en-US: Demo
+    zh-CN: 演示
+    ja-JP: デモ
+  home.projects.tags.fulfillment:
+    en-US: Fulfillment
+    zh-CN: 履约
+    ja-JP: フルフィルメント
+  home.projects.tags.operations:
+    en-US: Operations
+    zh-CN: 运营
+    ja-JP: オペレーション
+  home.projects.tags.ops:
+    en-US: Ops
+    zh-CN: 运营
+    ja-JP: 運用
+  home.projects.tags.productized:
+    en-US: Productized
+    zh-CN: 产品化
+    ja-JP: 製品化
+  home.projects.tags.prototype:
+    en-US: Prototype
+    zh-CN: 原型验证
+    ja-JP: プロトタイプ
+  home.projects.tags.reference:
+    en-US: Reference
+    zh-CN: 参考实现
+    ja-JP: リファレンス
+  home.projects.tags.taskOps:
+    en-US: TaskOps
+    zh-CN: 任务运营
+    ja-JP: タスク運用
+  home.projects.tags.validation:
+    en-US: Validation
+    zh-CN: 验证
+    ja-JP: 検証
+  home.projects.tags.workflow:
+    en-US: Workflow
+    zh-CN: 工作流
+    ja-JP: ワークフロー
+  home.projects.todo.tagline:
+    en-US: Rapid implementation template for task and project collaboration
+    zh-CN: 任务与项目协同场景的快速实施模板
+    ja-JP: タスク / プロジェクト協調の迅速導入テンプレート
+  home.quickActions.openWorkbench:
+    en-US: Open Order Workbench
+    zh-CN: 打开 Order Workbench
+    ja-JP: Order Workbench を開く
+  home.quickActions.viewDashboard:
+    en-US: View Dashboard Design
+    zh-CN: 查看 Dashboard 设计
+    ja-JP: Dashboard 設計を見る
+  home.quickActions.viewProducts:
+    en-US: View Product Overview
+    zh-CN: 进入项目总览
+    ja-JP: 製品一覧を見る
+  home.sections.capabilities.title:
+    en-US: Core Capabilities
+    zh-CN: 核心能力
+    ja-JP: コア機能
+  home.sections.projects.lead:
+    en-US: Select a workspace to enter the corresponding product operations and management area.
+    zh-CN: 选择一个工作区进入对应产品的运营与管理界面。
+    ja-JP: ワークスペースを選択し、対象製品の運用・管理画面に進みます。
+  home.sections.projects.title:
+    en-US: Enterprise Product Workspaces
+    zh-CN: 企业产品工作区
+    ja-JP: 企業向け製品ワークスペース
+  home.sections.quickActions.title:
+    en-US: Quick Actions
+    zh-CN: 快速入口
+    ja-JP: クイックアクション
+  home.sections.solutions.title:
+    en-US: Solution Matrix
+    zh-CN: 方案矩阵
+    ja-JP: ソリューションマトリクス
+  home.solutions.b2bOrderOps.audience:
+    en-US: Supply chain and fulfillment operations teams
+    zh-CN: 供应链 / 履约运营团队
+    ja-JP: サプライチェーン / 履行運用チーム
+  home.solutions.b2bOrderOps.name:
+    en-US: B2B Order Ops
+    zh-CN: B2B 订单运营
+    ja-JP: B2B 受注オペレーション
+  home.solutions.b2bOrderOps.status:
+    en-US: Production
+    zh-CN: 生产可用
+    ja-JP: 本番運用
+  home.solutions.b2bOrderOps.summary:
+    en-US: Focuses on order fulfillment and replenishment with workbench, radar, and priority queues.
+    zh-CN: 聚焦订单履约与补货决策，提供工作台、雷达图与优先级队列。
+    ja-JP: 受注履行と補充判断に特化し、ワークベンチ・レーダー・優先度キューを提供します。
+  home.solutions.blogCms.audience:
+    en-US: Content operations and marketing teams
+    zh-CN: 内容运营 / 市场团队
+    ja-JP: コンテンツ運用 / マーケティングチーム
+  home.solutions.blogCms.name:
+    en-US: Blog CMS
+    zh-CN: 内容管理系统
+    ja-JP: ブログ CMS
+  home.solutions.blogCms.status:
+    en-US: Pilot
+    zh-CN: 试点
+    ja-JP: パイロット
+  home.solutions.blogCms.summary:
+    en-US: Delivers content management capability rapidly with unified metadata configuration.
+    zh-CN: 通过统一元数据配置快速交付内容管理能力。
+    ja-JP: 統一メタデータ設定により、コンテンツ管理機能を迅速に提供します。
+  home.solutions.northwindOps.audience:
+    en-US: Operations platform and business analytics teams
+    zh-CN: 运营中台 / 业务分析团队
+    ja-JP: 運用基盤 / 業務分析チーム
+  home.solutions.northwindOps.name:
+    en-US: Northwind Ops
+    zh-CN: Northwind 运营包
+    ja-JP: Northwind 運用パック
+  home.solutions.northwindOps.status:
+    en-US: Production
+    zh-CN: 生产可用
+    ja-JP: 本番運用
+  home.solutions.northwindOps.summary:
+    en-US: Uses a canonical business model to quickly assemble operational monitoring and analysis pages.
+    zh-CN: 使用经典业务模型快速搭建运营监控和分析页面。
+    ja-JP: 標準業務モデルを活用し、運用監視・分析ページを迅速に組み立てます。
+  projects.home.project.layout.navigation.items.0.label:
+    en-US: Portal Home
+    zh-CN: 门户首页
+    ja-JP: ポータルホーム
+  projects.home.project.layout.navigation.items.1.label:
+    en-US: B2B Order Ops
+    zh-CN: B2B 订单运营
+    ja-JP: B2B 受注オペレーション
+  projects.home.project.layout.navigation.items.2.label:
+    en-US: Northwind Ops
+    zh-CN: Northwind 运营包
+    ja-JP: Northwind 運用パック
+  projects.home.project.layout.navigation.items.3.label:
+    en-US: Chinook
+    zh-CN: Chinook 音乐商店
+    ja-JP: Chinook ミュージックストア

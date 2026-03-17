@@ -1,0 +1,55 @@
+@model NetYamlForge.Controllers.ConfigDiagnosticsViewModel
+@{
+    ViewData["Title"] = "Config Diagnostics";
+}
+
+<div class="space-y-4">
+    <div>
+        <h1 class="text-2xl font-bold">Config Diagnostics</h1>
+        <p class="text-sm text-base-content/70">Project: @(string.IsNullOrWhiteSpace(Model.ProjectName) ? "(none)" : Model.ProjectName)</p>
+    </div>
+
+    <form method="get" class="flex flex-wrap items-end gap-3">
+        <input type="hidden" name="project" value="@Model.ProjectName" />
+        <label class="form-control w-80 max-w-full">
+            <span class="label-text text-sm">Entity</span>
+            <select name="entity" class="select select-bordered select-sm">
+                @foreach (var e in Model.Entities)
+                {
+                    <option value="@e" selected="@(Model.Entity.Equals(e, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@e</option>
+                }
+            </select>
+        </label>
+        <label class="label cursor-pointer gap-2 mb-1">
+            <input type="hidden" name="onlyChanged" value="false" />
+            <input type="checkbox" class="checkbox checkbox-sm" name="onlyChanged" value="true" checked="@(Model.OnlyChanged ? "checked" : null)" />
+            <span class="label-text text-sm">Only changed</span>
+        </label>
+        <button type="submit" class="btn btn-sm btn-primary">Reload</button>
+    </form>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="text-sm font-semibold mb-2">Base Definition</div>
+                <pre class="bg-base-200 rounded p-3 text-xs overflow-auto min-h-72">@Model.BaseJson</pre>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="text-sm font-semibold mb-2">Effective Definition</div>
+                <pre class="bg-base-200 rounded p-3 text-xs overflow-auto min-h-72">@Model.EffectiveJson</pre>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="text-sm font-semibold mb-2">
+                    Diff (@Model.Entity) - changed: @Model.ChangedCount
+                </div>
+                <pre class="bg-base-200 rounded p-3 text-xs overflow-auto min-h-72">@string.Join("\n", Model.DiffLines)</pre>
+            </div>
+        </div>
+    </div>
+</div>

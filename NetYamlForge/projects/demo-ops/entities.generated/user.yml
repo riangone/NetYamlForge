@@ -1,0 +1,50 @@
+entities:
+  user:
+    table: 'User'
+    key: 'UserId'
+    displayName: 'User'
+    displayNameKey: 'entities.user.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Username', 'Email', 'PasswordHash', 'DisplayName', 'Role', 'Avatar', 'Bio', 'IsActive', 'LastLoginAt', 'LastLoginIP', 'CreatedAt', 'UpdatedAt', 'CreatedBy', 'UpdatedBy']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      UserId: { type: int, identity: true, label: 'User Id', labelKey: 'entities.user.columns.UserId.label', sortable: true }
+      Username: { type: string, required: true, label: 'Username', labelKey: 'entities.user.columns.Username.label', searchable: true, sortable: true }
+      Email: { type: string, required: true, label: 'Email', labelKey: 'entities.user.columns.Email.label', searchable: true, sortable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', labelKey: 'entities.user.columns.PasswordHash.label', searchable: true, sortable: true }
+      DisplayName: { type: string, label: 'Display Name', labelKey: 'entities.user.columns.DisplayName.label', searchable: true, sortable: true }
+      Role: { type: string, label: 'Role', labelKey: 'entities.user.columns.Role.label', searchable: true, sortable: true }
+      Avatar: { type: string, label: 'Avatar', labelKey: 'entities.user.columns.Avatar.label', searchable: true, sortable: true }
+      Bio: { type: string, label: 'Bio', labelKey: 'entities.user.columns.Bio.label', searchable: true, sortable: true }
+      IsActive: { type: int, label: 'Is Active', labelKey: 'entities.user.columns.IsActive.label', sortable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', labelKey: 'entities.user.columns.LastLoginAt.label', searchable: true, sortable: true }
+      LastLoginIP: { type: string, label: 'Last Login Ip', labelKey: 'entities.user.columns.LastLoginIP.label', searchable: true, sortable: true }
+      CreatedAt: { type: string, label: 'Created At', labelKey: 'entities.user.columns.CreatedAt.label', searchable: true, sortable: true }
+      UpdatedAt: { type: string, label: 'Updated At', labelKey: 'entities.user.columns.UpdatedAt.label', searchable: true, sortable: true }
+      CreatedBy: { type: string, label: 'Created By', labelKey: 'entities.user.columns.CreatedBy.label', searchable: true, sortable: true }
+      UpdatedBy: { type: string, label: 'Updated By', labelKey: 'entities.user.columns.UpdatedBy.label', searchable: true, sortable: true }
+    forms:
+      Username: { type: string, required: true, label: 'Username', labelKey: 'entities.user.forms.Username.label', editable: true }
+      Email: { type: string, required: true, label: 'Email', labelKey: 'entities.user.forms.Email.label', editable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', labelKey: 'entities.user.forms.PasswordHash.label', editable: true }
+      DisplayName: { type: string, label: 'Display Name', labelKey: 'entities.user.forms.DisplayName.label', editable: true }
+      Role: { type: string, label: 'Role', labelKey: 'entities.user.forms.Role.label', editable: true }
+      Avatar: { type: string, label: 'Avatar', labelKey: 'entities.user.forms.Avatar.label', editable: true }
+      Bio: { type: string, label: 'Bio', labelKey: 'entities.user.forms.Bio.label', editable: true }
+      IsActive: { type: int, label: 'Is Active', labelKey: 'entities.user.forms.IsActive.label', editable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', labelKey: 'entities.user.forms.LastLoginAt.label', editable: true }
+      LastLoginIP: { type: string, label: 'Last Login Ip', labelKey: 'entities.user.forms.LastLoginIP.label', editable: true }
+      CreatedAt: { type: string, label: 'Created At', labelKey: 'entities.user.forms.CreatedAt.label', editable: true }
+      UpdatedAt: { type: string, label: 'Updated At', labelKey: 'entities.user.forms.UpdatedAt.label', editable: true }
+      CreatedBy: { type: string, label: 'Created By', labelKey: 'entities.user.forms.CreatedBy.label', editable: true }
+      UpdatedBy: { type: string, label: 'Updated By', labelKey: 'entities.user.forms.UpdatedBy.label', editable: true }
+    filters: {}
+    links: {}

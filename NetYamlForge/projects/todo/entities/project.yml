@@ -1,0 +1,183 @@
+imports: []
+entities:
+  project:
+    table: Project
+    key: Id
+    keys: []
+    displayName: Project
+    joins: []
+    forms:
+      Name:
+        type: string
+        identity: false
+        required: true
+        label: Project Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.forms.Name.label
+      Status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: false
+        editable: true
+        options:
+        - planning
+        - active
+        - on_hold
+        - completed
+        - cancelled
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.forms.Status.label
+      StartDate:
+        type: date
+        identity: false
+        required: false
+        label: Start Date
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.forms.StartDate.label
+      EndDate:
+        type: date
+        identity: false
+        required: false
+        label: End Date
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.forms.EndDate.label
+      Description:
+        type: textarea
+        identity: false
+        required: false
+        label: Description
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.forms.Description.label
+      CreatedAt:
+        type: string
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      Id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.Id.label
+      Name:
+        type: string
+        identity: false
+        required: true
+        label: Project Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.Name.label
+      Status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.Status.label
+      StartDate:
+        type: date
+        identity: false
+        required: false
+        label: Start Date
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.StartDate.label
+      EndDate:
+        type: date
+        identity: false
+        required: false
+        label: End Date
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.EndDate.label
+      CreatedAt:
+        type: datetime
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.project.entities.project.columns.CreatedAt.label
+      Description:
+        type: string
+        identity: false
+        required: false
+        label: Description
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - Name
+        - Status
+        - StartDate
+        - EndDate
+        - Description
+      filters:
+        columns: 2
+        order:
+        - Status
+    softDelete: false
+    isPublic: true
+    filters:
+      Status:
+        type: dropdown
+        label: Status
+        options:
+        - planning
+        - active
+        - on_hold
+        - completed
+        - cancelled
+        labelKey: projects.todo.entities.project.entities.project.filters.Status.label
+    links:
+      tasks:
+        label: Tasks
+        targetEntity: task
+        filter:
+          ProjectId: Id
+        labelKey: projects.todo.entities.project.entities.project.links.tasks.label
+    isCompositeKey: false
+    displayNameKey: projects.todo.entities.project.entities.project.displayName

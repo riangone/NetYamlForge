@@ -1,0 +1,113 @@
+translations:
+  entities.customer.columns.email.label:
+    en-US: 'Email'
+    zh-CN: 'Email'
+    ja-JP: 'Email'
+  entities.customer.columns.id.label:
+    en-US: 'Id'
+    zh-CN: 'Id'
+    ja-JP: 'Id'
+  entities.customer.columns.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  entities.customer.displayName:
+    en-US: 'Customer'
+    zh-CN: 'Customer'
+    ja-JP: 'Customer'
+  entities.customer.forms.email.label:
+    en-US: 'Email'
+    zh-CN: 'Email'
+    ja-JP: 'Email'
+  entities.customer.forms.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  projects.tmp-mode-display.dashboard.stats.0.label:
+    en-US: 'Customer Count'
+    zh-CN: 'Customer Count'
+    ja-JP: 'Customer Count'
+  projects.tmp-mode-display.home.actions.openWorkspace:
+    en-US: 'Open Workspace'
+    zh-CN: 'Open Workspace'
+    ja-JP: 'Open Workspace'
+  projects.tmp-mode-display.home.emptyProjectsMessage:
+    en-US: 'No projects found under projects/.'
+    zh-CN: 'No projects found under projects/.'
+    ja-JP: 'No projects found under projects/.'
+  projects.tmp-mode-display.home.hero.description:
+    en-US: 'Starter workspace generated from your database schema.'
+    zh-CN: 'Starter workspace generated from your database schema.'
+    ja-JP: 'Starter workspace generated from your database schema.'
+  projects.tmp-mode-display.home.hero.eyebrow:
+    en-US: 'Tmp Mode Display'
+    zh-CN: 'Tmp Mode Display'
+    ja-JP: 'Tmp Mode Display'
+  projects.tmp-mode-display.home.hero.highlights.0:
+    en-US: 'Highlights'
+    zh-CN: 'Highlights'
+    ja-JP: 'Highlights'
+  projects.tmp-mode-display.home.hero.highlights.1:
+    en-US: 'Highlights'
+    zh-CN: 'Highlights'
+    ja-JP: 'Highlights'
+  projects.tmp-mode-display.home.hero.primaryActionLabel:
+    en-US: 'Open Dashboard'
+    zh-CN: 'Open Dashboard'
+    ja-JP: 'Open Dashboard'
+  projects.tmp-mode-display.home.hero.secondaryActionLabel:
+    en-US: 'Open Schema Definitions'
+    zh-CN: 'Open Schema Definitions'
+    ja-JP: 'Open Schema Definitions'
+  projects.tmp-mode-display.home.hero.title:
+    en-US: 'Tmp Mode Display Workspace'
+    zh-CN: 'Tmp Mode Display Workspace'
+    ja-JP: 'Tmp Mode Display Workspace'
+  projects.tmp-mode-display.home.quickActions.0.label:
+    en-US: 'Dashboard'
+    zh-CN: 'Dashboard'
+    ja-JP: 'Dashboard'
+  projects.tmp-mode-display.home.quickActions.1.label:
+    en-US: 'Entity Definitions'
+    zh-CN: 'Entity Definitions'
+    ja-JP: 'Entity Definitions'
+  projects.tmp-mode-display.home.quickActions.2.label:
+    en-US: 'Starter Page'
+    zh-CN: 'Starter Page'
+    ja-JP: 'Starter Page'
+  projects.tmp-mode-display.home.sections.capabilities.title:
+    en-US: 'Core Capabilities'
+    zh-CN: 'Core Capabilities'
+    ja-JP: 'Core Capabilities'
+  projects.tmp-mode-display.home.sections.projects.lead:
+    en-US: 'Build your business screens from this starter project.'
+    zh-CN: 'Build your business screens from this starter project.'
+    ja-JP: 'Build your business screens from this starter project.'
+  projects.tmp-mode-display.home.sections.projects.title:
+    en-US: 'Tmp Mode Display'
+    zh-CN: 'Tmp Mode Display'
+    ja-JP: 'Tmp Mode Display'
+  projects.tmp-mode-display.home.sections.quickActions.title:
+    en-US: 'Quick Actions'
+    zh-CN: 'Quick Actions'
+    ja-JP: 'Quick Actions'
+  projects.tmp-mode-display.home.sections.solutions.title:
+    en-US: 'Solution Matrix'
+    zh-CN: 'Solution Matrix'
+    ja-JP: 'Solution Matrix'
+  projects.tmp-mode-display.pages.starterOverview.description:
+    en-US: 'Auto-generated starter page'
+    zh-CN: 'Auto-generated starter page'
+    ja-JP: 'Auto-generated starter page'
+  projects.tmp-mode-display.pages.starterOverview.sections.0.title:
+    en-US: 'Customer List'
+    zh-CN: 'Customer List'
+    ja-JP: 'Customer List'
+  projects.tmp-mode-display.pages.starterOverview.title:
+    en-US: 'Starter Overview'
+    zh-CN: 'Starter Overview'
+    ja-JP: 'Starter Overview'
+  projects.tmp-mode-display.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'

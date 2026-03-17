@@ -1,0 +1,25 @@
+title: Starter Overview
+titleKey: projects.tmp-mode-display.pages.starterOverview.title
+description: Auto-generated starter page
+descriptionKey: projects.tmp-mode-display.pages.starterOverview.description
+main_table: customers
+
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: customer_list
+    title: Customer List
+    titleKey: projects.tmp-mode-display.pages.starterOverview.sections.0.title
+    source_type: table
+    source: customers
+    page_size: 20
+    editable: false
+    read_only: true
+    ui:
+      component: DataTable
+      selectable: none
+

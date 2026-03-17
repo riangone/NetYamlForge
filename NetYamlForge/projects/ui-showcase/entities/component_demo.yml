@@ -1,0 +1,324 @@
+# UI Component Showcase - 全 19 種類のフォームコンポーネントデモ
+entities:
+  component_demo:
+    table: component_demo
+    key: id
+    displayName: "Component Demo"
+    description: "All 19 form component types demonstration"
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          # 基本コンポーネント
+          - name
+          - email_addr
+          - bio
+          - age
+          - birth_date
+          - active
+          # 選択コンポーネント
+          - category
+          - priority
+          - interests
+          - notifications
+          # 通貨・数値コンポーネント
+          - price
+          - discount_rate
+          # 連絡先コンポーネント
+          - phone
+          - website
+          - password
+          # ファイルアップロード
+          - attachment
+          - avatar
+          # リッチテキスト
+          - content_html
+          - content_md
+          # 自動完成・タグ
+          - tags
+          - autocomplete_demo
+          # 高度なコンポーネント
+          - event_period
+          - code_sample
+          - json_config
+          - signature
+          - location
+          - color_pick
+          - progress_val
+          - rating
+      filters:
+        columns: 4
+        order:
+          - name
+          - category
+          - priority
+          - active
+          - price
+          - birth_date
+
+    columns:
+      # --- 基本コンポーネント ---
+      id:          { type: int,     identity: true, label: ID,        sortable: true }
+      name:        { type: string,  label: Name,      searchable: true, sortable: true, required: true }
+      email_addr:  { type: email,   label: Email,     searchable: true }
+      bio:         { type: textarea, label: Bio,      searchable: true }
+      age:         { type: int,     label: Age,       sortable: true }
+      birth_date:  { type: date,    label: Birth Date, sortable: true }
+      active:      { type: bool,    label: Active,    sortable: true }
+      
+      # --- 選択コンポーネント ---
+      category:    { type: string,  label: Category,  sortable: true }
+      priority:    { type: string,  label: Priority,  sortable: true }
+      interests:   { type: string,  label: Interests }
+      notifications: { type: string, label: Notifications }
+      
+      # --- 通貨・数値コンポーネント ---
+      price:       { type: decimal, label: Price,     sortable: true }
+      discount_rate: { type: decimal, label: Discount (%) }
+      
+      # --- 連絡先コンポーネント ---
+      phone:       { type: string,  label: Phone }
+      website:     { type: string,  label: Website }
+      password:    { type: string,  label: Password }
+      
+      # --- ファイルアップロード ---
+      attachment:  { type: string,  label: Attachment }
+      avatar:      { type: string,  label: Avatar }
+      
+      # --- リッチテキスト ---
+      content_html: { type: string, label: Content (HTML) }
+      content_md:   { type: string, label: Content (Markdown) }
+      
+      # --- 自動完成・タグ ---
+      tags:        { type: string,  label: Tags }
+      autocomplete_demo: { type: string, label: Autocomplete }
+      
+      # --- 高度なコンポーネント ---
+      event_period: { type: string, label: Event Period }
+      code_sample:  { type: string,  label: Code Sample }
+      json_config:  { type: string,  label: JSON Config }
+      signature:    { type: string,  label: Signature }
+      location:     { type: string,  label: Location }
+      
+      # --- その他 ---
+      color_pick:  { type: string,  label: Color }
+      progress_val: { type: int,    label: Progress,  sortable: true }
+      rating:      { type: int,     label: Rating,    sortable: true }
+      created_at:  { type: date,    label: Created,   sortable: true }
+
+    forms:
+      # ==================== 基本コンポーネント ====================
+      name:
+        type: string
+        label: "📝 Name (text)"
+        editable: true
+        required: true
+      email_addr:
+        type: email
+        label: "📧 Email (email)"
+        editable: true
+      bio:
+        type: textarea
+        label: "📄 Bio (textarea)"
+        editable: true
+      age:
+        type: int
+        label: "🔢 Age (int)"
+        editable: true
+      birth_date:
+        type: date
+        label: "📅 Birth Date (date)"
+        editable: true
+      active:
+        type: bool
+        label: "✅ Active (toggle)"
+        editable: true
+
+      # ==================== 選択コンポーネント ====================
+      category:
+        type: radio
+        label: "📻 Category (radio)"
+        editable: true
+        options:
+          - Tech
+          - Design
+          - Marketing
+          - Sales
+      priority:
+        type: string
+        label: "🎯 Priority (select)"
+        editable: true
+        options:
+          - Low
+          - Medium
+          - High
+          - Critical
+      interests:
+        type: checkbox-group
+        label: "☑️ Interests (checkbox-group)"
+        editable: true
+        options:
+          - Programming
+          - Design
+          - Music
+          - Sports
+          - Travel
+          - Reading
+      notifications:
+        type: switch-group
+        label: "🔔 Notifications (switch-group)"
+        editable: true
+        options:
+          - email
+          - sms
+          - push
+          - weekly
+
+      # ==================== 通貨・数値コンポーネント ====================
+      price:
+        type: money
+        label: "💰 Price (money)"
+        editable: true
+        currency: JPY
+        locale: ja-JP
+      discount_rate:
+        type: percent
+        label: "📊 Discount Rate (percent)"
+        editable: true
+        precision: 1
+
+      # ==================== 連絡先コンポーネント ====================
+      phone:
+        type: tel
+        label: "📞 Phone (tel)"
+        editable: true
+      website:
+        type: url
+        label: "🌐 Website (url)"
+        editable: true
+      password:
+        type: password
+        label: "🔐 Password (password)"
+        editable: true
+
+      # ==================== ファイルアップロード ====================
+      attachment:
+        type: file
+        label: "📎 Attachment (file)"
+        editable: true
+        uploadPath: /uploads/attachments
+        allowedExtensions: .pdf,.doc,.docx,.xls,.xlsx
+        maxFileSize: 10485760
+      avatar:
+        type: image
+        label: "🖼️ Avatar (image)"
+        editable: true
+        uploadPath: /uploads/avatars
+        allowedExtensions: .jpg,.jpeg,.png,.gif,.webp
+        maxFileSize: 5242880
+
+      # ==================== リッチテキスト ====================
+      content_html:
+        type: richtext
+        label: "📝 Content (richtext)"
+        editable: true
+      content_md:
+        type: markdown
+        label: "📝 Content (markdown)"
+        editable: true
+
+      # ==================== 自動完成・タグ ====================
+      tags:
+        type: tags
+        label: "🏷️ Tags (tags input)"
+        editable: true
+        options:
+          - Feature
+          - Bugfix
+          - Enhancement
+          - Documentation
+          - Testing
+      autocomplete_demo:
+        type: autocomplete
+        label: "🔍 Autocomplete (autocomplete)"
+        editable: true
+        options:
+          - Apple
+          - Banana
+          - Cherry
+          - Date
+          - Elderberry
+          - Fig
+          - Grape
+
+      # ==================== 高度なコンポーネント ====================
+      event_period:
+        type: datetime-range
+        label: "📅 Event Period (datetime-range)"
+        editable: true
+      code_sample:
+        type: code
+        label: "💻 Code Sample (code)"
+        editable: true
+      json_config:
+        type: json
+        label: "⚙️ JSON Config (json)"
+        editable: true
+      signature:
+        type: signature
+        label: "✍️ Signature (signature pad)"
+        editable: true
+      location:
+        type: map
+        label: "📍 Location (map picker)"
+        editable: true
+
+      # ==================== その他コンポーネント ====================
+      color_pick:
+        type: color
+        label: "🎨 Favorite Color (color picker)"
+        editable: true
+      progress_val:
+        type: range
+        label: "📊 Progress % (range slider)"
+        editable: true
+      rating:
+        type: rating
+        label: "⭐ Rating (star rating)"
+        editable: true
+
+    filters:
+      name:
+        type: text
+        label: Name Search
+      category:
+        type: toggle-group
+        label: Category
+        options:
+          - Tech
+          - Design
+          - Marketing
+          - Sales
+      priority:
+        type: multi-select
+        label: Priority
+        options:
+          - Low
+          - Medium
+          - High
+          - Critical
+      active:
+        type: bool-toggle
+        label: Active
+      price:
+        type: range
+        label: Price Range
+      birth_date:
+        type: date-range
+        label: Birth Date Range

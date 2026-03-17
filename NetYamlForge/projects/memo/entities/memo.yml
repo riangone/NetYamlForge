@@ -1,0 +1,92 @@
+entities:
+  memo:
+    table: Memo
+    key: Id
+    displayName: Memo
+    joins:
+      - type: left
+        table: Notebook
+        alias: n
+        true: Memo.NotebookId = n.Id
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+          - NotebookId
+          - Title
+          - Status
+          - IsPinned
+          - DueDate
+          - Content
+      filters:
+        columns: 3
+        order:
+          - Status
+          - NotebookId
+          - IsPinned
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      Title: { type: string, required: true, label: Title, searchable: true, sortable: true }
+      Status: { type: string, label: Status, searchable: true, sortable: true }
+      IsPinned: { type: int, label: Pinned, sortable: true }
+      DueDate: { type: date, label: Due Date, sortable: true }
+      NotebookId: { type: int, label: Notebook ID, hidden: true }
+      NotebookName: { type: string, label: Notebook, expression: n.Name, searchable: true, sortable: true }
+      CreatedAt: { type: datetime, label: Created At, sortable: true }
+      UpdatedAt: { type: datetime, label: Updated At, sortable: true }
+      Content: { type: string, label: Content, searchable: true, sortable: false }
+    forms:
+      NotebookId:
+        type: int
+        label: Notebook
+        editable: true
+        foreignKey:
+          entity: notebook
+          displayColumn: Name
+      Title: { type: string, required: true, label: Title, editable: true }
+      Status:
+        type: string
+        label: Status
+        editable: true
+        options:
+          - active
+          - archived
+      IsPinned:
+        type: int
+        label: Pinned
+        editable: true
+        options:
+          - 0
+          - 1
+      DueDate: { type: date, label: Due Date, editable: true }
+      Content: { type: textarea, label: Content, editable: true }
+    filters:
+      Status:
+        type: dropdown
+        label: Status
+        options:
+          - active
+          - archived
+      NotebookId:
+        type: dropdown
+        label: Notebook
+        expression: Memo.NotebookId
+        foreignKey:
+          entity: notebook
+          displayColumn: Name
+      IsPinned:
+        type: dropdown
+        label: Pinned
+        options:
+          - "0"
+          - "1"
+    links:
+      notebook:
+        label: Notebook
+        targetEntity: notebook
+        filter:
+          Id: NotebookId

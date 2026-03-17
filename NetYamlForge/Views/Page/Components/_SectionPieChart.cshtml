@@ -1,0 +1,109 @@
+@using NetYamlForge.Models
+@using System.Text.Json
+@model SectionRenderModel
+@{
+    var sec        = Model.Sec;
+    var rows       = Model.Rows;
+    var labelField = sec.LabelField ?? sec.XField ?? (sec.GetColumnAt(0));
+    var valueField = sec.ValueField ?? sec.YField ?? (sec.GetColumnAt(1));
+    var chartId    = $"chart-pie-{sec.Id}";
+
+    var labels = rows.Select(r => r.TryGetValue(labelField, out var v) ? v?.ToString() ?? "" : "").ToList();
+    var values = rows.Select(r =>
+    {
+        if (!r.TryGetValue(valueField, out var v) || v == null) return 0.0;
+        return double.TryParse(v.ToString(), System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var d) ? d : 0.0;
+    }).ToList();
+
+    string[] palette = [
+        "rgba(99,102,241,0.85)",  "rgba(34,197,94,0.85)",   "rgba(251,146,60,0.85)",
+        "rgba(236,72,153,0.85)",  "rgba(14,165,233,0.85)",  "rgba(168,85,247,0.85)",
+        "rgba(245,158,11,0.85)",  "rgba(20,184,166,0.85)",  "rgba(239,68,68,0.85)",
+        "rgba(107,114,128,0.85)"
+    ];
+    var colorsJson = JsonSerializer.Serialize(labels.Select((_, i) => palette[i % palette.Length]).ToList());
+    var labelsJson = JsonSerializer.Serialize(labels);
+    var valuesJson = JsonSerializer.Serialize(values);
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div class="flex flex-col md:flex-row items-center gap-6">
+        <div style="position:relative;height:280px;width:280px;flex-shrink:0;">
+            <canvas id="@chartId"></canvas>
+        </div>
+        @* 凡例テーブル *@
+        <div class="flex-1 overflow-x-auto">
+            <table class="text-sm w-full">
+                <thead>
+                    <tr class="border-b border-gray-100">
+                        <th class="text-left py-1 pr-4 font-medium text-gray-500">@labelField</th>
+                        <th class="text-right py-1 font-medium text-gray-500">@valueField</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < rows.Count; i++)
+                    {
+                        var row = rows[i];
+                        var lbl = row.TryGetValue(labelField, out var lv) ? lv?.ToString() ?? "" : "";
+                        var val = row.TryGetValue(valueField, out var vv) ? vv?.ToString() ?? "" : "";
+                        var dotColor = palette[i % palette.Length];
+                        <tr class="border-b border-gray-50">
+                            <td class="py-1 pr-4">
+                                <span class="inline-block w-3 h-3 rounded-full mr-2" style="background:@dotColor"></span>
+                                @lbl
+                            </td>
+                            <td class="py-1 text-right font-mono">@val</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    function initChart() {
+        if (typeof Chart === 'undefined') { setTimeout(initChart, 100); return; }
+        var ctx = document.getElementById('@chartId');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(labelsJson),
+                datasets: [{
+                    data: @Html.Raw(valuesJson),
+                    backgroundColor: @Html.Raw(colorsJson),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                                var pct = total > 0 ? (ctx.parsed / total * 100).toFixed(1) : '0';
+                                return ' ' + ctx.label + ': ' +
+                                    ctx.parsed.toLocaleString(undefined,{maximumFractionDigits:2}) +
+                                    ' (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    }
+    initChart();
+})();
+</script>

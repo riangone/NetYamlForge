@@ -1,0 +1,79 @@
+@* ファイル概要: ダッシュボードディスパッチャー。
+   ViewData["DashboardTheme"] に応じてテーマ partial を選択します。
+   統計・グラフの追加・変更は config/dashboard.yml を編集してください。 *@
+
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var theme = (ViewData["DashboardTheme"] as string ?? "default").ToLowerInvariant();
+    var partialName = theme switch {
+        "minimal"   => "~/Views/Dashboard/Themes/_Minimal.cshtml",
+        "analytics" => "~/Views/Dashboard/Themes/_Analytics.cshtml",
+        "ops"       => "~/Views/Dashboard/Themes/_Ops.cshtml",
+        "workspace" => "~/Views/Dashboard/Themes/_Workspace.cshtml",
+        _           => "~/Views/Dashboard/Themes/_Default.cshtml",
+    };
+}
+
+@await Html.PartialAsync(partialName, Model)
+
+@section Scripts {
+    @if (Model.Charts.Count > 0)
+    {
+        <script src="/lib/chartjs/chart.umd.min.js"></script>
+        <script>
+            Chart.defaults.font.family = "'Inter', 'Helvetica Neue', sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = 'rgba(100,116,139,0.9)';
+
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var c = Model.Charts[i];
+                var isMultiColor = c.ColorsJson != null;
+                var colorBg     = c.ColorBg ?? "rgba(99,102,241,0.6)";
+                var colorBorder = c.ColorBorder ?? "rgba(99,102,241,1)";
+            <text>
+            (function() {
+                var ctx = document.getElementById('chart-@i');
+                if (!ctx) return;
+                var labels = @Html.Raw(c.LabelsJson);
+                var values = @Html.Raw(c.ValuesJson);
+                var type   = '@c.Type';
+                var dataset = { data: values, borderWidth: type === 'line' ? 2 : 1 };
+                @if (isMultiColor)
+                {
+                    <text>
+                dataset.backgroundColor = @Html.Raw(c.ColorsJson!);
+                dataset.borderColor     = @Html.Raw(c.ColorsJson!.Replace("0.85", "1"));
+                    </text>
+                }
+                else
+                {
+                    <text>
+                dataset.backgroundColor = '@colorBg';
+                dataset.borderColor     = '@colorBorder';
+                dataset.fill    = type === 'line';
+                dataset.tension = 0.35;
+                    </text>
+                }
+                new Chart(ctx, {
+                    type: type,
+                    data: { labels: labels, datasets: [dataset] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: type === 'doughnut' || type === 'pie', position: 'bottom', labels: { boxWidth: 12, padding: 10 } },
+                            tooltip: { callbacks: { label: function(ctx) { var v = ctx.parsed.y ?? ctx.parsed; return ' ' + (typeof v === 'number' ? v.toLocaleString(undefined,{maximumFractionDigits:2}) : v); } } }
+                        },
+                        scales: (type === 'doughnut' || type === 'pie') ? {} : {
+                            x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 12 } },
+                            y: { beginAtZero: true, ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } } }
+                        }
+                    }
+                });
+            })();
+            </text>
+            }
+        </script>
+    }
+}

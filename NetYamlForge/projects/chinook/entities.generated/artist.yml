@@ -1,0 +1,23 @@
+entities:
+  artist:
+    table: 'Artist'
+    key: 'ArtistId'
+    displayName: 'Artist'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Name']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      ArtistId: { type: int, identity: true, label: 'Artist Id', sortable: true }
+      Name: { type: string, label: 'Name', searchable: true, sortable: true }
+    forms:
+      Name: { type: string, label: 'Name', editable: true }
+    filters: {}
+    links: {}

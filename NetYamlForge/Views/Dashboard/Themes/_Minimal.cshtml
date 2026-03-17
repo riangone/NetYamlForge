@@ -1,0 +1,93 @@
+@* minimal テーマ: クリーンなヒーローバナー + シンプルな統計カード *@
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    var projectName = ViewData["ProjectDisplayName"] as string ?? "Dashboard";
+}
+
+<div class="space-y-6">
+    @* Hero banner *@
+    <div class="rounded-2xl bg-gradient-to-br from-primary/10 via-base-200 to-secondary/10 border border-base-300 px-8 py-10">
+        <p class="text-xs font-semibold tracking-widest text-primary uppercase mb-2">Workspace</p>
+        <h1 class="text-3xl font-bold text-base-content mb-3">@projectName</h1>
+        @if (Model.Stats.Count > 0)
+        {
+            <div class="flex flex-wrap gap-2 mt-4">
+                @foreach (var stat in Model.Stats)
+                {
+                    if (!string.IsNullOrEmpty(stat.EntityUrl))
+                    {
+                        <a href="@stat.EntityUrl"
+                           class="badge badge-outline badge-lg gap-2 hover:badge-primary transition-colors no-underline">
+                            @if (!string.IsNullOrEmpty(stat.Icon)) { <span>@stat.Icon</span> }
+                            <span class="font-bold">@stat.Value</span>
+                            <span class="opacity-70 font-normal">@stat.Label</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="badge badge-outline badge-lg gap-2">
+                            @if (!string.IsNullOrEmpty(stat.Icon)) { <span>@stat.Icon</span> }
+                            <span class="font-bold">@stat.Value</span>
+                            <span class="opacity-70 font-normal">@stat.Label</span>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+
+    @* Stat cards *@
+    @if (Model.Stats.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach (var stat in Model.Stats)
+            {
+                var icon = string.IsNullOrEmpty(stat.Icon) ? "📋" : stat.Icon;
+                if (stat.HasError)
+                {
+                    <div class="card bg-error/10 border border-error/30 shadow-sm" title="@stat.ErrorHint">
+                        <div class="card-body py-5 px-6 flex flex-row items-center gap-4">
+                            <div class="text-3xl w-12 text-center opacity-40">@icon</div>
+                            <div>
+                                <div class="text-2xl font-bold text-error">–</div>
+                                <div class="text-sm text-base-content/60">@stat.Label</div>
+                                <div class="text-xs text-error mt-1">@stat.ErrorHint</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(stat.EntityUrl))
+                {
+                    <a href="@stat.EntityUrl"
+                       class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md hover:border-primary/40 transition-all no-underline">
+                        <div class="card-body py-5 px-6 flex flex-row items-center gap-4">
+                            <div class="text-3xl w-12 text-center">@icon</div>
+                            <div>
+                                <div class="text-2xl font-bold text-base-content">@stat.Value</div>
+                                <div class="text-sm text-base-content/60">@stat.Label</div>
+                            </div>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="card bg-base-100 border border-base-300 shadow-sm">
+                        <div class="card-body py-5 px-6 flex flex-row items-center gap-4">
+                            <div class="text-3xl w-12 text-center">@icon</div>
+                            <div>
+                                <div class="text-2xl font-bold text-base-content">@stat.Value</div>
+                                <div class="text-sm text-base-content/60">@stat.Label</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert">
+            <span>統計情報が未設定です。<code>config/dashboard.yml</code> の <code>stats</code> セクションを設定してください。</span>
+        </div>
+    }
+</div>

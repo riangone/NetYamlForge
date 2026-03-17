@@ -1,0 +1,62 @@
+name: northwind-sqlite3-ops
+displayName: Northwind Operations Pack
+version: 1.1.0
+
+# AI向けヒント: このプロジェクトに変更を加える前に必ず参照すること
+aiHints:
+  primaryLanguage: en-US
+  authRequired: true
+  sharedDatabase: northwind-sqlite3  # northwind-sqlite3 プロジェクトと同じDBを共有
+  customHooks:
+    - nw_order_date_guard           # 注文日付の整合性チェック
+    - nw_order_status_transition    # 注文ステータス遷移ルール
+    - nw_orderdetail_stock_guard    # 在庫数チェック
+  protectedEntities:
+    - order      # ステータス遷移ルールあり。直接SQL編集は禁止
+  notes:
+    - "northwind-sqlite3 プロジェクトと同一DBを参照。エンティティYAMLの変更は両プロジェクトに影響する"
+    - "order.ShippedDate は Shipped ステータス時に自動セットされる"
+
+database:
+  type: sqlite
+  path: ../northwind-sqlite3/database/northwind.db
+features:
+  multiLanguage: true
+  userAuthentication: true
+layout:
+  dashboardTheme: analytics
+  header:
+    title: Northwind Operations Pack
+  navigation:
+    showDashboard: true
+    entities:
+    - order
+    - orderdetail
+    - product
+    - customer
+    - supplier
+    - employee
+    - shipper
+    - category
+    items:
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+      labelKey: projects.northwind-sqlite3-ops.project.layout.navigation.items.0.label
+    - label: Order Operations
+      url: /northwind-sqlite3-ops/DynamicEntity/Index?entity=order
+      icon: 📦
+      labelKey: projects.northwind-sqlite3-ops.project.layout.navigation.items.1.label
+    - label: Fulfillment Queue
+      url: /northwind-sqlite3-ops/Page/FulfillmentQueue
+      icon: 🚚
+      labelKey: projects.northwind-sqlite3-ops.project.layout.navigation.items.2.label
+    - label: Replenishment Plan
+      url: /northwind-sqlite3-ops/Page/ReplenishmentPlan
+      icon: 🏭
+      labelKey: projects.northwind-sqlite3-ops.project.layout.navigation.items.3.label
+    - label: Customer Risk Radar
+      url: /northwind-sqlite3-ops/Page/CustomerRiskRadar
+      icon: ⚠️
+      labelKey: projects.northwind-sqlite3-ops.project.layout.navigation.items.4.label

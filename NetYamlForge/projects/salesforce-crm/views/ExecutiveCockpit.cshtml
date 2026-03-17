@@ -1,0 +1,118 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath ?? "_Layout";
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+    string LocalizeMetric(string metric) => metric switch
+    {
+        "Open Pipeline" => T("projects.salesforce-crm.pages.exec.metrics.openPipeline", metric),
+        "Won / Shipped" => T("projects.salesforce-crm.pages.exec.metrics.wonShipped", metric),
+        "At Risk" => T("projects.salesforce-crm.pages.exec.metrics.atRisk", metric),
+        "Account Coverage" => T("projects.salesforce-crm.pages.exec.metrics.accountCoverage", metric),
+        _ => metric
+    };
+    string LocalizeNote(string note) => note switch
+    {
+        "Orders.Status = Open" => T("projects.salesforce-crm.pages.exec.notes.open", note),
+        "Orders.Status = Shipped" => T("projects.salesforce-crm.pages.exec.notes.shipped", note),
+        "Orders.Status = Delayed or Cancelled" => T("projects.salesforce-crm.pages.exec.notes.risk", note),
+        "Customers.Active = 1" => T("projects.salesforce-crm.pages.exec.notes.coverage", note),
+        _ => note
+    };
+    string LocalizeStage(string stage) => stage switch
+    {
+        "Open" => T("projects.salesforce-crm.pages.exec.stages.open", stage),
+        "Shipped" => T("projects.salesforce-crm.pages.exec.stages.shipped", stage),
+        "Delayed" => T("projects.salesforce-crm.pages.exec.stages.delayed", stage),
+        "Cancelled" => T("projects.salesforce-crm.pages.exec.stages.cancelled", stage),
+        _ => stage
+    };
+
+    ViewData["Title"] = T("projects.salesforce-crm.pages.exec.title", "Executive Cockpit");
+    var kpis = Model.TryGetValue("kpi_strip", out var k) ? k.Rows.ToList() : new List<Dictionary<string, object>>();
+    var stages = Model.TryGetValue("stage_mix", out var s) ? s.Rows.ToList() : new List<Dictionary<string, object>>();
+    var accounts = Model.TryGetValue("strategic_accounts", out var a) ? a.Rows.ToList() : new List<Dictionary<string, object>>();
+}
+
+<div class="space-y-6">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-bold">@T("projects.salesforce-crm.pages.exec.title", "Executive Cockpit")</h1>
+                <p class="text-sm opacity-70">@T("projects.salesforce-crm.pages.exec.subtitle", "Salesforce-style leadership console for pipeline health and account risk.")</p>
+            </div>
+            <a href="/salesforce-crm/Page/PipelineBoard" class="btn btn-primary btn-sm">@T("projects.salesforce-crm.pages.exec.openPipelineBoard", "Open Pipeline Board")</a>
+        </div>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        @foreach (var row in kpis)
+        {
+            var metric = row.TryGetValue("Metric", out var m) ? m?.ToString() ?? "" : "";
+            var value = row.TryGetValue("Value", out var v) ? v?.ToString() ?? "0" : "0";
+            var note = row.TryGetValue("Note", out var n) ? n?.ToString() ?? "" : "";
+            <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+                <div class="text-xs uppercase tracking-wide opacity-60">@LocalizeMetric(metric)</div>
+                <div class="mt-1 text-3xl font-bold text-primary">@value</div>
+                <div class="mt-2 text-xs opacity-70">@LocalizeNote(note)</div>
+            </article>
+        }
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[1fr_1.3fr]">
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.exec.stageMix", "Stage Mix")</h2>
+            <div class="mt-3 overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>@T("projects.salesforce-crm.pages.exec.columns.stage", "Stage")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.exec.columns.deals", "Deals")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.exec.columns.weightedValue", "Weighted Value")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in stages)
+                    {
+                        <tr>
+                            <td>@LocalizeStage(row.TryGetValue("Stage", out var c0) ? c0?.ToString() ?? "" : "")</td>
+                            <td class="text-right">@(row.TryGetValue("Deals", out var c1) ? c1 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("WeightedValue", out var c2) ? c2 : "")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.exec.strategicAccounts", "Strategic Accounts")</h2>
+            <div class="mt-3 overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>@T("projects.salesforce-crm.pages.exec.columns.account", "Account")</th>
+                            <th>@T("projects.salesforce-crm.pages.exec.columns.country", "Country")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.exec.columns.deals", "Deals")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.exec.columns.revenue", "Revenue")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.exec.columns.risk", "Risk")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in accounts)
+                    {
+                        <tr>
+                            <td>@(row.TryGetValue("CompanyName", out var c0) ? c0 : "")</td>
+                            <td>@(row.TryGetValue("Country", out var c1) ? c1 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("DealCount", out var c2) ? c2 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("Revenue", out var c3) ? c3 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("RiskSignals", out var c4) ? c4 : "")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+</div>

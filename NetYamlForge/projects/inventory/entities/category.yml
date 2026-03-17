@@ -1,0 +1,51 @@
+entities:
+  category:
+    table: category
+    key: id
+    displayName: カテゴリ
+    displayNameI18n: {ja-JP: カテゴリ, zh-CN: 类别, en-US: Category}
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+        hidden: false
+      name:
+        type: string
+        required: true
+        label: カテゴリ名
+        labelI18n: {ja-JP: カテゴリ名, zh-CN: 类别名称, en-US: Category Name}
+        searchable: true
+        sortable: true
+        hidden: false
+      description:
+        type: string
+        label: 説明
+        labelI18n: {ja-JP: 説明, zh-CN: 描述, en-US: Description}
+        searchable: true
+        hidden: false
+    forms:
+      name:
+        type: string
+        required: true
+        label: カテゴリ名
+        editable: true
+        hidden: false
+      description:
+        type: string
+        required: false
+        label: 説明
+        editable: true
+        hidden: false
+    layout:
+      forms:
+        columns: 2
+        order: [name, description]
+    hooks:
+      beforeCreate:
+        - validate_required
+        - trim
+      beforeUpdate:
+        - validate_required
+        - trim

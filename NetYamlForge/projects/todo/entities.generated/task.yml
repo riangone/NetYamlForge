@@ -1,0 +1,43 @@
+entities:
+  task:
+    table: 'Task'
+    key: 'Id'
+    displayName: 'Task'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Title', 'Description', 'Status', 'Priority', 'DueDate', 'ProjectId', 'CreatedAt', 'CompletedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      Title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
+      Description: { type: string, label: 'Description', searchable: true, sortable: true }
+      Status: { type: string, label: 'Status', searchable: true, sortable: true }
+      Priority: { type: string, label: 'Priority', searchable: true, sortable: true }
+      DueDate: { type: string, label: 'Due Date', searchable: true, sortable: true }
+      ProjectId: { type: int, label: 'Project Id', sortable: true }
+      CreatedAt: { type: string, label: 'Created At', searchable: true, sortable: true }
+      CompletedAt: { type: string, label: 'Completed At', searchable: true, sortable: true }
+    forms:
+      Title: { type: string, required: true, label: 'Title', editable: true }
+      Description: { type: string, label: 'Description', editable: true }
+      Status: { type: string, label: 'Status', editable: true }
+      Priority: { type: string, label: 'Priority', editable: true }
+      DueDate: { type: string, label: 'Due Date', editable: true }
+      ProjectId:
+        type: int
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: project
+          displayColumn: 'Name'
+      CreatedAt: { type: string, label: 'Created At', editable: true }
+      CompletedAt: { type: string, label: 'Completed At', editable: true }
+    filters: {}
+    links: {}

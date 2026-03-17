@@ -1,0 +1,27 @@
+@* ファイル概要：全ビュー共通のレイアウト設定を行います。
+   プロジェクトが指定されている場合は、プロジェクト固有のレイアウトを試みます。 *@
+
+@{
+    var project = ViewContext.RouteData.Values["project"]?.ToString();
+
+    // プロジェクト固有のレイアウトを検索
+    if (!string.IsNullOrEmpty(project))
+    {
+        var projectLayoutFull = System.IO.Path.Combine(
+            System.IO.Directory.GetCurrentDirectory(),
+            $"projects/{project}/views/_Layout.cshtml");
+
+        if (System.IO.File.Exists(projectLayoutFull))
+        {
+            Layout = $"/projects/{project}/views/_Layout.cshtml";
+        }
+        else
+        {
+            Layout = "_Layout";
+        }
+    }
+    else
+    {
+        Layout = "_Layout";
+    }
+}

@@ -1,0 +1,41 @@
+title: Calendar Workbench
+description: Responsive calendar UI with multi-source holiday overlays.
+template: CalendarWorkbench
+titleKey: projects.calendar-ui-lab.pages.calendarWorkbench.title
+descriptionKey: projects.calendar-ui-lab.pages.calendarWorkbench.description
+
+calendar_ui:
+  mobile_month_count: 1
+  desktop_min_month_count: 2
+  desktop_max_month_count: 6
+  show_japan_holidays: true
+  show_chinese_lunar: true
+  third_party_holidays:
+    - date: '2026-03-14'
+      name: OSS Festival Day
+      source: partner-feed
+    - date: '2026-04-22'
+      name: Earth Action Day
+      source: open-data
+  custom_holidays:
+    - date: '2026-03-18'
+      name: Team Offsite
+      source: custom
+    - date: '2026-05-01'
+      name: Company Foundation Day
+      source: custom
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: calendar_seed
+    title: Calendar Seed
+    source_type: custom
+    source: SELECT 1 AS Seed
+    columns: [Seed]
+    page_size: 1
+    editable: false
+    read_only: true

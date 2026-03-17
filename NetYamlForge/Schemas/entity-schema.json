@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dynamiccrudsample.local/schemas/entity-schema.json",
+  "title": "Entity Definition Schema",
+  "description": "YAML-driven entity definition schema for NetYamlForge. AI: Before modifying YAML, consult docs/examples/ for correct patterns.",
+  "type": "object",
+  "properties": {
+    "imports": {
+      "type": "array",
+      "description": "Other YAML files to import/merge. Use relative paths from the project root.",
+      "items": { "type": "string" }
+    },
+    "entities": {
+      "type": "object",
+      "description": "Map of entity name (PascalCase) to entity definition.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["table"],
+        "description": "Single entity definition. See docs/examples/03-add-new-entity.md for full example.",
+        "properties": {
+          "table": {
+            "type": "string",
+            "minLength": 1,
+            "description": "CRITICAL: The actual DB table name. Must match the database exactly. Do NOT rename without migrating the DB schema."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Primary key column name (single key). Use 'keys' for composite keys."
+          },
+          "keys": {
+            "type": "array",
+            "description": "Composite primary key column names. Use only when the table has a multi-column PK.",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable entity name (English). Use displayNameI18n for multi-language support."
+          },
+          "displayNameKey": {
+            "type": "string",
+            "minLength": 1,
+            "description": "i18n resource key for the display name. Mutually exclusive with displayName."
+          },
+          "displayNameI18n": {
+            "type": "object",
+            "description": "Multi-language display names keyed by culture code (e.g. en-US, ja-JP, zh-CN, ko-KR).",
+            "additionalProperties": { "type": "string" }
+          },
+          "softDelete": {
+            "type": "boolean",
+            "description": "If true, DELETE becomes UPDATE SET is_deleted=1, and all SELECTs add WHERE is_deleted=0. Requires an 'is_deleted' INTEGER column in the DB table."
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "If true, the entity list/detail is accessible without authentication."
+          },
+          "joins": {
+            "type": "array",
+            "description": "LEFT/INNER JOIN definitions. Always use 'alias' and reference it in column 'expression' fields.",
+            "items": {
+              "type": "object",
+              "required": ["table"],
+              "properties": {
+                "table": {
+                  "type": "string",
+                  "description": "The table to join."
+                },
+                "alias": {
+                  "type": "string",
+                  "description": "SQL alias for the joined table. Required when the same table is joined more than once."
+                },
+                "on": {
+                  "type": "string",
+                  "description": "JOIN ON clause. Use table/alias prefixes on all column names to avoid ambiguity. Example: 'customer.country_id = c.id'"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "JOIN type: 'left' (default), 'inner', or 'right'. Use 'inner' only when the joined row is guaranteed to exist."
+                }
+              }
+            }
+          },
+          "columns": {
+            "type": "object",
+            "description": "READ-TIME configuration: controls list display, search, and sort. Does NOT control form fields (use 'forms' for that). See docs/examples/01-add-simple-column.md.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["string", "int", "long", "decimal", "double", "boolean", "bool",
+                           "datetime", "date", "text", "textarea", "email",
+                           "radio", "color", "range", "rating", "money"],
+                  "description": "Column data type. Drives input widget type and value parsing."
+                },
+                "displayName": { "type": "string" },
+                "expression": {
+                  "type": "string",
+                  "description": "SQL expression override. Use for computed or joined columns. Allowed chars: alphanumeric, dot, space, comma, parentheses, operators. Example: \"c.country_name\" or \"firstName || ' ' || lastName\""
+                },
+                "searchable": {
+                  "type": "boolean",
+                  "description": "If true, this column is included in the global search."
+                },
+                "sortable": {
+                  "type": "boolean",
+                  "description": "If false, disables sorting for this column. Recommended false for joined/computed columns."
+                },
+                "foreignKey": {
+                  "type": "object",
+                  "description": "Makes this column a FK lookup. The referenced entity must exist in YAML.",
+                  "properties": {
+                    "entity": { "type": "string", "description": "Referenced entity name (PascalCase, must exist in YAML)." },
+                    "displayColumn": { "type": "string", "description": "Column from referenced entity to display. Defaults to 'id' if omitted." }
+                  }
+                }
+              }
+            }
+          },
+          "forms": {
+            "type": ["object", "null"],
+            "description": "WRITE-TIME configuration: controls which fields appear in create/edit forms. Separate from 'columns'. See docs/examples/01-add-simple-column.md.",
+            "properties": {
+              "create": {
+                "type": "object",
+                "description": "Create form configuration.",
+                "properties": {
+                  "fields": {
+                    "type": "array",
+                    "description": "Fields to include in the create form. Do NOT include the primary key (auto-generated).",
+                    "items": { "type": "string" }
+                  }
+                }
+              },
+              "edit": {
+                "type": "object",
+                "description": "Edit form configuration.",
+                "properties": {
+                  "fields": {
+                    "type": "array",
+                    "description": "Fields to include in the edit form.",
+                    "items": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "filters": {
+            "type": "object",
+            "description": "Filter controls shown above the list. Each key becomes a query string parameter.",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "column": { "type": "string", "description": "DB column name to filter on." },
+                "type": {
+                  "type": "string",
+                  "description": "Filter input type. Maps to a UI control in _FilterControl.cshtml. Common values: string, like, dropdown, boolean, enum, date, datetime, date-range, range, checkbox, multi-select, entity-picker, entity-multi-picker, toggle-group, bool-toggle. Column types (int, decimal, email, etc.) are also accepted as input type hints."
+                },
+                "values": {
+                  "type": "array",
+                  "description": "For type=enum: list of selectable values.",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          },
+          "hooks": {
+            "type": "object",
+            "description": "Hook names to execute at CRUD lifecycle points. Use names from docs/COMMON_HOOKS.md. Do NOT invent new names here — implement IEntityHook in code first. See docs/examples/02-add-validation-hook.md and docs/examples/05-add-custom-hook.md. Keys use camelCase (beforeCreate, afterCreate, beforeUpdate, afterUpdate, beforeDelete, afterDelete). 'presets' defines reusable hook lists referenced via '@presetName'.",
+            "properties": {
+              "presets": {
+                "type": "object",
+                "description": "Named hook lists that can be referenced via '@presetName' in other hook arrays.",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": { "oneOf": [{ "type": "string" }, { "type": "object" }, { "type": "array" }] }
+                }
+              },
+              "beforeCreate": {
+                "description": "Hooks run before INSERT. Executed in order. Any hook can abort the operation. Common values: trim, validate_email, validate_required, validate_unique, validate_range, now.",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              },
+              "beforeUpdate": {
+                "description": "Hooks run before UPDATE.",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              },
+              "beforeDelete": {
+                "description": "Hooks run before DELETE (or soft-delete UPDATE).",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              },
+              "afterCreate": {
+                "description": "Hooks run after INSERT (within same transaction). Common values: audit_log, webhook, update_count.",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              },
+              "afterUpdate": {
+                "description": "Hooks run after UPDATE (within same transaction).",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              },
+              "afterDelete": {
+                "description": "Hooks run after DELETE (within same transaction).",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "oneOf": [{ "type": "string" }, { "type": "object" }] } }
+                ]
+              }
+            },
+            "additionalProperties": true
+          },
+          "confirmation": {
+            "type": "object",
+            "description": "Confirmation dialog settings for create/update operations."
+          },
+          "links": {
+            "type": "object",
+            "description": "Navigation link definitions shown in the entity detail view."
+          },
+          "layout": {
+            "type": "object",
+            "description": "UI layout overrides (column widths, card mode, etc.)."
+          },
+          "paging": {
+            "type": "object",
+            "description": "Pagination settings.",
+            "properties": {
+              "defaultPageSize": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 500,
+                "description": "Number of rows per page. Default: 20."
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "anyOf": [
+              { "required": ["key"] },
+              { "required": ["keys"] }
+            ]
+          },
+          {
+            "anyOf": [
+              { "required": ["displayName"] },
+              { "required": ["displayNameKey"] },
+              { "required": ["displayNameI18n"] }
+            ]
+          }
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["entities"],
+  "additionalProperties": true
+}

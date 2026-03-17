@@ -1,0 +1,304 @@
+@* ファイル概要: 一覧テーブルとページングUIを描画するパーシャルです。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Linq
+@using System.Text.Json
+@model NetYamlForge.Controllers.DynamicListViewModel
+@inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
+@{
+    var displayColumns = Model.Meta.Columns.Where(c => !c.Value.Hidden).ToList();
+    var baseIndexUrl = Url.Action("Index", "DynamicEntity") ?? "/";
+    var stateQuery = Context.Request.QueryString.HasValue ? Context.Request.QueryString.Value : string.Empty;
+    var stateParams = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+    if (!string.IsNullOrEmpty(stateQuery))
+    {
+        var parsedQuery = QueryHelpers.ParseQuery(stateQuery);
+        foreach (var kv in parsedQuery)
+        {
+            if (kv.Key.Equals("clear", StringComparison.OrdinalIgnoreCase)
+                || kv.Key.Equals("returnUrl", StringComparison.OrdinalIgnoreCase)
+                || kv.Key.Equals("returnEntity", StringComparison.OrdinalIgnoreCase)
+                || kv.Key.Equals("returnDisplayName", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var value = kv.Value.FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                stateParams[kv.Key] = value;
+            }
+        }
+    }
+    stateParams["entity"] = Model.Entity;
+    stateParams["count"] = "true";
+    var currentStateUrl = stateParams.Count == 0
+        ? baseIndexUrl
+        : QueryHelpers.AddQueryString(baseIndexUrl, stateParams
+            .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
+            .ToDictionary(kv => kv.Key, kv => kv.Value!));
+    var currentListUrl = Url.Action("Index", "DynamicEntity", new
+    {
+        entity = Model.Entity,
+        search = Model.Search,
+        sort = Model.Sort,
+        dir = Model.Dir,
+        pageSize = Model.PageSize,
+        count = "true",
+        cursor = Model.Cursor
+    });
+    var currentReturnUrl = string.IsNullOrEmpty(currentListUrl) ? null : currentListUrl;
+    
+    // 複合主鍵対応の ID 生成ヘルパー
+    Func<IDictionary<string, object>, string> buildItemId = (item) =>
+    {
+        var pkColumns = Model.Meta.GetPrimaryKeyColumns();
+        if (pkColumns.Count == 1)
+        {
+            // 単一主鍵：主鍵列名をパラメータ名として使用
+            var key = pkColumns[0];
+            return item.TryGetValue(key, out var val) ? val?.ToString() ?? "0" : "0";
+        }
+        else
+        {
+            // 複合主鍵：JSON 形式
+            var keyObj = new Dictionary<string, object?>();
+            foreach (var col in pkColumns)
+            {
+                keyObj[col] = item.TryGetValue(col, out var val) ? val : null;
+            }
+            return JsonSerializer.Serialize(keyObj);
+        }
+    };
+    
+    // 主鍵列名を取得（URL パラメータ名として使用）
+    var pkColumns = Model.Meta.GetPrimaryKeyColumns();
+    var pkParamName = pkColumns.Count == 1 ? pkColumns[0] : "id";
+}
+
+<div class="card bg-base-100 shadow">
+    <div class="card-body space-y-4">
+        <div class="flex items-center gap-2 flex-wrap">
+            <a class="btn btn-outline btn-sm"
+               href="@Url.Action("CreatePage", "DynamicEntity", new { entity = Model.Entity, returnUrl = currentReturnUrl })">
+                New Page
+            </a>
+            <span class="text-sm ml-2">Page Size:</span>
+            <select class="select select-bordered select-sm w-24"
+                    hx-get="@Url.Action("ListPartial", new { cursor = (string?)null })"
+                    hx-include="#filter-form"
+                    hx-target="#list-container"
+                    hx-swap="innerHTML"
+                    name="pageSize">
+                @foreach (var size in new[] { 1, 3, 5, 10, 20, 50 })
+                {
+                    <option value="@size" selected="@(Model.PageSize == size ? "selected" : null)">@size</option>
+                }
+            </select>
+            <input type="hidden" name="entity" value="@Model.Entity" />
+            <input type="hidden" name="search" value="@Model.Search" />
+            <input type="hidden" name="sort" value="@Model.Sort" />
+            <input type="hidden" name="dir" value="@Model.Dir" />
+            <input type="hidden" name="count" value="true" />
+            <input type="hidden" name="cursor" value="@Model.Cursor" />
+            @if (Model.Total >= 0)
+            {
+                <span class="text-sm ml-auto">Total: @Model.Total</span>
+            }
+        </div>
+
+        @{
+            // filter なし = エンティティレベルリンク（上部に表示）
+            var entityLevelLinks = Model.Meta.Links
+                .Where(l => l.Value.Filter == null || l.Value.Filter.Count == 0)
+                .ToList();
+        }
+        @if (entityLevelLinks.Count > 0)
+        {
+            <div class="flex flex-wrap items-center gap-2 mb-4 border-b pb-3 text-sm text-base-content/70">
+                <span class="font-semibold">他のエンティティへ</span>
+                @foreach (var entry in entityLevelLinks)
+                {
+                    var link = entry.Value;
+                    var linkParams = link.Query != null
+                        ? new Dictionary<string, string?>(link.Query)
+                        : new Dictionary<string, string?>();
+                    linkParams["entity"] = link.TargetEntity;
+                    linkParams["returnUrl"] = currentStateUrl;
+                    var href = QueryHelpers.AddQueryString(baseIndexUrl, linkParams
+                        .Where(kv => kv.Value != null)
+                        .ToDictionary(kv => kv.Key, kv => kv.Value!));
+                    <a class="btn btn-sm btn-outline" href="@href">
+                        @link.GetLabel()
+                    </a>
+                }
+            </div>
+        }
+
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        @foreach (var col in displayColumns)
+                        {
+                            var name = col.Key;
+                            var def = col.Value;
+
+                            if (!def.Sortable)
+                            {
+                                <th>@def.GetLabel(name)</th>
+                            }
+                            else
+                            {
+                                var nextDir = (Model.Sort == name && Model.Dir != "desc") ? "desc" : "asc";
+                                <th>
+                                    <a class="link link-hover"
+                                       hx-get="@Url.Action("ListPartial", "DynamicEntity", new { entity = Model.Entity, search = Model.Search, sort = name, dir = nextDir, count = "true", cursor = (string?)null })"
+                                       hx-include="#filter-form"
+                                       hx-target="#list-container"
+                                       hx-swap="innerHTML">
+                                        @def.GetLabel(name)
+                                        @(Model.Sort == name ? (Model.Dir == "desc" ? " v" : " ^") : "")
+                                    </a>
+                                </th>
+                            }
+                        }
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                    <tr>
+                        @foreach (var col in displayColumns)
+                        {
+                            var name = col.Key;
+                            var def = col.Value;
+
+                            object? value = null;
+                            try { value = ((IDictionary<string, object>)item)[name]; } catch { }
+
+                            var formattedValue = ColumnValueFormatter.FormatValue(def.Type, value, def.OptionLabels);
+
+                            var hasNavigableLink = def.ForeignKey != null
+                                && value != null
+                                && EntityMetadataProvider.TryGet(def.ForeignKey.Entity, out _);
+                            var targetUrl = hasNavigableLink
+                                ? Url.Action("Index", "DynamicEntity", new
+                                {
+                                    entity = def.ForeignKey.Entity,
+                                    returnUrl = currentReturnUrl,
+                                    returnEntity = Model.Entity,
+                                    returnDisplayName = Model.Meta.GetDisplayName()
+                                })
+                                : null;
+                            <td>
+                                @if (hasNavigableLink && targetUrl != null)
+                                {
+                                    <a class="link link-hover" href="@targetUrl">@formattedValue</a>
+                                }
+                                else
+                                {
+                                    @formattedValue
+                                }
+                            </td>
+                        }
+                            <td class="text-right">
+                                <div class="flex flex-wrap gap-1 justify-end">
+                                    @{
+                                        // filter が設定されているリンクを行ごとに描画
+                                        var rowLinks = Model.Meta.Links
+                                            .Where(l => l.Value.Filter != null && l.Value.Filter.Count > 0)
+                                            .ToList();
+                                        var rowDict = item as IDictionary<string, object>;
+                                        var itemId = buildItemId((IDictionary<string, object>)item);
+                                    }
+                                    @foreach (var linkEntry in rowLinks)
+                                    {
+                                        var rowLink = linkEntry.Value;
+                                        var rowLinkParams = rowLink.Query != null
+                                            ? new Dictionary<string, string?>(rowLink.Query)
+                                            : new Dictionary<string, string?>();
+                                        rowLinkParams["entity"] = rowLink.TargetEntity;
+                                        // 現在のページ状態（検索・ソート・フィルタ）を returnUrl に含めて遷移後に復元できるようにする
+                                        rowLinkParams["returnUrl"] = currentStateUrl;
+                                        foreach (var fkv in rowLink.Filter!)
+                                        {
+                                            if (rowDict != null && rowDict.TryGetValue(fkv.Value, out var rowVal))
+                                            {
+                                                rowLinkParams[fkv.Key] = rowVal?.ToString();
+                                            }
+                                        }
+                                        var rowLinkHref = QueryHelpers.AddQueryString(baseIndexUrl, rowLinkParams
+                                            .Where(kv => kv.Value != null)
+                                            .ToDictionary(kv => kv.Key, kv => kv.Value!));
+                                        <a class="btn btn-xs btn-secondary btn-outline" href="@rowLinkHref">
+                                            @rowLink.GetLabel() →
+                                        </a>
+                                    }
+                                    <button class="btn btn-xs btn-outline"
+                                            hx-get="@Url.Action("EditForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["mode"] = "modal" })"
+                                            hx-target="#modal-form-content"
+                                            hx-swap="innerHTML">
+                                        Edit
+                                    </button>
+                                    <a class="btn btn-xs btn-ghost"
+                                       href="@Url.Action("EditPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
+                                        Edit Page
+                                    </a>
+                                    <button class="btn btn-xs btn-error"
+                                            hx-post="@Url.Action("Delete", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
+                                            hx-target="#list-container"
+                                            hx-swap="innerHTML"
+                                            hx-confirm="Delete this item?">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @{
+            var totalPages = Model.CountEnabled ? (int)Math.Ceiling(Model.Total / (double)Model.PageSize) : 0;
+            var current = Model.Page;
+            var maxPageLinks = 5;
+            var half = maxPageLinks / 2;
+            var startPage = Math.Max(1, current - half);
+            var endPage = Math.Min(totalPages, startPage + maxPageLinks - 1);
+            if (endPage - startPage + 1 < maxPageLinks)
+                startPage = Math.Max(1, endPage - maxPageLinks + 1);
+
+            string ListUrl(int page, string countVal) =>
+                Url.Action("ListPartial", new { entity = Model.Entity, page, search = Model.Search, sort = Model.Sort, dir = Model.Dir, pageSize = Model.PageSize, count = countVal, cursor = (string?)null }) ?? "#";
+
+            var countStr = Model.CountEnabled ? "true" : "false";
+            var pageLinks = Enumerable.Range(startPage, Math.Max(0, endPage - startPage + 1))
+                .Select(i => new NetYamlForge.Models.PaginationPageLink(i, ListUrl(i, countStr), i == current))
+                .ToList();
+            var pagination = new NetYamlForge.Models.PaginationModel
+            {
+                Mode = Model.Meta.Paging.Mode,
+                CurrentPage = current,
+                TotalPages = totalPages,
+                HasMore = Model.HasMore,
+                CountEnabled = Model.CountEnabled,
+                HxTarget = "#list-container",
+                HxInclude = "#filter-form",
+                HxSwap = "innerHTML",
+                FirstHxUrl = ListUrl(1, countStr),
+                PrevHxUrl = ListUrl(Math.Max(1, current - 1), countStr),
+                PageLinks = pageLinks,
+                NextHxUrl = Model.Meta.Paging.Mode == "keyset"
+                    ? Url.Action("ListPartial", new { entity = Model.Entity, search = Model.Search, sort = Model.Sort, dir = Model.Dir, pageSize = Model.PageSize, count = "true", cursor = Model.NextCursor }) ?? "#"
+                    : ListUrl(current + 1, countStr),
+                LastHxUrl = ListUrl(totalPages, countStr)
+            };
+        }
+        @await Html.PartialAsync("_Pagination", pagination)
+    </div>
+</div>

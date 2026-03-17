@@ -1,0 +1,39 @@
+entities:
+  Category:
+    table: category
+    key: id
+
+    displayName: "カテゴリ"
+    displayNameI18n:
+      ja-JP: "カテゴリ"
+      zh-CN: "分类"
+
+    columns:
+      id:
+        type: int
+        identity: true
+        sortable: true
+      name:
+        type: string
+        displayName: "名前"
+        displayNameI18n:
+          ja-JP: "名前"
+          zh-CN: "名字"
+        searchable: true
+        sortable: true
+        required: true
+      description:
+        type: text
+        displayName: "説明"
+        displayNameI18n:
+          ja-JP: "説明"
+          zh-CN: "描述"
+
+    forms:
+      create:
+        fields: [name, description]
+      edit:
+        fields: [name, description]
+
+    hooks:
+      beforeCreate: [trim, validate_required]

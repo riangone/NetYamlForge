@@ -1,0 +1,62 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var titleField = sec.TitleField ?? (sec.GetColumnAt(0));
+    var dateField = sec.DateField ?? (sec.GetColumnAt(1));
+    var typeField = sec.TypeField;
+    var userField = sec.UserField;
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+
+<div class="activity-feed-container bg-base-100 rounded shadow">
+    @if (rows.Any())
+    {
+        <div class="divide-y">
+            @foreach (var row in rows)
+            {
+                var title = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
+                var date = row.TryGetValue(dateField, out var d) ? d?.ToString() ?? "" : "";
+                var type = !string.IsNullOrEmpty(typeField) && row.TryGetValue(typeField, out var tp) ? tp?.ToString() ?? "" : "default";
+                var user = !string.IsNullOrEmpty(userField) && row.TryGetValue(userField, out var u) ? u?.ToString() ?? "" : "";
+                
+                var typeConfig = type switch
+                {
+                    "create" => (Icon: "➕", Color: "success"),
+                    "update" => (Icon: "✏️", Color: "info"),
+                    "delete" => (Icon: "🗑️", Color: "error"),
+                    "comment" => (Icon: "💬", Color: "warning"),
+                    "upload" => (Icon: "📎", Color: "accent"),
+                    _ => (Icon: "📌", Color: "neutral")
+                };
+                
+                <div class="flex gap-4 p-4 hover:bg-base-200 transition-colors">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-@typeConfig.Color text-white flex items-center justify-center">
+                            @typeConfig.Icon
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            @if (!string.IsNullOrEmpty(user))
+                            {
+                                <span class="font-medium">@user</span>
+                            }
+                            <span class="text-sm text-gray-500">@date</span>
+                        </div>
+                        <div class="text-gray-700">@title</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-gray-400 py-8">No activity yet</div>
+    }
+</div>

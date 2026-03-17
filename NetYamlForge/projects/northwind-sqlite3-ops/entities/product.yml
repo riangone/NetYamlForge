@@ -1,0 +1,281 @@
+imports: []
+entities:
+  product:
+    table: Products
+    key: ProductId
+    keys: []
+    displayName: Product
+    joins:
+    - type: left
+      table: Suppliers
+      alias: s
+      true: Products.SupplierId = s.SupplierId
+    - type: left
+      table: Categories
+      alias: c
+      true: Products.CategoryId = c.CategoryId
+    forms:
+      ProductName:
+        type: string
+        identity: false
+        required: true
+        label: Product
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      SupplierId:
+        type: int
+        identity: false
+        required: true
+        label: Supplier
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: supplier
+          displayColumn: Id
+          displayColumns:
+          - CompanyName
+          - ContactName
+          - Country
+          query: 'SELECT SupplierId AS Id, CompanyName, ContactName, Country
+
+            FROM Suppliers
+
+            WHERE Active = 1
+
+            '
+          picker: true
+          multiPicker: false
+        hidden: false
+      CategoryId:
+        type: int
+        identity: false
+        required: true
+        label: Category
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: Id
+          displayColumns:
+          - CategoryName
+          query: 'SELECT CategoryId AS Id, CategoryName
+
+            FROM Categories
+
+            '
+          picker: false
+          multiPicker: false
+        hidden: false
+      UnitPrice:
+        type: decimal
+        identity: false
+        required: true
+        label: Unit Price
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      UnitsInStock:
+        type: int
+        identity: false
+        required: false
+        label: Stock
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      ReorderLevel:
+        type: int
+        identity: false
+        required: false
+        label: Reorder Level
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Discontinued:
+        type: bool
+        identity: false
+        required: false
+        label: Discontinued
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      ProductId:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ProductId.label
+      ProductName:
+        type: string
+        identity: false
+        required: true
+        label: Product
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ProductName.label
+      SupplierId:
+        type: int
+        identity: false
+        required: true
+        label: Supplier
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: true
+      SupplierName:
+        type: string
+        identity: true
+        required: false
+        label: Supplier
+        searchable: true
+        sortable: true
+        editable: true
+        expression: s.CompanyName
+        hidden: false
+      CategoryId:
+        type: int
+        identity: false
+        required: true
+        label: Category
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: true
+      CategoryName:
+        type: string
+        identity: true
+        required: false
+        label: Category
+        searchable: true
+        sortable: true
+        editable: true
+        expression: c.CategoryName
+        hidden: false
+      UnitPrice:
+        type: decimal
+        identity: false
+        required: true
+        label: Unit Price
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.UnitPrice.label
+      UnitsInStock:
+        type: int
+        identity: false
+        required: false
+        label: Stock
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.UnitsInStock.label
+      ReorderLevel:
+        type: int
+        identity: false
+        required: false
+        label: Reorder Level
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ReorderLevel.label
+      Discontinued:
+        type: bool
+        identity: false
+        required: false
+        label: Discontinued
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.northwind-sqlite3-ops.entities.product.entities.product.columns.Discontinued.label
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - ProductName
+        - SupplierId
+        - CategoryId
+        - UnitPrice
+        - UnitsInStock
+        - ReorderLevel
+        - Discontinued
+      filters:
+        columns: 4
+        order:
+        - SupplierId
+        - CategoryId
+        - UnitPrice
+        - Discontinued
+    softDelete: false
+    isPublic: true
+    filters:
+      SupplierId:
+        type: entity-picker
+        label: Supplier
+        expression: Products.SupplierId
+        foreignKey:
+          entity: supplier
+          displayColumn: Id
+          displayColumns:
+          - CompanyName
+          - ContactName
+          - Country
+          query: 'SELECT SupplierId AS Id, CompanyName, ContactName, Country
+
+            FROM Suppliers
+
+            WHERE Active = 1
+
+            '
+          picker: false
+          multiPicker: false
+      CategoryId:
+        type: dropdown
+        label: Category
+        expression: Products.CategoryId
+        foreignKey:
+          entity: category
+          displayColumn: Id
+          displayColumns:
+          - CategoryName
+          picker: false
+          multiPicker: false
+      UnitPrice:
+        type: range
+        label: Unit Price
+        expression: Products.UnitPrice
+      Discontinued:
+        type: dropdown
+        label: Discontinued
+        options:
+        - 0
+        - 1
+    links:
+      orderdetails:
+        label: Order Details
+        targetEntity: orderdetail
+        filter:
+          ProductId: ProductId
+    isCompositeKey: false
+    displayNameKey: projects.northwind-sqlite3-ops.entities.product.entities.product.displayName

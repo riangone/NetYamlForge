@@ -1,0 +1,9 @@
+name: demo-ops
+displayName: Demo Ops
+version: "1.0.0"
+database:
+  type: sqlite
+  path: /home/ubuntu/ws/ccc/NetYamlForge/projects/blog/database/blog.db
+features:
+  multiLanguage: true
+  userAuthentication: true

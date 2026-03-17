@@ -1,0 +1,95 @@
+entities:
+  Book:
+    table: book
+    key: id
+
+    displayName: "蔵書"
+    displayNameI18n:
+      ja-JP: "蔵書"
+      zh-CN: "藏书"
+
+    columns:
+      id:
+        type: int
+        identity: true
+        sortable: true
+      title:
+        type: string
+        displayName: "タイトル"
+        displayNameI18n:
+          ja-JP: "タイトル"
+          zh-CN: "标题"
+        searchable: true
+        sortable: true
+        required: true
+      isbn:
+        type: string
+        displayName: "ISBN"
+      author_id:
+        type: int
+        displayName: "著者"
+        displayNameI18n:
+          ja-JP: "著者"
+          zh-CN: "作者"
+      author_name:
+        type: string
+        expression: "author.name"
+        displayName: "著者名"
+        displayNameI18n:
+          ja-JP: "著者名"
+          zh-CN: "作者名"
+        searchable: true
+      category_id:
+        type: int
+        displayName: "カテゴリ"
+        displayNameI18n:
+          ja-JP: "カテゴリ"
+          zh-CN: "分类"
+      category_name:
+        type: string
+        expression: "category.name"
+        displayName: "カテゴリ名"
+        displayNameI18n:
+          ja-JP: "カテゴリ名"
+          zh-CN: "分类名"
+        searchable: true
+      publish_date:
+        type: date
+        displayName: "出版日"
+        displayNameI18n:
+          ja-JP: "出版日"
+          zh-CN: "出版日期"
+        sortable: true
+      total_copies:
+        type: int
+        displayName: "所蔵冊数"
+        displayNameI18n:
+          ja-JP: "所蔵冊数"
+          zh-CN: "总拷贝数"
+      available_count:
+        type: int
+        displayName: "利用可能冊数"
+        displayNameI18n:
+          ja-JP: "利用可能冊数"
+          zh-CN: "可用副本"
+        sortable: true
+
+    forms:
+      create:
+        fields: [title, isbn, author_id, category_id, publish_date, total_copies]
+      edit:
+        fields: [title, isbn, author_id, category_id, publish_date, total_copies]
+
+    joins:
+      - table: author
+        alias: a
+        on: "book.author_id = a.id"
+        type: left
+      - table: category
+        alias: c
+        on: "book.category_id = c.id"
+        type: left
+
+    hooks:
+      beforeCreate: [trim, validate_required]
+      afterCreate: [audit_log]

@@ -1,0 +1,57 @@
+translations:
+  projects.tmp-starter-ops.home.hero.description:
+    en-US: 'Starter workspace generated from your database schema.'
+    zh-CN: 'Starter workspace generated from your database schema.'
+    ja-JP: 'Starter workspace generated from your database schema.'
+  projects.tmp-starter-ops.home.hero.eyebrow:
+    en-US: 'Tmp Starter Ops'
+    zh-CN: 'Tmp Starter Ops'
+    ja-JP: 'Tmp Starter Ops'
+  projects.tmp-starter-ops.home.hero.primaryActionLabel:
+    en-US: 'Open Dashboard'
+    zh-CN: 'Open Dashboard'
+    ja-JP: 'Open Dashboard'
+  projects.tmp-starter-ops.home.hero.secondaryActionLabel:
+    en-US: 'Open Schema Definitions'
+    zh-CN: 'Open Schema Definitions'
+    ja-JP: 'Open Schema Definitions'
+  projects.tmp-starter-ops.home.hero.title:
+    en-US: 'Tmp Starter Ops Workspace'
+    zh-CN: 'Tmp Starter Ops Workspace'
+    ja-JP: 'Tmp Starter Ops Workspace'
+  projects.tmp-starter-ops.home.quickActions.0.label:
+    en-US: 'Dashboard'
+    zh-CN: 'Dashboard'
+    ja-JP: 'Dashboard'
+  projects.tmp-starter-ops.home.quickActions.1.label:
+    en-US: 'Entity Definitions'
+    zh-CN: 'Entity Definitions'
+    ja-JP: 'Entity Definitions'
+  projects.tmp-starter-ops.home.quickActions.2.label:
+    en-US: 'Starter Page'
+    zh-CN: 'Starter Page'
+    ja-JP: 'Starter Page'
+  projects.tmp-starter-ops.home.sections.projects.lead:
+    en-US: 'Build your business screens from this starter project.'
+    zh-CN: 'Build your business screens from this starter project.'
+    ja-JP: 'Build your business screens from this starter project.'
+  projects.tmp-starter-ops.home.sections.projects.title:
+    en-US: 'Tmp Starter Ops'
+    zh-CN: 'Tmp Starter Ops'
+    ja-JP: 'Tmp Starter Ops'
+  projects.tmp-starter-ops.pages.starterOverview.description:
+    en-US: 'Auto-generated starter page'
+    zh-CN: 'Auto-generated starter page'
+    ja-JP: 'Auto-generated starter page'
+  projects.tmp-starter-ops.pages.starterOverview.sections.0.title:
+    en-US: 'Starter Sample'
+    zh-CN: 'Starter Sample'
+    ja-JP: 'Starter Sample'
+  projects.tmp-starter-ops.pages.starterOverview.title:
+    en-US: 'Starter Overview'
+    zh-CN: 'Starter Overview'
+    ja-JP: 'Starter Overview'
+  projects.tmp-starter-ops.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'

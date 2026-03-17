@@ -1,0 +1,557 @@
+entities:
+  customer:
+    table: Customer
+    key: CustomerId
+    displayName: Customer
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    # 確認ダイアログ設定: 新規作成・更新時にそれぞれ確認を求める
+    confirmation:
+      create: "新しい顧客を登録してよろしいですか？"
+      update: "顧客情報を更新してよろしいですか？変更内容は即座に反映されます。"
+    # フック設定: 前処理（Email ドメイン検証 + 名前正規化）と後処理（ログ記録）
+    hooks:
+      beforeCreate: "customer_email_domain"
+      afterCreate: "console_log_after"
+      beforeUpdate: "customer_email_domain"
+      afterUpdate: "console_log_after"
+    joins:
+      - type: left
+        table: Employee
+        alias: e
+        on: Customer.SupportRepId = e.EmployeeId
+    columns:
+      CustomerId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        searchable: true
+        sortable: true
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        searchable: true
+        sortable: true
+      Email:
+        type: email
+        required: true
+        label: Email
+        searchable: true
+        sortable: true
+      Country:
+        type: string
+        label: Country
+        searchable: true
+        sortable: true
+      SupportRepId:
+        type: int
+        label: Support Rep
+        sortable: true
+      SupportRepName:
+        type: string
+        identity: true
+        label: Support Rep
+        searchable: true
+        sortable: true
+        expression: e.LastName || ', ' || e.FirstName
+    forms:
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        editable: true
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        editable: true
+      Email:
+        type: email
+        required: true
+        label: Email
+        editable: true
+      Country:
+        type: string
+        required: false
+        label: Country
+        editable: true
+      SupportRepId:
+        type: int
+        required: false
+        label: Support Rep
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: LastName
+    filters:
+      Country:
+        type: multi-select
+        label: Country
+        options:
+          - USA
+          - Canada
+          - Brazil
+          - France
+          - Germany
+      SupportRepId:
+        type: dropdown
+        label: Support Rep
+        expression: Customer.SupportRepId
+        foreignKey:
+          entity: employee
+          displayColumn: LastName
+
+  employee:
+    table: Employee
+    key: EmployeeId
+    displayName: Employee
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    columns:
+      EmployeeId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        searchable: true
+        sortable: true
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        searchable: true
+        sortable: true
+      Title:
+        type: string
+        label: Title
+        searchable: true
+        sortable: true
+      BirthDate:
+        type: date
+        label: Birth Date
+        searchable: false
+        sortable: true
+      HireDate:
+        type: date
+        label: Hire Date
+        searchable: false
+        sortable: true
+    forms:
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        editable: true
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        editable: true
+      Title:
+        type: string
+        required: false
+        label: Title
+        editable: true
+      BirthDate:
+        type: date
+        required: false
+        label: Birth Date
+        editable: true
+      HireDate:
+        type: date
+        required: false
+        label: Hire Date
+        editable: true
+    filters:
+      BirthDate:
+        type: date-range
+        label: Birth Date
+        expression: Employee.BirthDate
+
+  artist:
+    table: Artist
+    key: ArtistId
+    displayName: Artist
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    columns:
+      ArtistId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+    forms:
+      Name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+    filters: {}
+
+  album:
+    table: Album
+    key: AlbumId
+    displayName: Album
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    joins:
+      - type: left
+        table: Artist
+        alias: a
+        on: Album.ArtistId = a.ArtistId
+    columns:
+      AlbumId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      Title:
+        type: string
+        required: true
+        label: Title
+        searchable: true
+        sortable: true
+      ArtistId:
+        type: int
+        label: Artist
+        sortable: true
+      ArtistName:
+        type: string
+        identity: true
+        label: Artist
+        searchable: true
+        sortable: true
+        expression: a.Name
+    forms:
+      Title:
+        type: string
+        required: true
+        label: Title
+        editable: true
+      ArtistId:
+        type: int
+        required: true
+        label: Artist
+        editable: true
+        foreignKey:
+          entity: artist
+          displayColumn: Name
+          picker: true  # ドロップダウンの代わりにピッカーモーダルを使用
+    filters:
+      ArtistId:
+        type: entity-picker
+        label: Artist
+        expression: Album.ArtistId
+        foreignKey:
+          entity: artist
+          displayColumn: Name
+
+  track:
+    table: Track
+    key: TrackId
+    displayName: Track
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    joins:
+      - type: left
+        table: Album
+        alias: al
+        on: Track.AlbumId = al.AlbumId
+      - type: left
+        table: Genre
+        alias: g
+        on: Track.GenreId = g.GenreId
+    columns:
+      TrackId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      AlbumId:
+        type: int
+        label: Album
+        sortable: true
+      AlbumTitle:
+        type: string
+        identity: true
+        label: Album
+        searchable: true
+        sortable: true
+        expression: al.Title
+      GenreId:
+        type: int
+        label: Genre
+        sortable: true
+      GenreName:
+        type: string
+        identity: true
+        label: Genre
+        searchable: true
+        sortable: true
+        expression: g.Name
+      UnitPrice:
+        type: decimal
+        label: Price
+        searchable: false
+        sortable: true
+      Milliseconds:
+        type: int
+        label: Length(ms)
+        searchable: false
+        sortable: true
+    forms:
+      Name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      AlbumId:
+        type: int
+        required: false
+        label: Album
+        editable: true
+        foreignKey:
+          entity: album
+          displayColumn: Title
+      GenreId:
+        type: int
+        required: false
+        label: Genre
+        editable: true
+        foreignKey:
+          entity: genre
+          displayColumn: Name
+      UnitPrice:
+        type: decimal
+        required: true
+        label: Unit Price
+        editable: true
+      Milliseconds:
+        type: int
+        required: false
+        label: Length(ms)
+        editable: true
+    filters:
+      GenreId:
+        type: dropdown
+        label: Genre
+        expression: Track.GenreId
+        foreignKey:
+          entity: genre
+          displayColumn: Name
+      UnitPrice:
+        type: range
+        label: Price Range
+        expression: Track.UnitPrice
+
+  genre:
+    table: Genre
+    key: GenreId
+    displayName: Genre
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    columns:
+      GenreId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+    forms:
+      Name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+    filters: {}
+
+  invoice:
+    table: Invoice
+    key: InvoiceId
+    displayName: Invoice
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    # 確認ダイアログ設定: 更新時のみ確認（新規は確認なし）
+    confirmation:
+      update: "Invoice の金額・請求先を更新します。よろしいですか？"
+    # フック設定: 最小金額チェック（前処理）
+    hooks:
+      beforeCreate: "invoice_minimum_total"
+      beforeUpdate: "invoice_minimum_total"
+      afterCreate: "console_log_after"
+    joins:
+      - type: left
+        table: Customer
+        alias: c
+        on: Invoice.CustomerId = c.CustomerId
+    columns:
+      InvoiceId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      CustomerId:
+        type: int
+        required: true
+        label: Customer
+        searchable: false
+        sortable: true
+      CustomerName:
+        type: string
+        identity: true
+        label: Customer
+        searchable: true
+        sortable: true
+        expression: c.LastName || ', ' || c.FirstName
+      InvoiceDate:
+        type: date
+        required: true
+        label: Invoice Date
+        searchable: false
+        sortable: true
+      BillingCountry:
+        type: string
+        label: Billing Country
+        searchable: true
+        sortable: true
+      BillingAddress:
+        type: textarea
+        label: Billing Address
+        searchable: false
+        sortable: false
+        hidden: true
+      BillingCity:
+        type: string
+        label: Billing City
+        searchable: true
+        sortable: true
+        hidden: true
+      BillingState:
+        type: string
+        label: Billing State
+        searchable: true
+        sortable: true
+        hidden: true
+      BillingPostalCode:
+        type: string
+        label: Billing Postal Code
+        searchable: false
+        sortable: false
+        hidden: true
+      Total:
+        type: decimal
+        required: true
+        label: Total
+        searchable: false
+        sortable: true
+    forms:
+      CustomerId:
+        type: int
+        required: true
+        label: Customer
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: LastName
+          picker: true  # 多数のCustomerからピッカーで選択
+      InvoiceDate:
+        type: date
+        required: true
+        label: Invoice Date
+        editable: true
+      BillingAddress:
+        type: textarea
+        required: false
+        label: Billing Address
+        editable: true
+      BillingCity:
+        type: string
+        required: false
+        label: Billing City
+        editable: true
+      BillingState:
+        type: string
+        required: false
+        label: Billing State
+        editable: true
+      BillingCountry:
+        type: string
+        required: false
+        label: Billing Country
+        editable: true
+      BillingPostalCode:
+        type: string
+        required: false
+        label: Billing Postal Code
+        editable: true
+      Total:
+        type: decimal
+        required: true
+        label: Total
+        editable: true
+    filters:
+      BillingCountry:
+        type: multi-select
+        label: Billing Country
+        options:
+          - USA
+          - Canada
+          - Brazil
+          - France
+          - Germany
+      InvoiceDate:
+        type: date-range
+        label: Invoice Date
+        expression: Invoice.InvoiceDate
+      Total:
+        type: range
+        label: Total Range
+        expression: Invoice.Total

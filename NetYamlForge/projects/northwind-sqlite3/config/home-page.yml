@@ -1,0 +1,33 @@
+hero:
+  eyebrow: Northwind SQLite3
+  title: 標準ビジネスデータ 検証環境
+  description: 顧客・商品・注文・従業員からなる古典的なビジネスモデルで、フレームワーク機能の検証とプロトタイピングに最適な環境。
+  primaryActionLabel: 顧客一覧
+  primaryActionUrl: /northwind-sqlite3/DynamicEntity/Index?entity=customer
+  secondaryActionLabel: Dashboard
+  secondaryActionUrl: /northwind-sqlite3/Dashboard
+  highlights:
+    - Classic Schema
+    - Prototype Ready
+    - Full CRUD
+
+projectsSectionTitle: Northwind Workspace
+projectsSectionLead: Northwind データセットを使ったビジネスシナリオの検証環境です。
+
+quickActions:
+  - label: 顧客
+    url: /northwind-sqlite3/DynamicEntity/Index?entity=customer
+    style: btn-primary
+    icon: 🏢
+  - label: 商品
+    url: /northwind-sqlite3/DynamicEntity/Index?entity=product
+    style: btn-outline
+    icon: 📦
+  - label: 注文
+    url: /northwind-sqlite3/DynamicEntity/Index?entity=order
+    style: btn-outline
+    icon: 🛒
+  - label: 従業員
+    url: /northwind-sqlite3/DynamicEntity/Index?entity=employee
+    style: btn-outline
+    icon: 👤

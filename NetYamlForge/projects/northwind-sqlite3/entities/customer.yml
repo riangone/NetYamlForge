@@ -1,0 +1,175 @@
+imports: []
+entities:
+  customer:
+    table: Customers
+    key: CustomerId
+    keys: []
+    displayName: Customer
+    joins: []
+    forms:
+      CompanyName:
+        type: string
+        identity: false
+        required: true
+        label: Company
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      ContactName:
+        type: string
+        identity: false
+        required: true
+        label: Contact
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Country:
+        type: string
+        identity: false
+        required: true
+        label: Country
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      City:
+        type: string
+        identity: false
+        required: false
+        label: City
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Phone:
+        type: string
+        identity: false
+        required: false
+        label: Phone
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Active:
+        type: bool
+        identity: false
+        required: false
+        label: Active
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      CustomerId:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+      CompanyName:
+        type: string
+        identity: false
+        required: true
+        label: Company
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      ContactName:
+        type: string
+        identity: false
+        required: true
+        label: Contact
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      Country:
+        type: string
+        identity: false
+        required: true
+        label: Country
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      City:
+        type: string
+        identity: false
+        required: false
+        label: City
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      Phone:
+        type: string
+        identity: false
+        required: false
+        label: Phone
+        searchable: true
+        sortable: false
+        editable: true
+        hidden: false
+      Active:
+        type: bool
+        identity: false
+        required: false
+        label: Active
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+    paging:
+      pageSize: 12
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - CompanyName
+        - ContactName
+        - Country
+        - City
+        - Phone
+        - Active
+      filters:
+        columns: 3
+        order:
+        - Country
+        - Active
+    softDelete: false
+    isPublic: true
+    filters:
+      Country:
+        type: multi-select
+        label: Country
+        options:
+        - Germany
+        - UK
+        - Sweden
+        - France
+        - USA
+        - Canada
+        - Italy
+        - Brazil
+      Active:
+        type: dropdown
+        label: Active
+        options:
+        - 1
+        - 0
+    links:
+      orders:
+        label: Orders
+        targetEntity: order
+        filter:
+          CustomerId: CustomerId
+    isCompositeKey: false
+    displayNameKey: projects.northwind-sqlite3.entities.customer.entities.customer.displayName

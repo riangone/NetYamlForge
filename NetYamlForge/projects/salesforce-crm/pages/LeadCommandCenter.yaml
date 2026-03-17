@@ -1,0 +1,68 @@
+title: Lead Command Center
+description: Qualification-first page that mirrors Salesforce lead operation rhythm.
+
+sections:
+  - id: fresh_leads
+    title: Fresh Leads
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId AS LeadId,
+        c.CompanyName AS LeadName,
+        c.ContactName AS Contact,
+        c.Country,
+        c.City,
+        CASE
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId) THEN 'Qualified'
+          ELSE 'New'
+        END AS LeadStage
+      FROM Customers c
+      WHERE c.Active = 1
+      ORDER BY c.CustomerId DESC
+    columns:
+      - LeadId
+      - LeadName
+      - Contact
+      - Country
+      - City
+      - LeadStage
+    page_size: 30
+    editable: false
+    read_only: true
+    filters:
+      Country:
+        label: Country
+        type: eq
+      LeadStage:
+        label: Stage
+        type: eq
+
+  - id: follow_up_queue
+    title: Follow-up Queue
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId AS LeadId,
+        c.CompanyName,
+        MAX(o.OrderDate) AS LastActivityDate,
+        COUNT(DISTINCT o.OrderId) AS OpportunityTouches,
+        CASE
+          WHEN MAX(o.OrderDate) IS NULL THEN 'No Touch'
+          WHEN julianday('now') - julianday(MAX(o.OrderDate)) >= 90 THEN 'Cold'
+          WHEN julianday('now') - julianday(MAX(o.OrderDate)) >= 30 THEN 'Warm'
+          ELSE 'Hot'
+        END AS Temperature
+      FROM Customers c
+      LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
+      WHERE c.Active = 1
+      GROUP BY c.CustomerId, c.CompanyName
+      ORDER BY Temperature DESC, LastActivityDate ASC
+    columns:
+      - LeadId
+      - CompanyName
+      - LastActivityDate
+      - OpportunityTouches
+      - Temperature
+    page_size: 30
+    editable: false
+    read_only: true

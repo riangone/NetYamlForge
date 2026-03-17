@@ -1,0 +1,27 @@
+entities:
+  appuserrole:
+    table: 'AppUserRole'
+    key: 'Id'
+    displayName: 'Appuserrole'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'RoleName', 'CreatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', searchable: true, sortable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', searchable: true, sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', editable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

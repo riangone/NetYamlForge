@@ -1,0 +1,102 @@
+@* ファイル概要: エンティティ選択ピッカーモーダルのコンテンツ（テーブル＋ページング）を描画します。
+   PickerList アクションから呼び出されます。 *@
+
+@using NetYamlForge.Models
+@model NetYamlForge.Controllers.PickerViewModel
+
+@{
+    string BuildLabel(IDictionary<string, object> dict, string fallback)
+    {
+        var parts = new List<string>();
+        foreach (var col in Model.DisplayColumns)
+        {
+            if (dict.TryGetValue(col, out var raw) && raw != null)
+            {
+                var text = raw.ToString();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    parts.Add(text);
+                }
+            }
+        }
+
+        return parts.Count > 0 ? string.Join(" / ", parts) : fallback;
+    }
+
+    // 表示カラム（identity除外・hidden除外）を最大5列まで取得
+    var displayCols = Model.Meta.Columns
+        .Where(c => !c.Value.Hidden && !c.Value.Identity)
+        .Take(5)
+        .ToList();
+}
+
+<div class="overflow-x-auto">
+    <table class="table table-sm table-zebra w-full">
+        <thead>
+            <tr>
+                @foreach (var col in displayCols)
+                {
+                    <th>@col.Value.GetLabel(col.Key)</th>
+                }
+                <th class="text-right">Select</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                var dict = (IDictionary<string, object>)item;
+                var rowId = dict.TryGetValue("Id", out var idVal)
+                    ? idVal?.ToString() ?? ""
+                    : (dict.TryGetValue(Model.Meta.Key, out var keyVal) ? keyVal?.ToString() ?? "" : "");
+                var rowLabel = BuildLabel(dict, rowId);
+                <tr class="hover cursor-pointer"
+                    data-picker-id="@rowId"
+                    data-picker-label="@rowLabel"
+                    onclick="pickerSelectFromRow(this)">
+                    @foreach (var col in displayCols)
+                    {
+                        var colVal = dict.TryGetValue(col.Key, out var cv) ? cv?.ToString() ?? "" : "";
+                        <td>@colVal</td>
+                    }
+                    <td class="text-right">
+                        <button type="button" class="btn btn-xs btn-primary">Select</button>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any())
+            {
+                <tr>
+                    <td colspan="@(displayCols.Count + 1)" class="text-center text-base-content/50 py-6">
+                        No results found
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* ページング *@
+@if (Model.HasMore || Model.Page > 1)
+{
+    <div class="flex justify-between items-center mt-3">
+        @if (Model.Page > 1)
+        {
+            <button type="button" class="btn btn-sm btn-ghost"
+                    onclick="loadPickerPage(@(Model.Page - 1))">← Prev</button>
+        }
+        else
+        {
+            <span></span>
+        }
+        <span class="text-sm text-base-content/60">Page @Model.Page</span>
+        @if (Model.HasMore)
+        {
+            <button type="button" class="btn btn-sm btn-ghost"
+                    onclick="loadPickerPage(@(Model.Page + 1))">Next →</button>
+        }
+        else
+        {
+            <span></span>
+        }
+    </div>
+}

@@ -1,0 +1,38 @@
+hero:
+  eyebrow: Tmp Starter Ops
+  eyebrowKey: projects.tmp-starter-ops.home.hero.eyebrow
+  title: Tmp Starter Ops Workspace
+  titleKey: projects.tmp-starter-ops.home.hero.title
+  description: Starter workspace generated from your database schema.
+  descriptionKey: projects.tmp-starter-ops.home.hero.description
+  primaryActionLabel: Open Dashboard
+  primaryActionLabelKey: projects.tmp-starter-ops.home.hero.primaryActionLabel
+  primaryActionUrl: /tmp-starter-ops/Dashboard
+  secondaryActionLabel: Open Schema Definitions
+  secondaryActionLabelKey: projects.tmp-starter-ops.home.hero.secondaryActionLabel
+  secondaryActionUrl: /tmp-starter-ops/DynamicEntity/AllDefinitions
+  highlights:
+    - Template Ready
+    - YAML First
+
+projectsSectionTitle: Tmp Starter Ops
+projectsSectionTitleKey: projects.tmp-starter-ops.home.sections.projects.title
+projectsSectionLead: Build your business screens from this starter project.
+projectsSectionLeadKey: projects.tmp-starter-ops.home.sections.projects.lead
+
+quickActions:
+  - label: Dashboard
+    labelKey: projects.tmp-starter-ops.home.quickActions.0.label
+    url: /tmp-starter-ops/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Definitions
+    labelKey: projects.tmp-starter-ops.home.quickActions.1.label
+    url: /tmp-starter-ops/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    labelKey: projects.tmp-starter-ops.home.quickActions.2.label
+    url: /tmp-starter-ops/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭

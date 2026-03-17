@@ -1,0 +1,102 @@
+stats:
+- label: Total Tasks
+  entity: task
+  aggregate: count
+  icon: 📋
+  color: badge-primary
+  labelKey: projects.todo.dashboard.stats.0.label
+- label: Pending
+  entity: task
+  aggregate: count
+  filter: Status='pending'
+  icon: ⏳
+  color: badge-warning
+  labelKey: projects.todo.dashboard.stats.1.label
+- label: In Progress
+  entity: task
+  aggregate: count
+  filter: Status='in_progress'
+  icon: 🔄
+  color: badge-info
+  labelKey: projects.todo.dashboard.stats.2.label
+- label: Completed
+  entity: task
+  aggregate: count
+  filter: Status='completed'
+  icon: ✅
+  color: badge-success
+  labelKey: projects.todo.dashboard.stats.3.label
+- label: Urgent Tasks
+  entity: task
+  aggregate: count
+  filter: Priority='urgent'
+  icon: 🚨
+  color: badge-error
+  labelKey: projects.todo.dashboard.stats.4.label
+- label: Total Projects
+  entity: project
+  aggregate: count
+  icon: 📁
+  color: badge-secondary
+  labelKey: projects.todo.dashboard.stats.5.label
+- label: Active Projects
+  entity: project
+  aggregate: count
+  filter: Status='active'
+  icon: 🚀
+  color: badge-accent
+  labelKey: projects.todo.dashboard.stats.6.label
+charts:
+- title: Tasks by Status
+  type: doughnut
+  entity: task
+  valueAggregate: count
+  groupExpression: Status
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colors:
+  - rgba(245, 158, 11, 0.85)
+  - rgba(59, 130, 246, 0.85)
+  - rgba(16, 185, 129, 0.85)
+  - rgba(107, 114, 128, 0.85)
+  titleKey: projects.todo.dashboard.charts.0.title
+- title: Tasks by Priority
+  type: bar
+  entity: task
+  valueAggregate: count
+  groupExpression: Priority
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(99, 102, 241, 0.7)
+  colorBorder: rgba(99, 102, 241, 1)
+  titleKey: projects.todo.dashboard.charts.1.title
+- title: Tasks per Project
+  type: bar
+  entity: task
+  valueAggregate: count
+  labelJoinEntity: project
+  labelJoinKey: ProjectId
+  labelJoinDisplay: Name
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(16, 185, 129, 0.7)
+  colorBorder: rgba(16, 185, 129, 1)
+  titleKey: projects.todo.dashboard.charts.2.title
+- title: Projects by Status
+  type: pie
+  entity: project
+  valueAggregate: count
+  groupExpression: Status
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colors:
+  - rgba(99, 102, 241, 0.85)
+  - rgba(59, 130, 246, 0.85)
+  - rgba(245, 158, 11, 0.85)
+  - rgba(16, 185, 129, 0.85)
+  - rgba(107, 114, 128, 0.85)
+  titleKey: projects.todo.dashboard.charts.3.title

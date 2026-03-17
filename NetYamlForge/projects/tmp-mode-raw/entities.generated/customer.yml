@@ -1,0 +1,26 @@
+entities:
+  customer:
+    table: 'customers'
+    key: 'id'
+    displayName: 'Customer'
+    displayNameKey: 'entities.customer.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name', 'email']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.customer.columns.id.label', sortable: true }
+      name: { type: string, required: true, label: 'Name', labelKey: 'entities.customer.columns.name.label', searchable: true, sortable: true }
+      email: { type: string, label: 'Email', labelKey: 'entities.customer.columns.email.label', searchable: true, sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', labelKey: 'entities.customer.forms.name.label', editable: true }
+      email: { type: string, label: 'Email', labelKey: 'entities.customer.forms.email.label', editable: true }
+    filters: {}
+    links: {}

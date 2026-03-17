@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="NetYamlForge.Analyzers/NetYamlForge.Analyzers.csproj" />
+  <Project Path="NetYamlForge.Tests/NetYamlForge.Tests.csproj" />
+  <Project Path="NetYamlForge/NetYamlForge.csproj" />
+</Solution>

@@ -1,0 +1,59 @@
+title: Approval Inbox
+description: Unified approval queue for deals requiring management decision.
+
+template: ApprovalInbox
+
+sections:
+  - id: pending_approvals
+    title: Pending Approvals
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId AS ApprovalId,
+        c.CompanyName AS Account,
+        c.ContactName AS Contact,
+        o.OrderDate,
+        o.RequiredDate,
+        o.Freight,
+        o.Status,
+        CASE
+          WHEN o.Freight >= 120 THEN 'High'
+          WHEN o.Freight >= 60 THEN 'Medium'
+          ELSE 'Low'
+        END AS ApprovalRisk,
+        CASE
+          WHEN o.Status = 'Delayed' THEN 'Exception handling required'
+          WHEN o.Status = 'Open' THEN 'Commercial approval pending'
+          ELSE 'Manual review'
+        END AS ApprovalReason
+      FROM Orders o
+      JOIN Customers c ON c.CustomerId = o.CustomerId
+      WHERE o.Status IN ('Open', 'Delayed')
+      ORDER BY o.Freight DESC, o.RequiredDate ASC, o.OrderId DESC
+    columns:
+      - ApprovalId
+      - Account
+      - Contact
+      - OrderDate
+      - RequiredDate
+      - Freight
+      - Status
+      - ApprovalRisk
+      - ApprovalReason
+    page_size: 50
+    editable: true
+    read_only: false
+    target_table: Orders
+    target_primary_key: OrderId
+    updatable_fields:
+      - Status
+    filters:
+      Account:
+        label: Account
+        type: like
+      Status:
+        label: Status
+        type: eq
+      ApprovalRisk:
+        label: Risk
+        type: eq

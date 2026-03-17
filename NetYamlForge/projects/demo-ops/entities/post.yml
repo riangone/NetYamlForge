@@ -1,0 +1,55 @@
+entities:
+  post:
+    table: 'posts'
+    key: 'post_id'
+    displayName: 'Post'
+    displayNameKey: 'entities.post.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'slug', 'content', 'excerpt', 'status', 'category_id', 'author', 'featured', 'allow_comments', 'view_count', 'published_at', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      post_id: { type: int, identity: true, label: 'Post Id', labelKey: 'entities.post.columns.post_id.label', sortable: true }
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.post.columns.title.label', searchable: true, sortable: true }
+      slug: { type: string, required: true, label: 'Slug', labelKey: 'entities.post.columns.slug.label', searchable: true, sortable: true }
+      content: { type: string, required: true, label: 'Content', labelKey: 'entities.post.columns.content.label', searchable: true, sortable: true }
+      excerpt: { type: string, label: 'Excerpt', labelKey: 'entities.post.columns.excerpt.label', searchable: true, sortable: true }
+      status: { type: string, label: 'Status', labelKey: 'entities.post.columns.status.label', searchable: true, sortable: true }
+      category_id: { type: int, label: 'Category Id', labelKey: 'entities.post.columns.category_id.label', sortable: true }
+      author: { type: string, label: 'Author', labelKey: 'entities.post.columns.author.label', searchable: true, sortable: true }
+      featured: { type: string, label: 'Featured', labelKey: 'entities.post.columns.featured.label', searchable: true, sortable: true }
+      allow_comments: { type: string, label: 'Allow Comments', labelKey: 'entities.post.columns.allow_comments.label', searchable: true, sortable: true }
+      view_count: { type: int, label: 'View Count', labelKey: 'entities.post.columns.view_count.label', sortable: true }
+      published_at: { type: string, label: 'Published At', labelKey: 'entities.post.columns.published_at.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.post.columns.created_at.label', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.post.columns.updated_at.label', searchable: true, sortable: true }
+    forms:
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.post.forms.title.label', editable: true }
+      slug: { type: string, required: true, label: 'Slug', labelKey: 'entities.post.forms.slug.label', editable: true }
+      content: { type: string, required: true, label: 'Content', labelKey: 'entities.post.forms.content.label', editable: true }
+      excerpt: { type: string, label: 'Excerpt', labelKey: 'entities.post.forms.excerpt.label', editable: true }
+      status: { type: string, label: 'Status', labelKey: 'entities.post.forms.status.label', editable: true }
+      category_id:
+        type: int
+        label: 'Category Id'
+        labelKey: 'entities.post.forms.category_id.label'
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: 'name'
+      author: { type: string, label: 'Author', labelKey: 'entities.post.forms.author.label', editable: true }
+      featured: { type: string, label: 'Featured', labelKey: 'entities.post.forms.featured.label', editable: true }
+      allow_comments: { type: string, label: 'Allow Comments', labelKey: 'entities.post.forms.allow_comments.label', editable: true }
+      view_count: { type: int, label: 'View Count', labelKey: 'entities.post.forms.view_count.label', editable: true }
+      published_at: { type: string, label: 'Published At', labelKey: 'entities.post.forms.published_at.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.post.forms.created_at.label', editable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.post.forms.updated_at.label', editable: true }
+    filters: {}
+    links: {}

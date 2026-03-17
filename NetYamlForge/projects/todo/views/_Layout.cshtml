@@ -1,0 +1,171 @@
+@* TODO プロジェクト専用レイアウト *@
+@using NetYamlForge.Localization
+@using Microsoft.Extensions.Localization
+@using NetYamlForge.Services
+@inject IStringLocalizer<SharedResource> L
+@inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
+@inject NetYamlForge.Services.ProjectScope ProjectScope
+<!DOCTYPE html>
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TODO Manager</title>
+    <script type="importmap"></script>
+    <link href="/lib/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
+    <script src="/lib/tailwindcss/browser.min.js"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
+    <style>
+        /* TODO プロジェクト専用スタイル */
+        .todo-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .task-badge {
+            @* タスク用のカスタムバッジ *@
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+    @{
+        var showSidebar = User.Identity?.IsAuthenticated ?? false;
+        var isAdminUser = User?.IsInRole("Admin") ?? false;
+        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "";
+    }
+    <div class="drawer">
+        <input id="app-sidebar" type="checkbox" class="drawer-toggle" />
+
+        <div class="drawer-content flex flex-col min-h-screen">
+            <!-- TODO 専用ヘッダー -->
+            <header class="navbar todo-header px-3 lg:px-6">
+                @if (showSidebar)
+                {
+                    <div class="flex-none">
+                        <label for="app-sidebar" class="btn btn-ghost btn-square">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </label>
+                    </div>
+                }
+
+                <div class="flex-1">
+                    <a class="btn btn-ghost text-xl text-white"
+                       asp-controller="Home"
+                       asp-action="Project"
+                       asp-route-project="@currentProject">
+                        ✅ TODO Manager
+                    </a>
+                </div>
+
+                <div class="flex-none gap-2">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                                <div class="w-10 rounded-full bg-white/20 text-white grid place-items-center font-semibold">
+                                    @((User.Identity?.Name ?? "U").Substring(0, 1).ToUpperInvariant())
+                                </div>
+                            </div>
+                            <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-64 p-2 shadow">
+                                <li class="menu-title">
+                                    <span>@L["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name)</span>
+                                </li>
+                                <li class="menu-title"><span>Language</span></li>
+                                <li>
+                                    <div class="flex gap-2 px-2 py-1">
+                                        <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <input type="hidden" name="culture" value="en-US" />
+                                            <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "en-US" ? "btn-active" : "")" title="English">🇺🇸</button>
+                                        </form>
+                                        <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <input type="hidden" name="culture" value="zh-CN" />
+                                            <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-CN" ? "btn-active" : "")" title="中文">🇨🇳</button>
+                                        </form>
+                                        <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <input type="hidden" name="culture" value="ja-JP" />
+                                            <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ja-JP" ? "btn-active" : "")" title="日本語">🇯🇵</button>
+                                        </form>
+                                    </div>
+                                </li>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
+                                }
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" asp-route-project="@currentProject" method="post">
+                                        <button type="submit" class="text-left w-full">@L["Logout"]</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" asp-route-project="@currentProject" class="btn btn-ghost btn-sm">Login</a>
+                    }
+                </div>
+            </header>
+
+            <main class="p-4 lg:p-6">
+                @RenderBody()
+            </main>
+        </div>
+
+        @if (showSidebar)
+        {
+            <div class="drawer-side z-40">
+                <label for="app-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
+                <aside class="bg-base-100 w-72 min-h-full border-r border-base-300">
+                    <div class="p-4 border-b border-base-300 flex items-center justify-between">
+                        <div>
+                            <div class="text-sm opacity-70">TODO Navigation</div>
+                            <div class="font-semibold">Task Manager</div>
+                        </div>
+                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </label>
+                    </div>
+
+                    <ul class="menu p-3 gap-1">
+                        <li>
+                            <a asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject">
+                                📊 Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="DynamicEntity" asp-action="Index" asp-route-project="@currentProject" asp-route-entity="task">
+                                ✅ Tasks
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-controller="DynamicEntity" asp-action="Index" asp-route-project="@currentProject" asp-route-entity="project">
+                                📁 Projects
+                            </a>
+                        </li>
+                        @if (isAdminUser)
+                        {
+                            <li class="menu-title mt-2"><span>Admin</span></li>
+                            <li>
+                                <a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">
+                                    👥 Users
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </aside>
+            </div>
+        }
+    </div>
+
+    <script src="/lib/htmx/htmx.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

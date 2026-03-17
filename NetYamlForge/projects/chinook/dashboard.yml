@@ -1,0 +1,134 @@
+stats:
+- label: Artists
+  entity: artist
+  aggregate: count
+  icon: 🎵
+  color: badge-primary
+  labelKey: projects.chinook.dashboard.stats.0.label
+- label: Albums
+  entity: album
+  aggregate: count
+  icon: 💿
+  color: badge-secondary
+  labelKey: projects.chinook.dashboard.stats.1.label
+- label: Tracks
+  entity: track
+  aggregate: count
+  icon: 🎸
+  color: badge-accent
+  labelKey: projects.chinook.dashboard.stats.2.label
+- label: Genres
+  entity: genre
+  aggregate: count
+  icon: 🎼
+  color: badge-primary
+  labelKey: projects.chinook.dashboard.stats.3.label
+- label: Media Types
+  entity: mediatype
+  aggregate: count
+  icon: 📀
+  color: badge-secondary
+  labelKey: projects.chinook.dashboard.stats.4.label
+- label: Playlists
+  entity: playlist
+  aggregate: count
+  icon: 📋
+  color: badge-accent
+  labelKey: projects.chinook.dashboard.stats.5.label
+- label: Customers
+  entity: customer
+  aggregate: count
+  icon: 👥
+  color: badge-info
+  labelKey: projects.chinook.dashboard.stats.6.label
+- label: Employees
+  entity: employee
+  aggregate: count
+  icon: 🧑‍💼
+  color: badge-neutral
+  labelKey: projects.chinook.dashboard.stats.7.label
+- label: Invoices
+  entity: invoice
+  aggregate: count
+  icon: 📄
+  color: badge-warning
+  labelKey: projects.chinook.dashboard.stats.8.label
+- label: Invoice Lines
+  entity: invoiceline
+  aggregate: count
+  icon: 🧾
+  color: badge-ghost
+  labelKey: projects.chinook.dashboard.stats.9.label
+- label: Total Revenue
+  entity: invoice
+  aggregate: sum
+  column: Total
+  icon: 💰
+  color: badge-success
+  labelKey: projects.chinook.dashboard.stats.10.label
+- label: Avg Invoice
+  entity: invoice
+  aggregate: avg
+  column: Total
+  icon: 📊
+  color: badge-info
+  labelKey: projects.chinook.dashboard.stats.11.label
+charts:
+- title: Monthly Revenue
+  type: line
+  entity: invoice
+  valueAggregate: sum
+  valueColumn: Total
+  groupExpression: strftime('%Y-%m', InvoiceDate)
+  orderBy: label
+  orderDir: asc
+  limit: 24
+  colorBg: rgba(99, 102, 241, 0.15)
+  colorBorder: rgba(99, 102, 241, 1)
+  titleKey: projects.chinook.dashboard.charts.0.title
+- title: Tracks by Genre
+  type: doughnut
+  entity: track
+  valueAggregate: count
+  labelJoinEntity: genre
+  labelJoinKey: GenreId
+  labelJoinDisplay: Name
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colors:
+  - rgba(99, 102, 241, 0.85)
+  - rgba(16, 185, 129, 0.85)
+  - rgba(245, 158, 11, 0.85)
+  - rgba(239, 68, 68, 0.85)
+  - rgba(59, 130, 246, 0.85)
+  - rgba(236, 72, 153, 0.85)
+  - rgba(168, 85, 247, 0.85)
+  - rgba(14, 165, 233, 0.85)
+  - rgba(251, 146, 60, 0.85)
+  - rgba(52, 211, 153, 0.85)
+  titleKey: projects.chinook.dashboard.charts.1.title
+- title: Top 10 Countries by Invoices
+  type: bar
+  entity: invoice
+  valueAggregate: count
+  groupExpression: BillingCountry
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(16, 185, 129, 0.7)
+  colorBorder: rgba(16, 185, 129, 1)
+  titleKey: projects.chinook.dashboard.charts.2.title
+- title: Top 10 Artists by Albums
+  type: bar
+  entity: album
+  valueAggregate: count
+  labelJoinEntity: artist
+  labelJoinKey: ArtistId
+  labelJoinDisplay: Name
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(245, 158, 11, 0.7)
+  colorBorder: rgba(245, 158, 11, 1)
+  titleKey: projects.chinook.dashboard.charts.3.title

@@ -1,0 +1,77 @@
+title: User Role Profile
+description: Identity, role, and profile operations with language settings and recent access activity.
+
+template: UserRoleProfile
+
+sections:
+  - id: user_directory
+    title: User Directory
+    source_type: custom
+    source: |
+      SELECT
+        Id AS UserId,
+        UserName,
+        DisplayName,
+        Email,
+        CASE WHEN IsAdmin = 1 THEN 'Admin' ELSE 'User' END AS Role,
+        CASE WHEN IsActive = 1 THEN 'Active' ELSE 'Disabled' END AS UserState,
+        PreferredLanguage AS Locale,
+        LastLoginAt,
+        CreatedAt
+      FROM AppUser
+      ORDER BY IsActive DESC, IsAdmin DESC, UserName ASC
+    columns:
+      - UserId
+      - UserName
+      - DisplayName
+      - Email
+      - Role
+      - UserState
+      - Locale
+      - LastLoginAt
+      - CreatedAt
+    page_size: 40
+    editable: true
+    read_only: false
+    target_table: AppUser
+    target_primary_key: Id
+    updatable_fields:
+      - DisplayName
+      - Email
+      - IsAdmin
+      - IsActive
+      - PreferredLanguage
+    filters:
+      UserName:
+        label: User Name
+        type: like
+      Role:
+        label: Role
+        type: eq
+      UserState:
+        label: State
+        type: eq
+      Locale:
+        label: Locale
+        type: eq
+
+  - id: user_activity
+    title: User Activity Snapshot
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(a.UserName, ''), 'system') AS UserName,
+        COUNT(*) AS EventCount,
+        MAX(a.CreatedAt) AS LastEventAt,
+        SUM(CASE WHEN lower(a.Action) LIKE '%login%' THEN 1 ELSE 0 END) AS LoginEvents
+      FROM AuditLog a
+      GROUP BY COALESCE(NULLIF(a.UserName, ''), 'system')
+      ORDER BY EventCount DESC, LastEventAt DESC
+    columns:
+      - UserName
+      - EventCount
+      - LastEventAt
+      - LoginEvents
+    page_size: 30
+    editable: false
+    read_only: true

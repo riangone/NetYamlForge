@@ -1,0 +1,267 @@
+imports: []
+entities:
+  task:
+    table: Task
+    key: Id
+    keys: []
+    displayName: Task
+    joins:
+    - type: left
+      table: Project
+      alias: p
+      true: Task.ProjectId = p.Id
+    forms:
+      Title:
+        type: string
+        identity: false
+        required: true
+        label: Title
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.Title.label
+      Status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: false
+        editable: true
+        options:
+        - pending
+        - in_progress
+        - completed
+        - cancelled
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.Status.label
+      Priority:
+        type: string
+        identity: false
+        required: true
+        label: Priority
+        searchable: false
+        sortable: false
+        editable: true
+        options:
+        - low
+        - medium
+        - high
+        - urgent
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.Priority.label
+      DueDate:
+        type: date
+        identity: false
+        required: false
+        label: Due Date
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.DueDate.label
+      ProjectId:
+        type: int
+        identity: false
+        required: false
+        label: Project
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: project
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.ProjectId.label
+      Description:
+        type: textarea
+        identity: false
+        required: false
+        label: Description
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.forms.Description.label
+      CreatedAt:
+        type: string
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      CompletedAt:
+        type: string
+        identity: false
+        required: false
+        label: Completed At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      Id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.Id.label
+      Title:
+        type: string
+        identity: false
+        required: true
+        label: Title
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.Title.label
+      Status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.Status.label
+      Priority:
+        type: string
+        identity: false
+        required: true
+        label: Priority
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.Priority.label
+      DueDate:
+        type: date
+        identity: false
+        required: false
+        label: Due Date
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.DueDate.label
+      ProjectId:
+        type: int
+        identity: false
+        required: false
+        label: Project ID
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: true
+        labelKey: projects.todo.entities.task.entities.task.columns.ProjectId.label
+      ProjectName:
+        type: string
+        identity: true
+        required: false
+        label: Project
+        searchable: true
+        sortable: true
+        editable: true
+        expression: p.Name
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.ProjectName.label
+      CreatedAt:
+        type: datetime
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.CreatedAt.label
+      CompletedAt:
+        type: datetime
+        identity: false
+        required: false
+        label: Completed At
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.todo.entities.task.entities.task.columns.CompletedAt.label
+      Description:
+        type: string
+        identity: false
+        required: false
+        label: Description
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - Title
+        - Status
+        - Priority
+        - DueDate
+        - ProjectId
+        - Description
+      filters:
+        columns: 3
+        order:
+        - Status
+        - Priority
+        - ProjectId
+    softDelete: false
+    isPublic: true
+    filters:
+      Status:
+        type: dropdown
+        label: Status
+        options:
+        - pending
+        - in_progress
+        - completed
+        - cancelled
+        labelKey: projects.todo.entities.task.entities.task.filters.Status.label
+      Priority:
+        type: dropdown
+        label: Priority
+        options:
+        - low
+        - medium
+        - high
+        - urgent
+        labelKey: projects.todo.entities.task.entities.task.filters.Priority.label
+      ProjectId:
+        type: dropdown
+        label: Project
+        expression: Task.ProjectId
+        foreignKey:
+          entity: project
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+        labelKey: projects.todo.entities.task.entities.task.filters.ProjectId.label
+    links:
+      project:
+        label: Project
+        targetEntity: project
+        filter:
+          Id: ProjectId
+        labelKey: projects.todo.entities.task.entities.task.links.project.label
+    isCompositeKey: false
+    displayNameKey: projects.todo.entities.task.entities.task.displayName

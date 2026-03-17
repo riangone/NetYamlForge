@@ -1,0 +1,92 @@
+title: Lead Detail 360
+description: 360-degree lead profile with qualification, touch history, and account risk context.
+
+sections:
+  - id: lead_profile
+    title: Lead Profile
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId AS LeadId,
+        c.CompanyName AS LeadName,
+        c.ContactName AS Contact,
+        c.Country,
+        c.City,
+        c.Phone,
+        CASE
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId) THEN 'Qualified'
+          ELSE 'New'
+        END AS LeadStage,
+        COUNT(DISTINCT o.OrderId) AS OpportunityCount,
+        MAX(o.OrderDate) AS LastActivityDate,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS LifetimeValue
+      FROM Customers c
+      LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY c.CustomerId, c.CompanyName, c.ContactName, c.Country, c.City, c.Phone
+      ORDER BY LastActivityDate DESC, c.CustomerId DESC
+    columns:
+      - LeadId
+      - LeadName
+      - Contact
+      - Country
+      - City
+      - Phone
+      - LeadStage
+      - OpportunityCount
+      - LastActivityDate
+      - LifetimeValue
+    page_size: 35
+    editable: false
+    read_only: true
+    filters:
+      LeadName:
+        label: Lead Name
+        type: like
+      Country:
+        label: Country
+        type: eq
+      LeadStage:
+        label: Lead Stage
+        type: eq
+
+  - id: lead_timeline
+    title: Lead Timeline
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId AS TimelineId,
+        c.CustomerId AS LeadId,
+        c.CompanyName AS LeadName,
+        o.OrderDate AS EventDate,
+        o.Status AS EventType,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS EventValue,
+        CASE
+          WHEN o.Status = 'Open' THEN 'Pipeline in progress'
+          WHEN o.Status = 'Delayed' THEN 'Risk signal detected'
+          WHEN o.Status = 'Shipped' THEN 'Won and fulfilled'
+          ELSE 'Status update'
+        END AS Note
+      FROM Orders o
+      JOIN Customers c ON c.CustomerId = o.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY o.OrderId, c.CustomerId, c.CompanyName, o.OrderDate, o.Status
+      ORDER BY o.OrderDate DESC, o.OrderId DESC
+    columns:
+      - TimelineId
+      - LeadId
+      - LeadName
+      - EventDate
+      - EventType
+      - EventValue
+      - Note
+    page_size: 60
+    editable: false
+    read_only: true
+    filters:
+      LeadName:
+        label: Lead Name
+        type: like
+      EventType:
+        label: Event Type
+        type: eq

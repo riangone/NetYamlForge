@@ -1,0 +1,303 @@
+@using NetYamlForge.Models
+@using Microsoft.AspNetCore.WebUtilities
+@using NetYamlForge.Controllers
+@model SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var total = Model.Total;
+    var project = Model.Project;
+    var pageName = Model.PageName;
+    var baseUrl = $"/{project}/Page/{pageName}";
+    var canEdit = sec.Editable && !sec.ReadOnly && !string.IsNullOrEmpty(sec.TargetTable);
+    var pkCol = sec.TargetPrimaryKey ?? "id";
+    var visibleCols = sec.GetVisibleColumnNames();
+
+    // 現在のクエリパラメータを取得（HTMX 部分更新時はモデルから、通常リクエストは Request.Query から）
+    var qParams = Model.AllQueryParams != null
+        ? new Dictionary<string, string>(Model.AllQueryParams, StringComparer.OrdinalIgnoreCase)
+        : Context.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
+
+    // セクション単位の部分更新エンドポイント
+    var sectionUrl = $"/{project}/Page/{pageName}/section/{sec.Id}";
+
+    // ページネーション
+    var pageKey    = $"{sec.Id}__page";
+    var psSizeKey  = $"{sec.Id}__pagesize";
+    // ページサイズ（URL パラメータ優先 → YAML 設定値）
+    var effectivePageSize = sec.GetEffectivePageSize();
+    var currentPageSize   = qParams.TryGetValue(psSizeKey, out var psStr2) &&
+                            int.TryParse(psStr2, out var psVal2) && psVal2 > 0
+        ? psVal2 : effectivePageSize;
+    var currentPage = qParams.TryGetValue(pageKey, out var pgStr) && int.TryParse(pgStr, out var pg)
+        ? Math.Max(1, pg) : 1;
+    var totalPages = currentPageSize > 0 && total > currentPageSize
+        ? (int)Math.Ceiling(total / (double)currentPageSize) : 1;
+
+    // DaisyUI サイズ修飾子
+    var size = sec.Size;
+
+    // ソート（{sec.Id}__sort / {sec.Id}__dir）
+    var sortKey = $"{sec.Id}__sort";
+    var dirKey  = $"{sec.Id}__dir";
+    var curSort = qParams.TryGetValue(sortKey, out var sortColVal) ? sortColVal : null;
+    var curDir  = qParams.TryGetValue(dirKey,  out var sortDirVal) ? sortDirVal : "asc";
+
+    string BuildSortUrl(string col)
+    {
+        var q = new Dictionary<string, string>(qParams);
+        if (curSort == col)
+            q[dirKey] = curDir == "asc" ? "desc" : "asc";
+        else
+        {
+            q[sortKey] = col;
+            q.Remove(dirKey);   // デフォルト昇順
+        }
+        q.Remove(pageKey);  // ソート変更時はページをリセット
+        return QueryHelpers.AddQueryString(baseUrl, q.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+    }
+
+    // HTMX 用: セクションエンドポイント向け URL（このセクションのパラメータのみ）
+    var sectionPrefix = $"{sec.Id}_";
+    string BuildSectionSortUrl(string col)
+    {
+        var q = qParams
+            .Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+        if (curSort == col)
+            q[dirKey] = curDir == "asc" ? "desc" : "asc";
+        else
+        {
+            q[sortKey] = col;
+            q.Remove(dirKey);
+        }
+        q.Remove(pageKey);
+        return q.Count == 0 ? sectionUrl
+            : QueryHelpers.AddQueryString(sectionUrl, q.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+    }
+    string BuildSectionPageUrl(int page)
+    {
+        var q = qParams
+            .Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase))
+            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+        if (page <= 1) q.Remove(pageKey);
+        else q[pageKey] = page.ToString();
+        if (currentPageSize != effectivePageSize) q[psSizeKey] = currentPageSize.ToString();
+        else q.Remove(psSizeKey);
+        return q.Count == 0 ? sectionUrl
+            : QueryHelpers.AddQueryString(sectionUrl, q.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+    }
+
+    var hasFilters = sec.Filters != null && sec.Filters.Count > 0;
+
+    // _FilterControl 用: PageFilterDefinition → FilterDefinition 変換
+    // キー名はセクションプレフィックス付き（{sec.Id}_{filterKey}）
+    FilterDefinition ToFilterDef(PageFilterDefinition pf) => new FilterDefinition
+    {
+        Type       = pf.Type.Replace("_", "-"),  // toggle_group → toggle-group 等
+        Label      = pf.Label,
+        OptionLabels = pf.Options
+    };
+    // _FilterControl に渡す Filters 辞書（キー=フィールド名、値=現在値）
+    var filterValuesForControl = qParams
+        .Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase))
+        .ToDictionary(
+            kv => kv.Key,
+            kv => (string?)kv.Value,
+            StringComparer.OrdinalIgnoreCase);
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+
+@* ── フィルターフォーム ─────────────────────────────────────────────── *@
+@if (hasFilters)
+{
+    <form method="get" action="@baseUrl"
+          hx-get="@sectionUrl"
+          hx-target="#section-@sec.Id"
+          hx-swap="innerHTML"
+          class="mb-4 flex flex-wrap gap-3 items-end bg-gray-50 p-3 rounded-lg border border-gray-200">
+        @* 他セクションのパラメータを保持（非HTMX フォールバック用）*@
+        @foreach (var kv in qParams.Where(kv => !kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase)))
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+
+        @foreach (var f in sec.Filters!)
+        {
+            var fKey = $"{sec.Id}_{f.Key}";
+            <div class="flex flex-col min-w-0">
+                <label class="text-xs text-gray-500 mb-1">@f.Value.GetLabel(f.Key)</label>
+                @await Html.PartialAsync("_FilterControl", (fKey, ToFilterDef(f.Value), filterValuesForControl))
+            </div>
+        }
+
+        <div class="flex gap-2 items-end">
+            <button type="submit" class="btn btn-@size btn-primary">Filter</button>
+            <a href="@baseUrl" class="btn btn-@size btn-ghost">Clear</a>
+        </div>
+    </form>
+}
+
+@* ── テーブル ──────────────────────────────────────────────────────────── *@
+<div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center gap-3">
+        @if (canEdit)
+        {
+            <button class="btn btn-@size btn-primary"
+                    hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form")"
+                    hx-target="#section-modal-content-@sec.Id"
+                    hx-swap="innerHTML"
+                    hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
+                + New
+            </button>
+        }
+        <div class="ml-auto flex items-center gap-2">
+            <span class="text-xs text-gray-500">Page Size:</span>
+            @* ページサイズ変更フォーム（セクション単位） *@
+            <form hx-get="@sectionUrl"
+                  hx-target="#section-@sec.Id"
+                  hx-swap="innerHTML"
+                  hx-trigger="change from:select[name='@psSizeKey']">
+                @foreach (var kv in qParams.Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase)
+                                                      && kv.Key != pageKey && kv.Key != psSizeKey))
+                {
+                    <input type="hidden" name="@kv.Key" value="@kv.Value" />
+                }
+                <select name="@psSizeKey" class="select select-bordered select-@size w-20">
+                    @foreach (var ps in new[] { 5, 10, 20, 50, 100 })
+                    {
+                        <option value="@ps" selected="@(currentPageSize == ps ? "selected" : null)">@ps</option>
+                    }
+                </select>
+            </form>
+        </div>
+    </div>
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+            <tr>
+                @foreach (var col in visibleCols)
+                {
+                    var colDef = sec.Columns.TryGetValue(col, out var cd) ? cd : new SectionColumnDef();
+                    var isCurSort = curSort == col;
+                    var sortArrow = !isCurSort ? "⇅" : (curDir == "desc" ? "↓" : "↑");
+                    var sortArrowClass = isCurSort ? "text-blue-600" : "text-gray-300 group-hover:text-gray-400";
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        @if (colDef.Sortable)
+                        {
+                            <a href="@BuildSortUrl(col)"
+                               hx-get="@BuildSectionSortUrl(col)"
+                               hx-target="#section-@sec.Id"
+                               hx-swap="innerHTML"
+                               class="group flex items-center gap-1 hover:text-gray-700">
+                                @colDef.GetLabel(col)
+                                <span class="@sortArrowClass text-xs">@sortArrow</span>
+                            </a>
+                        }
+                        else
+                        {
+                            @colDef.GetLabel(col)
+                        }
+                    </th>
+                }
+                @if (canEdit)
+                {
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            @foreach (var row in rows)
+            {
+                var rowId = row.TryGetValue(pkCol, out var rid) ? rid?.ToString() : null;
+                <tr class="hover:bg-gray-50">
+                    @foreach (var col in visibleCols)
+                    {
+                        var colDef = sec.Columns.TryGetValue(col, out var cd) ? cd : new SectionColumnDef();
+                        var rawVal = row.TryGetValue(col, out var v) ? v : null;
+                        var displayVal = ColumnValueFormatter.FormatValue(colDef.Type, rawVal, colDef.Options);
+                        <td class="px-4 py-3 text-gray-700">@displayVal</td>
+                    }
+                    @if (canEdit && rowId != null)
+                    {
+                        <td class="px-4 py-3 text-right">
+                            <button class="btn btn-@size btn-outline mr-1"
+                                    hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form?rowId={rowId}")"
+                                    hx-target="#section-modal-content-@sec.Id"
+                                    hx-swap="innerHTML"
+                                    hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
+                                Edit
+                            </button>
+                            <form hx-post="/@project/Page/@pageName/section/@sec.Id/delete-row"
+                                  hx-target="#section-@sec.Id"
+                                  hx-swap="innerHTML"
+                                  hx-confirm="@(sec.Confirmation?.Delete ?? "Delete this row?")"
+                                  method="post"
+                                  action="/@project/Page/@pageName/section/@sec.Id/delete-row"
+                                  style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="rowId" value="@rowId" />
+                                <button type="submit" class="btn btn-@size btn-error">Delete</button>
+                            </form>
+                        </td>
+                    }
+                </tr>
+            }
+            @if (!rows.Any())
+            {
+                <tr>
+                    <td colspan="@(visibleCols.Count + (canEdit ? 1 : 0))"
+                        class="px-4 py-8 text-center text-gray-400">No data available</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* ── ページネーション ───────────────────────────────────────────────────── *@
+@{
+    var maxPageLinks = 5;
+    var half = maxPageLinks / 2;
+    var startPage = Math.Max(1, currentPage - half);
+    var endPage = Math.Min(totalPages, startPage + maxPageLinks - 1);
+    if (endPage - startPage + 1 < maxPageLinks)
+        startPage = Math.Max(1, endPage - maxPageLinks + 1);
+
+    var secPageLinks = Enumerable.Range(startPage, Math.Max(0, endPage - startPage + 1))
+        .Select(i => new PaginationPageLink(i, BuildSectionPageUrl(i), i == currentPage))
+        .ToList();
+    var secPagination = new PaginationModel
+    {
+        Mode         = sec.Paging?.Mode ?? "numbered",
+        CurrentPage  = currentPage,
+        TotalPages   = totalPages,
+        HasMore      = rows.Count >= effectivePageSize,
+        CountEnabled = true,
+        HxTarget     = $"#section-{sec.Id}",
+        HxSwap       = "innerHTML",
+        FirstHxUrl   = BuildSectionPageUrl(1),
+        PrevHxUrl    = BuildSectionPageUrl(Math.Max(1, currentPage - 1)),
+        PageLinks    = secPageLinks,
+        NextHxUrl    = BuildSectionPageUrl(currentPage + 1),
+        LastHxUrl    = BuildSectionPageUrl(totalPages)
+    };
+}
+@await Html.PartialAsync("_Pagination", secPagination)
+
+@* ── 新規/編集フォーム用モーダル ────────────────────────────────────────── *@
+@if (canEdit)
+{
+    <dialog id="section-modal-@sec.Id" class="modal">
+        <div class="modal-box">
+            <div id="section-modal-content-@sec.Id">
+                @* HTMX で _SectionRowForm が読み込まれる *@
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+}

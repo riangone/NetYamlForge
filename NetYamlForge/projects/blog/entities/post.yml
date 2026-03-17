@@ -1,0 +1,759 @@
+imports: []
+entities:
+  post:
+    table: posts
+    key: post_id
+    keys: []
+    displayName: Post
+    joins: []
+    forms:
+      title:
+        type: string
+        identity: false
+        required: true
+        label: Title
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      content:
+        type: string
+        identity: false
+        required: true
+        label: Content
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      excerpt:
+        type: string
+        identity: false
+        required: false
+        label: Excerpt
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      status:
+        type: string
+        identity: false
+        required: false
+        label: Status
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      category_id:
+        type: int
+        identity: false
+        required: false
+        label: Category Id
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: name
+          picker: false
+          multiPicker: false
+        hidden: false
+      author:
+        type: string
+        identity: false
+        required: false
+        label: Author
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      featured:
+        type: string
+        identity: false
+        required: false
+        label: Featured
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      allow_comments:
+        type: string
+        identity: false
+        required: false
+        label: Allow Comments
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      view_count:
+        type: int
+        identity: false
+        required: false
+        label: View Count
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      published_at:
+        type: string
+        identity: false
+        required: false
+        label: Published At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      created_at:
+        type: string
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      updated_at:
+        type: string
+        identity: false
+        required: false
+        label: Updated At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      post_id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.post_id.label
+      title:
+        type: string
+        identity: false
+        required: true
+        label: Title
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.title.label
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.slug.label
+      content:
+        type: text
+        identity: false
+        required: true
+        label: Content
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.content.label
+      excerpt:
+        type: text
+        identity: false
+        required: false
+        label: Excerpt
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.excerpt.label
+      status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: true
+        editable: true
+        options:
+        - draft
+        - published
+        - archived
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.status.label
+      category_id:
+        type: int
+        identity: false
+        required: false
+        label: Category
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.category_id.label
+      author:
+        type: string
+        identity: false
+        required: true
+        label: Author
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.author.label
+      featured:
+        type: string
+        identity: false
+        required: false
+        label: Featured
+        searchable: false
+        sortable: false
+        editable: true
+        options:
+        - true
+        - false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.featured.label
+      allow_comments:
+        type: string
+        identity: false
+        required: false
+        label: Allow Comments
+        searchable: false
+        sortable: false
+        editable: true
+        options:
+        - true
+        - false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.allow_comments.label
+      view_count:
+        type: int
+        identity: false
+        required: false
+        label: Views
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.view_count.label
+      published_at:
+        type: datetime
+        identity: false
+        required: false
+        label: Published At
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.published_at.label
+      created_at:
+        type: datetime
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.created_at.label
+      updated_at:
+        type: datetime
+        identity: false
+        required: false
+        label: Updated At
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.post.columns.updated_at.label
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - title
+        - slug
+        - author
+        - category_id
+        - status
+        - featured
+        - allow_comments
+        - published_at
+        - excerpt
+        - content
+      filters:
+        columns: 3
+        order:
+        - title
+        - status
+        - published_at
+    softDelete: false
+    isPublic: true
+    filters:
+      title:
+        type: like
+        label: Title
+        labelKey: projects.blog.entities.post.entities.post.filters.title.label
+      status:
+        type: dropdown
+        label: Status
+        options:
+        - draft
+        - published
+        - archived
+        labelKey: projects.blog.entities.post.entities.post.filters.status.label
+    links: {}
+    confirmation:
+      create: 新しい記事を作成してよろしいですか？
+      update: 記事を更新してよろしいですか？
+    hooks:
+      presets:
+        blog_common_before:
+        - validate_required
+        - trim
+      beforeCreate:
+      - blog_post_slug_generator
+      - '@blog_common_before'
+      afterCreate:
+      - blog_post_published_notification
+      - audit_log
+      beforeUpdate:
+      - blog_post_slug_generator
+      - '@blog_common_before'
+      afterUpdate:
+      - audit_log
+    isCompositeKey: false
+    displayNameKey: projects.blog.entities.post.entities.post.displayName
+  category:
+    table: categories
+    key: category_id
+    keys: []
+    displayName: Category
+    joins: []
+    forms:
+      name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      description:
+        type: string
+        identity: false
+        required: false
+        label: Description
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      color:
+        type: string
+        identity: false
+        required: false
+        label: Color
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      created_at:
+        type: string
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      category_id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.category_id.label
+      name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.name.label
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.slug.label
+      description:
+        type: text
+        identity: false
+        required: false
+        label: Description
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.description.label
+      color:
+        type: string
+        identity: false
+        required: false
+        label: Color
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.color.label
+      created_at:
+        type: datetime
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.category.columns.created_at.label
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 1
+        order:
+        - name
+        - slug
+        - description
+        - color
+      filters:
+        columns: 2
+        order:
+        - name
+    softDelete: false
+    isPublic: true
+    filters:
+      name:
+        type: like
+        label: Name
+        labelKey: projects.blog.entities.post.entities.category.filters.name.label
+    links: {}
+    isCompositeKey: false
+    displayNameKey: projects.blog.entities.post.entities.category.displayName
+  tag:
+    table: tags
+    key: tag_id
+    keys: []
+    displayName: Tag
+    joins: []
+    forms:
+      name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      color:
+        type: string
+        identity: false
+        required: false
+        label: Color
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      tag_id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.tag.columns.tag_id.label
+      name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.tag.columns.name.label
+      slug:
+        type: string
+        identity: false
+        required: true
+        label: Slug
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.tag.columns.slug.label
+      color:
+        type: string
+        identity: false
+        required: false
+        label: Color
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.tag.columns.color.label
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 1
+        order:
+        - name
+        - slug
+        - color
+      filters:
+        columns: 2
+        order:
+        - name
+    softDelete: false
+    isPublic: true
+    filters:
+      name:
+        type: like
+        label: Name
+        labelKey: projects.blog.entities.post.entities.tag.filters.name.label
+    links: {}
+    isCompositeKey: false
+    displayNameKey: projects.blog.entities.post.entities.tag.displayName
+  comment:
+    table: comments
+    key: comment_id
+    keys: []
+    displayName: Comment
+    joins: []
+    forms:
+      post_id:
+        type: int
+        identity: false
+        required: true
+        label: Post Id
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: post
+          displayColumn: title
+          picker: false
+          multiPicker: false
+        hidden: false
+      author_name:
+        type: string
+        identity: false
+        required: true
+        label: Author Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      author_email:
+        type: string
+        identity: false
+        required: true
+        label: Author Email
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      content:
+        type: string
+        identity: false
+        required: true
+        label: Content
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      status:
+        type: string
+        identity: false
+        required: false
+        label: Status
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      created_at:
+        type: string
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      comment_id:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.comment_id.label
+      post_id:
+        type: int
+        identity: false
+        required: true
+        label: Post ID
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.post_id.label
+      author_name:
+        type: string
+        identity: false
+        required: true
+        label: Author Name
+        searchable: true
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.author_name.label
+      author_email:
+        type: string
+        identity: false
+        required: true
+        label: Email
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.author_email.label
+      content:
+        type: text
+        identity: false
+        required: true
+        label: Content
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.content.label
+      status:
+        type: string
+        identity: false
+        required: true
+        label: Status
+        searchable: false
+        sortable: true
+        editable: true
+        options:
+        - pending
+        - approved
+        - spam
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.status.label
+      created_at:
+        type: datetime
+        identity: false
+        required: false
+        label: Created At
+        searchable: false
+        sortable: true
+        editable: false
+        hidden: false
+        labelKey: projects.blog.entities.post.entities.comment.columns.created_at.label
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 1
+        order:
+        - post_id
+        - author_name
+        - author_email
+        - status
+        - content
+      filters:
+        columns: 3
+        order:
+        - author_name
+        - status
+    softDelete: false
+    isPublic: true
+    filters:
+      author_name:
+        type: like
+        label: Author Name
+        labelKey: projects.blog.entities.post.entities.comment.filters.author_name.label
+      status:
+        type: dropdown
+        label: Status
+        options:
+        - pending
+        - approved
+        - spam
+        labelKey: projects.blog.entities.post.entities.comment.filters.status.label
+    links: {}
+    isCompositeKey: false
+    displayNameKey: projects.blog.entities.post.entities.comment.displayName

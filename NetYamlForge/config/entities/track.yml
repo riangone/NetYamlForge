@@ -1,0 +1,132 @@
+entities:
+  track:
+    table: Track
+    key: TrackId
+    displayName: Track
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: keyset
+      enableCount: false
+    layout:
+      forms:
+        columns: 2
+        order:
+        - Name
+        - AlbumId
+        - GenreId
+        - UnitPrice
+        - Milliseconds
+      filters:
+        columns: 3
+        order:
+        - GenreId
+        - UnitPrice
+    joins:
+    - type: left
+      table: Album
+      alias: al
+      true: Track.AlbumId = al.AlbumId
+    - type: left
+      table: Genre
+      alias: g
+      true: Track.GenreId = g.GenreId
+    columns:
+      TrackId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.TrackId.label
+      Name:
+        type: string
+        label: Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.Name.label
+      AlbumId:
+        type: int
+        label: Album
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.AlbumId.label
+      AlbumTitle:
+        type: string
+        identity: true
+        label: Album
+        expression: al.Title
+        searchable: true
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.AlbumTitle.label
+      GenreId:
+        type: int
+        label: Genre
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.GenreId.label
+      GenreName:
+        type: string
+        identity: true
+        label: Genre
+        expression: g.Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.GenreName.label
+      UnitPrice:
+        type: decimal
+        label: Price
+        searchable: false
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.UnitPrice.label
+      Milliseconds:
+        type: int
+        label: Length(ms)
+        searchable: false
+        sortable: true
+        labelKey: config.entities.track.entities.track.columns.Milliseconds.label
+    forms:
+      Name:
+        type: string
+        label: Name
+        editable: true
+        labelKey: config.entities.track.entities.track.forms.Name.label
+      AlbumId:
+        type: int
+        label: Album
+        editable: true
+        foreignKey:
+          entity: album
+          displayColumn: Title
+        labelKey: config.entities.track.entities.track.forms.AlbumId.label
+      GenreId:
+        type: int
+        label: Genre
+        editable: true
+        foreignKey:
+          entity: genre
+          displayColumn: Name
+        labelKey: config.entities.track.entities.track.forms.GenreId.label
+      UnitPrice:
+        type: decimal
+        label: Price
+        editable: true
+        labelKey: config.entities.track.entities.track.forms.UnitPrice.label
+      Milliseconds:
+        type: int
+        label: Length(ms)
+        editable: true
+        labelKey: config.entities.track.entities.track.forms.Milliseconds.label
+    filters:
+      GenreId:
+        type: dropdown
+        label: Genre
+        expression: Track.GenreId
+        foreignKey:
+          entity: genre
+          displayColumn: Name
+        labelKey: config.entities.track.entities.track.filters.GenreId.label
+      UnitPrice:
+        type: range
+        label: Price Range
+        expression: Track.UnitPrice
+        labelKey: config.entities.track.entities.track.filters.UnitPrice.label
+    displayNameKey: config.entities.track.entities.track.displayName

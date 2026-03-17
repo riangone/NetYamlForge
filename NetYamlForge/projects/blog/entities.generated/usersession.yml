@@ -1,0 +1,41 @@
+entities:
+  usersession:
+    table: 'UserSession'
+    key: 'SessionId'
+    displayName: 'Usersession'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['SessionId', 'UserId', 'Token', 'IPAddress', 'UserAgent', 'ExpiresAt', 'CreatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      SessionId: { type: string, label: 'Session Id', searchable: true, sortable: true }
+      UserId: { type: int, required: true, label: 'User Id', sortable: true }
+      Token: { type: string, required: true, label: 'Token', searchable: true, sortable: true }
+      IPAddress: { type: string, label: 'Ipaddress', searchable: true, sortable: true }
+      UserAgent: { type: string, label: 'User Agent', searchable: true, sortable: true }
+      ExpiresAt: { type: string, required: true, label: 'Expires At', searchable: true, sortable: true }
+      CreatedAt: { type: string, label: 'Created At', searchable: true, sortable: true }
+    forms:
+      SessionId: { type: string, label: 'Session Id', editable: true }
+      UserId:
+        type: int
+        required: true
+        label: 'User Id'
+        editable: true
+        foreignKey:
+          entity: user
+          displayColumn: 'Username'
+      Token: { type: string, required: true, label: 'Token', editable: true }
+      IPAddress: { type: string, label: 'Ipaddress', editable: true }
+      UserAgent: { type: string, label: 'User Agent', editable: true }
+      ExpiresAt: { type: string, required: true, label: 'Expires At', editable: true }
+      CreatedAt: { type: string, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

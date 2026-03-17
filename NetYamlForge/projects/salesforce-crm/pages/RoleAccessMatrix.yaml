@@ -1,0 +1,54 @@
+title: Role Access Matrix
+description: User-role access visibility for admin governance, activation state, and localization footprint.
+
+sections:
+  - id: role_matrix
+    title: User Role Matrix
+    source_type: custom
+    source: |
+      SELECT
+        Id AS UserId,
+        UserName,
+        DisplayName,
+        CASE WHEN IsAdmin = 1 THEN 'Admin' ELSE COALESCE((SELECT RoleName FROM AppUserRole ur WHERE ur.UserName = AppUser.UserName ORDER BY ur.RoleName LIMIT 1), 'User') END AS Role,
+        CASE WHEN IsActive = 1 THEN 'Active' ELSE 'Disabled' END AS UserState,
+        PreferredLanguage AS Locale,
+        CreatedAt
+      FROM AppUser
+      ORDER BY IsAdmin DESC, IsActive DESC, UserName ASC
+    columns:
+      - UserId
+      - UserName
+      - DisplayName
+      - Role
+      - UserState
+      - Locale
+      - CreatedAt
+    page_size: 40
+    editable: false
+    read_only: true
+
+  - id: permission_matrix
+    title: Permission Matrix
+    source_type: custom
+    source: |
+      SELECT
+        RoleName,
+        ResourceType,
+        ResourceName,
+        CASE WHEN CanRead = 1 THEN 'Yes' ELSE 'No' END AS CanRead,
+        CASE WHEN CanWrite = 1 THEN 'Yes' ELSE 'No' END AS CanWrite,
+        UpdatedAt
+      FROM AppRolePermission
+      WHERE ProjectName = 'salesforce-crm'
+      ORDER BY RoleName ASC, ResourceType ASC, ResourceName ASC
+    columns:
+      - RoleName
+      - ResourceType
+      - ResourceName
+      - CanRead
+      - CanWrite
+      - UpdatedAt
+    page_size: 120
+    editable: false
+    read_only: true

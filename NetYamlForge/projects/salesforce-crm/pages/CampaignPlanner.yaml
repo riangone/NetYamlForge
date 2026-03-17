@@ -1,0 +1,71 @@
+title: Campaign Planner
+description: Campaign planning workspace for budget allocation, target segmentation, and expected pipeline impact.
+
+sections:
+  - id: campaign_overview
+    title: Campaign Overview
+    source_type: custom
+    source: |
+      SELECT
+        c.Country AS Segment,
+        COUNT(DISTINCT c.CustomerId) AS TargetAccounts,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Open' THEN od.UnitPrice * od.Quantity * (1 - od.Discount) ELSE 0 END), 0), 2) AS OpenPipelineImpact,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Shipped' THEN od.UnitPrice * od.Quantity * (1 - od.Discount) ELSE 0 END), 0), 2) AS WonImpact,
+        ROUND(COALESCE(COUNT(DISTINCT o.OrderId), 0) * 12.5, 2) AS EstimatedBudget
+      FROM Customers c
+      LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY c.Country
+      ORDER BY OpenPipelineImpact DESC, TargetAccounts DESC
+    columns:
+      - Segment
+      - TargetAccounts
+      - OpenPipelineImpact
+      - WonImpact
+      - EstimatedBudget
+    page_size: 30
+    editable: false
+    read_only: true
+    filters:
+      Segment:
+        label: Segment
+        type: like
+
+  - id: campaign_actions
+    title: Campaign Actions
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId AS ActionId,
+        c.CompanyName AS Account,
+        c.Country AS Segment,
+        CASE
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId AND o.Status = 'Open') THEN 'Retarget'
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId AND o.Status = 'Shipped') THEN 'Upsell'
+          ELSE 'Acquire'
+        END AS CampaignMotion,
+        CASE
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId AND o.Status = 'Delayed') THEN 'High'
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId AND o.Status = 'Open') THEN 'Medium'
+          ELSE 'Low'
+        END AS Priority,
+        date('now', '+' || ((c.CustomerId % 7) + 1) || ' day') AS NextTouchDate
+      FROM Customers c
+      ORDER BY Priority DESC, NextTouchDate ASC, c.CustomerId DESC
+    columns:
+      - ActionId
+      - Account
+      - Segment
+      - CampaignMotion
+      - Priority
+      - NextTouchDate
+    page_size: 60
+    editable: false
+    read_only: true
+    filters:
+      Account:
+        label: Account
+        type: like
+      Priority:
+        label: Priority
+        type: eq

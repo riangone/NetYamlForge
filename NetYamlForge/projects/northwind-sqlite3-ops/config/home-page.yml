@@ -1,0 +1,33 @@
+hero:
+  eyebrow: Northwind Ops
+  title: 運営モニタリング & 行動クローズ
+  description: 注文遅延・在庫アラート・顧客アクティビティを一元監視。異常検知と対応フローに特化したオペレーション強化版 Northwind。
+  primaryActionLabel: 注文ワークベンチ
+  primaryActionUrl: /northwind-sqlite3-ops/DynamicEntity/Index?entity=order
+  secondaryActionLabel: Dashboard
+  secondaryActionUrl: /northwind-sqlite3-ops/Dashboard
+  highlights:
+    - Ops Monitoring
+    - Alert Driven
+    - Action Oriented
+
+projectsSectionTitle: Northwind Ops Workspace
+projectsSectionLead: 運営上の異常を素早く検知し、対応アクションにつなげるオペレーションハブです。
+
+quickActions:
+  - label: 注文
+    url: /northwind-sqlite3-ops/DynamicEntity/Index?entity=order
+    style: btn-primary
+    icon: 📋
+  - label: 商品
+    url: /northwind-sqlite3-ops/DynamicEntity/Index?entity=product
+    style: btn-outline
+    icon: 📦
+  - label: 顧客
+    url: /northwind-sqlite3-ops/DynamicEntity/Index?entity=customer
+    style: btn-outline
+    icon: 🏢
+  - label: Dashboard
+    url: /northwind-sqlite3-ops/Dashboard
+    style: btn-outline
+    icon: 📊

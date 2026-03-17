@@ -1,0 +1,59 @@
+title: Quote Builder
+description: Build and compare quote bundles from opportunity lines with discount and margin visibility.
+
+sections:
+  - id: quote_candidates
+    title: Quote Candidates
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId AS QuoteId,
+        c.CompanyName AS Account,
+        o.Status AS Stage,
+        COUNT(od.OrderDetailId) AS LineCount,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity), 0), 2) AS GrossAmount,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * od.Discount), 0), 2) AS DiscountAmount,
+        ROUND(COALESCE(SUM((od.UnitPrice * od.Quantity) * (1 - od.Discount)), 0), 2) AS NetAmount
+      FROM Orders o
+      JOIN Customers c ON c.CustomerId = o.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY o.OrderId, c.CompanyName, o.Status
+      ORDER BY NetAmount DESC
+    columns:
+      - QuoteId
+      - Account
+      - Stage
+      - LineCount
+      - GrossAmount
+      - DiscountAmount
+      - NetAmount
+    page_size: 40
+    editable: false
+    read_only: true
+
+  - id: quote_lines
+    title: Quote Lines
+    source_type: custom
+    source: |
+      SELECT
+        od.OrderDetailId AS LineId,
+        od.OrderId AS QuoteId,
+        p.ProductName,
+        od.UnitPrice,
+        od.Quantity,
+        od.Discount,
+        ROUND((od.UnitPrice * od.Quantity) * (1 - od.Discount), 2) AS NetValue
+      FROM OrderDetails od
+      JOIN Products p ON p.ProductId = od.ProductId
+      ORDER BY od.OrderId DESC, od.OrderDetailId DESC
+    columns:
+      - LineId
+      - QuoteId
+      - ProductName
+      - UnitPrice
+      - Quantity
+      - Discount
+      - NetValue
+    page_size: 80
+    editable: false
+    read_only: true

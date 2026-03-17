@@ -1,0 +1,134 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var pageDef = (PageDefinition)ViewData["PageDef"]!;
+    var currentProject = ViewData["Project"] as string ?? "";
+    var pageName = ViewData["PageName"] as string ?? "";
+    var pageKeyBase = $"projects.{currentProject}.pages.{pageName}";
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+    var localizedTitle = T($"{pageKeyBase}.title", pageDef.Title);
+    ViewData["Title"] = localizedTitle;
+    ViewData["ActivePage"] = "Page";
+
+    // グラフ系コンポーネントが存在するか判定（Chart.js ロード制御）
+    var chartComponents = new HashSet<string> { "bar_chart", "line_chart", "pie_chart", "radar_chart" };
+    var hasChart = pageDef.Sections.Any(s => chartComponents.Contains(s.Component));
+    
+    // 新コンポーネント判定
+    var hasNewComponents = pageDef.Sections.Any(s => 
+        new[] { "area_chart", "donut_chart", "card_list", "accordion", "leaderboard", 
+                "activity_feed", "goal_tracker", "file_upload", "calendar", "org_chart" }
+        .Contains(s.Component));
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">@localizedTitle</h1>
+        @if (!string.IsNullOrEmpty(pageDef.Description))
+        {
+            <p class="text-gray-500 mt-1">@T($"{pageKeyBase}.description", pageDef.Description)</p>
+        }
+    </div>
+
+    @foreach (var sec in pageDef.Sections)
+    {
+        var sectionData = Model.TryGetValue(sec.Id, out var sd)
+            ? sd : (Enumerable.Empty<Dictionary<string, object>>(), 0);
+        var rows = sectionData.Item1.ToList();
+        var total = sectionData.Item2;
+
+        var renderModel = new SectionRenderModel
+        {
+            Sec = sec,
+            Rows = rows,
+            Total = total,
+            Project = currentProject,
+            PageName = pageName
+        };
+
+        <div id="section-@sec.Id" class="mb-8">
+            @switch (sec.Component)
+            {
+                case "stat_cards":
+                    @await Html.PartialAsync("Components/_SectionStatCards", renderModel)
+                    break;
+                case "bar_chart":
+                    @await Html.PartialAsync("Components/_SectionBarChart", renderModel)
+                    break;
+                case "line_chart":
+                    @await Html.PartialAsync("Components/_SectionLineChart", renderModel)
+                    break;
+                case "pie_chart":
+                    @await Html.PartialAsync("Components/_SectionPieChart", renderModel)
+                    break;
+                case "kanban":
+                    @await Html.PartialAsync("Components/_SectionKanban", renderModel)
+                    break;
+                case "timeline":
+                    @await Html.PartialAsync("Components/_SectionTimeline", renderModel)
+                    break;
+                case "detail_card":
+                    @await Html.PartialAsync("Components/_SectionDetailCard", renderModel)
+                    break;
+                case "progress_bars":
+                    @await Html.PartialAsync("Components/_SectionProgressBars", renderModel)
+                    break;
+                case "badge_list":
+                    @await Html.PartialAsync("Components/_SectionBadgeList", renderModel)
+                    break;
+                case "radar_chart":
+                    @await Html.PartialAsync("Components/_SectionRadarChart", renderModel)
+                    break;
+                case "heat_map":
+                    @await Html.PartialAsync("Components/_SectionHeatMap", renderModel)
+                    break;
+                // 新規コンポーネント
+                case "area_chart":
+                    @await Html.PartialAsync("Components/_SectionAreaChart", renderModel)
+                    break;
+                case "donut_chart":
+                    @await Html.PartialAsync("Components/_SectionDonutChart", renderModel)
+                    break;
+                case "card_list":
+                    @await Html.PartialAsync("Components/_SectionCardList", renderModel)
+                    break;
+                case "accordion":
+                    @await Html.PartialAsync("Components/_SectionAccordion", renderModel)
+                    break;
+                case "leaderboard":
+                    @await Html.PartialAsync("Components/_SectionLeaderboard", renderModel)
+                    break;
+                case "activity_feed":
+                    @await Html.PartialAsync("Components/_SectionActivityFeed", renderModel)
+                    break;
+                case "goal_tracker":
+                    @await Html.PartialAsync("Components/_SectionGoalTracker", renderModel)
+                    break;
+                case "file_upload":
+                    @await Html.PartialAsync("Components/_SectionFileUpload", renderModel)
+                    break;
+                case "calendar":
+                    @await Html.PartialAsync("Components/_SectionCalendar", renderModel)
+                    break;
+                case "org_chart":
+                    @await Html.PartialAsync("Components/_SectionOrgChart", renderModel)
+                    break;
+                default:
+                    @await Html.PartialAsync("Components/_SectionTable", renderModel)
+                    break;
+            }
+        </div>
+    }
+</div>
+
+@if (hasChart)
+{
+    @section Scripts {
+        <script src="/lib/chartjs/chart.umd.min.js"></script>
+        <script>
+            Chart.defaults.font.family = "'Inter','Helvetica Neue',sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = 'rgba(100,116,139,0.9)';
+        </script>
+    }
+}

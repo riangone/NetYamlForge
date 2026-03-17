@@ -1,0 +1,96 @@
+@using NetYamlForge.Models
+@using System.Text.Json
+@model SectionRenderModel
+@{
+    var sec     = Model.Sec;
+    var rows    = Model.Rows;
+    var xField  = sec.XField ?? (sec.GetColumnAt(0));
+    // YField supports comma-separated multi-series: "revenue,orders"
+    var yFields = (sec.YField ?? (sec.GetColumnAt(1)))
+                    .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+    var chartId = $"chart-line-{sec.Id}";
+
+    var labels = rows.Select(r => r.TryGetValue(xField, out var v) ? v?.ToString() ?? "" : "").ToList();
+    var labelsJson = JsonSerializer.Serialize(labels);
+
+    string[] palette = [
+        "rgba(99,102,241,0.8)",  "rgba(34,197,94,0.8)",  "rgba(251,146,60,0.8)",
+        "rgba(236,72,153,0.8)",  "rgba(14,165,233,0.8)", "rgba(168,85,247,0.8)"
+    ];
+
+    var datasets = yFields.Select((yf, i) =>
+    {
+        var vals = rows.Select(r =>
+        {
+            if (!r.TryGetValue(yf, out var v) || v == null) return 0.0;
+            return double.TryParse(v.ToString(), System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var d) ? d : 0.0;
+        }).ToList();
+        var c = palette[i % palette.Length];
+        return new { label = yf, data = JsonSerializer.Serialize(vals), color = c };
+    }).ToList();
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div style="position:relative;height:300px;">
+        <canvas id="@chartId"></canvas>
+    </div>
+</div>
+
+<script>
+(function() {
+    function initChart() {
+        if (typeof Chart === 'undefined') { setTimeout(initChart, 100); return; }
+        var ctx = document.getElementById('@chartId');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(labelsJson),
+                datasets: [
+                    @foreach (var ds in datasets)
+                    {
+                        <text>
+                        {
+                            label: '@ds.label',
+                            data: @Html.Raw(ds.data),
+                            borderColor: '@ds.color'.replace('0.8','1'),
+                            backgroundColor: '@ds.color',
+                            fill: @(datasets.Count == 1 ? "true" : "false"),
+                            tension: 0.35,
+                            borderWidth: 2,
+                            pointRadius: 3
+                        },
+                        </text>
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: @(datasets.Count > 1 ? "true" : "false"), position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ' ' + ctx.dataset.label + ': ' +
+                                    ctx.parsed.y.toLocaleString(undefined, {maximumFractionDigits:2});
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 14 } },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+    initChart();
+})();
+</script>

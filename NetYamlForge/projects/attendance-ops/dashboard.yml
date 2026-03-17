@@ -1,0 +1,67 @@
+stats:
+  - label: Employee Count
+    labelKey: projects.attendance-ops.dashboard.stats.0.label
+    entity: employee
+    aggregate: count
+    icon: 👥
+    color: badge-info
+  - label: Active Employees
+    labelKey: projects.attendance-ops.dashboard.stats.1.label
+    entity: employee
+    aggregate: count
+    filter: "Status='active'"
+    icon: 🟢
+    color: badge-success
+  - label: Today's Attendance
+    labelKey: projects.attendance-ops.dashboard.stats.2.label
+    entity: attendance_record
+    aggregate: count
+    filter: "WorkDate = date('now','localtime')"
+    icon: 🕒
+    color: badge-primary
+  - label: Pending Leave Requests
+    labelKey: projects.attendance-ops.dashboard.stats.3.label
+    entity: leave_request
+    aggregate: count
+    filter: "Status='pending'"
+    icon: 🏖️
+    color: badge-warning
+  - label: Pending Overtime Requests
+    labelKey: projects.attendance-ops.dashboard.stats.4.label
+    entity: overtime_request
+    aggregate: count
+    filter: "Status='pending'"
+    icon: ⏱️
+    color: badge-warning
+charts:
+  - title: Attendance by Status
+    titleKey: projects.attendance-ops.dashboard.charts.0.title
+    type: doughnut
+    entity: attendance_record
+    valueAggregate: count
+    groupExpression: AttendanceStatus
+    orderBy: value
+    orderDir: desc
+    limit: 10
+  - title: Leave Requests by Status
+    titleKey: projects.attendance-ops.dashboard.charts.1.title
+    type: bar
+    entity: leave_request
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(59, 130, 246, 0.65)
+    colorBorder: rgba(59, 130, 246, 1)
+  - title: Employees by Department
+    titleKey: projects.attendance-ops.dashboard.charts.2.title
+    type: pie
+    entity: employee
+    valueAggregate: count
+    labelJoinEntity: department
+    labelJoinKey: DepartmentId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 20

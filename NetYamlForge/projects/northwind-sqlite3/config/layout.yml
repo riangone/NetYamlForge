@@ -1,0 +1,40 @@
+header:
+  title: Northwind Operations Demo
+
+navigation:
+  showDashboard: true
+  entities:
+    - customer
+    - employee
+    - supplier
+    - category
+    - product
+    - shipper
+    - order
+    - orderdetail
+  items:
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: 受注管理
+      url: /northwind-sqlite3/DynamicEntity/Index?entity=order
+      icon: 📦
+    - label: 受注明細
+      url: /northwind-sqlite3/DynamicEntity/Index?entity=orderdetail
+      icon: 🧾
+    - label: 商品在庫
+      url: /northwind-sqlite3/DynamicEntity/Index?entity=product
+      icon: 📦
+    - label: 取引先
+      url: /northwind-sqlite3/DynamicEntity/Index?entity=customer
+      icon: 🤝
+    - label: 低在庫アラート
+      url: /northwind-sqlite3/Page/LowStockAlert
+      icon: 🚨
+    - label: 配送遅延監視
+      url: /northwind-sqlite3/Page/ShippingDelayMonitor
+      icon: 🚚
+    - label: 営業KPI
+      url: /northwind-sqlite3/Page/SalesKpi
+      icon: 📈

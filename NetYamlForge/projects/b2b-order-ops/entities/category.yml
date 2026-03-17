@@ -1,0 +1,57 @@
+entities:
+  category:
+    table: Categories
+    key: CategoryId
+    displayName: Category
+    softDelete: false
+    paging:
+      pageSize: 12
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - CategoryName
+        - Description
+      filters:
+        columns: 2
+        order:
+        - CategoryName
+    columns:
+      CategoryId:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      CategoryName:
+        type: string
+        required: true
+        label: Category Name
+        searchable: true
+        sortable: true
+      Description:
+        type: textarea
+        label: Description
+        searchable: true
+        sortable: false
+    forms:
+      CategoryName:
+        type: string
+        required: true
+        label: Category Name
+        editable: true
+      Description:
+        type: textarea
+        label: Description
+        editable: true
+    filters:
+      CategoryName:
+        type: text
+        label: Category Name
+    links:
+      products:
+        label: Products
+        targetEntity: product
+        filter:
+          CategoryId: CategoryId
+    displayNameKey: projects.b2b-order-ops.entities.category.entities.category.displayName

@@ -1,0 +1,23 @@
+// ファイル概要: PostgreSQL 用 SQL 方言実装（LIMIT / OFFSET によるページング）。
+using Dapper;
+
+namespace NetYamlForge.Services.Dialect;
+
+public class PostgreSqlDialect : ISqlDialect
+{
+    public string ConcatOperator => "||";
+
+    public void AppendNumberedPagination(List<string> sqlParts, DynamicParameters param, int effectivePageSize, int offset, string defaultOrderByExpr)
+    {
+        sqlParts.Add(" LIMIT @PageSize");
+        param.Add("PageSize", effectivePageSize);
+        sqlParts.Add(" OFFSET @Offset");
+        param.Add("Offset", offset);
+    }
+
+    public void AppendKeysetPagination(List<string> sqlParts, DynamicParameters param, int effectivePageSize)
+    {
+        sqlParts.Add(" LIMIT @PageSize");
+        param.Add("PageSize", effectivePageSize);
+    }
+}

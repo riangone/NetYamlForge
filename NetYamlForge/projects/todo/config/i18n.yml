@@ -1,0 +1,181 @@
+translations:
+  projects.todo.dashboard.charts.0.title:
+    en-US: Tasks by Status
+    zh-CN: 任务状态分布
+    ja-JP: ステータス別タスク数
+  projects.todo.dashboard.charts.1.title:
+    en-US: Tasks by Priority
+    zh-CN: 任务优先级分布
+    ja-JP: 優先度別タスク数
+  projects.todo.dashboard.charts.2.title:
+    en-US: Tasks per Project
+    zh-CN: 各项目任务数
+    ja-JP: プロジェクト別タスク数
+  projects.todo.dashboard.charts.3.title:
+    en-US: Projects by Status
+    zh-CN: 项目状态分布
+    ja-JP: プロジェクトステータス別件数
+  projects.todo.dashboard.stats.0.label:
+    en-US: Total Tasks
+    zh-CN: 总任务数
+    ja-JP: 総タスク数
+  projects.todo.dashboard.stats.1.label:
+    en-US: Pending
+    zh-CN: 待处理
+    ja-JP: 未着手
+  projects.todo.dashboard.stats.2.label:
+    en-US: In Progress
+    zh-CN: 进行中
+    ja-JP: 進行中
+  projects.todo.dashboard.stats.3.label:
+    en-US: Completed
+    zh-CN: 已完成
+    ja-JP: 完了
+  projects.todo.dashboard.stats.4.label:
+    en-US: Urgent Tasks
+    zh-CN: 紧急任务
+    ja-JP: 緊急タスク
+  projects.todo.dashboard.stats.5.label:
+    en-US: Total Projects
+    zh-CN: 总项目数
+    ja-JP: 総プロジェクト数
+  projects.todo.dashboard.stats.6.label:
+    en-US: Active Projects
+    zh-CN: 活跃项目
+    ja-JP: 進行中プロジェクト
+  projects.todo.entities.project.entities.project.columns.CreatedAt.label:
+    en-US: Created At
+    zh-CN: 创建时间
+    ja-JP: 作成日時
+  projects.todo.entities.project.entities.project.columns.EndDate.label:
+    en-US: End Date
+    zh-CN: 结束日期
+    ja-JP: 終了日
+  projects.todo.entities.project.entities.project.columns.Id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.todo.entities.project.entities.project.columns.Name.label:
+    en-US: Project Name
+    zh-CN: 项目名称
+    ja-JP: プロジェクト名
+  projects.todo.entities.project.entities.project.columns.StartDate.label:
+    en-US: Start Date
+    zh-CN: 开始日期
+    ja-JP: 開始日
+  projects.todo.entities.project.entities.project.columns.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.project.entities.project.displayName:
+    en-US: Project
+    zh-CN: 项目
+    ja-JP: プロジェクト
+  projects.todo.entities.project.entities.project.filters.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.project.entities.project.forms.Description.label:
+    en-US: Description
+    zh-CN: 描述
+    ja-JP: 説明
+  projects.todo.entities.project.entities.project.forms.EndDate.label:
+    en-US: End Date
+    zh-CN: 结束日期
+    ja-JP: 終了日
+  projects.todo.entities.project.entities.project.forms.Name.label:
+    en-US: Project Name
+    zh-CN: 项目名称
+    ja-JP: プロジェクト名
+  projects.todo.entities.project.entities.project.forms.StartDate.label:
+    en-US: Start Date
+    zh-CN: 开始日期
+    ja-JP: 開始日
+  projects.todo.entities.project.entities.project.forms.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.project.entities.project.links.tasks.label:
+    en-US: Tasks
+    zh-CN: 任务列表
+    ja-JP: タスク一覧
+  projects.todo.entities.task.entities.task.columns.CompletedAt.label:
+    en-US: Completed At
+    zh-CN: 完成时间
+    ja-JP: 完了日時
+  projects.todo.entities.task.entities.task.columns.CreatedAt.label:
+    en-US: Created At
+    zh-CN: 创建时间
+    ja-JP: 作成日時
+  projects.todo.entities.task.entities.task.columns.DueDate.label:
+    en-US: Due Date
+    zh-CN: 截止日期
+    ja-JP: 締切日
+  projects.todo.entities.task.entities.task.columns.Id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.todo.entities.task.entities.task.columns.Priority.label:
+    en-US: Priority
+    zh-CN: 优先级
+    ja-JP: 優先度
+  projects.todo.entities.task.entities.task.columns.ProjectId.label:
+    en-US: Project ID
+    zh-CN: 项目ID
+    ja-JP: プロジェクトID
+  projects.todo.entities.task.entities.task.columns.ProjectName.label:
+    en-US: Project
+    zh-CN: 项目
+    ja-JP: プロジェクト
+  projects.todo.entities.task.entities.task.columns.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.task.entities.task.columns.Title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  projects.todo.entities.task.entities.task.displayName:
+    en-US: Task
+    zh-CN: 任务
+    ja-JP: タスク
+  projects.todo.entities.task.entities.task.filters.Priority.label:
+    en-US: Priority
+    zh-CN: 优先级
+    ja-JP: 優先度
+  projects.todo.entities.task.entities.task.filters.ProjectId.label:
+    en-US: Project
+    zh-CN: 项目
+    ja-JP: プロジェクト
+  projects.todo.entities.task.entities.task.filters.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.task.entities.task.forms.Description.label:
+    en-US: Description
+    zh-CN: 描述
+    ja-JP: 説明
+  projects.todo.entities.task.entities.task.forms.DueDate.label:
+    en-US: Due Date
+    zh-CN: 截止日期
+    ja-JP: 締切日
+  projects.todo.entities.task.entities.task.forms.Priority.label:
+    en-US: Priority
+    zh-CN: 优先级
+    ja-JP: 優先度
+  projects.todo.entities.task.entities.task.forms.ProjectId.label:
+    en-US: Project
+    zh-CN: 项目
+    ja-JP: プロジェクト
+  projects.todo.entities.task.entities.task.forms.Status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.todo.entities.task.entities.task.forms.Title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  projects.todo.entities.task.entities.task.links.project.label:
+    en-US: Project
+    zh-CN: 所属项目
+    ja-JP: プロジェクト

@@ -1,0 +1,75 @@
+entities:
+  album:
+    table: Album
+    key: AlbumId
+    displayName: Album
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - Title
+        - ArtistId
+      filters:
+        columns: 2
+        order:
+        - ArtistId
+    joins:
+    - type: left
+      table: Artist
+      alias: a
+      true: Album.ArtistId = a.ArtistId
+    columns:
+      AlbumId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: config.entities.album.entities.album.columns.AlbumId.label
+      Title:
+        type: string
+        label: Title
+        searchable: true
+        sortable: true
+        labelKey: config.entities.album.entities.album.columns.Title.label
+      ArtistId:
+        type: int
+        label: Artist
+        sortable: true
+        labelKey: config.entities.album.entities.album.columns.ArtistId.label
+      ArtistName:
+        type: string
+        identity: true
+        label: Artist
+        expression: a.Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.album.entities.album.columns.ArtistName.label
+    forms:
+      Title:
+        type: string
+        label: Title
+        editable: true
+        labelKey: config.entities.album.entities.album.forms.Title.label
+      ArtistId:
+        type: int
+        label: Artist
+        editable: true
+        foreignKey:
+          entity: artist
+          displayColumn: Name
+        labelKey: config.entities.album.entities.album.forms.ArtistId.label
+    filters:
+      ArtistId:
+        type: dropdown
+        label: Artist
+        expression: Album.ArtistId
+        foreignKey:
+          entity: artist
+          displayColumn: Name
+        labelKey: config.entities.album.entities.album.filters.ArtistId.label
+    displayNameKey: config.entities.album.entities.album.displayName

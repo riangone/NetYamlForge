@@ -1,0 +1,32 @@
+entities:
+  album:
+    table: 'Album'
+    key: 'AlbumId'
+    displayName: 'Album'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Title', 'ArtistId']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      AlbumId: { type: int, identity: true, label: 'Album Id', sortable: true }
+      Title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
+      ArtistId: { type: int, required: true, label: 'Artist Id', sortable: true }
+    forms:
+      Title: { type: string, required: true, label: 'Title', editable: true }
+      ArtistId:
+        type: int
+        required: true
+        label: 'Artist Id'
+        editable: true
+        foreignKey:
+          entity: artist
+          displayColumn: 'Name'
+    filters: {}
+    links: {}

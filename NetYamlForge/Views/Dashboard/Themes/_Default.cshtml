@@ -1,0 +1,80 @@
+@* default テーマ: スタンダードなグリッド統計 + チャート *@
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    var projectName = ViewData["ProjectDisplayName"] as string ?? "Dashboard";
+}
+
+<div class="space-y-8">
+    <h1 class="text-2xl font-bold">@projectName</h1>
+
+    @if (Model.Stats.Count > 0)
+    {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            @foreach (var stat in Model.Stats)
+            {
+                if (stat.HasError)
+                {
+                    @* 設定エラー/クエリ失敗時: エラー状態カード *@
+                    <div class="stat bg-error/10 shadow rounded-box border border-error/30" title="@stat.ErrorHint">
+                        @if (!string.IsNullOrEmpty(stat.Icon)) { <div class="stat-figure text-3xl opacity-40">@stat.Icon</div> }
+                        <div class="stat-title text-xs opacity-70">@stat.Label</div>
+                        <div class="stat-value text-xl text-error">–</div>
+                        <div class="stat-desc text-error text-xs">@stat.ErrorHint</div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(stat.EntityUrl))
+                {
+                    <a href="@stat.EntityUrl"
+                       class="stat bg-base-100 shadow rounded-box hover:shadow-lg hover:scale-105 transition-all duration-150 cursor-pointer no-underline">
+                        @if (!string.IsNullOrEmpty(stat.Icon)) { <div class="stat-figure text-3xl">@stat.Icon</div> }
+                        <div class="stat-title text-xs opacity-70">@stat.Label</div>
+                        <div class="stat-value text-xl">@stat.Value</div>
+                    </a>
+                }
+                else
+                {
+                    <div class="stat bg-base-100 shadow rounded-box">
+                        @if (!string.IsNullOrEmpty(stat.Icon)) { <div class="stat-figure text-3xl">@stat.Icon</div> }
+                        <div class="stat-title text-xs opacity-70">@stat.Label</div>
+                        <div class="stat-value text-xl">@stat.Value</div>
+                    </div>
+                }
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <span>統計情報が未設定です。<code>config/dashboard.yml</code> の <code>stats</code> セクションに定義を追加してください。</span>
+        </div>
+    }
+
+    @if (Model.Charts.Count > 0)
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var chart = Model.Charts[i];
+                <div class="card bg-base-100 shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-base">@chart.Title</h2>
+                        @if (chart.HasError)
+                        {
+                            @* 設定エラー/クエリ失敗時: エラー状態プレースホルダー *@
+                            <div class="flex items-center justify-center gap-2 text-error opacity-70" style="height:280px">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                <span class="text-sm">@chart.ErrorHint</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="relative" style="height:280px">
+                                <canvas id="chart-@i"></canvas>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

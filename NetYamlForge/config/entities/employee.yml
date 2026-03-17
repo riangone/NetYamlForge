@@ -1,0 +1,93 @@
+entities:
+  employee:
+    table: Employee
+    key: EmployeeId
+    displayName: Employee
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - FirstName
+        - LastName
+        - Title
+        - BirthDate
+        - HireDate
+      filters:
+        columns: 2
+        order:
+        - BirthDate
+    columns:
+      EmployeeId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.EmployeeId.label
+      FirstName:
+        type: string
+        label: First Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.FirstName.label
+      LastName:
+        type: string
+        label: Last Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.LastName.label
+      Title:
+        type: string
+        label: Title
+        searchable: true
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.Title.label
+      BirthDate:
+        type: date
+        label: Birth Date
+        searchable: false
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.BirthDate.label
+      HireDate:
+        type: date
+        label: Hire Date
+        searchable: false
+        sortable: true
+        labelKey: config.entities.employee.entities.employee.columns.HireDate.label
+    forms:
+      FirstName:
+        type: string
+        label: First Name
+        editable: true
+        labelKey: config.entities.employee.entities.employee.forms.FirstName.label
+      LastName:
+        type: string
+        label: Last Name
+        editable: true
+        labelKey: config.entities.employee.entities.employee.forms.LastName.label
+      Title:
+        type: string
+        label: Title
+        editable: true
+        labelKey: config.entities.employee.entities.employee.forms.Title.label
+      BirthDate:
+        type: date
+        label: Birth Date
+        editable: true
+        labelKey: config.entities.employee.entities.employee.forms.BirthDate.label
+      HireDate:
+        type: date
+        label: Hire Date
+        editable: true
+        labelKey: config.entities.employee.entities.employee.forms.HireDate.label
+    filters:
+      BirthDate:
+        type: date-range
+        label: Birth Date
+        expression: Employee.BirthDate
+        labelKey: config.entities.employee.entities.employee.filters.BirthDate.label
+    displayNameKey: config.entities.employee.entities.employee.displayName

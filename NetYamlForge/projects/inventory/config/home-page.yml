@@ -1,0 +1,33 @@
+hero:
+  eyebrow: Inventory Management
+  title: 在庫管理システム
+  description: 商品・サプライヤー・発注・在庫移動を統合管理。カスタムフックで在庫数を自動更新するオペレーション向けシステム。
+  primaryActionLabel: 商品一覧
+  primaryActionUrl: /inventory/DynamicEntity/Index?entity=product
+  secondaryActionLabel: Dashboard
+  secondaryActionUrl: /inventory/Dashboard
+  highlights:
+    - Custom Hooks
+    - Stock Control
+    - Purchase Orders
+
+projectsSectionTitle: Inventory Workspace
+projectsSectionLead: 在庫状況をリアルタイムに把握し、発注・仕入れ管理を行います。
+
+quickActions:
+  - label: 商品
+    url: /inventory/DynamicEntity/Index?entity=product
+    style: btn-primary
+    icon: 📦
+  - label: 在庫移動
+    url: /inventory/DynamicEntity/Index?entity=stock_movement
+    style: btn-outline
+    icon: 🔄
+  - label: 発注
+    url: /inventory/DynamicEntity/Index?entity=purchase_order
+    style: btn-outline
+    icon: 🛒
+  - label: サプライヤー
+    url: /inventory/DynamicEntity/Index?entity=supplier
+    style: btn-outline
+    icon: 🏭

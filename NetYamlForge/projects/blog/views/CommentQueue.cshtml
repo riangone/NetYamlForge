@@ -1,0 +1,122 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    // プロジェクト固有のレイアウトを設定
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+    
+    var pageDef = (PageDefinition)ViewData["PageDef"]!;
+    var pageName = (string)ViewData["PageName"]!;
+    var currentProject = ViewData["Project"] as string ?? "";
+
+    ViewData["Title"] = "コメント審査 - Blog CMS";
+    ViewData["ActivePage"] = "Page";
+
+    var pending = Model.TryGetValue("pending", out var pd) ? pd.Item1.ToList() : new();
+}
+
+<div class="container mx-auto px-4 py-8">
+
+    @* ヘッダー *@
+    <div class="mb-8">
+        <a href="/@Uri.EscapeDataString(currentProject)/Dashboard"
+           class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-2">
+            <i class="fas fa-arrow-left"></i> ダッシュボードへ
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+            <i class="fas fa-comments text-blue-500"></i>
+            コメント審査キュー
+        </h1>
+    </div>
+
+    @* サマリー *@
+    <div class="flex gap-4 mb-8">
+        <span class="px-4 py-2 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-full text-sm font-medium">
+            <i class="fas fa-clock mr-1"></i> 承認待ち @pending.Count 件
+        </span>
+    </div>
+
+    @* 承認待ちコメント *@
+    <section>
+        <h2 class="text-lg font-bold text-gray-700 mb-3">承認待ちコメント</h2>
+        @if (!pending.Any())
+        {
+            <div class="text-center py-12 bg-gray-50 rounded-xl text-gray-400">
+                <i class="fas fa-check-circle text-4xl mb-3"></i>
+                <p>承認待ちコメントはありません</p>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-3" id="pending-list">
+                @foreach (var comment in pending)
+                {
+                    var cid = comment.TryGetValue("comment_id", out var c1) ? c1?.ToString() ?? "" : "";
+                    var authorName = comment.TryGetValue("author_name", out var c2) ? c2?.ToString() ?? "" : "";
+                    var authorEmail = comment.TryGetValue("author_email", out var c3) ? c3?.ToString() ?? "" : "";
+                    var content = comment.TryGetValue("content", out var c4) ? c4?.ToString() ?? "" : "";
+                    var createdAt = comment.TryGetValue("created_at", out var c5) ? c5?.ToString() ?? "" : "";
+                    var postTitle = comment.TryGetValue("post_title", out var c6) ? c6?.ToString() ?? "" : "";
+                    var postId = comment.TryGetValue("post_id", out var c7) ? c7?.ToString() ?? "" : "";
+
+                    <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm" id="comment-@cid">
+                        <div class="flex items-start justify-between gap-4 mb-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold flex-shrink-0">
+                                        @(authorName.Length > 0 ? authorName[0].ToString().ToUpper() : "?")
+                                    </span>
+                                    <span class="font-semibold text-gray-800">@authorName</span>
+                                    <span class="text-xs text-gray-400">@authorEmail</span>
+                                </div>
+                                <p class="text-xs text-gray-400 ml-10">
+                                    記事: <a href="/@Uri.EscapeDataString(currentProject)/Page/BlogDetail?posts_post_id=@Uri.EscapeDataString(postId)"
+                                             class="text-blue-500 hover:underline">@postTitle</a>
+                                    <span class="mx-2">·</span>
+                                    @(createdAt.Length > 16 ? createdAt.Substring(0, 16) : createdAt)
+                                </p>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0">
+                                @* 承認 *@
+                                <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/pending/update-row"
+                                      hx-target="#comment-@cid"
+                                      hx-swap="outerHTML"
+                                      class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="rowId" value="@cid" />
+                                    <input type="hidden" name="field" value="status" />
+                                    <input type="hidden" name="value" value="approved" />
+                                    <button type="submit"
+                                            class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5">
+                                        <i class="fas fa-check"></i> 承認
+                                    </button>
+                                </form>
+                                @* スパム *@
+                                <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/pending/update-row"
+                                      hx-target="#comment-@cid"
+                                      hx-swap="outerHTML"
+                                      hx-confirm="スパムとしてマークしますか？"
+                                      class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="rowId" value="@cid" />
+                                    <input type="hidden" name="field" value="status" />
+                                    <input type="hidden" name="value" value="spam" />
+                                    <button type="submit"
+                                            class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-lg transition flex items-center gap-1.5">
+                                        <i class="fas fa-ban"></i> スパム
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="ml-10 bg-gray-50 rounded-lg p-3 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                            @content
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+</div>

@@ -1,0 +1,35 @@
+entities:
+  crmquote:
+    table: 'CrmQuote'
+    key: 'QuoteId'
+    displayName: 'Crmquote'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['OrderId', 'QuoteStatus', 'DiscountRate', 'TotalAmount', 'VersionNo', 'CreatedAt', 'UpdatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      QuoteId: { type: int, identity: true, label: 'Quote Id', sortable: true }
+      OrderId: { type: int, required: true, label: 'Order Id', sortable: true }
+      QuoteStatus: { type: string, required: true, label: 'Quote Status', searchable: true, sortable: true }
+      DiscountRate: { type: decimal, label: 'Discount Rate', sortable: true }
+      TotalAmount: { type: decimal, label: 'Total Amount', sortable: true }
+      VersionNo: { type: int, label: 'Version No', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      OrderId: { type: int, required: true, label: 'Order Id', editable: true }
+      QuoteStatus: { type: string, required: true, label: 'Quote Status', editable: true }
+      DiscountRate: { type: decimal, label: 'Discount Rate', editable: true }
+      TotalAmount: { type: decimal, label: 'Total Amount', editable: true }
+      VersionNo: { type: int, label: 'Version No', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', editable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

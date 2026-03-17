@@ -1,0 +1,58 @@
+title: 顧客リスク監視 / Customer Risk Radar
+description: 遅延比率・受注金額をもとに優先フォロー顧客を抽出します。
+
+main_table: Customers
+
+sections:
+  - id: risk_customer
+    title: フォロー優先顧客
+    type: custom
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId,
+        c.CompanyName,
+        c.ContactName,
+        c.Country,
+        COUNT(DISTINCT o.OrderId) AS TotalOrders,
+        SUM(CASE WHEN o.Status = 'Delayed' THEN 1 ELSE 0 END) AS DelayedOrders,
+        ROUND(
+          CAST(SUM(CASE WHEN o.Status = 'Delayed' THEN 1 ELSE 0 END) AS REAL)
+          / NULLIF(COUNT(DISTINCT o.OrderId), 0),
+          2
+        ) AS DelayRate,
+        ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS Revenue,
+        CASE
+          WHEN SUM(CASE WHEN o.Status = 'Delayed' THEN 1 ELSE 0 END) >= 3 THEN 'High'
+          WHEN SUM(CASE WHEN o.Status = 'Delayed' THEN 1 ELSE 0 END) >= 1 THEN 'Medium'
+          ELSE 'Low'
+        END AS RiskLevel
+      FROM Customers c
+      JOIN Orders o ON c.CustomerId = o.CustomerId
+      JOIN OrderDetails od ON o.OrderId = od.OrderId
+      GROUP BY c.CustomerId, c.CompanyName, c.ContactName, c.Country
+      HAVING TotalOrders >= 2
+      ORDER BY RiskLevel DESC, DelayRate DESC, Revenue DESC
+    columns:
+      - CustomerId
+      - CompanyName
+      - ContactName
+      - Country
+      - TotalOrders
+      - DelayedOrders
+      - DelayRate
+      - Revenue
+      - RiskLevel
+    page_size: 30
+    editable: false
+    read_only: true
+    filters:
+      CompanyName:
+        label: 顧客名
+        type: like
+      Country:
+        label: 国
+        type: eq
+      RiskLevel:
+        label: リスクレベル
+        type: eq

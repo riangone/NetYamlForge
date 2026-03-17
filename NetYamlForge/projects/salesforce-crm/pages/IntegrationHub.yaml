@@ -1,0 +1,86 @@
+title: Integration Hub
+description: Central registry of integration endpoints, data contracts, and sync health across CRM domains.
+
+sections:
+  - id: integration_endpoints
+    title: Integration Endpoints
+    source_type: custom
+    source: |
+      SELECT
+        'CustomerSync' AS IntegrationName,
+        '/api/integration/customer-sync' AS Endpoint,
+        'Outbound' AS Direction,
+        'Active' AS Status,
+        '15m' AS Schedule,
+        datetime('now', '-5 minute') AS LastRunAt
+      UNION ALL
+      SELECT
+        'OrderIngestion',
+        '/api/integration/order-ingestion',
+        'Inbound',
+        'Active',
+        '5m',
+        datetime('now', '-2 minute')
+      UNION ALL
+      SELECT
+        'CaseEscalationWebhook',
+        '/api/integration/case-escalation',
+        'Outbound',
+        'Warning',
+        'Realtime',
+        datetime('now', '-12 minute')
+      UNION ALL
+      SELECT
+        'ForecastSnapshot',
+        '/api/integration/forecast-snapshot',
+        'Outbound',
+        'Active',
+        '1h',
+        datetime('now', '-20 minute')
+    columns:
+      - IntegrationName
+      - Endpoint
+      - Direction
+      - Status
+      - Schedule
+      - LastRunAt
+    page_size: 20
+    editable: false
+    read_only: true
+    filters:
+      IntegrationName:
+        label: Integration
+        type: like
+      Direction:
+        label: Direction
+        type: eq
+      Status:
+        label: Status
+        type: eq
+
+  - id: sync_health
+    title: Sync Health
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(Entity, ''), 'system') AS Domain,
+        COUNT(*) AS TotalEvents,
+        SUM(CASE WHEN lower(Action) LIKE '%error%' OR lower(Detail) LIKE '%error%' THEN 1 ELSE 0 END) AS ErrorEvents,
+        SUM(CASE WHEN lower(Action) LIKE '%webhook%' OR lower(Detail) LIKE '%webhook%' THEN 1 ELSE 0 END) AS WebhookEvents,
+        MAX(CreatedAt) AS LastEventAt
+      FROM AuditLog
+      GROUP BY COALESCE(NULLIF(Entity, ''), 'system')
+      ORDER BY TotalEvents DESC, LastEventAt DESC
+    columns:
+      - Domain
+      - TotalEvents
+      - ErrorEvents
+      - WebhookEvents
+      - LastEventAt
+    page_size: 40
+    editable: false
+    read_only: true
+    filters:
+      Domain:
+        label: Domain
+        type: like

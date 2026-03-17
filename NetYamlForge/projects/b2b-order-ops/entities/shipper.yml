@@ -1,0 +1,57 @@
+entities:
+  shipper:
+    table: Shippers
+    key: ShipperId
+    displayName: Shipper
+    softDelete: false
+    paging:
+      pageSize: 12
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - CompanyName
+        - Phone
+      filters:
+        columns: 2
+        order:
+        - CompanyName
+    columns:
+      ShipperId:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      CompanyName:
+        type: string
+        required: true
+        label: Company
+        searchable: true
+        sortable: true
+      Phone:
+        type: string
+        label: Phone
+        searchable: true
+        sortable: false
+    forms:
+      CompanyName:
+        type: string
+        required: true
+        label: Company
+        editable: true
+      Phone:
+        type: string
+        label: Phone
+        editable: true
+    filters:
+      CompanyName:
+        type: text
+        label: Company
+    links:
+      orders:
+        label: Orders
+        targetEntity: order
+        filter:
+          ShipperId: ShipperId
+    displayNameKey: projects.b2b-order-ops.entities.shipper.entities.shipper.displayName

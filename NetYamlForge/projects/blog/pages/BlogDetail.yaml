@@ -1,0 +1,58 @@
+title: 記事詳細
+title_en: Post Detail
+description: ブログ記事の詳細とコメントを表示します
+
+template: BlogDetail
+
+main_table: posts
+
+sections:
+  - id: posts
+    title: ""
+    type: custom
+    source_type: custom
+    source: |
+      SELECT p.post_id, p.title, p.slug, p.content, p.excerpt, p.author,
+             p.published_at, p.view_count,
+             c.name AS category_name, c.color AS category_color
+      FROM posts p
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      WHERE p.status = 'published'
+    columns:
+      - post_id
+      - title
+      - slug
+      - content
+      - excerpt
+      - author
+      - published_at
+      - view_count
+      - category_name
+      - category_color
+    page_size: 1
+    editable: false
+    read_only: true
+    filters:
+      post_id:
+        label: Post ID
+        type: eq
+
+  - id: comments
+    title: コメント
+    type: custom
+    source_type: custom
+    source: |
+      SELECT comment_id, author_name, content, created_at
+      FROM comments
+      WHERE status = 'approved'
+      ORDER BY created_at ASC
+    columns:
+      - comment_id
+      - author_name
+      - content
+      - created_at
+    page_size: 20
+    editable: false
+    read_only: true
+    foreign_key: post_id
+    local_foreign_key: post_id

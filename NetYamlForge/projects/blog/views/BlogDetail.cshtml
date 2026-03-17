@@ -1,0 +1,108 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    // プロジェクト固有のレイアウトを設定
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+    
+    var pageDef = (PageDefinition)ViewData["PageDef"]!;
+    var currentProject = ViewData["Project"] as string ?? "";
+
+    ViewData["ActivePage"] = "Page";
+
+    var postsData = Model.TryGetValue("posts", out var pd) ? pd : (Enumerable.Empty<Dictionary<string, object>>(), 0);
+    var article = postsData.Item1.FirstOrDefault();
+
+    var commentsData = Model.TryGetValue("comments", out var cd2) ? cd2 : (Enumerable.Empty<Dictionary<string, object>>(), 0);
+    var comments = commentsData.Item1.ToList();
+
+    var artTitle = article?.TryGetValue("title", out var at) == true ? at?.ToString() ?? "" : "";
+    ViewData["Title"] = (string.IsNullOrEmpty(artTitle) ? "記事詳細" : artTitle) + " - Blog CMS";
+}
+
+<div class="container mx-auto px-4 py-8">
+    @if (article != null)
+    {
+        var artContent = article.TryGetValue("content", out var ac) ? ac?.ToString() ?? "" : "";
+        var artExcerpt = article.TryGetValue("excerpt", out var ae) ? ae?.ToString() ?? "" : "";
+        var artAuthor = article.TryGetValue("author", out var aa) ? aa?.ToString() ?? "" : "";
+        var artDate = article.TryGetValue("published_at", out var ad) ? ad?.ToString() ?? "" : "";
+        var artCat = article.TryGetValue("category_name", out var acn) ? acn?.ToString() ?? "" : "";
+        var artCatColor = article.TryGetValue("category_color", out var acc) ? acc?.ToString() ?? "#6366f1" : "#6366f1";
+
+        @* 記事本文 *@
+        <article class="max-w-3xl mx-auto">
+            <a href="/@Uri.EscapeDataString(currentProject)/Page/BlogList"
+               class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm mb-6 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> 記事一覧に戻る
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 mb-4 leading-tight">@artTitle</h1>
+            <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-6">
+                @if (!string.IsNullOrEmpty(artCat))
+                {
+                    <span class="inline-block text-xs font-semibold px-2 py-1 rounded-full text-white"
+                          style="background-color: @artCatColor;">@artCat</span>
+                }
+                <span><i class="fas fa-user-circle mr-1"></i>@artAuthor</span>
+                <span><i class="fas fa-calendar-alt mr-1"></i>@(artDate.Length > 10 ? artDate.Substring(0, 10) : artDate)</span>
+            </div>
+            @if (!string.IsNullOrEmpty(artExcerpt))
+            {
+                <p class="text-gray-600 text-lg border-l-4 border-blue-400 pl-4 mb-6 italic">@artExcerpt</p>
+            }
+            <div class="prose prose-gray max-w-none text-gray-800 leading-relaxed whitespace-pre-wrap">@artContent</div>
+        </article>
+
+        @* コメント一覧 *@
+        <div class="max-w-3xl mx-auto mt-12">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-comments mr-2 text-blue-500"></i>コメント
+            </h2>
+            <div class="space-y-4">
+                @if (comments.Any())
+                {
+                    @foreach (var comment in comments)
+                    {
+                        var cmtAuthor = comment.TryGetValue("author_name", out var ca) ? ca?.ToString() ?? "" : "";
+                        var cmtContent = comment.TryGetValue("content", out var cc2) ? cc2?.ToString() ?? "" : "";
+                        var cmtDate = comment.TryGetValue("created_at", out var cdt) ? cdt?.ToString() ?? "" : "";
+
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-gray-800 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold">
+                                        @(cmtAuthor.Length > 0 ? cmtAuthor[0].ToString().ToUpper() : "?")
+                                    </span>
+                                    @cmtAuthor
+                                </span>
+                                <span class="text-xs text-gray-400">@(cmtDate.Length > 16 ? cmtDate.Substring(0, 16) : cmtDate)</span>
+                            </div>
+                            <p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">@cmtContent</p>
+                        </div>
+                    }
+                    <div class="text-sm text-gray-400 text-right">@comments.Count 件のコメント</div>
+                }
+                else
+                {
+                    <div class="text-center py-6 text-gray-400">
+                        <i class="fas fa-comment text-3xl mb-2"></i>
+                        <p class="text-sm">まだコメントはありません。</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-16 text-gray-400">
+            <i class="fas fa-file-alt text-5xl mb-4"></i>
+            <p class="text-lg">記事が見つかりません</p>
+            <a href="/@Uri.EscapeDataString(currentProject)/Page/BlogList"
+               class="text-blue-600 mt-4 inline-block hover:underline">
+                ← 記事一覧に戻る
+            </a>
+        </div>
+    }
+</div>

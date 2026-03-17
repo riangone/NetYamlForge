@@ -1,0 +1,431 @@
+@* ファイル概要: エンティティ定義を表示する専用ページ（Admin のみ）。
+   Columns / Forms / Filters / Joins / Links / Settings の各タブで定義を一覧表示します。 *@
+
+@using NetYamlForge.Models
+@model NetYamlForge.Controllers.EntityDefinitionViewModel
+@{
+    var meta = Model.Meta;
+    var title = meta.GetDisplayName() + " — Definition";
+    ViewData["Title"] = title;
+}
+
+<div class="space-y-4">
+    @* パンくずナビ *@
+    <nav aria-label="Breadcrumb" class="text-sm text-base-content/60">
+        <ol class="flex flex-wrap items-center gap-1.5">
+            <li><a class="link link-hover" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+            <li aria-hidden="true">/</li>
+            <li>
+                <a class="link link-hover"
+                   asp-controller="DynamicEntity"
+                   asp-action="Index"
+                   asp-route-entity="@Model.Entity">@meta.GetDisplayName()</a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-base-content">Definition</li>
+        </ol>
+    </nav>
+
+    <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold">@meta.GetDisplayName()</h1>
+        <span class="badge badge-outline badge-lg">@Model.Entity</span>
+        @if (meta.IsPublic)
+        {
+            <span class="badge badge-success badge-sm">public</span>
+        }
+        else
+        {
+            <span class="badge badge-warning badge-sm">protected</span>
+        }
+        @if (meta.SoftDelete)
+        {
+            <span class="badge badge-info badge-sm">soft-delete</span>
+        }
+    </div>
+
+    @* 基本情報カード *@
+    <div class="card bg-base-100 shadow">
+        <div class="card-body py-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <div class="text-base-content/50 text-xs uppercase tracking-wide mb-1">Table</div>
+                    <code class="font-mono font-bold">@meta.Table</code>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs uppercase tracking-wide mb-1">Primary Key</div>
+                    <code class="font-mono font-bold">@meta.Key</code>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs uppercase tracking-wide mb-1">Page Size</div>
+                    <span class="font-bold">@meta.Paging.PageSize</span>
+                    <span class="text-base-content/50 ml-1">(@meta.Paging.Mode)</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs uppercase tracking-wide mb-1">Count</div>
+                    <span class="font-bold">@(meta.Paging.EnableCount ? "enabled" : "disabled")</span>
+                </div>
+            </div>
+            @if (meta.DisplayNameI18n != null && meta.DisplayNameI18n.Count > 0)
+            {
+                <div class="mt-3 text-sm">
+                    <div class="text-base-content/50 text-xs uppercase tracking-wide mb-1">Display Name (i18n)</div>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var kv in meta.DisplayNameI18n)
+                        {
+                            <span class="badge badge-ghost badge-sm"><span class="text-base-content/50 mr-1">@kv.Key</span>@kv.Value</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* タブナビゲーション *@
+    <div role="tablist" class="tabs tabs-lifted tabs-md">
+
+        @* ── Columns タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Columns (@meta.Columns.Count)" checked />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Label</th>
+                            <th>Identity</th>
+                            <th>Searchable</th>
+                            <th>Sortable</th>
+                            <th>Editable</th>
+                            <th>Expression</th>
+                            <th>FK / Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var col in meta.Columns)
+                        {
+                            <tr>
+                                <td><code class="font-mono text-sm">@col.Key</code></td>
+                                <td><span class="badge badge-ghost badge-sm">@col.Value.Type</span></td>
+                                <td>@col.Value.GetLabel(col.Key)</td>
+                                <td>@(col.Value.Identity ? "✔" : "")</td>
+                                <td>@(col.Value.Searchable ? "✔" : "")</td>
+                                <td>@(col.Value.Sortable ? "✔" : "")</td>
+                                <td>@(col.Value.Editable ? "✔" : "–")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(col.Value.Expression))
+                                    {
+                                        <code class="font-mono text-xs text-base-content/70">@col.Value.Expression</code>
+                                    }
+                                </td>
+                                <td>
+                                    @if (col.Value.ForeignKey != null)
+                                    {
+                                        <span class="badge badge-info badge-sm">FK → @col.Value.ForeignKey.Entity</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (meta.Columns.Count == 0)
+                {
+                    <p class="text-base-content/50 text-sm text-center py-4">No columns defined.</p>
+                }
+            </div>
+        </div>
+
+        @* ── Forms タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Forms (@meta.Forms.Count)" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            @{
+                var formCols = meta.Layout.Forms.Columns;
+                var formOrder = meta.Layout.Forms.Order;
+            }
+            @if (formOrder.Count > 0)
+            {
+                <p class="text-sm text-base-content/60 mb-3">
+                    Layout: <strong>@formCols</strong> columns
+                    — Order: <code class="font-mono text-xs">@string.Join(", ", formOrder)</code>
+                </p>
+            }
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Label</th>
+                            <th>Required</th>
+                            <th>Identity</th>
+                            <th>Hidden</th>
+                            <th>Options / FK</th>
+                            <th>Expression</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in meta.GetOrderedForms())
+                        {
+                            <tr>
+                                <td><code class="font-mono text-sm">@f.Key</code></td>
+                                <td><span class="badge badge-ghost badge-sm">@f.Value.Type</span></td>
+                                <td>@f.Value.GetLabel(f.Key)</td>
+                                <td>@(f.Value.Required ? "✔" : "")</td>
+                                <td>@(f.Value.Identity ? "✔" : "")</td>
+                                <td>@(f.Value.Hidden ? "✔" : "")</td>
+                                <td>
+                                    @if (f.Value.ForeignKey != null)
+                                    {
+                                        <span class="badge badge-info badge-sm">FK → @f.Value.ForeignKey.Entity</span>
+                                        if (f.Value.ForeignKey.Picker)
+                                        {
+                                            <span class="badge badge-secondary badge-sm ml-1">picker</span>
+                                        }
+                                    }
+                                    else if (f.Value.Options != null && f.Value.Options.Count > 0)
+                                    {
+                                        <span class="text-xs text-base-content/70">[@string.Join(", ", f.Value.Options)]</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(f.Value.Expression))
+                                    {
+                                        <code class="font-mono text-xs text-base-content/70">@f.Value.Expression</code>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (meta.Forms.Count == 0)
+                {
+                    <p class="text-base-content/50 text-sm text-center py-4">No forms defined.</p>
+                }
+            </div>
+        </div>
+
+        @* ── Filters タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Filters (@meta.Filters.Count)" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            @{
+                var filterCols = meta.Layout.Filters.Columns;
+                var filterOrder = meta.Layout.Filters.Order;
+            }
+            @if (filterOrder.Count > 0)
+            {
+                <p class="text-sm text-base-content/60 mb-3">
+                    Layout: <strong>@filterCols</strong> columns
+                    — Order: <code class="font-mono text-xs">@string.Join(", ", filterOrder)</code>
+                </p>
+            }
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Label</th>
+                            <th>Options / FK</th>
+                            <th>Expression</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var f in meta.GetOrderedFilters())
+                        {
+                            <tr>
+                                <td><code class="font-mono text-sm">@f.Key</code></td>
+                                <td><span class="badge badge-ghost badge-sm">@f.Value.Type</span></td>
+                                <td>@f.Value.GetLabel(f.Key)</td>
+                                <td>
+                                    @if (f.Value.ForeignKey != null)
+                                    {
+                                        <span class="badge badge-info badge-sm">FK → @f.Value.ForeignKey.Entity</span>
+                                    }
+                                    else if (f.Value.Options != null && f.Value.Options.Count > 0)
+                                    {
+                                        <span class="text-xs text-base-content/70">[@string.Join(", ", f.Value.Options)]</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(f.Value.Expression))
+                                    {
+                                        <code class="font-mono text-xs text-base-content/70">@f.Value.Expression</code>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (meta.Filters.Count == 0)
+                {
+                    <p class="text-base-content/50 text-sm text-center py-4">No filters defined.</p>
+                }
+            </div>
+        </div>
+
+        @* ── Joins タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Joins (@meta.Joins.Count)" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Table</th>
+                            <th>Alias</th>
+                            <th>ON</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var j in meta.Joins)
+                        {
+                            <tr>
+                                <td><span class="badge badge-ghost badge-sm">@j.Type.ToUpperInvariant()</span></td>
+                                <td><code class="font-mono text-sm">@j.Table</code></td>
+                                <td><code class="font-mono text-sm">@j.Alias</code></td>
+                                <td><code class="font-mono text-xs text-base-content/70">@j.On</code></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (meta.Joins.Count == 0)
+                {
+                    <p class="text-base-content/50 text-sm text-center py-4">No joins defined.</p>
+                }
+            </div>
+        </div>
+
+        @* ── Links タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Links (@meta.Links.Count)" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Label</th>
+                            <th>Target Entity</th>
+                            <th>Filter</th>
+                            <th>Query</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lnk in meta.Links)
+                        {
+                            <tr>
+                                <td><code class="font-mono text-sm">@lnk.Key</code></td>
+                                <td>@lnk.Value.GetLabel()</td>
+                                <td><span class="badge badge-accent badge-sm">@lnk.Value.TargetEntity</span></td>
+                                <td>
+                                    @if (lnk.Value.Filter != null && lnk.Value.Filter.Count > 0)
+                                    {
+                                        <code class="font-mono text-xs text-base-content/70">
+                                            @string.Join(", ", lnk.Value.Filter.Select(kv => $"{kv.Key}={kv.Value}"))
+                                        </code>
+                                    }
+                                </td>
+                                <td>
+                                    @if (lnk.Value.Query != null && lnk.Value.Query.Count > 0)
+                                    {
+                                        <code class="font-mono text-xs text-base-content/70">
+                                            @string.Join(", ", lnk.Value.Query.Select(kv => $"{kv.Key}={kv.Value}"))
+                                        </code>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                @if (meta.Links.Count == 0)
+                {
+                    <p class="text-base-content/50 text-sm text-center py-4">No links defined.</p>
+                }
+            </div>
+        </div>
+
+        @* ── Settings タブ ── *@
+        <input type="radio" name="def-tabs" role="tab" class="tab" aria-label="Settings" />
+        <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                @* Paging *@
+                <div>
+                    <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/60 mb-2">Paging</h3>
+                    <dl class="text-sm space-y-1">
+                        <div class="flex gap-2"><dt class="w-28 text-base-content/50">Page Size</dt><dd class="font-mono">@meta.Paging.PageSize</dd></div>
+                        <div class="flex gap-2"><dt class="w-28 text-base-content/50">Mode</dt><dd class="font-mono">@meta.Paging.Mode</dd></div>
+                        <div class="flex gap-2"><dt class="w-28 text-base-content/50">Enable Count</dt><dd>@(meta.Paging.EnableCount ? "true" : "false")</dd></div>
+                    </dl>
+                </div>
+
+                @* Layout *@
+                <div>
+                    <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/60 mb-2">Layout</h3>
+                    <dl class="text-sm space-y-1">
+                        <div class="flex gap-2"><dt class="w-32 text-base-content/50">Form Columns</dt><dd class="font-mono">@meta.Layout.Forms.Columns</dd></div>
+                        @if (meta.Layout.Forms.Order.Count > 0)
+                        {
+                            <div class="flex gap-2"><dt class="w-32 text-base-content/50">Form Order</dt><dd class="font-mono text-xs">@string.Join(", ", meta.Layout.Forms.Order)</dd></div>
+                        }
+                        <div class="flex gap-2"><dt class="w-32 text-base-content/50">Filter Columns</dt><dd class="font-mono">@meta.Layout.Filters.Columns</dd></div>
+                        @if (meta.Layout.Filters.Order.Count > 0)
+                        {
+                            <div class="flex gap-2"><dt class="w-32 text-base-content/50">Filter Order</dt><dd class="font-mono text-xs">@string.Join(", ", meta.Layout.Filters.Order)</dd></div>
+                        }
+                    </dl>
+                </div>
+
+                @* Confirmation *@
+                @if (meta.Confirmation != null)
+                {
+                    <div>
+                        <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/60 mb-2">Confirmation</h3>
+                        <dl class="text-sm space-y-1">
+                            @if (!string.IsNullOrEmpty(meta.Confirmation.Create))
+                            {
+                                <div class="flex gap-2"><dt class="w-20 text-base-content/50">Create</dt><dd>@meta.Confirmation.Create</dd></div>
+                            }
+                            @if (!string.IsNullOrEmpty(meta.Confirmation.Update))
+                            {
+                                <div class="flex gap-2"><dt class="w-20 text-base-content/50">Update</dt><dd>@meta.Confirmation.Update</dd></div>
+                            }
+                        </dl>
+                    </div>
+                }
+
+                @* Hooks *@
+                @if (meta.Hooks != null)
+                {
+                    <div>
+                        <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/60 mb-2">Hooks</h3>
+                        <dl class="text-sm space-y-1">
+                            @{
+                                var beforeCreate = meta.Hooks.GetHookList(h => h.BeforeCreate);
+                                var afterCreate = meta.Hooks.GetHookList(h => h.AfterCreate);
+                                var beforeUpdate = meta.Hooks.GetHookList(h => h.BeforeUpdate);
+                                var afterUpdate = meta.Hooks.GetHookList(h => h.AfterUpdate);
+                            }
+                            @if (beforeCreate != null && beforeCreate.Any())
+                            {
+                                <div class="flex gap-2"><dt class="w-28 text-base-content/50">BeforeCreate</dt><dd class="font-mono text-xs">@string.Join(", ", beforeCreate)</dd></div>
+                            }
+                            @if (afterCreate != null && afterCreate.Any())
+                            {
+                                <div class="flex gap-2"><dt class="w-28 text-base-content/50">AfterCreate</dt><dd class="font-mono text-xs">@string.Join(", ", afterCreate)</dd></div>
+                            }
+                            @if (beforeUpdate != null && beforeUpdate.Any())
+                            {
+                                <div class="flex gap-2"><dt class="w-28 text-base-content/50">BeforeUpdate</dt><dd class="font-mono text-xs">@string.Join(", ", beforeUpdate)</dd></div>
+                            }
+                            @if (afterUpdate != null && afterUpdate.Any())
+                            {
+                                <div class="flex gap-2"><dt class="w-28 text-base-content/50">AfterUpdate</dt><dd class="font-mono text-xs">@string.Join(", ", afterUpdate)</dd></div>
+                            }
+                        </dl>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>

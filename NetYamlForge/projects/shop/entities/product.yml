@@ -1,0 +1,84 @@
+entities:
+  product:
+    table: product
+    key: id
+    displayName: '商品'
+    softDelete: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [name, price, stock, category_id, is_active, created_at]
+      filters:
+        columns: 4
+        order: [category_id, is_active]
+
+    confirmation:
+      delete: "この商品を削除してもよいですか？この操作は元に戻せません。"
+
+    joins:
+      - table: category
+        alias: cat
+        on: "product.category_id = cat.id"
+        type: left
+
+    columns:
+      id: { type: int, identity: true, label: 'ID', sortable: true }
+      name: { type: string, required: true, label: '商品名', searchable: true, sortable: true }
+      price: { type: decimal, required: true, label: '価格', sortable: true }
+      stock: { type: int, label: '在庫数', sortable: true }
+      category_name:
+        type: string
+        expression: "cat.name"
+        label: 'カテゴリ'
+        sortable: true
+      is_active: { type: int, label: '公開中', sortable: true }
+      created_at: { type: string, label: '登録日時', sortable: true }
+
+    forms:
+      name: { type: string, required: true, label: '商品名', editable: true }
+      price: { type: decimal, required: true, label: '価格（円）', editable: true }
+      stock: { type: int, label: '在庫数', editable: true }
+      category_id:
+        type: int
+        label: 'カテゴリ'
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: name
+      is_active: { type: boolean, label: '公開中', editable: true }
+      created_at: { type: string, label: '登録日時', editable: false }
+
+    filters:
+      category_id:
+        type: dropdown
+        label: 'カテゴリ'
+        foreignKey:
+          entity: category
+          displayColumn: name
+      is_active:
+        type: dropdown
+        label: '公開状態'
+        options:
+          - "1"
+          - "0"
+
+    hooks:
+      beforeCreate:
+        - validate_required:name,price
+        - validate_range:price:min=0,max=9999999
+        - validate_range:stock:min=0
+        - trim:name
+        - now:created_at
+      beforeUpdate:
+        - validate_required:name,price
+        - validate_range:price:min=0,max=9999999
+        - validate_range:stock:min=0
+        - trim:name
+
+    links: {}

@@ -1,0 +1,35 @@
+# Chinook Music Store 用レイアウト設定
+
+header:
+  title: Chinook Music Store
+
+navigation:
+  showDashboard: true
+  # 主要エンティティのみ表示
+  entities:
+    - artist
+    - album
+    - track
+    - customer
+    - invoice
+    - employee
+  items:
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Artists
+      url: /chinook/DynamicEntity/Index?entity=artist
+      icon: 🎵
+    - label: Albums
+      url: /chinook/DynamicEntity/Index?entity=album
+      icon: 💿
+    - label: Tracks
+      url: /chinook/DynamicEntity/Index?entity=track
+      icon: 🎸
+    - label: Customers
+      url: /chinook/DynamicEntity/Index?entity=customer
+      icon: 👥
+    - label: Invoices
+      url: /chinook/DynamicEntity/Index?entity=invoice
+      icon: 💰

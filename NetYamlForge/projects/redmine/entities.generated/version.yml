@@ -1,0 +1,40 @@
+entities:
+  version:
+    table: 'version'
+    key: 'id'
+    displayName: 'Version'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['project_id', 'name', 'description', 'status', 'due_date', 'created_on']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      project_id: { type: int, required: true, label: 'Project Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      status: { type: string, label: 'Status', searchable: true, sortable: true }
+      due_date: { type: string, label: 'Due Date', searchable: true, sortable: true }
+      created_on: { type: string, label: 'Created On', searchable: true, sortable: true }
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: rm_project
+          displayColumn: 'name'
+      name: { type: string, required: true, label: 'Name', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      status: { type: string, label: 'Status', editable: true }
+      due_date: { type: string, label: 'Due Date', editable: true }
+      created_on: { type: string, label: 'Created On', editable: true }
+    filters: {}
+    links: {}

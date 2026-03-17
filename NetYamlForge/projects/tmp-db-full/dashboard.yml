@@ -1,0 +1,8 @@
+stats:
+  - label: Customer Count
+    labelKey: projects.tmp-db-full.dashboard.stats.0.label
+    entity: customer
+    aggregate: count
+    icon: 📊
+    color: badge-info
+charts: []

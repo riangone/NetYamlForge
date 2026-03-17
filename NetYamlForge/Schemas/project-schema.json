@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name", "database"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "プロジェクト識別子（URLパスセグメントとして使用されます）"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "表示名（省略時は name が使用されます）"
+    },
+    "version": {
+      "type": "string",
+      "description": "プロジェクトバージョン"
+    },
+    "database": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["sqlite", "sqlserver", "postgresql", "postgres", "mysql", "mariadb"],
+          "description": "データベース種別"
+        },
+        "path": {
+          "type": "string",
+          "description": "SQLite DBファイルのパス（project.yaml からの相対パス）"
+        },
+        "connectionString": {
+          "type": "string",
+          "description": "SQL Server / PostgreSQL / MySQL 用接続文字列"
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "multiLanguage": {
+          "type": "boolean"
+        },
+        "userAuthentication": {
+          "type": "boolean"
+        }
+      }
+    },
+    "calendar": {
+      "type": "object",
+      "properties": {
+        "japanHoliday": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "enum": ["hybrid", "api", "builtin"]
+            },
+            "apiUrlTemplate": {
+              "type": "string"
+            },
+            "apiTimeoutMs": {
+              "type": "integer",
+              "minimum": 500
+            }
+          }
+        }
+      }
+    }
+  }
+}

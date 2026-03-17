@@ -1,0 +1,52 @@
+entities:
+  notebook:
+    table: Notebook
+    key: Id
+    displayName: Notebook
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Name
+          - Color
+      filters:
+        columns: 2
+        order:
+          - Color
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      Name: { type: string, required: true, label: Name, searchable: true, sortable: true }
+      Color: { type: string, label: Color, searchable: true, sortable: true }
+      CreatedAt: { type: datetime, label: Created At, sortable: true }
+    forms:
+      Name: { type: string, required: true, label: Name, editable: true }
+      Color:
+        type: string
+        label: Color
+        editable: true
+        options:
+          - blue
+          - emerald
+          - violet
+          - amber
+          - slate
+    filters:
+      Color:
+        type: dropdown
+        label: Color
+        options:
+          - blue
+          - emerald
+          - violet
+          - amber
+          - slate
+    links:
+      memos:
+        label: Memos
+        targetEntity: memo
+        filter:
+          NotebookId: Id

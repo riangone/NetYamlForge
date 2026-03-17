@@ -1,0 +1,45 @@
+title: Sales Trend
+description: bar_chart / line_chart コンポーネントのデモ — 単系列・多系列グラフ
+
+sections:
+  - id: revenue_bar
+    title: 月次売上（bar_chart）
+    component: bar_chart
+    source_type: custom
+    source: |
+      SELECT month, revenue FROM monthly_revenue ORDER BY id
+    columns: [month, revenue]
+    x_field: month
+    y_field: revenue
+    color: "rgba(99,102,241,0.75)"
+    page_size: 12
+    editable: false
+    read_only: true
+
+  - id: multi_line
+    title: 売上・注文数・新規顧客 推移（line_chart — 多系列）
+    component: line_chart
+    source_type: custom
+    source: |
+      SELECT month, revenue, orders, new_customers
+      FROM monthly_revenue ORDER BY id
+    columns: [month, revenue, orders, new_customers]
+    x_field: month
+    y_field: "revenue,orders,new_customers"
+    page_size: 12
+    editable: false
+    read_only: true
+
+  - id: revenue_detail
+    title: 月次データ詳細（table）
+    component: table
+    source_type: custom
+    source: |
+      SELECT month AS 月, revenue AS 売上, orders AS 注文数,
+             new_customers AS 新規顧客,
+             ROUND(revenue / orders, 0) AS 平均単価
+      FROM monthly_revenue ORDER BY id
+    columns: [月, 売上, 注文数, 新規顧客, 平均単価]
+    page_size: 12
+    editable: false
+    read_only: true

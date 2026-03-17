@@ -1,0 +1,59 @@
+title: 出荷優先度キュー / Fulfillment Queue
+description: 納期超過リスクの高い受注を優先順で可視化します。
+
+main_table: Orders
+
+sections:
+  - id: queue
+    title: 優先対応受注
+    type: custom
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId,
+        c.CompanyName AS Customer,
+        o.OrderDate,
+        o.RequiredDate,
+        o.ShippedDate,
+        o.Status,
+        o.ShipCountry,
+        CASE
+          WHEN o.ShippedDate IS NULL THEN CAST(julianday('now') - julianday(o.RequiredDate) AS INTEGER)
+          ELSE CAST(julianday(o.ShippedDate) - julianday(o.RequiredDate) AS INTEGER)
+        END AS DelayDays,
+        ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS Revenue,
+        CASE
+          WHEN o.Status = 'Delayed' THEN 'P1'
+          WHEN o.Status = 'Open' AND o.RequiredDate <= date('now', '+2 day') THEN 'P2'
+          ELSE 'P3'
+        END AS Priority
+      FROM Orders o
+      JOIN Customers c ON o.CustomerId = c.CustomerId
+      JOIN OrderDetails od ON o.OrderId = od.OrderId
+      GROUP BY o.OrderId, c.CompanyName, o.OrderDate, o.RequiredDate, o.ShippedDate, o.Status, o.ShipCountry
+      HAVING DelayDays >= 0 OR o.Status IN ('Open', 'Delayed')
+      ORDER BY Priority ASC, DelayDays DESC, Revenue DESC
+    columns:
+      - Priority
+      - OrderId
+      - Customer
+      - OrderDate
+      - RequiredDate
+      - ShippedDate
+      - DelayDays
+      - Revenue
+      - Status
+      - ShipCountry
+    page_size: 30
+    editable: false
+    read_only: true
+    filters:
+      Priority:
+        label: 優先度
+        type: eq
+      Status:
+        label: ステータス
+        type: eq
+      Customer:
+        label: 顧客
+        type: like

@@ -1,0 +1,116 @@
+@* analytics テーマ: 大型KPI数値 + チャート重視レイアウト *@
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    var projectName = ViewData["ProjectDisplayName"] as string ?? "Dashboard";
+    string[] txtColors = ["text-primary", "text-secondary", "text-accent", "text-success", "text-warning", "text-info"];
+    string[] bgColors  = ["bg-primary/10", "bg-secondary/10", "bg-accent/10", "bg-success/10", "bg-warning/10", "bg-info/10"];
+    string[] bdColors  = ["border-primary/30", "border-secondary/30", "border-accent/30", "border-success/30", "border-warning/30", "border-info/30"];
+}
+
+<div class="space-y-6">
+    @* Header *@
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold tracking-widest text-base-content/40 uppercase">Analytics</p>
+            <h1 class="text-2xl font-bold text-base-content">@projectName</h1>
+        </div>
+        <div class="badge badge-neutral">Live Data</div>
+    </div>
+
+    @* Large KPI strip *@
+    @if (Model.Stats.Count > 0)
+    {
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-@(Math.Min(Model.Stats.Count, 6)) gap-3">
+            @for (int i = 0; i < Model.Stats.Count; i++)
+            {
+                var stat     = Model.Stats[i];
+                var txtColor = txtColors[i % txtColors.Length];
+                var bgColor  = bgColors[i % bgColors.Length];
+                var bdColor  = bdColors[i % bdColors.Length];
+                if (stat.HasError)
+                {
+                    <div class="rounded-xl bg-error/10 border border-error/30 p-5" title="@stat.ErrorHint">
+                        <div class="flex flex-col gap-1">
+                            <div class="text-xs font-medium text-base-content/50 uppercase tracking-wide mb-1">@stat.Label</div>
+                            <div class="text-3xl font-extrabold text-error leading-none">–</div>
+                            <div class="text-xs text-error mt-1">@stat.ErrorHint</div>
+                        </div>
+                    </div>
+                }
+                else if (!string.IsNullOrEmpty(stat.EntityUrl))
+                {
+                    <a href="@stat.EntityUrl"
+                       class="rounded-xl @bgColor border @bdColor p-5 hover:shadow-md transition-shadow no-underline">
+                        <div class="flex flex-col gap-1">
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-2xl">@stat.Icon</span>
+                                    <span class="text-xs font-medium text-base-content/50 uppercase tracking-wide">@stat.Label</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-xs font-medium text-base-content/50 uppercase tracking-wide mb-1">@stat.Label</div>
+                            }
+                            <div class="text-3xl font-extrabold @txtColor leading-none">@stat.Value</div>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="rounded-xl @bgColor border @bdColor p-5">
+                        <div class="flex flex-col gap-1">
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-2xl">@stat.Icon</span>
+                                    <span class="text-xs font-medium text-base-content/50 uppercase tracking-wide">@stat.Label</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-xs font-medium text-base-content/50 uppercase tracking-wide mb-1">@stat.Label</div>
+                            }
+                            <div class="text-3xl font-extrabold @txtColor leading-none">@stat.Value</div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+    @* Charts — full size *@
+    @if (Model.Charts.Count > 0)
+    {
+        var colClass = Model.Charts.Count == 1 ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2";
+        <div class="grid @colClass gap-5">
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var chart = Model.Charts[i];
+                <div class="bg-base-100 border border-base-300 rounded-2xl shadow-sm p-6">
+                    <h2 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">@chart.Title</h2>
+                    @if (chart.HasError)
+                    {
+                        <div class="flex items-center justify-center gap-2 text-error opacity-70" style="height:320px">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            <span class="text-sm">@chart.ErrorHint</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="relative" style="height:320px">
+                            <canvas id="chart-@i"></canvas>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else if (Model.Stats.Count == 0)
+    {
+        <div class="alert alert-info">
+            <span>統計情報が未設定です。<code>config/dashboard.yml</code> を設定してください。</span>
+        </div>
+    }
+</div>

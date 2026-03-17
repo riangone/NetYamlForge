@@ -1,0 +1,32 @@
+@* ファイル概要: ログイン入力フォーム画面です。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@using NetYamlForge.Localization
+@using Microsoft.Extensions.Localization
+@model NetYamlForge.Models.Auth.LoginViewModel
+@inject IStringLocalizer<SharedResource> L
+@{
+    ViewData["Title"] = L["Login"];
+}
+
+<div class="max-w-md mx-auto card bg-base-100 shadow">
+    <div class="card-body">
+        <h1 class="card-title">@L["Login"]</h1>
+        <form method="post" class="space-y-3">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div>
+                <label class="label"><span class="label-text">@L["UserName"]</span></label>
+                <input asp-for="UserName" class="input input-bordered w-full" />
+                <span asp-validation-for="UserName" class="text-error text-sm"></span>
+            </div>
+            <div>
+                <label class="label"><span class="label-text">@L["Password"]</span></label>
+                <input asp-for="Password" class="input input-bordered w-full" />
+                <span asp-validation-for="Password" class="text-error text-sm"></span>
+            </div>
+            <div asp-validation-summary="ModelOnly" class="text-error text-sm"></div>
+            <button type="submit" class="btn btn-primary btn-sm w-full">@L["Login"]</button>
+        </form>
+    </div>
+</div>

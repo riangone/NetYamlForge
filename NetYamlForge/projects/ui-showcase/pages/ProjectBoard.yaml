@@ -1,0 +1,44 @@
+title: Project Board
+description: kanban コンポーネントのデモ — ステータス別タスクボード
+
+sections:
+  - id: task_board
+    title: タスクボード（kanban）
+    component: kanban
+    source_type: custom
+    source: |
+      SELECT id, title, assignee, status, priority, due_date
+      FROM tasks
+      ORDER BY
+        CASE status
+          WHEN 'blocked'     THEN 1
+          WHEN 'in_progress' THEN 2
+          WHEN 'review'      THEN 3
+          WHEN 'todo'        THEN 4
+          WHEN 'done'        THEN 5
+          ELSE 6
+        END, id
+    columns: [id, title, assignee, status, priority, due_date]
+    group_by: status
+    card_title: title
+    card_subtitle: assignee
+    page_size: 50
+    editable: false
+    read_only: true
+
+  - id: task_table
+    title: タスク一覧（table）
+    component: table
+    source_type: custom
+    source: |
+      SELECT id, title, assignee AS 担当, status AS ステータス,
+             priority AS 優先度, due_date AS 期限
+      FROM tasks ORDER BY id
+    columns: [id, title, 担当, ステータス, 優先度, 期限]
+    filters:
+      ステータス:
+        label: ステータス
+        type: eq
+    page_size: 20
+    editable: false
+    read_only: true

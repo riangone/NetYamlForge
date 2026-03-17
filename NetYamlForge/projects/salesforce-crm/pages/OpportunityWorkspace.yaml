@@ -1,0 +1,73 @@
+title: Opportunity Workspace
+description: Deal review page inspired by Salesforce opportunity and account tabs.
+
+main_table: Orders
+
+sections:
+  - id: opportunities
+    title: Opportunities
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId AS OpportunityId,
+        c.CompanyName AS Account,
+        o.OrderDate AS CreatedDate,
+        o.RequiredDate AS TargetCloseDate,
+        o.Status AS Stage,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS Amount
+      FROM Orders o
+      JOIN Customers c ON c.CustomerId = o.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY o.OrderId, c.CompanyName, o.OrderDate, o.RequiredDate, o.Status
+      ORDER BY o.OrderDate DESC
+    columns:
+      - OpportunityId
+      - Account
+      - CreatedDate
+      - TargetCloseDate
+      - Stage
+      - Amount
+    page_size: 25
+    editable: false
+    read_only: true
+    filters:
+      Account:
+        label: Account
+        type: like
+      Stage:
+        label: Stage
+        type: eq
+
+  - id: quote_lines
+    title: Quote Lines
+    source_type: custom
+    source: |
+      SELECT
+        od.OrderDetailId AS QuoteLineId,
+        od.OrderId AS OpportunityId,
+        p.ProductName,
+        od.UnitPrice,
+        od.Quantity,
+        od.Discount,
+        ROUND((od.UnitPrice * od.Quantity) * (1 - od.Discount), 2) AS NetValue
+      FROM OrderDetails od
+      JOIN Products p ON p.ProductId = od.ProductId
+      ORDER BY od.OrderId DESC, od.OrderDetailId DESC
+    columns:
+      - QuoteLineId
+      - OpportunityId
+      - ProductName
+      - UnitPrice
+      - Quantity
+      - Discount
+      - NetValue
+    page_size: 40
+    editable: false
+    read_only: true
+    filters:
+      OpportunityId:
+        label: Opportunity ID
+        type: eq
+      ProductName:
+        label: Product
+        type: like

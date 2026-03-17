@@ -1,0 +1,65 @@
+stats:
+  - label: Open Opportunities
+    entity: order
+    aggregate: count
+    filter: Orders.Status = 'Open'
+    icon: 💼
+    color: badge-primary
+    labelKey: projects.salesforce-crm.dashboard.stats.0
+  - label: Delayed Deals
+    entity: order
+    aggregate: count
+    filter: Orders.Status = 'Delayed'
+    icon: 🚨
+    color: badge-error
+    labelKey: projects.salesforce-crm.dashboard.stats.1
+  - label: Active Accounts
+    entity: customer
+    aggregate: count
+    filter: Customers.Active = 1
+    icon: 🏢
+    color: badge-success
+    labelKey: projects.salesforce-crm.dashboard.stats.2
+  - label: Case-like Signals
+    entity: order
+    aggregate: count
+    filter: Orders.Status IN ('Delayed', 'Cancelled')
+    icon: 🛟
+    color: badge-warning
+    labelKey: projects.salesforce-crm.dashboard.stats.3
+charts:
+  - title: Pipeline by Stage
+    type: bar
+    entity: order
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 8
+    colorBg: rgba(37, 99, 235, 0.7)
+    colorBorder: rgba(37, 99, 235, 1)
+    titleKey: projects.salesforce-crm.dashboard.charts.0
+  - title: Revenue Velocity (Monthly)
+    type: line
+    entity: orderdetail
+    valueAggregate: sum
+    valueColumn: UnitPrice
+    groupExpression: strftime('%Y-%m', (SELECT o.OrderDate FROM Orders o WHERE o.OrderId = OrderDetails.OrderId))
+    orderBy: label
+    orderDir: asc
+    limit: 12
+    colorBg: rgba(16, 185, 129, 0.2)
+    colorBorder: rgba(16, 185, 129, 1)
+    titleKey: projects.salesforce-crm.dashboard.charts.1
+  - title: Top Accounts by Revenue
+    type: bar
+    entity: orderdetail
+    valueAggregate: sum
+    valueColumn: UnitPrice
+    groupExpression: (SELECT c.CompanyName FROM Orders o JOIN Customers c ON c.CustomerId = o.CustomerId WHERE o.OrderId = OrderDetails.OrderId)
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(245, 158, 11, 0.7)
+    colorBorder: rgba(245, 158, 11, 1)
+    titleKey: projects.salesforce-crm.dashboard.charts.2

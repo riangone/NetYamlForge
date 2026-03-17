@@ -1,0 +1,73 @@
+title: 営業KPI
+title_en: Sales KPI
+description: 顧客別売上、担当者別売上、商品別数量を確認します。
+
+main_table: Orders
+
+sections:
+  - id: customer_sales
+    title: 顧客別売上 Top 10
+    type: custom
+    source_type: custom
+    source: |
+      SELECT
+        c.CompanyName AS Customer,
+        COUNT(DISTINCT o.OrderId) AS Orders,
+        ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS Revenue
+      FROM Orders o
+      JOIN Customers c ON o.CustomerId = c.CustomerId
+      JOIN OrderDetails od ON o.OrderId = od.OrderId
+      GROUP BY c.CompanyName
+      ORDER BY Revenue DESC
+      LIMIT 10
+    columns:
+      - Customer
+      - Orders
+      - Revenue
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: employee_sales
+    title: 担当者別売上
+    type: custom
+    source_type: custom
+    source: |
+      SELECT
+        (e.LastName || ', ' || e.FirstName) AS Employee,
+        COUNT(DISTINCT o.OrderId) AS Orders,
+        ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS Revenue
+      FROM Orders o
+      JOIN Employees e ON o.EmployeeId = e.EmployeeId
+      JOIN OrderDetails od ON o.OrderId = od.OrderId
+      GROUP BY Employee
+      ORDER BY Revenue DESC
+    columns:
+      - Employee
+      - Orders
+      - Revenue
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: product_volume
+    title: 商品別出荷数量
+    type: custom
+    source_type: custom
+    source: |
+      SELECT
+        p.ProductName,
+        SUM(od.Quantity) AS Quantity,
+        ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS Revenue
+      FROM OrderDetails od
+      JOIN Products p ON od.ProductId = p.ProductId
+      GROUP BY p.ProductName
+      ORDER BY Quantity DESC
+      LIMIT 20
+    columns:
+      - ProductName
+      - Quantity
+      - Revenue
+    page_size: 20
+    editable: false
+    read_only: true

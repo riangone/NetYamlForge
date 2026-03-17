@@ -1,0 +1,295 @@
+@* ファイル概要: 動的CRUDのメイン画面。検索・フィルタ・一覧領域を構成します。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@using NetYamlForge.Models
+@model NetYamlForge.Controllers.DynamicListViewModel
+@{
+    var title = Model.Meta.GetDisplayName();
+    ViewData["Title"] = title;
+    ViewBag.ForeignKeyData = Model.ForeignKeyData;
+    var filterCols = Math.Clamp(Model.Meta.Layout.Filters.Columns, 1, 6);
+    var filterColClass = $"md:grid-cols-{filterCols}";
+    var orderedFilters = Model.Meta.GetOrderedFilters().ToList();
+    IReadOnlyList<BreadcrumbItem> breadcrumbs = Model.BreadcrumbChain ?? new List<BreadcrumbItem>();
+}
+
+<div class="space-y-4">
+    <div class="flex flex-col gap-2">
+
+        @* パンくずナビ（タイトルの上） *@
+        <nav aria-label="Breadcrumb" class="text-sm text-base-content/60">
+            <ol class="flex flex-wrap items-center gap-1.5">
+                <li>
+                    <a class="link link-hover"
+                       asp-controller="Dashboard"
+                       asp-action="Index">Dashboard</a>
+                </li>
+                @foreach (var crumb in breadcrumbs)
+                {
+                    <li aria-hidden="true">/</li>
+                    <li>
+                        <a class="link link-hover" href="@crumb.Url">@crumb.Label</a>
+                    </li>
+                }
+                <li aria-hidden="true">/</li>
+                <li class="font-semibold text-base-content">@title</li>
+            </ol>
+        </nav>
+
+        @* Newボタン（モーダル） + タイトル。"New Page" は _List.cshtml 内に移動（HTMX でstate付きURLを維持するため） *@
+        <div class="flex items-center gap-3">
+            <button class="btn btn-primary btn-sm"
+                hx-get="@Url.Action("CreateForm", "DynamicEntity", new { entity = Model.Entity, mode = "modal", returnUrl = Model.ReturnUrl })"
+                hx-target="#modal-form-content"
+                hx-swap="innerHTML">
+                New
+            </button>
+            <h1 class="text-2xl font-bold">@title</h1>
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="btn btn-ghost btn-xs text-base-content/50"
+                   asp-controller="DynamicEntity"
+                   asp-action="Definition"
+                   asp-route-entity="@Model.Entity"
+                   title="View Definition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Definition
+                </a>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+        {
+            <div class="flex items-center gap-2 text-sm text-base-content/70">
+                <a class="btn btn-ghost btn-sm" href="@Model.ReturnUrl">
+                    ← 前の@(Model.ReturnDisplayName ?? Model.ReturnEntity ?? "一覧")に戻る
+                </a>
+                <span>状態を維持したまま戻る</span>
+            </div>
+        }
+    </div>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <form id="filter-form"
+                  class="grid grid-cols-1 @filterColClass gap-3"
+                  hx-get="@Url.Action("ListPartial", "DynamicEntity")"
+                  hx-target="#list-container"
+                  hx-swap="innerHTML">
+                <input type="hidden" name="entity" value="@Model.Entity" />
+                <input type="hidden" name="count" value="true" />
+                <input type="hidden" name="clear" value="" id="clear-flag" />
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
+                <label class="input input-bordered col-span-full">
+                    <span class="label">Search</span>
+                    <input type="text" name="search" value="@Model.Search" placeholder="Search..." id="search-input" />
+                </label>
+
+                @foreach (var f in orderedFilters)
+                {
+                    var name = f.Key;
+                    var def = f.Value;
+                    <div>
+                        <div class="label text-sm">@def.GetLabel(name)</div>
+                        @await Html.PartialAsync("_FilterControl", (name, def, Model.Filters ?? new Dictionary<string, string?>()))
+                    </div>
+                }
+
+                <div class="col-span-full flex items-center gap-2">
+                    <button type="submit" class="btn btn-outline btn-sm">Search</button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <dialog id="entity-form-modal" class="modal">
+        <div class="modal-box max-w-3xl">
+            <div id="modal-form-content"></div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <div id="list-container"
+         hx-get="@Url.Action("ListPartial", "DynamicEntity", new { entity = Model.Entity, search = Model.Search, sort = Model.Sort, dir = Model.Dir, count = "true", cursor = Model.Cursor, returnUrl = Model.ReturnUrl })"
+         hx-include="#filter-form"
+         hx-trigger="load"
+         hx-target="#list-container"
+         hx-swap="innerHTML"></div>
+</div>
+
+@section Scripts {
+    <script>
+        document.body.addEventListener("htmx:afterSwap", function (evt) {
+            if (evt.target && evt.target.id === "modal-form-content") {
+                const dlg = document.getElementById("entity-form-modal");
+                if (dlg && typeof dlg.showModal === "function") {
+                    dlg.showModal();
+                }
+            }
+        });
+
+        document.body.addEventListener("entity-form-saved", function () {
+            const dlg = document.getElementById("entity-form-modal");
+            const content = document.getElementById("modal-form-content");
+            if (dlg && typeof dlg.close === "function") {
+                dlg.close();
+            }
+            if (content) {
+                content.innerHTML = "";
+            }
+        });
+
+        document.getElementById("clear-filters-btn")?.addEventListener("click", function () {
+            const form = document.getElementById("filter-form");
+            if (!form) return;
+            const clearFlag = document.getElementById("clear-flag");
+
+            const fields = form.querySelectorAll("input, select, textarea");
+            fields.forEach(function (field) {
+                if (field.name === "entity" || field.name === "count" || field.name === "clear" || field.name === "returnUrl") {
+                    return;
+                }
+                if (field.tagName === "SELECT") {
+                    if (field.multiple) {
+                        Array.from(field.options).forEach(function (opt) { opt.selected = false; });
+                    }
+                    field.value = "";
+                    return;
+                }
+                if (field.type === "checkbox" || field.type === "radio") {
+                    field.checked = false;
+                    return;
+                }
+                field.value = "";
+            });
+
+            const pickerDisplays = form.querySelectorAll("[id^='picker-display-']");
+            pickerDisplays.forEach(function (display) {
+                if (display.tagName === "INPUT") {
+                    display.value = "";
+                } else {
+                    display.textContent = "(All)";
+                }
+            });
+
+            const pickerChips = form.querySelectorAll("[id^='picker-chips-']");
+            pickerChips.forEach(function (chips) {
+                chips.innerHTML = "";
+            });
+
+            form.querySelectorAll("[data-multi-compact-option]").forEach(function (opt) { opt.checked = false; });
+            form.querySelectorAll("[data-multi-compact]").forEach(function (container) {
+                syncCompactMultiSelect(container);
+            });
+
+            // toggle-group / bool-toggle: 全ボタンを outline に戻し "All" (value="") を active に
+            form.querySelectorAll("[data-toggle-group]").forEach(function (group) {
+                group.querySelectorAll('input[type="radio"]').forEach(function (r) {
+                    var span = r.nextElementSibling;
+                    if (!span) return;
+                    span.classList.remove("btn-primary", "btn-active");
+                    span.classList.add("btn-outline");
+                });
+                var allRadio = group.querySelector('input[type="radio"][value=""]');
+                if (allRadio) {
+                    allRadio.checked = true;
+                    var allSpan = allRadio.nextElementSibling;
+                    if (allSpan) {
+                        allSpan.classList.remove("btn-outline");
+                        allSpan.classList.add("btn-primary", "btn-active");
+                    }
+                }
+            });
+
+            if (clearFlag) {
+                clearFlag.value = "1";
+            }
+
+            if (window.htmx) {
+                window.htmx.trigger(form, "submit");
+            } else {
+                form.submit();
+            }
+        });
+
+        document.getElementById("filter-form")?.addEventListener("submit", function () {
+            const clearFlag = document.getElementById("clear-flag");
+            if (clearFlag && clearFlag.value !== "1") {
+                clearFlag.value = "";
+            }
+        });
+
+        document.body.addEventListener("htmx:afterRequest", function (evt) {
+            const target = evt && evt.detail && evt.detail.elt;
+            if (!target || target.id !== "filter-form") return;
+            const clearFlag = document.getElementById("clear-flag");
+            if (clearFlag) {
+                clearFlag.value = "";
+            }
+        });
+
+        function syncCompactMultiSelect(container) {
+            if (!container) return;
+            const hidden = container.querySelector("[data-multi-compact-value]");
+            const summary = container.querySelector("[data-multi-compact-summary]");
+            const options = Array.from(container.querySelectorAll("[data-multi-compact-option]"));
+            if (!hidden || !summary) return;
+
+            const selectedOpts = options.filter(function (opt) { return opt.checked; });
+            const selected = selectedOpts.map(function (opt) { return opt.value; }).filter(function (v) { return !!v; });
+
+            hidden.value = selected.join(",");
+            const baseLabel = container.getAttribute("data-multi-compact-label")
+                || container.getAttribute("data-multi-compact")
+                || "items";
+
+            if (selected.length === 0) {
+                summary.textContent = "All " + baseLabel;
+            } else {
+                const labels = selectedOpts.map(function (opt) {
+                    var span = opt.closest("label") && opt.closest("label").querySelector(".label-text");
+                    return span ? span.textContent.trim() : opt.value;
+                });
+                summary.textContent = labels.length <= 3
+                    ? labels.join(", ")
+                    : (labels.slice(0, 2).join(", ") + " +" + (labels.length - 2) + " more");
+            }
+
+            // Update chips area
+            var chips = container.querySelector("[data-multi-compact-chips]");
+            if (chips) {
+                chips.innerHTML = "";
+                selectedOpts.forEach(function (opt) {
+                    var span = opt.closest("label") && opt.closest("label").querySelector(".label-text");
+                    var lbl = span ? span.textContent.trim() : opt.value;
+                    var chip = document.createElement("span");
+                    chip.className = "badge badge-neutral badge-sm gap-1 text-xs cursor-pointer";
+                    chip.title = "クリックで解除";
+                    chip.textContent = lbl;
+                    chip.addEventListener("click", function () {
+                        opt.checked = false;
+                        syncCompactMultiSelect(container);
+                    });
+                    chips.appendChild(chip);
+                });
+            }
+        }
+
+        document.querySelectorAll("[data-multi-compact]").forEach(function (el) {
+            syncCompactMultiSelect(el);
+        });
+
+        document.body.addEventListener("change", function (evt) {
+            const target = evt.target;
+            if (!target || !target.matches("[data-multi-compact-option]")) return;
+            syncCompactMultiSelect(target.closest("[data-multi-compact]"));
+        });
+    </script>
+}

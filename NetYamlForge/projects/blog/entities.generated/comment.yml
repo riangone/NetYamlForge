@@ -1,0 +1,40 @@
+entities:
+  comment:
+    table: 'comments'
+    key: 'comment_id'
+    displayName: 'Comment'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['post_id', 'author_name', 'author_email', 'content', 'status', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      comment_id: { type: int, identity: true, label: 'Comment Id', sortable: true }
+      post_id: { type: int, required: true, label: 'Post Id', sortable: true }
+      author_name: { type: string, required: true, label: 'Author Name', searchable: true, sortable: true }
+      author_email: { type: string, required: true, label: 'Author Email', searchable: true, sortable: true }
+      content: { type: string, required: true, label: 'Content', searchable: true, sortable: true }
+      status: { type: string, label: 'Status', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+    forms:
+      post_id:
+        type: int
+        required: true
+        label: 'Post Id'
+        editable: true
+        foreignKey:
+          entity: post
+          displayColumn: 'title'
+      author_name: { type: string, required: true, label: 'Author Name', editable: true }
+      author_email: { type: string, required: true, label: 'Author Email', editable: true }
+      content: { type: string, required: true, label: 'Content', editable: true }
+      status: { type: string, label: 'Status', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

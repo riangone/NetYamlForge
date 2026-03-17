@@ -1,0 +1,51 @@
+hero:
+  eyebrow: Tmp Mode Display
+  eyebrowKey: projects.tmp-mode-display.home.hero.eyebrow
+  title: Tmp Mode Display Workspace
+  titleKey: projects.tmp-mode-display.home.hero.title
+  description: Starter workspace generated from your database schema.
+  descriptionKey: projects.tmp-mode-display.home.hero.description
+  primaryActionLabel: Open Dashboard
+  primaryActionLabelKey: projects.tmp-mode-display.home.hero.primaryActionLabel
+  primaryActionUrl: /tmp-mode-display/Dashboard
+  secondaryActionLabel: Open Schema Definitions
+  secondaryActionLabelKey: projects.tmp-mode-display.home.hero.secondaryActionLabel
+  secondaryActionUrl: /tmp-mode-display/DynamicEntity/AllDefinitions
+  highlights:
+    - Template Ready
+    - YAML First
+  highlightKeys:
+    - projects.tmp-mode-display.home.hero.highlights.0
+    - projects.tmp-mode-display.home.hero.highlights.1
+
+projectsSectionTitle: Tmp Mode Display
+projectsSectionTitleKey: projects.tmp-mode-display.home.sections.projects.title
+projectsSectionLead: Build your business screens from this starter project.
+projectsSectionLeadKey: projects.tmp-mode-display.home.sections.projects.lead
+capabilitiesSectionTitle: Core Capabilities
+capabilitiesSectionTitleKey: projects.tmp-mode-display.home.sections.capabilities.title
+solutionsSectionTitle: Solution Matrix
+solutionsSectionTitleKey: projects.tmp-mode-display.home.sections.solutions.title
+quickActionsSectionTitle: Quick Actions
+quickActionsSectionTitleKey: projects.tmp-mode-display.home.sections.quickActions.title
+openWorkspaceLabel: Open Workspace
+openWorkspaceLabelKey: projects.tmp-mode-display.home.actions.openWorkspace
+emptyProjectsMessage: No projects found under projects/.
+emptyProjectsMessageKey: projects.tmp-mode-display.home.emptyProjectsMessage
+
+quickActions:
+  - label: Dashboard
+    labelKey: projects.tmp-mode-display.home.quickActions.0.label
+    url: /tmp-mode-display/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Definitions
+    labelKey: projects.tmp-mode-display.home.quickActions.1.label
+    url: /tmp-mode-display/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    labelKey: projects.tmp-mode-display.home.quickActions.2.label
+    url: /tmp-mode-display/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭

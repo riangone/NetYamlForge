@@ -1,0 +1,29 @@
+hero:
+  eyebrow: ショップ管理
+  title: ショップ管理システム
+  description: 商品・カテゴリを管理するサンプルプロジェクト。developer-tutorial-ja.md のチュートリアルに従って作成。
+  primaryActionLabel: ダッシュボード
+  primaryActionUrl: /shop/Dashboard
+  secondaryActionLabel: 商品一覧
+  secondaryActionUrl: /shop/DynamicEntity/Index?entity=product
+  highlights:
+    - チュートリアルサンプル
+    - 商品管理
+    - カテゴリ管理
+
+projectsSectionTitle: ショップ管理
+projectsSectionLead: 商品・カテゴリのCRUD操作とダッシュボード統計を体験できます。
+
+quickActions:
+  - label: ダッシュボード
+    url: /shop/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 商品一覧
+    url: /shop/DynamicEntity/Index?entity=product
+    style: btn-outline
+    icon: 🛍️
+  - label: カテゴリ一覧
+    url: /shop/DynamicEntity/Index?entity=category
+    style: btn-outline
+    icon: 📂

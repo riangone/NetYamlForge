@@ -1,0 +1,32 @@
+title: コメント審査キュー
+title_en: Comment Moderation
+
+template: CommentQueue
+
+sections:
+  - id: pending
+    title: 承認待ちコメント
+    type: custom
+    source_type: custom
+    source: |
+      SELECT c.comment_id, c.author_name, c.author_email, c.content,
+             c.created_at, p.title AS post_title, p.post_id
+      FROM comments c
+      JOIN posts p ON c.post_id = p.post_id
+      WHERE c.status = 'pending'
+      ORDER BY c.created_at ASC
+    columns:
+      - comment_id
+      - author_name
+      - author_email
+      - content
+      - created_at
+      - post_title
+      - post_id
+    target_table: comments
+    target_primary_key: comment_id
+    updatable_fields:
+      - status
+    page_size: 50
+    editable: false
+    read_only: true

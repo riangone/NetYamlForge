@@ -1,0 +1,275 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath ?? "_Layout";
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    ViewData["Title"] = T("projects.salesforce-crm.pages.AuditTrail.title", "Audit Trail");
+
+    var recent = Model.TryGetValue("recent_events", out var e) ? e.Rows.ToList() : new List<Dictionary<string, object>>();
+    var byUser = Model.TryGetValue("activity_by_user", out var u) ? u.Rows.ToList() : new List<Dictionary<string, object>>();
+    var byEntity = Model.TryGetValue("activity_by_entity", out var en) ? en.Rows.ToList() : new List<Dictionary<string, object>>();
+    var hookRejected = Model.TryGetValue("hook_rejected_events", out var hr) ? hr.Rows.ToList() : new List<Dictionary<string, object>>();
+    var savedViews = ViewData["SavedViews"] as List<Dictionary<string, string>> ?? new List<Dictionary<string, string>>();
+    var currentProject = ViewContext.RouteData.Values["project"]?.ToString() ?? "salesforce-crm";
+    var selectedAction = Context.Request.Query["recent_events_Action"].ToString();
+    var selectedEntity = Context.Request.Query["recent_events_Entity"].ToString();
+    var selectedCreatedAt = Context.Request.Query["recent_events_CreatedAt"].ToString();
+    var selectedCreatedAtTo = Context.Request.Query["recent_events_CreatedAt_to"].ToString();
+    var selectedCreatedAtInput = selectedCreatedAt.Length >= 10 ? selectedCreatedAt[..10] : selectedCreatedAt;
+    var selectedCreatedAtToInput = selectedCreatedAtTo.Length >= 10 ? selectedCreatedAtTo[..10] : selectedCreatedAtTo;
+    var todayStart = DateTime.Now.Date.ToString("yyyy-MM-dd");
+    var todayEnd = DateTime.Now.Date.AddDays(1).AddSeconds(-1).ToString("yyyy-MM-dd HH:mm:ss");
+    var sevenDaysStart = DateTime.Now.Date.AddDays(-7).ToString("yyyy-MM-dd");
+    var thirtyDaysStart = DateTime.Now.Date.AddDays(-30).ToString("yyyy-MM-dd");
+    var isAll = string.IsNullOrWhiteSpace(selectedAction) &&
+        string.IsNullOrWhiteSpace(selectedEntity) &&
+        string.IsNullOrWhiteSpace(selectedCreatedAt) &&
+        string.IsNullOrWhiteSpace(selectedCreatedAtTo);
+    var isOrderPageUpdate = string.Equals(selectedAction, "page_update", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(selectedEntity, "Orders", StringComparison.OrdinalIgnoreCase);
+    var isOrderPageDelete = string.Equals(selectedAction, "page_delete", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(selectedEntity, "Orders", StringComparison.OrdinalIgnoreCase);
+    var isToday = string.Equals(selectedCreatedAt, todayStart, StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(selectedCreatedAtTo, todayEnd, StringComparison.OrdinalIgnoreCase);
+    var isLast7Days = string.Equals(selectedCreatedAt, sevenDaysStart, StringComparison.OrdinalIgnoreCase) &&
+        string.IsNullOrWhiteSpace(selectedCreatedAtTo);
+    var isLast30Days = string.Equals(selectedCreatedAt, thirtyDaysStart, StringComparison.OrdinalIgnoreCase) &&
+        string.IsNullOrWhiteSpace(selectedCreatedAtTo);
+}
+
+<div class="space-y-6">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <h1 class="text-2xl font-bold">@T("projects.salesforce-crm.pages.AuditTrail.title", "Audit Trail")</h1>
+        <p class="mt-1 text-sm opacity-70">@T("projects.salesforce-crm.pages.AuditTrail.description", "Operational audit timeline for user actions, entity changes, and security-sensitive events.")</p>
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+            <a class="btn btn-xs @(isAll ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail">@T("projects.salesforce-crm.pages.AuditTrail.quick.all", "全イベント")</a>
+            <a class="btn btn-xs @((selectedAction == "crm_order_event") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=crm_order_event">@T("projects.salesforce-crm.pages.AuditTrail.quick.orderEvents", "受注イベント")</a>
+            <a class="btn btn-xs @((selectedAction == "crm_customer_event") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=crm_customer_event">@T("projects.salesforce-crm.pages.AuditTrail.quick.customerEvents", "顧客イベント")</a>
+            <a class="btn btn-xs @((selectedAction == "crm_product_event") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=crm_product_event">@T("projects.salesforce-crm.pages.AuditTrail.quick.productEvents", "商品イベント")</a>
+            <a class="btn btn-xs @((selectedAction == "hook_rejected") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=hook_rejected">@T("projects.salesforce-crm.pages.AuditTrail.quick.hookRejected", "Hook拒否")</a>
+            <a class="btn btn-xs @((selectedEntity == "Orders") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Entity=Orders">@T("projects.salesforce-crm.pages.AuditTrail.quick.orderMutations", "受注ミューテーション")</a>
+            <a class="btn btn-xs @((selectedAction == "page_update") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=page_update">@T("projects.salesforce-crm.pages.AuditTrail.quick.pageUpdates", "画面更新")</a>
+            <a class="btn btn-xs @((selectedAction == "page_delete") ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=page_delete">@T("projects.salesforce-crm.pages.AuditTrail.quick.pageDeletes", "画面削除")</a>
+            <a class="btn btn-xs @(isOrderPageUpdate ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=page_update&recent_events_Entity=Orders">@T("projects.salesforce-crm.pages.AuditTrail.quick.orderPageUpdates", "受注画面更新")</a>
+            <a class="btn btn-xs @(isOrderPageDelete ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_Action=page_delete&recent_events_Entity=Orders">@T("projects.salesforce-crm.pages.AuditTrail.quick.orderPageDeletes", "受注画面削除")</a>
+            <a class="btn btn-xs @(isToday ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_CreatedAt=@todayStart&recent_events_CreatedAt_to=@todayEnd">@T("projects.salesforce-crm.pages.AuditTrail.quick.today", "今日")</a>
+            <a class="btn btn-xs @(isLast7Days ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_CreatedAt=@sevenDaysStart">@T("projects.salesforce-crm.pages.AuditTrail.quick.last7days", "直近7日")</a>
+            <a class="btn btn-xs @(isLast30Days ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail?recent_events_CreatedAt=@thirtyDaysStart">@T("projects.salesforce-crm.pages.AuditTrail.quick.last30days", "直近30日")</a>
+            <a class="btn btn-xs @(isAll ? "btn-primary" : "btn-outline")" href="/@currentProject/Page/AuditTrail">@T("projects.salesforce-crm.pages.AuditTrail.quick.clear", "クリア")</a>
+            @if (!string.IsNullOrWhiteSpace(selectedAction) || !string.IsNullOrWhiteSpace(selectedEntity) || !string.IsNullOrWhiteSpace(selectedCreatedAt) || !string.IsNullOrWhiteSpace(selectedCreatedAtTo))
+            {
+                <span class="badge badge-neutral badge-sm">@T("projects.salesforce-crm.pages.AuditTrail.quick.filter", "フィルタ"): @(string.IsNullOrWhiteSpace(selectedAction) ? "-" : selectedAction) / @(string.IsNullOrWhiteSpace(selectedEntity) ? "-" : selectedEntity) / @(string.IsNullOrWhiteSpace(selectedCreatedAt) ? "-" : selectedCreatedAt) ~ @(string.IsNullOrWhiteSpace(selectedCreatedAtTo) ? "-" : selectedCreatedAtTo)</span>
+            }
+        </div>
+        <form method="get" action="/@currentProject/Page/AuditTrail" class="mt-3 flex flex-wrap items-end gap-2">
+            @if (!string.IsNullOrWhiteSpace(selectedAction))
+            {
+                <input type="hidden" name="recent_events_Action" value="@selectedAction" />
+            }
+            @if (!string.IsNullOrWhiteSpace(selectedEntity))
+            {
+                <input type="hidden" name="recent_events_Entity" value="@selectedEntity" />
+            }
+            <label class="form-control">
+                <span class="label-text text-xs">@T("projects.salesforce-crm.pages.AuditTrail.quick.from", "開始日")</span>
+                <input class="input input-bordered input-xs" type="date" name="recent_events_CreatedAt" value="@selectedCreatedAtInput" />
+            </label>
+            <label class="form-control">
+                <span class="label-text text-xs">@T("projects.salesforce-crm.pages.AuditTrail.quick.to", "終了日")</span>
+                <input class="input input-bordered input-xs" type="date" name="recent_events_CreatedAt_to" value="@selectedCreatedAtToInput" />
+            </label>
+            <button type="submit" class="btn btn-xs btn-primary">@T("projects.salesforce-crm.pages.AuditTrail.quick.apply", "適用")</button>
+        </form>
+        <div class="mt-4 rounded-xl border border-base-300 p-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h3 class="text-sm font-semibold">@T("projects.salesforce-crm.pages.AuditTrail.saved.title", "保存済みビュー")</h3>
+                <form method="post" action="/@currentProject/Page/AuditTrail/save-view" class="flex flex-wrap items-center gap-2">
+                    @Html.AntiForgeryToken()
+                    <input class="input input-bordered input-xs w-40" type="text" name="viewName" placeholder="@T("projects.salesforce-crm.pages.AuditTrail.saved.namePlaceholder", "ビュー名")" required />
+                    <label class="label cursor-pointer gap-1">
+                        <input type="checkbox" name="isDefault" value="true" class="checkbox checkbox-xs" />
+                        <span class="label-text text-xs">@T("projects.salesforce-crm.pages.AuditTrail.saved.default", "デフォルト")</span>
+                    </label>
+                    @if (!string.IsNullOrWhiteSpace(selectedAction))
+                    {
+                        <input type="hidden" name="recent_events_Action" value="@selectedAction" />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(selectedEntity))
+                    {
+                        <input type="hidden" name="recent_events_Entity" value="@selectedEntity" />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(selectedCreatedAt))
+                    {
+                        <input type="hidden" name="recent_events_CreatedAt" value="@selectedCreatedAt" />
+                    }
+                    @if (!string.IsNullOrWhiteSpace(selectedCreatedAtTo))
+                    {
+                        <input type="hidden" name="recent_events_CreatedAt_to" value="@selectedCreatedAtTo" />
+                    }
+                    <button type="submit" class="btn btn-xs btn-secondary">@T("projects.salesforce-crm.pages.AuditTrail.saved.save", "保存")</button>
+                </form>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+                @if (savedViews.Count == 0)
+                {
+                    <span class="text-xs text-base-content/60">@T("projects.salesforce-crm.pages.AuditTrail.saved.empty", "保存済みビューはありません。")</span>
+                }
+                else
+                {
+                    foreach (var view in savedViews)
+                    {
+                        var viewName = view.TryGetValue("ViewName", out var vn) ? vn : "-";
+                        var viewUrl = view.TryGetValue("Url", out var vu) ? vu : $"/{currentProject}/Page/AuditTrail";
+                        var isDefaultView = view.TryGetValue("IsDefault", out var dv) && dv == "1";
+                        <a class="btn btn-xs @(isDefaultView ? "btn-primary" : "btn-outline")" href="@viewUrl">@viewName</a>
+                        <form method="post" action="/@currentProject/Page/AuditTrail/delete-view" class="inline-flex">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="viewName" value="@viewName" />
+                            <button type="submit" class="btn btn-xs btn-ghost text-error">@T("projects.salesforce-crm.pages.AuditTrail.saved.delete", "削除")</button>
+                        </form>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 lg:grid-cols-2">
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_user.title", "Activity by User")</h2>
+            <div class="mt-3 overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_user.columns.UserName", "User")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_user.columns.EventCount", "Events")</th>
+                            <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_user.columns.LastEventAt", "Last Event")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in byUser)
+                    {
+                        <tr>
+                            <td>@(row.TryGetValue("UserName", out var c0) ? c0 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("EventCount", out var c1) ? c1 : "")</td>
+                            <td>@(row.TryGetValue("LastEventAt", out var c2) ? c2 : "")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+            <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_entity.title", "Activity by Entity")</h2>
+            <div class="mt-3 overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_entity.columns.Entity", "Entity")</th>
+                            <th class="text-right">@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_entity.columns.EventCount", "Events")</th>
+                            <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.activity_by_entity.columns.LastEventAt", "Last Event")</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in byEntity)
+                    {
+                        <tr>
+                            <td>@(row.TryGetValue("Entity", out var c0) ? c0 : "")</td>
+                            <td class="text-right">@(row.TryGetValue("EventCount", out var c1) ? c1 : "")</td>
+                            <td>@(row.TryGetValue("LastEventAt", out var c2) ? c2 : "")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+        <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.title", "Recent Events")</h2>
+        <div class="mt-3 overflow-x-auto">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.Id", "ID")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.UserName", "User")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.Action", "Action")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.Entity", "Entity")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.Detail", "Detail")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.recent_events.columns.CreatedAt", "Created At")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!recent.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="py-6 text-center text-base-content/50">@T("projects.salesforce-crm.pages.AuditTrail.empty", "No audit events.")</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var row in recent)
+                        {
+                            <tr>
+                                <td>@(row.TryGetValue("Id", out var c0) ? c0 : "")</td>
+                                <td>@(row.TryGetValue("UserName", out var c1) ? c1 : "")</td>
+                                <td>@(row.TryGetValue("Action", out var c2) ? c2 : "")</td>
+                                <td>@(row.TryGetValue("Entity", out var c3) ? c3 : "")</td>
+                                <td>@(row.TryGetValue("Detail", out var c4) ? c4 : "")</td>
+                                <td>@(row.TryGetValue("CreatedAt", out var c5) ? c5 : "")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+        <h2 class="text-lg font-semibold">@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.title", "Hook Rejected Events")</h2>
+        <div class="mt-3 overflow-x-auto">
+            <table class="table table-xs">
+                <thead>
+                    <tr>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.Id", "ID")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.UserName", "User")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.Entity", "Entity")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.Operation", "Operation")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.RecordKey", "Record Key")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.HookNames", "Hooks")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.Reason", "Reason")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.ReasonCode", "Reason Code")</th>
+                        <th>@T("projects.salesforce-crm.pages.AuditTrail.sections.hook_rejected_events.columns.CreatedAt", "Created At")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!hookRejected.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="py-4 text-center text-base-content/50">@T("projects.salesforce-crm.pages.AuditTrail.empty", "No audit events.")</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var row in hookRejected)
+                        {
+                            <tr>
+                                <td>@(row.TryGetValue("Id", out var c0) ? c0 : "")</td>
+                                <td>@(row.TryGetValue("UserName", out var c1) ? c1 : "")</td>
+                                <td>@(row.TryGetValue("Entity", out var c2) ? c2 : "")</td>
+                                <td>@(row.TryGetValue("Operation", out var c3) ? c3 : "")</td>
+                                <td>@(row.TryGetValue("RecordKey", out var c4) ? c4 : "")</td>
+                                <td class="max-w-xs truncate">@(row.TryGetValue("HookNames", out var c5) ? c5 : "")</td>
+                                <td class="max-w-md truncate">@(row.TryGetValue("Reason", out var c6) ? c6 : "")</td>
+                                <td>@(row.TryGetValue("ReasonCode", out var c7) ? c7 : "")</td>
+                                <td>@(row.TryGetValue("CreatedAt", out var c8) ? c8 : "")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

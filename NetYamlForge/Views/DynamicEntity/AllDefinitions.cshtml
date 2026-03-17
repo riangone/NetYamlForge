@@ -1,0 +1,217 @@
+@* ファイル概要: プロジェクト内の全エンティティ定義を概要テーブルで一覧表示する Admin 専用ページ。 *@
+
+@using NetYamlForge.Models
+@model NetYamlForge.Controllers.AllDefinitionsViewModel
+@{
+    ViewData["Title"] = "Schema — All Definitions";
+}
+
+<div class="space-y-4">
+    @* パンくずナビ *@
+    <nav aria-label="Breadcrumb" class="text-sm text-base-content/60">
+        <ol class="flex flex-wrap items-center gap-1.5">
+            <li><a class="link link-hover" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-base-content">Schema</li>
+        </ol>
+    </nav>
+
+    <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold">Schema</h1>
+        <span class="badge badge-neutral badge-lg">@Model.Entities.Count entities</span>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>Entity</th>
+                            <th>Display Name</th>
+                            <th>Table</th>
+                            <th>Key</th>
+                            <th class="text-center">Columns</th>
+                            <th class="text-center">Forms</th>
+                            <th class="text-center">Filters</th>
+                            <th class="text-center">Joins</th>
+                            <th class="text-center">Links</th>
+                            <th>Paging</th>
+                            <th>Flags</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kv in Model.Entities.OrderBy(e => e.Key))
+                        {
+                            var e = kv.Value;
+                            <tr>
+                                <td>
+                                    <code class="font-mono font-bold text-sm">@kv.Key</code>
+                                </td>
+                                <td>
+                                    <span>@e.GetDisplayName()</span>
+                                    @if (e.DisplayNameI18n != null && e.DisplayNameI18n.Count > 1)
+                                    {
+                                        <span class="badge badge-ghost badge-xs ml-1">i18n</span>
+                                    }
+                                </td>
+                                <td><code class="font-mono text-sm">@e.Table</code></td>
+                                <td><code class="font-mono text-sm text-base-content/60">@e.Key</code></td>
+                                <td class="text-center">
+                                    <span class="badge badge-ghost badge-sm">@e.Columns.Count</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-ghost badge-sm">@e.Forms.Count</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-ghost badge-sm">@e.Filters.Count</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (e.Joins.Count > 0)
+                                    {
+                                        <span class="badge badge-info badge-sm">@e.Joins.Count</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-base-content/30">–</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (e.Links.Count > 0)
+                                    {
+                                        <span class="badge badge-accent badge-sm">@e.Links.Count</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-base-content/30">–</span>
+                                    }
+                                </td>
+                                <td class="text-sm text-base-content/70">
+                                    @e.Paging.PageSize / @e.Paging.Mode
+                                </td>
+                                <td>
+                                    <div class="flex flex-wrap gap-1">
+                                        @if (!e.IsPublic)
+                                        {
+                                            <span class="badge badge-warning badge-xs">private</span>
+                                        }
+                                        @if (e.SoftDelete)
+                                        {
+                                            <span class="badge badge-info badge-xs">soft-del</span>
+                                        }
+                                        @if (e.Hooks != null)
+                                        {
+                                            <span class="badge badge-secondary badge-xs">hooks</span>
+                                        }
+                                        @if (e.Confirmation != null)
+                                        {
+                                            <span class="badge badge-ghost badge-xs">confirm</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="btn btn-ghost btn-xs"
+                                       asp-controller="DynamicEntity"
+                                       asp-action="Definition"
+                                       asp-route-entity="@kv.Key">
+                                        Detail →
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* Joins / Links クロス参照サマリ *@
+    @{
+        var entitiesWithJoins = Model.Entities.Where(e => e.Value.Joins.Count > 0).ToList();
+        var entitiesWithLinks = Model.Entities.Where(e => e.Value.Links.Count > 0).ToList();
+    }
+    @if (entitiesWithJoins.Any() || entitiesWithLinks.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            @if (entitiesWithJoins.Any())
+            {
+                <div class="card bg-base-100 shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-base">JOIN 一覧</h2>
+                        <div class="overflow-x-auto">
+                            <table class="table table-xs w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Entity</th>
+                                        <th>Type</th>
+                                        <th>Table (alias)</th>
+                                        <th>ON</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var kv in entitiesWithJoins)
+                                    {
+                                        @foreach (var j in kv.Value.Joins)
+                                        {
+                                            <tr>
+                                                <td><code class="font-mono text-xs">@kv.Key</code></td>
+                                                <td><span class="badge badge-ghost badge-xs">@j.Type.ToUpperInvariant()</span></td>
+                                                <td><code class="font-mono text-xs">@j.Table (@j.Alias)</code></td>
+                                                <td><code class="font-mono text-xs text-base-content/60">@j.On</code></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (entitiesWithLinks.Any())
+            {
+                <div class="card bg-base-100 shadow">
+                    <div class="card-body">
+                        <h2 class="card-title text-base">エンティティ間リンク</h2>
+                        <div class="overflow-x-auto">
+                            <table class="table table-xs w-full">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>Link</th>
+                                        <th>→ To</th>
+                                        <th>Filter</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var kv in entitiesWithLinks)
+                                    {
+                                        @foreach (var lnk in kv.Value.Links)
+                                        {
+                                            <tr>
+                                                <td><code class="font-mono text-xs">@kv.Key</code></td>
+                                                <td class="text-xs">@lnk.Value.GetLabel()</td>
+                                                <td><span class="badge badge-accent badge-xs">@lnk.Value.TargetEntity</span></td>
+                                                <td>
+                                                    @if (lnk.Value.Filter != null && lnk.Value.Filter.Count > 0)
+                                                    {
+                                                        <code class="font-mono text-xs text-base-content/60">
+                                                            @string.Join(", ", lnk.Value.Filter.Select(f => $"{f.Key}={f.Value}"))
+                                                        </code>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    }
+</div>

@@ -1,0 +1,151 @@
+title: 审批页面
+description: 集中处理请假与加班审批任务。
+template: ApprovalCenter
+
+ui:
+  page:
+    layout: stack
+    density: comfortable
+
+sections:
+  - id: pending_leave
+    title: 待审批请假
+    source_type: custom
+    source: |
+      SELECT
+        lr.Id AS LeaveRequestId,
+        e.EmployeeNo,
+        e.FullName AS EmployeeName,
+        d.Name AS DepartmentName,
+        lr.LeaveType,
+        lr.StartDate,
+        lr.EndDate,
+        lr.Days,
+        lr.Status,
+        IFNULL(lr.AppliedAt, '-') AS AppliedAt,
+        IFNULL(lr.Reason, '-') AS Reason
+      FROM LeaveRequest lr
+      JOIN Employee e ON e.Id = lr.EmployeeId
+      LEFT JOIN Department d ON d.Id = e.DepartmentId
+      WHERE lr.Status = 'pending'
+      ORDER BY lr.Id ASC
+    columns:
+      - LeaveRequestId
+      - EmployeeNo
+      - EmployeeName
+      - DepartmentName
+      - LeaveType
+      - StartDate
+      - EndDate
+      - Days
+      - Status
+      - AppliedAt
+      - Reason
+    page_size: 100
+    editable: false
+    read_only: true
+    target_table: LeaveRequest
+    target_primary_key: Id
+    updatable_fields:
+      - Status
+    filters:
+      EmployeeNo:
+        label: 工号
+        type: like
+      EmployeeName:
+        label: 姓名
+        type: like
+      LeaveType:
+        label: 请假类型
+        type: eq
+
+  - id: pending_overtime
+    title: 待审批加班
+    source_type: custom
+    source: |
+      SELECT
+        ot.Id AS OvertimeRequestId,
+        e.EmployeeNo,
+        e.FullName AS EmployeeName,
+        d.Name AS DepartmentName,
+        ot.WorkDate,
+        ot.StartTime,
+        ot.EndTime,
+        ot.Hours,
+        ot.Status,
+        IFNULL(ot.Reason, '-') AS Reason
+      FROM OvertimeRequest ot
+      JOIN Employee e ON e.Id = ot.EmployeeId
+      LEFT JOIN Department d ON d.Id = e.DepartmentId
+      WHERE ot.Status = 'pending'
+      ORDER BY ot.Id ASC
+    columns:
+      - OvertimeRequestId
+      - EmployeeNo
+      - EmployeeName
+      - DepartmentName
+      - WorkDate
+      - StartTime
+      - EndTime
+      - Hours
+      - Status
+      - Reason
+    page_size: 100
+    editable: false
+    read_only: true
+    target_table: OvertimeRequest
+    target_primary_key: Id
+    updatable_fields:
+      - Status
+    filters:
+      EmployeeNo:
+        label: 工号
+        type: like
+      EmployeeName:
+        label: 姓名
+        type: like
+      WorkDate:
+        label: 日期
+        type: eq
+
+  - id: recent_approved
+    title: 最近已审批记录
+    source_type: custom
+    source: |
+      SELECT
+        lr.Id AS RequestId,
+        'leave' AS RequestType,
+        e.EmployeeNo,
+        e.FullName AS EmployeeName,
+        lr.StartDate AS DateRef,
+        lr.Status,
+        IFNULL(lr.Approver, '-') AS Approver,
+        IFNULL(lr.ApprovedAt, '-') AS ApprovedAt
+      FROM LeaveRequest lr
+      JOIN Employee e ON e.Id = lr.EmployeeId
+      WHERE lr.Status IN ('approved', 'rejected')
+      UNION ALL
+      SELECT
+        ot.Id AS RequestId,
+        'overtime' AS RequestType,
+        e.EmployeeNo,
+        e.FullName AS EmployeeName,
+        ot.WorkDate AS DateRef,
+        ot.Status,
+        IFNULL(ot.Approver, '-') AS Approver,
+        IFNULL(ot.ApprovedAt, '-') AS ApprovedAt
+      FROM OvertimeRequest ot
+      JOIN Employee e ON e.Id = ot.EmployeeId
+      WHERE ot.Status IN ('approved', 'rejected')
+    columns:
+      - RequestId
+      - RequestType
+      - EmployeeNo
+      - EmployeeName
+      - DateRef
+      - Status
+      - Approver
+      - ApprovedAt
+    page_size: 100
+    editable: false
+    read_only: true

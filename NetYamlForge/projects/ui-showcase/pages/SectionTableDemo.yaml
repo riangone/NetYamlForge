@@ -1,0 +1,318 @@
+title: "Section Table Demo"
+description: "columns / filters / forms / paging / sortable / hooks を entities と同じ記法で定義できるデモ"
+
+sections:
+
+  # ① columns に label / type / hidden / sortable を定義
+  - id: task_columns
+    title: "① columns 定義（ラベル・型・非表示・sortable）"
+    component: table
+    source_type: custom
+    source: |
+      SELECT id, title, assignee, status, priority, due_date
+      FROM tasks
+    columns:
+      id:
+        label: "# ID"
+        type: int
+        hidden: true
+      title:
+        label: タイトル
+        type: string
+        sortable: true
+      assignee:
+        label: 担当者
+        type: string
+        sortable: true
+      status:
+        label: ステータス
+        type: select
+        sortable: true
+        options:
+          todo: "📋 Todo"
+          in_progress: "🔄 In Progress"
+          review: "👀 Review"
+          done: "✅ Done"
+          blocked: "🚫 Blocked"
+      priority:
+        label: 優先度
+        type: select
+        sortable: true
+        options:
+          High: "🔴 High"
+          Medium: "🟡 Medium"
+          Low: "🟢 Low"
+      due_date:
+        label: 期限日
+        type: date
+        sortable: true
+    paging:
+      page_size: 8
+      mode: numbered
+      enable_count: true
+
+  # ② filters に複数タイプを定義
+  - id: task_filters
+    title: "② filters 定義（like / select / toggle_group / date_range）"
+    component: table
+    source_type: custom
+    source: |
+      SELECT id, title, assignee, status, priority, due_date
+      FROM tasks
+    columns:
+      id:
+        label: ID
+        hidden: true
+      title:
+        label: タイトル
+        sortable: true
+      assignee:
+        label: 担当者
+        sortable: true
+      status:
+        label: ステータス
+        sortable: true
+      priority:
+        label: 優先度
+        sortable: true
+      due_date:
+        label: 期限日
+        sortable: true
+    filters:
+      title:
+        label: タイトル（部分一致）
+        type: like
+      status:
+        label: ステータス
+        type: toggle_group
+        options:
+          todo: "Todo"
+          in_progress: "In Progress"
+          review: "Review"
+          done: "Done"
+          blocked: "Blocked"
+      priority:
+        label: 優先度
+        type: select
+        options:
+          High: "🔴 High"
+          Medium: "🟡 Medium"
+          Low: "🟢 Low"
+      due_date:
+        label: 期限日
+        type: date_range
+    paging:
+      page_size: 8
+
+  # ③ paging を小さく設定してページネーションを確認
+  - id: catalog_paging
+    title: "③ paging 定義（3件/ページ）"
+    component: table
+    source_type: custom
+    source: |
+      SELECT id, item_name, category, quantity, unit_price, supplier
+      FROM catalog_items
+    columns:
+      id:
+        label: ID
+        type: int
+        sortable: true
+      item_name:
+        label: 商品名
+        sortable: true
+      category:
+        label: カテゴリ
+        sortable: true
+      quantity:
+        label: 在庫数
+        type: int
+        sortable: true
+      unit_price:
+        label: 単価
+        type: decimal
+        sortable: true
+      supplier:
+        label: 仕入先
+    filters:
+      category:
+        label: カテゴリ
+        type: toggle_group
+        options:
+          Electronics: Electronics
+          Furniture: Furniture
+          Accessories: Accessories
+      unit_price:
+        label: 単価
+        type: range
+    paging:
+      page_size: 3
+
+  # ④ forms の create と update を個別定義（共通フックあり）
+  - id: catalog_crud
+    title: "④ forms: create / update を別定義 + 共通フック"
+    component: table
+    source_type: table
+    source: catalog_items
+    columns:
+      id:
+        label: ID
+        type: int
+      item_name:
+        label: 商品名
+        sortable: true
+      category:
+        label: カテゴリ
+        type: select
+        sortable: true
+        options:
+          Electronics: "💻 Electronics"
+          Furniture: "🪑 Furniture"
+          Accessories: "🎒 Accessories"
+      quantity:
+        label: 在庫数
+        type: int
+        sortable: true
+      unit_price:
+        label: 単価（円）
+        type: decimal
+        sortable: true
+      supplier:
+        label: 仕入先
+    filters:
+      item_name:
+        label: 商品名
+        type: like
+      category:
+        label: カテゴリ
+        type: select
+        options:
+          Electronics: "💻 Electronics"
+          Furniture: "🪑 Furniture"
+          Accessories: "🎒 Accessories"
+    forms:
+      create:
+        title: "新規商品を登録"
+        fields: [item_name, category, quantity, unit_price, supplier]
+      update:                        # "edit" と "update" は相互エイリアス
+        title: "商品を編集"
+        fields: [category, quantity, unit_price]  # 編集時は名前・仕入先を変更不可
+    field_defs:
+      item_name:
+        label: 商品名
+        type: string
+        required: true
+        placeholder: "例: MacBook Pro 16"
+      category:
+        label: カテゴリ
+        type: select
+        required: true
+        options:
+          Electronics: "💻 Electronics"
+          Furniture: "🪑 Furniture"
+          Accessories: "🎒 Accessories"
+      quantity:
+        label: 在庫数
+        type: int
+        required: true
+        placeholder: "0以上の整数"
+      unit_price:
+        label: 単価（円）
+        type: decimal
+        placeholder: "例: 128000"
+      supplier:
+        label: 仕入先
+        type: string
+        placeholder: "例: Apple Japan"
+    hooks:
+      beforeCreate: [trim, validate_required]   # camelCase 形式（推奨）
+      afterCreate:  [audit_log]
+      beforeUpdate: [validate_required]
+      afterUpdate:  [audit_log]
+    paging:
+      page_size: 5
+    editable: true
+    read_only: false
+    target_table: catalog_items
+    target_primary_key: id
+
+  # ⑤ カスタムフック（ui-showcase プロジェクト固有）
+  - id: catalog_custom_hooks
+    title: "⑤ カスタムフック（validate_quantity_positive / validate_price_positive / normalize_item_name）"
+    component: table
+    source_type: table
+    source: catalog_items
+    columns:
+      id:
+        label: ID
+        type: int
+      item_name:
+        label: 商品名
+        sortable: true
+      category:
+        label: カテゴリ
+        type: select
+        sortable: true
+        options:
+          Electronics: "💻 Electronics"
+          Furniture: "🪑 Furniture"
+          Accessories: "🎒 Accessories"
+      quantity:
+        label: 在庫数
+        type: int
+        sortable: true
+      unit_price:
+        label: 単価（円）
+        type: decimal
+        sortable: true
+      supplier:
+        label: 仕入先
+    forms:
+      create:
+        title: "新規商品を登録（カスタムバリデーション付き）"
+        fields: [item_name, category, quantity, unit_price, supplier]
+      update:
+        title: "商品を編集（カスタムバリデーション付き）"
+        fields: [category, quantity, unit_price]
+    field_defs:
+      item_name:
+        label: 商品名
+        type: string
+        required: true
+        placeholder: "例: macbook pro 16（先頭が自動大文字化）"
+      category:
+        label: カテゴリ
+        type: select
+        required: true
+        options:
+          Electronics: "💻 Electronics"
+          Furniture: "🪑 Furniture"
+          Accessories: "🎒 Accessories"
+      quantity:
+        label: 在庫数（0以上）
+        type: int
+        required: true
+        placeholder: "0以上の整数"
+      unit_price:
+        label: 単価（0より大）
+        type: decimal
+        placeholder: "例: 128000"
+      supplier:
+        label: 仕入先
+        type: string
+    hooks:
+      # カスタムフック: projects/ui-showcase/Hooks/UiShowcaseHooks.cs で定義
+      beforeCreate:
+        - normalize_item_name       # 商品名を正規化（trim + 先頭大文字）
+        - validate_quantity_positive # 在庫数 >= 0 を検証
+        - validate_price_positive    # 単価 > 0 を検証
+        - validate_required          # required フィールドの必須チェック
+      afterCreate:  [audit_log]
+      beforeUpdate:
+        - validate_quantity_positive
+        - validate_price_positive
+      afterUpdate:  [audit_log]
+    paging:
+      page_size: 5
+    editable: true
+    target_table: catalog_items
+    target_primary_key: id

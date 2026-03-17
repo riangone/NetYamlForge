@@ -1,0 +1,95 @@
+@* workspace テーマ: パーソナルワークスペース — ウェルカムバナー + 統計カード + チャート *@
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    var projectName = ViewData["ProjectDisplayName"] as string ?? "Dashboard";
+    var now         = DateTime.Now;
+    var greeting    = now.Hour < 12 ? "Good morning" : now.Hour < 17 ? "Good afternoon" : "Good evening";
+    var dayLabel    = now.ToString("dddd, MMMM d", System.Globalization.CultureInfo.InvariantCulture);
+    string[] gradients = [
+        "from-primary/20 to-primary/5",
+        "from-secondary/20 to-secondary/5",
+        "from-accent/20 to-accent/5",
+        "from-success/20 to-success/5",
+        "from-warning/20 to-warning/5",
+        "from-info/20 to-info/5",
+    ];
+    string[] txtColors = [
+        "text-primary", "text-secondary", "text-accent",
+        "text-success",  "text-warning",   "text-info",
+    ];
+}
+
+<div class="space-y-6">
+    @* Welcome banner *@
+    <div class="rounded-2xl bg-gradient-to-r from-primary to-secondary p-6 text-primary-content shadow-lg">
+        <p class="text-sm opacity-80">@greeting 👋</p>
+        <h1 class="text-2xl font-bold mt-1">@projectName</h1>
+        <p class="text-sm opacity-70 mt-1">@dayLabel</p>
+    </div>
+
+    @* Stats as workspace gradient cards *@
+    @if (Model.Stats.Count > 0)
+    {
+        <div>
+            <h2 class="text-xs font-semibold tracking-widest text-base-content/40 uppercase mb-3">Overview</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                @for (int i = 0; i < Model.Stats.Count; i++)
+                {
+                    var stat     = Model.Stats[i];
+                    var grad     = gradients[i % gradients.Length];
+                    var txtColor = txtColors[i % txtColors.Length];
+                    if (!string.IsNullOrEmpty(stat.EntityUrl))
+                    {
+                        <a href="@stat.EntityUrl"
+                           class="rounded-xl bg-gradient-to-br @grad border border-base-300 p-4 hover:shadow-md hover:scale-[1.02] transition-all no-underline flex flex-col gap-1">
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <div class="text-2xl mb-1">@stat.Icon</div>
+                            }
+                            <div class="text-2xl font-extrabold @txtColor">@stat.Value</div>
+                            <div class="text-xs text-base-content/60 leading-snug">@stat.Label</div>
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="rounded-xl bg-gradient-to-br @grad border border-base-300 p-4 flex flex-col gap-1">
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <div class="text-2xl mb-1">@stat.Icon</div>
+                            }
+                            <div class="text-2xl font-extrabold @txtColor">@stat.Value</div>
+                            <div class="text-xs text-base-content/60 leading-snug">@stat.Label</div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+
+    @* Charts *@
+    @if (Model.Charts.Count > 0)
+    {
+        <div>
+            <h2 class="text-xs font-semibold tracking-widest text-base-content/40 uppercase mb-3">Insights</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                @for (int i = 0; i < Model.Charts.Count; i++)
+                {
+                    var chart = Model.Charts[i];
+                    <div class="bg-base-100 border border-base-300 rounded-2xl shadow-sm p-5">
+                        <h3 class="text-sm font-medium text-base-content/60 mb-3">@chart.Title</h3>
+                        <div class="relative" style="height:240px">
+                            <canvas id="chart-@i"></canvas>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model.Stats.Count == 0 && Model.Charts.Count == 0)
+    {
+        <div class="alert">
+            <span>統計情報が未設定です。<code>config/dashboard.yml</code> を設定してください。</span>
+        </div>
+    }
+</div>

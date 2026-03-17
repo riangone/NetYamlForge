@@ -1,0 +1,25 @@
+entities:
+  shipper:
+    table: 'Shippers'
+    key: 'ShipperId'
+    displayName: 'Shipper'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['CompanyName', 'Phone']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      ShipperId: { type: int, identity: true, label: 'Shipper Id', sortable: true }
+      CompanyName: { type: string, required: true, label: 'Company Name', searchable: true, sortable: true }
+      Phone: { type: string, label: 'Phone', searchable: true, sortable: true }
+    forms:
+      CompanyName: { type: string, required: true, label: 'Company Name', editable: true }
+      Phone: { type: string, label: 'Phone', editable: true }
+    filters: {}
+    links: {}

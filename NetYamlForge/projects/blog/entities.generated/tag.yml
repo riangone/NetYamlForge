@@ -1,0 +1,27 @@
+entities:
+  tag:
+    table: 'tags'
+    key: 'tag_id'
+    displayName: 'Tag'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name', 'slug', 'color']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      tag_id: { type: int, identity: true, label: 'Tag Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      slug: { type: string, required: true, label: 'Slug', searchable: true, sortable: true }
+      color: { type: string, label: 'Color', searchable: true, sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', editable: true }
+      slug: { type: string, required: true, label: 'Slug', editable: true }
+      color: { type: string, label: 'Color', editable: true }
+    filters: {}
+    links: {}

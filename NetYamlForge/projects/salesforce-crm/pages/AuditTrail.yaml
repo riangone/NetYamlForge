@@ -1,0 +1,128 @@
+title: Audit Trail
+description: Operational audit timeline for user actions, entity changes, and security-sensitive events.
+
+template: AuditTrail
+
+sections:
+  - id: recent_events
+    title: Recent Events
+    source_type: custom
+    source: |
+      SELECT
+        Id,
+        COALESCE(NULLIF(UserName, ''), 'system') AS UserName,
+        Action,
+        COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
+        COALESCE(Detail, '-') AS Detail,
+        CreatedAt
+      FROM AuditLog
+      ORDER BY Id DESC
+    columns:
+      - Id
+      - UserName
+      - Action
+      - Entity
+      - Detail
+      - CreatedAt
+    page_size: 80
+    editable: false
+    read_only: true
+    filters:
+      UserName:
+        label: User
+        type: like
+      Action:
+        label: Action
+        type: eq
+      Entity:
+        label: Entity
+        type: eq
+      CreatedAt:
+        label: Created At
+        type: gte
+
+  - id: activity_by_user
+    title: Activity by User
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(UserName, ''), 'system') AS UserName,
+        COUNT(*) AS EventCount,
+        MAX(CreatedAt) AS LastEventAt
+      FROM AuditLog
+      GROUP BY COALESCE(NULLIF(UserName, ''), 'system')
+      ORDER BY EventCount DESC, LastEventAt DESC
+    columns:
+      - UserName
+      - EventCount
+      - LastEventAt
+    page_size: 30
+    editable: false
+    read_only: true
+
+  - id: activity_by_entity
+    title: Activity by Entity
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
+        COUNT(*) AS EventCount,
+        MAX(CreatedAt) AS LastEventAt
+      FROM AuditLog
+      GROUP BY COALESCE(NULLIF(Entity, ''), 'system')
+      ORDER BY EventCount DESC, LastEventAt DESC
+    columns:
+      - Entity
+      - EventCount
+      - LastEventAt
+    page_size: 30
+    editable: false
+    read_only: true
+
+  - id: hook_rejected_events
+    title: Hook Rejected Events
+    source_type: custom
+    source: |
+      SELECT
+        Id,
+        COALESCE(NULLIF(UserName, ''), 'system') AS UserName,
+        COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.operation'), '-')
+          ELSE '-'
+        END AS Operation,
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.key'), '-')
+          ELSE '-'
+        END AS RecordKey,
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.hooksCsv'), '-')
+          ELSE '-'
+        END AS HookNames,
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.reason'), '-')
+          ELSE '-'
+        END AS Reason,
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.reasonCode'), '-')
+          ELSE '-'
+        END AS ReasonCode,
+        COALESCE(Detail, '-') AS RawDetail,
+        CreatedAt
+      FROM AuditLog
+      WHERE Action = 'hook_rejected'
+      ORDER BY Id DESC
+    columns:
+      - Id
+      - UserName
+      - Entity
+      - Operation
+      - RecordKey
+      - HookNames
+      - Reason
+      - ReasonCode
+      - RawDetail
+      - CreatedAt
+    page_size: 50
+    editable: false
+    read_only: true

@@ -1,0 +1,41 @@
+hero:
+  eyebrow: B2B Order Operations
+  eyebrowKey: projects.b2b-order-ops.home.hero.eyebrow
+  title: 受注オペレーション統合ワークスペース
+  titleKey: projects.b2b-order-ops.home.hero.title
+  description: 受注、出荷、補充、顧客リスク対応を単一ワークスペースで運用します。
+  descriptionKey: projects.b2b-order-ops.home.hero.description
+  primaryActionLabel: Order Workbench を開く
+  primaryActionLabelKey: projects.b2b-order-ops.home.hero.primaryActionLabel
+  primaryActionUrl: /b2b-order-ops/Page/OrderWorkbench
+  secondaryActionLabel: Fulfillment Queue を開く
+  secondaryActionLabelKey: projects.b2b-order-ops.home.hero.secondaryActionLabel
+  secondaryActionUrl: /b2b-order-ops/Page/FulfillmentQueue
+  highlights:
+    - Priority-driven Fulfillment
+    - Risk-aware Order Execution
+  highlightKeys:
+    - projects.b2b-order-ops.home.hero.highlights.priorityDriven
+    - projects.b2b-order-ops.home.hero.highlights.riskAware
+
+projectsSectionTitle: B2B Operations Product
+projectsSectionTitleKey: projects.b2b-order-ops.home.sections.projects.title
+projectsSectionLead: このワークスペースは受注業務に特化した運用機能を提供します。
+projectsSectionLeadKey: projects.b2b-order-ops.home.sections.projects.lead
+
+quickActions:
+  - label: Order Workbench
+    labelKey: projects.b2b-order-ops.home.quickActions.workbench
+    url: /b2b-order-ops/Page/OrderWorkbench
+    style: btn-primary
+    icon: 🧩
+  - label: Replenishment Plan
+    labelKey: projects.b2b-order-ops.home.quickActions.replenishment
+    url: /b2b-order-ops/Page/ReplenishmentPlan
+    style: btn-outline
+    icon: 🏭
+  - label: Customer Risk Radar
+    labelKey: projects.b2b-order-ops.home.quickActions.riskRadar
+    url: /b2b-order-ops/Page/CustomerRiskRadar
+    style: btn-outline
+    icon: ⚠️

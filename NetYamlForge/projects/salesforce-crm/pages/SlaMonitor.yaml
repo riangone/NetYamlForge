@@ -1,0 +1,67 @@
+title: SLA Monitor
+description: SLA breach watchlist and response timeline across open and delayed customer commitments.
+
+template: SlaMonitor
+
+sections:
+  - id: sla_watchlist
+    title: SLA Watchlist
+    source_type: custom
+    source: |
+      SELECT
+        o.OrderId AS SlaId,
+        c.CompanyName AS Account,
+        c.ContactName AS Contact,
+        o.OrderDate,
+        o.RequiredDate,
+        o.Status,
+        CAST(julianday('now') - julianday(o.RequiredDate) AS INTEGER) AS DelayDays,
+        CASE
+          WHEN o.Status = 'Delayed' AND (julianday('now') - julianday(o.RequiredDate)) >= 7 THEN 'Breach'
+          WHEN o.Status = 'Delayed' THEN 'AtRisk'
+          WHEN o.Status = 'Open' AND (julianday(o.RequiredDate) - julianday('now')) <= 2 THEN 'Warning'
+          ELSE 'Healthy'
+        END AS SlaState,
+        CASE
+          WHEN o.Status = 'Delayed' THEN 'Immediate escalation required'
+          WHEN o.Status = 'Open' THEN 'Monitor due date proximity'
+          ELSE 'No action'
+        END AS ActionHint
+      FROM Orders o
+      JOIN Customers c ON c.CustomerId = o.CustomerId
+      WHERE o.Status IN ('Open', 'Delayed', 'Cancelled')
+      ORDER BY
+        CASE
+          WHEN o.Status = 'Delayed' THEN 1
+          WHEN o.Status = 'Open' THEN 2
+          ELSE 3
+        END,
+        o.RequiredDate ASC,
+        o.OrderId DESC
+    columns:
+      - SlaId
+      - Account
+      - Contact
+      - OrderDate
+      - RequiredDate
+      - Status
+      - DelayDays
+      - SlaState
+      - ActionHint
+    page_size: 60
+    editable: true
+    read_only: false
+    target_table: Orders
+    target_primary_key: OrderId
+    updatable_fields:
+      - Status
+    filters:
+      Account:
+        label: Account
+        type: like
+      Status:
+        label: Status
+        type: eq
+      SlaState:
+        label: SLA State
+        type: eq

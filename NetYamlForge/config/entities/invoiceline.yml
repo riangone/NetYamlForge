@@ -1,0 +1,111 @@
+entities:
+  invoiceline:
+    table: InvoiceLine
+    key: InvoiceLineId
+    displayName: Invoice Line
+    softDelete: false
+    isPublic: true
+    paging:
+      pageSize: 15
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - InvoiceId
+        - TrackId
+        - UnitPrice
+        - Quantity
+      filters:
+        columns: 2
+        order:
+        - InvoiceId
+    joins:
+    - type: left
+      table: Invoice
+      alias: inv
+      true: InvoiceLine.InvoiceId = inv.InvoiceId
+    - type: left
+      table: Track
+      alias: t
+      true: InvoiceLine.TrackId = t.TrackId
+    columns:
+      InvoiceLineId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.InvoiceLineId.label
+      InvoiceId:
+        type: int
+        label: Invoice
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.InvoiceId.label
+      TrackId:
+        type: int
+        label: Track
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.TrackId.label
+      TrackName:
+        type: string
+        identity: true
+        label: Track
+        expression: t.Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.TrackName.label
+      UnitPrice:
+        type: decimal
+        label: Unit Price
+        searchable: false
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.UnitPrice.label
+      Quantity:
+        type: int
+        label: Quantity
+        searchable: false
+        sortable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.columns.Quantity.label
+    forms:
+      InvoiceId:
+        type: int
+        label: Invoice
+        editable: true
+        foreignKey:
+          entity: invoice
+          displayColumn: InvoiceId
+        labelKey: config.entities.invoiceline.entities.invoiceline.forms.InvoiceId.label
+      TrackId:
+        type: int
+        label: Track
+        editable: true
+        foreignKey:
+          entity: track
+          displayColumn: Name
+        labelKey: config.entities.invoiceline.entities.invoiceline.forms.TrackId.label
+      UnitPrice:
+        type: decimal
+        label: Unit Price
+        editable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.forms.UnitPrice.label
+      Quantity:
+        type: int
+        label: Quantity
+        editable: true
+        labelKey: config.entities.invoiceline.entities.invoiceline.forms.Quantity.label
+    filters:
+      InvoiceId:
+        type: dropdown
+        label: Invoice
+        expression: InvoiceLine.InvoiceId
+        foreignKey:
+          entity: invoice
+          displayColumn: InvoiceId
+        labelKey: config.entities.invoiceline.entities.invoiceline.filters.InvoiceId.label
+      UnitPrice:
+        type: range
+        label: Unit Price Range
+        expression: InvoiceLine.UnitPrice
+        labelKey: config.entities.invoiceline.entities.invoiceline.filters.UnitPrice.label
+    displayNameKey: config.entities.invoiceline.entities.invoiceline.displayName

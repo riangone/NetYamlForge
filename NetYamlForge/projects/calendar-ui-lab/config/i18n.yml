@@ -1,0 +1,69 @@
+translations:
+  projects.calendar-ui-lab.home.hero.eyebrow:
+    en-US: 'Calendar UI Lab'
+    zh-CN: 'Calendar UI Lab'
+    ja-JP: 'Calendar UI Lab'
+  projects.calendar-ui-lab.home.hero.title:
+    en-US: 'YAML Driven Calendar UI Sandbox'
+    zh-CN: 'YAML 驱动日历 UI 沙盒'
+    ja-JP: 'YAML 駆動カレンダー UI サンドボックス'
+  projects.calendar-ui-lab.home.hero.description:
+    en-US: 'Validate responsive calendar components with holiday overlays and lunar display.'
+    zh-CN: '验证响应式日历组件，叠加节假日与农历显示。'
+    ja-JP: 'レスポンシブなカレンダー部品に祝日・旧暦表示を重ねて検証します。'
+  projects.calendar-ui-lab.home.hero.primaryActionLabel:
+    en-US: 'Open Calendar Workbench'
+    zh-CN: '打开日历工作台'
+    ja-JP: 'カレンダーワークベンチを開く'
+  projects.calendar-ui-lab.home.hero.secondaryActionLabel:
+    en-US: 'Open Dashboard'
+    zh-CN: '打开仪表盘'
+    ja-JP: 'ダッシュボードを開く'
+  projects.calendar-ui-lab.home.hero.highlights.0:
+    en-US: 'Mobile: one month view'
+    zh-CN: '手机端：单月视图'
+    ja-JP: 'モバイル: 単月表示'
+  projects.calendar-ui-lab.home.hero.highlights.1:
+    en-US: 'Desktop: adaptive multi-month grid'
+    zh-CN: '桌面端：自适应多月网格'
+    ja-JP: 'デスクトップ: 自動調整マルチ月グリッド'
+  projects.calendar-ui-lab.home.sections.projects.title:
+    en-US: 'Calendar UI Lab'
+    zh-CN: '日历 UI 实验室'
+    ja-JP: 'カレンダー UI ラボ'
+  projects.calendar-ui-lab.home.sections.projects.lead:
+    en-US: 'UI verification workspace for YAML-defined calendar screens.'
+    zh-CN: '用于 YAML 定义日历页面的 UI 验证空间。'
+    ja-JP: 'YAML 定義カレンダー画面の UI 検証ワークスペースです。'
+  projects.calendar-ui-lab.home.sections.quickActions.title:
+    en-US: 'Quick Actions'
+    zh-CN: '快捷操作'
+    ja-JP: 'クイックアクション'
+  projects.calendar-ui-lab.home.actions.openWorkspace:
+    en-US: 'Open Workspace'
+    zh-CN: '打开工作区'
+    ja-JP: 'ワークスペースを開く'
+  projects.calendar-ui-lab.home.emptyProjectsMessage:
+    en-US: 'No project configured.'
+    zh-CN: '未配置项目。'
+    ja-JP: 'プロジェクトが構成されていません。'
+  projects.calendar-ui-lab.home.quickActions.0.label:
+    en-US: 'Calendar Workbench'
+    zh-CN: '日历工作台'
+    ja-JP: 'カレンダーワークベンチ'
+  projects.calendar-ui-lab.home.quickActions.1.label:
+    en-US: 'Dashboard'
+    zh-CN: '仪表盘'
+    ja-JP: 'ダッシュボード'
+  projects.calendar-ui-lab.home.quickActions.2.label:
+    en-US: 'Definitions'
+    zh-CN: '定义'
+    ja-JP: '定義'
+  projects.calendar-ui-lab.pages.calendarWorkbench.title:
+    en-US: 'Calendar Workbench'
+    zh-CN: '日历工作台'
+    ja-JP: 'カレンダーワークベンチ'
+  projects.calendar-ui-lab.pages.calendarWorkbench.description:
+    en-US: 'Responsive calendar UI with multi-source holiday overlays.'
+    zh-CN: '支持多来源节假日叠加的响应式日历 UI。'
+    ja-JP: '複数ソース祝日を重ね表示するレスポンシブカレンダー UI。'

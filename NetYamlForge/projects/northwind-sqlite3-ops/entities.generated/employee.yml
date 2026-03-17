@@ -1,0 +1,31 @@
+entities:
+  employee:
+    table: 'Employees'
+    key: 'EmployeeId'
+    displayName: 'Employee'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['LastName', 'FirstName', 'Title', 'Region', 'HireDate']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      EmployeeId: { type: int, identity: true, label: 'Employee Id', sortable: true }
+      LastName: { type: string, required: true, label: 'Last Name', searchable: true, sortable: true }
+      FirstName: { type: string, required: true, label: 'First Name', searchable: true, sortable: true }
+      Title: { type: string, label: 'Title', searchable: true, sortable: true }
+      Region: { type: string, label: 'Region', searchable: true, sortable: true }
+      HireDate: { type: string, label: 'Hire Date', searchable: true, sortable: true }
+    forms:
+      LastName: { type: string, required: true, label: 'Last Name', editable: true }
+      FirstName: { type: string, required: true, label: 'First Name', editable: true }
+      Title: { type: string, label: 'Title', editable: true }
+      Region: { type: string, label: 'Region', editable: true }
+      HireDate: { type: string, label: 'Hire Date', editable: true }
+    filters: {}
+    links: {}

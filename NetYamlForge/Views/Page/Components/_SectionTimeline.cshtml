@@ -1,0 +1,67 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec        = Model.Sec;
+    var rows       = Model.Rows;
+    var dateField  = sec.DateField  ?? (sec.GetColumnAt(0));
+    var eventField = sec.EventField ?? (sec.GetColumnAt(1));
+    var descField  = sec.DescField  ?? (sec.GetColumnAt(2));
+
+    // イベントタイプ別アイコン
+    static string EventIcon(string? desc) => desc?.ToLowerInvariant() switch
+    {
+        var s when s != null && s.Contains("error")    => "🔴",
+        var s when s != null && s.Contains("warn")     => "🟡",
+        var s when s != null && s.Contains("success")  => "🟢",
+        var s when s != null && s.Contains("deploy")   => "🚀",
+        var s when s != null && s.Contains("release")  => "🎉",
+        var s when s != null && s.Contains("meeting")  => "📅",
+        _ => "🔵"
+    };
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <ul class="timeline timeline-vertical">
+        @for (int i = 0; i < rows.Count; i++)
+        {
+            var row   = rows[i];
+            var date  = !string.IsNullOrEmpty(dateField)  && row.TryGetValue(dateField,  out var dv) ? dv?.ToString() ?? "" : "";
+            var evt   = !string.IsNullOrEmpty(eventField) && row.TryGetValue(eventField, out var ev) ? ev?.ToString() ?? "" : "";
+            var desc  = !string.IsNullOrEmpty(descField)  && row.TryGetValue(descField,  out var sv) ? sv?.ToString() ?? "" : "";
+            var icon  = EventIcon(desc);
+            var isLeft = i % 2 == 0;
+            <li>
+                @if (i > 0) { <hr /> }
+                @if (isLeft)
+                {
+                    <div class="timeline-start text-right">
+                        <time class="font-mono text-xs text-gray-400">@date</time>
+                    </div>
+                }
+                <div class="timeline-middle">
+                    <span class="text-lg">@icon</span>
+                </div>
+                <div class="@(isLeft ? "timeline-end" : "timeline-start text-right") timeline-box shadow-sm">
+                    <p class="font-semibold text-sm">@evt</p>
+                    @if (!string.IsNullOrEmpty(desc))
+                    {
+                        <p class="text-xs text-gray-500 mt-1">@desc</p>
+                    }
+                    @if (!isLeft)
+                    {
+                        <time class="font-mono text-xs text-gray-400 block mt-1">@date</time>
+                    }
+                </div>
+                @if (i < rows.Count - 1) { <hr /> }
+            </li>
+        }
+        @if (!rows.Any())
+        {
+            <li><div class="timeline-end text-gray-400">No events</div></li>
+        }
+    </ul>
+</div>

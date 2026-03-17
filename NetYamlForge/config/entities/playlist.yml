@@ -1,0 +1,39 @@
+entities:
+  playlist:
+    table: Playlist
+    key: PlaylistId
+    displayName: Playlist
+    softDelete: false
+    isPublic: true
+    paging:
+      pageSize: 10
+      mode: numbered
+    layout:
+      forms:
+        columns: 1
+        order:
+        - Name
+      filters:
+        columns: 1
+    columns:
+      PlaylistId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: config.entities.playlist.entities.playlist.columns.PlaylistId.label
+      Name:
+        type: string
+        label: Name
+        searchable: true
+        sortable: true
+        labelKey: config.entities.playlist.entities.playlist.columns.Name.label
+    forms:
+      Name:
+        type: string
+        label: Name
+        editable: true
+        labelKey: config.entities.playlist.entities.playlist.forms.Name.label
+    filters: {}
+    displayNameKey: config.entities.playlist.entities.playlist.displayName

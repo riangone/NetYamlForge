@@ -1,0 +1,154 @@
+entities:
+  time_entry:
+    table: time_entry
+    key: id
+    displayName: 作業時間
+    displayNameI18n:
+      ja-JP: 作業時間
+      zh-CN: 工时记录
+      en-US: Time Entry
+    joins:
+      - type: left
+        table: rm_project
+        alias: proj
+        on: "time_entry.project_id = proj.id"
+      - type: left
+        table: issue
+        alias: iss
+        on: "time_entry.issue_id = iss.id"
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+        hidden: false
+      project_id:
+        type: int
+        required: true
+        label: プロジェクトID
+        labelI18n: {ja-JP: プロジェクトID, zh-CN: 项目ID, en-US: Project ID}
+        hidden: false
+      project_name:
+        type: string
+        expression: "proj.name"
+        label: プロジェクト
+        labelI18n: {ja-JP: プロジェクト, zh-CN: 项目, en-US: Project}
+        searchable: true
+        hidden: false
+      issue_id:
+        type: int
+        label: チケットID
+        labelI18n: {ja-JP: チケットID, zh-CN: 工单ID, en-US: Issue ID}
+        hidden: false
+      issue_subject:
+        type: string
+        expression: "iss.subject"
+        label: チケット
+        labelI18n: {ja-JP: チケット, zh-CN: 工单, en-US: Issue}
+        searchable: true
+        hidden: false
+      username:
+        type: string
+        required: true
+        label: ユーザー名
+        labelI18n: {ja-JP: ユーザー名, zh-CN: 用户名, en-US: Username}
+        searchable: true
+        sortable: true
+        hidden: false
+      hours:
+        type: decimal
+        required: true
+        label: 時間(h)
+        labelI18n: {ja-JP: 時間(h), zh-CN: 工时(h), en-US: Hours}
+        sortable: true
+        hidden: false
+      activity:
+        type: string
+        label: 作業種別
+        labelI18n: {ja-JP: 作業種別, zh-CN: 活动类型, en-US: Activity}
+        sortable: true
+        hidden: false
+      comments:
+        type: string
+        label: コメント
+        labelI18n: {ja-JP: コメント, zh-CN: 备注, en-US: Comments}
+        searchable: true
+        hidden: false
+      spent_on:
+        type: date
+        required: true
+        label: 作業日
+        labelI18n: {ja-JP: 作業日, zh-CN: 工作日期, en-US: Spent On}
+        sortable: true
+        hidden: false
+      created_on:
+        type: string
+        label: 記録日時
+        labelI18n: {ja-JP: 記録日時, zh-CN: 记录时间, en-US: Created On}
+        sortable: true
+        hidden: false
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: プロジェクトID
+        editable: true
+        hidden: false
+      issue_id:
+        type: int
+        required: false
+        label: チケットID
+        editable: true
+        hidden: false
+      username:
+        type: string
+        required: true
+        label: ユーザー名
+        editable: true
+        hidden: false
+      hours:
+        type: decimal
+        required: true
+        label: 時間(h)
+        editable: true
+        hidden: false
+      activity:
+        type: string
+        required: false
+        label: 作業種別
+        editable: true
+        hidden: false
+      spent_on:
+        type: date
+        required: true
+        label: 作業日
+        editable: true
+        hidden: false
+      comments:
+        type: string
+        required: false
+        label: コメント
+        editable: true
+        hidden: false
+    layout:
+      forms:
+        columns: 2
+        order: [project_id, issue_id, username, hours, activity, spent_on, comments]
+      filters:
+        columns: 3
+        order: [username, activity]
+    filters:
+      username:
+        type: like
+        label: ユーザー名
+      activity:
+        type: dropdown
+        label: 作業種別
+        options: [development, design, testing, documentation, management]
+    hooks:
+      beforeCreate:
+        - validate_required
+        - validate_range
+      beforeUpdate:
+        - validate_range

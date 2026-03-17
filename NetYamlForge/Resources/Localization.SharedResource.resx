@@ -1,0 +1,1779 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Hello</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="config.dashboard.charts.0.title" xml:space="preserve">
+    <value>Monthly Revenue</value>
+  </data>
+  <data name="config.dashboard.charts.1.title" xml:space="preserve">
+    <value>Tracks by Genre</value>
+  </data>
+  <data name="config.dashboard.charts.2.title" xml:space="preserve">
+    <value>Top 10 Countries by Invoices</value>
+  </data>
+  <data name="config.dashboard.charts.3.title" xml:space="preserve">
+    <value>Top 10 Artists by Albums</value>
+  </data>
+  <data name="config.dashboard.stats.0.label" xml:space="preserve">
+    <value>Artists</value>
+  </data>
+  <data name="config.dashboard.stats.1.label" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="config.dashboard.stats.10.label" xml:space="preserve">
+    <value>Total Revenue</value>
+  </data>
+  <data name="config.dashboard.stats.11.label" xml:space="preserve">
+    <value>Avg Invoice</value>
+  </data>
+  <data name="config.dashboard.stats.2.label" xml:space="preserve">
+    <value>Tracks</value>
+  </data>
+  <data name="config.dashboard.stats.3.label" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="config.dashboard.stats.4.label" xml:space="preserve">
+    <value>Media Types</value>
+  </data>
+  <data name="config.dashboard.stats.5.label" xml:space="preserve">
+    <value>Playlists</value>
+  </data>
+  <data name="config.dashboard.stats.6.label" xml:space="preserve">
+    <value>Customers</value>
+  </data>
+  <data name="config.dashboard.stats.7.label" xml:space="preserve">
+    <value>Employees</value>
+  </data>
+  <data name="config.dashboard.stats.8.label" xml:space="preserve">
+    <value>Invoices</value>
+  </data>
+  <data name="config.dashboard.stats.9.label" xml:space="preserve">
+    <value>Invoice Lines</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.CustomerId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.columns.SupportRepName.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.filters.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.filters.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.forms.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.forms.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities-sqlserver.customer.entities.customer.forms.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.InvoiceId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.columns.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.displayName" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.filters.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.filters.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.filters.Total.label" xml:space="preserve">
+    <value>Total Range</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities-sqlserver.invoice.entities.invoice.forms.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="config.entities.album.entities.album.columns.AlbumId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.album.entities.album.columns.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="config.entities.album.entities.album.columns.ArtistName.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="config.entities.album.entities.album.columns.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="config.entities.album.entities.album.displayName" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="config.entities.album.entities.album.filters.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="config.entities.album.entities.album.forms.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="config.entities.album.entities.album.forms.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="config.entities.artist.entities.artist.columns.ArtistId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.artist.entities.artist.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.artist.entities.artist.displayName" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="config.entities.artist.entities.artist.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.CustomerId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.columns.SupportRepName.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.filters.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.filters.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.forms.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.forms.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities.customer.entities.customer.forms.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.EmployeeId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.HireDate.label" xml:space="preserve">
+    <value>Hire Date</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.columns.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.displayName" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.filters.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.forms.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.forms.HireDate.label" xml:space="preserve">
+    <value>Hire Date</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="config.entities.employee.entities.employee.forms.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="config.entities.genre.entities.genre.columns.GenreId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.genre.entities.genre.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.genre.entities.genre.displayName" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="config.entities.genre.entities.genre.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.InvoiceId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.columns.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.displayName" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.filters.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.filters.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.filters.Total.label" xml:space="preserve">
+    <value>Total Range</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="config.entities.invoice.entities.invoice.forms.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.InvoiceLineId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.TrackId.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.TrackName.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.displayName" xml:space="preserve">
+    <value>Invoice Line</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.filters.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.filters.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price Range</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.forms.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.forms.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.forms.TrackId.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="config.entities.invoiceline.entities.invoiceline.forms.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="config.entities.mediatype.entities.mediatype.columns.MediaTypeId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.mediatype.entities.mediatype.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.mediatype.entities.mediatype.displayName" xml:space="preserve">
+    <value>Media Type</value>
+  </data>
+  <data name="config.entities.mediatype.entities.mediatype.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.mediatype.entities.mediatype.links.tracks.label" xml:space="preserve">
+    <value>Tracks</value>
+  </data>
+  <data name="config.entities.playlist.entities.playlist.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.playlist.entities.playlist.columns.PlaylistId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.playlist.entities.playlist.displayName" xml:space="preserve">
+    <value>Playlist</value>
+  </data>
+  <data name="config.entities.playlist.entities.playlist.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.AlbumId.label" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.AlbumTitle.label" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.GenreId.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.GenreName.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.Milliseconds.label" xml:space="preserve">
+    <value>Length(ms)</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.TrackId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="config.entities.track.entities.track.columns.UnitPrice.label" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="config.entities.track.entities.track.displayName" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="config.entities.track.entities.track.filters.GenreId.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="config.entities.track.entities.track.filters.UnitPrice.label" xml:space="preserve">
+    <value>Price Range</value>
+  </data>
+  <data name="config.entities.track.entities.track.forms.AlbumId.label" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="config.entities.track.entities.track.forms.GenreId.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="config.entities.track.entities.track.forms.Milliseconds.label" xml:space="preserve">
+    <value>Length(ms)</value>
+  </data>
+  <data name="config.entities.track.entities.track.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="config.entities.track.entities.track.forms.UnitPrice.label" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.charts.0.title" xml:space="preserve">
+    <value>Monthly Revenue Trend</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.charts.1.title" xml:space="preserve">
+    <value>Orders by Ship Country</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.charts.2.title" xml:space="preserve">
+    <value>Product Fulfillment Load</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.stats.0.label" xml:space="preserve">
+    <value>Open Orders</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.stats.1.label" xml:space="preserve">
+    <value>Delayed Orders</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.stats.2.label" xml:space="preserve">
+    <value>Low Stock SKUs</value>
+  </data>
+  <data name="projects.b2b-order-ops.dashboard.stats.3.label" xml:space="preserve">
+    <value>At-Risk Customers</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.category.entities.category.displayName" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.employee.entities.employee.displayName" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.EmployeeName.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.Freight.label" xml:space="preserve">
+    <value>Freight</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.OrderId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.RelatedProductIds.label" xml:space="preserve">
+    <value>Related Products</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.RequiredDate.label" xml:space="preserve">
+    <value>Required Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.ShippedDate.label" xml:space="preserve">
+    <value>Shipped Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.ShipperId.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.ShipperName.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.columns.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.displayName" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.filters.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.filters.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.filters.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.filters.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.Freight.label" xml:space="preserve">
+    <value>Freight</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.RelatedProductIds.label" xml:space="preserve">
+    <value>Related Products</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.RequiredDate.label" xml:space="preserve">
+    <value>Required Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.ShippedDate.label" xml:space="preserve">
+    <value>Shipped Date</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.ShipperId.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.forms.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.links.customer.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.links.details.label" xml:space="preserve">
+    <value>Order Details</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.order.entities.order.links.employee.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.Discount.label" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.LineTotal.label" xml:space="preserve">
+    <value>Line Total</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.OrderDetailId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.OrderSummary.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.ProductName.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.displayName" xml:space="preserve">
+    <value>Order Detail</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.filters.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.filters.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.filters.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.forms.Discount.label" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.forms.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.forms.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.forms.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.forms.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.links.order.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.orderdetail.entities.orderdetail.links.product.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.Discontinued.label" xml:space="preserve">
+    <value>Discontinued</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.ProductId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.ProductName.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.ReorderLevel.label" xml:space="preserve">
+    <value>Reorder Level</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.columns.UnitsInStock.label" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.product.entities.product.displayName" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.shipper.entities.shipper.displayName" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.b2b-order-ops.entities.supplier.entities.supplier.displayName" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.0.label" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.1.label" xml:space="preserve">
+    <value>Order Operations</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.2.label" xml:space="preserve">
+    <value>Order Workbench</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.3.label" xml:space="preserve">
+    <value>Fulfillment Queue</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.4.label" xml:space="preserve">
+    <value>Replenishment Plan</value>
+  </data>
+  <data name="projects.b2b-order-ops.project.layout.navigation.items.5.label" xml:space="preserve">
+    <value>Customer Risk Radar</value>
+  </data>
+  <data name="projects.blog.dashboard.charts.0.title" xml:space="preserve">
+    <value>Posts by Status</value>
+  </data>
+  <data name="projects.blog.dashboard.charts.1.title" xml:space="preserve">
+    <value>Comments by Status</value>
+  </data>
+  <data name="projects.blog.dashboard.charts.2.title" xml:space="preserve">
+    <value>Posts by Author</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.0.label" xml:space="preserve">
+    <value>Total Posts</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.1.label" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.2.label" xml:space="preserve">
+    <value>Drafts</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.3.label" xml:space="preserve">
+    <value>Archived</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.4.label" xml:space="preserve">
+    <value>Total Comments</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.5.label" xml:space="preserve">
+    <value>Pending Comments</value>
+  </data>
+  <data name="projects.blog.dashboard.stats.6.label" xml:space="preserve">
+    <value>Categories</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.category_id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.color.label" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.created_at.label" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.description.label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.columns.slug.label" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.displayName" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.category.filters.name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.author_email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.author_name.label" xml:space="preserve">
+    <value>Author Name</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.comment_id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.content.label" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.created_at.label" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.post_id.label" xml:space="preserve">
+    <value>Post ID</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.columns.status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.displayName" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.filters.author_name.label" xml:space="preserve">
+    <value>Author Name</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.comment.filters.status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.allow_comments.label" xml:space="preserve">
+    <value>Allow Comments</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.author.label" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.category_id.label" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.content.label" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.created_at.label" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.excerpt.label" xml:space="preserve">
+    <value>Excerpt</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.featured.label" xml:space="preserve">
+    <value>Featured</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.post_id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.published_at.label" xml:space="preserve">
+    <value>Published At</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.slug.label" xml:space="preserve">
+    <value>Slug (URL)</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.updated_at.label" xml:space="preserve">
+    <value>Updated At</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.columns.view_count.label" xml:space="preserve">
+    <value>Views</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.displayName" xml:space="preserve">
+    <value>Post</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.filters.status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.post.filters.title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.columns.color.label" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.columns.name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.columns.slug.label" xml:space="preserve">
+    <value>Slug</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.columns.tag_id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.displayName" xml:space="preserve">
+    <value>Tag</value>
+  </data>
+  <data name="projects.blog.entities.post.entities.tag.filters.name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.dashboard.charts.0.title" xml:space="preserve">
+    <value>Monthly Revenue</value>
+  </data>
+  <data name="projects.chinook.dashboard.charts.1.title" xml:space="preserve">
+    <value>Tracks by Genre</value>
+  </data>
+  <data name="projects.chinook.dashboard.charts.2.title" xml:space="preserve">
+    <value>Top 10 Countries by Invoices</value>
+  </data>
+  <data name="projects.chinook.dashboard.charts.3.title" xml:space="preserve">
+    <value>Top 10 Artists by Albums</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.0.label" xml:space="preserve">
+    <value>Artists</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.1.label" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.10.label" xml:space="preserve">
+    <value>Total Revenue</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.11.label" xml:space="preserve">
+    <value>Avg Invoice</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.2.label" xml:space="preserve">
+    <value>Tracks</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.3.label" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.4.label" xml:space="preserve">
+    <value>Media Types</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.5.label" xml:space="preserve">
+    <value>Playlists</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.6.label" xml:space="preserve">
+    <value>Customers</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.7.label" xml:space="preserve">
+    <value>Employees</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.8.label" xml:space="preserve">
+    <value>Invoices</value>
+  </data>
+  <data name="projects.chinook.dashboard.stats.9.label" xml:space="preserve">
+    <value>Invoice Lines</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.CustomerId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.columns.SupportRepName.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.filters.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.filters.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.forms.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.forms.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.customer.entities.customer.forms.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.InvoiceId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.columns.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.displayName" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.filters.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.filters.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.filters.Total.label" xml:space="preserve">
+    <value>Total Range</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities-sqlserver.invoice.entities.invoice.forms.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.columns.AlbumId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.columns.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.columns.ArtistName.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.columns.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.displayName" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.filters.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.forms.ArtistId.label" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="projects.chinook.entities.album.entities.album.forms.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.chinook.entities.artist.entities.artist.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.artist.entities.artist.displayName" xml:space="preserve">
+    <value>Artist</value>
+  </data>
+  <data name="projects.chinook.entities.artist.entities.artist.filters.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.artist.entities.artist.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.CustomerId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.columns.SupportRepName.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.filters.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.filters.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.forms.Country.label" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.forms.Email.label" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities.customer.entities.customer.forms.SupportRepId.label" xml:space="preserve">
+    <value>Support Rep</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.EmployeeId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.HireDate.label" xml:space="preserve">
+    <value>Hire Date</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.columns.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.displayName" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.filters.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.forms.BirthDate.label" xml:space="preserve">
+    <value>Birth Date</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.forms.FirstName.label" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.forms.HireDate.label" xml:space="preserve">
+    <value>Hire Date</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.forms.LastName.label" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="projects.chinook.entities.employee.entities.employee.forms.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.chinook.entities.genre.entities.genre.columns.GenreId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.genre.entities.genre.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.genre.entities.genre.displayName" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="projects.chinook.entities.genre.entities.genre.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.BillingPostalCode.label" xml:space="preserve">
+    <value>Billing Postal Code</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.BillingState.label" xml:space="preserve">
+    <value>Billing State</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.InvoiceId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.columns.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.displayName" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.filters.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.filters.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.filters.Total.label" xml:space="preserve">
+    <value>Total Range</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.BillingAddress.label" xml:space="preserve">
+    <value>Billing Address</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.BillingCity.label" xml:space="preserve">
+    <value>Billing City</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.BillingCountry.label" xml:space="preserve">
+    <value>Billing Country</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.InvoiceDate.label" xml:space="preserve">
+    <value>Invoice Date</value>
+  </data>
+  <data name="projects.chinook.entities.invoice.entities.invoice.forms.Total.label" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.InvoiceLineId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.TrackId.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.TrackName.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.displayName" xml:space="preserve">
+    <value>Invoice Line</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.filters.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.filters.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price Range</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.forms.InvoiceId.label" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.forms.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.forms.TrackId.label" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="projects.chinook.entities.invoiceline.entities.invoiceline.forms.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.chinook.entities.mediatype.entities.mediatype.columns.MediaTypeId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.mediatype.entities.mediatype.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.mediatype.entities.mediatype.displayName" xml:space="preserve">
+    <value>Media Type</value>
+  </data>
+  <data name="projects.chinook.entities.mediatype.entities.mediatype.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.mediatype.entities.mediatype.links.tracks.label" xml:space="preserve">
+    <value>Tracks</value>
+  </data>
+  <data name="projects.chinook.entities.playlist.entities.playlist.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.playlist.entities.playlist.columns.PlaylistId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.chinook.entities.playlist.entities.playlist.displayName" xml:space="preserve">
+    <value>Playlist</value>
+  </data>
+  <data name="projects.chinook.entities.playlist.entities.playlist.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.columns.Composer.label" xml:space="preserve">
+    <value>Composer</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.columns.DurationSeconds.label" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.columns.Milliseconds.label" xml:space="preserve">
+    <value>Milliseconds</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.columns.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.displayName" xml:space="preserve">
+    <value>Track</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.filters.AlbumId.label" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.filters.GenreId.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.filters.MediaTypeId.label" xml:space="preserve">
+    <value>Media Type</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.AlbumId.label" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.Composer.label" xml:space="preserve">
+    <value>Composer</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.GenreId.label" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.MediaTypeId.label" xml:space="preserve">
+    <value>Media Type</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.Milliseconds.label" xml:space="preserve">
+    <value>Milliseconds</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.Name.label" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="projects.chinook.entities.track.entities.track.forms.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.charts.0.title" xml:space="preserve">
+    <value>Monthly Revenue Trend</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.charts.1.title" xml:space="preserve">
+    <value>Orders by Ship Country</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.charts.2.title" xml:space="preserve">
+    <value>Product Fulfillment Load</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.stats.0.label" xml:space="preserve">
+    <value>Open Orders</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.stats.1.label" xml:space="preserve">
+    <value>Delayed Orders</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.stats.2.label" xml:space="preserve">
+    <value>Low Stock SKUs</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.dashboard.stats.3.label" xml:space="preserve">
+    <value>At-Risk Customers</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.category.entities.category.displayName" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.employee.entities.employee.displayName" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.CustomerName.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.EmployeeName.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.Freight.label" xml:space="preserve">
+    <value>Freight</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.OrderId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.RelatedProductIds.label" xml:space="preserve">
+    <value>Related Products</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.RequiredDate.label" xml:space="preserve">
+    <value>Required Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.ShippedDate.label" xml:space="preserve">
+    <value>Shipped Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.ShipperId.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.ShipperName.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.columns.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.displayName" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.filters.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.filters.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.filters.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.filters.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.filters.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.CustomerId.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.EmployeeId.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.Freight.label" xml:space="preserve">
+    <value>Freight</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.OrderDate.label" xml:space="preserve">
+    <value>Order Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.RelatedProductIds.label" xml:space="preserve">
+    <value>Related Products</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.RequiredDate.label" xml:space="preserve">
+    <value>Required Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.ShipCountry.label" xml:space="preserve">
+    <value>Ship Country</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.ShippedDate.label" xml:space="preserve">
+    <value>Shipped Date</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.ShipperId.label" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.forms.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.links.customer.label" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.links.details.label" xml:space="preserve">
+    <value>Order Details</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.order.entities.order.links.employee.label" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.Discount.label" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.LineTotal.label" xml:space="preserve">
+    <value>Line Total</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.OrderDetailId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.OrderSummary.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.ProductName.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.displayName" xml:space="preserve">
+    <value>Order Detail</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.filters.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.filters.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.filters.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.forms.Discount.label" xml:space="preserve">
+    <value>Discount</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.forms.OrderId.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.forms.ProductId.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.forms.Quantity.label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.forms.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.links.order.label" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.orderdetail.entities.orderdetail.links.product.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.Discontinued.label" xml:space="preserve">
+    <value>Discontinued</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ProductId.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ProductName.label" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.ReorderLevel.label" xml:space="preserve">
+    <value>Reorder Level</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.UnitPrice.label" xml:space="preserve">
+    <value>Unit Price</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.columns.UnitsInStock.label" xml:space="preserve">
+    <value>Stock</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.product.entities.product.displayName" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.shipper.entities.shipper.displayName" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.entities.supplier.entities.supplier.displayName" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.project.layout.navigation.items.0.label" xml:space="preserve">
+    <value>Dashboard</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.project.layout.navigation.items.1.label" xml:space="preserve">
+    <value>Order Operations</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.project.layout.navigation.items.2.label" xml:space="preserve">
+    <value>Fulfillment Queue</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.project.layout.navigation.items.3.label" xml:space="preserve">
+    <value>Replenishment Plan</value>
+  </data>
+  <data name="projects.northwind-sqlite3-ops.project.layout.navigation.items.4.label" xml:space="preserve">
+    <value>Customer Risk Radar</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.charts.0.title" xml:space="preserve">
+    <value>Monthly Order Count</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.charts.1.title" xml:space="preserve">
+    <value>Orders by Ship Country</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.charts.2.title" xml:space="preserve">
+    <value>Top Products by Quantity</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.stats.0.label" xml:space="preserve">
+    <value>Open Orders</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.stats.1.label" xml:space="preserve">
+    <value>Delayed Orders</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.stats.2.label" xml:space="preserve">
+    <value>Revenue</value>
+  </data>
+  <data name="projects.northwind-sqlite3.dashboard.stats.3.label" xml:space="preserve">
+    <value>Low Stock SKUs</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.category.entities.category.displayName" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.customer.entities.customer.displayName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.employee.entities.employee.displayName" xml:space="preserve">
+    <value>Employee</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.order.entities.order.displayName" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.orderdetail.entities.orderdetail.displayName" xml:space="preserve">
+    <value>Order Detail</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.product.entities.product.displayName" xml:space="preserve">
+    <value>Product</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.shipper.entities.shipper.displayName" xml:space="preserve">
+    <value>Shipper</value>
+  </data>
+  <data name="projects.northwind-sqlite3.entities.supplier.entities.supplier.displayName" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="projects.todo.dashboard.charts.0.title" xml:space="preserve">
+    <value>Tasks by Status</value>
+  </data>
+  <data name="projects.todo.dashboard.charts.1.title" xml:space="preserve">
+    <value>Tasks by Priority</value>
+  </data>
+  <data name="projects.todo.dashboard.charts.2.title" xml:space="preserve">
+    <value>Tasks per Project</value>
+  </data>
+  <data name="projects.todo.dashboard.charts.3.title" xml:space="preserve">
+    <value>Projects by Status</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.0.label" xml:space="preserve">
+    <value>Total Tasks</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.1.label" xml:space="preserve">
+    <value>Pending</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.2.label" xml:space="preserve">
+    <value>In Progress</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.3.label" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.4.label" xml:space="preserve">
+    <value>Urgent Tasks</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.5.label" xml:space="preserve">
+    <value>Total Projects</value>
+  </data>
+  <data name="projects.todo.dashboard.stats.6.label" xml:space="preserve">
+    <value>Active Projects</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.CreatedAt.label" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.EndDate.label" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.Id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.Name.label" xml:space="preserve">
+    <value>Project Name</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.StartDate.label" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.columns.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.displayName" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.filters.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.forms.Description.label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.forms.EndDate.label" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.forms.Name.label" xml:space="preserve">
+    <value>Project Name</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.forms.StartDate.label" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.forms.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.project.entities.project.links.tasks.label" xml:space="preserve">
+    <value>Tasks</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.CompletedAt.label" xml:space="preserve">
+    <value>Completed At</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.CreatedAt.label" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.DueDate.label" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.Id.label" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.Priority.label" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.ProjectId.label" xml:space="preserve">
+    <value>Project ID</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.ProjectName.label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.columns.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.displayName" xml:space="preserve">
+    <value>Task</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.filters.Priority.label" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.filters.ProjectId.label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.filters.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.Description.label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.DueDate.label" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.Priority.label" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.ProjectId.label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.Status.label" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.forms.Title.label" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="projects.todo.entities.task.entities.task.links.project.label" xml:space="preserve">
+    <value>Project</value>
+  </data>
+</root>

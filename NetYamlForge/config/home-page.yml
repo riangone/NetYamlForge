@@ -1,0 +1,200 @@
+hero:
+  eyebrow: Enterprise Product Platform
+  eyebrowKey: home.hero.eyebrow
+  title: 统一 YAML 定义，快速交付企业业务产品
+  titleKey: home.hero.title
+  description: 通过元数据驱动的方式统一构建 Dashboard、运营工作台与 CRUD 页面，减少重复开发并提升交付一致性。
+  descriptionKey: home.hero.description
+  primaryActionLabel: 浏览产品工作区
+  primaryActionLabelKey: home.hero.primaryActionLabel
+  primaryActionUrl: "#products"
+  secondaryActionLabel: 查看平台说明
+  secondaryActionLabelKey: home.hero.secondaryActionLabel
+  secondaryActionUrl: "/Home/Privacy"
+  highlights:
+    - Multi-Project Governance
+    - YAML-first UI Definition
+    - Built-in Auth & Audit
+    - SQL Provider Abstraction
+  highlightKeys:
+    - home.hero.highlights.multiProjectGovernance
+    - home.hero.highlights.yamlFirstUiDefinition
+    - home.hero.highlights.builtInAuthAudit
+    - home.hero.highlights.sqlProviderAbstraction
+
+metrics:
+  - label: Active Workspaces
+    labelKey: home.metrics.activeWorkspaces.label
+    value: "6"
+    trend: "已接入多个行业模板"
+    trendKey: home.metrics.activeWorkspaces.trend
+    tone: text-primary
+  - label: YAML Definitions
+    labelKey: home.metrics.yamlDefinitions.label
+    value: "500+"
+    trend: "统一管理页面与字段"
+    trendKey: home.metrics.yamlDefinitions.trend
+    tone: text-secondary
+  - label: Localization Keys
+    labelKey: home.metrics.localizationKeys.label
+    value: "580+"
+    trend: "YAML 为主，resx 兜底"
+    trendKey: home.metrics.localizationKeys.trend
+    tone: text-accent
+  - label: Deployment Readiness
+    labelKey: home.metrics.deploymentReadiness.label
+    value: "99.9%"
+    trend: "支持分环境配置与扩展"
+    trendKey: home.metrics.deploymentReadiness.trend
+    tone: text-success
+
+capabilities:
+  - icon: 🧭
+    title: YAML 中心化配置
+    titleKey: home.capabilities.yamlCentered.title
+    description: 页面结构、字段呈现、导航入口与文案统一由 YAML 管理，降低维护复杂度。
+    descriptionKey: home.capabilities.yamlCentered.description
+    badge: Core
+    badgeKey: home.capabilities.yamlCentered.badge
+  - icon: 🛡️
+    title: 企业级访问控制
+    titleKey: home.capabilities.enterpriseAccessControl.title
+    description: 内置认证、角色授权与审计日志，适配企业内部系统安全要求。
+    descriptionKey: home.capabilities.enterpriseAccessControl.description
+    badge: Security
+    badgeKey: home.capabilities.enterpriseAccessControl.badge
+  - icon: 🧩
+    title: 可插拔业务扩展
+    titleKey: home.capabilities.pluggableExtensions.title
+    description: 支持 Hook 与业务逻辑扩展，保持平台稳定同时满足项目定制化。
+    descriptionKey: home.capabilities.pluggableExtensions.description
+    badge: Extensibility
+    badgeKey: home.capabilities.pluggableExtensions.badge
+  - icon: 📊
+    title: 运营指标可视化
+    titleKey: home.capabilities.analyticsReady.title
+    description: Dashboard 与运营页面由配置驱动，快速搭建管理视图与监控面板。
+    descriptionKey: home.capabilities.analyticsReady.description
+    badge: Analytics
+    badgeKey: home.capabilities.analyticsReady.badge
+
+solutions:
+  - name: B2B Order Ops
+    nameKey: home.solutions.b2bOrderOps.name
+    audience: 供应链 / 履约运营团队
+    audienceKey: home.solutions.b2bOrderOps.audience
+    summary: 聚焦订单履约与补货决策，提供工作台、雷达图与优先级队列。
+    summaryKey: home.solutions.b2bOrderOps.summary
+    status: Production
+    statusKey: home.solutions.b2bOrderOps.status
+  - name: Northwind Ops
+    nameKey: home.solutions.northwindOps.name
+    audience: 运营中台 / 业务分析团队
+    audienceKey: home.solutions.northwindOps.audience
+    summary: 使用经典业务模型快速搭建运营监控和分析页面。
+    summaryKey: home.solutions.northwindOps.summary
+    status: Production
+    statusKey: home.solutions.northwindOps.status
+  - name: Blog CMS
+    nameKey: home.solutions.blogCms.name
+    audience: 内容运营 / 市场团队
+    audienceKey: home.solutions.blogCms.audience
+    summary: 通过统一元数据配置快速交付内容管理能力。
+    summaryKey: home.solutions.blogCms.summary
+    status: Pilot
+    statusKey: home.solutions.blogCms.status
+
+projectsSectionTitle: 企业产品工作区
+projectsSectionTitleKey: home.sections.projects.title
+projectsSectionLead: 选择一个工作区进入对应产品的运营与管理界面。
+projectsSectionLeadKey: home.sections.projects.lead
+capabilitiesSectionTitle: Core Capabilities
+capabilitiesSectionTitleKey: home.sections.capabilities.title
+solutionsSectionTitle: Solution Matrix
+solutionsSectionTitleKey: home.sections.solutions.title
+quickActionsSectionTitle: Quick Actions
+quickActionsSectionTitleKey: home.sections.quickActions.title
+openWorkspaceLabel: Open Workspace
+openWorkspaceLabelKey: home.actions.openWorkspace
+emptyProjectsMessage: プロジェクトが見つかりません。`projects/` 配下を確認してください。
+emptyProjectsMessageKey: home.messages.noProjects
+
+projectProfiles:
+  chinook:
+    icon: 🎵
+    tagline: 多语言 + 审计 + 元数据驱动 CRUD 的参考实现
+    taglineKey: home.projects.chinook.tagline
+    tags: [Reference, Analytics, Demo]
+    tagKeys: [home.projects.tags.reference, home.projects.tags.analytics, home.projects.tags.demo]
+  blog:
+    icon: ✍️
+    tagline: 内容生产与审核流程的轻量化企业方案
+    taglineKey: home.projects.blog.tagline
+    tags: [CMS, Workflow]
+    tagKeys: [home.projects.tags.cms, home.projects.tags.workflow]
+  todo:
+    icon: ✅
+    tagline: 任务与项目协同场景的快速实施模板
+    taglineKey: home.projects.todo.tagline
+    tags: [TaskOps, Collaboration]
+    tagKeys: [home.projects.tags.taskOps, home.projects.tags.collaboration]
+  b2b-order-ops:
+    icon: 📦
+    tagline: 面向履约与供应链协同的企业运营产品
+    taglineKey: home.projects.b2bOrderOps.tagline
+    tags: [Operations, Fulfillment, B2B]
+    tagKeys: [home.projects.tags.operations, home.projects.tags.fulfillment, home.projects.tags.b2b]
+  northwind-sqlite3:
+    icon: 🧪
+    tagline: 标准化样本数据驱动的业务验证环境
+    taglineKey: home.projects.northwindSqlite3.tagline
+    tags: [Prototype, Validation]
+    tagKeys: [home.projects.tags.prototype, home.projects.tags.validation]
+  northwind-sqlite3-ops:
+    icon: 🚚
+    tagline: 运营场景增强版，聚焦异常监控与行动闭环
+    taglineKey: home.projects.northwindSqlite3Ops.tagline
+    tags: [Ops, Alerting]
+    tagKeys: [home.projects.tags.ops, home.projects.tags.alerting]
+  library:
+    icon: 📚
+    tagline: 图书馆管理系统，展示框架全部特性（YAML CRUD、自定义钩子、仪表盘、多语言）
+    taglineKey: home.projects.library.tagline
+    tags: [Showcase, Framework, Reference]
+    tagKeys: [home.projects.tags.showcase, home.projects.tags.framework, home.projects.tags.reference]
+  inventory:
+    icon: 📦
+    tagline: 在庫管理システム。YAML CRUD・カスタムフック・ダッシュボード・多言語を実演するボイラープレート
+    taglineKey: home.projects.inventory.tagline
+    tags: [Boilerplate, Showcase, i18n]
+    tagKeys: [home.projects.tags.boilerplate, home.projects.tags.showcase, home.projects.tags.i18n]
+  redmine:
+    icon: 🔴
+    tagline: プロジェクト管理システム。Redmineを完全クローン。チケット・Wiki・フォーラム・作業時間管理を実現
+    taglineKey: home.projects.redmine.tagline
+    tags: [ProjectManagement, Clone, Full-Featured]
+    tagKeys: [home.projects.tags.projectManagement, home.projects.tags.clone, home.projects.tags.fullFeatured]
+
+defaultProjectProfile:
+  icon: 🧱
+  tagline: 可配置的企业业务工作区
+  taglineKey: home.projects.default.tagline
+  tags: [Configurable, Productized]
+  tagKeys: [home.projects.tags.configurable, home.projects.tags.productized]
+
+quickActions:
+  - label: 进入项目总览
+    labelKey: home.quickActions.viewProducts
+    url: "#products"
+    style: btn-primary
+    icon: 🚀
+  - label: 查看 Dashboard 设计
+    labelKey: home.quickActions.viewDashboard
+    url: "/northwind-sqlite3-ops/Dashboard"
+    style: btn-outline
+    icon: 📈
+  - label: 打开 Order Workbench
+    labelKey: home.quickActions.openWorkbench
+    url: "/b2b-order-ops/Page/OrderWorkbench"
+    style: btn-outline
+    icon: 🧩

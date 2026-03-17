@@ -1,0 +1,93 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec         = Model.Sec;
+    var rows        = Model.Rows;
+    var groupBy     = sec.GroupBy     ?? (sec.GetColumnAt(0));
+    var cardTitle   = sec.CardTitle   ?? (sec.GetColumnAt(1));
+    var cardSub     = sec.CardSubtitle;
+
+    // グループ化
+    var groups = rows
+        .GroupBy(r => r.TryGetValue(groupBy, out var v) ? v?.ToString() ?? "—" : "—")
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    // ステータス別カラー（DaisyUI バッジ色）
+    static string StatusBadge(string status) => status.ToLowerInvariant() switch
+    {
+        "done" or "completed" or "closed" or "shipped" => "badge-success",
+        "in_progress" or "inprogress" or "active" or "open" => "badge-info",
+        "todo" or "new" or "pending" => "badge-ghost",
+        "blocked" or "cancelled" or "error" => "badge-error",
+        "review" or "testing" => "badge-warning",
+        _ => "badge-neutral"
+    };
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="overflow-x-auto pb-2">
+    <div class="flex gap-4 min-w-max">
+        @foreach (var group in groups)
+        {
+            var badgeClass = StatusBadge(group.Key);
+            <div class="w-64 flex-shrink-0">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="badge @badgeClass badge-sm">@group.Key</span>
+                    <span class="text-xs text-gray-400">(@group.Count())</span>
+                </div>
+                <div class="space-y-2">
+                    @foreach (var row in group)
+                    {
+                        var title = !string.IsNullOrEmpty(cardTitle) && row.TryGetValue(cardTitle, out var tv)
+                            ? tv?.ToString() ?? "" : "";
+                        var sub   = !string.IsNullOrEmpty(cardSub)   && row.TryGetValue(cardSub,   out var sv)
+                            ? sv?.ToString() ?? "" : "";
+
+                        <div class="card bg-base-100 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                            <div class="card-body p-3">
+                                <p class="font-medium text-sm text-gray-800">@title</p>
+                                @if (!string.IsNullOrEmpty(sub))
+                                {
+                                    <p class="text-xs text-gray-400 mt-1">@sub</p>
+                                }
+                                @* 残りのフィールドをタグ表示 *@
+                                @{
+                                    var extraFields = sec.Columns.Keys
+                                        .Where(c => c != groupBy && c != cardTitle && c != cardSub)
+                                        .ToList();
+                                }
+                                @if (extraFields.Any())
+                                {
+                                    <div class="flex flex-wrap gap-1 mt-2">
+                                        @foreach (var ef in extraFields)
+                                        {
+                                            var efVal = row.TryGetValue(ef, out var ev) ? ev?.ToString() ?? "" : "";
+                                            if (!string.IsNullOrEmpty(efVal))
+                                            {
+                                                <span class="badge badge-ghost badge-xs">@efVal</span>
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @if (!group.Any())
+                    {
+                        <div class="text-xs text-gray-300 text-center py-4 border border-dashed border-gray-200 rounded-lg">
+                            Empty
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        @if (!groups.Any())
+        {
+            <div class="text-gray-400 py-8">No data available</div>
+        }
+    </div>
+</div>

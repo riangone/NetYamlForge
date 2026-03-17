@@ -1,0 +1,102 @@
+entities:
+  employee:
+    table: Employees
+    key: EmployeeId
+    displayName: Employee
+    softDelete: false
+    paging:
+      pageSize: 12
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - LastName
+        - FirstName
+        - Title
+        - Region
+        - HireDate
+      filters:
+        columns: 3
+        order:
+        - Title
+        - Region
+    columns:
+      EmployeeId:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        searchable: true
+        sortable: true
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        searchable: true
+        sortable: true
+      Title:
+        type: string
+        label: Title
+        searchable: true
+        sortable: true
+      Region:
+        type: string
+        label: Region
+        searchable: true
+        sortable: true
+      HireDate:
+        type: date
+        label: Hire Date
+        sortable: true
+    forms:
+      LastName:
+        type: string
+        required: true
+        label: Last Name
+        editable: true
+      FirstName:
+        type: string
+        required: true
+        label: First Name
+        editable: true
+      Title:
+        type: string
+        label: Title
+        editable: true
+      Region:
+        type: string
+        label: Region
+        editable: true
+      HireDate:
+        type: date
+        label: Hire Date
+        editable: true
+    filters:
+      Title:
+        type: dropdown
+        label: Title
+        options:
+        - Sales Representative
+        - Vice President
+        - Sales
+        - Sales Manager
+      Region:
+        type: dropdown
+        label: Region
+        options:
+        - WA
+        - CA
+        - TX
+        - NY
+    links:
+      orders:
+        label: Orders
+        targetEntity: order
+        filter:
+          EmployeeId: EmployeeId
+    displayNameKey: projects.b2b-order-ops.entities.employee.entities.employee.displayName

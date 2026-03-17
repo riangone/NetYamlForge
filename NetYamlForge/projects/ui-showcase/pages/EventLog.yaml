@@ -1,0 +1,34 @@
+title: Event Log
+description: timeline / detail_card コンポーネントのデモ
+
+sections:
+  - id: project_timeline
+    title: プロジェクトタイムライン（timeline）
+    component: timeline
+    source_type: custom
+    source: |
+      SELECT event_date, event_name, description, event_type
+      FROM events
+      ORDER BY id
+    columns: [event_date, event_name, description, event_type]
+    date_field: event_date
+    event_field: event_name
+    desc_field: description
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: latest_event
+    title: 直近イベント詳細（detail_card）
+    component: detail_card
+    source_type: custom
+    source: |
+      SELECT id, event_date AS 日時, event_name AS イベント名,
+             description AS 説明, event_type AS 種別
+      FROM events
+      ORDER BY id DESC
+      LIMIT 3
+    columns: [id, 日時, イベント名, 説明, 種別]
+    page_size: 3
+    editable: false
+    read_only: true

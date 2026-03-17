@@ -1,0 +1,61 @@
+translations:
+  projects.northwind-sqlite3.dashboard.charts.0.title:
+    en-US: Monthly Order Count
+    zh-CN: Monthly Order Count
+    ja-JP: 月別受注件数
+  projects.northwind-sqlite3.dashboard.charts.1.title:
+    en-US: Orders by Ship Country
+    zh-CN: Orders by Ship Country
+    ja-JP: 出荷国別受注件数
+  projects.northwind-sqlite3.dashboard.charts.2.title:
+    en-US: Top Products by Quantity
+    zh-CN: Top Products by Quantity
+    ja-JP: 出荷数量 Top 商品
+  projects.northwind-sqlite3.dashboard.stats.0.label:
+    en-US: Open Orders
+    zh-CN: Open Orders
+    ja-JP: 未出荷受注
+  projects.northwind-sqlite3.dashboard.stats.1.label:
+    en-US: Delayed Orders
+    zh-CN: Delayed Orders
+    ja-JP: 遅延受注
+  projects.northwind-sqlite3.dashboard.stats.2.label:
+    en-US: Revenue
+    zh-CN: Revenue
+    ja-JP: 受注売上
+  projects.northwind-sqlite3.dashboard.stats.3.label:
+    en-US: Low Stock SKUs
+    zh-CN: Low Stock SKUs
+    ja-JP: 低在庫商品数
+  projects.northwind-sqlite3.entities.category.entities.category.displayName:
+    en-US: Category
+    zh-CN: Category
+    ja-JP: カテゴリ
+  projects.northwind-sqlite3.entities.customer.entities.customer.displayName:
+    en-US: Customer
+    zh-CN: Customer
+    ja-JP: 顧客
+  projects.northwind-sqlite3.entities.employee.entities.employee.displayName:
+    en-US: Employee
+    zh-CN: Employee
+    ja-JP: 担当者
+  projects.northwind-sqlite3.entities.order.entities.order.displayName:
+    en-US: Order
+    zh-CN: Order
+    ja-JP: 受注
+  projects.northwind-sqlite3.entities.orderdetail.entities.orderdetail.displayName:
+    en-US: Order Detail
+    zh-CN: Order Detail
+    ja-JP: 受注明細
+  projects.northwind-sqlite3.entities.product.entities.product.displayName:
+    en-US: Product
+    zh-CN: Product
+    ja-JP: 商品
+  projects.northwind-sqlite3.entities.shipper.entities.shipper.displayName:
+    en-US: Shipper
+    zh-CN: Shipper
+    ja-JP: 配送業者
+  projects.northwind-sqlite3.entities.supplier.entities.supplier.displayName:
+    en-US: Supplier
+    zh-CN: Supplier
+    ja-JP: 仕入先

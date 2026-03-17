@@ -1,0 +1,105 @@
+entities:
+  purchase_order:
+    table: purchase_order
+    key: id
+    displayName: 発注書
+    displayNameI18n: {ja-JP: 発注書, zh-CN: 采购订单, en-US: Purchase Order}
+    joins:
+      - type: left
+        table: supplier
+        alias: s
+        on: "purchase_order.supplier_id = s.id"
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+        hidden: false
+      supplier_id:
+        type: int
+        required: true
+        label: 仕入先ID
+        labelI18n: {ja-JP: 仕入先ID, zh-CN: 供应商ID, en-US: Supplier ID}
+        hidden: false
+      supplier_name:
+        type: string
+        expression: "s.name"
+        label: 仕入先
+        labelI18n: {ja-JP: 仕入先, zh-CN: 供应商, en-US: Supplier}
+        searchable: true
+        hidden: false
+      status:
+        type: string
+        label: ステータス
+        labelI18n: {ja-JP: ステータス, zh-CN: 状态, en-US: Status}
+        sortable: true
+        hidden: false
+      order_date:
+        type: date
+        required: true
+        label: 発注日
+        labelI18n: {ja-JP: 発注日, zh-CN: 订单日期, en-US: Order Date}
+        sortable: true
+        hidden: false
+      expected_date:
+        type: date
+        label: 納品予定日
+        labelI18n: {ja-JP: 納品予定日, zh-CN: 预计到货日期, en-US: Expected Date}
+        sortable: true
+        hidden: false
+      note:
+        type: string
+        label: 備考
+        labelI18n: {ja-JP: 備考, zh-CN: 备注, en-US: Note}
+        searchable: true
+        hidden: false
+    forms:
+      supplier_id:
+        type: int
+        required: true
+        label: 仕入先ID
+        editable: true
+        hidden: false
+      order_date:
+        type: date
+        required: true
+        label: 発注日
+        editable: true
+        hidden: false
+      status:
+        type: string
+        required: false
+        label: ステータス
+        editable: true
+        hidden: false
+      expected_date:
+        type: date
+        required: false
+        label: 納品予定日
+        editable: true
+        hidden: false
+      note:
+        type: string
+        required: false
+        label: 備考
+        editable: true
+        hidden: false
+    layout:
+      forms:
+        columns: 2
+        order: [supplier_id, order_date, expected_date, status, note]
+      filters:
+        columns: 3
+        order: [status]
+    filters:
+      status:
+        type: dropdown
+        label: ステータス
+        options: [draft, ordered, received, cancelled]
+    hooks:
+      beforeCreate:
+        - validate_required
+        - audit_log
+      beforeUpdate:
+        - audit_log

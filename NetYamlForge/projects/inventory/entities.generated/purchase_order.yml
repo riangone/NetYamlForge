@@ -1,0 +1,38 @@
+entities:
+  purchase_order:
+    table: 'purchase_order'
+    key: 'id'
+    displayName: 'Purchase Order'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['supplier_id', 'status', 'order_date', 'expected_date', 'note']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      supplier_id: { type: int, required: true, label: 'Supplier Id', sortable: true }
+      status: { type: string, label: 'Status', searchable: true, sortable: true }
+      order_date: { type: string, required: true, label: 'Order Date', searchable: true, sortable: true }
+      expected_date: { type: string, label: 'Expected Date', searchable: true, sortable: true }
+      note: { type: string, label: 'Note', searchable: true, sortable: true }
+    forms:
+      supplier_id:
+        type: int
+        required: true
+        label: 'Supplier Id'
+        editable: true
+        foreignKey:
+          entity: supplier
+          displayColumn: 'name'
+      status: { type: string, label: 'Status', editable: true }
+      order_date: { type: string, required: true, label: 'Order Date', editable: true }
+      expected_date: { type: string, label: 'Expected Date', editable: true }
+      note: { type: string, label: 'Note', editable: true }
+    filters: {}
+    links: {}

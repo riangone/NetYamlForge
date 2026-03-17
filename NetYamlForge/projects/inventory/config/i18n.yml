@@ -1,0 +1,104 @@
+translations:
+  nav.dashboard:
+    ja-JP: ダッシュボード
+    zh-CN: 仪表盘
+    en-US: Dashboard
+
+  nav.product:
+    ja-JP: 商品
+    zh-CN: 商品
+    en-US: Products
+
+  nav.stock_movement:
+    ja-JP: 在庫移動
+    zh-CN: 库存移动
+    en-US: Stock Movements
+
+  nav.category:
+    ja-JP: カテゴリ
+    zh-CN: 类别
+    en-US: Categories
+
+  nav.supplier:
+    ja-JP: 仕入先
+    zh-CN: 供应商
+    en-US: Suppliers
+
+  nav.purchase_order:
+    ja-JP: 発注書
+    zh-CN: 采购订单
+    en-US: Purchase Orders
+
+  # ダッシュボード統計
+  projects.inventory.dashboard.stats.0.label:
+    ja-JP: 商品総数
+    zh-CN: 商品总数
+    en-US: Total Products
+
+  projects.inventory.dashboard.stats.1.label:
+    ja-JP: 在庫切れ商品
+    zh-CN: 缺货商品
+    en-US: Out of Stock
+
+  projects.inventory.dashboard.stats.2.label:
+    ja-JP: 発注点以下
+    zh-CN: 低于补货点
+    en-US: Below Reorder Level
+
+  projects.inventory.dashboard.stats.3.label:
+    ja-JP: 仕入先数
+    zh-CN: 供应商数量
+    en-US: Active Suppliers
+
+  projects.inventory.dashboard.stats.4.label:
+    ja-JP: 処理中発注書
+    zh-CN: 处理中的采购订单
+    en-US: Orders in Progress
+
+  # ダッシュボードチャート
+  projects.inventory.dashboard.charts.0.title:
+    ja-JP: カテゴリ別商品数
+    zh-CN: 按类别统计商品数量
+    en-US: Products by Category
+
+  projects.inventory.dashboard.charts.1.title:
+    ja-JP: 在庫移動種別
+    zh-CN: 库存移动类型
+    en-US: Stock Movement Types
+
+  projects.inventory.dashboard.charts.2.title:
+    ja-JP: 発注書ステータス
+    zh-CN: 采购订单状态
+    en-US: Purchase Order Status
+
+  # エンティティ表示名
+  entity.product.displayName:
+    ja-JP: 商品
+    zh-CN: 商品
+    en-US: Product
+
+  entity.stock_movement.displayName:
+    ja-JP: 在庫移動
+    zh-CN: 库存移动
+    en-US: Stock Movement
+
+  entity.category.displayName:
+    ja-JP: カテゴリ
+    zh-CN: 类别
+    en-US: Category
+
+  entity.supplier.displayName:
+    ja-JP: 仕入先
+    zh-CN: 供应商
+    en-US: Supplier
+
+  entity.purchase_order.displayName:
+    ja-JP: 発注書
+    zh-CN: 采购订单
+    en-US: Purchase Order
+
+  # ホームページ
+  home.projects.inventory.tagline:
+    ja-JP: 在庫管理システム。フレームワークのYAML CRUD・カスタムフック・ダッシュボード・多言語を実演するサンプルプロジェクト
+    zh-CN: 库存管理系统。展示框架的YAML CRUD、自定义钩子、仪表盘、多语言功能的示例项目
+    en-US: Inventory management system. Boilerplate showcasing YAML CRUD, custom hooks, dashboard, and i18n features

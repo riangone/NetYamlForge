@@ -1,0 +1,49 @@
+@* ファイル概要: ユーザー一覧管理画面です。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@model IReadOnlyList<NetYamlForge.Models.Auth.AppUser>
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="space-y-4">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Users</h1>
+        <a class="btn btn-primary btn-sm" asp-action="Create">New User</a>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>UserName</th>
+                            <th>DisplayName</th>
+                            <th>Language</th>
+                            <th>Admin</th>
+                            <th>Active</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in Model)
+                        {
+                            <tr>
+                                <td>@u.Id</td>
+                                <td>@u.UserName</td>
+                                <td>@u.DisplayName</td>
+                                <td>@u.PreferredLanguage</td>
+                                <td>@u.IsAdmin</td>
+                                <td>@u.IsActive</td>
+                                <td><a class="btn btn-xs btn-outline" asp-action="Edit" asp-route-id="@u.Id">Edit</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,118 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec        = Model.Sec;
+    var rows       = Model.Rows;
+    var dateField  = sec.DateField  ?? sec.XField  ?? (sec.GetColumnAt(0));
+    var valueField = sec.ValueField ?? sec.YField  ?? (sec.GetColumnAt(1));
+    var labelField = sec.LabelField ?? sec.DescField;
+
+    // 日付→値 辞書を作成
+    var dataByDate = new Dictionary<string, (double Value, string Label)>();
+    foreach (var row in rows)
+    {
+        var date  = row.TryGetValue(dateField,  out var dv) ? dv?.ToString() ?? "" : "";
+        var valS  = row.TryGetValue(valueField, out var vv) ? vv?.ToString() ?? "0" : "0";
+        var lbl   = !string.IsNullOrEmpty(labelField) && row.TryGetValue(labelField, out var lv) ? lv?.ToString() ?? "" : "";
+        if (string.IsNullOrEmpty(date)) continue;
+        double.TryParse(valS, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var val);
+        dataByDate[date] = (val, lbl);
+    }
+
+    // 最大値（色強度の基準）
+    var maxVal = dataByDate.Values.Select(x => x.Value).DefaultIfEmpty(1).Max();
+    if (maxVal == 0) maxVal = 1;
+
+    // 表示範囲: データの最初の日から最後の日、または直近12週
+    var today = DateTime.Today;
+    var startDate = today.AddDays(-(int)today.DayOfWeek - 7 * 11); // 12週前の日曜
+    var endDate   = today;
+
+    // 週ごとにグループ化
+    var weeks = new List<List<(DateTime Date, double Val, string Label, bool HasData)>>();
+    var cur = startDate;
+    while (cur <= endDate)
+    {
+        var week = new List<(DateTime, double, string, bool)>();
+        for (int d = 0; d < 7; d++)
+        {
+            var day = cur.AddDays(d);
+            var key = day.ToString("yyyy-MM-dd");
+            var hasData = dataByDate.TryGetValue(key, out var entry);
+            week.Add((day, hasData ? entry.Value : 0, hasData ? entry.Label : "", hasData));
+        }
+        weeks.Add(week);
+        cur = cur.AddDays(7);
+    }
+
+    // 色強度計算
+    string HeatColor(double val, double max)
+    {
+        if (val <= 0) return "bg-gray-100";
+        var pct = val / max;
+        return pct switch
+        {
+            >= 0.75 => "bg-green-600",
+            >= 0.50 => "bg-green-400",
+            >= 0.25 => "bg-green-300",
+            _       => "bg-green-100"
+        };
+    }
+
+    var months = weeks
+        .Select(w => w[0].Date.ToString("MMM"))
+        .Distinct()
+        .ToList();
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+    <div class="overflow-x-auto">
+        <div class="flex gap-1" style="min-width: max-content;">
+            @* 曜日ラベル *@
+            <div class="flex flex-col gap-1 mr-1 pt-5">
+                @foreach (var day in new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
+                {
+                    <div class="text-xs text-gray-400 h-3 flex items-center">@(day[0])</div>
+                }
+            </div>
+
+            @* 週グリッド *@
+            @foreach (var week in weeks)
+            {
+                <div class="flex flex-col gap-1">
+                    @* 月ラベル（週の最初の日が月初なら表示） *@
+                    <div class="text-xs text-gray-400 h-4 text-center">
+                        @(week[0].Date.Day <= 7 ? week[0].Date.ToString("MMM") : "")
+                    </div>
+                    @foreach (var (date, val, lbl, hasData) in week)
+                    {
+                        var colorCls = HeatColor(val, maxVal);
+                        var tooltip  = hasData
+                            ? $"{date:yyyy-MM-dd}: {val}{(string.IsNullOrEmpty(lbl) ? "" : " — " + lbl)}"
+                            : date.ToString("yyyy-MM-dd");
+                        var isFuture = date > today;
+                        <div class="w-3 h-3 rounded-sm @colorCls @(isFuture ? "opacity-20" : "") cursor-default"
+                             title="@tooltip"></div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    @* 凡例 *@
+    <div class="flex items-center gap-2 mt-3 text-xs text-gray-400">
+        <span>Less</span>
+        <div class="w-3 h-3 rounded-sm bg-gray-100"></div>
+        <div class="w-3 h-3 rounded-sm bg-green-100"></div>
+        <div class="w-3 h-3 rounded-sm bg-green-300"></div>
+        <div class="w-3 h-3 rounded-sm bg-green-400"></div>
+        <div class="w-3 h-3 rounded-sm bg-green-600"></div>
+        <span>More</span>
+        <span class="ml-4">Total: @rows.Count records</span>
+    </div>
+</div>

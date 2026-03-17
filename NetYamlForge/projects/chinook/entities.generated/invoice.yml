@@ -1,0 +1,44 @@
+entities:
+  invoice:
+    table: 'Invoice'
+    key: 'InvoiceId'
+    displayName: 'Invoice'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['CustomerId', 'InvoiceDate', 'BillingAddress', 'BillingCity', 'BillingState', 'BillingCountry', 'BillingPostalCode', 'Total']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      InvoiceId: { type: int, identity: true, label: 'Invoice Id', sortable: true }
+      CustomerId: { type: int, required: true, label: 'Customer Id', sortable: true }
+      InvoiceDate: { type: datetime, required: true, label: 'Invoice Date', sortable: true }
+      BillingAddress: { type: string, label: 'Billing Address', searchable: true, sortable: true }
+      BillingCity: { type: string, label: 'Billing City', searchable: true, sortable: true }
+      BillingState: { type: string, label: 'Billing State', searchable: true, sortable: true }
+      BillingCountry: { type: string, label: 'Billing Country', searchable: true, sortable: true }
+      BillingPostalCode: { type: string, label: 'Billing Postal Code', searchable: true, sortable: true }
+      Total: { type: decimal, required: true, label: 'Total', sortable: true }
+    forms:
+      CustomerId:
+        type: int
+        required: true
+        label: 'Customer Id'
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: 'FirstName'
+      InvoiceDate: { type: datetime, required: true, label: 'Invoice Date', editable: true }
+      BillingAddress: { type: string, label: 'Billing Address', editable: true }
+      BillingCity: { type: string, label: 'Billing City', editable: true }
+      BillingState: { type: string, label: 'Billing State', editable: true }
+      BillingCountry: { type: string, label: 'Billing Country', editable: true }
+      BillingPostalCode: { type: string, label: 'Billing Postal Code', editable: true }
+      Total: { type: decimal, required: true, label: 'Total', editable: true }
+    filters: {}
+    links: {}

@@ -1,0 +1,36 @@
+entities:
+  appuser:
+    table: 'AppUser'
+    key: 'Id'
+    displayName: 'Appuser'
+    displayNameKey: 'entities.appuser.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'PasswordHash', 'DisplayName', 'PreferredLanguage', 'IsAdmin', 'IsActive', 'CreatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', labelKey: 'entities.appuser.columns.Id.label', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', labelKey: 'entities.appuser.columns.UserName.label', searchable: true, sortable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', labelKey: 'entities.appuser.columns.PasswordHash.label', searchable: true, sortable: true }
+      DisplayName: { type: string, required: true, label: 'Display Name', labelKey: 'entities.appuser.columns.DisplayName.label', searchable: true, sortable: true }
+      PreferredLanguage: { type: string, label: 'Preferred Language', labelKey: 'entities.appuser.columns.PreferredLanguage.label', searchable: true, sortable: true }
+      IsAdmin: { type: int, label: 'Is Admin', labelKey: 'entities.appuser.columns.IsAdmin.label', sortable: true }
+      IsActive: { type: int, label: 'Is Active', labelKey: 'entities.appuser.columns.IsActive.label', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.appuser.columns.CreatedAt.label', searchable: true, sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', labelKey: 'entities.appuser.forms.UserName.label', editable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', labelKey: 'entities.appuser.forms.PasswordHash.label', editable: true }
+      DisplayName: { type: string, required: true, label: 'Display Name', labelKey: 'entities.appuser.forms.DisplayName.label', editable: true }
+      PreferredLanguage: { type: string, label: 'Preferred Language', labelKey: 'entities.appuser.forms.PreferredLanguage.label', editable: true }
+      IsAdmin: { type: int, label: 'Is Admin', labelKey: 'entities.appuser.forms.IsAdmin.label', editable: true }
+      IsActive: { type: int, label: 'Is Active', labelKey: 'entities.appuser.forms.IsActive.label', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.appuser.forms.CreatedAt.label', editable: true }
+    filters: {}
+    links: {}

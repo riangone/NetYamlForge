@@ -1,0 +1,25 @@
+title: Starter Overview
+titleKey: projects.demo-ops.pages.starterOverview.title
+description: Auto-generated starter page
+descriptionKey: projects.demo-ops.pages.starterOverview.description
+main_table: AppUser
+
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: appuser_list
+    title: Appuser List
+    titleKey: projects.demo-ops.pages.starterOverview.sections.0.title
+    source_type: table
+    source: AppUser
+    page_size: 20
+    editable: false
+    read_only: true
+    ui:
+      component: DataTable
+      selectable: none
+

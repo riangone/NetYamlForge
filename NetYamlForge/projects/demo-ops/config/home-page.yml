@@ -1,0 +1,51 @@
+hero:
+  eyebrow: Demo Ops
+  eyebrowKey: projects.demo-ops.home.hero.eyebrow
+  title: Demo Ops Workspace
+  titleKey: projects.demo-ops.home.hero.title
+  description: Starter workspace generated from your database schema.
+  descriptionKey: projects.demo-ops.home.hero.description
+  primaryActionLabel: Open Dashboard
+  primaryActionLabelKey: projects.demo-ops.home.hero.primaryActionLabel
+  primaryActionUrl: /demo-ops/Dashboard
+  secondaryActionLabel: Open Schema Definitions
+  secondaryActionLabelKey: projects.demo-ops.home.hero.secondaryActionLabel
+  secondaryActionUrl: /demo-ops/DynamicEntity/AllDefinitions
+  highlights:
+    - Template Ready
+    - YAML First
+  highlightKeys:
+    - projects.demo-ops.home.hero.highlights.0
+    - projects.demo-ops.home.hero.highlights.1
+
+projectsSectionTitle: Demo Ops
+projectsSectionTitleKey: projects.demo-ops.home.sections.projects.title
+projectsSectionLead: Build your business screens from this starter project.
+projectsSectionLeadKey: projects.demo-ops.home.sections.projects.lead
+capabilitiesSectionTitle: Core Capabilities
+capabilitiesSectionTitleKey: projects.demo-ops.home.sections.capabilities.title
+solutionsSectionTitle: Solution Matrix
+solutionsSectionTitleKey: projects.demo-ops.home.sections.solutions.title
+quickActionsSectionTitle: Quick Actions
+quickActionsSectionTitleKey: projects.demo-ops.home.sections.quickActions.title
+openWorkspaceLabel: Open Workspace
+openWorkspaceLabelKey: projects.demo-ops.home.actions.openWorkspace
+emptyProjectsMessage: No projects found under projects/.
+emptyProjectsMessageKey: projects.demo-ops.home.emptyProjectsMessage
+
+quickActions:
+  - label: Dashboard
+    labelKey: projects.demo-ops.home.quickActions.0.label
+    url: /demo-ops/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Definitions
+    labelKey: projects.demo-ops.home.quickActions.1.label
+    url: /demo-ops/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    labelKey: projects.demo-ops.home.quickActions.2.label
+    url: /demo-ops/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭

@@ -1,0 +1,39 @@
+entities:
+  crmtaskactivity:
+    table: 'CrmTaskActivity'
+    key: 'ActivityId'
+    displayName: 'Crmtaskactivity'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['EntityType', 'EntityId', 'ActivityType', 'Status', 'DueAt', 'OwnerUserName', 'PayloadJson', 'CreatedAt', 'UpdatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      ActivityId: { type: int, identity: true, label: 'Activity Id', sortable: true }
+      EntityType: { type: string, required: true, label: 'Entity Type', searchable: true, sortable: true }
+      EntityId: { type: int, required: true, label: 'Entity Id', sortable: true }
+      ActivityType: { type: string, required: true, label: 'Activity Type', searchable: true, sortable: true }
+      Status: { type: string, required: true, label: 'Status', searchable: true, sortable: true }
+      DueAt: { type: string, label: 'Due At', searchable: true, sortable: true }
+      OwnerUserName: { type: string, label: 'Owner User Name', searchable: true, sortable: true }
+      PayloadJson: { type: string, label: 'Payload Json', searchable: true, sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      EntityType: { type: string, required: true, label: 'Entity Type', editable: true }
+      EntityId: { type: int, required: true, label: 'Entity Id', editable: true }
+      ActivityType: { type: string, required: true, label: 'Activity Type', editable: true }
+      Status: { type: string, required: true, label: 'Status', editable: true }
+      DueAt: { type: string, label: 'Due At', editable: true }
+      OwnerUserName: { type: string, label: 'Owner User Name', editable: true }
+      PayloadJson: { type: string, label: 'Payload Json', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', editable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

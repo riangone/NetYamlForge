@@ -1,0 +1,37 @@
+entities:
+  appuser:
+    table: 'AppUser'
+    key: 'Id'
+    displayName: 'Appuser'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'PasswordHash', 'DisplayName', 'PreferredLanguage', 'IsAdmin', 'IsActive', 'CreatedAt', 'LastLoginAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', searchable: true, sortable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', searchable: true, sortable: true }
+      DisplayName: { type: string, required: true, label: 'Display Name', searchable: true, sortable: true }
+      PreferredLanguage: { type: string, label: 'Preferred Language', searchable: true, sortable: true }
+      IsAdmin: { type: int, label: 'Is Admin', sortable: true }
+      IsActive: { type: int, label: 'Is Active', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', searchable: true, sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', editable: true }
+      PasswordHash: { type: string, required: true, label: 'Password Hash', editable: true }
+      DisplayName: { type: string, required: true, label: 'Display Name', editable: true }
+      PreferredLanguage: { type: string, label: 'Preferred Language', editable: true }
+      IsAdmin: { type: int, label: 'Is Admin', editable: true }
+      IsActive: { type: int, label: 'Is Active', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', editable: true }
+      LastLoginAt: { type: string, label: 'Last Login At', editable: true }
+    filters: {}
+    links: {}

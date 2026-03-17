@@ -1,0 +1,77 @@
+title: Webhook Delivery Monitor
+description: Delivery timeline for webhook events with retry analysis and endpoint reliability metrics.
+
+template: WebhookDeliveryMonitor
+
+sections:
+  - id: webhook_events
+    title: Webhook Events
+    source_type: custom
+    source: |
+      SELECT
+        Id AS EventId,
+        COALESCE(NULLIF(Entity, ''), 'system') AS Domain,
+        Action,
+        COALESCE(Detail, '-') AS Detail,
+        CASE
+          WHEN lower(Action) LIKE '%error%' OR lower(Detail) LIKE '%timeout%' THEN 'Failed'
+          WHEN lower(Action) LIKE '%retry%' THEN 'Retrying'
+          WHEN lower(Action) LIKE '%webhook%' OR lower(Detail) LIKE '%webhook%' THEN 'Delivered'
+          ELSE 'Observed'
+        END AS DeliveryStatus,
+        CASE
+          WHEN lower(Detail) LIKE '%timeout%' THEN 2
+          WHEN lower(Action) LIKE '%retry%' THEN 1
+          ELSE 0
+        END AS RetryCount,
+        CreatedAt
+      FROM AuditLog
+      ORDER BY Id DESC
+    columns:
+      - EventId
+      - Domain
+      - Action
+      - Detail
+      - DeliveryStatus
+      - RetryCount
+      - CreatedAt
+    page_size: 80
+    editable: false
+    read_only: true
+    filters:
+      Domain:
+        label: Domain
+        type: like
+      DeliveryStatus:
+        label: Delivery Status
+        type: eq
+
+  - id: endpoint_reliability
+    title: Endpoint Reliability
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(Entity, ''), 'system') AS Endpoint,
+        COUNT(*) AS EventCount,
+        SUM(CASE WHEN lower(Action) LIKE '%error%' OR lower(Detail) LIKE '%timeout%' THEN 1 ELSE 0 END) AS FailedCount,
+        SUM(CASE WHEN lower(Action) LIKE '%retry%' THEN 1 ELSE 0 END) AS RetryCount,
+        ROUND(
+          CASE
+            WHEN COUNT(*) = 0 THEN 100.0
+            ELSE (COUNT(*) - SUM(CASE WHEN lower(Action) LIKE '%error%' OR lower(Detail) LIKE '%timeout%' THEN 1 ELSE 0 END)) * 100.0 / COUNT(*)
+          END, 2
+        ) AS SuccessRate,
+        MAX(CreatedAt) AS LastEventAt
+      FROM AuditLog
+      GROUP BY COALESCE(NULLIF(Entity, ''), 'system')
+      ORDER BY SuccessRate ASC, EventCount DESC
+    columns:
+      - Endpoint
+      - EventCount
+      - FailedCount
+      - RetryCount
+      - SuccessRate
+      - LastEventAt
+    page_size: 40
+    editable: false
+    read_only: true

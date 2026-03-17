@@ -1,0 +1,76 @@
+entities:
+  issue_priority:
+    table: issue_priority
+    key: id
+    displayName: 優先度
+    displayNameI18n:
+      ja-JP: 優先度
+      zh-CN: 优先级
+      en-US: Priority
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+        hidden: false
+      name:
+        type: string
+        required: true
+        label: 名前
+        labelI18n: {ja-JP: 名前, zh-CN: 名称, en-US: Name}
+        searchable: true
+        sortable: true
+        hidden: false
+      is_default:
+        type: int
+        label: デフォルト
+        labelI18n: {ja-JP: デフォルト, zh-CN: 默认, en-US: Default}
+        hidden: false
+      position:
+        type: int
+        label: 表示順
+        labelI18n: {ja-JP: 表示順, zh-CN: 排序, en-US: Position}
+        sortable: true
+        hidden: false
+      color:
+        type: string
+        label: カラーコード
+        labelI18n: {ja-JP: カラーコード, zh-CN: 颜色代码, en-US: Color}
+        hidden: false
+    forms:
+      name:
+        type: string
+        required: true
+        label: 名前
+        editable: true
+        hidden: false
+      position:
+        type: int
+        required: false
+        label: 表示順
+        editable: true
+        hidden: false
+      is_default:
+        type: int
+        required: false
+        label: デフォルト
+        editable: true
+        hidden: false
+      color:
+        type: string
+        required: false
+        label: カラーコード
+        editable: true
+        hidden: false
+    layout:
+      forms:
+        columns: 2
+        order: [name, position, is_default, color]
+    hooks:
+      beforeCreate:
+        - validate_required
+        - trim
+      beforeUpdate:
+        - validate_required
+        - trim

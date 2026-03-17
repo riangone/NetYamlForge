@@ -1,0 +1,103 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath ?? "_Layout";
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    var currentProject = ViewData["Project"] as string ?? "salesforce-crm";
+    var pageName = ViewData["PageName"] as string ?? "ApprovalInbox";
+    var isAdmin = (ViewData["IsAdmin"] as bool?) ?? User.IsInRole("Admin");
+    ViewData["Title"] = T("projects.salesforce-crm.pages.ApprovalInbox.title", "Approval Inbox");
+
+    var rows = Model.TryGetValue("pending_approvals", out var data)
+        ? data.Rows.ToList()
+        : new List<Dictionary<string, object>>();
+}
+
+<div class="space-y-6">
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
+        <h1 class="text-2xl font-bold">@T("projects.salesforce-crm.pages.ApprovalInbox.title", "Approval Inbox")</h1>
+        <p class="mt-1 text-sm opacity-70">@T("projects.salesforce-crm.pages.ApprovalInbox.description", "Unified approval queue for deals requiring management decision.")</p>
+    </section>
+
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.ApprovalId", "Approval ID")</th>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.Account", "Account")</th>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.Status", "Status")</th>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.ApprovalRisk", "Risk")</th>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.ApprovalReason", "Reason")</th>
+                        <th class="text-right">@T("projects.salesforce-crm.pages.ApprovalInbox.sections.pending_approvals.columns.Freight", "Freight")</th>
+                        <th>@T("projects.salesforce-crm.pages.ApprovalInbox.actions", "Actions")</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!rows.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-base-content/50">@T("projects.salesforce-crm.pages.ApprovalInbox.empty", "No pending approvals.")</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var row in rows)
+                        {
+                            var id = row.TryGetValue("ApprovalId", out var c0) ? c0?.ToString() ?? "" : "";
+                            var account = row.TryGetValue("Account", out var c1) ? c1?.ToString() ?? "" : "";
+                            var status = row.TryGetValue("Status", out var c2) ? c2?.ToString() ?? "" : "";
+                            var risk = row.TryGetValue("ApprovalRisk", out var c3) ? c3?.ToString() ?? "" : "";
+                            var reason = row.TryGetValue("ApprovalReason", out var c4) ? c4?.ToString() ?? "" : "";
+                            var freight = row.TryGetValue("Freight", out var c5) ? c5?.ToString() ?? "0" : "0";
+
+                            <tr id="approval-@id">
+                                <td>@id</td>
+                                <td>@account</td>
+                                <td>@status</td>
+                                <td>
+                                    <span class="badge @(risk == "High" ? "badge-error" : risk == "Medium" ? "badge-warning" : "badge-info")">@risk</span>
+                                </td>
+                                <td>@reason</td>
+                                <td class="text-right">@freight</td>
+                                <td>
+                                    @if (isAdmin)
+                                    {
+                                        <div class="flex flex-wrap gap-1">
+                                            <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/pending_approvals/update-row"
+                                                  hx-target="#approval-@id"
+                                                  hx-swap="outerHTML"
+                                                  class="inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="rowId" value="@id" />
+                                                <input type="hidden" name="field" value="Status" />
+                                                <input type="hidden" name="value" value="Shipped" />
+                                                <button type="submit" class="btn btn-xs btn-success">@T("projects.salesforce-crm.pages.ApprovalInbox.action.approve", "Approve")</button>
+                                            </form>
+                                            <form hx-post="/@Uri.EscapeDataString(currentProject)/Page/@pageName/section/pending_approvals/update-row"
+                                                  hx-target="#approval-@id"
+                                                  hx-swap="outerHTML"
+                                                  class="inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="rowId" value="@id" />
+                                                <input type="hidden" name="field" value="Status" />
+                                                <input type="hidden" name="value" value="Cancelled" />
+                                                <button type="submit" class="btn btn-xs btn-error">@T("projects.salesforce-crm.pages.ApprovalInbox.action.reject", "Reject")</button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-xs text-base-content/60">@T("projects.salesforce-crm.pages.ApprovalInbox.readOnly", "Read-only")</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,52 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var labelField  = sec.LabelField  ?? (sec.GetColumnAt(0));
+    var valueField  = sec.ValueField  ?? (sec.GetColumnAt(1));
+    var iconField   = sec.IconField;
+    var deltaField  = sec.DeltaField;
+    var subField    = sec.SubValueField;
+    var staticIcon  = sec.Icon ?? "";
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+    @foreach (var row in rows)
+    {
+        var label    = !string.IsNullOrEmpty(labelField) && row.TryGetValue(labelField, out var lv)  ? lv?.ToString() ?? "" : "";
+        var value    = !string.IsNullOrEmpty(valueField) && row.TryGetValue(valueField, out var vv)  ? vv?.ToString() ?? "" : "";
+        var icon     = !string.IsNullOrEmpty(iconField)  && row.TryGetValue(iconField,  out var iv)  ? iv?.ToString() ?? staticIcon : staticIcon;
+        var delta    = !string.IsNullOrEmpty(deltaField) && row.TryGetValue(deltaField, out var dv)  ? dv?.ToString() ?? "" : "";
+        var subValue = !string.IsNullOrEmpty(subField)   && row.TryGetValue(subField,   out var sv)  ? sv?.ToString() ?? "" : "";
+
+        var isPositiveDelta = delta.StartsWith("+");
+        var isNegativeDelta = delta.StartsWith("-");
+        var deltaClass = isPositiveDelta ? "text-success" : isNegativeDelta ? "text-error" : "text-gray-400";
+
+        <div class="stat bg-base-100 shadow rounded-box">
+            @if (!string.IsNullOrEmpty(icon))
+            {
+                <div class="stat-figure text-3xl">@icon</div>
+            }
+            <div class="stat-title text-xs opacity-70">@label</div>
+            <div class="stat-value text-xl">@value</div>
+            @if (!string.IsNullOrEmpty(delta))
+            {
+                <div class="stat-desc @deltaClass">@delta</div>
+            }
+            else if (!string.IsNullOrEmpty(subValue))
+            {
+                <div class="stat-desc text-gray-400">@subValue</div>
+            }
+        </div>
+    }
+    @if (!rows.Any())
+    {
+        <div class="col-span-full text-center text-gray-400 py-8">No data available</div>
+    }
+</div>

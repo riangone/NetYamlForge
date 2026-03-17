@@ -1,0 +1,80 @@
+name: ui-showcase
+displayName: "UI Component Showcase"
+description: "全UIコンポーネントのデモプロジェクト"
+
+database:
+  type: sqlite
+  path: database/ui-showcase.db
+
+features:
+  dashboard: false
+  pages: true
+
+layout:
+  dashboardTheme: minimal
+  header:
+    title: "🎨 UI Showcase"
+  navigation:
+    showDashboard: false
+    items:
+      - label: KPI Overview
+        url: /ui-showcase/Page/KpiOverview
+        icon: 📊
+        section: Charts & Cards
+      - label: Sales Trend
+        url: /ui-showcase/Page/SalesTrend
+        icon: 📈
+        section: Charts & Cards
+      - label: Product Share
+        url: /ui-showcase/Page/ProductShare
+        icon: 🥧
+        section: Charts & Cards
+      - label: Radar Analysis
+        url: /ui-showcase/Page/RadarAnalysis
+        icon: 🕸️
+        section: Charts & Cards
+      - label: Project Board
+        url: /ui-showcase/Page/ProjectBoard
+        icon: 🗂️
+        section: Layout
+      - label: Event Log
+        url: /ui-showcase/Page/EventLog
+        icon: 📅
+        section: Layout
+      - label: Team Status
+        url: /ui-showcase/Page/TeamStatus
+        icon: 👥
+        section: Layout
+      - label: Badge Gallery
+        url: /ui-showcase/Page/BadgeGallery
+        icon: 🏷️
+        section: Layout
+      - label: Heat Map
+        url: /ui-showcase/Page/HeatMap
+        icon: 🔥
+        section: Layout
+      - label: Component Gallery
+        url: /ui-showcase/Page/ComponentGallery
+        icon: 🖼️
+        section: Layout
+      - label: Form & Filter Demo
+        url: /ui-showcase/DynamicEntity/Index?entity=component_demo
+        icon: 🧩
+        section: Forms & Filters
+      - label: All Components (New!)
+        url: /ui-showcase/DynamicEntity/CreatePage?entity=component_demo
+        icon: ✨
+        section: Forms & Filters
+      - label: New Components Demo
+        url: /ui-showcase/Page/NewComponentsDemo
+        icon: 🆕
+        section: New!
+      - label: Section Table Demo
+        url: /ui-showcase/Page/SectionTableDemo
+        icon: 🔍
+        section: Table Features
+
+home_page:
+  icon: "🎨"
+  tagline: "All UI components in one place"
+  tags: [Showcase, Components, Demo]

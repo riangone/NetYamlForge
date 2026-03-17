@@ -1,0 +1,63 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec           = Model.Sec;
+    var rows          = Model.Rows;
+    var labelField    = sec.LabelField    ?? (sec.GetColumnAt(0));
+    var progressField = sec.ProgressField ?? (sec.GetColumnAt(1));
+    var maxField      = sec.MaxField;
+    var subField      = sec.SubValueField;
+
+    static string ProgressColor(double pct) => pct switch
+    {
+        >= 90 => "progress-success",
+        >= 60 => "progress-info",
+        >= 30 => "progress-warning",
+        _     => "progress-error"
+    };
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+    @foreach (var row in rows)
+    {
+        var label = !string.IsNullOrEmpty(labelField)    && row.TryGetValue(labelField,    out var lv) ? lv?.ToString() ?? "" : "";
+        var progS = !string.IsNullOrEmpty(progressField) && row.TryGetValue(progressField, out var pv) ? pv?.ToString() ?? "0" : "0";
+        var maxS  = !string.IsNullOrEmpty(maxField)      && row.TryGetValue(maxField,      out var mv) ? mv?.ToString() ?? "100" : "100";
+        var sub   = !string.IsNullOrEmpty(subField)      && row.TryGetValue(subField,      out var sv) ? sv?.ToString() ?? "" : "";
+
+        double.TryParse(progS, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var progVal);
+        double.TryParse(maxS, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var maxVal);
+        if (maxVal <= 0) maxVal = 100;
+
+        var pct        = Math.Min(100, Math.Round(progVal / maxVal * 100, 1));
+        var colorClass = ProgressColor(pct);
+
+        <div>
+            <div class="flex justify-between items-baseline mb-1">
+                <span class="text-sm font-medium text-gray-700">@label</span>
+                <div class="text-right">
+                    <span class="text-sm font-bold text-gray-800">@pct%</span>
+                    @if (!string.IsNullOrEmpty(sub))
+                    {
+                        <span class="text-xs text-gray-400 ml-2">@sub</span>
+                    }
+                    else if (!string.IsNullOrEmpty(maxField))
+                    {
+                        <span class="text-xs text-gray-400 ml-2">@progS / @maxS</span>
+                    }
+                </div>
+            </div>
+            <progress class="progress @colorClass w-full" value="@pct" max="100"></progress>
+        </div>
+    }
+    @if (!rows.Any())
+    {
+        <div class="text-center text-gray-400 py-8">No data available</div>
+    }
+</div>

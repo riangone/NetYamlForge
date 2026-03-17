@@ -1,0 +1,27 @@
+entities:
+  notebook:
+    table: 'Notebook'
+    key: 'Id'
+    displayName: 'Notebook'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Name', 'Color', 'CreatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      Name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      Color: { type: string, label: 'Color', searchable: true, sortable: true }
+      CreatedAt: { type: string, label: 'Created At', searchable: true, sortable: true }
+    forms:
+      Name: { type: string, required: true, label: 'Name', editable: true }
+      Color: { type: string, label: 'Color', editable: true }
+      CreatedAt: { type: string, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

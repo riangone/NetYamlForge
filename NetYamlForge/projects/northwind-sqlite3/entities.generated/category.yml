@@ -1,0 +1,25 @@
+entities:
+  category:
+    table: 'Categories'
+    key: 'CategoryId'
+    displayName: 'Category'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['CategoryName', 'Description']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      CategoryId: { type: int, identity: true, label: 'Category Id', sortable: true }
+      CategoryName: { type: string, required: true, label: 'Category Name', searchable: true, sortable: true }
+      Description: { type: string, label: 'Description', searchable: true, sortable: true }
+    forms:
+      CategoryName: { type: string, required: true, label: 'Category Name', editable: true }
+      Description: { type: string, label: 'Description', editable: true }
+    filters: {}
+    links: {}

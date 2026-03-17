@@ -1,0 +1,305 @@
+@* Redmine風ダッシュボード
+   統計カード、クイックアクション、ステータス遷移図、チャートを表示します。 *@
+
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    ViewData["Title"] = "ダッシュボード";
+    var project = Context.GetRouteValue("project")?.ToString() ?? "redmine";
+}
+
+<div class="space-y-6">
+
+    @* ─── ページヘッダー ──────────────────────────────────── *@
+    <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold text-gray-800">プロジェクト概要</h1>
+        <div class="flex gap-2">
+            <a href="/@project/DynamicEntity/CreatePage?entity=issue"
+               class="btn btn-sm btn-error text-white">
+                ➕ 新規チケット
+            </a>
+            <a href="/@project/DynamicEntity/CreatePage?entity=time_entry"
+               class="btn btn-sm btn-outline">
+                ⏱️ 作業時間記録
+            </a>
+        </div>
+    </div>
+
+    @* ─── 統計カード ──────────────────────────────────────── *@
+    @if (Model.Stats.Count > 0)
+    {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            @foreach (var stat in Model.Stats)
+            {
+                @if (!string.IsNullOrEmpty(stat.EntityUrl))
+                {
+                    <a href="@stat.EntityUrl"
+                       class="block bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all no-underline">
+                        <div class="text-2xl mb-1">@stat.Icon</div>
+                        <div class="text-2xl font-bold text-gray-800">@stat.Value</div>
+                        <div class="text-xs text-gray-500 mt-1">@stat.Label</div>
+                    </a>
+                }
+                else
+                {
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                        <div class="text-2xl mb-1">@stat.Icon</div>
+                        <div class="text-2xl font-bold text-gray-800">@stat.Value</div>
+                        <div class="text-xs text-gray-500 mt-1">@stat.Label</div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+    @* ─── 2カラム: 遷移図 + クイックリンク ────────────────── *@
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        @* ── ステータス遷移図（3/5） ───── *@
+        <div class="lg:col-span-3 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+            <h2 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <span>🔄</span> チケット ステータス遷移
+            </h2>
+
+            @* SVGで遷移図を描画 *@
+            <div class="overflow-x-auto">
+                <svg viewBox="0 0 620 260" xmlns="http://www.w3.org/2000/svg"
+                     class="w-full max-w-2xl mx-auto" style="min-width:420px">
+
+                    @* ── ノード定義 ── *@
+                    @* 新規(1) x=60, y=110 *@
+                    @* 進行中(2) x=220, y=60 *@
+                    @* 解決済み(3) x=380, y=60 *@
+                    @* フィードバック(4) x=380, y=160 *@
+                    @* 完了(5) x=540, y=110 *@
+                    @* 却下(6) x=220, y=180 *@
+
+                    <defs>
+                        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#6b7280" />
+                        </marker>
+                        <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#ef4444" />
+                        </marker>
+                        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L8,3 z" fill="#10b981" />
+                        </marker>
+                    </defs>
+
+                    @* ── エッジ（遷移矢印） ── *@
+                    @* 新規 → 進行中 *@
+                    <line x1="112" y1="100" x2="178" y2="80" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" />
+                    @* 新規 → 却下 *@
+                    <line x1="112" y1="120" x2="178" y2="170" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow-red)" stroke-dasharray="5,3" />
+                    @* 進行中 → 解決済み *@
+                    <line x1="292" y1="75" x2="348" y2="75" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" />
+                    @* 進行中 → フィードバック *@
+                    <line x1="256" y1="95" x2="356" y2="153" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" />
+                    @* 解決済み → 完了 *@
+                    <line x1="452" y1="80" x2="508" y2="105" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrow-green)" />
+                    @* 解決済み → フィードバック *@
+                    <line x1="400" y1="97" x2="400" y2="143" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" />
+                    @* フィードバック → 進行中 *@
+                    <line x1="350" y1="155" x2="290" y2="95" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" stroke-dasharray="4,3" />
+                    @* 完了 → 新規（再オープン） *@
+                    <path d="M 524 140 Q 524 220 240 220 Q 80 220 80 140" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow)" />
+
+                    @* ── ノード（ステータスボックス） ── *@
+                    @* 新規 (1) *@
+                    <rect x="12" y="90" width="100" height="40" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5" />
+                    <text x="62" y="115" text-anchor="middle" font-size="12" font-weight="600" fill="#1d4ed8">新規</text>
+
+                    @* 進行中 (2) *@
+                    <rect x="172" y="58" width="120" height="40" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5" />
+                    <text x="232" y="83" text-anchor="middle" font-size="12" font-weight="600" fill="#854d0e">進行中</text>
+
+                    @* 解決済み (3) *@
+                    <rect x="348" y="58" width="120" height="40" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5" />
+                    <text x="408" y="83" text-anchor="middle" font-size="12" font-weight="600" fill="#15803d">解決済み</text>
+
+                    @* フィードバック (4) *@
+                    <rect x="348" y="143" width="120" height="40" rx="6" fill="#fde8d8" stroke="#ea580c" stroke-width="1.5" />
+                    <text x="408" y="168" text-anchor="middle" font-size="12" font-weight="600" fill="#c2410c">フィードバック</text>
+
+                    @* 完了 (5) *@
+                    <rect x="500" y="90" width="100" height="40" rx="6" fill="#f3f4f6" stroke="#6b7280" stroke-width="2" />
+                    <text x="550" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#374151">完了</text>
+
+                    @* 却下 (6) *@
+                    <rect x="172" y="168" width="100" height="40" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" />
+                    <text x="222" y="193" text-anchor="middle" font-size="12" font-weight="600" fill="#991b1b">却下</text>
+
+                    @* ── 凡例 ── *@
+                    <line x1="20" y1="245" x2="50" y2="245" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)" />
+                    <text x="56" y="249" font-size="10" fill="#6b7280">通常遷移</text>
+                    <line x1="130" y1="245" x2="160" y2="245" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow)" />
+                    <text x="166" y="249" font-size="10" fill="#6b7280">再オープン</text>
+                    <line x1="260" y1="245" x2="290" y2="245" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-red)" />
+                    <text x="296" y="249" font-size="10" fill="#6b7280">却下</text>
+                    <line x1="350" y1="245" x2="380" y2="245" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrow-green)" />
+                    <text x="386" y="249" font-size="10" fill="#6b7280">完了</text>
+                </svg>
+            </div>
+        </div>
+
+        @* ── クイックリンク（2/5） ───── *@
+        <div class="lg:col-span-2 space-y-4">
+
+            @* クイックアクション *@
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h2 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <span>⚡</span> クイックアクション
+                </h2>
+                <div class="space-y-2">
+                    <a href="/@project/DynamicEntity/CreatePage?entity=issue"
+                       class="flex items-center gap-3 p-2 rounded-lg hover:bg-red-50 transition-colors group">
+                        <span class="text-lg">🎫</span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800 group-hover:text-red-700">新規チケット作成</div>
+                            <div class="text-xs text-gray-500">バグ報告・機能要望を登録</div>
+                        </div>
+                    </a>
+                    <a href="/@project/DynamicEntity/Index?entity=issue&filter_status_id=1"
+                       class="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors group">
+                        <span class="text-lg">📋</span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800 group-hover:text-blue-700">新規チケット一覧</div>
+                            <div class="text-xs text-gray-500">未着手のチケットを確認</div>
+                        </div>
+                    </a>
+                    <a href="/@project/DynamicEntity/CreatePage?entity=time_entry"
+                       class="flex items-center gap-3 p-2 rounded-lg hover:bg-green-50 transition-colors group">
+                        <span class="text-lg">⏱️</span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800 group-hover:text-green-700">作業時間を記録</div>
+                            <div class="text-xs text-gray-500">本日の作業を記録</div>
+                        </div>
+                    </a>
+                    <a href="/@project/DynamicEntity/CreatePage?entity=news"
+                       class="flex items-center gap-3 p-2 rounded-lg hover:bg-yellow-50 transition-colors group">
+                        <span class="text-lg">📰</span>
+                        <div>
+                            <div class="text-sm font-medium text-gray-800 group-hover:text-yellow-700">ニュースを投稿</div>
+                            <div class="text-xs text-gray-500">お知らせをチームに共有</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            @* エンティティ管理リンク *@
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h2 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <span>🗂️</span> データ管理
+                </h2>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    @{
+                        var navItems = new[]
+                        {
+                            ($"/{project}/DynamicEntity/Index?entity=rm_project", "📁", "プロジェクト"),
+                            ($"/{project}/DynamicEntity/Index?entity=version",    "🏷️", "バージョン"),
+                            ($"/{project}/DynamicEntity/Index?entity=member",     "👥", "メンバー"),
+                            ($"/{project}/DynamicEntity/Index?entity=wiki_page",  "📖", "Wiki"),
+                            ($"/{project}/DynamicEntity/Index?entity=forum",      "💬", "フォーラム"),
+                            ($"/{project}/DynamicEntity/Index?entity=tracker",    "⚙️", "トラッカー"),
+                            ($"/{project}/DynamicEntity/Index?entity=issue_status","⚙️","ステータス"),
+                            ($"/{project}/DynamicEntity/Index?entity=issue_priority","⚙️","優先度"),
+                        };
+                    }
+                    @foreach (var (href, icon, label) in navItems)
+                    {
+                        <a href="@href"
+                           class="flex items-center gap-1 p-2 rounded-lg border border-gray-100 hover:border-blue-300 hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition-colors">
+                            <span>@icon</span>
+                            <span>@label</span>
+                        </a>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @* ─── チャート ────────────────────────────────────────── *@
+    @if (Model.Charts.Count > 0)
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var chart = Model.Charts[i];
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                    <h3 class="text-sm font-bold text-gray-700 mb-3">@chart.Title</h3>
+                    <div class="relative" style="height:260px">
+                        <canvas id="chart-@i"></canvas>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>
+
+@section Scripts {
+    <script src="/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.color = 'rgba(100,116,139,0.9)';
+
+        @for (int i = 0; i < Model.Charts.Count; i++)
+        {
+            var c = Model.Charts[i];
+            var isMultiColor = c.ColorsJson != null;
+            var colorBg     = c.ColorBg ?? "rgba(99,102,241,0.65)";
+            var colorBorder = c.ColorBorder ?? "rgba(99,102,241,1)";
+        <text>
+        (function() {
+            var ctx = document.getElementById('chart-@i');
+            if (!ctx) return;
+            var labels = @Html.Raw(c.LabelsJson);
+            var values = @Html.Raw(c.ValuesJson);
+            var type   = '@c.Type';
+            var dataset = { data: values, borderWidth: type === 'line' ? 2 : 1 };
+            @if (isMultiColor)
+            {
+                <text>
+            dataset.backgroundColor = @Html.Raw(c.ColorsJson!);
+            dataset.borderColor     = @Html.Raw(c.ColorsJson!.Replace("0.85", "1"));
+                </text>
+            }
+            else
+            {
+                <text>
+            dataset.backgroundColor = '@colorBg';
+            dataset.borderColor     = '@colorBorder';
+            dataset.fill            = type === 'line';
+            dataset.tension         = 0.35;
+                </text>
+            }
+            new Chart(ctx, {
+                type: type,
+                data: { labels: labels, datasets: [dataset] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: type === 'doughnut' || type === 'pie', position: 'bottom',
+                            labels: { boxWidth: 12, padding: 10 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    var v = ctx.parsed.y ?? ctx.parsed;
+                                    return ' ' + (typeof v === 'number' ? v.toLocaleString(undefined, {maximumFractionDigits:2}) : v);
+                                }
+                            }
+                        }
+                    },
+                    scales: type === 'doughnut' || type === 'pie' ? {} : {
+                        x: { ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } },
+                        y: { beginAtZero: true,
+                             ticks: { callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; } } }
+                    }
+                }
+            });
+        })();
+        </text>
+        }
+    </script>
+}

@@ -1,0 +1,41 @@
+@* ファイル概要: フォームを単独ページとして表示するラッパービューです。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@using NetYamlForge.Controllers
+@model NetYamlForge.Controllers.DynamicFormViewModel
+@{
+    ViewData["Title"] = Model.Meta.GetDisplayName() + " Form";
+    IReadOnlyList<BreadcrumbItem> breadcrumbs = Model.BreadcrumbChain ?? new List<BreadcrumbItem>();
+    var formLabel = Model.Item == null ? "Create" : "Edit";
+}
+
+<div class="space-y-4">
+    @* パンくずナビ（タイトルの上） *@
+    <nav aria-label="Breadcrumb" class="text-sm text-base-content/60">
+        <ol class="flex flex-wrap items-center gap-1.5">
+            <li>
+                <a class="link link-hover" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+            </li>
+            @foreach (var crumb in breadcrumbs)
+            {
+                <li aria-hidden="true">/</li>
+                <li>
+                    <a class="link link-hover" href="@crumb.Url">@crumb.Label</a>
+                </li>
+            }
+            @if (breadcrumbs.Count == 0)
+            {
+                <li aria-hidden="true">/</li>
+                <li>
+                    <a class="link link-hover"
+                       href="@Url.Action("Index", "DynamicEntity", new { entity = Model.Entity })">@Model.Meta.GetDisplayName()</a>
+                </li>
+            }
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-base-content">@formLabel</li>
+        </ol>
+    </nav>
+
+    @await Html.PartialAsync("_Form", Model)
+</div>

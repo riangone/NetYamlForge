@@ -1,0 +1,29 @@
+hero:
+  eyebrow: Todo & Project Manager
+  title: タスク & プロジェクト管理
+  description: プロジェクトとタスクのシンプルな階層管理。協同作業とタスク優先度管理の最小構成スターター。
+  primaryActionLabel: タスク一覧
+  primaryActionUrl: /todo/DynamicEntity/Index?entity=task
+  secondaryActionLabel: プロジェクト一覧
+  secondaryActionUrl: /todo/DynamicEntity/Index?entity=project
+  highlights:
+    - Task Tracking
+    - Project Hierarchy
+    - Minimal Setup
+
+projectsSectionTitle: Todo Workspace
+projectsSectionLead: タスクとプロジェクトをシンプルに管理するワークスペースです。
+
+quickActions:
+  - label: タスク
+    url: /todo/DynamicEntity/Index?entity=task
+    style: btn-primary
+    icon: ✅
+  - label: プロジェクト
+    url: /todo/DynamicEntity/Index?entity=project
+    style: btn-outline
+    icon: 📁
+  - label: 新規タスク
+    url: /todo/DynamicEntity/CreatePage?entity=task
+    style: btn-outline
+    icon: ➕

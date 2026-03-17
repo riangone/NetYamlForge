@@ -1,0 +1,64 @@
+title: Forecast Console
+description: Team-level pipeline and revenue forecast by stage, period, and confidence bands.
+
+sections:
+  - id: forecast_summary
+    title: Forecast Summary
+    source_type: custom
+    source: |
+      SELECT
+        strftime('%Y-%m', o.OrderDate) AS Period,
+        COUNT(DISTINCT o.OrderId) AS DealCount,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS ForecastAmount,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Shipped' THEN (od.UnitPrice * od.Quantity * (1 - od.Discount)) ELSE 0 END), 0), 2) AS CommittedAmount,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Open' THEN (od.UnitPrice * od.Quantity * (1 - od.Discount)) ELSE 0 END), 0), 2) AS BestCaseAmount,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status IN ('Delayed', 'Cancelled') THEN (od.UnitPrice * od.Quantity * (1 - od.Discount)) ELSE 0 END), 0), 2) AS RiskAmount
+      FROM Orders o
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY strftime('%Y-%m', o.OrderDate)
+      ORDER BY Period DESC
+    columns:
+      - Period
+      - DealCount
+      - ForecastAmount
+      - CommittedAmount
+      - BestCaseAmount
+      - RiskAmount
+    page_size: 24
+    editable: false
+    read_only: true
+    filters:
+      Period:
+        label: Period
+        type: like
+
+  - id: forecast_by_owner
+    title: Forecast by Owner
+    source_type: custom
+    source: |
+      SELECT
+        e.EmployeeId AS OwnerId,
+        (e.LastName || ', ' || e.FirstName) AS OwnerName,
+        COUNT(DISTINCT o.OrderId) AS DealCount,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS ForecastAmount,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Shipped' THEN (od.UnitPrice * od.Quantity * (1 - od.Discount)) ELSE 0 END), 0), 2) AS ClosedAmount,
+        ROUND(COALESCE(SUM(CASE WHEN o.Status = 'Open' THEN (od.UnitPrice * od.Quantity * (1 - od.Discount)) ELSE 0 END), 0), 2) AS PipelineAmount
+      FROM Orders o
+      LEFT JOIN Employees e ON e.EmployeeId = o.EmployeeId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      GROUP BY e.EmployeeId, e.LastName, e.FirstName
+      ORDER BY ForecastAmount DESC
+    columns:
+      - OwnerId
+      - OwnerName
+      - DealCount
+      - ForecastAmount
+      - ClosedAmount
+      - PipelineAmount
+    page_size: 20
+    editable: false
+    read_only: true
+    filters:
+      OwnerName:
+        label: Owner
+        type: like

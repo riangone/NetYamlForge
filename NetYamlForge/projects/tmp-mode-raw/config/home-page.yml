@@ -1,0 +1,51 @@
+hero:
+  eyebrow: Tmp Mode Raw
+  eyebrowKey: projects.tmp-mode-raw.home.hero.eyebrow
+  title: Tmp Mode Raw Workspace
+  titleKey: projects.tmp-mode-raw.home.hero.title
+  description: Starter workspace generated from your database schema.
+  descriptionKey: projects.tmp-mode-raw.home.hero.description
+  primaryActionLabel: Open Dashboard
+  primaryActionLabelKey: projects.tmp-mode-raw.home.hero.primaryActionLabel
+  primaryActionUrl: /tmp-mode-raw/Dashboard
+  secondaryActionLabel: Open Schema Definitions
+  secondaryActionLabelKey: projects.tmp-mode-raw.home.hero.secondaryActionLabel
+  secondaryActionUrl: /tmp-mode-raw/DynamicEntity/AllDefinitions
+  highlights:
+    - Template Ready
+    - YAML First
+  highlightKeys:
+    - projects.tmp-mode-raw.home.hero.highlights.0
+    - projects.tmp-mode-raw.home.hero.highlights.1
+
+projectsSectionTitle: Tmp Mode Raw
+projectsSectionTitleKey: projects.tmp-mode-raw.home.sections.projects.title
+projectsSectionLead: Build your business screens from this starter project.
+projectsSectionLeadKey: projects.tmp-mode-raw.home.sections.projects.lead
+capabilitiesSectionTitle: Core Capabilities
+capabilitiesSectionTitleKey: projects.tmp-mode-raw.home.sections.capabilities.title
+solutionsSectionTitle: Solution Matrix
+solutionsSectionTitleKey: projects.tmp-mode-raw.home.sections.solutions.title
+quickActionsSectionTitle: Quick Actions
+quickActionsSectionTitleKey: projects.tmp-mode-raw.home.sections.quickActions.title
+openWorkspaceLabel: Open Workspace
+openWorkspaceLabelKey: projects.tmp-mode-raw.home.actions.openWorkspace
+emptyProjectsMessage: No projects found under projects/.
+emptyProjectsMessageKey: projects.tmp-mode-raw.home.emptyProjectsMessage
+
+quickActions:
+  - label: Dashboard
+    labelKey: projects.tmp-mode-raw.home.quickActions.0.label
+    url: /tmp-mode-raw/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Definitions
+    labelKey: projects.tmp-mode-raw.home.quickActions.1.label
+    url: /tmp-mode-raw/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    labelKey: projects.tmp-mode-raw.home.quickActions.2.label
+    url: /tmp-mode-raw/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭

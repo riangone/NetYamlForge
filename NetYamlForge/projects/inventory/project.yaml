@@ -1,0 +1,58 @@
+name: inventory
+displayName: 在庫管理システム
+displayNameI18n:
+  ja-JP: 在庫管理システム
+  zh-CN: 库存管理系统
+  en-US: Inventory Management System
+
+database:
+  type: sqlite
+  path: database/inventory.db
+
+features:
+  dashboard: true
+  i18n: true
+
+defaultLocale: ja-JP
+supportedLocales: [ja-JP, zh-CN, en-US]
+
+nav:
+  - label: ダッシュボード
+    labelKey: nav.dashboard
+    href: /inventory/Dashboard/Index
+    icon: 📊
+  - label: 商品
+    labelKey: nav.product
+    href: /inventory/DynamicEntity/Index?entity=product
+    icon: 📦
+  - label: 在庫移動
+    labelKey: nav.stock_movement
+    href: /inventory/DynamicEntity/Index?entity=stock_movement
+    icon: 🔄
+  - label: カテゴリ
+    labelKey: nav.category
+    href: /inventory/DynamicEntity/Index?entity=category
+    icon: 🏷️
+  - label: 仕入先
+    labelKey: nav.supplier
+    href: /inventory/DynamicEntity/Index?entity=supplier
+    icon: 🏭
+  - label: 発注書
+    labelKey: nav.purchase_order
+    href: /inventory/DynamicEntity/Index?entity=purchase_order
+    icon: 📋
+
+aiHints:
+  customHooks:
+    - validate_stock_out
+    - update_product_stock
+  notes:
+    - stock_movement.movement_type: in / out / adjustment
+    - product.stock_qty は update_product_stock フックで自動更新
+    - 出庫時は validate_stock_out で在庫確認
+  protectedEntities:
+    - product
+    - stock_movement
+
+layout:
+  dashboardTheme: ops

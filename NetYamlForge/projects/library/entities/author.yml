@@ -1,0 +1,45 @@
+entities:
+  Author:
+    table: author
+    key: id
+
+    displayName: "著者"
+    displayNameI18n:
+      ja-JP: "著者"
+      zh-CN: "作者"
+
+    columns:
+      id:
+        type: int
+        identity: true
+        sortable: true
+      name:
+        type: string
+        displayName: "名前"
+        displayNameI18n:
+          ja-JP: "名前"
+          zh-CN: "名字"
+        searchable: true
+        sortable: true
+        required: true
+      country:
+        type: string
+        displayName: "国"
+        displayNameI18n:
+          ja-JP: "国"
+          zh-CN: "国家"
+      birth_year:
+        type: int
+        displayName: "生年"
+        displayNameI18n:
+          ja-JP: "生年"
+          zh-CN: "出生年"
+
+    forms:
+      create:
+        fields: [name, country, birth_year]
+      edit:
+        fields: [name, country, birth_year]
+
+    hooks:
+      beforeCreate: [trim, validate_required]

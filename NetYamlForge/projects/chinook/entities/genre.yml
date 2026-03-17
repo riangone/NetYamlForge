@@ -1,0 +1,39 @@
+entities:
+  genre:
+    table: Genre
+    key: GenreId
+    displayName: Genre
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    layout:
+      forms:
+        columns: 1
+        order:
+        - Name
+      filters:
+        columns: 1
+        order: []
+    columns:
+      GenreId:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+        labelKey: projects.chinook.entities.genre.entities.genre.columns.GenreId.label
+      Name:
+        type: string
+        label: Name
+        searchable: true
+        sortable: true
+        labelKey: projects.chinook.entities.genre.entities.genre.columns.Name.label
+    forms:
+      Name:
+        type: string
+        label: Name
+        editable: true
+        labelKey: projects.chinook.entities.genre.entities.genre.forms.Name.label
+    filters: {}
+    displayNameKey: projects.chinook.entities.genre.entities.genre.displayName

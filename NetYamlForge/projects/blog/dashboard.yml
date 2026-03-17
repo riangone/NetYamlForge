@@ -1,0 +1,85 @@
+stats:
+- label: Total Posts
+  entity: post
+  aggregate: count
+  icon: 📝
+  color: badge-primary
+  labelKey: projects.blog.dashboard.stats.0.label
+- label: Published
+  entity: post
+  aggregate: count
+  filter: status='published'
+  icon: 🌐
+  color: badge-success
+  labelKey: projects.blog.dashboard.stats.1.label
+- label: Drafts
+  entity: post
+  aggregate: count
+  filter: status='draft'
+  icon: ✏️
+  color: badge-warning
+  labelKey: projects.blog.dashboard.stats.2.label
+- label: Archived
+  entity: post
+  aggregate: count
+  filter: status='archived'
+  icon: 📦
+  color: badge-secondary
+  labelKey: projects.blog.dashboard.stats.3.label
+- label: Total Comments
+  entity: comment
+  aggregate: count
+  icon: 💬
+  color: badge-info
+  labelKey: projects.blog.dashboard.stats.4.label
+- label: Pending Comments
+  entity: comment
+  aggregate: count
+  filter: status='pending'
+  icon: ⏳
+  color: badge-error
+  labelKey: projects.blog.dashboard.stats.5.label
+- label: Categories
+  entity: category
+  aggregate: count
+  icon: 🗂️
+  color: badge-accent
+  labelKey: projects.blog.dashboard.stats.6.label
+charts:
+- title: Posts by Status
+  type: doughnut
+  entity: post
+  valueAggregate: count
+  groupExpression: status
+  orderBy: value
+  orderDir: desc
+  limit: 5
+  colors:
+  - rgba(245, 158, 11, 0.85)
+  - rgba(16, 185, 129, 0.85)
+  - rgba(107, 114, 128, 0.85)
+  titleKey: projects.blog.dashboard.charts.0.title
+- title: Comments by Status
+  type: pie
+  entity: comment
+  valueAggregate: count
+  groupExpression: status
+  orderBy: value
+  orderDir: desc
+  limit: 5
+  colors:
+  - rgba(245, 158, 11, 0.85)
+  - rgba(16, 185, 129, 0.85)
+  - rgba(239, 68, 68, 0.85)
+  titleKey: projects.blog.dashboard.charts.1.title
+- title: Posts by Author
+  type: bar
+  entity: post
+  valueAggregate: count
+  groupExpression: author
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(99, 102, 241, 0.7)
+  colorBorder: rgba(99, 102, 241, 1)
+  titleKey: projects.blog.dashboard.charts.2.title

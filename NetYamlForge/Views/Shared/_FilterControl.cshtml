@@ -1,0 +1,321 @@
+@* ファイル概要: フィルタ種別に応じた入力コントロールを描画します。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@model (string Name, FilterDefinition Filter, Dictionary<string, string?> Filters)
+
+@{
+    var current = Model.Filters.TryGetValue(Model.Name, out var one) ? one : null;
+    var values = (current ?? string.Empty)
+        .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    var min = Model.Filters.TryGetValue($"{Model.Name}_min", out var minVal) ? minVal : null;
+    var max = Model.Filters.TryGetValue($"{Model.Name}_max", out var maxVal) ? maxVal : null;
+    var from = Model.Filters.TryGetValue($"{Model.Name}_from", out var fromVal) ? fromVal : null;
+    var to = Model.Filters.TryGetValue($"{Model.Name}_to", out var toVal) ? toVal : null;
+    var fkDisplayColsParam = Model.Filter.ForeignKey == null
+        ? "Id"
+        : string.Join(",", Model.Filter.ForeignKey.GetDisplayColumns());
+    var fkQuery = Model.Filter.ForeignKey?.Query ?? "";
+
+    string BuildFkLabel(IDictionary<string, object> dict, ForeignKeyDefinition? fk, string fallback)
+    {
+        if (fk == null)
+        {
+            return fallback;
+        }
+
+        var cols = fk.GetDisplayColumns();
+        var parts = new List<string>();
+        foreach (var col in cols)
+        {
+            if (dict.TryGetValue(col, out var raw) && raw != null)
+            {
+                var text = raw.ToString();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    parts.Add(text);
+                }
+            }
+        }
+
+        return parts.Count > 0 ? string.Join(" / ", parts) : fallback;
+    }
+}
+
+@switch (Model.Filter.Type)
+{
+    case "dropdown":
+    case "select":
+        <select name="@Model.Name" class="select select-bordered select-sm w-full">
+            <option value="">All @Model.Filter.GetLabel(Model.Name)</option>
+            @if (Model.Filter.ForeignKey != null && ViewBag.ForeignKeyData is Dictionary<string, IEnumerable<dynamic>> fkData && fkData.TryGetValue(Model.Name, out var items))
+            {
+                foreach (var item in items)
+                {
+                    var dict = (IDictionary<string, object>)item;
+                    if (!dict.TryGetValue("Id", out var rawId) || rawId == null)
+                    {
+                        continue;
+                    }
+                    var id = rawId.ToString();
+                    var text = BuildFkLabel(dict, Model.Filter.ForeignKey, id ?? "");
+                    <option value="@id" selected="@(current == id ? "selected" : null)">@text</option>
+                }
+            }
+            else if (Model.Filter.OptionLabels != null)
+            {
+                @* key=保存値/value=表示名 の辞書（PageFilterDefinition.Options 由来） *@
+                foreach (var opt in Model.Filter.OptionLabels)
+                {
+                    <option value="@opt.Key" selected="@(current == opt.Key ? "selected" : null)">@opt.Value</option>
+                }
+            }
+            else if (Model.Filter.Options != null)
+            {
+                foreach (var opt in Model.Filter.Options)
+                {
+                    <option value="@opt" selected="@(current == opt ? "selected" : null)">@opt</option>
+                }
+            }
+        </select>
+        break;
+    case "checkbox":
+        foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+        {
+            var id = $"{Model.Name}_{opt}";
+            bool checkedVal = values.Contains(opt);
+            <label class="label cursor-pointer justify-start gap-2">
+                <input type="checkbox" name="@Model.Name" value="@opt" id="@id" class="checkbox checkbox-sm" checked="@(checkedVal ? "checked" : null)" />
+                <span class="label-text">@opt</span>
+            </label>
+        }
+        break;
+    case "multi-select":
+        <div class="w-full" data-multi-compact="@Model.Name" data-multi-compact-label="@Model.Filter.GetLabel(Model.Name)">
+            <input type="hidden"
+                   name="@Model.Name"
+                   id="multi-compact-value-@Model.Name"
+                   value="@current"
+                   data-multi-compact-value />
+            <details class="dropdown w-full" data-multi-compact-dropdown>
+                <summary class="btn btn-outline btn-sm w-full justify-between normal-case text-left truncate" data-multi-compact-summary>
+                    @(values.Count > 0 ? $"{values.Count} selected" : $"All {Model.Filter.GetLabel(Model.Name)}")
+                </summary>
+                <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box z-[20] w-full max-h-64 overflow-y-auto border border-base-300">
+                    @if (Model.Filter.ForeignKey != null && ViewBag.ForeignKeyData is Dictionary<string, IEnumerable<dynamic>> fkData2 && fkData2.TryGetValue(Model.Name, out var fkItems))
+                    {
+                        foreach (var item in fkItems)
+                        {
+                            var dict = (IDictionary<string, object>)item;
+                            if (!dict.TryGetValue("Id", out var rawId) || rawId == null)
+                            {
+                                continue;
+                            }
+                            var id = rawId.ToString() ?? string.Empty;
+                            var text = BuildFkLabel(dict, Model.Filter.ForeignKey, id);
+                            <li>
+                                <label class="label cursor-pointer justify-start gap-2 py-1">
+                                    <input type="checkbox"
+                                           class="checkbox checkbox-sm"
+                                           value="@id"
+                                           data-multi-compact-option
+                                           checked="@(values.Contains(id) ? "checked" : null)" />
+                                    <span class="label-text text-sm">@text</span>
+                                </label>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+                        {
+                            <li>
+                                <label class="label cursor-pointer justify-start gap-2 py-1">
+                                    <input type="checkbox"
+                                           class="checkbox checkbox-sm"
+                                           value="@opt"
+                                           data-multi-compact-option
+                                           checked="@(values.Contains(opt) ? "checked" : null)" />
+                                    <span class="label-text text-sm">@opt</span>
+                                </label>
+                            </li>
+                        }
+                    }
+                </ul>
+            </details>
+            <div class="flex flex-wrap gap-1 mt-1 min-h-0" data-multi-compact-chips></div>
+        </div>
+        break;
+    case "multi-select-legacy":
+        <select name="@Model.Name" multiple class="select select-bordered select-sm w-full min-h-28">
+            @if (Model.Filter.ForeignKey != null && ViewBag.ForeignKeyData is Dictionary<string, IEnumerable<dynamic>> fkData2Legacy && fkData2Legacy.TryGetValue(Model.Name, out var fkItemsLegacy))
+            {
+                foreach (var item in fkItemsLegacy)
+                {
+                    var dict = (IDictionary<string, object>)item;
+                    if (!dict.TryGetValue("Id", out var rawId) || rawId == null)
+                    {
+                        continue;
+                    }
+                    var id = rawId.ToString();
+                    var text = BuildFkLabel(dict, Model.Filter.ForeignKey, id ?? "");
+                    <option value="@id" selected="@(values.Contains(id ?? string.Empty) ? "selected" : null)">@text</option>
+                }
+            }
+            else
+            {
+                foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+                {
+                    <option value="@opt" selected="@(values.Contains(opt) ? "selected" : null)">@opt</option>
+                }
+            }
+        </select>
+        break;
+    case "range":
+        <div class="flex gap-1 items-center">
+            <input type="number" step="0.01" name="@($"{Model.Name}_min")" value="@min" class="input input-bordered input-sm w-full" placeholder="Min" />
+            <span class="text-base-content/40 text-xs shrink-0">–</span>
+            <input type="number" step="0.01" name="@($"{Model.Name}_max")" value="@max" class="input input-bordered input-sm w-full" placeholder="Max" />
+        </div>
+        break;
+    case "date-range":
+        <div class="flex gap-1 items-center">
+            <input type="date" name="@($"{Model.Name}_from")" value="@from" class="input input-bordered input-sm w-full" />
+            <span class="text-base-content/40 text-xs shrink-0">–</span>
+            <input type="date" name="@($"{Model.Name}_to")" value="@to" class="input input-bordered input-sm w-full" />
+        </div>
+        break;
+    case "entity-picker":
+        @* 単一選択ピッカー（フィルター用） *@
+        {
+            string pickerLabel = current ?? "";
+            if (!string.IsNullOrEmpty(current) && Model.Filter.ForeignKey != null
+                && ViewBag.ForeignKeyData is Dictionary<string, IEnumerable<dynamic>> fkPData
+                && fkPData.TryGetValue(Model.Name, out var fkPItems))
+            {
+                foreach (var item in fkPItems)
+                {
+                    var dict = (IDictionary<string, object>)item;
+                    if (dict.TryGetValue("Id", out var rawId) && rawId?.ToString() == current)
+                    {
+                        pickerLabel = BuildFkLabel(dict, Model.Filter.ForeignKey, current);
+                        break;
+                    }
+                }
+            }
+            <div class="flex gap-2 items-center" data-picker-container>
+                <input type="hidden" name="@Model.Name" id="picker-value-@Model.Name" value="@current" />
+                <span id="picker-display-@Model.Name"
+                      class="input input-bordered input-sm flex-1 flex items-center text-sm cursor-default">
+                    @(string.IsNullOrEmpty(pickerLabel) ? "(All)" : pickerLabel)
+                </span>
+                <button type="button" class="btn btn-sm btn-outline"
+                        data-picker-field="@Model.Name"
+                        data-picker-entity="@Model.Filter.ForeignKey?.Entity"
+                        data-picker-display-col="@fkDisplayColsParam"
+                        data-picker-query="@fkQuery"
+                        data-picker-multi="false"
+                        onclick="openEntityPicker(this)">
+                    Browse...
+                </button>
+                @if (!string.IsNullOrEmpty(current))
+                {
+                    <button type="button" class="btn btn-sm btn-ghost"
+                            onclick="clearPickerFilterValue('@Model.Name', this)">✕</button>
+                }
+            </div>
+        }
+        break;
+    case "entity-multi-picker":
+        @* 複数選択ピッカー（フィルター用） *@
+        {
+            var entityPkrLabels = new Dictionary<string, string>();
+            if (Model.Filter.ForeignKey != null
+                && ViewBag.ForeignKeyData is Dictionary<string, IEnumerable<dynamic>> fkMPData
+                && fkMPData.TryGetValue(Model.Name, out var fkMPItems))
+            {
+                foreach (var item in fkMPItems)
+                {
+                    var dict = (IDictionary<string, object>)item;
+                    if (dict.TryGetValue("Id", out var rawId) && rawId != null)
+                    {
+                        var sid = rawId.ToString()!;
+                        var lbl = BuildFkLabel(dict, Model.Filter.ForeignKey, sid);
+                        entityPkrLabels[sid] = lbl;
+                    }
+                }
+            }
+            <div data-picker-container>
+                <div id="picker-chips-@Model.Name" class="flex flex-wrap gap-1 mb-1 min-h-6">
+                    @foreach (var v in values)
+                    {
+                        var chipLbl = entityPkrLabels.TryGetValue(v, out var cl) ? cl : v;
+                        <div class="badge badge-neutral gap-1 text-xs" data-id="@v">
+                            @chipLbl
+                            <button type="button"
+                                    onclick="removePickerChip('@Model.Name', '@v', this.parentElement)">✕</button>
+                        </div>
+                    }
+                </div>
+                <input type="hidden" name="@Model.Name" id="picker-value-@Model.Name" value="@current" />
+                <button type="button" class="btn btn-sm btn-outline"
+                        data-picker-field="@Model.Name"
+                        data-picker-entity="@Model.Filter.ForeignKey?.Entity"
+                        data-picker-display-col="@fkDisplayColsParam"
+                        data-picker-query="@fkQuery"
+                        data-picker-multi="true"
+                        onclick="openEntityPicker(this)">
+                    + Browse...
+                </button>
+                @if (values.Count > 0)
+                {
+                    <button type="button" class="btn btn-sm btn-ghost ml-1"
+                            onclick="clearPickerFilterValue('@Model.Name', this)">Clear</button>
+                }
+            </div>
+        }
+        break;
+    case "toggle-group":
+        @* オプションをボタングループで表示（単一選択） *@
+        <div class="flex flex-wrap gap-1" data-toggle-group>
+            @{
+                bool allChecked = string.IsNullOrEmpty(current);
+            }
+            <label class="cursor-pointer">
+                <input type="radio" name="@Model.Name" value="" class="sr-only"
+                       checked="@(allChecked ? "checked" : null)" />
+                <span class="btn btn-sm @(allChecked ? "btn-primary btn-active" : "btn-outline")">All</span>
+            </label>
+            @foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+            {
+                bool optChecked = current == opt;
+                <label class="cursor-pointer">
+                    <input type="radio" name="@Model.Name" value="@opt" class="sr-only"
+                           checked="@(optChecked ? "checked" : null)" />
+                    <span class="btn btn-sm @(optChecked ? "btn-primary btn-active" : "btn-outline")">@opt</span>
+                </label>
+            }
+        </div>
+        break;
+    case "bool-toggle":
+        @* 真偽値トグル（true / false / All） *@
+        {
+            var boolOpts = new[] { ("", "All"), ("true", "✓ Yes"), ("false", "✗ No") };
+            <div class="join" data-toggle-group>
+                @foreach (var (bval, blabel) in boolOpts)
+                {
+                    bool boolChecked = current == bval;
+                    <label class="cursor-pointer">
+                        <input type="radio" name="@Model.Name" value="@bval" class="sr-only"
+                               checked="@(boolChecked ? "checked" : null)" />
+                        <span class="btn btn-sm join-item @(boolChecked ? "btn-primary btn-active" : "btn-outline")">@blabel</span>
+                    </label>
+                }
+            </div>
+        }
+        break;
+    default:
+        <input type="text" name="@Model.Name" value="@current" class="input input-bordered input-sm w-full" />
+        break;
+}

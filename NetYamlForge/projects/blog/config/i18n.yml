@@ -1,0 +1,205 @@
+translations:
+  projects.blog.dashboard.charts.0.title:
+    en-US: Posts by Status
+    zh-CN: 文章状态分布
+    ja-JP: ステータス別記事数
+  projects.blog.dashboard.charts.1.title:
+    en-US: Comments by Status
+    zh-CN: 评论状态分布
+    ja-JP: ステータス別コメント数
+  projects.blog.dashboard.charts.2.title:
+    en-US: Posts by Author
+    zh-CN: 作者文章数
+    ja-JP: 著者別記事数
+  projects.blog.dashboard.stats.0.label:
+    en-US: Total Posts
+    zh-CN: 总文章数
+    ja-JP: 総記事数
+  projects.blog.dashboard.stats.1.label:
+    en-US: Published
+    zh-CN: 已发布
+    ja-JP: 公開中
+  projects.blog.dashboard.stats.2.label:
+    en-US: Drafts
+    zh-CN: 草稿
+    ja-JP: 下書き
+  projects.blog.dashboard.stats.3.label:
+    en-US: Archived
+    zh-CN: 已归档
+    ja-JP: アーカイブ
+  projects.blog.dashboard.stats.4.label:
+    en-US: Total Comments
+    zh-CN: 总评论数
+    ja-JP: 総コメント数
+  projects.blog.dashboard.stats.5.label:
+    en-US: Pending Comments
+    zh-CN: 待审评论
+    ja-JP: 承認待ちコメント
+  projects.blog.dashboard.stats.6.label:
+    en-US: Categories
+    zh-CN: 分类数
+    ja-JP: カテゴリ数
+  projects.blog.entities.post.entities.category.columns.category_id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.blog.entities.post.entities.category.columns.color.label:
+    en-US: Color
+    zh-CN: 颜色
+    ja-JP: カラー
+  projects.blog.entities.post.entities.category.columns.created_at.label:
+    en-US: Created At
+    zh-CN: 创建时间
+    ja-JP: 作成日時
+  projects.blog.entities.post.entities.category.columns.description.label:
+    en-US: Description
+    zh-CN: 描述
+    ja-JP: 説明
+  projects.blog.entities.post.entities.category.columns.name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: カテゴリ名
+  projects.blog.entities.post.entities.category.columns.slug.label:
+    en-US: Slug
+    zh-CN: 短链接
+    ja-JP: スラッグ
+  projects.blog.entities.post.entities.category.displayName:
+    en-US: Category
+    zh-CN: 分类
+    ja-JP: カテゴリ
+  projects.blog.entities.post.entities.category.filters.name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: カテゴリ名
+  projects.blog.entities.post.entities.comment.columns.author_email.label:
+    en-US: Email
+    zh-CN: 邮箱
+    ja-JP: メールアドレス
+  projects.blog.entities.post.entities.comment.columns.author_name.label:
+    en-US: Author Name
+    zh-CN: 作者名
+    ja-JP: 投稿者名
+  projects.blog.entities.post.entities.comment.columns.comment_id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.blog.entities.post.entities.comment.columns.content.label:
+    en-US: Content
+    zh-CN: 内容
+    ja-JP: コメント本文
+  projects.blog.entities.post.entities.comment.columns.created_at.label:
+    en-US: Created At
+    zh-CN: 创建时间
+    ja-JP: 投稿日時
+  projects.blog.entities.post.entities.comment.columns.post_id.label:
+    en-US: Post ID
+    zh-CN: 文章ID
+    ja-JP: 記事ID
+  projects.blog.entities.post.entities.comment.columns.status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.blog.entities.post.entities.comment.displayName:
+    en-US: Comment
+    zh-CN: 评论
+    ja-JP: コメント
+  projects.blog.entities.post.entities.comment.filters.author_name.label:
+    en-US: Author Name
+    zh-CN: 作者名
+    ja-JP: 投稿者名
+  projects.blog.entities.post.entities.comment.filters.status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.blog.entities.post.entities.post.columns.allow_comments.label:
+    en-US: Allow Comments
+    zh-CN: 允许评论
+    ja-JP: コメント許可
+  projects.blog.entities.post.entities.post.columns.author.label:
+    en-US: Author
+    zh-CN: 作者
+    ja-JP: 著者
+  projects.blog.entities.post.entities.post.columns.category_id.label:
+    en-US: Category
+    zh-CN: 分类
+    ja-JP: カテゴリ
+  projects.blog.entities.post.entities.post.columns.content.label:
+    en-US: Content
+    zh-CN: 内容
+    ja-JP: 本文
+  projects.blog.entities.post.entities.post.columns.created_at.label:
+    en-US: Created At
+    zh-CN: 创建时间
+    ja-JP: 作成日時
+  projects.blog.entities.post.entities.post.columns.excerpt.label:
+    en-US: Excerpt
+    zh-CN: 摘要
+    ja-JP: 概要
+  projects.blog.entities.post.entities.post.columns.featured.label:
+    en-US: Featured
+    zh-CN: 置顶
+    ja-JP: 注目記事
+  projects.blog.entities.post.entities.post.columns.post_id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.blog.entities.post.entities.post.columns.published_at.label:
+    en-US: Published At
+    zh-CN: 发布时间
+    ja-JP: 公開日時
+  projects.blog.entities.post.entities.post.columns.slug.label:
+    en-US: Slug (URL)
+    zh-CN: 短链接
+    ja-JP: スラッグ
+  projects.blog.entities.post.entities.post.columns.status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.blog.entities.post.entities.post.columns.title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  projects.blog.entities.post.entities.post.columns.updated_at.label:
+    en-US: Updated At
+    zh-CN: 更新时间
+    ja-JP: 更新日時
+  projects.blog.entities.post.entities.post.columns.view_count.label:
+    en-US: Views
+    zh-CN: 浏览量
+    ja-JP: 閲覧数
+  projects.blog.entities.post.entities.post.displayName:
+    en-US: Post
+    zh-CN: 文章
+    ja-JP: 記事
+  projects.blog.entities.post.entities.post.filters.status.label:
+    en-US: Status
+    zh-CN: 状态
+    ja-JP: ステータス
+  projects.blog.entities.post.entities.post.filters.title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  projects.blog.entities.post.entities.tag.columns.color.label:
+    en-US: Color
+    zh-CN: 颜色
+    ja-JP: カラー
+  projects.blog.entities.post.entities.tag.columns.name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: タグ名
+  projects.blog.entities.post.entities.tag.columns.slug.label:
+    en-US: Slug
+    zh-CN: 短链接
+    ja-JP: スラッグ
+  projects.blog.entities.post.entities.tag.columns.tag_id.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  projects.blog.entities.post.entities.tag.displayName:
+    en-US: Tag
+    zh-CN: 标签
+    ja-JP: タグ
+  projects.blog.entities.post.entities.tag.filters.name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: タグ名

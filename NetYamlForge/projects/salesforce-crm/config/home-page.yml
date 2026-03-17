@@ -1,0 +1,93 @@
+hero:
+  eyebrow: Salesforce-style CRM Workspace
+  eyebrowKey: projects.salesforce-crm.home.hero.eyebrow
+  title: Start with data input, then run operations
+  titleKey: projects.salesforce-crm.home.hero.title
+  description: Most pages are analytics and execution consoles. First register Customer -> Order -> Order Detail from Operation Workbench.
+  descriptionKey: projects.salesforce-crm.home.hero.description
+  primaryActionLabel: Open Operation Workbench
+  primaryActionLabelKey: projects.salesforce-crm.home.hero.primaryAction
+  primaryActionUrl: /salesforce-crm/Page/OperationWorkbench
+  secondaryActionLabel: Create Customer
+  secondaryActionLabelKey: projects.salesforce-crm.home.hero.secondaryAction
+  secondaryActionUrl: /salesforce-crm/DynamicEntity/CreatePage?entity=customer
+  highlights:
+    - Input start point is explicitly guided
+    - Workflow follows Customer -> Order -> Service
+  highlightKeys:
+    - projects.salesforce-crm.home.hero.highlights.0
+    - projects.salesforce-crm.home.hero.highlights.1
+
+projectsSectionTitle: Salesforce CRM Clone
+projectsSectionTitleKey: projects.salesforce-crm.home.sections.title
+projectsSectionLead: Begin from the start actions below, then move to execution consoles for daily operations.
+projectsSectionLeadKey: projects.salesforce-crm.home.sections.lead
+
+quickActions:
+  - label: Operation Workbench
+    url: /salesforce-crm/Page/OperationWorkbench
+    style: btn-primary
+    icon: 🧭
+  - label: Create Customer
+    url: /salesforce-crm/DynamicEntity/CreatePage?entity=customer
+    style: btn-primary
+    icon: 🏢
+  - label: Create Order
+    url: /salesforce-crm/DynamicEntity/CreatePage?entity=order
+    style: btn-primary
+    icon: 📦
+  - label: Create Order Detail
+    url: /salesforce-crm/DynamicEntity/CreatePage?entity=orderdetail
+    style: btn-primary
+    icon: 🧾
+  - label: Customer List
+    url: /salesforce-crm/DynamicEntity/Index?entity=customer
+    style: btn-outline
+    icon: 📋
+  - label: Order List
+    url: /salesforce-crm/DynamicEntity/Index?entity=order
+    style: btn-outline
+    icon: 📑
+  - label: Lead Inbox
+    labelKey: projects.salesforce-crm.home.quick.leadInbox
+    url: /salesforce-crm/Page/LeadInbox
+    style: btn-outline
+    icon: 📥
+  - label: Opportunity Workspace
+    labelKey: projects.salesforce-crm.home.quick.oppty
+    url: /salesforce-crm/Page/OpportunityWorkspace
+    style: btn-outline
+    icon: 💼
+  - label: Order Management
+    labelKey: projects.salesforce-crm.home.quick.orderManagement
+    url: /salesforce-crm/Page/OrderManagement
+    style: btn-outline
+    icon: 🚚
+  - label: Case Queue
+    labelKey: projects.salesforce-crm.home.quick.caseQueue
+    url: /salesforce-crm/Page/CaseQueue
+    style: btn-outline
+    icon: 🧰
+  - label: SLA Monitor
+    labelKey: projects.salesforce-crm.home.quick.slaMonitor
+    url: /salesforce-crm/Page/SlaMonitor
+    style: btn-outline
+    icon: ⏱️
+  - label: Approval Inbox
+    labelKey: projects.salesforce-crm.home.quick.approvalInbox
+    url: /salesforce-crm/Page/ApprovalInbox
+    style: btn-outline
+    icon: ✅
+    adminOnly: true
+  - label: Audit Trail
+    labelKey: projects.salesforce-crm.home.quick.auditTrail
+    url: /salesforce-crm/Page/AuditTrail
+    style: btn-outline
+    icon: 🧾
+    adminOnly: true
+  - label: User Role Profile
+    labelKey: projects.salesforce-crm.home.quick.userRoleProfile
+    url: /salesforce-crm/Page/UserRoleProfile
+    style: btn-outline
+    icon: 👥
+    adminOnly: true

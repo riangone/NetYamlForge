@@ -1,0 +1,33 @@
+title: Product Share
+description: pie_chart コンポーネントのデモ — ドーナツグラフ + 凡例テーブル
+
+sections:
+  - id: category_pie
+    title: カテゴリ別売上シェア（pie_chart）
+    component: pie_chart
+    source_type: custom
+    source: |
+      SELECT category_name, sales_amount, order_count,
+             ROUND(sales_amount * 100.0 / SUM(sales_amount) OVER(), 1) AS share_pct
+      FROM category_sales
+      ORDER BY sales_amount DESC
+    columns: [category_name, sales_amount, order_count, share_pct]
+    label_field: category_name
+    value_field: sales_amount
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: category_bar
+    title: カテゴリ別注文数（bar_chart）
+    component: bar_chart
+    source_type: custom
+    source: |
+      SELECT category_name, order_count FROM category_sales ORDER BY order_count DESC
+    columns: [category_name, order_count]
+    x_field: category_name
+    y_field: order_count
+    color: "rgba(34,197,94,0.75)"
+    page_size: 20
+    editable: false
+    read_only: true

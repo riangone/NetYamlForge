@@ -1,0 +1,37 @@
+entities:
+  approlepermission:
+    table: 'AppRolePermission'
+    key: 'Id'
+    displayName: 'Approlepermission'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ProjectName', 'RoleName', 'ResourceType', 'ResourceName', 'CanRead', 'CanWrite', 'CreatedAt', 'UpdatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      ProjectName: { type: string, required: true, label: 'Project Name', searchable: true, sortable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', searchable: true, sortable: true }
+      ResourceType: { type: string, required: true, label: 'Resource Type', searchable: true, sortable: true }
+      ResourceName: { type: string, required: true, label: 'Resource Name', searchable: true, sortable: true }
+      CanRead: { type: int, label: 'Can Read', sortable: true }
+      CanWrite: { type: int, label: 'Can Write', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', searchable: true, sortable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      ProjectName: { type: string, required: true, label: 'Project Name', editable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', editable: true }
+      ResourceType: { type: string, required: true, label: 'Resource Type', editable: true }
+      ResourceName: { type: string, required: true, label: 'Resource Name', editable: true }
+      CanRead: { type: int, label: 'Can Read', editable: true }
+      CanWrite: { type: int, label: 'Can Write', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', editable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

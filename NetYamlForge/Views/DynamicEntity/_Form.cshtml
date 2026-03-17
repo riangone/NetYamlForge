@@ -1,0 +1,154 @@
+@* ファイル概要: 動的フォーム（モーダル/ページ両対応）を描画します。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@using Microsoft.AspNetCore.Routing
+@using System.Text.Json
+@model NetYamlForge.Controllers.DynamicFormViewModel
+@{
+    var itemDict = Model.Item as IDictionary<string, object>;
+    var isEdit = itemDict != null;
+    var action = isEdit ? "Edit" : "Create";
+    var isPageMode = Model.Mode.Equals("page", StringComparison.OrdinalIgnoreCase);
+    var formCols = Math.Clamp(Model.Meta.Layout.Forms.Columns, 1, 4);
+    var formColClass = $"md:grid-cols-{formCols}";
+    var orderedForms = Model.Meta.GetOrderedForms().ToList();
+    var routeValues = new RouteValueDictionary();
+    routeValues["entity"] = Model.Entity;
+    
+    // 複合主鍵対応の ID 設定
+    if (isEdit && itemDict != null)
+    {
+        var pkColumns = Model.Meta.GetPrimaryKeyColumns();
+        if (pkColumns.Count == 1)
+        {
+            // 単一主鍵：主鍵列名をパラメータ名として使用
+            var key = pkColumns[0];
+            if (itemDict.TryGetValue(key, out var routeId))
+            {
+                routeValues[key] = routeId?.ToString() ?? "0";
+            }
+        }
+        else
+        {
+            // 複合主鍵：JSON 形式
+            var keyObj = new Dictionary<string, object?>();
+            foreach (var col in pkColumns)
+            {
+                keyObj[col] = itemDict.TryGetValue(col, out var val) ? val : null;
+            }
+            routeValues["id"] = JsonSerializer.Serialize(keyObj);
+        }
+    }
+    // 確認ダイアログメッセージ（entities.yml の confirmation セクションから取得）
+    var confirmMsg = Model.Meta.Confirmation != null
+        ? (isEdit ? Model.Meta.Confirmation.Update : Model.Meta.Confirmation.Create)
+        : null;
+    // フック由来のエラーメッセージ（前処理キャンセル時に __hook キーで格納される）
+    var hookError = Model.Errors.TryGetValue("__hook", out var he) ? he : null;
+}
+
+<div class="card bg-base-100 shadow">
+    <div class="card-body">
+        <h2 class="card-title">@Model.Meta.GetDisplayName() - @(isEdit ? "Edit" : "Create")</h2>
+
+        @* フック前処理キャンセル時のエラーバナー *@
+        @if (!string.IsNullOrEmpty(hookError))
+        {
+            <div class="alert alert-error mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>@hookError</span>
+            </div>
+        }
+
+        @if (isPageMode)
+        {
+            <form class="grid @formColClass gap-4"
+                  method="post"
+                  action="@Url.Action(action, "DynamicEntity", routeValues)"
+                  data-confirm-msg="@(confirmMsg ?? "")">
+                <input type="hidden" name="mode" value="@Model.Mode" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+                @foreach (var field in orderedForms)
+                {
+                    var name = field.Key;
+                    var def = field.Value;
+                    if (def.Identity)
+                    {
+                        continue;
+                    }
+
+                    object? value = null;
+                    if (isEdit && itemDict != null && itemDict.TryGetValue(name, out var rawValue))
+                    {
+                        value = rawValue;
+                    }
+                    // エラー再表示時は送信値で上書き（フィールド消去防止）
+                    if (Model.SubmittedValues != null && Model.SubmittedValues.TryGetValue(name, out var sv))
+                    {
+                        value = sv;
+                    }
+
+                    var label = def.GetLabel(name);
+                    var error = Model.Errors.ContainsKey(name) ? Model.Errors[name] : null;
+
+                    @await Html.PartialAsync("_FormField", new DynamicFormFieldViewModel(name, def, value, label, error, Model.ForeignKeyData, Model.Meta.Columns.GetValueOrDefault(name)))
+                }
+
+                <div class="md:col-span-2 flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">@(isEdit ? "Update" : "Create")</button>
+                    @{
+                        var cancelUrl = Context.Request.Query["returnUrl"].ToString() is { Length: > 0 } cancelReturnUrl
+                            ? cancelReturnUrl
+                            : Url.Action("Index", "DynamicEntity", new { entity = Model.Entity });
+                    }
+                    <a class="btn btn-ghost btn-sm" href="@cancelUrl">Cancel</a>
+                </div>
+            </form>
+        }
+        else
+        {
+            @* hx-confirm が空文字の場合は _Layout.cshtml の htmx:confirm ハンドラで確認なしでリクエストを発行します *@
+            <form class="grid @formColClass gap-4"
+                  hx-post="@Url.Action(action, "DynamicEntity", routeValues)"
+                  hx-target="#modal-form-content"
+                  hx-swap="innerHTML"
+                  hx-confirm="@(confirmMsg ?? "")">
+                <input type="hidden" name="mode" value="@Model.Mode" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+                @foreach (var field in orderedForms)
+                {
+                    var name = field.Key;
+                    var def = field.Value;
+                    if (def.Identity)
+                    {
+                        continue;
+                    }
+
+                    object? value = null;
+                    if (isEdit && itemDict != null && itemDict.TryGetValue(name, out var rawValue))
+                    {
+                        value = rawValue;
+                    }
+                    // エラー再表示時は送信値で上書き（フィールド消去防止）
+                    if (Model.SubmittedValues != null && Model.SubmittedValues.TryGetValue(name, out var sv))
+                    {
+                        value = sv;
+                    }
+
+                    var label = def.GetLabel(name);
+                    var error = Model.Errors.ContainsKey(name) ? Model.Errors[name] : null;
+
+                    @await Html.PartialAsync("_FormField", new DynamicFormFieldViewModel(name, def, value, label, error, Model.ForeignKeyData, Model.Meta.Columns.GetValueOrDefault(name)))
+                }
+
+                <div class="md:col-span-2 flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm">@(isEdit ? "Update" : "Create")</button>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('entity-form-modal')?.close();">Cancel</button>
+                </div>
+            </form>
+        }
+    </div>
+</div>

@@ -1,0 +1,503 @@
+@* ファイル概要: 単一フォームフィールドを型に応じてレンダリングする共有パーシャルです。
+   _Form.cshtml (DynamicEntity) および _SectionRowForm.cshtml (Page) から共通利用されます。
+   SectionFormFieldDef.Options (Dict<string,string>) は ColDef.OptionLabels に変換して渡してください。 *@
+@model NetYamlForge.Controllers.DynamicFormFieldViewModel
+@{
+    var name = Model.FieldName;
+    var formDef = Model.Def;
+    var value = Model.Value;
+    var label = Model.Label;
+    var error = Model.Error;
+    var fkDisplayCols = formDef.ForeignKey?.GetDisplayColumns() ?? Array.Empty<string>();
+    var fkDisplayColsParam = string.Join(",", fkDisplayCols);
+    var fkQuery = formDef.ForeignKey?.Query ?? "";
+
+    // ColumnDefinition 拡張プロパティを使用
+    // forms の type が定義されている場合はそれを優先、そうでなければ columns の type を使用
+    var formType = formDef.Type ?? "string";
+    var colType = Model.GetColType();
+    var finalType = formType != "string" ? formType : colType;
+    var colOptions = Model.GetColOptions();
+    var colOptionLabels = Model.GetColOptionLabels();
+    var colEditable = Model.GetColEditable();
+    var colCurrency = Model.GetColCurrency();
+    var colLocale = Model.GetColLocale();
+    var colPrecision = Model.GetColPrecision();
+    var colPlaceholder = Model.GetColPlaceholder();
+
+    string BuildFkLabel(IDictionary<string, object> dict, string fallback)
+    {
+        var parts = new List<string>();
+        foreach (var col in fkDisplayCols)
+        {
+            if (dict.TryGetValue(col, out var raw) && raw != null)
+            {
+                var text = raw.ToString();
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    parts.Add(text);
+                }
+            }
+        }
+
+        return parts.Count > 0 ? string.Join(" / ", parts) : fallback;
+    }
+}
+
+<div class="form-control">
+    <label class="label">
+        <span class="label-text">
+            @label
+            @if (formDef.Required)
+            {
+                <span class="text-error ml-1">*</span>
+            }
+        </span>
+    </label>
+
+    @if (!colEditable)
+    {
+        <input type="text" name="@name" value="@(value ?? "")" class="input input-bordered input-sm w-full" readonly disabled />
+    }
+    else if (formDef.ForeignKey != null && formDef.ForeignKey.Picker)
+    {
+        @* 単一選択ピッカー *@
+        var fkId = value?.ToString() ?? "";
+        var fkLabel = fkId;
+        if (!string.IsNullOrEmpty(fkId) && Model.ForeignKeyData.TryGetValue(name, out var fkPickItems))
+        {
+            foreach (var fkItem in fkPickItems)
+            {
+                var d = (IDictionary<string, object>)fkItem;
+                if (d.TryGetValue("Id", out var rawId) && rawId?.ToString() == fkId)
+                {
+                    fkLabel = BuildFkLabel(d, fkId);
+                    break;
+                }
+            }
+        }
+        <div class="flex gap-2 items-center" data-picker-container>
+            <input type="hidden" name="@name" id="picker-value-@name" value="@fkId" />
+            <input type="text" id="picker-display-@name" class="input input-bordered input-sm flex-1"
+                   readonly placeholder="Browse で選択..." value="@fkLabel" />
+            <button type="button" class="btn btn-outline btn-sm"
+                    data-picker-field="@name"
+                    data-picker-entity="@formDef.ForeignKey.Entity"
+                    data-picker-display-col="@fkDisplayColsParam"
+                    data-picker-query="@fkQuery"
+                    data-picker-multi="false"
+                    onclick="openEntityPicker(this)">
+                Browse...
+            </button>
+            @if (!string.IsNullOrEmpty(fkId))
+            {
+                <button type="button" class="btn btn-ghost btn-sm"
+                        onclick="clearPickerValue('@name', this)">✕</button>
+            }
+        </div>
+    }
+    else if (formDef.ForeignKey != null && formDef.ForeignKey.MultiPicker)
+    {
+        @* 複数選択ピッカー *@
+        var rawIds = (value?.ToString() ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var chipLabels = new Dictionary<string, string>();
+        if (Model.ForeignKeyData.TryGetValue(name, out var fkMultiItems))
+        {
+            foreach (var fkItem in fkMultiItems)
+            {
+                var d = (IDictionary<string, object>)fkItem;
+                if (d.TryGetValue("Id", out var rawId) && rawId != null)
+                {
+                    var sid = rawId.ToString()!;
+                    var lbl = BuildFkLabel(d, sid);
+                    chipLabels[sid] = lbl;
+                }
+            }
+        }
+        <div data-picker-container>
+            <div id="picker-chips-@name" class="flex flex-wrap gap-1 mb-2 min-h-8">
+                @foreach (var pid in rawIds)
+                {
+                    var chipLbl = chipLabels.TryGetValue(pid, out var cl) ? cl : pid;
+                    <div class="badge badge-neutral gap-1" data-id="@pid">
+                        @chipLbl
+                        <button type="button"
+                                onclick="removePickerChip('@name', '@pid', this.parentElement)">✕</button>
+                    </div>
+                }
+            </div>
+            <input type="hidden" name="@name" id="picker-value-@name" value="@(value?.ToString() ?? "")" />
+            <button type="button" class="btn btn-outline btn-sm"
+                    data-picker-field="@name"
+                    data-picker-entity="@formDef.ForeignKey.Entity"
+                    data-picker-display-col="@fkDisplayColsParam"
+                    data-picker-query="@fkQuery"
+                    data-picker-multi="true"
+                    onclick="openEntityPicker(this)">
+                + Browse...
+            </button>
+        </div>
+    }
+    else if (formDef.ForeignKey != null && Model.ForeignKeyData.TryGetValue(name, out var fkItems))
+    {
+        var selVal = value?.ToString();
+        <select name="@name" class="select select-bordered w-full" @(formDef.Required ? "required" : "")>
+            <option value="">-- select --</option>
+            @foreach (var fk in fkItems)
+            {
+                var dict = (IDictionary<string, object>)fk;
+                var fkIdVal = dict["Id"];
+                var fkText = BuildFkLabel(dict, fkIdVal?.ToString() ?? "");
+                bool selected = selVal != null && selVal == fkIdVal?.ToString();
+                <option value="@fkIdVal" selected="@(selected ? "selected" : null)">@fkText</option>
+            }
+        </select>
+    }
+    else if (finalType.Equals("bool", StringComparison.OrdinalIgnoreCase))
+    {
+        var boolStr = value?.ToString() ?? "";
+        bool checkedValue = value is bool b ? b : boolStr.Equals("true", StringComparison.OrdinalIgnoreCase);
+        <label class="flex items-center gap-3 cursor-pointer py-1">
+            <input type="checkbox" name="@name" class="toggle toggle-primary" checked="@(checkedValue ? "checked" : null)" />
+            <span class="label-text text-sm text-gray-500">@(checkedValue ? "有効" : "無効")</span>
+        </label>
+    }
+    else if (colOptionLabels != null && colOptionLabels.Any() && !finalType.Equals("radio", StringComparison.OrdinalIgnoreCase))
+    {
+        @* SectionFormFieldDef.Options (Dict<string,string>) 由来: key=保存値, value=表示名 *@
+        var current = value?.ToString();
+        <select name="@name" class="select select-bordered w-full" @(formDef.Required ? "required" : "")>
+            @if (!formDef.Required)
+            {
+                <option value="">— 選択 —</option>
+            }
+            @foreach (var opt in colOptionLabels)
+            {
+                <option value="@opt.Key" selected="@(current == opt.Key ? "selected" : null)">@opt.Value</option>
+            }
+        </select>
+    }
+    else if (colOptions != null && colOptions.Any() && !finalType.Equals("radio", StringComparison.OrdinalIgnoreCase))
+    {
+        var current = value?.ToString();
+        <select name="@name" class="select select-bordered w-full" @(formDef.Required ? "required" : "")>
+            <option value="">-- select --</option>
+            @foreach (var opt in colOptions)
+            {
+                <option value="@opt" selected="@(current == opt ? "selected" : null)">@opt</option>
+            }
+        </select>
+    }
+    else if (finalType.Equals("int", StringComparison.OrdinalIgnoreCase))
+    {
+        <input type="number" name="@name" value="@(value ?? "")" class="input input-bordered input-sm w-full"
+               placeholder="@colPlaceholder" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("decimal", StringComparison.OrdinalIgnoreCase) || finalType.Equals("double", StringComparison.OrdinalIgnoreCase))
+    {
+        <input type="number" step="0.01" name="@name" value="@(value ?? "")" class="input input-bordered input-sm w-full"
+               placeholder="@colPlaceholder" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("datetime", StringComparison.OrdinalIgnoreCase))
+    {
+        string v = value is DateTime dtv
+            ? dtv.ToString("yyyy-MM-dd")
+            : DateTime.TryParse(value?.ToString(), out var dtv2) ? dtv2.ToString("yyyy-MM-dd") : value?.ToString() ?? "";
+        <input type="date" name="@name" value="@v" class="input input-bordered input-sm w-full" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("date", StringComparison.OrdinalIgnoreCase))
+    {
+        string v = value is DateTime dtd
+            ? dtd.ToString("yyyy-MM-dd")
+            : DateTime.TryParse(value?.ToString(), out var dtd2) ? dtd2.ToString("yyyy-MM-dd") : value?.ToString() ?? "";
+        <input type="date" name="@name" value="@v" class="input input-bordered input-sm w-full" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("email", StringComparison.OrdinalIgnoreCase))
+    {
+        <input type="email" name="@name" value="@(value ?? "")" class="input input-bordered input-sm w-full"
+               placeholder="@(colPlaceholder ?? label)" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("textarea", StringComparison.OrdinalIgnoreCase))
+    {
+        <textarea name="@name" class="textarea textarea-bordered w-full" rows="4"
+                  placeholder="@colPlaceholder" @(formDef.Required ? "required" : "")>@(value ?? "")</textarea>
+    }
+    else if (finalType.Equals("radio", StringComparison.OrdinalIgnoreCase) && colOptions != null)
+    {
+        var current = value?.ToString();
+        <div class="flex gap-4 flex-wrap">
+            @foreach (var opt in colOptions)
+            {
+                <label class="label cursor-pointer gap-2">
+                    <input type="radio" name="@name" value="@opt" class="radio radio-sm" checked="@(current == opt ? "checked" : null)" />
+                    <span class="label-text">@opt</span>
+                </label>
+            }
+        </div>
+    }
+    else if (finalType.Equals("color", StringComparison.OrdinalIgnoreCase))
+    {
+        var colorVal = value?.ToString() ?? "#000000";
+        <div class="flex items-center gap-3">
+            <input type="color" name="@name" value="@colorVal" class="w-12 h-10 rounded cursor-pointer border border-base-300"
+                   id="color-input-@name" oninput="document.getElementById('color-text-@name').value=this.value" />
+            <input type="text" id="color-text-@name" value="@colorVal" class="input input-bordered input-sm w-32 font-mono text-sm"
+                   oninput="document.getElementById('color-input-@name').value=this.value;this.closest('div').querySelector('[name=@name]').value=this.value" />
+        </div>
+    }
+    else if (finalType.Equals("range", StringComparison.OrdinalIgnoreCase))
+    {
+        var rangeVal = value?.ToString() ?? "0";
+        <div class="flex items-center gap-3">
+            <input type="range" name="@name" value="@rangeVal" min="0" max="100" step="1"
+                   class="range range-primary flex-1"
+                   id="range-input-@name"
+                   oninput="document.getElementById('range-display-@name').textContent=this.value" />
+            <span id="range-display-@name" class="badge badge-neutral w-12 text-center">@rangeVal</span>
+        </div>
+    }
+    else if (finalType.Equals("rating", StringComparison.OrdinalIgnoreCase))
+    {
+        var ratingVal = int.TryParse(value?.ToString(), out var rv) ? rv : 0;
+        <div class="rating rating-lg">
+            <input type="radio" name="@name" value="0" class="rating-hidden" checked="@(ratingVal == 0 ? "checked" : null)" />
+            @for (int star = 1; star <= 5; star++)
+            {
+                <input type="radio" name="@name" value="@star" class="mask mask-star-2 bg-orange-400"
+                       checked="@(ratingVal == star ? "checked" : null)" />
+            }
+        </div>
+    }
+    else if (finalType.Equals("file", StringComparison.OrdinalIgnoreCase))
+    {
+        var filePath = value?.ToString() ?? "";
+        var fileName = string.IsNullOrEmpty(filePath) ? "" : System.IO.Path.GetFileName(filePath);
+        <div class="flex flex-col gap-2">
+            @if (!string.IsNullOrEmpty(filePath))
+            {
+                <div class="flex items-center gap-2 p-2 bg-base-200 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <a href="@filePath" target="_blank" class="link link-primary flex-1 truncate">@fileName</a>
+                </div>
+            }
+            <input type="file" name="@name" id="file-input-@name" class="file-input file-input-bordered w-full"
+                   @(!colEditable ? "disabled" : "") />
+        </div>
+    }
+    else if (finalType.Equals("image", StringComparison.OrdinalIgnoreCase))
+    {
+        var imagePath = value?.ToString() ?? "";
+        var imageUrl = string.IsNullOrEmpty(imagePath) ? "" : (imagePath.StartsWith("http") ? imagePath : "/" + imagePath);
+        <div class="flex flex-col gap-2">
+            @if (!string.IsNullOrEmpty(imagePath))
+            {
+                <div class="relative inline-block">
+                    <img src="@imageUrl" alt="@name" class="max-h-48 rounded border border-base-300" />
+                </div>
+            }
+            <input type="file" name="@name" id="image-input-@name" class="file-input file-input-bordered w-full"
+                   accept="image/*"
+                   @(!colEditable ? "disabled" : "") />
+        </div>
+    }
+    else if (finalType.Equals("richtext", StringComparison.OrdinalIgnoreCase))
+    {
+        var richtextValue = value?.ToString() ?? "";
+        <div class="richtext-editor">
+            <textarea name="@name" class="textarea textarea-bordered w-full" rows="6">@richtextValue</textarea>
+        </div>
+    }
+    else if (finalType.Equals("markdown", StringComparison.OrdinalIgnoreCase))
+    {
+        var markdownValue = value?.ToString() ?? "";
+        <div class="markdown-editor">
+            <textarea name="@name" class="textarea textarea-bordered w-full" rows="6" placeholder="Markdown で入力してください">@markdownValue</textarea>
+            <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-outline" onclick="toggleMarkdownPreview('@name')">プレビュー表示</button>
+            </div>
+            <div id="markdown-preview-@name" class="mt-2 p-4 bg-base-200 rounded" style="display:none;"></div>
+        </div>
+    }
+    else if (finalType.Equals("autocomplete", StringComparison.OrdinalIgnoreCase))
+    {
+        var currentValue = value?.ToString() ?? "";
+        var suggestions = colOptions != null ? string.Join(",", colOptions) : "";
+        <div class="autocomplete-wrapper">
+            <input type="text" name="@name" class="input input-bordered input-sm w-full"
+                   value="@currentValue" placeholder="入力して候補を選択"
+                   data-suggestions="@suggestions" />
+        </div>
+    }
+    else if (finalType.Equals("tags", StringComparison.OrdinalIgnoreCase))
+    {
+        var tagsValue = value?.ToString() ?? "";
+        <div class="tags-input-wrapper">
+            <input type="text" name="@name" class="input input-bordered input-sm w-full"
+                   value="@tagsValue" placeholder="タグを入力して Enter 区切り" />
+        </div>
+    }
+    else if (finalType.Equals("money", StringComparison.OrdinalIgnoreCase))
+    {
+        var moneyValue = value?.ToString() ?? "0";
+        var currency = colCurrency ?? "JPY";
+        <div class="money-input-wrapper">
+            <div class="join">
+                <span class="join-item btn btn-outline btn-sm">@currency</span>
+                <input type="text" name="@name" class="input input-bordered input-sm join-item w-full text-right"
+                       value="@moneyValue" />
+            </div>
+        </div>
+    }
+    else if (finalType.Equals("percent", StringComparison.OrdinalIgnoreCase))
+    {
+        var percentValue = value?.ToString() ?? "0";
+        <div class="percent-input-wrapper">
+            <div class="join">
+                <input type="number" name="@name" class="input input-bordered input-sm join-item w-full text-right"
+                       value="@percentValue" step="0.01" min="0" max="100" />
+                <span class="join-item btn btn-outline btn-sm">%</span>
+            </div>
+        </div>
+    }
+    else if (finalType.Equals("tel", StringComparison.OrdinalIgnoreCase))
+    {
+        var telValue = value?.ToString() ?? "";
+        <input type="tel" name="@name" value="@telValue" class="input input-bordered input-sm w-full"
+               placeholder="@(colPlaceholder ?? "03-1234-5678")" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("url", StringComparison.OrdinalIgnoreCase))
+    {
+        var urlValue = value?.ToString() ?? "";
+        <input type="url" name="@name" value="@urlValue" class="input input-bordered input-sm w-full"
+               placeholder="@(colPlaceholder ?? "https://example.com")" @(formDef.Required ? "required" : "") />
+    }
+    else if (finalType.Equals("password", StringComparison.OrdinalIgnoreCase))
+    {
+        var passwordValue = value?.ToString() ?? "";
+        <div class="password-input-wrapper relative">
+            <input type="password" name="@name" value="@passwordValue"
+                   class="input input-bordered input-sm w-full" minlength="8" @(formDef.Required ? "required" : "") />
+        </div>
+    }
+    else if (finalType.Equals("checkbox-group", StringComparison.OrdinalIgnoreCase))
+    {
+        var currentValue = value?.ToString() ?? "";
+        var selectedValues = currentValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+        var options = colOptions ?? new List<string>();
+        <div class="checkbox-group-wrapper flex flex-wrap gap-4">
+            @foreach (var opt in options)
+            {
+                var isChecked = selectedValues.Contains(opt);
+                <label class="label cursor-pointer gap-2">
+                    <input type="checkbox" value="@opt" class="checkbox checkbox-sm"
+                           @(isChecked ? "checked" : "")
+                           onchange="toggleCheckboxGroup('@name', this)" />
+                    <span class="label-text">@opt</span>
+                </label>
+            }
+            <input type="hidden" name="@name" id="checkbox-group-value-@name" value="@currentValue" />
+        </div>
+    }
+    else if (finalType.Equals("switch-group", StringComparison.OrdinalIgnoreCase))
+    {
+        var currentValue = value?.ToString() ?? "";
+        var selectedValues = currentValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+        var options = colOptions ?? new List<string>();
+        <div class="switch-group-wrapper flex flex-wrap gap-4">
+            @foreach (var opt in options)
+            {
+                var isChecked = selectedValues.Contains(opt);
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" value="@opt" class="toggle toggle-sm"
+                           @(isChecked ? "checked" : "")
+                           onchange="toggleSwitchGroup('@name', this)" />
+                    <span>@opt</span>
+                </label>
+            }
+            <input type="hidden" name="@name" id="switch-group-value-@name" value="@currentValue" />
+        </div>
+    }
+    else if (finalType.Equals("datetime-range", StringComparison.OrdinalIgnoreCase))
+    {
+        var rangeValue = value?.ToString() ?? "";
+        var parts = rangeValue.Split('|');
+        var startDate = parts.Length > 0 ? parts[0] : "";
+        var endDate = parts.Length > 1 ? parts[1] : "";
+        <div class="datetime-range-wrapper flex gap-2 items-center">
+            <input type="datetime-local" name="@name-start" value="@startDate" class="input input-bordered input-sm w-40" placeholder="開始" />
+            <span>〜</span>
+            <input type="datetime-local" name="@name-end" value="@endDate" class="input input-bordered input-sm w-40" placeholder="終了" />
+            <input type="hidden" name="@name" id="datetime-range-value-@name" value="@rangeValue" />
+        </div>
+    }
+    else if (finalType.Equals("code", StringComparison.OrdinalIgnoreCase))
+    {
+        var codeValue = value?.ToString() ?? "";
+        var language = "plaintext";
+        <div class="code-editor-wrapper">
+            <textarea name="@name" class="textarea textarea-bordered w-full font-mono text-sm" rows="8"
+                      placeholder="コードを入力">@codeValue</textarea>
+            <span class="text-sm text-gray-500">Language: @language</span>
+        </div>
+    }
+    else if (finalType.Equals("json", StringComparison.OrdinalIgnoreCase))
+    {
+        var jsonValue = value?.ToString() ?? "{}";
+        <div class="json-editor-wrapper">
+            <textarea name="@name" class="textarea textarea-bordered w-full font-mono text-sm" rows="8"
+                      placeholder='{"key": "value"}'>@jsonValue</textarea>
+            <button type="button" class="btn btn-sm btn-outline mt-2" onclick="validateJson('@name')">JSON 検証</button>
+            <span id="json-error-@name" class="text-error text-sm mt-1"></span>
+        </div>
+    }
+    else if (finalType.Equals("signature", StringComparison.OrdinalIgnoreCase))
+    {
+        var sigValue = value?.ToString() ?? "";
+        <div class="signature-editor-wrapper">
+            <canvas id="signature-canvas-@name" class="border border-base-300 rounded" width="400" height="200"></canvas>
+            <div class="flex gap-2 mt-2">
+                <button type="button" class="btn btn-sm btn-outline" onclick="clearSignature('@name')">クリア</button>
+            </div>
+            <input type="hidden" name="@name" id="signature-value-@name" value="@sigValue" />
+        </div>
+    }
+    else if (finalType.Equals("map", StringComparison.OrdinalIgnoreCase))
+    {
+        var mapValue = value?.ToString() ?? "";
+        <div class="map-selector-wrapper">
+            <div id="map-container-@name" class="h-64 bg-base-200 rounded mb-2"></div>
+            <div class="flex gap-2">
+                <input type="text" name="@name" value="@mapValue" class="input input-bordered input-sm w-full" placeholder="緯度，経度" />
+            </div>
+        </div>
+    }
+    else if (finalType.Equals("sortable-list", StringComparison.OrdinalIgnoreCase))
+    {
+        var listValue = value?.ToString() ?? "";
+        var items = listValue.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        <div class="sortable-list-wrapper">
+            <ul id="sortable-list-@name" class="list-none p-0 m-0">
+                @foreach (var item in items)
+                {
+                    <li class="p-2 mb-1 bg-base-200 rounded cursor-move flex justify-between">
+                        <span>@item</span>
+                        <span>⋮⋮</span>
+                    </li>
+                }
+            </ul>
+            <input type="hidden" name="@name" id="sortable-list-value-@name" value="@listValue" />
+        </div>
+    }
+    else
+    {
+        <input type="text" name="@name" value="@(value ?? "")" class="input input-bordered input-sm w-full"
+               placeholder="@colPlaceholder" @(formDef.Required ? "required" : "") />
+    }
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <span class="text-error text-sm">@error</span>
+    }
+</div>

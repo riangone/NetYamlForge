@@ -1,0 +1,61 @@
+entities:
+  order:
+    table: 'Orders'
+    key: 'OrderId'
+    displayName: 'Order'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['CustomerId', 'EmployeeId', 'OrderDate', 'RequiredDate', 'ShippedDate', 'ShipperId', 'Freight', 'ShipCountry', 'Status', 'RelatedProductIds']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      OrderId: { type: int, identity: true, label: 'Order Id', sortable: true }
+      CustomerId: { type: int, required: true, label: 'Customer Id', sortable: true }
+      EmployeeId: { type: int, required: true, label: 'Employee Id', sortable: true }
+      OrderDate: { type: string, required: true, label: 'Order Date', searchable: true, sortable: true }
+      RequiredDate: { type: string, label: 'Required Date', searchable: true, sortable: true }
+      ShippedDate: { type: string, label: 'Shipped Date', searchable: true, sortable: true }
+      ShipperId: { type: int, label: 'Shipper Id', sortable: true }
+      Freight: { type: decimal, label: 'Freight', sortable: true }
+      ShipCountry: { type: string, label: 'Ship Country', searchable: true, sortable: true }
+      Status: { type: string, label: 'Status', searchable: true, sortable: true }
+      RelatedProductIds: { type: string, label: 'Related Product Ids', searchable: true, sortable: true }
+    forms:
+      CustomerId:
+        type: int
+        required: true
+        label: 'Customer Id'
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: 'CompanyName'
+      EmployeeId:
+        type: int
+        required: true
+        label: 'Employee Id'
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: 'LastName'
+      OrderDate: { type: string, required: true, label: 'Order Date', editable: true }
+      RequiredDate: { type: string, label: 'Required Date', editable: true }
+      ShippedDate: { type: string, label: 'Shipped Date', editable: true }
+      ShipperId:
+        type: int
+        label: 'Shipper Id'
+        editable: true
+        foreignKey:
+          entity: shipper
+          displayColumn: 'CompanyName'
+      Freight: { type: decimal, label: 'Freight', editable: true }
+      ShipCountry: { type: string, label: 'Ship Country', editable: true }
+      Status: { type: string, label: 'Status', editable: true }
+      RelatedProductIds: { type: string, label: 'Related Product Ids', editable: true }
+    filters: {}
+    links: {}

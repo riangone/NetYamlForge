@@ -1,0 +1,66 @@
+stats:
+- label: Open Orders
+  entity: order
+  aggregate: count
+  filter: Orders.Status = 'Open'
+  icon: 📬
+  color: badge-warning
+  labelKey: projects.northwind-sqlite3.dashboard.stats.0.label
+- label: Delayed Orders
+  entity: order
+  aggregate: count
+  filter: Orders.Status = 'Delayed'
+  icon: 🚚
+  color: badge-error
+  labelKey: projects.northwind-sqlite3.dashboard.stats.1.label
+- label: Revenue
+  entity: orderdetail
+  aggregate: sum
+  column: UnitPrice
+  icon: 💰
+  color: badge-success
+  labelKey: projects.northwind-sqlite3.dashboard.stats.2.label
+- label: Low Stock SKUs
+  entity: product
+  aggregate: count
+  filter: Products.UnitsInStock <= Products.ReorderLevel AND Products.Discontinued = 0
+  icon: 📉
+  color: badge-info
+  labelKey: projects.northwind-sqlite3.dashboard.stats.3.label
+charts:
+- title: Monthly Order Count
+  type: line
+  entity: order
+  valueAggregate: count
+  groupExpression: strftime('%Y-%m', OrderDate)
+  orderBy: label
+  orderDir: asc
+  limit: 12
+  colorBg: rgba(59, 130, 246, 0.2)
+  colorBorder: rgba(59, 130, 246, 1)
+  titleKey: projects.northwind-sqlite3.dashboard.charts.0.title
+- title: Orders by Country
+  type: bar
+  entity: order
+  valueAggregate: count
+  groupExpression: ShipCountry
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(16, 185, 129, 0.7)
+  colorBorder: rgba(16, 185, 129, 1)
+  titleKey: projects.northwind-sqlite3.dashboard.charts.1.title
+- title: Top Products by Quantity
+  type: bar
+  entity: orderdetail
+  valueAggregate: sum
+  valueColumn: Quantity
+  labelJoinEntity: product
+  labelJoinKey: ProductId
+  labelJoinDisplay: ProductName
+  orderBy: value
+  orderDir: desc
+  limit: 10
+  colorBg: rgba(245, 158, 11, 0.7)
+  colorBorder: rgba(245, 158, 11, 1)
+  titleKey: projects.northwind-sqlite3.dashboard.charts.2.title

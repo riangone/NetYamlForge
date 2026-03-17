@@ -1,0 +1,33 @@
+title: Campaign Member
+description: Campaign member progression and response metrics by account segment and lifecycle stage.
+
+sections:
+  - id: campaign_members
+    title: Campaign Members
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId AS MemberId,
+        c.CompanyName AS Account,
+        c.Country AS Segment,
+        CASE
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId AND o.Status = 'Shipped') THEN 'Converted'
+          WHEN EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerId = c.CustomerId) THEN 'Engaged'
+          ELSE 'Targeted'
+        END AS MemberState,
+        COUNT(DISTINCT o.OrderId) AS RelatedDeals,
+        MAX(o.OrderDate) AS LastResponseAt
+      FROM Customers c
+      LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
+      GROUP BY c.CustomerId, c.CompanyName, c.Country
+      ORDER BY LastResponseAt DESC
+    columns:
+      - MemberId
+      - Account
+      - Segment
+      - MemberState
+      - RelatedDeals
+      - LastResponseAt
+    page_size: 80
+    editable: false
+    read_only: true

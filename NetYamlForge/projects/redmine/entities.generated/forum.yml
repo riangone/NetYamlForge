@@ -1,0 +1,34 @@
+entities:
+  forum:
+    table: 'forum'
+    key: 'id'
+    displayName: 'Forum'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['project_id', 'name', 'description']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      project_id: { type: int, required: true, label: 'Project Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: rm_project
+          displayColumn: 'name'
+      name: { type: string, required: true, label: 'Name', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+    filters: {}
+    links: {}

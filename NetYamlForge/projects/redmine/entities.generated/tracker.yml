@@ -1,0 +1,29 @@
+entities:
+  tracker:
+    table: 'tracker'
+    key: 'id'
+    displayName: 'Tracker'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name', 'position', 'is_in_roadmap', 'default_status_id']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      position: { type: int, label: 'Position', sortable: true }
+      is_in_roadmap: { type: int, label: 'Is In Roadmap', sortable: true }
+      default_status_id: { type: int, label: 'Default Status Id', sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', editable: true }
+      position: { type: int, label: 'Position', editable: true }
+      is_in_roadmap: { type: int, label: 'Is In Roadmap', editable: true }
+      default_status_id: { type: int, label: 'Default Status Id', editable: true }
+    filters: {}
+    links: {}

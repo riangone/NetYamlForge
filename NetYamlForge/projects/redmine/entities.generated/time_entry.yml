@@ -1,0 +1,50 @@
+entities:
+  time_entry:
+    table: 'time_entry'
+    key: 'id'
+    displayName: 'Time Entry'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['project_id', 'issue_id', 'username', 'hours', 'activity', 'comments', 'spent_on', 'created_on']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      project_id: { type: int, required: true, label: 'Project Id', sortable: true }
+      issue_id: { type: int, label: 'Issue Id', sortable: true }
+      username: { type: string, required: true, label: 'Username', searchable: true, sortable: true }
+      hours: { type: decimal, required: true, label: 'Hours', sortable: true }
+      activity: { type: string, label: 'Activity', searchable: true, sortable: true }
+      comments: { type: string, label: 'Comments', searchable: true, sortable: true }
+      spent_on: { type: string, required: true, label: 'Spent On', searchable: true, sortable: true }
+      created_on: { type: string, label: 'Created On', searchable: true, sortable: true }
+    forms:
+      project_id:
+        type: int
+        required: true
+        label: 'Project Id'
+        editable: true
+        foreignKey:
+          entity: rm_project
+          displayColumn: 'name'
+      issue_id:
+        type: int
+        label: 'Issue Id'
+        editable: true
+        foreignKey:
+          entity: issue
+          displayColumn: 'subject'
+      username: { type: string, required: true, label: 'Username', editable: true }
+      hours: { type: decimal, required: true, label: 'Hours', editable: true }
+      activity: { type: string, label: 'Activity', editable: true }
+      comments: { type: string, label: 'Comments', editable: true }
+      spent_on: { type: string, required: true, label: 'Spent On', editable: true }
+      created_on: { type: string, label: 'Created On', editable: true }
+    filters: {}
+    links: {}

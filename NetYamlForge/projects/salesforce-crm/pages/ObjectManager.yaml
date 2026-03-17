@@ -1,0 +1,70 @@
+title: Object Manager
+description: Metadata inventory for CRM objects, lifecycle status, and governance readiness.
+
+sections:
+  - id: object_catalog
+    title: Object Catalog
+    source_type: custom
+    source: |
+      SELECT
+        m.name AS ObjectName,
+        UPPER(m.type) AS ObjectType,
+        LENGTH(m.sql) AS DefinitionSize,
+        CASE
+          WHEN m.name IN ('Customers', 'Orders', 'OrderDetails', 'AuditLog', 'AppUser') THEN 'Core'
+          WHEN m.name IN ('Employees', 'Products', 'Suppliers', 'Shippers', 'Categories') THEN 'Supporting'
+          ELSE 'Extension'
+        END AS Domain,
+        CASE
+          WHEN m.name IN ('Orders', 'Customers', 'OrderDetails', 'AuditLog') THEN 'Managed'
+          ELSE 'Review'
+        END AS GovernanceState
+      FROM sqlite_master m
+      WHERE m.type = 'table' AND m.name NOT LIKE 'sqlite_%'
+      ORDER BY
+        CASE Domain WHEN 'Core' THEN 1 WHEN 'Supporting' THEN 2 ELSE 3 END,
+        m.name ASC
+    columns:
+      - ObjectName
+      - ObjectType
+      - DefinitionSize
+      - Domain
+      - GovernanceState
+    page_size: 80
+    editable: false
+    read_only: true
+    filters:
+      ObjectName:
+        label: Object Name
+        type: like
+      Domain:
+        label: Domain
+        type: eq
+      GovernanceState:
+        label: Governance State
+        type: eq
+
+  - id: object_activity
+    title: Object Activity
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(NULLIF(Entity, ''), 'system') AS Entity,
+        COUNT(*) AS EventCount,
+        MIN(CreatedAt) AS FirstSeenAt,
+        MAX(CreatedAt) AS LastSeenAt
+      FROM AuditLog
+      GROUP BY COALESCE(NULLIF(Entity, ''), 'system')
+      ORDER BY EventCount DESC, LastSeenAt DESC
+    columns:
+      - Entity
+      - EventCount
+      - FirstSeenAt
+      - LastSeenAt
+    page_size: 40
+    editable: false
+    read_only: true
+    filters:
+      Entity:
+        label: Entity
+        type: like

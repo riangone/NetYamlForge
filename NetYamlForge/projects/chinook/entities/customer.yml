@@ -1,0 +1,353 @@
+imports: []
+entities:
+  customer:
+    table: Customer
+    key: CustomerId
+    keys: []
+    displayName: Customer
+    joins:
+    - type: left
+      table: Employee
+      alias: e
+      true: Customer.SupportRepId = e.EmployeeId
+    forms:
+      FirstName:
+        type: string
+        identity: false
+        required: true
+        label: First Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.forms.FirstName.label
+      LastName:
+        type: string
+        identity: false
+        required: true
+        label: Last Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.forms.LastName.label
+      Email:
+        type: email
+        identity: false
+        required: true
+        label: Email
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.forms.Email.label
+      Country:
+        type: string
+        identity: false
+        required: false
+        label: Country
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.forms.Country.label
+      SupportRepId:
+        type: int
+        identity: false
+        required: false
+        label: Support Rep
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: Id
+          displayColumns:
+          - LastName
+          - FirstName
+          - Title
+          query: 'SELECT EmployeeId AS Id, LastName, FirstName, Title
+
+            FROM Employee
+
+            '
+          picker: false
+          multiPicker: false
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.forms.SupportRepId.label
+      Company:
+        type: string
+        identity: false
+        required: false
+        label: Company
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Address:
+        type: string
+        identity: false
+        required: false
+        label: Address
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      City:
+        type: string
+        identity: false
+        required: false
+        label: City
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      State:
+        type: string
+        identity: false
+        required: false
+        label: State
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      PostalCode:
+        type: string
+        identity: false
+        required: false
+        label: Postal Code
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Phone:
+        type: string
+        identity: false
+        required: false
+        label: Phone
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      Fax:
+        type: string
+        identity: false
+        required: false
+        label: Fax
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+    columns:
+      CustomerId:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.CustomerId.label
+      FirstName:
+        type: string
+        identity: false
+        required: true
+        label: First Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.FirstName.label
+      LastName:
+        type: string
+        identity: false
+        required: true
+        label: Last Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.LastName.label
+      Email:
+        type: email
+        identity: false
+        required: true
+        label: Email
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.Email.label
+      Country:
+        type: string
+        identity: false
+        required: false
+        label: Country
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.Country.label
+      SupportRepId:
+        type: int
+        identity: false
+        required: false
+        label: Support Rep
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.SupportRepId.label
+      SupportRepName:
+        type: string
+        identity: true
+        required: false
+        label: Support Rep
+        searchable: true
+        sortable: true
+        editable: true
+        expression: e.LastName || ', ' || e.FirstName
+        hidden: false
+        labelKey: projects.chinook.entities.customer.entities.customer.columns.SupportRepName.label
+      Company:
+        type: string
+        identity: false
+        required: false
+        label: Company
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      Address:
+        type: string
+        identity: false
+        required: false
+        label: Address
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      City:
+        type: string
+        identity: false
+        required: false
+        label: City
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      State:
+        type: string
+        identity: false
+        required: false
+        label: State
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      PostalCode:
+        type: string
+        identity: false
+        required: false
+        label: Postal Code
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      Phone:
+        type: string
+        identity: false
+        required: false
+        label: Phone
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+      Fax:
+        type: string
+        identity: false
+        required: false
+        label: Fax
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - FirstName
+        - LastName
+        - Email
+        - Country
+        - SupportRepId
+      filters:
+        columns: 3
+        order:
+        - Country
+        - SupportRepId
+    softDelete: false
+    isPublic: true
+    filters:
+      Country:
+        type: multi-select
+        label: Country
+        options:
+        - USA
+        - Canada
+        - Brazil
+        - France
+        - Germany
+        labelKey: projects.chinook.entities.customer.entities.customer.filters.Country.label
+      SupportRepId:
+        type: dropdown
+        label: Support Rep
+        expression: Customer.SupportRepId
+        foreignKey:
+          entity: employee
+          displayColumn: Id
+          displayColumns:
+          - LastName
+          - FirstName
+          - Title
+          query: 'SELECT EmployeeId AS Id, LastName, FirstName, Title
+
+            FROM Employee
+
+            '
+          picker: false
+          multiPicker: false
+        labelKey: projects.chinook.entities.customer.entities.customer.filters.SupportRepId.label
+    links:
+      employees:
+        label: Support Reps
+        targetEntity: employee
+      invoices:
+        label: Invoices
+        targetEntity: invoice
+        filter:
+          CustomerId: CustomerId
+    confirmation:
+      create: 新しい顧客を登録してよろしいですか？
+      update: 顧客情報を更新してよろしいですか？
+    hooks:
+      beforeCreate:
+      - validate_email
+      - validate_required
+      - trim
+      afterCreate:
+      - chinook_customer_welcome
+      - audit_log
+      beforeUpdate:
+      - validate_email
+      - validate_required
+      - trim
+      afterUpdate:
+      - audit_log
+    isCompositeKey: false
+    displayNameKey: projects.chinook.entities.customer.entities.customer.displayName

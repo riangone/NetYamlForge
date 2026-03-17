@@ -1,0 +1,9 @@
+name: tmp-starter-ops
+displayName: Tmp Starter Ops
+version: "1.0.0"
+database:
+  type: sqlite
+  path: database/tmp-starter-ops.db
+features:
+  multiLanguage: true
+  userAuthentication: true

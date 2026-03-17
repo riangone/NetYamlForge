@@ -1,0 +1,45 @@
+title: KPI Overview
+description: stat_cards コンポーネントのデモ — 値・アイコン・前期比デルタを表示
+
+sections:
+  - id: kpi_cards
+    title: 今月のKPI
+    component: stat_cards
+    source_type: custom
+    source: |
+      SELECT metric_name, metric_value, metric_icon, metric_delta, metric_sub
+      FROM kpi_metrics
+      ORDER BY id
+    columns:
+      - metric_name
+      - metric_value
+      - metric_icon
+      - metric_delta
+      - metric_sub
+    label_field: metric_name
+    value_field: metric_value
+    icon_field: metric_icon
+    delta_field: metric_delta
+    sub_value_field: metric_sub
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: kpi_table
+    title: KPI詳細テーブル（table コンポーネント）
+    component: table
+    source_type: custom
+    source: |
+      SELECT metric_name AS 指標, metric_value AS 値,
+             metric_icon AS アイコン, metric_delta AS 前期比, metric_sub AS 補足
+      FROM kpi_metrics
+      ORDER BY id
+    columns:
+      - 指標
+      - 値
+      - アイコン
+      - 前期比
+      - 補足
+    page_size: 20
+    editable: false
+    read_only: true

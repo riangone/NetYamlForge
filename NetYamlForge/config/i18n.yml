@@ -1,0 +1,661 @@
+translations:
+  Hello:
+    en-US: Hello
+    zh-CN: 你好
+    ja-JP: こんにちは
+  Login:
+    en-US: Login
+    zh-CN: 登录
+    ja-JP: ログイン
+  Logout:
+    en-US: Logout
+    zh-CN: 退出
+    ja-JP: ログアウト
+  Password:
+    en-US: Password
+    zh-CN: 密码
+    ja-JP: パスワード
+  UserName:
+    en-US: User Name
+    zh-CN: 用户名
+    ja-JP: ユーザー名
+  Users:
+    en-US: Users
+    zh-CN: 用户管理
+    ja-JP: ユーザー管理
+  config.dashboard.charts.0.title:
+    en-US: Monthly Revenue
+    zh-CN: 月度收入
+    ja-JP: 月別売上推移
+  config.dashboard.charts.1.title:
+    en-US: Tracks by Genre
+    zh-CN: 按流派的曲目数
+    ja-JP: ジャンル別トラック数
+  config.dashboard.charts.2.title:
+    en-US: Top 10 Countries by Invoices
+    zh-CN: 按国家的发票数 Top 10
+    ja-JP: 国別請求数 Top 10
+  config.dashboard.charts.3.title:
+    en-US: Top 10 Artists by Albums
+    zh-CN: 专辑最多的艺术家 Top 10
+    ja-JP: アルバム数 Top 10 アーティスト
+  config.dashboard.stats.0.label:
+    en-US: Artists
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.dashboard.stats.1.label:
+    en-US: Albums
+    zh-CN: 专辑
+    ja-JP: アルバム
+  config.dashboard.stats.10.label:
+    en-US: Total Revenue
+    zh-CN: 总收入
+    ja-JP: 総売上
+  config.dashboard.stats.11.label:
+    en-US: Avg Invoice
+    zh-CN: 平均发票
+    ja-JP: 平均請求額
+  config.dashboard.stats.2.label:
+    en-US: Tracks
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.dashboard.stats.3.label:
+    en-US: Genres
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.dashboard.stats.4.label:
+    en-US: Media Types
+    zh-CN: 媒体类型
+    ja-JP: メディアタイプ
+  config.dashboard.stats.5.label:
+    en-US: Playlists
+    zh-CN: 播放列表
+    ja-JP: プレイリスト
+  config.dashboard.stats.6.label:
+    en-US: Customers
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.dashboard.stats.7.label:
+    en-US: Employees
+    zh-CN: 员工
+    ja-JP: 従業員
+  config.dashboard.stats.8.label:
+    en-US: Invoices
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.dashboard.stats.9.label:
+    en-US: Invoice Lines
+    zh-CN: 发票明细
+    ja-JP: 請求明細
+  config.entities-sqlserver.customer.entities.customer.columns.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities-sqlserver.customer.entities.customer.columns.CustomerId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities-sqlserver.customer.entities.customer.columns.Email.label:
+    en-US: Email
+    zh-CN: 邮箱
+    ja-JP: メール
+  config.entities-sqlserver.customer.entities.customer.columns.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities-sqlserver.customer.entities.customer.columns.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities-sqlserver.customer.entities.customer.columns.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities-sqlserver.customer.entities.customer.columns.SupportRepName.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities-sqlserver.customer.entities.customer.displayName:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities-sqlserver.customer.entities.customer.filters.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities-sqlserver.customer.entities.customer.filters.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities-sqlserver.customer.entities.customer.forms.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities-sqlserver.customer.entities.customer.forms.Email.label:
+    en-US: Email
+    zh-CN: 邮箱
+    ja-JP: メール
+  config.entities-sqlserver.customer.entities.customer.forms.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities-sqlserver.customer.entities.customer.forms.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities-sqlserver.customer.entities.customer.forms.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities-sqlserver.invoice.entities.invoice.columns.BillingAddress.label:
+    en-US: Billing Address
+    zh-CN: 地址
+    ja-JP: 住所
+  config.entities-sqlserver.invoice.entities.invoice.columns.BillingCity.label:
+    en-US: Billing City
+    zh-CN: 城市
+    ja-JP: 市区町村
+  config.entities-sqlserver.invoice.entities.invoice.columns.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities-sqlserver.invoice.entities.invoice.columns.BillingPostalCode.label:
+    en-US: Billing Postal Code
+    zh-CN: 邮编
+    ja-JP: 郵便番号
+  config.entities-sqlserver.invoice.entities.invoice.columns.BillingState.label:
+    en-US: Billing State
+    zh-CN: 省州
+    ja-JP: 州/都道府県
+  config.entities-sqlserver.invoice.entities.invoice.columns.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities-sqlserver.invoice.entities.invoice.columns.CustomerName.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities-sqlserver.invoice.entities.invoice.columns.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities-sqlserver.invoice.entities.invoice.columns.InvoiceId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities-sqlserver.invoice.entities.invoice.columns.Total.label:
+    en-US: Total
+    zh-CN: 总额
+    ja-JP: 合計
+  config.entities-sqlserver.invoice.entities.invoice.displayName:
+    en-US: Invoice
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.entities-sqlserver.invoice.entities.invoice.filters.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities-sqlserver.invoice.entities.invoice.filters.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities-sqlserver.invoice.entities.invoice.filters.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities-sqlserver.invoice.entities.invoice.filters.Total.label:
+    en-US: Total Range
+    zh-CN: 总额范围
+    ja-JP: 合計範囲
+  config.entities-sqlserver.invoice.entities.invoice.forms.BillingAddress.label:
+    en-US: Billing Address
+    zh-CN: 地址
+    ja-JP: 住所
+  config.entities-sqlserver.invoice.entities.invoice.forms.BillingCity.label:
+    en-US: Billing City
+    zh-CN: 城市
+    ja-JP: 市区町村
+  config.entities-sqlserver.invoice.entities.invoice.forms.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities-sqlserver.invoice.entities.invoice.forms.BillingPostalCode.label:
+    en-US: Billing Postal Code
+    zh-CN: 邮编
+    ja-JP: 郵便番号
+  config.entities-sqlserver.invoice.entities.invoice.forms.BillingState.label:
+    en-US: Billing State
+    zh-CN: 省州
+    ja-JP: 州/都道府県
+  config.entities-sqlserver.invoice.entities.invoice.forms.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities-sqlserver.invoice.entities.invoice.forms.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities-sqlserver.invoice.entities.invoice.forms.Total.label:
+    en-US: Total
+    zh-CN: 总额
+    ja-JP: 合計
+  config.entities.album.entities.album.columns.AlbumId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.album.entities.album.columns.ArtistId.label:
+    en-US: Artist
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.entities.album.entities.album.columns.ArtistName.label:
+    en-US: Artist
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.entities.album.entities.album.columns.Title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  config.entities.album.entities.album.displayName:
+    en-US: Album
+    zh-CN: 专辑
+    ja-JP: アルバム
+  config.entities.album.entities.album.filters.ArtistId.label:
+    en-US: Artist
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.entities.album.entities.album.forms.ArtistId.label:
+    en-US: Artist
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.entities.album.entities.album.forms.Title.label:
+    en-US: Title
+    zh-CN: 标题
+    ja-JP: タイトル
+  config.entities.artist.entities.artist.columns.ArtistId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.artist.entities.artist.columns.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.artist.entities.artist.displayName:
+    en-US: Artist
+    zh-CN: 艺术家
+    ja-JP: アーティスト
+  config.entities.artist.entities.artist.forms.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.customer.entities.customer.columns.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities.customer.entities.customer.columns.CustomerId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.customer.entities.customer.columns.Email.label:
+    en-US: Email
+    zh-CN: 邮箱
+    ja-JP: メール
+  config.entities.customer.entities.customer.columns.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities.customer.entities.customer.columns.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities.customer.entities.customer.columns.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities.customer.entities.customer.columns.SupportRepName.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities.customer.entities.customer.displayName:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities.customer.entities.customer.filters.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities.customer.entities.customer.filters.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities.customer.entities.customer.forms.Country.label:
+    en-US: Country
+    zh-CN: 国家
+    ja-JP: 国
+  config.entities.customer.entities.customer.forms.Email.label:
+    en-US: Email
+    zh-CN: 邮箱
+    ja-JP: メール
+  config.entities.customer.entities.customer.forms.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities.customer.entities.customer.forms.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities.customer.entities.customer.forms.SupportRepId.label:
+    en-US: Support Rep
+    zh-CN: 支持代表
+    ja-JP: サポート担当
+  config.entities.employee.entities.employee.columns.BirthDate.label:
+    en-US: Birth Date
+    zh-CN: 生日
+    ja-JP: 生年月日
+  config.entities.employee.entities.employee.columns.EmployeeId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.employee.entities.employee.columns.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities.employee.entities.employee.columns.HireDate.label:
+    en-US: Hire Date
+    zh-CN: 入职日期
+    ja-JP: 入社日
+  config.entities.employee.entities.employee.columns.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities.employee.entities.employee.columns.Title.label:
+    en-US: Title
+    zh-CN: 职位
+    ja-JP: 役職
+  config.entities.employee.entities.employee.displayName:
+    en-US: Employee
+    zh-CN: 员工
+    ja-JP: 従業員
+  config.entities.employee.entities.employee.filters.BirthDate.label:
+    en-US: Birth Date
+    zh-CN: 生日范围
+    ja-JP: 生年月日範囲
+  config.entities.employee.entities.employee.forms.BirthDate.label:
+    en-US: Birth Date
+    zh-CN: 生日
+    ja-JP: 生年月日
+  config.entities.employee.entities.employee.forms.FirstName.label:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+  config.entities.employee.entities.employee.forms.HireDate.label:
+    en-US: Hire Date
+    zh-CN: 入职日期
+    ja-JP: 入社日
+  config.entities.employee.entities.employee.forms.LastName.label:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+  config.entities.employee.entities.employee.forms.Title.label:
+    en-US: Title
+    zh-CN: 职位
+    ja-JP: 役職
+  config.entities.genre.entities.genre.columns.GenreId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.genre.entities.genre.columns.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.genre.entities.genre.displayName:
+    en-US: Genre
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.entities.genre.entities.genre.forms.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.invoice.entities.invoice.columns.BillingAddress.label:
+    en-US: Billing Address
+    zh-CN: 地址
+    ja-JP: 住所
+  config.entities.invoice.entities.invoice.columns.BillingCity.label:
+    en-US: Billing City
+    zh-CN: 城市
+    ja-JP: 市区町村
+  config.entities.invoice.entities.invoice.columns.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities.invoice.entities.invoice.columns.BillingPostalCode.label:
+    en-US: Billing Postal Code
+    zh-CN: 邮编
+    ja-JP: 郵便番号
+  config.entities.invoice.entities.invoice.columns.BillingState.label:
+    en-US: Billing State
+    zh-CN: 省州
+    ja-JP: 州/都道府県
+  config.entities.invoice.entities.invoice.columns.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities.invoice.entities.invoice.columns.CustomerName.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities.invoice.entities.invoice.columns.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities.invoice.entities.invoice.columns.InvoiceId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.invoice.entities.invoice.columns.Total.label:
+    en-US: Total
+    zh-CN: 总额
+    ja-JP: 合計
+  config.entities.invoice.entities.invoice.displayName:
+    en-US: Invoice
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.entities.invoice.entities.invoice.filters.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities.invoice.entities.invoice.filters.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities.invoice.entities.invoice.filters.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities.invoice.entities.invoice.filters.Total.label:
+    en-US: Total Range
+    zh-CN: 总额范围
+    ja-JP: 合計範囲
+  config.entities.invoice.entities.invoice.forms.BillingAddress.label:
+    en-US: Billing Address
+    zh-CN: 地址
+    ja-JP: 住所
+  config.entities.invoice.entities.invoice.forms.BillingCity.label:
+    en-US: Billing City
+    zh-CN: 城市
+    ja-JP: 市区町村
+  config.entities.invoice.entities.invoice.forms.BillingCountry.label:
+    en-US: Billing Country
+    zh-CN: 账单国家
+    ja-JP: 請求国
+  config.entities.invoice.entities.invoice.forms.BillingPostalCode.label:
+    en-US: Billing Postal Code
+    zh-CN: 邮编
+    ja-JP: 郵便番号
+  config.entities.invoice.entities.invoice.forms.BillingState.label:
+    en-US: Billing State
+    zh-CN: 省州
+    ja-JP: 州/都道府県
+  config.entities.invoice.entities.invoice.forms.CustomerId.label:
+    en-US: Customer
+    zh-CN: 客户
+    ja-JP: 顧客
+  config.entities.invoice.entities.invoice.forms.InvoiceDate.label:
+    en-US: Invoice Date
+    zh-CN: 发票日期
+    ja-JP: 請求日
+  config.entities.invoice.entities.invoice.forms.Total.label:
+    en-US: Total
+    zh-CN: 总额
+    ja-JP: 合計
+  config.entities.invoiceline.entities.invoiceline.columns.InvoiceId.label:
+    en-US: Invoice
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.entities.invoiceline.entities.invoiceline.columns.InvoiceLineId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.invoiceline.entities.invoiceline.columns.Quantity.label:
+    en-US: Quantity
+    zh-CN: 数量
+    ja-JP: 数量
+  config.entities.invoiceline.entities.invoiceline.columns.TrackId.label:
+    en-US: Track
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.entities.invoiceline.entities.invoiceline.columns.TrackName.label:
+    en-US: Track
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.entities.invoiceline.entities.invoiceline.columns.UnitPrice.label:
+    en-US: Unit Price
+    zh-CN: 单价
+    ja-JP: 単価
+  config.entities.invoiceline.entities.invoiceline.displayName:
+    en-US: Invoice Line
+    zh-CN: 发票明细
+    ja-JP: 請求明細
+  config.entities.invoiceline.entities.invoiceline.filters.InvoiceId.label:
+    en-US: Invoice
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.entities.invoiceline.entities.invoiceline.filters.UnitPrice.label:
+    en-US: Unit Price Range
+    zh-CN: 单价范围
+    ja-JP: 単価範囲
+  config.entities.invoiceline.entities.invoiceline.forms.InvoiceId.label:
+    en-US: Invoice
+    zh-CN: 发票
+    ja-JP: 請求書
+  config.entities.invoiceline.entities.invoiceline.forms.Quantity.label:
+    en-US: Quantity
+    zh-CN: 数量
+    ja-JP: 数量
+  config.entities.invoiceline.entities.invoiceline.forms.TrackId.label:
+    en-US: Track
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.entities.invoiceline.entities.invoiceline.forms.UnitPrice.label:
+    en-US: Unit Price
+    zh-CN: 单价
+    ja-JP: 単価
+  config.entities.mediatype.entities.mediatype.columns.MediaTypeId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.mediatype.entities.mediatype.columns.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.mediatype.entities.mediatype.displayName:
+    en-US: Media Type
+    zh-CN: 媒体类型
+    ja-JP: メディアタイプ
+  config.entities.mediatype.entities.mediatype.forms.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.mediatype.entities.mediatype.links.tracks.label:
+    en-US: Tracks
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.entities.playlist.entities.playlist.columns.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.playlist.entities.playlist.columns.PlaylistId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.playlist.entities.playlist.displayName:
+    en-US: Playlist
+    zh-CN: 播放列表
+    ja-JP: プレイリスト
+  config.entities.playlist.entities.playlist.forms.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.track.entities.track.columns.AlbumId.label:
+    en-US: Album
+    zh-CN: 专辑
+    ja-JP: アルバム
+  config.entities.track.entities.track.columns.AlbumTitle.label:
+    en-US: Album
+    zh-CN: 专辑
+    ja-JP: アルバム
+  config.entities.track.entities.track.columns.GenreId.label:
+    en-US: Genre
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.entities.track.entities.track.columns.GenreName.label:
+    en-US: Genre
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.entities.track.entities.track.columns.Milliseconds.label:
+    en-US: Length(ms)
+    zh-CN: 时长(毫秒)
+    ja-JP: 長さ(ms)
+  config.entities.track.entities.track.columns.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.track.entities.track.columns.TrackId.label:
+    en-US: ID
+    zh-CN: 编号
+    ja-JP: ID
+  config.entities.track.entities.track.columns.UnitPrice.label:
+    en-US: Price
+    zh-CN: 价格
+    ja-JP: 価格
+  config.entities.track.entities.track.displayName:
+    en-US: Track
+    zh-CN: 曲目
+    ja-JP: トラック
+  config.entities.track.entities.track.filters.GenreId.label:
+    en-US: Genre
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.entities.track.entities.track.filters.UnitPrice.label:
+    en-US: Price Range
+    zh-CN: 价格范围
+    ja-JP: 価格範囲
+  config.entities.track.entities.track.forms.AlbumId.label:
+    en-US: Album
+    zh-CN: 专辑
+    ja-JP: アルバム
+  config.entities.track.entities.track.forms.GenreId.label:
+    en-US: Genre
+    zh-CN: 流派
+    ja-JP: ジャンル
+  config.entities.track.entities.track.forms.Milliseconds.label:
+    en-US: Length(ms)
+    zh-CN: 时长(毫秒)
+    ja-JP: 長さ(ms)
+  config.entities.track.entities.track.forms.Name.label:
+    en-US: Name
+    zh-CN: 名称
+    ja-JP: 名前
+  config.entities.track.entities.track.forms.UnitPrice.label:
+    en-US: Price
+    zh-CN: 价格
+    ja-JP: 価格

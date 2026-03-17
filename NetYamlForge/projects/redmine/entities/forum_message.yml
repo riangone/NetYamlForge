@@ -1,0 +1,116 @@
+entities:
+  forum_message:
+    table: forum_message
+    key: id
+    displayName: フォーラム投稿
+    displayNameI18n:
+      ja-JP: フォーラム投稿
+      zh-CN: 论坛帖子
+      en-US: Forum Message
+    joins:
+      - type: left
+        table: forum
+        alias: f
+        on: "forum_message.forum_id = f.id"
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+        hidden: false
+      forum_id:
+        type: int
+        required: true
+        label: フォーラムID
+        labelI18n: {ja-JP: フォーラムID, zh-CN: 论坛ID, en-US: Forum ID}
+        hidden: false
+      forum_name:
+        type: string
+        expression: "f.name"
+        label: フォーラム
+        labelI18n: {ja-JP: フォーラム, zh-CN: 论坛, en-US: Forum}
+        searchable: true
+        hidden: false
+      parent_id:
+        type: int
+        label: 親投稿ID
+        labelI18n: {ja-JP: 親投稿ID, zh-CN: 父帖子ID, en-US: Parent Message ID}
+        hidden: false
+      author:
+        type: string
+        required: true
+        label: 投稿者
+        labelI18n: {ja-JP: 投稿者, zh-CN: 发帖人, en-US: Author}
+        searchable: true
+        sortable: true
+        hidden: false
+      subject:
+        type: string
+        required: true
+        label: 件名
+        labelI18n: {ja-JP: 件名, zh-CN: 主题, en-US: Subject}
+        searchable: true
+        sortable: true
+        hidden: false
+      content:
+        type: string
+        label: 本文
+        labelI18n: {ja-JP: 本文, zh-CN: 内容, en-US: Content}
+        searchable: true
+        hidden: false
+      created_on:
+        type: string
+        label: 投稿日時
+        labelI18n: {ja-JP: 投稿日時, zh-CN: 发帖时间, en-US: Posted At}
+        sortable: true
+        hidden: false
+    forms:
+      forum_id:
+        type: int
+        required: true
+        label: フォーラムID
+        editable: true
+        hidden: false
+      parent_id:
+        type: int
+        required: false
+        label: 親投稿ID
+        editable: true
+        hidden: false
+      author:
+        type: string
+        required: true
+        label: 投稿者
+        editable: true
+        hidden: false
+      subject:
+        type: string
+        required: true
+        label: 件名
+        editable: true
+        hidden: false
+      content:
+        type: string
+        required: false
+        label: 本文
+        editable: true
+        hidden: false
+    layout:
+      forms:
+        columns: 2
+        order: [forum_id, parent_id, author, subject, content]
+      filters:
+        columns: 3
+        order: [author]
+    filters:
+      author:
+        type: like
+        label: 投稿者
+    hooks:
+      beforeCreate:
+        - validate_required
+        - trim
+      beforeUpdate:
+        - validate_required
+        - trim

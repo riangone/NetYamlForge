@@ -1,0 +1,55 @@
+entities:
+  employee:
+    table: 'Employee'
+    key: 'EmployeeId'
+    displayName: 'Employee'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['LastName', 'FirstName', 'Title', 'ReportsTo', 'BirthDate', 'HireDate', 'Address', 'City', 'State', 'Country', 'PostalCode', 'Phone', 'Fax', 'Email']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      EmployeeId: { type: int, identity: true, label: 'Employee Id', sortable: true }
+      LastName: { type: string, required: true, label: 'Last Name', searchable: true, sortable: true }
+      FirstName: { type: string, required: true, label: 'First Name', searchable: true, sortable: true }
+      Title: { type: string, label: 'Title', searchable: true, sortable: true }
+      ReportsTo: { type: int, label: 'Reports To', sortable: true }
+      BirthDate: { type: datetime, label: 'Birth Date', sortable: true }
+      HireDate: { type: datetime, label: 'Hire Date', sortable: true }
+      Address: { type: string, label: 'Address', searchable: true, sortable: true }
+      City: { type: string, label: 'City', searchable: true, sortable: true }
+      State: { type: string, label: 'State', searchable: true, sortable: true }
+      Country: { type: string, label: 'Country', searchable: true, sortable: true }
+      PostalCode: { type: string, label: 'Postal Code', searchable: true, sortable: true }
+      Phone: { type: string, label: 'Phone', searchable: true, sortable: true }
+      Fax: { type: string, label: 'Fax', searchable: true, sortable: true }
+      Email: { type: string, label: 'Email', searchable: true, sortable: true }
+    forms:
+      LastName: { type: string, required: true, label: 'Last Name', editable: true }
+      FirstName: { type: string, required: true, label: 'First Name', editable: true }
+      Title: { type: string, label: 'Title', editable: true }
+      ReportsTo:
+        type: int
+        label: 'Reports To'
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: 'LastName'
+      BirthDate: { type: datetime, label: 'Birth Date', editable: true }
+      HireDate: { type: datetime, label: 'Hire Date', editable: true }
+      Address: { type: string, label: 'Address', editable: true }
+      City: { type: string, label: 'City', editable: true }
+      State: { type: string, label: 'State', editable: true }
+      Country: { type: string, label: 'Country', editable: true }
+      PostalCode: { type: string, label: 'Postal Code', editable: true }
+      Phone: { type: string, label: 'Phone', editable: true }
+      Fax: { type: string, label: 'Fax', editable: true }
+      Email: { type: string, label: 'Email', editable: true }
+    filters: {}
+    links: {}

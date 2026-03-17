@@ -1,0 +1,32 @@
+header:
+  title: Attendance Operations
+
+navigation:
+  showDashboard: true
+  entities:
+    - attendance_record
+    - employee
+    - leave_request
+    - overtime_request
+    - department
+    - shift
+  items:
+    - label: 考勤首页
+      url: /attendance-ops/Page/AttendancePortal
+      icon: 🏠
+    - label: 打卡页面
+      url: /attendance-ops/Page/ClockInCenter
+      icon: 🕒
+    - label: 员工页面
+      url: /attendance-ops/Page/EmployeeHub
+      icon: 👥
+    - label: 管理页面
+      url: /attendance-ops/Page/ManagementConsole
+      icon: 📊
+    - label: 审批页面
+      url: /attendance-ops/Page/ApprovalCenter
+      icon: ✅
+    - label: 数据看板
+      controller: Dashboard
+      action: Index
+      icon: 📈

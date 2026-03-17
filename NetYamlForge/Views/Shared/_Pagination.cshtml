@@ -1,0 +1,43 @@
+@* ファイル概要: ページネーション UI を描画する共有パーシャル。
+   numbered (count あり / なし) および keyset モードに対応。
+   URL 構築は呼び出し元が PaginationModel に格納して渡す。 *@
+@model NetYamlForge.Models.PaginationModel
+@{
+    var m = Model;
+    var inc = m.HxInclude ?? "";
+}
+
+@if (m.Mode == "keyset")
+{
+    <div class="join">
+        <a class="join-item btn btn-sm @(m.NextHxUrl == null ? "btn-disabled" : "")"
+           hx-get="@m.NextHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Next</a>
+    </div>
+}
+else if (m.Mode == "numbered" && m.CountEnabled && m.TotalPages > 1)
+{
+    <div class="join">
+        <a class="join-item btn btn-sm @(m.CurrentPage == 1 ? "btn-disabled" : "")"
+           hx-get="@m.FirstHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">First</a>
+        <a class="join-item btn btn-sm @(m.CurrentPage == 1 ? "btn-disabled" : "")"
+           hx-get="@m.PrevHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Prev</a>
+        @foreach (var link in m.PageLinks)
+        {
+            <a class="join-item btn btn-sm @(link.IsCurrent ? "btn-primary" : "")"
+               hx-get="@link.HxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">@link.Page</a>
+        }
+        <a class="join-item btn btn-sm @(m.CurrentPage == m.TotalPages ? "btn-disabled" : "")"
+           hx-get="@m.NextHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Next</a>
+        <a class="join-item btn btn-sm @(m.CurrentPage == m.TotalPages ? "btn-disabled" : "")"
+           hx-get="@m.LastHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Last</a>
+    </div>
+}
+else if (m.Mode == "numbered" && !m.CountEnabled)
+{
+    <div class="join">
+        <a class="join-item btn btn-sm @(m.CurrentPage <= 1 ? "btn-disabled" : "")"
+           hx-get="@m.PrevHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Prev</a>
+        <a class="join-item btn btn-sm @(m.HasMore ? "" : "btn-disabled")"
+           hx-get="@m.NextHxUrl" hx-target="@m.HxTarget" hx-swap="@m.HxSwap" hx-include="@inc">Next</a>
+    </div>
+}

@@ -1,0 +1,78 @@
+title: Audit Metrics
+description: KPI dashboard for rejection rate, automation executions, and role-level failure trends.
+
+sections:
+  - id: rejection_kpi
+    title: Rejection KPI
+    source_type: custom
+    source: |
+      SELECT
+        CAST(SUM(CASE WHEN Action = 'hook_rejected' THEN 1 ELSE 0 END) AS INTEGER) AS RejectedEvents,
+        CAST(SUM(CASE WHEN Action IN ('create','update','delete','page_update','page_delete') THEN 1 ELSE 0 END) AS INTEGER) AS MutationEvents,
+        CASE
+          WHEN SUM(CASE WHEN Action IN ('create','update','delete','page_update','page_delete') THEN 1 ELSE 0 END) = 0 THEN 0
+          ELSE ROUND(
+            SUM(CASE WHEN Action = 'hook_rejected' THEN 1.0 ELSE 0 END) * 100.0 /
+            SUM(CASE WHEN Action IN ('create','update','delete','page_update','page_delete') THEN 1 ELSE 0 END), 2
+          )
+        END AS RejectionRatePct,
+        SUM(CASE WHEN Action = 'automation_run' THEN 1 ELSE 0 END) AS AutomationRuns
+      FROM AuditLog
+      WHERE datetime(CreatedAt) >= datetime('now', '-30 day')
+    columns:
+      - RejectedEvents
+      - MutationEvents
+      - RejectionRatePct
+      - AutomationRuns
+    page_size: 1
+    editable: false
+    read_only: true
+
+  - id: reject_reason_breakdown
+    title: Rejection Reason Breakdown
+    source_type: custom
+    source: |
+      SELECT
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.reasonCode'), 'BUSINESS_RULE')
+          ELSE 'BUSINESS_RULE'
+        END AS ReasonCode,
+        COUNT(*) AS RejectCount,
+        MAX(CreatedAt) AS LastSeenAt
+      FROM AuditLog
+      WHERE Action = 'hook_rejected'
+      GROUP BY
+        CASE
+          WHEN json_valid(Detail) THEN COALESCE(json_extract(Detail, '$.reasonCode'), 'BUSINESS_RULE')
+          ELSE 'BUSINESS_RULE'
+        END
+      ORDER BY RejectCount DESC, LastSeenAt DESC
+    columns:
+      - ReasonCode
+      - RejectCount
+      - LastSeenAt
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: reject_by_role
+    title: Rejection by Role
+    source_type: custom
+    source: |
+      SELECT
+        COALESCE(r.RoleName, CASE WHEN u.IsAdmin = 1 THEN 'AdminOps' ELSE 'User' END) AS RoleName,
+        COUNT(*) AS RejectCount,
+        MAX(a.CreatedAt) AS LastSeenAt
+      FROM AuditLog a
+      LEFT JOIN AppUser u ON u.UserName = a.UserName
+      LEFT JOIN AppUserRole r ON r.UserName = a.UserName
+      WHERE a.Action = 'hook_rejected'
+      GROUP BY COALESCE(r.RoleName, CASE WHEN u.IsAdmin = 1 THEN 'AdminOps' ELSE 'User' END)
+      ORDER BY RejectCount DESC, LastSeenAt DESC
+    columns:
+      - RoleName
+      - RejectCount
+      - LastSeenAt
+    page_size: 20
+    editable: false
+    read_only: true

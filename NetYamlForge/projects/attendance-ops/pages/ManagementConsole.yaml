@@ -1,0 +1,101 @@
+title: 管理页面
+description: 部门、班次与近期考勤运营指标。
+
+ui:
+  page:
+    layout: stack
+    density: comfortable
+
+sections:
+  - id: department_kpi
+    title: 部门人力概览
+    source_type: custom
+    source: |
+      SELECT
+        d.Id AS DepartmentId,
+        d.Name AS DepartmentName,
+        d.Code AS DepartmentCode,
+        d.Status AS DepartmentStatus,
+        COUNT(e.Id) AS EmployeeCount,
+        SUM(CASE WHEN e.Status = 'active' THEN 1 ELSE 0 END) AS ActiveEmployeeCount
+      FROM Department d
+      LEFT JOIN Employee e ON e.DepartmentId = d.Id
+      GROUP BY d.Id, d.Name, d.Code, d.Status
+      ORDER BY d.Id ASC
+    columns:
+      - DepartmentId
+      - DepartmentName
+      - DepartmentCode
+      - DepartmentStatus
+      - EmployeeCount
+      - ActiveEmployeeCount
+    page_size: 50
+    editable: false
+    read_only: true
+
+  - id: shift_load_today
+    title: 今日班次覆盖
+    source_type: custom
+    source: |
+      SELECT
+        s.Id AS ShiftId,
+        s.ShiftCode,
+        s.ShiftName,
+        s.StartTime,
+        s.EndTime,
+        s.Status,
+        COUNT(ar.Id) AS AssignedToday
+      FROM Shift s
+      LEFT JOIN AttendanceRecord ar
+        ON ar.ShiftId = s.Id
+       AND ar.WorkDate = date('now','localtime')
+      GROUP BY s.Id, s.ShiftCode, s.ShiftName, s.StartTime, s.EndTime, s.Status
+      ORDER BY s.Id ASC
+    columns:
+      - ShiftId
+      - ShiftCode
+      - ShiftName
+      - StartTime
+      - EndTime
+      - Status
+      - AssignedToday
+    page_size: 50
+    editable: false
+    read_only: true
+
+  - id: attendance_trend
+    title: 最近7天出勤与加班申请
+    source_type: custom
+    source: |
+      WITH RECURSIVE days(day) AS (
+        SELECT date('now','localtime','-6 day')
+        UNION ALL
+        SELECT date(day,'+1 day')
+        FROM days
+        WHERE day < date('now','localtime')
+      )
+      SELECT
+        days.day AS WorkDate,
+        IFNULL(ar.TotalAttendance, 0) AS AttendanceCount,
+        IFNULL(ot.TotalOvertimeRequest, 0) AS OvertimeRequestCount
+      FROM days
+      LEFT JOIN (
+        SELECT WorkDate, COUNT(*) AS TotalAttendance
+        FROM AttendanceRecord
+        WHERE WorkDate >= date('now','localtime','-6 day')
+        GROUP BY WorkDate
+      ) ar ON ar.WorkDate = days.day
+      LEFT JOIN (
+        SELECT WorkDate, COUNT(*) AS TotalOvertimeRequest
+        FROM OvertimeRequest
+        WHERE WorkDate >= date('now','localtime','-6 day')
+        GROUP BY WorkDate
+      ) ot ON ot.WorkDate = days.day
+      ORDER BY days.day ASC
+    columns:
+      - WorkDate
+      - AttendanceCount
+      - OvertimeRequestCount
+    page_size: 20
+    editable: false
+    read_only: true

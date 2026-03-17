@@ -1,0 +1,39 @@
+entities:
+  crmapprovalrequest:
+    table: 'CrmApprovalRequest'
+    key: 'ApprovalId'
+    displayName: 'Crmapprovalrequest'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['EntityType', 'EntityId', 'RequestType', 'ApprovalStatus', 'RequestedBy', 'ApproverUserName', 'Reason', 'RequestedAt', 'DecidedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      ApprovalId: { type: int, identity: true, label: 'Approval Id', sortable: true }
+      EntityType: { type: string, required: true, label: 'Entity Type', searchable: true, sortable: true }
+      EntityId: { type: int, required: true, label: 'Entity Id', sortable: true }
+      RequestType: { type: string, required: true, label: 'Request Type', searchable: true, sortable: true }
+      ApprovalStatus: { type: string, required: true, label: 'Approval Status', searchable: true, sortable: true }
+      RequestedBy: { type: string, label: 'Requested By', searchable: true, sortable: true }
+      ApproverUserName: { type: string, label: 'Approver User Name', searchable: true, sortable: true }
+      Reason: { type: string, label: 'Reason', searchable: true, sortable: true }
+      RequestedAt: { type: string, required: true, label: 'Requested At', searchable: true, sortable: true }
+      DecidedAt: { type: string, label: 'Decided At', searchable: true, sortable: true }
+    forms:
+      EntityType: { type: string, required: true, label: 'Entity Type', editable: true }
+      EntityId: { type: int, required: true, label: 'Entity Id', editable: true }
+      RequestType: { type: string, required: true, label: 'Request Type', editable: true }
+      ApprovalStatus: { type: string, required: true, label: 'Approval Status', editable: true }
+      RequestedBy: { type: string, label: 'Requested By', editable: true }
+      ApproverUserName: { type: string, label: 'Approver User Name', editable: true }
+      Reason: { type: string, label: 'Reason', editable: true }
+      RequestedAt: { type: string, required: true, label: 'Requested At', editable: true }
+      DecidedAt: { type: string, label: 'Decided At', editable: true }
+    filters: {}
+    links: {}

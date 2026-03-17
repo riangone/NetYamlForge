@@ -1,0 +1,325 @@
+imports: []
+entities:
+  track:
+    table: Track
+    key: TrackId
+    keys: []
+    displayName: Track
+    joins:
+    - type: left
+      table: Album
+      alias: a
+      true: Track.AlbumId = a.AlbumId
+    - type: left
+      table: Genre
+      alias: g
+      true: Track.GenreId = g.GenreId
+    - type: left
+      table: MediaType
+      alias: m
+      true: Track.MediaTypeId = m.MediaTypeId
+    forms:
+      Name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.Name.label
+      AlbumId:
+        type: int
+        identity: false
+        required: false
+        label: Album
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: album
+          displayColumn: Id
+          displayColumns:
+          - Title
+          picker: false
+          multiPicker: false
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.AlbumId.label
+      GenreId:
+        type: int
+        identity: false
+        required: false
+        label: Genre
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: genre
+          displayColumn: Id
+          displayColumns:
+          - Name
+          picker: false
+          multiPicker: false
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.GenreId.label
+      MediaTypeId:
+        type: int
+        identity: false
+        required: true
+        label: Media Type
+        searchable: false
+        sortable: false
+        editable: true
+        foreignKey:
+          entity: mediatype
+          displayColumn: Id
+          displayColumns:
+          - Name
+          picker: false
+          multiPicker: false
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.MediaTypeId.label
+      Milliseconds:
+        type: int
+        identity: false
+        required: true
+        label: Milliseconds
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.Milliseconds.label
+      Bytes:
+        type: long
+        identity: false
+        required: false
+        label: Bytes
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+      UnitPrice:
+        type: decimal
+        identity: false
+        required: true
+        label: Unit Price
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.UnitPrice.label
+      Composer:
+        type: string
+        identity: false
+        required: false
+        label: Composer
+        searchable: false
+        sortable: false
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.forms.Composer.label
+    columns:
+      TrackId:
+        type: int
+        identity: true
+        required: false
+        label: ID
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+      Name:
+        type: string
+        identity: false
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.columns.Name.label
+      AlbumTitle:
+        type: string
+        identity: true
+        required: false
+        label: Album
+        searchable: true
+        sortable: true
+        editable: true
+        expression: a.Title
+        hidden: false
+      GenreName:
+        type: string
+        identity: true
+        required: false
+        label: Genre
+        searchable: true
+        sortable: true
+        editable: true
+        expression: g.Name
+        hidden: false
+      MediaTypeName:
+        type: string
+        identity: true
+        required: false
+        label: Media Type
+        searchable: true
+        sortable: true
+        editable: true
+        expression: m.Name
+        hidden: false
+      Milliseconds:
+        type: int
+        identity: false
+        required: true
+        label: Milliseconds
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.columns.Milliseconds.label
+      Bytes:
+        type: long
+        identity: false
+        required: false
+        label: Bytes
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+      UnitPrice:
+        type: decimal
+        identity: false
+        required: true
+        label: Unit Price
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.columns.UnitPrice.label
+      Composer:
+        type: string
+        identity: false
+        required: false
+        label: Composer
+        searchable: true
+        sortable: false
+        editable: true
+        hidden: true
+        labelKey: projects.chinook.entities.track.entities.track.columns.Composer.label
+      DurationSeconds:
+        type: decimal
+        identity: true
+        required: false
+        label: Duration (sec)
+        searchable: false
+        sortable: true
+        editable: true
+        expression: Track.Milliseconds / 1000.0
+        hidden: false
+        labelKey: projects.chinook.entities.track.entities.track.columns.DurationSeconds.label
+      AlbumId:
+        type: int
+        identity: false
+        required: false
+        label: Album Id
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+      MediaTypeId:
+        type: int
+        identity: false
+        required: true
+        label: Media Type Id
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+      GenreId:
+        type: int
+        identity: false
+        required: false
+        label: Genre Id
+        searchable: false
+        sortable: true
+        editable: true
+        hidden: false
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order:
+        - Name
+        - AlbumId
+        - GenreId
+        - MediaTypeId
+        - Composer
+        - Milliseconds
+        - Bytes
+        - UnitPrice
+      filters:
+        columns: 3
+        order:
+        - GenreId
+        - MediaTypeId
+        - AlbumId
+    softDelete: false
+    isPublic: true
+    filters:
+      GenreId:
+        type: dropdown
+        label: Genre
+        expression: Track.GenreId
+        foreignKey:
+          entity: genre
+          displayColumn: Id
+          displayColumns:
+          - Name
+          picker: false
+          multiPicker: false
+        labelKey: projects.chinook.entities.track.entities.track.filters.GenreId.label
+      MediaTypeId:
+        type: dropdown
+        label: Media Type
+        expression: Track.MediaTypeId
+        foreignKey:
+          entity: mediatype
+          displayColumn: Id
+          displayColumns:
+          - Name
+          picker: false
+          multiPicker: false
+        labelKey: projects.chinook.entities.track.entities.track.filters.MediaTypeId.label
+      AlbumId:
+        type: dropdown
+        label: Album
+        expression: Track.AlbumId
+        foreignKey:
+          entity: album
+          displayColumn: Id
+          displayColumns:
+          - Title
+          picker: false
+          multiPicker: false
+        labelKey: projects.chinook.entities.track.entities.track.filters.AlbumId.label
+    links:
+      album:
+        label: Album
+        targetEntity: album
+        filter:
+          AlbumId: TrackId
+    confirmation:
+      create: 新しいトラックを追加してよろしいですか？
+      update: トラック情報を更新してよろしいですか？
+    hooks:
+      beforeCreate: validate_required
+      afterCreate: audit_log
+      beforeUpdate: chinook_track_duration
+      afterUpdate: audit_log
+    isCompositeKey: false
+    displayNameKey: projects.chinook.entities.track.entities.track.displayName

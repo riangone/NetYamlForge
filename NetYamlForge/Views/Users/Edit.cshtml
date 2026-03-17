@@ -1,0 +1,62 @@
+@* ファイル概要: ユーザー作成・編集画面です。
+   このビューは画面表示と操作導線を担当します。
+   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
+
+@model NetYamlForge.Models.Auth.UserEditViewModel
+@{
+    var isEdit = Model.Id.HasValue;
+    ViewData["Title"] = isEdit ? "Edit User" : "Create User";
+}
+
+<div class="max-w-2xl card bg-base-100 shadow">
+    <div class="card-body">
+        <h1 class="card-title">@ViewData["Title"]</h1>
+        <form method="post" class="grid md:grid-cols-2 gap-3">
+            <input type="hidden" asp-for="Id" />
+
+            <div>
+                <label class="label"><span class="label-text">UserName</span></label>
+                <input asp-for="UserName" class="input input-bordered w-full" />
+                <span asp-validation-for="UserName" class="text-error text-sm"></span>
+            </div>
+
+            <div>
+                <label class="label"><span class="label-text">DisplayName</span></label>
+                <input asp-for="DisplayName" class="input input-bordered w-full" />
+                <span asp-validation-for="DisplayName" class="text-error text-sm"></span>
+            </div>
+
+            <div>
+                <label class="label"><span class="label-text">Password @(isEdit ? "(optional)" : "")</span></label>
+                <input asp-for="Password" class="input input-bordered w-full" />
+            </div>
+
+            <div>
+                <label class="label"><span class="label-text">Language</span></label>
+                <select asp-for="PreferredLanguage" class="select select-bordered w-full">
+                    <option value="en-US">en-US</option>
+                    <option value="zh-CN">zh-CN</option>
+                    <option value="ja-JP">ja-JP</option>
+                    <option value="ko-KR">ko-KR</option>
+                </select>
+            </div>
+
+            <label class="label cursor-pointer justify-start gap-2">
+                <input asp-for="IsAdmin" type="checkbox" class="checkbox" />
+                <span class="label-text">IsAdmin</span>
+            </label>
+
+            <label class="label cursor-pointer justify-start gap-2">
+                <input asp-for="IsActive" type="checkbox" class="checkbox" />
+                <span class="label-text">IsActive</span>
+            </label>
+
+            <div asp-validation-summary="ModelOnly" class="text-error text-sm md:col-span-2"></div>
+
+            <div class="md:col-span-2 flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <a class="btn btn-ghost btn-sm" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

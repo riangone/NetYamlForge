@@ -1,0 +1,33 @@
+entities:
+  project:
+    table: 'Project'
+    key: 'Id'
+    displayName: 'Project'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['Name', 'Description', 'Status', 'StartDate', 'EndDate', 'CreatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      Name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      Description: { type: string, label: 'Description', searchable: true, sortable: true }
+      Status: { type: string, label: 'Status', searchable: true, sortable: true }
+      StartDate: { type: string, label: 'Start Date', searchable: true, sortable: true }
+      EndDate: { type: string, label: 'End Date', searchable: true, sortable: true }
+      CreatedAt: { type: string, label: 'Created At', searchable: true, sortable: true }
+    forms:
+      Name: { type: string, required: true, label: 'Name', editable: true }
+      Description: { type: string, label: 'Description', editable: true }
+      Status: { type: string, label: 'Status', editable: true }
+      StartDate: { type: string, label: 'Start Date', editable: true }
+      EndDate: { type: string, label: 'End Date', editable: true }
+      CreatedAt: { type: string, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

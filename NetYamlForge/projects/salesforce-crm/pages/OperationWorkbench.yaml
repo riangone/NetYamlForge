@@ -1,0 +1,50 @@
+title: Operation Workbench
+description: Role-based CRM operation cockpit that shows who can do what and where to execute each workflow.
+template: OperationWorkbench
+
+sections:
+  - id: workload_snapshot
+    title: Workload Snapshot
+    source_type: custom
+    source: |
+      SELECT
+        SUM(CASE WHEN o.Status = 'Open' THEN 1 ELSE 0 END) AS OpenDeals,
+        SUM(CASE WHEN o.Status = 'Delayed' THEN 1 ELSE 0 END) AS DelayedDeals,
+        SUM(CASE WHEN o.Status IN ('Open', 'Delayed') THEN 1 ELSE 0 END) AS ActiveCases,
+        COUNT(DISTINCT c.CustomerId) AS ActiveAccounts
+      FROM Orders o
+      LEFT JOIN Customers c ON c.CustomerId = o.CustomerId
+    columns:
+      - OpenDeals
+      - DelayedDeals
+      - ActiveCases
+      - ActiveAccounts
+    page_size: 1
+    editable: false
+    read_only: true
+
+  - id: user_directory
+    title: User Directory
+    source_type: custom
+    source: |
+      SELECT
+        Id AS UserId,
+        UserName,
+        DisplayName,
+        CASE WHEN IsAdmin = 1 THEN 'Admin' ELSE 'User' END AS Role,
+        CASE WHEN IsActive = 1 THEN 'Active' ELSE 'Disabled' END AS State,
+        PreferredLanguage AS Locale,
+        LastLoginAt
+      FROM AppUser
+      ORDER BY IsAdmin DESC, IsActive DESC, UserName ASC
+    columns:
+      - UserId
+      - UserName
+      - DisplayName
+      - Role
+      - State
+      - Locale
+      - LastLoginAt
+    page_size: 50
+    editable: false
+    read_only: true

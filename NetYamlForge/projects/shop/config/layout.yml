@@ -1,0 +1,13 @@
+header:
+  title: ショップ管理
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /shop
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊

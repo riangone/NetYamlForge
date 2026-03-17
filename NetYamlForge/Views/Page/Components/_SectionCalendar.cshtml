@@ -1,0 +1,123 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var titleField = sec.TitleField ?? (sec.GetColumnAt(0));
+    var startDateField = sec.StartDateField ?? (sec.GetColumnAt(1));
+    var endDateField = sec.EndDateField;
+    var typeField = sec.TypeField;
+    var colorField = sec.ColorField;
+    
+    var today = DateTime.Today;
+    var currentMonth = today.Month;
+    var currentYear = today.Year;
+    var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+    var firstDayOfMonth = new DateTime(currentYear, currentMonth, 1);
+    var startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+}
+
+@if (!string.IsNullOrEmpty(sec.Title))
+{
+    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+}
+
+<div class="calendar-container bg-base-100 rounded shadow p-4">
+    @* 年月ナビゲーション *@
+    <div class="flex justify-between items-center mb-4">
+        <button class="btn btn-ghost btn-sm" onclick="prevMonth()">← 前月</button>
+        <h3 class="text-xl font-bold">@currentYear 年 @currentMonth 月</h3>
+        <button class="btn btn-ghost btn-sm" onclick="nextMonth()">次月 →</button>
+    </div>
+    
+    @* 曜日ヘッダー *@
+    <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="text-center text-sm font-medium text-gray-500">日</div>
+        <div class="text-center text-sm font-medium text-gray-500">月</div>
+        <div class="text-center text-sm font-medium text-gray-500">火</div>
+        <div class="text-center text-sm font-medium text-gray-500">水</div>
+        <div class="text-center text-sm font-medium text-gray-500">木</div>
+        <div class="text-center text-sm font-medium text-gray-500">金</div>
+        <div class="text-center text-sm font-medium text-gray-500">土</div>
+    </div>
+    
+    @* カレンダーグリッド *@
+    <div class="grid grid-cols-7 gap-1">
+        @* 空白セル（月前半）*@
+        @for (var i = 0; i < startDayOfWeek; i++)
+        {
+            <div class="aspect-square p-1"></div>
+        }
+        
+        @* 日付セル *@
+        @for (var day = 1; day <= daysInMonth; day++)
+        {
+            var date = new DateTime(currentYear, currentMonth, day);
+            var isToday = date == today;
+            var eventsForDay = rows.Where(r =>
+            {
+                if (!r.TryGetValue(startDateField, out var sd) || !DateTime.TryParse(sd?.ToString(), out var startDate))
+                    return false;
+                DateTime? endDate = null;
+                if (!string.IsNullOrEmpty(endDateField) && r.TryGetValue(endDateField, out var ed) && DateTime.TryParse(ed?.ToString(), out var endD))
+                    endDate = endD;
+                var actualEndDate = endDate ?? startDate;
+                return date >= startDate.Date && date <= actualEndDate.Date;
+            }).ToList();
+            
+            <div class="aspect-square p-1 border border-base-300 rounded @(isToday ? "bg-primary text-primary-content" : "hover:bg-base-200") relative">
+                <div class="text-sm font-medium @(isToday ? "font-bold" : "")">@day</div>
+                @if (eventsForDay.Any())
+                {
+                    <div class="mt-1 space-y-0.5">
+                        @foreach (var evt in eventsForDay.Take(3))
+                        {
+                            var eventTitle = evt.TryGetValue(titleField, out var et) ? et?.ToString() ?? "" : "";
+                            var eventColor = !string.IsNullOrEmpty(colorField) && evt.TryGetValue(colorField, out var ec)
+                                ? ec?.ToString() ?? "bg-primary"
+                                : "bg-primary";
+                            <div class="text-xs truncate px-1 py-0.5 rounded @eventColor text-white" title="@eventTitle">
+                                @eventTitle
+                            </div>
+                        }
+                        @if (eventsForDay.Count > 3)
+                        {
+                            <div class="text-xs text-gray-500">+@(eventsForDay.Count - 3) 件</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    
+    @* イベント凡例 *@
+    @if (rows.Any())
+    {
+        <div class="mt-4 pt-4 border-t border-base-300">
+            <h4 class="font-medium mb-2">今月のイベント (@rows.Count 件)</h4>
+            <div class="space-y-1 max-h-32 overflow-y-auto">
+                @foreach (var row in rows.OrderBy(r => r.TryGetValue(startDateField, out var sd) ? sd?.ToString() : ""))
+                {
+                    var title = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
+                    var startDate = row.TryGetValue(startDateField, out var sd) ? sd?.ToString() ?? "" : "";
+                    <div class="text-sm flex items-center gap-2">
+                        <span class="text-gray-500 text-xs w-24">@startDate</span>
+                        <span>@title</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function prevMonth() {
+        console.log('Previous month');
+        // 実際の実装は Controller 側で処理
+    }
+    
+    function nextMonth() {
+        console.log('Next month');
+        // 実際の実装は Controller 側で処理
+    }
+</script>

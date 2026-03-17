@@ -1,0 +1,31 @@
+entities:
+  supplier:
+    table: 'Suppliers'
+    key: 'SupplierId'
+    displayName: 'Supplier'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['CompanyName', 'ContactName', 'Country', 'Phone', 'Active']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      SupplierId: { type: int, identity: true, label: 'Supplier Id', sortable: true }
+      CompanyName: { type: string, required: true, label: 'Company Name', searchable: true, sortable: true }
+      ContactName: { type: string, label: 'Contact Name', searchable: true, sortable: true }
+      Country: { type: string, label: 'Country', searchable: true, sortable: true }
+      Phone: { type: string, label: 'Phone', searchable: true, sortable: true }
+      Active: { type: int, label: 'Active', sortable: true }
+    forms:
+      CompanyName: { type: string, required: true, label: 'Company Name', editable: true }
+      ContactName: { type: string, label: 'Contact Name', editable: true }
+      Country: { type: string, label: 'Country', editable: true }
+      Phone: { type: string, label: 'Phone', editable: true }
+      Active: { type: int, label: 'Active', editable: true }
+    filters: {}
+    links: {}

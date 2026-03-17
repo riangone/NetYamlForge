@@ -1,0 +1,75 @@
+title: Executive Cockpit
+description: Salesforce-style command center for leadership, with KPI cards, stage view, and strategic watchlist.
+
+template: ExecutiveCockpit
+
+sections:
+  - id: kpi_strip
+    title: KPI Strip
+    source_type: custom
+    source: |
+      SELECT 'Open Pipeline' AS Metric, CAST(COUNT(*) AS TEXT) AS Value, 'Orders.Status = Open' AS Note
+      FROM Orders WHERE Status = 'Open'
+      UNION ALL
+      SELECT 'Won / Shipped', CAST(COUNT(*) AS TEXT), 'Orders.Status = Shipped'
+      FROM Orders WHERE Status = 'Shipped'
+      UNION ALL
+      SELECT 'At Risk', CAST(COUNT(*) AS TEXT), 'Orders.Status = Delayed or Cancelled'
+      FROM Orders WHERE Status IN ('Delayed', 'Cancelled')
+      UNION ALL
+      SELECT 'Account Coverage', CAST(COUNT(*) AS TEXT), 'Customers.Active = 1'
+      FROM Customers WHERE Active = 1
+    columns:
+      - Metric
+      - Value
+      - Note
+    page_size: 10
+    editable: false
+    read_only: true
+
+  - id: stage_mix
+    title: Stage Mix
+    source_type: custom
+    source: |
+      SELECT
+        Status AS Stage,
+        COUNT(*) AS Deals,
+        ROUND(COALESCE(SUM(Freight), 0), 2) AS WeightedValue
+      FROM Orders
+      GROUP BY Status
+      ORDER BY Deals DESC
+    columns:
+      - Stage
+      - Deals
+      - WeightedValue
+    page_size: 20
+    editable: false
+    read_only: true
+
+  - id: strategic_accounts
+    title: Strategic Accounts
+    source_type: custom
+    source: |
+      SELECT
+        c.CustomerId,
+        c.CompanyName,
+        c.Country,
+        COUNT(DISTINCT o.OrderId) AS DealCount,
+        ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS Revenue,
+        SUM(CASE WHEN o.Status IN ('Delayed', 'Cancelled') THEN 1 ELSE 0 END) AS RiskSignals
+      FROM Customers c
+      LEFT JOIN Orders o ON o.CustomerId = c.CustomerId
+      LEFT JOIN OrderDetails od ON od.OrderId = o.OrderId
+      WHERE c.Active = 1
+      GROUP BY c.CustomerId, c.CompanyName, c.Country
+      ORDER BY Revenue DESC
+    columns:
+      - CustomerId
+      - CompanyName
+      - Country
+      - DealCount
+      - Revenue
+      - RiskSignals
+    page_size: 20
+    editable: false
+    read_only: true

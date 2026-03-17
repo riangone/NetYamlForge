@@ -1,0 +1,292 @@
+title: New Components Demo
+description: 10 種類の新ページコンポーネントデモ
+
+sections:
+  # 1. 面積グラフ
+  - id: area_chart_demo
+    title: 面積グラフデモ (AreaChart)
+    component: area_chart
+    source_type: custom
+    source: |
+      SELECT 
+        month AS label,
+        revenue AS value
+      FROM (
+        SELECT '1 月' AS month, 100000 AS revenue UNION ALL
+        SELECT '2 月', 150000 UNION ALL
+        SELECT '3 月', 180000 UNION ALL
+        SELECT '4 月', 220000 UNION ALL
+        SELECT '5 月', 280000 UNION ALL
+        SELECT '6 月', 320000 UNION ALL
+        SELECT '7 月', 380000 UNION ALL
+        SELECT '8 月', 420000 UNION ALL
+        SELECT '9 月', 480000 UNION ALL
+        SELECT '10 月', 520000 UNION ALL
+        SELECT '11 月', 580000 UNION ALL
+        SELECT '12 月', 650000
+      ) ORDER BY rowid
+    columns: [label, value]
+    label_field: label
+    value_field: value
+    editable: false
+
+  # 2. ドーナツグラフ
+  - id: donut_chart_demo
+    title: ドーナツグラフデモ (DonutChart)
+    component: donut_chart
+    source_type: custom
+    source: |
+      SELECT 
+        category AS label,
+        amount AS value
+      FROM (
+        SELECT '製品 A' AS category, 350000 AS amount UNION ALL
+        SELECT '製品 B', 280000 UNION ALL
+        SELECT '製品 C', 200000 UNION ALL
+        SELECT '製品 D', 120000 UNION ALL
+        SELECT 'その他', 50000
+      )
+    columns: [label, value]
+    label_field: label
+    value_field: value
+    editable: false
+
+  # 3. カードリスト
+  - id: card_list_demo
+    title: カードリストデモ (CardList)
+    component: card_list
+    source_type: custom
+    source: |
+      SELECT 
+        product_name AS title,
+        category AS subtitle,
+        description AS description,
+        image_url AS image
+      FROM (
+        SELECT '高性能ノート PC' AS product_name, ' Electronics' AS category, 
+               '最新の CPU を搭載したビジネス向けノート PC' AS description,
+               'https://via.placeholder.com/300x200?text=PC' AS image_url
+        UNION ALL
+        SELECT 'ワイヤレスマウス', 'Accessories', '人間工学に基づいたデザイン',
+               'https://via.placeholder.com/300x200?text=Mouse'
+        UNION ALL
+        SELECT '4K モニター', 'Displays', '27 インチ 4K 解像度',
+               'https://via.placeholder.com/300x200?text=Monitor'
+        UNION ALL
+        SELECT 'メカニカルキーボード', 'Accessories', '青軸スイッチ採用',
+               'https://via.placeholder.com/300x200?text=Keyboard'
+      )
+    columns: [title, subtitle, description, image]
+    title_field: title
+    subtitle_field: subtitle
+    description_field: description
+    image_field: image
+    editable: false
+
+  # 4. アコーディオン
+  - id: accordion_demo
+    title: アコーディオンデモ (Accordion)
+    component: accordion
+    source_type: custom
+    source: |
+      SELECT 
+        question AS title,
+        answer AS content
+      FROM (
+        SELECT 'Q1. 返品ポリシーを教えてください' AS question,
+               '商品到着後 7 日以内であれば未開封・未使用の場合に限り返品を承っております。' AS answer
+        UNION ALL
+        SELECT 'Q2. 配送料はいくらですか？',
+               '10,000 円以上のご注文で送料無料となります。10,000 円未満の場合は全国一律 500 円です。'
+        UNION ALL
+        SELECT 'Q3. 支払い方法を教えてください',
+               'クレジットカード、銀行振込、コンビニ決済、代金引換をご利用いただけます。'
+        UNION ALL
+        SELECT 'Q4. 保証期間はありますか？',
+               '全ての商品に 1 年間のメーカー保証が付いております。'
+      )
+    columns: [title, content]
+    title_field: title
+    content_field: content
+    expanded_by_default: false
+    editable: false
+
+  # 5. ランキング
+  - id: leaderboard_demo
+    title: ランキングデモ (Leaderboard)
+    component: leaderboard
+    source_type: custom
+    source: |
+      SELECT 
+        salesperson AS name,
+        amount AS value,
+        avatar AS avatar,
+        trend AS trend
+      FROM (
+        SELECT '山田太郎' AS salesperson, 1500000 AS amount, 
+               'https://via.placeholder.com/50?text=Y' AS avatar, '+12%' AS trend
+        UNION ALL
+        SELECT '鈴木花子', 1350000, 'https://via.placeholder.com/50?text=S', '+8%'
+        UNION ALL
+        SELECT '佐藤次郎', 1200000, 'https://via.placeholder.com/50?text=Z', '+5%'
+        UNION ALL
+        SELECT '田中美咲', 980000, 'https://via.placeholder.com/50?text=T', '-3%'
+        UNION ALL
+        SELECT '高橋健一', 850000, 'https://via.placeholder.com/50?text=K', '+2%'
+      ) ORDER BY amount DESC
+    columns: [name, value, avatar, trend]
+    name_field: name
+    value_field: value
+    avatar_field: avatar
+    trend_field: trend
+    editable: false
+
+  # 6. アクティビティフィード
+  - id: activity_feed_demo
+    title: アクティビティフィードデモ (ActivityFeed)
+    component: activity_feed
+    source_type: custom
+    source: |
+      SELECT 
+        action AS title,
+        timestamp AS date,
+        type AS type,
+        user_name AS user
+      FROM (
+        SELECT '新しい注文を受け付けました #12345' AS action,
+               '2025-03-13 10:30' AS timestamp, 'create' AS type, '山田太郎' AS user_name
+        UNION ALL
+        SELECT '顧客情報を更新しました', '2025-03-13 09:15', 'update', '鈴木花子'
+        UNION ALL
+        SELECT 'コメントを追加しました', '2025-03-13 08:45', 'comment', '佐藤次郎'
+        UNION ALL
+        SELECT 'ファイルをアップロードしました', '2025-03-12 16:20', 'upload', '田中美咲'
+        UNION ALL
+        SELECT 'タスクを完了しました', '2025-03-12 14:00', 'update', '高橋健一'
+      ) ORDER BY timestamp DESC
+    columns: [title, date, type, user]
+    title_field: title
+    date_field: date
+    type_field: type
+    user_field: user
+    editable: false
+
+  # 7. 目標追跡
+  - id: goal_tracker_demo
+    title: 目標追跡デモ (GoalTracker)
+    component: goal_tracker
+    source_type: custom
+    source: |
+      SELECT 
+        goal_name AS name,
+        current_value AS current,
+        target_value AS target,
+        unit AS unit,
+        deadline AS deadline
+      FROM (
+        SELECT '売上目標 Q1' AS goal_name, 750000 AS current_value, 
+               1000000 AS target_value, '円' AS unit, '2025-03-31' AS deadline
+        UNION ALL
+        SELECT '新規顧客獲得', 45, 60, '社', '2025-03-31'
+        UNION ALL
+        SELECT '顧客満足度向上', 4.2, 4.5, '点', '2025-06-30'
+        UNION ALL
+        SELECT 'コスト削減', 180000, 200000, '円', '2025-04-30'
+      )
+    columns: [name, current, target, unit, deadline]
+    name_field: name
+    current_field: current
+    target_field: target
+    unit_field: unit
+    deadline_field: deadline
+    editable: false
+
+  # 8. ファイルアップロード
+  - id: file_upload_demo
+    title: ファイルアップロードデモ (FileUpload)
+    component: file_upload
+    source_type: custom
+    source: |
+      SELECT 
+        file_name AS FileName,
+        file_size AS FileSize,
+        upload_date AS UploadDate,
+        file_url AS FileUrl
+      FROM (
+        SELECT '提案書_2025Q1.pdf' AS file_name, 2048576 AS file_size,
+               '2025-03-10' AS upload_date, '/files/proposal.pdf' AS file_url
+        UNION ALL
+        SELECT '見積書_ABC 社.xlsx', 524288, '2025-03-09', '/files/quote.xlsx'
+        UNION ALL
+        SELECT '製品カタログ 2025.pdf', 5242880, '2025-03-08', '/files/catalog.pdf'
+      )
+    columns: [FileName, FileSize, UploadDate, FileUrl]
+    upload_url: /api/upload
+    max_file_size: 10485760
+    allowed_types: ".pdf,.xlsx,.docx,.png,.jpg"
+    multiple: true
+    editable: false
+
+  # 9. カレンダー（簡易版）
+  - id: calendar_demo
+    title: カレンダーデモ (Calendar)
+    component: calendar
+    source_type: custom
+    source: |
+      SELECT 
+        event_name AS title,
+        start_date AS start_date,
+        end_date AS end_date,
+        event_type AS type,
+        color AS color
+      FROM (
+        SELECT 'プロジェクトキックオフ' AS event_name,
+               '2025-03-15' AS start_date, '2025-03-15' AS end_date,
+               'meeting' AS event_type, 'bg-primary' AS color
+        UNION ALL
+        SELECT '顧客プレゼン', '2025-03-18', '2025-03-18', 'meeting', 'bg-secondary'
+        UNION ALL
+        SELECT '締切：四半期報告書', '2025-03-25', '2025-03-25', 'deadline', 'bg-error'
+        UNION ALL
+        SELECT 'チームビルディング', '2025-03-28', '2025-03-28', 'event', 'bg-success'
+        UNION ALL
+        SELECT '製品リリース', '2025-03-31', '2025-03-31', 'milestone', 'bg-accent'
+      )
+    columns: [title, start_date, end_date, type, color]
+    title_field: title
+    start_date_field: start_date
+    end_date_field: end_date
+    color_field: color
+    editable: false
+
+  # 10. 組織図
+  - id: org_chart_demo
+    title: 組織図デモ (OrgChart)
+    component: org_chart
+    source_type: custom
+    source: |
+      SELECT 
+        name AS name,
+        title AS title,
+        email AS email,
+        parent_name AS parent,
+        avatar AS avatar
+      FROM (
+        SELECT '山田太郎' AS name, 'CEO' AS title, 'ceo@company.com' AS email,
+               CAST(NULL AS VARCHAR) AS parent_name, 'https://via.placeholder.com/50?text=Y' AS avatar
+        UNION ALL
+        SELECT '鈴木花子', 'CTO', 'cto@company.com', '山田太郎', 'https://via.placeholder.com/50?text=S'
+        UNION ALL
+        SELECT '佐藤次郎', 'CFO', 'cfo@company.com', '山田太郎', 'https://via.placeholder.com/50?text=Z'
+        UNION ALL
+        SELECT '田中美咲', '開発リーダー', 'dev@company.com', '鈴木花子', 'https://via.placeholder.com/50?text=T'
+        UNION ALL
+        SELECT '高橋健一', '営業部長', 'sales@company.com', '佐藤次郎', 'https://via.placeholder.com/50?text=K'
+      )
+    columns: [name, title, email, parent, avatar]
+    name_field: name
+    title_field: title
+    email_field: email
+    parent_field: parent
+    avatar_field: avatar
+    editable: false

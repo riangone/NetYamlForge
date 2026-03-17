@@ -1,0 +1,9 @@
+name: tmp-mode-display
+displayName: Tmp Mode Display
+version: "1.0.0"
+database:
+  type: sqlite
+  path: /tmp/scaffold-check.db
+features:
+  multiLanguage: true
+  userAuthentication: true

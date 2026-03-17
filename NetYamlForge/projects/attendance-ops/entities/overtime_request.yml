@@ -1,0 +1,87 @@
+imports: []
+entities:
+  overtime_request:
+    table: OvertimeRequest
+    key: Id
+    keys: []
+    displayName: Overtime Request
+    joins:
+      - type: left
+        table: Employee
+        alias: e
+        true: OvertimeRequest.EmployeeId = e.Id
+      - type: left
+        table: Department
+        alias: d
+        true: e.DepartmentId = d.Id
+    forms:
+      EmployeeId:
+        type: int
+        required: true
+        label: Employee
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: FullName
+          displayColumns: [EmployeeNo, FullName]
+          picker: true
+          multiPicker: false
+      WorkDate: { type: date, required: true, label: Work Date, editable: true }
+      StartTime: { type: datetime, required: true, label: Start Time, editable: true }
+      EndTime: { type: datetime, required: true, label: End Time, editable: true }
+      Hours: { type: decimal, required: true, label: Hours, editable: true }
+      Reason: { type: textarea, label: Reason, editable: true }
+      Status:
+        type: string
+        required: true
+        label: Status
+        editable: true
+        options: [pending, approved, rejected, cancelled]
+      Approver: { type: string, label: Approver, editable: true }
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      EmployeeId: { type: int, required: true, label: Employee ID, hidden: true }
+      EmployeeNo: { type: string, label: Employee No, expression: e.EmployeeNo, searchable: true, sortable: true }
+      EmployeeName: { type: string, label: Employee, expression: e.FullName, searchable: true, sortable: true }
+      DepartmentName: { type: string, label: Department, expression: d.Name, searchable: true, sortable: true }
+      WorkDate: { type: date, required: true, label: Work Date, sortable: true }
+      StartTime: { type: datetime, required: true, label: Start Time, sortable: true }
+      EndTime: { type: datetime, required: true, label: End Time, sortable: true }
+      Hours: { type: decimal, required: true, label: Hours, sortable: true }
+      Status: { type: string, label: Status, sortable: true }
+      Approver: { type: string, label: Approver, searchable: true, sortable: true }
+      Reason: { type: string, label: Reason, searchable: true, sortable: false }
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [EmployeeId, WorkDate, StartTime, EndTime, Hours, Status, Approver, Reason]
+      filters:
+        columns: 4
+        order: [EmployeeId, WorkDate, Status]
+    softDelete: false
+    filters:
+      EmployeeId:
+        type: dropdown
+        label: Employee
+        expression: OvertimeRequest.EmployeeId
+        foreignKey:
+          entity: employee
+          displayColumn: FullName
+      WorkDate:
+        type: date-range
+        label: Work Date
+        expression: OvertimeRequest.WorkDate
+      Status:
+        type: dropdown
+        label: Status
+        options: [pending, approved, rejected, cancelled]
+    links:
+      employee:
+        label: Employee
+        targetEntity: employee
+        filter:
+          Id: EmployeeId
+    isCompositeKey: false

@@ -1,0 +1,729 @@
+translations:
+  entities.appuser.columns.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.appuser.columns.DisplayName.label:
+    en-US: 'Display Name'
+    zh-CN: 'Display Name'
+    ja-JP: 'Display Name'
+  entities.appuser.columns.Id.label:
+    en-US: 'Id'
+    zh-CN: 'Id'
+    ja-JP: 'Id'
+  entities.appuser.columns.IsActive.label:
+    en-US: 'Is Active'
+    zh-CN: 'Is Active'
+    ja-JP: 'Is Active'
+  entities.appuser.columns.IsAdmin.label:
+    en-US: 'Is Admin'
+    zh-CN: 'Is Admin'
+    ja-JP: 'Is Admin'
+  entities.appuser.columns.PasswordHash.label:
+    en-US: 'Password Hash'
+    zh-CN: 'Password Hash'
+    ja-JP: 'Password Hash'
+  entities.appuser.columns.PreferredLanguage.label:
+    en-US: 'Preferred Language'
+    zh-CN: 'Preferred Language'
+    ja-JP: 'Preferred Language'
+  entities.appuser.columns.UserName.label:
+    en-US: 'User Name'
+    zh-CN: 'User Name'
+    ja-JP: 'User Name'
+  entities.appuser.displayName:
+    en-US: 'Appuser'
+    zh-CN: 'Appuser'
+    ja-JP: 'Appuser'
+  entities.appuser.forms.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.appuser.forms.DisplayName.label:
+    en-US: 'Display Name'
+    zh-CN: 'Display Name'
+    ja-JP: 'Display Name'
+  entities.appuser.forms.IsActive.label:
+    en-US: 'Is Active'
+    zh-CN: 'Is Active'
+    ja-JP: 'Is Active'
+  entities.appuser.forms.IsAdmin.label:
+    en-US: 'Is Admin'
+    zh-CN: 'Is Admin'
+    ja-JP: 'Is Admin'
+  entities.appuser.forms.PasswordHash.label:
+    en-US: 'Password Hash'
+    zh-CN: 'Password Hash'
+    ja-JP: 'Password Hash'
+  entities.appuser.forms.PreferredLanguage.label:
+    en-US: 'Preferred Language'
+    zh-CN: 'Preferred Language'
+    ja-JP: 'Preferred Language'
+  entities.appuser.forms.UserName.label:
+    en-US: 'User Name'
+    zh-CN: 'User Name'
+    ja-JP: 'User Name'
+  entities.auditlog.columns.Action.label:
+    en-US: 'Action'
+    zh-CN: 'Action'
+    ja-JP: 'Action'
+  entities.auditlog.columns.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.auditlog.columns.Detail.label:
+    en-US: 'Detail'
+    zh-CN: 'Detail'
+    ja-JP: 'Detail'
+  entities.auditlog.columns.Entity.label:
+    en-US: 'Entity'
+    zh-CN: 'Entity'
+    ja-JP: 'Entity'
+  entities.auditlog.columns.Id.label:
+    en-US: 'Id'
+    zh-CN: 'Id'
+    ja-JP: 'Id'
+  entities.auditlog.columns.UserName.label:
+    en-US: 'User Name'
+    zh-CN: 'User Name'
+    ja-JP: 'User Name'
+  entities.auditlog.displayName:
+    en-US: 'Auditlog'
+    zh-CN: 'Auditlog'
+    ja-JP: 'Auditlog'
+  entities.auditlog.forms.Action.label:
+    en-US: 'Action'
+    zh-CN: 'Action'
+    ja-JP: 'Action'
+  entities.auditlog.forms.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.auditlog.forms.Detail.label:
+    en-US: 'Detail'
+    zh-CN: 'Detail'
+    ja-JP: 'Detail'
+  entities.auditlog.forms.Entity.label:
+    en-US: 'Entity'
+    zh-CN: 'Entity'
+    ja-JP: 'Entity'
+  entities.auditlog.forms.UserName.label:
+    en-US: 'User Name'
+    zh-CN: 'User Name'
+    ja-JP: 'User Name'
+  entities.category.columns.category_id.label:
+    en-US: 'Category Id'
+    zh-CN: 'Category Id'
+    ja-JP: 'Category Id'
+  entities.category.columns.color.label:
+    en-US: 'Color'
+    zh-CN: 'Color'
+    ja-JP: 'Color'
+  entities.category.columns.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.category.columns.description.label:
+    en-US: 'Description'
+    zh-CN: 'Description'
+    ja-JP: 'Description'
+  entities.category.columns.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  entities.category.columns.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.category.displayName:
+    en-US: 'Category'
+    zh-CN: 'Category'
+    ja-JP: 'Category'
+  entities.category.forms.color.label:
+    en-US: 'Color'
+    zh-CN: 'Color'
+    ja-JP: 'Color'
+  entities.category.forms.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.category.forms.description.label:
+    en-US: 'Description'
+    zh-CN: 'Description'
+    ja-JP: 'Description'
+  entities.category.forms.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  entities.category.forms.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.comment.columns.author_email.label:
+    en-US: 'Author Email'
+    zh-CN: 'Author Email'
+    ja-JP: 'Author Email'
+  entities.comment.columns.author_name.label:
+    en-US: 'Author Name'
+    zh-CN: 'Author Name'
+    ja-JP: 'Author Name'
+  entities.comment.columns.comment_id.label:
+    en-US: 'Comment Id'
+    zh-CN: 'Comment Id'
+    ja-JP: 'Comment Id'
+  entities.comment.columns.content.label:
+    en-US: 'Content'
+    zh-CN: 'Content'
+    ja-JP: 'Content'
+  entities.comment.columns.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.comment.columns.post_id.label:
+    en-US: 'Post Id'
+    zh-CN: 'Post Id'
+    ja-JP: 'Post Id'
+  entities.comment.columns.status.label:
+    en-US: 'Status'
+    zh-CN: 'Status'
+    ja-JP: 'Status'
+  entities.comment.displayName:
+    en-US: 'Comment'
+    zh-CN: 'Comment'
+    ja-JP: 'Comment'
+  entities.comment.forms.author_email.label:
+    en-US: 'Author Email'
+    zh-CN: 'Author Email'
+    ja-JP: 'Author Email'
+  entities.comment.forms.author_name.label:
+    en-US: 'Author Name'
+    zh-CN: 'Author Name'
+    ja-JP: 'Author Name'
+  entities.comment.forms.content.label:
+    en-US: 'Content'
+    zh-CN: 'Content'
+    ja-JP: 'Content'
+  entities.comment.forms.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.comment.forms.post_id.label:
+    en-US: 'Post Id'
+    zh-CN: 'Post Id'
+    ja-JP: 'Post Id'
+  entities.comment.forms.status.label:
+    en-US: 'Status'
+    zh-CN: 'Status'
+    ja-JP: 'Status'
+  entities.post.columns.allow_comments.label:
+    en-US: 'Allow Comments'
+    zh-CN: 'Allow Comments'
+    ja-JP: 'Allow Comments'
+  entities.post.columns.author.label:
+    en-US: 'Author'
+    zh-CN: 'Author'
+    ja-JP: 'Author'
+  entities.post.columns.category_id.label:
+    en-US: 'Category Id'
+    zh-CN: 'Category Id'
+    ja-JP: 'Category Id'
+  entities.post.columns.content.label:
+    en-US: 'Content'
+    zh-CN: 'Content'
+    ja-JP: 'Content'
+  entities.post.columns.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.post.columns.excerpt.label:
+    en-US: 'Excerpt'
+    zh-CN: 'Excerpt'
+    ja-JP: 'Excerpt'
+  entities.post.columns.featured.label:
+    en-US: 'Featured'
+    zh-CN: 'Featured'
+    ja-JP: 'Featured'
+  entities.post.columns.post_id.label:
+    en-US: 'Post Id'
+    zh-CN: 'Post Id'
+    ja-JP: 'Post Id'
+  entities.post.columns.published_at.label:
+    en-US: 'Published At'
+    zh-CN: 'Published At'
+    ja-JP: 'Published At'
+  entities.post.columns.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.post.columns.status.label:
+    en-US: 'Status'
+    zh-CN: 'Status'
+    ja-JP: 'Status'
+  entities.post.columns.title.label:
+    en-US: 'Title'
+    zh-CN: 'Title'
+    ja-JP: 'Title'
+  entities.post.columns.updated_at.label:
+    en-US: 'Updated At'
+    zh-CN: 'Updated At'
+    ja-JP: 'Updated At'
+  entities.post.columns.view_count.label:
+    en-US: 'View Count'
+    zh-CN: 'View Count'
+    ja-JP: 'View Count'
+  entities.post.displayName:
+    en-US: 'Post'
+    zh-CN: 'Post'
+    ja-JP: 'Post'
+  entities.post.forms.allow_comments.label:
+    en-US: 'Allow Comments'
+    zh-CN: 'Allow Comments'
+    ja-JP: 'Allow Comments'
+  entities.post.forms.author.label:
+    en-US: 'Author'
+    zh-CN: 'Author'
+    ja-JP: 'Author'
+  entities.post.forms.category_id.label:
+    en-US: 'Category Id'
+    zh-CN: 'Category Id'
+    ja-JP: 'Category Id'
+  entities.post.forms.content.label:
+    en-US: 'Content'
+    zh-CN: 'Content'
+    ja-JP: 'Content'
+  entities.post.forms.created_at.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.post.forms.excerpt.label:
+    en-US: 'Excerpt'
+    zh-CN: 'Excerpt'
+    ja-JP: 'Excerpt'
+  entities.post.forms.featured.label:
+    en-US: 'Featured'
+    zh-CN: 'Featured'
+    ja-JP: 'Featured'
+  entities.post.forms.published_at.label:
+    en-US: 'Published At'
+    zh-CN: 'Published At'
+    ja-JP: 'Published At'
+  entities.post.forms.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.post.forms.status.label:
+    en-US: 'Status'
+    zh-CN: 'Status'
+    ja-JP: 'Status'
+  entities.post.forms.title.label:
+    en-US: 'Title'
+    zh-CN: 'Title'
+    ja-JP: 'Title'
+  entities.post.forms.updated_at.label:
+    en-US: 'Updated At'
+    zh-CN: 'Updated At'
+    ja-JP: 'Updated At'
+  entities.post.forms.view_count.label:
+    en-US: 'View Count'
+    zh-CN: 'View Count'
+    ja-JP: 'View Count'
+  entities.post_tag.columns.id.label:
+    en-US: 'Id'
+    zh-CN: 'Id'
+    ja-JP: 'Id'
+  entities.post_tag.columns.post_id.label:
+    en-US: 'Post Id'
+    zh-CN: 'Post Id'
+    ja-JP: 'Post Id'
+  entities.post_tag.columns.tag_id.label:
+    en-US: 'Tag Id'
+    zh-CN: 'Tag Id'
+    ja-JP: 'Tag Id'
+  entities.post_tag.displayName:
+    en-US: 'Post Tag'
+    zh-CN: 'Post Tag'
+    ja-JP: 'Post Tag'
+  entities.post_tag.forms.post_id.label:
+    en-US: 'Post Id'
+    zh-CN: 'Post Id'
+    ja-JP: 'Post Id'
+  entities.post_tag.forms.tag_id.label:
+    en-US: 'Tag Id'
+    zh-CN: 'Tag Id'
+    ja-JP: 'Tag Id'
+  entities.tag.columns.color.label:
+    en-US: 'Color'
+    zh-CN: 'Color'
+    ja-JP: 'Color'
+  entities.tag.columns.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  entities.tag.columns.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.tag.columns.tag_id.label:
+    en-US: 'Tag Id'
+    zh-CN: 'Tag Id'
+    ja-JP: 'Tag Id'
+  entities.tag.displayName:
+    en-US: 'Tag'
+    zh-CN: 'Tag'
+    ja-JP: 'Tag'
+  entities.tag.forms.color.label:
+    en-US: 'Color'
+    zh-CN: 'Color'
+    ja-JP: 'Color'
+  entities.tag.forms.name.label:
+    en-US: 'Name'
+    zh-CN: 'Name'
+    ja-JP: 'Name'
+  entities.tag.forms.slug.label:
+    en-US: 'Slug'
+    zh-CN: 'Slug'
+    ja-JP: 'Slug'
+  entities.user.columns.Avatar.label:
+    en-US: 'Avatar'
+    zh-CN: 'Avatar'
+    ja-JP: 'Avatar'
+  entities.user.columns.Bio.label:
+    en-US: 'Bio'
+    zh-CN: 'Bio'
+    ja-JP: 'Bio'
+  entities.user.columns.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.user.columns.CreatedBy.label:
+    en-US: 'Created By'
+    zh-CN: 'Created By'
+    ja-JP: 'Created By'
+  entities.user.columns.DisplayName.label:
+    en-US: 'Display Name'
+    zh-CN: 'Display Name'
+    ja-JP: 'Display Name'
+  entities.user.columns.Email.label:
+    en-US: 'Email'
+    zh-CN: 'Email'
+    ja-JP: 'Email'
+  entities.user.columns.IsActive.label:
+    en-US: 'Is Active'
+    zh-CN: 'Is Active'
+    ja-JP: 'Is Active'
+  entities.user.columns.LastLoginAt.label:
+    en-US: 'Last Login At'
+    zh-CN: 'Last Login At'
+    ja-JP: 'Last Login At'
+  entities.user.columns.LastLoginIP.label:
+    en-US: 'Last Login Ip'
+    zh-CN: 'Last Login Ip'
+    ja-JP: 'Last Login Ip'
+  entities.user.columns.PasswordHash.label:
+    en-US: 'Password Hash'
+    zh-CN: 'Password Hash'
+    ja-JP: 'Password Hash'
+  entities.user.columns.Role.label:
+    en-US: 'Role'
+    zh-CN: 'Role'
+    ja-JP: 'Role'
+  entities.user.columns.UpdatedAt.label:
+    en-US: 'Updated At'
+    zh-CN: 'Updated At'
+    ja-JP: 'Updated At'
+  entities.user.columns.UpdatedBy.label:
+    en-US: 'Updated By'
+    zh-CN: 'Updated By'
+    ja-JP: 'Updated By'
+  entities.user.columns.UserId.label:
+    en-US: 'User Id'
+    zh-CN: 'User Id'
+    ja-JP: 'User Id'
+  entities.user.columns.Username.label:
+    en-US: 'Username'
+    zh-CN: 'Username'
+    ja-JP: 'Username'
+  entities.user.displayName:
+    en-US: 'User'
+    zh-CN: 'User'
+    ja-JP: 'User'
+  entities.user.forms.Avatar.label:
+    en-US: 'Avatar'
+    zh-CN: 'Avatar'
+    ja-JP: 'Avatar'
+  entities.user.forms.Bio.label:
+    en-US: 'Bio'
+    zh-CN: 'Bio'
+    ja-JP: 'Bio'
+  entities.user.forms.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.user.forms.CreatedBy.label:
+    en-US: 'Created By'
+    zh-CN: 'Created By'
+    ja-JP: 'Created By'
+  entities.user.forms.DisplayName.label:
+    en-US: 'Display Name'
+    zh-CN: 'Display Name'
+    ja-JP: 'Display Name'
+  entities.user.forms.Email.label:
+    en-US: 'Email'
+    zh-CN: 'Email'
+    ja-JP: 'Email'
+  entities.user.forms.IsActive.label:
+    en-US: 'Is Active'
+    zh-CN: 'Is Active'
+    ja-JP: 'Is Active'
+  entities.user.forms.LastLoginAt.label:
+    en-US: 'Last Login At'
+    zh-CN: 'Last Login At'
+    ja-JP: 'Last Login At'
+  entities.user.forms.LastLoginIP.label:
+    en-US: 'Last Login Ip'
+    zh-CN: 'Last Login Ip'
+    ja-JP: 'Last Login Ip'
+  entities.user.forms.PasswordHash.label:
+    en-US: 'Password Hash'
+    zh-CN: 'Password Hash'
+    ja-JP: 'Password Hash'
+  entities.user.forms.Role.label:
+    en-US: 'Role'
+    zh-CN: 'Role'
+    ja-JP: 'Role'
+  entities.user.forms.UpdatedAt.label:
+    en-US: 'Updated At'
+    zh-CN: 'Updated At'
+    ja-JP: 'Updated At'
+  entities.user.forms.UpdatedBy.label:
+    en-US: 'Updated By'
+    zh-CN: 'Updated By'
+    ja-JP: 'Updated By'
+  entities.user.forms.Username.label:
+    en-US: 'Username'
+    zh-CN: 'Username'
+    ja-JP: 'Username'
+  entities.userrole.columns.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.userrole.columns.Description.label:
+    en-US: 'Description'
+    zh-CN: 'Description'
+    ja-JP: 'Description'
+  entities.userrole.columns.Permissions.label:
+    en-US: 'Permissions'
+    zh-CN: 'Permissions'
+    ja-JP: 'Permissions'
+  entities.userrole.columns.RoleId.label:
+    en-US: 'Role Id'
+    zh-CN: 'Role Id'
+    ja-JP: 'Role Id'
+  entities.userrole.columns.RoleName.label:
+    en-US: 'Role Name'
+    zh-CN: 'Role Name'
+    ja-JP: 'Role Name'
+  entities.userrole.displayName:
+    en-US: 'Userrole'
+    zh-CN: 'Userrole'
+    ja-JP: 'Userrole'
+  entities.userrole.forms.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.userrole.forms.Description.label:
+    en-US: 'Description'
+    zh-CN: 'Description'
+    ja-JP: 'Description'
+  entities.userrole.forms.Permissions.label:
+    en-US: 'Permissions'
+    zh-CN: 'Permissions'
+    ja-JP: 'Permissions'
+  entities.userrole.forms.RoleName.label:
+    en-US: 'Role Name'
+    zh-CN: 'Role Name'
+    ja-JP: 'Role Name'
+  entities.usersession.columns.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.usersession.columns.ExpiresAt.label:
+    en-US: 'Expires At'
+    zh-CN: 'Expires At'
+    ja-JP: 'Expires At'
+  entities.usersession.columns.IPAddress.label:
+    en-US: 'Ipaddress'
+    zh-CN: 'Ipaddress'
+    ja-JP: 'Ipaddress'
+  entities.usersession.columns.SessionId.label:
+    en-US: 'Session Id'
+    zh-CN: 'Session Id'
+    ja-JP: 'Session Id'
+  entities.usersession.columns.Token.label:
+    en-US: 'Token'
+    zh-CN: 'Token'
+    ja-JP: 'Token'
+  entities.usersession.columns.UserAgent.label:
+    en-US: 'User Agent'
+    zh-CN: 'User Agent'
+    ja-JP: 'User Agent'
+  entities.usersession.columns.UserId.label:
+    en-US: 'User Id'
+    zh-CN: 'User Id'
+    ja-JP: 'User Id'
+  entities.usersession.displayName:
+    en-US: 'Usersession'
+    zh-CN: 'Usersession'
+    ja-JP: 'Usersession'
+  entities.usersession.forms.CreatedAt.label:
+    en-US: 'Created At'
+    zh-CN: 'Created At'
+    ja-JP: 'Created At'
+  entities.usersession.forms.ExpiresAt.label:
+    en-US: 'Expires At'
+    zh-CN: 'Expires At'
+    ja-JP: 'Expires At'
+  entities.usersession.forms.IPAddress.label:
+    en-US: 'Ipaddress'
+    zh-CN: 'Ipaddress'
+    ja-JP: 'Ipaddress'
+  entities.usersession.forms.SessionId.label:
+    en-US: 'Session Id'
+    zh-CN: 'Session Id'
+    ja-JP: 'Session Id'
+  entities.usersession.forms.Token.label:
+    en-US: 'Token'
+    zh-CN: 'Token'
+    ja-JP: 'Token'
+  entities.usersession.forms.UserAgent.label:
+    en-US: 'User Agent'
+    zh-CN: 'User Agent'
+    ja-JP: 'User Agent'
+  entities.usersession.forms.UserId.label:
+    en-US: 'User Id'
+    zh-CN: 'User Id'
+    ja-JP: 'User Id'
+  projects.demo-ops.dashboard.stats.0.label:
+    en-US: 'Appuser Count'
+    zh-CN: 'Appuser Count'
+    ja-JP: 'Appuser Count'
+  projects.demo-ops.dashboard.stats.1.label:
+    en-US: 'Auditlog Count'
+    zh-CN: 'Auditlog Count'
+    ja-JP: 'Auditlog Count'
+  projects.demo-ops.dashboard.stats.2.label:
+    en-US: 'Category Count'
+    zh-CN: 'Category Count'
+    ja-JP: 'Category Count'
+  projects.demo-ops.dashboard.stats.3.label:
+    en-US: 'Comment Count'
+    zh-CN: 'Comment Count'
+    ja-JP: 'Comment Count'
+  projects.demo-ops.dashboard.stats.4.label:
+    en-US: 'Post Count'
+    zh-CN: 'Post Count'
+    ja-JP: 'Post Count'
+  projects.demo-ops.dashboard.stats.5.label:
+    en-US: 'Post_tag Count'
+    zh-CN: 'Post_tag Count'
+    ja-JP: 'Post_tag Count'
+  projects.demo-ops.dashboard.stats.6.label:
+    en-US: 'Tag Count'
+    zh-CN: 'Tag Count'
+    ja-JP: 'Tag Count'
+  projects.demo-ops.dashboard.stats.7.label:
+    en-US: 'User Count'
+    zh-CN: 'User Count'
+    ja-JP: 'User Count'
+  projects.demo-ops.dashboard.stats.8.label:
+    en-US: 'Userrole Count'
+    zh-CN: 'Userrole Count'
+    ja-JP: 'Userrole Count'
+  projects.demo-ops.dashboard.stats.9.label:
+    en-US: 'Usersession Count'
+    zh-CN: 'Usersession Count'
+    ja-JP: 'Usersession Count'
+  projects.demo-ops.home.actions.openWorkspace:
+    en-US: 'Open Workspace'
+    zh-CN: 'Open Workspace'
+    ja-JP: 'Open Workspace'
+  projects.demo-ops.home.emptyProjectsMessage:
+    en-US: 'No projects found under projects/.'
+    zh-CN: 'No projects found under projects/.'
+    ja-JP: 'No projects found under projects/.'
+  projects.demo-ops.home.hero.description:
+    en-US: 'Starter workspace generated from your database schema.'
+    zh-CN: 'Starter workspace generated from your database schema.'
+    ja-JP: 'Starter workspace generated from your database schema.'
+  projects.demo-ops.home.hero.eyebrow:
+    en-US: 'Demo Ops'
+    zh-CN: 'Demo Ops'
+    ja-JP: 'Demo Ops'
+  projects.demo-ops.home.hero.highlights.0:
+    en-US: 'Highlights'
+    zh-CN: 'Highlights'
+    ja-JP: 'Highlights'
+  projects.demo-ops.home.hero.highlights.1:
+    en-US: 'Highlights'
+    zh-CN: 'Highlights'
+    ja-JP: 'Highlights'
+  projects.demo-ops.home.hero.primaryActionLabel:
+    en-US: 'Open Dashboard'
+    zh-CN: 'Open Dashboard'
+    ja-JP: 'Open Dashboard'
+  projects.demo-ops.home.hero.secondaryActionLabel:
+    en-US: 'Open Schema Definitions'
+    zh-CN: 'Open Schema Definitions'
+    ja-JP: 'Open Schema Definitions'
+  projects.demo-ops.home.hero.title:
+    en-US: 'Demo Ops Workspace'
+    zh-CN: 'Demo Ops Workspace'
+    ja-JP: 'Demo Ops Workspace'
+  projects.demo-ops.home.quickActions.0.label:
+    en-US: 'Dashboard'
+    zh-CN: 'Dashboard'
+    ja-JP: 'Dashboard'
+  projects.demo-ops.home.quickActions.1.label:
+    en-US: 'Entity Definitions'
+    zh-CN: 'Entity Definitions'
+    ja-JP: 'Entity Definitions'
+  projects.demo-ops.home.quickActions.2.label:
+    en-US: 'Starter Page'
+    zh-CN: 'Starter Page'
+    ja-JP: 'Starter Page'
+  projects.demo-ops.home.sections.capabilities.title:
+    en-US: 'Core Capabilities'
+    zh-CN: 'Core Capabilities'
+    ja-JP: 'Core Capabilities'
+  projects.demo-ops.home.sections.projects.lead:
+    en-US: 'Build your business screens from this starter project.'
+    zh-CN: 'Build your business screens from this starter project.'
+    ja-JP: 'Build your business screens from this starter project.'
+  projects.demo-ops.home.sections.projects.title:
+    en-US: 'Demo Ops'
+    zh-CN: 'Demo Ops'
+    ja-JP: 'Demo Ops'
+  projects.demo-ops.home.sections.quickActions.title:
+    en-US: 'Quick Actions'
+    zh-CN: 'Quick Actions'
+    ja-JP: 'Quick Actions'
+  projects.demo-ops.home.sections.solutions.title:
+    en-US: 'Solution Matrix'
+    zh-CN: 'Solution Matrix'
+    ja-JP: 'Solution Matrix'
+  projects.demo-ops.pages.starterOverview.description:
+    en-US: 'Auto-generated starter page'
+    zh-CN: 'Auto-generated starter page'
+    ja-JP: 'Auto-generated starter page'
+  projects.demo-ops.pages.starterOverview.sections.0.title:
+    en-US: 'Appuser List'
+    zh-CN: 'Appuser List'
+    ja-JP: 'Appuser List'
+  projects.demo-ops.pages.starterOverview.title:
+    en-US: 'Starter Overview'
+    zh-CN: 'Starter Overview'
+    ja-JP: 'Starter Overview'
+  projects.demo-ops.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'
