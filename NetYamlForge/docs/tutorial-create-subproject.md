@@ -1,55 +1,55 @@
-# Tutorial: Creating a Subproject in NetYamlForge
+# チュートリアル：NetYamlForge でサブプロジェクトを作成する
 
-This tutorial walks you through building a **Task Management System (task-tracker)** from scratch using the NetYamlForge framework CLI. It covers all major features step by step.
-
----
-
-## What You Will Build
-
-| Feature | Description |
-|---------|-------------|
-| Entities | Category / Task / Comment |
-| Dashboard | 4 stat cards + 2 charts |
-| Custom page | Overdue tasks list |
-| Built-in hooks | Validation and auto-timestamps |
-| Custom hook | Auto-set task completion time |
+このチュートリアルでは、NetYamlForge フレームワーク CLI を使って **タスク管理システム（task-tracker）** をゼロから構築する手順を、主要機能をステップごとに説明します。
 
 ---
 
-## Framework Structure
+## 作るもの
 
-A subproject lives under `projects/<name>/` and is configured entirely through YAML files. The framework reads these files at startup and generates a full CRUD admin panel — no hand-written controllers or views required.
+| 機能 | 説明 |
+|------|------|
+| エンティティ | Category / Task / Comment |
+| ダッシュボード | 統計カード × 4 ＋ チャート × 2 |
+| カスタムページ | 期限切れタスク一覧 |
+| 組み込みフック | バリデーション・自動タイムスタンプ |
+| カスタムフック | タスク完了時刻の自動設定 |
+
+---
+
+## フレームワーク構造
+
+サブプロジェクトは `projects/<name>/` 以下に配置し、すべて YAML ファイルで設定します。フレームワークは起動時にこれらのファイルを読み込み、フル CRUD 管理画面を自動生成します。コントローラやビューを手書きする必要はありません。
 
 ```
 projects/<name>/
-├── project.yaml          # Project settings
+├── project.yaml          # プロジェクト設定
 ├── config/
-│   ├── dashboard.yml     # Dashboard stats and charts
-│   ├── layout.yml        # Navigation menu
-│   └── i18n.yml          # Multilingual labels
-├── entities/             # Entity YAML definitions
-├── pages/                # Custom page YAML
-├── Hooks/                # Project-specific hook classes
-├── database/             # SQLite DB file
-└── views/                # Project-specific views
+│   ├── dashboard.yml     # ダッシュボードの統計・チャート
+│   ├── layout.yml        # ナビゲーションメニュー
+│   └── i18n.yml          # 多言語ラベル
+├── entities/             # エンティティ YAML 定義
+├── pages/                # カスタムページ YAML
+├── Hooks/                # プロジェクト固有のフッククラス
+├── database/             # SQLite DB ファイル
+└── views/                # プロジェクト固有のビュー
 ```
 
 ---
 
-## Step 1: Initialize the Project
+## ステップ 1: プロジェクトを初期化する
 
-Run the `--init-project` command to scaffold the directory structure and generate `project.yaml`.
+`--init-project` コマンドを実行してディレクトリ構造をスキャフォールドし、`project.yaml` を生成します。
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --init-project \
   --project=task-tracker \
-  --display-name="Task Manager" \
+  --display-name="タスク管理" \
   --db-type=sqlite \
   --db-path=database/task-tracker.db
 ```
 
-The following directory structure is created automatically:
+以下のディレクトリ構造が自動生成されます：
 
 ```
 projects/task-tracker/
@@ -65,11 +65,11 @@ projects/task-tracker/
 └── views/
 ```
 
-### Review the generated `project.yaml`
+### 生成された `project.yaml` を確認する
 
 ```yaml
 name: task-tracker
-displayName: Task Manager
+displayName: タスク管理
 version: "1.0.0"
 database:
   type: sqlite
@@ -81,12 +81,12 @@ features:
 
 ---
 
-## Step 2: Create the Database
+## ステップ 2: データベースを作成する
 
-Create `projects/task-tracker/database/init.sql` with your table definitions:
+`projects/task-tracker/database/init.sql` にテーブル定義を作成します：
 
 ```sql
--- Categories
+-- カテゴリ
 CREATE TABLE IF NOT EXISTS category (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS category (
     created_at  TEXT    DEFAULT (datetime('now','localtime'))
 );
 
--- Tasks
+-- タスク
 CREATE TABLE IF NOT EXISTS task (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     title        TEXT    NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS task (
     is_deleted   INTEGER DEFAULT 0
 );
 
--- Comments
+-- コメント
 CREATE TABLE IF NOT EXISTS comment (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id    INTEGER NOT NULL REFERENCES task(id),
@@ -118,15 +118,15 @@ CREATE TABLE IF NOT EXISTS comment (
     created_at TEXT    DEFAULT (datetime('now','localtime'))
 );
 
--- Sample data
-INSERT INTO category(name, color) VALUES ('Development', '#0d6efd'), ('Design', '#6f42c1'), ('Operations', '#dc3545');
+-- サンプルデータ
+INSERT INTO category(name, color) VALUES ('開発', '#0d6efd'), ('デザイン', '#6f42c1'), ('運用', '#dc3545');
 INSERT INTO task(title, status, priority, category_id, due_date)
-  VALUES ('Implement top page', 'in_progress', 'high', 1, date('now', '+3 days')),
-         ('Logo design', 'todo', 'medium', 2, date('now', '+7 days')),
-         ('Server configuration', 'done', 'high', 3, date('now', '-1 day'));
+  VALUES ('トップページ実装', 'in_progress', 'high', 1, date('now', '+3 days')),
+         ('ロゴデザイン', 'todo', 'medium', 2, date('now', '+7 days')),
+         ('サーバー設定', 'done', 'high', 3, date('now', '-1 day'));
 ```
 
-Initialize the SQLite database using the SQLite CLI:
+SQLite CLI を使って SQLite データベースを初期化します：
 
 ```bash
 sqlite3 projects/task-tracker/database/task-tracker.db < projects/task-tracker/database/init.sql
@@ -134,9 +134,9 @@ sqlite3 projects/task-tracker/database/task-tracker.db < projects/task-tracker/d
 
 ---
 
-## Step 3: Scaffold Entities
+## ステップ 3: エンティティをスキャフォールドする
 
-With the database in place, run the scaffold command to auto-generate YAML skeletons from the table schema:
+データベースが準備できたら、スキャフォールドコマンドを実行してテーブルスキーマから YAML スケルトンを自動生成します：
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
@@ -144,13 +144,13 @@ dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --project=task-tracker
 ```
 
-This generates `category.yml`, `task.yml`, and `comment.yml` under `projects/task-tracker/entities/`. The following steps walk through editing each file.
+`projects/task-tracker/entities/` 以下に `category.yml`、`task.yml`、`comment.yml` が生成されます。以降のステップでは各ファイルの編集方法を説明します。
 
 ---
 
-## Step 4: Define Entity YAML
+## ステップ 4: エンティティ YAML を定義する
 
-Edit each generated file to configure columns, forms, filters, and hooks.
+生成された各ファイルを編集して、カラム・フォーム・フィルター・フックを設定します。
 
 ### `entities/category.yml`
 
@@ -159,7 +159,7 @@ entities:
   category:
     table: category
     key: id
-    displayName: Category
+    displayName: カテゴリ
 
     paging:
       pageSize: 20
@@ -172,19 +172,19 @@ entities:
 
     columns:
       id:         { type: int,    identity: true, label: ID,         sortable: true }
-      name:       { type: string, required: true,  label: Name,      searchable: true, sortable: true }
-      color:      { type: string, label: Color }
-      created_at: { type: string, label: Created At, sortable: true }
+      name:       { type: string, required: true,  label: 名前,      searchable: true, sortable: true }
+      color:      { type: string, label: カラー }
+      created_at: { type: string, label: 作成日時, sortable: true }
 
     forms:
-      name:  { type: string, required: true, label: Category Name, editable: true }
-      color: { type: string, label: "Color code (e.g. #0d6efd)", editable: true }
+      name:  { type: string, required: true, label: カテゴリ名, editable: true }
+      color: { type: string, label: "カラーコード (例: #0d6efd)", editable: true }
 
     filters: {}
 
     links:
       tasks:
-        label: Tasks
+        label: タスク
         entity: task
         filter:
           category_id: "{id}"
@@ -197,15 +197,15 @@ entities:
         - trim:name
 ```
 
-### `entities/task.yml` (with JOIN, foreign key, soft delete)
+### `entities/task.yml`（JOIN・外部キー・ソフトデリート付き）
 
 ```yaml
 entities:
   task:
     table: task
     key: id
-    displayName: Task
-    softDelete: true    # DELETE updates is_deleted=1 instead of removing the row
+    displayName: タスク
+    softDelete: true    # DELETE は行を削除せず is_deleted=1 に更新する
 
     paging:
       pageSize: 25
@@ -221,7 +221,7 @@ entities:
         order: [status, priority, category_id, due_date]
 
     confirmation:
-      delete: "Are you sure you want to delete this task?"
+      delete: "このタスクを削除してもよろしいですか？"
 
     joins:
       - table: category
@@ -231,80 +231,80 @@ entities:
 
     columns:
       id:           { type: int,    identity: true, label: ID,           sortable: true }
-      title:        { type: string, required: true,  label: Title,       searchable: true, sortable: true }
-      status:       { type: string, label: Status,   sortable: true }
-      priority:     { type: string, label: Priority, sortable: true }
+      title:        { type: string, required: true,  label: タイトル,    searchable: true, sortable: true }
+      status:       { type: string, label: ステータス, sortable: true }
+      priority:     { type: string, label: 優先度,   sortable: true }
       category_name:
         type: string
-        expression: "cat.name"     # Reference a JOINed column via expression
-        label: Category
+        expression: "cat.name"     # expression で JOIN したカラムを参照する
+        label: カテゴリ
         sortable: true
-      due_date:     { type: string, label: Due Date,      sortable: true }
-      completed_at: { type: string, label: Completed At,  sortable: true }
-      created_at:   { type: string, label: Created At,    sortable: true }
+      due_date:     { type: string, label: 期限日,     sortable: true }
+      completed_at: { type: string, label: 完了日時,   sortable: true }
+      created_at:   { type: string, label: 作成日時,   sortable: true }
 
     forms:
       title:
         type: string
         required: true
-        label: Title
+        label: タイトル
         editable: true
       description:
         type: string
-        label: Description
+        label: 説明
         editable: true
       status:
         type: string
-        label: Status
+        label: ステータス
         editable: true
         options: [todo, in_progress, done]
       priority:
         type: string
-        label: Priority
+        label: 優先度
         editable: true
         options: [low, medium, high]
       category_id:
         type: int
-        label: Category
+        label: カテゴリ
         editable: true
         foreignKey:
           entity: category
-          displayColumn: name       # Show category.name in the dropdown
+          displayColumn: name       # ドロップダウンに category.name を表示する
       due_date:
         type: date
-        label: Due Date
+        label: 期限日
         editable: true
       completed_at:
         type: string
-        label: Completed At
-        editable: false             # Not editable in forms; set automatically by hook
+        label: 完了日時
+        editable: false             # フォームでは編集不可。フックが自動的に設定する
       created_at:
         type: string
-        label: Created At
+        label: 作成日時
         editable: false
 
     filters:
       status:
         type: dropdown
-        label: Status
+        label: ステータス
         options: [todo, in_progress, done]
       priority:
         type: dropdown
-        label: Priority
+        label: 優先度
         options: [low, medium, high]
       category_id:
         type: dropdown
-        label: Category
+        label: カテゴリ
         foreignKey:
           entity: category
           displayColumn: name
       due_date:
-        type: date-range            # Date range filter (_from / _to)
-        label: Due Date
+        type: date-range            # 日付範囲フィルター（_from / _to）
+        label: 期限日
 
     links:
       comments:
-        label: Comments
+        label: コメント
         entity: comment
         filter:
           task_id: "{id}"
@@ -319,7 +319,7 @@ entities:
         - validate_required:title
         - trim:title
         - now:updated_at
-        - task_complete_timestamp    # Custom hook implemented in Step 6
+        - task_complete_timestamp    # ステップ 6 で実装するカスタムフック
 ```
 
 ### `entities/comment.yml`
@@ -329,7 +329,7 @@ entities:
   comment:
     table: comment
     key: id
-    displayName: Comment
+    displayName: コメント
 
     paging:
       pageSize: 50
@@ -351,16 +351,16 @@ entities:
       task_title:
         type: string
         expression: "t.title"
-        label: Task
+        label: タスク
         sortable: true
-      author:     { type: string, label: Author,  searchable: true, sortable: true }
-      body:       { type: string, label: Body,    searchable: true }
-      created_at: { type: string, label: Posted At, sortable: true }
+      author:     { type: string, label: 投稿者, searchable: true, sortable: true }
+      body:       { type: string, label: 本文,   searchable: true }
+      created_at: { type: string, label: 投稿日時, sortable: true }
 
     forms:
       task_id:
         type: int
-        label: Task
+        label: タスク
         editable: true
         foreignKey:
           entity: task
@@ -368,18 +368,18 @@ entities:
       author:
         type: string
         required: true
-        label: Author
+        label: 投稿者
         editable: true
       body:
         type: string
         required: true
-        label: Body
+        label: 本文
         editable: true
 
     filters:
       author:
         type: like
-        label: Author
+        label: 投稿者
 
     hooks:
       beforeCreate:
@@ -390,44 +390,44 @@ entities:
 
 ---
 
-## Step 5: Configure the Dashboard
+## ステップ 5: ダッシュボードを設定する
 
-Edit `projects/task-tracker/config/dashboard.yml`:
+`projects/task-tracker/config/dashboard.yml` を編集します：
 
 ```yaml
-# Stat cards
+# 統計カード
 stats:
-  - label: Total Tasks
+  - label: タスク合計
     entity: task
     aggregate: count
     icon: 📋
     color: badge-primary
 
-  - label: Todo
+  - label: 未着手
     entity: task
     aggregate: count
     filter: "status = 'todo'"
     icon: 🔵
     color: badge-info
 
-  - label: In Progress
+  - label: 進行中
     entity: task
     aggregate: count
     filter: "status = 'in_progress'"
     icon: 🟡
     color: badge-warning
 
-  - label: Done
+  - label: 完了
     entity: task
     aggregate: count
     filter: "status = 'done'"
     icon: ✅
     color: badge-success
 
-# Charts
+# チャート
 charts:
-  # Tasks by priority (doughnut)
-  - title: Tasks by Priority
+  # 優先度別タスク（ドーナツグラフ）
+  - title: 優先度別タスク
     type: doughnut
     entity: task
     valueAggregate: count
@@ -435,8 +435,8 @@ charts:
     orderBy: value
     orderDir: desc
 
-  # Tasks by category (bar chart)
-  - title: Tasks by Category
+  # カテゴリ別タスク（棒グラフ）
+  - title: カテゴリ別タスク
     type: bar
     entity: task
     valueAggregate: count
@@ -448,22 +448,22 @@ charts:
     colorBorder: rgba(13, 110, 253, 1)
 ```
 
-### Dashboard configuration options
+### ダッシュボード設定オプション
 
-| Key | Description |
-|-----|-------------|
+| キー | 説明 |
+|------|------|
 | `aggregate` | `count` / `sum` / `avg` |
-| `filter` | SQL condition appended to the WHERE clause (only validated identifiers allowed) |
+| `filter` | WHERE 句に追加する SQL 条件（検証済み識別子のみ使用可） |
 | `type` | `bar` / `doughnut` / `pie` / `line` |
-| `groupExpression` | GROUP BY expression (supports aliased JOIN columns) |
-| `joinClause` | JOIN clause for charts |
-| `valueColumn` | Column to aggregate when using `sum` or `avg` |
+| `groupExpression` | GROUP BY 式（JOIN のエイリアスカラム指定可） |
+| `joinClause` | チャート用の JOIN 句 |
+| `valueColumn` | `sum` / `avg` 使用時の集計カラム |
 
 ---
 
-## Step 6: Add Custom Hooks
+## ステップ 6: カスタムフックを追加する
 
-Use the CLI to scaffold a hook class and its test file:
+CLI を使ってフッククラスとテストファイルをスキャフォールドします：
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
@@ -473,16 +473,16 @@ dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --with-tests
 ```
 
-Generated files:
+生成されるファイル：
 
 ```
 projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs
 NetYamlForge.Tests/Hooks/TaskCompleteTimestampHookTests.cs
 ```
 
-### Implement the hook
+### フックを実装する
 
-Edit `projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs`:
+`projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs` を編集します：
 
 ```csharp
 using System.Data;
@@ -491,9 +491,9 @@ using NetYamlForge.Services.Hooks;
 namespace NetYamlForge.Projects.TaskTracker.Hooks;
 
 /// <summary>
-/// Automatically sets completed_at when a task's status is changed to "done".
+/// タスクのステータスが "done" に変更されたとき、completed_at を自動設定する。
 ///
-/// Usage in entities/task.yml:
+/// entities/task.yml での使用例:
 ///   hooks:
 ///     beforeUpdate:
 ///       - task_complete_timestamp
@@ -508,7 +508,7 @@ public class TaskCompleteTimestampHook : IEntityHook
 
         if (string.Equals(newStatus, "done", StringComparison.OrdinalIgnoreCase))
         {
-            // Set completion time only if not already set
+            // まだ設定されていない場合のみ完了時刻を設定する
             if (!ctx.Values.TryGetValue("completed_at", out var existing) ||
                 existing == null || string.IsNullOrWhiteSpace(existing.ToString()))
             {
@@ -517,7 +517,7 @@ public class TaskCompleteTimestampHook : IEntityHook
         }
         else
         {
-            // Clear completion time if status is changed back from "done"
+            // ステータスが "done" から変更された場合は完了時刻をクリアする
             ctx.Values["completed_at"] = null;
         }
 
@@ -529,26 +529,26 @@ public class TaskCompleteTimestampHook : IEntityHook
 }
 ```
 
-### Register the hook in `Program.cs`
+### `Program.cs` にフックを登録する
 
-Add the following line to the DI registration section in `NetYamlForge/Program.cs`:
+`NetYamlForge/Program.cs` の DI 登録セクションに以下の行を追加します：
 
 ```csharp
 // projects/task-tracker/Hooks
 builder.Services.AddSingleton<IEntityHook, TaskCompleteTimestampHook>();
 ```
 
-> **Note**: The hook name (the `Name` property) is matched case-insensitively against the name listed in the YAML `hooks` section.
+> **注意**: フック名（`Name` プロパティ）は、YAML の `hooks` セクションに記述された名前と大文字小文字を区別せずに照合されます。
 
 ---
 
-## Step 7: Create Custom Pages
+## ステップ 7: カスタムページを作成する
 
-Create `projects/task-tracker/pages/OverdueTasks.yml`:
+`projects/task-tracker/pages/OverdueTasks.yml` を作成します：
 
 ```yaml
-title: Overdue Tasks
-description: Tasks past their due date that have not been completed.
+title: 期限切れタスク
+description: 期限を過ぎたまま完了していないタスク一覧。
 
 ui:
   page:
@@ -557,17 +557,17 @@ ui:
 
 sections:
   - id: overdue_tasks
-    title: Overdue Tasks
+    title: 期限切れタスク
     source_type: custom
     source: |
       SELECT
         t.id        AS TaskId,
-        t.title     AS Title,
-        t.status    AS Status,
-        t.priority  AS Priority,
-        cat.name    AS Category,
-        t.due_date  AS DueDate,
-        CAST(julianday('now') - julianday(t.due_date) AS INTEGER) AS DaysOverdue
+        t.title     AS タイトル,
+        t.status    AS ステータス,
+        t.priority  AS 優先度,
+        cat.name    AS カテゴリ,
+        t.due_date  AS 期限日,
+        CAST(julianday('now') - julianday(t.due_date) AS INTEGER) AS 超過日数
       FROM task t
       LEFT JOIN category cat ON cat.id = t.category_id
       WHERE t.due_date < date('now','localtime')
@@ -575,152 +575,152 @@ sections:
         AND t.is_deleted = 0
     columns:
       - TaskId
-      - Title
-      - Status
-      - Priority
-      - Category
-      - DueDate
-      - DaysOverdue
+      - タイトル
+      - ステータス
+      - 優先度
+      - カテゴリ
+      - 期限日
+      - 超過日数
     page_size: 50
     editable: false
     read_only: true
     filters:
-      Priority:
-        label: Priority
+      優先度:
+        label: 優先度
         type: eq
-      Category:
-        label: Category
+      カテゴリ:
+        label: カテゴリ
         type: like
 ```
 
-### Custom page configuration options
+### カスタムページ設定オプション
 
-| Key | Description |
-|-----|-------------|
-| `source_type` | `custom` (arbitrary SQL) or `table` (direct table reference) |
-| `source` | Custom SQL query (when `source_type: custom`) |
-| `editable` | Set to `true` to allow row editing |
-| `updatable_fields` | Restrict which fields can be edited |
-| `page_size` | Rows per page |
-| `filters` | Page-level filters (`like` / `eq` / `range` / `date-range` / `gte` / `lte`) |
+| キー | 説明 |
+|------|------|
+| `source_type` | `custom`（任意の SQL）または `table`（テーブル直接参照） |
+| `source` | カスタム SQL クエリ（`source_type: custom` 使用時） |
+| `editable` | `true` にすると行の編集を許可する |
+| `updatable_fields` | 編集可能なフィールドを制限する |
+| `page_size` | 1ページあたりの表示件数 |
+| `filters` | ページレベルフィルター（`like` / `eq` / `range` / `date-range` / `gte` / `lte`） |
 
 ---
 
-## Step 8: Update Navigation
+## ステップ 8: ナビゲーションを更新する
 
-Edit `projects/task-tracker/config/layout.yml` to add menu links:
+`projects/task-tracker/config/layout.yml` を編集してメニューリンクを追加します：
 
 ```yaml
 nav:
-  - label: Dashboard
+  - label: ダッシュボード
     href: /task-tracker/Dashboard
     icon: 🏠
 
-  - label: Tasks
+  - label: タスク
     href: /task-tracker/DynamicEntity/task
     icon: 📋
 
-  - label: Categories
+  - label: カテゴリ
     href: /task-tracker/DynamicEntity/category
     icon: 🏷️
 
-  - label: Comments
+  - label: コメント
     href: /task-tracker/DynamicEntity/comment
     icon: 💬
 
-  - label: Overdue Tasks
+  - label: 期限切れタスク
     href: /task-tracker/Page/OverdueTasks
     icon: ⚠️
 ```
 
 ---
 
-## Step 9: Run and Verify
+## ステップ 9: 起動して確認する
 
-Start the application:
+アプリケーションを起動します：
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj
 ```
 
-Open `http://localhost:5000/task-tracker` in your browser.
+ブラウザで `http://localhost:5000/task-tracker` を開きます。
 
-- Default login: `admin` / `Admin@123`
-- Verify that the dashboard, task list, category list, and the custom Overdue Tasks page all appear correctly
-- Create a task, set its status to `done`, and confirm that `completed_at` is set automatically by the custom hook
+- デフォルトログイン: `admin` / `Admin@123`
+- ダッシュボード・タスク一覧・カテゴリ一覧・カスタムの「期限切れタスク」ページが正しく表示されることを確認する
+- タスクを作成してステータスを `done` に変更し、カスタムフックにより `completed_at` が自動設定されることを確認する
 
 ---
 
-## Reference: Entity YAML Full Options
+## リファレンス: エンティティ YAML 全オプション
 
 ```yaml
 entities:
-  <entity_name>:
-    table: <DB table name>        # Required
-    key: <primary key column>     # Required
-    displayName: <display name>
-    softDelete: true              # true → DELETE updates is_deleted=1 instead of removing the row
+  <エンティティ名>:
+    table: <DB テーブル名>        # 必須
+    key: <主キーカラム>           # 必須
+    displayName: <表示名>
+    softDelete: true              # true → DELETE は行を削除せず is_deleted=1 に更新する
 
     paging:
-      pageSize: 20                # Rows per page
-      mode: numbered              # numbered (page numbers) or cursor
-      enableCount: true           # Fetch total record count
+      pageSize: 20                # 1ページあたりの表示件数
+      mode: numbered              # numbered（ページ番号）または cursor
+      enableCount: true           # レコード総件数を取得する
 
-    confirmation:                 # Confirmation dialogs (optional)
-      create: "Confirmation message"
-      update: "Confirmation message"
-      delete: "Confirmation message"
+    confirmation:                 # 確認ダイアログ（任意）
+      create: "確認メッセージ"
+      update: "確認メッセージ"
+      delete: "確認メッセージ"
 
     layout:
       forms:
-        columns: 2                # Form columns (1 or 2)
-        order: [field1, field2]   # Display order
+        columns: 2                # フォームカラム数（1 または 2）
+        order: [field1, field2]   # 表示順
       filters:
         columns: 4
         order: [filter1, filter2]
 
-    joins:                        # Table joins
+    joins:                        # テーブル結合
       - table: other_table
         alias: ot
         on: "main_table.fk_id = ot.id"
         type: left                # left / inner
 
-    columns:                      # List view columns
+    columns:                      # 一覧ビューのカラム
       <col>:
         type: string | int | decimal | boolean | date | email
-        label: Display name
+        label: 表示名
         required: true
-        searchable: true          # Include in full-text search
+        searchable: true          # 全文検索に含める
         sortable: true
-        identity: true            # Auto-increment primary key
-        expression: "ot.col"      # Reference a JOINed column
+        identity: true            # 自動連番主キー
+        expression: "ot.col"      # JOIN したカラムを参照する
 
-    forms:                        # Create / edit form fields
+    forms:                        # 作成・編集フォームのフィールド
       <col>:
-        type: <type>
-        label: Display name
+        type: <タイプ>
+        label: 表示名
         required: true
         editable: true
-        options: [val1, val2]     # Dropdown choices
+        options: [val1, val2]     # ドロップダウンの選択肢
         foreignKey:
-          entity: <entity>
-          displayColumn: <col>    # Column to display from referenced entity
+          entity: <エンティティ>
+          displayColumn: <col>    # 参照エンティティから表示するカラム
 
-    filters:                      # Filter UI
+    filters:                      # フィルター UI
       <col>:
         type: dropdown | like | range | date-range
-        label: Display name
+        label: 表示名
         options: [val1, val2]
         foreignKey:
-          entity: <entity>
+          entity: <エンティティ>
           displayColumn: <col>
 
-    links:                        # Related links on detail pages
-      <link_name>:
-        label: Link label
-        entity: <entity>
+    links:                        # 詳細ページの関連リンク
+      <リンク名>:
+        label: リンクラベル
+        entity: <エンティティ>
         filter:
-          <col>: "{id}"           # {id} is replaced with the current record's primary key
+          <col>: "{id}"           # {id} は現在のレコードの主キーに置換される
 
     hooks:
       beforeCreate: [hook1, hook2]
@@ -733,46 +733,46 @@ entities:
 
 ---
 
-## Reference: Built-in Hooks
+## リファレンス: 組み込みフック一覧
 
-| Hook name | Purpose | Example |
-|-----------|---------|---------|
-| `validate_required:f1,f2` | Required field check | `validate_required:title,author` |
-| `validate_email:f` | Email format check | `validate_email:email` |
-| `validate_range:f:min=0,max=100` | Numeric range check | `validate_range:price:min=0` |
-| `validate_unique:f` | Duplicate check | `validate_unique:name` |
-| `trim:f1,f2` | Strip leading/trailing whitespace | `trim:title,body` |
-| `uppercase:f` | Convert to uppercase | `uppercase:code` |
-| `lowercase:f` | Convert to lowercase | `lowercase:email` |
-| `now:f` | Set current timestamp automatically | `now:created_at` |
-| `current_user:f` | Set the logged-in user | `current_user:author` |
-| `audit_log` | Record change log | `afterCreate: [audit_log]` |
+| フック名 | 用途 | 使用例 |
+|---------|------|--------|
+| `validate_required:f1,f2` | 必須フィールドチェック | `validate_required:title,author` |
+| `validate_email:f` | メール形式チェック | `validate_email:email` |
+| `validate_range:f:min=0,max=100` | 数値範囲チェック | `validate_range:price:min=0` |
+| `validate_unique:f` | 重複チェック | `validate_unique:name` |
+| `trim:f1,f2` | 前後の空白を除去する | `trim:title,body` |
+| `uppercase:f` | 大文字に変換する | `uppercase:code` |
+| `lowercase:f` | 小文字に変換する | `lowercase:email` |
+| `now:f` | 現在のタイムスタンプを自動設定する | `now:created_at` |
+| `current_user:f` | ログインユーザーを設定する | `current_user:author` |
+| `audit_log` | 変更ログを記録する | `afterCreate: [audit_log]` |
 
-For the full list, see `docs/COMMON_HOOKS.md`.
-
----
-
-## Common Pitfalls
-
-| Mistake | Correct approach |
-|---------|-----------------|
-| Defined a field in `columns` but it does not appear in the form | You must also define it in `forms` — `columns` controls the list view; `forms` controls the input form |
-| A JOINed column does not appear in the list | Specify `expression: "alias.col"` in the `columns` definition |
-| A hook does not run | Check that `AddSingleton<IEntityHook, XxxHook>()` has been added to `Program.cs` |
-| `softDelete: true` is set but rows are physically deleted | Verify that the `is_deleted` column exists in the database table |
-| A custom page returns 404 | Check that the filename (including case) matches the URL exactly |
-| A filter has no effect | For `date-range`, parameters are `key_from`/`key_to`; for `range`, they are `key_min`/`key_max` |
+全一覧は `docs/COMMON_HOOKS.md` を参照してください。
 
 ---
 
-## Next Steps
+## よくある失敗パターン
 
-| Document | Description |
-|----------|-------------|
-| `docs/COMMON_HOOKS.md` | Details for all 20 built-in hooks |
-| `docs/examples/02-add-validation-hook.md` | Worked example: adding validation |
-| `docs/examples/05-add-custom-hook.md` | Custom hook implementation template |
-| `docs/architecture-map-ja.md` | Full request processing flow diagram |
-| `docs/runbook-index-ja.md` | Operations runbook index |
-| `docs/how-to-create-subproject.md` | AI instruction patterns for creating subprojects |
-| `docs/tutorial-create-project-ja.md` | Japanese version of this tutorial |
+| 間違い | 正しい対処 |
+|-------|-----------|
+| `columns` にフィールドを定義したがフォームに表示されない | `forms` にも定義が必要です。`columns` は一覧ビュー、`forms` は入力フォームを制御します |
+| JOIN したカラムが一覧に表示されない | `columns` 定義に `expression: "エイリアス.カラム"` を指定してください |
+| フックが実行されない | `Program.cs` に `AddSingleton<IEntityHook, XxxHook>()` が追加されているか確認してください |
+| `softDelete: true` を設定したが行が物理削除される | データベーステーブルに `is_deleted` カラムが存在するか確認してください |
+| カスタムページが 404 になる | ファイル名（大文字小文字含む）が URL と完全に一致しているか確認してください |
+| フィルターが効かない | `date-range` のパラメーターは `key_from`/`key_to`、`range` のパラメーターは `key_min`/`key_max` です |
+
+---
+
+## 次のステップ
+
+| ドキュメント | 説明 |
+|------------|------|
+| `docs/COMMON_HOOKS.md` | 組み込みフック 20 種の詳細 |
+| `docs/examples/02-add-validation-hook.md` | バリデーション追加の実践例 |
+| `docs/examples/05-add-custom-hook.md` | カスタムフック実装テンプレート |
+| `docs/architecture-map-ja.md` | リクエスト処理フローの全体図 |
+| `docs/runbook-index-ja.md` | 運用ランブックインデックス |
+| `docs/how-to-create-subproject.md` | サブプロジェクト作成時の AI 指示パターン |
+| `docs/tutorial-create-project-ja.md` | プロジェクト作成チュートリアル（日本語） |
