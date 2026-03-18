@@ -1,54 +1,75 @@
-# 教程：从 CLI 开始创建子项目
+# Tutorial: Creating a Subproject in NetYamlForge
 
-本教程以 **「任务管理系统（task-tracker）」** 为例，
-讲解如何通过 CLI 从零构建一个完整的 NetYamlForge 子项目。
-
----
-
-## 最终效果
-
-| 功能 | 内容 |
-|------|------|
-| 实体 | Category（分类）/ Task（任务）/ Comment（评论） |
-| 仪表盘 | 4 个统计卡片 + 2 个图表 |
-| 自定义页面 | 逾期任务列表 |
-| 内置钩子 | 校验 + 自动时间戳 |
-| 自定义钩子 | 任务完成时自动设置完成时间 |
+This tutorial walks you through building a **Task Management System (task-tracker)** from scratch using the NetYamlForge framework CLI. It covers all major features step by step.
 
 ---
 
-## Step 1：初始化项目
+## What You Will Build
+
+| Feature | Description |
+|---------|-------------|
+| Entities | Category / Task / Comment |
+| Dashboard | 4 stat cards + 2 charts |
+| Custom page | Overdue tasks list |
+| Built-in hooks | Validation and auto-timestamps |
+| Custom hook | Auto-set task completion time |
+
+---
+
+## Framework Structure
+
+A subproject lives under `projects/<name>/` and is configured entirely through YAML files. The framework reads these files at startup and generates a full CRUD admin panel — no hand-written controllers or views required.
+
+```
+projects/<name>/
+├── project.yaml          # Project settings
+├── config/
+│   ├── dashboard.yml     # Dashboard stats and charts
+│   ├── layout.yml        # Navigation menu
+│   └── i18n.yml          # Multilingual labels
+├── entities/             # Entity YAML definitions
+├── pages/                # Custom page YAML
+├── Hooks/                # Project-specific hook classes
+├── database/             # SQLite DB file
+└── views/                # Project-specific views
+```
+
+---
+
+## Step 1: Initialize the Project
+
+Run the `--init-project` command to scaffold the directory structure and generate `project.yaml`.
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --init-project \
   --project=task-tracker \
-  --display-name="任务管理" \
+  --display-name="Task Manager" \
   --db-type=sqlite \
   --db-path=database/task-tracker.db
 ```
 
-执行后，自动生成以下目录结构：
+The following directory structure is created automatically:
 
 ```
 projects/task-tracker/
-├── project.yaml          # 项目配置
+├── project.yaml
 ├── config/
-│   ├── dashboard.yml     # 仪表盘统计配置
-│   ├── layout.yml        # 导航配置
-│   └── i18n.yml          # 多语言标签
-├── entities/             # 实体 YAML（在此添加文件）
-├── pages/                # 自定义页面 YAML
-├── Hooks/                # 项目专属钩子
-├── database/             # SQLite 数据库文件
-└── views/                # 项目专属视图
+│   ├── dashboard.yml
+│   ├── layout.yml
+│   └── i18n.yml
+├── entities/
+├── pages/
+├── Hooks/
+├── database/
+└── views/
 ```
 
-### 查看生成的 `project.yaml`
+### Review the generated `project.yaml`
 
 ```yaml
 name: task-tracker
-displayName: 任务管理
+displayName: Task Manager
 version: "1.0.0"
 database:
   type: sqlite
@@ -60,12 +81,12 @@ features:
 
 ---
 
-## Step 2：创建数据库
+## Step 2: Create the Database
 
-新建 `projects/task-tracker/database/init.sql`，定义表结构：
+Create `projects/task-tracker/database/init.sql` with your table definitions:
 
 ```sql
--- 分类
+-- Categories
 CREATE TABLE IF NOT EXISTS category (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL,
@@ -73,7 +94,7 @@ CREATE TABLE IF NOT EXISTS category (
     created_at  TEXT    DEFAULT (datetime('now','localtime'))
 );
 
--- 任务
+-- Tasks
 CREATE TABLE IF NOT EXISTS task (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     title        TEXT    NOT NULL,
@@ -88,7 +109,7 @@ CREATE TABLE IF NOT EXISTS task (
     is_deleted   INTEGER DEFAULT 0
 );
 
--- 评论
+-- Comments
 CREATE TABLE IF NOT EXISTS comment (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     task_id    INTEGER NOT NULL REFERENCES task(id),
@@ -97,15 +118,15 @@ CREATE TABLE IF NOT EXISTS comment (
     created_at TEXT    DEFAULT (datetime('now','localtime'))
 );
 
--- 示例数据
-INSERT INTO category(name, color) VALUES ('开发', '#0d6efd'), ('设计', '#6f42c1'), ('运维', '#dc3545');
+-- Sample data
+INSERT INTO category(name, color) VALUES ('Development', '#0d6efd'), ('Design', '#6f42c1'), ('Operations', '#dc3545');
 INSERT INTO task(title, status, priority, category_id, due_date)
-  VALUES ('首页开发', 'in_progress', 'high', 1, date('now', '+3 days')),
-         ('Logo 设计', 'todo', 'medium', 2, date('now', '+7 days')),
-         ('服务器配置', 'done', 'high', 3, date('now', '-1 day'));
+  VALUES ('Implement top page', 'in_progress', 'high', 1, date('now', '+3 days')),
+         ('Logo design', 'todo', 'medium', 2, date('now', '+7 days')),
+         ('Server configuration', 'done', 'high', 3, date('now', '-1 day'));
 ```
 
-用 SQLite CLI 创建数据库：
+Initialize the SQLite database using the SQLite CLI:
 
 ```bash
 sqlite3 projects/task-tracker/database/task-tracker.db < projects/task-tracker/database/init.sql
@@ -113,9 +134,9 @@ sqlite3 projects/task-tracker/database/task-tracker.db < projects/task-tracker/d
 
 ---
 
-## Step 3：自动生成实体 YAML（脚手架）
+## Step 3: Scaffold Entities
 
-数据库存在后，执行脚手架命令，从表结构自动生成 YAML 骨架：
+With the database in place, run the scaffold command to auto-generate YAML skeletons from the table schema:
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
@@ -123,21 +144,22 @@ dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --project=task-tracker
 ```
 
-`projects/task-tracker/entities/` 下会生成 `category.yml`、`task.yml`、`comment.yml`。
-后续步骤中我们逐一完善这些文件。
+This generates `category.yml`, `task.yml`, and `comment.yml` under `projects/task-tracker/entities/`. The following steps walk through editing each file.
 
 ---
 
-## Step 4：定义 Category 实体
+## Step 4: Define Entity YAML
 
-编辑 `projects/task-tracker/entities/category.yml`：
+Edit each generated file to configure columns, forms, filters, and hooks.
+
+### `entities/category.yml`
 
 ```yaml
 entities:
   category:
     table: category
     key: id
-    displayName: 分类
+    displayName: Category
 
     paging:
       pageSize: 20
@@ -149,20 +171,20 @@ entities:
         order: [name, color]
 
     columns:
-      id:         { type: int,    identity: true, label: ID,   sortable: true }
-      name:       { type: string, required: true,  label: 分类名, searchable: true, sortable: true }
-      color:      { type: string, label: 颜色 }
-      created_at: { type: string, label: 创建时间, sortable: true }
+      id:         { type: int,    identity: true, label: ID,         sortable: true }
+      name:       { type: string, required: true,  label: Name,      searchable: true, sortable: true }
+      color:      { type: string, label: Color }
+      created_at: { type: string, label: Created At, sortable: true }
 
     forms:
-      name:  { type: string, required: true, label: 分类名,                editable: true }
-      color: { type: string, label: 颜色代码（例: #0d6efd）, editable: true }
+      name:  { type: string, required: true, label: Category Name, editable: true }
+      color: { type: string, label: "Color code (e.g. #0d6efd)", editable: true }
 
     filters: {}
 
     links:
       tasks:
-        label: 任务列表
+        label: Tasks
         entity: task
         filter:
           category_id: "{id}"
@@ -175,19 +197,15 @@ entities:
         - trim:name
 ```
 
----
-
-## Step 5：定义 Task 实体（JOIN / 外键 / 软删除）
-
-编辑 `projects/task-tracker/entities/task.yml`：
+### `entities/task.yml` (with JOIN, foreign key, soft delete)
 
 ```yaml
 entities:
   task:
     table: task
     key: id
-    displayName: 任务
-    softDelete: true    # 删除时更新 is_deleted=1（不物理删除）
+    displayName: Task
+    softDelete: true    # DELETE updates is_deleted=1 instead of removing the row
 
     paging:
       pageSize: 25
@@ -203,7 +221,7 @@ entities:
         order: [status, priority, category_id, due_date]
 
     confirmation:
-      delete: "确定要删除该任务吗？"
+      delete: "Are you sure you want to delete this task?"
 
     joins:
       - table: category
@@ -212,81 +230,81 @@ entities:
         type: left
 
     columns:
-      id:           { type: int,    identity: true, label: ID,   sortable: true }
-      title:        { type: string, required: true,  label: 标题, searchable: true, sortable: true }
-      status:       { type: string, label: 状态,     sortable: true }
-      priority:     { type: string, label: 优先级,   sortable: true }
+      id:           { type: int,    identity: true, label: ID,           sortable: true }
+      title:        { type: string, required: true,  label: Title,       searchable: true, sortable: true }
+      status:       { type: string, label: Status,   sortable: true }
+      priority:     { type: string, label: Priority, sortable: true }
       category_name:
         type: string
-        expression: "cat.name"
-        label: 分类
+        expression: "cat.name"     # Reference a JOINed column via expression
+        label: Category
         sortable: true
-      due_date:     { type: string, label: 截止日期, sortable: true }
-      completed_at: { type: string, label: 完成时间, sortable: true }
-      created_at:   { type: string, label: 创建时间, sortable: true }
+      due_date:     { type: string, label: Due Date,      sortable: true }
+      completed_at: { type: string, label: Completed At,  sortable: true }
+      created_at:   { type: string, label: Created At,    sortable: true }
 
     forms:
       title:
         type: string
         required: true
-        label: 标题
+        label: Title
         editable: true
       description:
         type: string
-        label: 详情
+        label: Description
         editable: true
       status:
         type: string
-        label: 状态
+        label: Status
         editable: true
         options: [todo, in_progress, done]
       priority:
         type: string
-        label: 优先级
+        label: Priority
         editable: true
         options: [low, medium, high]
       category_id:
         type: int
-        label: 分类
+        label: Category
         editable: true
         foreignKey:
           entity: category
-          displayColumn: name
+          displayColumn: name       # Show category.name in the dropdown
       due_date:
         type: date
-        label: 截止日期
+        label: Due Date
         editable: true
       completed_at:
         type: string
-        label: 完成时间
-        editable: false           # 由钩子自动设置
+        label: Completed At
+        editable: false             # Not editable in forms; set automatically by hook
       created_at:
         type: string
-        label: 创建时间
+        label: Created At
         editable: false
 
     filters:
       status:
         type: dropdown
-        label: 状态
+        label: Status
         options: [todo, in_progress, done]
       priority:
         type: dropdown
-        label: 优先级
+        label: Priority
         options: [low, medium, high]
       category_id:
         type: dropdown
-        label: 分类
+        label: Category
         foreignKey:
           entity: category
           displayColumn: name
       due_date:
-        type: date-range
-        label: 截止日期
+        type: date-range            # Date range filter (_from / _to)
+        label: Due Date
 
     links:
       comments:
-        label: 评论
+        label: Comments
         entity: comment
         filter:
           task_id: "{id}"
@@ -301,21 +319,17 @@ entities:
         - validate_required:title
         - trim:title
         - now:updated_at
-        - task_complete_timestamp    # ← 自定义钩子（Step 8 实现）
+        - task_complete_timestamp    # Custom hook implemented in Step 6
 ```
 
----
-
-## Step 6：定义 Comment 实体
-
-编辑 `projects/task-tracker/entities/comment.yml`：
+### `entities/comment.yml`
 
 ```yaml
 entities:
   comment:
     table: comment
     key: id
-    displayName: 评论
+    displayName: Comment
 
     paging:
       pageSize: 50
@@ -333,20 +347,20 @@ entities:
         type: left
 
     columns:
-      id:         { type: int,    identity: true, label: ID,   sortable: true }
+      id:         { type: int,    identity: true, label: ID,         sortable: true }
       task_title:
         type: string
         expression: "t.title"
-        label: 任务
+        label: Task
         sortable: true
-      author:     { type: string, label: 作者,   searchable: true, sortable: true }
-      body:       { type: string, label: 内容,   searchable: true }
-      created_at: { type: string, label: 发布时间, sortable: true }
+      author:     { type: string, label: Author,  searchable: true, sortable: true }
+      body:       { type: string, label: Body,    searchable: true }
+      created_at: { type: string, label: Posted At, sortable: true }
 
     forms:
       task_id:
         type: int
-        label: 任务
+        label: Task
         editable: true
         foreignKey:
           entity: task
@@ -354,18 +368,18 @@ entities:
       author:
         type: string
         required: true
-        label: 作者
+        label: Author
         editable: true
       body:
         type: string
         required: true
-        label: 内容
+        label: Body
         editable: true
 
     filters:
       author:
         type: like
-        label: 作者
+        label: Author
 
     hooks:
       beforeCreate:
@@ -376,43 +390,44 @@ entities:
 
 ---
 
-## Step 7：配置仪表盘
+## Step 5: Configure the Dashboard
 
-编辑 `projects/task-tracker/config/dashboard.yml`：
+Edit `projects/task-tracker/config/dashboard.yml`:
 
 ```yaml
-# 统计卡片
+# Stat cards
 stats:
-  - label: 任务总数
+  - label: Total Tasks
     entity: task
     aggregate: count
     icon: 📋
     color: badge-primary
 
-  - label: 待处理
+  - label: Todo
     entity: task
     aggregate: count
     filter: "status = 'todo'"
     icon: 🔵
     color: badge-info
 
-  - label: 进行中
+  - label: In Progress
     entity: task
     aggregate: count
     filter: "status = 'in_progress'"
     icon: 🟡
     color: badge-warning
 
-  - label: 已完成
+  - label: Done
     entity: task
     aggregate: count
     filter: "status = 'done'"
     icon: ✅
     color: badge-success
 
-# 图表
+# Charts
 charts:
-  - title: 按优先级统计
+  # Tasks by priority (doughnut)
+  - title: Tasks by Priority
     type: doughnut
     entity: task
     valueAggregate: count
@@ -420,7 +435,8 @@ charts:
     orderBy: value
     orderDir: desc
 
-  - title: 按分类统计
+  # Tasks by category (bar chart)
+  - title: Tasks by Category
     type: bar
     entity: task
     valueAggregate: count
@@ -432,11 +448,22 @@ charts:
     colorBorder: rgba(13, 110, 253, 1)
 ```
 
+### Dashboard configuration options
+
+| Key | Description |
+|-----|-------------|
+| `aggregate` | `count` / `sum` / `avg` |
+| `filter` | SQL condition appended to the WHERE clause (only validated identifiers allowed) |
+| `type` | `bar` / `doughnut` / `pie` / `line` |
+| `groupExpression` | GROUP BY expression (supports aliased JOIN columns) |
+| `joinClause` | JOIN clause for charts |
+| `valueColumn` | Column to aggregate when using `sum` or `avg` |
+
 ---
 
-## Step 8：脚手架自定义钩子
+## Step 6: Add Custom Hooks
 
-用 CLI 生成钩子类和测试文件骨架：
+Use the CLI to scaffold a hook class and its test file:
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
@@ -446,16 +473,16 @@ dotnet run --project ./NetYamlForge/NetYamlForge.csproj -- \
   --with-tests
 ```
 
-生成文件：
+Generated files:
 
 ```
 projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs
 NetYamlForge.Tests/Hooks/TaskCompleteTimestampHookTests.cs
 ```
 
-### 实现钩子
+### Implement the hook
 
-编辑 `projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs`：
+Edit `projects/task-tracker/Hooks/TaskCompleteTimestampHook.cs`:
 
 ```csharp
 using System.Data;
@@ -464,9 +491,9 @@ using NetYamlForge.Services.Hooks;
 namespace NetYamlForge.Projects.TaskTracker.Hooks;
 
 /// <summary>
-/// 当任务 status 变为 "done" 时，自动设置 completed_at。
+/// Automatically sets completed_at when a task's status is changed to "done".
 ///
-/// 在 entities/task.yml 中的用法：
+/// Usage in entities/task.yml:
 ///   hooks:
 ///     beforeUpdate:
 ///       - task_complete_timestamp
@@ -481,6 +508,7 @@ public class TaskCompleteTimestampHook : IEntityHook
 
         if (string.Equals(newStatus, "done", StringComparison.OrdinalIgnoreCase))
         {
+            // Set completion time only if not already set
             if (!ctx.Values.TryGetValue("completed_at", out var existing) ||
                 existing == null || string.IsNullOrWhiteSpace(existing.ToString()))
             {
@@ -489,7 +517,7 @@ public class TaskCompleteTimestampHook : IEntityHook
         }
         else
         {
-            // 状态从 done 改回时清除完成时间
+            // Clear completion time if status is changed back from "done"
             ctx.Values["completed_at"] = null;
         }
 
@@ -501,26 +529,26 @@ public class TaskCompleteTimestampHook : IEntityHook
 }
 ```
 
-### 注册到 DI
+### Register the hook in `Program.cs`
 
-在 `NetYamlForge/Program.cs` 的 DI 注册区添加：
+Add the following line to the DI registration section in `NetYamlForge/Program.cs`:
 
 ```csharp
 // projects/task-tracker/Hooks
 builder.Services.AddSingleton<IEntityHook, TaskCompleteTimestampHook>();
 ```
 
-> **注意**：钩子名称（`Name` 属性）与 YAML 中的 `hooks.beforeUpdate` 条目不区分大小写匹配。
+> **Note**: The hook name (the `Name` property) is matched case-insensitively against the name listed in the YAML `hooks` section.
 
 ---
 
-## Step 9：创建自定义页面（逾期任务）
+## Step 7: Create Custom Pages
 
-新建 `projects/task-tracker/pages/OverdueTasks.yml`：
+Create `projects/task-tracker/pages/OverdueTasks.yml`:
 
 ```yaml
-title: 逾期任务
-description: 已超过截止日期且未完成的任务列表。
+title: Overdue Tasks
+description: Tasks past their due date that have not been completed.
 
 ui:
   page:
@@ -529,156 +557,170 @@ ui:
 
 sections:
   - id: overdue_tasks
-    title: 逾期任务
+    title: Overdue Tasks
     source_type: custom
     source: |
       SELECT
-        t.id        AS 任务ID,
-        t.title     AS 标题,
-        t.status    AS 状态,
-        t.priority  AS 优先级,
-        cat.name    AS 分类,
-        t.due_date  AS 截止日期,
-        CAST(julianday('now') - julianday(t.due_date) AS INTEGER) AS 逾期天数
+        t.id        AS TaskId,
+        t.title     AS Title,
+        t.status    AS Status,
+        t.priority  AS Priority,
+        cat.name    AS Category,
+        t.due_date  AS DueDate,
+        CAST(julianday('now') - julianday(t.due_date) AS INTEGER) AS DaysOverdue
       FROM task t
       LEFT JOIN category cat ON cat.id = t.category_id
       WHERE t.due_date < date('now','localtime')
         AND t.status != 'done'
         AND t.is_deleted = 0
     columns:
-      - 任务ID
-      - 标题
-      - 状态
-      - 优先级
-      - 分类
-      - 截止日期
-      - 逾期天数
+      - TaskId
+      - Title
+      - Status
+      - Priority
+      - Category
+      - DueDate
+      - DaysOverdue
     page_size: 50
     editable: false
     read_only: true
     filters:
-      priority:
-        label: 优先级
+      Priority:
+        label: Priority
         type: eq
-      分类:
-        label: 分类
+      Category:
+        label: Category
         type: like
 ```
 
+### Custom page configuration options
+
+| Key | Description |
+|-----|-------------|
+| `source_type` | `custom` (arbitrary SQL) or `table` (direct table reference) |
+| `source` | Custom SQL query (when `source_type: custom`) |
+| `editable` | Set to `true` to allow row editing |
+| `updatable_fields` | Restrict which fields can be edited |
+| `page_size` | Rows per page |
+| `filters` | Page-level filters (`like` / `eq` / `range` / `date-range` / `gte` / `lte`) |
+
 ---
 
-## Step 10：添加导航
+## Step 8: Update Navigation
 
-编辑 `projects/task-tracker/config/layout.yml`：
+Edit `projects/task-tracker/config/layout.yml` to add menu links:
 
 ```yaml
 nav:
-  - label: 仪表盘
+  - label: Dashboard
     href: /task-tracker/Dashboard
     icon: 🏠
 
-  - label: 任务
+  - label: Tasks
     href: /task-tracker/DynamicEntity/task
     icon: 📋
 
-  - label: 分类
+  - label: Categories
     href: /task-tracker/DynamicEntity/category
     icon: 🏷️
 
-  - label: 评论
+  - label: Comments
     href: /task-tracker/DynamicEntity/comment
     icon: 💬
 
-  - label: 逾期任务
+  - label: Overdue Tasks
     href: /task-tracker/Page/OverdueTasks
     icon: ⚠️
 ```
 
 ---
 
-## Step 11：启动并验证
+## Step 9: Run and Verify
+
+Start the application:
 
 ```bash
 dotnet run --project ./NetYamlForge/NetYamlForge.csproj
 ```
 
-浏览器打开 `http://localhost:5000/task-tracker`
+Open `http://localhost:5000/task-tracker` in your browser.
 
-- 登录：`admin` / `Admin@123`
-- 仪表盘、任务列表、自定义页面均正常显示
+- Default login: `admin` / `Admin@123`
+- Verify that the dashboard, task list, category list, and the custom Overdue Tasks page all appear correctly
+- Create a task, set its status to `done`, and confirm that `completed_at` is set automatically by the custom hook
 
 ---
 
-## 实体 YAML 完整选项参考
+## Reference: Entity YAML Full Options
 
 ```yaml
 entities:
   <entity_name>:
-    table: <数据库表名>           # 必填
-    key: <主键列名>               # 必填
-    displayName: <显示名>
-    softDelete: true              # true → DELETE 更新为 is_deleted=1
+    table: <DB table name>        # Required
+    key: <primary key column>     # Required
+    displayName: <display name>
+    softDelete: true              # true → DELETE updates is_deleted=1 instead of removing the row
 
     paging:
-      pageSize: 20
-      mode: numbered              # numbered（页码）或 cursor
-      enableCount: true
+      pageSize: 20                # Rows per page
+      mode: numbered              # numbered (page numbers) or cursor
+      enableCount: true           # Fetch total record count
 
-    confirmation:
-      create: "确认消息"
-      update: "确认消息"
-      delete: "确认消息"
+    confirmation:                 # Confirmation dialogs (optional)
+      create: "Confirmation message"
+      update: "Confirmation message"
+      delete: "Confirmation message"
 
     layout:
       forms:
-        columns: 2                # 表单列数（1 或 2）
-        order: [field1, field2]
+        columns: 2                # Form columns (1 or 2)
+        order: [field1, field2]   # Display order
       filters:
         columns: 4
         order: [filter1, filter2]
 
-    joins:
+    joins:                        # Table joins
       - table: other_table
         alias: ot
         on: "main_table.fk_id = ot.id"
         type: left                # left / inner
 
-    columns:
+    columns:                      # List view columns
       <col>:
         type: string | int | decimal | boolean | date | email
-        label: 显示名
+        label: Display name
         required: true
-        searchable: true
+        searchable: true          # Include in full-text search
         sortable: true
-        identity: true            # 自增主键
-        expression: "ot.col"      # 引用 JOIN 列
+        identity: true            # Auto-increment primary key
+        expression: "ot.col"      # Reference a JOINed column
 
-    forms:
+    forms:                        # Create / edit form fields
       <col>:
         type: <type>
-        label: 显示名
+        label: Display name
         required: true
         editable: true
-        options: [val1, val2]
+        options: [val1, val2]     # Dropdown choices
         foreignKey:
           entity: <entity>
-          displayColumn: <col>
+          displayColumn: <col>    # Column to display from referenced entity
 
-    filters:
+    filters:                      # Filter UI
       <col>:
         type: dropdown | like | range | date-range
-        label: 显示名
+        label: Display name
         options: [val1, val2]
         foreignKey:
           entity: <entity>
           displayColumn: <col>
 
-    links:
+    links:                        # Related links on detail pages
       <link_name>:
-        label: 链接标签
+        label: Link label
         entity: <entity>
         filter:
-          <col>: "{id}"
+          <col>: "{id}"           # {id} is replaced with the current record's primary key
 
     hooks:
       beforeCreate: [hook1, hook2]
@@ -691,84 +733,46 @@ entities:
 
 ---
 
-## 常用内置钩子
+## Reference: Built-in Hooks
 
-| 钩子名 | 用途 | 示例 |
-|--------|------|------|
-| `validate_required:f1,f2` | 必填校验 | `validate_required:title,author` |
-| `validate_email:f` | 邮件格式校验 | `validate_email:email` |
-| `validate_range:f:min=0,max=100` | 数值范围校验 | `validate_range:price:min=0` |
-| `validate_unique:f` | 唯一性校验 | `validate_unique:name` |
-| `trim:f1,f2` | 去除首尾空格 | `trim:title,body` |
-| `uppercase:f` | 转大写 | `uppercase:code` |
-| `lowercase:f` | 转小写 | `lowercase:email` |
-| `now:f` | 自动设置当前时间 | `now:created_at` |
-| `current_user:f` | 设置当前登录用户 | `current_user:author` |
-| `audit_log` | 记录变更日志 | `afterCreate: [audit_log]` |
+| Hook name | Purpose | Example |
+|-----------|---------|---------|
+| `validate_required:f1,f2` | Required field check | `validate_required:title,author` |
+| `validate_email:f` | Email format check | `validate_email:email` |
+| `validate_range:f:min=0,max=100` | Numeric range check | `validate_range:price:min=0` |
+| `validate_unique:f` | Duplicate check | `validate_unique:name` |
+| `trim:f1,f2` | Strip leading/trailing whitespace | `trim:title,body` |
+| `uppercase:f` | Convert to uppercase | `uppercase:code` |
+| `lowercase:f` | Convert to lowercase | `lowercase:email` |
+| `now:f` | Set current timestamp automatically | `now:created_at` |
+| `current_user:f` | Set the logged-in user | `current_user:author` |
+| `audit_log` | Record change log | `afterCreate: [audit_log]` |
 
-详细文档请参考 `docs/COMMON_HOOKS.md`。
-
----
-
-## 自定义钩子实现模板
-
-```csharp
-public class MyHook : IEntityHook
-{
-    public string Name => "my_hook_name";   // YAML 中引用的名称
-
-    // 写入数据库前执行（校验/值转换）
-    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
-    {
-        // ctx.Values  : 表单输入值（可修改）
-        // ctx.Entity  : 实体名称
-        // ctx.Action  : Create / Update / Delete
-        // ctx.RowId   : 现有记录主键（Update/Delete 时）
-
-        if (someConditionFails)
-            return Task.FromResult(HookResult.Abort("错误消息"));
-
-        ctx.Values["my_field"] = "自动设置的值";
-        return Task.FromResult(HookResult.Continue());
-    }
-
-    // 写入数据库后执行（同一事务内）
-    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
-    {
-        // 更新关联表、发送通知等
-        return Task.CompletedTask;
-    }
-}
-```
-
-在 `Program.cs` 注册：
-
-```csharp
-builder.Services.AddSingleton<IEntityHook, MyHook>();
-```
+For the full list, see `docs/COMMON_HOOKS.md`.
 
 ---
 
-## 常见错误排查
+## Common Pitfalls
 
-| 错误现象 | 解决方法 |
-|---------|---------|
-| YAML `columns` 定义了字段但表单不显示 | 还需在 `forms` 中定义（`columns` 是列表视图，`forms` 是输入表单） |
-| JOIN 列在列表中不显示 | 在 `columns` 中添加 `expression: "alias.col"` |
-| 钩子不执行 | 检查 `Program.cs` 是否有 `AddSingleton<IEntityHook, XxxHook>()` |
-| `softDelete: true` 仍然物理删除 | 确认数据库表有 `is_deleted` 列 |
-| 自定义页面 404 | 检查文件名大小写与 URL 是否一致 |
-| 过滤器不生效 | `date-range` 参数为 `key_from`/`key_to`，`range` 为 `key_min`/`key_max` |
+| Mistake | Correct approach |
+|---------|-----------------|
+| Defined a field in `columns` but it does not appear in the form | You must also define it in `forms` — `columns` controls the list view; `forms` controls the input form |
+| A JOINed column does not appear in the list | Specify `expression: "alias.col"` in the `columns` definition |
+| A hook does not run | Check that `AddSingleton<IEntityHook, XxxHook>()` has been added to `Program.cs` |
+| `softDelete: true` is set but rows are physically deleted | Verify that the `is_deleted` column exists in the database table |
+| A custom page returns 404 | Check that the filename (including case) matches the URL exactly |
+| A filter has no effect | For `date-range`, parameters are `key_from`/`key_to`; for `range`, they are `key_min`/`key_max` |
 
 ---
 
-## 延伸阅读
+## Next Steps
 
-| 文档 | 内容 |
-|------|------|
-| `docs/COMMON_HOOKS.md` | 全部 20 种内置钩子详解 |
-| `docs/examples/02-add-validation-hook.md` | 添加校验钩子的实际示例 |
-| `docs/examples/05-add-custom-hook.md` | 自定义钩子实现模板 |
-| `docs/architecture-map-ja.md` | 请求处理流程全景图 |
-| `docs/runbook-index-ja.md` | 运维手册索引 |
-| `docs/how-to-create-subproject.md` | AI 指令最佳实践模式 |
+| Document | Description |
+|----------|-------------|
+| `docs/COMMON_HOOKS.md` | Details for all 20 built-in hooks |
+| `docs/examples/02-add-validation-hook.md` | Worked example: adding validation |
+| `docs/examples/05-add-custom-hook.md` | Custom hook implementation template |
+| `docs/architecture-map-ja.md` | Full request processing flow diagram |
+| `docs/runbook-index-ja.md` | Operations runbook index |
+| `docs/how-to-create-subproject.md` | AI instruction patterns for creating subprojects |
+| `docs/tutorial-create-project-ja.md` | Japanese version of this tutorial |
