@@ -72,8 +72,9 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     private long _lastSettingsRefreshUnixMs;
     private static readonly ConcurrentDictionary<string, long> SlowQueryCounters = new(StringComparer.OrdinalIgnoreCase);
     private static long _lastSlowSummaryUnixMs;
-    private static readonly Regex IdentifierRegex = new("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
-    private static readonly Regex ExpressionRegex = new("^[A-Za-z0-9_\\.\\s,()\\+\\-*/%<>=!'|]+$", RegexOptions.Compiled);
+    // IdentifierRegex / ExpressionRegex は SqlSafetyGuard から参照（重複定義排除）
+    private static readonly Regex IdentifierRegex = SqlSafetyGuard.IdentifierRegex;
+    private static readonly Regex ExpressionRegex = SqlSafetyGuard.ExpressionRegex;
     private static readonly HashSet<string> AllowedJoinTypes = new(StringComparer.OrdinalIgnoreCase) { "left", "inner", "right" };
 
     public DynamicCrudRepository(IDbConnection db, IEntityMetadataProvider meta, ISqlDialect dialect, ILogger<DynamicCrudRepository> logger)

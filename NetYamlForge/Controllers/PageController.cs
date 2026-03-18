@@ -6,6 +6,7 @@ using System.Security.Claims;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.Page;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -47,6 +48,7 @@ public class PageController : BaseProjectController
     private readonly PageRowMutationService _rowMutationService;
     private readonly PageDataQueryService _pageDataQueryService;
     private readonly PageViewPreferenceService _pageViewPreferenceService;
+    private readonly SectionRowFormViewModelFactory _formViewModelFactory;
     private readonly ILogger<PageController> _logger;
 
     public PageController(
@@ -56,6 +58,7 @@ public class PageController : BaseProjectController
         PageRowMutationService rowMutationService,
         PageDataQueryService pageDataQueryService,
         PageViewPreferenceService pageViewPreferenceService,
+        SectionRowFormViewModelFactory formViewModelFactory,
         ILogger<PageController> logger)
     {
         _projectScope = projectScope;
@@ -64,6 +67,7 @@ public class PageController : BaseProjectController
         _rowMutationService = rowMutationService;
         _pageDataQueryService = pageDataQueryService;
         _pageViewPreferenceService = pageViewPreferenceService;
+        _formViewModelFactory = formViewModelFactory;
         _logger = logger;
     }
 
@@ -169,13 +173,7 @@ public class PageController : BaseProjectController
         if (!string.IsNullOrEmpty(rowId) && int.TryParse(rowId, out var rowIdInt))
             row = await _pageDataQueryService.GetRowByIdAsync(section, rowIdInt);
 
-        return PartialView("Components/_SectionRowForm", new NetYamlForge.Models.SectionRowFormModel
-        {
-            Sec = section,
-            Row = row,
-            Project = proj.Name,
-            PageName = pageName
-        });
+        return PartialView("Components/_SectionRowForm", _formViewModelFactory.BuildEdit(section, row, proj.Name, pageName));
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/insert-row
@@ -199,15 +197,10 @@ public class PageController : BaseProjectController
         var result = await _rowMutationService.InsertRowAsync(proj.Name, section, fields);
         if (!result.ok)
         {
-            return PartialView("Components/_SectionRowForm", new NetYamlForge.Models.SectionRowFormModel
-            {
-                Sec = section,
-                Row = null,
-                Project = proj.Name,
-                PageName = pageName,
-                ErrorMessage = result.message ?? "挿入に失敗しました。",
-                SubmittedValues = fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
-            });
+            return PartialView("Components/_SectionRowForm", _formViewModelFactory.BuildWithError(
+                section, null, proj.Name, pageName,
+                result.message ?? "挿入に失敗しました。",
+                fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)));
         }
 
         await TryWritePageAuditAsync("page_insert", section.TargetTable, $"Page={pageName},Section={sectionId}");
@@ -241,15 +234,10 @@ public class PageController : BaseProjectController
         {
             var pkCol = section.TargetPrimaryKey ?? "id";
             var errorRow = new Dictionary<string, object> { [pkCol] = rowIdInt };
-            return PartialView("Components/_SectionRowForm", new NetYamlForge.Models.SectionRowFormModel
-            {
-                Sec = section,
-                Row = errorRow,
-                Project = proj.Name,
-                PageName = pageName,
-                ErrorMessage = result.message ?? "更新に失敗しました。",
-                SubmittedValues = fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
-            });
+            return PartialView("Components/_SectionRowForm", _formViewModelFactory.BuildWithError(
+                section, errorRow, proj.Name, pageName,
+                result.message ?? "更新に失敗しました。",
+                fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)));
         }
 
         await TryWritePageAuditAsync("page_update_all", section.TargetTable, $"Page={pageName},Section={sectionId},RowId={rowIdInt}");

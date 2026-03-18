@@ -7,6 +7,7 @@ using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
+using NetYamlForge.Services.Page;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
@@ -106,6 +107,10 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IValueConverter, ValueConverter>();
         services.AddScoped<IDynamicCrudRepository, DynamicCrudRepository>();
+        services.AddScoped<IRowMutationRepository, RowMutationRepository>();
+        services.AddScoped<HookExecutionService>();
+        services.AddScoped<SectionRowValidationService>();
+        services.AddScoped<SectionRowFormViewModelFactory>();
         services.AddScoped<PageRowMutationService>();
         services.AddSingleton<IProjectPageMutationValidatorRegistry, ProjectPageMutationValidatorRegistry>();
         services.AddScoped<PageDataQueryService>();

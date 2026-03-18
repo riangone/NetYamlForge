@@ -40,18 +40,6 @@ public class CalendarHolidayDefinition
     public string? Source { get; set; }
 }
 
-// ── セクション確認ダイアログ定義 ──────────────────────────────────────────
-/// <summary>
-/// セクション CRUD 確認ダイアログメッセージ。entities の ConfirmationDefinition に相当。
-/// YAML: confirmation: { create: "本当に作成しますか？", update: "更新します", delete: "削除しますか？" }
-/// </summary>
-public class SectionConfirmationDef
-{
-    public string? Create { get; set; }
-    public string? Update { get; set; }
-    public string? Delete { get; set; }
-}
-
 // ── セクションフック定義 ─────────────────────────────────────────────────
 /// <summary>
 /// セクション CRUD フック定義。entities の EntityHooksDefinition に相当。
@@ -59,7 +47,7 @@ public class SectionConfirmationDef
 /// フック名は EntityHookRegistry に登録された IEntityHook.Name と一致する必要があります。
 /// @presetName 形式で presets に定義したフックリストを参照できます（entities と同様）。
 /// </summary>
-public class SectionHooksDefinition
+public class SectionHooksDefinition : HooksDefinitionBase
 {
     public List<string> BeforeCreate { get; set; } = new();
     public List<string> AfterCreate  { get; set; } = new();
@@ -73,30 +61,16 @@ public class SectionHooksDefinition
     /// </summary>
     public Dictionary<string, List<string>>? Presets { get; set; }
 
-    /// <summary>@preset 参照を展開した実行順リストを返す（entities の GetExpandedHookList と統一動作）。</summary>
+    /// <summary>プリセット名に対応するフック名リストを返す（HooksDefinitionBase の実装）。</summary>
+    protected override IReadOnlyList<string>? GetPreset(string presetName)
+    {
+        if (Presets == null || !Presets.TryGetValue(presetName, out var preset)) return null;
+        return preset.Count == 0 ? null : preset;
+    }
+
+    /// <summary>@preset 参照を展開した実行順リストを返す（HooksDefinitionBase.ExpandHookEntries を使用）。</summary>
     public List<string> GetExpandedHooks(List<string> hooks, Action<string>? onWarning = null)
-    {
-        if (hooks.Count == 0) return hooks;
-        var result = new List<string>();
-        var visiting = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var h in hooks)
-            ExpandEntry(h, result, visiting, onWarning);
-        return result;
-    }
-
-    private void ExpandEntry(string name, List<string> output, HashSet<string> visiting, Action<string>? onWarning)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return;
-        if (!name.StartsWith('@')) { output.Add(name); return; }
-
-        var presetName = name[1..].Trim();
-        if (Presets == null || !Presets.TryGetValue(presetName, out var preset))
-        { onWarning?.Invoke($"Hook preset '{presetName}' が定義されていません。"); return; }
-        if (!visiting.Add(presetName))
-        { onWarning?.Invoke($"Hook preset '{presetName}' に循環参照があります。"); return; }
-        foreach (var h in preset) ExpandEntry(h, output, visiting, onWarning);
-        visiting.Remove(presetName);
-    }
+        => hooks.Count == 0 ? hooks : ExpandHookEntries(hooks, onWarning);
 }
 
 // ── セクション列定義 ─────────────────────────────────────────────────────
@@ -163,19 +137,6 @@ public class SectionFormFieldDef
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
-// ── セクションページング定義 ──────────────────────────────────────────────
-/// <summary>
-/// ページング設定。entities の PagingDefinition に相当。
-/// YAML: paging: { page_size: 20, mode: numbered, enable_count: true }
-/// </summary>
-public class SectionPagingDef
-{
-    public int PageSize { get; set; } = 10;
-    /// <summary>numbered | keyset</summary>
-    public string Mode { get; set; } = "numbered";
-    public bool EnableCount { get; set; } = true;
-}
-
 // ── ページフィルター定義（拡張版）────────────────────────────────────────
 /// <summary>
 /// セクションフィルター定義。entities の FilterDefinition に相当。
@@ -234,17 +195,18 @@ public class SectionDefinition
 
     // ── ページング定義 ───────────────────────────────────────────────
     /// <summary>
-    /// ページング設定。設定時は page_size を上書きする。
+    /// ページング設定。entities の PagingDefinition と共通クラスを使用。
+    /// 未設定時は PageSize フィールド（デフォルト 10）にフォールバック。
     /// YAML: paging: { page_size: 20, mode: numbered }
     /// </summary>
-    public SectionPagingDef? Paging { get; set; }
+    public PagingDefinition? Paging { get; set; }
 
     // ── 確認ダイアログ定義 ───────────────────────────────────────────
     /// <summary>
-    /// CRUD 確認ダイアログメッセージ。entities の confirmation に相当。
+    /// CRUD 確認ダイアログメッセージ。entities の confirmation と共通クラスを使用。
     /// YAML: confirmation: { create: "...", update: "...", delete: "..." }
     /// </summary>
-    public SectionConfirmationDef? Confirmation { get; set; }
+    public ConfirmationDefinition? Confirmation { get; set; }
 
     // ── コンポーネントサイズ ─────────────────────────────────────────
     /// <summary>DaisyUI サイズ修飾子（xs / sm / md / lg）。デフォルト: sm</summary>

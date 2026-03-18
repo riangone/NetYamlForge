@@ -11,8 +11,22 @@ namespace NetYamlForge.Tests;
 
 public class PageRowMutationServiceTests
 {
-    private static PageRowMutationService CreateSut(SqliteConnection conn) =>
-        new PageRowMutationService(conn, new SalesforceCrmValidatorRegistry(), new EmptyHookRegistry(), new EmptyProjectHookRegistry(), NullLogger<PageRowMutationService>.Instance);
+    private static PageRowMutationService CreateSut(SqliteConnection conn)
+    {
+        var telemetry = new HookExecutionTelemetryLogger(NullLogger<HookExecutionTelemetryLogger>.Instance);
+        var hookExecution = new HookExecutionService(
+            new EmptyHookRegistry(),
+            new EmptyProjectHookRegistry(),
+            telemetry,
+            NullLogger<HookExecutionService>.Instance);
+        var mutationRepo = new RowMutationRepository(conn, NullLogger<RowMutationRepository>.Instance);
+        return new PageRowMutationService(
+            conn,
+            new SalesforceCrmValidatorRegistry(),
+            hookExecution,
+            mutationRepo,
+            NullLogger<PageRowMutationService>.Instance);
+    }
 
     private sealed class EmptyHookRegistry : IEntityHookRegistry
     {

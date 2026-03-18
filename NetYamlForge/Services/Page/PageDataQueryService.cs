@@ -12,7 +12,8 @@ namespace NetYamlForge.Services;
 
 public sealed class PageDataQueryService
 {
-    private static readonly Regex IdentifierRegex = new(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
+    // IdentifierRegex は SqlSafetyGuard から参照（重複定義排除）
+    private static readonly Regex IdentifierRegex = SqlSafetyGuard.IdentifierRegex;
     private readonly IDbConnection _db;
     private readonly ILogger<PageDataQueryService> _logger;
 

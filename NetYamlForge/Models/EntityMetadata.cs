@@ -414,7 +414,7 @@ public class ConfirmationDefinition
 /// entities.yml の hooks セクションに対応します。
 /// 単一フック名（文字列）と複数フック名（リスト）の両方をサポートします。
 /// </summary>
-public class EntityHooksDefinition
+public class EntityHooksDefinition : HooksDefinitionBase
 {
     private string? _beforeCreate;
     private List<string>? _beforeCreateList;
@@ -528,6 +528,17 @@ public class EntityHooksDefinition
     }
 
     /// <summary>
+    /// プリセット名に対応するフック名リストを返す（HooksDefinitionBase の実装）。
+    /// </summary>
+    protected override IReadOnlyList<string>? GetPreset(string presetName)
+    {
+        if (_presets == null || !_presets.TryGetValue(presetName, out var presetValue))
+            return null;
+        var list = ToHookList(presetValue);
+        return list.Count == 0 ? null : list;
+    }
+
+    /// <summary>
     /// フック名リストを取得し、@preset 形式を展開した実行順リストを返します。
     /// 例: ["@commonValidation", "audit_log"]。
     /// </summary>
@@ -537,70 +548,8 @@ public class EntityHooksDefinition
     {
         var hooks = GetHookList(selector);
         if (hooks == null || hooks.Count == 0)
-        {
             return hooks;
-        }
-
-        var expanded = new List<string>();
-        foreach (var hook in hooks)
-        {
-            ExpandHookEntry(hook, expanded, new HashSet<string>(StringComparer.OrdinalIgnoreCase), onWarning);
-        }
-
-        return expanded;
-    }
-
-    private void ExpandHookEntry(
-        string? hookName,
-        List<string> output,
-        HashSet<string> visitingPresets,
-        Action<string>? onWarning)
-    {
-        if (string.IsNullOrWhiteSpace(hookName))
-        {
-            return;
-        }
-
-        var trimmed = hookName.Trim();
-        if (!trimmed.StartsWith('@'))
-        {
-            output.Add(trimmed);
-            return;
-        }
-
-        var presetName = trimmed[1..].Trim();
-        if (string.IsNullOrWhiteSpace(presetName))
-        {
-            onWarning?.Invoke("Hook preset 名が空です。'@' のみは無効です。");
-            return;
-        }
-
-        if (_presets == null || !_presets.TryGetValue(presetName, out var presetValue))
-        {
-            onWarning?.Invoke($"Hook preset '{presetName}' が定義されていません。");
-            return;
-        }
-
-        if (!visitingPresets.Add(presetName))
-        {
-            onWarning?.Invoke($"Hook preset '{presetName}' で循環参照を検出したため展開を中止しました。");
-            return;
-        }
-
-        var presetHooks = ToHookList(presetValue);
-        if (presetHooks.Count == 0)
-        {
-            onWarning?.Invoke($"Hook preset '{presetName}' に有効なフック定義がありません。");
-            visitingPresets.Remove(presetName);
-            return;
-        }
-
-        foreach (var presetHook in presetHooks)
-        {
-            ExpandHookEntry(presetHook, output, visitingPresets, onWarning);
-        }
-
-        visitingPresets.Remove(presetName);
+        return ExpandHookEntries(hooks, onWarning);
     }
 
     private static List<string> ToHookList(object? value)

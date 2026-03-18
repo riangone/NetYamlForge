@@ -1,10 +1,10 @@
 // ファイル概要: ページ（カスタムページ・セクション）単位の行単位ミューテーション処理を担当するサービス。
 // 責務: 識別子の安全性検証 → プロジェクト固有バリデーター委譲 → SQL実行。
+// SQL 生成・実行は IRowMutationRepository に委譲し、フック実行は HookExecutionService に委譲します。
 // ビジネスロジックは projects/<name>/Hooks/<Name>PageMutationValidator.cs に実装すること。
 // このファイルを変更する場面: 識別子検証・共通フロー変更のみ。
 
 using System.Data;
-using Dapper;
 using NetYamlForge.Models;
 using NetYamlForge.Services.Hooks;
 
@@ -17,64 +17,22 @@ public sealed class PageRowMutationService
 
     private readonly IDbConnection _db;
     private readonly IProjectPageMutationValidatorRegistry _validatorRegistry;
-    private readonly IEntityHookRegistry _hookRegistry;
-    private readonly IProjectHookRegistry _projectHookRegistry;
+    private readonly HookExecutionService _hookExecution;
+    private readonly IRowMutationRepository _mutationRepo;
     private readonly ILogger<PageRowMutationService> _logger;
 
     public PageRowMutationService(
         IDbConnection db,
         IProjectPageMutationValidatorRegistry validatorRegistry,
-        IEntityHookRegistry hookRegistry,
-        IProjectHookRegistry projectHookRegistry,
+        HookExecutionService hookExecution,
+        IRowMutationRepository mutationRepo,
         ILogger<PageRowMutationService> logger)
     {
         _db = db;
         _validatorRegistry = validatorRegistry;
-        _hookRegistry = hookRegistry;
-        _projectHookRegistry = projectHookRegistry;
+        _hookExecution = hookExecution;
+        _mutationRepo = mutationRepo;
         _logger = logger;
-    }
-
-    /// <summary>
-    /// フック名からフックを解決する。プロジェクト固有レジストリを優先し、なければ共通レジストリを参照する。
-    /// </summary>
-    private IEntityHook? ResolveHook(string projectName, string hookName, EntityHookContext ctx)
-        => _projectHookRegistry.Find(projectName, hookName, ctx)
-           ?? _hookRegistry.Find(hookName, ctx);
-
-    /// <summary>
-    /// セクション定義のフックリストを実行する。
-    /// Before フックが Abort を返した場合は処理を中断する。
-    /// </summary>
-    private async Task<(bool ok, string? message)> RunBeforeHooksAsync(
-        string projectName,
-        List<string> hookNames,
-        EntityHookContext ctx,
-        IDbTransaction? tx)
-    {
-        foreach (var name in hookNames)
-        {
-            var hook = ResolveHook(projectName, name, ctx);
-            if (hook == null) continue;
-            var result = await hook.BeforeAsync(ctx, _db, tx);
-            if (result.Cancel)
-                return (false, result.CancelMessage ?? $"フック '{name}' が処理を中断しました。");
-        }
-        return (true, null);
-    }
-
-    private async Task RunAfterHooksAsync(
-        string projectName,
-        List<string> hookNames,
-        EntityHookContext ctx,
-        IDbTransaction? tx)
-    {
-        foreach (var name in hookNames)
-        {
-            var hook = ResolveHook(projectName, name, ctx);
-            if (hook == null) continue;
-            await hook.AfterAsync(ctx, _db, tx);
-        }
     }
 
     public async Task<(bool ok, string? message)> UpdateRowAsync(
@@ -103,11 +61,11 @@ public sealed class PageRowMutationService
             if (!result.ok) return result;
         }
 
-        // Safe: TargetTable/field/TargetPrimaryKey は IdentifierRegex で検証済み
-#pragma warning disable DCS001
-        var sql = $"UPDATE \"{section.TargetTable}\" SET \"{field}\" = @Value WHERE \"{section.TargetPrimaryKey}\" = @RowId";
-#pragma warning restore DCS001
-        await _db.ExecuteAsync(sql, new { Value = value, RowId = rowId });
+        await _mutationRepo.UpdateAsync(
+            section.TargetTable,
+            section.TargetPrimaryKey,
+            rowId,
+            new[] { KeyValuePair.Create(field, (object?)value) });
         return (true, null);
     }
 
@@ -135,24 +93,18 @@ public sealed class PageRowMutationService
         };
 
         var beforeHooks = section.Hooks?.BeforeCreate ?? new();
-        var beforeResult = await RunBeforeHooksAsync(projectName, beforeHooks, ctx, null);
-        if (!beforeResult.ok) return beforeResult;
+        var beforeHookResult = await _hookExecution.RunBeforeAsync(beforeHooks, ctx, projectName, _db, null);
+        if (beforeHookResult.Cancel) return (false, beforeHookResult.CancelMessage ?? "前処理によりキャンセルされました。");
 
-        var cols = string.Join(", ", safeFields.Select(f => $"\"{f.Key}\""));
-        var parms = string.Join(", ", safeFields.Select(f => $"@{f.Key}"));
+        var insertFields = safeFields
+            .Select(f => KeyValuePair.Create(f.Key,
+                ctx.Values.TryGetValue(f.Key, out var v) ? v : (string.IsNullOrWhiteSpace(f.Value) ? null : (object?)f.Value)))
+            .ToArray();
 
-        // Safe: TargetTable/col names validated by IdentifierRegex
-#pragma warning disable DCS001
-        var sql = $"INSERT INTO \"{section.TargetTable}\" ({cols}) VALUES ({parms})";
-#pragma warning restore DCS001
-        var param = new DynamicParameters();
-        foreach (var f in safeFields)
-            param.Add(f.Key, ctx.Values.TryGetValue(f.Key, out var v) ? v : (string.IsNullOrWhiteSpace(f.Value) ? null : (object)f.Value));
-
-        await _db.ExecuteAsync(sql, param);
+        await _mutationRepo.InsertAsync(section.TargetTable, insertFields);
 
         var afterHooks = section.Hooks?.AfterCreate ?? new();
-        await RunAfterHooksAsync(projectName, afterHooks, ctx, null);
+        await _hookExecution.RunAfterAsync(afterHooks, ctx, projectName, _db, null);
 
         return (true, null);
     }
@@ -184,24 +136,18 @@ public sealed class PageRowMutationService
         };
 
         var beforeHooks = section.Hooks?.BeforeUpdate ?? new();
-        var beforeResult = await RunBeforeHooksAsync(projectName, beforeHooks, ctx, null);
-        if (!beforeResult.ok) return beforeResult;
+        var beforeHookResult = await _hookExecution.RunBeforeAsync(beforeHooks, ctx, projectName, _db, null);
+        if (beforeHookResult.Cancel) return (false, beforeHookResult.CancelMessage ?? "前処理によりキャンセルされました。");
 
-        var setSql = string.Join(", ", safeFields.Select(f => $"\"{f.Key}\" = @{f.Key}"));
+        var updateFields = safeFields
+            .Select(f => KeyValuePair.Create(f.Key,
+                ctx.Values.TryGetValue(f.Key, out var v) ? v : (string.IsNullOrWhiteSpace(f.Value) ? null : (object?)f.Value)))
+            .ToArray();
 
-        // Safe: TargetTable/field/TargetPrimaryKey validated by IdentifierRegex
-#pragma warning disable DCS001
-        var sql = $"UPDATE \"{section.TargetTable}\" SET {setSql} WHERE \"{section.TargetPrimaryKey}\" = @_RowId";
-#pragma warning restore DCS001
-        var param = new DynamicParameters();
-        foreach (var f in safeFields)
-            param.Add(f.Key, ctx.Values.TryGetValue(f.Key, out var v) ? v : (string.IsNullOrWhiteSpace(f.Value) ? null : (object)f.Value));
-        param.Add("_RowId", rowId);
-
-        await _db.ExecuteAsync(sql, param);
+        await _mutationRepo.UpdateAsync(section.TargetTable, section.TargetPrimaryKey, rowId, updateFields);
 
         var afterHooks = section.Hooks?.AfterUpdate ?? new();
-        await RunAfterHooksAsync(projectName, afterHooks, ctx, null);
+        await _hookExecution.RunAfterAsync(afterHooks, ctx, projectName, _db, null);
 
         return (true, null);
     }
@@ -227,8 +173,8 @@ public sealed class PageRowMutationService
         };
 
         var beforeHooks = section.Hooks?.BeforeDelete ?? new();
-        var beforeResult = await RunBeforeHooksAsync(projectName, beforeHooks, ctx, null);
-        if (!beforeResult.ok) return beforeResult;
+        var beforeHookResult = await _hookExecution.RunBeforeAsync(beforeHooks, ctx, projectName, _db, null);
+        if (beforeHookResult.Cancel) return (false, beforeHookResult.CancelMessage ?? "前処理によりキャンセルされました。");
 
         // プロジェクト固有の削除検証に委譲
         var validator = _validatorRegistry.Get(projectName);
@@ -239,14 +185,10 @@ public sealed class PageRowMutationService
             if (!result.ok) return result;
         }
 
-        // Safe: TargetTable/TargetPrimaryKey は IdentifierRegex で検証済み
-#pragma warning disable DCS001
-        var sql = $"DELETE FROM \"{section.TargetTable}\" WHERE \"{section.TargetPrimaryKey}\" = @RowId";
-#pragma warning restore DCS001
-        await _db.ExecuteAsync(sql, new { RowId = rowId });
+        await _mutationRepo.DeleteAsync(section.TargetTable, section.TargetPrimaryKey, rowId);
 
         var afterHooks = section.Hooks?.AfterDelete ?? new();
-        await RunAfterHooksAsync(projectName, afterHooks, ctx, null);
+        await _hookExecution.RunAfterAsync(afterHooks, ctx, projectName, _db, null);
 
         return (true, null);
     }
