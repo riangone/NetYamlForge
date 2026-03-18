@@ -14,11 +14,11 @@ namespace NetYamlForge.Services;
 /// </summary>
 public sealed class DynamicEntityFormValidationService
 {
-    private readonly IValueConverter _converter;
+    private readonly FormValueValidationService _validator;
 
-    public DynamicEntityFormValidationService(IValueConverter converter)
+    public DynamicEntityFormValidationService(FormValueValidationService validator)
     {
-        _converter = converter;
+        _validator = validator;
     }
 
     /// <summary>
@@ -34,39 +34,14 @@ public sealed class DynamicEntityFormValidationService
         EntityDefinition meta,
         Dictionary<string, string?> form)
     {
-        var values = new Dictionary<string, object?>();
-        var errors = new Dictionary<string, string>();
-
-        foreach (var kv in meta.Columns)
+        var fields = meta.Columns.Select(kv =>
         {
             var name = kv.Key;
             var col = kv.Value;
+            var editable = !(col.Identity || !string.IsNullOrWhiteSpace(col.Expression));
+            return new FormFieldSpec(name, col.Type, col.Required, editable);
+        });
 
-            // identity 列（自動採番）はフォームから受け取らない
-            // expression 列（JOIN等の計算列）は実テーブルに存在しないためスキップ
-            if (col.Identity || !string.IsNullOrWhiteSpace(col.Expression))
-            {
-                continue;
-            }
-
-            form.TryGetValue(name, out var raw);
-
-            // bool/チェックボックス列: フォームに含まれない = チェックなし = false として扱う
-            if (col.Type.Equals("bool", StringComparison.OrdinalIgnoreCase) && !form.ContainsKey(name))
-            {
-                raw = "false";
-            }
-
-            if (!_converter.TryConvert(raw, col, out var val, out var error))
-            {
-                errors[name] = error ?? "Invalid value";
-            }
-            else
-            {
-                values[name] = val;
-            }
-        }
-
-        return (values, errors);
+        return _validator.ConvertAndValidate(fields, form);
     }
 }

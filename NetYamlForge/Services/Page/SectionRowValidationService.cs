@@ -14,11 +14,11 @@ namespace NetYamlForge.Services.Page;
 /// </summary>
 public sealed class SectionRowValidationService
 {
-    private readonly IValueConverter _converter;
+    private readonly FormValueValidationService _validator;
 
-    public SectionRowValidationService(IValueConverter converter)
+    public SectionRowValidationService(FormValueValidationService validator)
     {
-        _converter = converter;
+        _validator = validator;
     }
 
     /// <summary>
@@ -36,36 +36,13 @@ public sealed class SectionRowValidationService
         Dictionary<string, string?> form,
         string mode = "edit")
     {
-        var values = new Dictionary<string, object?>();
-        var errors = new Dictionary<string, string>();
-
-        var fields = section.GetFormFields(mode);
-        foreach (var fieldName in fields)
-        {
-            var fieldDef = section.GetFieldDef(fieldName);
-
-            // editable=false のフィールドはスキップ
-            if (!fieldDef.Editable) continue;
-
-            form.TryGetValue(fieldName, out var raw);
-
-            // bool/チェックボックス列: フォームに含まれない = チェックなし = false として扱う
-            if (fieldDef.Type.Equals("bool", StringComparison.OrdinalIgnoreCase) && !form.ContainsKey(fieldName))
-                raw = "false";
-
-            // SectionFormFieldDef を ColumnDefinition に変換して IValueConverter に渡す
-            var colDef = new ColumnDefinition
+        var fields = section.GetFormFields(mode)
+            .Select(fieldName =>
             {
-                Type = fieldDef.Type,
-                Required = fieldDef.Required
-            };
+                var def = section.GetFieldDef(fieldName);
+                return new FormFieldSpec(fieldName, def.Type, def.Required, def.Editable);
+            });
 
-            if (!_converter.TryConvert(raw, colDef, out var val, out var error))
-                errors[fieldName] = error ?? "Invalid value";
-            else
-                values[fieldName] = val;
-        }
-
-        return (values, errors);
+        return _validator.ConvertAndValidate(fields, form);
     }
 }

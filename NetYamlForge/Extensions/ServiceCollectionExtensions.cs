@@ -106,6 +106,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDynamicCrudCore(this IServiceCollection services)
     {
         services.AddSingleton<IValueConverter, ValueConverter>();
+        services.AddScoped<FormValueValidationService>();
         services.AddScoped<IDynamicCrudRepository, DynamicCrudRepository>();
         services.AddScoped<IRowMutationRepository, RowMutationRepository>();
         services.AddScoped<HookExecutionService>();
