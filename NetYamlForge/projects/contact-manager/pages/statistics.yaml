@@ -1,0 +1,119 @@
+title: 统计报表
+titleKey: projects.contact_manager.pages.statistics.title
+description: 联系人和交互数据的统计报表
+descriptionKey: projects.contact_manager.pages.statistics.description
+mainTable: Contact
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: overview_stats
+    title: 📊 概览统计
+    sourceType: custom
+    source: |
+      SELECT '公司总数' as Metric, COUNT(*) as Value FROM company
+      UNION ALL
+      SELECT '联系人总数', COUNT(*) FROM contact
+      UNION ALL
+      SELECT '活跃联系人', COUNT(*) FROM contact WHERE status = 'active'
+      UNION ALL
+      SELECT '潜在联系人', COUNT(*) FROM contact WHERE status = 'lead'
+      UNION ALL
+      SELECT '交互总数', COUNT(*) FROM interaction
+      UNION ALL
+      SELECT '已完成交互', COUNT(*) FROM interaction WHERE status = 'completed'
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: contact_by_status
+    title: 👥 联系人状态分布
+    sourceType: custom
+    source: |
+      SELECT 
+        CASE status
+          WHEN 'active' THEN '活跃'
+          WHEN 'inactive' THEN '非活跃'
+          WHEN 'lead' THEN '潜在'
+          ELSE status
+        END as 状态，
+        COUNT(*) as 数量，
+        ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM contact), 1) as 百分比
+      FROM contact
+      GROUP BY status
+      ORDER BY 数量 DESC
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: interaction_by_type
+    title: 📞 交互类型统计
+    sourceType: custom
+    source: |
+      SELECT 
+        CASE type
+          WHEN 'call' THEN '电话'
+          WHEN 'email' THEN '邮件'
+          WHEN 'meeting' THEN '会议'
+          WHEN 'task' THEN '任务'
+          WHEN 'note' THEN '备注'
+          ELSE type
+        END as 类型，
+        COUNT(*) as 数量，
+        SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as 已完成
+      FROM interaction
+      GROUP BY type
+      ORDER BY 数量 DESC
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: company_contact_summary
+    title: 🏢 公司联系人汇总
+    sourceType: custom
+    source: |
+      SELECT 
+        co.name as 公司，
+        co.industry as 行业，
+        COUNT(c.id) as 联系人数，
+        SUM(CASE WHEN c.status = 'active' THEN 1 ELSE 0 END) as 活跃人数
+      FROM company co
+      LEFT JOIN contact c ON c.companyId = co.id
+      GROUP BY co.id, co.name, co.industry
+      ORDER BY 联系人数 DESC
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: upcoming_interactions
+    title: 📅 即将到来的交互
+    sourceType: custom
+    source: |
+      SELECT 
+        i.subject as 主题，
+        c.firstName || ' ' || c.lastName as 联系人，
+        co.name as 公司，
+        CASE i.type
+          WHEN 'call' THEN '电话'
+          WHEN 'email' THEN '邮件'
+          WHEN 'meeting' THEN '会议'
+          ELSE i.type
+        END as 类型，
+        i.scheduledAt as 计划时间，
+        CASE i.priority
+          WHEN 'high' THEN '🔴 高'
+          WHEN 'medium' THEN '🟡 中'
+          ELSE '🟢 低'
+        END as 优先级
+      FROM interaction i
+      LEFT JOIN contact c ON c.id = i.contactId
+      LEFT JOIN company co ON co.id = i.companyId
+      WHERE i.status = 'planned'
+      ORDER BY i.scheduledAt ASC
+      LIMIT 10
+    pageSize: 10
+    editable: false
+    readOnly: true

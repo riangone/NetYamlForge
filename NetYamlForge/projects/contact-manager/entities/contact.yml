@@ -17,18 +17,13 @@ entities:
       id: { type: int, identity: true, label: 'ID', sortable: true }
       firstName: { type: string, required: true, label: '名', searchable: true, sortable: true }
       lastName: { type: string, required: true, label: '姓', sortable: true }
-      fullName: { type: string, label: '全名', sortable: true }
       companyId: { type: int, label: '所属公司', sortable: true }
       title: { type: string, label: '职位' }
-      department: { type: string, label: '部门' }
       email: { type: string, required: true, label: '邮箱', sortable: true }
       phone: { type: string, label: '手机' }
-      linkedin: { type: string, label: 'LinkedIn' }
       status: { type: string, label: '状态', sortable: true }
       priority: { type: string, label: '优先级', sortable: true }
-      notes: { type: text, label: '备注' }
       createdAt: { type: string, label: '创建时间', sortable: true }
-      updatedAt: { type: string, label: '更新时间', sortable: true }
 
     forms:
       firstName: { type: string, required: true, label: '名', editable: true }
@@ -41,15 +36,11 @@ entities:
           entity: company
           displayColumn: name
       title: { type: string, label: '职位', editable: true }
-      department: { type: string, label: '部门', editable: true }
       email: { type: string, required: true, label: '邮箱', editable: true }
       phone: { type: string, label: '手机', editable: true }
-      linkedin: { type: string, label: 'LinkedIn', editable: true }
       status: { type: string, label: '状态', editable: true, enum: ['active', 'inactive', 'lead'] }
       priority: { type: string, label: '优先级', editable: true, enum: ['high', 'medium', 'low'] }
-      notes: { type: text, label: '备注', editable: true }
       createdAt: { type: string, label: '创建时间', editable: false }
-      updatedAt: { type: string, label: '更新时间', editable: false }
 
     filters:
       companyId:
@@ -69,4 +60,3 @@ entities:
       beforeUpdate:
         - trim:firstName
         - trim:lastName
-        - now:updatedAt

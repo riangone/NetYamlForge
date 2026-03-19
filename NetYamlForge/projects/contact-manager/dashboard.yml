@@ -1,58 +1,63 @@
-dashboard:
-  title: 联系人管理仪表板
-  
-  sections:
-    - type: stats
-      title: 快速统计
-      cards:
-        - title: 公司总数
-          query: SELECT COUNT(*) FROM company
-          icon: 🏢
-          color: blue
-          link: /contact-manager/company
-        
-        - title: 联系人总数
-          query: SELECT COUNT(*) FROM contact
-          icon: 👥
-          color: green
-          link: /contact-manager/contact
-        
-        - title: 活跃联系人
-          query: SELECT COUNT(*) FROM contact WHERE status = 'active'
-          icon: ✅
-          color: teal
-          link: /contact-manager/contact?status=active
-        
-        - title: 待跟进交互
-          query: SELECT COUNT(*) FROM interaction WHERE status = 'planned'
-          icon: 📅
-          color: orange
-          link: /contact-manager/interaction?status=planned
-    
-    - type: table
-      title: 最近添加的联系人
-      query: |
-        SELECT 
-          c.firstName || ' ' || c.lastName as 姓名，
-          c.title as 职位，
-          co.name as 公司，
-          c.email as 邮箱，
-          c.createdAt as 创建时间
-        FROM contact c
-        LEFT JOIN company co ON co.id = c.companyId
-        ORDER BY c.createdAt DESC
-        LIMIT 5
-    
-    - type: table
-      title: 即将到来的交互
-      query: |
-        SELECT 
-          i.subject as 主题，
-          c.firstName || ' ' || c.lastName as 联系人，
-          i.type as 类型，
-          i.scheduledAt as 计划时间
-        FROM interaction i
-        LEFT JOIN contact c ON c.id = i.contactId
-        WHERE i.status = 'planned'
-        ORDER BY i.scheduledAt ASC
-        LIMIT 5
+stats:
+  - label: 公司总数
+    entity: company
+    aggregate: count
+    icon: 🏢
+    color: badge-primary
+
+  - label: 联系人总数
+    entity: contact
+    aggregate: count
+    icon: 👥
+    color: badge-success
+
+  - label: 活跃联系人
+    entity: contact
+    aggregate: count
+    filter: "status = 'active'"
+    icon: ✅
+    color: badge-accent
+
+  - label: 待跟进交互
+    entity: interaction
+    aggregate: count
+    filter: "status = 'planned'"
+    icon: 📅
+    color: badge-warning
+
+  - label: 本周新增联系人
+    entity: contact
+    aggregate: count
+    filter: "createdAt >= datetime('now', '-7 days')"
+    icon: 🆕
+    color: badge-info
+
+  - label: 已完成交互
+    entity: interaction
+    aggregate: count
+    filter: "status = 'completed'"
+    icon: ✔️
+    color: badge-primary
+
+charts:
+  - title: 联系人状态分布
+    type: doughnut
+    entity: contact
+    valueAggregate: count
+    groupExpression: status
+    orderBy: value
+    orderDir: desc
+
+  - title: 交互类型统计
+    type: bar
+    entity: interaction
+    valueAggregate: count
+    groupExpression: type
+    orderBy: value
+    orderDir: desc
+
+  - title: 联系人优先级分布
+    type: pie
+    entity: contact
+    valueAggregate: count
+    groupExpression: priority

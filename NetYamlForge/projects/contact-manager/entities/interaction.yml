@@ -19,14 +19,10 @@ entities:
       companyId: { type: int, label: '公司', sortable: true }
       type: { type: string, required: true, label: '类型', sortable: true }
       subject: { type: string, required: true, label: '主题', searchable: true, sortable: true }
-      description: { type: text, label: '详情' }
       scheduledAt: { type: string, label: '计划时间', sortable: true }
-      completedAt: { type: string, label: '完成时间', sortable: true }
       status: { type: string, label: '状态', sortable: true }
       priority: { type: string, label: '优先级', sortable: true }
-      outcome: { type: text, label: '结果' }
       createdAt: { type: string, label: '创建时间', sortable: true }
-      updatedAt: { type: string, label: '更新时间', sortable: true }
 
     forms:
       contactId:
@@ -44,33 +40,16 @@ entities:
         foreignKey:
           entity: company
           displayColumn: name
-      type: { type: string, required: true, label: '类型', editable: true, enum: ['call', 'email', 'meeting', 'task', 'note', 'other'] }
+      type: { type: string, required: true, label: '类型', editable: true, enum: ['call', 'email', 'meeting', 'task', 'note'] }
       subject: { type: string, required: true, label: '主题', editable: true }
-      description: { type: text, label: '详情', editable: true }
       scheduledAt: { type: string, label: '计划时间', editable: true }
-      completedAt: { type: string, label: '完成时间', editable: true }
       status: { type: string, label: '状态', editable: true, enum: ['planned', 'completed', 'cancelled'] }
       priority: { type: string, label: '优先级', editable: true, enum: ['high', 'medium', 'low'] }
-      outcome: { type: text, label: '结果', editable: true }
       createdAt: { type: string, label: '创建时间', editable: false }
-      updatedAt: { type: string, label: '更新时间', editable: false }
 
     filters:
-      contactId:
-        type: dropdown
-        label: '联系人'
-        foreignKey:
-          entity: contact
-          displayColumn: fullName
-      companyId:
-        type: dropdown
-        label: '公司'
-        foreignKey:
-          entity: company
-          displayColumn: name
-      type: { type: dropdown, label: '类型', options: ['call', 'email', 'meeting', 'task', 'note', 'other'] }
+      type: { type: dropdown, label: '类型', options: ['call', 'email', 'meeting', 'task', 'note'] }
       status: { type: dropdown, label: '状态', options: ['planned', 'completed', 'cancelled'] }
-      priority: { type: dropdown, label: '优先级', options: ['high', 'medium', 'low'] }
 
     hooks:
       beforeCreate:
