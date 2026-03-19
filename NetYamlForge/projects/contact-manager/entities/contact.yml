@@ -1,174 +1,73 @@
-# 联系人实体定义
+# 联系人实体
 entities:
   contact:
     table: contact
     key: id
     displayName: 联系人
-    displayColumn: fullName
-    
+    displayNameKey: contact_display
+    displayNameI18n:
+      ja: 連絡先
+      en: Contact
+      zh: 联系人
+
     columns:
-      id:
-        type: number
-        label: ID
-        isIdentity: true
-        hidden: true
-      
-      firstName:
-        type: string
-        label: 名
-        required: true
-        maxLength: 100
-        trim: true
-      
-      lastName:
-        type: string
-        label: 姓
-        required: true
-        maxLength: 100
-        trim: true
-      
-      fullName:
-        type: string
-        label: 全名
-        maxLength: 200
-        hidden: true  # 由钩子自动计算
-      
+      id: { type: int, identity: true, label: 'ID', sortable: true }
+      firstName: { type: string, required: true, label: '名', searchable: true, sortable: true }
+      lastName: { type: string, required: true, label: '姓', sortable: true }
+      fullName: { type: string, label: '全名', sortable: true }
+      companyId: { type: int, label: '所属公司', sortable: true }
+      title: { type: string, label: '职位' }
+      department: { type: string, label: '部门' }
+      email: { type: string, required: true, label: '邮箱', sortable: true }
+      phone: { type: string, label: '手机' }
+      linkedin: { type: string, label: 'LinkedIn' }
+      status: { type: string, label: '状态', sortable: true }
+      priority: { type: string, label: '优先级', sortable: true }
+      notes: { type: text, label: '备注' }
+      createdAt: { type: string, label: '创建时间', sortable: true }
+      updatedAt: { type: string, label: '更新时间', sortable: true }
+
+    forms:
+      firstName: { type: string, required: true, label: '名', editable: true }
+      lastName: { type: string, required: true, label: '姓', editable: true }
       companyId:
-        type: number
-        label: 所属公司
+        type: int
+        label: '所属公司'
+        editable: true
         foreignKey:
           entity: company
           displayColumn: name
-      
-      title:
-        type: string
-        label: 职位
-        maxLength: 100
-      
-      department:
-        type: string
-        label: 部门
-        maxLength: 100
-      
-      email:
-        type: string
-        label: 邮箱
-        maxLength: 200
-        required: true
-        validateEmail: true
-      
-      phone:
-        type: string
-        label: 手机
-        maxLength: 50
-        validatePhone: true
-      
-      linkedin:
-        type: string
-        label: LinkedIn
-        maxLength: 200
-        validateUrl: true
-      
-      birthday:
-        type: date
-        label: 生日
-      
-      tags:
-        type: string
-        label: 标签
-        maxLength: 500
-        placeholder: "用逗号分隔多个标签"
-      
-      status:
-        type: string
-        label: 状态
-        enum:
-          - active
-          - inactive
-          - lead
-        default: active
-      
-      priority:
-        type: string
-        label: 优先级
-        enum:
-          - high
-          - medium
-          - low
-        default: medium
-      
-      notes:
-        type: text
-        label: 备注
-      
-      createdAt:
-        type: datetime
-        label: 创建时间
-        hidden: true
-        now: true
-      
-      updatedAt:
-        type: datetime
-        label: 更新时间
-        hidden: true
-        now: true
-    
+      title: { type: string, label: '职位', editable: true }
+      department: { type: string, label: '部门', editable: true }
+      email: { type: string, required: true, label: '邮箱', editable: true }
+      phone: { type: string, label: '手机', editable: true }
+      linkedin: { type: string, label: 'LinkedIn', editable: true }
+      status: { type: string, label: '状态', editable: true, enum: ['active', 'inactive', 'lead'] }
+      priority: { type: string, label: '优先级', editable: true, enum: ['high', 'medium', 'low'] }
+      notes: { type: text, label: '备注', editable: true }
+      createdAt: { type: string, label: '创建时间', editable: false }
+      updatedAt: { type: string, label: '更新时间', editable: false }
+
+    filters:
+      companyId:
+        type: dropdown
+        label: '公司'
+        foreignKey:
+          entity: company
+          displayColumn: name
+      status: { type: dropdown, label: '状态', options: ['active', 'inactive', 'lead'] }
+      priority: { type: dropdown, label: '优先级', options: ['high', 'medium', 'low'] }
+
     hooks:
       beforeCreate:
         - contact_generate_fullname
         - trim_contact_fields
         - validate_contact_email
+        - now:createdAt
       beforeUpdate:
         - contact_generate_fullname
         - trim_contact_fields
         - validate_contact_email
+        - now:updatedAt
       afterCreate:
         - log_contact_created
-      afterUpdate:
-        - log_contact_updated
-    
-    list:
-      columns:
-        - fullName
-        - companyId
-        - title
-        - email
-        - phone
-        - status
-        - priority
-        - createdAt
-      defaultSort: createdAt
-      defaultOrder: desc
-      filters:
-        - column: status
-          type: select
-        - column: priority
-          type: select
-        - column: companyId
-          type: select
-    
-    form:
-      sections:
-        - title: 个人信息
-          columns:
-            - firstName
-            - lastName
-            - title
-            - department
-        - title: 联系方式
-          columns:
-            - email
-            - phone
-            - linkedin
-        - title: 组织信息
-          columns:
-            - companyId
-            - birthday
-        - title: 分类
-          columns:
-            - status
-            - priority
-            - tags
-        - title: 备注
-          columns:
-            - notes

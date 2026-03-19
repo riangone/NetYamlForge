@@ -1,13 +1,13 @@
-# 布局配置
-layout:
-  sidebar:
-    collapsed: false
-    position: left
-  
-  header:
-    showLogo: true
-    showUser: false
-  
-  footer:
-    show: true
-    text: "© 2025 Contact Manager - Powered by NetYamlForge"
+header:
+  title: 联系人管理系统
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /contact-manager
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
