@@ -105,6 +105,24 @@ if (args.Any(a => a.Equals("--init-project", StringComparison.OrdinalIgnoreCase)
     return;
 }
 
+if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnoreCase)))
+{
+    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
+    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
+    var nameArg = args.FirstOrDefault(a => a.StartsWith("--name=", StringComparison.OrdinalIgnoreCase));
+    var jobName = nameArg?.Split('=', 2).ElementAtOrDefault(1);
+    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-batch-job" };
+    if (jsonMode) Console.SetOut(TextWriter.Null);
+    var exitCode = BatchJobScaffolder.Run(
+        Directory.GetCurrentDirectory(),
+        projectName,
+        jobName ?? "sample_job",
+        scaffoldResult);
+    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
+    Environment.Exit(exitCode);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, cfg) =>

@@ -5,6 +5,7 @@
 using System.Data;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
@@ -138,6 +139,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFileUploadService, FileUploadService>();
         services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
+
+        // バッチジョブサービス
+        services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
+        services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
+        services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();
+        services.AddHostedService<BatchJobHostedService>();
 
         return services;
     }

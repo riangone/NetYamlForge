@@ -1,0 +1,30 @@
+# 夜间统计作业 - 商品販売統計を CSV 出力
+# 毎日 2:00（日本時間）に前日の販売データを集計して CSV ファイルを生成
+
+jobs:
+  nightly_stats:
+    displayName: 夜间统计作业
+    description: "每日 2 点に前日の商品販売統計を CSV 出力します"
+    enabled: true
+    
+    # スケジュール設定
+    schedule:
+      cron: "0 2 * * *"  # 毎日 2:00
+      timezone: "Asia/Tokyo"
+    
+    # ジョブタイプ：SQL 実行結果を CSV 出力
+    type: sql_to_csv
+    
+    # ジョブ設定
+    settings:
+      sqlFile: jobs/sql/nightly_stats.sql
+      outputFile: jobs/output/stats_{date:yyyyMMdd}.csv
+      includeHeader: true
+      delimiter: ","
+      outputFormat: csv
+    
+    # 失敗時ポリシー
+    onFailure:
+      retryCount: 3
+      retryInterval: 300  # 5 分
+      logError: true
