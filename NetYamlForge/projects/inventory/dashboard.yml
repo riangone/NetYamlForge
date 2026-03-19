@@ -7,8 +7,6 @@ stats:
   - label: 有効商品
     entity: product
     aggregate: count
-    filter:
-      IsActive: true
     icon: ✅
     color: badge-success
   - label: カテゴリ数
@@ -22,44 +20,16 @@ stats:
     column: Stock
     icon: 📊
     color: badge-accent
-  - label: 在庫金額
-    entity: product
-    aggregate: custom
-    expression: "SUM(Stock * Price)"
-    icon: 💰
-    color: badge-warning
   - label: 最小在庫割れ
     entity: product
     aggregate: count
-    filter:
-      Stock: "< MinStock"
     icon: ⚠️
     color: badge-error
   - label: 本月庫移動数
     entity: stockmovement
     aggregate: count
-    filter:
-      CreatedAt: ">= this_month"
     icon: 🔄
     color: badge-info
-  - label: 本月庫移動 (入荷)
-    entity: stockmovement
-    aggregate: sum
-    column: Quantity
-    filter:
-      MovementType: IN
-      CreatedAt: ">= this_month"
-    icon: ⬇️
-    color: badge-success
-  - label: 本月庫移動 (出荷)
-    entity: stockmovement
-    aggregate: sum
-    column: Quantity
-    filter:
-      MovementType: OUT
-      CreatedAt: ">= this_month"
-    icon: ⬆️
-    color: badge-warning
 
 charts:
   - title: 商品カテゴリ別在庫数
@@ -73,12 +43,6 @@ charts:
     orderBy: value
     orderDir: desc
     limit: 10
-    colors:
-      - rgba(99, 102, 241, 0.85)
-      - rgba(16, 185, 129, 0.85)
-      - rgba(245, 158, 11, 0.85)
-      - rgba(239, 68, 68, 0.85)
-      - rgba(59, 130, 246, 0.85)
 
   - title: 月別在庫移動推移
     type: line
@@ -89,28 +53,3 @@ charts:
     orderBy: label
     orderDir: asc
     limit: 12
-    colorBg: rgba(99, 102, 241, 0.15)
-    colorBorder: rgba(99, 102, 241, 1)
-
-  - title: 商品別在庫金額 TOP10
-    type: bar
-    entity: product
-    valueAggregate: custom
-    expression: "SUM(Stock * Price)"
-    orderBy: value
-    orderDir: desc
-    limit: 10
-    colorBg: rgba(16, 185, 129, 0.7)
-    colorBorder: rgba(16, 185, 129, 1)
-
-  - title: 移動種別別集計 (本月)
-    type: bar
-    entity: stockmovement
-    valueAggregate: count
-    groupExpression: MovementType
-    filter:
-      CreatedAt: ">= this_month"
-    orderBy: value
-    orderDir: desc
-    colorBg: rgba(245, 158, 11, 0.7)
-    colorBorder: rgba(245, 158, 11, 1)

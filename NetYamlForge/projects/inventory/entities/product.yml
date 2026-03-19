@@ -1,29 +1,15 @@
+imports: []
 entities:
   product:
     table: Products
     key: Id
+    keys: []
     displayName: 商品
     displayColumn: Name
     softDelete: false
     paging:
       pageSize: 20
       mode: numbered
-    layout:
-      forms:
-        columns: 2
-        order:
-        - Name
-        - CategoryId
-        - Price
-        - Stock
-        - MinStock
-        - IsActive
-      filters:
-        columns: 3
-        order:
-        - Name
-        - CategoryId
-        - IsActive
     columns:
       Id:
         type: int
@@ -45,7 +31,6 @@ entities:
       Price:
         type: decimal
         label: 価格
-        format: "¥{0:N0}"
       Stock:
         type: int
         label: 在庫数
@@ -108,17 +93,15 @@ entities:
         type: bool
         label: 有効/無効
         expression: Products.IsActive
-    links:
-      stockMovements:
-        label: 在庫移動履歴
-        targetEntity: stockmovement
-        filter:
-          ProductId: Id
     hooks:
-      beforeCreate: [validate_product_price, check_stock_threshold]
-      beforeUpdate: [validate_product_price, check_stock_threshold]
-      afterCreate: [check_stock_threshold]
-      afterUpdate: [check_stock_threshold]
+      beforeCreate:
+        - validate_product_price
+      beforeUpdate:
+        - validate_product_price
+      afterCreate:
+        - check_stock_threshold
+      afterUpdate:
+        - check_stock_threshold
     confirmation:
       create: 新しい商品を登録してよろしいですか？
       update: 商品情報を更新してよろしいですか？

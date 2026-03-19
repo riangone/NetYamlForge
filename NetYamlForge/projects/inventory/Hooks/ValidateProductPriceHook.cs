@@ -1,7 +1,9 @@
 // 責務：商品価格のバリデーションを行うフック
 // entities.yml の hooks.beforeCreate / hooks.beforeUpdate で使用
 
+using System;
 using System.Data;
+using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
 using Microsoft.Extensions.Logging;
 

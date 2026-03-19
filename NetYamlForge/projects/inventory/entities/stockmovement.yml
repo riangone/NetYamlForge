@@ -1,26 +1,15 @@
+imports: []
 entities:
   stockmovement:
     table: StockMovements
     key: Id
+    keys: []
     displayName: 在庫移動
     displayColumn: Reason
     softDelete: false
     paging:
       pageSize: 20
       mode: numbered
-    layout:
-      forms:
-        columns: 1
-        order:
-        - ProductId
-        - Quantity
-        - MovementType
-        - Reason
-      filters:
-        columns: 2
-        order:
-        - ProductId
-        - MovementType
     columns:
       Id:
         type: int
@@ -64,13 +53,6 @@ entities:
         label: 移動種別
         editable: true
         required: true
-        options:
-          - value: IN
-            label: 入荷
-          - value: OUT
-            label: 出荷
-          - value: ADJUST
-            label: 調整
       Reason:
         type: string
         label: 理由
@@ -86,16 +68,11 @@ entities:
         type: select
         label: 移動種別
         expression: StockMovements.MovementType
-        options:
-          - value: IN
-            label: 入荷
-          - value: OUT
-            label: 出荷
-          - value: ADJUST
-            label: 調整
     hooks:
-      beforeCreate: [validate_stock_movement, update_product_stock]
-      afterCreate: [check_stock_threshold]
+      beforeCreate:
+        - update_product_stock
+      afterCreate:
+        - check_stock_threshold
     confirmation:
       create: 在庫移動を登録してよろしいですか？
       update: 在庫移動情報を更新してよろしいですか？

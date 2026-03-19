@@ -1,23 +1,15 @@
+imports: []
 entities:
   category:
     table: Categories
     key: Id
+    keys: []
     displayName: カテゴリ
     displayColumn: Name
     softDelete: false
     paging:
       pageSize: 10
       mode: numbered
-    layout:
-      forms:
-        columns: 1
-        order:
-        - Name
-        - Description
-      filters:
-        columns: 1
-        order:
-        - Name
     columns:
       Id:
         type: int
@@ -55,7 +47,8 @@ entities:
         label: カテゴリ名
         expression: Categories.Name
     hooks:
-      beforeDelete: [check_category_usage]
+      beforeDelete:
+        - check_category_usage
     confirmation:
       create: 新しいカテゴリを登録してよろしいですか？
       update: カテゴリ情報を更新してよろしいですか？

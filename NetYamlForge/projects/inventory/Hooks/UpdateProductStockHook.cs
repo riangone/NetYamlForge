@@ -1,6 +1,8 @@
 // 責務：在庫移動時に商品在庫を更新するフック
 
+using System;
 using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using Microsoft.Extensions.Logging;
