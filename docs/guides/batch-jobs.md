@@ -277,6 +277,128 @@ onFailure:
 - メール通知機能は未実装（TODO）
 - ストアドプロシージャタイプは未実装（TODO）
 
+## Windows サービスとしての実行
+
+バッチジョブを定期的に実行するには、アプリケーションをバックグラウンドで実行する必要があります。
+Windows では**Windows サービス**として実行することを推奨します。
+
+### 事前準備
+
+1.  アプリケーションを公開ディレクトリに配置
+
+```powershell
+dotnet publish -c Release -o C:\apps\NetYamlForge
+```
+
+2.  `scripts` ディレクトリからインストールスクリプトをコピー
+
+```powershell
+# 公開ディレクトリにスクリプトをコピー
+Copy-Item scripts\install-windows-service.bat C:\apps\NetYamlForge\
+Copy-Item scripts\WindowsServiceInstaller.ps1 C:\apps\NetYamlForge\
+```
+
+### 方法 1: PowerShell スクリプトを使用（推奨）
+
+```powershell
+# 管理者として PowerShell を実行
+cd C:\apps\NetYamlForge
+.\WindowsServiceInstaller.ps1
+
+# アンインストールする場合
+.\WindowsServiceInstaller.ps1 -Uninstall
+```
+
+### 方法 2: バッチファイルを使用
+
+```cmd
+REM 管理者としてコマンドプロンプトを実行
+cd C:\apps\NetYamlForge
+install-windows-service.bat
+
+REM アンインストールする場合
+uninstall-windows-service.bat
+```
+
+### 方法 3: 手動で設定
+
+```powershell
+# サービス作成
+sc create NetYamlForge binPath= "C:\apps\NetYamlForge\NetYamlForge.exe --run-as-service" start= auto
+
+# サービス説明設定
+sc description NetYamlForge "NetYamlForge Web Application"
+
+# サービス開始
+net start NetYamlForge
+```
+
+### サービス操作コマンド
+
+```powershell
+# サービス一覧確認
+Get-Service NetYamlForge
+
+# サービス開始
+Start-Service NetYamlForge
+# または
+net start NetYamlForge
+
+# サービス停止
+Stop-Service NetYamlForge
+# または
+net stop NetYamlForge
+
+# サービス削除
+sc delete NetYamlForge
+```
+
+### ログの確認
+
+Windows イベントログ:
+```powershell
+# イベントログを表示
+Get-EventLog -LogName Application -Source .NETRuntime | Select-Object -First 20
+```
+
+アプリケーションログ:
+```
+C:\apps\NetYamlForge\logs\app-YYYYMMDD.log
+```
+
+### Linux/macOS での実行
+
+Linux/macOS では、systemd サービスまたは supervisor として設定します。
+
+**systemd サービス例** (`/etc/systemd/system/netyamlforge.service`):
+
+```ini
+[Unit]
+Description=NetYamlForge Web Application
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+WorkingDirectory=/var/www/NetYamlForge
+ExecStart=/usr/bin/dotnet /var/www/NetYamlForge/NetYamlForge.dll
+Restart=always
+RestartSec=10
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# サービス有効化
+sudo systemctl enable netyamlforge
+sudo systemctl start netyamlforge
+
+# 状態確認
+sudo systemctl status netyamlforge
+```
+
 ## ベストプラクティス
 
 1. **冪等性の確保**: ジョブは複数回実行されても問題ないように設計

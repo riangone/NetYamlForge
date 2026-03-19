@@ -13,9 +13,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Serilog;
 
 var jsonMode = args.Any(a => a.Equals("--json", StringComparison.OrdinalIgnoreCase));
+
+// Windows サービスとして実行するかどうか（--run-as-service フラグまたは環境変数）
+var useWindowsService = args.Any(a => a.Equals("--run-as-service", StringComparison.OrdinalIgnoreCase))
+    || Environment.GetEnvironmentVariable("DOTNET_RUNNING_AS_WINDOWS_SERVICE") == "true";
+
+if (useWindowsService)
+{
+    args = args.Where(a => a != "--run-as-service").ToArray();
+}
 
 if (args.Any(a => a.Equals("--scaffold-entities", StringComparison.OrdinalIgnoreCase)))
 {
@@ -124,6 +134,12 @@ if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnor
 }
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Windows サービスとして実行する場合
+if (useWindowsService)
+{
+    builder.Host.UseWindowsService();
+}
 
 builder.Host.UseSerilog((context, cfg) =>
 {
