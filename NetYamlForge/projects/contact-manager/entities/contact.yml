@@ -1,0 +1,174 @@
+# 联系人实体定义
+entities:
+  contact:
+    table: contact
+    key: id
+    displayName: 联系人
+    displayColumn: fullName
+    
+    columns:
+      id:
+        type: number
+        label: ID
+        isIdentity: true
+        hidden: true
+      
+      firstName:
+        type: string
+        label: 名
+        required: true
+        maxLength: 100
+        trim: true
+      
+      lastName:
+        type: string
+        label: 姓
+        required: true
+        maxLength: 100
+        trim: true
+      
+      fullName:
+        type: string
+        label: 全名
+        maxLength: 200
+        hidden: true  # 由钩子自动计算
+      
+      companyId:
+        type: number
+        label: 所属公司
+        foreignKey:
+          entity: company
+          displayColumn: name
+      
+      title:
+        type: string
+        label: 职位
+        maxLength: 100
+      
+      department:
+        type: string
+        label: 部门
+        maxLength: 100
+      
+      email:
+        type: string
+        label: 邮箱
+        maxLength: 200
+        required: true
+        validateEmail: true
+      
+      phone:
+        type: string
+        label: 手机
+        maxLength: 50
+        validatePhone: true
+      
+      linkedin:
+        type: string
+        label: LinkedIn
+        maxLength: 200
+        validateUrl: true
+      
+      birthday:
+        type: date
+        label: 生日
+      
+      tags:
+        type: string
+        label: 标签
+        maxLength: 500
+        placeholder: "用逗号分隔多个标签"
+      
+      status:
+        type: string
+        label: 状态
+        enum:
+          - active
+          - inactive
+          - lead
+        default: active
+      
+      priority:
+        type: string
+        label: 优先级
+        enum:
+          - high
+          - medium
+          - low
+        default: medium
+      
+      notes:
+        type: text
+        label: 备注
+      
+      createdAt:
+        type: datetime
+        label: 创建时间
+        hidden: true
+        now: true
+      
+      updatedAt:
+        type: datetime
+        label: 更新时间
+        hidden: true
+        now: true
+    
+    hooks:
+      beforeCreate:
+        - contact_generate_fullname
+        - trim_contact_fields
+        - validate_contact_email
+      beforeUpdate:
+        - contact_generate_fullname
+        - trim_contact_fields
+        - validate_contact_email
+      afterCreate:
+        - log_contact_created
+      afterUpdate:
+        - log_contact_updated
+    
+    list:
+      columns:
+        - fullName
+        - companyId
+        - title
+        - email
+        - phone
+        - status
+        - priority
+        - createdAt
+      defaultSort: createdAt
+      defaultOrder: desc
+      filters:
+        - column: status
+          type: select
+        - column: priority
+          type: select
+        - column: companyId
+          type: select
+    
+    form:
+      sections:
+        - title: 个人信息
+          columns:
+            - firstName
+            - lastName
+            - title
+            - department
+        - title: 联系方式
+          columns:
+            - email
+            - phone
+            - linkedin
+        - title: 组织信息
+          columns:
+            - companyId
+            - birthday
+        - title: 分类
+          columns:
+            - status
+            - priority
+            - tags
+        - title: 备注
+          columns:
+            - notes

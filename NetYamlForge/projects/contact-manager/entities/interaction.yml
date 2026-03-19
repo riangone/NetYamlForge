@@ -1,0 +1,151 @@
+# 交互记录实体定义
+entities:
+  interaction:
+    table: interaction
+    key: id
+    displayName: 交互记录
+    displayColumn: subject
+    
+    columns:
+      id:
+        type: number
+        label: ID
+        isIdentity: true
+        hidden: true
+      
+      contactId:
+        type: number
+        label: 联系人
+        required: true
+        foreignKey:
+          entity: contact
+          displayColumn: fullName
+      
+      companyId:
+        type: number
+        label: 公司
+        foreignKey:
+          entity: company
+          displayColumn: name
+      
+      type:
+        type: string
+        label: 类型
+        required: true
+        enum:
+          - call
+          - email
+          - meeting
+          - task
+          - note
+          - other
+      
+      subject:
+        type: string
+        label: 主题
+        required: true
+        maxLength: 200
+      
+      description:
+        type: text
+        label: 详情
+      
+      scheduledAt:
+        type: datetime
+        label: 计划时间
+      
+      completedAt:
+        type: datetime
+        label: 完成时间
+      
+      status:
+        type: string
+        label: 状态
+        enum:
+          - planned
+          - completed
+          - cancelled
+        default: planned
+      
+      priority:
+        type: string
+        label: 优先级
+        enum:
+          - high
+          - medium
+          - low
+        default: medium
+      
+      outcome:
+        type: text
+        label: 结果
+      
+      followUpAt:
+        type: datetime
+        label: 跟进时间
+      
+      assignedTo:
+        type: string
+        label: 负责人
+        maxLength: 100
+      
+      createdAt:
+        type: datetime
+        label: 创建时间
+        hidden: true
+        now: true
+      
+      updatedAt:
+        type: datetime
+        label: 更新时间
+        hidden: true
+        now: true
+    
+    hooks:
+      beforeCreate:
+        - interaction_set_defaults
+      beforeUpdate:
+        - interaction_update_timestamp
+    
+    list:
+      columns:
+        - subject
+        - contactId
+        - companyId
+        - type
+        - status
+        - priority
+        - scheduledAt
+        - createdAt
+      defaultSort: scheduledAt
+      defaultOrder: desc
+      filters:
+        - column: type
+          type: select
+        - column: status
+          type: select
+        - column: priority
+          type: select
+    
+    form:
+      sections:
+        - title: 基本信息
+          columns:
+            - contactId
+            - companyId
+            - type
+            - subject
+        - title: 详情
+          columns:
+            - description
+            - outcome
+        - title: 时间安排
+          columns:
+            - scheduledAt
+            - completedAt
+            - followUpAt
+        - title: 分类
+          columns:
+            - status
+            - priority
+            - assignedTo

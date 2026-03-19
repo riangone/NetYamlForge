@@ -1,0 +1,120 @@
+# 公司实体定义
+entities:
+  company:
+    table: company
+    key: id
+    displayName: 公司
+    displayColumn: name
+    
+    columns:
+      id:
+        type: number
+        label: ID
+        isIdentity: true
+        hidden: true
+      
+      name:
+        type: string
+        label: 公司名称
+        required: true
+        maxLength: 200
+      
+      industry:
+        type: string
+        label: 行业
+        maxLength: 100
+      
+      website:
+        type: string
+        label: 网站
+        maxLength: 200
+        validateUrl: true
+      
+      phone:
+        type: string
+        label: 电话
+        maxLength: 50
+        validatePhone: true
+      
+      email:
+        type: string
+        label: 邮箱
+        maxLength: 200
+        validateEmail: true
+      
+      address:
+        type: string
+        label: 地址
+        maxLength: 500
+      
+      employeeCount:
+        type: number
+        label: 员工数
+      
+      annualRevenue:
+        type: number
+        label: 年收入
+        precision: 2
+      
+      rating:
+        type: string
+        label: 评级
+        enum:
+          - A
+          - B
+          - C
+          - D
+      
+      notes:
+        type: text
+        label: 备注
+      
+      createdAt:
+        type: datetime
+        label: 创建时间
+        hidden: true
+        now: true
+      
+      updatedAt:
+        type: datetime
+        label: 更新时间
+        hidden: true
+        now: true
+    
+    hooks:
+      beforeCreate:
+        - trim_company_fields
+      beforeUpdate:
+        - trim_company_fields
+    
+    list:
+      columns:
+        - name
+        - industry
+        - phone
+        - email
+        - rating
+        - createdAt
+      defaultSort: createdAt
+      defaultOrder: desc
+    
+    form:
+      sections:
+        - title: 基本信息
+          columns:
+            - name
+            - industry
+        - title: 联系方式
+          columns:
+            - phone
+            - email
+            - website
+        - title: 详细信息
+          columns:
+            - address
+            - employeeCount
+            - annualRevenue
+            - rating
+        - title: 备注
+          columns:
+            - notes

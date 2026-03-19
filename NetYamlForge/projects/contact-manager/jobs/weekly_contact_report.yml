@@ -1,0 +1,22 @@
+# 每周联系人统计报告
+jobs:
+  weekly_contact_report:
+    displayName: 每周联系人统计报告
+    description: "每周一早上 8 点生成上周联系人统计报告"
+    enabled: true
+    
+    schedule:
+      cron: "0 8 * * 1"  # 每周一 8:00
+      timezone: "Asia/Tokyo"
+    
+    type: sql_to_csv
+    
+    settings:
+      sqlFile: jobs/sql/weekly_contact_report.sql
+      outputFile: jobs/output/weekly_report_{date:yyyy-MM-dd}.csv
+      includeHeader: true
+      delimiter: ","
+    
+    onFailure:
+      retryCount: 3
+      retryInterval: 300

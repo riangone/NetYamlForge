@@ -1,0 +1,13 @@
+# 布局配置
+layout:
+  sidebar:
+    collapsed: false
+    position: left
+  
+  header:
+    showLogo: true
+    showUser: false
+  
+  footer:
+    show: true
+    text: "© 2025 Contact Manager - Powered by NetYamlForge"

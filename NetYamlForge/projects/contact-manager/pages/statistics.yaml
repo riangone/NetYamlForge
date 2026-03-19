@@ -1,0 +1,74 @@
+# 统计报表页面
+page:
+  statistics:
+    title: 统计报表
+    description: 联系人和交互数据统计
+    
+    sections:
+      - type: stats
+        title: 概览
+        cards:
+          - title: 联系人总数
+            query: SELECT COUNT(*) FROM contact
+            icon: users
+            color: blue
+          
+          - title: 公司总数
+            query: SELECT COUNT(*) FROM company
+            icon: building
+            color: green
+          
+          - title: 活跃联系人
+            query: SELECT COUNT(*) FROM contact WHERE status = 'active'
+            icon: user-check
+            color: teal
+          
+          - title: 本月交互
+            query: SELECT COUNT(*) FROM interaction WHERE strftime('%Y-%m', scheduledAt) = strftime('%Y-%m', 'now')
+            icon: activity
+            color: purple
+      
+      - type: chart
+        title: 联系人状态分布
+        chartType: pie
+        query: |
+          SELECT status as label, COUNT(*) as value
+          FROM contact
+          GROUP BY status
+      
+      - type: chart
+        title: 交互类型统计
+        chartType: bar
+        query: |
+          SELECT type as label, COUNT(*) as value
+          FROM interaction
+          GROUP BY type
+          ORDER BY value DESC
+      
+      - type: chart
+        title: 月度交互趋势
+        chartType: line
+        query: |
+          SELECT 
+            strftime('%Y-%m', scheduledAt) as label,
+            COUNT(*) as value
+          FROM interaction
+          WHERE scheduledAt >= date('now', '-6 months')
+          GROUP BY strftime('%Y-%m', scheduledAt)
+          ORDER BY label
+      
+      - type: table
+        title: 最近交互
+        query: |
+          SELECT 
+            i.subject as 主题，
+            c.fullName as 联系人，
+            co.name as 公司，
+            i.type as 类型，
+            i.status as 状态，
+            i.scheduledAt as 计划时间
+          FROM interaction i
+          LEFT JOIN contact c ON c.id = i.contactId
+          LEFT JOIN company co ON co.id = i.companyId
+          ORDER BY i.scheduledAt DESC
+          LIMIT 10

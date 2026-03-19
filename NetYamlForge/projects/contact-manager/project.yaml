@@ -1,0 +1,36 @@
+# Contact Manager - 简单的联系人管理系统
+# 演示 NetYamlForge 框架的所有核心功能
+
+name: contact-manager
+displayName: 联系人管理系统
+description: "简单的联系人管理系统示例项目，展示框架的完整功能"
+version: "1.0.0"
+
+# 数据库配置（使用 SQLite）
+database:
+  type: sqlite
+  path: database/contact-manager.db
+
+# 功能配置
+features:
+  multiLanguage: true
+  userAuthentication: false  # 简化示例，不启用认证
+
+# 布局配置
+layout:
+  dashboardTheme: analytics
+  navigation:
+    title: 联系人管理
+    entities:
+      - contact
+      - company
+      - interaction
+    pages:
+      - name: statistics
+        label: 统计报表
+        icon: chart
+
+# 日历配置（用于交互记录）
+calendar:
+  enabled: true
+  defaultView: month
