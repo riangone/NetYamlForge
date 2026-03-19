@@ -1,0 +1,102 @@
+# NetYamlForge 实体 YAML 模板
+# 复制此文件并根据需要修改
+
+entities:
+  your_entity_name:
+    # === 基本设置 ===
+    table: your_table_name          # 数据库表名
+    key: id                         # 主键字段名
+    displayName: 显示名称            # 显示名称（中文）
+    displayNameKey: entity_display  # 国际化键
+    displayNameI18n:                # 多语言显示名称（必需）
+      ja: 表示名
+      en: Display Name
+      zh: 显示名称
+    
+    # === 分页设置 ===
+    paging:
+      pageSize: 20
+      mode: numbered    # numbered | simple
+    
+    # === 列定义（列表显示）===
+    columns:
+      id: 
+        type: int
+        identity: true
+        label: 'ID'
+        sortable: true
+      
+      name:
+        type: string
+        required: true
+        label: '名称'
+        searchable: true
+        sortable: true
+      
+      status:
+        type: string
+        label: '状态'
+        sortable: true
+      
+      createdAt:
+        type: string
+        label: '创建时间'
+        sortable: true
+    
+    # === 表单定义（编辑界面）===
+    forms:
+      name:
+        type: string
+        required: true
+        label: '名称'
+        editable: true
+      
+      status:
+        type: string
+        label: '状态'
+        editable: true
+        enum: ['active', 'inactive']  # 枚举值
+      
+      createdAt:
+        type: string
+        label: '创建时间'
+        editable: false  # 只读
+    
+    # === 筛选器定义 ===
+    filters:
+      status:
+        type: dropdown
+        label: '状态'
+        options: ['active', 'inactive']
+      
+      keyword:
+        type: text
+        label: '关键词'
+    
+    # === 钩子定义（使用字符串格式）===
+    hooks:
+      beforeCreate:
+        - trim:name           # 修剪空格
+        - trim:email
+        - now:createdAt       # 设置当前时间
+        - uppercase:code      # 转大写
+        - lowercase:email     # 转小写
+      
+      beforeUpdate:
+        - trim:name
+        - now:updatedAt
+      
+      afterCreate:
+        - log:created         # 记录日志（如果实现了）
+      
+      afterUpdate:
+        - log:updated
+    
+    # === 外键关联示例 ===
+    # 在 columns 和 forms 中添加：
+    # company_id:
+    #   type: int
+    #   label: '所属公司'
+    #   foreignKey:
+    #     entity: company
+    #     displayColumn: name
