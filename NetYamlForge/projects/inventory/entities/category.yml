@@ -1,51 +1,62 @@
 entities:
   category:
-    table: category
-    key: id
+    table: Categories
+    key: Id
     displayName: カテゴリ
-    displayNameI18n: {ja-JP: カテゴリ, zh-CN: 类别, en-US: Category}
+    displayColumn: Name
+    softDelete: false
+    paging:
+      pageSize: 10
+      mode: numbered
+    layout:
+      forms:
+        columns: 1
+        order:
+        - Name
+        - Description
+      filters:
+        columns: 1
+        order:
+        - Name
     columns:
-      id:
+      Id:
         type: int
         identity: true
         label: ID
+        searchable: false
         sortable: true
-        hidden: false
-      name:
+      Name:
         type: string
-        required: true
         label: カテゴリ名
-        labelI18n: {ja-JP: カテゴリ名, zh-CN: 类别名称, en-US: Category Name}
         searchable: true
         sortable: true
-        hidden: false
-      description:
+      Description:
         type: string
         label: 説明
-        labelI18n: {ja-JP: 説明, zh-CN: 描述, en-US: Description}
-        searchable: true
-        hidden: false
+        multiline: true
+      CreatedAt:
+        type: string
+        label: 作成日
+        readonly: true
     forms:
-      name:
+      Name:
         type: string
-        required: true
         label: カテゴリ名
         editable: true
-        hidden: false
-      description:
+        required: true
+      Description:
         type: string
-        required: false
         label: 説明
         editable: true
-        hidden: false
-    layout:
-      forms:
-        columns: 2
-        order: [name, description]
+        multiline: true
+    filters:
+      Name:
+        type: text
+        label: カテゴリ名
+        expression: Categories.Name
     hooks:
-      beforeCreate:
-        - validate_required
-        - trim
-      beforeUpdate:
-        - validate_required
-        - trim
+      beforeDelete: [check_category_usage]
+    confirmation:
+      create: 新しいカテゴリを登録してよろしいですか？
+      update: カテゴリ情報を更新してよろしいですか？
+      delete: このカテゴリを削除してもよろしいですか？

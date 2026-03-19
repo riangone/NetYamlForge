@@ -1,134 +1,125 @@
 entities:
   product:
-    table: product
-    key: id
+    table: Products
+    key: Id
     displayName: 商品
-    displayNameI18n: {ja-JP: 商品, zh-CN: 商品, en-US: Product}
-    joins:
-      - type: left
-        table: category
-        alias: c
-        on: "product.category_id = c.id"
-      - type: left
-        table: supplier
-        alias: s
-        on: "product.supplier_id = s.id"
-    columns:
-      id:
-        type: int
-        identity: true
-        label: ID
-        sortable: true
-        hidden: false
-      name:
-        type: string
-        required: true
-        label: 商品名
-        labelI18n: {ja-JP: 商品名, zh-CN: 商品名称, en-US: Product Name}
-        searchable: true
-        sortable: true
-        hidden: false
-      sku:
-        type: string
-        required: true
-        label: SKU
-        labelI18n: {ja-JP: SKU, zh-CN: SKU编码, en-US: SKU}
-        searchable: true
-        sortable: true
-        hidden: false
-      category_id:
-        type: int
-        label: カテゴリID
-        labelI18n: {ja-JP: カテゴリID, zh-CN: 类别ID, en-US: Category ID}
-        hidden: false
-      category_name:
-        type: string
-        expression: "c.name"
-        label: カテゴリ
-        labelI18n: {ja-JP: カテゴリ, zh-CN: 类别, en-US: Category}
-        searchable: true
-        hidden: false
-      supplier_id:
-        type: int
-        label: 仕入先ID
-        labelI18n: {ja-JP: 仕入先ID, zh-CN: 供应商ID, en-US: Supplier ID}
-        hidden: false
-      supplier_name:
-        type: string
-        expression: "s.name"
-        label: 仕入先
-        labelI18n: {ja-JP: 仕入先, zh-CN: 供应商, en-US: Supplier}
-        searchable: true
-        hidden: false
-      price:
-        type: decimal
-        label: 単価
-        labelI18n: {ja-JP: 単価, zh-CN: 单价, en-US: Unit Price}
-        sortable: true
-        hidden: false
-      stock_qty:
-        type: int
-        label: 在庫数
-        labelI18n: {ja-JP: 在庫数, zh-CN: 库存数量, en-US: Stock Qty}
-        sortable: true
-        hidden: false
-      reorder_level:
-        type: int
-        label: 発注点
-        labelI18n: {ja-JP: 発注点, zh-CN: 补货点, en-US: Reorder Level}
-        sortable: true
-        hidden: false
-    forms:
-      name:
-        type: string
-        required: true
-        label: 商品名
-        editable: true
-        hidden: false
-      sku:
-        type: string
-        required: true
-        label: SKU
-        editable: true
-        hidden: false
-      category_id:
-        type: int
-        required: false
-        label: カテゴリID
-        editable: true
-        hidden: false
-      supplier_id:
-        type: int
-        required: false
-        label: 仕入先ID
-        editable: true
-        hidden: false
-      price:
-        type: decimal
-        required: false
-        label: 単価
-        editable: true
-        hidden: false
-      stock_qty:
-        type: int
-        required: false
-        label: 在庫数
-        editable: true
-        hidden: false
-      reorder_level:
-        type: int
-        required: false
-        label: 発注点
-        editable: true
-        hidden: false
+    displayColumn: Name
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
     layout:
       forms:
         columns: 2
-        order: [name, sku, category_id, supplier_id, price, stock_qty, reorder_level]
+        order:
+        - Name
+        - CategoryId
+        - Price
+        - Stock
+        - MinStock
+        - IsActive
+      filters:
+        columns: 3
+        order:
+        - Name
+        - CategoryId
+        - IsActive
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        searchable: false
+        sortable: true
+      Name:
+        type: string
+        label: 商品名
+        searchable: true
+        sortable: true
+      CategoryId:
+        type: int
+        label: カテゴリ
+        foreignKey:
+          entity: category
+          displayColumn: Name
+      Price:
+        type: decimal
+        label: 価格
+        format: "¥{0:N0}"
+      Stock:
+        type: int
+        label: 在庫数
+      MinStock:
+        type: int
+        label: 最小在庫
+      IsActive:
+        type: bool
+        label: 有効
+      CreatedAt:
+        type: string
+        label: 作成日
+        readonly: true
+      UpdatedAt:
+        type: string
+        label: 更新日
+        readonly: true
+    forms:
+      Name:
+        type: string
+        label: 商品名
+        editable: true
+        required: true
+      CategoryId:
+        type: int
+        label: カテゴリ
+        editable: true
+        dropdown: true
+      Price:
+        type: decimal
+        label: 価格
+        editable: true
+        required: true
+        min: 0
+      Stock:
+        type: int
+        label: 在庫数
+        editable: true
+        min: 0
+      MinStock:
+        type: int
+        label: 最小在庫
+        editable: true
+        min: 0
+      IsActive:
+        type: bool
+        label: 有効
+        editable: true
+    filters:
+      Name:
+        type: text
+        label: 商品名
+        expression: Products.Name
+      CategoryId:
+        type: select
+        label: カテゴリ
+        expression: Products.CategoryId
+        dropdown: true
+      IsActive:
+        type: bool
+        label: 有効/無効
+        expression: Products.IsActive
+    links:
+      stockMovements:
+        label: 在庫移動履歴
+        targetEntity: stockmovement
+        filter:
+          ProductId: Id
     hooks:
-      beforeCreate:
-        - validate_required
-        - trim
-      beforeUpdate:
-        - validate_required
-        - trim
+      beforeCreate: [validate_product_price, check_stock_threshold]
+      beforeUpdate: [validate_product_price, check_stock_threshold]
+      afterCreate: [check_stock_threshold]
+      afterUpdate: [check_stock_threshold]
+    confirmation:
+      create: 新しい商品を登録してよろしいですか？
+      update: 商品情報を更新してよろしいですか？
+      delete: この商品を削除してもよろしいですか？

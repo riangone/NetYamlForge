@@ -1,0 +1,28 @@
+# 在庫管理システム用レイアウト設定
+
+header:
+  title: 在庫管理システム
+
+navigation:
+  showDashboard: true
+  entities:
+    - product
+    - category
+    - stockmovement
+  items:
+    - label: ダッシュボード
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: 商品一覧
+      url: /inventory/DynamicEntity/Index?entity=product
+      icon: 📦
+    - label: カテゴリ
+      url: /inventory/DynamicEntity/Index?entity=category
+      icon: 🏷️
+    - label: 在庫移動
+      url: /inventory/DynamicEntity/Index?entity=stockmovement
+      icon: 🔄
+    - label: 在庫状況
+      url: /inventory/Page/StockStatus
+      icon: 📈

@@ -1,33 +1,33 @@
 hero:
-  eyebrow: Inventory Management
-  title: 在庫管理システム
-  description: 商品・サプライヤー・発注・在庫移動を統合管理。カスタムフックで在庫数を自動更新するオペレーション向けシステム。
-  primaryActionLabel: 商品一覧
+  eyebrow: 在庫管理システム
+  title: 在庫管理ダッシュボード
+  description: 商品・在庫・売上を一元的に管理するシステムです。
+  primaryActionLabel: 商品一覧へ
   primaryActionUrl: /inventory/DynamicEntity/Index?entity=product
-  secondaryActionLabel: Dashboard
+  secondaryActionLabel: ダッシュボード
   secondaryActionUrl: /inventory/Dashboard
   highlights:
-    - Custom Hooks
-    - Stock Control
-    - Purchase Orders
+    - リアルタイム在庫管理
+    - 自動発注アラート
+    - 売上分析
 
-projectsSectionTitle: Inventory Workspace
-projectsSectionLead: 在庫状況をリアルタイムに把握し、発注・仕入れ管理を行います。
+projectsSectionTitle: 在庫管理ワークスペース
+projectsSectionLead: 商品管理から在庫移動、売上分析までを一元管理。
 
 quickActions:
-  - label: 商品
+  - label: 商品一覧
     url: /inventory/DynamicEntity/Index?entity=product
     style: btn-primary
     icon: 📦
+  - label: 新規商品登録
+    url: /inventory/DynamicEntity/CreatePage?entity=product
+    style: btn-accent
+    icon: ➕
   - label: 在庫移動
-    url: /inventory/DynamicEntity/Index?entity=stock_movement
+    url: /inventory/DynamicEntity/CreatePage?entity=stockmovement
     style: btn-outline
     icon: 🔄
-  - label: 発注
-    url: /inventory/DynamicEntity/Index?entity=purchase_order
+  - label: 在庫状況
+    url: /inventory/Page/StockStatus
     style: btn-outline
-    icon: 🛒
-  - label: サプライヤー
-    url: /inventory/DynamicEntity/Index?entity=supplier
-    style: btn-outline
-    icon: 🏭
+    icon: 📈
