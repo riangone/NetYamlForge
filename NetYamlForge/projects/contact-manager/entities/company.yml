@@ -1,4 +1,3 @@
-# 公司实体
 entities:
   company:
     table: company
@@ -9,6 +8,10 @@ entities:
       ja: 会社
       en: Company
       zh: 公司
+
+    paging:
+      pageSize: 20
+      mode: numbered
 
     columns:
       id: { type: int, identity: true, label: 'ID', sortable: true }
@@ -43,8 +46,8 @@ entities:
 
     hooks:
       beforeCreate:
-        - trim_company_fields
+        - trim:name
         - now:createdAt
       beforeUpdate:
-        - trim_company_fields
+        - trim:name
         - now:updatedAt

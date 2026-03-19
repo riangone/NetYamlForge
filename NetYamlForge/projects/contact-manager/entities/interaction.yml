@@ -1,4 +1,3 @@
-# 交互记录实体
 entities:
   interaction:
     table: interaction
@@ -9,6 +8,10 @@ entities:
       ja: 交互記録
       en: Interaction
       zh: 交互记录
+
+    paging:
+      pageSize: 20
+      mode: numbered
 
     columns:
       id: { type: int, identity: true, label: 'ID', sortable: true }
@@ -71,8 +74,6 @@ entities:
 
     hooks:
       beforeCreate:
-        - interaction_set_defaults
         - now:createdAt
       beforeUpdate:
-        - interaction_update_timestamp
         - now:updatedAt
