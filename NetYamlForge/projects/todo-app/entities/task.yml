@@ -200,7 +200,7 @@ entities:
       Status:
         type: toggle-group
         label: ステータス
-        options:
+        optionLabels:
           pending: "📋 Pending"
           in_progress: "🔄 In Progress"
           review: "👀 Review"

@@ -9,7 +9,7 @@ public class DynamicEntityFormValidationServiceTests
     [Fact]
     public void ConvertAndValidate_SkipsIdentityColumn()
     {
-        var sut = new DynamicEntityFormValidationService(new ValueConverter());
+        var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));
         var meta = new EntityDefinition
         {
             Table = "Orders",
@@ -33,7 +33,7 @@ public class DynamicEntityFormValidationServiceTests
     [Fact]
     public void ConvertAndValidate_DefaultsMissingBoolToFalse()
     {
-        var sut = new DynamicEntityFormValidationService(new ValueConverter());
+        var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));
         var meta = new EntityDefinition
         {
             Table = "Orders",
@@ -55,7 +55,7 @@ public class DynamicEntityFormValidationServiceTests
     [Fact]
     public void ConvertAndValidate_ReturnsError_WhenConversionFails()
     {
-        var sut = new DynamicEntityFormValidationService(new ValueConverter());
+        var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));
         var meta = new EntityDefinition
         {
             Table = "Orders",

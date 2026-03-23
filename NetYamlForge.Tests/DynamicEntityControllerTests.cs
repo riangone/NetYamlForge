@@ -359,7 +359,7 @@ public class DynamicEntityControllerTests
             new DynamicEntityListHttpResponseService(),
             new DynamicEntityNavigationService(metaProvider),
             diagnosticsService,
-            new DynamicEntityFormValidationService(new ValueConverter()),
+            new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter())),
             new CommandErrorHttpMapper(),
             scope,
             new FileUploadService(

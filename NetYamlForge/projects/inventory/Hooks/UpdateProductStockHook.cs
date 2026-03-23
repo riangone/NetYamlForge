@@ -33,14 +33,15 @@ public sealed class UpdateProductStockHook : IEntityHook
             return Task.FromResult(HookResult.Continue());
 
         // 在庫移動のバリデーション
+        // 必須フィールドが存在しない場合はこのエンティティ向けフックではないとみなしてスキップ
         if (!ctx.Values.TryGetValue("ProductId", out var productIdObj) || productIdObj is not int productId)
-            return Task.FromResult(HookResult.Abort("商品 ID が指定されていません。"));
+            return Task.FromResult(HookResult.Continue());
 
         if (!ctx.Values.TryGetValue("Quantity", out var quantityObj) || quantityObj is not int quantity)
-            return Task.FromResult(HookResult.Abort("数量が指定されていません。"));
+            return Task.FromResult(HookResult.Continue());
 
         if (!ctx.Values.TryGetValue("MovementType", out var movementTypeObj) || movementTypeObj is not string movementType)
-            return Task.FromResult(HookResult.Abort("移動種別が指定されていません。"));
+            return Task.FromResult(HookResult.Continue());
 
         // 移動種別による数量の符号決定
         int stockChange = movementType switch

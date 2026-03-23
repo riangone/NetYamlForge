@@ -6,6 +6,7 @@
 using System.Data;
 using System.Diagnostics;
 using System.Text.Json;
+using Microsoft.Extensions.Logging.Abstractions;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Hooks;
 
@@ -19,16 +20,27 @@ public sealed class EntityCrudExecutionService
     private readonly ProjectScope _projectScope;
     private readonly ILogger<EntityCrudExecutionService> _logger;
 
+    /// <summary>
+    /// DIコンテナから直接フック依存を受け取るコンストラクタ。
+    /// HookExecutionService を内部生成し、テストでも直接インスタンス化可能。
+    /// </summary>
+    [ActivatorUtilitiesConstructor]
     public EntityCrudExecutionService(
         IDbConnection db,
         IAuditLogService audit,
-        HookExecutionService hookExecution,
+        IEntityHookRegistry hookRegistry,
+        IProjectHookRegistry projectHookRegistry,
+        IHookExecutionTelemetry hookTelemetry,
         ProjectScope projectScope,
         ILogger<EntityCrudExecutionService> logger)
     {
         _db = db;
         _audit = audit;
-        _hookExecution = hookExecution;
+        _hookExecution = new HookExecutionService(
+            hookRegistry,
+            projectHookRegistry,
+            hookTelemetry,
+            NullLogger<HookExecutionService>.Instance);
         _projectScope = projectScope;
         _logger = logger;
     }

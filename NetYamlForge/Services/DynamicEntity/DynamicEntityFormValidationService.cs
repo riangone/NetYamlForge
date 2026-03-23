@@ -16,6 +16,9 @@ public sealed class DynamicEntityFormValidationService
 {
     private readonly FormValueValidationService _validator;
 
+    /// <summary>
+    /// FormValueValidationService を注入するコンストラクタ（DI コンテナ向け）。
+    /// </summary>
     public DynamicEntityFormValidationService(FormValueValidationService validator)
     {
         _validator = validator;
