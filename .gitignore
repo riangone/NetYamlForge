@@ -22,8 +22,13 @@ logs/
 packages/
 
 # Runtime data
+*.db
 *.db-shm
 *.db-wal
+
+# App runtime files
+*.pid
+reports/
 
 # OS
 .DS_Store
