@@ -15,12 +15,12 @@
   </ItemGroup>
   <ItemGroup>
     <!-- アナライザープロジェクト: 禁止パターンをビルド時に検出 (DCS001-DCS004) -->
-    <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.5.0" />
+    <PackageReference Include="itext7" Version="9.5.0" />
     <PackageReference Include="JsonSchema.Net" Version="8.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />

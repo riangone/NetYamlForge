@@ -35,6 +35,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly IFileUploadService _fileUploadService;
     private readonly IProjectActionRegistry _actionRegistry;
     private readonly IDbConnection _db;
+    private readonly IPdfExportService _pdfExport;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -55,6 +56,7 @@ public class DynamicEntityController : BaseProjectController
         IFileUploadService fileUploadService,
         IProjectActionRegistry actionRegistry,
         IDbConnection db,
+        IPdfExportService pdfExport,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -74,6 +76,7 @@ public class DynamicEntityController : BaseProjectController
         _fileUploadService = fileUploadService;
         _actionRegistry = actionRegistry;
         _db = db;
+        _pdfExport = pdfExport;
         _logger = logger;
     }
 
@@ -567,11 +570,13 @@ public class DynamicEntityController : BaseProjectController
         }
 
         var format = (exportDef.Format ?? "csv").ToLowerInvariant();
-        var defaultPattern = $"{entity}_{exportKey}_{{date:yyyyMMdd_HHmmss}}.{format}";
+        var ext = format == "pdf" ? "pdf" : format == "json" ? "json" : format == "tsv" ? "tsv" : "csv";
+        var defaultPattern = $"{entity}_{exportKey}_{{date:yyyyMMdd_HHmmss}}.{ext}";
         var filename = ResolveExportFilename(exportDef.Filename ?? defaultPattern);
 
         return format switch
         {
+            "pdf"  => BuildPdfExport(itemList, meta, columns, exportDef.Pdf ?? new(), filename),
             "json" => BuildJsonExport(itemList, columns, filename),
             "tsv"  => BuildDelimitedExport(itemList, meta, columns, '\t', "text/tab-separated-values", filename),
             _      => BuildDelimitedExport(itemList, meta, columns, ',', "text/csv", filename),
@@ -646,6 +651,19 @@ public class DynamicEntityController : BaseProjectController
         var json = JsonSerializer.Serialize(rows, new JsonSerializerOptions { WriteIndented = true });
         var bytes = Encoding.UTF8.GetBytes(json);
         return File(bytes, "application/json", filename);
+    }
+
+    /// <summary>PDF 形式のレスポンスを生成します。</summary>
+    private IActionResult BuildPdfExport(
+        List<IDictionary<string, object>> items,
+        EntityDefinition meta,
+        List<(string Key, string Label)> columns,
+        NetYamlForge.Models.PdfExportOptions options,
+        string filename)
+    {
+        var projectDir = _projectScope.Current?.ProjectDir;
+        var bytes = _pdfExport.Generate(items, columns, meta, options, projectDir);
+        return File(bytes, "application/pdf", filename);
     }
 
     /// <summary>

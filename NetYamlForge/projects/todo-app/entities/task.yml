@@ -311,6 +311,44 @@ entities:
         filename: "overdue_tasks_{date:yyyyMMdd}.json"
         sqlFile: exports/sql/overdue_tasks.sql
 
+      # エクスポート例3: PDF レポート（ランドスケープ、ヘッダー色・交互行色付き）
+      task_pdf:
+        label: "PDF レポート"
+        format: pdf
+        filename: "tasks_{date:yyyyMMdd}.pdf"
+        columns:
+          - Title
+          - Status
+          - Priority
+          - DueDate
+          - AssignedTo
+          - ProjectName
+        pdf:
+          title: "タスク一覧レポート"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#1E3A5F"
+          oddRowColor: "#F0F4F8"
+          showPageNumbers: true
+          showGeneratedAt: true
+          # fontFile: fonts/NotoSansJP-Regular.ttf  # CJK フォント指定例
+          columns:
+            - key: Title
+              width: 30
+            - key: Status
+              width: 13
+              align: center
+            - key: Priority
+              width: 11
+              align: center
+            - key: DueDate
+              width: 14
+              align: center
+            - key: AssignedTo
+              width: 16
+            - key: ProjectName
+              width: 16
+
     links:
       project:
         label: プロジェクト

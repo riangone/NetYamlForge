@@ -137,6 +137,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPagePermissionService, PagePermissionService>();
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();
+        // PDF エクスポートサービス
+        services.AddSingleton<IPdfExportService, PdfExportService>();
         services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 
