@@ -7,7 +7,7 @@
     var invokeUrl = Url.Action("InvokeAction", "DynamicEntity", new
     {
         entity = Model.Entity,
-        action = Model.Action,
+        actionKey = Model.Action,
         id = Model.RecordId
     });
 }

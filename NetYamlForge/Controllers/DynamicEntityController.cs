@@ -439,7 +439,7 @@ public class DynamicEntityController : BaseProjectController
     /// カスタムアクション入力フォームをモーダル用パーシャルとして返します。
     /// inputs が空のアクションは確認ダイアログを表示せずそのまま InvokeAction を呼びます。
     /// </summary>
-    public IActionResult ActionForm(string entity, string action, string? id = null)
+    public IActionResult ActionForm(string entity, string actionKey, string? id = null)
     {
         entity = NormalizeSingleValue(entity) ?? "";
         var meta = _meta.Get(entity);
@@ -447,11 +447,11 @@ public class DynamicEntityController : BaseProjectController
         if (accessDenied != null)
             return accessDenied;
 
-        if (!meta.Actions.TryGetValue(action, out var actionDef))
-            return NotFound($"アクション '{action}' が見つかりません。");
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound($"アクション '{actionKey}' が見つかりません。");
 
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
-        return PartialView("_ActionForm", new ActionFormViewModel(entity, action, actionDef, keyValue));
+        return PartialView("_ActionForm", new ActionFormViewModel(entity, actionKey, actionDef, keyValue));
     }
 
     /// <summary>
@@ -460,7 +460,7 @@ public class DynamicEntityController : BaseProjectController
     [HttpPost]
     public async Task<IActionResult> InvokeAction(
         string entity,
-        string action,
+        string actionKey,
         string? id = null,
         [FromForm] Dictionary<string, string?> form = null!,
         [FromForm] string? returnUrl = null)
@@ -473,14 +473,14 @@ public class DynamicEntityController : BaseProjectController
         if (accessDenied != null)
             return accessDenied;
 
-        if (!meta.Actions.TryGetValue(action, out var actionDef))
-            return NotFound($"アクション '{action}' が見つかりません。");
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound($"アクション '{actionKey}' が見つかりません。");
 
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
         var projectName = _projectScope.Current?.Name ?? "";
 
         // ハンドラー名を解決（省略時はアクションキー名）
-        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? action : actionDef.Handler;
+        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? actionKey : actionDef.Handler;
         var handler = _actionRegistry.Find(projectName, handlerName);
         if (handler == null)
         {
@@ -499,7 +499,7 @@ public class DynamicEntityController : BaseProjectController
         {
             Project = projectName,
             Entity = entity,
-            Action = action,
+            Action = actionKey,
             RecordId = keyValue,
             Inputs = inputs,
             UserName = User.Identity?.Name
@@ -530,7 +530,7 @@ public class DynamicEntityController : BaseProjectController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "アクション '{Action}' の実行中にエラーが発生しました", action);
+            _logger.LogError(ex, "アクション '{Action}' の実行中にエラーが発生しました", actionKey);
             return StatusCode(500, "アクションの実行中にエラーが発生しました。");
         }
 

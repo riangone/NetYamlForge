@@ -265,7 +265,7 @@
                                         {
                                             // 入力フォームまたは確認ダイアログが必要な場合はモーダルを開く
                                             <button class="btn btn-xs btn-accent btn-outline"
-                                                    hx-get="@Url.Action("ActionForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["action"] = actionKey, [pkParamName] = itemId })"
+                                                    hx-get="@Url.Action("ActionForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
                                                     hx-target="#modal-form-content"
                                                     hx-swap="innerHTML">
                                                 @actionDef.Label
@@ -275,7 +275,7 @@
                                         {
                                             // 入力も確認もない場合は直接実行
                                             <button class="btn btn-xs btn-accent btn-outline"
-                                                    hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["action"] = actionKey, [pkParamName] = itemId })"
+                                                    hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
                                                     hx-target="#list-container"
                                                     hx-swap="innerHTML">
                                                 @actionDef.Label
