@@ -586,10 +586,19 @@ public class EntityHooksDefinition : HooksDefinitionBase
 public class ActionInputField
 {
     public string Name { get; set; } = default!;
+    /// <summary>
+    /// 入力フィールドの種別。
+    /// string / text / textarea / date / number / dropdown（Options 指定時）/ file
+    /// </summary>
     public string Type { get; set; } = "string";
     public string? Label { get; set; }
     public bool Required { get; set; }
+    /// <summary>dropdown 用の選択肢</summary>
     public List<string>? Options { get; set; }
+    /// <summary>type: file — 許可する拡張子（カンマ区切り例: ".csv,.xlsx"）。省略時は全拡張子許可。</summary>
+    public string? AllowedExtensions { get; set; }
+    /// <summary>type: file — 最大ファイルサイズ（バイト）。省略時は 10MB。</summary>
+    public long? MaxSizeBytes { get; set; }
 }
 
 /// <summary>カスタムアクションのフック定義（実行前後）</summary>

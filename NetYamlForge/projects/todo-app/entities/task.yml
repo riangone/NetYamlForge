@@ -270,6 +270,26 @@ entities:
         confirm: "期限切れのタスクをすべてキャンセルにしますか？"
         handler: bulk_close_overdue
 
+      # ファイルアップロード + カスタム処理の例
+      import_csv:
+        label: "CSV インポート"
+        scope: header
+        handler: import_tasks_csv
+        inputs:
+          - name: CsvFile
+            type: file
+            label: タスク CSV ファイル
+            required: true
+            allowedExtensions: ".csv"
+            maxSizeBytes: 5242880   # 5 MB
+          - name: DefaultStatus
+            type: dropdown
+            label: インポート時のステータス
+            required: true
+            options:
+              - todo
+              - in_progress
+
     exports:
       # エクスポート例1: 現在のフィルタを引き継いで特定列のみ CSV 出力
       filtered_csv:

@@ -2,9 +2,12 @@
    inputs が空のアクションでもこのパーシャルを描画し、確認のみ行います。 *@
 
 @model NetYamlForge.Controllers.ActionFormViewModel
+@using NetYamlForge.Models
 @{
     var hasInputs = Model.ActionDef.Inputs != null && Model.ActionDef.Inputs.Count > 0;
-    var invokeUrl = Url.Action("InvokeAction", "DynamicEntity", new
+    var hasFileInput = Model.ActionDef.Inputs?.Any(i => i.Type == "file") ?? false;
+    var invokeAction = Model.RecordId == null ? "InvokeHeaderAction" : "InvokeAction";
+    var invokeUrl = Url.Action(invokeAction, "DynamicEntity", new
     {
         entity = Model.Entity,
         actionKey = Model.Action,
@@ -20,9 +23,11 @@
         <p class="text-sm text-base-content/70">@Model.ActionDef.Confirm</p>
     }
 
+    @* ファイル入力に対応するため常に multipart/form-data でエンコードする *@
     <form hx-post="@invokeUrl"
           hx-target="#list-container"
           hx-swap="innerHTML"
+          hx-encoding="multipart/form-data"
           hx-on::after-request="if(event.detail.successful){ document.getElementById('entity-form-modal').close(); }">
 
         @if (hasInputs)
@@ -34,7 +39,24 @@
                         <label class="label">
                             <span class="label-text">@(input.Label ?? input.Name)@(input.Required ? " *" : "")</span>
                         </label>
-                        @if (input.Options != null && input.Options.Count > 0)
+                        @if (input.Type == "file")
+                        {
+                            @* ファイルアップロード入力 *@
+                            var accept = string.IsNullOrWhiteSpace(input.AllowedExtensions) ? "" : input.AllowedExtensions;
+                            var maxMb = input.MaxSizeBytes.HasValue
+                                ? $"最大 {input.MaxSizeBytes.Value / 1024 / 1024} MB"
+                                : "最大 10 MB";
+                            <input type="file"
+                                   name="@input.Name"
+                                   class="file-input file-input-bordered file-input-sm w-full"
+                                   accept="@accept"
+                                   @(input.Required ? "required" : "") />
+                            <span class="label-text-alt text-base-content/50 mt-1">
+                                @if (!string.IsNullOrWhiteSpace(accept)) { <text>@accept &nbsp;|&nbsp;</text> }
+                                @maxMb
+                            </span>
+                        }
+                        else if (input.Options != null && input.Options.Count > 0)
                         {
                             <select name="@input.Name" class="select select-bordered select-sm" @(input.Required ? "required" : "")>
                                 <option value="">-- 選択 --</option>

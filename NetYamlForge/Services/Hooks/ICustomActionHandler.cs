@@ -24,6 +24,13 @@ public class CustomActionContext
     /// <summary>アクションフォームからの入力値マップ</summary>
     public Dictionary<string, object?> Inputs { get; set; } = new();
 
+    /// <summary>
+    /// アップロードされたファイルの一時パスマップ。
+    /// キー: ActionInputField.Name（YAML 定義名）、値: 一時ファイルの絶対パス。
+    /// ハンドラー実行後に自動削除されます。
+    /// </summary>
+    public Dictionary<string, string> Files { get; set; } = new();
+
     /// <summary>操作を実行したユーザー名</summary>
     public string? UserName { get; set; }
 

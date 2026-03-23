@@ -649,6 +649,73 @@ public class DynamicEntityController : BaseProjectController
     }
 
     /// <summary>
+    /// アクションの file 型 inputs に対応するアップロードファイルを一時ディレクトリに保存します。
+    /// 成功した場合は (inputName → 一時ファイル絶対パス) の辞書を返します。
+    /// バリデーションエラーがある場合はエラーメッセージを返します。
+    /// </summary>
+    private static async Task<(Dictionary<string, string> Files, string? Error)> SaveActionUploadedFilesAsync(
+        NetYamlForge.Models.ActionDefinition actionDef,
+        IFormFileCollection formFiles)
+    {
+        var saved = new Dictionary<string, string>();
+        if (actionDef.Inputs == null) return (saved, null);
+
+        foreach (var input in actionDef.Inputs.Where(i => i.Type == "file"))
+        {
+            var formFile = formFiles.GetFile(input.Name);
+            if (formFile == null || formFile.Length == 0)
+            {
+                if (input.Required)
+                    return (saved, $"'{input.Label ?? input.Name}' は必須です。");
+                continue;
+            }
+
+            // サイズ検証
+            var maxBytes = input.MaxSizeBytes ?? 10L * 1024 * 1024;
+            if (formFile.Length > maxBytes)
+                return (saved, $"'{input.Label ?? input.Name}' のファイルサイズが上限（{maxBytes / 1024 / 1024} MB）を超えています。");
+
+            // 拡張子検証
+            if (!string.IsNullOrWhiteSpace(input.AllowedExtensions))
+            {
+                var allowed = input.AllowedExtensions
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(e => e.TrimStart('.').ToLowerInvariant())
+                    .ToHashSet();
+                var ext = Path.GetExtension(formFile.FileName).TrimStart('.').ToLowerInvariant();
+                if (!allowed.Contains(ext))
+                    return (saved, $"'{input.Label ?? input.Name}' の拡張子 .{ext} は許可されていません（許可: {input.AllowedExtensions}）。");
+            }
+
+            // 一時ファイルに保存
+            var tempDir = Path.Combine(Path.GetTempPath(), "netyamlforge_uploads");
+            Directory.CreateDirectory(tempDir);
+            var safeFilename = $"{Guid.NewGuid():N}_{Path.GetFileName(formFile.FileName)}";
+            var tempPath = Path.Combine(tempDir, safeFilename);
+
+            await using var fs = System.IO.File.Create(tempPath);
+            await formFile.CopyToAsync(fs);
+
+            saved[input.Name] = tempPath;
+        }
+
+        return (saved, null);
+    }
+
+    /// <summary>アクション実行後に一時ファイルを削除します。</summary>
+    private void CleanupTempFiles(Dictionary<string, string> files)
+    {
+        foreach (var path in files.Values)
+        {
+            try { System.IO.File.Delete(path); }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "一時ファイルの削除に失敗しました: {Path}", path);
+            }
+        }
+    }
+
+    /// <summary>
     /// ヘッダーアクション入力フォームをモーダル用パーシャルとして返します。
     /// </summary>
     public IActionResult HeaderActionForm(string entity, string actionKey)
@@ -696,6 +763,11 @@ public class DynamicEntityController : BaseProjectController
             .Where(kv => kv.Key != "__RequestVerificationToken")
             .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
+        // ファイル入力を一時領域に保存する
+        var (savedFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
+        if (fileError != null)
+            return BadRequest(fileError);
+
         var ctx = new CustomActionContext
         {
             Project = projectName,
@@ -703,6 +775,7 @@ public class DynamicEntityController : BaseProjectController
             Action = actionKey,
             RecordId = null,
             Inputs = inputs,
+            Files = savedFiles,
             UserName = User.Identity?.Name
         };
 
@@ -715,6 +788,10 @@ public class DynamicEntityController : BaseProjectController
         {
             _logger.LogError(ex, "ヘッダーアクション '{Action}' の実行中にエラーが発生しました", actionKey);
             return StatusCode(500, "アクションの実行中にエラーが発生しました。");
+        }
+        finally
+        {
+            CleanupTempFiles(savedFiles);
         }
 
         if (!result.Ok)
@@ -851,6 +928,11 @@ public class DynamicEntityController : BaseProjectController
             .Where(kv => kv.Key != "__RequestVerificationToken")
             .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
+        // ファイル入力を一時領域に保存する
+        var (savedFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
+        if (fileError != null)
+            return BadRequest(fileError);
+
         var ctx = new NetYamlForge.Services.Hooks.CustomActionContext
         {
             Project = projectName,
@@ -858,6 +940,7 @@ public class DynamicEntityController : BaseProjectController
             Action = actionKey,
             RecordId = keyValue,
             Inputs = inputs,
+            Files = savedFiles,
             UserName = User.Identity?.Name
         };
 
@@ -888,6 +971,10 @@ public class DynamicEntityController : BaseProjectController
         {
             _logger.LogError(ex, "アクション '{Action}' の実行中にエラーが発生しました", actionKey);
             return StatusCode(500, "アクションの実行中にエラーが発生しました。");
+        }
+        finally
+        {
+            CleanupTempFiles(ctx.Files);
         }
 
         if (!result.Ok)
