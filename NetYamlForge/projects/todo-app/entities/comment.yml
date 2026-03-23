@@ -50,10 +50,12 @@ entities:
         sortable: true
       EntityType:
         type: string
+        required: true
         label: 対象タイプ
         sortable: true
       EntityId:
         type: int
+        required: true
         label: 対象ID
         sortable: true
       TaskTitle:
@@ -64,11 +66,13 @@ entities:
         sortable: true
       Author:
         type: string
+        required: true
         label: 作成者
         searchable: true
         sortable: true
       Body:
         type: string
+        required: true
         label: コメント
         searchable: true
         sortable: false
