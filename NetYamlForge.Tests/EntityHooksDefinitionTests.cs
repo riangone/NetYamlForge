@@ -81,4 +81,21 @@ public class EntityHooksDefinitionTests
         Assert.Contains("validate_required:Name", expanded);
         Assert.Contains(warnings, w => w.Contains("循環参照", StringComparison.Ordinal));
     }
+
+    [Fact]
+    public void TaskYaml_DeserializesHooksCorrectly()
+    {
+        var yaml = File.ReadAllText("../../../../NetYamlForge/projects/todo-app/entities/task.yml");
+        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
+            .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+        var root = deserializer.Deserialize<EntityConfigRoot>(yaml);
+        var taskDef = root.Entities["task"];
+        Assert.NotNull(taskDef.Hooks);
+        var bc = taskDef.Hooks!.GetHookList(h => h.BeforeCreate);
+        Assert.NotNull(bc);
+        Assert.Contains("normalize_title", bc!);
+        Assert.Contains("validate_due_date", bc!);
+    }
 }

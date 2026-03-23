@@ -71,7 +71,7 @@ public sealed class DynamicEntityCommandService
         var newId = 0;
         await _crudExecutionService.ExecuteCrudTransactionAsync(async tx =>
         {
-            newId = await _repo.InsertAsync(entity, values, tx);
+            newId = await _repo.InsertAsync(entity, hookCtx.Values, tx);
             hookCtx.Id = newId;
             await _crudExecutionService.WriteCrudAuditAsync("create", entity, $"Created {entity}", userName, tx);
             await _crudExecutionService.RunAfterHookAsync(afterHooks, hookCtx, tx);
@@ -122,7 +122,7 @@ public sealed class DynamicEntityCommandService
         {
             await _crudExecutionService.ExecuteCrudTransactionAsync(async tx =>
             {
-                var affected = await _repo.UpdateAsync(entity, keyValue ?? string.Empty, values, tx);
+                var affected = await _repo.UpdateAsync(entity, keyValue ?? string.Empty, hookCtx.Values, tx);
                 if (affected <= 0)
                 {
                     throw new NoRowsAffectedException("update");

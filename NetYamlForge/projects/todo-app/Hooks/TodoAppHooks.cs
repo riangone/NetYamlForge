@@ -50,6 +50,14 @@ public class ValidateTaskDueDateHook : IEntityHook
         if (!ctx.Values.TryGetValue("DueDate", out var dueDateVal) || dueDateVal == null)
             return Task.FromResult(HookResult.Continue());
 
+        // ValueConverter が date 型を DateTime オブジェクトに変換済みの場合を優先処理
+        if (dueDateVal is DateTime dt)
+        {
+            if (dt.Date < DateTime.Today)
+                return Task.FromResult(HookResult.Abort("期限日には本日以降の日付を入力してください。"));
+            return Task.FromResult(HookResult.Continue());
+        }
+
         var dueDateStr = dueDateVal.ToString() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(dueDateStr))
             return Task.FromResult(HookResult.Continue());
