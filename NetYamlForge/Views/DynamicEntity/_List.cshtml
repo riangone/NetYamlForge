@@ -255,6 +255,33 @@
                                             hx-confirm="Delete this item?">
                                         Delete
                                     </button>
+                                    @foreach (var actionEntry in Model.Meta.Actions)
+                                    {
+                                        var actionKey = actionEntry.Key;
+                                        var actionDef = actionEntry.Value;
+                                        var hasInputs = actionDef.Inputs != null && actionDef.Inputs.Count > 0;
+                                        var hasConfirm = !string.IsNullOrWhiteSpace(actionDef.Confirm);
+                                        if (hasInputs || hasConfirm)
+                                        {
+                                            // 入力フォームまたは確認ダイアログが必要な場合はモーダルを開く
+                                            <button class="btn btn-xs btn-accent btn-outline"
+                                                    hx-get="@Url.Action("ActionForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["action"] = actionKey, [pkParamName] = itemId })"
+                                                    hx-target="#modal-form-content"
+                                                    hx-swap="innerHTML">
+                                                @actionDef.Label
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            // 入力も確認もない場合は直接実行
+                                            <button class="btn btn-xs btn-accent btn-outline"
+                                                    hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["action"] = actionKey, [pkParamName] = itemId })"
+                                                    hx-target="#list-container"
+                                                    hx-swap="innerHTML">
+                                                @actionDef.Label
+                                            </button>
+                                        }
+                                    }
                                 </div>
                             </td>
                         </tr>

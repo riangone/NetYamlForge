@@ -7,7 +7,8 @@ public enum CrudOperation
 {
     Create,
     Update,
-    Delete
+    Delete,
+    CustomAction
 }
 
 /// <summary>

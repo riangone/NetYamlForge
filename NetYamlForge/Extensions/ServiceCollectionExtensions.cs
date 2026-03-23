@@ -165,6 +165,9 @@ public static class ServiceCollectionExtensions
         // 各プロジェクトの Hooks/ ディレクトリからビジネスロジック・バリデーション・データ変換を読み込みます。
         services.AddSingleton<IProjectBusinessLogicRegistry, ProjectBusinessLogicRegistry>();
 
+        // ===== プロジェクト固有カスタムアクション =====
+        services.AddSingleton<IProjectActionRegistry, ProjectActionRegistry>();
+
         return services;
     }
 

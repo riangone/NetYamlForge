@@ -158,4 +158,36 @@ public sealed class EntityCrudExecutionService
             throw;
         }
     }
+
+    /// <summary>
+    /// カスタムアクションハンドラーをトランザクション内で実行します。
+    /// ハンドラーが ActionHandlerResult.Failure を返した場合はロールバックします。
+    /// </summary>
+    public async Task<ActionHandlerResult> ExecuteActionAsync(ICustomActionHandler handler, CustomActionContext ctx)
+    {
+        if (_db.State != ConnectionState.Open)
+            _db.Open();
+
+        var result = ActionHandlerResult.Failure("実行前エラー");
+        using var tx = _db.BeginTransaction();
+        try
+        {
+            result = await handler.ExecuteAsync(ctx, _db, tx);
+            if (result.Ok)
+            {
+                tx.Commit();
+            }
+            else
+            {
+                tx.Rollback();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "action_tx result=rollback action={Action}", ctx.Action);
+            tx.Rollback();
+            throw;
+        }
+        return result;
+    }
 }

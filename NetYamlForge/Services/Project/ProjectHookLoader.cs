@@ -27,6 +27,11 @@ public interface IProjectHookLoader
     /// 指定プロジェクトのビジネスロジックを読み込んで登録します。
     /// </summary>
     Task LoadProjectBusinessLogicAsync(string projectName, string projectDir, IProjectBusinessLogicRegistry registry);
+
+    /// <summary>
+    /// 指定プロジェクトのカスタムアクションハンドラーを読み込んで登録します。
+    /// </summary>
+    Task LoadProjectActionHandlersAsync(string projectName, string projectDir, IProjectActionRegistry registry);
 }
 
 /// <summary>
@@ -316,6 +321,59 @@ public class ProjectHookLoader : IProjectHookLoader
 
         ms.Seek(0, SeekOrigin.Begin);
         return Assembly.Load(ms.ToArray());
+    }
+
+    public async Task LoadProjectActionHandlersAsync(string projectName, string projectDir, IProjectActionRegistry registry)
+    {
+        var hooksDir = Path.Combine(projectDir, "Hooks");
+        if (!Directory.Exists(hooksDir))
+            return;
+
+        var csFiles = Directory.GetFiles(hooksDir, "*.cs", SearchOption.AllDirectories);
+        if (csFiles.Length == 0)
+            return;
+
+        try
+        {
+            // アセンブリが既に読み込まれている場合は再利用
+            if (!_loadedAssemblies.TryGetValue(projectName, out var assembly))
+            {
+                assembly = await CompileHooksAsync(projectName, csFiles);
+                if (assembly == null)
+                    return;
+                _loadedAssemblies[projectName] = assembly;
+            }
+
+            using var scope = _scopeFactory.CreateScope();
+            var serviceProvider = scope.ServiceProvider;
+
+            var handlerTypes = assembly.GetTypes()
+                .Where(t => typeof(ICustomActionHandler).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+            foreach (var handlerType in handlerTypes)
+            {
+                try
+                {
+                    var handler = ActivatorUtilities.CreateInstance(serviceProvider, handlerType);
+                    if (handler is ICustomActionHandler h)
+                    {
+                        registry.Register(projectName, h);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "[{ErrorCode}] プロジェクト '{Project}' のアクションハンドラー '{Type}' の初期化に失敗しました",
+                        "ACTION_HANDLER_INIT_FAILED", projectName, handlerType.FullName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "[{ErrorCode}] プロジェクト '{Project}' のアクションハンドラー読み込み中にエラーが発生しました",
+                "ACTION_HANDLER_LOAD_FAILED", projectName);
+        }
     }
 
     private static string GetHookCompileHint(string diagnosticId)

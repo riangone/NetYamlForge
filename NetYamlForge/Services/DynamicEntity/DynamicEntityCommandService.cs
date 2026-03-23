@@ -199,6 +199,18 @@ public sealed class DynamicEntityCommandService
         return CommandResult.Success();
     }
 
+    /// <summary>
+    /// カスタムアクションの before フックを実行します。
+    /// </summary>
+    public Task<HookResult> RunBeforeHooksForActionAsync(List<string> hookNames, EntityHookContext ctx)
+        => _crudExecutionService.RunBeforeHookAsync(hookNames, ctx);
+
+    /// <summary>
+    /// カスタムアクションハンドラーをトランザクション内で実行します。
+    /// </summary>
+    public Task<ActionHandlerResult> ExecuteActionAsync(ICustomActionHandler handler, CustomActionContext ctx)
+        => _crudExecutionService.ExecuteActionAsync(handler, ctx);
+
     // UPDATE/DELETE で影響行数が 0 だった場合にスローする内部例外。
     // ExecuteCrudTransactionAsync の外で catch して ConcurrencyConflict エラーに変換する。
     private sealed class NoRowsAffectedException : Exception

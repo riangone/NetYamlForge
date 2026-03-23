@@ -249,6 +249,24 @@ entities:
         label: 期限日
         expression: Task.DueDate
 
+    actions:
+      mark_done:
+        label: "完了にする"
+        confirm: "このタスクを完了にしますか？"
+        handler: mark_done
+        hooks:
+          before:
+            - audit_log
+      reopen:
+        label: "再オープン"
+        confirm: "このタスクを再オープンしますか？"
+        handler: reopen_task
+        inputs:
+          - name: Reason
+            type: string
+            label: 再オープン理由
+            required: true
+
     links:
       project:
         label: プロジェクト

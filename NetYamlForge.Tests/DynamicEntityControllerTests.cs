@@ -365,6 +365,7 @@ public class DynamicEntityControllerTests
             new FileUploadService(
                 new TestWebHostEnvironment(),
                 NullLogger<FileUploadService>.Instance),
+            new StubProjectActionRegistry(),
             NullLogger<DynamicEntityController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
@@ -580,6 +581,12 @@ public class DynamicEntityControllerTests
     private sealed class DummyDashboardConfigProvider : IDashboardConfigProvider
     {
         public DashboardConfig GetConfig() => new();
+    }
+
+    private sealed class StubProjectActionRegistry : IProjectActionRegistry
+    {
+        public ICustomActionHandler? Find(string projectName, string handlerName) => null;
+        public void Register(string projectName, ICustomActionHandler handler) { }
     }
 
     private sealed class StubUrlHelper : IUrlHelper

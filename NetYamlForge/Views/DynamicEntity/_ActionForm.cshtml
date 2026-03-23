@@ -1,0 +1,73 @@
+@* カスタムアクション入力フォームのモーダルパーシャル。
+   inputs が空のアクションでもこのパーシャルを描画し、確認のみ行います。 *@
+
+@model NetYamlForge.Controllers.ActionFormViewModel
+@{
+    var hasInputs = Model.ActionDef.Inputs != null && Model.ActionDef.Inputs.Count > 0;
+    var invokeUrl = Url.Action("InvokeAction", "DynamicEntity", new
+    {
+        entity = Model.Entity,
+        action = Model.Action,
+        id = Model.RecordId
+    });
+}
+
+<div class="p-4 space-y-4">
+    <h3 class="text-lg font-bold">@Model.ActionDef.Label</h3>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ActionDef.Confirm))
+    {
+        <p class="text-sm text-base-content/70">@Model.ActionDef.Confirm</p>
+    }
+
+    <form hx-post="@invokeUrl"
+          hx-target="#list-container"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful){ document.getElementById('entity-form-modal').close(); }">
+
+        @if (hasInputs)
+        {
+            <div class="space-y-3">
+                @foreach (var input in Model.ActionDef.Inputs!)
+                {
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">@(input.Label ?? input.Name)@(input.Required ? " *" : "")</span>
+                        </label>
+                        @if (input.Options != null && input.Options.Count > 0)
+                        {
+                            <select name="@input.Name" class="select select-bordered select-sm" @(input.Required ? "required" : "")>
+                                <option value="">-- 選択 --</option>
+                                @foreach (var opt in input.Options)
+                                {
+                                    <option value="@opt">@opt</option>
+                                }
+                            </select>
+                        }
+                        else if (input.Type == "textarea")
+                        {
+                            <textarea name="@input.Name" class="textarea textarea-bordered textarea-sm" rows="3" @(input.Required ? "required" : "")></textarea>
+                        }
+                        else
+                        {
+                            <input type="@(input.Type == "date" ? "date" : input.Type == "number" ? "number" : "text")"
+                                   name="@input.Name"
+                                   class="input input-bordered input-sm"
+                                   @(input.Required ? "required" : "") />
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="flex justify-end gap-2 pt-2">
+            <button type="button" class="btn btn-sm btn-ghost"
+                    onclick="document.getElementById('entity-form-modal').close()">
+                キャンセル
+            </button>
+            <button type="submit" class="btn btn-sm btn-primary">
+                実行
+            </button>
+        </div>
+    </form>
+</div>

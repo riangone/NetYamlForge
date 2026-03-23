@@ -333,6 +333,8 @@ public class EntityDefinition
     public ConfirmationDefinition? Confirmation { get; set; }
     /// <summary>前処理・後処理フックの設定</summary>
     public EntityHooksDefinition? Hooks { get; set; }
+    /// <summary>一覧・詳細画面に追加するカスタムアクションボタン定義</summary>
+    public Dictionary<string, ActionDefinition> Actions { get; set; } = new();
 
     /// <summary>
     /// 主鍵列名のリストを取得する。複合主鍵の場合は Keys を返し、
@@ -576,6 +578,41 @@ public class EntityHooksDefinition : HooksDefinitionBase
 
         return new List<string>();
     }
+}
+
+/// <summary>カスタムアクションの入力フィールド定義</summary>
+public class ActionInputField
+{
+    public string Name { get; set; } = default!;
+    public string Type { get; set; } = "string";
+    public string? Label { get; set; }
+    public bool Required { get; set; }
+    public List<string>? Options { get; set; }
+}
+
+/// <summary>カスタムアクションのフック定義（実行前後）</summary>
+public class ActionHooksDefinition
+{
+    public List<string>? Before { get; set; }
+    public List<string>? After { get; set; }
+}
+
+/// <summary>
+/// 一覧画面の行に表示するカスタムアクションボタン定義。
+/// entities.yml の actions セクションに対応します。
+/// </summary>
+public class ActionDefinition
+{
+    /// <summary>ボタンに表示するラベル</summary>
+    public string Label { get; set; } = default!;
+    /// <summary>実行前に表示する確認メッセージ（null の場合は確認なし）</summary>
+    public string? Confirm { get; set; }
+    /// <summary>実行する ICustomActionHandler の Name（省略時はアクションキー名と同じ）</summary>
+    public string? Handler { get; set; }
+    /// <summary>アクション実行時に入力を求めるフィールド定義</summary>
+    public List<ActionInputField>? Inputs { get; set; }
+    /// <summary>アクション前後に実行するフック</summary>
+    public ActionHooksDefinition? Hooks { get; set; }
 }
 
 public class EntityLinkDefinition

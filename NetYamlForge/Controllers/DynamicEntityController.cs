@@ -4,6 +4,7 @@
 
 using NetYamlForge.Models;
 using NetYamlForge.Services;
+using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly CommandErrorHttpMapper _commandErrorHttpMapper;
     private readonly ProjectScope _projectScope;
     private readonly IFileUploadService _fileUploadService;
+    private readonly IProjectActionRegistry _actionRegistry;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -46,6 +48,7 @@ public class DynamicEntityController : BaseProjectController
         CommandErrorHttpMapper commandErrorHttpMapper,
         ProjectScope projectScope,
         IFileUploadService fileUploadService,
+        IProjectActionRegistry actionRegistry,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -63,6 +66,7 @@ public class DynamicEntityController : BaseProjectController
         _commandErrorHttpMapper = commandErrorHttpMapper;
         _projectScope = projectScope;
         _fileUploadService = fileUploadService;
+        _actionRegistry = actionRegistry;
         _logger = logger;
     }
 
@@ -431,6 +435,114 @@ public class DynamicEntityController : BaseProjectController
             diagnostics.ChangedCount));
     }
 
+    /// <summary>
+    /// カスタムアクション入力フォームをモーダル用パーシャルとして返します。
+    /// inputs が空のアクションは確認ダイアログを表示せずそのまま InvokeAction を呼びます。
+    /// </summary>
+    public IActionResult ActionForm(string entity, string action, string? id = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        if (!meta.Actions.TryGetValue(action, out var actionDef))
+            return NotFound($"アクション '{action}' が見つかりません。");
+
+        var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
+        return PartialView("_ActionForm", new ActionFormViewModel(entity, action, actionDef, keyValue));
+    }
+
+    /// <summary>
+    /// カスタムアクションを実行し、一覧パーシャルを返します。
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> InvokeAction(
+        string entity,
+        string action,
+        string? id = null,
+        [FromForm] Dictionary<string, string?> form = null!,
+        [FromForm] string? returnUrl = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        form ??= new Dictionary<string, string?>();
+
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        if (!meta.Actions.TryGetValue(action, out var actionDef))
+            return NotFound($"アクション '{action}' が見つかりません。");
+
+        var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
+        var projectName = _projectScope.Current?.Name ?? "";
+
+        // ハンドラー名を解決（省略時はアクションキー名）
+        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? action : actionDef.Handler;
+        var handler = _actionRegistry.Find(projectName, handlerName);
+        if (handler == null)
+        {
+            _logger.LogWarning(
+                "プロジェクト '{Project}' のアクションハンドラー '{Handler}' が見つかりません",
+                projectName, handlerName);
+            return BadRequest($"アクションハンドラー '{handlerName}' が見つかりません。");
+        }
+
+        // 入力値を object? 辞書に変換
+        var inputs = form
+            .Where(kv => kv.Key != "__RequestVerificationToken")
+            .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
+
+        var ctx = new NetYamlForge.Services.Hooks.CustomActionContext
+        {
+            Project = projectName,
+            Entity = entity,
+            Action = action,
+            RecordId = keyValue,
+            Inputs = inputs,
+            UserName = User.Identity?.Name
+        };
+
+        // before フックを実行（IEntityHook として）
+        var beforeHooks = actionDef.Hooks?.Before;
+        if (beforeHooks != null && beforeHooks.Count > 0)
+        {
+            var hookCtx = new NetYamlForge.Services.Hooks.EntityHookContext
+            {
+                Entity = entity,
+                Operation = NetYamlForge.Services.Hooks.CrudOperation.CustomAction,
+                Id = int.TryParse(keyValue, out var intId) ? intId : null,
+                Values = inputs,
+                UserName = User.Identity?.Name
+            };
+            var beforeResult = await _commandService.RunBeforeHooksForActionAsync(beforeHooks, hookCtx);
+            if (beforeResult.Cancel)
+                return BadRequest(beforeResult.CancelMessage ?? "前処理によりキャンセルされました。");
+        }
+
+        // ハンドラー実行（トランザクション付き）
+        ActionHandlerResult result;
+        try
+        {
+            result = await _commandService.ExecuteActionAsync(handler, ctx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "アクション '{Action}' の実行中にエラーが発生しました", action);
+            return StatusCode(500, "アクションの実行中にエラーが発生しました。");
+        }
+
+        if (!result.Ok)
+            return BadRequest(result.ErrorMessage ?? "アクションが失敗しました。");
+
+        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
+        return PartialView("_List",
+            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
+    }
+
     // エンティティ選択ピッカーモーダル用の一覧を返します
     public async Task<IActionResult> PickerList(
         string entity,
@@ -617,6 +729,12 @@ public record PickerViewModel(
     int Page,
     int PageSize,
     bool HasMore);
+
+public record ActionFormViewModel(
+    string Entity,
+    string Action,
+    ActionDefinition ActionDef,
+    string? RecordId);
 
 public record DynamicFormFieldViewModel(
     string FieldName,

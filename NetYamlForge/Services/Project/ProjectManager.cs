@@ -15,18 +15,21 @@ public class ProjectManager
     private readonly IProjectHookRegistry _projectHookRegistry;
     private readonly IProjectHookLoader _projectHookLoader;
     private readonly IProjectBusinessLogicRegistry _projectBusinessLogicRegistry;
+    private readonly IProjectActionRegistry _projectActionRegistry;
 
     public ProjectManager(
         IWebHostEnvironment env,
         ILogger<ProjectManager> logger,
         IProjectHookRegistry projectHookRegistry,
         IProjectHookLoader projectHookLoader,
-        IProjectBusinessLogicRegistry projectBusinessLogicRegistry)
+        IProjectBusinessLogicRegistry projectBusinessLogicRegistry,
+        IProjectActionRegistry projectActionRegistry)
     {
         _logger = logger;
         _projectHookRegistry = projectHookRegistry;
         _projectHookLoader = projectHookLoader;
         _projectBusinessLogicRegistry = projectBusinessLogicRegistry;
+        _projectActionRegistry = projectActionRegistry;
         _projects = new Dictionary<string, ProjectInfo>(StringComparer.OrdinalIgnoreCase);
 
         var projectsRoot = Path.Combine(env.ContentRootPath, "projects");
@@ -138,6 +141,9 @@ public class ProjectManager
 
         // プロジェクト固有ビジネスロジックを読み込み
         await _projectHookLoader.LoadProjectBusinessLogicAsync(config.Name, projectDir, _projectBusinessLogicRegistry);
+
+        // プロジェクト固有カスタムアクションハンドラーを読み込み
+        await _projectHookLoader.LoadProjectActionHandlersAsync(config.Name, projectDir, _projectActionRegistry);
     }
 
     private static string BuildConnectionString(ProjectConfig config, string projectDir, string dbType)
