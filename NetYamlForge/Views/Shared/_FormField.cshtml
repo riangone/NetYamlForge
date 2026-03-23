@@ -17,7 +17,7 @@
     var formType = formDef.Type ?? "string";
     var colType = Model.GetColType();
     var finalType = formType != "string" ? formType : colType;
-    var colOptions = Model.GetColOptions();
+    var colOptions = Model.GetColOptions() ?? formDef.Options;
     var colOptionLabels = Model.GetColOptionLabels();
     var colEditable = Model.GetColEditable();
     var colCurrency = Model.GetColCurrency();
