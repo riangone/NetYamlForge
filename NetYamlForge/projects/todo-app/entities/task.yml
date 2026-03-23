@@ -165,6 +165,19 @@ entities:
         searchable: true
         sortable: false
 
+    hooks:
+      beforeCreate:
+        - normalize_title       # タイトル前後の空白を除去
+        - validate_due_date     # 期限日が過去でないことを検証
+      afterCreate:
+        - audit_log             # 作成操作を監査ログに記録
+      beforeUpdate:
+        - normalize_title
+        - validate_due_date
+        - set_completed_at      # Status=done のとき CompletedAt を自動設定
+      afterUpdate:
+        - audit_log
+
     paging:
       pageSize: 15
       mode: numbered

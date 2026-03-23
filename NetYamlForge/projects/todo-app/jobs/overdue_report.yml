@@ -1,0 +1,21 @@
+jobs:
+  overdue_report:
+    displayName: 期限切れタスクレポート
+    description: "期限を過ぎた未完了タスクを CSV に出力します。毎日 08:00 (JST) に実行。"
+    enabled: true
+
+    schedule:
+      cron: "0 8 * * *"        # 毎日 08:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/overdue_report.sql
+      outputFile: "jobs/output/overdue_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 300       # 5 分後にリトライ
+      logError: true
