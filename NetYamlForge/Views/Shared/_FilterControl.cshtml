@@ -287,14 +287,29 @@
                        checked="@(allChecked ? "checked" : null)" />
                 <span class="btn btn-sm @(allChecked ? "btn-primary btn-active" : "btn-outline")">All</span>
             </label>
-            @foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+            @if (Model.Filter.OptionLabels != null)
             {
-                bool optChecked = current == opt;
-                <label class="cursor-pointer">
-                    <input type="radio" name="@Model.Name" value="@opt" class="sr-only"
-                           checked="@(optChecked ? "checked" : null)" />
-                    <span class="btn btn-sm @(optChecked ? "btn-primary btn-active" : "btn-outline")">@opt</span>
-                </label>
+                foreach (var opt in Model.Filter.OptionLabels)
+                {
+                    bool optChecked = current == opt.Key;
+                    <label class="cursor-pointer">
+                        <input type="radio" name="@Model.Name" value="@opt.Key" class="sr-only"
+                               checked="@(optChecked ? "checked" : null)" />
+                        <span class="btn btn-sm @(optChecked ? "btn-primary btn-active" : "btn-outline")">@opt.Value</span>
+                    </label>
+                }
+            }
+            else
+            {
+                foreach (var opt in Model.Filter.Options ?? Enumerable.Empty<string>())
+                {
+                    bool optChecked = current == opt;
+                    <label class="cursor-pointer">
+                        <input type="radio" name="@Model.Name" value="@opt" class="sr-only"
+                               checked="@(optChecked ? "checked" : null)" />
+                        <span class="btn btn-sm @(optChecked ? "btn-primary btn-active" : "btn-outline")">@opt</span>
+                    </label>
+                }
             }
         </div>
         break;
