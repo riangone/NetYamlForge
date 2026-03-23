@@ -252,20 +252,23 @@ entities:
     actions:
       mark_done:
         label: "完了にする"
+        scope: row
         confirm: "このタスクを完了にしますか？"
         handler: mark_done
-        hooks:
-          before:
-            - audit_log
       reopen:
         label: "再オープン"
-        confirm: "このタスクを再オープンしますか？"
+        scope: row
         handler: reopen_task
         inputs:
           - name: Reason
             type: string
             label: 再オープン理由
             required: true
+      bulk_close_overdue:
+        label: "期限切れを一括クローズ"
+        scope: header
+        confirm: "期限切れのタスクをすべてキャンセルにしますか？"
+        handler: bulk_close_overdue
 
     links:
       project:

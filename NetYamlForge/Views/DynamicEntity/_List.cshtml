@@ -81,11 +81,7 @@
 <div class="card bg-base-100 shadow">
     <div class="card-body space-y-4">
         <div class="flex items-center gap-2 flex-wrap">
-            <a class="btn btn-outline btn-sm"
-               href="@Url.Action("CreatePage", "DynamicEntity", new { entity = Model.Entity, returnUrl = currentReturnUrl })">
-                New Page
-            </a>
-            <span class="text-sm ml-2">Page Size:</span>
+            <span class="text-sm">Page Size:</span>
             <select class="select select-bordered select-sm w-24"
                     hx-get="@Url.Action("ListPartial", new { cursor = (string?)null })"
                     hx-include="#filter-form"
@@ -105,8 +101,53 @@
             <input type="hidden" name="cursor" value="@Model.Cursor" />
             @if (Model.Total >= 0)
             {
-                <span class="text-sm ml-auto">Total: @Model.Total</span>
+                <span class="text-sm">Total: @Model.Total</span>
             }
+
+            @* 右側ボタン群 *@
+            <div class="ml-auto flex items-center gap-2 flex-wrap">
+                @* CSV エクスポートボタン *@
+                <a class="btn btn-outline btn-sm"
+                   href="@Url.Action("ExportCsv", "DynamicEntity", new { entity = Model.Entity, search = Model.Search, sort = Model.Sort, dir = Model.Dir })">
+                    ⬇ Export CSV
+                </a>
+
+                @* ヘッダースコープのカスタムアクションボタン *@
+                @foreach (var actionEntry in Model.Meta.Actions.Where(a => a.Value.Scope == "header"))
+                {
+                    var hActionKey = actionEntry.Key;
+                    var hActionDef = actionEntry.Value;
+                    var hHasInputs = hActionDef.Inputs != null && hActionDef.Inputs.Count > 0;
+                    var hHasConfirm = !string.IsNullOrWhiteSpace(hActionDef.Confirm);
+                    if (hHasInputs || hHasConfirm)
+                    {
+                        <button class="btn btn-outline btn-sm"
+                                hx-get="@Url.Action("HeaderActionForm", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
+                                hx-target="#modal-form-content"
+                                hx-swap="innerHTML">
+                            @hActionDef.Label
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline btn-sm"
+                                hx-post="@Url.Action("InvokeHeaderAction", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
+                                hx-target="#list-container"
+                                hx-swap="innerHTML"
+                                @(!string.IsNullOrWhiteSpace(hActionDef.Confirm) ? $"hx-confirm=\"{hActionDef.Confirm}\"" : "")>
+                            @hActionDef.Label
+                        </button>
+                    }
+                }
+
+                @* New ボタン *@
+                <button class="btn btn-primary btn-sm"
+                        hx-get="@Url.Action("CreateForm", "DynamicEntity", new { entity = Model.Entity, mode = "modal" })"
+                        hx-target="#modal-form-content"
+                        hx-swap="innerHTML">
+                    + New
+                </button>
+            </div>
         </div>
 
         @{

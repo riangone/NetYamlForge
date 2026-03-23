@@ -7,6 +7,7 @@ using NetYamlForge.Services;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace NetYamlForge.Controllers;
 
@@ -433,6 +434,140 @@ public class DynamicEntityController : BaseProjectController
             diagnostics.DiffLines,
             onlyChanged,
             diagnostics.ChangedCount));
+    }
+
+    /// <summary>
+    /// エンティティの全レコードを CSV ファイルとしてダウンロードします。
+    /// 現在の検索・フィルタ条件を引き継ぎます。
+    /// </summary>
+    public async Task<IActionResult> ExportCsv(
+        string entity,
+        string? search = null,
+        string? sort = null,
+        string? dir = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        // 現在の検索・フィルタ条件を取得
+        var filters = FilterValueParser.Build(meta, Request.Query);
+
+        // 全件取得（最大 10 万件）
+        var items = await _repo.GetAllAsync(entity, search, sort, dir, filters, page: 1, pageSize: 100000);
+
+        // CSV 生成
+        var displayColumns = meta.Columns.Where(c => !c.Value.Hidden).ToList();
+        var sb = new System.Text.StringBuilder();
+
+        // ヘッダー行
+        sb.AppendLine(string.Join(",", displayColumns.Select(c => CsvEscape(c.Value.GetLabel(c.Key)))));
+
+        // データ行
+        foreach (var item in items)
+        {
+            var row = displayColumns.Select(c =>
+            {
+                object? value = null;
+                try { value = ((IDictionary<string, object>)item)[c.Key]; } catch { }
+                var formatted = ColumnValueFormatter.FormatValue(c.Value.Type, value, c.Value.OptionLabels);
+                return CsvEscape(formatted);
+            });
+            sb.AppendLine(string.Join(",", row));
+        }
+
+        var fileName = $"{entity}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+        var bytes = System.Text.Encoding.UTF8.GetPreamble()
+            .Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString()))
+            .ToArray();
+        return File(bytes, "text/csv", fileName);
+    }
+
+    private static string CsvEscape(string value)
+    {
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        return value;
+    }
+
+    /// <summary>
+    /// ヘッダーアクション入力フォームをモーダル用パーシャルとして返します。
+    /// </summary>
+    public IActionResult HeaderActionForm(string entity, string actionKey)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound($"アクション '{actionKey}' が見つかりません。");
+
+        return PartialView("_ActionForm", new ActionFormViewModel(entity, actionKey, actionDef, null));
+    }
+
+    /// <summary>
+    /// ヘッダーアクション（行に依存しない操作）を実行し、一覧パーシャルを返します。
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> InvokeHeaderAction(
+        string entity,
+        string actionKey,
+        [FromForm] Dictionary<string, string?> form = null!,
+        [FromForm] string? returnUrl = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        form ??= new Dictionary<string, string?>();
+
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound($"アクション '{actionKey}' が見つかりません。");
+
+        var projectName = _projectScope.Current?.Name ?? "";
+        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? actionKey : actionDef.Handler;
+        var handler = _actionRegistry.Find(projectName, handlerName);
+        if (handler == null)
+            return BadRequest($"アクションハンドラー '{handlerName}' が見つかりません。");
+
+        var inputs = form
+            .Where(kv => kv.Key != "__RequestVerificationToken")
+            .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
+
+        var ctx = new CustomActionContext
+        {
+            Project = projectName,
+            Entity = entity,
+            Action = actionKey,
+            RecordId = null,
+            Inputs = inputs,
+            UserName = User.Identity?.Name
+        };
+
+        ActionHandlerResult result;
+        try
+        {
+            result = await _commandService.ExecuteActionAsync(handler, ctx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ヘッダーアクション '{Action}' の実行中にエラーが発生しました", actionKey);
+            return StatusCode(500, "アクションの実行中にエラーが発生しました。");
+        }
+
+        if (!result.Ok)
+            return BadRequest(result.ErrorMessage ?? "アクションが失敗しました。");
+
+        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
+        return PartialView("_List",
+            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
     }
 
     /// <summary>

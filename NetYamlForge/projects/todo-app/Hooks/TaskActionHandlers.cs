@@ -4,15 +4,21 @@
 //   actions:
 //     mark_done:
 //       label: "完了にする"
+//       scope: row
 //       handler: mark_done
 //     reopen:
 //       label: "再オープン"
+//       scope: row
 //       handler: reopen_task
 //       inputs:
 //         - name: Reason
 //           type: string
 //           label: 再オープン理由
 //           required: true
+//     bulk_close_overdue:
+//       label: "期限切れを一括クローズ"
+//       scope: header
+//       handler: bulk_close_overdue
 
 using System;
 using System.Data;
@@ -24,7 +30,7 @@ namespace NetYamlForge.Projects.TodoApp.Hooks;
 
 /// <summary>
 /// タスクを「完了」ステータスに更新するアクションハンドラー。
-/// YAML: actions.mark_done.handler = "mark_done"
+/// YAML: actions.mark_done.handler = "mark_done"（scope: row）
 /// </summary>
 public class MarkDoneHandler : ICustomActionHandler
 {
@@ -53,7 +59,7 @@ public class MarkDoneHandler : ICustomActionHandler
 
 /// <summary>
 /// タスクを「pending」ステータスに戻すアクションハンドラー。
-/// YAML: actions.reopen.handler = "reopen_task"
+/// YAML: actions.reopen.handler = "reopen_task"（scope: row）
 /// inputs: Reason（必須）
 /// </summary>
 public class ReopenTaskHandler : ICustomActionHandler
@@ -86,6 +92,29 @@ public class ReopenTaskHandler : ICustomActionHandler
 
         if (affected <= 0)
             return ActionHandlerResult.Failure("対象タスクが見つかりません。");
+
+        return ActionHandlerResult.Success();
+    }
+}
+
+/// <summary>
+/// 期限切れのタスクをすべてキャンセルにするヘッダーアクションハンドラー。
+/// YAML: actions.bulk_close_overdue.handler = "bulk_close_overdue"（scope: header）
+/// </summary>
+public class BulkCloseOverdueHandler : ICustomActionHandler
+{
+    public string Name => "bulk_close_overdue";
+
+    public async Task<ActionHandlerResult> ExecuteAsync(CustomActionContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        var today = DateTime.Today.ToString("yyyy-MM-dd");
+        await db.ExecuteAsync(
+            @"UPDATE Task
+              SET Status = 'cancelled'
+              WHERE DueDate < @today
+                AND Status NOT IN ('done', 'cancelled')",
+            new { today },
+            tx);
 
         return ActionHandlerResult.Success();
     }

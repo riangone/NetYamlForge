@@ -598,13 +598,19 @@ public class ActionHooksDefinition
 }
 
 /// <summary>
-/// 一覧画面の行に表示するカスタムアクションボタン定義。
+/// 一覧画面に表示するカスタムアクションボタン定義。
 /// entities.yml の actions セクションに対応します。
 /// </summary>
 public class ActionDefinition
 {
     /// <summary>ボタンに表示するラベル</summary>
     public string Label { get; set; } = default!;
+    /// <summary>
+    /// アクションのスコープ。
+    /// "row"（デフォルト）: 各行のアクション列に表示。
+    /// "header": 一覧ヘッダーの右側に表示（行に依存しない操作 = エクスポート等）。
+    /// </summary>
+    public string Scope { get; set; } = "row";
     /// <summary>実行前に表示する確認メッセージ（null の場合は確認なし）</summary>
     public string? Confirm { get; set; }
     /// <summary>実行する ICustomActionHandler の Name（省略時はアクションキー名と同じ）</summary>
