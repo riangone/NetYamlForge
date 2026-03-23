@@ -335,6 +335,8 @@ public class EntityDefinition
     public EntityHooksDefinition? Hooks { get; set; }
     /// <summary>一覧・詳細画面に追加するカスタムアクションボタン定義</summary>
     public Dictionary<string, ActionDefinition> Actions { get; set; } = new();
+    /// <summary>ツールバーに追加するカスタムエクスポートボタン定義</summary>
+    public Dictionary<string, ExportDefinition> Exports { get; set; } = new();
 
     /// <summary>
     /// 主鍵列名のリストを取得する。複合主鍵の場合は Keys を返し、
@@ -619,6 +621,33 @@ public class ActionDefinition
     public List<ActionInputField>? Inputs { get; set; }
     /// <summary>アクション前後に実行するフック</summary>
     public ActionHooksDefinition? Hooks { get; set; }
+}
+
+/// <summary>
+/// ツールバーに追加するカスタムダウンロードエクスポート定義。
+/// entities.yml の exports セクションに対応します。
+/// </summary>
+public class ExportDefinition
+{
+    /// <summary>ボタンに表示するラベル</summary>
+    public string Label { get; set; } = default!;
+    /// <summary>出力フォーマット: csv (デフォルト), tsv, json</summary>
+    public string Format { get; set; } = "csv";
+    /// <summary>
+    /// ダウンロードファイル名パターン。
+    /// {date:yyyyMMdd} のようなプレースホルダーを使用可能。
+    /// 省略時は "{entity}_{exportKey}_{date:yyyyMMdd_HHmmss}.{format}" を使用。
+    /// </summary>
+    public string? Filename { get; set; }
+    /// <summary>
+    /// 出力する列キーのリスト（省略時: 非表示でない全列）。
+    /// カスタム SQL 使用時は SQL 結果の全列を出力。
+    /// </summary>
+    public List<string>? Columns { get; set; }
+    /// <summary>カスタム SQL クエリ（省略時: エンティティのクエリパイプラインを使用）</summary>
+    public string? SqlQuery { get; set; }
+    /// <summary>カスタム SQL ファイルパス（プロジェクトルートからの相対パス）</summary>
+    public string? SqlFile { get; set; }
 }
 
 public class EntityLinkDefinition

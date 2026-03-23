@@ -7,7 +7,10 @@ using NetYamlForge.Services;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Dapper;
+using System.Data;
 using System.Text;
+using System.Text.Json;
 
 namespace NetYamlForge.Controllers;
 
@@ -31,6 +34,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly ProjectScope _projectScope;
     private readonly IFileUploadService _fileUploadService;
     private readonly IProjectActionRegistry _actionRegistry;
+    private readonly IDbConnection _db;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -50,6 +54,7 @@ public class DynamicEntityController : BaseProjectController
         ProjectScope projectScope,
         IFileUploadService fileUploadService,
         IProjectActionRegistry actionRegistry,
+        IDbConnection db,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -68,6 +73,7 @@ public class DynamicEntityController : BaseProjectController
         _projectScope = projectScope;
         _fileUploadService = fileUploadService;
         _actionRegistry = actionRegistry;
+        _db = db;
         _logger = logger;
     }
 
@@ -490,6 +496,156 @@ public class DynamicEntityController : BaseProjectController
         if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
             return $"\"{value.Replace("\"", "\"\"")}\"";
         return value;
+    }
+
+    /// <summary>
+    /// YAML の exports セクションで定義したカスタムエクスポートをダウンロードします。
+    /// format が csv/tsv の場合は区切りテキスト、json の場合は JSON 配列を返します。
+    /// sqlQuery / sqlFile が指定された場合はカスタム SQL を実行し、
+    /// 省略された場合は現在のフィルタ条件を引き継いだエンティティクエリを使用します。
+    /// </summary>
+    public async Task<IActionResult> ExportCustom(
+        string entity,
+        string exportKey,
+        string? search = null,
+        string? sort = null,
+        string? dir = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+        exportKey = NormalizeSingleValue(exportKey) ?? "";
+
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null) return accessDenied;
+
+        if (!meta.Exports.TryGetValue(exportKey, out var exportDef))
+            return NotFound();
+
+        bool useCustomSql = !string.IsNullOrWhiteSpace(exportDef.SqlQuery)
+                         || !string.IsNullOrWhiteSpace(exportDef.SqlFile);
+
+        IEnumerable<dynamic> rawItems;
+        if (useCustomSql)
+        {
+            var sql = exportDef.SqlQuery ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(exportDef.SqlFile))
+            {
+                var sqlPath = Path.Combine(_projectScope.Current!.ProjectDir, exportDef.SqlFile);
+                sql = await System.IO.File.ReadAllTextAsync(sqlPath);
+            }
+            rawItems = await _db.QueryAsync(sql);
+        }
+        else
+        {
+            var filters = FilterValueParser.Build(meta, Request.Query);
+            rawItems = await _repo.GetAllAsync(entity, search, sort, dir, filters, page: 1, pageSize: 100000);
+        }
+
+        var itemList = rawItems.Select(r => (IDictionary<string, object>)r).ToList();
+
+        // 出力列を決定する
+        List<(string Key, string Label)> columns;
+        if (exportDef.Columns is { Count: > 0 })
+        {
+            columns = exportDef.Columns.Select(k =>
+            {
+                var label = meta.Columns.TryGetValue(k, out var col) ? col.GetLabel(k) : k;
+                return (k, label);
+            }).ToList();
+        }
+        else if (useCustomSql && itemList.Count > 0)
+        {
+            // カスタム SQL の場合は結果の全列をそのまま使用する
+            columns = itemList[0].Keys.Select(k => (k, k)).ToList();
+        }
+        else
+        {
+            columns = meta.Columns
+                .Where(c => !c.Value.Hidden)
+                .Select(c => (c.Key, c.Value.GetLabel(c.Key)))
+                .ToList();
+        }
+
+        var format = (exportDef.Format ?? "csv").ToLowerInvariant();
+        var defaultPattern = $"{entity}_{exportKey}_{{date:yyyyMMdd_HHmmss}}.{format}";
+        var filename = ResolveExportFilename(exportDef.Filename ?? defaultPattern);
+
+        return format switch
+        {
+            "json" => BuildJsonExport(itemList, columns, filename),
+            "tsv"  => BuildDelimitedExport(itemList, meta, columns, '\t', "text/tab-separated-values", filename),
+            _      => BuildDelimitedExport(itemList, meta, columns, ',', "text/csv", filename),
+        };
+    }
+
+    /// <summary>ファイル名パターン内の {date:format} プレースホルダーを現在日時に置換します。</summary>
+    private static string ResolveExportFilename(string pattern)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(
+            pattern,
+            @"\{date:([^}]+)\}",
+            m => DateTime.Now.ToString(m.Groups[1].Value));
+    }
+
+    /// <summary>CSV または TSV 形式のレスポンスを生成します。</summary>
+    private IActionResult BuildDelimitedExport(
+        List<IDictionary<string, object>> items,
+        EntityDefinition meta,
+        List<(string Key, string Label)> columns,
+        char delimiter,
+        string contentType,
+        string filename)
+    {
+        string EscapeCell(string value)
+        {
+            if (value.Contains(delimiter) || value.Contains('"') || value.Contains('\n'))
+                return $"\"{value.Replace("\"", "\"\"")}\"";
+            return value;
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine(string.Join(delimiter, columns.Select(c => EscapeCell(c.Label))));
+
+        foreach (var item in items)
+        {
+            var row = columns.Select(c =>
+            {
+                item.TryGetValue(c.Key, out var raw);
+                var colDef = meta.Columns.GetValueOrDefault(c.Key);
+                var formatted = colDef != null
+                    ? ColumnValueFormatter.FormatValue(colDef.Type, raw, colDef.OptionLabels)
+                    : raw?.ToString() ?? string.Empty;
+                return EscapeCell(formatted);
+            });
+            sb.AppendLine(string.Join(delimiter, row));
+        }
+
+        var bytes = Encoding.UTF8.GetPreamble()
+            .Concat(Encoding.UTF8.GetBytes(sb.ToString()))
+            .ToArray();
+        return File(bytes, contentType, filename);
+    }
+
+    /// <summary>JSON 配列形式のレスポンスを生成します。</summary>
+    private IActionResult BuildJsonExport(
+        List<IDictionary<string, object>> items,
+        List<(string Key, string Label)> columns,
+        string filename)
+    {
+        var rows = items.Select(item =>
+        {
+            var dict = new Dictionary<string, object?>();
+            foreach (var (key, _) in columns)
+            {
+                item.TryGetValue(key, out var val);
+                dict[key] = val;
+            }
+            return dict;
+        }).ToList();
+
+        var json = JsonSerializer.Serialize(rows, new JsonSerializerOptions { WriteIndented = true });
+        var bytes = Encoding.UTF8.GetBytes(json);
+        return File(bytes, "application/json", filename);
     }
 
     /// <summary>

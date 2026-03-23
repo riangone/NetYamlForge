@@ -270,6 +270,27 @@ entities:
         confirm: "期限切れのタスクをすべてキャンセルにしますか？"
         handler: bulk_close_overdue
 
+    exports:
+      # エクスポート例1: 現在のフィルタを引き継いで特定列のみ CSV 出力
+      filtered_csv:
+        label: "フィルタ結果 CSV"
+        format: csv
+        filename: "tasks_{date:yyyyMMdd}.csv"
+        columns:
+          - Title
+          - Status
+          - Priority
+          - DueDate
+          - AssignedTo
+          - ProjectName
+
+      # エクスポート例2: カスタム SQL で期限切れタスクのみを JSON 出力
+      overdue_json:
+        label: "期限切れ JSON"
+        format: json
+        filename: "overdue_tasks_{date:yyyyMMdd}.json"
+        sqlFile: exports/sql/overdue_tasks.sql
+
     links:
       project:
         label: プロジェクト

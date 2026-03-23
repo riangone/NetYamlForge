@@ -98,6 +98,18 @@
                 ⬇ Export CSV
             </button>
 
+            @* カスタムエクスポートボタン（exports セクションで定義） *@
+            @foreach (var expEntry in Model.Meta.Exports)
+            {
+                var expKey = expEntry.Key;
+                var expDef = expEntry.Value;
+                <button class="btn btn-outline btn-sm export-custom-btn"
+                        data-export-key="@expKey"
+                        title="@expDef.Label">
+                    ⬇ @expDef.Label
+                </button>
+            }
+
             @* ヘッダースコープのカスタムアクションボタン *@
             @foreach (var actionEntry in Model.Meta.Actions.Where(a => a.Value.Scope == "header"))
             {
@@ -390,6 +402,25 @@
                 alert("操作中にエラーが発生しました: " + err.message);
             });
         }
+
+        // カスタムエクスポートボタン（現在のフィルター状態を引き継ぐ）
+        document.querySelectorAll(".export-custom-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const exportKey = btn.dataset.exportKey;
+                const form = document.getElementById("filter-form");
+                const params = new URLSearchParams();
+                params.append("entity", "@Model.Entity");
+                params.append("exportKey", exportKey);
+                if (form) {
+                    new FormData(form).forEach(function (value, key) {
+                        if (key !== "__RequestVerificationToken" && value) {
+                            params.append(key, value);
+                        }
+                    });
+                }
+                window.location.href = "@Url.Action("ExportCustom", "DynamicEntity")" + "?" + params.toString();
+            });
+        });
 
         // Export CSV ボタン（現在のフィルター状態を引き継ぐ）
         document.getElementById("export-csv-btn")?.addEventListener("click", function () {

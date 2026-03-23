@@ -64,7 +64,9 @@ public class BatchJobLoader : IBatchJobLoader
                     foreach (var kvp in jobContainer.Jobs)
                     {
                         var job = kvp.Value;
-                        job.Id = string.IsNullOrEmpty(job.Id) ? Path.GetFileNameWithoutExtension(file) : job.Id;
+                        // 複数ジョブ定義をサポートするため、IDは辞書キーを優先して使用する。
+                        // 単一ジョブファイルでキーが未設定の場合のみファイル名にフォールバック。
+                        job.Id = string.IsNullOrEmpty(job.Id) ? kvp.Key : job.Id;
                         
                         // 相対パスを絶対パスに変換
                         if (!string.IsNullOrEmpty(job.Settings.SqlFile))

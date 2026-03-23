@@ -1,0 +1,44 @@
+jobs:
+  # ジョブ1: 完了済みタスクの統計を CSV 出力（毎日 01:00）
+  completed_stats:
+    displayName: 完了タスク日次統計
+    description: "前日に完了したタスクをプロジェクト別に集計して CSV に出力します。"
+    enabled: true
+
+    schedule:
+      cron: "0 1 * * *"           # 毎日 01:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/completed_stats.sql
+      outputFile: "jobs/output/completed_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 180
+      logError: true
+
+  # ジョブ2: 30日以上前の完了タスクを削除（毎日 02:00）
+  cleanup_old_tasks:
+    displayName: 古い完了タスクの削除
+    description: "完了から 30 日以上経過したタスクを削除します。"
+    enabled: true
+
+    schedule:
+      cron: "0 2 * * *"           # 毎日 02:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_command
+    settings:
+      sqlQuery: >
+        DELETE FROM tasks
+        WHERE status = 'done'
+          AND updated_at < date('now', '-30 days')
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 60
+      logError: true
