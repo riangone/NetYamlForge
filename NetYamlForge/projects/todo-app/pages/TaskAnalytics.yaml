@@ -1,0 +1,184 @@
+title: Task Analytics
+description: "各種チャート・timeline・heat_map を使ったタスク分析ページ"
+
+sections:
+  # pie_chart: ステータス別シェア
+  - id: status_pie
+    title: ステータス別タスクシェア（pie_chart）
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT Status AS label, COUNT(*) AS value
+      FROM Task
+      GROUP BY Status
+      ORDER BY value DESC
+    columns: [label, value]
+    labelField: label
+    valueField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # donut_chart: 優先度別分布
+  - id: priority_donut
+    title: 優先度別タスク分布（donut_chart）
+    component: donut_chart
+    sourceType: custom
+    source: |
+      SELECT Priority AS label, COUNT(*) AS value
+      FROM Task
+      GROUP BY Priority
+      ORDER BY CASE Priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END
+    columns: [label, value]
+    labelField: label
+    valueField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # area_chart: プロジェクト別タスク数推移
+  - id: project_area
+    title: プロジェクト別タスク数（area_chart）
+    component: area_chart
+    sourceType: custom
+    source: |
+      SELECT p.Name AS label, COUNT(t.Id) AS value
+      FROM Project p
+      LEFT JOIN Task t ON t.ProjectId = p.Id
+      GROUP BY p.Id, p.Name
+      ORDER BY value DESC
+    columns: [label, value]
+    labelField: label
+    valueField: value
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # radar_chart: 担当者別タスク指標
+  - id: assignee_radar
+    title: 担当者別タスク指標（radar_chart）
+    component: radar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        AssignedTo AS skill_axis,
+        SUM(CASE WHEN Status='pending' THEN 1 ELSE 0 END) AS pending_count,
+        SUM(CASE WHEN Status='in_progress' THEN 1 ELSE 0 END) AS inprogress_count,
+        SUM(CASE WHEN Status='done' THEN 1 ELSE 0 END) AS done_count
+      FROM Task
+      WHERE AssignedTo IS NOT NULL AND AssignedTo != ''
+      GROUP BY AssignedTo
+      ORDER BY AssignedTo
+    columns: [skill_axis, pending_count, inprogress_count, done_count]
+    labelField: skill_axis
+    yField: "pending_count,inprogress_count,done_count"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # leaderboard: 完了タスク数ランキング
+  - id: completion_leaderboard
+    title: 完了タスク数ランキング（leaderboard）
+    component: leaderboard
+    sourceType: custom
+    source: |
+      SELECT
+        AssignedTo AS name,
+        COUNT(*) AS value,
+        NULL AS avatar,
+        NULL AS trend
+      FROM Task
+      WHERE Status = 'done' AND AssignedTo IS NOT NULL AND AssignedTo != ''
+      GROUP BY AssignedTo
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [name, value, avatar, trend]
+    nameField: name
+    valueField: value
+    avatarField: avatar
+    trendField: trend
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # goal_tracker: プロジェクト完了目標
+  - id: project_goals
+    title: プロジェクト完了目標（goal_tracker）
+    component: goal_tracker
+    sourceType: custom
+    source: |
+      SELECT
+        p.Name AS name,
+        SUM(CASE WHEN t.Status = 'done' THEN 1 ELSE 0 END) AS current,
+        COUNT(t.Id) AS target,
+        'タスク' AS unit,
+        p.EndDate AS deadline
+      FROM Project p
+      LEFT JOIN Task t ON t.ProjectId = p.Id
+      WHERE p.Status = 'active'
+      GROUP BY p.Id, p.Name, p.EndDate
+      HAVING COUNT(t.Id) > 0
+      ORDER BY p.Name
+    columns: [name, current, target, unit, deadline]
+    nameField: name
+    currentField: current
+    targetField: target
+    unitField: unit
+    deadlineField: deadline
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # activity_feed: 最近のアクティビティ
+  - id: recent_activity
+    title: 最近のアクティビティ（activity_feed）
+    component: activity_feed
+    sourceType: custom
+    source: |
+      SELECT
+        Title AS title,
+        CompletedAt AS date,
+        'update' AS type,
+        AssignedTo AS user
+      FROM Task
+      WHERE Status = 'done' AND CompletedAt IS NOT NULL
+      ORDER BY CompletedAt DESC
+      LIMIT 10
+    columns: [title, date, type, user]
+    titleField: title
+    dateField: date
+    typeField: type
+    userField: user
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # accordion: タスクステータス説明
+  - id: status_guide
+    title: ステータスガイド（accordion）
+    component: accordion
+    sourceType: custom
+    source: |
+      SELECT title, content FROM (
+        SELECT 1 AS ord, 'pending（未着手）とは？' AS title,
+               'まだ着手していないタスクです。優先度に従って作業を開始してください。' AS content
+        UNION ALL
+        SELECT 2, 'in_progress（進行中）とは？',
+               '現在作業中のタスクです。完了したら done に変更してください。'
+        UNION ALL
+        SELECT 3, 'review（レビュー中）とは？',
+               '作業完了後、レビュー待ちの状態です。承認後に done になります。'
+        UNION ALL
+        SELECT 4, 'done（完了）とは？',
+               'すべての作業が完了したタスクです。'
+        UNION ALL
+        SELECT 5, 'cancelled（キャンセル）とは？',
+               '何らかの理由で中断・取り消しになったタスクです。'
+      ) ORDER BY ord
+    columns: [title, content]
+    titleField: title
+    contentField: content
+    expandedByDefault: false
+    pageSize: 10
+    editable: false
+    readOnly: true

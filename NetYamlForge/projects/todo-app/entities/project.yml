@@ -1,0 +1,126 @@
+imports: []
+entities:
+  project:
+    table: Project
+    key: Id
+    displayName: Project
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: プロジェクト名
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options:
+          - planning
+          - active
+          - on_hold
+          - completed
+          - cancelled
+      Priority:
+        type: string
+        required: true
+        label: 優先度
+        editable: true
+        options:
+          - low
+          - medium
+          - high
+      StartDate:
+        type: date
+        label: 開始日
+        editable: true
+      EndDate:
+        type: date
+        label: 終了日
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: プロジェクト名
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        sortable: true
+      Priority:
+        type: string
+        required: true
+        label: 優先度
+        sortable: true
+      StartDate:
+        type: date
+        label: 開始日
+        sortable: true
+      EndDate:
+        type: date
+        label: 終了日
+        sortable: true
+      Description:
+        type: string
+        label: 説明
+        searchable: true
+        sortable: false
+
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [Name, Status, Priority, StartDate, EndDate, Description]
+      filters:
+        columns: 3
+        order: [Status, Priority]
+
+    filters:
+      Status:
+        type: dropdown
+        label: ステータス
+        options:
+          - planning
+          - active
+          - on_hold
+          - completed
+          - cancelled
+      Priority:
+        type: dropdown
+        label: 優先度
+        options:
+          - low
+          - medium
+          - high
+      Name:
+        type: like
+        label: プロジェクト名
+
+    links:
+      tasks:
+        label: タスク
+        targetEntity: task
+        filter:
+          ProjectId: Id

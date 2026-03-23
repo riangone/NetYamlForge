@@ -1,0 +1,79 @@
+name: todo-app
+displayName: "Todo App"
+description: "フレームワーク全機能を網羅するTODOサンプルプロジェクト"
+version: "1.0.0"
+
+aiHints:
+  primaryLanguage: ja-JP
+  authRequired: true
+  customHooks: []
+  notes:
+    - "task.status の値: pending / in_progress / review / done / cancelled"
+    - "task.priority の値: low / medium / high / urgent"
+    - "project.status の値: planning / active / on_hold / completed / cancelled"
+    - "comment.entity_type の値: task / project"
+
+database:
+  type: sqlite
+  path: database/todo-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Todo App"
+  navigation:
+    showDashboard: true
+    entities:
+      - task
+      - project
+      - category
+      - comment
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+      - label: Overview
+        url: /todo-app/Page/Overview
+        icon: 🏠
+        section: Overview
+      - label: タスク一覧
+        url: /todo-app/DynamicEntity/Index?entity=task
+        icon: ✅
+        section: タスク管理
+      - label: カンバンボード
+        url: /todo-app/Page/KanbanBoard
+        icon: 🗂️
+        section: タスク管理
+      - label: タスク分析
+        url: /todo-app/Page/TaskAnalytics
+        icon: 📈
+        section: タスク管理
+      - label: プロジェクト一覧
+        url: /todo-app/DynamicEntity/Index?entity=project
+        icon: 📁
+        section: プロジェクト
+      - label: プロジェクトボード
+        url: /todo-app/Page/ProjectBoard
+        icon: 🏗️
+        section: プロジェクト
+      - label: カテゴリ管理
+        url: /todo-app/DynamicEntity/Index?entity=category
+        icon: 🏷️
+        section: 設定
+      - label: コメント管理
+        url: /todo-app/DynamicEntity/Index?entity=comment
+        icon: 💬
+        section: 設定
+
+home_page:
+  icon: "✅"
+  tagline: "タスク・プロジェクト管理の全機能デモ"
+  tags: [Todo, Tasks, Projects, Demo]

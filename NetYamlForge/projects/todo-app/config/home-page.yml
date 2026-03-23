@@ -1,0 +1,33 @@
+hero:
+  eyebrow: Todo App
+  title: タスク・プロジェクト管理
+  description: "フレームワーク全機能を網羅するTODOサンプルアプリ。カンバン・チャート・フォーム・フィルターなどすべての機能をデモします。"
+  primaryActionLabel: Overview
+  primaryActionUrl: /todo-app/Page/Overview
+  secondaryActionLabel: カンバンボード
+  secondaryActionUrl: /todo-app/Page/KanbanBoard
+  highlights:
+    - Kanban Board
+    - Charts & Analytics
+    - CRUD Forms & Filters
+
+projectsSectionTitle: Todo App Workspace
+projectsSectionLead: タスク管理・プロジェクト管理・分析ページを確認できます。
+
+quickActions:
+  - label: Overview
+    url: /todo-app/Page/Overview
+    style: btn-primary
+    icon: 🏠
+  - label: Kanban
+    url: /todo-app/Page/KanbanBoard
+    style: btn-outline
+    icon: 🗂️
+  - label: Analytics
+    url: /todo-app/Page/TaskAnalytics
+    style: btn-outline
+    icon: 📈
+  - label: Tasks
+    url: /todo-app/DynamicEntity/Index?entity=task
+    style: btn-outline
+    icon: ✅

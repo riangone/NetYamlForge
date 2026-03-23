@@ -1,0 +1,169 @@
+title: Project Board
+description: "プロジェクト管理ページ — detail_card・timeline・stat_cards・org_chart を使ったプロジェクト概要"
+
+sections:
+  # stat_cards: プロジェクトKPI
+  - id: project_kpi
+    title: プロジェクトKPI（stat_cards）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全プロジェクト' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '📁' AS metric_icon, NULL AS metric_delta
+        FROM Project
+      UNION ALL
+      SELECT 'アクティブ', CAST(COUNT(*) AS TEXT), '🚀', NULL FROM Project WHERE Status='active'
+      UNION ALL
+      SELECT '完了', CAST(COUNT(*) AS TEXT), '✅', NULL FROM Project WHERE Status='completed'
+      UNION ALL
+      SELECT '計画中', CAST(COUNT(*) AS TEXT), '📋', NULL FROM Project WHERE Status='planning'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # detail_card: プロジェクト詳細
+  - id: project_details
+    title: プロジェクト詳細（detail_card）
+    component: detail_card
+    sourceType: custom
+    source: |
+      SELECT p.Name AS プロジェクト名, p.Status AS ステータス, p.Priority AS 優先度,
+             p.StartDate AS 開始日, p.EndDate AS 終了日,
+             COUNT(t.Id) AS タスク数,
+             SUM(CASE WHEN t.Status='done' THEN 1 ELSE 0 END) AS 完了タスク,
+             p.Description AS 説明
+      FROM Project p
+      LEFT JOIN Task t ON t.ProjectId = p.Id
+      GROUP BY p.Id, p.Name, p.Status, p.Priority, p.StartDate, p.EndDate, p.Description
+      ORDER BY CASE p.Status WHEN 'active' THEN 1 WHEN 'planning' THEN 2 ELSE 3 END, p.Name
+    columns: [プロジェクト名, ステータス, 優先度, 開始日, 終了日, タスク数, 完了タスク, 説明]
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # timeline: プロジェクトタイムライン
+  - id: project_timeline
+    title: プロジェクトタイムライン（timeline）
+    component: timeline
+    sourceType: custom
+    source: |
+      SELECT StartDate AS event_date, Name AS event_name,
+             'プロジェクト開始: ' || Status AS description,
+             Status AS event_type
+      FROM Project
+      WHERE StartDate IS NOT NULL
+      ORDER BY StartDate ASC
+    columns: [event_date, event_name, description, event_type]
+    dateField: event_date
+    eventField: event_name
+    descField: description
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # bar_chart: プロジェクト別タスク数
+  - id: tasks_per_project
+    title: プロジェクト別タスク数（bar_chart）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT p.Name AS project_name, COUNT(t.Id) AS task_count
+      FROM Project p
+      LEFT JOIN Task t ON t.ProjectId = p.Id
+      GROUP BY p.Id, p.Name
+      ORDER BY task_count DESC
+    columns: [project_name, task_count]
+    xField: project_name
+    yField: task_count
+    color: "rgba(59,130,246,0.75)"
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # table: プロジェクト一覧（columns/filters定義デモ）
+  - id: project_table
+    title: プロジェクト一覧（table — columns・filters定義）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.Id, p.Name, p.Status, p.Priority,
+             p.StartDate, p.EndDate,
+             COUNT(t.Id) AS task_count,
+             SUM(CASE WHEN t.Status='done' THEN 1 ELSE 0 END) AS done_count
+      FROM Project p
+      LEFT JOIN Task t ON t.ProjectId = p.Id
+      GROUP BY p.Id, p.Name, p.Status, p.Priority, p.StartDate, p.EndDate
+      ORDER BY p.Name
+    columns:
+      Id:
+        label: ID
+        type: int
+        hidden: true
+      Name:
+        label: プロジェクト名
+        type: string
+        sortable: true
+      Status:
+        label: ステータス
+        type: select
+        sortable: true
+        options:
+          planning: "📋 Planning"
+          active: "🚀 Active"
+          on_hold: "⏸️ On Hold"
+          completed: "✅ Completed"
+          cancelled: "❌ Cancelled"
+      Priority:
+        label: 優先度
+        type: select
+        sortable: true
+        options:
+          low: "🟢 Low"
+          medium: "🟡 Medium"
+          high: "🔴 High"
+      StartDate:
+        label: 開始日
+        type: date
+        sortable: true
+      EndDate:
+        label: 終了日
+        type: date
+        sortable: true
+      task_count:
+        label: タスク数
+        type: int
+        sortable: true
+      done_count:
+        label: 完了数
+        type: int
+        sortable: true
+    filters:
+      Status:
+        label: ステータス
+        type: toggle-group
+        options:
+          planning: "Planning"
+          active: "Active"
+          on_hold: "On Hold"
+          completed: "Completed"
+          cancelled: "Cancelled"
+      Priority:
+        label: 優先度
+        type: select
+        options:
+          low: "Low"
+          medium: "Medium"
+          high: "High"
+      Name:
+        label: プロジェクト名
+        type: like
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+    editable: false
+    readOnly: true

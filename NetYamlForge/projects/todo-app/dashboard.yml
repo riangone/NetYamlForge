@@ -1,0 +1,102 @@
+stats:
+  - label: 全タスク数
+    entity: task
+    aggregate: count
+    icon: 📋
+    color: badge-primary
+  - label: 未着手
+    entity: task
+    aggregate: count
+    filter: Status='pending'
+    icon: ⏳
+    color: badge-warning
+  - label: 進行中
+    entity: task
+    aggregate: count
+    filter: Status='in_progress'
+    icon: 🔄
+    color: badge-info
+  - label: レビュー中
+    entity: task
+    aggregate: count
+    filter: Status='review'
+    icon: 👀
+    color: badge-secondary
+  - label: 完了
+    entity: task
+    aggregate: count
+    filter: Status='done'
+    icon: ✅
+    color: badge-success
+  - label: 緊急タスク
+    entity: task
+    aggregate: count
+    filter: Priority='urgent'
+    icon: 🚨
+    color: badge-error
+  - label: 全プロジェクト
+    entity: project
+    aggregate: count
+    icon: 📁
+    color: badge-accent
+  - label: アクティブプロジェクト
+    entity: project
+    aggregate: count
+    filter: Status='active'
+    icon: 🚀
+    color: badge-primary
+
+charts:
+  - title: ステータス別タスク数
+    type: doughnut
+    entity: task
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(245, 158, 11, 0.85)
+      - rgba(59, 130, 246, 0.85)
+      - rgba(168, 85, 247, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(107, 114, 128, 0.85)
+
+  - title: 優先度別タスク数
+    type: bar
+    entity: task
+    valueAggregate: count
+    groupExpression: Priority
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)
+
+  - title: プロジェクト別タスク数
+    type: bar
+    entity: task
+    valueAggregate: count
+    labelJoinEntity: project
+    labelJoinKey: ProjectId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: プロジェクトステータス分布
+    type: pie
+    entity: project
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(99, 102, 241, 0.85)
+      - rgba(59, 130, 246, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(107, 114, 128, 0.85)

@@ -1,9 +1,0 @@
-name: shop
-displayName: ショップ管理
-version: "1.0.0"
-database:
-  type: sqlite
-  path: database/shop.db
-features:
-  multiLanguage: true
-  userAuthentication: true

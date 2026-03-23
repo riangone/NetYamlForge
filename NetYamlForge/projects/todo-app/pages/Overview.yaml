@@ -1,0 +1,84 @@
+title: Overview
+description: "stat_cards・bar_chart・table コンポーネントを使ったTODOアプリ概要ページ"
+
+sections:
+  # stat_cards: KPIサマリー
+  - id: kpi_summary
+    title: タスクKPI
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全タスク' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '📋' AS metric_icon, NULL AS metric_delta
+        FROM Task
+      UNION ALL
+      SELECT '未着手', CAST(COUNT(*) AS TEXT), '⏳', NULL FROM Task WHERE Status='pending'
+      UNION ALL
+      SELECT '進行中', CAST(COUNT(*) AS TEXT), '🔄', NULL FROM Task WHERE Status='in_progress'
+      UNION ALL
+      SELECT '完了', CAST(COUNT(*) AS TEXT), '✅', NULL FROM Task WHERE Status='done'
+      UNION ALL
+      SELECT '緊急', CAST(COUNT(*) AS TEXT), '🚨', NULL FROM Task WHERE Priority='urgent'
+      UNION ALL
+      SELECT '全プロジェクト', CAST(COUNT(*) AS TEXT), '📁', NULL FROM Project
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # bar_chart: 優先度別タスク数
+  - id: priority_bar
+    title: 優先度別タスク数（bar_chart）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT Priority AS label, COUNT(*) AS value
+      FROM Task
+      GROUP BY Priority
+      ORDER BY CASE Priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(239,68,68,0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # line_chart: 期限別タスク数（多系列）
+  - id: status_bar
+    title: ステータス別タスク数（bar_chart）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT Status AS label, COUNT(*) AS value
+      FROM Task
+      GROUP BY Status
+      ORDER BY CASE Status WHEN 'pending' THEN 1 WHEN 'in_progress' THEN 2 WHEN 'review' THEN 3 WHEN 'done' THEN 4 ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(99,102,241,0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # table: 直近タスク（期限が近い順）
+  - id: upcoming_tasks
+    title: 期限が近いタスク（table）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT t.Id, t.Title AS タイトル, t.Status AS ステータス, t.Priority AS 優先度,
+             p.Name AS プロジェクト, t.AssignedTo AS 担当者, t.DueDate AS 期限日
+      FROM Task t
+      LEFT JOIN Project p ON t.ProjectId = p.Id
+      WHERE t.Status NOT IN ('done', 'cancelled') AND t.DueDate IS NOT NULL
+      ORDER BY t.DueDate ASC
+      LIMIT 10
+    columns: [Id, タイトル, ステータス, 優先度, プロジェクト, 担当者, 期限日]
+    pageSize: 10
+    editable: false
+    readOnly: true

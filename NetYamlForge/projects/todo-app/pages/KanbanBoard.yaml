@@ -1,0 +1,138 @@
+title: Kanban Board
+description: "kanban コンポーネントを使ったタスクボード — ステータス別カード表示"
+
+sections:
+  # kanban: タスクボード
+  - id: task_kanban
+    title: タスクカンバン（kanban）
+    component: kanban
+    sourceType: custom
+    source: |
+      SELECT t.Id, t.Title AS title, t.AssignedTo AS assignee, t.Status AS status,
+             t.Priority AS priority, t.DueDate AS due_date,
+             p.Name AS project_name
+      FROM Task t
+      LEFT JOIN Project p ON t.ProjectId = p.Id
+      ORDER BY
+        CASE t.Status
+          WHEN 'in_progress' THEN 1
+          WHEN 'review'      THEN 2
+          WHEN 'pending'     THEN 3
+          WHEN 'done'        THEN 4
+          ELSE 5
+        END,
+        CASE t.Priority
+          WHEN 'urgent' THEN 1
+          WHEN 'high'   THEN 2
+          WHEN 'medium' THEN 3
+          ELSE 4
+        END
+    columns: [Id, title, assignee, status, priority, due_date, project_name]
+    groupBy: status
+    cardTitle: title
+    cardSubtitle: assignee
+    pageSize: 100
+    editable: false
+    readOnly: true
+
+  # progress_bars: 担当者別完了率
+  - id: assignee_progress
+    title: 担当者別タスク完了率（progress_bars）
+    component: progress_bars
+    sourceType: custom
+    source: |
+      SELECT
+        AssignedTo AS member_name,
+        SUM(CASE WHEN Status = 'done' THEN 1 ELSE 0 END) AS done_count,
+        COUNT(*) AS total_count,
+        ROUND(SUM(CASE WHEN Status = 'done' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS completion_rate
+      FROM Task
+      WHERE AssignedTo IS NOT NULL AND AssignedTo != ''
+      GROUP BY AssignedTo
+      ORDER BY completion_rate DESC
+    columns: [member_name, done_count, total_count, completion_rate]
+    labelField: member_name
+    progressField: completion_rate
+    subValueField: total_count
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # table: タスク一覧（フィルター付き）
+  - id: task_list
+    title: タスク一覧（table — フィルター・ソート付き）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT t.Id, t.Title AS title, t.AssignedTo AS assignee, t.Status AS status,
+             t.Priority AS priority, t.DueDate AS due_date, p.Name AS project
+      FROM Task t
+      LEFT JOIN Project p ON t.ProjectId = p.Id
+      ORDER BY t.Id
+    columns:
+      Id:
+        label: ID
+        type: int
+        sortable: true
+      title:
+        label: タイトル
+        type: string
+        sortable: true
+      assignee:
+        label: 担当者
+        type: string
+        sortable: true
+      status:
+        label: ステータス
+        type: select
+        sortable: true
+        options:
+          pending: "📋 Pending"
+          in_progress: "🔄 In Progress"
+          review: "👀 Review"
+          done: "✅ Done"
+          cancelled: "❌ Cancelled"
+      priority:
+        label: 優先度
+        type: select
+        sortable: true
+        options:
+          urgent: "🔴 Urgent"
+          high: "🟠 High"
+          medium: "🟡 Medium"
+          low: "🟢 Low"
+      due_date:
+        label: 期限日
+        type: date
+        sortable: true
+      project:
+        label: プロジェクト
+        type: string
+        sortable: true
+    filters:
+      status:
+        label: ステータス
+        type: toggle-group
+        options:
+          pending: "Pending"
+          in_progress: "In Progress"
+          review: "Review"
+          done: "Done"
+          cancelled: "Cancelled"
+      priority:
+        label: 優先度
+        type: select
+        options:
+          urgent: "Urgent"
+          high: "High"
+          medium: "Medium"
+          low: "Low"
+      due_date:
+        label: 期限日
+        type: date-range
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+    editable: false
+    readOnly: true

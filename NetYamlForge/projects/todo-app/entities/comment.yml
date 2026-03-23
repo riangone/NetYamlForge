@@ -1,0 +1,102 @@
+imports: []
+entities:
+  comment:
+    table: Comment
+    key: Id
+    displayName: Comment
+    softDelete: false
+    isPublic: true
+
+    joins:
+      - type: left
+        table: Task
+        alias: t
+        on: Comment.EntityId = t.Id AND Comment.EntityType = 'task'
+
+    forms:
+      EntityType:
+        type: string
+        required: true
+        label: 対象タイプ
+        editable: true
+        options:
+          - task
+          - project
+      EntityId:
+        type: int
+        required: true
+        label: 対象ID
+        editable: true
+      Author:
+        type: string
+        required: true
+        label: 作成者
+        editable: true
+      Body:
+        type: textarea
+        required: true
+        label: コメント本文
+        editable: true
+      CreatedAt:
+        type: datetime
+        label: 作成日時
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      EntityType:
+        type: string
+        label: 対象タイプ
+        sortable: true
+      EntityId:
+        type: int
+        label: 対象ID
+        sortable: true
+      TaskTitle:
+        type: string
+        label: タスク名
+        expression: t.Title
+        searchable: true
+        sortable: true
+      Author:
+        type: string
+        label: 作成者
+        searchable: true
+        sortable: true
+      Body:
+        type: string
+        label: コメント
+        searchable: true
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: 作成日時
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [EntityType, EntityId, Author, Body, CreatedAt]
+      filters:
+        columns: 3
+        order: [EntityType, Author]
+
+    filters:
+      EntityType:
+        type: dropdown
+        label: 対象タイプ
+        options:
+          - task
+          - project
+      Author:
+        type: like
+        label: 作成者

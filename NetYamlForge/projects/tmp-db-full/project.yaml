@@ -1,9 +1,0 @@
-name: tmp-db-full
-displayName: Tmp Db Full
-version: "1.0.0"
-database:
-  type: sqlite
-  path: /tmp/scaffold-check.db
-features:
-  multiLanguage: true
-  userAuthentication: true
