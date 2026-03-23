@@ -37,7 +37,7 @@
             </ol>
         </nav>
 
-        @* Newボタン（モーダル） + タイトル。"New Page" は _List.cshtml 内に移動（HTMX でstate付きURLを維持するため） *@
+        @* New ボタン + タイトル *@
         <div class="flex items-center gap-3">
             <button class="btn btn-primary btn-sm"
                 hx-get="@Url.Action("CreateForm", "DynamicEntity", new { entity = Model.Entity, mode = "modal", returnUrl = Model.ReturnUrl })"
@@ -71,6 +71,62 @@
             </div>
         }
     </div>
+
+    @* ===== ツールバー（フィルターフォームの上） ===== *@
+    <div class="flex items-center gap-2 flex-wrap" id="entity-toolbar">
+
+        @* 一括操作バー（チェックボックスで1件以上選択時に表示） *@
+        <div id="bulk-action-bar" class="hidden items-center gap-2 flex-wrap">
+            <span id="bulk-selected-count" class="text-sm font-semibold badge badge-neutral">0 件選択</span>
+            @foreach (var actionEntry in Model.Meta.Actions.Where(a => a.Value.Scope != "header"))
+            {
+                var bActionKey = actionEntry.Key;
+                var bActionDef = actionEntry.Value;
+                <button class="btn btn-sm btn-warning btn-outline"
+                        onclick="invokeBulkAction('@bActionKey', '@(bActionDef.Confirm ?? "")')">
+                    @bActionDef.Label (選択)
+                </button>
+            }
+            <button class="btn btn-sm btn-ghost" onclick="clearAllCheckboxes()">選択解除</button>
+        </div>
+
+        @* 右側ボタン群（常時表示） *@
+        <div class="ml-auto flex items-center gap-2 flex-wrap">
+            @* CSV エクスポートボタン *@
+            <button class="btn btn-outline btn-sm" id="export-csv-btn"
+                    title="現在の検索・フィルタ条件でエクスポート">
+                ⬇ Export CSV
+            </button>
+
+            @* ヘッダースコープのカスタムアクションボタン *@
+            @foreach (var actionEntry in Model.Meta.Actions.Where(a => a.Value.Scope == "header"))
+            {
+                var hActionKey = actionEntry.Key;
+                var hActionDef = actionEntry.Value;
+                var hHasInputs = hActionDef.Inputs != null && hActionDef.Inputs.Count > 0;
+                if (hHasInputs)
+                {
+                    <button class="btn btn-outline btn-sm"
+                            hx-get="@Url.Action("HeaderActionForm", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
+                            hx-target="#modal-form-content"
+                            hx-swap="innerHTML">
+                        @hActionDef.Label
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-outline btn-sm"
+                            hx-post="@Url.Action("InvokeHeaderAction", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
+                            hx-target="#list-container"
+                            hx-swap="innerHTML"
+                            @(!string.IsNullOrWhiteSpace(hActionDef.Confirm) ? $"hx-confirm=\"{hActionDef.Confirm}\"" : "")>
+                        @hActionDef.Label
+                    </button>
+                }
+            }
+        </div>
+    </div>
+    @* ===== /ツールバー ===== *@
 
     <div class="card bg-base-100 shadow">
         <div class="card-body">
@@ -233,6 +289,121 @@
             if (clearFlag) {
                 clearFlag.value = "";
             }
+        });
+
+        // ===== チェックボックス一括操作 =====
+        const entityName = "@Model.Entity";
+        const bulkActionBase = "@Url.Action("InvokeBulkAction", "DynamicEntity")";
+
+        function getCheckedIds() {
+            return Array.from(document.querySelectorAll(".row-checkbox:checked"))
+                .map(function (cb) { return cb.value; });
+        }
+
+        function updateBulkBar() {
+            const ids = getCheckedIds();
+            const bar = document.getElementById("bulk-action-bar");
+            const counter = document.getElementById("bulk-selected-count");
+            if (!bar) return;
+            if (ids.length > 0) {
+                bar.classList.remove("hidden");
+                bar.classList.add("flex");
+                if (counter) counter.textContent = ids.length + " 件選択";
+            } else {
+                bar.classList.add("hidden");
+                bar.classList.remove("flex");
+            }
+        }
+
+        function clearAllCheckboxes() {
+            document.querySelectorAll(".row-checkbox, #select-all-checkbox").forEach(function (cb) {
+                cb.checked = false;
+            });
+            updateBulkBar();
+        }
+
+        // HTMX でリスト更新後にチェックボックスリスナーを再設定
+        function bindCheckboxEvents() {
+            document.querySelectorAll(".row-checkbox").forEach(function (cb) {
+                cb.addEventListener("change", updateBulkBar);
+            });
+            const selectAll = document.getElementById("select-all-checkbox");
+            if (selectAll) {
+                selectAll.addEventListener("change", function () {
+                    document.querySelectorAll(".row-checkbox").forEach(function (cb) {
+                        cb.checked = selectAll.checked;
+                    });
+                    updateBulkBar();
+                });
+            }
+        }
+
+        document.body.addEventListener("htmx:afterSwap", function (evt) {
+            if (evt.detail && evt.detail.target && evt.detail.target.id === "list-container") {
+                bindCheckboxEvents();
+                clearAllCheckboxes();
+            }
+        });
+
+        // 初回ロード後にもバインド（list-container は load トリガー）
+        document.addEventListener("DOMContentLoaded", function () {
+            // list は htmx:afterSwap で処理されるため不要だが念のため
+            bindCheckboxEvents();
+        });
+
+        // 一括アクション実行
+        function invokeBulkAction(actionKey, confirmMsg) {
+            const ids = getCheckedIds();
+            if (ids.length === 0) {
+                alert("操作するレコードを選択してください。");
+                return;
+            }
+            if (confirmMsg && !window.confirm(confirmMsg + "\n\n" + ids.length + " 件を処理します。")) {
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.append("entity", entityName);
+            params.append("actionKey", actionKey);
+            ids.forEach(function (id) { params.append("ids", id); });
+
+            const token = document.querySelector("input[name='__RequestVerificationToken']");
+            if (token) params.append("__RequestVerificationToken", token.value);
+
+            fetch(bulkActionBase + "?" + new URLSearchParams({ entity: entityName, actionKey: actionKey }).toString(), {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: params.toString()
+            }).then(function (resp) {
+                if (!resp.ok) return resp.text().then(function (t) { throw new Error(t); });
+                return resp.text();
+            }).then(function (html) {
+                const container = document.getElementById("list-container");
+                if (container) {
+                    container.innerHTML = html;
+                    if (window.htmx) htmx.process(container);
+                    bindCheckboxEvents();
+                    clearAllCheckboxes();
+                }
+            }).catch(function (err) {
+                console.error("Bulk action failed:", err);
+                alert("操作中にエラーが発生しました: " + err.message);
+            });
+        }
+
+        // Export CSV ボタン（現在のフィルター状態を引き継ぐ）
+        document.getElementById("export-csv-btn")?.addEventListener("click", function () {
+            const form = document.getElementById("filter-form");
+            const params = new URLSearchParams();
+            if (form) {
+                new FormData(form).forEach(function (value, key) {
+                    if (key !== "__RequestVerificationToken" && value) {
+                        params.append(key, value);
+                    }
+                });
+            }
+            const exportUrl = "@Url.Action("ExportCsv", "DynamicEntity")" + "?" + params.toString();
+            window.location.href = exportUrl;
         });
 
         function syncCompactMultiSelect(container) {

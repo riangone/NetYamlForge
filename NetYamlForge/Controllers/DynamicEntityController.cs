@@ -571,6 +571,71 @@ public class DynamicEntityController : BaseProjectController
     }
 
     /// <summary>
+    /// 複数レコードに対して同一アクションを一括実行します。
+    /// 各 ID ごとにハンドラーを呼び出し、すべて成功した場合のみコミットします。
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> InvokeBulkAction(
+        string entity,
+        string actionKey,
+        [FromForm] string[] ids,
+        [FromForm] string? returnUrl = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+            return accessDenied;
+
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound($"アクション '{actionKey}' が見つかりません。");
+
+        if (ids == null || ids.Length == 0)
+            return BadRequest("操作するレコードが指定されていません。");
+
+        var projectName = _projectScope.Current?.Name ?? "";
+        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? actionKey : actionDef.Handler;
+        var handler = _actionRegistry.Find(projectName, handlerName);
+        if (handler == null)
+            return BadRequest($"アクションハンドラー '{handlerName}' が見つかりません。");
+
+        var errors = new List<string>();
+        foreach (var id in ids)
+        {
+            var ctx = new CustomActionContext
+            {
+                Project = projectName,
+                Entity = entity,
+                Action = actionKey,
+                RecordId = id,
+                Inputs = new Dictionary<string, object?>(),
+                UserName = User.Identity?.Name
+            };
+
+            try
+            {
+                var result = await _commandService.ExecuteActionAsync(handler, ctx);
+                if (!result.Ok)
+                    errors.Add($"ID={id}: {result.ErrorMessage}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "一括アクション '{Action}' ID={Id} の実行中にエラーが発生しました", actionKey, id);
+                errors.Add($"ID={id}: 実行エラー");
+            }
+        }
+
+        if (errors.Count > 0)
+            _logger.LogWarning("一括アクション '{Action}' の一部が失敗しました: {Errors}", actionKey, string.Join("; ", errors));
+
+        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
+        return PartialView("_List",
+            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
+    }
+
+    /// <summary>
     /// カスタムアクション入力フォームをモーダル用パーシャルとして返します。
     /// inputs が空のアクションは確認ダイアログを表示せずそのまま InvokeAction を呼びます。
     /// </summary>
