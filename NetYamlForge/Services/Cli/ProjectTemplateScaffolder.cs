@@ -230,55 +230,34 @@ features:
         return $$"""
 hero:
   eyebrow: {{displayName}}
-  eyebrowKey: projects.{{projectName}}.home.hero.eyebrow
-  title: {{displayName}} Workspace
-  titleKey: projects.{{projectName}}.home.hero.title
-  description: Starter workspace generated from your database schema.
-  descriptionKey: projects.{{projectName}}.home.hero.description
+  title: Welcome to {{displayName}}
+  description: Edit entities/ YAML files to customize your screens. Run --scaffold-entities to regenerate from DB.
   primaryActionLabel: Open Dashboard
-  primaryActionLabelKey: projects.{{projectName}}.home.hero.primaryActionLabel
   primaryActionUrl: /{{projectName}}/Dashboard
-  secondaryActionLabel: Open Schema Definitions
-  secondaryActionLabelKey: projects.{{projectName}}.home.hero.secondaryActionLabel
+  secondaryActionLabel: View Schema
   secondaryActionUrl: /{{projectName}}/DynamicEntity/AllDefinitions
   highlights:
-    - Template Ready
     - YAML First
-  highlightKeys:
-    - projects.{{projectName}}.home.hero.highlights.0
-    - projects.{{projectName}}.home.hero.highlights.1
-
-projectsSectionTitle: {{displayName}}
-projectsSectionTitleKey: projects.{{projectName}}.home.sections.projects.title
-projectsSectionLead: Build your business screens from this starter project.
-projectsSectionLeadKey: projects.{{projectName}}.home.sections.projects.lead
-capabilitiesSectionTitle: Core Capabilities
-capabilitiesSectionTitleKey: projects.{{projectName}}.home.sections.capabilities.title
-solutionsSectionTitle: Solution Matrix
-solutionsSectionTitleKey: projects.{{projectName}}.home.sections.solutions.title
-quickActionsSectionTitle: Quick Actions
-quickActionsSectionTitleKey: projects.{{projectName}}.home.sections.quickActions.title
-openWorkspaceLabel: Open Workspace
-openWorkspaceLabelKey: projects.{{projectName}}.home.actions.openWorkspace
-emptyProjectsMessage: No projects found under projects/.
-emptyProjectsMessageKey: projects.{{projectName}}.home.emptyProjectsMessage
+    - Auto CRUD
+    - Multi-language
 
 quickActions:
   - label: Dashboard
-    labelKey: projects.{{projectName}}.home.quickActions.0.label
     url: /{{projectName}}/Dashboard
     style: btn-primary
     icon: 📊
-  - label: Entity Definitions
-    labelKey: projects.{{projectName}}.home.quickActions.1.label
+  - label: Entity Schema
     url: /{{projectName}}/DynamicEntity/AllDefinitions
     style: btn-outline
     icon: 🧩
   - label: Starter Page
-    labelKey: projects.{{projectName}}.home.quickActions.2.label
     url: /{{projectName}}/Page/StarterOverview
     style: btn-outline
     icon: 🧭
+  - label: Docs
+    url: /{{projectName}}/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖
 """ + Environment.NewLine;
     }
 
@@ -287,6 +266,11 @@ quickActions:
         return $$"""
 header:
   title: {{displayName}}
+  showProjectBadge: true
+
+sidebar:
+  enabled: false
+
 navigation:
   showDashboard: true
   entities: []
@@ -298,17 +282,85 @@ navigation:
       controller: Dashboard
       action: Index
       icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "{{displayName}} — powered by NetYamlForge"
+  showVersion: true
 """ + Environment.NewLine;
     }
 
     private static string BuildI18nYaml(string projectName)
     {
         return $$"""
+# i18n translation file for project: {{projectName}}
+# Keys are referenced by labelKey / titleKey / descriptionKey in YAML definitions.
+# Supported locales: en-US, zh-CN, ja-JP, ko-KR
+# Add keys here as you add labelKey references to entities/, pages/, dashboard.yml, etc.
 translations:
-  projects.{{projectName}}.template.welcome:
-    en-US: Starter template
-    zh-CN: Starter template
-    ja-JP: Starter template
+  nav.home:
+    en-US: Home
+    zh-CN: 首页
+    ja-JP: ホーム
+    ko-KR: 홈
+  nav.dashboard:
+    en-US: Dashboard
+    zh-CN: 仪表盘
+    ja-JP: ダッシュボード
+    ko-KR: 대시보드
+  nav.schema:
+    en-US: Schema
+    zh-CN: 数据模型
+    ja-JP: スキーマ
+    ko-KR: 스키마
+  common.search:
+    en-US: Search
+    zh-CN: 搜索
+    ja-JP: 検索
+    ko-KR: 검색
+  common.reset:
+    en-US: Reset
+    zh-CN: 重置
+    ja-JP: リセット
+    ko-KR: 초기화
+  common.save:
+    en-US: Save
+    zh-CN: 保存
+    ja-JP: 保存
+    ko-KR: 저장
+  common.delete:
+    en-US: Delete
+    zh-CN: 删除
+    ja-JP: 削除
+    ko-KR: 삭제
+  common.cancel:
+    en-US: Cancel
+    zh-CN: 取消
+    ja-JP: キャンセル
+    ko-KR: 취소
+  common.edit:
+    en-US: Edit
+    zh-CN: 编辑
+    ja-JP: 編集
+    ko-KR: 편집
+  common.create:
+    en-US: Create
+    zh-CN: 新建
+    ja-JP: 作成
+    ko-KR: 만들기
+  common.total:
+    en-US: Total
+    zh-CN: 合计
+    ja-JP: 合計
+    ko-KR: 합계
+  common.loading:
+    en-US: Loading...
+    zh-CN: 加载中...
+    ja-JP: 読み込み中...
+    ko-KR: 로딩 중...
 """ + Environment.NewLine;
     }
 
@@ -333,24 +385,58 @@ translations:
         sb.AppendLine("stats:");
         if (entityNames.Count == 0)
         {
+            sb.AppendLine("  # Add stat cards here. Example:");
+            sb.AppendLine("  # - label: Total Records");
+            sb.AppendLine("  #   entity: my_entity");
+            sb.AppendLine("  #   aggregate: count");
+            sb.AppendLine("  #   icon: 📊");
+            sb.AppendLine("  #   color: badge-info");
             sb.AppendLine("  []");
         }
         else
         {
+            var colors = new[] { "badge-info", "badge-success", "badge-warning", "badge-error", "badge-primary", "badge-secondary" };
             for (var i = 0; i < entityNames.Count; i++)
             {
                 var entity = entityNames[i];
                 var label = $"{ToDisplayName(entity)} Count";
+                var color = colors[i % colors.Length];
                 sb.AppendLine($"  - label: {label}");
-                sb.AppendLine($"    labelKey: projects.{projectName}.dashboard.stats.{i}.label");
                 sb.AppendLine($"    entity: {entity}");
                 sb.AppendLine("    aggregate: count");
                 sb.AppendLine("    icon: 📊");
-                sb.AppendLine("    color: badge-info");
+                sb.AppendLine($"    color: {color}");
             }
         }
 
-        sb.AppendLine("charts: []");
+        sb.AppendLine();
+        sb.AppendLine("charts:");
+        if (entityNames.Count == 0)
+        {
+            sb.AppendLine("  # Add charts here. Example:");
+            sb.AppendLine("  # - id: trend");
+            sb.AppendLine("  #   title: Monthly Trend");
+            sb.AppendLine("  #   type: bar");
+            sb.AppendLine("  #   source: \"SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM YourTable GROUP BY Month ORDER BY Month DESC LIMIT 12\"");
+            sb.AppendLine("  #   xAxis: Month");
+            sb.AppendLine("  #   yAxis: Count");
+            sb.AppendLine("  []");
+        }
+        else
+        {
+            var firstEntity = entityNames[0];
+            var firstTable = firstEntity; // will be resolved at runtime
+            sb.AppendLine($"  # Auto-generated chart example based on first entity: {firstEntity}");
+            sb.AppendLine($"  # Uncomment and adjust the SQL to match your actual table/columns.");
+            sb.AppendLine($"  # - id: {firstEntity}_trend");
+            sb.AppendLine($"  #   title: {ToDisplayName(firstEntity)} Monthly Trend");
+            sb.AppendLine("  #   type: bar");
+            sb.AppendLine($"  #   source: \"SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM {firstTable} GROUP BY Month ORDER BY Month DESC LIMIT 12\"");
+            sb.AppendLine("  #   xAxis: Month");
+            sb.AppendLine("  #   yAxis: Count");
+            sb.AppendLine("  []");
+        }
+
         return sb.ToString();
     }
 
@@ -648,48 +734,115 @@ sections:
 
         WriteFile(Path.Combine(projectDir, "pages", "StarterOverview.yaml"), pageYamlBuilder.ToString() + Environment.NewLine);
 
-        var viewCshtml = """
+        var viewCshtml = $$"""
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
-    var pageName = ViewData["PageName"]?.ToString() ?? "StarterOverview";
     var title = ViewData["Title"]?.ToString() ?? "Starter Overview";
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "{{projectName}}";
 }
-<div class="space-y-4">
-    <h1 class="text-2xl font-bold">@title</h1>
-    <p class="opacity-70">This is an auto-generated starter page template: @pageName</p>
-    @foreach (var section in Model)
+
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold">@title</h1>
+            <p class="text-sm opacity-60 mt-1">
+                Auto-generated overview — edit
+                <code class="font-mono bg-base-200 px-1 rounded">pages/StarterOverview.yaml</code>
+                or
+                <code class="font-mono bg-base-200 px-1 rounded">entities/*.yml</code>
+                to customize.
+            </p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline"
+               asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject">
+                📊 Dashboard
+            </a>
+            <a class="btn btn-sm btn-ghost"
+               asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject">
+                🧩 Schema
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary stats -->
+    @if (Model.Any())
     {
-        <div class="card bg-base-100 border border-base-300 shadow-sm">
-            <div class="card-body">
-                <h2 class="card-title">@(section.Key) (@(section.Value.Total))</h2>
-                <div class="overflow-x-auto">
-                    <table class="table table-zebra table-sm w-full">
-                        <thead>
-                            <tr>
-                                @if (section.Value.Rows.Any())
-                                {
-                                    @foreach (var col in section.Value.Rows.First().Keys)
-                                    {
-                                        <th>@col</th>
-                                    }
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var row in section.Value.Rows)
-                            {
-                                <tr>
-                                    @foreach (var val in row.Values)
-                                    {
-                                        <td>@(val?.ToString())</td>
-                                    }
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            @foreach (var section in Model)
+            {
+                <div class="stat bg-base-100 rounded-box border border-base-300 shadow-sm p-4">
+                    <div class="stat-title text-xs truncate">@section.Key</div>
+                    <div class="stat-value text-2xl">@section.Value.Total</div>
+                    <div class="stat-desc">records</div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Data sections -->
+    @if (!Model.Any())
+    {
+        <div class="hero bg-base-100 rounded-box border border-base-300 min-h-48">
+            <div class="hero-content text-center">
+                <div>
+                    <p class="text-4xl mb-3">🧭</p>
+                    <h2 class="text-xl font-semibold">No sections yet</h2>
+                    <p class="opacity-60 mt-1 text-sm">
+                        Run <code class="font-mono bg-base-200 px-1 rounded">--scaffold-entities</code> to auto-generate entity definitions,
+                        then edit <code class="font-mono bg-base-200 px-1 rounded">pages/StarterOverview.yaml</code>.
+                    </p>
                 </div>
             </div>
         </div>
+    }
+    else
+    {
+        @foreach (var section in Model)
+        {
+            <div class="card bg-base-100 border border-base-300 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="card-title text-base">@section.Key</h2>
+                        <span class="badge badge-ghost badge-sm">@section.Value.Total total</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra table-sm w-full">
+                            <thead>
+                                <tr class="bg-base-200">
+                                    @if (section.Value.Rows.Any())
+                                    {
+                                        @foreach (var col in section.Value.Rows.First().Keys)
+                                        {
+                                            <th class="text-xs font-semibold uppercase tracking-wide">@col</th>
+                                        }
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!section.Value.Rows.Any())
+                                {
+                                    <tr><td colspan="99" class="text-center opacity-50 py-6">No records</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var row in section.Value.Rows)
+                                    {
+                                        <tr class="hover">
+                                            @foreach (var val in row.Values)
+                                            {
+                                                <td class="text-sm">@(val?.ToString() ?? "—")</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>
 """;
@@ -729,45 +882,149 @@ sections:
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - {{displayName}}</title>
-    <script type="importmap"></script>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : ""){{displayName}}</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
 </head>
-<body class="min-h-screen bg-base-200">
+<body class="min-h-screen bg-base-200 flex flex-col">
     @{
         var currentProject = Context.GetRouteValue("project")?.ToString() ?? "{{projectName}}";
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     }
-    <header class="navbar bg-base-100 border-b border-base-300 px-4">
-        <div class="flex-1">
-            <a class="btn btn-ghost text-xl"
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar bg-base-100 border-b border-base-300 px-4 shadow-sm sticky top-0 z-50">
+        <div class="navbar-start gap-2">
+            <!-- Mobile hamburger -->
+            <div class="dropdown lg:hidden">
+                <label tabindex="0" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </label>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">🏠 Home</a></li>
+                    <li><a asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject">📊 Dashboard</a></li>
+                    <li><a asp-controller="Page" asp-action="Index" asp-route-project="@currentProject" asp-route-pageName="StarterOverview">🧭 Overview</a></li>
+                    <li><a asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject">🧩 Schema</a></li>
+                </ul>
+            </div>
+            <!-- Brand -->
+            <a class="btn btn-ghost text-lg font-bold tracking-tight"
                asp-controller="Home"
                asp-action="Project"
-               asp-route-project="@currentProject">{{displayName}}</a>
+               asp-route-project="@currentProject">
+                {{displayName}}
+            </a>
         </div>
-        <div class="flex-none gap-2">
-            <a class="btn btn-ghost btn-sm"
-               asp-controller="Dashboard"
-               asp-action="Index"
-               asp-route-project="@currentProject">Dashboard</a>
-            <a class="btn btn-ghost btn-sm"
-               asp-controller="Page"
-               asp-action="Index"
-               asp-route-project="@currentProject"
-               asp-route-pageName="StarterOverview">Starter</a>
-            <a class="btn btn-ghost btn-sm"
-               asp-controller="DynamicEntity"
-               asp-action="AllDefinitions"
-               asp-route-project="@currentProject">Entities</a>
+
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1 gap-1">
+                <li>
+                    <a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject"
+                       class="@(currentController == "Home" ? "active" : "")">
+                        🏠 Home
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject"
+                       class="@(currentController == "Dashboard" ? "active" : "")">
+                        📊 Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Page" asp-action="Index" asp-route-project="@currentProject" asp-route-pageName="StarterOverview"
+                       class="@(currentController == "Page" ? "active" : "")">
+                        🧭 Overview
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject"
+                       class="@(currentController == "DynamicEntity" ? "active" : "")">
+                        🧩 Schema
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="navbar-end gap-2">
+            <!-- Language switcher -->
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle" title="Language">
+                    🌐
+                </label>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32 z-[1]">
+                    <li><a href="?lang=en-US">English</a></li>
+                    <li><a href="?lang=zh-CN">中文</a></li>
+                    <li><a href="?lang=ja-JP">日本語</a></li>
+                    <li><a href="?lang=ko-KR">한국어</a></li>
+                </ul>
+            </div>
+            <!-- Theme toggle -->
+            <label class="swap swap-rotate btn btn-ghost btn-sm btn-circle" title="Toggle theme">
+                <input type="checkbox" id="theme-toggle" />
+                <svg class="swap-off h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+                </svg>
+                <svg class="swap-on h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+                </svg>
+            </label>
         </div>
     </header>
-    <main class="p-4 lg:p-6">
+
+    <!-- ===== Breadcrumbs ===== -->
+    @if (ViewData["Breadcrumbs"] is IEnumerable<(string Label, string? Url)> crumbs)
+    {
+        <div class="px-4 py-2 bg-base-100 border-b border-base-200">
+            <div class="breadcrumbs text-sm max-w-screen-xl mx-auto">
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">{{displayName}}</a></li>
+                    @foreach (var (label, url) in crumbs)
+                    {
+                        if (url != null)
+                        {
+                            <li><a href="@url">@label</a></li>
+                        }
+                        else
+                        {
+                            <li>@label</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+
+    <!-- ===== Main content ===== -->
+    <main class="flex-1 p-4 lg:p-6 max-w-screen-xl mx-auto w-full">
         @RenderBody()
     </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer footer-center p-4 bg-base-100 border-t border-base-300 text-base-content text-xs opacity-60">
+        <div>
+            <p>{{displayName}} — powered by <a href="https://github.com/yourorg/NetYamlForge" class="link link-hover">NetYamlForge</a></p>
+        </div>
+    </footer>
+
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Theme toggle persistence
+        const toggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const saved = localStorage.getItem('nyfTheme');
+        if (saved === 'dark') { html.setAttribute('data-theme', 'dark'); toggle.checked = true; }
+        toggle?.addEventListener('change', () => {
+            const theme = toggle.checked ? 'dark' : 'corporate';
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('nyfTheme', toggle.checked ? 'dark' : 'light');
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
@@ -803,14 +1060,102 @@ sections:
         return $$"""
 # {{displayName}}
 
-このディレクトリは `--init-project` で生成された最小テンプレートです。
+> `--init-project` で自動生成されたサブプロジェクトです。
 
-## 次の作業
+## ディレクトリ構成
 
-1. `project.yaml` の DB 設定を確認
-2. `dotnet run -- --scaffold-entities --project={{projectName}}` を実行
-3. `entities/` と `pages/` に必要な YAML を追加
-4. `/{{projectName}}` と `/{{projectName}}/Dashboard` を確認
+```
+{{projectName}}/
+├── project.yaml          # プロジェクト設定（DB接続・機能フラグ）
+├── dashboard.yml         # ダッシュボード（統計カード・チャート）
+├── config/
+│   ├── home-page.yml     # ホームページのヒーロー・クイックアクション
+│   ├── layout.yml        # ナビゲーション・ヘッダー・フッター
+│   └── i18n.yml          # 翻訳キー（en-US / zh-CN / ja-JP / ko-KR）
+├── entities/             # ★ エンティティ定義（手動編集 or scaffold 生成）
+├── entities.generated/   # scaffold 自動生成（上書き可）
+├── pages/                # カスタムページ定義（YAML）
+├── database/             # SQLite DB ファイル
+├── views/                # Razor カスタムビュー（.cshtml）
+└── docs/
+    └── README-ja.md      # このファイル
+```
+
+## クイックスタート
+
+```bash
+# 1. DB からエンティティ YAML を自動生成
+dotnet run -- --scaffold-entities --project={{projectName}}
+
+# 2. ブラウザで確認
+# → http://localhost:5000/{{projectName}}
+# → http://localhost:5000/{{projectName}}/Dashboard
+```
+
+## エンティティ定義の書き方
+
+`entities/my_entity.yml` の最小構成:
+
+```yaml
+entities:
+  my_entity:
+    table: MyTable
+    key: Id
+    displayName: My Entity
+    columns:
+      Id:   { type: int, identity: true, label: ID, sortable: true }
+      Name: { type: string, required: true, label: Name, searchable: true }
+    forms:
+      Name: { type: string, required: true, label: Name, editable: true }
+    filters:
+      Name: { type: like, label: Name }
+```
+
+## カスタマイズ例
+
+### ナビに項目を追加（`config/layout.yml`）
+
+```yaml
+navigation:
+  items:
+    - label: My Page
+      url: /{{projectName}}/Page/MyPage
+      icon: 📋
+```
+
+### ダッシュボードにチャートを追加（`dashboard.yml`）
+
+```yaml
+charts:
+  - id: monthly
+    title: Monthly Trend
+    type: bar
+    source: "SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM MyTable GROUP BY Month ORDER BY Month DESC LIMIT 12"
+    xAxis: Month
+    yAxis: Count
+```
+
+### i18n キーを追加（`config/i18n.yml`）
+
+```yaml
+translations:
+  my.custom.label:
+    en-US: My Label
+    zh-CN: 我的标签
+    ja-JP: 私のラベル
+    ko-KR: 내 레이블
+```
+
+## トラブルシューティング
+
+| 症状 | 対処 |
+|------|------|
+| entities/ が空 | `--scaffold-entities` を実行 |
+| YAML 構文エラー | `dotnet test` でバリデーション確認 |
+| 画面が反映されない | サーバー再起動 (`dotnet run`) |
+| フックを追加したい | `dotnet run -- --scaffold-hook --name=MyHook --project={{projectName}}` |
+
+詳細ドキュメント: `docs/developer-tutorial-ja.md` / `docs/COMMON_HOOKS.md`
 """ + Environment.NewLine;
     }
 }
