@@ -1,0 +1,169 @@
+@* ファイル概要: バッチジョブ実行履歴ページ。指定ジョブの過去の実行結果を一覧表示します。 *@
+@model NetYamlForge.Controllers.BatchJobHistoryViewModel
+@{
+    ViewData["Title"] = $"{Model.DisplayName} - 実行履歴";
+    var projectName = Model.ProjectName;
+    var successCount = Model.History.Count(h => h.Result.Success);
+    var failCount = Model.History.Count - successCount;
+}
+
+<div class="space-y-6">
+
+    @* ─── パンくず + ヘッダー ─── *@
+    <div>
+        <div class="text-sm breadcrumbs mb-2">
+            <ul>
+                <li>
+                    <a asp-controller="BatchJob"
+                       asp-action="Index"
+                       asp-route-project="@projectName">Batch Jobs</a>
+                </li>
+                <li>@Model.DisplayName</li>
+            </ul>
+        </div>
+        <div class="flex flex-wrap items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold">@Model.DisplayName</h1>
+                <p class="text-base-content/60 text-sm font-mono">@Model.JobId</p>
+            </div>
+            @if (Model.History.Count > 0)
+            {
+                <div class="ml-auto flex gap-2 flex-wrap">
+                    <div class="stats stats-horizontal shadow-sm border border-base-300 bg-base-100">
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">実行回数</div>
+                            <div class="stat-value text-lg">@Model.History.Count</div>
+                        </div>
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">成功</div>
+                            <div class="stat-value text-lg text-success">@successCount</div>
+                        </div>
+                        @if (failCount > 0)
+                        {
+                            <div class="stat py-2 px-4">
+                                <div class="stat-title text-xs">失敗</div>
+                                <div class="stat-value text-lg text-error">@failCount</div>
+                            </div>
+                        }
+                        @{
+                            var avgDuration = Model.History.Any()
+                                ? (long)Model.History.Average(h => h.Result.DurationMs)
+                                : 0L;
+                        }
+                        <div class="stat py-2 px-4">
+                            <div class="stat-title text-xs">平均時間</div>
+                            <div class="stat-value text-lg">@avgDuration<span class="text-base font-normal">ms</span></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* ─── 履歴テーブル ─── *@
+    @if (Model.History.Count == 0)
+    {
+        <div class="card bg-base-100 border border-base-300">
+            <div class="card-body items-center text-center py-16">
+                <div class="text-4xl mb-3">📋</div>
+                <h2 class="card-title text-base-content/60">実行履歴がありません</h2>
+                <p class="text-base-content/40 text-sm">まだこのジョブは実行されていません。</p>
+                <a asp-controller="BatchJob"
+                   asp-action="Index"
+                   asp-route-project="@projectName"
+                   class="btn btn-sm btn-outline mt-4">
+                    ← ジョブ一覧に戻る
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card bg-base-100 border border-base-300 overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="text-xs text-base-content/60">
+                        <th>実行日時</th>
+                        <th>結果</th>
+                        <th class="text-right">処理時間</th>
+                        <th class="text-right">影響行数</th>
+                        <th>出力ファイル</th>
+                        <th>エラー</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.History)
+                    {
+                        var result = entry.Result;
+                        var execLocal = entry.ExecutedAt.ToLocalTime();
+                        <tr>
+                            <td class="text-sm font-mono whitespace-nowrap">
+                                @execLocal.ToString("yyyy-MM-dd HH:mm:ss")
+                            </td>
+                            <td>
+                                @if (result.Success)
+                                {
+                                    <span class="badge badge-success badge-sm">成功</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-error badge-sm">失敗</span>
+                                }
+                                @if (result.RetryCount > 0)
+                                {
+                                    <span class="badge badge-warning badge-sm ml-1">リトライ @result.RetryCount 回</span>
+                                }
+                            </td>
+                            <td class="text-right text-sm font-mono">@result.DurationMs ms</td>
+                            <td class="text-right text-sm">@result.RowsAffected</td>
+                            <td class="text-sm">
+                                @if (!string.IsNullOrEmpty(result.OutputFile))
+                                {
+                                    <span class="font-mono text-xs truncate max-w-xs block" title="@result.OutputFile">
+                                        @System.IO.Path.GetFileName(result.OutputFile)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-base-content/30">-</span>
+                                }
+                            </td>
+                            <td class="max-w-xs">
+                                @if (!string.IsNullOrEmpty(result.ErrorMessage))
+                                {
+                                    <div class="collapse collapse-arrow">
+                                        <input type="checkbox" />
+                                        <div class="collapse-title text-xs text-error p-0 min-h-0">
+                                            @(result.ErrorMessage.Length > 60
+                                                ? result.ErrorMessage[..60] + "…"
+                                                : result.ErrorMessage)
+                                        </div>
+                                        <div class="collapse-content px-0">
+                                            @if (!string.IsNullOrEmpty(result.ErrorDetail))
+                                            {
+                                                <pre class="text-xs bg-base-200 p-2 rounded overflow-x-auto whitespace-pre-wrap mt-1">@result.ErrorDetail</pre>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-base-content/30">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-end">
+            <a asp-controller="BatchJob"
+               asp-action="Index"
+               asp-route-project="@projectName"
+               class="btn btn-sm btn-ghost">
+                ← ジョブ一覧に戻る
+            </a>
+        </div>
+    }
+</div>

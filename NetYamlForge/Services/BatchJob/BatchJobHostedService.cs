@@ -18,6 +18,21 @@ public interface IBatchJobScheduler
     /// ジョブの次回実行時刻を取得する
     /// </summary>
     DateTime? GetNextRunTime(string jobId);
+
+    /// <summary>
+    /// プロジェクトに登録されたスケジュール済みジョブを取得する
+    /// </summary>
+    IReadOnlyList<ScheduledJob> GetScheduledJobsForProject(string projectName);
+
+    /// <summary>
+    /// 指定ジョブを即時実行する（手動トリガー）
+    /// </summary>
+    Task TriggerJobNowAsync(string projectName, string jobId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 現在実行中のジョブ ID セットを取得する
+    /// </summary>
+    IReadOnlySet<string> GetRunningJobIds();
 }
 
 /// <summary>
@@ -118,11 +133,12 @@ public static class CronParser
 /// <summary>
 /// バッチジョブホストサービス
 /// </summary>
-public class BatchJobHostedService : BackgroundService
+public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<BatchJobHostedService> _logger;
     private readonly ConcurrentDictionary<string, ScheduledJob> _scheduledJobs = new();
+    private readonly ConcurrentDictionary<string, byte> _runningJobs = new();
 
     public BatchJobHostedService(IServiceProvider serviceProvider, ILogger<BatchJobHostedService> logger)
     {
@@ -215,12 +231,30 @@ public class BatchJobHostedService : BackgroundService
 
     private async Task RunJobAsync(ScheduledJob scheduledJob, CancellationToken cancellationToken)
     {
+        if (!_runningJobs.TryAdd(scheduledJob.Job.Id, 0))
+        {
+            _logger.LogWarning("ジョブはすでに実行中です：{JobId}", scheduledJob.Job.Id);
+            return;
+        }
+
+        try
+        {
+            await ExecuteJobCoreAsync(scheduledJob, cancellationToken);
+        }
+        finally
+        {
+            _runningJobs.TryRemove(scheduledJob.Job.Id, out _);
+        }
+    }
+
+    private async Task ExecuteJobCoreAsync(ScheduledJob scheduledJob, CancellationToken cancellationToken)
+    {
         using var scope = _serviceProvider.CreateScope();
         var executor = scope.ServiceProvider.GetRequiredService<IBatchJobExecutor>();
         var jobHistoryStore = scope.ServiceProvider.GetService<IBatchJobHistoryStore>();
 
         var job = scheduledJob.Job;
-        
+
         // リトライロジック
         var maxAttempts = (job.OnFailure?.RetryCount ?? 0) + 1;
         BatchJobResult? lastResult = null;
@@ -229,14 +263,14 @@ public class BatchJobHostedService : BackgroundService
         {
             try
             {
-                _logger.LogInformation("ジョブ実行開始：{JobId} (試行 {Attempt}/{Max})", 
+                _logger.LogInformation("ジョブ実行開始：{JobId} (試行 {Attempt}/{Max})",
                     job.Id, attempt, maxAttempts);
 
                 lastResult = await executor.ExecuteAsync(job, scheduledJob.ProjectName, cancellationToken);
 
                 if (lastResult.Success)
                 {
-                    _logger.LogInformation("ジョブ成功：{JobId}, Duration: {Duration}ms, Rows: {Rows}", 
+                    _logger.LogInformation("ジョブ成功：{JobId}, Duration: {Duration}ms, Rows: {Rows}",
                         job.Id, lastResult.DurationMs, lastResult.RowsAffected);
                     break;
                 }
@@ -245,7 +279,7 @@ public class BatchJobHostedService : BackgroundService
                 if (attempt < maxAttempts)
                 {
                     var retryInterval = TimeSpan.FromSeconds(job.OnFailure?.RetryInterval ?? 60);
-                    _logger.LogWarning("ジョブ失敗、リトライ待機：{JobId}, Error: {Error}, Retry in {Seconds}s", 
+                    _logger.LogWarning("ジョブ失敗、リトライ待機：{JobId}, Error: {Error}, Retry in {Seconds}s",
                         job.Id, lastResult.ErrorMessage, retryInterval.TotalSeconds);
                     await Task.Delay(retryInterval, cancellationToken);
                 }
@@ -310,10 +344,41 @@ public class BatchJobHostedService : BackgroundService
     /// </summary>
     public DateTime? GetNextRunTime(string jobId)
     {
-        return _scheduledJobs.TryGetValue(jobId, out var scheduledJob) 
-            ? scheduledJob.NextRunTime 
+        return _scheduledJobs.TryGetValue(jobId, out var scheduledJob)
+            ? scheduledJob.NextRunTime
             : null;
     }
+
+    /// <summary>
+    /// プロジェクトに登録されたスケジュール済みジョブを取得する
+    /// </summary>
+    public IReadOnlyList<ScheduledJob> GetScheduledJobsForProject(string projectName)
+    {
+        return _scheduledJobs.Values
+            .Where(j => string.Equals(j.ProjectName, projectName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+    }
+
+    /// <summary>
+    /// 指定ジョブを即時実行する（手動トリガー）
+    /// </summary>
+    public Task TriggerJobNowAsync(string projectName, string jobId, CancellationToken cancellationToken = default)
+    {
+        if (_scheduledJobs.TryGetValue(jobId, out var scheduledJob) &&
+            string.Equals(scheduledJob.ProjectName, projectName, StringComparison.OrdinalIgnoreCase))
+        {
+            _ = RunJobAsync(scheduledJob, cancellationToken);
+            return Task.CompletedTask;
+        }
+
+        _logger.LogWarning("手動トリガー失敗：ジョブが見つかりません {Project}/{JobId}", projectName, jobId);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 現在実行中のジョブ ID セットを取得する
+    /// </summary>
+    public IReadOnlySet<string> GetRunningJobIds() => _runningJobs.Keys.ToHashSet();
 }
 
 /// <summary>

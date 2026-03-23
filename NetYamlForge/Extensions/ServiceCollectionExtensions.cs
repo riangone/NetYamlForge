@@ -147,7 +147,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();
-        services.AddHostedService<BatchJobHostedService>();
+        // BatchJobHostedService を Singleton として登録し、IBatchJobScheduler でも解決できるようにする
+        services.AddSingleton<BatchJobHostedService>();
+        services.AddSingleton<IBatchJobScheduler>(sp => sp.GetRequiredService<BatchJobHostedService>());
+        services.AddHostedService(sp => sp.GetRequiredService<BatchJobHostedService>());
 
         return services;
     }

@@ -1,0 +1,108 @@
+@* ファイル概要: バッチジョブ管理ページ。プロジェクト内の全バッチジョブを一覧表示し、手動実行・履歴確認ができます。 *@
+@model NetYamlForge.Controllers.BatchJobIndexViewModel
+@{
+    ViewData["Title"] = "Batch Jobs";
+    var projectName = Model.ProjectName;
+    var enabledCount = Model.Jobs.Count(j => j.Enabled);
+    var runningCount = Model.Jobs.Count(j => j.IsRunning);
+    var failedCount = Model.Jobs.Count(j => !j.IsRunning && j.LastExecution?.Result?.Success == false);
+}
+
+<div class="space-y-6">
+
+    @* ─── ヘッダー ─── *@
+    <div class="flex flex-wrap items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold">Batch Jobs</h1>
+            <p class="text-base-content/60 text-sm">定時バッチ処理ジョブの管理・実行履歴の確認</p>
+        </div>
+        <div class="ml-auto flex gap-2 flex-wrap">
+            <div class="stats stats-horizontal shadow-sm border border-base-300 bg-base-100">
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">全ジョブ</div>
+                    <div class="stat-value text-lg">@Model.Jobs.Count</div>
+                </div>
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">有効</div>
+                    <div class="stat-value text-lg text-success">@enabledCount</div>
+                </div>
+                @if (runningCount > 0)
+                {
+                    <div class="stat py-2 px-4">
+                        <div class="stat-title text-xs">実行中</div>
+                        <div class="stat-value text-lg text-warning">@runningCount</div>
+                    </div>
+                }
+                @if (failedCount > 0)
+                {
+                    <div class="stat py-2 px-4">
+                        <div class="stat-title text-xs">直近失敗</div>
+                        <div class="stat-value text-lg text-error">@failedCount</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ─── ジョブテーブル ─── *@
+    @if (Model.Jobs.Count == 0)
+    {
+        <div class="card bg-base-100 border border-base-300">
+            <div class="card-body items-center text-center py-16">
+                <div class="text-4xl mb-3">⚙️</div>
+                <h2 class="card-title text-base-content/60">バッチジョブが定義されていません</h2>
+                <p class="text-base-content/40 text-sm">
+                    <code>projects/@projectName/jobs/</code> ディレクトリに YAML ファイルを追加してください。
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card bg-base-100 border border-base-300 overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr class="text-xs text-base-content/60">
+                        <th>ジョブ名</th>
+                        <th>タイプ</th>
+                        <th>Cron スケジュール</th>
+                        <th>ステータス</th>
+                        <th>次回実行</th>
+                        <th>最終実行</th>
+                        <th class="text-right">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="job-list">
+                    @foreach (var job in Model.Jobs)
+                    {
+                        ViewData["ProjectName"] = projectName;
+                        @await Html.PartialAsync("_JobRow", job)
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @* ─── Cron 説明 ─── *@
+        <div class="collapse collapse-arrow bg-base-100 border border-base-300">
+            <input type="checkbox" />
+            <div class="collapse-title text-sm font-medium text-base-content/60">Cron 式の書き方</div>
+            <div class="collapse-content">
+                <div class="text-sm space-y-2 pt-2">
+                    <p class="text-base-content/60">書式: <code class="font-mono bg-base-200 px-1 rounded">分 時 日 月 曜日</code></p>
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm w-auto">
+                            <thead><tr><th>例</th><th>意味</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>0 2 * * *</code></td><td>毎日 02:00</td></tr>
+                                <tr><td><code>0 */6 * * *</code></td><td>6時間ごと</td></tr>
+                                <tr><td><code>0 9 * * 1-5</code></td><td>平日 09:00</td></tr>
+                                <tr><td><code>30 23 * * 0</code></td><td>毎週日曜 23:30</td></tr>
+                                <tr><td><code>0 1 1 * *</code></td><td>毎月1日 01:00</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

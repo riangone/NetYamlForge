@@ -311,6 +311,14 @@
                         {
                             <li class="menu-title mt-2"><span>Admin</span></li>
                             <li>
+                                <a asp-controller="BatchJob"
+                                   asp-action="Index"
+                                   asp-route-project="@currentProject"
+                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "BatchJob", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    Batch Jobs
+                                </a>
+                            </li>
+                            <li>
                                 <a asp-controller="DynamicEntity"
                                    asp-action="AllDefinitions"
                                    asp-route-project="@currentProject"

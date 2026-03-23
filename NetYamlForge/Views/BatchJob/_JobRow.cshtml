@@ -1,0 +1,141 @@
+@* HTMX 部分更新用：バッチジョブ1行分のテーブル行 *@
+@model NetYamlForge.Controllers.BatchJobListItemViewModel
+@{
+    var projectName = ViewData["ProjectName"]?.ToString() ?? "";
+    var isRunning = Model.IsRunning;
+    var lastResult = Model.LastExecution?.Result;
+    string statusBadge;
+    string statusText;
+    if (isRunning)
+    {
+        statusBadge = "badge-warning";
+        statusText = "実行中";
+    }
+    else if (!Model.Enabled)
+    {
+        statusBadge = "badge-ghost";
+        statusText = "無効";
+    }
+    else if (lastResult == null)
+    {
+        statusBadge = "badge-info";
+        statusText = "待機中";
+    }
+    else if (lastResult.Success)
+    {
+        statusBadge = "badge-success";
+        statusText = "成功";
+    }
+    else
+    {
+        statusBadge = "badge-error";
+        statusText = "失敗";
+    }
+
+    string typeLabel = Model.Type switch
+    {
+        "sql_to_csv" => "SQL→CSV",
+        "sql_command" => "SQLコマンド",
+        "stored_procedure" => "ストアドプロシージャ",
+        _ => Model.Type
+    };
+}
+
+<tr id="job-row-@Model.JobId"
+    @if (isRunning)
+    {
+        <text>hx-get="/@projectName/BatchJob/JobStatus?jobId=@Model.JobId"
+              hx-trigger="every 3s"
+              hx-target="#job-row-@Model.JobId"
+              hx-swap="outerHTML"</text>
+    }>
+    <td>
+        <div class="font-medium">@Model.DisplayName</div>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="text-xs text-base-content/50">@Model.Description</div>
+        }
+    </td>
+    <td>
+        <span class="badge badge-outline badge-sm">@typeLabel</span>
+    </td>
+    <td class="font-mono text-sm">
+        @if (!string.IsNullOrEmpty(Model.CronExpression))
+        {
+            <span>@Model.CronExpression</span>
+            <div class="text-xs text-base-content/50">@Model.Timezone</div>
+        }
+        else
+        {
+            <span class="text-base-content/40">-</span>
+        }
+    </td>
+    <td>
+        <span class="badge @statusBadge badge-sm">
+            @if (isRunning)
+            {
+                <span class="loading loading-spinner loading-xs mr-1"></span>
+            }
+            @statusText
+        </span>
+    </td>
+    <td class="text-sm">
+        @if (Model.NextRunTime.HasValue)
+        {
+            var nextLocal = Model.NextRunTime.Value.ToLocalTime();
+            <span title="@nextLocal.ToString("yyyy-MM-dd HH:mm:ss")">
+                @nextLocal.ToString("MM/dd HH:mm")
+            </span>
+        }
+        else
+        {
+            <span class="text-base-content/40">-</span>
+        }
+    </td>
+    <td class="text-sm">
+        @if (lastResult != null)
+        {
+            var execLocal = (Model.LastExecution?.ExecutedAt ?? DateTime.UtcNow).ToLocalTime();
+            <span title="@execLocal.ToString("yyyy-MM-dd HH:mm:ss")">
+                @execLocal.ToString("MM/dd HH:mm")
+            </span>
+            <div class="text-xs text-base-content/50">@lastResult.DurationMs ms / @lastResult.RowsAffected 行</div>
+        }
+        else
+        {
+            <span class="text-base-content/40">未実行</span>
+        }
+    </td>
+    <td>
+        <div class="flex gap-1 justify-end">
+            @if (User.IsInRole("Admin") && Model.Enabled && !isRunning)
+            {
+                <form method="post"
+                      asp-controller="BatchJob"
+                      asp-action="TriggerJob"
+                      asp-route-project="@projectName"
+                      asp-route-jobId="@Model.JobId">
+                    <button type="button"
+                            class="btn btn-sm btn-ghost"
+                            title="今すぐ実行"
+                            hx-post="/@projectName/BatchJob/TriggerJob?jobId=@Model.JobId"
+                            hx-target="#job-row-@Model.JobId"
+                            hx-swap="outerHTML"
+                            hx-confirm="「@Model.DisplayName」を今すぐ実行しますか？">
+                        ▶
+                    </button>
+                </form>
+            }
+            else if (isRunning)
+            {
+                <span class="btn btn-sm btn-ghost btn-disabled opacity-50" title="実行中">▶</span>
+            }
+            <a class="btn btn-sm btn-ghost"
+               asp-controller="BatchJob"
+               asp-action="History"
+               asp-route-project="@projectName"
+               asp-route-jobId="@Model.JobId"
+               title="実行履歴">📋</a>
+        </div>
+    </td>
+</tr>
