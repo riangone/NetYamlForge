@@ -8,6 +8,7 @@
 //     beforeUpdate: [normalize_title, validate_due_date, set_completed_at]
 //     afterUpdate:  [audit_log]
 
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
