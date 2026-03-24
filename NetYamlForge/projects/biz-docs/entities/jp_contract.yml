@@ -78,6 +78,24 @@ entities:
         type: date
         label: 締結日
         editable: true
+      IsElectronic:
+        type: boolean
+        label: 電子契約
+        editable: true
+      StampTaxAmount:
+        type: int
+        label: 印紙税額（円）
+        editable: true
+      JurisdictionCourt:
+        type: string
+        label: 合意管轄裁判所
+        editable: true
+        placeholder: "東京地方裁判所"
+      GoverningLaw:
+        type: string
+        label: 準拠法
+        editable: true
+        placeholder: "日本法"
       OurSignatory:
         type: string
         label: 自社署名者
@@ -141,6 +159,9 @@ entities:
       AutoRenew:
         type: boolean
         label: 自動更新
+      IsElectronic:
+        type: boolean
+        label: 電子契約
 
     filters:
       Status:
@@ -188,8 +209,12 @@ entities:
           - EndDate
           - AutoRenew
           - SignedDate
+          - IsElectronic
+          - StampTaxAmount
           - ContractAmount
           - PaymentTerms
+          - JurisdictionCourt
+          - GoverningLaw
           - OurSignatory
           - TheirSignatory
           - Remarks
@@ -255,24 +280,27 @@ entities:
           showGeneratedAt: true
           columns:
             - key: ContractNo
-              width: 16
+              width: 14
             - key: CustomerName
-              width: 24
+              width: 20
             - key: Title
-              width: 22
+              width: 20
             - key: ContractType
-              width: 15
+              width: 14
             - key: EndDate
-              width: 12
+              width: 11
               align: center
             - key: DaysUntilExpiry
-              width: 14
+              width: 11
               align: right
             - key: AutoRenew
-              width: 12
+              width: 9
+              align: center
+            - key: ContractForm
+              width: 9
               align: center
             - key: Status
-              width: 10
+              width: 9
               align: center
 
       contract_csv:

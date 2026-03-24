@@ -14,9 +14,15 @@ SELECT
     ei.Quantity,
     ei.UnitPrice,
     ei.Amount,
+    ei.TaxRate,
     e.Total              AS EstimateTotal,
+    e.Subtotal10,
+    e.TaxAmount10,
+    e.Subtotal8,
+    e.TaxAmount8,
+    e.ValidityNote,
     e.PreparedBy
 FROM JpEstimate e
-JOIN Customer     cu ON cu.Id = e.CustomerId
+JOIN Customer       cu ON cu.Id = e.CustomerId
 JOIN JpEstimateItem ei ON ei.EstimateId = e.Id
 ORDER BY e.IssueDate DESC, e.Id, ei.LineNo

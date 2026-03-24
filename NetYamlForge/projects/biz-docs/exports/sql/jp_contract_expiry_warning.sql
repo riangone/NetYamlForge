@@ -8,6 +8,8 @@ SELECT
     c.EndDate,
     CAST(julianday(c.EndDate) - julianday('now') AS INTEGER)          AS DaysUntilExpiry,
     CASE WHEN c.AutoRenew = 1 THEN 'あり' ELSE 'なし' END            AS AutoRenew,
+    CASE WHEN c.IsElectronic = 1 THEN '電子' ELSE '紙' END           AS ContractForm,
+    c.JurisdictionCourt,
     c.Status,
     c.OurSignatory,
     c.TheirSignatory,

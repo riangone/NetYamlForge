@@ -42,27 +42,54 @@ entities:
         type: string
         label: 納品場所
         editable: true
-      Subtotal:
+      Subtotal10:
         type: decimal
-        label: 小計
+        label: 10%対象小計
         editable: true
         precision: 0
-      TaxRate:
+      TaxAmount10:
         type: decimal
-        label: 消費税率(%)
+        label: 消費税額(10%)
+        editable: true
+        precision: 0
+      Subtotal8:
+        type: decimal
+        label: 8%対象小計（軽減）
+        editable: true
+        precision: 0
+      TaxAmount8:
+        type: decimal
+        label: 消費税額(8%)
+        editable: true
+        precision: 0
+      Subtotal:
+        type: decimal
+        label: 小計（税抜合計）
         editable: true
         precision: 0
       TaxAmount:
         type: decimal
-        label: 消費税額
+        label: 消費税合計
         editable: true
         precision: 0
       Total:
         type: decimal
         required: true
-        label: 合計金額
+        label: 合計金額（税込）
         editable: true
         precision: 0
+      InspectionPeriodDays:
+        type: int
+        label: 検収期間（営業日）
+        editable: true
+      ReceiptConfirmedDate:
+        type: date
+        label: 受領確認日
+        editable: true
+      CompanyStamp:
+        type: string
+        label: 社印（会社名）
+        editable: true
       Status:
         type: string
         required: true
@@ -155,10 +182,16 @@ entities:
           - DeliveryPlace
           - Status
           - PreparedBy
+          - Subtotal10
+          - TaxAmount10
+          - Subtotal8
+          - TaxAmount8
           - Subtotal
-          - TaxRate
           - TaxAmount
           - Total
+          - InspectionPeriodDays
+          - ReceiptConfirmedDate
+          - CompanyStamp
           - Remarks
 
     exports:

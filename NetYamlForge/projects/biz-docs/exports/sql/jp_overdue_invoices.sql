@@ -3,9 +3,12 @@ SELECT
     inv.InvoiceNo,
     cu.Name                                                      AS CustomerName,
     inv.Title,
+    inv.RegistrationNo,
     inv.IssueDate,
     inv.DueDate,
     ROUND(inv.Total, 0)                                          AS Total,
+    ROUND(inv.TaxAmount10, 0)                                    AS TaxAmount10,
+    ROUND(inv.TaxAmount8, 0)                                     AS TaxAmount8,
     CASE
         WHEN inv.DueDate < date('now')
         THEN CAST(julianday('now') - julianday(inv.DueDate) AS INTEGER)

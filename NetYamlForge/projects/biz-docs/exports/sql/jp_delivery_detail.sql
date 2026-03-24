@@ -14,9 +14,16 @@ SELECT
     di.Quantity,
     di.UnitPrice,
     di.Amount,
+    di.TaxRate,
     d.Total              AS DeliveryTotal,
+    d.Subtotal10,
+    d.TaxAmount10,
+    d.Subtotal8,
+    d.TaxAmount8,
+    d.InspectionPeriodDays,
+    d.ReceiptConfirmedDate,
     d.PreparedBy
 FROM JpDelivery d
-JOIN Customer      cu ON cu.Id = d.CustomerId
+JOIN Customer       cu ON cu.Id = d.CustomerId
 JOIN JpDeliveryItem di ON di.DeliveryId = d.Id
 ORDER BY d.DeliveryDate DESC, d.Id, di.LineNo

@@ -43,31 +43,47 @@ entities:
         required: true
         label: 支払期日
         editable: true
-      Subtotal:
+      RegistrationNo:
+        type: string
+        label: 登録番号（T番号）
+        editable: true
+        placeholder: "T1234567890123"
+      Subtotal10:
         type: decimal
-        label: 小計
+        label: 10%対象小計
         editable: true
         precision: 0
-      TaxRate:
+      TaxAmount10:
         type: decimal
-        label: 消費税率(%)
+        label: 消費税額(10%)
+        editable: true
+        precision: 0
+      Subtotal8:
+        type: decimal
+        label: 8%対象小計（軽減）
+        editable: true
+        precision: 0
+      TaxAmount8:
+        type: decimal
+        label: 消費税額(8%)
+        editable: true
+        precision: 0
+      Subtotal:
+        type: decimal
+        label: 小計（税抜合計）
         editable: true
         precision: 0
       TaxAmount:
         type: decimal
-        label: 消費税額
+        label: 消費税合計
         editable: true
         precision: 0
       Total:
         type: decimal
         required: true
-        label: 請求金額
+        label: 請求金額（税込）
         editable: true
         precision: 0
-      PaymentMethod:
-        type: string
-        label: 振込先
-        editable: true
       BankName:
         type: string
         label: 銀行名
@@ -88,6 +104,14 @@ entities:
       AccountHolder:
         type: string
         label: 口座名義
+        editable: true
+      TransferFeeNote:
+        type: string
+        label: 振込手数料注記
+        editable: true
+      CompanyStamp:
+        type: string
+        label: 社印（会社名）
         editable: true
       Status:
         type: string
@@ -183,8 +207,12 @@ entities:
           - DueDate
           - Status
           - PreparedBy
+          - RegistrationNo
+          - Subtotal10
+          - TaxAmount10
+          - Subtotal8
+          - TaxAmount8
           - Subtotal
-          - TaxRate
           - TaxAmount
           - Total
           - BankName
@@ -192,7 +220,8 @@ entities:
           - AccountType
           - AccountNo
           - AccountHolder
-          - PaymentMethod
+          - TransferFeeNote
+          - CompanyStamp
           - Remarks
 
     exports:
@@ -221,19 +250,24 @@ entities:
           showGeneratedAt: true
           columns:
             - key: InvoiceNo
-              width: 20
+              width: 18
             - key: CustomerName
-              width: 24
+              width: 20
             - key: Title
-              width: 22
+              width: 18
+            - key: RegistrationNo
+              width: 18
             - key: IssueDate
-              width: 13
+              width: 12
               align: center
             - key: DueDate
-              width: 13
+              width: 12
               align: center
             - key: Total
-              width: 18
+              width: 14
+              align: right
+            - key: TaxAmount10
+              width: 14
               align: right
 
       # 未回収請求書 PDF（入金催促用・赤）

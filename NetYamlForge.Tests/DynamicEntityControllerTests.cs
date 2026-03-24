@@ -366,6 +366,8 @@ public class DynamicEntityControllerTests
                 new TestWebHostEnvironment(),
                 NullLogger<FileUploadService>.Instance),
             new StubProjectActionRegistry(),
+            new SqliteConnection("Data Source=:memory:"),
+            new StubPdfExportService(),
             NullLogger<DynamicEntityController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
@@ -587,6 +589,16 @@ public class DynamicEntityControllerTests
     {
         public ICustomActionHandler? Find(string projectName, string handlerName) => null;
         public void Register(string projectName, ICustomActionHandler handler) { }
+    }
+
+    private sealed class StubPdfExportService : IPdfExportService
+    {
+        public byte[] Generate(
+            List<IDictionary<string, object>> rows,
+            List<(string Key, string Label)> columns,
+            EntityDefinition meta,
+            PdfExportOptions options,
+            string? projectDir = null) => [];
     }
 
     private sealed class StubUrlHelper : IUrlHelper
