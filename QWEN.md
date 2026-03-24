@@ -22,7 +22,8 @@
 - **多租户项目结构**: 每个项目独立配置，支持多数据库类型
 - **自动 SQL 生成**: 根据 YAML 定义自动生成 CRUD SQL，支持方言适配
 - **钩子系统**: 支持 before/after 钩子链，用于业务逻辑扩展
-- **国际化 (i18n)**: 支持日语、英语、中文等多语言
+- **批处理作业**: 支持 Cron 调度的定时任务（SQL 执行、CSV 输出）
+- **国际化 (i18n)**: 支持日语、英语、中文、韩语
 
 ---
 
@@ -34,12 +35,15 @@ NetYamlForge/
 │   ├── Controllers/           # MVC 控制器
 │   │   ├── DynamicEntityController.cs  # 动态 CRUD 核心
 │   │   ├── DashboardController.cs
-│   │   └── PageController.cs
+│   │   ├── PageController.cs
+│   │   └── AccountController.cs
 │   ├── Services/              # 业务服务层
 │   │   ├── DynamicEntity/     # 动态实体服务
+│   │   ├── BatchJob/          # 批处理作业服务
 │   │   ├── Hooks/             # 钩子执行服务
 │   │   ├── Dialect/           # SQL 方言适配
-│   │   └── Cli/               # CLI 脚手架工具
+│   │   ├── Cli/               # CLI 脚手架工具
+│   │   └── Auth/              # 认证授权服务
 │   ├── Models/                # 数据模型
 │   ├── Views/                 # Razor 视图
 │   ├── Schemas/               # JSON Schema 验证
@@ -48,12 +52,13 @@ NetYamlForge/
 │   │       ├── project.yaml   # 项目定义
 │   │       ├── entities/*.yml # 实体定义
 │   │       ├── pages/*.yaml   # 页面定义
+│   │       ├── jobs/*.yml     # 批处理作业定义
 │   │       └── config/*.yml   # 配置文件
 │   └── Program.cs             # 应用入口
 │
 ├── NetYamlForge.Tests/        # xUnit 测试
 ├── NetYamlForge.Analyzers/    # Roslyn 代码分析器
-└── docs/                      # 文档 (已删除)
+└── docs/                      # 文档
 ```
 
 ---
@@ -102,9 +107,27 @@ dotnet run -- --scaffold-hook \
   --project=<name> \
   [--with-tests]
 
+# 生成批处理作业模板
+dotnet run -- --scaffold-batch-job \
+  --project=<name> \
+  --name=<job_name>
+
 # YAML 现代化升级
 dotnet run -- --upgrade-entity-yaml \
   --project=<name>
+```
+
+### 脚本命令
+
+```bash
+# 启动应用（后台运行）
+./start.sh
+
+# 停止应用
+./stop.sh
+
+# 重启应用
+./restart.sh
 ```
 
 ---
@@ -136,14 +159,15 @@ dotnet run -- --upgrade-entity-yaml \
 
 ## 核心组件说明
 
-### 1. DynamicEntityController
+### 1. 控制器
 
-处理所有实体的动态 CRUD 请求：
-- `Index/ListPartial`: 列表查询
-- `CreatePage/Create`: 创建
-- `EditPage/Edit`: 编辑
-- `Delete`: 删除
-- `ConfigDiagnostics`: 配置诊断
+| 控制器 | 职责 |
+|--------|------|
+| `DynamicEntityController` | 动态 CRUD 操作（列表、创建、编辑、删除） |
+| `DashboardController` | 仪表板页面 |
+| `PageController` | 自定义 YAML 页面 |
+| `AccountController` | 用户认证（登录/登出） |
+| `UsersController` | 用户管理 |
 
 ### 2. 服务层
 
@@ -153,6 +177,8 @@ dotnet run -- --upgrade-entity-yaml \
 | `DynamicEntityListQueryService` | 列表查询构建 |
 | `EntityCrudExecutionService` | 钩子编排与事务管理 |
 | `HookExecutionService` | 钩子执行引擎 |
+| `BatchJobHostedService` | 批处理作业调度 |
+| `BatchJobExecutor` | 作业执行（SQL→CSV 等） |
 | `FormValueValidationService` | 表单验证与类型转换 |
 | `SqlSafetyGuard` | SQL 注入防护 |
 
@@ -162,13 +188,26 @@ dotnet run -- --upgrade-entity-yaml \
 - `beforeCreate` / `afterCreate`
 - `beforeUpdate` / `afterUpdate`
 - `beforeDelete` / `afterDelete`
+- `beforeRun` / `afterRun` (批处理作业)
 
 钩子可返回：
 - `Continue`: 继续执行
 - `Cancel`: 中止操作
 - `Abort`: 返回错误
 
-### 4. 数据库方言
+### 4. 批处理作业
+
+支持的作业类型：
+- `sql_to_csv`: SQL 查询结果输出为 CSV
+- `sql_command`: 执行 SQL 命令
+- `stored_procedure`: 执行存储过程
+
+Cron 表达式示例：
+- `0 2 * * *` - 每天 2:00
+- `0 */6 * * *` - 每 6 小时
+- `30 9 * * 1-5` - 工作日 9:30
+
+### 5. 数据库方言
 
 支持多种数据库的 SQL 语法适配：
 - `SqliteDialect`
@@ -183,61 +222,88 @@ dotnet run -- --upgrade-entity-yaml \
 ### 项目定义 (project.yaml)
 
 ```yaml
-name: shop
-displayName: 商店管理
+name: todo-app
+displayName: "Todo App"
+description: "タスク・プロジェクト管理の全機能デモ"
 version: "1.0.0"
 
 database:
   type: sqlite
-  path: database/shop.db
+  path: database/todo-app.db
 
 features:
   multiLanguage: true
   userAuthentication: true
+  dashboard: true
+  pages: true
 
 layout:
-  dashboardTheme: analytics
+  dashboardTheme: workspace
   navigation:
     entities:
-      - product
+      - task
+      - project
       - category
-      - order
 ```
 
-### 实体定义 (entities/product.yml)
+### 实体定义 (entities/task.yml)
 
 ```yaml
 entities:
-  product:
-    table: product
-    key: id
-    displayName: 商品
-    displayColumn: name
+  task:
+    table: Task
+    key: Id
+    displayName: Task
     
-    columns:
-      id:
-        type: number
-        label: ID
-        isIdentity: true
-      name:
+    forms:
+      Title:
         type: string
-        label: 商品名
         required: true
-      price:
-        type: number
-        label: 价格
-      category_id:
-        type: number
-        label: 分类
-        foreignKey:
-          entity: category
-          displayColumn: name
+        label: タイトル
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        options:
+          - pending
+          - in_progress
+          - review
+          - done
+          - cancelled
+      Priority:
+        type: string
+        label: 優先度
+        options:
+          - low
+          - medium
+          - high
+          - urgent
+```
+
+### 批处理作业 (jobs/nightly_stats.yml)
+
+```yaml
+jobs:
+  nightly_stats:
+    displayName: 夜间统计作业
+    enabled: true
     
-    hooks:
-      beforeCreate:
-        - validate_price
-      afterCreate:
-        - send_notification
+    schedule:
+      cron: "0 2 * * *"  # 每天 2:00
+      timezone: "Asia/Tokyo"
+    
+    type: sql_to_csv
+    
+    settings:
+      sqlFile: jobs/sql/nightly_stats.sql
+      outputFile: jobs/output/stats_{date:yyyyMMdd}.csv
+      includeHeader: true
+      delimiter: ","
+    
+    onFailure:
+      retryCount: 3
+      retryInterval: 300
 ```
 
 ---
@@ -252,7 +318,7 @@ entities:
 | `EntityCrudExecutionServiceTests.cs` | 钩子执行与事务 |
 | `YamlSchemaValidationTests.cs` | YAML 格式验证 |
 | `SqlGenerationSnapshotTests.cs` | SQL 生成回归 |
-| `CommandErrorHttpMapperTests.cs` | 错误码映射 |
+| `BatchJobExecutorTests.cs` | 批处理作业执行 |
 
 ### 测试模式
 
@@ -285,14 +351,6 @@ test: 测试相关
 chore: 构建/工具
 ```
 
-示例：
-```
-docs: 删除文档目录下的所有内容
-
-- 删除 docs/ 目录下的所有文档
-- 删除 NetYamlForge/docs/ 目录下的所有文档（54 个文件）
-```
-
 ---
 
 ## 常见问题
@@ -311,12 +369,25 @@ dotnet run -- --scaffold-entities --project=<项目名>
 2. 钩子名拼写是否正确
 3. `Program.cs` 中是否注册了 DI
 
-### Q: 外部键下拉框为空
+### Q: 批处理作业不执行
 
 **检查点**:
-1. 参照实体的 `displayColumn` 是否匹配实际列名
-2. 参照表是否有数据
-3. 外部键实体是否在 YAML 中定义
+1. 作业是否 `enabled: true`
+2. Cron 表达式是否正确
+3. 时区配置是否匹配
+
+---
+
+## 示例项目
+
+项目包含两个示例项目：
+
+1. **todo-app**: 任务管理示例
+   - 实体：task, project, category, comment
+   - 功能：CRUD、看板、分析仪表板
+
+2. **ui-showcase**: UI 组件展示
+   - 展示所有 UI 组件样式
 
 ---
 
