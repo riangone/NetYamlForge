@@ -39,6 +39,11 @@ RUN mkdir -p /seeds && \
         < /src/NetYamlForge/projects/todo-app/database/init_seed.sql && \
     echo "[seed] todo-app.db created ($(wc -c < /seeds/todo-app.db) bytes)"
 
+# biz-docs: create from init_seed.sql
+RUN sqlite3 /seeds/biz-docs.db \
+        < /src/NetYamlForge/projects/biz-docs/database/init_seed.sql && \
+    echo "[seed] biz-docs.db created ($(wc -c < /seeds/biz-docs.db) bytes)"
+
 # ui-showcase: copy the tracked demo database (already seeded)
 RUN if [ -f /src/NetYamlForge/projects/ui-showcase/database/ui-showcase.db ]; then \
         cp /src/NetYamlForge/projects/ui-showcase/database/ui-showcase.db /seeds/ui-showcase.db && \
@@ -69,6 +74,7 @@ RUN chmod +x /app/entrypoint.sh
 RUN mkdir -p \
         /app/projects/todo-app/database \
         /app/projects/ui-showcase/database \
+        /app/projects/biz-docs/database \
         /app/logs
 
 EXPOSE 8080

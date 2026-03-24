@@ -1,0 +1,381 @@
+imports: []
+entities:
+  customs_declaration:
+    table: CustomsDeclaration
+    key: Id
+    displayName: 報関単
+    softDelete: false
+    isPublic: true
+
+    joins:
+      - type: left
+        table: Invoice
+        alias: inv
+        on: CustomsDeclaration.InvoiceId = inv.Id
+
+    forms:
+      DeclNo:
+        type: string
+        required: true
+        label: 申告番号
+        editable: true
+      InvoiceId:
+        type: int
+        label: 請求書
+        editable: true
+        foreignKey:
+          entity: invoice
+          displayColumn: InvoiceNo
+          picker: false
+      DeclType:
+        type: string
+        required: true
+        label: 申告種別
+        editable: true
+        options: [export, import]
+      ExporterName:
+        type: string
+        required: true
+        label: 輸出者名
+        editable: true
+      ExporterAddress:
+        type: textarea
+        label: 輸出者住所
+        editable: true
+      ImporterName:
+        type: string
+        required: true
+        label: 輸入者名
+        editable: true
+      ImporterAddress:
+        type: textarea
+        label: 輸入者住所
+        editable: true
+      PortOfLoading:
+        type: string
+        label: 積地港
+        editable: true
+      PortOfDischarge:
+        type: string
+        label: 揚地港
+        editable: true
+      DepartureDate:
+        type: date
+        label: 出港日
+        editable: true
+      ArrivalDate:
+        type: date
+        label: 入港日
+        editable: true
+      Incoterms:
+        type: string
+        required: true
+        label: インコタームズ
+        editable: true
+        options: [EXW, FOB, CIF, DAP, DDP, FCA, CPT, CIP]
+      Currency:
+        type: string
+        required: true
+        label: 通貨
+        editable: true
+        options: [USD, EUR, CNY, JPY]
+      TotalValue:
+        type: decimal
+        required: true
+        label: 申告価額
+        editable: true
+        precision: 2
+      Packages:
+        type: int
+        label: 梱包数
+        editable: true
+      GrossWeightKg:
+        type: decimal
+        label: 総重量(kg)
+        editable: true
+        precision: 1
+      NetWeightKg:
+        type: decimal
+        label: 正味重量(kg)
+        editable: true
+        precision: 1
+      HsCode:
+        type: string
+        label: HSコード
+        editable: true
+      CargoDescription:
+        type: textarea
+        required: true
+        label: 貨物名称
+        editable: true
+      ContainerNo:
+        type: string
+        label: コンテナ番号
+        editable: true
+      VesselName:
+        type: string
+        label: 船名
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [draft, submitted, approved, rejected, cleared]
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      DeclNo:
+        type: string
+        label: 申告番号
+        searchable: true
+        sortable: true
+      InvoiceNo:
+        type: string
+        label: 請求書番号
+        expression: inv.InvoiceNo
+      DeclType:
+        type: string
+        label: 申告種別
+        sortable: true
+      ExporterName:
+        type: string
+        label: 輸出者
+        searchable: true
+        sortable: true
+      ImporterName:
+        type: string
+        label: 輸入者
+        searchable: true
+        sortable: true
+      PortOfLoading:
+        type: string
+        label: 積地港
+      PortOfDischarge:
+        type: string
+        label: 揚地港
+      DepartureDate:
+        type: date
+        label: 出港日
+        sortable: true
+      Incoterms:
+        type: string
+        label: インコタームズ
+        sortable: true
+      Currency:
+        type: string
+        label: 通貨
+      TotalValue:
+        type: decimal
+        label: 申告価額
+        sortable: true
+        precision: 2
+      GrossWeightKg:
+        type: decimal
+        label: 総重量(kg)
+        precision: 1
+      HsCode:
+        type: string
+        label: HSコード
+        searchable: true
+      CargoDescription:
+        type: string
+        label: 貨物名称
+        searchable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft:     "📝 Draft"
+          submitted: "📤 Submitted"
+          approved:  "✅ Approved"
+          rejected:  "❌ Rejected"
+          cleared:   "🔓 Cleared"
+      DeclType:
+        type: dropdown
+        label: 申告種別
+        options: [export, import]
+      Incoterms:
+        type: dropdown
+        label: インコタームズ
+        options: [EXW, FOB, CIF, DAP, DDP]
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - DeclNo
+          - InvoiceId
+          - DeclType
+          - Status
+          - ExporterName
+          - ImporterName
+          - ExporterAddress
+          - ImporterAddress
+          - PortOfLoading
+          - PortOfDischarge
+          - DepartureDate
+          - ArrivalDate
+          - Incoterms
+          - Currency
+          - TotalValue
+          - Packages
+          - GrossWeightKg
+          - NetWeightKg
+          - HsCode
+          - ContainerNo
+          - VesselName
+          - CargoDescription
+          - Notes
+
+    exports:
+      # 報関単 PDF（税関申告書様式・ネイビー）
+      decl_pdf:
+        label: "報関単 PDF"
+        format: pdf
+        filename: "customs_decl_{date:yyyyMMdd}.pdf"
+        columns:
+          - DeclNo
+          - DeclType
+          - ExporterName
+          - ImporterName
+          - PortOfLoading
+          - PortOfDischarge
+          - DepartureDate
+          - Incoterms
+          - Currency
+          - TotalValue
+          - Packages
+          - GrossWeightKg
+          - HsCode
+          - CargoDescription
+          - Status
+        pdf:
+          title: "CUSTOMS DECLARATION"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#1E293B"
+          oddRowColor: "#F1F5F9"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: DeclNo
+              width: 16
+            - key: DeclType
+              width: 9
+              align: center
+            - key: ExporterName
+              width: 18
+            - key: ImporterName
+              width: 18
+            - key: PortOfLoading
+              width: 12
+            - key: PortOfDischarge
+              width: 12
+            - key: DepartureDate
+              width: 12
+              align: center
+            - key: Incoterms
+              width: 8
+              align: center
+            - key: TotalValue
+              width: 12
+              align: right
+
+      # 輸出申告 PDF（FOB/CIF 向け・ブルーグレー）
+      export_decl_pdf:
+        label: "輸出申告 PDF"
+        format: pdf
+        filename: "export_customs_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/export_declarations.sql
+        pdf:
+          title: "EXPORT CUSTOMS DECLARATION"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#334155"
+          oddRowColor: "#F8FAFC"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: DeclNo
+              width: 16
+            - key: ExporterName
+              width: 20
+            - key: ImporterName
+              width: 20
+            - key: PortOfLoading
+              width: 13
+            - key: PortOfDischarge
+              width: 13
+            - key: DepartureDate
+              width: 12
+              align: center
+            - key: Incoterms
+              width: 8
+              align: center
+            - key: TotalValue
+              width: 13
+              align: right
+            - key: GrossWeightKg
+              width: 12
+              align: right
+
+      # 輸入申告 PDF（アンバー）
+      import_decl_pdf:
+        label: "輸入申告 PDF"
+        format: pdf
+        filename: "import_customs_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/import_declarations.sql
+        pdf:
+          title: "IMPORT CUSTOMS DECLARATION"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#78350F"
+          oddRowColor: "#FFFBEB"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: DeclNo
+              width: 16
+            - key: ImporterName
+              width: 22
+            - key: ExporterName
+              width: 20
+            - key: PortOfDischarge
+              width: 14
+            - key: ArrivalDate
+              width: 12
+              align: center
+            - key: HsCode
+              width: 12
+            - key: TotalValue
+              width: 13
+              align: right
+            - key: NetWeightKg
+              width: 11
+              align: right
+
+      # CSV エクスポート
+      decl_csv:
+        label: "報関単 CSV"
+        format: csv
+        filename: "customs_declarations_{date:yyyyMMdd}.csv"

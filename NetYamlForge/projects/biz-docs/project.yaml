@@ -1,0 +1,59 @@
+name: biz-docs
+displayName: "Biz Docs"
+description: "報価単・請款書・報関単など各種ビジネス文書の PDF エクスポートデモ"
+version: "1.0.0"
+
+aiHints:
+  primaryLanguage: zh-CN
+  authRequired: true
+  notes:
+    - "quotation.status: draft / sent / accepted / rejected / expired"
+    - "invoice.status: draft / issued / paid / overdue / cancelled"
+    - "customs_declaration.status: draft / submitted / approved / rejected / cleared"
+    - "incoterms: EXW / FOB / CIF / DAP / DDP"
+    - "currency: CNY / USD / JPY / EUR"
+
+database:
+  type: sqlite
+  path: database/biz-docs.db
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Biz Docs"
+  navigation:
+    showDashboard: true
+    entities:
+      - quotation
+      - invoice
+      - customs_declaration
+      - customer
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+      - label: 報価単
+        url: /biz-docs/DynamicEntity/Index?entity=quotation
+        icon: 📋
+        section: 文書管理
+      - label: 請款書
+        url: /biz-docs/DynamicEntity/Index?entity=invoice
+        icon: 🧾
+        section: 文書管理
+      - label: 報関単
+        url: /biz-docs/DynamicEntity/Index?entity=customs_declaration
+        icon: 🚢
+        section: 文書管理
+
+home_page:
+  icon: "📑"
+  tagline: "PDF エクスポートの各種ビジネス文書デモ"
+  tags: [PDF, Business, Documents, Trade]

@@ -1,0 +1,29 @@
+hero:
+  eyebrow: Biz Docs
+  title: ビジネス文書 PDF エクスポートデモ
+  description: "報価単・請款書・報関単など各種ビジネス文書を YAML 設定だけで PDF 出力。カスタム SQL で明細展開・未収金集計なども対応します。"
+  primaryActionLabel: 報価単一覧
+  primaryActionUrl: /biz-docs/DynamicEntity/Index?entity=quotation
+  secondaryActionLabel: 請款書一覧
+  secondaryActionUrl: /biz-docs/DynamicEntity/Index?entity=invoice
+
+projectsSectionTitle: Biz Docs Workspace
+projectsSectionLead: 取引先・見積・請求・報関の各エンティティを管理します。
+
+quickActions:
+  - label: 報価単
+    url: /biz-docs/DynamicEntity/Index?entity=quotation
+    style: btn-primary
+    icon: 📋
+  - label: 請款書
+    url: /biz-docs/DynamicEntity/Index?entity=invoice
+    style: btn-outline
+    icon: 🧾
+  - label: 報関単
+    url: /biz-docs/DynamicEntity/Index?entity=customs_declaration
+    style: btn-outline
+    icon: 🚢
+  - label: 取引先
+    url: /biz-docs/DynamicEntity/Index?entity=customer
+    style: btn-ghost
+    icon: 🏢

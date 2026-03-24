@@ -1,0 +1,124 @@
+imports: []
+entities:
+  customer:
+    table: Customer
+    key: Id
+    displayName: 取引先
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      Code:
+        type: string
+        required: true
+        label: 取引先コード
+        editable: true
+      Name:
+        type: string
+        required: true
+        label: 取引先名（中国語）
+        editable: true
+      NameEn:
+        type: string
+        label: 取引先名（英語）
+        editable: true
+      Country:
+        type: string
+        required: true
+        label: 国コード
+        editable: true
+      ContactPerson:
+        type: string
+        label: 担当者
+        editable: true
+      Phone:
+        type: string
+        label: 電話番号
+        editable: true
+      Email:
+        type: string
+        label: メール
+        editable: true
+      TaxId:
+        type: string
+        label: 統一信用コード/税番号
+        editable: true
+      Address:
+        type: textarea
+        label: 住所（中国語）
+        editable: true
+      AddressEn:
+        type: textarea
+        label: 住所（英語）
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Code:
+        type: string
+        label: コード
+        searchable: true
+        sortable: true
+      Name:
+        type: string
+        label: 取引先名
+        searchable: true
+        sortable: true
+      NameEn:
+        type: string
+        label: 英語名
+        searchable: true
+      Country:
+        type: string
+        label: 国
+        sortable: true
+      ContactPerson:
+        type: string
+        label: 担当者
+        searchable: true
+      Phone:
+        type: string
+        label: 電話
+      Email:
+        type: string
+        label: メール
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Code
+          - Name
+          - NameEn
+          - Country
+          - ContactPerson
+          - Phone
+          - Email
+          - TaxId
+          - Address
+          - AddressEn
+
+    exports:
+      customer_csv:
+        label: "取引先 CSV"
+        format: csv
+        filename: "customers_{date:yyyyMMdd}.csv"
+        columns:
+          - Code
+          - Name
+          - NameEn
+          - Country
+          - ContactPerson
+          - Phone
+          - Email
