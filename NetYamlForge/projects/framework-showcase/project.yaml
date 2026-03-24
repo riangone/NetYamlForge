@@ -1,0 +1,89 @@
+name: framework-showcase
+displayName: "Framework Showcase"
+description: "NetYamlForge フレームワークの全機能を網羅的に展示するデモプロジェクト"
+version: "1.0.0"
+
+aiHints:
+  primaryLanguage: ja-JP
+  authRequired: true
+  notes:
+    - "form_component.field_type: 全 30 種類のフォームタイプを展示"
+    - "filter_demo.filter_type: 全 10 種類のフィルターを展示"
+    - "layout_demo.layout_type: grid / tabs / accordion / wizard"
+    - "batch_job_demo.job_type: sql_to_csv / sql_command / stored_procedure"
+    - "hook_demo.hook_stage: before_create / after_create / before_update / after_update / before_delete / after_delete"
+
+database:
+  type: sqlite
+  path: database/framework-showcase.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  batchJobs: true
+  hooks: true
+  pdfExport: true
+  customActions: true
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Framework Showcase"
+  navigation:
+    showDashboard: true
+    entities:
+      - form_component
+      - filter_demo
+      - layout_demo
+      - batch_job_demo
+      - hook_demo
+      - export_demo
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+      - label: 概要
+        url: /framework-showcase/Page/Overview
+        icon: 🏠
+        section: Overview
+      - label: フォーム部品
+        url: /framework-showcase/DynamicEntity/Index?entity=form_component
+        icon: 📝
+        section: 機能演示
+      - label: フィルター
+        url: /framework-showcase/DynamicEntity/Index?entity=filter_demo
+        icon: 🔍
+        section: 機能演示
+      - label: レイアウト
+        url: /framework-showcase/DynamicEntity/Index?entity=layout_demo
+        icon: 📐
+        section: 機能演示
+      - label: バッチ処理
+        url: /framework-showcase/DynamicEntity/Index?entity=batch_job_demo
+        icon: ⚙️
+        section: 機能演示
+      - label: フック処理
+        url: /framework-showcase/DynamicEntity/Index?entity=hook_demo
+        icon: 🎣
+        section: 機能演示
+      - label: エクスポート
+        url: /framework-showcase/DynamicEntity/Index?entity=export_demo
+        icon: 📤
+        section: 機能演示
+      - label: 部品ギャラリー
+        url: /framework-showcase/Page/ComponentGallery
+        icon: 🎨
+        section: ギャラリー
+      - label: レイアウト集
+        url: /framework-showcase/Page/LayoutCollection
+        icon: 🖼️
+        section: ギャラリー
+
+home_page:
+  icon: "🎯"
+  tagline: "NetYamlForge の全機能を網羅的に展示"
+  tags: [Demo, Showcase, Framework, Features, Components]

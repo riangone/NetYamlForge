@@ -1,0 +1,163 @@
+imports: []
+entities:
+  batch_job_demo:
+    table: BatchJobDemo
+    key: Id
+    displayName: バッチ処理演示
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      JobName:
+        type: string
+        required: true
+        label: ジョブ名
+        editable: true
+      JobType:
+        type: string
+        required: true
+        label: ジョブ種別
+        editable: true
+        options: [sql_to_csv, sql_command, stored_procedure]
+      Schedule:
+        type: string
+        label: スケジュール
+        editable: true
+        placeholder: "0 2 * * * (Cron 形式)"
+      SqlFile:
+        type: string
+        label: SQL ファイル
+        editable: true
+        placeholder: "jobs/sql/example.sql"
+      OutputFile:
+        type: string
+        label: 出力ファイル
+        editable: true
+        placeholder: "jobs/output/result_{date:yyyyMMdd}.csv"
+      IsEnabled:
+        type: bool
+        label: 有効
+        editable: true
+        defaultValue: true
+      LastRunAt:
+        type: datetime
+        label: 最終実行日時
+        editable: true
+      NextRunAt:
+        type: datetime
+        label: 次回実行日時
+        editable: true
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options: [idle, running, success, failed]
+      RetryCount:
+        type: int
+        label: リトライ回数
+        editable: true
+        defaultValue: 0
+      MaxRetryCount:
+        type: int
+        label: 最大リトライ
+        editable: true
+        defaultValue: 3
+      TimeoutSeconds:
+        type: int
+        label: タイムアウト (秒)
+        editable: true
+        defaultValue: 300
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      JobName:
+        type: string
+        label: ジョブ名
+        searchable: true
+        sortable: true
+      JobType:
+        type: string
+        label: 種別
+        sortable: true
+      Schedule:
+        type: string
+        label: スケジュール
+      IsEnabled:
+        type: bool
+        label: 有効
+        sortable: true
+      LastRunAt:
+        type: datetime
+        label: 最終実行
+        sortable: true
+      NextRunAt:
+        type: datetime
+        label: 次回実行
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      RetryCount:
+        type: int
+        label: リトライ
+        sortable: true
+      MaxRetryCount:
+        type: int
+        label: 最大リトライ
+
+    filters:
+      JobType:
+        type: dropdown
+        label: ジョブ種別
+        options: [sql_to_csv, sql_command, stored_procedure]
+      IsEnabled:
+        type: toggle
+        label: 有効/無効
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          idle: "⏸️ 待機"
+          running: "▶️ 実行中"
+          success: "✅ 成功"
+          failed: "❌ 失敗"
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - JobName
+          - JobType
+          - Schedule
+          - IsEnabled
+          - SqlFile
+          - OutputFile
+          - LastRunAt
+          - NextRunAt
+          - Status
+          - RetryCount
+          - MaxRetryCount
+          - TimeoutSeconds
+          - Description
+
+    exports:
+      batch_jobs_csv:
+        label: "バッチジョブ CSV"
+        format: csv
+        filename: "batch_jobs_{date:yyyyMMdd}.csv"

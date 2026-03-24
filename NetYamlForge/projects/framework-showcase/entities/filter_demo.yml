@@ -1,0 +1,242 @@
+imports: []
+entities:
+  filter_demo:
+    table: FilterDemo
+    key: Id
+    displayName: フィルター演示
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: タイトル
+        editable: true
+      Category:
+        type: string
+        label: カテゴリ
+        editable: true
+        options: [news, article, tutorial, announcement, event]
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options: [draft, published, archived]
+      Priority:
+        type: string
+        label: 優先度
+        editable: true
+        options: [low, medium, high, urgent]
+      Tags:
+        type: string
+        label: タグ
+        editable: true
+      Author:
+        type: string
+        label: 作成者
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+      ViewCount:
+        type: int
+        label: 閲覧数
+        editable: true
+      Rating:
+        type: decimal
+        label: 評価
+        editable: true
+        precision: 1
+      IsFeatured:
+        type: bool
+        label: おすすめ
+        editable: true
+      PublishedDate:
+        type: date
+        label: 公開日
+        editable: true
+      CreatedAt:
+        type: datetime
+        label: 作成日時
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: タイトル
+        searchable: true
+        sortable: true
+      Category:
+        type: string
+        label: カテゴリ
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      Priority:
+        type: string
+        label: 優先度
+        sortable: true
+      Tags:
+        type: string
+        label: タグ
+        searchable: true
+      Author:
+        type: string
+        label: 作成者
+        searchable: true
+        sortable: true
+      ViewCount:
+        type: int
+        label: 閲覧数
+        sortable: true
+      Rating:
+        type: decimal
+        label: 評価
+        sortable: true
+        precision: 1
+      IsFeatured:
+        type: bool
+        label: おすすめ
+        sortable: true
+      PublishedDate:
+        type: date
+        label: 公開日
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 作成日時
+        sortable: true
+
+    filters:
+      # テキスト検索
+      Search:
+        type: like
+        label: フリーワード
+        expression: "Title LIKE '%{value}%' OR Description LIKE '%{value}%'"
+      
+      # 等値選択
+      Category:
+        type: eq
+        label: カテゴリ
+        options: [news, article, tutorial, announcement, event]
+        optionLabels:
+          news: "📰 ニュース"
+          article: "📄 記事"
+          tutorial: "📚 チュートリアル"
+          announcement: "📢 告知"
+          event: "🎉 イベント"
+      
+      # ドロップダウン
+      Status:
+        type: dropdown
+        label: ステータス
+        options: [draft, published, archived]
+        optionLabels:
+          draft: "📝 下書き"
+          published: "✅ 公開済"
+          archived: "🗄️ 保管"
+      
+      # トグルグループ
+      Priority:
+        type: toggle-group
+        label: 優先度
+        options: [low, medium, high, urgent]
+        optionLabels:
+          low: "🟢 低"
+          medium: "🟡 中"
+          high: "🟠 高"
+          urgent: "🔴 緊急"
+      
+      # 複数選択
+      Tags:
+        type: multi-select
+        label: タグ
+        options: [important, beginner, intermediate, advanced, update]
+        optionLabels:
+          important: "⭐ 重要"
+          beginner: "🌱 初心者"
+          intermediate: "🌿 中級者"
+          advanced: "🌳 上級者"
+          update: "🔄 更新"
+      
+      # ブール
+      IsFeatured:
+        type: bool-toggle
+        label: おすすめ
+      
+      # 日付範囲
+      PublishedDate:
+        type: date-range
+        label: 公開日
+      
+      # 数値範囲（以上）
+      ViewCount:
+        type: gte
+        label: 閲覧数（以上）
+      
+      # 数値範囲（以下）
+      Rating:
+        type: gte
+        label: 評価（以上）
+      
+      # 作成者
+      Author:
+        type: entity-picker
+        label: 作成者
+        foreignKey:
+          entity: form_component
+          displayColumn: TextField
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - Category
+          - Status
+          - Priority
+          - Tags
+          - Author
+          - Description
+          - ViewCount
+          - Rating
+          - IsFeatured
+          - PublishedDate
+          - CreatedAt
+      
+      filters:
+        columns: 3
+        order:
+          - Search
+          - Category
+          - Status
+          - Priority
+          - Tags
+          - IsFeatured
+          - PublishedDate
+          - ViewCount
+          - Rating
+          - Author
+
+    exports:
+      filter_demo_csv:
+        label: "フィルター演示 CSV"
+        format: csv
+        filename: "filter_demo_{date:yyyyMMdd}.csv"

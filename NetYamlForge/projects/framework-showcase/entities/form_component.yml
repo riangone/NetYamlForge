@@ -1,0 +1,280 @@
+imports: []
+entities:
+  form_component:
+    table: FormComponent
+    key: Id
+    displayName: フォーム部品
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      # 基本テキスト系
+      TextField:
+        type: string
+        label: テキストフィールド
+        editable: true
+        placeholder: "テキストを入力"
+      EmailField:
+        type: email
+        label: メールアドレス
+        editable: true
+        placeholder: "example@email.com"
+      UrlField:
+        type: url
+        label: URL
+        editable: true
+        placeholder: "https://example.com"
+      TelField:
+        type: tel
+        label: 電話番号
+        editable: true
+        placeholder: "03-1234-5678"
+      PasswordField:
+        type: password
+        label: パスワード
+        editable: true
+        placeholder: "8 文字以上"
+      TextArea:
+        type: textarea
+        label: テキストエリア
+        editable: true
+        placeholder: "複数行テキスト"
+      RichText:
+        type: richtext
+        label: リッチテキスト
+        editable: true
+      Markdown:
+        type: markdown
+        label: Markdown
+        editable: true
+      Code:
+        type: code
+        label: コードエディタ
+        editable: true
+
+      # 数値系
+      NumberField:
+        type: int
+        label: 数値
+        editable: true
+        placeholder: "0"
+      DecimalField:
+        type: decimal
+        label: 小数
+        editable: true
+        precision: 2
+      MoneyField:
+        type: money
+        label: 通貨
+        editable: true
+        currency: JPY
+      PercentField:
+        type: percent
+        label: パーセント
+        editable: true
+      RangeField:
+        type: range
+        label: スライダー
+        editable: true
+      RatingField:
+        type: rating
+        label: 星評価
+        editable: true
+
+      # 日付系
+      DateField:
+        type: date
+        label: 日付
+        editable: true
+      DateTimeField:
+        type: datetime
+        label: 日時
+        editable: true
+      DateRangeField:
+        type: datetime-range
+        label: 日付範囲
+        editable: true
+
+      # 選択系
+      SelectField:
+        type: string
+        label: セレクトボックス
+        editable: true
+        options: [option1, option2, option3]
+      RadioField:
+        type: radio
+        label: ラジオボタン
+        editable: true
+        options: [choice_a, choice_b, choice_c]
+      ToggleGroupField:
+        type: toggle-group
+        label: トグルグループ
+        editable: true
+        optionLabels:
+          draft: "📝 下書き"
+          published: "📤 公開済"
+          archived: "🗄️ 保管済"
+      MultiSelectField:
+        type: multi-select
+        label: マルチセレクト
+        editable: true
+        optionLabels:
+          html: "HTML"
+          css: "CSS"
+          javascript: "JavaScript"
+          typescript: "TypeScript"
+      CheckboxGroupField:
+        type: checkbox-group
+        label: チェックボックスグループ
+        editable: true
+        options: [feature1, feature2, feature3]
+      SwitchGroupField:
+        type: switch-group
+        label: スイッチグループ
+        editable: true
+        optionLabels:
+          email: "メール通知"
+          push: "プッシュ通知"
+          sms: "SMS 通知"
+
+      # ブール系
+      BoolToggle:
+        type: bool
+        label: ブールトグル
+        editable: true
+
+      # ファイル系
+      FileUpload:
+        type: file
+        label: ファイルアップロード
+        editable: true
+        uploadPath: "/uploads/files"
+        allowedExtensions: ".pdf,.doc,.docx,.xls,.xlsx"
+        maxFileSize: 10485760
+      ImageUpload:
+        type: image
+        label: 画像アップロード
+        editable: true
+        uploadPath: "/uploads/images"
+        allowedExtensions: ".jpg,.jpeg,.png,.gif,.webp"
+        maxFileSize: 5242880
+
+      # その他
+      ColorPicker:
+        type: color
+        label: カラーピッカー
+        editable: true
+      TagsField:
+        type: tags
+        label: タグ入力
+        editable: true
+      AutocompleteField:
+        type: autocomplete
+        label: 自動補完
+        editable: true
+        options: ["Tokyo", "Osaka", "Kyoto", "Hokkaido", "Fukuoka"]
+      JsonField:
+        type: json
+        label: JSON エディタ
+        editable: true
+      SignatureField:
+        type: signature
+        label: 署名
+        editable: true
+      MapField:
+        type: map
+        label: マップ選択
+        editable: true
+      SortableListField:
+        type: sortable-list
+        label: ソート可能リスト
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      TextField:
+        type: string
+        label: テキスト
+        searchable: true
+      EmailField:
+        type: string
+        label: メール
+      NumberField:
+        type: int
+        label: 数値
+        sortable: true
+      DateField:
+        type: date
+        label: 日付
+        sortable: true
+      BoolToggle:
+        type: bool
+        label: フラグ
+
+    filters:
+      BoolToggle:
+        type: toggle
+        label: フラグ
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          # 基本テキスト系
+          - TextField
+          - EmailField
+          - UrlField
+          - TelField
+          - PasswordField
+          - TextArea
+          - RichText
+          - Markdown
+          - Code
+          # 数値系
+          - NumberField
+          - DecimalField
+          - MoneyField
+          - PercentField
+          - RangeField
+          - RatingField
+          # 日付系
+          - DateField
+          - DateTimeField
+          - DateRangeField
+          # 選択系
+          - SelectField
+          - RadioField
+          - ToggleGroupField
+          - MultiSelectField
+          - CheckboxGroupField
+          - SwitchGroupField
+          # ブール系
+          - BoolToggle
+          # ファイル系
+          - FileUpload
+          - ImageUpload
+          # その他
+          - ColorPicker
+          - TagsField
+          - AutocompleteField
+          - JsonField
+          - SignatureField
+          - MapField
+          - SortableListField
+
+    exports:
+      form_components_csv:
+        label: "フォーム部品 CSV"
+        format: csv
+        filename: "form_components_{date:yyyyMMdd}.csv"

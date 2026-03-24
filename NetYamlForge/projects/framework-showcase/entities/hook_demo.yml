@@ -1,0 +1,186 @@
+imports: []
+entities:
+  hook_demo:
+    table: HookDemo
+    key: Id
+    displayName: フック演示
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: タイトル
+        editable: true
+      Content:
+        type: textarea
+        label: 内容
+        editable: true
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options: [draft, pending, approved, rejected]
+      Priority:
+        type: string
+        label: 優先度
+        editable: true
+        options: [low, medium, high]
+      Assignee:
+        type: string
+        label: 担当者
+        editable: true
+      DueDate:
+        type: date
+        label: 期限
+        editable: true
+      CompletedAt:
+        type: datetime
+        label: 完了日時
+        editable: true
+      IsArchived:
+        type: bool
+        label: アーカイブ
+        editable: true
+        defaultValue: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: タイトル
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      Priority:
+        type: string
+        label: 優先度
+        sortable: true
+      Assignee:
+        type: string
+        label: 担当者
+        searchable: true
+      DueDate:
+        type: date
+        label: 期限
+        sortable: true
+      CompletedAt:
+        type: datetime
+        label: 完了日時
+        sortable: true
+      IsArchived:
+        type: bool
+        label: アーカイブ
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft: "📝 下書き"
+          pending: "⏳ 保留"
+          approved: "✅ 承認"
+          rejected: "❌ 却下"
+      Priority:
+        type: dropdown
+        label: 優先度
+        options: [low, medium, high]
+      IsArchived:
+        type: toggle
+        label: アーカイブ
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - Content
+          - Status
+          - Priority
+          - Assignee
+          - DueDate
+          - CompletedAt
+          - IsArchived
+
+    hooks:
+      # 作成前フック
+      before_create:
+        - name: trim_whitespace
+          description: "前後の空白をトリム"
+          order: 1
+        - name: validate_title
+          description: "タイトル必須検証"
+          order: 2
+        - name: set_default_status
+          description: "デフォルトステータス設定"
+          order: 3
+      
+      # 作成後フック
+      after_create:
+        - name: send_notification
+          description: "作成通知送信"
+          order: 1
+        - name: create_audit_log
+          description: "監査ログ作成"
+          order: 2
+      
+      # 更新前フック
+      before_update:
+        - name: trim_whitespace
+          description: "前後の空白をトリム"
+          order: 1
+        - name: check_permission
+          description: "権限チェック"
+          order: 2
+        - name: validate_transition
+          description: "ステータス遷移検証"
+          order: 3
+      
+      # 更新後フック
+      after_update:
+        - name: send_update_notification
+          description: "更新通知送信"
+          order: 1
+        - name: update_audit_log
+          description: "監査ログ更新"
+          order: 2
+      
+      # 削除前フック
+      before_delete:
+        - name: check_dependencies
+          description: "依存関係チェック"
+          order: 1
+        - name: archive_before_delete
+          description: "削除前アーカイブ"
+          order: 2
+      
+      # 削除後フック
+      after_delete:
+        - name: cleanup_related
+          description: "関連データクリーンアップ"
+          order: 1
+        - name: log_deletion
+          description: "削除ログ記録"
+          order: 2
+
+    exports:
+      hook_demo_csv:
+        label: "フック演示 CSV"
+        format: csv
+        filename: "hook_demo_{date:yyyyMMdd}.csv"

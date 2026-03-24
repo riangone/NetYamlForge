@@ -1,0 +1,93 @@
+pages:
+  overview:
+    path: Overview
+    title: "Framework Showcase - 概要"
+    icon: "🏠"
+    sections:
+      - title: "NetYamlForge フレームワーク機能一覧"
+        type: content
+        content: |
+          # NetYamlForge フレームワークへようこそ
+      
+          このプロジェクトでは、NetYamlForge フレームワークが提供する**全ての機能**を実際に操作しながら学ぶことができます。
+      
+          ## 主な機能カテゴリ
+      
+          ### 📝 フォーム部品
+          30 種類以上のフォームフィールドタイプをサポート：
+          - テキスト系：string, email, url, tel, password, textarea, richtext, markdown, code
+          - 数値系：int, decimal, money, percent, range, rating
+          - 日付系：date, datetime, datetime-range
+          - 選択系：select, radio, toggle-group, multi-select, checkbox-group, switch-group
+          - ファイル系：file, image
+          - その他：color, tags, autocomplete, json, signature, map, sortable-list
+      
+          ### 🔍 フィルター機能
+          10 種類のフィルタータイプ：
+          - like, eq, dropdown, toggle-group, multi-select, bool-toggle, date-range, gte, lte, entity-picker
+      
+          ### 📐 レイアウト機能
+          - グリッドレイアウト（1-4 カラム）
+          - タブ表示
+          - アコーディオン
+          - ウィザード形式
+      
+          ### ⚙️ バッチ処理
+          - Cron スケジューリング
+          - SQL→CSV エクスポート
+          - SQL コマンド実行
+          -  stored procedure 実行
+      
+          ### 🎣 フックシステム
+          - before_create / after_create
+          - before_update / after_update
+          - before_delete / after_delete
+      
+          ### 📤 エクスポート機能
+          - CSV / JSON / PDF フォーマット
+          - カスタム SQL ベースのエクスポート
+          - PDF レイアウトカスタマイズ
+
+      - title: "クイックリンク"
+        type: cards
+        cards:
+          - title: "フォーム部品"
+            icon: "📝"
+            description: "全てのフォームタイプを体験"
+            url: "/framework-showcase/DynamicEntity/Index?entity=form_component"
+          - title: "フィルター"
+            icon: "🔍"
+            description: "多様なフィルターオプション"
+            url: "/framework-showcase/DynamicEntity/Index?entity=filter_demo"
+          - title: "レイアウト"
+            icon: "📐"
+            description: "様々なレイアウト形式"
+            url: "/framework-showcase/DynamicEntity/Index?entity=layout_demo"
+          - title: "バッチ処理"
+            icon: "⚙️"
+            description: "定期処理のデモ"
+            url: "/framework-showcase/DynamicEntity/Index?entity=batch_job_demo"
+          - title: "フック処理"
+            icon: "🎣"
+            description: "CRUD フックのデモ"
+            url: "/framework-showcase/DynamicEntity/Index?entity=hook_demo"
+          - title: "エクスポート"
+            icon: "📤"
+            description: "多彩な出力形式"
+            url: "/framework-showcase/DynamicEntity/Index?entity=export_demo"
+
+      - title: "統計情報"
+        type: stats
+        stats:
+          - label: "フォームタイプ数"
+            value: "30+"
+            icon: "📝"
+          - label: "フィルタータイプ数"
+            value: "10"
+            icon: "🔍"
+          - label: "エンティティ数"
+            value: "6"
+            icon: "📊"
+          - label: "ページ数"
+            value: "3"
+            icon: "📄"

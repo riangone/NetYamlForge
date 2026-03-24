@@ -1,0 +1,62 @@
+jobs:
+  daily_export:
+    displayName: 日次エクスポートジョブ
+    description: "毎日未明にデータを CSV エクスポート"
+    enabled: true
+    
+    schedule:
+      cron: "0 2 * * *"  # 毎日 2:00
+      timezone: "Asia/Tokyo"
+    
+    type: sql_to_csv
+    
+    settings:
+      sqlFile: exports/sql/daily_export.sql
+      outputFile: exports/daily_export_{date:yyyyMMdd}.csv
+      includeHeader: true
+      delimiter: ","
+      encoding: "UTF-8"
+    
+    onFailure:
+      retryCount: 3
+      retryInterval: 300  # 5 分
+      notifyEmail: "admin@example.com"
+  
+  weekly_report:
+    displayName: 週次レポート生成
+    description: "毎週月曜日に週次レポートを PDF 生成"
+    enabled: true
+    
+    schedule:
+      cron: "0 9 * * 1"  # 毎週月曜日 9:00
+      timezone: "Asia/Tokyo"
+    
+    type: sql_to_csv
+    
+    settings:
+      sqlFile: exports/sql/weekly_report.sql
+      outputFile: exports/weekly_report_{date:yyyyMMdd}.csv
+      includeHeader: true
+      delimiter: ","
+    
+    onFailure:
+      retryCount: 2
+      retryInterval: 600
+  
+  cleanup_old_data:
+    displayName: 古いデータクリーンアップ
+    description: "不要な一時データを削除"
+    enabled: false
+    
+    schedule:
+      cron: "0 3 * * 0"  # 毎週日曜日 3:00
+      timezone: "Asia/Tokyo"
+    
+    type: sql_command
+    
+    settings:
+      sqlFile: jobs/sql/cleanup.sql
+    
+    onFailure:
+      retryCount: 1
+      retryInterval: 300

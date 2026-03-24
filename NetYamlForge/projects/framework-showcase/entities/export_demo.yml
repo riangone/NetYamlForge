@@ -1,0 +1,218 @@
+imports: []
+entities:
+  export_demo:
+    table: ExportDemo
+    key: Id
+    displayName: エクスポート演示
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      ProductName:
+        type: string
+        required: true
+        label: 製品名
+        editable: true
+      Category:
+        type: string
+        label: カテゴリ
+        editable: true
+        options: [electronics, clothing, food, books, other]
+      Price:
+        type: decimal
+        label: 価格
+        editable: true
+        precision: 0
+      Stock:
+        type: int
+        label: 在庫数
+        editable: true
+      Rating:
+        type: decimal
+        label: 評価
+        editable: true
+        precision: 1
+      ReleaseDate:
+        type: date
+        label: 発売日
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+      IsActive:
+        type: bool
+        label: 販売中
+        editable: true
+        defaultValue: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      ProductName:
+        type: string
+        label: 製品名
+        searchable: true
+        sortable: true
+      Category:
+        type: string
+        label: カテゴリ
+        searchable: true
+        sortable: true
+      Price:
+        type: decimal
+        label: 価格
+        sortable: true
+        precision: 0
+      Stock:
+        type: int
+        label: 在庫
+        sortable: true
+      Rating:
+        type: decimal
+        label: 評価
+        sortable: true
+        precision: 1
+      ReleaseDate:
+        type: date
+        label: 発売日
+        sortable: true
+      IsActive:
+        type: bool
+        label: 販売中
+        sortable: true
+
+    filters:
+      Category:
+        type: dropdown
+        label: カテゴリ
+        options: [electronics, clothing, food, books, other]
+      IsActive:
+        type: toggle
+        label: 販売中
+      Price:
+        type: gte
+        label: 価格（以上）
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - ProductName
+          - Category
+          - Price
+          - Stock
+          - Rating
+          - ReleaseDate
+          - Description
+          - IsActive
+
+    exports:
+      # CSV エクスポート
+      products_csv:
+        label: "製品一覧 CSV"
+        format: csv
+        filename: "products_{date:yyyyMMdd}.csv"
+        columns:
+          - Id
+          - ProductName
+          - Category
+          - Price
+          - Stock
+          - Rating
+          - ReleaseDate
+          - IsActive
+
+      # JSON エクスポート
+      products_json:
+        label: "製品一覧 JSON"
+        format: json
+        filename: "products_{date:yyyyMMdd}.json"
+        columns:
+          - Id
+          - ProductName
+          - Category
+          - Price
+          - Stock
+          - Rating
+
+      # PDF エクスポート（標準）
+      products_pdf:
+        label: "製品一覧 PDF"
+        format: pdf
+        filename: "products_{date:yyyyMMdd}.pdf"
+        columns:
+          - ProductName
+          - Category
+          - Price
+          - Stock
+          - Rating
+        pdf:
+          title: "製品一覧表"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#059669"
+          oddRowColor: "#ECFDF5"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: ProductName
+              width: 30
+            - key: Category
+              width: 15
+            - key: Price
+              width: 15
+              align: right
+            - key: Stock
+              width: 10
+              align: right
+            - key: Rating
+              width: 10
+              align: right
+
+      # PDF エクスポート（横長）
+      products_pdf_landscape:
+        label: "製品一覧 PDF（横）"
+        format: pdf
+        filename: "products_landscape_{date:yyyyMMdd}.pdf"
+        columns:
+          - Id
+          - ProductName
+          - Category
+          - Price
+          - Stock
+          - Rating
+          - ReleaseDate
+        pdf:
+          title: "製品一覧表（横長）"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#7C3AED"
+          oddRowColor: "#F5F3FF"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      # 高価格製品のみ PDF
+      premium_products_pdf:
+        label: "高価格製品 PDF"
+        format: pdf
+        filename: "premium_products_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/premium_products.sql
+        pdf:
+          title: "高価格製品一覧（¥50,000 以上）"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#DC2626"
+          oddRowColor: "#FEF2F2"
+          showPageNumbers: true
+          showGeneratedAt: true

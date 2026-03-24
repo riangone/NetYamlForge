@@ -1,0 +1,142 @@
+imports: []
+entities:
+  layout_demo:
+    table: LayoutDemo
+    key: Id
+    displayName: レイアウト演示
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: タイトル
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+      Category:
+        type: string
+        label: カテゴリ
+        editable: true
+        options: [type_a, type_b, type_c]
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options: [active, inactive]
+      SortOrder:
+        type: int
+        label: 表示順
+        editable: true
+      IsPublic:
+        type: bool
+        label: 公開
+        editable: true
+      PublishedDate:
+        type: date
+        label: 公開日
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: タイトル
+        searchable: true
+        sortable: true
+      Description:
+        type: string
+        label: 説明
+        searchable: true
+      Category:
+        type: string
+        label: カテゴリ
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      SortOrder:
+        type: int
+        label: 表示順
+        sortable: true
+      IsPublic:
+        type: bool
+        label: 公開
+        sortable: true
+      PublishedDate:
+        type: date
+        label: 公開日
+        sortable: true
+
+    filters:
+      Category:
+        type: dropdown
+        label: カテゴリ
+        options: [type_a, type_b, type_c]
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          active: "✅ 有効"
+          inactive: "⏸️ 無効"
+      IsPublic:
+        type: toggle
+        label: 公開設定
+
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - Description
+          - Category
+          - Status
+          - SortOrder
+          - IsPublic
+          - PublishedDate
+      
+      filters:
+        columns: 3
+        order:
+          - Category
+          - Status
+          - IsPublic
+
+    exports:
+      layout_demo_csv:
+        label: "レイアウト演示 CSV"
+        format: csv
+        filename: "layout_demo_{date:yyyyMMdd}.csv"
+      layout_demo_pdf:
+        label: "レイアウト演示 PDF"
+        format: pdf
+        filename: "layout_demo_{date:yyyyMMdd}.pdf"
+        columns:
+          - Id
+          - Title
+          - Category
+          - Status
+          - PublishedDate
+        pdf:
+          title: "レイアウト演示一覧"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#4F46E5"
+          oddRowColor: "#EEF2FF"
+          showPageNumbers: true
+          showGeneratedAt: true

@@ -1,0 +1,34 @@
+icon: "🎯"
+tagline: "NetYamlForge の全機能を網羅的に展示"
+description: |
+  このプロジェクトでは、NetYamlForge フレームワークが提供する全ての機能を実際に操作しながら学ぶことができます。
+  
+  ## 主な機能
+  
+  - 📝 **30 種類以上のフォームタイプ**: テキスト、数値、日付、選択、ファイルなど
+  - 🔍 **10 種類のフィルター**: 多様な検索・絞り込みオプション
+  - 📐 **レイアウト機能**: グリッド、タブ、アコーディオンなど
+  - ⚙️ **バッチ処理**: Cron スケジューリング、自動実行
+  - 🎣 **フックシステム**: CRUD 操作の前後処理
+  - 📤 **エクスポート**: CSV, JSON, PDF 形式
+
+tags: [Demo, Showcase, Framework, Components, Features]
+quickLinks:
+  - label: フォーム部品
+    url: /framework-showcase/DynamicEntity/Index?entity=form_component
+    icon: "📝"
+  - label: フィルター
+    url: /framework-showcase/DynamicEntity/Index?entity=filter_demo
+    icon: "🔍"
+  - label: レイアウト
+    url: /framework-showcase/DynamicEntity/Index?entity=layout_demo
+    icon: "📐"
+  - label: バッチ処理
+    url: /framework-showcase/DynamicEntity/Index?entity=batch_job_demo
+    icon: "⚙️"
+  - label: フック処理
+    url: /framework-showcase/DynamicEntity/Index?entity=hook_demo
+    icon: "🎣"
+  - label: エクスポート
+    url: /framework-showcase/DynamicEntity/Index?entity=export_demo
+    icon: "📤"
