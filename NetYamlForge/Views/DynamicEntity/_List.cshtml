@@ -243,6 +243,10 @@
                                             @rowLink.GetLabel() →
                                         </a>
                                     }
+                                    <a class="btn btn-xs btn-info btn-outline"
+                                       href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
+                                        Detail
+                                    </a>
                                     <button class="btn btn-xs btn-outline"
                                             hx-get="@Url.Action("EditForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["mode"] = "modal" })"
                                             hx-target="#modal-form-content"

@@ -289,6 +289,26 @@ public class DynamicEntityController : BaseProjectController
         return PartialView("_Form", vm);
     }
 
+    public async Task<IActionResult> DetailPage(string entity, string? id = null, string? returnUrl = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "customer";
+
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null)
+        {
+            return accessDenied;
+        }
+
+        var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
+
+        var item = await _repo.GetByIdAsync(entity, keyValue ?? "");
+        var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
+        var breadcrumbs = _navigationService.BuildBreadcrumbChain(returnUrl);
+        var vm = new DynamicDetailViewModel(entity, meta, item, fkData, breadcrumbs, returnUrl);
+        return View("DetailPage", vm);
+    }
+
     public async Task<IActionResult> EditPage(string entity, string? id = null, string? returnUrl = null)
     {
         entity = NormalizeSingleValue(entity) ?? "customer";
@@ -1223,6 +1243,14 @@ public static class DynamicFormFieldViewModelExtensions
 }
 
 public record EntityDefinitionViewModel(string Entity, EntityDefinition Meta);
+
+public record DynamicDetailViewModel(
+    string Entity,
+    EntityDefinition Meta,
+    dynamic? Item,
+    Dictionary<string, IEnumerable<dynamic>> ForeignKeyData,
+    IReadOnlyList<BreadcrumbItem>? BreadcrumbChain = null,
+    string? ReturnUrl = null);
 
 public record AllDefinitionsViewModel(IReadOnlyDictionary<string, EntityDefinition> Entities);
 

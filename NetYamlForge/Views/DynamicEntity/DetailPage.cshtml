@@ -1,0 +1,151 @@
+@* ファイル概要: エンティティの詳細（読み取り専用）ページを描画します。
+   このビューは画面表示と操作導線を担当します。 *@
+
+@using NetYamlForge.Models
+@using NetYamlForge.Controllers
+@model NetYamlForge.Controllers.DynamicDetailViewModel
+@{
+    ViewData["Title"] = Model.Meta.GetDisplayName() + " Detail";
+    IReadOnlyList<BreadcrumbItem> breadcrumbs = Model.BreadcrumbChain ?? new List<BreadcrumbItem>();
+    var itemDict = Model.Item as IDictionary<string, object>;
+    var pkColumns = Model.Meta.GetPrimaryKeyColumns();
+    var pkParamName = pkColumns.Count == 1 ? pkColumns[0] : "id";
+    string? itemId = null;
+    if (itemDict != null && pkColumns.Count == 1)
+    {
+        itemDict.TryGetValue(pkColumns[0], out var pkVal);
+        itemId = pkVal?.ToString();
+    }
+
+    // FK ルックアップヘルパー
+    string ResolveFkLabel(string colName, NetYamlForge.Models.ColumnDefinition col, object? rawValue)
+    {
+        if (col.ForeignKey == null || rawValue == null)
+            return rawValue?.ToString() ?? "";
+        var fkEntity = col.ForeignKey.Entity;
+        var displayCol = col.ForeignKey.DisplayColumn ?? "Name";
+        if (Model.ForeignKeyData.TryGetValue(colName, out var fkRows))
+        {
+            foreach (IDictionary<string, object> row in fkRows)
+            {
+                if (row.TryGetValue("Id", out var fkId) && fkId?.ToString() == rawValue.ToString())
+                {
+                    return row.TryGetValue(displayCol, out var disp) ? disp?.ToString() ?? rawValue.ToString()! : rawValue.ToString()!;
+                }
+            }
+        }
+        return rawValue.ToString() ?? "";
+    }
+
+    // 表示する列（Hidden=false のもの）
+    var displayColumns = Model.Meta.Columns.Where(c => !c.Value.Hidden).ToList();
+}
+
+<div class="space-y-4">
+    @* パンくずナビ *@
+    <nav aria-label="Breadcrumb" class="text-sm text-base-content/60">
+        <ol class="flex flex-wrap items-center gap-1.5">
+            <li>
+                <a class="link link-hover" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+            </li>
+            @foreach (var crumb in breadcrumbs)
+            {
+                <li aria-hidden="true">/</li>
+                <li>
+                    <a class="link link-hover" href="@crumb.Url">@crumb.Label</a>
+                </li>
+            }
+            @if (breadcrumbs.Count == 0)
+            {
+                <li aria-hidden="true">/</li>
+                <li>
+                    <a class="link link-hover"
+                       href="@Url.Action("Index", "DynamicEntity", new { entity = Model.Entity })">@Model.Meta.GetDisplayName()</a>
+                </li>
+            }
+            <li aria-hidden="true">/</li>
+            <li class="font-semibold text-base-content">Detail</li>
+        </ol>
+    </nav>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <h2 class="card-title">@Model.Meta.GetDisplayName() - Detail</h2>
+                <div class="flex gap-2">
+                    @if (itemId != null)
+                    {
+                        <a class="btn btn-sm btn-outline"
+                           href="@Url.Action("EditPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = Model.ReturnUrl })">
+                            Edit
+                        </a>
+                    }
+                    <a class="btn btn-sm btn-ghost"
+                       href="@(Model.ReturnUrl ?? Url.Action("Index", "DynamicEntity", new { entity = Model.Entity }))">
+                        Back
+                    </a>
+                </div>
+            </div>
+
+            @if (itemDict == null)
+            {
+                <div class="alert alert-warning">
+                    <span>レコードが見つかりませんでした。</span>
+                </div>
+            }
+            else
+            {
+                var formCols = Math.Clamp(Model.Meta.Layout.Forms.Columns, 1, 4);
+                var gridColClass = $"md:grid-cols-{formCols}";
+                <dl class="grid grid-cols-1 @gridColClass gap-x-6 gap-y-4">
+                    @foreach (var col in displayColumns)
+                    {
+                        var colName = col.Key;
+                        var colDef = col.Value;
+                        object? rawValue = null;
+                        try { itemDict.TryGetValue(colName, out rawValue); } catch { }
+
+                        string displayValue;
+                        if (colDef.ForeignKey != null && rawValue != null)
+                        {
+                            displayValue = ResolveFkLabel(colName, colDef, rawValue);
+                        }
+                        else
+                        {
+                            displayValue = ColumnValueFormatter.FormatValue(colDef.Type, rawValue, colDef.OptionLabels);
+                        }
+
+                        <div class="space-y-1">
+                            <dt class="text-xs font-semibold text-base-content/50 uppercase tracking-wide">@colDef.GetLabel(colName)</dt>
+                            <dd class="text-sm text-base-content">
+                                @if (string.IsNullOrEmpty(displayValue))
+                                {
+                                    <span class="text-base-content/30 italic">—</span>
+                                }
+                                else if (colDef.Type == "boolean")
+                                {
+                                    if (displayValue is "true" or "True" or "1" or "Yes" or "はい")
+                                    {
+                                        <span class="badge badge-success badge-sm">Yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-ghost badge-sm">No</span>
+                                    }
+                                }
+                                else if (colDef.Options != null && colDef.Options.Count > 0)
+                                {
+                                    <span class="badge badge-outline badge-sm">@displayValue</span>
+                                }
+                                else
+                                {
+                                    @displayValue
+                                }
+                            </dd>
+                        </div>
+                    }
+                </dl>
+            }
+        </div>
+    </div>
+</div>
