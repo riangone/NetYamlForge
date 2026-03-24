@@ -368,7 +368,7 @@ public class DynamicEntityControllerTests
             new StubProjectActionRegistry(),
             new SqliteConnection("Data Source=:memory:"),
             new StubPdfExportService(),
-            new StubJpDocumentPdfService(),
+            new StubDocumentPdfService(),
             NullLogger<DynamicEntityController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
@@ -602,9 +602,15 @@ public class DynamicEntityControllerTests
             string? projectDir = null) => [];
     }
 
-    private sealed class StubJpDocumentPdfService : IJpDocumentPdfService
+    private sealed class StubDocumentPdfService : IDocumentPdfService
     {
-        public byte[] Generate(JpDocumentContext ctx) => [];
+        public PdfTemplateConfig? LoadTemplate(string projectDir, string templateName) => null;
+
+        public byte[] Generate(
+            PdfTemplateConfig template,
+            IDictionary<string, object?> header,
+            IDictionary<string, IList<IDictionary<string, object?>>> dataSources,
+            string? projectDir = null) => [];
     }
 
     private sealed class StubUrlHelper : IUrlHelper

@@ -6,7 +6,7 @@ entities:
     displayName: 契約書
     softDelete: false
     isPublic: true
-    jpDocument: contract
+    pdfTemplate: contract
 
     joins:
       - type: left

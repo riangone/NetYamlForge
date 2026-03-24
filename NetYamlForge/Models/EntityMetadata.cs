@@ -338,10 +338,10 @@ public class EntityDefinition
     /// <summary>ツールバーに追加するカスタムエクスポートボタン定義</summary>
     public Dictionary<string, ExportDefinition> Exports { get; set; } = new();
     /// <summary>
-    /// 日本向け帳票 PDF の文書種別。設定すると一覧行に「帳票」ボタンが表示されます。
-    /// 値: delivery | invoice | estimate | contract
+    /// 帳票 PDF テンプレート名。設定すると一覧行に「帳票」ボタンが表示されます。
+    /// プロジェクトの pdf-templates/ ディレクトリ内の YAML ファイル名（拡張子なし）を指定します。
     /// </summary>
-    public string? JpDocument { get; set; }
+    public string? PdfTemplate { get; set; }
 
     /// <summary>
     /// 主鍵列名のリストを取得する。複合主鍵の場合は Keys を返し、

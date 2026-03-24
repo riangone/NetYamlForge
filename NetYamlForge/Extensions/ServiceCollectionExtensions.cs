@@ -139,7 +139,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFileUploadService, FileUploadService>();
         // PDF エクスポートサービス
         services.AddSingleton<IPdfExportService, PdfExportService>();
-        services.AddSingleton<IJpDocumentPdfService, JpDocumentPdfService>();
+        services.AddSingleton<IDocumentPdfService, DocumentPdfService>();
         services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 

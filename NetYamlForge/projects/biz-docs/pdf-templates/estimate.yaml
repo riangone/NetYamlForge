@@ -1,0 +1,125 @@
+# 御見積書 帳票テンプレート
+name: estimate
+filenameTemplate: "見積書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "1c3658"
+  labelColor: "78b4cc"
+  labelTextColor: "ffffff"
+  subtleBackground: "f0f0f0"
+  oddRowColor: "f8fcfe"
+  borderColor: "b4b4b4"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @CustomerId"
+  items:
+    query: "SELECT * FROM JpEstimateItem WHERE EstimateId = @Id ORDER BY LineNo"
+
+sections:
+  - type: documentHeader
+    title: "御　見　積　書"
+    titleFontSize: 20
+    numberLabel: "見積番号"
+    numberField: EstimateNo
+    dateLabel: "見積日"
+    dateField: IssueDate
+
+  - type: separator
+    style: thick
+
+  - type: recipientBlock
+    nameSource: "customer.Name"
+    suffix: "　御中"
+    nameFontSize: 13
+    introText: "下記のとおり、お見積り申し上げます。"
+
+  - type: infoWithSender
+    infoRows:
+      - label: "件名"
+        field: Title
+      - label: "見積日"
+        field: IssueDate
+      - label: "有効期限"
+        field: ExpiryDate
+        omitIfEmpty: true
+      - label: "納期"
+        field: DeliveryDays
+        omitIfEmpty: true
+      - label: "支払条件"
+        field: PaymentTerms
+        omitIfEmpty: true
+    senderFields:
+      - field: CompanyStamp
+        fontSize: 10
+      - field: PreparedBy
+        prefix: "担当："
+
+  - type: totalBanner
+    label: "合　計　金　額"
+    field: Total
+    bannerSuffix: "（税込）"
+
+  - type: separator
+    style: double
+
+  - type: itemsTable
+    dataSource: items
+    minRows: 8
+    columns:
+      - field: _rowNumber
+        label: "No."
+        width: 6
+        align: center
+      - field: ItemName
+        label: "摘　要"
+        width: 36
+        align: left
+      - field: Spec
+        label: "仕様"
+        width: 14
+        align: left
+      - field: Unit
+        label: "単位"
+        width: 7
+        align: center
+      - field: Quantity
+        label: "数量"
+        width: 8
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単価"
+        width: 13
+        align: right
+        format: currency
+      - field: Amount
+        label: "金額"
+        width: 16
+        align: right
+        format: currency
+
+  - type: taxSummary
+    taxRows:
+      - label: "小計"
+        field: Subtotal
+      - label: "消費税（10%）"
+        field: TaxAmount10
+        omitIfZero: true
+      - label: "消費税（8%）"
+        field: TaxAmount8
+        omitIfZero: true
+      - label: "合　計　金　額"
+        field: Total
+        bold: true
+
+  - type: remarksBox
+    label: "備　考"
+    minHeight: 50
+    remarksTemplate: |
+      {ValidityNote}
+      {ExclusionNote}
+      {Remarks}

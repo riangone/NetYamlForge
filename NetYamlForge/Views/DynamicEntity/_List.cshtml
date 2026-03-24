@@ -247,10 +247,10 @@
                                        href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
                                         Detail
                                     </a>
-                                    @if (Model.Meta.JpDocument != null)
+                                    @if (Model.Meta.PdfTemplate != null)
                                     {
                                         <a class="btn btn-xs btn-accent btn-outline"
-                                           href="@Url.Action("JpDocumentPdf", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
+                                           href="@Url.Action("DocumentPdf", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
                                            target="_blank"
                                            title="帳票 PDF">
                                             📄 帳票

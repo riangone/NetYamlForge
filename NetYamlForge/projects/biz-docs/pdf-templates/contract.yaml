@@ -1,0 +1,74 @@
+# 契約書 帳票テンプレート
+name: contract
+filenameTemplate: "契約書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "1c3658"
+  labelColor: "78b4cc"
+  labelTextColor: "ffffff"
+  subtleBackground: "f0f0f0"
+  oddRowColor: "f8fcfe"
+  borderColor: "b4b4b4"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @CustomerId"
+
+sections:
+  - type: documentHeader
+    title: "契　約　書"
+    titleFontSize: 20
+    numberLabel: "契約番号"
+    numberField: ContractNo
+    dateLabel: "締結日"
+    dateField: SignedDate
+
+  - type: separator
+    style: thick
+
+  - type: contractParties
+    partyASource: "customer.Name"
+    partyALabel: "　（甲）"
+    partyBField: OurSignatory
+    partyBLabel: "　（乙）"
+    bodyTemplate: "「{Title}」について、甲乙は以下のとおり合意し、本契約を締結する。"
+
+  - type: contractInfoTable
+    infoRows:
+      - label: "契約種別"
+        field: ContractType
+      - label: "契約開始日"
+        field: StartDate
+      - label: "契約終了日"
+        field: EndDate
+      - label: "自動更新"
+        field: AutoRenewLabel
+      - label: "契約金額"
+        field: ContractAmountLabel
+      - label: "支払条件"
+        field: PaymentTerms
+      - label: "契約形態"
+        field: ContractFormLabel
+      - label: "合意管轄"
+        field: JurisdictionCourt
+        omitIfEmpty: true
+      - label: "準拠法"
+        field: GoverningLaw
+        omitIfEmpty: true
+
+  - type: contractSignatures
+    signatories:
+      - role: "甲"
+        nameSource: "customer.Name"
+        signatoryField: TheirSignatory
+      - role: "乙"
+        nameSource: OurSignatory
+        signatoryFallback: "代表取締役"
+
+  - type: remarksBox
+    label: "備　考"
+    minHeight: 50
+    remarksTemplate: "{Remarks}"

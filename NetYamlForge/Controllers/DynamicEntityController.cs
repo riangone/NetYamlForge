@@ -36,7 +36,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly IProjectActionRegistry _actionRegistry;
     private readonly IDbConnection _db;
     private readonly IPdfExportService _pdfExport;
-    private readonly IJpDocumentPdfService _jpDocPdf;
+    private readonly IDocumentPdfService _docPdf;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -58,7 +58,7 @@ public class DynamicEntityController : BaseProjectController
         IProjectActionRegistry actionRegistry,
         IDbConnection db,
         IPdfExportService pdfExport,
-        IJpDocumentPdfService jpDocPdf,
+        IDocumentPdfService docPdf,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -79,7 +79,7 @@ public class DynamicEntityController : BaseProjectController
         _actionRegistry = actionRegistry;
         _db = db;
         _pdfExport = pdfExport;
-        _jpDocPdf = jpDocPdf;
+        _docPdf = docPdf;
         _logger = logger;
     }
 
@@ -313,70 +313,74 @@ public class DynamicEntityController : BaseProjectController
     }
 
     /// <summary>
-    /// 日本向けビジネス文書（見積書・請求書・納品書・契約書）の帳票 PDF を生成します。
+    /// YAML テンプレート（pdf-templates/*.yaml）を使用して帳票 PDF を生成します。
+    /// エンティティの pdfTemplate プロパティでテンプレート名を指定します。
     /// </summary>
     [HttpGet]
-    public async Task<IActionResult> JpDocumentPdf(string entity, string? id = null)
+    public async Task<IActionResult> DocumentPdf(string entity, string? id = null)
     {
         entity = NormalizeSingleValue(entity) ?? "";
 
-        var meta    = _meta.Get(entity);
-        var docType = meta.JpDocument;
-        if (string.IsNullOrWhiteSpace(docType))
-            return NotFound("jpDocument is not configured for entity: " + entity);
+        var meta         = _meta.Get(entity);
+        var templateName = meta.PdfTemplate;
+        if (string.IsNullOrWhiteSpace(templateName))
+            return NotFound("pdfTemplate is not configured for entity: " + entity);
 
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
         var record   = await _repo.GetByIdAsync(entity, keyValue ?? "");
         if (record == null) return NotFound();
 
-        // IDictionary<string, object?> に変換
         var header = ((IDictionary<string, object>)record)
             .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
-        // 取引先情報をロード
-        Dictionary<string, object?>? customer = null;
-        if (header.TryGetValue("CustomerId", out var cidRaw) && cidRaw != null)
-        {
-            var cuRow = await _db.QueryFirstOrDefaultAsync<dynamic>(
-                "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @id",
-                new { id = cidRaw });
-            if (cuRow != null)
-                customer = ((IDictionary<string, object>)cuRow)
-                    .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
-        }
+        var projectDir = _projectScope.Current?.ProjectDir
+            ?? throw new InvalidOperationException("No active project scope");
 
-        // 明細行をロード
-        var itemsSql = entity switch
+        var template = _docPdf.LoadTemplate(projectDir, templateName);
+        if (template == null)
+            return NotFound($"PDF template '{templateName}.yaml' not found in project pdf-templates/");
+
+        // テンプレートのデータソースクエリを実行
+        var dataSources = new Dictionary<string, IList<IDictionary<string, object?>>>();
+        foreach (var (sourceName, sourceConfig) in template.DataSources)
         {
-            "jp_delivery" => "SELECT * FROM JpDeliveryItem WHERE DeliveryId = @id ORDER BY LineNo",
-            "jp_invoice"  => "SELECT * FROM JpInvoiceItem  WHERE InvoiceId  = @id ORDER BY LineNo",
-            "jp_estimate" => "SELECT * FROM JpEstimateItem WHERE EstimateId = @id ORDER BY LineNo",
-            _             => null
-        };
-        var items = new List<IDictionary<string, object?>>();
-        if (itemsSql != null)
-        {
-            var rows = await _db.QueryAsync<dynamic>(itemsSql, new { id = keyValue });
-            items = rows.Select(r =>
-                (IDictionary<string, object?>)((IDictionary<string, object>)r)
+            var dynParams = BuildQueryParams(sourceConfig.Query, header);
+            var rows = await _db.QueryAsync<dynamic>(sourceConfig.Query, dynParams);
+            dataSources[sourceName] = rows
+                .Select(r => (IDictionary<string, object?>)
+                    ((IDictionary<string, object>)r)
                     .ToDictionary(kv => kv.Key, kv => (object?)kv.Value))
                 .ToList();
         }
 
-        var projectDir = _projectScope.Current?.ProjectDir;
-        var ctx = new JpDocumentContext(docType, header, customer, items, projectDir);
-        var bytes = _jpDocPdf.Generate(ctx);
-
-        var filename = docType switch
-        {
-            "delivery" => $"納品書_{DateTime.Now:yyyyMMdd}.pdf",
-            "invoice"  => $"請求書_{DateTime.Now:yyyyMMdd}.pdf",
-            "estimate" => $"見積書_{DateTime.Now:yyyyMMdd}.pdf",
-            "contract" => $"契約書_{DateTime.Now:yyyyMMdd}.pdf",
-            _          => $"document_{DateTime.Now:yyyyMMdd}.pdf"
-        };
-
+        var bytes    = _docPdf.Generate(template, header, dataSources, projectDir);
+        var filename = BuildPdfFilename(template.FilenameTemplate, templateName);
         return File(bytes, "application/pdf", filename);
+    }
+
+    private static Dapper.DynamicParameters BuildQueryParams(
+        string query, IDictionary<string, object?> header)
+    {
+        var dynParams  = new Dapper.DynamicParameters();
+        var paramNames = System.Text.RegularExpressions.Regex
+            .Matches(query, @"@(\w+)")
+            .Select(m => m.Groups[1].Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var name in paramNames)
+        {
+            header.TryGetValue(name, out var val);
+            dynParams.Add(name, val);
+        }
+        return dynParams;
+    }
+
+    private static string BuildPdfFilename(string? template, string fallbackName)
+    {
+        if (string.IsNullOrWhiteSpace(template))
+            return $"{fallbackName}_{DateTime.Now:yyyyMMdd}.pdf";
+        return template.Replace("{date:yyyyMMdd}", DateTime.Now.ToString("yyyyMMdd"))
+                       .Replace("{date}", DateTime.Now.ToString("yyyyMMdd"));
     }
 
     public async Task<IActionResult> EditPage(string entity, string? id = null, string? returnUrl = null)

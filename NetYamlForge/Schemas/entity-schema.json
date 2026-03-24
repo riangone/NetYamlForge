@@ -57,10 +57,9 @@
             "type": "boolean",
             "description": "If true, the entity list/detail is accessible without authentication."
           },
-          "jpDocument": {
+          "pdfTemplate": {
             "type": "string",
-            "enum": ["delivery", "invoice", "estimate", "contract"],
-            "description": "Japanese business document type. Adds a 帳票 PDF button to each list row. Values: delivery | invoice | estimate | contract"
+            "description": "PDF template name (without .yaml extension) in the project's pdf-templates/ directory. Adds a PDF button to each list row."
           },
           "joins": {
             "type": "array",
