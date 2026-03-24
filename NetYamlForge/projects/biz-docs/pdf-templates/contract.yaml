@@ -1,4 +1,5 @@
 # 契約書 帳票テンプレート
+# すべてのレイアウトは YAML で定義します。C# には 5 つの汎用プリミティブのみ。
 name: contract
 filenameTemplate: "契約書_{date:yyyyMMdd}.pdf"
 pageSize: A4
@@ -18,40 +19,77 @@ dataSources:
     query: "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @CustomerId"
 
 sections:
-  - type: documentHeader
-    title: "契　約　書"
-    titleFontSize: 20
-    numberLabel: "契約番号"
-    numberField: ContractNo
-    dateLabel: "締結日"
-    dateField: SignedDate
-    layout:
-      columns: [55, 45]
-      innerColumns: [38, 62]
-      cellPadding: 3
-      fontSize: 8
-      marginBottom: 2
+  # ── ドキュメントヘッダー（タイトル | 番号ボックス） ──────────────────────
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 2
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "契　約　書"
+            fontSize: 20
+            color: primary
+            align: center
+      - vAlign: bottom
+        paddingLeft: 16
+        elements:
+          - type: labelTable
+            columnWidths: [38, 62]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "契約番号"
+                field: ContractNo
+              - label: "締結日"
+                field: SignedDate
 
-  - type: separator
-    style: thick
-    layout:
-      marginTop: 4
-      marginBottom: 6
+  # ── 太い区切り線 ─────────────────────────────────────────────────────────
+  - type: line
+    lineWeight: 2
+    color: primary
+    marginTop: 4
+    marginBottom: 6
 
-  - type: contractParties
-    partyASource: "customer.Name"
-    partyALabel: "　（甲）"
-    partyBField: OurSignatory
-    partyBLabel: "　（乙）"
-    nameFontSize: 13
-    bodyTemplate: "「{Title}」について、甲乙は以下のとおり合意し、本契約を締結する。"
-    layout:
-      marginTop: 8
-      marginBottom: 8
-      fontSize: 9
+  # ── 当事者ブロック（甲・乙） ─────────────────────────────────────────────
+  - type: row
+    columnWidths: [50, 50]
+    marginTop: 8
+    cells:
+      - padding: 4
+        elements:
+          - type: paragraph
+            field: "customer.Name"
+            suffix: "　（甲）"
+            fontSize: 13
+            suffixFontSize: 9
+      - padding: 4
+        elements:
+          - type: paragraph
+            field: OurSignatory
+            suffix: "　（乙）"
+            fontSize: 13
+            suffixFontSize: 9
 
-  - type: contractInfoTable
-    infoRows:
+  - type: paragraph
+    template: "「{Title}」について、甲乙は以下のとおり合意し、本契約を締結する。"
+    fontSize: 9
+    marginTop: 6
+    marginBottom: 8
+
+  # ── 契約情報テーブル ─────────────────────────────────────────────────────
+  - type: labelTable
+    columnWidths: [28, 72]
+    labelBackground: label
+    labelTextColor: labelText
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    marginBottom: 12
+    rows:
       - label: "契約種別"
         field: ContractType
       - label: "契約開始日"
@@ -72,34 +110,75 @@ sections:
       - label: "準拠法"
         field: GoverningLaw
         omitIfEmpty: true
-    layout:
-      columns: [28, 72]         # ラベル | 値
-      cellPadding: 4
-      fontSize: 8.5
-      marginBottom: 12
 
-  - type: contractSignatures
-    signatories:
-      - role: "甲"
-        nameSource: "customer.Name"
-        signatoryField: TheirSignatory
-      - role: "乙"
-        nameSource: OurSignatory
-        signatoryFallback: "代表取締役"
-    layout:
-      innerColumns: [35, 65]    # 署名ブロック内: ロール | 名前+署名者
-      cellPadding: 4
-      fontSize: 8.5
-      accentFontSize: 10        # 名前フォントサイズ
-      marginBottom: 8
+  # ── 署名欄（甲・乙 2 列） ─────────────────────────────────────────────────
+  - type: row
+    columnWidths: [50, 50]
+    cells:
+      - borderWeight: 0.5
+        padding: 4
+        minHeight: 60
+        elements:
+          - type: row
+            columnWidths: [35, 65]
+            cells:
+              - padding: 4
+                vAlign: middle
+                elements:
+                  - type: paragraph
+                    text: "甲"
+                    fontSize: 8.5
+                    align: center
+              - padding: 4
+                elements:
+                  - type: paragraph
+                    field: "customer.Name"
+                    fontSize: 10
+                  - type: paragraph
+                    field: TheirSignatory
+                    fontSize: 8.5
+      - borderWeight: 0.5
+        padding: 4
+        minHeight: 60
+        elements:
+          - type: row
+            columnWidths: [35, 65]
+            cells:
+              - padding: 4
+                vAlign: middle
+                elements:
+                  - type: paragraph
+                    text: "乙"
+                    fontSize: 8.5
+                    align: center
+              - padding: 4
+                elements:
+                  - type: paragraph
+                    field: OurSignatory
+                    fontSize: 10
+                  - type: paragraph
+                    text: "代表取締役"
+                    fontSize: 8.5
 
-  - type: remarksBox
-    label: "備　考"
-    minHeight: 50
-    remarksTemplate: "{Remarks}"
-    layout:
-      columns: [15, 85]
-      cellPadding: 6
-      fontSize: 8.5
-      accentFontSize: 9
-      marginTop: 8
+  # ── 備考欄 ───────────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [15, 85]
+    marginTop: 8
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "備　考"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 50
+        elements:
+          - type: paragraph
+            template: "{Remarks}"
+            fontSize: 8.5

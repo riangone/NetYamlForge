@@ -1,5 +1,6 @@
-// ファイル概要: YAML 帳票テンプレート（pdf-templates/*.yaml）を読み込んで PDF を生成する
-// 汎用ドキュメントサービス。C# 側にレイアウト・フィールド名・日本語文字列を持ちません。
+// ファイル概要: YAML 帳票テンプレートを読み込んで PDF を生成する汎用サービス。
+// C# は 5 つのプリミティブ（line / paragraph / row / labelTable / dataTable）のみを定義します。
+// すべての帳票レイアウトは YAML テンプレートで組み合わせて定義します。
 
 using System.Text.RegularExpressions;
 using iText.IO.Font;
@@ -55,11 +56,10 @@ public class DocumentPdfService : IDocumentPdfService
             .IgnoreUnmatchedProperties()
             .Build();
 
-        var yaml = System.IO.File.ReadAllText(path);
-        return deserializer.Deserialize<PdfTemplateConfig>(yaml);
+        return deserializer.Deserialize<PdfTemplateConfig>(System.IO.File.ReadAllText(path));
     }
 
-    // ── PDF 生成エントリポイント ───────────────────────────────────────────────
+    // ── PDF 生成エントリポイント ──────────────────────────────────────────────
 
     public byte[] Generate(
         PdfTemplateConfig template,
@@ -86,243 +86,237 @@ public class DocumentPdfService : IDocumentPdfService
         var theme = BuildTheme(template.Theme);
 
         foreach (var section in template.Sections)
-            RenderSection(doc, font, theme, section, header, dataSources);
+            RenderTopLevel(doc, font, theme, section, header, dataSources);
 
         doc.Close();
         return ms.ToArray();
     }
 
-    // ── セクション種別ごとのレンダリング ─────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // トップレベルレンダリング（Document への追加）
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private static void RenderSection(
+    private static void RenderTopLevel(
         Document doc, PdfFont font, ThemeColors t,
         PdfSectionConfig s,
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        switch (s.Type)
+        if (s.Type == "line")
         {
-            case "documentHeader":    RenderDocumentHeader(doc, font, t, s, h); break;
-            case "separator":         RenderSeparator(doc, t, s); break;
-            case "recipientBlock":    RenderRecipientBlock(doc, font, s, h, ds); break;
-            case "infoWithSender":    RenderInfoWithSender(doc, font, t, s, h, ds); break;
-            case "totalBanner":       RenderTotalBanner(doc, font, t, s, h); break;
-            case "itemsTable":        RenderItemsTable(doc, font, t, s, ds); break;
-            case "taxSummary":        RenderTaxSummary(doc, font, t, s, h); break;
-            case "remarksBox":        RenderRemarksBox(doc, font, t, s, h, ds); break;
-            case "contractParties":   RenderContractParties(doc, font, s, h, ds); break;
-            case "contractInfoTable": RenderContractInfoTable(doc, font, t, s, h); break;
-            case "contractSignatures":RenderContractSignatures(doc, font, t, s, h, ds); break;
+            // LineSeparator は ILeafElement のためトップレベル専用
+            var color = ResolveColor(s.Color, t) ?? t.Border;
+            var line = new SolidLine(s.LineWeight);
+            line.SetColor(color);
+            doc.Add(new LineSeparator(line)
+                .SetMarginTop(s.MarginTop ?? 0f)
+                .SetMarginBottom(s.MarginBottom ?? 0f));
+            return;
         }
+
+        var element = BuildElement(font, t, s, h, ds);
+        if (element != null) doc.Add(element);
     }
 
-    // ① documentHeader ────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // 要素ビルド（再帰対応 — セル内からも呼ばれる）
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private static void RenderDocumentHeader(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s, IDictionary<string, object?> h)
+    private static IBlockElement? BuildElement(
+        PdfFont font, ThemeColors t,
+        PdfSectionConfig s,
+        IDictionary<string, object?> h,
+        IDictionary<string, IList<IDictionary<string, object?>>> ds)
+        => s.Type switch
+        {
+            "paragraph"  => BuildParagraph(font, t, s, h, ds),
+            "row"        => BuildRow(font, t, s, h, ds),
+            "labelTable" => BuildLabelTable(font, t, s, h, ds),
+            "dataTable"  => BuildDataTable(font, t, s, ds),
+            _            => null,
+        };
+
+    // ── paragraph ────────────────────────────────────────────────────────────
+
+    private static Paragraph BuildParagraph(
+        PdfFont font, ThemeColors t,
+        PdfSectionConfig s,
+        IDictionary<string, object?> h,
+        IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var lo        = s.Layout;
-        var cols      = lo.Columns      ?? [55f, 45f];
-        var innerCols = lo.InnerColumns ?? [38f, 62f];
-        float pad     = lo.CellPadding  ?? 3f;
-        float fs      = lo.FontSize     ?? 8f;
-        float mb      = lo.MarginBottom ?? 2f;
-        float mt      = lo.MarginTop    ?? 0f;
-
-        var tbl = new Table(UnitValue.CreatePercentArray(cols))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
-            .SetMarginTop(mt).SetMarginBottom(mb);
-
-        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-            .SetVerticalAlignment(VerticalAlignment.MIDDLE)
-            .Add(new Paragraph(s.Title ?? "")
-                .SetFont(font).SetFontSize(s.TitleFontSize)
-                .SetFontColor(t.Primary).SetTextAlignment(TextAlignment.CENTER)));
-
-        var box = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
-        var cb  = new SolidBorder(t.Border, 0.5f);
-
-        void AddBoxRow(string lbl, string val)
-        {
-            box.AddCell(new Cell().SetBorder(cb).SetBackgroundColor(t.Subtle).SetPadding(pad)
-                .Add(new Paragraph(lbl).SetFont(font).SetFontSize(fs)
-                    .SetTextAlignment(TextAlignment.CENTER)));
-            box.AddCell(new Cell().SetBorder(cb).SetPadding(pad)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
-        }
-        if (s.NumberLabel != null)
-            AddBoxRow(s.NumberLabel, GetStr(h, s.NumberField));
-        if (s.DateLabel != null)
-            AddBoxRow(s.DateLabel, GetStr(h, s.DateField));
-
-        // 番号ボックスの左パディングはデフォルト 16pt（カスタム時はカラム比率で代替）
-        float boxPadLeft = lo.Columns == null ? 16f : 0f;
-        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER).SetPaddingLeft(boxPadLeft)
-            .SetVerticalAlignment(VerticalAlignment.BOTTOM).Add(box));
-
-        doc.Add(tbl);
-    }
-
-    // ② separator ─────────────────────────────────────────────────────────────
-
-    private static void RenderSeparator(Document doc, ThemeColors t, PdfSectionConfig s)
-    {
-        var lo = s.Layout;
-        if (s.Style == "double")
-        {
-            var l1 = new SolidLine(2f); l1.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l1)
-                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(2f));
-            var l2 = new SolidLine(0.5f); l2.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l2)
-                .SetMarginTop(0f).SetMarginBottom(lo.MarginBottom ?? 4f));
-        }
-        else if (s.Style == "thick")
-        {
-            var l = new SolidLine(2f); l.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l)
-                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(lo.MarginBottom ?? 6f));
-        }
+        string value;
+        if (s.Template != null)
+            value = InterpolateTemplate(s.Template, h, ds);
+        else if (s.Field != null)
+            value = FormatValue(ResolveField(s.Field, h, ds), s.Format);
         else
+            value = s.Text ?? "";
+
+        var mainText = (s.Prefix ?? "") + value;
+        var textColor = ResolveColor(s.Color, t);
+
+        var p = new Paragraph().SetFont(font);
+        if (s.MarginTop.HasValue)    p.SetMarginTop(s.MarginTop.Value);
+        if (s.MarginBottom.HasValue) p.SetMarginBottom(s.MarginBottom.Value);
+
+        var run = new Text(mainText).SetFontSize(s.FontSize);
+        if (textColor != null) run.SetFontColor(textColor);
+        if (s.Bold) run.SimulateBold();
+        p.Add(run);
+
+        if (s.Suffix != null)
         {
-            var l = new SolidLine(0.5f); l.SetColor(t.Border);
-            doc.Add(new LineSeparator(l)
-                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(lo.MarginBottom ?? 4f));
+            var suffixRun = new Text(s.Suffix).SetFontSize(s.SuffixFontSize ?? s.FontSize);
+            if (textColor != null) suffixRun.SetFontColor(textColor);
+            p.Add(suffixRun);
         }
+
+        if (s.Align != null) p.SetTextAlignment(MapAlign(s.Align));
+
+        return p;
     }
 
-    // ③ recipientBlock ────────────────────────────────────────────────────────
+    // ── row ──────────────────────────────────────────────────────────────────
 
-    private static void RenderRecipientBlock(
-        Document doc, PdfFont font,
+    private static Table BuildRow(
+        PdfFont font, ThemeColors t,
         PdfSectionConfig s,
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var lo  = s.Layout;
-        float fs = lo.FontSize ?? 9f;
-        var name = ResolveField(s.NameSource, h, ds);
+        if (s.Cells.Count == 0)
+            return new Table(1).UseAllAvailableWidth().SetBorder(Border.NO_BORDER);
 
-        doc.Add(new Paragraph()
-            .SetMarginTop(lo.MarginTop ?? 6f).SetMarginBottom(0f)
-            .Add(new Text(name).SetFont(font).SetFontSize(s.NameFontSize))
-            .Add(new Text(s.Suffix ?? "").SetFont(font).SetFontSize(fs)));
-        if (!string.IsNullOrWhiteSpace(s.IntroText))
-            doc.Add(new Paragraph(s.IntroText).SetFont(font).SetFontSize(fs)
-                .SetMarginTop(2f).SetMarginBottom(lo.MarginBottom ?? 6f));
+        // カラム幅を決定（省略時は均等分割）
+        int colCount = s.ColumnWidths?.Length > 0
+            ? s.ColumnWidths.Length
+            : s.Cells.Max(c => c.ColSpan);
+        float[] widths = s.ColumnWidths ?? Enumerable.Repeat(100f / colCount, colCount).ToArray();
+
+        var tbl = new Table(UnitValue.CreatePercentArray(widths))
+            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER);
+        if (s.MarginTop.HasValue)    tbl.SetMarginTop(s.MarginTop.Value);
+        if (s.MarginBottom.HasValue) tbl.SetMarginBottom(s.MarginBottom.Value);
+
+        foreach (var cellCfg in s.Cells)
+        {
+            var cell = new Cell(cellCfg.RowSpan, cellCfg.ColSpan);
+
+            // ボーダー（row セルはデフォルトなし）
+            if (cellCfg.BorderWeight is > 0)
+                cell.SetBorder(new SolidBorder(t.Border, cellCfg.BorderWeight.Value));
+            else
+                cell.SetBorder(Border.NO_BORDER);
+
+            // 背景色
+            var bg = ResolveColor(cellCfg.Background, t);
+            if (bg != null) cell.SetBackgroundColor(bg);
+
+            // パディング
+            if (cellCfg.Padding.HasValue)    cell.SetPadding(cellCfg.Padding.Value);
+            if (cellCfg.PaddingLeft.HasValue)   cell.SetPaddingLeft(cellCfg.PaddingLeft.Value);
+            if (cellCfg.PaddingRight.HasValue)  cell.SetPaddingRight(cellCfg.PaddingRight.Value);
+            if (cellCfg.PaddingTop.HasValue)    cell.SetPaddingTop(cellCfg.PaddingTop.Value);
+            if (cellCfg.PaddingBottom.HasValue) cell.SetPaddingBottom(cellCfg.PaddingBottom.Value);
+
+            // 縦揃え
+            if (cellCfg.VAlign != null) cell.SetVerticalAlignment(MapVAlign(cellCfg.VAlign));
+
+            // 最小高さ
+            if (cellCfg.MinHeight.HasValue) cell.SetMinHeight(cellCfg.MinHeight.Value);
+
+            // 再帰的に子要素をレンダリング
+            foreach (var elem in cellCfg.Elements)
+            {
+                var built = BuildElement(font, t, elem, h, ds);
+                if (built != null) cell.Add(built);
+            }
+
+            tbl.AddCell(cell);
+        }
+
+        return tbl;
     }
 
-    // ④ infoWithSender ────────────────────────────────────────────────────────
+    // ── labelTable ───────────────────────────────────────────────────────────
 
-    private static void RenderInfoWithSender(
-        Document doc, PdfFont font, ThemeColors t,
+    private static Table BuildLabelTable(
+        PdfFont font, ThemeColors t,
         PdfSectionConfig s,
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var lo        = s.Layout;
-        var cols      = lo.Columns      ?? [55f, 45f];
-        var innerCols = lo.InnerColumns ?? [32f, 68f];
-        float pad     = lo.CellPadding  ?? 4f;
-        float fs      = lo.FontSize     ?? 8.5f;
-        float mb      = lo.MarginBottom ?? 8f;
+        float[] widths = s.ColumnWidths ?? [35f, 65f];
+        var tbl = new Table(UnitValue.CreatePercentArray(widths)).UseAllAvailableWidth();
+        if (s.MarginTop.HasValue)    tbl.SetMarginTop(s.MarginTop.Value);
+        if (s.MarginBottom.HasValue) tbl.SetMarginBottom(s.MarginBottom.Value);
 
-        var outer = new Table(UnitValue.CreatePercentArray(cols))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
-            .SetMarginTop(lo.MarginTop ?? 0f).SetMarginBottom(mb);
+        var border     = new SolidBorder(t.Border, s.BorderWeight);
+        var labelBg    = ResolveColor(s.LabelBackground, t) ?? t.Label;
+        var labelColor = s.LabelTextColor != null ? ResolveColor(s.LabelTextColor, t) : null;
+        float pad = s.CellPadding;
+        float fs  = s.FontSize;
 
-        // 左: 情報テーブル
-        var leftTbl = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
-        var b = new SolidBorder(t.Border, 0.5f);
-        foreach (var row in s.InfoRows)
+        foreach (var row in s.Rows)
         {
-            var val = GetStr(h, row.Field);
-            if (row.OmitIfEmpty && string.IsNullOrWhiteSpace(val)) continue;
-            leftTbl.AddCell(new Cell().SetBorder(b)
-                .SetBackgroundColor(t.Label).SetPadding(pad).SetPaddingLeft(pad + 2f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)
-                    .SetFontColor(t.LabelText)));
-            leftTbl.AddCell(new Cell().SetBorder(b).SetPadding(pad).SetPaddingLeft(pad + 2f)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
-        }
-        outer.AddCell(new Cell().SetBorder(Border.NO_BORDER).SetPaddingRight(12f).Add(leftTbl));
+            var rawVal = ResolveField(row.Field, h, ds);
+            if (row.OmitIfEmpty && string.IsNullOrWhiteSpace(rawVal)) continue;
+            if (row.OmitIfZero  && !decimal.TryParse(rawVal, out var dv)) dv = 0m;
+            if (row.OmitIfZero  && decimal.TryParse(rawVal, out var dz) && dz == 0m) continue;
 
-        // 右: 送付元情報
-        var rightP = new Paragraph().SetFont(font).SetFontSize(fs);
-        bool first = true;
-        foreach (var sf in s.SenderFields)
-        {
-            var val = GetStr(h, sf.Field);
-            if (string.IsNullOrWhiteSpace(val)) continue;
-            if (!first) rightP.Add("\n");
-            rightP.Add(new Text((sf.Prefix ?? "") + val).SetFontSize(sf.FontSize));
-            first = false;
-        }
-        outer.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-            .SetVerticalAlignment(VerticalAlignment.TOP).SetPaddingTop(4f)
-            .Add(rightP));
+            // ラベルセル
+            var labelCell = new Cell().SetBorder(border)
+                .SetBackgroundColor(labelBg).SetPadding(pad).SetPaddingLeft(pad + 2f);
+            var labelPar = new Paragraph(row.Label).SetFont(font).SetFontSize(fs);
+            if (labelColor != null) labelPar.SetFontColor(labelColor);
+            tbl.AddCell(labelCell.Add(labelPar));
 
-        doc.Add(outer);
+            // 値セル
+            var displayVal = FormatValue(rawVal, row.Format);
+            var valueCell  = new Cell().SetBorder(border).SetPadding(pad).SetPaddingLeft(pad + 2f)
+                .SetPaddingRight(pad + 2f);
+            var valuePar = new Paragraph(displayVal).SetFont(font).SetFontSize(row.Bold ? fs + 1.5f : fs);
+            if (row.Bold) valuePar.SimulateBold();
+            // 通貨・数値は右揃え
+            if (row.Format is "currency" or "quantity")
+                valuePar.SetTextAlignment(TextAlignment.RIGHT);
+            tbl.AddCell(valueCell.Add(valuePar));
+        }
+
+        return tbl;
     }
 
-    // ⑤ totalBanner ───────────────────────────────────────────────────────────
+    // ── dataTable ────────────────────────────────────────────────────────────
 
-    private static void RenderTotalBanner(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s, IDictionary<string, object?> h)
-    {
-        var lo   = s.Layout;
-        var cols = lo.Columns ?? [30f, 40f, 30f];
-        float fs = lo.FontSize       ?? 10f;
-        float afs = lo.AccentFontSize ?? 11f;
-        float pad = lo.CellPadding   ?? 4f;
-        float mb  = lo.MarginBottom  ?? 4f;
-
-        var total = GetDecimal(h, s.Field);
-        var tbl = new Table(UnitValue.CreatePercentArray(cols))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
-            .SetMarginTop(lo.MarginTop ?? 0f).SetMarginBottom(mb);
-
-        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(fs)));
-        tbl.AddCell(new Cell().SetBorder(new SolidBorder(t.Border, 1f)).SetPadding(pad)
-            .Add(new Paragraph(FormatCurrency(total)).SetFont(font).SetFontSize(afs)
-                .SetTextAlignment(TextAlignment.RIGHT)));
-        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-            .SetVerticalAlignment(VerticalAlignment.MIDDLE)
-            .Add(new Paragraph(s.BannerSuffix ?? "").SetFont(font).SetFontSize(fs - 1f)));
-        doc.Add(tbl);
-    }
-
-    // ⑥ itemsTable ────────────────────────────────────────────────────────────
-
-    private static void RenderItemsTable(
-        Document doc, PdfFont font, ThemeColors t,
+    private static Table BuildDataTable(
+        PdfFont font, ThemeColors t,
         PdfSectionConfig s,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var lo  = s.Layout;
-        float fs  = lo.FontSize    ?? 8.5f;
-        float pad = lo.CellPadding ?? 3f;
-
         var items = new List<IDictionary<string, object?>>();
         if (s.DataSource != null && ds.TryGetValue(s.DataSource, out var src))
             items.AddRange(src);
 
         var widths = s.Columns.Select(c => c.Width).ToArray();
         var tbl = new Table(UnitValue.CreatePercentArray(widths)).UseAllAvailableWidth();
-        if (lo.MarginTop.HasValue) tbl.SetMarginTop(lo.MarginTop.Value);
-        if (lo.MarginBottom.HasValue) tbl.SetMarginBottom(lo.MarginBottom.Value);
-        var b = new SolidBorder(t.Border, 0.5f);
+        if (s.MarginTop.HasValue)    tbl.SetMarginTop(s.MarginTop.Value);
+        if (s.MarginBottom.HasValue) tbl.SetMarginBottom(s.MarginBottom.Value);
+
+        var border     = new SolidBorder(t.Border, s.BorderWeight);
+        var labelBg    = ResolveColor(s.LabelBackground, t) ?? t.Label;
+        var labelColor = s.LabelTextColor != null ? ResolveColor(s.LabelTextColor, t) : null;
+        var oddBg      = ResolveColor(s.OddRowBackground, t) ?? t.OddRow;
+        float pad = s.CellPadding;
+        float fs  = s.FontSize;
 
         // ヘッダー行
         foreach (var col in s.Columns)
         {
-            tbl.AddHeaderCell(new Cell().SetBackgroundColor(t.Label).SetBorder(b)
-                .SetPadding(lo.CellPadding ?? 4f)
-                .Add(new Paragraph(col.Label).SetFont(font).SetFontSize(fs)
-                    .SetFontColor(t.LabelText).SetTextAlignment(MapAlign(col.Align))));
+            var hCell = new Cell().SetBackgroundColor(labelBg).SetBorder(border).SetPadding(pad);
+            var hPar  = new Paragraph(col.Label).SetFont(font).SetFontSize(fs)
+                .SetTextAlignment(MapAlign(col.Align));
+            if (labelColor != null) hPar.SetFontColor(labelColor);
+            tbl.AddHeaderCell(hCell.Add(hPar));
         }
 
         // データ行（最低 minRows 行）
@@ -341,226 +335,66 @@ public class DocumentPdfService : IDocumentPdfService
                 if (col.Field == "_rowNumber")
                     text = hasData ? rowNum.ToString() : "";
                 else
-                    text = FormatItemCell(col, item);
+                {
+                    item.TryGetValue(col.Field, out var raw);
+                    text = FormatValue(raw?.ToString() ?? "", col.Format);
+                }
 
-                var cell = new Cell().SetBorder(b).SetMinHeight(18f)
-                    .SetPadding(pad).SetPaddingLeft(pad + 2f).SetPaddingRight(pad + 2f)
-                    .Add(new Paragraph(text).SetFont(font).SetFontSize(fs)
-                        .SetTextAlignment(MapAlign(col.Align)));
-                if (isOdd && hasData) cell.SetBackgroundColor(t.OddRow);
+                var cell = new Cell().SetBorder(border).SetMinHeight(18f)
+                    .SetPadding(pad).SetPaddingLeft(pad + 2f).SetPaddingRight(pad + 2f);
+                cell.Add(new Paragraph(text).SetFont(font).SetFontSize(fs)
+                    .SetTextAlignment(MapAlign(col.Align)));
+                if (isOdd && hasData) cell.SetBackgroundColor(oddBg);
                 tbl.AddCell(cell);
             }
             if (hasData) rowNum++;
         }
-        doc.Add(tbl);
+
+        return tbl;
     }
 
-    // ⑦ taxSummary ────────────────────────────────────────────────────────────
-
-    private static void RenderTaxSummary(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s, IDictionary<string, object?> h)
-    {
-        var lo        = s.Layout;
-        var cols      = lo.Columns      ?? [55f, 45f];
-        var innerCols = lo.InnerColumns ?? [55f, 45f];
-        float fs      = lo.FontSize     ?? 8.5f;
-        float afs     = lo.AccentFontSize ?? 10f;
-        float pad     = lo.CellPadding  ?? 3f;
-
-        var outer = new Table(UnitValue.CreatePercentArray(cols))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
-            .SetMarginTop(lo.MarginTop ?? 0f);
-        if (lo.MarginBottom.HasValue) outer.SetMarginBottom(lo.MarginBottom.Value);
-        outer.AddCell(new Cell().SetBorder(Border.NO_BORDER));
-
-        var summaryTbl = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
-        var b = new SolidBorder(t.Border, 0.5f);
-
-        foreach (var row in s.TaxRows)
-        {
-            var val = GetDecimal(h, row.Field);
-            if (row.OmitIfZero && val == 0m) continue;
-
-            summaryTbl.AddCell(new Cell().SetBorder(b)
-                .SetBackgroundColor(t.Subtle).SetPadding(pad).SetPaddingLeft(pad + 3f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)));
-
-            var p = new Paragraph(FormatCurrency(val)).SetFont(font)
-                .SetFontSize(row.Bold ? afs : fs)
-                .SetTextAlignment(TextAlignment.RIGHT);
-            summaryTbl.AddCell(new Cell().SetBorder(b)
-                .SetPadding(pad).SetPaddingRight(pad + 3f).Add(p));
-        }
-
-        outer.AddCell(new Cell().SetBorder(Border.NO_BORDER).Add(summaryTbl));
-        doc.Add(outer);
-    }
-
-    // ⑧ remarksBox ────────────────────────────────────────────────────────────
-
-    private static void RenderRemarksBox(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s,
-        IDictionary<string, object?> h,
-        IDictionary<string, IList<IDictionary<string, object?>>> ds)
-    {
-        var lo   = s.Layout;
-        var cols = lo.Columns     ?? [15f, 85f];
-        float fs  = lo.FontSize   ?? 8.5f;
-        float pad = lo.CellPadding ?? 6f;
-        float mt  = lo.MarginTop   ?? 8f;
-
-        var text = string.IsNullOrWhiteSpace(s.RemarksTemplate)
-            ? ""
-            : InterpolateTemplate(s.RemarksTemplate, h, ds);
-
-        var tbl = new Table(UnitValue.CreatePercentArray(cols))
-            .UseAllAvailableWidth().SetMarginTop(mt);
-        if (lo.MarginBottom.HasValue) tbl.SetMarginBottom(lo.MarginBottom.Value);
-        var b = new SolidBorder(t.Border, 0.5f);
-
-        tbl.AddCell(new Cell().SetBorder(b).SetBackgroundColor(t.Label)
-            .SetPadding(pad).SetVerticalAlignment(VerticalAlignment.MIDDLE)
-            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(lo.AccentFontSize ?? 9f)
-                .SetFontColor(t.LabelText).SetTextAlignment(TextAlignment.CENTER)));
-        tbl.AddCell(new Cell().SetBorder(b).SetMinHeight(s.MinHeight).SetPadding(pad)
-            .Add(new Paragraph(text).SetFont(font).SetFontSize(fs)));
-
-        doc.Add(tbl);
-    }
-
-    // ⑨ contractParties ───────────────────────────────────────────────────────
-
-    private static void RenderContractParties(
-        Document doc, PdfFont font,
-        PdfSectionConfig s,
-        IDictionary<string, object?> h,
-        IDictionary<string, IList<IDictionary<string, object?>>> ds)
-    {
-        var lo  = s.Layout;
-        float fs = lo.FontSize ?? 9f;
-        var partyA = ResolveField(s.PartyASource, h, ds);
-        var partyB = GetStr(h, s.PartyBField);
-
-        doc.Add(new Paragraph()
-            .SetMarginTop(lo.MarginTop ?? 8f).SetMarginBottom(2f)
-            .Add(new Text(partyA).SetFont(font).SetFontSize(s.NameFontSize))
-            .Add(new Text(s.PartyALabel ?? "").SetFont(font).SetFontSize(fs)));
-        doc.Add(new Paragraph()
-            .SetMarginBottom(6f)
-            .Add(new Text(string.IsNullOrWhiteSpace(partyB) ? "　" : partyB)
-                .SetFont(font).SetFontSize(fs))
-            .Add(new Text(s.PartyBLabel ?? "").SetFont(font).SetFontSize(fs)));
-
-        if (!string.IsNullOrWhiteSpace(s.BodyTemplate))
-        {
-            var body = InterpolateTemplate(s.BodyTemplate, h, ds);
-            doc.Add(new Paragraph(body).SetFont(font).SetFontSize(fs)
-                .SetMarginBottom(lo.MarginBottom ?? 8f));
-        }
-    }
-
-    // ⑩ contractInfoTable ─────────────────────────────────────────────────────
-
-    private static void RenderContractInfoTable(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s, IDictionary<string, object?> h)
-    {
-        var lo   = s.Layout;
-        var cols = lo.Columns     ?? [28f, 72f];
-        float fs  = lo.FontSize   ?? 8.5f;
-        float pad = lo.CellPadding ?? 4f;
-        float mb  = lo.MarginBottom ?? 12f;
-
-        var tbl = new Table(UnitValue.CreatePercentArray(cols)).UseAllAvailableWidth();
-        if (lo.MarginTop.HasValue) tbl.SetMarginTop(lo.MarginTop.Value);
-        var b = new SolidBorder(t.Border, 0.5f);
-        foreach (var row in s.InfoRows)
-        {
-            var val = GetStr(h, row.Field);
-            if (row.OmitIfEmpty && string.IsNullOrWhiteSpace(val)) continue;
-            tbl.AddCell(new Cell().SetBorder(b).SetBackgroundColor(t.Label)
-                .SetPadding(pad).SetPaddingLeft(pad + 2f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)
-                    .SetFontColor(t.LabelText)));
-            tbl.AddCell(new Cell().SetBorder(b).SetPadding(pad).SetPaddingLeft(pad + 2f)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
-        }
-        doc.Add(tbl.SetMarginBottom(mb));
-    }
-
-    // ⑪ contractSignatures ────────────────────────────────────────────────────
-
-    private static void RenderContractSignatures(
-        Document doc, PdfFont font, ThemeColors t,
-        PdfSectionConfig s,
-        IDictionary<string, object?> h,
-        IDictionary<string, IList<IDictionary<string, object?>>> ds)
-    {
-        int count = s.Signatories.Count;
-        if (count == 0) return;
-
-        var lo        = s.Layout;
-        var innerCols = lo.InnerColumns ?? [35f, 65f];
-        float fs      = lo.FontSize     ?? 8.5f;
-        float afs     = lo.AccentFontSize ?? 10f;
-        float pad     = lo.CellPadding  ?? 4f;
-        float mb      = lo.MarginBottom ?? 8f;
-
-        float[] colWidths = Enumerable.Repeat(100f / count, count).ToArray();
-        var sigTbl = new Table(UnitValue.CreatePercentArray(colWidths))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER);
-        if (lo.MarginTop.HasValue) sigTbl.SetMarginTop(lo.MarginTop.Value);
-        var sb = new SolidBorder(t.Border, 0.5f);
-
-        for (int i = 0; i < count; i++)
-        {
-            var sig = s.Signatories[i];
-            var name      = ResolveField(sig.NameSource, h, ds);
-            var signatory = GetStr(h, sig.SignatoryField);
-            if (string.IsNullOrWhiteSpace(signatory))
-                signatory = sig.SignatoryFallback ?? "";
-
-            var block = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
-            block.AddCell(new Cell(2, 1).SetBorder(sb).SetBackgroundColor(t.Label)
-                .SetPadding(pad).SetVerticalAlignment(VerticalAlignment.MIDDLE)
-                .Add(new Paragraph(sig.Role).SetFont(font).SetFontSize(fs)
-                    .SetFontColor(t.LabelText).SetTextAlignment(TextAlignment.CENTER)));
-            block.AddCell(new Cell().SetBorder(sb).SetPadding(pad)
-                .Add(new Paragraph(name).SetFont(font).SetFontSize(afs)));
-            block.AddCell(new Cell().SetBorder(sb).SetPadding(pad)
-                .Add(new Paragraph(signatory).SetFont(font).SetFontSize(fs)));
-
-            bool isLast = i == count - 1;
-            sigTbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-                .SetPaddingRight(isLast ? 0f : 8f).Add(block));
-        }
-        doc.Add(sigTbl.SetMarginBottom(mb));
-    }
-
-    // ── ユーティリティ ────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // ユーティリティ
+    // ─────────────────────────────────────────────────────────────────────────
 
     private record ThemeColors(
         DeviceRgb Primary, DeviceRgb Label, DeviceRgb LabelText,
         DeviceRgb Subtle, DeviceRgb OddRow, DeviceRgb Border);
 
     private static ThemeColors BuildTheme(PdfThemeConfig cfg) => new(
-        ParseColor(cfg.PrimaryColor),
-        ParseColor(cfg.LabelColor),
-        ParseColor(cfg.LabelTextColor),
-        ParseColor(cfg.SubtleBackground),
-        ParseColor(cfg.OddRowColor),
-        ParseColor(cfg.BorderColor));
+        ParseColor(cfg.PrimaryColor),  ParseColor(cfg.LabelColor),
+        ParseColor(cfg.LabelTextColor), ParseColor(cfg.SubtleBackground),
+        ParseColor(cfg.OddRowColor),   ParseColor(cfg.BorderColor));
+
+    /// <summary>テーマキーワードまたは hex 文字列から色を解決します</summary>
+    private static DeviceRgb? ResolveColor(string? colorRef, ThemeColors t)
+    {
+        if (string.IsNullOrEmpty(colorRef)) return null;
+        return colorRef.ToLowerInvariant() switch
+        {
+            "primary"   => t.Primary,
+            "label"     => t.Label,
+            "labeltext" => t.LabelText,
+            "subtle"    => t.Subtle,
+            "oddrow"    => t.OddRow,
+            "border"    => t.Border,
+            _           => TryParseColor(colorRef),
+        };
+    }
 
     private static DeviceRgb ParseColor(string hex)
     {
         hex = hex.TrimStart('#');
-        if (hex.Length != 6) return new DeviceRgb(0, 0, 0);
         return new DeviceRgb(
             Convert.ToInt32(hex[..2], 16),
             Convert.ToInt32(hex[2..4], 16),
             Convert.ToInt32(hex[4..6], 16));
+    }
+
+    private static DeviceRgb? TryParseColor(string hex)
+    {
+        try { return ParseColor(hex); }
+        catch { return null; }
     }
 
     private static PageSize ParsePageSize(string size, string orientation)
@@ -593,40 +427,37 @@ public class DocumentPdfService : IDocumentPdfService
         _        => TextAlignment.LEFT,
     };
 
-    private static string FormatCurrency(decimal v)
-        => v == 0 ? "¥0" : $"¥{v:N0}";
-
-    private static string FormatItemCell(ItemColumnConfig col, IDictionary<string, object?> item)
+    private static VerticalAlignment MapVAlign(string? vAlign) => vAlign?.ToLowerInvariant() switch
     {
-        item.TryGetValue(col.Field, out var raw);
-        if (raw == null) return "";
+        "middle" => VerticalAlignment.MIDDLE,
+        "bottom" => VerticalAlignment.BOTTOM,
+        _        => VerticalAlignment.TOP,
+    };
 
-        return col.Format switch
+    private static string FormatValue(string? raw, string? format)
+    {
+        if (string.IsNullOrEmpty(raw)) return "";
+        return format?.ToLowerInvariant() switch
         {
-            "currency" => decimal.TryParse(raw.ToString(), out var d) ? FormatCurrency(d) : raw.ToString() ?? "",
-            "quantity" => decimal.TryParse(raw.ToString(), out var q)
+            "currency" => decimal.TryParse(raw, out var d) ? $"¥{d:N0}" : raw,
+            "quantity" => decimal.TryParse(raw, out var q)
                 ? (q == Math.Floor(q) ? ((int)q).ToString() : q.ToString("N1"))
-                : raw.ToString() ?? "",
-            _ => raw.ToString() ?? "",
+                : raw,
+            _ => raw,
         };
     }
 
-    /// <summary>
-    /// "dataSource.Field" または "Field" 形式のフィールド参照を解決します。
-    /// dataSource 形式の場合はデータソースの最初の行を使用します。
-    /// </summary>
     private static string ResolveField(
         string? fieldRef,
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
         if (string.IsNullOrEmpty(fieldRef)) return "";
-
-        var dotIdx = fieldRef.IndexOf('.');
-        if (dotIdx > 0)
+        var dot = fieldRef.IndexOf('.');
+        if (dot > 0)
         {
-            var srcName = fieldRef[..dotIdx];
-            var fieldName = fieldRef[(dotIdx + 1)..];
+            var srcName   = fieldRef[..dot];
+            var fieldName = fieldRef[(dot + 1)..];
             if (ds.TryGetValue(srcName, out var src) && src.Count > 0)
                 return GetStr(src[0], fieldName);
             return "";
@@ -634,36 +465,20 @@ public class DocumentPdfService : IDocumentPdfService
         return GetStr(h, fieldRef);
     }
 
-    /// <summary>
-    /// テンプレート文字列の {FieldName} または {dataSource.Field} を解決します。
-    /// 解決後に空行を除去します。
-    /// </summary>
     private static string InterpolateTemplate(
         string template,
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var result = Regex.Replace(template, @"\{([^}]+)\}", m =>
-            ResolveField(m.Groups[1].Value, h, ds));
-
-        var lines = result.Split('\n')
-            .Select(l => l.Trim())
-            .Where(l => !string.IsNullOrEmpty(l));
-        return string.Join("\n", lines);
+        var result = Regex.Replace(template, @"\{([^}]+)\}",
+            m => ResolveField(m.Groups[1].Value, h, ds));
+        return string.Join("\n", result.Split('\n')
+            .Select(l => l.Trim()).Where(l => !string.IsNullOrEmpty(l)));
     }
 
     private static string GetStr(IDictionary<string, object?>? d, string? key)
     {
         if (d == null || string.IsNullOrEmpty(key)) return "";
         return d.TryGetValue(key, out var v) && v != null ? v.ToString()! : "";
-    }
-
-    private static decimal GetDecimal(IDictionary<string, object?> d, string? key)
-    {
-        if (string.IsNullOrEmpty(key)) return 0m;
-        if (d.TryGetValue(key, out var v) && v != null &&
-            decimal.TryParse(v.ToString(), out var r))
-            return r;
-        return 0m;
     }
 }

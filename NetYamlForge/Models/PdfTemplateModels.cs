@@ -1,5 +1,6 @@
 // ファイル概要: YAML 帳票テンプレート（pdf-templates/*.yaml）の C# モデル定義。
-// C# 側にレイアウト情報を持たず、すべての帳票固有情報は YAML で定義します。
+// C# は 5 つの汎用プリミティブ（line / paragraph / row / labelTable / dataTable）のみを定義し、
+// 帳票固有のレイアウトはすべて YAML で組み合わせて定義します。
 
 namespace NetYamlForge.Models;
 
@@ -9,32 +10,23 @@ public class PdfTemplateConfig
     public string Name { get; set; } = "";
     /// <summary>ファイル名テンプレート。{date:yyyyMMdd} を使用可</summary>
     public string? FilenameTemplate { get; set; }
-    /// <summary>ページサイズ: A4 | A3 | Letter | Legal</summary>
     public string PageSize { get; set; } = "A4";
     /// <summary>portrait | landscape</summary>
     public string Orientation { get; set; } = "portrait";
-    /// <summary>余白 [top, right, bottom, left]（ポイント）省略時は [36,42,36,42]</summary>
+    /// <summary>余白 [top, right, bottom, left]（ポイント）</summary>
     public float[] Margins { get; set; } = [36f, 42f, 36f, 42f];
     public PdfThemeConfig Theme { get; set; } = new();
-    /// <summary>追加データソース（items, customer など）。@FieldName でヘッダー値を参照</summary>
     public Dictionary<string, DataSourceConfig> DataSources { get; set; } = new();
-    /// <summary>ページセクション（上から順に描画）</summary>
     public List<PdfSectionConfig> Sections { get; set; } = [];
 }
 
 public class PdfThemeConfig
 {
-    /// <summary>メインカラー（タイトル・区切り線）hex 6桁</summary>
     public string PrimaryColor { get; set; } = "1c3658";
-    /// <summary>ラベル背景色 hex 6桁</summary>
     public string LabelColor { get; set; } = "78b4cc";
-    /// <summary>ラベルテキスト色 hex 6桁</summary>
     public string LabelTextColor { get; set; } = "ffffff";
-    /// <summary>淡い背景色（番号ボックスなど）hex 6桁</summary>
     public string SubtleBackground { get; set; } = "f0f0f0";
-    /// <summary>明細奇数行背景色 hex 6桁</summary>
     public string OddRowColor { get; set; } = "f8fcfe";
-    /// <summary>罫線色 hex 6桁</summary>
     public string BorderColor { get; set; } = "b4b4b4";
 }
 
@@ -44,94 +36,130 @@ public class DataSourceConfig
     public string Query { get; set; } = "";
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PDF セクション（プリミティブ 5 種類）
+// ─────────────────────────────────────────────────────────────────────────────
+
 /// <summary>
-/// PDF セクション定義。type フィールドで種別を指定します。<br/>
-/// 種別: documentHeader | separator | recipientBlock | infoWithSender |
-///        totalBanner | itemsTable | taxSummary | remarksBox |
-///        contractParties | contractInfoTable | contractSignatures
+/// PDF セクション定義。<br/>
+/// type: <b>line</b> | <b>paragraph</b> | <b>row</b> | <b>labelTable</b> | <b>dataTable</b>
 /// </summary>
 public class PdfSectionConfig
 {
+    // ── 共通 ─────────────────────────────────────────────────────────────────
+    /// <summary>line | paragraph | row | labelTable | dataTable</summary>
     public string Type { get; set; } = "";
+    public float? MarginTop { get; set; }
+    public float? MarginBottom { get; set; }
 
-    // ── レイアウト設定（全セクション共通） ───────────────────────────────────
-    /// <summary>
-    /// セクションのレイアウト設定。カラム幅・マージン・フォントサイズなどを YAML で上書きできます。
-    /// </summary>
-    public PdfLayoutConfig Layout { get; set; } = new();
+    // ── line ─────────────────────────────────────────────────────────────────
+    /// <summary>線の太さ（ポイント）。デフォルト 0.5</summary>
+    public float LineWeight { get; set; } = 0.5f;
 
-    // ── documentHeader ──────────────────────────────────────────────────────
-    public string? Title { get; set; }
-    public float TitleFontSize { get; set; } = 20f;
-    public string? NumberField { get; set; }
-    public string? NumberLabel { get; set; }
-    public string? DateField { get; set; }
-    public string? DateLabel { get; set; }
-
-    // ── separator ───────────────────────────────────────────────────────────
-    /// <summary>thick | double | thin</summary>
-    public string Style { get; set; } = "thin";
-
-    // ── recipientBlock ──────────────────────────────────────────────────────
-    /// <summary>宛名フィールド参照。"dataSource.Field" または "HeaderField"</summary>
-    public string? NameSource { get; set; }
-    /// <summary>宛名の後に付ける敬称（例: "　御中"）</summary>
-    public string? Suffix { get; set; }
-    public float NameFontSize { get; set; } = 13f;
-    public string? IntroText { get; set; }
-
-    // ── infoWithSender ──────────────────────────────────────────────────────
-    public List<InfoRowConfig> InfoRows { get; set; } = [];
-    public List<SenderFieldConfig> SenderFields { get; set; } = [];
-
-    // ── totalBanner ─────────────────────────────────────────────────────────
-    /// <summary>金額フィールド名（ヘッダーから参照）</summary>
+    // ── paragraph ────────────────────────────────────────────────────────────
+    /// <summary>静的テキスト</summary>
+    public string? Text { get; set; }
+    /// <summary>データフィールド参照（"dataSource.Field" または "Field"）</summary>
     public string? Field { get; set; }
-    public string? Label { get; set; }
-    public string? BannerSuffix { get; set; }
+    /// <summary>{Field} プレースホルダーを使ったテキストテンプレート</summary>
+    public string? Template { get; set; }
+    /// <summary>フィールド値の前に付加するテキスト</summary>
+    public string? Prefix { get; set; }
+    /// <summary>フィールド値の後に付加するテキスト</summary>
+    public string? Suffix { get; set; }
+    /// <summary>Suffix のフォントサイズ（省略時は FontSize と同じ）</summary>
+    public float? SuffixFontSize { get; set; }
+    public float FontSize { get; set; } = 9f;
+    public bool Bold { get; set; } = false;
+    /// <summary>テキスト色（hex 6桁 またはテーマキー: primary/label/labelText/subtle/border）</summary>
+    public string? Color { get; set; }
+    /// <summary>left | center | right</summary>
+    public string? Align { get; set; }
+    /// <summary>currency | quantity | text</summary>
+    public string? Format { get; set; }
 
-    // ── itemsTable ──────────────────────────────────────────────────────────
+    // ── row ──────────────────────────────────────────────────────────────────
+    /// <summary>
+    /// カラム幅比率（%）。例: [55, 45] / [30, 40, 30]<br/>
+    /// 省略時はセル数で均等分割。
+    /// </summary>
+    public float[]? ColumnWidths { get; set; }
+    /// <summary>
+    /// セル定義のリスト。複数行にわたる場合は rowSpan/colSpan を使用し、
+    /// iText がカラム数に応じて自動的に行を改めます。
+    /// </summary>
+    public List<PdfCellConfig> Cells { get; set; } = [];
+
+    // ── labelTable ─────────────────────────────────────────────────────────
+    // （labelTable はラベル列と値列を持つ 2 カラムテーブル）
+    /// <summary>ラベルセルの背景色（テーマキーまたは hex）。デフォルト "label"</summary>
+    public string LabelBackground { get; set; } = "label";
+    /// <summary>ラベルセルのテキスト色（テーマキーまたは hex）。null で標準色</summary>
+    public string? LabelTextColor { get; set; } = "labelText";
+    /// <summary>セルのボーダー太さ（ポイント）。デフォルト 0.5</summary>
+    public float BorderWeight { get; set; } = 0.5f;
+    /// <summary>セルの内側パディング（ポイント）。デフォルト 4</summary>
+    public float CellPadding { get; set; } = 4f;
+    public List<LabelValueRowConfig> Rows { get; set; } = [];
+
+    // ── dataTable ─────────────────────────────────────────────────────────
     public string? DataSource { get; set; }
     public int MinRows { get; set; } = 8;
-    public List<ItemColumnConfig> Columns { get; set; } = [];
-
-    // ── taxSummary ──────────────────────────────────────────────────────────
-    public List<TaxRowConfig> TaxRows { get; set; } = [];
-
-    // ── remarksBox ──────────────────────────────────────────────────────────
-    /// <summary>{FieldName} または {dataSource.Field} プレースホルダー使用可</summary>
-    public string? RemarksTemplate { get; set; }
-    public float MinHeight { get; set; } = 50f;
-
-    // ── contractParties（契約書の甲乙宛名） ─────────────────────────────────
-    /// <summary>甲の名称ソース（"dataSource.Field" または "Field"）</summary>
-    public string? PartyASource { get; set; }
-    public string? PartyALabel { get; set; }
-    public string? PartyBField { get; set; }
-    public string? PartyBLabel { get; set; }
-    /// <summary>前文テンプレート。{Field} プレースホルダー使用可</summary>
-    public string? BodyTemplate { get; set; }
-
-    // ── contractSignatures（署名欄） ─────────────────────────────────────────
-    public List<SignatoryConfig> Signatories { get; set; } = [];
+    /// <summary>奇数行の背景色（テーマキーまたは hex）。デフォルト "oddRow"</summary>
+    public string OddRowBackground { get; set; } = "oddRow";
+    public List<DataColumnConfig> Columns { get; set; } = [];
 }
 
-public class InfoRowConfig
+// ─────────────────────────────────────────────────────────────────────────────
+// row 内のセル定義
+// ─────────────────────────────────────────────────────────────────────────────
+
+public class PdfCellConfig
+{
+    /// <summary>背景色（テーマキーまたは hex）</summary>
+    public string? Background { get; set; }
+    /// <summary>
+    /// セルボーダー太さ（ポイント）。<br/>
+    /// null = ボーダーなし（row のデフォルト）、0 より大きい値 = ボーダーあり
+    /// </summary>
+    public float? BorderWeight { get; set; }
+    public float? Padding { get; set; }
+    public float? PaddingLeft { get; set; }
+    public float? PaddingRight { get; set; }
+    public float? PaddingTop { get; set; }
+    public float? PaddingBottom { get; set; }
+    /// <summary>top | middle | bottom</summary>
+    public string? VAlign { get; set; }
+    public float? MinHeight { get; set; }
+    public int ColSpan { get; set; } = 1;
+    public int RowSpan { get; set; } = 1;
+    /// <summary>セル内の要素（再帰的に paragraph / row / labelTable / dataTable を配置可）</summary>
+    public List<PdfSectionConfig> Elements { get; set; } = [];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// labelTable の行定義
+// ─────────────────────────────────────────────────────────────────────────────
+
+public class LabelValueRowConfig
 {
     public string Label { get; set; } = "";
-    /// <summary>ヘッダーフィールド名。OmitIfEmpty=true のとき空なら行を省略</summary>
+    /// <summary>ヘッダーフィールド名または "dataSource.Field"</summary>
     public string Field { get; set; } = "";
+    /// <summary>currency | quantity | text</summary>
+    public string? Format { get; set; }
+    /// <summary>値が 0 の場合に行を省略する</summary>
+    public bool OmitIfZero { get; set; } = false;
+    /// <summary>値が空の場合に行を省略する</summary>
     public bool OmitIfEmpty { get; set; } = false;
+    public bool Bold { get; set; } = false;
 }
 
-public class SenderFieldConfig
-{
-    public string Field { get; set; } = "";
-    public string? Prefix { get; set; }
-    public float FontSize { get; set; } = 8.5f;
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// dataTable の列定義
+// ─────────────────────────────────────────────────────────────────────────────
 
-public class ItemColumnConfig
+public class DataColumnConfig
 {
     /// <summary>フィールド名。"_rowNumber" は自動連番</summary>
     public string Field { get; set; } = "";
@@ -141,60 +169,4 @@ public class ItemColumnConfig
     public string Align { get; set; } = "left";
     /// <summary>currency | quantity | text</summary>
     public string? Format { get; set; }
-}
-
-public class TaxRowConfig
-{
-    public string Label { get; set; } = "";
-    public string Field { get; set; } = "";
-    public bool OmitIfZero { get; set; } = false;
-    public bool Bold { get; set; } = false;
-}
-
-public class SignatoryConfig
-{
-    public string Role { get; set; } = "";
-    /// <summary>会社名・相手名（"dataSource.Field" または "Field"）</summary>
-    public string? NameSource { get; set; }
-    public string? SignatoryField { get; set; }
-    /// <summary>SignatoryField が空のとき使う固定テキスト</summary>
-    public string? SignatoryFallback { get; set; }
-}
-
-/// <summary>
-/// セクションのレイアウト設定。C# のデフォルト値を YAML で上書きします。<br/>
-/// すべてのプロパティはオプションで、省略するとデフォルト値が使われます。
-/// </summary>
-public class PdfLayoutConfig
-{
-    // ── カラム幅 %（セクション主レイアウト） ──────────────────────────────────
-    /// <summary>
-    /// メインカラムの幅比率（%）。<br/>
-    /// 2カラム例: [55, 45]、3カラム例: [30, 40, 30]
-    /// </summary>
-    public float[]? Columns { get; set; }
-
-    /// <summary>
-    /// 内側ネストテーブルのカラム幅比率（%）。<br/>
-    /// documentHeader の番号ボックス、infoWithSender の情報テーブルなどに使用します。
-    /// </summary>
-    public float[]? InnerColumns { get; set; }
-
-    // ── 間隔 ──────────────────────────────────────────────────────────────────
-    /// <summary>セクション上部のマージン（ポイント）</summary>
-    public float? MarginTop { get; set; }
-
-    /// <summary>セクション下部のマージン（ポイント）</summary>
-    public float? MarginBottom { get; set; }
-
-    // ── テーブルスタイル ──────────────────────────────────────────────────────
-    /// <summary>テーブルセルの内側パディング（ポイント）</summary>
-    public float? CellPadding { get; set; }
-
-    // ── フォントサイズ ────────────────────────────────────────────────────────
-    /// <summary>セクション内の基本テキストフォントサイズ（ポイント）</summary>
-    public float? FontSize { get; set; }
-
-    /// <summary>強調テキスト（合計金額など）のフォントサイズ（ポイント）</summary>
-    public float? AccentFontSize { get; set; }
 }
