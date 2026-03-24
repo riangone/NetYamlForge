@@ -1,0 +1,244 @@
+imports: []
+entities:
+  jp_delivery:
+    table: JpDelivery
+    key: Id
+    displayName: 納品書
+    softDelete: false
+    isPublic: true
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpDelivery.CustomerId = cu.Id
+
+    forms:
+      DeliveryNo:
+        type: string
+        required: true
+        label: 納品書番号
+        editable: true
+      CustomerId:
+        type: int
+        required: true
+        label: 取引先
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+          picker: false
+      Title:
+        type: string
+        required: true
+        label: 件名
+        editable: true
+      DeliveryDate:
+        type: date
+        required: true
+        label: 納品日
+        editable: true
+      DeliveryPlace:
+        type: string
+        label: 納品場所
+        editable: true
+      Subtotal:
+        type: decimal
+        label: 小計
+        editable: true
+        precision: 0
+      TaxRate:
+        type: decimal
+        label: 消費税率(%)
+        editable: true
+        precision: 0
+      TaxAmount:
+        type: decimal
+        label: 消費税額
+        editable: true
+        precision: 0
+      Total:
+        type: decimal
+        required: true
+        label: 合計金額
+        editable: true
+        precision: 0
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [draft, delivered, confirmed, returned]
+      PreparedBy:
+        type: string
+        label: 担当者
+        editable: true
+      Remarks:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      DeliveryNo:
+        type: string
+        label: 納品書番号
+        searchable: true
+        sortable: true
+      CustomerName:
+        type: string
+        label: 取引先
+        expression: cu.Name
+        searchable: true
+        sortable: true
+      CustomerId:
+        type: int
+        label: CustomerId
+        hidden: true
+      Title:
+        type: string
+        label: 件名
+        searchable: true
+      DeliveryDate:
+        type: date
+        label: 納品日
+        sortable: true
+      DeliveryPlace:
+        type: string
+        label: 納品場所
+      Total:
+        type: decimal
+        label: 合計金額
+        sortable: true
+        precision: 0
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      PreparedBy:
+        type: string
+        label: 担当者
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft:     "📝 下書き"
+          delivered: "🚚 納品済"
+          confirmed: "✅ 受領確認"
+          returned:  "↩️ 返品"
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - DeliveryNo
+          - CustomerId
+          - Title
+          - DeliveryDate
+          - DeliveryPlace
+          - Status
+          - PreparedBy
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+          - Total
+          - Remarks
+
+    exports:
+      # 納品書 PDF（日本標準様式・グリーン系）
+      delivery_pdf:
+        label: "納品書 PDF"
+        format: pdf
+        filename: "納品書_{date:yyyyMMdd}.pdf"
+        columns:
+          - DeliveryNo
+          - CustomerName
+          - Title
+          - DeliveryDate
+          - DeliveryPlace
+          - Total
+          - Status
+          - PreparedBy
+        pdf:
+          title: "納品書"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#064E3B"
+          oddRowColor: "#ECFDF5"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: DeliveryNo
+              width: 20
+            - key: CustomerName
+              width: 26
+            - key: Title
+              width: 24
+            - key: DeliveryDate
+              width: 14
+              align: center
+            - key: Total
+              width: 16
+              align: right
+
+      # 納品書明細 PDF（カスタムSQL・品目展開）
+      delivery_detail_pdf:
+        label: "納品書明細 PDF"
+        format: pdf
+        filename: "納品書明細_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/jp_delivery_detail.sql
+        pdf:
+          title: "納品書 明細一覧"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#064E3B"
+          oddRowColor: "#ECFDF5"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: DeliveryNo
+              width: 18
+            - key: CustomerName
+              width: 20
+            - key: DeliveryDate
+              width: 13
+              align: center
+            - key: LineNo
+              width: 7
+              align: center
+            - key: ItemName
+              width: 22
+            - key: Unit
+              width: 8
+              align: center
+            - key: Quantity
+              width: 8
+              align: right
+            - key: UnitPrice
+              width: 12
+              align: right
+            - key: Amount
+              width: 12
+              align: right
+
+      delivery_csv:
+        label: "納品書 CSV"
+        format: csv
+        filename: "納品書_{date:yyyyMMdd}.csv"

@@ -34,6 +34,10 @@ layout:
       - invoice
       - customs_declaration
       - customer
+      - jp_estimate
+      - jp_invoice
+      - jp_delivery
+      - jp_contract
     items:
       - label: ダッシュボード
         controller: Dashboard
@@ -43,15 +47,35 @@ layout:
       - label: 報価単
         url: /biz-docs/DynamicEntity/Index?entity=quotation
         icon: 📋
-        section: 文書管理
+        section: 貿易文書
       - label: 請款書
         url: /biz-docs/DynamicEntity/Index?entity=invoice
         icon: 🧾
-        section: 文書管理
+        section: 貿易文書
       - label: 報関単
         url: /biz-docs/DynamicEntity/Index?entity=customs_declaration
         icon: 🚢
-        section: 文書管理
+        section: 貿易文書
+      - label: 見積書
+        url: /biz-docs/DynamicEntity/Index?entity=jp_estimate
+        icon: 📝
+        section: 国内文書
+      - label: 請求書
+        url: /biz-docs/DynamicEntity/Index?entity=jp_invoice
+        icon: 💴
+        section: 国内文書
+      - label: 納品書
+        url: /biz-docs/DynamicEntity/Index?entity=jp_delivery
+        icon: 📦
+        section: 国内文書
+      - label: 契約書台帳
+        url: /biz-docs/DynamicEntity/Index?entity=jp_contract
+        icon: 📜
+        section: 国内文書
+      - label: 取引先
+        url: /biz-docs/DynamicEntity/Index?entity=customer
+        icon: 🏢
+        section: マスタ
 
 home_page:
   icon: "📑"

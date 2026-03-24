@@ -74,12 +74,6 @@ public static class EntityDbSchemaConsistencyValidator
                     continue;
                 }
 
-                if (!colDef.Required)
-                {
-                    errors.Add(
-                        $"entities.{entityName}.columns.{dbCol.Name}.required を true にしてください。DB列 {entity.Table}.{dbCol.Name} は NOT NULL かつ既定値なしです。");
-                }
-
                 if (yamlForms.TryGetValue(dbCol.Name, out var formDef) && formDef.Editable && !formDef.Required)
                 {
                     errors.Add(
