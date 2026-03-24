@@ -1,7 +1,7 @@
 name: biz-docs
 displayName: "Biz Docs"
 description: "報価単・請款書・報関単など各種ビジネス文書の PDF エクスポートデモ"
-version: "1.0.0"
+version: "1.1.0"
 
 aiHints:
   primaryLanguage: zh-CN
@@ -12,6 +12,8 @@ aiHints:
     - "customs_declaration.status: draft / submitted / approved / rejected / cleared"
     - "incoterms: EXW / FOB / CIF / DAP / DDP"
     - "currency: CNY / USD / JPY / EUR"
+    - "pdf_template.status: active / inactive / draft"
+    - "pdf_template_category.isEnabled: true / false"
 
 database:
   type: sqlite
@@ -38,6 +40,8 @@ layout:
       - jp_invoice
       - jp_delivery
       - jp_contract
+      - pdf_template
+      - pdf_template_category
     items:
       - label: ダッシュボード
         controller: Dashboard
@@ -72,6 +76,14 @@ layout:
         url: /biz-docs/DynamicEntity/Index?entity=jp_contract
         icon: 📜
         section: 国内文書
+      - label: PDF テンプレート
+        url: /biz-docs/DynamicEntity/Index?entity=pdf_template
+        icon: 📄
+        section: テンプレート管理
+      - label: テンプレートカテゴリ
+        url: /biz-docs/DynamicEntity/Index?entity=pdf_template_category
+        icon: 📁
+        section: テンプレート管理
       - label: 取引先
         url: /biz-docs/DynamicEntity/Index?entity=customer
         icon: 🏢
@@ -80,4 +92,4 @@ layout:
 home_page:
   icon: "📑"
   tagline: "PDF エクスポートの各種ビジネス文書デモ"
-  tags: [PDF, Business, Documents, Trade]
+  tags: [PDF, Business, Documents, Trade, Templates]

@@ -1,0 +1,218 @@
+imports: []
+entities:
+  pdf_template:
+    table: PdfTemplate
+    key: Id
+    displayName: PDF テンプレート
+    softDelete: false
+    isPublic: true
+
+    joins:
+      - type: left
+        table: PdfTemplateCategory
+        alias: cat
+        on: PdfTemplate.CategoryId = cat.Id
+
+    forms:
+      TemplateNo:
+        type: string
+        required: true
+        label: テンプレート番号
+        editable: true
+      CategoryId:
+        type: int
+        required: true
+        label: カテゴリ
+        editable: true
+        foreignKey:
+          entity: pdf_template_category
+          displayColumn: Name
+          picker: false
+      Name:
+        type: string
+        required: true
+        label: テンプレート名
+        editable: true
+      NameEn:
+        type: string
+        label: 英語名
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+      FileName:
+        type: string
+        required: true
+        label: ファイル名
+        editable: true
+        placeholder: "invoice-standard.pdf"
+      PageSize:
+        type: string
+        required: true
+        label: 用紙サイズ
+        editable: true
+        options: [A4, A3, B4, B5, Letter, Legal]
+      Orientation:
+        type: string
+        required: true
+        label: 向き
+        editable: true
+        options: [portrait, landscape]
+      Theme:
+        type: string
+        label: テーマ
+        editable: true
+        options: [standard, blue, green, orange, gray, snow, bank]
+      HeaderColor:
+        type: string
+        label: ヘッダー色
+        editable: true
+        placeholder: "#1c3658"
+      IsDefault:
+        type: boolean
+        label: デフォルト
+        editable: true
+      SortOrder:
+        type: int
+        label: 表示順
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [active, inactive, draft]
+      Remarks:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      TemplateNo:
+        type: string
+        label: テンプレート番号
+        searchable: true
+        sortable: true
+      Name:
+        type: string
+        label: テンプレート名
+        searchable: true
+        sortable: true
+      NameEn:
+        type: string
+        label: 英語名
+        searchable: true
+      CategoryName:
+        type: string
+        label: カテゴリ
+        expression: cat.Name
+        searchable: true
+        sortable: true
+      CategoryId:
+        type: int
+        label: CategoryId
+        hidden: true
+      FileName:
+        type: string
+        label: ファイル名
+        searchable: true
+      PageSize:
+        type: string
+        label: 用紙サイズ
+        sortable: true
+      Orientation:
+        type: string
+        label: 向き
+        sortable: true
+      Theme:
+        type: string
+        label: テーマ
+        sortable: true
+      IsDefault:
+        type: boolean
+        label: デフォルト
+        sortable: true
+      SortOrder:
+        type: int
+        label: 表示順
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          active:   "✅ 有効"
+          inactive: "⏸️ 無効"
+          draft:    "📝 下書き"
+      CategoryId:
+        type: dropdown
+        label: カテゴリ
+        foreignKey:
+          entity: pdf_template_category
+          displayColumn: Name
+      Theme:
+        type: dropdown
+        label: テーマ
+        options: [standard, blue, green, orange, gray, snow, bank]
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - TemplateNo
+          - Name
+          - NameEn
+          - CategoryId
+          - FileName
+          - PageSize
+          - Orientation
+          - Theme
+          - HeaderColor
+          - IsDefault
+          - SortOrder
+          - Status
+          - Description
+          - Remarks
+
+    exports:
+      template_list_pdf:
+        label: "テンプレート一覧 PDF"
+        format: pdf
+        filename: "PDF テンプレート一覧_{date:yyyyMMdd}.pdf"
+        columns:
+          - TemplateNo
+          - Name
+          - CategoryName
+          - FileName
+          - PageSize
+          - Theme
+          - Status
+        pdf:
+          title: "PDF テンプレート一覧"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#1c3658"
+          oddRowColor: "#f8fcfe"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      template_csv:
+        label: "テンプレート CSV"
+        format: csv
+        filename: "pdf_templates_{date:yyyyMMdd}.csv"

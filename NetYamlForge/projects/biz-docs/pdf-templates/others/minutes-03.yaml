@@ -1,0 +1,263 @@
+# 議事録テンプレート - 03
+# ソースファイル：templates/business/minutes/minutes-03.pdf
+name: minutes-03
+filenameTemplate: "議事録_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [40, 44, 40, 44]
+
+theme:
+  primaryColor: "4A5568"
+  labelColor: "718096"
+  labelTextColor: "ffffff"
+  subtleBackground: "F7FAFC"
+  oddRowColor: "EDF2F7"
+  borderColor: "CBD5E0"
+
+dataSources:
+  attendees:
+    query: "SELECT * FROM MeetingAttendee WHERE MeetingId = @Id ORDER BY Role, Name"
+  decisions:
+    query: "SELECT * FROM MeetingDecision WHERE MeetingId = @Id ORDER BY ItemNo"
+  actionItems:
+    query: "SELECT * FROM MeetingActionItem WHERE MeetingId = @Id ORDER BY Priority, DueDate"
+
+sections:
+  # タイトル
+  - type: paragraph
+    field: Title
+    fontSize: 18
+    align: center
+    bold: true
+    color: primary
+    marginTop: 10
+    marginBottom: 4
+
+  - type: paragraph
+    text: "議 事 録"
+    fontSize: 14
+    align: center
+    color: "666666"
+    marginBottom: 8
+
+  # 基本情報
+  - type: labelTable
+    columnWidths: [25, 25, 25, 25]
+    labelBackground: subtle
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    rows:
+      - label: "開催日時"
+        field: MeetingDate
+        format: "yyyy/MM/dd HH:mm"
+      - label: "開催場所"
+        field: Location
+      - label: "議 事 録"
+        field: Recorder
+      - label: "議 長"
+        field: Chairperson
+
+  # 出席者
+  - type: paragraph
+    text: "【出席者】"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginTop: 8
+    marginBottom: 4
+
+  - type: dataTable
+    dataSource: attendees
+    minRows: 5
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: Name
+        label: "氏名"
+        width: 30
+        align: left
+      - field: Department
+        label: "所属"
+        width: 25
+        align: left
+      - field: Role
+        label: "役割"
+        width: 15
+        align: center
+      - field: AttendanceType
+        label: "出席"
+        width: 15
+        align: center
+      - field: Comments
+        label: "備考"
+        width: 15
+        align: left
+
+  # 議事次第
+  - type: paragraph
+    text: "【議事次第】"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginTop: 8
+    marginBottom: 4
+
+  - type: dataTable
+    dataSource: decisions
+    minRows: 5
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: ItemNo
+        label: "No."
+        width: 6
+        align: center
+      - field: Topic
+        label: "議題"
+        width: 40
+        align: left
+      - field: Content
+        label: "議事内容"
+        width: 40
+        align: left
+      - field: Decision
+        label: "決定事項"
+        width: 14
+        align: left
+
+  # 決定事項
+  - type: paragraph
+    text: "【決定事項】"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginTop: 8
+    marginBottom: 4
+
+  - type: row
+    columnWidths: [100]
+    cells:
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 60
+        elements:
+          - type: paragraph
+            field: Decisions
+            fontSize: 9
+            lineHeight: 1.6
+
+  # 課題・アクションアイテム
+  - type: paragraph
+    text: "【課題・アクションアイテム】"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginTop: 8
+    marginBottom: 4
+
+  - type: dataTable
+    dataSource: actionItems
+    minRows: 4
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: ItemNo
+        label: "No."
+        width: 6
+        align: center
+      - field: Description
+        label: "内容"
+        width: 35
+        align: left
+      - field: Owner
+        label: "担当者"
+        width: 15
+        align: center
+      - field: DueDate
+        label: "期限"
+        width: 12
+        align: center
+      - field: Priority
+        label: "優先度"
+        width: 10
+        align: center
+      - field: Status
+        label: "ステータス"
+        width: 12
+        align: center
+      - field: Remarks
+        label: "備考"
+        width: 10
+        align: left
+
+  # 次回会議
+  - type: paragraph
+    text: "【次回会議】"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginTop: 8
+    marginBottom: 4
+
+  - type: labelTable
+    columnWidths: [25, 75]
+    labelBackground: subtle
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    rows:
+      - label: "日時"
+        field: NextMeetingDate
+      - label: "場所"
+        field: NextMeetingLocation
+      - label: "議題（予定）"
+        field: NextMeetingAgenda
+
+  # 承認欄
+  - type: row
+    columnWidths: [50, 50]
+    marginTop: 12
+    cells:
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            text: "承認："
+            fontSize: 9
+            marginBottom: 20
+          - type: line
+            lineWeight: 0.5
+            width: 100
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            text: "作成："
+            fontSize: 9
+            marginBottom: 20
+          - type: paragraph
+            field: Recorder
+            fontSize: 9
+
+  # 脚注
+  - type: paragraph
+    text: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    fontSize: 7
+    color: "999999"
+    marginTop: 12
+
+  - type: paragraph
+    field: Remarks
+    fontSize: 7.5
+    color: "666666"

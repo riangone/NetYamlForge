@@ -1,0 +1,270 @@
+# 請求書テンプレート - Bank (銀行振込込)
+# ソースファイル：templates/business/invoices/invoice-bank.pdf
+name: invoice-bank
+filenameTemplate: "請求書（銀行）_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "0F4C75"
+  labelColor: "5B8FA8"
+  labelTextColor: "ffffff"
+  subtleBackground: "E8F4FD"
+  oddRowColor: "F0F8FF"
+  borderColor: "A0C4E0"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name, Address, Phone, Email, TaxId FROM Customer WHERE Id = @CustomerId"
+  items:
+    query: "SELECT * FROM JpInvoiceItem WHERE InvoiceId = @Id ORDER BY LineNo"
+
+sections:
+  # ヘッダー
+  - type: row
+    columnWidths: [60, 40]
+    marginBottom: 3
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "請 求 書"
+            fontSize: 22
+            color: primary
+            align: center
+            bold: true
+      - vAlign: bottom
+        paddingLeft: 12
+        elements:
+          - type: labelTable
+            columnWidths: [35, 65]
+            labelBackground: subtle
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "請求書番号"
+                field: InvoiceNo
+              - label: "発行日"
+                field: IssueDate
+              - label: "T 番号"
+                field: RegistrationNo
+
+  # 区切り線
+  - type: line
+    lineWeight: 2.5
+    color: primary
+    marginBottom: 6
+
+  # 宛先ブロック
+  - type: row
+    columnWidths: [70, 30]
+    marginBottom: 4
+    cells:
+      - vAlign: top
+        elements:
+          - type: paragraph
+            field: "customer.Name"
+            suffix: " 御中"
+            fontSize: 14
+            suffixFontSize: 9
+          - type: paragraph
+            field: "customer.Address"
+            fontSize: 9
+            marginTop: 2
+      - vAlign: top
+        elements:
+          - type: labelTable
+            columnWidths: [40, 60]
+            labelBackground: primary
+            labelTextColor: labelText
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 7.5
+            rows:
+              - label: "TEL"
+                field: "customer.Phone"
+              - label: "EMAIL"
+                field: "customer.Email"
+
+  - type: paragraph
+    text: "平素は格別のお引き立てをいただき、厚く御礼申し上げます。\n下記のとおりご請求申し上げますので、ご査収のほどよろしくお願い申し上げます。"
+    fontSize: 8
+    marginBottom: 6
+    lineHeight: 1.4
+
+  # 基本情報テーブル
+  - type: labelTable
+    columnWidths: [25, 25, 25, 25]
+    labelBackground: subtle
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    rows:
+      - label: "請求日"
+        field: IssueDate
+      - label: "支払期日"
+        field: DueDate
+      - label: "件名"
+        field: Title
+      - label: "担当者"
+        field: PreparedBy
+
+  # 合計金額強調ボックス
+  - type: row
+    columnWidths: [50, 50]
+    marginTop: 6
+    marginBottom: 6
+    cells:
+      - elements: []
+      - elements:
+          - type: row
+            columnWidths: [50, 50]
+            cells:
+              - background: primary
+                padding: 6
+                vAlign: middle
+                borderWeight: 1
+                borderColor: primary
+                elements:
+                  - type: paragraph
+                    text: "請求金額"
+                    fontSize: 10
+                    color: labelText
+                    align: center
+                    bold: true
+              - background: subtle
+                padding: 6
+                vAlign: middle
+                borderWeight: 1
+                borderColor: primary
+                elements:
+                  - type: paragraph
+                    field: Total
+                    format: "¥#,##0"
+                    fontSize: 14
+                    align: center
+                    bold: true
+                    color: primary
+
+  # 明細テーブル
+  - type: dataTable
+    dataSource: items
+    minRows: 10
+    borderWeight: 0.75
+    cellPadding: 4
+    fontSize: 8.5
+    labelBackground: primary
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: _rowNumber
+        label: "No."
+        width: 6
+        align: center
+      - field: ItemName
+        label: "品 目"
+        width: 32
+        align: left
+      - field: Spec
+        label: "仕様・規格"
+        width: 16
+        align: left
+      - field: Unit
+        label: "単位"
+        width: 7
+        align: center
+      - field: Quantity
+        label: "数量"
+        width: 8
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単 価"
+        width: 13
+        align: right
+        format: currency
+      - field: Amount
+        label: "金 額"
+        width: 18
+        align: right
+        format: currency
+
+  # 税額・合計テーブル
+  - type: labelTable
+    columnWidths: [55, 15, 30]
+    labelBackground: subtle
+    borderWeight: 0.5
+    cellPadding: 4
+    fontSize: 8.5
+    marginTop: 2
+    rows:
+      - label: "税抜合計"
+        field: Subtotal
+        format: "¥#,##0"
+      - label: "消費税 10%"
+        field: TaxAmount10
+        format: "¥#,##0"
+        omitIfZero: true
+      - label: "消費税 8%"
+        field: TaxAmount8
+        format: "¥#,##0"
+        omitIfZero: true
+      - label: "請求合計"
+        field: Total
+        format: "¥#,##0"
+        bold: true
+
+  # 振込先情報
+  - type: row
+    columnWidths: [20, 80]
+    marginTop: 10
+    cells:
+      - background: primary
+        padding: 8
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "振込先"
+            fontSize: 10
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.75
+        padding: 6
+        elements:
+          - type: labelTable
+            columnWidths: [25, 75]
+            labelBackground: null
+            borderWeight: 0.25
+            cellPadding: 2
+            fontSize: 8.5
+            rows:
+              - label: "銀行名"
+                field: BankName
+              - label: "支店名"
+                field: BranchName
+              - label: "口座種別"
+                field: AccountType
+              - label: "口座番号"
+                field: AccountNo
+              - label: "口座名義"
+                field: AccountHolder
+
+  # 注記
+  - type: paragraph
+    text: "※振込手数料はお客様負担にてお願い申し上げます。"
+    fontSize: 7
+    marginTop: 4
+    color: "666666"
+
+  - type: paragraph
+    field: TransferFeeNote
+    fontSize: 7
+    color: "666666"
+
+  - type: paragraph
+    field: Remarks
+    fontSize: 8
+    marginTop: 4
