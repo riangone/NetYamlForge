@@ -247,6 +247,15 @@
                                        href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
                                         Detail
                                     </a>
+                                    @if (Model.Entity is "jp_delivery" or "jp_invoice" or "jp_estimate" or "jp_contract")
+                                    {
+                                        <a class="btn btn-xs btn-accent btn-outline"
+                                           href="@Url.Action("JpDocumentPdf", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
+                                           target="_blank"
+                                           title="帳票 PDF">
+                                            📄 帳票
+                                        </a>
+                                    }
                                     <button class="btn btn-xs btn-outline"
                                             hx-get="@Url.Action("EditForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["mode"] = "modal" })"
                                             hx-target="#modal-form-content"

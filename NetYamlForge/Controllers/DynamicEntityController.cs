@@ -36,6 +36,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly IProjectActionRegistry _actionRegistry;
     private readonly IDbConnection _db;
     private readonly IPdfExportService _pdfExport;
+    private readonly IJpDocumentPdfService _jpDocPdf;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -57,6 +58,7 @@ public class DynamicEntityController : BaseProjectController
         IProjectActionRegistry actionRegistry,
         IDbConnection db,
         IPdfExportService pdfExport,
+        IJpDocumentPdfService jpDocPdf,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -77,6 +79,7 @@ public class DynamicEntityController : BaseProjectController
         _actionRegistry = actionRegistry;
         _db = db;
         _pdfExport = pdfExport;
+        _jpDocPdf = jpDocPdf;
         _logger = logger;
     }
 
@@ -307,6 +310,80 @@ public class DynamicEntityController : BaseProjectController
         var breadcrumbs = _navigationService.BuildBreadcrumbChain(returnUrl);
         var vm = new DynamicDetailViewModel(entity, meta, item, fkData, breadcrumbs, returnUrl);
         return View("DetailPage", vm);
+    }
+
+    /// <summary>
+    /// 日本向けビジネス文書（見積書・請求書・納品書・契約書）の帳票 PDF を生成します。
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> JpDocumentPdf(string entity, string? id = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "";
+
+        // 対応する文書種別を決定
+        var docType = entity switch
+        {
+            "jp_delivery" => "delivery",
+            "jp_invoice"  => "invoice",
+            "jp_estimate" => "estimate",
+            "jp_contract" => "contract",
+            _ => null
+        };
+        if (docType == null) return NotFound("JpDocumentPdf is not supported for entity: " + entity);
+
+        var meta     = _meta.Get(entity);
+        var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
+        var record   = await _repo.GetByIdAsync(entity, keyValue ?? "");
+        if (record == null) return NotFound();
+
+        // IDictionary<string, object?> に変換
+        var header = ((IDictionary<string, object>)record)
+            .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
+
+        // 取引先情報をロード
+        Dictionary<string, object?>? customer = null;
+        if (header.TryGetValue("CustomerId", out var cidRaw) && cidRaw != null)
+        {
+            var cuRow = await _db.QueryFirstOrDefaultAsync<dynamic>(
+                "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @id",
+                new { id = cidRaw });
+            if (cuRow != null)
+                customer = ((IDictionary<string, object>)cuRow)
+                    .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
+        }
+
+        // 明細行をロード
+        var itemsSql = entity switch
+        {
+            "jp_delivery" => "SELECT * FROM JpDeliveryItem WHERE DeliveryId = @id ORDER BY LineNo",
+            "jp_invoice"  => "SELECT * FROM JpInvoiceItem  WHERE InvoiceId  = @id ORDER BY LineNo",
+            "jp_estimate" => "SELECT * FROM JpEstimateItem WHERE EstimateId = @id ORDER BY LineNo",
+            _             => null
+        };
+        var items = new List<IDictionary<string, object?>>();
+        if (itemsSql != null)
+        {
+            var rows = await _db.QueryAsync<dynamic>(itemsSql, new { id = keyValue });
+            items = rows.Select(r =>
+                (IDictionary<string, object?>)((IDictionary<string, object>)r)
+                    .ToDictionary(kv => kv.Key, kv => (object?)kv.Value))
+                .ToList();
+        }
+
+        var projectDir = _projectScope.Current?.ProjectDir;
+        var ctx = new JpDocumentContext(docType, header, customer, items, projectDir);
+        var bytes = _jpDocPdf.Generate(ctx);
+
+        var filename = docType switch
+        {
+            "delivery" => $"納品書_{DateTime.Now:yyyyMMdd}.pdf",
+            "invoice"  => $"請求書_{DateTime.Now:yyyyMMdd}.pdf",
+            "estimate" => $"見積書_{DateTime.Now:yyyyMMdd}.pdf",
+            "contract" => $"契約書_{DateTime.Now:yyyyMMdd}.pdf",
+            _          => $"document_{DateTime.Now:yyyyMMdd}.pdf"
+        };
+
+        return File(bytes, "application/pdf", filename);
     }
 
     public async Task<IActionResult> EditPage(string entity, string? id = null, string? returnUrl = null)
