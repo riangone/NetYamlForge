@@ -25,16 +25,30 @@ sections:
     numberField: ContractNo
     dateLabel: "締結日"
     dateField: SignedDate
+    layout:
+      columns: [55, 45]
+      innerColumns: [38, 62]
+      cellPadding: 3
+      fontSize: 8
+      marginBottom: 2
 
   - type: separator
     style: thick
+    layout:
+      marginTop: 4
+      marginBottom: 6
 
   - type: contractParties
     partyASource: "customer.Name"
     partyALabel: "　（甲）"
     partyBField: OurSignatory
     partyBLabel: "　（乙）"
+    nameFontSize: 13
     bodyTemplate: "「{Title}」について、甲乙は以下のとおり合意し、本契約を締結する。"
+    layout:
+      marginTop: 8
+      marginBottom: 8
+      fontSize: 9
 
   - type: contractInfoTable
     infoRows:
@@ -58,6 +72,11 @@ sections:
       - label: "準拠法"
         field: GoverningLaw
         omitIfEmpty: true
+    layout:
+      columns: [28, 72]         # ラベル | 値
+      cellPadding: 4
+      fontSize: 8.5
+      marginBottom: 12
 
   - type: contractSignatures
     signatories:
@@ -67,8 +86,20 @@ sections:
       - role: "乙"
         nameSource: OurSignatory
         signatoryFallback: "代表取締役"
+    layout:
+      innerColumns: [35, 65]    # 署名ブロック内: ロール | 名前+署名者
+      cellPadding: 4
+      fontSize: 8.5
+      accentFontSize: 10        # 名前フォントサイズ
+      marginBottom: 8
 
   - type: remarksBox
     label: "備　考"
     minHeight: 50
     remarksTemplate: "{Remarks}"
+    layout:
+      columns: [15, 85]
+      cellPadding: 6
+      fontSize: 8.5
+      accentFontSize: 9
+      marginTop: 8

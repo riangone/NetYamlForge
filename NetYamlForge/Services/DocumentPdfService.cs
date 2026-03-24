@@ -103,7 +103,7 @@ public class DocumentPdfService : IDocumentPdfService
         switch (s.Type)
         {
             case "documentHeader":    RenderDocumentHeader(doc, font, t, s, h); break;
-            case "separator":         RenderSeparator(doc, t, s.Style); break;
+            case "separator":         RenderSeparator(doc, t, s); break;
             case "recipientBlock":    RenderRecipientBlock(doc, font, s, h, ds); break;
             case "infoWithSender":    RenderInfoWithSender(doc, font, t, s, h, ds); break;
             case "totalBanner":       RenderTotalBanner(doc, font, t, s, h); break;
@@ -122,8 +122,17 @@ public class DocumentPdfService : IDocumentPdfService
         Document doc, PdfFont font, ThemeColors t,
         PdfSectionConfig s, IDictionary<string, object?> h)
     {
-        var tbl = new Table(UnitValue.CreatePercentArray([55f, 45f]))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER).SetMarginBottom(2f);
+        var lo        = s.Layout;
+        var cols      = lo.Columns      ?? [55f, 45f];
+        var innerCols = lo.InnerColumns ?? [38f, 62f];
+        float pad     = lo.CellPadding  ?? 3f;
+        float fs      = lo.FontSize     ?? 8f;
+        float mb      = lo.MarginBottom ?? 2f;
+        float mt      = lo.MarginTop    ?? 0f;
+
+        var tbl = new Table(UnitValue.CreatePercentArray(cols))
+            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
+            .SetMarginTop(mt).SetMarginBottom(mb);
 
         tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
             .SetVerticalAlignment(VerticalAlignment.MIDDLE)
@@ -131,23 +140,25 @@ public class DocumentPdfService : IDocumentPdfService
                 .SetFont(font).SetFontSize(s.TitleFontSize)
                 .SetFontColor(t.Primary).SetTextAlignment(TextAlignment.CENTER)));
 
-        var box = new Table(UnitValue.CreatePercentArray([38f, 62f])).UseAllAvailableWidth();
-        var cb = new SolidBorder(t.Border, 0.5f);
+        var box = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
+        var cb  = new SolidBorder(t.Border, 0.5f);
 
         void AddBoxRow(string lbl, string val)
         {
-            box.AddCell(new Cell().SetBorder(cb).SetBackgroundColor(t.Subtle).SetPadding(3f)
-                .Add(new Paragraph(lbl).SetFont(font).SetFontSize(8f)
+            box.AddCell(new Cell().SetBorder(cb).SetBackgroundColor(t.Subtle).SetPadding(pad)
+                .Add(new Paragraph(lbl).SetFont(font).SetFontSize(fs)
                     .SetTextAlignment(TextAlignment.CENTER)));
-            box.AddCell(new Cell().SetBorder(cb).SetPadding(3f)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(8f)));
+            box.AddCell(new Cell().SetBorder(cb).SetPadding(pad)
+                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
         }
         if (s.NumberLabel != null)
             AddBoxRow(s.NumberLabel, GetStr(h, s.NumberField));
         if (s.DateLabel != null)
             AddBoxRow(s.DateLabel, GetStr(h, s.DateField));
 
-        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER).SetPaddingLeft(16f)
+        // 番号ボックスの左パディングはデフォルト 16pt（カスタム時はカラム比率で代替）
+        float boxPadLeft = lo.Columns == null ? 16f : 0f;
+        tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER).SetPaddingLeft(boxPadLeft)
             .SetVerticalAlignment(VerticalAlignment.BOTTOM).Add(box));
 
         doc.Add(tbl);
@@ -155,24 +166,29 @@ public class DocumentPdfService : IDocumentPdfService
 
     // ② separator ─────────────────────────────────────────────────────────────
 
-    private static void RenderSeparator(Document doc, ThemeColors t, string style)
+    private static void RenderSeparator(Document doc, ThemeColors t, PdfSectionConfig s)
     {
-        if (style == "double")
+        var lo = s.Layout;
+        if (s.Style == "double")
         {
             var l1 = new SolidLine(2f); l1.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l1).SetMarginTop(4f).SetMarginBottom(2f));
+            doc.Add(new LineSeparator(l1)
+                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(2f));
             var l2 = new SolidLine(0.5f); l2.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l2).SetMarginTop(0f).SetMarginBottom(4f));
+            doc.Add(new LineSeparator(l2)
+                .SetMarginTop(0f).SetMarginBottom(lo.MarginBottom ?? 4f));
         }
-        else if (style == "thick")
+        else if (s.Style == "thick")
         {
             var l = new SolidLine(2f); l.SetColor(t.Primary);
-            doc.Add(new LineSeparator(l).SetMarginTop(4f).SetMarginBottom(6f));
+            doc.Add(new LineSeparator(l)
+                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(lo.MarginBottom ?? 6f));
         }
         else
         {
             var l = new SolidLine(0.5f); l.SetColor(t.Border);
-            doc.Add(new LineSeparator(l).SetMarginTop(4f).SetMarginBottom(4f));
+            doc.Add(new LineSeparator(l)
+                .SetMarginTop(lo.MarginTop ?? 4f).SetMarginBottom(lo.MarginBottom ?? 4f));
         }
     }
 
@@ -184,14 +200,17 @@ public class DocumentPdfService : IDocumentPdfService
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
+        var lo  = s.Layout;
+        float fs = lo.FontSize ?? 9f;
         var name = ResolveField(s.NameSource, h, ds);
+
         doc.Add(new Paragraph()
-            .SetMarginTop(6f).SetMarginBottom(0f)
+            .SetMarginTop(lo.MarginTop ?? 6f).SetMarginBottom(0f)
             .Add(new Text(name).SetFont(font).SetFontSize(s.NameFontSize))
-            .Add(new Text(s.Suffix ?? "").SetFont(font).SetFontSize(9f)));
+            .Add(new Text(s.Suffix ?? "").SetFont(font).SetFontSize(fs)));
         if (!string.IsNullOrWhiteSpace(s.IntroText))
-            doc.Add(new Paragraph(s.IntroText).SetFont(font).SetFontSize(9f)
-                .SetMarginTop(2f).SetMarginBottom(6f));
+            doc.Add(new Paragraph(s.IntroText).SetFont(font).SetFontSize(fs)
+                .SetMarginTop(2f).SetMarginBottom(lo.MarginBottom ?? 6f));
     }
 
     // ④ infoWithSender ────────────────────────────────────────────────────────
@@ -202,35 +221,42 @@ public class DocumentPdfService : IDocumentPdfService
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
-        var outer = new Table(UnitValue.CreatePercentArray([55f, 45f]))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER).SetMarginBottom(8f);
+        var lo        = s.Layout;
+        var cols      = lo.Columns      ?? [55f, 45f];
+        var innerCols = lo.InnerColumns ?? [32f, 68f];
+        float pad     = lo.CellPadding  ?? 4f;
+        float fs      = lo.FontSize     ?? 8.5f;
+        float mb      = lo.MarginBottom ?? 8f;
+
+        var outer = new Table(UnitValue.CreatePercentArray(cols))
+            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
+            .SetMarginTop(lo.MarginTop ?? 0f).SetMarginBottom(mb);
 
         // 左: 情報テーブル
-        var leftTbl = new Table(UnitValue.CreatePercentArray([32f, 68f])).UseAllAvailableWidth();
+        var leftTbl = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
         var b = new SolidBorder(t.Border, 0.5f);
         foreach (var row in s.InfoRows)
         {
             var val = GetStr(h, row.Field);
             if (row.OmitIfEmpty && string.IsNullOrWhiteSpace(val)) continue;
             leftTbl.AddCell(new Cell().SetBorder(b)
-                .SetBackgroundColor(t.Label).SetPadding(4f).SetPaddingLeft(6f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(8.5f)
+                .SetBackgroundColor(t.Label).SetPadding(pad).SetPaddingLeft(pad + 2f)
+                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)
                     .SetFontColor(t.LabelText)));
-            leftTbl.AddCell(new Cell().SetBorder(b).SetPadding(4f).SetPaddingLeft(6f)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(8.5f)));
+            leftTbl.AddCell(new Cell().SetBorder(b).SetPadding(pad).SetPaddingLeft(pad + 2f)
+                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
         }
         outer.AddCell(new Cell().SetBorder(Border.NO_BORDER).SetPaddingRight(12f).Add(leftTbl));
 
         // 右: 送付元情報
-        var rightP = new Paragraph().SetFont(font).SetFontSize(8.5f);
+        var rightP = new Paragraph().SetFont(font).SetFontSize(fs);
         bool first = true;
         foreach (var sf in s.SenderFields)
         {
             var val = GetStr(h, sf.Field);
             if (string.IsNullOrWhiteSpace(val)) continue;
             if (!first) rightP.Add("\n");
-            var text = new Text((sf.Prefix ?? "") + val).SetFontSize(sf.FontSize);
-            rightP.Add(text);
+            rightP.Add(new Text((sf.Prefix ?? "") + val).SetFontSize(sf.FontSize));
             first = false;
         }
         outer.AddCell(new Cell().SetBorder(Border.NO_BORDER)
@@ -246,18 +272,26 @@ public class DocumentPdfService : IDocumentPdfService
         Document doc, PdfFont font, ThemeColors t,
         PdfSectionConfig s, IDictionary<string, object?> h)
     {
+        var lo   = s.Layout;
+        var cols = lo.Columns ?? [30f, 40f, 30f];
+        float fs = lo.FontSize       ?? 10f;
+        float afs = lo.AccentFontSize ?? 11f;
+        float pad = lo.CellPadding   ?? 4f;
+        float mb  = lo.MarginBottom  ?? 4f;
+
         var total = GetDecimal(h, s.Field);
-        var tbl = new Table(UnitValue.CreatePercentArray([30f, 40f, 30f]))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER).SetMarginBottom(4f);
+        var tbl = new Table(UnitValue.CreatePercentArray(cols))
+            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
+            .SetMarginTop(lo.MarginTop ?? 0f).SetMarginBottom(mb);
 
         tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
-            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(10f)));
-        tbl.AddCell(new Cell().SetBorder(new SolidBorder(t.Border, 1f)).SetPadding(4f)
-            .Add(new Paragraph(FormatCurrency(total)).SetFont(font).SetFontSize(11f)
+            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(fs)));
+        tbl.AddCell(new Cell().SetBorder(new SolidBorder(t.Border, 1f)).SetPadding(pad)
+            .Add(new Paragraph(FormatCurrency(total)).SetFont(font).SetFontSize(afs)
                 .SetTextAlignment(TextAlignment.RIGHT)));
         tbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
             .SetVerticalAlignment(VerticalAlignment.MIDDLE)
-            .Add(new Paragraph(s.BannerSuffix ?? "").SetFont(font).SetFontSize(9f)));
+            .Add(new Paragraph(s.BannerSuffix ?? "").SetFont(font).SetFontSize(fs - 1f)));
         doc.Add(tbl);
     }
 
@@ -268,19 +302,26 @@ public class DocumentPdfService : IDocumentPdfService
         PdfSectionConfig s,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
+        var lo  = s.Layout;
+        float fs  = lo.FontSize    ?? 8.5f;
+        float pad = lo.CellPadding ?? 3f;
+
         var items = new List<IDictionary<string, object?>>();
         if (s.DataSource != null && ds.TryGetValue(s.DataSource, out var src))
             items.AddRange(src);
 
         var widths = s.Columns.Select(c => c.Width).ToArray();
         var tbl = new Table(UnitValue.CreatePercentArray(widths)).UseAllAvailableWidth();
+        if (lo.MarginTop.HasValue) tbl.SetMarginTop(lo.MarginTop.Value);
+        if (lo.MarginBottom.HasValue) tbl.SetMarginBottom(lo.MarginBottom.Value);
         var b = new SolidBorder(t.Border, 0.5f);
 
         // ヘッダー行
         foreach (var col in s.Columns)
         {
-            tbl.AddHeaderCell(new Cell().SetBackgroundColor(t.Label).SetBorder(b).SetPadding(4f)
-                .Add(new Paragraph(col.Label).SetFont(font).SetFontSize(8.5f)
+            tbl.AddHeaderCell(new Cell().SetBackgroundColor(t.Label).SetBorder(b)
+                .SetPadding(lo.CellPadding ?? 4f)
+                .Add(new Paragraph(col.Label).SetFont(font).SetFontSize(fs)
                     .SetFontColor(t.LabelText).SetTextAlignment(MapAlign(col.Align))));
         }
 
@@ -292,7 +333,7 @@ public class DocumentPdfService : IDocumentPdfService
         int rowNum = 1;
         foreach (var item in displayItems)
         {
-            bool isOdd = rowNum % 2 == 1;
+            bool isOdd   = rowNum % 2 == 1;
             bool hasData = item.Count > 0;
             foreach (var col in s.Columns)
             {
@@ -303,8 +344,8 @@ public class DocumentPdfService : IDocumentPdfService
                     text = FormatItemCell(col, item);
 
                 var cell = new Cell().SetBorder(b).SetMinHeight(18f)
-                    .SetPadding(3f).SetPaddingLeft(5f).SetPaddingRight(5f)
-                    .Add(new Paragraph(text).SetFont(font).SetFontSize(8.5f)
+                    .SetPadding(pad).SetPaddingLeft(pad + 2f).SetPaddingRight(pad + 2f)
+                    .Add(new Paragraph(text).SetFont(font).SetFontSize(fs)
                         .SetTextAlignment(MapAlign(col.Align)));
                 if (isOdd && hasData) cell.SetBackgroundColor(t.OddRow);
                 tbl.AddCell(cell);
@@ -320,11 +361,20 @@ public class DocumentPdfService : IDocumentPdfService
         Document doc, PdfFont font, ThemeColors t,
         PdfSectionConfig s, IDictionary<string, object?> h)
     {
-        var outer = new Table(UnitValue.CreatePercentArray([55f, 45f]))
-            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER).SetMarginTop(0f);
+        var lo        = s.Layout;
+        var cols      = lo.Columns      ?? [55f, 45f];
+        var innerCols = lo.InnerColumns ?? [55f, 45f];
+        float fs      = lo.FontSize     ?? 8.5f;
+        float afs     = lo.AccentFontSize ?? 10f;
+        float pad     = lo.CellPadding  ?? 3f;
+
+        var outer = new Table(UnitValue.CreatePercentArray(cols))
+            .UseAllAvailableWidth().SetBorder(Border.NO_BORDER)
+            .SetMarginTop(lo.MarginTop ?? 0f);
+        if (lo.MarginBottom.HasValue) outer.SetMarginBottom(lo.MarginBottom.Value);
         outer.AddCell(new Cell().SetBorder(Border.NO_BORDER));
 
-        var summaryTbl = new Table(UnitValue.CreatePercentArray([55f, 45f])).UseAllAvailableWidth();
+        var summaryTbl = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
         var b = new SolidBorder(t.Border, 0.5f);
 
         foreach (var row in s.TaxRows)
@@ -333,13 +383,14 @@ public class DocumentPdfService : IDocumentPdfService
             if (row.OmitIfZero && val == 0m) continue;
 
             summaryTbl.AddCell(new Cell().SetBorder(b)
-                .SetBackgroundColor(t.Subtle).SetPadding(3f).SetPaddingLeft(6f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(8.5f)));
+                .SetBackgroundColor(t.Subtle).SetPadding(pad).SetPaddingLeft(pad + 3f)
+                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)));
 
             var p = new Paragraph(FormatCurrency(val)).SetFont(font)
-                .SetFontSize(row.Bold ? 10f : 8.5f)
+                .SetFontSize(row.Bold ? afs : fs)
                 .SetTextAlignment(TextAlignment.RIGHT);
-            summaryTbl.AddCell(new Cell().SetBorder(b).SetPadding(3f).SetPaddingRight(6f).Add(p));
+            summaryTbl.AddCell(new Cell().SetBorder(b)
+                .SetPadding(pad).SetPaddingRight(pad + 3f).Add(p));
         }
 
         outer.AddCell(new Cell().SetBorder(Border.NO_BORDER).Add(summaryTbl));
@@ -354,20 +405,27 @@ public class DocumentPdfService : IDocumentPdfService
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
+        var lo   = s.Layout;
+        var cols = lo.Columns     ?? [15f, 85f];
+        float fs  = lo.FontSize   ?? 8.5f;
+        float pad = lo.CellPadding ?? 6f;
+        float mt  = lo.MarginTop   ?? 8f;
+
         var text = string.IsNullOrWhiteSpace(s.RemarksTemplate)
             ? ""
             : InterpolateTemplate(s.RemarksTemplate, h, ds);
 
-        var tbl = new Table(UnitValue.CreatePercentArray([15f, 85f]))
-            .UseAllAvailableWidth().SetMarginTop(8f);
+        var tbl = new Table(UnitValue.CreatePercentArray(cols))
+            .UseAllAvailableWidth().SetMarginTop(mt);
+        if (lo.MarginBottom.HasValue) tbl.SetMarginBottom(lo.MarginBottom.Value);
         var b = new SolidBorder(t.Border, 0.5f);
 
         tbl.AddCell(new Cell().SetBorder(b).SetBackgroundColor(t.Label)
-            .SetPadding(6f).SetVerticalAlignment(VerticalAlignment.MIDDLE)
-            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(9f)
+            .SetPadding(pad).SetVerticalAlignment(VerticalAlignment.MIDDLE)
+            .Add(new Paragraph(s.Label ?? "").SetFont(font).SetFontSize(lo.AccentFontSize ?? 9f)
                 .SetFontColor(t.LabelText).SetTextAlignment(TextAlignment.CENTER)));
-        tbl.AddCell(new Cell().SetBorder(b).SetMinHeight(s.MinHeight).SetPadding(6f)
-            .Add(new Paragraph(text).SetFont(font).SetFontSize(8.5f)));
+        tbl.AddCell(new Cell().SetBorder(b).SetMinHeight(s.MinHeight).SetPadding(pad)
+            .Add(new Paragraph(text).SetFont(font).SetFontSize(fs)));
 
         doc.Add(tbl);
     }
@@ -380,23 +438,26 @@ public class DocumentPdfService : IDocumentPdfService
         IDictionary<string, object?> h,
         IDictionary<string, IList<IDictionary<string, object?>>> ds)
     {
+        var lo  = s.Layout;
+        float fs = lo.FontSize ?? 9f;
         var partyA = ResolveField(s.PartyASource, h, ds);
         var partyB = GetStr(h, s.PartyBField);
 
         doc.Add(new Paragraph()
-            .SetMarginTop(8f).SetMarginBottom(2f)
-            .Add(new Text(partyA).SetFont(font).SetFontSize(13f))
-            .Add(new Text(s.PartyALabel ?? "").SetFont(font).SetFontSize(9f)));
+            .SetMarginTop(lo.MarginTop ?? 8f).SetMarginBottom(2f)
+            .Add(new Text(partyA).SetFont(font).SetFontSize(s.NameFontSize))
+            .Add(new Text(s.PartyALabel ?? "").SetFont(font).SetFontSize(fs)));
         doc.Add(new Paragraph()
             .SetMarginBottom(6f)
             .Add(new Text(string.IsNullOrWhiteSpace(partyB) ? "　" : partyB)
-                .SetFont(font).SetFontSize(9f))
-            .Add(new Text(s.PartyBLabel ?? "").SetFont(font).SetFontSize(9f)));
+                .SetFont(font).SetFontSize(fs))
+            .Add(new Text(s.PartyBLabel ?? "").SetFont(font).SetFontSize(fs)));
 
         if (!string.IsNullOrWhiteSpace(s.BodyTemplate))
         {
             var body = InterpolateTemplate(s.BodyTemplate, h, ds);
-            doc.Add(new Paragraph(body).SetFont(font).SetFontSize(9f).SetMarginBottom(8f));
+            doc.Add(new Paragraph(body).SetFont(font).SetFontSize(fs)
+                .SetMarginBottom(lo.MarginBottom ?? 8f));
         }
     }
 
@@ -406,20 +467,27 @@ public class DocumentPdfService : IDocumentPdfService
         Document doc, PdfFont font, ThemeColors t,
         PdfSectionConfig s, IDictionary<string, object?> h)
     {
-        var tbl = new Table(UnitValue.CreatePercentArray([28f, 72f])).UseAllAvailableWidth();
+        var lo   = s.Layout;
+        var cols = lo.Columns     ?? [28f, 72f];
+        float fs  = lo.FontSize   ?? 8.5f;
+        float pad = lo.CellPadding ?? 4f;
+        float mb  = lo.MarginBottom ?? 12f;
+
+        var tbl = new Table(UnitValue.CreatePercentArray(cols)).UseAllAvailableWidth();
+        if (lo.MarginTop.HasValue) tbl.SetMarginTop(lo.MarginTop.Value);
         var b = new SolidBorder(t.Border, 0.5f);
         foreach (var row in s.InfoRows)
         {
             var val = GetStr(h, row.Field);
             if (row.OmitIfEmpty && string.IsNullOrWhiteSpace(val)) continue;
             tbl.AddCell(new Cell().SetBorder(b).SetBackgroundColor(t.Label)
-                .SetPadding(4f).SetPaddingLeft(6f)
-                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(8.5f)
+                .SetPadding(pad).SetPaddingLeft(pad + 2f)
+                .Add(new Paragraph(row.Label).SetFont(font).SetFontSize(fs)
                     .SetFontColor(t.LabelText)));
-            tbl.AddCell(new Cell().SetBorder(b).SetPadding(4f).SetPaddingLeft(6f)
-                .Add(new Paragraph(val).SetFont(font).SetFontSize(8.5f)));
+            tbl.AddCell(new Cell().SetBorder(b).SetPadding(pad).SetPaddingLeft(pad + 2f)
+                .Add(new Paragraph(val).SetFont(font).SetFontSize(fs)));
         }
-        doc.Add(tbl.SetMarginBottom(12f));
+        doc.Add(tbl.SetMarginBottom(mb));
     }
 
     // ⑪ contractSignatures ────────────────────────────────────────────────────
@@ -433,34 +501,42 @@ public class DocumentPdfService : IDocumentPdfService
         int count = s.Signatories.Count;
         if (count == 0) return;
 
+        var lo        = s.Layout;
+        var innerCols = lo.InnerColumns ?? [35f, 65f];
+        float fs      = lo.FontSize     ?? 8.5f;
+        float afs     = lo.AccentFontSize ?? 10f;
+        float pad     = lo.CellPadding  ?? 4f;
+        float mb      = lo.MarginBottom ?? 8f;
+
         float[] colWidths = Enumerable.Repeat(100f / count, count).ToArray();
         var sigTbl = new Table(UnitValue.CreatePercentArray(colWidths))
             .UseAllAvailableWidth().SetBorder(Border.NO_BORDER);
+        if (lo.MarginTop.HasValue) sigTbl.SetMarginTop(lo.MarginTop.Value);
         var sb = new SolidBorder(t.Border, 0.5f);
 
         for (int i = 0; i < count; i++)
         {
             var sig = s.Signatories[i];
-            var name = ResolveField(sig.NameSource, h, ds);
+            var name      = ResolveField(sig.NameSource, h, ds);
             var signatory = GetStr(h, sig.SignatoryField);
             if (string.IsNullOrWhiteSpace(signatory))
                 signatory = sig.SignatoryFallback ?? "";
 
-            var block = new Table(UnitValue.CreatePercentArray([35f, 65f])).UseAllAvailableWidth();
+            var block = new Table(UnitValue.CreatePercentArray(innerCols)).UseAllAvailableWidth();
             block.AddCell(new Cell(2, 1).SetBorder(sb).SetBackgroundColor(t.Label)
-                .SetPadding(4f).SetVerticalAlignment(VerticalAlignment.MIDDLE)
-                .Add(new Paragraph(sig.Role).SetFont(font).SetFontSize(8.5f)
+                .SetPadding(pad).SetVerticalAlignment(VerticalAlignment.MIDDLE)
+                .Add(new Paragraph(sig.Role).SetFont(font).SetFontSize(fs)
                     .SetFontColor(t.LabelText).SetTextAlignment(TextAlignment.CENTER)));
-            block.AddCell(new Cell().SetBorder(sb).SetPadding(4f)
-                .Add(new Paragraph(name).SetFont(font).SetFontSize(10f)));
-            block.AddCell(new Cell().SetBorder(sb).SetPadding(4f)
-                .Add(new Paragraph(signatory).SetFont(font).SetFontSize(8.5f)));
+            block.AddCell(new Cell().SetBorder(sb).SetPadding(pad)
+                .Add(new Paragraph(name).SetFont(font).SetFontSize(afs)));
+            block.AddCell(new Cell().SetBorder(sb).SetPadding(pad)
+                .Add(new Paragraph(signatory).SetFont(font).SetFontSize(fs)));
 
             bool isLast = i == count - 1;
             sigTbl.AddCell(new Cell().SetBorder(Border.NO_BORDER)
                 .SetPaddingRight(isLast ? 0f : 8f).Add(block));
         }
-        doc.Add(sigTbl.SetMarginBottom(8f));
+        doc.Add(sigTbl.SetMarginBottom(mb));
     }
 
     // ── ユーティリティ ────────────────────────────────────────────────────────

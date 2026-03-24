@@ -27,15 +27,28 @@ sections:
     numberField: DeliveryNo
     dateLabel: "納品日"
     dateField: DeliveryDate
+    layout:
+      columns: [55, 45]
+      innerColumns: [38, 62]
+      cellPadding: 3
+      fontSize: 8
+      marginBottom: 2
 
   - type: separator
     style: thick
+    layout:
+      marginTop: 4
+      marginBottom: 6
 
   - type: recipientBlock
     nameSource: "customer.Name"
     suffix: "　御中"
     nameFontSize: 13
     introText: "下記のとおり、納品いたします。"
+    layout:
+      marginTop: 6
+      marginBottom: 6
+      fontSize: 9
 
   - type: infoWithSender
     infoRows:
@@ -54,14 +67,29 @@ sections:
         fontSize: 10
       - field: PreparedBy
         prefix: "担当："
+    layout:
+      columns: [55, 45]
+      innerColumns: [32, 68]
+      cellPadding: 4
+      fontSize: 8.5
+      marginBottom: 8
 
   - type: totalBanner
     label: "合　計　金　額"
     field: Total
     bannerSuffix: "（税込）"
+    layout:
+      columns: [30, 40, 30]
+      cellPadding: 4
+      fontSize: 10
+      accentFontSize: 11
+      marginBottom: 4
 
   - type: separator
     style: double
+    layout:
+      marginTop: 4
+      marginBottom: 4
 
   - type: itemsTable
     dataSource: items
@@ -98,6 +126,9 @@ sections:
         width: 16
         align: right
         format: currency
+    layout:
+      cellPadding: 3
+      fontSize: 8.5
 
   - type: taxSummary
     taxRows:
@@ -112,6 +143,12 @@ sections:
       - label: "合　計　金　額"
         field: Total
         bold: true
+    layout:
+      columns: [55, 45]
+      innerColumns: [55, 45]
+      cellPadding: 3
+      fontSize: 8.5
+      accentFontSize: 10
 
   - type: remarksBox
     label: "備　考"
@@ -120,3 +157,9 @@ sections:
       検収期間：納品後 {InspectionPeriodDays} 営業日以内にご連絡ください。
       受領確認日：{ReceiptConfirmedDate}
       {Remarks}
+    layout:
+      columns: [15, 85]
+      cellPadding: 6
+      fontSize: 8.5
+      accentFontSize: 9
+      marginTop: 8

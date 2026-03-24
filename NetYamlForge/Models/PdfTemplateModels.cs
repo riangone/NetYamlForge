@@ -48,11 +48,17 @@ public class DataSourceConfig
 /// PDF セクション定義。type フィールドで種別を指定します。<br/>
 /// 種別: documentHeader | separator | recipientBlock | infoWithSender |
 ///        totalBanner | itemsTable | taxSummary | remarksBox |
-///        contractParties | contractSignatures
+///        contractParties | contractInfoTable | contractSignatures
 /// </summary>
 public class PdfSectionConfig
 {
     public string Type { get; set; } = "";
+
+    // ── レイアウト設定（全セクション共通） ───────────────────────────────────
+    /// <summary>
+    /// セクションのレイアウト設定。カラム幅・マージン・フォントサイズなどを YAML で上書きできます。
+    /// </summary>
+    public PdfLayoutConfig Layout { get; set; } = new();
 
     // ── documentHeader ──────────────────────────────────────────────────────
     public string? Title { get; set; }
@@ -153,4 +159,42 @@ public class SignatoryConfig
     public string? SignatoryField { get; set; }
     /// <summary>SignatoryField が空のとき使う固定テキスト</summary>
     public string? SignatoryFallback { get; set; }
+}
+
+/// <summary>
+/// セクションのレイアウト設定。C# のデフォルト値を YAML で上書きします。<br/>
+/// すべてのプロパティはオプションで、省略するとデフォルト値が使われます。
+/// </summary>
+public class PdfLayoutConfig
+{
+    // ── カラム幅 %（セクション主レイアウト） ──────────────────────────────────
+    /// <summary>
+    /// メインカラムの幅比率（%）。<br/>
+    /// 2カラム例: [55, 45]、3カラム例: [30, 40, 30]
+    /// </summary>
+    public float[]? Columns { get; set; }
+
+    /// <summary>
+    /// 内側ネストテーブルのカラム幅比率（%）。<br/>
+    /// documentHeader の番号ボックス、infoWithSender の情報テーブルなどに使用します。
+    /// </summary>
+    public float[]? InnerColumns { get; set; }
+
+    // ── 間隔 ──────────────────────────────────────────────────────────────────
+    /// <summary>セクション上部のマージン（ポイント）</summary>
+    public float? MarginTop { get; set; }
+
+    /// <summary>セクション下部のマージン（ポイント）</summary>
+    public float? MarginBottom { get; set; }
+
+    // ── テーブルスタイル ──────────────────────────────────────────────────────
+    /// <summary>テーブルセルの内側パディング（ポイント）</summary>
+    public float? CellPadding { get; set; }
+
+    // ── フォントサイズ ────────────────────────────────────────────────────────
+    /// <summary>セクション内の基本テキストフォントサイズ（ポイント）</summary>
+    public float? FontSize { get; set; }
+
+    /// <summary>強調テキスト（合計金額など）のフォントサイズ（ポイント）</summary>
+    public float? AccentFontSize { get; set; }
 }
