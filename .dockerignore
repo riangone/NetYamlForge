@@ -1,0 +1,39 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Logs and runtime data
+logs/
+*.log
+data/
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Test results
+TestResults/
+coverage/
+
+# Git
+.git/
+.gitignore
+
+# Claude memory
+memory/
+QWEN.md
+
+# Docker itself (avoid recursive context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+DOCKER.md

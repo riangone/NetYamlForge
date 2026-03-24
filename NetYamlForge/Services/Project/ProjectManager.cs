@@ -110,8 +110,20 @@ public class ProjectManager
             }
         }
 
-        var dbType = (config.Database.Type ?? "sqlite").ToLowerInvariant();
-        var connectionString = BuildConnectionString(config, projectDir, dbType);
+        // 環境変数によるDB設定の上書き（Docker / CI 対応）
+        // 形式: NYFORGE_{PROJECT_NAME}_DB_TYPE / NYFORGE_{PROJECT_NAME}_CONNECTION_STRING
+        // 例:   NYFORGE_TODO_APP_DB_TYPE=postgresql
+        var envPrefix = $"NYFORGE_{config.Name.Replace("-", "_").ToUpperInvariant()}";
+        var envDbType = Environment.GetEnvironmentVariable($"{envPrefix}_DB_TYPE");
+        var envConnStr = Environment.GetEnvironmentVariable($"{envPrefix}_CONNECTION_STRING");
+
+        var dbType = string.IsNullOrWhiteSpace(envDbType)
+            ? (config.Database.Type ?? "sqlite").ToLowerInvariant()
+            : envDbType.Trim().ToLowerInvariant();
+
+        var connectionString = string.IsNullOrWhiteSpace(envConnStr)
+            ? BuildConnectionString(config, projectDir, dbType)
+            : envConnStr.Trim();
 
         var entityMetadata = new EntityMetadataProvider(projectDir, dbType);
         var dashboardConfig = new DashboardConfigProvider(projectDir);

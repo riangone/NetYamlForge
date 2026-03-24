@@ -1,0 +1,195 @@
+# ─────────────────────────────────────────────────────────
+# NetYamlForge — Docker Compose
+#
+# Profiles (choose one):
+#   (none)      SQLite  — docker compose up
+#   postgres    PostgreSQL — docker compose --profile postgres up
+#   mysql       MySQL      — docker compose --profile mysql up
+#   sqlserver   SQL Server — docker compose --profile sqlserver up
+#
+# Quick start:
+#   cp .env.example .env          # SQLite (default)
+#   docker compose up -d
+#
+# See DOCKER.md for full instructions.
+# ─────────────────────────────────────────────────────────
+
+x-app-base: &app-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: netyamlforge:latest
+  ports:
+    - "${APP_PORT:-8080}:8080"
+  environment:
+    ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+    TZ: ${TZ:-UTC}
+    # Per-project DB overrides (empty = use SQLite from project.yaml)
+    NYFORGE_TODO_APP_DB_TYPE: ${NYFORGE_TODO_APP_DB_TYPE:-sqlite}
+    NYFORGE_TODO_APP_CONNECTION_STRING: ${NYFORGE_TODO_APP_CONNECTION_STRING:-}
+    NYFORGE_UI_SHOWCASE_DB_TYPE: ${NYFORGE_UI_SHOWCASE_DB_TYPE:-sqlite}
+    NYFORGE_UI_SHOWCASE_CONNECTION_STRING: ${NYFORGE_UI_SHOWCASE_CONNECTION_STRING:-}
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 30s
+
+services:
+
+  # ───────────────────────────────────────────────────────
+  # App — SQLite (default, no profile required)
+  # ───────────────────────────────────────────────────────
+  app:
+    <<: *app-base
+    volumes:
+      - todo_app_sqlite:/app/projects/todo-app/database
+      - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_logs:/app/logs
+
+  # ───────────────────────────────────────────────────────
+  # PostgreSQL stack  (--profile postgres)
+  # ───────────────────────────────────────────────────────
+  app-postgres:
+    <<: *app-base
+    profiles: [postgres]
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      TZ: ${TZ:-UTC}
+      NYFORGE_TODO_APP_DB_TYPE: postgresql
+      NYFORGE_TODO_APP_CONNECTION_STRING: >-
+        Host=postgres;Port=5432;Database=${POSTGRES_DB:-todo_app};
+        Username=${POSTGRES_USER:-nyforge};Password=${POSTGRES_PASSWORD:-nyforge_pass}
+      NYFORGE_UI_SHOWCASE_DB_TYPE: sqlite
+      NYFORGE_UI_SHOWCASE_CONNECTION_STRING: ""
+    volumes:
+      - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: [postgres]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-todo_app}
+      POSTGRES_USER: ${POSTGRES_USER:-nyforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nyforge_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nyforge} -d ${POSTGRES_DB:-todo_app}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ───────────────────────────────────────────────────────
+  # MySQL stack  (--profile mysql)
+  # ───────────────────────────────────────────────────────
+  app-mysql:
+    <<: *app-base
+    profiles: [mysql]
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      TZ: ${TZ:-UTC}
+      NYFORGE_TODO_APP_DB_TYPE: mysql
+      NYFORGE_TODO_APP_CONNECTION_STRING: >-
+        Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-todo_app};
+        Uid=${MYSQL_USER:-nyforge};Pwd=${MYSQL_PASSWORD:-nyforge_pass};
+        CharSet=utf8mb4;AllowUserVariables=true
+      NYFORGE_UI_SHOWCASE_DB_TYPE: sqlite
+      NYFORGE_UI_SHOWCASE_CONNECTION_STRING: ""
+    volumes:
+      - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    profiles: [mysql]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-todo_app}
+      MYSQL_USER: ${MYSQL_USER:-nyforge}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-nyforge_pass}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "${MYSQL_USER:-nyforge}", "-p${MYSQL_PASSWORD:-nyforge_pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ───────────────────────────────────────────────────────
+  # SQL Server stack  (--profile sqlserver)
+  # ───────────────────────────────────────────────────────
+  app-sqlserver:
+    <<: *app-base
+    profiles: [sqlserver]
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      TZ: ${TZ:-UTC}
+      NYFORGE_TODO_APP_DB_TYPE: sqlserver
+      NYFORGE_TODO_APP_CONNECTION_STRING: >-
+        Server=sqlserver,1433;Database=${MSSQL_DB:-todo_app};
+        User Id=${MSSQL_USER:-nyforge};Password=${MSSQL_PASSWORD:-Nyforge@123};
+        TrustServerCertificate=True
+      NYFORGE_UI_SHOWCASE_DB_TYPE: sqlite
+      NYFORGE_UI_SHOWCASE_CONNECTION_STRING: ""
+    volumes:
+      - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_logs:/app/logs
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles: [sqlserver]
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Sa@Nyforge123}
+      MSSQL_PID: Express
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./docker/sqlserver/init:/docker-sqlserver-init:ro
+    healthcheck:
+      test: ["CMD-SHELL",
+        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${MSSQL_SA_PASSWORD:-Sa@Nyforge123}' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    # SQL Server doesn't have a built-in init script mechanism;
+    # we use an init container to run the setup script.
+    command: >
+      bash -c "
+        /opt/mssql/bin/sqlservr &
+        sleep 20 &&
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${MSSQL_SA_PASSWORD:-Sa@Nyforge123}' -C
+          -Q \"CREATE DATABASE [${MSSQL_DB:-todo_app}]; CREATE LOGIN [${MSSQL_USER:-nyforge}]
+               WITH PASSWORD='${MSSQL_PASSWORD:-Nyforge@123}';
+               USE [${MSSQL_DB:-todo_app}];
+               CREATE USER [${MSSQL_USER:-nyforge}] FOR LOGIN [${MSSQL_USER:-nyforge}];
+               EXEC sp_addrolemember 'db_owner', '${MSSQL_USER:-nyforge}';\" 2>/dev/null || true &&
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${MSSQL_SA_PASSWORD:-Sa@Nyforge123}'
+          -C -d '${MSSQL_DB:-todo_app}' -i /docker-sqlserver-init/01_schema.sql &&
+        wait
+      "
+
+volumes:
+  todo_app_sqlite:
+  ui_showcase_sqlite:
+  postgres_data:
+  mysql_data:
+  sqlserver_data:
+  app_logs:

@@ -30,6 +30,13 @@ public class ProjectSpecificInitializer
             return;
         }
 
+        // todo-app: プロジェクト固有テーブルを init_seed.sql から初期化
+        if (string.Equals(projectName, "todo-app", StringComparison.OrdinalIgnoreCase))
+        {
+            await InitializeTodoAppAsync(conn as SqliteConnection, logger);
+            return;
+        }
+
         // attendance-ops: 承認カラム追加
         if (!string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
         {
@@ -38,6 +45,44 @@ public class ProjectSpecificInitializer
 
         await EnsureColumnAsync(conn as SqliteConnection, "LeaveRequest", "ApprovedAt", "TEXT", logger);
         await EnsureColumnAsync(conn as SqliteConnection, "OvertimeRequest", "ApprovedAt", "TEXT", logger);
+    }
+
+    /// <summary>
+    /// todo-app プロジェクトの初期化（テーブルが存在しない場合 init_seed.sql を実行）
+    /// </summary>
+    private static async Task InitializeTodoAppAsync(SqliteConnection? conn, ILogger logger)
+    {
+        if (conn == null) return;
+
+        // Category テーブルの存在確認
+        var tables = await conn.QueryAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='Category'");
+        if (tables.Any())
+        {
+            logger.LogInformation("todo-app のテーブルは既に存在します。初期化をスキップします。");
+            return;
+        }
+
+        // init_seed.sql を検索（複数のパスを試行）
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "projects", "todo-app", "database", "init_seed.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "projects", "todo-app", "database", "init_seed.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", "todo-app", "database", "init_seed.sql"),
+        };
+
+        var initSqlPath = candidates.FirstOrDefault(File.Exists);
+        if (initSqlPath == null)
+        {
+            logger.LogWarning("todo-app の初期化スクリプトが見つかりません。検索パス: {Paths}",
+                string.Join(", ", candidates));
+            return;
+        }
+
+        logger.LogInformation("todo-app の初期化スクリプトを実行します: {Path}", initSqlPath);
+        var sql = await File.ReadAllTextAsync(initSqlPath);
+        await conn.ExecuteAsync(sql);
+        logger.LogInformation("todo-app の初期化が完了しました。");
     }
 
     /// <summary>
