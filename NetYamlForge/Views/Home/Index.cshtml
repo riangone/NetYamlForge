@@ -7,71 +7,47 @@
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
     var isAdmin = User?.IsInRole("Admin") ?? false;
     string T(string? key, string fallback) => NetYamlForge.Models.I18nText.Resolve(null, fallback, key);
-    var heroHighlights = (hero.HighlightKeys != null && hero.HighlightKeys.Count > 0)
-        ? hero.HighlightKeys.Select((k, i) =>
-        {
-            var fallback = i < hero.Highlights.Count ? hero.Highlights[i] : k;
-            return T(k, fallback);
-        }).ToList()
-        : hero.Highlights.ToList();
 }
 
-<div class="space-y-12">
-    @* ===== Hero Section ===== *@
+<div class="space-y-8">
+    @* ===== Hero ===== *@
     <section class="relative overflow-hidden rounded-2xl border border-base-300 bg-base-100">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-60"></div>
-        <div class="relative p-8 md:p-16">
-            <div class="max-w-4xl space-y-6">
+        <div class="relative p-8 md:p-12">
+            <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200 border border-base-300 text-sm font-medium">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                     @T(hero.EyebrowKey, hero.Eyebrow)
                 </div>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight tracking-tight">
                     @T(hero.TitleKey, hero.Title)
                 </h1>
-                <p class="text-lg md:text-xl text-base-content/70 max-w-2xl leading-relaxed">
+                <p class="text-base text-base-content/70 max-w-xl leading-relaxed">
                     @T(hero.DescriptionKey, hero.Description)
                 </p>
-                @if (heroHighlights.Count > 0)
-                {
-                    <div class="flex flex-wrap gap-2 pt-2">
-                        @foreach (var item in heroHighlights)
-                        {
-                            <span class="px-3 py-1.5 rounded-lg bg-base-200 border border-base-300 text-sm font-medium">
-                                @item
-                            </span>
-                        }
-                    </div>
-                }
-                <div class="flex flex-wrap gap-3 pt-4">
-                    <a class="btn btn-primary gap-2" href="@hero.PrimaryActionUrl">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
-                        </svg>
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <a class="btn btn-primary" href="@hero.PrimaryActionUrl">
                         @T(hero.PrimaryActionLabelKey, hero.PrimaryActionLabel)
                     </a>
-                    <a class="btn btn-ghost gap-2" href="@hero.SecondaryActionUrl">
+                    <a class="btn btn-ghost" href="@hero.SecondaryActionUrl">
                         @T(hero.SecondaryActionLabelKey, hero.SecondaryActionLabel)
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    @* ===== Metrics Section ===== *@
+    @* ===== Metrics ===== *@
     @if (config.Metrics.Count > 0)
     {
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach (var metric in config.Metrics)
             {
                 var tone = string.IsNullOrWhiteSpace(metric.Tone) ? "text-primary" : metric.Tone;
-                <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="card bg-base-100 border border-base-300 shadow-sm">
                     <div class="card-body p-5">
                         <div class="text-sm font-medium text-base-content/60 mb-1">@T(metric.LabelKey, metric.Label)</div>
-                        <div class="text-3xl font-bold @tone tracking-tight">@metric.Value</div>
+                        <div class="text-3xl font-bold @tone">@metric.Value</div>
                         @if (!string.IsNullOrWhiteSpace(metric.Trend))
                         {
                             <div class="text-xs text-base-content/50 mt-1">@T(metric.TrendKey, metric.Trend)</div>
@@ -82,82 +58,11 @@
         </section>
     }
 
-    @* ===== Capabilities & Solutions ===== *@
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
-            <div class="card bg-base-100 border border-base-300 shadow-sm">
-                <div class="card-body">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="p-2 rounded-lg bg-primary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <h2 class="card-title text-xl">@T(config.CapabilitiesSectionTitleKey, config.CapabilitiesSectionTitle)</h2>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        @foreach (var capability in config.Capabilities)
-                        {
-                            <div class="group p-4 rounded-xl border border-base-300 bg-base-200/30 hover:bg-base-200/60 hover:border-base-400 transition-all duration-200">
-                                <div class="flex items-start gap-3">
-                                    <span class="text-2xl flex-shrink-0">@capability.Icon</span>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2 mb-1">
-                                            <div class="font-semibold truncate">@T(capability.TitleKey, capability.Title)</div>
-                                            @if (!string.IsNullOrWhiteSpace(capability.Badge))
-                                            {
-                                                <span class="px-2 py-0.5 rounded-md bg-base-300 border border-base-400 text-xs font-medium flex-shrink-0">
-                                                    @T(capability.BadgeKey, capability.Badge)
-                                                </span>
-                                            }
-                                        </div>
-                                        <p class="text-sm text-base-content/70 leading-relaxed">@T(capability.DescriptionKey, capability.Description)</p>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="lg:col-span-1">
-            <div class="card bg-base-100 border border-base-300 shadow-sm h-full">
-                <div class="card-body">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="p-2 rounded-lg bg-secondary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <h2 class="card-title text-xl">@T(config.SolutionsSectionTitleKey, config.SolutionsSectionTitle)</h2>
-                    </div>
-                    <div class="space-y-3">
-                        @foreach (var solution in config.Solutions)
-                        {
-                            <div class="p-4 rounded-xl border border-base-300 hover:border-base-400 hover:bg-base-200/30 transition-all duration-200">
-                                <div class="flex items-center justify-between mb-1">
-                                    <div class="font-semibold">@T(solution.NameKey, solution.Name)</div>
-                                    <span class="px-2 py-0.5 rounded-md bg-base-200 border border-base-300 text-xs font-medium">
-                                        @T(solution.StatusKey, solution.Status)
-                                    </span>
-                                </div>
-                                <div class="text-xs text-base-content/50 mb-2">@T(solution.AudienceKey, solution.Audience)</div>
-                                <p class="text-sm text-base-content/70 leading-relaxed">@T(solution.SummaryKey, solution.Summary)</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    @* ===== Projects Section ===== *@
+    @* ===== Projects ===== *@
     <section id="products" class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-bold">@T(config.ProjectsSectionTitleKey, config.ProjectsSectionTitle)</h2>
-                <p class="text-base-content/60 mt-0.5">@T(config.ProjectsSectionLeadKey, config.ProjectsSectionLead)</p>
-            </div>
+        <div>
+            <h2 class="text-2xl font-bold">@T(config.ProjectsSectionTitleKey, config.ProjectsSectionTitle)</h2>
+            <p class="text-base-content/60 mt-0.5 text-sm">@T(config.ProjectsSectionLeadKey, config.ProjectsSectionLead)</p>
         </div>
 
         @if (projects.Any())
@@ -175,10 +80,10 @@
                             return T(k, fallback);
                         }).ToList()
                         : profile.Tags.ToList();
-                    <article class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-lg hover:border-base-400 transition-all duration-200">
+                    <article class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow duration-200">
                         <div class="card-body">
                             <div class="flex items-start gap-3">
-                                <div class="p-2.5 rounded-xl bg-base-200 border border-base-300 text-2xl group-hover:scale-110 transition-transform duration-200">
+                                <div class="p-2.5 rounded-xl bg-base-200 border border-base-300 text-2xl">
                                     @profile.Icon
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -193,18 +98,13 @@
                                 </span>
                                 @foreach (var tag in profileTags)
                                 {
-                                    <span class="px-2 py-1 rounded-md bg-base-200 border border-base-300 text-xs font-medium">
-                                        @tag
-                                    </span>
+                                    <span class="px-2 py-1 rounded-md bg-base-200 border border-base-300 text-xs font-medium">@tag</span>
                                 }
                             </div>
                             <div class="pt-2 mt-1 border-t border-base-200">
-                                <a asp-controller="Home" asp-action="Project" asp-route-project="@project.Name" 
-                                   class="btn btn-primary btn-sm w-full gap-2 group-hover:scale-[1.02] transition-transform duration-200">
+                                <a asp-controller="Home" asp-action="Project" asp-route-project="@project.Name"
+                                   class="btn btn-primary btn-sm w-full gap-2">
                                     @T(config.OpenWorkspaceLabelKey, config.OpenWorkspaceLabel)
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
                                 </a>
                             </div>
                         </div>
@@ -214,10 +114,7 @@
         }
         else
         {
-            <div class="alert alert-warning gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 stroke-current shrink-0" fill="none" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+            <div class="alert alert-warning">
                 <span>@T(config.EmptyProjectsMessageKey, config.EmptyProjectsMessage)</span>
             </div>
         }
@@ -228,15 +125,8 @@
     {
         <section class="card bg-base-100 border border-base-300 shadow-sm">
             <div class="card-body">
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="p-2 rounded-lg bg-accent/10">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <h2 class="card-title text-xl">@T(config.QuickActionsSectionTitleKey, config.QuickActionsSectionTitle)</h2>
-                </div>
-                <div class="flex flex-wrap gap-2 mt-2">
+                <h2 class="card-title text-lg mb-2">@T(config.QuickActionsSectionTitleKey, config.QuickActionsSectionTitle)</h2>
+                <div class="flex flex-wrap gap-2">
                     @foreach (var action in config.QuickActions)
                     {
                         if (action.AdminOnly && !isAdmin) { continue; }

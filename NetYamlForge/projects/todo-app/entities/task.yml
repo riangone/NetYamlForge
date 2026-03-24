@@ -349,6 +349,105 @@ entities:
             - key: ProjectName
               width: 16
 
+      # エクスポート例4: 期限切れタスク PDF（カスタム SQL + 警告カラー）
+      overdue_pdf:
+        label: "期限切れ PDF"
+        format: pdf
+        filename: "overdue_tasks_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/overdue_tasks.sql
+        pdf:
+          title: "期限切れタスク一覧"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#B91C1C"
+          oddRowColor: "#FEF2F2"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: Title
+              width: 35
+            - key: Priority
+              width: 13
+              align: center
+            - key: DueDate
+              width: 16
+              align: center
+            - key: OverdueDays
+              width: 14
+              align: right
+            - key: AssignedTo
+              width: 22
+
+      # エクスポート例5: 進行中タスク PDF（優先度順、グリーン系）
+      active_pdf:
+        label: "進行中タスク PDF"
+        format: pdf
+        filename: "active_tasks_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/active_tasks_by_priority.sql
+        pdf:
+          title: "進行中・レビュー中タスク"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#065F46"
+          oddRowColor: "#ECFDF5"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: Title
+              width: 28
+            - key: Priority
+              width: 11
+              align: center
+            - key: Status
+              width: 13
+              align: center
+            - key: AssignedTo
+              width: 14
+            - key: DueDate
+              width: 13
+              align: center
+            - key: EstimatedHours
+              width: 10
+              align: right
+            - key: ProjectName
+              width: 16
+
+      # エクスポート例6: チーム負荷サマリ PDF（担当者集計、縦向き・コンパクト）
+      team_workload_pdf:
+        label: "チーム負荷 PDF"
+        format: pdf
+        filename: "team_workload_{date:yyyyMMdd}.pdf"
+        sqlFile: exports/sql/team_workload.sql
+        pdf:
+          title: "担当者別作業負荷サマリ"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#4338CA"
+          oddRowColor: "#EEF2FF"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: AssignedTo
+              width: 22
+            - key: TotalTasks
+              width: 14
+              align: right
+            - key: DoneTasks
+              width: 14
+              align: right
+            - key: ActiveTasks
+              width: 14
+              align: right
+            - key: OverdueTasks
+              width: 14
+              align: right
+            - key: TotalEstimatedHours
+              width: 16
+              align: right
+            - key: TotalActualHours
+              width: 16
+              align: right
+
     links:
       project:
         label: プロジェクト
