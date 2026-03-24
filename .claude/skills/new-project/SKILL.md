@@ -39,6 +39,8 @@ NetYamlForge/projects/<project-name>/
 ├── database/          ← 空ディレクトリ（SQLite DB が自動生成される）
 ├── entities/
 │   └── <entity>.yml
+├── pdf-templates/     ← 帳票 YAML テンプレート（必要な場合のみ）
+│   └── <template>.yaml
 ├── Hooks/             ← カスタムハンドラー（必要な場合のみ）
 ├── jobs/              ← バッチジョブ（必要な場合のみ）
 │   └── sql/
@@ -114,6 +116,8 @@ entities:
     key: Id                   # 主キー列名
     displayName: <表示名>
     softDelete: false         # true にすると削除フラグ方式になる
+    isPublic: false           # true にすると認証なしでアクセス可
+    # pdfTemplate: <template> # pdf-templates/<template>.yaml を使った帳票ボタン
 
     # テーブル結合（外部キー参照時に必要）
     joins:
@@ -125,10 +129,12 @@ entities:
     # フォーム定義（登録・編集画面）
     forms:
       <FieldName>:
-        type: <type>          # string / int / decimal / bool / datetime / text / file / image
+        type: <type>          # string / int / decimal / bool / date / datetime / textarea / file / image
         required: true
         label: <ラベル>
         editable: true
+        # placeholder: "<プレースホルダー>"
+        # precision: 0         # decimal の小数点以下桁数
         # options: [value1, value2]   # select/dropdown の選択肢
         # foreignKey:                 # 外部キー参照
         #   entity: <entity-key>
@@ -138,6 +144,11 @@ entities:
 
     # 一覧表示列定義
     columns:
+      Id:
+        type: int
+        identity: true        # 自動採番（表示のみ）
+        label: ID
+        sortable: true
       <ColumnName>:
         type: <type>
         label: <ラベル>
@@ -145,6 +156,7 @@ entities:
         sortable: true        # ソート可能
         hidden: false         # true で一覧非表示（エクスポートも除外）
         # expression: <alias>.<Column>  # JOIN したテーブルの列を使う場合
+        # precision: 0                  # decimal 列の小数桁数
         # optionLabels:                 # 表示名マッピング
         #   value1: 表示1
         #   value2: 表示2
@@ -152,10 +164,23 @@ entities:
     # フィルター定義
     filters:
       <FilterName>:
-        type: <filter-type>   # like / dropdown / multi-select / date-range / bool / number-range
+        type: <filter-type>   # like / dropdown / multi-select / toggle-group / date-range / bool / number-range
         label: <ラベル>
-        # expression: <alias>.<Column>  # JOIN 列をフィルタ対象にする場合
-        # options: [value1, value2]     # dropdown / multi-select 用
+        # expression: <TableName>.<Column>  # JOIN 列をフィルタ対象にする場合
+        # options: [value1, value2]          # dropdown / multi-select 用
+        # optionLabels:                      # toggle-group の表示名マッピング
+        #   value1: "🟢 表示1"
+        #   value2: "🔴 表示2"
+        # foreignKey:                        # ドロップダウンを別エンティティから動的生成
+        #   entity: <entity-key>
+        #   displayColumn: <column>
+
+    # フック定義（組み込みフック名または Hooks/<File>.cs 内のクラス名）
+    hooks:
+      beforeCreate: []        # 例: [normalize_title, validate_due_date]
+      afterCreate:  []        # 例: [audit_log]
+      beforeUpdate: []
+      afterUpdate:  []
 
     # エンティティ間ナビゲーション
     links:
@@ -184,12 +209,37 @@ entities:
     exports:
       <export-key>:
         label: <ボタンラベル>
-        format: csv           # csv / tsv / json
+        format: csv           # csv / tsv / json / pdf
         filename: "<entity>_{date:yyyyMMdd}.csv"
         columns:              # 省略時は非表示でない全列
           - <ColumnName>
         # sqlFile: exports/sql/<query>.sql     # カスタム SQL の場合
         # sqlQuery: "SELECT ..."               # インライン SQL の場合
+        # pdf:                                 # format: pdf の場合
+        #   title: "レポートタイトル"
+        #   pageSize: A4                       # A4 / A3 / LETTER
+        #   orientation: portrait              # portrait / landscape
+        #   headerColor: "#1E3A5F"
+        #   oddRowColor: "#F0F4F8"
+        #   showPageNumbers: true
+        #   showGeneratedAt: true
+        #   columns:
+        #     - key: <ColumnName>
+        #       width: 20                      # 列幅（%）
+        #       align: left                    # left / center / right
+
+    # フォーム・フィルターのレイアウト設定
+    layout:
+      forms:
+        columns: 2            # フォームの列数（1 / 2 / 3）
+        order:                # 表示順（省略時は forms の定義順）
+          - <FieldName1>
+          - <FieldName2>
+      filters:
+        columns: 4            # フィルターの列数
+        order:
+          - <FilterName1>
+          - <FilterName2>
 
     # ページング設定
     paging:
@@ -198,29 +248,31 @@ entities:
       enableCount: true
 ```
 
-#### 列タイプ一覧
+#### フォームフィールドタイプ一覧
 
-| type | 用途 | 備考 |
+| type | 用途 | 補足 |
 |------|------|------|
-| `string` | 短いテキスト | |
-| `text` | 長いテキスト | textarea で編集 |
+| `string` | 短いテキスト（1行） | |
+| `textarea` | 長いテキスト（複数行） | |
 | `int` | 整数 | |
-| `decimal` | 小数 | |
+| `decimal` | 小数 | `precision` で小数桁数指定 |
 | `bool` | チェックボックス | |
-| `datetime` | 日時 | |
+| `date` | 日付（年月日） | |
+| `datetime` | 日時（年月日時分） | |
 | `file` | ファイル添付 | `uploadPath` 指定必要 |
 | `image` | 画像 | `uploadPath` 指定必要 |
 
 #### フィルタータイプ一覧
 
-| type | 用途 |
-|------|------|
-| `like` | 部分一致テキスト検索 |
-| `dropdown` | 単一選択（options 必須） |
-| `multi-select` | 複数選択（options 必須） |
-| `date-range` | 日付範囲 |
-| `bool` | true/false トグル |
-| `number-range` | 数値範囲 |
+| type | 用途 | 補足 |
+|------|------|------|
+| `like` | 部分一致テキスト検索 | |
+| `dropdown` | 単一選択 | `options` または `foreignKey` |
+| `multi-select` | 複数選択 | `options` または `foreignKey` |
+| `toggle-group` | ボタングループ切り替え | `optionLabels` で絵文字付き表示 |
+| `date-range` | 日付範囲（From/To） | |
+| `bool` | true/false トグル | |
+| `number-range` | 数値範囲（Min/Max） | |
 
 ### Step 5 — dashboard.yml の作成
 
@@ -291,15 +343,20 @@ dotnet build NetYamlForge/NetYamlForge.csproj 2>&1 | tail -8
 
 ## 既存プロジェクトの参照
 
-迷った場合は既存の `todo-app` プロジェクトを参考にしてください。
+迷った場合は既存のプロジェクトを参考にしてください。
 
 ```
 NetYamlForge/projects/todo-app/
-├── project.yaml          ← navigation, features の例
-├── dashboard.yml         ← stats, charts の例
-├── entities/task.yml     ← joins, actions, exports, filters の例
-├── entities/project.yml  ← 外部キーの例
+├── project.yaml              ← navigation, features, layout の例
+├── dashboard.yml             ← stats, charts の例
+├── entities/task.yml         ← joins, toggle-group, hooks, actions, exports, layout の例
+├── entities/project.yml      ← 外部キーの例
 └── Hooks/TaskActionHandlers.cs  ← カスタムアクションの例
+
+NetYamlForge/projects/biz-docs/
+├── entities/jp_invoice.yml   ← pdfTemplate, date 型, precision の例
+├── entities/jp_contract.yml  ← シンプルな帳票エンティティの例
+└── pdf-templates/invoice.yaml  ← 帳票テンプレート（5プリミティブ: line/paragraph/row/labelTable/dataTable）
 ```
 
 ---

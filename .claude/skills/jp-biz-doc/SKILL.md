@@ -176,6 +176,30 @@ CREATE TABLE JpContract (
 
 ### 2. エンティティ YAML（entities/jp_*.yml）
 
+#### pdfTemplate — 帳票 PDF ボタンの紐付け
+
+エンティティに `pdfTemplate` を指定すると、一覧の各行に帳票出力ボタンが追加されます。
+
+```yaml
+entities:
+  jp_invoice:
+    table: JpInvoice
+    key: Id
+    displayName: 請求書
+    pdfTemplate: invoice    # pdf-templates/invoice.yaml を使用
+```
+
+`pdf-templates/<template>.yaml` の中身は 5 つの汎用プリミティブ（`line` / `paragraph` / `row` / `labelTable` / `dataTable`）の組み合わせだけで定義します。C# コードにレイアウト値は一切持ちません。
+
+**既存テンプレートの参照先:**
+```
+projects/biz-docs/pdf-templates/
+├── invoice.yaml   ← 請求書
+├── estimate.yaml  ← 見積書
+├── delivery.yaml  ← 納品書
+└── contract.yaml  ← 契約書
+```
+
 #### 重要フィールド定義パターン
 
 **インボイス登録番号（請求書のみ）**
@@ -314,54 +338,159 @@ ORDER BY DaysUntilExpiry ASC
 
 ---
 
-### 4. PDF エクスポート定義パターン
+### 4. 帳票テンプレート（pdf-templates/*.yaml）
 
-#### 請求書（インボイス対応）
+帳票は C# コードではなく YAML で完全定義します。以下の **5つのプリミティブ** のみを使います。
+
+| プリミティブ | 用途 |
+|---|---|
+| `line` | 水平区切り線（`lineWeight`, `color`, `marginTop/Bottom`） |
+| `paragraph` | テキスト1行（`text` / `field` / `template` で内容指定） |
+| `row` | 列分割レイアウト（`columnWidths`, `cells[]`） |
+| `labelTable` | ラベル+値の2カラムテーブル（`rows[]`） |
+| `dataTable` | データソースから明細テーブル生成（`dataSource`, `columns[]`） |
+
+#### 最小構成のテンプレート例（見積書）
+
 ```yaml
-invoice_pdf:
-  label: "請求書 PDF"
-  format: pdf
-  filename: "請求書_{date:yyyyMMdd}.pdf"
-  pdf:
-    title: "請求書"
-    pageSize: A4
-    orientation: portrait
-    headerColor: "#0F4C75"
-    oddRowColor: "#E8F4FD"
-    showPageNumbers: true
-    showGeneratedAt: true
+name: my_estimate
+filenameTemplate: "見積書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "1c3658"
+  labelColor: "78b4cc"
+  labelTextColor: "ffffff"
+  subtleBackground: "f0f0f0"
+  oddRowColor: "f8fcfe"
+  borderColor: "b4b4b4"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name FROM Customer WHERE Id = @CustomerId"
+  items:
+    query: "SELECT * FROM MyEstimateItem WHERE EstimateId = @Id ORDER BY LineNo"
+
+sections:
+  # タイトル行
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 2
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "御　見　積　書"
+            fontSize: 20
+            color: primary
+            align: center
+      - vAlign: bottom
+        paddingLeft: 16
+        elements:
+          - type: labelTable
+            columnWidths: [38, 62]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "見積番号"
+                field: EstimateNo
+              - label: "見積日"
+                field: IssueDate
+
+  # 区切り線
+  - type: line
+    lineWeight: 2
+    color: primary
+    marginTop: 4
+    marginBottom: 6
+
+  # 宛先
+  - type: paragraph
+    field: "customer.Name"
+    suffix: "　御中"
+    fontSize: 13
+    suffixFontSize: 9
+    marginTop: 6
+
+  # 明細テーブル
+  - type: dataTable
+    dataSource: items
+    minRows: 8
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
     columns:
-      - key: InvoiceNo
-        width: 18
-      - key: CustomerName
-        width: 20
-      - key: RegistrationNo     # インボイス登録番号
-        width: 18
-      - key: Total
-        width: 14
+      - field: _rowNumber
+        label: "No."
+        width: 6
+        align: center
+      - field: ItemName
+        label: "摘　要"
+        width: 44
+        align: left
+      - field: Quantity
+        label: "数量"
+        width: 10
         align: right
-      - key: TaxAmount10        # 10%消費税
-        width: 14
+        format: quantity
+      - field: UnitPrice
+        label: "単価"
+        width: 18
         align: right
+        format: currency
+      - field: Amount
+        label: "金額"
+        width: 22
+        align: right
+        format: currency
 ```
 
-#### 期限警告（契約書）
+**`paragraph` の内容指定方法:**
+- `text: "固定テキスト"` — 静的なテキスト
+- `field: FieldName` または `field: "dataSource.FieldName"` — フィールド値
+- `template: "{FieldA} と {FieldB}"` — 複数フィールドの結合
+
+**フォーマット指定（`format`）:**
+- `currency` → `¥N0` 形式
+- `quantity` → 整数なら整数、小数なら1桁
+
+#### 一覧 PDF（exports セクション）
+
+帳票 PDF（`pdfTemplate`）とは別に、一覧エクスポート PDF も定義できます。
+
 ```yaml
-expiry_warning_pdf:
-  label: "期限切れ警告 PDF"
-  format: pdf
-  sqlFile: exports/sql/jp_contract_expiry_warning.sql
-  pdf:
-    title: "契約期限切れ警告（90日以内）"
-    headerColor: "#92400E"   # アンバー（警告色）
-    oddRowColor: "#FFFBEB"
-    columns:
-      - key: DaysUntilExpiry
-        width: 11
-        align: right
-      - key: ContractForm       # 電子 or 紙
-        width: 9
-        align: center
+exports:
+  overdue_pdf:
+    label: "未回収一覧 PDF"
+    format: pdf
+    sqlFile: exports/sql/jp_overdue_invoices.sql
+    pdf:
+      title: "未回収請求書一覧"
+      pageSize: A4
+      orientation: landscape
+      headerColor: "#9B1C1C"
+      oddRowColor: "#FEF2F2"
+      showPageNumbers: true
+      showGeneratedAt: true
+      columns:
+        - key: InvoiceNo
+          width: 18
+        - key: CustomerName
+          width: 24
+        - key: Total
+          width: 14
+          align: right
+        - key: OverdueDays
+          width: 12
+          align: right
 ```
 
 ---

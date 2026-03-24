@@ -197,31 +197,44 @@ public static class ProjectTemplateScaffolder
         string? dbPath,
         string? dbConnectionString)
     {
-        if (string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
-        {
-            return $$"""
-name: {{projectName}}
-displayName: {{displayName}}
-version: "1.0.0"
-database:
-  type: {{dbType}}
-  path: {{dbPath}}
-features:
-  multiLanguage: true
-  userAuthentication: true
-""" + Environment.NewLine;
-        }
+        var dbSection = string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase)
+            ? $"  type: {dbType}\n  path: {dbPath}"
+            : $"  type: {dbType}\n  connectionString: {dbConnectionString}";
 
         return $$"""
 name: {{projectName}}
 displayName: {{displayName}}
 version: "1.0.0"
+
 database:
-  type: {{dbType}}
-  connectionString: {{dbConnectionString}}
+{{dbSection}}
+
 features:
   multiLanguage: true
   userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "{{displayName}}"
+  navigation:
+    showDashboard: true
+    entities: []
+    items:
+      - label: Home
+        url: /{{projectName}}
+        icon: 🏠
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📊
+
+home_page:
+  icon: "🗂️"
+  tagline: "{{displayName}}"
+  tags: []
 """ + Environment.NewLine;
     }
 
