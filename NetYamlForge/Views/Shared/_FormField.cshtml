@@ -162,6 +162,32 @@
             <span class="label-text text-sm text-gray-500">@(checkedValue ? "有効" : "無効")</span>
         </label>
     }
+    else if (finalType.Equals("toggle-group", StringComparison.OrdinalIgnoreCase) && colOptionLabels != null && colOptionLabels.Any())
+    {
+        var current = value?.ToString();
+        <div class="btn-group w-full">
+            @foreach (var opt in colOptionLabels)
+            {
+                var isSelected = current == opt.Key;
+                <input type="radio" name="@name" value="@opt.Key"
+                       class="btn btn-sm @(isSelected ? "btn-active btn-primary" : "")"
+                       checked="@(isSelected ? "checked" : null)"
+                       onclick="document.querySelectorAll('input[name=@name]').forEach(el=>el.classList.remove('btn-active', 'btn-primary'));if(this.checked){this.classList.add('btn-active', 'btn-primary')}" />
+            }
+        </div>
+    }
+    else if (finalType.Equals("multi-select", StringComparison.OrdinalIgnoreCase) && colOptionLabels != null && colOptionLabels.Any())
+    {
+        var currentValues = (value?.ToString() ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToHashSet();
+        <select name="@name" class="select select-bordered w-full" multiple size="@(Math.Min(colOptionLabels.Count + 1, 6))">
+            @foreach (var opt in colOptionLabels)
+            {
+                var isSelected = currentValues.Contains(opt.Key);
+                <option value="@opt.Key" selected="@(isSelected ? "selected" : null)">@opt.Value</option>
+            }
+        </select>
+        <p class="text-sm text-gray-500 mt-1">複数選択可</p>
+    }
     else if (colOptionLabels != null && colOptionLabels.Any() && !finalType.Equals("radio", StringComparison.OrdinalIgnoreCase))
     {
         @* SectionFormFieldDef.Options (Dict<string,string>) 由来: key=保存値, value=表示名 *@

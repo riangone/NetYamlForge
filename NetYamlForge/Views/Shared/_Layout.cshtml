@@ -646,6 +646,30 @@
             }
             if (chips) chips.innerHTML = '';
         }
+
+        // checkbox-group: 複数選択フォームの値を更新
+        function toggleCheckboxGroup(fieldName, checkbox) {
+            var hidden = document.getElementById('checkbox-group-value-' + fieldName);
+            if (!hidden) return;
+            var checkboxes = document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']');
+            var values = [];
+            checkboxes.forEach(function(cb) {
+                if (cb.checked) values.push(cb.value);
+            });
+            hidden.value = values.join(',');
+        }
+
+        // switch-group: 複数選択フォームの値を更新
+        function toggleSwitchGroup(fieldName, toggle) {
+            var hidden = document.getElementById('switch-group-value-' + fieldName);
+            if (!hidden) return;
+            var toggles = document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']');
+            var values = [];
+            toggles.forEach(function(t) {
+                if (t.checked) values.push(t.value);
+            });
+            hidden.value = values.join(',');
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

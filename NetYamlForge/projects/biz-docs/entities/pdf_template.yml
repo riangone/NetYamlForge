@@ -82,7 +82,11 @@ entities:
         required: true
         label: ステータス
         editable: true
-        options: [active, inactive, draft]
+        type: toggle-group
+        optionLabels:
+          active: "✅ 有効"
+          inactive: "⏸️ 無効"
+          draft: "📝 下書き"
       Remarks:
         type: textarea
         label: 備考
