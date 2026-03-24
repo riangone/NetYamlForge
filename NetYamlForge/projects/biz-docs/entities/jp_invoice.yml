@@ -6,6 +6,7 @@ entities:
     displayName: 請求書
     softDelete: false
     isPublic: true
+    jpDocument: invoice
 
     joins:
       - type: left

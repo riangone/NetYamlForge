@@ -337,6 +337,11 @@ public class EntityDefinition
     public Dictionary<string, ActionDefinition> Actions { get; set; } = new();
     /// <summary>ツールバーに追加するカスタムエクスポートボタン定義</summary>
     public Dictionary<string, ExportDefinition> Exports { get; set; } = new();
+    /// <summary>
+    /// 日本向け帳票 PDF の文書種別。設定すると一覧行に「帳票」ボタンが表示されます。
+    /// 値: delivery | invoice | estimate | contract
+    /// </summary>
+    public string? JpDocument { get; set; }
 
     /// <summary>
     /// 主鍵列名のリストを取得する。複合主鍵の場合は Keys を返し、

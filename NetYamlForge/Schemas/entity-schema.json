@@ -57,6 +57,11 @@
             "type": "boolean",
             "description": "If true, the entity list/detail is accessible without authentication."
           },
+          "jpDocument": {
+            "type": "string",
+            "enum": ["delivery", "invoice", "estimate", "contract"],
+            "description": "Japanese business document type. Adds a 帳票 PDF button to each list row. Values: delivery | invoice | estimate | contract"
+          },
           "joins": {
             "type": "array",
             "description": "LEFT/INNER JOIN definitions. Always use 'alias' and reference it in column 'expression' fields.",

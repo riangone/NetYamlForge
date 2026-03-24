@@ -247,7 +247,7 @@
                                        href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
                                         Detail
                                     </a>
-                                    @if (Model.Entity is "jp_delivery" or "jp_invoice" or "jp_estimate" or "jp_contract")
+                                    @if (Model.Meta.JpDocument != null)
                                     {
                                         <a class="btn btn-xs btn-accent btn-outline"
                                            href="@Url.Action("JpDocumentPdf", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"

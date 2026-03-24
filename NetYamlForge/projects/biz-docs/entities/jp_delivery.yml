@@ -6,6 +6,7 @@ entities:
     displayName: 納品書
     softDelete: false
     isPublic: true
+    jpDocument: delivery
 
     joins:
       - type: left

@@ -320,18 +320,11 @@ public class DynamicEntityController : BaseProjectController
     {
         entity = NormalizeSingleValue(entity) ?? "";
 
-        // 対応する文書種別を決定
-        var docType = entity switch
-        {
-            "jp_delivery" => "delivery",
-            "jp_invoice"  => "invoice",
-            "jp_estimate" => "estimate",
-            "jp_contract" => "contract",
-            _ => null
-        };
-        if (docType == null) return NotFound("JpDocumentPdf is not supported for entity: " + entity);
+        var meta    = _meta.Get(entity);
+        var docType = meta.JpDocument;
+        if (string.IsNullOrWhiteSpace(docType))
+            return NotFound("jpDocument is not configured for entity: " + entity);
 
-        var meta     = _meta.Get(entity);
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
         var record   = await _repo.GetByIdAsync(entity, keyValue ?? "");
         if (record == null) return NotFound();

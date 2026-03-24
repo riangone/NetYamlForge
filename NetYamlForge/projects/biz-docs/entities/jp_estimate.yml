@@ -6,6 +6,7 @@ entities:
     displayName: 見積書
     softDelete: false
     isPublic: true
+    jpDocument: estimate
 
     joins:
       - type: left
