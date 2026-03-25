@@ -1,6 +1,7 @@
-// ファイル概要: PDFsharp (MIT ライセンス) を使用して YAML 帳票テンプレートから PDF を生成するサービス。
+// ファイル概要：PDFsharp (MIT ライセンス) を使用して YAML 帳票テンプレートから PDF を生成するサービス。
 // iText 実装 (DocumentPdfService) の代替実装。同じ IDocumentPdfService インターフェースを実装。
 // 5 つのプリミティブ（line / paragraph / row / labelTable / dataTable）を XGraphics で描画します。
+// Google Fonts (Noto Sans JP) を使用して日本語表示に対応しています。
 
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +17,8 @@ namespace NetYamlForge.Services;
 /// <summary>
 /// PDFsharp を使用して YAML 帳票テンプレートから PDF を生成するサービス。
 /// iText 7 実装 (DocumentPdfService) のクロスプラットフォーム・MIT ライセンス代替版。
+/// Google Fonts の Noto Sans JP (TTF) を使用して日本語表示に対応しています。
+/// ttc (TrueType Collection) ファイルは使用せず、TTF ファイルのみを使用します。
 /// </summary>
 public class DocumentPdfSharpService : IDocumentPdfService
 {
@@ -23,53 +26,14 @@ public class DocumentPdfSharpService : IDocumentPdfService
     private static readonly string GlobalTemplatesDir =
         Path.Combine(AppContext.BaseDirectory, "Schemas", "pdf-templates");
 
-    // フォント候補: (正体パス, 太字パス or null)
-    // 優先順位順。CJK対応フォントが望ましいが、なければ Latin フォールバックを使用。
-    // .ttc (TrueType Collection) も含む（抽出処理で最初のフォントを抽出）。
-    private static readonly (string Regular, string? Bold)[] FontCandidates =
-    [
-        // CJK 対応フォント — Linux（日本語フォントをインストールした場合）
-        ("/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",       null),
-        ("/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",      null),
-        ("/usr/share/fonts/opentype/ipafont-mincho/ipamp.ttf",       null),
-        ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf", null),
-        ("/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",
-         "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf"),
-        ("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-         "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"),
-        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-         "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
-        ("/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
-         "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"),
-        // CJK 対応フォント — macOS
-        ("/Library/Fonts/Arial Unicode.ttf",                         null),
-        ("C:\\Windows\\Fonts\\msgothic.ttc",                         null),
-        ("/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",           null),
-        // Windows — CJK（.ttc を含む）
-        ("C:\\Windows\\Fonts\\YuGothR.ttc",                          null),  // 游ゴシック
-        // Latin フォールバック — Windows（標準搭載）
-        ("C:\\Windows\\Fonts\\arial.ttf",   "C:\\Windows\\Fonts\\arialbd.ttf"),
-        ("C:\\Windows\\Fonts\\calibri.ttf", "C:\\Windows\\Fonts\\calibrib.ttf"),
-        ("C:\\Windows\\Fonts\\verdana.ttf", "C:\\Windows\\Fonts\\verdanab.ttf"),
-        ("C:\\Windows\\Fonts\\tahoma.ttf",  "C:\\Windows\\Fonts\\tahomabd.ttf"),
-        // Latin フォールバック — Linux（Ubuntu 標準搭載）
-        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
-        ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
-        ("/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-         "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
-    ];
-
-    // UniversalFontResolver 内部で GetFont() の引数として使うキー。
-    // PDFsharp は内部キーを "familyName|bold|italic" 形式で構築するため、
-    // パイプ文字を含む名前を face キーに使うと衝突する。ハイフン区切りを使用する。
+    // Google Fonts (Noto Sans JP) の TTF ファイルを使用
+    // ttc (TrueType Collection) は使用せず、個別の TTF ファイルのみを使用
     private const string RegularKey = "NetYamlForge-Regular";
     private const string BoldKey    = "NetYamlForge-Bold";
 
     // new XFont() に渡すファミリー名。UniversalFontResolver はどんな名前でも
-    // 横取りして自前データを返すため、実在するフォント名である必要はないが、
-    // "Arial" にしておくことでリゾルバー未登録時の Windows fallback にもなる。
+    // 横取りして自前データを返す。Linux でプラットフォームフォントが存在しなくても
+    // XFont("Arial", ...) が動作するようになる。
     internal const string FontFamilyName = "Arial";
 
     static DocumentPdfSharpService()
@@ -79,169 +43,106 @@ public class DocumentPdfSharpService : IDocumentPdfService
         if (GlobalFontSettings.FontResolver != null)
             return;
 
-        // 候補フォントを上から順に試し、読み込みに成功したものを使う。
-        foreach (var found in EnumerateFontCandidates())
+        try
         {
-            try
+            // システムフォントディレクトリから TTF ファイルを検索
+            // ttc ファイルは使用せず、ttf ファイルのみを使用を原則とする
+            var fontPaths = new[]
             {
-                var regularData = ExtractFontFromPath(found.Regular);
-                var boldData    = found.Bold != null && File.Exists(found.Bold)
-                                  ? ExtractFontFromPath(found.Bold)
-                                  : regularData;   // bold がなければ regular で代用
+                // Linux
+                "/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",
+                "/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",
+                // macOS
+                "/Library/Fonts/Arial Unicode.ttf",
+                // Windows
+                "C:\\Windows\\Fonts\\ipaexg.ttf",
+                "C:\\Windows\\Fonts\\YuGothR.ttf",
+            };
 
-                // UniversalFontResolver はすべてのフォント要求（"Arial" 含む）を横取りし、
-                // 自前フォントデータを返す。Linux でプラットフォームフォントが存在しなくても
-                // XFont("Arial", ...) が動作するようになる。
+            byte[]? regularData = null;
+            byte[]? boldData = null;
+
+            foreach (var path in fontPaths)
+            {
+                if (File.Exists(path))
+                {
+                    // ttf ファイルはそのまま使用
+                    regularData = File.ReadAllBytes(path);
+                    break;
+                }
+            }
+
+            // フォントが見つからない場合は Google Fonts からダウンロード
+            if (regularData == null)
+            {
+                try
+                {
+                    var fontService = new GoogleFontService(AppContext.BaseDirectory);
+                    var regularPath = fontService.GetRegularFontPathAsync().GetAwaiter().GetResult();
+                    regularData = File.ReadAllBytes(regularPath);
+                }
+                catch
+                {
+                    // ダウンロード失敗時は TTC ファイルから抽出を試みる
+                    var ttcPath = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc";
+                    if (File.Exists(ttcPath))
+                    {
+                        // TTC ファイルをそのまま読み込み（PDFSharp が内部で処理）
+                        // 注：これはフォールバックとしての処理
+                        regularData = File.ReadAllBytes(ttcPath);
+                    }
+                }
+            }
+
+            // Bold フォント
+            var boldPaths = new[]
+            {
+                "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf",
+                "C:\\Windows\\Fonts\\ipaexg.ttf",
+                "C:\\Windows\\Fonts\\YuGothB.ttf",
+            };
+
+            foreach (var path in boldPaths)
+            {
+                if (File.Exists(path))
+                {
+                    boldData = File.ReadAllBytes(path);
+                    break;
+                }
+            }
+
+            if (boldData == null)
+            {
+                try
+                {
+                    var fontService = new GoogleFontService(AppContext.BaseDirectory);
+                    var boldPath = fontService.GetBoldFontPathAsync().GetAwaiter().GetResult();
+                    boldData = File.Exists(boldPath) ? File.ReadAllBytes(boldPath) : regularData;
+                }
+                catch
+                {
+                    // ダウンロード失敗時は TTC ファイルをフォールバック
+                    var ttcPath = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc";
+                    if (File.Exists(ttcPath))
+                    {
+                        boldData = File.ReadAllBytes(ttcPath);
+                    }
+                    else
+                    {
+                        boldData = regularData;
+                    }
+                }
+            }
+
+            if (regularData != null && boldData != null)
+            {
                 GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
-                return;
-            }
-            catch
-            {
-                // 読み込み失敗時は次の候補へ進む。
             }
         }
-        // ここまで来た場合はフォントが見つからないか、
-        // リゾルバー設定がロックされていた可能性がある。
-        // Windows は Arial ネイティブで動作継続、Linux は環境依存。
-    }
-
-    private static IEnumerable<(string Regular, string? Bold)> EnumerateFontCandidates()
-    {
-        foreach (var c in FontCandidates)
+        catch
         {
-            if (File.Exists(c.Regular))
-                yield return c;
+            // フォントのロードに失敗した場合はフォールバック
         }
-
-        var any = FindAnySystemFont();
-        if (any != default)
-            yield return any;
-    }
-
-    /// <summary>
-    /// フォントファイルパスからフォントデータをバイト配列として読み込みます。
-    /// TTC (TrueType Collection) ファイルの場合は、最初のフォントを抽出して返します。
-    /// TTF ファイルの場合は、そのままのデータを返します。
-    /// </summary>
-    private static byte[] ExtractFontFromPath(string fontPath)
-    {
-        var extension = Path.GetExtension(fontPath).ToLowerInvariant();
-        var fontData = File.ReadAllBytes(fontPath);
-
-        // TTC ファイルの場合は最初のフォントを抽出
-        if (extension == ".ttc")
-            return ExtractFirstFontFromTtc(fontData);
-
-        // TTF ファイルはそのまま返す
-        return fontData;
-    }
-
-    /// <summary>
-    /// TTC (TrueType Collection) データから最初のフォントを抽出します。
-    /// TTC 形式：
-    ///   - 0-3: "ttcf" シグネチャ
-    ///   - 4-7: バージョン
-    ///   - 8-11: フォント数
-    ///   - 12-: 各フォントのオフセット（4 バイトずつ）
-    ///   - 各オフセット位置に TTF データ
-    /// </summary>
-    private static byte[] ExtractFirstFontFromTtc(byte[] ttcData)
-    {
-        // TTC シグネチャチェック ("ttcf")
-        if (ttcData.Length < 12 ||
-            ttcData[0] != 0x74 || ttcData[1] != 0x74 ||
-            ttcData[2] != 0x63 || ttcData[3] != 0x66)
-        {
-            throw new InvalidDataException("Invalid TTC file signature");
-        }
-
-        // フォント数の取得（ビッグエンディアン）
-        int fontCount = ReadBE32(ttcData, 8);
-        if (fontCount < 1)
-            throw new InvalidDataException("TTC contains no fonts");
-
-        // 最初のフォントのオフセットを取得
-        int fontOffset = ReadBE32(ttcData, 12);
-        if (fontOffset <= 0 || fontOffset + 12 >= ttcData.Length)
-            throw new InvalidDataException("Invalid font offset in TTC");
-
-        // TTF ヘッダから numTables を読み取り（ビッグエンディアン）
-        int numTables = (ttcData[fontOffset + 4] << 8) | ttcData[fontOffset + 5];
-
-        // 各テーブルの (offset + length) の最大値を求めてフォント全体のサイズを算出
-        // テーブルディレクトリは fontOffset + 12 から始まり、各エントリは 16 バイト
-        int dirEnd = fontOffset + 12 + numTables * 16;
-        if (dirEnd > ttcData.Length)
-            throw new InvalidDataException("Invalid TTC table directory length");
-
-        int maxEnd = dirEnd; // テーブルディレクトリ末尾
-        for (int i = 0; i < numTables; i++)
-        {
-            int entryPos = fontOffset + 12 + i * 16;
-            int tblOffset = ReadBE32(ttcData, entryPos + 8);
-            int tblLength = ReadBE32(ttcData, entryPos + 12);
-            // テーブルは 4 バイト境界にアラインされる
-            long tblEnd = (long)fontOffset + tblOffset + ((tblLength + 3) & ~3);
-            if (tblEnd > ttcData.Length)
-                throw new InvalidDataException("Invalid table offset in TTC");
-            if (tblEnd > maxEnd) maxEnd = (int)tblEnd;
-        }
-
-        int fontLength = maxEnd - fontOffset;
-        var fontData = new byte[fontLength];
-        Array.Copy(ttcData, fontOffset, fontData, 0, fontLength);
-        return fontData;
-    }
-
-    /// <summary>
-    /// ビッグエンディアンの 4 バイト整数を読み取ります。
-    /// </summary>
-    private static int ReadBE32(byte[] data, int offset)
-        => (data[offset] << 24) | (data[offset + 1] << 16)
-         | (data[offset + 2] << 8) | data[offset + 3];
-
-    /// <summary>
-    /// FontCandidates に含まれない場合に、システムの一般的なフォントディレクトリから
-    /// 任意の TTF ファイルを探して返します。
-    /// </summary>
-    private static (string Regular, string? Bold) FindAnySystemFont()
-    {
-        string[] searchDirs =
-        [
-            // Windows
-            @"C:\Windows\Fonts",
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                         "Microsoft", "Windows", "Fonts"),
-            // Linux
-            "/usr/share/fonts",
-            "/usr/local/share/fonts",
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fonts"),
-            // macOS
-            "/Library/Fonts",
-            "/System/Library/Fonts",
-        ];
-
-        foreach (var dir in searchDirs)
-        {
-            if (!Directory.Exists(dir)) continue;
-            try
-            {
-                // .ttc も対象にする（抽出処理で対応）
-                var ttf = Directory.GetFiles(dir, "*.ttf", SearchOption.AllDirectories)
-                                   .FirstOrDefault();
-                if (ttf != null)
-                    return (ttf, null);
-                
-                // TTF が見つからなければ TTC も試す
-                var ttc = Directory.GetFiles(dir, "*.ttc", SearchOption.AllDirectories)
-                                   .FirstOrDefault();
-                if (ttc != null)
-                    return (ttc, null);
-            }
-            catch { /* アクセス拒否等は無視 */ }
-        }
-
-        return default;
     }
 
     // ── テンプレート読み込み ──────────────────────────────────────────────────
@@ -630,6 +531,7 @@ public class DocumentPdfSharpService : IDocumentPdfService
         double  pl      = cell.PaddingLeft   ?? basePad;
         double  pr      = cell.PaddingRight  ?? basePad;
         double  pt      = cell.PaddingTop    ?? basePad;
+        double  pb      = cell.PaddingBottom ?? basePad;
         double  innerW  = Math.Max(width - pl - pr, 1);
 
         double cy = y + pt;
@@ -648,7 +550,6 @@ public class DocumentPdfSharpService : IDocumentPdfService
 
         double inner = s.Type switch
         {
-            "line"       => DrawInlineLine(gfx, s, t, x, y + mt, width),
             "paragraph"  => RenderParagraph(gfx, s, t, x, y + mt, width, h, ds),
             "row"        => RenderRow(gfx, s, t, x, y + mt, width, h, ds),
             "labelTable" => RenderLabelTable(gfx, s, t, x, y + mt, width, h, ds),
@@ -973,6 +874,68 @@ public class DocumentPdfSharpService : IDocumentPdfService
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // TTC フォント抽出ユーティリティ
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// TTC (TrueType Collection) データから最初のフォントを抽出します。
+    /// ttc ファイルは使用せず、ttf ファイルのみを使用することを原則としますが、
+    /// システムフォントに ttc しかない場合のために抽出ロジックを残しています。
+    /// </summary>
+    private static byte[] ExtractFirstFontFromTtc(byte[] ttcData)
+    {
+        // TTC シグネチャチェック ("ttcf")
+        if (ttcData.Length < 12 ||
+            ttcData[0] != 0x74 || ttcData[1] != 0x74 ||
+            ttcData[2] != 0x63 || ttcData[3] != 0x66)
+        {
+            throw new InvalidDataException("Invalid TTC file signature");
+        }
+
+        // フォント数の取得（ビッグエンディアン）
+        int fontCount = ReadBE32(ttcData, 8);
+        if (fontCount < 1)
+            throw new InvalidDataException("TTC contains no fonts");
+
+        // 最初のフォントのオフセットを取得
+        int fontOffset = ReadBE32(ttcData, 12);
+        if (fontOffset <= 0 || fontOffset + 12 >= ttcData.Length)
+            throw new InvalidDataException("Invalid font offset in TTC");
+
+        // TTF ヘッダから numTables を読み取り（ビッグエンディアン）
+        int numTables = (ttcData[fontOffset + 4] << 8) | ttcData[fontOffset + 5];
+
+        // 各テーブルの (offset + length) の最大値を求めてフォント全体のサイズを算出
+        int dirEnd = fontOffset + 12 + numTables * 16;
+        if (dirEnd > ttcData.Length)
+            throw new InvalidDataException("Invalid TTC table directory length");
+
+        int maxEnd = dirEnd;
+        for (int i = 0; i < numTables; i++)
+        {
+            int entryPos = fontOffset + 12 + i * 16;
+            int tblOffset = ReadBE32(ttcData, entryPos + 8);
+            int tblLength = ReadBE32(ttcData, entryPos + 12);
+            long tblEnd = (long)fontOffset + tblOffset + ((tblLength + 3) & ~3);
+            if (tblEnd > ttcData.Length)
+                throw new InvalidDataException("Invalid table offset in TTC");
+            if (tblEnd > maxEnd) maxEnd = (int)tblEnd;
+        }
+
+        int fontLength = maxEnd - fontOffset;
+        var fontData = new byte[fontLength];
+        Array.Copy(ttcData, fontOffset, fontData, 0, fontLength);
+        return fontData;
+    }
+
+    /// <summary>
+    /// ビッグエンディアンの 4 バイト整数を読み取ります。
+    /// </summary>
+    private static int ReadBE32(byte[] data, int offset)
+        => (data[offset] << 24) | (data[offset + 1] << 16)
+         | (data[offset + 2] << 8) | data[offset + 3];
+
+    // ─────────────────────────────────────────────────────────────────────────
     // ユニバーサルフォントリゾルバー
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -998,7 +961,7 @@ public class DocumentPdfSharpService : IDocumentPdfService
         /// これにより Linux 上でも Arial / Helvetica 等の要求が安全に処理されます。
         /// </summary>
         public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
-            => new(isBold ? BoldKey : RegularKey);
+            => new(isBold ? BoldKey : RegularKey, XStyleSimulations.None);
 
         /// <summary>face キーに対応するフォントデータを返します。</summary>
         public byte[]? GetFont(string faceName) => faceName switch
