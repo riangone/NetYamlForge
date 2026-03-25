@@ -1,180 +1,102 @@
 imports: []
 entities:
   jp_invoice_standard:
-    table: JpInvoice
+    table: JpInvoiceStandard
     key: Id
     displayName: 請求書（標準）
     softDelete: false
     isPublic: true
-    pdfTemplate: invoices/invoice-standard
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: JpInvoice.CustomerId = cu.Id
 
     forms:
       InvoiceNo:
         type: string
-        required: true
-        label: 請求書番号
+        label: InvoiceNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
-      Title:
-        type: string
-        required: true
-        label: 件名
-        editable: true
       IssueDate:
         type: date
-        required: true
-        label: 請求日
+        label: 発行日
         editable: true
+        required: true
       DueDate:
         type: date
-        required: true
         label: 支払期日
         editable: true
-      RegistrationNo:
-        type: string
-        label: 登録番号
-        editable: true
-      Subtotal10:
-        type: decimal
-        label: 10%対象小計
-        editable: true
-        precision: 0
-      TaxAmount10:
-        type: decimal
-        label: 消費税(10%)
-        editable: true
-        precision: 0
-      Subtotal8:
-        type: decimal
-        label: 8%対象小計
-        editable: true
-        precision: 0
-      TaxAmount8:
-        type: decimal
-        label: 消費税(8%)
-        editable: true
-        precision: 0
+        required: true
       Subtotal:
         type: decimal
         label: 小計
         editable: true
-        precision: 0
+        precision: 2
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+        editable: true
+        precision: 2
       TaxAmount:
         type: decimal
-        label: 消費税合計
+        label: 税額
         editable: true
-        precision: 0
+        precision: 2
       Total:
         type: decimal
+        label: 合計
+        editable: true
         required: true
-        label: 請求金額（税込）
-        editable: true
-        precision: 0
-      BankName:
+        precision: 2
+      Notes:
         type: string
-        label: 銀行名
-        editable: true
-      BranchName:
-        type: string
-        label: 支店名
-        editable: true
-      AccountType:
-        type: string
-        label: 口座種別
-        editable: true
-        options: [普通, 当座]
-      AccountNo:
-        type: string
-        label: 口座番号
-        editable: true
-      AccountHolder:
-        type: string
-        label: 口座名義
-        editable: true
-      Status:
-        type: string
-        required: true
-        label: ステータス
-        editable: true
-        options: [draft, issued, paid, overdue, cancelled]
-      PreparedBy:
-        type: string
-        label: 担当者
-        editable: true
-      CompanyStamp:
-        type: string
-        label: 社印（会社名）
-        editable: true
-      Remarks:
-        type: textarea
-        label: 備考
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       InvoiceNo:
         type: string
-        label: 請求書番号
-        searchable: true
-        sortable: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
+        label: InvoiceNo
       CustomerId:
         type: int
-        label: CustomerId
-        hidden: true
-      Title:
-        type: string
-        label: 件名
-        searchable: true
+        label: 取引先 ID
       IssueDate:
         type: date
-        label: 請求日
-        sortable: true
+        label: 発行日
+      DueDate:
+        type: date
+        label: 支払期日
+      Subtotal:
+        type: decimal
+        label: 小計
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+      TaxAmount:
+        type: decimal
+        label: 税額
       Total:
         type: decimal
-        label: 請求金額
-        sortable: true
-        precision: 0
-      Status:
+        label: 合計
+      Notes:
         type: string
-        label: ステータス
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:     "📝 下書き"
-          issued:    "📤 発行済"
-          paid:      "✅ 入金済"
-          overdue:   "⚠️ 期限超過"
-          cancelled: "❌ 取消"
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

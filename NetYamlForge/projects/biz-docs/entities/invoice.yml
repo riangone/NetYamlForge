@@ -7,46 +7,24 @@ entities:
     softDelete: false
     isPublic: true
 
-    hooks:
-      beforeCreate:
-        - validate_invoice_status
-        - validate_tax_rate
-        - validate_amount_positive
-        - validate_currency
-      beforeUpdate:
-        - validate_invoice_status
-        - validate_tax_rate
-        - validate_amount_positive
-        - validate_currency
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: Invoice.CustomerId = cu.Id
-      - type: left
-        table: Quotation
-        alias: q
-        on: Invoice.QuotationId = q.Id
-
     forms:
       InvoiceNo:
         type: string
-        required: true
-        label: 請求書番号
+        label: InvoiceNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
       QuotationId:
         type: int
-        label: 見積番号
+        label: 見積 ID
         editable: true
         foreignKey:
           entity: quotation
@@ -54,19 +32,19 @@ entities:
           picker: false
       IssueDate:
         type: date
-        required: true
         label: 発行日
         editable: true
+        required: true
       DueDate:
         type: date
-        required: true
         label: 支払期日
         editable: true
+        required: true
       Currency:
         type: string
-        required: true
         label: 通貨
         editable: true
+        required: true
         options: [USD, EUR, CNY, JPY]
       Subtotal:
         type: decimal
@@ -75,7 +53,7 @@ entities:
         precision: 2
       TaxRate:
         type: decimal
-        label: 税率(%)
+        label: 税率 (%)
         editable: true
         precision: 2
       TaxAmount:
@@ -85,235 +63,84 @@ entities:
         precision: 2
       Total:
         type: decimal
-        required: true
-        label: 請求金額
+        label: 合計
         editable: true
+        required: true
         precision: 2
       PaidAmount:
         type: decimal
-        label: 入金済額
+        label: 入金済
         editable: true
         precision: 2
       Status:
         type: string
-        required: true
         label: ステータス
         editable: true
-        options: [draft, issued, paid, overdue, cancelled]
-      BankName:
-        type: string
-        label: 銀行名
-        editable: true
-      BankAccount:
-        type: string
-        label: 口座番号
-        editable: true
-      SwiftCode:
-        type: string
-        label: SWIFT コード
-        editable: true
+        required: true
+        options: [draft, sent, accepted, rejected, expired]
       PaymentTerms:
         type: string
-        label: 支払条件
+        label: PaymentTerms
         editable: true
       Notes:
-        type: textarea
-        label: 備考
+        type: string
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       InvoiceNo:
         type: string
-        label: 請求書番号
-        searchable: true
-        sortable: true
+        label: InvoiceNo
       CustomerId:
         type: int
-        label: Customer ID
-        hidden: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
-      QuoteNo:
-        type: string
-        label: 見積番号
-        expression: q.QuoteNo
+        label: 取引先 ID
+      QuotationId:
+        type: int
+        label: 見積 ID
       IssueDate:
         type: date
         label: 発行日
-        sortable: true
       DueDate:
         type: date
         label: 支払期日
-        sortable: true
       Currency:
         type: string
         label: 通貨
-        sortable: true
+      Subtotal:
+        type: decimal
+        label: 小計
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+      TaxAmount:
+        type: decimal
+        label: 税額
       Total:
         type: decimal
-        label: 請求金額
-        sortable: true
-        precision: 2
+        label: 合計
       PaidAmount:
         type: decimal
-        label: 入金済額
-        sortable: true
-        precision: 2
+        label: 入金済
       Status:
         type: string
         label: ステータス
-        sortable: true
-      BankName:
+      PaymentTerms:
         type: string
-        label: 銀行名
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:     "📝 Draft"
-          issued:    "📤 Issued"
-          paid:      "✅ Paid"
-          overdue:   "⚠️ Overdue"
-          cancelled: "❌ Cancelled"
-      Currency:
-        type: dropdown
-        label: 通貨
-        options: [USD, EUR, CNY, JPY]
-      CustomerId:
-        type: dropdown
-        label: 取引先
-        foreignKey:
-          entity: customer
-          displayColumn: Name
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - InvoiceNo
-          - CustomerId
-          - QuotationId
-          - IssueDate
-          - DueDate
-          - Currency
-          - Status
-          - Subtotal
-          - TaxRate
-          - TaxAmount
-          - Total
-          - PaidAmount
-          - BankName
-          - BankAccount
-          - SwiftCode
-          - PaymentTerms
-          - Notes
-
-    exports:
-      # 請款書 PDF（正式インボイス・グリーン系）
-      invoice_pdf:
-        label: "請款書 PDF"
-        format: pdf
-        filename: "invoice_{date:yyyyMMdd}.pdf"
-        columns:
-          - InvoiceNo
-          - CustomerName
-          - IssueDate
-          - DueDate
-          - Currency
-          - Subtotal
-          - TaxAmount
-          - Total
-          - PaidAmount
-          - Status
-          - PaymentTerms
-        pdf:
-          title: "COMMERCIAL INVOICE"
-          pageSize: A4
-          orientation: portrait
-          headerColor: "#065F46"
-          oddRowColor: "#ECFDF5"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: InvoiceNo
-              width: 20
-            - key: CustomerName
-              width: 26
-            - key: IssueDate
-              width: 14
-              align: center
-            - key: DueDate
-              width: 14
-              align: center
-            - key: Currency
-              width: 10
-              align: center
-            - key: Total
-              width: 14
-              align: right
-            - key: Status
-              width: 12
-              align: center
-
-      # 未収金一覧 PDF（overdue/issued のみ、赤系警告カラー）
-      unpaid_pdf:
-        label: "未収金一覧 PDF"
-        format: pdf
-        filename: "unpaid_invoices_{date:yyyyMMdd}.pdf"
-        sqlFile: exports/sql/unpaid_invoices.sql
-        pdf:
-          title: "UNPAID INVOICES"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#B91C1C"
-          oddRowColor: "#FEF2F2"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: InvoiceNo
-              width: 18
-            - key: CustomerName
-              width: 24
-            - key: IssueDate
-              width: 13
-              align: center
-            - key: DueDate
-              width: 13
-              align: center
-            - key: Currency
-              width: 9
-              align: center
-            - key: Total
-              width: 13
-              align: right
-            - key: PaidAmount
-              width: 13
-              align: right
-            - key: Balance
-              width: 13
-              align: right
-            - key: OverdueDays
-              width: 10
-              align: right
-
-      # JSON エクスポート
-      invoice_json:
-        label: "請款書 JSON"
-        format: json
-        filename: "invoices_{date:yyyyMMdd}.json"
+        label: PaymentTerms
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

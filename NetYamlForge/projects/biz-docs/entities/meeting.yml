@@ -3,97 +3,104 @@ entities:
   meeting:
     table: Meeting
     key: Id
-    displayName: 議事録
+    displayName: 会議録
     softDelete: false
     isPublic: true
-    pdfTemplate: others/minutes-03
 
     forms:
+      MeetingNo:
+        type: string
+        label: MeetingNo
+        editable: true
+        required: true
       Title:
         type: string
-        required: true
-        label: 会議名
+        label: Title
         editable: true
+        required: true
       MeetingDate:
         type: datetime
-        required: true
-        label: 開催日時
+        label: MeetingDate
         editable: true
+        required: true
       Location:
         type: string
-        label: 開催場所
+        label: Location
         editable: true
-      Chairperson:
+      Organizer:
         type: string
-        label: 議長
+        label: Organizer
         editable: true
-      Recorder:
+      Participants:
         type: string
-        label: 書記
+        label: Participants
+        editable: true
+      Agenda:
+        type: string
+        label: Agenda
         editable: true
       Decisions:
-        type: textarea
-        label: 決定事項
+        type: string
+        label: Decisions
+        editable: true
+      ActionItems:
+        type: string
+        label: ActionItems
         editable: true
       NextMeetingDate:
         type: datetime
-        label: 次回会議日時
+        label: NextMeetingDate
         editable: true
-      NextMeetingLocation:
+      Notes:
         type: string
-        label: 次回会議場所
-        editable: true
-      NextMeetingAgenda:
-        type: string
-        label: 次回議題（予定）
-        editable: true
-      Status:
-        type: string
-        required: true
-        label: ステータス
-        editable: true
-        options: [draft, finalized, cancelled]
-      Remarks:
-        type: textarea
-        label: 備考
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
+      MeetingNo:
+        type: string
+        label: MeetingNo
       Title:
         type: string
-        label: 会議名
-        searchable: true
-        sortable: true
+        label: Title
       MeetingDate:
-        type: string
-        label: 開催日時
-        sortable: true
+        type: datetime
+        label: MeetingDate
       Location:
         type: string
-        label: 開催場所
-      Chairperson:
+        label: Location
+      Organizer:
         type: string
-        label: 議長
-      Status:
+        label: Organizer
+      Participants:
         type: string
-        label: ステータス
+        label: Participants
+      Agenda:
+        type: string
+        label: Agenda
+      Decisions:
+        type: string
+        label: Decisions
+      ActionItems:
+        type: string
+        label: ActionItems
+      NextMeetingDate:
+        type: datetime
+        label: NextMeetingDate
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:     "📝 下書き"
-          finalized: "✅ 確定"
-          cancelled: "❌ 中止"
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

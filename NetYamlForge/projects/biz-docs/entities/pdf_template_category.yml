@@ -7,141 +7,57 @@ entities:
     softDelete: false
     isPublic: true
 
-    joins: []
-
     forms:
       Code:
         type: string
-        required: true
-        label: カテゴリコード
+        label: Code
         editable: true
-        placeholder: "INVOICE"
+        required: true
       Name:
         type: string
+        label: Name
+        editable: true
         required: true
-        label: カテゴリ名
-        editable: true
-        placeholder: "請求書"
-      NameEn:
-        type: string
-        label: 英語名
-        editable: true
-        placeholder: "Invoices"
       Description:
-        type: textarea
-        label: 説明
-        editable: true
-      ParentId:
-        type: int
-        label: 親カテゴリ
-        editable: true
-        foreignKey:
-          entity: pdf_template_category
-          displayColumn: Name
-          picker: false
-      Icon:
         type: string
-        label: アイコン
+        label: Description
         editable: true
-        placeholder: "📄"
-      Color:
-        type: string
-        label: 色
-        editable: true
-        placeholder: "#1c3658"
       SortOrder:
         type: int
-        label: 表示順
+        label: SortOrder
         editable: true
       IsEnabled:
-        type: boolean
-        label: 有効
-        editable: true
-        defaultValue: true
-      Remarks:
-        type: textarea
-        label: 備考
+        type: int
+        label: IsEnabled
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       Code:
         type: string
-        label: コード
-        searchable: true
-        sortable: true
+        label: Code
       Name:
         type: string
-        label: カテゴリ名
-        searchable: true
-        sortable: true
-      NameEn:
+        label: Name
+      Description:
         type: string
-        label: 英語名
-        searchable: true
-      ParentId:
-        type: int
-        label: 親カテゴリ
-        sortable: true
-      Icon:
-        type: string
-        label: アイコン
-      Color:
-        type: string
-        label: 色
+        label: Description
       SortOrder:
         type: int
-        label: 表示順
-        sortable: true
+        label: SortOrder
       IsEnabled:
-        type: boolean
-        label: 有効
+        type: int
+        label: IsEnabled
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      IsEnabled:
-        type: toggle
-        label: 有効/無効
-      ParentId:
-        type: dropdown
-        label: 親カテゴリ
-        foreignKey:
-          entity: pdf_template_category
-          displayColumn: Name
-
-    paging:
-      pageSize: 20
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - Code
-          - Name
-          - NameEn
-          - ParentId
-          - Icon
-          - Color
-          - SortOrder
-          - IsEnabled
-          - Description
-          - Remarks
-
-    exports:
-      category_csv:
-        label: "カテゴリ CSV"
-        format: csv
-        filename: "pdf_template_categories_{date:yyyyMMdd}.csv"
-        columns:
-          - Code
-          - Name
-          - NameEn
-          - Icon
-          - SortOrder
-          - IsEnabled
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

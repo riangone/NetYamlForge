@@ -6,55 +6,36 @@ entities:
     displayName: 報価単
     softDelete: false
     isPublic: true
-    pdfTemplate: orders/purchase-order4
-
-    hooks:
-      beforeCreate:
-        - validate_quotation_status
-        - validate_tax_rate
-        - validate_amount_positive
-        - validate_currency
-      beforeUpdate:
-        - validate_quotation_status
-        - validate_tax_rate
-        - validate_amount_positive
-        - validate_currency
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: Quotation.CustomerId = cu.Id
 
     forms:
       QuoteNo:
         type: string
-        required: true
-        label: 見積番号
+        label: QuoteNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
       IssueDate:
         type: date
-        required: true
         label: 発行日
         editable: true
+        required: true
       ExpiryDate:
         type: date
-        label: 有効期限
+        label: ExpiryDate
         editable: true
       Currency:
         type: string
-        required: true
         label: 通貨
         editable: true
+        required: true
         options: [USD, EUR, CNY, JPY]
       Subtotal:
         type: decimal
@@ -63,7 +44,7 @@ entities:
         precision: 2
       TaxRate:
         type: decimal
-        label: 税率(%)
+        label: 税率 (%)
         editable: true
         precision: 2
       TaxAmount:
@@ -73,216 +54,80 @@ entities:
         precision: 2
       Total:
         type: decimal
-        required: true
-        label: 合計金額
+        label: 合計
         editable: true
+        required: true
         precision: 2
       Status:
         type: string
-        required: true
         label: ステータス
         editable: true
+        required: true
         options: [draft, sent, accepted, rejected, expired]
       PaymentTerms:
         type: string
-        label: 支払条件
+        label: PaymentTerms
         editable: true
       DeliveryTerms:
         type: string
-        label: 納期条件
+        label: DeliveryTerms
         editable: true
       Notes:
-        type: textarea
-        label: 備考
+        type: string
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       QuoteNo:
         type: string
-        label: 見積番号
-        searchable: true
-        sortable: true
+        label: QuoteNo
       CustomerId:
         type: int
-        label: Customer ID
-        hidden: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
+        label: 取引先 ID
       IssueDate:
         type: date
         label: 発行日
-        sortable: true
       ExpiryDate:
         type: date
-        label: 有効期限
-        sortable: true
+        label: ExpiryDate
       Currency:
         type: string
         label: 通貨
-        sortable: true
+      Subtotal:
+        type: decimal
+        label: 小計
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+      TaxAmount:
+        type: decimal
+        label: 税額
       Total:
         type: decimal
-        label: 合計金額
-        sortable: true
-        precision: 2
+        label: 合計
       Status:
         type: string
         label: ステータス
-        sortable: true
       PaymentTerms:
         type: string
-        label: 支払条件
+        label: PaymentTerms
       DeliveryTerms:
         type: string
-        label: 納期条件
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:    "📝 Draft"
-          sent:     "📤 Sent"
-          accepted: "✅ Accepted"
-          rejected: "❌ Rejected"
-          expired:  "⏰ Expired"
-      Currency:
-        type: dropdown
-        label: 通貨
-        options: [USD, EUR, CNY, JPY]
-      CustomerId:
-        type: dropdown
-        label: 取引先
-        foreignKey:
-          entity: customer
-          displayColumn: Name
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - QuoteNo
-          - CustomerId
-          - IssueDate
-          - ExpiryDate
-          - Currency
-          - Status
-          - PaymentTerms
-          - DeliveryTerms
-          - Subtotal
-          - TaxRate
-          - TaxAmount
-          - Total
-          - Notes
-
-    exports:
-      # 報価単 PDF（正式書類レイアウト・ブルー系）
-      quote_pdf:
-        label: "報価単 PDF"
-        format: pdf
-        filename: "quotation_{date:yyyyMMdd}.pdf"
-        columns:
-          - QuoteNo
-          - CustomerName
-          - IssueDate
-          - ExpiryDate
-          - Currency
-          - Total
-          - Status
-          - PaymentTerms
-          - DeliveryTerms
-        pdf:
-          title: "QUOTATION"
-          pageSize: A4
-          orientation: portrait
-          headerColor: "#1E3A5F"
-          oddRowColor: "#EFF6FF"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: QuoteNo
-              width: 20
-            - key: CustomerName
-              width: 28
-            - key: IssueDate
-              width: 14
-              align: center
-            - key: ExpiryDate
-              width: 14
-              align: center
-            - key: Currency
-              width: 10
-              align: center
-            - key: Total
-              width: 14
-              align: right
-
-      # 明細付き報価単 PDF（カスタム SQL で品目展開）
-      quote_detail_pdf:
-        label: "明細付き報価単 PDF"
-        format: pdf
-        filename: "quote_detail_{date:yyyyMMdd}.pdf"
-        sqlFile: exports/sql/quotation_with_items.sql
-        pdf:
-          title: "QUOTATION DETAIL"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#1E3A5F"
-          oddRowColor: "#EFF6FF"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: QuoteNo
-              width: 15
-            - key: CustomerName
-              width: 20
-            - key: LineNo
-              width: 8
-              align: center
-            - key: PartNo
-              width: 12
-            - key: Description
-              width: 22
-            - key: Unit
-              width: 7
-              align: center
-            - key: Quantity
-              width: 9
-              align: right
-            - key: UnitPrice
-              width: 10
-              align: right
-            - key: Amount
-              width: 12
-              align: right
-
-      # CSV エクスポート
-      quote_csv:
-        label: "報価単 CSV"
-        format: csv
-        filename: "quotations_{date:yyyyMMdd}.csv"
-        columns:
-          - QuoteNo
-          - CustomerName
-          - IssueDate
-          - ExpiryDate
-          - Currency
-          - Subtotal
-          - TaxRate
-          - TaxAmount
-          - Total
-          - Status
+        label: DeliveryTerms
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

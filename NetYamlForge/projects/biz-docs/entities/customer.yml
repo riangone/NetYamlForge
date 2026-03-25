@@ -7,118 +7,93 @@ entities:
     softDelete: false
     isPublic: true
 
-    joins: []
-
     forms:
       Code:
         type: string
-        required: true
-        label: 取引先コード
+        label: Code
         editable: true
+        required: true
       Name:
         type: string
-        required: true
-        label: 取引先名（中国語）
+        label: Name
         editable: true
+        required: true
       NameEn:
         type: string
-        label: 取引先名（英語）
+        label: NameEn
         editable: true
       Country:
         type: string
-        required: true
-        label: 国コード
+        label: Country
         editable: true
+        required: true
       ContactPerson:
         type: string
-        label: 担当者
+        label: ContactPerson
         editable: true
       Phone:
         type: string
-        label: 電話番号
+        label: Phone
         editable: true
       Email:
         type: string
-        label: メール
+        label: Email
         editable: true
       TaxId:
         type: string
-        label: 統一信用コード/税番号
+        label: TaxId
         editable: true
       Address:
-        type: textarea
-        label: 住所（中国語）
+        type: string
+        label: Address
         editable: true
       AddressEn:
-        type: textarea
-        label: 住所（英語）
+        type: string
+        label: AddressEn
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       Code:
         type: string
-        label: コード
-        searchable: true
-        sortable: true
+        label: Code
       Name:
         type: string
-        label: 取引先名
-        searchable: true
-        sortable: true
+        label: Name
       NameEn:
         type: string
-        label: 英語名
-        searchable: true
+        label: NameEn
       Country:
         type: string
-        label: 国
-        sortable: true
+        label: Country
       ContactPerson:
         type: string
-        label: 担当者
-        searchable: true
+        label: ContactPerson
       Phone:
         type: string
-        label: 電話
+        label: Phone
       Email:
         type: string
-        label: メール
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - Code
-          - Name
-          - NameEn
-          - Country
-          - ContactPerson
-          - Phone
-          - Email
-          - TaxId
-          - Address
-          - AddressEn
-
-    exports:
-      customer_csv:
-        label: "取引先 CSV"
-        format: csv
-        filename: "customers_{date:yyyyMMdd}.csv"
-        columns:
-          - Code
-          - Name
-          - NameEn
-          - Country
-          - ContactPerson
-          - Phone
-          - Email
+        label: Email
+      TaxId:
+        type: string
+        label: TaxId
+      Address:
+        type: string
+        label: Address
+      AddressEn:
+        type: string
+        label: AddressEn
+      CreatedAt:
+        type: datetime
+        label: 作成日
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

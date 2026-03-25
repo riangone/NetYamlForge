@@ -3,308 +3,90 @@ entities:
   jp_contract:
     table: JpContract
     key: Id
-    displayName: 契約書
+    displayName: 契約書台帳
     softDelete: false
     isPublic: true
-    pdfTemplate: contract
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: JpContract.CustomerId = cu.Id
 
     forms:
       ContractNo:
         type: string
-        required: true
-        label: 契約番号
+        label: ContractNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先（甲）
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
       Title:
         type: string
-        required: true
-        label: 契約件名
+        label: Title
         editable: true
-      ContractType:
-        type: string
         required: true
-        label: 契約種別
-        editable: true
-        options:
-          - 業務委託契約
-          - 売買契約
-          - 秘密保持契約
-          - 保守契約
-          - 賃貸借契約
-          - 請負契約
-          - 雇用契約
       StartDate:
         type: date
-        required: true
-        label: 契約開始日
+        label: StartDate
         editable: true
       EndDate:
         type: date
-        label: 契約終了日
+        label: EndDate
         editable: true
-      AutoRenew:
-        type: boolean
-        label: 自動更新
-        editable: true
-      ContractAmount:
+      Amount:
         type: decimal
-        label: 契約金額
+        label: 金額
         editable: true
-        precision: 0
-      PaymentTerms:
-        type: string
-        label: 支払条件
-        editable: true
+        precision: 2
       Status:
         type: string
-        required: true
         label: ステータス
         editable: true
-        options: [draft, review, active, expired, terminated]
-      SignedDate:
-        type: date
-        label: 締結日
-        editable: true
-      IsElectronic:
-        type: boolean
-        label: 電子契約
-        editable: true
-      StampTaxAmount:
-        type: int
-        label: 印紙税額（円）
-        editable: true
-      JurisdictionCourt:
+        required: true
+        options: [draft, sent, accepted, rejected, expired]
+      Notes:
         type: string
-        label: 合意管轄裁判所
-        editable: true
-        placeholder: "東京地方裁判所"
-      GoverningLaw:
-        type: string
-        label: 準拠法
-        editable: true
-        placeholder: "日本法"
-      OurSignatory:
-        type: string
-        label: 自社署名者
-        editable: true
-      TheirSignatory:
-        type: string
-        label: 相手方署名者
-        editable: true
-      Remarks:
-        type: textarea
-        label: 備考
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       ContractNo:
         type: string
-        label: 契約番号
-        searchable: true
-        sortable: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
+        label: ContractNo
       CustomerId:
         type: int
-        label: CustomerId
-        hidden: true
+        label: 取引先 ID
       Title:
         type: string
-        label: 契約件名
-        searchable: true
-        sortable: true
-      ContractType:
-        type: string
-        label: 契約種別
-        sortable: true
+        label: Title
       StartDate:
         type: date
-        label: 開始日
-        sortable: true
+        label: StartDate
       EndDate:
         type: date
-        label: 終了日
-        sortable: true
-      ContractAmount:
+        label: EndDate
+      Amount:
         type: decimal
-        label: 契約金額
-        sortable: true
-        precision: 0
+        label: 金額
       Status:
         type: string
         label: ステータス
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-      AutoRenew:
-        type: boolean
-        label: 自動更新
-      IsElectronic:
-        type: boolean
-        label: 電子契約
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:      "📝 下書き"
-          review:     "👀 レビュー中"
-          active:     "✅ 有効"
-          expired:    "⏰ 期限切"
-          terminated: "❌ 解除"
-      ContractType:
-        type: dropdown
-        label: 契約種別
-        options:
-          - 業務委託契約
-          - 売買契約
-          - 秘密保持契約
-          - 保守契約
-          - 賃貸借契約
-          - 請負契約
-          - 雇用契約
-      CustomerId:
-        type: dropdown
-        label: 取引先
-        foreignKey:
-          entity: customer
-          displayColumn: Name
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - ContractNo
-          - CustomerId
-          - Title
-          - ContractType
-          - Status
-          - StartDate
-          - EndDate
-          - AutoRenew
-          - SignedDate
-          - IsElectronic
-          - StampTaxAmount
-          - ContractAmount
-          - PaymentTerms
-          - JurisdictionCourt
-          - GoverningLaw
-          - OurSignatory
-          - TheirSignatory
-          - Remarks
-
-    exports:
-      # 契約書台帳 PDF（ダークパープル）
-      contract_pdf:
-        label: "契約書台帳 PDF"
-        format: pdf
-        filename: "契約書台帳_{date:yyyyMMdd}.pdf"
-        columns:
-          - ContractNo
-          - CustomerName
-          - Title
-          - ContractType
-          - StartDate
-          - EndDate
-          - ContractAmount
-          - Status
-        pdf:
-          title: "契約書台帳"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#4C1D95"
-          oddRowColor: "#F5F3FF"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: ContractNo
-              width: 16
-            - key: CustomerName
-              width: 22
-            - key: Title
-              width: 22
-            - key: ContractType
-              width: 15
-            - key: StartDate
-              width: 12
-              align: center
-            - key: EndDate
-              width: 12
-              align: center
-            - key: ContractAmount
-              width: 14
-              align: right
-            - key: Status
-              width: 12
-              align: center
-
-      # 期限切れ間近の契約 PDF（警告・オレンジ）
-      expiry_warning_pdf:
-        label: "期限切れ警告 PDF"
-        format: pdf
-        filename: "契約期限警告_{date:yyyyMMdd}.pdf"
-        sqlFile: exports/sql/jp_contract_expiry_warning.sql
-        pdf:
-          title: "契約期限切れ警告（90日以内）"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#92400E"
-          oddRowColor: "#FFFBEB"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: ContractNo
-              width: 14
-            - key: CustomerName
-              width: 20
-            - key: Title
-              width: 20
-            - key: ContractType
-              width: 14
-            - key: EndDate
-              width: 11
-              align: center
-            - key: DaysUntilExpiry
-              width: 11
-              align: right
-            - key: AutoRenew
-              width: 9
-              align: center
-            - key: ContractForm
-              width: 9
-              align: center
-            - key: Status
-              width: 9
-              align: center
-
-      contract_csv:
-        label: "契約書台帳 CSV"
-        format: csv
-        filename: "契約書台帳_{date:yyyyMMdd}.csv"
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

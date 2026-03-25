@@ -6,114 +6,100 @@ entities:
     displayName: 履歴書
     softDelete: false
     isPublic: true
-    pdfTemplate: others/resume-jis
 
     forms:
-      Name:
+      ResumeNo:
         type: string
+        label: ResumeNo
+        editable: true
         required: true
-        label: 氏名
-        editable: true
-      Kana:
+      ApplicantName:
         type: string
-        label: フリガナ
+        label: ApplicantName
         editable: true
+        required: true
       BirthDate:
         type: date
-        label: 生年月日
+        label: BirthDate
         editable: true
       Gender:
         type: string
-        label: 性別
+        label: Gender
         editable: true
-        options: [男, 女, その他]
       Address:
         type: string
-        label: 現住所
+        label: Address
         editable: true
       Phone:
         type: string
-        label: 電話番号
+        label: Phone
         editable: true
       Email:
         type: string
-        label: メールアドレス
+        label: Email
         editable: true
-      Hobbies:
-        type: textarea
-        label: 趣味・特技
-        editable: true
-      Hope:
-        type: textarea
-        label: 本人希望
-        editable: true
-      AvailableDate:
-        type: date
-        label: 入社可能日
-        editable: true
-      Awards:
-        type: textarea
-        label: 自賞点・他賞点
-        editable: true
-      References:
-        type: textarea
-        label: 推奨者・補足事項
-        editable: true
-      CreatedDate:
-        type: date
-        label: 作成日
-        editable: true
-      Status:
+      EducationHistory:
         type: string
-        required: true
-        label: ステータス
+        label: EducationHistory
         editable: true
-        options: [draft, submitted, archived]
+      WorkHistory:
+        type: string
+        label: WorkHistory
+        editable: true
+      Skills:
+        type: string
+        label: Skills
+        editable: true
+      Notes:
+        type: string
+        label: Notes
+        editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
-      Name:
+        identity: true
+        hidden: true
+      ResumeNo:
         type: string
-        label: 氏名
-        searchable: true
-        sortable: true
-      Kana:
+        label: ResumeNo
+      ApplicantName:
         type: string
-        label: フリガナ
-        searchable: true
+        label: ApplicantName
       BirthDate:
         type: date
-        label: 生年月日
-        sortable: true
+        label: BirthDate
+      Gender:
+        type: string
+        label: Gender
+      Address:
+        type: string
+        label: Address
       Phone:
         type: string
-        label: 電話番号
+        label: Phone
       Email:
         type: string
-        label: メール
-      AvailableDate:
-        type: date
-        label: 入社可能日
-        sortable: true
-      Status:
+        label: Email
+      EducationHistory:
         type: string
-        label: ステータス
+        label: EducationHistory
+      WorkHistory:
+        type: string
+        label: WorkHistory
+      Skills:
+        type: string
+        label: Skills
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:     "📝 下書き"
-          submitted: "📤 提出済"
-          archived:  "📁 アーカイブ"
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

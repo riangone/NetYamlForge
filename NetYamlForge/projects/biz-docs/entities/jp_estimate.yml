@@ -6,288 +6,112 @@ entities:
     displayName: 見積書
     softDelete: false
     isPublic: true
-    pdfTemplate: estimate
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: JpEstimate.CustomerId = cu.Id
 
     forms:
       EstimateNo:
         type: string
-        required: true
-        label: 見積番号
+        label: EstimateNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
-      Title:
-        type: string
-        required: true
-        label: 件名
-        editable: true
       IssueDate:
         type: date
-        required: true
-        label: 見積日
+        label: 発行日
         editable: true
+        required: true
       ExpiryDate:
         type: date
-        label: 有効期限
+        label: ExpiryDate
         editable: true
-      Subtotal10:
-        type: decimal
-        label: 10%対象小計
-        editable: true
-        precision: 0
-      TaxAmount10:
-        type: decimal
-        label: 消費税額(10%)
-        editable: true
-        precision: 0
-      Subtotal8:
-        type: decimal
-        label: 8%対象小計（軽減）
-        editable: true
-        precision: 0
-      TaxAmount8:
-        type: decimal
-        label: 消費税額(8%)
-        editable: true
-        precision: 0
       Subtotal:
         type: decimal
-        label: 小計（税抜合計）
+        label: 小計
         editable: true
-        precision: 0
+        precision: 2
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+        editable: true
+        precision: 2
       TaxAmount:
         type: decimal
-        label: 消費税合計
+        label: 税額
         editable: true
-        precision: 0
+        precision: 2
       Total:
         type: decimal
+        label: 合計
+        editable: true
         required: true
-        label: 合計金額（税込）
-        editable: true
-        precision: 0
-      PaymentTerms:
-        type: string
-        label: 支払条件
-        editable: true
-      DeliveryDays:
-        type: string
-        label: 納期
-        editable: true
-      DeliveryPlace:
-        type: string
-        label: 納品場所
-        editable: true
-      ValidityNote:
-        type: string
-        label: 有効期限注記
-        editable: true
-        placeholder: "本見積の有効期限は発行日より30日間とします。"
-      ExclusionNote:
-        type: textarea
-        label: 見積除外事項
-        editable: true
-      CompanyStamp:
-        type: string
-        label: 社印（会社名）
-        editable: true
-      Remarks:
-        type: textarea
-        label: 備考
-        editable: true
+        precision: 2
       Status:
         type: string
-        required: true
         label: ステータス
         editable: true
+        required: true
         options: [draft, sent, accepted, rejected, expired]
-      PreparedBy:
+      ValidityPeriod:
         type: string
-        label: 担当者
+        label: ValidityPeriod
+        editable: true
+      Notes:
+        type: string
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       EstimateNo:
         type: string
-        label: 見積番号
-        searchable: true
-        sortable: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
+        label: EstimateNo
       CustomerId:
         type: int
-        label: CustomerId
-        hidden: true
-      Title:
-        type: string
-        label: 件名
-        searchable: true
+        label: 取引先 ID
       IssueDate:
         type: date
-        label: 見積日
-        sortable: true
+        label: 発行日
       ExpiryDate:
         type: date
-        label: 有効期限
-        sortable: true
+        label: ExpiryDate
+      Subtotal:
+        type: decimal
+        label: 小計
+      TaxRate:
+        type: decimal
+        label: 税率 (%)
+      TaxAmount:
+        type: decimal
+        label: 税額
       Total:
         type: decimal
-        label: 合計金額
-        sortable: true
-        precision: 0
+        label: 合計
       Status:
         type: string
         label: ステータス
-        sortable: true
-      PreparedBy:
+      ValidityPeriod:
         type: string
-        label: 担当者
-        searchable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:    "📝 下書き"
-          sent:     "📤 送付済"
-          accepted: "✅ 承認"
-          rejected: "❌ 却下"
-          expired:  "⏰ 期限切"
-      CustomerId:
-        type: dropdown
-        label: 取引先
-        foreignKey:
-          entity: customer
-          displayColumn: Name
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - EstimateNo
-          - CustomerId
-          - Title
-          - IssueDate
-          - ExpiryDate
-          - Status
-          - PreparedBy
-          - PaymentTerms
-          - DeliveryDays
-          - DeliveryPlace
-          - Subtotal10
-          - TaxAmount10
-          - Subtotal8
-          - TaxAmount8
-          - Subtotal
-          - TaxAmount
-          - Total
-          - ValidityNote
-          - ExclusionNote
-          - CompanyStamp
-          - Remarks
-
-    exports:
-      # 見積書 PDF（日本標準様式・インディゴ）
-      estimate_pdf:
-        label: "見積書 PDF"
-        format: pdf
-        filename: "見積書_{date:yyyyMMdd}.pdf"
-        columns:
-          - EstimateNo
-          - CustomerName
-          - Title
-          - IssueDate
-          - ExpiryDate
-          - Total
-          - Status
-          - PreparedBy
-        pdf:
-          title: "見積書"
-          pageSize: A4
-          orientation: portrait
-          headerColor: "#312E81"
-          oddRowColor: "#EEF2FF"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: EstimateNo
-              width: 20
-            - key: CustomerName
-              width: 26
-            - key: Title
-              width: 24
-            - key: IssueDate
-              width: 14
-              align: center
-            - key: Total
-              width: 16
-              align: right
-
-      # 見積書一覧 PDF（明細付き・カスタムSQL）
-      estimate_detail_pdf:
-        label: "見積書明細 PDF"
-        format: pdf
-        filename: "見積書明細_{date:yyyyMMdd}.pdf"
-        sqlFile: exports/sql/jp_estimate_detail.sql
-        pdf:
-          title: "見積書 明細一覧"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#312E81"
-          oddRowColor: "#EEF2FF"
-          showPageNumbers: true
-          showGeneratedAt: true
-          columns:
-            - key: EstimateNo
-              width: 16
-            - key: CustomerName
-              width: 20
-            - key: Title
-              width: 20
-            - key: LineNo
-              width: 7
-              align: center
-            - key: ItemName
-              width: 20
-            - key: Quantity
-              width: 8
-              align: right
-            - key: UnitPrice
-              width: 12
-              align: right
-            - key: Amount
-              width: 12
-              align: right
-
-      estimate_csv:
-        label: "見積書 CSV"
-        format: csv
-        filename: "見積書_{date:yyyyMMdd}.csv"
+        label: ValidityPeriod
+      Notes:
+        type: string
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

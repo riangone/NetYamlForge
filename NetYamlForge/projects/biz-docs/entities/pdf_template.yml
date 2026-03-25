@@ -7,222 +7,123 @@ entities:
     softDelete: false
     isPublic: true
 
-    hooks:
-      beforeCreate:
-        - validate_pdf_template_status
-      beforeUpdate:
-        - validate_pdf_template_status
-
-    joins:
-      - type: left
-        table: PdfTemplateCategory
-        alias: cat
-        on: PdfTemplate.CategoryId = cat.Id
-
     forms:
       TemplateNo:
         type: string
-        required: true
-        label: テンプレート番号
+        label: TemplateNo
         editable: true
+        required: true
       CategoryId:
         type: int
-        required: true
-        label: カテゴリ
+        label: カテゴリ ID
         editable: true
+        required: true
         foreignKey:
           entity: pdf_template_category
           displayColumn: Name
           picker: false
       Name:
         type: string
-        required: true
-        label: テンプレート名
+        label: Name
         editable: true
+        required: true
       NameEn:
         type: string
-        label: 英語名
+        label: NameEn
         editable: true
       Description:
-        type: textarea
-        label: 説明
+        type: string
+        label: Description
         editable: true
       FileName:
         type: string
-        required: true
-        label: ファイル名
+        label: FileName
         editable: true
-        placeholder: "invoice-standard.pdf"
+        required: true
       PageSize:
         type: string
-        required: true
-        label: 用紙サイズ
+        label: PageSize
         editable: true
-        options: [A4, A3, B4, B5, Letter, Legal]
+        required: true
       Orientation:
         type: string
-        required: true
-        label: 向き
+        label: Orientation
         editable: true
-        options: [portrait, landscape]
+        required: true
       Theme:
         type: string
-        label: テーマ
+        label: Theme
         editable: true
-        options: [standard, blue, green, orange, gray, snow, bank]
       HeaderColor:
         type: string
-        label: ヘッダー色
+        label: HeaderColor
         editable: true
-        placeholder: "#1c3658"
       IsDefault:
-        type: boolean
-        label: デフォルト
+        type: int
+        label: IsDefault
         editable: true
       SortOrder:
         type: int
-        label: 表示順
+        label: SortOrder
         editable: true
       Status:
         type: string
-        required: true
         label: ステータス
         editable: true
-        type: toggle-group
-        optionLabels:
-          active: "✅ 有効"
-          inactive: "⏸️ 無効"
-          draft: "📝 下書き"
-      Remarks:
-        type: textarea
-        label: 備考
-        editable: true
+        required: true
+        options: [draft, sent, accepted, rejected, expired]
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
+        identity: true
+        hidden: true
       TemplateNo:
         type: string
-        label: テンプレート番号
-        searchable: true
-        sortable: true
+        label: TemplateNo
+      CategoryId:
+        type: int
+        label: カテゴリ ID
       Name:
         type: string
-        label: テンプレート名
-        searchable: true
-        sortable: true
+        label: Name
       NameEn:
         type: string
-        label: 英語名
-        searchable: true
-      CategoryName:
+        label: NameEn
+      Description:
         type: string
-        label: カテゴリ
-        expression: cat.Name
-        searchable: true
-        sortable: true
-      CategoryId:
-        type: int
-        label: CategoryId
-        hidden: true
+        label: Description
       FileName:
         type: string
-        label: ファイル名
-        searchable: true
+        label: FileName
       PageSize:
         type: string
-        label: 用紙サイズ
-        sortable: true
+        label: PageSize
       Orientation:
         type: string
-        label: 向き
-        sortable: true
+        label: Orientation
       Theme:
         type: string
-        label: テーマ
-        sortable: true
+        label: Theme
+      HeaderColor:
+        type: string
+        label: HeaderColor
       IsDefault:
-        type: boolean
-        label: デフォルト
-        sortable: true
+        type: int
+        label: IsDefault
       SortOrder:
         type: int
-        label: 表示順
-        sortable: true
+        label: SortOrder
       Status:
         type: string
         label: ステータス
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          active:   "✅ 有効"
-          inactive: "⏸️ 無効"
-          draft:    "📝 下書き"
-      CategoryId:
-        type: dropdown
-        label: カテゴリ
-        foreignKey:
-          entity: pdf_template_category
-          displayColumn: Name
-      Theme:
-        type: dropdown
-        label: テーマ
-        options: [standard, blue, green, orange, gray, snow, bank]
-
-    paging:
-      pageSize: 20
-      mode: numbered
-      enableCount: true
-
-    layout:
-      forms:
-        columns: 2
-        order:
-          - TemplateNo
-          - Name
-          - NameEn
-          - CategoryId
-          - FileName
-          - PageSize
-          - Orientation
-          - Theme
-          - HeaderColor
-          - IsDefault
-          - SortOrder
-          - Status
-          - Description
-          - Remarks
-
-    exports:
-      template_list_pdf:
-        label: "テンプレート一覧 PDF"
-        format: pdf
-        filename: "PDF テンプレート一覧_{date:yyyyMMdd}.pdf"
-        columns:
-          - TemplateNo
-          - Name
-          - CategoryName
-          - FileName
-          - PageSize
-          - Theme
-          - Status
-        pdf:
-          title: "PDF テンプレート一覧"
-          pageSize: A4
-          orientation: landscape
-          headerColor: "#1c3658"
-          oddRowColor: "#f8fcfe"
-          showPageNumbers: true
-          showGeneratedAt: true
-
-      template_csv:
-        label: "テンプレート CSV"
-        format: csv
-        filename: "pdf_templates_{date:yyyyMMdd}.csv"
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true

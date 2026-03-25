@@ -1,161 +1,75 @@
 imports: []
 entities:
   jp_delivery_slip:
-    table: JpDelivery
+    table: JpDeliverySlip
     key: Id
-    displayName: 納品書（明細付き）
+    displayName: 送付状
     softDelete: false
     isPublic: true
-    pdfTemplate: others/delivery-slip
-
-    joins:
-      - type: left
-        table: Customer
-        alias: cu
-        on: JpDelivery.CustomerId = cu.Id
 
     forms:
-      DeliveryNo:
+      SlipNo:
         type: string
-        required: true
-        label: 納品書番号
+        label: SlipNo
         editable: true
+        required: true
       CustomerId:
         type: int
-        required: true
-        label: 取引先
+        label: 取引先 ID
         editable: true
+        required: true
         foreignKey:
           entity: customer
           displayColumn: Name
           picker: false
-      Title:
-        type: string
-        required: true
-        label: 件名
+      IssueDate:
+        type: date
+        label: 発行日
         editable: true
+        required: true
       DeliveryDate:
         type: date
-        required: true
-        label: 納品日
+        label: DeliveryDate
         editable: true
-      DeliveryPlace:
-        type: string
-        label: 納品場所
-        editable: true
-      Subtotal10:
-        type: decimal
-        label: 10%対象小計
-        editable: true
-        precision: 0
-      TaxAmount10:
-        type: decimal
-        label: 消費税(10%)
-        editable: true
-        precision: 0
-      Subtotal8:
-        type: decimal
-        label: 8%対象小計
-        editable: true
-        precision: 0
-      TaxAmount8:
-        type: decimal
-        label: 消費税(8%)
-        editable: true
-        precision: 0
-      Subtotal:
-        type: decimal
-        label: 小計
-        editable: true
-        precision: 0
-      TaxAmount:
-        type: decimal
-        label: 消費税合計
-        editable: true
-        precision: 0
-      Total:
-        type: decimal
-        required: true
-        label: 合計金額（税込）
-        editable: true
-        precision: 0
-      InspectionPeriodDays:
+      TotalPackages:
         type: int
-        label: 検収期間（営業日）
+        label: TotalPackages
         editable: true
-      ReceiptConfirmedDate:
-        type: date
-        label: 受領確認日
-        editable: true
-      Status:
+      Notes:
         type: string
-        required: true
-        label: ステータス
-        editable: true
-        options: [draft, delivered, confirmed, returned]
-      PreparedBy:
-        type: string
-        label: 担当者
-        editable: true
-      CompanyStamp:
-        type: string
-        label: 社印（会社名）
-        editable: true
-      Remarks:
-        type: textarea
-        label: 備考
+        label: Notes
         editable: true
 
     columns:
       Id:
         type: int
-        identity: true
         label: ID
         sortable: true
-      DeliveryNo:
+        identity: true
+        hidden: true
+      SlipNo:
         type: string
-        label: 納品書番号
-        searchable: true
-        sortable: true
-      CustomerName:
-        type: string
-        label: 取引先
-        expression: cu.Name
-        searchable: true
-        sortable: true
+        label: SlipNo
       CustomerId:
         type: int
-        label: CustomerId
-        hidden: true
-      Title:
-        type: string
-        label: 件名
-        searchable: true
+        label: 取引先 ID
+      IssueDate:
+        type: date
+        label: 発行日
       DeliveryDate:
         type: date
-        label: 納品日
-        sortable: true
-      Total:
-        type: decimal
-        label: 合計金額
-        sortable: true
-        precision: 0
-      Status:
+        label: DeliveryDate
+      TotalPackages:
+        type: int
+        label: TotalPackages
+      Notes:
         type: string
-        label: ステータス
+        label: Notes
+      CreatedAt:
+        type: datetime
+        label: 作成日
         sortable: true
-
-    filters:
-      Status:
-        type: toggle-group
-        label: ステータス
-        optionLabels:
-          draft:     "📝 下書き"
-          delivered: "🚚 納品済"
-          confirmed: "✅ 受領確認"
-          returned:  "↩️ 返品"
-
-    paging:
-      pageSize: 15
-      mode: numbered
-      enableCount: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日
+        sortable: true
