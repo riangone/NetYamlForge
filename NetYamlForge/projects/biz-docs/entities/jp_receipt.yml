@@ -1,0 +1,146 @@
+imports: []
+entities:
+  jp_receipt:
+    table: JpReceipt
+    key: Id
+    displayName: 領収書
+    softDelete: false
+    isPublic: true
+    pdfTemplate: receipts/receipt-02
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpReceipt.CustomerId = cu.Id
+
+    forms:
+      ReceiptNo:
+        type: string
+        required: true
+        label: 領収番号
+        editable: true
+      CustomerId:
+        type: int
+        required: true
+        label: 取引先
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+          picker: false
+      ReceivedDate:
+        type: date
+        required: true
+        label: 受領日
+        editable: true
+      Purpose:
+        type: string
+        label: 但し書き
+        editable: true
+        placeholder: "○○代金として"
+      Amount:
+        type: decimal
+        required: true
+        label: 受領金額
+        editable: true
+        precision: 0
+      Details:
+        type: string
+        label: 内訳
+        editable: true
+      PaymentMethod:
+        type: string
+        label: 支払方法
+        editable: true
+        options: [現金, 銀行振込, 小切手, クレジットカード]
+      DepositDate:
+        type: date
+        label: 入金日
+        editable: true
+      InvoiceNo:
+        type: string
+        label: 請求書番号
+        editable: true
+      PreparedBy:
+        type: string
+        label: 担当者
+        editable: true
+      CompanyStamp:
+        type: string
+        label: 社印（会社名）
+        editable: true
+      CompanyName:
+        type: string
+        label: 会社名
+        editable: true
+      CompanyAddress:
+        type: string
+        label: 会社住所
+        editable: true
+      CompanyPhone:
+        type: string
+        label: 会社電話番号
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [draft, issued, cancelled]
+      Remarks:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      ReceiptNo:
+        type: string
+        label: 領収番号
+        searchable: true
+        sortable: true
+      CustomerName:
+        type: string
+        label: 取引先
+        expression: cu.Name
+        searchable: true
+        sortable: true
+      CustomerId:
+        type: int
+        label: CustomerId
+        hidden: true
+      ReceivedDate:
+        type: date
+        label: 受領日
+        sortable: true
+      Amount:
+        type: decimal
+        label: 受領金額
+        sortable: true
+        precision: 0
+      Purpose:
+        type: string
+        label: 但し書き
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft:    "📝 下書き"
+          issued:   "✅ 発行済"
+          cancelled: "❌ 取消"
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true

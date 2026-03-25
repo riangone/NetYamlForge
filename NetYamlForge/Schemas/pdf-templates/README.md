@@ -175,12 +175,7 @@ NetYamlForge/projects/{project-name}/pdf-templates/invoice.yaml
 `IDocumentPdfService` を注入すると `DocumentPdfSharpService` が使われます。
 iText 版を使うには `DocumentPdfService` を直接注入してください。
 
-### PDFsharp サンプル生成 CLI
+### サンプルデータでの動作確認
 
-全テンプレートのサンプル PDF を PDFsharp で生成するには:
-
-```bash
-dotnet run -- --generate-pdf-samples [--output-dir=<path>]
-```
-
-`--output-dir` を省略した場合は `./pdf-samples/` に出力されます。
+`biz-docs` プロジェクトには全テンプレートに対応するエンティティとシードデータが含まれています。
+アプリを起動して `/biz-docs` にアクセスし、各エンティティの「DocumentPdf」アクションで PDF を確認できます。

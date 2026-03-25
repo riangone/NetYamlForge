@@ -1,0 +1,119 @@
+imports: []
+entities:
+  jp_resume:
+    table: JpResume
+    key: Id
+    displayName: 履歴書
+    softDelete: false
+    isPublic: true
+    pdfTemplate: others/resume-jis
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 氏名
+        editable: true
+      Kana:
+        type: string
+        label: フリガナ
+        editable: true
+      BirthDate:
+        type: date
+        label: 生年月日
+        editable: true
+      Gender:
+        type: string
+        label: 性別
+        editable: true
+        options: [男, 女, その他]
+      Address:
+        type: string
+        label: 現住所
+        editable: true
+      Phone:
+        type: string
+        label: 電話番号
+        editable: true
+      Email:
+        type: string
+        label: メールアドレス
+        editable: true
+      Hobbies:
+        type: textarea
+        label: 趣味・特技
+        editable: true
+      Hope:
+        type: textarea
+        label: 本人希望
+        editable: true
+      AvailableDate:
+        type: date
+        label: 入社可能日
+        editable: true
+      Awards:
+        type: textarea
+        label: 自賞点・他賞点
+        editable: true
+      References:
+        type: textarea
+        label: 推奨者・補足事項
+        editable: true
+      CreatedDate:
+        type: date
+        label: 作成日
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [draft, submitted, archived]
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        label: 氏名
+        searchable: true
+        sortable: true
+      Kana:
+        type: string
+        label: フリガナ
+        searchable: true
+      BirthDate:
+        type: date
+        label: 生年月日
+        sortable: true
+      Phone:
+        type: string
+        label: 電話番号
+      Email:
+        type: string
+        label: メール
+      AvailableDate:
+        type: date
+        label: 入社可能日
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft:     "📝 下書き"
+          submitted: "📤 提出済"
+          archived:  "📁 アーカイブ"
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true

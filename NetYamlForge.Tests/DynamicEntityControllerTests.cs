@@ -605,6 +605,7 @@ public class DynamicEntityControllerTests
     private sealed class StubDocumentPdfService : IDocumentPdfService
     {
         public PdfTemplateConfig? LoadTemplate(string projectDir, string templateName) => null;
+        public PdfTemplateConfig? LoadGlobalTemplate(string templateName) => null;
 
         public byte[] Generate(
             PdfTemplateConfig template,

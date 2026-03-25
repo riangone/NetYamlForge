@@ -27,3 +27,31 @@ quickActions:
     url: /biz-docs/DynamicEntity/Index?entity=customer
     style: btn-ghost
     icon: 🏢
+  - label: 請求書
+    url: /biz-docs/DynamicEntity/Index?entity=jp_invoice
+    style: btn-primary
+    icon: 📄
+  - label: 見積書
+    url: /biz-docs/DynamicEntity/Index?entity=jp_estimate
+    style: btn-outline
+    icon: 📝
+  - label: 納品書
+    url: /biz-docs/DynamicEntity/Index?entity=jp_delivery_slip
+    style: btn-outline
+    icon: 🚚
+  - label: 領収書
+    url: /biz-docs/DynamicEntity/Index?entity=jp_receipt
+    style: btn-outline
+    icon: 🧾
+  - label: FAX 送付状
+    url: /biz-docs/DynamicEntity/Index?entity=fax_cover
+    style: btn-ghost
+    icon: 📠
+  - label: 議事録
+    url: /biz-docs/DynamicEntity/Index?entity=meeting
+    style: btn-ghost
+    icon: 📋
+  - label: 履歴書
+    url: /biz-docs/DynamicEntity/Index?entity=jp_resume
+    style: btn-ghost
+    icon: 👤

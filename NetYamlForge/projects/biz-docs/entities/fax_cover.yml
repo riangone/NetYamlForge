@@ -1,0 +1,170 @@
+imports: []
+entities:
+  fax_cover:
+    table: FaxCover
+    key: Id
+    displayName: FAX 送付状
+    softDelete: false
+    isPublic: true
+    pdfTemplate: others/fax-cover
+
+    joins:
+      - type: left
+        table: Contact
+        alias: rc
+        on: FaxCover.RecipientId = rc.Id
+
+    forms:
+      RecipientId:
+        type: int
+        required: true
+        label: 送信先
+        editable: true
+        foreignKey:
+          entity: contact
+          displayColumn: Name
+          picker: false
+      SendDate:
+        type: datetime
+        required: true
+        label: 送信日時
+        editable: true
+      TotalPages:
+        type: int
+        required: true
+        label: 総ページ数
+        editable: true
+      DocumentCount:
+        type: int
+        required: true
+        label: 本文書数
+        editable: true
+      Message:
+        type: textarea
+        label: メッセージ
+        editable: true
+      SenderCompany:
+        type: string
+        label: 送信者会社名
+        editable: true
+      SenderDepartment:
+        type: string
+        label: 送信者部署
+        editable: true
+      SenderName:
+        type: string
+        label: 送信者氏名
+        editable: true
+      SenderFax:
+        type: string
+        label: 送信者 FAX
+        editable: true
+      SenderPhone:
+        type: string
+        label: 送信者電話
+        editable: true
+      SenderEmail:
+        type: string
+        label: 送信者メール
+        editable: true
+      Remarks:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      RecipientName:
+        type: string
+        label: 送信先
+        expression: rc.Name
+        searchable: true
+        sortable: true
+      RecipientId:
+        type: int
+        label: RecipientId
+        hidden: true
+      SendDate:
+        type: string
+        label: 送信日時
+        sortable: true
+      TotalPages:
+        type: int
+        label: ページ数
+      SenderName:
+        type: string
+        label: 担当者
+        searchable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+  contact:
+    table: Contact
+    key: Id
+    displayName: 連絡先
+    softDelete: false
+    isPublic: true
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 会社名
+        editable: true
+      Department:
+        type: string
+        label: 部署
+        editable: true
+      ContactName:
+        type: string
+        label: 担当者名
+        editable: true
+      FaxNumber:
+        type: string
+        label: FAX番号
+        editable: true
+      Phone:
+        type: string
+        label: 電話番号
+        editable: true
+      Email:
+        type: string
+        label: メール
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        label: 会社名
+        searchable: true
+        sortable: true
+      Department:
+        type: string
+        label: 部署
+      ContactName:
+        type: string
+        label: 担当者
+        searchable: true
+      FaxNumber:
+        type: string
+        label: FAX番号
+      Phone:
+        type: string
+        label: 電話番号
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true

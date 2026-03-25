@@ -133,27 +133,6 @@ if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnor
     return;
 }
 
-// ── --generate-pdf-samples ─────────────────────────────────────────────────
-if (args.Any(a => a.Equals("--generate-pdf-samples", StringComparison.OrdinalIgnoreCase)))
-{
-    var outArg    = args.FirstOrDefault(a => a.StartsWith("--output-dir=", StringComparison.OrdinalIgnoreCase));
-    var outputDir = outArg?.Split('=', 2).ElementAtOrDefault(1) ?? "pdf-samples";
-
-    // 最小 DI コンテナで IDocumentPdfService (PDFsharp) と PdfTemplateSampleRunner を構築
-    var tempServices = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-    tempServices.AddSingleton<NetYamlForge.Services.IDocumentPdfService,
-                              NetYamlForge.Services.DocumentPdfSharpService>();
-    tempServices.AddSingleton<NetYamlForge.Services.PdfTemplateSampleRunner>();
-    var sp     = tempServices.BuildServiceProvider();
-    var runner = sp.GetRequiredService<NetYamlForge.Services.PdfTemplateSampleRunner>();
-
-    Console.WriteLine($"PDFsharp サンプル PDF を生成します → {Path.GetFullPath(outputDir)}");
-    int count = runner.Run(outputDir);
-    Console.WriteLine($"完了: {count} ファイルを生成しました。");
-    Environment.Exit(count > 0 ? 0 : 1);
-    return;
-}
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Windows サービスとして実行する場合

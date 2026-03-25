@@ -1,0 +1,184 @@
+imports: []
+entities:
+  jp_invoice_bank:
+    table: JpInvoice
+    key: Id
+    displayName: 請求書（銀行振込）
+    softDelete: false
+    isPublic: true
+    pdfTemplate: invoices/invoice-bank
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpInvoice.CustomerId = cu.Id
+
+    forms:
+      InvoiceNo:
+        type: string
+        required: true
+        label: 請求書番号
+        editable: true
+      CustomerId:
+        type: int
+        required: true
+        label: 取引先
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+          picker: false
+      Title:
+        type: string
+        required: true
+        label: 件名
+        editable: true
+      IssueDate:
+        type: date
+        required: true
+        label: 請求日
+        editable: true
+      DueDate:
+        type: date
+        required: true
+        label: 支払期日
+        editable: true
+      RegistrationNo:
+        type: string
+        label: 登録番号
+        editable: true
+      Subtotal10:
+        type: decimal
+        label: 10%対象小計
+        editable: true
+        precision: 0
+      TaxAmount10:
+        type: decimal
+        label: 消費税(10%)
+        editable: true
+        precision: 0
+      Subtotal8:
+        type: decimal
+        label: 8%対象小計
+        editable: true
+        precision: 0
+      TaxAmount8:
+        type: decimal
+        label: 消費税(8%)
+        editable: true
+        precision: 0
+      Subtotal:
+        type: decimal
+        label: 小計
+        editable: true
+        precision: 0
+      TaxAmount:
+        type: decimal
+        label: 消費税合計
+        editable: true
+        precision: 0
+      Total:
+        type: decimal
+        required: true
+        label: 請求金額（税込）
+        editable: true
+        precision: 0
+      BankName:
+        type: string
+        label: 銀行名
+        editable: true
+      BranchName:
+        type: string
+        label: 支店名
+        editable: true
+      AccountType:
+        type: string
+        label: 口座種別
+        editable: true
+        options: [普通, 当座]
+      AccountNo:
+        type: string
+        label: 口座番号
+        editable: true
+      AccountHolder:
+        type: string
+        label: 口座名義
+        editable: true
+      TransferFeeNote:
+        type: string
+        label: 振込手数料注記
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options: [draft, issued, paid, overdue, cancelled]
+      PreparedBy:
+        type: string
+        label: 担当者
+        editable: true
+      CompanyStamp:
+        type: string
+        label: 社印（会社名）
+        editable: true
+      Remarks:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      InvoiceNo:
+        type: string
+        label: 請求書番号
+        searchable: true
+        sortable: true
+      CustomerName:
+        type: string
+        label: 取引先
+        expression: cu.Name
+        searchable: true
+        sortable: true
+      CustomerId:
+        type: int
+        label: CustomerId
+        hidden: true
+      Title:
+        type: string
+        label: 件名
+        searchable: true
+      IssueDate:
+        type: date
+        label: 請求日
+        sortable: true
+      Total:
+        type: decimal
+        label: 請求金額
+        sortable: true
+        precision: 0
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          draft:     "📝 下書き"
+          issued:    "📤 発行済"
+          paid:      "✅ 入金済"
+          overdue:   "⚠️ 期限超過"
+          cancelled: "❌ 取消"
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true

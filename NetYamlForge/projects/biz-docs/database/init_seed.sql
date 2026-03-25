@@ -3,6 +3,17 @@
 -- ============================================================
 PRAGMA foreign_keys = OFF;
 
+DROP TABLE IF EXISTS ResumeQualification;
+DROP TABLE IF EXISTS ResumeWorkHistory;
+DROP TABLE IF EXISTS ResumeEducation;
+DROP TABLE IF EXISTS JpResume;
+DROP TABLE IF EXISTS MeetingActionItem;
+DROP TABLE IF EXISTS MeetingDecision;
+DROP TABLE IF EXISTS MeetingAttendee;
+DROP TABLE IF EXISTS Meeting;
+DROP TABLE IF EXISTS FaxCover;
+DROP TABLE IF EXISTS Contact;
+DROP TABLE IF EXISTS JpReceipt;
 DROP TABLE IF EXISTS CustomsDeclaration;
 DROP TABLE IF EXISTS Invoice;
 DROP TABLE IF EXISTS QuotationItem;
@@ -49,6 +60,12 @@ CREATE TABLE Quotation (
     PaymentTerms    TEXT,
     DeliveryTerms   TEXT,
     Notes           TEXT,
+    -- purchase-order テンプレート用追加列
+    Title           TEXT,
+    DeliveryDays    TEXT,
+    DeliveryPlace   TEXT,
+    CompanyStamp    TEXT,
+    PreparedBy      TEXT,
     FOREIGN KEY (CustomerId) REFERENCES Customer(Id)
 );
 
@@ -63,6 +80,8 @@ CREATE TABLE QuotationItem (
     UnitPrice       REAL    NOT NULL,
     Amount          REAL    NOT NULL,
     Remarks         TEXT,
+    ItemName        TEXT,   -- purchase-order テンプレート用（Description の別名）
+    Spec            TEXT,   -- purchase-order テンプレート用（仕様）
     FOREIGN KEY (QuotationId) REFERENCES Quotation(Id)
 );
 
@@ -174,6 +193,16 @@ INSERT INTO QuotationItem (QuotationId, LineNo, PartNo, Description, Unit, Quant
   -- QT-2026-0105
   (5, 1, 'EQ-CNC-5A', 'CNC加工中心五轴联动 型号5A', '台', 2, 88000.00, 176000.00),
   (5, 2, 'SVC-INST', '安装调试服务（含培训2天）', '次', 2, 5000.00, 10000.00);
+
+-- purchase-order テンプレート用 Quotation 補足データ
+UPDATE Quotation SET Title = '電子部品 購入品見積', DeliveryDays = '受注後30日', DeliveryPlace = '弊社倉庫', CompanyStamp = '○○商事株式会社', PreparedBy = '田中 太郎' WHERE QuoteNo = 'QT-2026-0101';
+UPDATE Quotation SET Title = 'WiFi モジュール・アンテナ', DeliveryDays = '受注後14日', DeliveryPlace = '弊社倉庫', CompanyStamp = '○○商事株式会社', PreparedBy = '山田 花子' WHERE QuoteNo = 'QT-2026-0102';
+UPDATE Quotation SET Title = 'サーバー機器一式', DeliveryDays = 'Net 60 days', DeliveryPlace = 'Hamburg Warehouse', CompanyStamp = '○○商事株式会社', PreparedBy = '佐藤 次郎' WHERE QuoteNo = 'QT-2026-0103';
+UPDATE Quotation SET Title = '電子部品サンプル', DeliveryDays = '受注後45日', DeliveryPlace = '指定場所', CompanyStamp = '○○商事株式会社', PreparedBy = '田中 太郎' WHERE QuoteNo = 'QT-2026-0104';
+UPDATE Quotation SET Title = 'CNC加工センター導入一式', DeliveryDays = '契約後60日', DeliveryPlace = '广州客先指定', CompanyStamp = '○○商事株式会社', PreparedBy = '李 明' WHERE QuoteNo = 'QT-2026-0105';
+
+-- purchase-order テンプレート用 QuotationItem 補足データ（ItemName / Spec）
+UPDATE QuotationItem SET ItemName = Description, Spec = PartNo;
 
 -- ---- Seed: Invoices ----
 
@@ -386,6 +415,157 @@ CREATE TABLE JpContract (
     FOREIGN KEY (CustomerId) REFERENCES Customer(Id)
 );
 
+-- 領収書（receipt-02 テンプレート用）
+CREATE TABLE JpReceipt (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    ReceiptNo       TEXT    NOT NULL UNIQUE,
+    CustomerId      INTEGER NOT NULL,
+    ReceivedDate    TEXT    NOT NULL,
+    Purpose         TEXT,
+    Amount          REAL    NOT NULL DEFAULT 0,
+    Details         TEXT,
+    PaymentMethod   TEXT,
+    DepositDate     TEXT,
+    InvoiceNo       TEXT,
+    PreparedBy      TEXT,
+    CompanyStamp    TEXT,
+    CompanyName     TEXT,
+    CompanyAddress  TEXT,
+    CompanyPhone    TEXT,
+    Status          TEXT    NOT NULL DEFAULT 'issued',
+    Remarks         TEXT,
+    FOREIGN KEY (CustomerId) REFERENCES Customer(Id)
+);
+
+-- 連絡先（fax-cover テンプレート用）
+CREATE TABLE Contact (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name            TEXT    NOT NULL,
+    Department      TEXT,
+    ContactName     TEXT,
+    FaxNumber       TEXT,
+    Phone           TEXT,
+    Email           TEXT
+);
+
+-- FAX 送付状（fax-cover テンプレート用）
+CREATE TABLE FaxCover (
+    Id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    RecipientId      INTEGER NOT NULL,
+    SendDate         TEXT    NOT NULL,
+    TotalPages       INTEGER NOT NULL DEFAULT 1,
+    DocumentCount    INTEGER NOT NULL DEFAULT 1,
+    Message          TEXT,
+    SenderCompany    TEXT,
+    SenderDepartment TEXT,
+    SenderName       TEXT,
+    SenderFax        TEXT,
+    SenderPhone      TEXT,
+    SenderEmail      TEXT,
+    Remarks          TEXT,
+    FOREIGN KEY (RecipientId) REFERENCES Contact(Id)
+);
+
+-- 会議（minutes-03 テンプレート用）
+CREATE TABLE Meeting (
+    Id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    Title                TEXT    NOT NULL,
+    MeetingDate          TEXT    NOT NULL,
+    Location             TEXT,
+    Recorder             TEXT,
+    Chairperson          TEXT,
+    Decisions            TEXT,
+    NextMeetingDate      TEXT,
+    NextMeetingLocation  TEXT,
+    NextMeetingAgenda    TEXT,
+    Status               TEXT    NOT NULL DEFAULT 'draft',
+    Remarks              TEXT
+);
+
+CREATE TABLE MeetingAttendee (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    MeetingId       INTEGER NOT NULL,
+    Name            TEXT    NOT NULL,
+    Department      TEXT,
+    Role            TEXT,
+    AttendanceType  TEXT,
+    Comments        TEXT,
+    FOREIGN KEY (MeetingId) REFERENCES Meeting(Id)
+);
+
+CREATE TABLE MeetingDecision (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    MeetingId       INTEGER NOT NULL,
+    ItemNo          INTEGER NOT NULL,
+    Topic           TEXT    NOT NULL,
+    Content         TEXT,
+    Decision        TEXT,
+    FOREIGN KEY (MeetingId) REFERENCES Meeting(Id)
+);
+
+CREATE TABLE MeetingActionItem (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    MeetingId       INTEGER NOT NULL,
+    ItemNo          INTEGER NOT NULL,
+    Description     TEXT    NOT NULL,
+    Owner           TEXT,
+    DueDate         TEXT,
+    Priority        TEXT    DEFAULT 'medium',
+    Status          TEXT    NOT NULL DEFAULT 'open',
+    Remarks         TEXT,
+    FOREIGN KEY (MeetingId) REFERENCES Meeting(Id)
+);
+
+-- 履歴書（resume-jis テンプレート用）
+CREATE TABLE JpResume (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name            TEXT    NOT NULL,
+    Kana            TEXT,
+    BirthDate       TEXT,
+    Gender          TEXT,
+    Address         TEXT,
+    Phone           TEXT,
+    Email           TEXT,
+    Hobbies         TEXT,
+    Hope            TEXT,
+    AvailableDate   TEXT,
+    Awards          TEXT,
+    References      TEXT,
+    CreatedDate     TEXT,
+    Status          TEXT    NOT NULL DEFAULT 'draft'
+);
+
+CREATE TABLE ResumeEducation (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    ResumeId        INTEGER NOT NULL,
+    StartDate       TEXT    NOT NULL,
+    EventType       TEXT    NOT NULL,
+    SchoolName      TEXT,
+    FOREIGN KEY (ResumeId) REFERENCES JpResume(Id)
+);
+
+CREATE TABLE ResumeWorkHistory (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    ResumeId        INTEGER NOT NULL,
+    StartDate       TEXT    NOT NULL,
+    EndDate         TEXT,
+    CompanyName     TEXT    NOT NULL,
+    Department      TEXT,
+    Position        TEXT,
+    Reason          TEXT,
+    FOREIGN KEY (ResumeId) REFERENCES JpResume(Id)
+);
+
+CREATE TABLE ResumeQualification (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    ResumeId        INTEGER NOT NULL,
+    ObtainedDate    TEXT    NOT NULL,
+    Category        TEXT,
+    Name            TEXT    NOT NULL,
+    IssuingOrg      TEXT,
+    FOREIGN KEY (ResumeId) REFERENCES JpResume(Id)
+);
+
 -- ---- 見積書シードデータ ----
 -- Subtotal10, TaxAmount10, Subtotal8, TaxAmount8, Subtotal, TaxAmount, Total
 
@@ -531,3 +711,127 @@ INSERT INTO JpContract (ContractNo, CustomerId, Title, ContractType, StartDate, 
    0, 3520000, '着手時50%・完了時50%', 'review', NULL,
    1, NULL, '東京地方裁判所', '日本法',
    NULL, NULL, '契約書レビュー中（法務確認待ち）');
+
+-- ============================================================
+-- 新規テンプレートデモ用シードデータ
+-- ============================================================
+
+-- ---- 領収書シードデータ（receipt-02 テンプレート用）----
+
+INSERT INTO JpReceipt (ReceiptNo, CustomerId, ReceivedDate, Purpose, Amount, Details,
+  PaymentMethod, DepositDate, InvoiceNo, PreparedBy, CompanyStamp,
+  CompanyName, CompanyAddress, CompanyPhone, Status) VALUES
+  ('RCP-2026-0001', 2, '2026-02-28', 'サーバー保守サービス代（2026年1月分）', 110000,
+   '税込 110,000 円（本体 100,000 円 ＋ 消費税 10,000 円）',
+   '銀行振込', '2026-02-28', 'INV-JP-0001', '鈴木 花子', '株式会社テックソリューション',
+   '株式会社テックソリューション', '東京都渋谷区道玄坂1丁目1番1号', '03-1234-5678', 'issued'),
+  ('RCP-2026-0002', 1, '2026-03-10', 'Webシステム開発 着手金', 1375000,
+   '税込 1,375,000 円（本体 1,250,000 円 ＋ 消費税 125,000 円）',
+   '銀行振込', '2026-03-10', 'INV-JP-0002', '田中 太郎', '株式会社テックソリューション',
+   '株式会社テックソリューション', '東京都渋谷区道玄坂1丁目1番1号', '03-1234-5678', 'issued'),
+  ('RCP-2026-0003', 4, '2026-03-25', 'IT研修プログラム実施費用', 495000,
+   '税込 495,000 円（本体 450,000 円 ＋ 消費税 45,000 円）',
+   '現金', '2026-03-25', 'INV-JP-0004', '田中 太郎', '株式会社テックソリューション',
+   '株式会社テックソリューション', '東京都渋谷区道玄坂1丁目1番1号', '03-1234-5678', 'issued');
+
+-- ---- 連絡先シードデータ（fax-cover テンプレート用）----
+
+INSERT INTO Contact (Name, Department, ContactName, FaxNumber, Phone, Email) VALUES
+  ('株式会社テックビジョン', '営業部', '鈴木 一郎', '03-9999-0001', '03-9999-0000', 'suzuki@techvision.co.jp'),
+  ('深圳市蓝海科技株式会社', '購買部', '李 明', '+86-755-8600-7789', '+86-755-8600-7788', 'liming@lanhai-tech.com'),
+  ('Acme Electronics GmbH', 'Procurement', 'Hans Müller', '+49-711-123457', '+49-711-123456', 'h.mueller@acme-elec.de');
+
+-- ---- FAX 送付状シードデータ（fax-cover テンプレート用）----
+
+INSERT INTO FaxCover (RecipientId, SendDate, TotalPages, DocumentCount, Message,
+  SenderCompany, SenderDepartment, SenderName, SenderFax, SenderPhone, SenderEmail) VALUES
+  (1, '2026-03-10 14:30', 5, 2,
+   '先日ご依頼いただきました見積書をお送りします。ご確認のほど、よろしくお願い申し上げます。',
+   '株式会社テックソリューション', '営業部', '田中 太郎',
+   '03-1234-5679', '03-1234-5678', 'tanaka@techsol.co.jp'),
+  (2, '2026-03-15 09:00', 3, 1,
+   'ご注文の件について、確認事項がございますのでご連絡申し上げます。',
+   '株式会社テックソリューション', '営業部', '山田 花子',
+   '03-1234-5679', '03-1234-5678', 'yamada@techsol.co.jp');
+
+-- ---- 会議シードデータ（minutes-03 テンプレート用）----
+
+INSERT INTO Meeting (Title, MeetingDate, Location, Recorder, Chairperson, Decisions,
+  NextMeetingDate, NextMeetingLocation, NextMeetingAgenda, Status) VALUES
+  ('2026年 第1四半期 事業計画レビュー', '2026-01-15 10:00', '本社 会議室A', '鈴木 花子', '山田 一郎',
+   '1. Q1目標を達成するため営業活動を強化する。2. サーバー移行プロジェクトを2026年3月末までに完了させる。',
+   '2026-02-15 10:00', '本社 会議室A', '第2四半期計画・サーバー移行進捗報告', 'finalized'),
+  ('Webシステム開発 キックオフミーティング', '2026-02-05 13:00', '本社 会議室B', '田中 太郎', '山田 一郎',
+   '開発体制・スケジュール・マイルストーンを確定。週次進捗報告はSlackで実施。',
+   '2026-02-20 13:00', '本社 会議室B', '要件定義書レビュー', 'finalized'),
+  ('セキュリティ対策会議', '2026-03-10 15:00', 'リモート（Zoom）', '佐藤 次郎', '鈴木 花子',
+   NULL, '2026-04-10 15:00', 'リモート（Zoom）', '対策実施結果報告', 'draft');
+
+INSERT INTO MeetingAttendee (MeetingId, Name, Department, Role, AttendanceType, Comments) VALUES
+  (1, '山田 一郎', '代表取締役', '議長', '対面', NULL),
+  (1, '鈴木 花子', '営業部', '書記', '対面', NULL),
+  (1, '田中 太郎', '開発部', '参加者', '対面', NULL),
+  (1, '佐藤 次郎', '技術部', '参加者', '対面', NULL),
+  (2, '山田 一郎', '代表取締役', '議長', '対面', NULL),
+  (2, '田中 太郎', '開発部', '書記', '対面', NULL),
+  (2, '鈴木 花子', '営業部', '参加者', '対面', NULL),
+  (3, '鈴木 花子', '営業部', '議長', 'リモート', NULL),
+  (3, '佐藤 次郎', '技術部', '書記', 'リモート', NULL);
+
+INSERT INTO MeetingDecision (MeetingId, ItemNo, Topic, Content, Decision) VALUES
+  (1, 1, 'Q1事業目標レビュー', '前期実績と今期目標の乖離分析。売上目標達成率85%。', '営業強化施策を2週間以内に策定'),
+  (1, 2, 'サーバー移行計画', 'AWS移行スケジュール確認。3月末完了目標。', '計画通り進める'),
+  (2, 1, '開発体制の確認', '5名体制・外部委託なし。', '確定'),
+  (2, 2, 'マイルストーン設定', '要件定義完了2/28、基本設計完了3/31、開発完了5/31。', '確定'),
+  (3, 1, 'インシデント報告', '不審なアクセスログが検出された件。', '詳細調査を実施'),
+  (3, 2, 'セキュリティ強化案', 'WAF導入・多要素認証強化を検討。', '次回会議までに見積取得');
+
+INSERT INTO MeetingActionItem (MeetingId, ItemNo, Description, Owner, DueDate, Priority, Status) VALUES
+  (1, 1, '営業強化施策の策定', '鈴木 花子', '2026-01-31', 'high', 'completed'),
+  (1, 2, 'AWS移行 詳細スケジュール作成', '佐藤 次郎', '2026-02-01', 'high', 'completed'),
+  (2, 1, '要件定義書 ドラフト作成', '田中 太郎', '2026-02-15', 'high', 'completed'),
+  (2, 2, 'テスト計画書 作成', '田中 太郎', '2026-03-15', 'medium', 'open'),
+  (3, 1, '不審アクセスの詳細調査', '佐藤 次郎', '2026-03-20', 'high', 'open'),
+  (3, 2, 'WAF 導入見積取得', '佐藤 次郎', '2026-04-01', 'medium', 'open');
+
+-- ---- 履歴書シードデータ（resume-jis テンプレート用）----
+
+INSERT INTO JpResume (Name, Kana, BirthDate, Gender, Address, Phone, Email,
+  Hobbies, Hope, AvailableDate, Awards, References, CreatedDate, Status) VALUES
+  ('田中 太郎', 'タナカ タロウ', '1990-05-15', '男', '東京都新宿区西新宿2丁目8番1号',
+   '090-1234-5678', 'taro.tanaka@example.com',
+   'プログラミング、読書（技術書）、登山',
+   'Webアプリケーション開発を担当するエンジニア職を希望します。リモートワーク可能な環境が望ましいですが、応相談です。',
+   '2026-04-01', NULL, NULL, '2026-03-01', 'submitted'),
+  ('鈴木 花子', 'スズキ ハナコ', '1995-11-20', '女', '神奈川県横浜市中区山下町10番地',
+   '090-9876-5432', 'hanako.suzuki@example.com',
+   'データ分析、ヨガ、料理',
+   'データサイエンティストまたはBIエンジニア職を希望します。',
+   '2026-05-01', NULL, NULL, '2026-03-05', 'draft');
+
+INSERT INTO ResumeEducation (ResumeId, StartDate, EventType, SchoolName) VALUES
+  (1, '2006-04-01', '入学', '〇〇市立〇〇中学校'),
+  (1, '2009-03-31', '卒業', '〇〇市立〇〇中学校'),
+  (1, '2009-04-01', '入学', '〇〇県立〇〇高等学校'),
+  (1, '2012-03-31', '卒業', '〇〇県立〇〇高等学校'),
+  (1, '2012-04-01', '入学', '〇〇大学 工学部 情報工学科'),
+  (1, '2016-03-31', '卒業', '〇〇大学 工学部 情報工学科'),
+  (2, '2011-04-01', '入学', '〇〇市立〇〇中学校'),
+  (2, '2014-03-31', '卒業', '〇〇市立〇〇中学校'),
+  (2, '2014-04-01', '入学', '〇〇県立〇〇高等学校'),
+  (2, '2017-03-31', '卒業', '〇〇県立〇〇高等学校'),
+  (2, '2017-04-01', '入学', '〇〇大学 理学部 数学科'),
+  (2, '2021-03-31', '修士課程修了', '〇〇大学 大学院 情報科学専攻');
+
+INSERT INTO ResumeWorkHistory (ResumeId, StartDate, EndDate, CompanyName, Department, Position, Reason) VALUES
+  (1, '2016-04-01', NULL, '株式会社テックソリューション', '開発部', 'Webエンジニア', '在職中'),
+  (2, '2021-04-01', '2023-03-31', '○○データ分析株式会社', 'データ分析部', 'ジュニアアナリスト', '一身上の都合'),
+  (2, '2023-04-01', NULL, 'フリーランス', NULL, 'データサイエンティスト', '在職中');
+
+INSERT INTO ResumeQualification (ResumeId, ObtainedDate, Category, Name, IssuingOrg) VALUES
+  (1, '2015-11-01', '情報系', '基本情報技術者', '独立行政法人 情報処理推進機構'),
+  (1, '2017-06-01', '情報系', '応用情報技術者', '独立行政法人 情報処理推進機構'),
+  (1, '2020-01-01', 'クラウド', 'AWS Certified Solutions Architect - Associate', 'Amazon Web Services'),
+  (2, '2019-11-01', '情報系', '基本情報技術者', '独立行政法人 情報処理推進機構'),
+  (2, '2022-03-01', 'データ', 'データサイエンティスト検定 リテラシーレベル', '一般社団法人データサイエンティスト協会'),
+  (2, '2023-07-01', 'クラウド', 'Google Cloud Professional Data Engineer', 'Google');

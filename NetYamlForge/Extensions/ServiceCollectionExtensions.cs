@@ -143,7 +143,6 @@ public static class ServiceCollectionExtensions
         // iText 実装 (DocumentPdfService) は DocumentPdfService を直接注入して利用可能
         services.AddSingleton<IDocumentPdfService, DocumentPdfSharpService>();
         services.AddSingleton<DocumentPdfService>();
-        services.AddSingleton<PdfTemplateSampleRunner>();
         services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 
