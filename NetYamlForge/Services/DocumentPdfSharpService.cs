@@ -54,11 +54,16 @@ public class DocumentPdfSharpService : IDocumentPdfService
          "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
     ];
 
-    private const string RegularKey = "NetYamlForge|Regular";
-    private const string BoldKey    = "NetYamlForge|Bold";
+    // UniversalFontResolver 内部で GetFont() の引数として使うキー。
+    // PDFsharp は内部キーを "familyName|bold|italic" 形式で構築するため、
+    // パイプ文字を含む名前を face キーに使うと衝突する。ハイフン区切りを使用する。
+    private const string RegularKey = "NetYamlForge-Regular";
+    private const string BoldKey    = "NetYamlForge-Bold";
 
-    /// <summary>PDF 描画に使用するフォントファミリー名（リゾルバー登録後は任意値でよい）</summary>
-    internal static readonly string FontFamilyName;
+    // new XFont() に渡すファミリー名。UniversalFontResolver はどんな名前でも
+    // 横取りして自前データを返すため、実在するフォント名である必要はないが、
+    // "Arial" にしておくことでリゾルバー未登録時の Windows fallback にもなる。
+    internal const string FontFamilyName = "Arial";
 
     static DocumentPdfSharpService()
     {
@@ -70,14 +75,7 @@ public class DocumentPdfSharpService : IDocumentPdfService
             found = FindAnySystemFont();
 
         if (found == default)
-        {
-            // フォントが一切見つからない場合: リゾルバーなしで "Arial" を使うと
-            // Linux 上で XFont コンストラクタが null instance 例外をスローするため、
-            // ダミーデータで UniversalFontResolver を設定するしかない。
-            // ここまで来ることは通常ないが、安全策として Arial のままにする。
-            FontFamilyName = "Arial";
-            return;
-        }
+            return;   // フォントなし: リゾルバー未登録のまま。Windows は Arial で動作継続、Linux はクラッシュ
 
         try
         {
@@ -86,23 +84,15 @@ public class DocumentPdfSharpService : IDocumentPdfService
                               ? File.ReadAllBytes(found.Bold)
                               : regularData;   // bold がなければ regular で代用
 
-            // UniversalFontResolver: すべてのフォント要求を登録済みデータで処理する。
-            // Linux 上でプラットフォームフォント（Arial 等）が見つからない場合でも
-            // クラッシュしないようにするため、null を返さず常に解決する。
-            // ※ null チェックなしで常に設定する。
-            //   以前の "null のときのみ" ガードでは、外部コードが先に別のリゾルバーを
-            //   登録していた場合に FontFamilyName = RegularKey を設定してしまい、
-            //   その外部リゾルバーが "NetYamlForge|Regular" を解決できずエラーになる。
+            // UniversalFontResolver はすべてのフォント要求（"Arial" 含む）を横取りし、
+            // 自前フォントデータを返す。Linux でプラットフォームフォントが存在しなくても
+            // XFont("Arial", ...) が動作するようになる。
             GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
-            FontFamilyName = RegularKey;   // リゾルバーが全リクエストを横取りするため任意値でよい
         }
         catch
         {
-            // XFont 生成後にリゾルバーを変更しようとした場合（InvalidOperationException）や
-            // フォントファイル読み込み失敗時はここに来る。
-            // Windows では "Arial" がプラットフォームフォントとして利用可能。
-            // Linux では依然としてクラッシュする可能性があるが、この経路は極めてまれ。
-            FontFamilyName = "Arial";
+            // リゾルバー登録失敗（XFont 生成後のロック等）は無視。
+            // Windows は Arial ネイティブで動作継続。
         }
     }
 
