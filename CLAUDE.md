@@ -5,24 +5,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Build
+# Build / Run
 dotnet build
-
-# Run
 dotnet run --project NetYamlForge
+dotnet build -c Release
 
-# Run tests
+# Tests
 dotnet test
-
-# Run a single test
 dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
-
-# Run tests with coverage
 dotnet test --collect:"XPlat Code Coverage"
 
-# Build in release mode
-dotnet build -c Release
+# CLI scaffolding (run from repo root)
+dotnet run -- --init-project --project=<name> --display-name="..." --db-type=sqlite
+dotnet run -- --scaffold-entities --project=<name> [--no-overwrite]
+dotnet run -- --scaffold-hook --name=<HookName> --project=<name> [--with-tests]
+dotnet run -- --scaffold-batch-job --project=<name> --name=<job_name>
+dotnet run -- --upgrade-entity-yaml --project=<name>
+
+# PDFsharp で全テンプレートのサンプル PDF を生成
+dotnet run -- --generate-pdf-samples [--output-dir=<path>]
 ```
+
+`--json` を付けると CI 向けの構造化 JSON（`generatedFiles`/`skippedFiles`/`nextSteps`/`errors`）が stdout に出力される。
 
 ## Architecture
 
@@ -93,6 +97,60 @@ These appear as standard compiler diagnostics during `dotnet build`.
 
 `DbInitializer` creates schema and seeds data on first run. Default admin credentials: `admin` / `Admin@123`.
 
+### Batch Jobs
+
+`BatchJobHostedService` runs background workers on cron schedules defined in `projects/<name>/jobs/*.yml`. Job implementations live in `projects/<name>/Hooks/` and are scaffolded via `--scaffold-batch-job`. Job types include `sql_to_csv` and custom C# implementations via `IBatchJobHandler`.
+
+### PDF Export
+
+PDF テンプレートはグローバル定義 (`NetYamlForge/Schemas/pdf-templates/`) に統一されています。プロジェクト固有テンプレートが不要なプロジェクト（biz-docs 等）はグローバルテンプレートを直接使用します。
+
+| クラス | エンジン | ライセンス | 用途 |
+|---|---|---|---|
+| `DocumentPdfSharpService` | PDFsharp 6.x | MIT | **既定実装** (`IDocumentPdfService`) |
+| `DocumentPdfService` | iText 7 | AGPL/商用 | 保持（直接注入） |
+| `PdfExportService` | iText 7 | AGPL/商用 | 一覧データの表形式 PDF |
+
+`PdfTemplateSampleRunner` で全テンプレートのサンプル PDF を PDFsharp で生成できます。
+
 ### Testing Patterns
 
-Tests in `NetYamlForge.Tests/` use xUnit. Large controller tests (`DynamicEntityControllerTests.cs`, `DashboardControllerTests.cs`) test full request pipelines. `SqlGenerationSnapshotTests.cs` uses snapshot testing for SQL output. `YamlSchemaValidationTests.cs` validates YAML config parsing.
+Tests in `NetYamlForge.Tests/` use xUnit (~380 tests).
+
+| File | What it covers |
+|------|---------------|
+| `DynamicEntityControllerTests.cs` | Full controller request pipeline |
+| `EntityCrudExecutionServiceTests.cs` | Hook execution and transactions |
+| `YamlSchemaValidationTests.cs` | YAML config parsing for all projects |
+| `SqlGenerationSnapshotTests.cs` | SQL output regression (snapshot tests) |
+| `YamlConfigStartupValidatorTests.cs` | Startup type validation |
+| `ListStateUrlBuilderTests.cs` | URL state builder |
+
+## Known Pitfalls for AI Agents
+
+These are recurring mistakes — read before modifying or deleting sub-projects.
+
+### Deleting a sub-project
+
+When deleting `projects/<name>/`, also delete **all** of the following or `dotnet build` will fail with `CS0234`/`CS0246` errors:
+
+1. `NetYamlForge/projects/<name>/Hooks/` — C# hook classes
+2. `NetYamlForge.Tests/Hooks/` — hook test files for that project
+3. Any other test files that reference the project's namespace
+
+```bash
+# Find lingering references before deleting
+grep -rl "NetYamlForge.Projects.<ProjectName>" NetYamlForge.Tests/
+dotnet build  # verify clean after deletion
+```
+
+### YAML `columns.required` must match the DB schema
+
+`EntityDbSchemaConsistencyValidator` runs at startup and throws if a `NOT NULL` / no-default DB column is missing `required: true` in the **`columns`** section of the entity YAML (not just in `forms`).
+
+| DB column definition | `columns.required` needed? |
+|---|---|
+| `NOT NULL` and no default | **yes** |
+| `NOT NULL` with a `DEFAULT` | no |
+| Nullable | no |
+| `PRIMARY KEY` / `AUTOINCREMENT` | no |

@@ -165,7 +165,22 @@ sections:
 NetYamlForge/projects/{project-name}/pdf-templates/invoice.yaml
 ```
 
-## ライセンス
+## PDF 生成エンジン
 
-iText 7 (PDF 生成エンジン) は AGPL v3 または商用ライセンスで提供されます。
-詳細は https://itextpdf.com/ をご覧ください。
+| 実装クラス | ライセンス | 特徴 |
+|---|---|---|
+| `DocumentPdfSharpService` | MIT (PDFsharp 6.x) | **既定**。クロスプラットフォーム対応 |
+| `DocumentPdfService` | AGPL v3 / 商用 (iText 7) | 保持。直接 DI 注入で利用可能 |
+
+`IDocumentPdfService` を注入すると `DocumentPdfSharpService` が使われます。
+iText 版を使うには `DocumentPdfService` を直接注入してください。
+
+### PDFsharp サンプル生成 CLI
+
+全テンプレートのサンプル PDF を PDFsharp で生成するには:
+
+```bash
+dotnet run -- --generate-pdf-samples [--output-dir=<path>]
+```
+
+`--output-dir` を省略した場合は `./pdf-samples/` に出力されます。
