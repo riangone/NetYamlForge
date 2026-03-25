@@ -89,15 +89,19 @@ public class DocumentPdfSharpService : IDocumentPdfService
             // UniversalFontResolver: すべてのフォント要求を登録済みデータで処理する。
             // Linux 上でプラットフォームフォント（Arial 等）が見つからない場合でも
             // クラッシュしないようにするため、null を返さず常に解決する。
-            // FontResolver は XFont を一度でも生成した後は変更不可なため、
-            // 未設定の場合のみ登録する。
-            if (GlobalFontSettings.FontResolver == null)
-                GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
-
+            // ※ null チェックなしで常に設定する。
+            //   以前の "null のときのみ" ガードでは、外部コードが先に別のリゾルバーを
+            //   登録していた場合に FontFamilyName = RegularKey を設定してしまい、
+            //   その外部リゾルバーが "NetYamlForge|Regular" を解決できずエラーになる。
+            GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
             FontFamilyName = RegularKey;   // リゾルバーが全リクエストを横取りするため任意値でよい
         }
         catch
         {
+            // XFont 生成後にリゾルバーを変更しようとした場合（InvalidOperationException）や
+            // フォントファイル読み込み失敗時はここに来る。
+            // Windows では "Arial" がプラットフォームフォントとして利用可能。
+            // Linux では依然としてクラッシュする可能性があるが、この経路は極めてまれ。
             FontFamilyName = "Arial";
         }
     }
