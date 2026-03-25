@@ -1,0 +1,53 @@
+title: "Framework Showcase - 概要"
+description: "NetYamlForge フレームワークの全機能を展示"
+
+sections:
+  - id: welcome
+    title: "NetYamlForge フレームワーク機能一覧"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'welcome' AS dummy"
+    content: |
+      # NetYamlForge フレームワークへようこそ
+      
+      このプロジェクトでは、NetYamlForge フレームワークが提供する**全ての機能**を実際に操作しながら学ぶことができます。
+      
+      ## 主な機能カテゴリ
+      
+      - 📝 **30 種類以上のフォームタイプ**
+      - 🔍 **10 種類のフィルター**
+      - 📐 **レイアウト機能**
+      - ⚙️ **バッチ処理**
+      - 🎣 **フックシステム**
+      - 📤 **エクスポート機能**
+
+  - id: quick_links
+    title: "クイックリンク"
+    component: cards
+    sourceType: custom
+    source: |
+      SELECT '📝' AS icon, 'フォーム部品' AS title, '全てのフォームタイプを体験' AS description, '/framework-showcase/DynamicEntity/Index?entity=form_component' AS url
+      UNION ALL SELECT '🔍', 'フィルター', '多様なフィルターオプション', '/framework-showcase/DynamicEntity/Index?entity=filter_demo'
+      UNION ALL SELECT '📐', 'レイアウト', '様々なレイアウト形式', '/framework-showcase/DynamicEntity/Index?entity=layout_demo'
+      UNION ALL SELECT '⚙️', 'バッチ処理', '定期処理のデモ', '/framework-showcase/DynamicEntity/Index?entity=batch_job_demo'
+      UNION ALL SELECT '🎣', 'フック処理', 'CRUD フックのデモ', '/framework-showcase/DynamicEntity/Index?entity=hook_demo'
+      UNION ALL SELECT '📤', 'エクスポート', '多彩な出力形式', '/framework-showcase/DynamicEntity/Index?entity=export_demo'
+    columns: [icon, title, description, url]
+    iconField: icon
+    titleField: title
+    descriptionField: description
+    urlField: url
+
+  - id: stats
+    title: "統計情報"
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'フォームタイプ数' AS metric_name, '30+' AS metric_value, '📝' AS metric_icon, NULL AS metric_delta
+      UNION ALL SELECT 'フィルタータイプ数', '10', '🔍', NULL
+      UNION ALL SELECT 'エンティティ数', '6', '📊', NULL
+      UNION ALL SELECT 'ページ数', '3', '📄', NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
