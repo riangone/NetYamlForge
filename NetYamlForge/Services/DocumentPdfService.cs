@@ -21,7 +21,15 @@ namespace NetYamlForge.Services;
 
 public interface IDocumentPdfService
 {
+    /// <summary>
+    /// プロジェクト固有の PDF テンプレートを読み込みます。
+    /// </summary>
     PdfTemplateConfig? LoadTemplate(string projectDir, string templateName);
+
+    /// <summary>
+    /// 核心フレームワークの PDF テンプレートを読み込みます。
+    /// </summary>
+    PdfTemplateConfig? LoadGlobalTemplate(string templateName);
 
     byte[] Generate(
         PdfTemplateConfig template,
@@ -32,6 +40,10 @@ public interface IDocumentPdfService
 
 public class DocumentPdfService : IDocumentPdfService
 {
+    // 核心フレームワークの PDF テンプレートディレクトリ
+    private static readonly string GlobalTemplatesDir =
+        System.IO.Path.Combine(AppContext.BaseDirectory, "Schemas", "pdf-templates");
+
     private static readonly string[] CjkFontPaths =
     [
         "/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",
@@ -49,6 +61,19 @@ public class DocumentPdfService : IDocumentPdfService
     public PdfTemplateConfig? LoadTemplate(string projectDir, string templateName)
     {
         var path = System.IO.Path.Combine(projectDir, "pdf-templates", templateName + ".yaml");
+        if (!System.IO.File.Exists(path)) return null;
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        return deserializer.Deserialize<PdfTemplateConfig>(System.IO.File.ReadAllText(path));
+    }
+
+    public PdfTemplateConfig? LoadGlobalTemplate(string templateName)
+    {
+        var path = System.IO.Path.Combine(GlobalTemplatesDir, templateName + ".yaml");
         if (!System.IO.File.Exists(path)) return null;
 
         var deserializer = new DeserializerBuilder()

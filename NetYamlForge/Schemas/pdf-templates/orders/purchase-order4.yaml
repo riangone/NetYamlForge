@@ -1,0 +1,249 @@
+# 見積書テンプレート - 8 (標準)
+# ソースファイル：templates/business/quotes/quotation-8.pdf
+name: quotation-8
+filenameTemplate: "見積書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "5B4D7A"
+  labelColor: "8B7DB5"
+  labelTextColor: "ffffff"
+  subtleBackground: "F5F3FA"
+  oddRowColor: "FAF9FC"
+  borderColor: "C4B5D9"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @CustomerId"
+  items:
+    query: "SELECT * FROM QuotationItem WHERE QuotationId = @Id ORDER BY LineNo"
+
+sections:
+  # ヘッダー
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 2
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "御 見 積 書"
+            fontSize: 20
+            color: primary
+            align: center
+      - vAlign: bottom
+        paddingLeft: 16
+        elements:
+          - type: labelTable
+            columnWidths: [38, 62]
+            labelBackground: subtle
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "見積番号"
+                field: QuoteNo
+              - label: "見積日"
+                field: IssueDate
+              - label: "有効期限"
+                field: ExpiryDate
+
+  # 区切り線
+  - type: line
+    lineWeight: 2
+    color: primary
+    marginTop: 4
+    marginBottom: 6
+
+  # 宛先
+  - type: paragraph
+    field: "customer.Name"
+    suffix: " 御中"
+    fontSize: 13
+    suffixFontSize: 9
+    marginTop: 6
+
+  - type: paragraph
+    text: "下記のとおり、お見積り申し上げます。\nご検討のほど、よろしくお願い申し上げます。"
+    fontSize: 9
+    marginBottom: 6
+    lineHeight: 1.5
+
+  # 基本情報 | 担当者
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 8
+    cells:
+      - vAlign: top
+        elements:
+          - type: labelTable
+            columnWidths: [32, 68]
+            labelBackground: label
+            labelTextColor: labelText
+            borderWeight: 0.5
+            cellPadding: 4
+            fontSize: 8.5
+            rows:
+              - label: "件名"
+                field: Title
+              - label: "見積日"
+                field: IssueDate
+              - label: "有効期限"
+                field: ExpiryDate
+              - label: "納期"
+                field: DeliveryDays
+              - label: "支払条件"
+                field: PaymentTerms
+      - vAlign: top
+        paddingLeft: 12
+        elements:
+          - type: paragraph
+            field: CompanyStamp
+            fontSize: 10
+          - type: paragraph
+            field: PreparedBy
+            prefix: "担当："
+            fontSize: 8.5
+
+  # 合計金額
+  - type: row
+    columnWidths: [30, 40, 30]
+    marginBottom: 4
+    cells:
+      - elements: []
+      - elements:
+          - type: row
+            columnWidths: [45, 55]
+            cells:
+              - background: label
+                padding: 4
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    text: "見積金額"
+                    fontSize: 10
+                    color: labelText
+                    align: center
+              - background: subtle
+                padding: 4
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    field: Total
+                    format: currency
+                    fontSize: 11
+                    align: center
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            text: "（税抜）"
+            fontSize: 9
+
+  # 区切り線
+  - type: line
+    lineWeight: 0.5
+    color: primary
+    marginTop: 4
+    marginBottom: 1
+
+  - type: line
+    lineWeight: 1.5
+    color: primary
+    marginBottom: 4
+
+  # 明細テーブル
+  - type: dataTable
+    dataSource: items
+    minRows: 8
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: _rowNumber
+        label: "No."
+        width: 6
+        align: center
+      - field: ItemName
+        label: "品 目"
+        width: 34
+        align: left
+      - field: Spec
+        label: "仕様"
+        width: 16
+        align: left
+      - field: Unit
+        label: "単位"
+        width: 7
+        align: center
+      - field: Quantity
+        label: "数量"
+        width: 8
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単価"
+        width: 13
+        align: right
+        format: currency
+      - field: Amount
+        label: "金額"
+        width: 16
+        align: right
+        format: currency
+
+  # 集計
+  - type: row
+    columnWidths: [55, 45]
+    cells:
+      - elements: []
+      - elements:
+          - type: labelTable
+            columnWidths: [55, 45]
+            labelBackground: subtle
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8.5
+            rows:
+              - label: "小計"
+                field: Subtotal
+                format: currency
+              - label: "消費税"
+                field: TaxAmount
+                format: currency
+              - label: "合計"
+                field: Total
+                format: currency
+                bold: true
+
+  # 備考
+  - type: row
+    columnWidths: [15, 85]
+    marginTop: 8
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "備 考"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 50
+        elements:
+          - type: paragraph
+            template: |
+              {PaymentTerms}
+              {DeliveryPlace}
+              {Remarks}
+            fontSize: 8.5

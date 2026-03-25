@@ -1,0 +1,253 @@
+# 納品書 帳票テンプレート
+# すべてのレイアウトは YAML で定義します。C# には 5 つの汎用プリミティブのみ。
+name: delivery
+filenameTemplate: "納品書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "1c3658"
+  labelColor: "78b4cc"
+  labelTextColor: "ffffff"
+  subtleBackground: "f0f0f0"
+  oddRowColor: "f8fcfe"
+  borderColor: "b4b4b4"
+
+dataSources:
+  customer:
+    query: "SELECT Id, Name, Address, Phone, Email FROM Customer WHERE Id = @CustomerId"
+  items:
+    query: "SELECT * FROM JpDeliveryItem WHERE DeliveryId = @Id ORDER BY LineNo"
+
+sections:
+  # ── ドキュメントヘッダー（タイトル | 番号ボックス） ──────────────────────
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 2
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "納　品　書"
+            fontSize: 20
+            color: primary
+            align: center
+      - vAlign: bottom
+        paddingLeft: 16
+        elements:
+          - type: labelTable
+            columnWidths: [38, 62]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "納品No."
+                field: DeliveryNo
+              - label: "納品日"
+                field: DeliveryDate
+
+  # ── 太い区切り線 ─────────────────────────────────────────────────────────
+  - type: line
+    lineWeight: 2
+    color: primary
+    marginTop: 4
+    marginBottom: 6
+
+  # ── 宛先ブロック ─────────────────────────────────────────────────────────
+  - type: paragraph
+    field: "customer.Name"
+    suffix: "　御中"
+    fontSize: 13
+    suffixFontSize: 9
+    marginTop: 6
+
+  - type: paragraph
+    text: "下記のとおり、納品いたします。"
+    fontSize: 9
+    marginBottom: 6
+
+  # ── 案件情報 | 差出人 ────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 8
+    cells:
+      - vAlign: top
+        elements:
+          - type: labelTable
+            columnWidths: [32, 68]
+            labelBackground: label
+            labelTextColor: labelText
+            borderWeight: 0.5
+            cellPadding: 4
+            fontSize: 8.5
+            rows:
+              - label: "件名"
+                field: Title
+              - label: "納品日"
+                field: DeliveryDate
+              - label: "納品場所"
+                field: DeliveryPlace
+                omitIfEmpty: true
+              - label: "支払条件"
+                field: PaymentTerms
+                omitIfEmpty: true
+      - vAlign: top
+        paddingLeft: 12
+        elements:
+          - type: paragraph
+            field: CompanyStamp
+            fontSize: 10
+          - type: paragraph
+            field: PreparedBy
+            prefix: "担当："
+            fontSize: 8.5
+
+  # ── 合計金額バナー ────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [30, 40, 30]
+    marginBottom: 4
+    cells:
+      - elements: []
+      - elements:
+          - type: row
+            columnWidths: [45, 55]
+            cells:
+              - background: label
+                padding: 4
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    text: "合　計　金　額"
+                    fontSize: 10
+                    color: labelText
+                    align: center
+              - background: subtle
+                padding: 4
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    field: Total
+                    format: currency
+                    fontSize: 11
+                    align: center
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            text: "（税込）"
+            fontSize: 9
+
+  # ── 二重区切り線 ─────────────────────────────────────────────────────────
+  - type: line
+    lineWeight: 0.5
+    color: primary
+    marginTop: 4
+    marginBottom: 1
+
+  - type: line
+    lineWeight: 1.5
+    color: primary
+    marginBottom: 4
+
+  # ── 明細テーブル ─────────────────────────────────────────────────────────
+  - type: dataTable
+    dataSource: items
+    minRows: 8
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: _rowNumber
+        label: "No."
+        width: 6
+        align: center
+      - field: ItemName
+        label: "摘　要"
+        width: 36
+        align: left
+      - field: Spec
+        label: "仕様"
+        width: 14
+        align: left
+      - field: Unit
+        label: "単位"
+        width: 7
+        align: center
+      - field: Quantity
+        label: "数量"
+        width: 8
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単価"
+        width: 13
+        align: right
+        format: currency
+      - field: Amount
+        label: "金額"
+        width: 16
+        align: right
+        format: currency
+
+  # ── 税額集計 ─────────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [55, 45]
+    cells:
+      - elements: []
+      - elements:
+          - type: labelTable
+            columnWidths: [55, 45]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8.5
+            rows:
+              - label: "小計"
+                field: Subtotal
+                format: currency
+              - label: "消費税（10%）"
+                field: TaxAmount10
+                format: currency
+                omitIfZero: true
+              - label: "消費税（8%）"
+                field: TaxAmount8
+                format: currency
+                omitIfZero: true
+              - label: "合　計　金　額"
+                field: Total
+                format: currency
+                bold: true
+
+  # ── 備考欄 ───────────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [15, 85]
+    marginTop: 8
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "備　考"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 50
+        elements:
+          - type: paragraph
+            template: |
+              検収期間：納品後 {InspectionPeriodDays} 営業日以内にご連絡ください。
+              受領確認日：{ReceiptConfirmedDate}
+              {Remarks}
+            fontSize: 8.5

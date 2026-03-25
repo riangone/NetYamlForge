@@ -1,0 +1,309 @@
+# 履歴書テンプレート - JIS 規格
+# ソースファイル：templates/business/resume/resume-jis.pdf
+name: resume-jis
+filenameTemplate: "履歴書_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [30, 30, 30, 30]
+
+theme:
+  primaryColor: "1a1a1a"
+  labelColor: "666666"
+  labelTextColor: "ffffff"
+  subtleBackground: "f5f5f5"
+  oddRowColor: "fafafa"
+  borderColor: "cccccc"
+
+dataSources:
+  education:
+    query: "SELECT * FROM ResumeEducation WHERE ResumeId = @Id ORDER BY StartDate"
+  workHistory:
+    query: "SELECT * FROM ResumeWorkHistory WHERE ResumeId = @Id ORDER BY StartDate"
+  qualifications:
+    query: "SELECT * FROM ResumeQualification WHERE ResumeId = @Id ORDER BY ObtainedDate"
+
+sections:
+  # タイトル
+  - type: paragraph
+    text: "履 歴 書"
+    fontSize: 16
+    align: center
+    bold: true
+    marginTop: 8
+    marginBottom: 8
+
+  # 写真枠と基本情報
+  - type: row
+    columnWidths: [30, 70]
+    marginBottom: 4
+    cells:
+      - vAlign: top
+        borderWeight: 0.5
+        padding: 4
+        minHeight: 100
+        elements:
+          - type: paragraph
+            text: "写真貼付欄"
+            fontSize: 8
+            align: center
+            color: "999999"
+          - type: paragraph
+            text: "（4cm×3cm）"
+            fontSize: 7
+            align: center
+            color: "999999"
+            marginTop: 30
+      - vAlign: top
+        paddingLeft: 8
+        elements:
+          - type: labelTable
+            columnWidths: [25, 35, 40]
+            labelBackground: subtle
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8.5
+            rows:
+              - label: "氏名"
+                field: Name
+                colspan: 2
+              - label: "フリガナ"
+                field: Kana
+                colspan: 2
+              - label: "生年月日"
+                field: BirthDate
+              - label: "性別"
+                field: Gender
+              - label: "現住所"
+                field: Address
+                colspan: 2
+              - label: "電話"
+                field: Phone
+              - label: "メール"
+                field: Email
+                colspan: 2
+
+  # 学歴
+  - type: paragraph
+    text: "【学歴】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: dataTable
+    dataSource: education
+    minRows: 6
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: StartDate
+        label: "年月"
+        width: 20
+        align: center
+        format: "yyyy/MM"
+      - field: EventType
+        label: "内容"
+        width: 55
+        align: left
+      - field: SchoolName
+        label: "学校名"
+        width: 25
+        align: left
+
+  # 職歴
+  - type: paragraph
+    text: "【職歴】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: dataTable
+    dataSource: workHistory
+    minRows: 6
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: StartDate
+        label: "年月"
+        width: 18
+        align: center
+        format: "yyyy/MM"
+      - field: EndDate
+        label: "退社"
+        width: 15
+        align: center
+        format: "yyyy/MM"
+      - field: CompanyName
+        label: "会社名"
+        width: 30
+        align: left
+      - field: Department
+        label: "部署"
+        width: 17
+        align: left
+      - field: Position
+        label: "職位"
+        width: 12
+        align: left
+      - field: Reason
+        label: "退職理由"
+        width: 8
+        align: left
+
+  # 免許・資格
+  - type: paragraph
+    text: "【免許・資格】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: dataTable
+    dataSource: qualifications
+    minRows: 4
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: ObtainedDate
+        label: "取得年月"
+        width: 20
+        align: center
+        format: "yyyy/MM"
+      - field: Category
+        label: "区分"
+        width: 15
+        align: center
+      - field: Name
+        label: "資格名"
+        width: 40
+        align: left
+      - field: IssuingOrg
+        label: "発行機関"
+        width: 25
+        align: left
+
+  # 趣味・特技
+  - type: paragraph
+    text: "【趣味・特技】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: row
+    columnWidths: [100]
+    cells:
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 35
+        elements:
+          - type: paragraph
+            field: Hobbies
+            fontSize: 9
+            lineHeight: 1.5
+
+  # 本人希望
+  - type: paragraph
+    text: "【本人希望】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: row
+    columnWidths: [85, 15]
+    cells:
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 35
+        elements:
+          - type: paragraph
+            field: Hope
+            fontSize: 9
+            lineHeight: 1.5
+      - vAlign: middle
+        paddingLeft: 4
+        elements:
+          - type: paragraph
+            text: "入社可能日"
+            fontSize: 8
+            marginBottom: 4
+          - type: paragraph
+            field: AvailableDate
+            fontSize: 9
+            align: center
+
+  # 自賞点・他賞点
+  - type: paragraph
+    text: "【自賞点・他賞点】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: row
+    columnWidths: [100]
+    cells:
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 25
+        elements:
+          - type: paragraph
+            field: Awards
+            fontSize: 9
+
+  # 推奨者・補足事項
+  - type: paragraph
+    text: "【推奨者・補足事項】"
+    fontSize: 10
+    bold: true
+    marginTop: 8
+    marginBottom: 2
+
+  - type: row
+    columnWidths: [100]
+    cells:
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 25
+        elements:
+          - type: paragraph
+            field: References
+            fontSize: 9
+
+  # 署名欄
+  - type: row
+    columnWidths: [70, 30]
+    marginTop: 12
+    cells:
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            field: CreatedDate
+            prefix: "作成日："
+            fontSize: 9
+        paddingLeft: 20
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            field: Name
+            fontSize: 10
+            align: right
+            marginBottom: 20
+          - type: paragraph
+            text: "印"
+            fontSize: 8
+            align: right
