@@ -25,7 +25,7 @@ public class DocumentPdfSharpService : IDocumentPdfService
 
     // フォント候補: (正体パス, 太字パス or null)
     // 優先順位順。CJK対応フォントが望ましいが、なければ Latin フォールバックを使用。
-    // ※ .ttc (TrueType Collection) はバイト列として PDFsharp に渡せないため除外。
+    // .ttc (TrueType Collection) も含む（抽出処理で最初のフォントを抽出）。
     private static readonly (string Regular, string? Bold)[] FontCandidates =
     [
         // CJK 対応フォント — Linux（日本語フォントをインストールした場合）
@@ -35,11 +35,18 @@ public class DocumentPdfSharpService : IDocumentPdfService
         ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf", null),
         ("/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",
          "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf"),
+        ("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+         "/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"),
+        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+         "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
+        ("/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
+         "/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc"),
         // CJK 対応フォント — macOS
         ("/Library/Fonts/Arial Unicode.ttf",                         null),
-        ("/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",           null),  // .ttc だが macOS では動作する場合あり
-        // Windows — CJK (.ttf のみ; msgothic.ttc は Collection のため除外)
-        ("C:\\Windows\\Fonts\\YuGothR.ttc",                          null),  // 游ゴシック（Win10+、.ttc だが単一フォント）
+        ("C:\\Windows\\Fonts\\msgothic.ttc",                         null),
+        ("/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",           null),
+        // Windows — CJK（.ttc を含む）
+        ("C:\\Windows\\Fonts\\YuGothR.ttc",                          null),  // 游ゴシック
         // Latin フォールバック — Windows（標準搭載）
         ("C:\\Windows\\Fonts\\arial.ttf",   "C:\\Windows\\Fonts\\arialbd.ttf"),
         ("C:\\Windows\\Fonts\\calibri.ttf", "C:\\Windows\\Fonts\\calibrib.ttf"),
@@ -79,9 +86,9 @@ public class DocumentPdfSharpService : IDocumentPdfService
 
         try
         {
-            var regularData = File.ReadAllBytes(found.Regular);
+            var regularData = ExtractFontFromPath(found.Regular);
             var boldData    = found.Bold != null && File.Exists(found.Bold)
-                              ? File.ReadAllBytes(found.Bold)
+                              ? ExtractFontFromPath(found.Bold)
                               : regularData;   // bold がなければ regular で代用
 
             // UniversalFontResolver はすべてのフォント要求（"Arial" 含む）を横取りし、
@@ -94,6 +101,78 @@ public class DocumentPdfSharpService : IDocumentPdfService
             // リゾルバー登録失敗（XFont 生成後のロック等）は無視。
             // Windows は Arial ネイティブで動作継続。
         }
+    }
+
+    /// <summary>
+    /// フォントファイルパスからフォントデータをバイト配列として読み込みます。
+    /// TTC (TrueType Collection) ファイルの場合は、最初のフォントを抽出して返します。
+    /// TTF ファイルの場合は、そのままのデータを返します。
+    /// </summary>
+    private static byte[] ExtractFontFromPath(string fontPath)
+    {
+        var extension = Path.GetExtension(fontPath).ToLowerInvariant();
+        var fontData = File.ReadAllBytes(fontPath);
+
+        // TTC ファイルの場合は最初のフォントを抽出
+        if (extension == ".ttc")
+            return ExtractFirstFontFromTtc(fontData);
+
+        // TTF ファイルはそのまま返す
+        return fontData;
+    }
+
+    /// <summary>
+    /// TTC (TrueType Collection) データから最初のフォントを抽出します。
+    /// TTC 形式：
+    ///   - 0-3: "ttcf" シグネチャ
+    ///   - 4-7: バージョン
+    ///   - 8-11: フォント数
+    ///   - 12-: 各フォントのオフセット（4 バイトずつ）
+    ///   - 各オフセット位置に TTF データ
+    /// </summary>
+    private static byte[] ExtractFirstFontFromTtc(byte[] ttcData)
+    {
+        // TTC シグネチャチェック ("ttcf")
+        if (ttcData.Length < 12 ||
+            ttcData[0] != 0x74 || ttcData[1] != 0x74 ||
+            ttcData[2] != 0x63 || ttcData[3] != 0x66)
+        {
+            throw new InvalidDataException("Invalid TTC file signature");
+        }
+
+        // フォント数の取得（ビッグエンディアン）
+        int fontCount = (ttcData[8] << 24) | (ttcData[9] << 16) | (ttcData[10] << 8) | ttcData[11];
+        if (fontCount < 1)
+            throw new InvalidDataException("TTC contains no fonts");
+
+        // 最初のフォントのオフセットを取得（オフセットテーブルはバイト 12 から始まる）
+        int offsetOffset = 12; // 最初のオフセットの位置
+        int fontOffset = (ttcData[offsetOffset] << 24) | (ttcData[offsetOffset + 1] << 16) |
+                         (ttcData[offsetOffset + 2] << 8) | ttcData[offsetOffset + 3];
+
+        if (fontOffset <= 0 || fontOffset >= ttcData.Length)
+            throw new InvalidDataException("Invalid font offset in TTC");
+
+        // 最初のフォントの長さを計算
+        // 2 番目のフォントのオフセットから最初のフォントの長さを計算する
+        int fontLength;
+        if (fontCount > 1)
+        {
+            int offsetOffset2 = offsetOffset + 4; // 2 番目のオフセット
+            int fontOffset2 = (ttcData[offsetOffset2] << 24) | (ttcData[offsetOffset2 + 1] << 16) |
+                              (ttcData[offsetOffset2 + 2] << 8) | ttcData[offsetOffset2 + 3];
+            fontLength = fontOffset2 - fontOffset;
+        }
+        else
+        {
+            // フォントが 1 つの場合はファイルの終わりまで
+            fontLength = ttcData.Length - fontOffset;
+        }
+
+        // フォントデータを抽出
+        var fontData = new byte[fontLength];
+        Array.Copy(ttcData, fontOffset, fontData, 0, fontLength);
+        return fontData;
     }
 
     /// <summary>
@@ -122,11 +201,17 @@ public class DocumentPdfSharpService : IDocumentPdfService
             if (!Directory.Exists(dir)) continue;
             try
             {
-                // .ttc はコレクション形式のため除外し .ttf のみ対象にする
+                // .ttc も対象にする（抽出処理で対応）
                 var ttf = Directory.GetFiles(dir, "*.ttf", SearchOption.AllDirectories)
                                    .FirstOrDefault();
                 if (ttf != null)
                     return (ttf, null);
+                
+                // TTF が見つからなければ TTC も試す
+                var ttc = Directory.GetFiles(dir, "*.ttc", SearchOption.AllDirectories)
+                                   .FirstOrDefault();
+                if (ttc != null)
+                    return (ttc, null);
             }
             catch { /* アクセス拒否等は無視 */ }
         }
