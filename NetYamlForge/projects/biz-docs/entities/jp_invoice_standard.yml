@@ -1,3 +1,6 @@
+# 請求書（標準）
+# 標準デザイン請求書
+
 imports: []
 entities:
   jp_invoice_standard:
@@ -7,10 +10,24 @@ entities:
     softDelete: false
     isPublic: true
 
+    hooks:
+      beforeCreate:
+        - validate_tax_rate
+        - validate_amount_positive
+      beforeUpdate:
+        - validate_tax_rate
+        - validate_amount_positive
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpInvoiceStandard.CustomerId = cu.Id
+
     forms:
       InvoiceNo:
         type: string
-        label: InvoiceNo
+        label: 請求書番号
         editable: true
         required: true
       CustomerId:
@@ -55,43 +72,52 @@ entities:
         precision: 2
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       InvoiceNo:
         type: string
-        label: InvoiceNo
+        label: 請求書番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       DueDate:
         type: date
         label: 支払期日
+        sortable: true
       Subtotal:
         type: decimal
         label: 小計
+        sortable: true
       TaxRate:
         type: decimal
         label: 税率 (%)
+        sortable: true
       TaxAmount:
         type: decimal
         label: 税額
+        sortable: true
       Total:
         type: decimal
         label: 合計
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -100,3 +126,57 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_invoice_standard_pdf:
+        label: "請求書（標準） PDF"
+        format: pdf
+        filename: "jp_invoice_standard_{date:yyyyMMdd}.pdf"
+        columns:
+          - InvoiceNo
+          - CustomerId
+          - IssueDate
+          - DueDate
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+          - Total
+        pdf:
+          title: "請求書（標準）"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_invoice_standard_csv:
+        label: "請求書（標準） CSV"
+        format: csv
+        filename: "jp_invoice_standards_{date:yyyyMMdd}.csv"
+        columns:
+          - InvoiceNo
+          - CustomerId
+          - IssueDate
+          - DueDate
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+          - Total

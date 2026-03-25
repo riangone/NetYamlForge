@@ -1,3 +1,6 @@
+# 領収書
+# 日本国内用領収書
+
 imports: []
 entities:
   jp_receipt:
@@ -7,10 +10,22 @@ entities:
     softDelete: false
     isPublic: true
 
+    hooks:
+      beforeCreate:
+        - validate_amount_positive
+      beforeUpdate:
+        - validate_amount_positive
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpReceipt.CustomerId = cu.Id
+
     forms:
       ReceiptNo:
         type: string
-        label: ReceiptNo
+        label: 領収書番号
         editable: true
         required: true
       CustomerId:
@@ -35,38 +50,44 @@ entities:
         precision: 2
       PaymentMethod:
         type: string
-        label: PaymentMethod
+        label: 支払方法
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       ReceiptNo:
         type: string
-        label: ReceiptNo
+        label: 領収書番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       Amount:
         type: decimal
         label: 金額
+        sortable: true
       PaymentMethod:
         type: string
-        label: PaymentMethod
+        label: 支払方法
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -75,3 +96,53 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_receipt_pdf:
+        label: "領収書 PDF"
+        format: pdf
+        filename: "jp_receipt_{date:yyyyMMdd}.pdf"
+        columns:
+          - ReceiptNo
+          - CustomerId
+          - IssueDate
+          - Amount
+          - PaymentMethod
+          - Notes
+        pdf:
+          title: "領収書"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_receipt_csv:
+        label: "領収書 CSV"
+        format: csv
+        filename: "jp_receipts_{date:yyyyMMdd}.csv"
+        columns:
+          - ReceiptNo
+          - CustomerId
+          - IssueDate
+          - Amount
+          - PaymentMethod
+          - Notes

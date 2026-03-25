@@ -1,3 +1,6 @@
+# 送付状
+# 日本国内用送付状
+
 imports: []
 entities:
   jp_delivery_slip:
@@ -7,10 +10,16 @@ entities:
     softDelete: false
     isPublic: true
 
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpDeliverySlip.CustomerId = cu.Id
+
     forms:
       SlipNo:
         type: string
-        label: SlipNo
+        label: 送付状番号
         editable: true
         required: true
       CustomerId:
@@ -29,42 +38,48 @@ entities:
         required: true
       DeliveryDate:
         type: date
-        label: DeliveryDate
+        label: 納品日
         editable: true
       TotalPackages:
         type: int
-        label: TotalPackages
+        label: 総梱包数
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       SlipNo:
         type: string
-        label: SlipNo
+        label: 送付状番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       DeliveryDate:
         type: date
-        label: DeliveryDate
+        label: 納品日
+        sortable: true
       TotalPackages:
         type: int
-        label: TotalPackages
+        label: 総梱包数
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -73,3 +88,53 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_delivery_slip_pdf:
+        label: "送付状 PDF"
+        format: pdf
+        filename: "jp_delivery_slip_{date:yyyyMMdd}.pdf"
+        columns:
+          - SlipNo
+          - CustomerId
+          - IssueDate
+          - DeliveryDate
+          - TotalPackages
+          - Notes
+        pdf:
+          title: "送付状"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_delivery_slip_csv:
+        label: "送付状 CSV"
+        format: csv
+        filename: "jp_delivery_slips_{date:yyyyMMdd}.csv"
+        columns:
+          - SlipNo
+          - CustomerId
+          - IssueDate
+          - DeliveryDate
+          - TotalPackages
+          - Notes

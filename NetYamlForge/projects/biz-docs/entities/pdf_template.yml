@@ -1,3 +1,6 @@
+# PDF テンプレート
+# PDF テンプレート設定
+
 imports: []
 entities:
   pdf_template:
@@ -7,10 +10,22 @@ entities:
     softDelete: false
     isPublic: true
 
+    hooks:
+      beforeCreate:
+        - validate_pdf_template_status
+      beforeUpdate:
+        - validate_pdf_template_status
+
+    joins:
+      - type: left
+        table: PdfTemplateCategory
+        alias: cat
+        on: PdfTemplate.CategoryId = cat.Id
+
     forms:
       TemplateNo:
         type: string
-        label: TemplateNo
+        label: テンプレート番号
         editable: true
         required: true
       CategoryId:
@@ -24,101 +39,118 @@ entities:
           picker: false
       Name:
         type: string
-        label: Name
+        label: 名称
         editable: true
         required: true
       NameEn:
         type: string
-        label: NameEn
+        label: 英語名
         editable: true
       Description:
         type: string
-        label: Description
+        label: 説明
         editable: true
       FileName:
         type: string
-        label: FileName
+        label: ファイル名
         editable: true
         required: true
       PageSize:
         type: string
-        label: PageSize
+        label: 用紙サイズ
         editable: true
         required: true
+        options: [A4, A3, B4, B5, Letter, Legal]
       Orientation:
         type: string
-        label: Orientation
+        label: 向き
         editable: true
         required: true
+        options: [portrait, landscape]
       Theme:
         type: string
-        label: Theme
+        label: テーマ
         editable: true
+        options: [standard, blue, green, orange, gray, snow, bank]
       HeaderColor:
         type: string
-        label: HeaderColor
+        label: ヘッダー色
         editable: true
       IsDefault:
         type: int
-        label: IsDefault
+        label: デフォルト
         editable: true
       SortOrder:
         type: int
-        label: SortOrder
+        label: 表示順
         editable: true
       Status:
         type: string
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       TemplateNo:
         type: string
-        label: TemplateNo
+        label: テンプレート番号
+        sortable: true
+        searchable: true
       CategoryId:
         type: int
         label: カテゴリ ID
+        sortable: true
       Name:
         type: string
-        label: Name
+        label: 名称
+        sortable: true
+        searchable: true
       NameEn:
         type: string
-        label: NameEn
+        label: 英語名
+        sortable: true
       Description:
         type: string
-        label: Description
+        label: 説明
+        sortable: true
       FileName:
         type: string
-        label: FileName
+        label: ファイル名
+        sortable: true
       PageSize:
         type: string
-        label: PageSize
+        label: 用紙サイズ
+        sortable: true
       Orientation:
         type: string
-        label: Orientation
+        label: 向き
+        sortable: true
       Theme:
         type: string
-        label: Theme
+        label: テーマ
+        sortable: true
       HeaderColor:
         type: string
-        label: HeaderColor
+        label: ヘッダー色
+        sortable: true
       IsDefault:
         type: int
-        label: IsDefault
+        label: デフォルト
+        sortable: true
       SortOrder:
         type: int
-        label: SortOrder
+        label: 表示順
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -127,3 +159,54 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      pdf_template_pdf:
+        label: "PDF テンプレート PDF"
+        format: pdf
+        filename: "pdf_template_{date:yyyyMMdd}.pdf"
+        columns:
+          - TemplateNo
+          - CategoryId
+          - Name
+          - NameEn
+          - Description
+          - FileName
+          - PageSize
+          - Orientation
+        pdf:
+          title: "PDF テンプレート"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      pdf_template_csv:
+        label: "PDF テンプレート CSV"
+        format: csv
+        filename: "pdf_templates_{date:yyyyMMdd}.csv"
+        columns:
+          - TemplateNo
+          - CategoryId
+          - Name
+          - NameEn
+          - Description
+          - FileName
+          - PageSize
+          - Orientation

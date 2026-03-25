@@ -1,3 +1,6 @@
+# 見積書
+# 日本国内用見積書
+
 imports: []
 entities:
   jp_estimate:
@@ -6,11 +9,28 @@ entities:
     displayName: 見積書
     softDelete: false
     isPublic: true
+    pdfTemplate: domestic/estimate-standard
+
+    hooks:
+      beforeCreate:
+        - validate_jp_estimate_status
+        - validate_tax_rate
+        - validate_amount_positive
+      beforeUpdate:
+        - validate_jp_estimate_status
+        - validate_tax_rate
+        - validate_amount_positive
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpEstimate.CustomerId = cu.Id
 
     forms:
       EstimateNo:
         type: string
-        label: EstimateNo
+        label: 見積番号
         editable: true
         required: true
       CustomerId:
@@ -29,7 +49,7 @@ entities:
         required: true
       ExpiryDate:
         type: date
-        label: ExpiryDate
+        label: 有効期限
         editable: true
       Subtotal:
         type: decimal
@@ -57,56 +77,67 @@ entities:
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
       ValidityPeriod:
         type: string
-        label: ValidityPeriod
+        label: 有効期間
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       EstimateNo:
         type: string
-        label: EstimateNo
+        label: 見積番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       ExpiryDate:
         type: date
-        label: ExpiryDate
+        label: 有効期限
+        sortable: true
       Subtotal:
         type: decimal
         label: 小計
+        sortable: true
       TaxRate:
         type: decimal
         label: 税率 (%)
+        sortable: true
       TaxAmount:
         type: decimal
         label: 税額
+        sortable: true
       Total:
         type: decimal
         label: 合計
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       ValidityPeriod:
         type: string
-        label: ValidityPeriod
+        label: 有効期間
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -115,3 +146,60 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_estimate_pdf:
+        label: "見積書 PDF"
+        format: pdf
+        filename: "jp_estimate_{date:yyyyMMdd}.pdf"
+        columns:
+          - EstimateNo
+          - CustomerId
+          - IssueDate
+          - ExpiryDate
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+          - Total
+        pdf:
+          title: "見積書"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_estimate_csv:
+        label: "見積書 CSV"
+        format: csv
+        filename: "jp_estimates_{date:yyyyMMdd}.csv"
+        columns:
+          - EstimateNo
+          - CustomerId
+          - IssueDate
+          - ExpiryDate
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+          - Total

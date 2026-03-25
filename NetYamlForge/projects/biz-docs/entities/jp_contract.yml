@@ -1,3 +1,6 @@
+# 契約書台帳
+# 契約書管理台帳
+
 imports: []
 entities:
   jp_contract:
@@ -6,11 +9,26 @@ entities:
     displayName: 契約書台帳
     softDelete: false
     isPublic: true
+    pdfTemplate: domestic/contract-standard
+
+    hooks:
+      beforeCreate:
+        - validate_jp_contract_status
+        - validate_amount_positive
+      beforeUpdate:
+        - validate_jp_contract_status
+        - validate_amount_positive
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: JpContract.CustomerId = cu.Id
 
     forms:
       ContractNo:
         type: string
-        label: ContractNo
+        label: 契約番号
         editable: true
         required: true
       CustomerId:
@@ -24,16 +42,16 @@ entities:
           picker: false
       Title:
         type: string
-        label: Title
+        label: 件名
         editable: true
         required: true
       StartDate:
         type: date
-        label: StartDate
+        label: 開始日
         editable: true
       EndDate:
         type: date
-        label: EndDate
+        label: 終了日
         editable: true
       Amount:
         type: decimal
@@ -45,43 +63,51 @@ entities:
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       ContractNo:
         type: string
-        label: ContractNo
+        label: 契約番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       Title:
         type: string
-        label: Title
+        label: 件名
+        sortable: true
       StartDate:
         type: date
-        label: StartDate
+        label: 開始日
+        sortable: true
       EndDate:
         type: date
-        label: EndDate
+        label: 終了日
+        sortable: true
       Amount:
         type: decimal
         label: 金額
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -90,3 +116,60 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_contract_pdf:
+        label: "契約書台帳 PDF"
+        format: pdf
+        filename: "jp_contract_{date:yyyyMMdd}.pdf"
+        columns:
+          - ContractNo
+          - CustomerId
+          - Title
+          - StartDate
+          - EndDate
+          - Amount
+          - Status
+          - Notes
+        pdf:
+          title: "契約書台帳"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_contract_csv:
+        label: "契約書台帳 CSV"
+        format: csv
+        filename: "jp_contracts_{date:yyyyMMdd}.csv"
+        columns:
+          - ContractNo
+          - CustomerId
+          - Title
+          - StartDate
+          - EndDate
+          - Amount
+          - Status
+          - Notes

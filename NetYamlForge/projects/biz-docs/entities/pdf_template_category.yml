@@ -1,3 +1,6 @@
+# PDF テンプレートカテゴリ
+# PDF テンプレート分類
+
 imports: []
 entities:
   pdf_template_category:
@@ -10,49 +13,54 @@ entities:
     forms:
       Code:
         type: string
-        label: Code
+        label: コード
         editable: true
         required: true
       Name:
         type: string
-        label: Name
+        label: 名称
         editable: true
         required: true
       Description:
         type: string
-        label: Description
+        label: 説明
         editable: true
       SortOrder:
         type: int
-        label: SortOrder
+        label: 表示順
         editable: true
       IsEnabled:
         type: int
-        label: IsEnabled
+        label: 有効
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       Code:
         type: string
-        label: Code
+        label: コード
+        sortable: true
       Name:
         type: string
-        label: Name
+        label: 名称
+        sortable: true
+        searchable: true
       Description:
         type: string
-        label: Description
+        label: 説明
+        sortable: true
       SortOrder:
         type: int
-        label: SortOrder
+        label: 表示順
+        sortable: true
       IsEnabled:
         type: int
-        label: IsEnabled
+        label: 有効
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -61,3 +69,43 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      pdf_template_category_pdf:
+        label: "PDF テンプレートカテゴリ PDF"
+        format: pdf
+        filename: "pdf_template_category_{date:yyyyMMdd}.pdf"
+        columns:
+          - Code
+          - Name
+          - Description
+          - SortOrder
+          - IsEnabled
+        pdf:
+          title: "PDF テンプレートカテゴリ"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      pdf_template_category_csv:
+        label: "PDF テンプレートカテゴリ CSV"
+        format: csv
+        filename: "pdf_template_categorys_{date:yyyyMMdd}.csv"
+        columns:
+          - Code
+          - Name
+          - Description
+          - SortOrder
+          - IsEnabled

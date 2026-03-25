@@ -1,3 +1,6 @@
+# 報関単
+# 貿易用報関単
+
 imports: []
 entities:
   customs_declaration:
@@ -6,11 +9,30 @@ entities:
     displayName: 報関単
     softDelete: false
     isPublic: true
+    pdfTemplate: trade/customs-declaration
+
+    hooks:
+      beforeCreate:
+        - validate_customs_declaration_status
+        - validate_currency
+      beforeUpdate:
+        - validate_customs_declaration_status
+        - validate_currency
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: CustomsDeclaration.CustomerId = cu.Id
+      - type: left
+        table: Invoice
+        alias: inv
+        on: CustomsDeclaration.InvoiceId = inv.Id
 
     forms:
       DeclarationNo:
         type: string
-        label: DeclarationNo
+        label: 申告番号
         editable: true
         required: true
       CustomerId:
@@ -37,7 +59,7 @@ entities:
         required: true
       ExportDate:
         type: date
-        label: ExportDate
+        label: 輸出日
         editable: true
       Currency:
         type: string
@@ -47,96 +69,115 @@ entities:
         options: [USD, EUR, CNY, JPY]
       Incoterms:
         type: string
-        label: Incoterms
+        label: インコタームズ
         editable: true
+        options: [EXW, FOB, CIF, DAP, DDP, FCA, CPT, CIP]
       CountryOfOrigin:
         type: string
-        label: CountryOfOrigin
+        label: 原産国
         editable: true
       PortOfLoading:
         type: string
-        label: PortOfLoading
+        label: 積地港
         editable: true
       PortOfDischarge:
         type: string
-        label: PortOfDischarge
+        label: 揚地港
         editable: true
       TotalValue:
         type: decimal
-        label: TotalValue
+        label: 申告価額
         editable: true
         required: true
+        precision: 2
       GrossWeight:
         type: decimal
-        label: GrossWeight
+        label: 総重量
         editable: true
+        precision: 2
       NetWeight:
         type: decimal
-        label: NetWeight
+        label: 正味重量
         editable: true
+        precision: 2
       Status:
         type: string
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       DeclarationNo:
         type: string
-        label: DeclarationNo
+        label: 申告番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       InvoiceId:
         type: int
         label: 請求書 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       ExportDate:
         type: date
-        label: ExportDate
+        label: 輸出日
+        sortable: true
       Currency:
         type: string
         label: 通貨
+        sortable: true
       Incoterms:
         type: string
-        label: Incoterms
+        label: インコタームズ
+        sortable: true
       CountryOfOrigin:
         type: string
-        label: CountryOfOrigin
+        label: 原産国
+        sortable: true
       PortOfLoading:
         type: string
-        label: PortOfLoading
+        label: 積地港
+        sortable: true
       PortOfDischarge:
         type: string
-        label: PortOfDischarge
+        label: 揚地港
+        sortable: true
       TotalValue:
         type: decimal
-        label: TotalValue
+        label: 申告価額
+        sortable: true
       GrossWeight:
         type: decimal
-        label: GrossWeight
+        label: 総重量
+        sortable: true
       NetWeight:
         type: decimal
-        label: NetWeight
+        label: 正味重量
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -145,3 +186,64 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+      Currency:
+        type: dropdown
+        label: 通貨
+        options: [USD, EUR, CNY, JPY]
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      customs_declaration_pdf:
+        label: "報関単 PDF"
+        format: pdf
+        filename: "customs_declaration_{date:yyyyMMdd}.pdf"
+        columns:
+          - DeclarationNo
+          - CustomerId
+          - InvoiceId
+          - IssueDate
+          - ExportDate
+          - Currency
+          - Incoterms
+          - CountryOfOrigin
+        pdf:
+          title: "報関単"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      customs_declaration_csv:
+        label: "報関単 CSV"
+        format: csv
+        filename: "customs_declarations_{date:yyyyMMdd}.csv"
+        columns:
+          - DeclarationNo
+          - CustomerId
+          - InvoiceId
+          - IssueDate
+          - ExportDate
+          - Currency
+          - Incoterms
+          - CountryOfOrigin

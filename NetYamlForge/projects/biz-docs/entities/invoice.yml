@@ -1,3 +1,6 @@
+# 請款書
+# 貿易用請款書
+
 imports: []
 entities:
   invoice:
@@ -6,11 +9,34 @@ entities:
     displayName: 請款書
     softDelete: false
     isPublic: true
+    pdfTemplate: invoices/invoice-standard
+
+    hooks:
+      beforeCreate:
+        - validate_invoice_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+      beforeUpdate:
+        - validate_invoice_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: Invoice.CustomerId = cu.Id
+      - type: left
+        table: Quotation
+        alias: q
+        on: Invoice.QuotationId = q.Id
 
     forms:
       InvoiceNo:
         type: string
-        label: InvoiceNo
+        label: 請求書番号
         editable: true
         required: true
       CustomerId:
@@ -77,65 +103,79 @@ entities:
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
       PaymentTerms:
         type: string
-        label: PaymentTerms
+        label: 支払条件
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       InvoiceNo:
         type: string
-        label: InvoiceNo
+        label: 請求書番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       QuotationId:
         type: int
         label: 見積 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       DueDate:
         type: date
         label: 支払期日
+        sortable: true
       Currency:
         type: string
         label: 通貨
+        sortable: true
       Subtotal:
         type: decimal
         label: 小計
+        sortable: true
       TaxRate:
         type: decimal
         label: 税率 (%)
+        sortable: true
       TaxAmount:
         type: decimal
         label: 税額
+        sortable: true
       Total:
         type: decimal
         label: 合計
+        sortable: true
       PaidAmount:
         type: decimal
         label: 入金済
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       PaymentTerms:
         type: string
-        label: PaymentTerms
+        label: 支払条件
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -144,3 +184,64 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+      Currency:
+        type: dropdown
+        label: 通貨
+        options: [USD, EUR, CNY, JPY]
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      invoice_pdf:
+        label: "請款書 PDF"
+        format: pdf
+        filename: "invoice_{date:yyyyMMdd}.pdf"
+        columns:
+          - InvoiceNo
+          - CustomerId
+          - QuotationId
+          - IssueDate
+          - DueDate
+          - Currency
+          - Subtotal
+          - TaxRate
+        pdf:
+          title: "請款書"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      invoice_csv:
+        label: "請款書 CSV"
+        format: csv
+        filename: "invoices_{date:yyyyMMdd}.csv"
+        columns:
+          - InvoiceNo
+          - CustomerId
+          - QuotationId
+          - IssueDate
+          - DueDate
+          - Currency
+          - Subtotal
+          - TaxRate

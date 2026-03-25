@@ -1,3 +1,6 @@
+# 会議録
+# 会議議事録
+
 imports: []
 entities:
   meeting:
@@ -10,92 +13,103 @@ entities:
     forms:
       MeetingNo:
         type: string
-        label: MeetingNo
+        label: 会議番号
         editable: true
         required: true
       Title:
         type: string
-        label: Title
+        label: 件名
         editable: true
         required: true
       MeetingDate:
         type: datetime
-        label: MeetingDate
+        label: 会議日時
         editable: true
         required: true
       Location:
         type: string
-        label: Location
+        label: 場所
         editable: true
       Organizer:
         type: string
-        label: Organizer
+        label: 主催者
         editable: true
       Participants:
         type: string
-        label: Participants
+        label: 参加者
         editable: true
       Agenda:
         type: string
-        label: Agenda
+        label: 議題
         editable: true
       Decisions:
         type: string
-        label: Decisions
+        label: 決定事項
         editable: true
       ActionItems:
         type: string
-        label: ActionItems
+        label: アクションアイテム
         editable: true
       NextMeetingDate:
         type: datetime
-        label: NextMeetingDate
+        label: 次回会議日
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       MeetingNo:
         type: string
-        label: MeetingNo
+        label: 会議番号
+        sortable: true
+        searchable: true
       Title:
         type: string
-        label: Title
+        label: 件名
+        sortable: true
       MeetingDate:
         type: datetime
-        label: MeetingDate
+        label: 会議日時
+        sortable: true
       Location:
         type: string
-        label: Location
+        label: 場所
+        sortable: true
       Organizer:
         type: string
-        label: Organizer
+        label: 主催者
+        sortable: true
       Participants:
         type: string
-        label: Participants
+        label: 参加者
+        sortable: true
       Agenda:
         type: string
-        label: Agenda
+        label: 議題
+        sortable: true
       Decisions:
         type: string
-        label: Decisions
+        label: 決定事項
+        sortable: true
       ActionItems:
         type: string
-        label: ActionItems
+        label: アクションアイテム
+        sortable: true
       NextMeetingDate:
         type: datetime
-        label: NextMeetingDate
+        label: 次回会議日
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -104,3 +118,49 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      meeting_pdf:
+        label: "会議録 PDF"
+        format: pdf
+        filename: "meeting_{date:yyyyMMdd}.pdf"
+        columns:
+          - MeetingNo
+          - Title
+          - MeetingDate
+          - Location
+          - Organizer
+          - Participants
+          - Agenda
+          - Decisions
+        pdf:
+          title: "会議録"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      meeting_csv:
+        label: "会議録 CSV"
+        format: csv
+        filename: "meetings_{date:yyyyMMdd}.csv"
+        columns:
+          - MeetingNo
+          - Title
+          - MeetingDate
+          - Location
+          - Organizer
+          - Participants
+          - Agenda
+          - Decisions

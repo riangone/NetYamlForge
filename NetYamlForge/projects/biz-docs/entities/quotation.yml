@@ -1,3 +1,6 @@
+# 報価単
+# 貿易用報価単
+
 imports: []
 entities:
   quotation:
@@ -6,11 +9,30 @@ entities:
     displayName: 報価単
     softDelete: false
     isPublic: true
+    pdfTemplate: orders/purchase-order4
+
+    hooks:
+      beforeCreate:
+        - validate_quotation_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+      beforeUpdate:
+        - validate_quotation_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+
+    joins:
+      - type: left
+        table: Customer
+        alias: cu
+        on: Quotation.CustomerId = cu.Id
 
     forms:
       QuoteNo:
         type: string
-        label: QuoteNo
+        label: 見積番号
         editable: true
         required: true
       CustomerId:
@@ -29,7 +51,7 @@ entities:
         required: true
       ExpiryDate:
         type: date
-        label: ExpiryDate
+        label: 有効期限
         editable: true
       Currency:
         type: string
@@ -63,66 +85,79 @@ entities:
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired]
+        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
       PaymentTerms:
         type: string
-        label: PaymentTerms
+        label: 支払条件
         editable: true
       DeliveryTerms:
         type: string
-        label: DeliveryTerms
+        label: 納期条件
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       QuoteNo:
         type: string
-        label: QuoteNo
+        label: 見積番号
+        sortable: true
+        searchable: true
       CustomerId:
         type: int
         label: 取引先 ID
+        sortable: true
       IssueDate:
         type: date
         label: 発行日
+        sortable: true
       ExpiryDate:
         type: date
-        label: ExpiryDate
+        label: 有効期限
+        sortable: true
       Currency:
         type: string
         label: 通貨
+        sortable: true
       Subtotal:
         type: decimal
         label: 小計
+        sortable: true
       TaxRate:
         type: decimal
         label: 税率 (%)
+        sortable: true
       TaxAmount:
         type: decimal
         label: 税額
+        sortable: true
       Total:
         type: decimal
         label: 合計
+        sortable: true
       Status:
         type: string
         label: ステータス
+        sortable: true
       PaymentTerms:
         type: string
-        label: PaymentTerms
+        label: 支払条件
+        sortable: true
       DeliveryTerms:
         type: string
-        label: DeliveryTerms
+        label: 納期条件
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -131,3 +166,64 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+      Currency:
+        type: dropdown
+        label: 通貨
+        options: [USD, EUR, CNY, JPY]
+      CustomerId:
+        type: dropdown
+        label: 取引先
+        foreignKey:
+          entity: customer
+          displayColumn: Name
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      quotation_pdf:
+        label: "報価単 PDF"
+        format: pdf
+        filename: "quotation_{date:yyyyMMdd}.pdf"
+        columns:
+          - QuoteNo
+          - CustomerId
+          - IssueDate
+          - ExpiryDate
+          - Currency
+          - Subtotal
+          - TaxRate
+          - TaxAmount
+        pdf:
+          title: "報価単"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      quotation_csv:
+        label: "報価単 CSV"
+        format: csv
+        filename: "quotations_{date:yyyyMMdd}.csv"
+        columns:
+          - QuoteNo
+          - CustomerId
+          - IssueDate
+          - ExpiryDate
+          - Currency
+          - Subtotal
+          - TaxRate
+          - TaxAmount

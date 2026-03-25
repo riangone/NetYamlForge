@@ -1,3 +1,6 @@
+# ファックス表紙
+# FAX 送付状
+
 imports: []
 entities:
   fax_cover:
@@ -10,107 +13,120 @@ entities:
     forms:
       FaxNo:
         type: string
-        label: FaxNo
+        label: FAX 番号
         editable: true
         required: true
       SenderName:
         type: string
-        label: SenderName
+        label: 送信者名
         editable: true
         required: true
       SenderCompany:
         type: string
-        label: SenderCompany
+        label: 送信者会社
         editable: true
       SenderPhone:
         type: string
-        label: SenderPhone
+        label: 送信者電話
         editable: true
       SenderFax:
         type: string
-        label: SenderFax
+        label: 送信者 FAX
         editable: true
       RecipientName:
         type: string
-        label: RecipientName
+        label: 受信者名
         editable: true
         required: true
       RecipientCompany:
         type: string
-        label: RecipientCompany
+        label: 受信者会社
         editable: true
       RecipientFax:
         type: string
-        label: RecipientFax
+        label: 受信者 FAX
         editable: true
       SendDate:
         type: datetime
-        label: SendDate
+        label: 送信日
         editable: true
         required: true
       TotalPages:
         type: int
-        label: TotalPages
+        label: 総ページ数
         editable: true
       Subject:
         type: string
-        label: Subject
+        label: 件名
         editable: true
       Message:
         type: string
-        label: Message
+        label: メッセージ
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       FaxNo:
         type: string
-        label: FaxNo
+        label: FAX 番号
+        sortable: true
+        searchable: true
       SenderName:
         type: string
-        label: SenderName
+        label: 送信者名
+        sortable: true
       SenderCompany:
         type: string
-        label: SenderCompany
+        label: 送信者会社
+        sortable: true
       SenderPhone:
         type: string
-        label: SenderPhone
+        label: 送信者電話
+        sortable: true
       SenderFax:
         type: string
-        label: SenderFax
+        label: 送信者 FAX
+        sortable: true
       RecipientName:
         type: string
-        label: RecipientName
+        label: 受信者名
+        sortable: true
       RecipientCompany:
         type: string
-        label: RecipientCompany
+        label: 受信者会社
+        sortable: true
       RecipientFax:
         type: string
-        label: RecipientFax
+        label: 受信者 FAX
+        sortable: true
       SendDate:
         type: datetime
-        label: SendDate
+        label: 送信日
+        sortable: true
       TotalPages:
         type: int
-        label: TotalPages
+        label: 総ページ数
+        sortable: true
       Subject:
         type: string
-        label: Subject
+        label: 件名
+        sortable: true
       Message:
         type: string
-        label: Message
+        label: メッセージ
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -119,3 +135,49 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      fax_cover_pdf:
+        label: "ファックス表紙 PDF"
+        format: pdf
+        filename: "fax_cover_{date:yyyyMMdd}.pdf"
+        columns:
+          - FaxNo
+          - SenderName
+          - SenderCompany
+          - SenderPhone
+          - SenderFax
+          - RecipientName
+          - RecipientCompany
+          - RecipientFax
+        pdf:
+          title: "ファックス表紙"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      fax_cover_csv:
+        label: "ファックス表紙 CSV"
+        format: csv
+        filename: "fax_covers_{date:yyyyMMdd}.csv"
+        columns:
+          - FaxNo
+          - SenderName
+          - SenderCompany
+          - SenderPhone
+          - SenderFax
+          - RecipientName
+          - RecipientCompany
+          - RecipientFax

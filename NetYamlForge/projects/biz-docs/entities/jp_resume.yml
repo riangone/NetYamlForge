@@ -1,3 +1,6 @@
+# 履歴書
+# 日本語履歴書
+
 imports: []
 entities:
   jp_resume:
@@ -10,91 +13,103 @@ entities:
     forms:
       ResumeNo:
         type: string
-        label: ResumeNo
+        label: 履歴書番号
         editable: true
         required: true
       ApplicantName:
         type: string
-        label: ApplicantName
+        label: 申請者名
         editable: true
         required: true
       BirthDate:
         type: date
-        label: BirthDate
+        label: 生年月日
         editable: true
       Gender:
         type: string
-        label: Gender
+        label: 性別
         editable: true
+        options: [Male, Female, Other]
       Address:
         type: string
-        label: Address
+        label: 住所
         editable: true
       Phone:
         type: string
-        label: Phone
+        label: 電話番号
         editable: true
       Email:
         type: string
-        label: Email
+        label: メール
         editable: true
       EducationHistory:
         type: string
-        label: EducationHistory
+        label: 学歴
         editable: true
       WorkHistory:
         type: string
-        label: WorkHistory
+        label: 職歴
         editable: true
       Skills:
         type: string
-        label: Skills
+        label: スキル
         editable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       ResumeNo:
         type: string
-        label: ResumeNo
+        label: 履歴書番号
+        sortable: true
+        searchable: true
       ApplicantName:
         type: string
-        label: ApplicantName
+        label: 申請者名
+        sortable: true
       BirthDate:
         type: date
-        label: BirthDate
+        label: 生年月日
+        sortable: true
       Gender:
         type: string
-        label: Gender
+        label: 性別
+        sortable: true
       Address:
         type: string
-        label: Address
+        label: 住所
+        sortable: true
       Phone:
         type: string
-        label: Phone
+        label: 電話番号
+        sortable: true
       Email:
         type: string
-        label: Email
+        label: メール
+        sortable: true
       EducationHistory:
         type: string
-        label: EducationHistory
+        label: 学歴
+        sortable: true
       WorkHistory:
         type: string
-        label: WorkHistory
+        label: 職歴
+        sortable: true
       Skills:
         type: string
-        label: Skills
+        label: スキル
+        sortable: true
       Notes:
         type: string
-        label: Notes
+        label: 備考
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -103,3 +118,49 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      jp_resume_pdf:
+        label: "履歴書 PDF"
+        format: pdf
+        filename: "jp_resume_{date:yyyyMMdd}.pdf"
+        columns:
+          - ResumeNo
+          - ApplicantName
+          - BirthDate
+          - Gender
+          - Address
+          - Phone
+          - Email
+          - EducationHistory
+        pdf:
+          title: "履歴書"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      jp_resume_csv:
+        label: "履歴書 CSV"
+        format: csv
+        filename: "jp_resumes_{date:yyyyMMdd}.csv"
+        columns:
+          - ResumeNo
+          - ApplicantName
+          - BirthDate
+          - Gender
+          - Address
+          - Phone
+          - Email
+          - EducationHistory

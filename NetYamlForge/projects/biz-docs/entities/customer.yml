@@ -1,3 +1,6 @@
+# 取引先
+# 取引先マスタ情報
+
 imports: []
 entities:
   customer:
@@ -10,85 +13,95 @@ entities:
     forms:
       Code:
         type: string
-        label: Code
+        label: コード
         editable: true
         required: true
       Name:
         type: string
-        label: Name
+        label: 名称
         editable: true
         required: true
       NameEn:
         type: string
-        label: NameEn
+        label: 英語名
         editable: true
       Country:
         type: string
-        label: Country
+        label: 国
         editable: true
         required: true
       ContactPerson:
         type: string
-        label: ContactPerson
+        label: 担当者
         editable: true
       Phone:
         type: string
-        label: Phone
+        label: 電話番号
         editable: true
       Email:
         type: string
-        label: Email
+        label: メール
         editable: true
       TaxId:
         type: string
-        label: TaxId
+        label: 税番号
         editable: true
       Address:
         type: string
-        label: Address
+        label: 住所
         editable: true
       AddressEn:
         type: string
-        label: AddressEn
+        label: 英語住所
         editable: true
 
     columns:
       Id:
         type: int
         label: ID
-        sortable: true
         identity: true
         hidden: true
       Code:
         type: string
-        label: Code
+        label: コード
+        sortable: true
       Name:
         type: string
-        label: Name
+        label: 名称
+        sortable: true
+        searchable: true
       NameEn:
         type: string
-        label: NameEn
+        label: 英語名
+        sortable: true
       Country:
         type: string
-        label: Country
+        label: 国
+        sortable: true
       ContactPerson:
         type: string
-        label: ContactPerson
+        label: 担当者
+        sortable: true
       Phone:
         type: string
-        label: Phone
+        label: 電話番号
+        sortable: true
       Email:
         type: string
-        label: Email
+        label: メール
+        sortable: true
       TaxId:
         type: string
-        label: TaxId
+        label: 税番号
+        sortable: true
       Address:
         type: string
-        label: Address
+        label: 住所
+        sortable: true
       AddressEn:
         type: string
-        label: AddressEn
+        label: 英語住所
+        sortable: true
       CreatedAt:
         type: datetime
         label: 作成日
@@ -97,3 +110,49 @@ entities:
         type: datetime
         label: 更新日
         sortable: true
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+
+    exports:
+      customer_pdf:
+        label: "取引先 PDF"
+        format: pdf
+        filename: "customer_{date:yyyyMMdd}.pdf"
+        columns:
+          - Code
+          - Name
+          - NameEn
+          - Country
+          - ContactPerson
+          - Phone
+          - Email
+          - TaxId
+        pdf:
+          title: "取引先"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1c3658"
+          oddRowColor: "#f5f5f5"
+          showPageNumbers: true
+          showGeneratedAt: true
+
+      customer_csv:
+        label: "取引先 CSV"
+        format: csv
+        filename: "customers_{date:yyyyMMdd}.csv"
+        columns:
+          - Code
+          - Name
+          - NameEn
+          - Country
+          - ContactPerson
+          - Phone
+          - Email
+          - TaxId
