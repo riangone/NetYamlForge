@@ -9,6 +9,7 @@ entities:
     displayName: 履歴書
     softDelete: false
     isPublic: true
+    pdfTemplate: others/resume-jis
 
     forms:
       ResumeNo:

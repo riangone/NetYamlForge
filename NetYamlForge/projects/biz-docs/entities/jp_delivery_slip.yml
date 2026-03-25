@@ -9,6 +9,7 @@ entities:
     displayName: 送付状
     softDelete: false
     isPublic: true
+    pdfTemplate: others/delivery-slip
 
     joins:
       - type: left

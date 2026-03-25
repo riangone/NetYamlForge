@@ -9,6 +9,7 @@ entities:
     displayName: 会議録
     softDelete: false
     isPublic: true
+    pdfTemplate: others/minutes-03
 
     forms:
       MeetingNo:

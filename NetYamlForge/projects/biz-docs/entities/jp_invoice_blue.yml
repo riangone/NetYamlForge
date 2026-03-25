@@ -9,6 +9,7 @@ entities:
     displayName: 請求書（青）
     softDelete: false
     isPublic: true
+    pdfTemplate: invoices/invoice-blue
 
     hooks:
       beforeCreate:
