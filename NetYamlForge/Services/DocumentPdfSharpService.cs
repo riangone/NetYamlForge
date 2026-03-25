@@ -23,22 +23,29 @@ public class DocumentPdfSharpService : IDocumentPdfService
     private static readonly string GlobalTemplatesDir =
         Path.Combine(AppContext.BaseDirectory, "Schemas", "pdf-templates");
 
-    // フォント候補: (正体パス, 太字パス or null, CJK対応か)
+    // フォント候補: (正体パス, 太字パス or null)
     // 優先順位順。CJK対応フォントが望ましいが、なければ Latin フォールバックを使用。
+    // ※ .ttc (TrueType Collection) はバイト列として PDFsharp に渡せないため除外。
     private static readonly (string Regular, string? Bold)[] FontCandidates =
     [
-        // CJK 対応フォント（日本語が必要な場合はいずれかをインストールすること）
+        // CJK 対応フォント — Linux（日本語フォントをインストールした場合）
         ("/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",       null),
-        ("/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",       null),
-        ("/usr/share/fonts/opentype/ipafont-mincho/ipamp.ttf",        null),
-        ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf",  null),
-        ("/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",     "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf"),
-        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",    null),
-        ("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",    null),
-        ("/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",         null),
-        ("/Library/Fonts/Arial Unicode.ttf",                           null),
-        ("C:\\Windows\\Fonts\\msgothic.ttc",                           null),
-        // Latin フォールバック（Ubuntu 標準搭載）
+        ("/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",      null),
+        ("/usr/share/fonts/opentype/ipafont-mincho/ipamp.ttf",       null),
+        ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf", null),
+        ("/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",
+         "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf"),
+        // CJK 対応フォント — macOS
+        ("/Library/Fonts/Arial Unicode.ttf",                         null),
+        ("/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",           null),  // .ttc だが macOS では動作する場合あり
+        // Windows — CJK (.ttf のみ; msgothic.ttc は Collection のため除外)
+        ("C:\\Windows\\Fonts\\YuGothR.ttc",                          null),  // 游ゴシック（Win10+、.ttc だが単一フォント）
+        // Latin フォールバック — Windows（標準搭載）
+        ("C:\\Windows\\Fonts\\arial.ttf",   "C:\\Windows\\Fonts\\arialbd.ttf"),
+        ("C:\\Windows\\Fonts\\calibri.ttf", "C:\\Windows\\Fonts\\calibrib.ttf"),
+        ("C:\\Windows\\Fonts\\verdana.ttf", "C:\\Windows\\Fonts\\verdanab.ttf"),
+        ("C:\\Windows\\Fonts\\tahoma.ttf",  "C:\\Windows\\Fonts\\tahomabd.ttf"),
+        // Latin フォールバック — Linux（Ubuntu 標準搭載）
         ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
          "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
         ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
@@ -103,9 +110,17 @@ public class DocumentPdfSharpService : IDocumentPdfService
     {
         string[] searchDirs =
         [
+            // Windows
+            @"C:\Windows\Fonts",
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                         "Microsoft", "Windows", "Fonts"),
+            // Linux
             "/usr/share/fonts",
             "/usr/local/share/fonts",
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fonts"),
+            // macOS
+            "/Library/Fonts",
+            "/System/Library/Fonts",
         ];
 
         foreach (var dir in searchDirs)
@@ -113,6 +128,7 @@ public class DocumentPdfSharpService : IDocumentPdfService
             if (!Directory.Exists(dir)) continue;
             try
             {
+                // .ttc はコレクション形式のため除外し .ttf のみ対象にする
                 var ttf = Directory.GetFiles(dir, "*.ttf", SearchOption.AllDirectories)
                                    .FirstOrDefault();
                 if (ttf != null)
