@@ -57,9 +57,17 @@ public class DocumentPdfSharpService : IDocumentPdfService
     {
         // 使用可能なフォントファイルを先頭から探す
         var found = FontCandidates.FirstOrDefault(c => File.Exists(c.Regular));
+
+        // 候補リストに見つからない場合はシステムフォントを広域検索する
+        if (found == default)
+            found = FindAnySystemFont();
+
         if (found == default)
         {
-            // フォントが一切見つからない場合（通常は起きない）
+            // フォントが一切見つからない場合: リゾルバーなしで "Arial" を使うと
+            // Linux 上で XFont コンストラクタが null instance 例外をスローするため、
+            // ダミーデータで UniversalFontResolver を設定するしかない。
+            // ここまで来ることは通常ないが、安全策として Arial のままにする。
             FontFamilyName = "Arial";
             return;
         }
@@ -74,13 +82,46 @@ public class DocumentPdfSharpService : IDocumentPdfService
             // UniversalFontResolver: すべてのフォント要求を登録済みデータで処理する。
             // Linux 上でプラットフォームフォント（Arial 等）が見つからない場合でも
             // クラッシュしないようにするため、null を返さず常に解決する。
-            GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
+            // FontResolver は XFont を一度でも生成した後は変更不可なため、
+            // 未設定の場合のみ登録する。
+            if (GlobalFontSettings.FontResolver == null)
+                GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
+
             FontFamilyName = RegularKey;   // リゾルバーが全リクエストを横取りするため任意値でよい
         }
         catch
         {
             FontFamilyName = "Arial";
         }
+    }
+
+    /// <summary>
+    /// FontCandidates に含まれない場合に、システムの一般的なフォントディレクトリから
+    /// 任意の TTF ファイルを探して返します。
+    /// </summary>
+    private static (string Regular, string? Bold) FindAnySystemFont()
+    {
+        string[] searchDirs =
+        [
+            "/usr/share/fonts",
+            "/usr/local/share/fonts",
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".fonts"),
+        ];
+
+        foreach (var dir in searchDirs)
+        {
+            if (!Directory.Exists(dir)) continue;
+            try
+            {
+                var ttf = Directory.GetFiles(dir, "*.ttf", SearchOption.AllDirectories)
+                                   .FirstOrDefault();
+                if (ttf != null)
+                    return (ttf, null);
+            }
+            catch { /* アクセス拒否等は無視 */ }
+        }
+
+        return default;
     }
 
     // ── テンプレート読み込み ──────────────────────────────────────────────────
