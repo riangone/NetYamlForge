@@ -21,6 +21,7 @@
         initPanel();
         initSignalR();
         loadCliTools();
+        configureMarked();
     });
     
     // 初始化面板
@@ -36,14 +37,14 @@
         `;
         trigger.onclick = togglePanel;
         document.body.appendChild(trigger);
-        
+
         // 创建面板
         const panel = document.createElement('div');
         panel.id = 'ai-assistant-panel';
         panel.className = 'ai-assistant-panel';
         panel.innerHTML = buildPanelHTML();
         document.body.appendChild(panel);
-        
+
         // 绑定事件
         bindPanelEvents();
     }
@@ -95,7 +96,7 @@
                     <label for="ai-cli-tool" class="text-sm">AI:</label>
                     <select id="ai-cli-tool" class="select select-sm select-bordered">
                         <option value="claude">Claude Code</option>
-                        <option value="qwen-code">Qwen Code</option>
+                        <option value="qwen">Qwen Code</option>
                         <option value="mock">Mock (Test)</option>
                     </select>
                     <span id="cli-status" class="text-xs opacity-50 ml-2"></span>
@@ -196,39 +197,9 @@
         document.head.appendChild(script);
     }
     
-    // 轮询回退方案
+    // 轮询回退方案（已废弃，使用 pollTaskResult 替代）
     function initPollingFallback() {
-        console.log('Using polling fallback for progress updates');
-        window.aiPollingInterval = null;
-    }
-    
-    function startPolling(taskId) {
-        stopPolling();
-        window.aiPollingInterval = setInterval(async function() {
-            try {
-                const response = await fetch(`${CONFIG.apiBaseUrl}/tasks/${taskId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    handleProgressUpdate({
-                        id: data.id,
-                        status: data.status,
-                        progress: data.progress,
-                        logs: data.logs,
-                        result: data.result,
-                        error: data.error
-                    });
-                }
-            } catch (error) {
-                console.error('Polling error:', error);
-            }
-        }, 1000);
-    }
-    
-    function stopPolling() {
-        if (window.aiPollingInterval) {
-            clearInterval(window.aiPollingInterval);
-            window.aiPollingInterval = null;
-        }
+        console.log('SignalR not available, using simple polling');
     }
     
     function connectSignalR() {
@@ -268,12 +239,15 @@
         }
     }
     
+    // tools は { "claude": {...}, "qwen-code": {...}, "mock": {...} } の辞書形式
     function updateCliSelector(tools) {
         const selector = document.getElementById('ai-cli-tool');
         if (!selector) return;
-        
+
+        // 現在の選択値を保持（再構築後に復元する）
+        const prevValue = selector.value;
         selector.innerHTML = '';
-        
+
         for (const [name, tool] of Object.entries(tools)) {
             const option = document.createElement('option');
             option.value = name;
@@ -284,35 +258,49 @@
             }
             selector.appendChild(option);
         }
-        
-        // 检查默认工具状态
-        checkCliStatus(selector.value);
+
+        // 以前の選択値があれば復元、なければ最初のインストール済みツールを選択
+        if (prevValue && selector.querySelector(`option[value="${prevValue}"]`)) {
+            selector.value = prevValue;
+        }
+
+        updateCliStatusDisplay(tools[selector.value]);
     }
-    
+
     async function checkCliStatus(toolName) {
         const statusEl = document.getElementById('cli-status');
         if (!statusEl) return;
-        
+
         try {
             const response = await fetch(`${CONFIG.apiBaseUrl}/cli-tools`);
             if (response.ok) {
                 const data = await response.json();
-                const tool = data.available[toolName];
-                if (tool) {
-                    if (tool.installed && tool.authenticated) {
-                        statusEl.textContent = '✓ 就绪';
-                        statusEl.className = 'text-xs text-success ml-2';
-                    } else if (tool.installed) {
-                        statusEl.textContent = '⚠ 未认证';
-                        statusEl.className = 'text-xs text-warning ml-2';
-                    } else {
-                        statusEl.textContent = '✗ 未安装';
-                        statusEl.className = 'text-xs text-error ml-2';
-                    }
-                }
+                // available は辞書形式: { "claude": {...}, ... }
+                const tool = data.available ? data.available[toolName] : null;
+                updateCliStatusDisplay(tool, statusEl);
             }
         } catch (error) {
-            statusEl.textContent = '?';
+            if (statusEl) statusEl.textContent = '?';
+        }
+    }
+
+    function updateCliStatusDisplay(tool, statusEl) {
+        statusEl = statusEl || document.getElementById('cli-status');
+        if (!statusEl) return;
+
+        if (!tool) {
+            statusEl.textContent = '';
+            return;
+        }
+        if (tool.installed && tool.authenticated) {
+            statusEl.textContent = '✓ 就绪';
+            statusEl.className = 'text-xs text-success ml-2';
+        } else if (tool.installed) {
+            statusEl.textContent = '⚠ 未认证';
+            statusEl.className = 'text-xs text-warning ml-2';
+        } else {
+            statusEl.textContent = '✗ 未安装';
+            statusEl.className = 'text-xs text-error ml-2';
         }
     }
     
@@ -321,17 +309,17 @@
         const input = document.getElementById('ai-input-message');
         const cliSelector = document.getElementById('ai-cli-tool');
         const message = input.value.trim();
-        
+
         if (!message) return;
-        
+
         // 添加用户消息
         addMessage(message, 'user');
         input.value = '';
-        
+
         // 更新状态
         updateStatus('running');
         setSendingState(true);
-        
+
         try {
             const response = await fetch(`${CONFIG.apiBaseUrl}/chat`, {
                 method: 'POST',
@@ -341,34 +329,185 @@
                 body: JSON.stringify({
                     message: message,
                     cliTool: cliSelector.value,
-                    streaming: true
+                    streaming: false  // 禁用流式，使用简单响应
                 })
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
-                currentTaskId = data.taskId;
 
-                // 添加进度容器
-                addProgressContainer(data.taskId);
-                
-                // 如果没有 SignalR 连接，使用轮询
-                if (!connection || connection.state !== 'Connected') {
-                    startPolling(data.taskId);
+                // タスク完成済みで結果がある場合は即時表示
+                if (data.result && data.result.trim()) {
+                    addMessage(data.result, 'assistant');
+                    updateStatus('completed');
+                    setSendingState(false);
+                    return;
                 }
+
+                if (data.taskId) {
+                    currentTaskId = data.taskId;
+                    // タスクIDがある場合はポーリングで結果を取得
+                    await pollTaskResult(data.taskId);
+                    currentTaskId = null;
+                } else {
+                    addMessage('任务已提交', 'assistant');
+                }
+
+                updateStatus('completed');
             } else {
                 const error = await response.json();
                 addMessage(`错误：${error.error}`, 'system');
                 updateStatus('error');
             }
         } catch (error) {
+            console.error('Send message error:', error);
             addMessage(`请求失败：${error.message}`, 'system');
             updateStatus('error');
         } finally {
             setSendingState(false);
         }
     }
+
+    // 轮询任务结果（只到完成为止）
+    async function pollTaskResult(taskId) {
+        const progressEl = addProgressContainer(taskId);
+        let lastLogCount = 0;
+
+        for (let i = 0; i < 60; i++) {  // 最多轮询 60 次
+            try {
+                const response = await fetch(`${CONFIG.apiBaseUrl}/tasks/${taskId}`);
+                if (!response.ok) break;
+
+                const data = await response.json();
+                console.log('Polling data:', data);  // 调试日志
+
+                // 更新进度
+                if (progressEl) {
+                    const fill = progressEl.querySelector('.ai-progress-fill');
+                    const percent = progressEl.querySelector('.progress-percent');
+                    const status = progressEl.querySelector('.progress-status');
+                    const logsContainer = progressEl.querySelector('.ai-logs ul');
+                    
+                    if (fill) fill.style.width = `${data.progress}%`;
+                    if (percent) percent.textContent = `${data.progress}%`;
+                    if (status) status.textContent = translateStatus(data.status);
+
+                    // 显示日志（仅新增的）
+                    if (logsContainer && data.logs && data.logs.length > lastLogCount) {
+                        for (let j = lastLogCount; j < data.logs.length; j++) {
+                            const logText = parseLogEntry(data.logs[j]);
+                            if (logText) {  // 跳过空日志
+                                const li = document.createElement('li');
+                                li.textContent = logText;
+                                li.className = 'text-xs text-gray-600 py-1';
+                                logsContainer.appendChild(li);
+                            }
+                        }
+                        lastLogCount = data.logs.length;
+                        scrollToBottom();
+                    }
+                }
+
+                // 检查完成状态
+                if (data.status === 'Completed' || data.status === 2) {
+                    if (data.result && data.result.trim()) {
+                        // Markdown の先頭に文字を付けると見出し等が壊れるため、結果のみを渡す
+                        addMessage(data.result, 'assistant');
+                    }
+                    return;
+                } else if (data.status === 'Failed' || data.status === 3 || data.status === 'Cancelled' || data.status === 4) {
+                    addMessage(`❌ ${data.error || '任务失败'}`, 'system');
+                    return;
+                }
+
+                // 等待 1 秒后继续轮询
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+                console.error('Polling error:', error);
+                break;
+            }
+        }
+
+        addMessage('⚠️ 任务超时或中断', 'system');
+    }
+
+    // 翻译状态
+    function translateStatus(status) {
+        if (typeof status === 'number') {
+            switch (status) {
+                case 0: return 'Pending';
+                case 1: return 'Running';
+                case 2: return 'Completed';
+                case 3: return 'Failed';
+                case 4: return 'Cancelled';
+                default: return status;
+            }
+        }
+        return status;
+    }
+
+    // ログエントリを表示テキストに変換する。
+    // バックエンド (BaseCLIService.ParseStreamLine) が既に人間が読めるテキストを返すため、
+    // そのまま返す。空文字・null は null を返してスキップする。
+    function parseLogEntry(logEntry) {
+        if (!logEntry || !logEntry.trim()) return null;
+        return logEntry;
+    }
     
+    // SignalR からのリアルタイム進捗更新を処理する
+    function handleProgressUpdate(data) {
+        if (!data) return;
+
+        // 該当タスクの進捗 UI を更新
+        const progressEl = document.querySelector(`[data-task-id="${data.id}"]`);
+        if (progressEl) {
+            const fill = progressEl.querySelector('.ai-progress-fill');
+            const percent = progressEl.querySelector('.progress-percent');
+            const status = progressEl.querySelector('.progress-status');
+            const logsContainer = progressEl.querySelector('.ai-logs ul');
+
+            if (fill) fill.style.width = `${data.progress || 0}%`;
+            if (percent) percent.textContent = `${data.progress || 0}%`;
+            if (status) status.textContent = translateStatus(data.status);
+
+            // ログを全件再描画（差分追加よりシンプルで正確）
+            if (logsContainer && Array.isArray(data.logs) && data.logs.length > 0) {
+                logsContainer.innerHTML = '';
+                for (const log of data.logs) {
+                    if (log && log.trim()) {
+                        const li = document.createElement('li');
+                        li.textContent = log;
+                        li.className = 'text-xs text-gray-600 py-1';
+                        logsContainer.appendChild(li);
+                    }
+                }
+                if (autoScroll) scrollToBottom();
+            }
+        }
+
+        // 完了・失敗時の処理（currentTaskId と一致する場合のみ UI をリセット）
+        if (data.id !== currentTaskId) return;
+
+        if (data.status === 'Completed' || data.status === 2) {
+            if (data.result && data.result.trim()) {
+                // Markdown のまま渡す（プレフィックス付けない）
+                addMessage(data.result, 'assistant');
+            }
+            updateStatus('completed');
+            setSendingState(false);
+            currentTaskId = null;
+        } else if (data.status === 'Failed' || data.status === 3) {
+            addMessage(`❌ ${data.error || '任务失败'}`, 'system');
+            updateStatus('error');
+            setSendingState(false);
+            currentTaskId = null;
+        } else if (data.status === 'Cancelled' || data.status === 4) {
+            updateStatus('idle');
+            setSendingState(false);
+            currentTaskId = null;
+        }
+    }
+
     // 停止任务
     async function stopTask() {
         if (!currentTaskId) return;
@@ -385,77 +524,72 @@
             console.error('Failed to stop task:', error);
         }
     }
-    
-    // 处理进度更新
-    function handleProgressUpdate(data) {
-        if (!currentTaskId || data.id !== currentTaskId) return;
-        
-        const progressContainer = document.querySelector(`[data-task-id="${data.id}"]`);
-        if (!progressContainer) return;
-        
-        // 更新进度条
-        const fill = progressContainer.querySelector('.ai-progress-fill');
-        const text = progressContainer.querySelector('.ai-progress-text');
-        
-        if (fill) {
-            fill.style.width = `${data.progress}%`;
-        }
-        
-        if (text) {
-            text.querySelector('.progress-percent').textContent = `${data.progress}%`;
-        }
-        
-        // 更新日志
-        if (data.logs && data.logs.length > 0) {
-            const logsContainer = progressContainer.querySelector('.ai-logs ul');
-            if (logsContainer) {
-                data.logs.forEach(log => {
-                    const li = document.createElement('li');
-                    li.textContent = log;
-                    logsContainer.appendChild(li);
-                });
-                logsContainer.scrollTop = logsContainer.scrollHeight;
-            }
-        }
-        
-        // 检查完成状态
-        if (data.status === 'Completed') {
-            updateStatus('completed');
-            addMessage(`✅ 任务完成：${data.result || ''}`, 'assistant');
-            currentTaskId = null;
-            setSendingState(false);
-            stopPolling();
-        } else if (data.status === 'Failed' || data.status === 'Cancelled') {
-            updateStatus('error');
-            addMessage(`❌ ${data.error || '任务失败'}`, 'system');
-            currentTaskId = null;
-            setSendingState(false);
-            stopPolling();
-        }
-        
-        // 自动滚动
-        if (autoScroll) {
-            scrollToBottom();
-        }
-    }
-    
+
     // 添加消息
     function addMessage(content, type) {
         const container = document.getElementById('ai-messages-container');
         const messageEl = document.createElement('div');
         messageEl.className = `ai-message ${type}`;
-        
-        if (type === 'assistant' || type === 'user') {
+
+        if (type === 'assistant') {
+            const contentEl = document.createElement('div');
+            contentEl.className = 'ai-message-content';
+            contentEl.innerHTML = renderMarkdown(content);
+            // コードブロックにコピーボタンを追加
+            contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
+            messageEl.appendChild(contentEl);
+        } else if (type === 'user') {
             messageEl.innerHTML = `<div class="ai-message-content">${escapeHtml(content)}</div>`;
         } else {
             messageEl.textContent = content;
         }
-        
+
         container.appendChild(messageEl);
-        
+
         if (autoScroll) {
             scrollToBottom();
         }
+    }
+
+    // marked.js は _Layout.cshtml で静的に読み込み済み（タイミング問題を回避）
+    function configureMarked() {
+        if (typeof marked === 'undefined') return;
+        marked.setOptions({
+            breaks: true,    // 改行を <br> に変換
+            gfm: true        // GitHub Flavored Markdown
+        });
+    }
+
+    // Markdown を HTML にレンダリング。marked.js が未ロードの場合は plaintext にフォールバック。
+    function renderMarkdown(text) {
+        if (typeof marked === 'undefined' || !text) {
+            return `<p>${escapeHtml(text || '')}</p>`;
+        }
+        try {
+            return marked.parse(text);
+        } catch (e) {
+            return `<p>${escapeHtml(text)}</p>`;
+        }
+    }
+
+    // コードブロックにコピーボタンを追加
+    function addCopyButton(codeEl) {
+        const pre = codeEl.parentElement;
+        pre.style.position = 'relative';
+
+        const btn = document.createElement('button');
+        btn.className = 'ai-code-copy-btn';
+        btn.textContent = 'Copy';
+        btn.onclick = function() {
+            navigator.clipboard.writeText(codeEl.textContent).then(function() {
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            }).catch(function() {
+                btn.textContent = 'Error';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            });
+        };
+        pre.appendChild(btn);
     }
     
     // 添加进度容器
@@ -481,6 +615,7 @@
         `;
         container.appendChild(progressEl);
         scrollToBottom();
+        return progressEl;  // 返回元素引用
     }
     
     // 更新状态指示器
@@ -531,16 +666,16 @@
     function openPanel() {
         const panel = document.getElementById('ai-assistant-panel');
         const trigger = document.getElementById('ai-assistant-trigger');
-        
+
         panel.classList.add('open');
         trigger.classList.add('hidden');
         isPanelOpen = true;
     }
-    
+
     function closePanel() {
         const panel = document.getElementById('ai-assistant-panel');
         const trigger = document.getElementById('ai-assistant-trigger');
-        
+
         panel.classList.remove('open');
         trigger.classList.remove('hidden');
         isPanelOpen = false;

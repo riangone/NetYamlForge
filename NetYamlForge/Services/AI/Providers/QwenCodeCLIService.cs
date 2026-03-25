@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace NetYamlForge.Services.AI.Providers;
 
 /// <summary>
-/// Qwen Code CLI 服务
+/// Qwen Code CLI サービス
 /// </summary>
 public class QwenCodeCLIService : BaseCLIService
 {
@@ -12,10 +12,28 @@ public class QwenCodeCLIService : BaseCLIService
         ProcessExecutor executor,
         IOptions<CliConfig> config,
         ILogger<QwenCodeCLIService> logger)
-        : base(executor, config, logger, "qwen-code")
+        : base(executor, config, logger, "qwen")
     {
     }
-    
+
+    // appsettings に QwenCode.Path が設定されている場合はそのパスを使用する
+    protected override string CommandPath =>
+        string.IsNullOrEmpty(Config.QwenCode.Path) ? ToolName : Config.QwenCode.Path;
+
+    // DASHSCOPE_API_KEY / DASHSCOPE_BASE_URL を環境変数として渡す
+    protected override IReadOnlyDictionary<string, string>? GetEnvironmentVariables()
+    {
+        var env = new Dictionary<string, string>();
+
+        if (!string.IsNullOrEmpty(Config.QwenCode.ApiKey))
+            env["DASHSCOPE_API_KEY"] = Config.QwenCode.ApiKey;
+
+        if (!string.IsNullOrEmpty(Config.QwenCode.BaseUrl))
+            env["DASHSCOPE_BASE_URL"] = Config.QwenCode.BaseUrl;
+
+        return env.Count > 0 ? env : null;
+    }
+
     public override async Task<CliToolInfo> GetToolInfoAsync(CancellationToken ct = default)
     {
         var info = new CliToolInfo
@@ -24,23 +42,31 @@ public class QwenCodeCLIService : BaseCLIService
             DisplayName = "Qwen Code",
             Capabilities = new() { "Read", "Write", "Edit", "Bash", "Git" }
         };
-        
+
         try
         {
-            // 检查是否安装
-            var result = await Executor.ExecuteAsync(ToolName, "--version", ct: ct);
+            var result = await Executor.ExecuteAsync(CommandPath, "--version",
+                environmentVariables: GetEnvironmentVariables(), ct: ct);
             if (result.ExitCode == 0)
             {
                 info.Installed = true;
                 info.Version = result.Output.Trim();
-                
-                // 检查是否已认证
-                var authResult = await Executor.ExecuteAsync(
-                    ToolName, 
-                    "-p \"Hello\" --output-format json", 
-                    ct: ct);
-                info.Authenticated = authResult.ExitCode == 0 && 
-                    !authResult.Error.Contains("auth", StringComparison.OrdinalIgnoreCase);
+
+                // API キーが設定されていれば認証済みとみなす
+                if (!string.IsNullOrEmpty(Config.QwenCode.ApiKey))
+                {
+                    info.Authenticated = true;
+                }
+                else
+                {
+                    var authResult = await Executor.ExecuteAsync(
+                        CommandPath,
+                        "-p \"Hello\" --output-format json",
+                        environmentVariables: GetEnvironmentVariables(),
+                        ct: ct);
+                    info.Authenticated = authResult.ExitCode == 0 &&
+                        !authResult.Error.Contains("auth", StringComparison.OrdinalIgnoreCase);
+                }
             }
         }
         catch (Exception ex)
@@ -49,10 +75,10 @@ public class QwenCodeCLIService : BaseCLIService
             info.Installed = false;
             info.Authenticated = false;
         }
-        
+
         return info;
     }
-    
+
     protected override string BuildArguments(
         string message,
         bool streaming,
@@ -60,31 +86,46 @@ public class QwenCodeCLIService : BaseCLIService
         List<string>? allowedTools)
     {
         var args = new List<string>();
-        
-        // -p 标志：非交互模式
+
+        // 非インタラクティブモード
         args.Add("-p");
         args.Add($"\"{EscapeArgument(message)}\"");
-        
-        // 输出格式
-        args.Add(streaming ? "--output-format stream-json" : "--output-format json");
-        
-        // 会话恢复（如果支持）
+
+        // 出力フォーマット（stream-json は --verbose も必要）
+        if (streaming)
+        {
+            args.Add("--output-format stream-json");
+            args.Add("--verbose");
+        }
+        else
+        {
+            args.Add("--output-format json");
+        }
+
+        // モデル指定（設定されている場合）
+        if (!string.IsNullOrEmpty(Config.QwenCode.Model))
+        {
+            args.Add("--model");
+            args.Add(Config.QwenCode.Model);
+        }
+
+        // セッション再開
         if (!string.IsNullOrEmpty(sessionId))
         {
             args.Add("--resume");
             args.Add($"\"{sessionId}\"");
         }
-        
-        // 工具权限控制
+
+        // ツール権限制御
         if (allowedTools != null && allowedTools.Count > 0)
         {
             args.Add("--allowedTools");
             args.Add(string.Join(",", allowedTools));
         }
-        
+
         return string.Join(" ", args);
     }
-    
+
     private static string EscapeArgument(string arg)
     {
         return arg.Replace("\"", "\\\"").Replace("\n", " ");
