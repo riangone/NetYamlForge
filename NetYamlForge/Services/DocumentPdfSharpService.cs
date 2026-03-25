@@ -141,39 +141,43 @@ public class DocumentPdfSharpService : IDocumentPdfService
         }
 
         // フォント数の取得（ビッグエンディアン）
-        int fontCount = (ttcData[8] << 24) | (ttcData[9] << 16) | (ttcData[10] << 8) | ttcData[11];
+        int fontCount = ReadBE32(ttcData, 8);
         if (fontCount < 1)
             throw new InvalidDataException("TTC contains no fonts");
 
-        // 最初のフォントのオフセットを取得（オフセットテーブルはバイト 12 から始まる）
-        int offsetOffset = 12; // 最初のオフセットの位置
-        int fontOffset = (ttcData[offsetOffset] << 24) | (ttcData[offsetOffset + 1] << 16) |
-                         (ttcData[offsetOffset + 2] << 8) | ttcData[offsetOffset + 3];
-
-        if (fontOffset <= 0 || fontOffset >= ttcData.Length)
+        // 最初のフォントのオフセットを取得
+        int fontOffset = ReadBE32(ttcData, 12);
+        if (fontOffset <= 0 || fontOffset + 12 >= ttcData.Length)
             throw new InvalidDataException("Invalid font offset in TTC");
 
-        // 最初のフォントの長さを計算
-        // 2 番目のフォントのオフセットから最初のフォントの長さを計算する
-        int fontLength;
-        if (fontCount > 1)
+        // TTF ヘッダから numTables を読み取り（ビッグエンディアン）
+        int numTables = (ttcData[fontOffset + 4] << 8) | ttcData[fontOffset + 5];
+
+        // 各テーブルの (offset + length) の最大値を求めてフォント全体のサイズを算出
+        // テーブルディレクトリは fontOffset + 12 から始まり、各エントリは 16 バイト
+        int maxEnd = fontOffset + 12 + numTables * 16; // テーブルディレクトリ末尾
+        for (int i = 0; i < numTables; i++)
         {
-            int offsetOffset2 = offsetOffset + 4; // 2 番目のオフセット
-            int fontOffset2 = (ttcData[offsetOffset2] << 24) | (ttcData[offsetOffset2 + 1] << 16) |
-                              (ttcData[offsetOffset2 + 2] << 8) | ttcData[offsetOffset2 + 3];
-            fontLength = fontOffset2 - fontOffset;
-        }
-        else
-        {
-            // フォントが 1 つの場合はファイルの終わりまで
-            fontLength = ttcData.Length - fontOffset;
+            int entryPos = fontOffset + 12 + i * 16;
+            int tblOffset = ReadBE32(ttcData, entryPos + 8);
+            int tblLength = ReadBE32(ttcData, entryPos + 12);
+            // テーブルは 4 バイト境界にアラインされる
+            int tblEnd = tblOffset + ((tblLength + 3) & ~3);
+            if (tblEnd > maxEnd) maxEnd = tblEnd;
         }
 
-        // フォントデータを抽出
+        int fontLength = maxEnd - fontOffset;
         var fontData = new byte[fontLength];
         Array.Copy(ttcData, fontOffset, fontData, 0, fontLength);
         return fontData;
     }
+
+    /// <summary>
+    /// ビッグエンディアンの 4 バイト整数を読み取ります。
+    /// </summary>
+    private static int ReadBE32(byte[] data, int offset)
+        => (data[offset] << 24) | (data[offset + 1] << 16)
+         | (data[offset + 2] << 8) | data[offset + 3];
 
     /// <summary>
     /// FontCandidates に含まれない場合に、システムの一般的なフォントディレクトリから
