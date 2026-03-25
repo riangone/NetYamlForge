@@ -2,6 +2,7 @@ using System.Threading.Channels;
 using TaskStatus = NetYamlForge.Models.AI.TaskStatus;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI.Providers;
+using Microsoft.Extensions.Options;
 
 namespace NetYamlForge.Services.AI;
 
@@ -20,14 +21,14 @@ public class TaskQueueService
     public TaskQueueService(
         ProgressTracker tracker,
         CLIServiceFactory factory,
-        CliConfig config,
+        IOptions<CliConfig> config,
         ILogger<TaskQueueService> logger,
         IServiceProvider serviceProvider)
     {
         _queue = Channel.CreateUnbounded<AITask>();
         _tracker = tracker;
         _factory = factory;
-        _config = config;
+        _config = config.Value;
         _logger = logger;
         _serviceProvider = serviceProvider;
     }
