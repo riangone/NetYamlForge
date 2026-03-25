@@ -125,6 +125,8 @@ CREATE TABLE ExportDemo (
     Category        TEXT,
     Price           REAL,
     Stock           INTEGER,
+    Rating          REAL,
+    ReleaseDate     TEXT,
     Description     TEXT,
     IsActive        INTEGER,
     CreatedAt       TEXT
