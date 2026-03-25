@@ -107,11 +107,12 @@ PDF テンプレートはグローバル定義 (`NetYamlForge/Schemas/pdf-templa
 
 | クラス | エンジン | ライセンス | 用途 |
 |---|---|---|---|
-| `DocumentPdfSharpService` | PDFsharp 6.x | MIT | **既定実装** (`IDocumentPdfService`) |
-| `DocumentPdfService` | iText 7 | AGPL/商用 | 保持（直接注入） |
-| `PdfExportService` | iText 7 | AGPL/商用 | 一覧データの表形式 PDF |
+| `DocumentPdfService` | PdfSharpCore | MIT | **既定実装** (`IDocumentPdfService`)。Google Fonts (Noto Sans JP) で日本語表示に対応 |
+| `PdfExportService` | PdfSharpCore | MIT | 一覧データの表形式 PDF |
 
-`PdfTemplateSampleRunner` で全テンプレートのサンプル PDF を PDFsharp で生成できます。
+`PdfTemplateSampleRunner` で全テンプレートのサンプル PDF を生成できます。
+
+日本語 PDF を正しく描画するには Noto Sans JP TTF フォントが `wwwroot/fonts/` に必要です。セットアップ手順は `NETYOAMLFORGE-FONT-SETUP.md` を参照。
 
 ### Testing Patterns
 

@@ -3,10 +3,10 @@ using Xunit;
 
 namespace NetYamlForge.Tests;
 
-/// <summary>DocumentPdfSharpService のフォント解決と PDF 生成を検証します。</summary>
-public class DocumentPdfSharpServiceTests
+/// <summary>DocumentPdfService のフォント解決と PDF 生成を検証します。</summary>
+public class DocumentPdfServiceTests
 {
-    private static readonly DocumentPdfSharpService Svc = new();
+    private static readonly DocumentPdfService Svc = new();
 
     private static Dictionary<string, object?> InvoiceHeader() => new()
     {
