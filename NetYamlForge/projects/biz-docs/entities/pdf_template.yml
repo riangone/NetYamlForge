@@ -7,6 +7,12 @@ entities:
     softDelete: false
     isPublic: true
 
+    hooks:
+      beforeCreate:
+        - validate_pdf_template_status
+      beforeUpdate:
+        - validate_pdf_template_status
+
     joins:
       - type: left
         table: PdfTemplateCategory

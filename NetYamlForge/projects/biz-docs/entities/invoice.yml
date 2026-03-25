@@ -7,6 +7,18 @@ entities:
     softDelete: false
     isPublic: true
 
+    hooks:
+      beforeCreate:
+        - validate_invoice_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+      beforeUpdate:
+        - validate_invoice_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+
     joins:
       - type: left
         table: Customer

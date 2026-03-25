@@ -8,6 +8,18 @@ entities:
     isPublic: true
     pdfTemplate: orders/purchase-order4
 
+    hooks:
+      beforeCreate:
+        - validate_quotation_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+      beforeUpdate:
+        - validate_quotation_status
+        - validate_tax_rate
+        - validate_amount_positive
+        - validate_currency
+
     joins:
       - type: left
         table: Customer

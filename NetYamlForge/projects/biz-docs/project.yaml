@@ -1,7 +1,7 @@
 name: biz-docs
 displayName: "Biz Docs"
 description: "報価単・請款書・報関単など各種ビジネス文書の PDF エクスポートデモ"
-version: "1.1.0"
+version: "1.2.0"
 
 aiHints:
   primaryLanguage: zh-CN
@@ -14,6 +14,14 @@ aiHints:
     - "currency: CNY / USD / JPY / EUR"
     - "pdf_template.status: active / inactive / draft"
     - "pdf_template_category.isEnabled: true / false"
+    - "jp_estimate.status: draft / sent / accepted / rejected"
+    - "jp_invoice.status: draft / issued / paid / overdue / cancelled"
+    - "jp_delivery.status: draft / delivered / received"
+    - "jp_contract.status: draft / active / completed / terminated"
+    - "jp_receipt.status: draft / issued"
+    - "jp_delivery_slip.status: draft / sent / delivered"
+    - "fax_cover.sendDate: datetime format"
+    - "meeting.meetingDate: datetime format"
 
 database:
   type: sqlite
@@ -38,8 +46,16 @@ layout:
       - customer
       - jp_estimate
       - jp_invoice
+      - jp_invoice_standard
+      - jp_invoice_blue
+      - jp_invoice_bank
       - jp_delivery
+      - jp_delivery_slip
+      - jp_receipt
       - jp_contract
+      - jp_resume
+      - fax_cover
+      - meeting
       - pdf_template
       - pdf_template_category
     items:
@@ -68,14 +84,46 @@ layout:
         url: /biz-docs/DynamicEntity/Index?entity=jp_invoice
         icon: 💴
         section: 国内文書
+      - label: 請求書（標準）
+        url: /biz-docs/DynamicEntity/Index?entity=jp_invoice_standard
+        icon: 📄
+        section: 国内文書
+      - label: 請求書（青）
+        url: /biz-docs/DynamicEntity/Index?entity=jp_invoice_blue
+        icon: 💙
+        section: 国内文書
+      - label: 請求書（銀行用）
+        url: /biz-docs/DynamicEntity/Index?entity=jp_invoice_bank
+        icon: 🏦
+        section: 国内文書
       - label: 納品書
         url: /biz-docs/DynamicEntity/Index?entity=jp_delivery
         icon: 📦
+        section: 国内文書
+      - label: 送付状
+        url: /biz-docs/DynamicEntity/Index?entity=jp_delivery_slip
+        icon: 📨
+        section: 国内文書
+      - label: 領収書
+        url: /biz-docs/DynamicEntity/Index?entity=jp_receipt
+        icon: 🧾
         section: 国内文書
       - label: 契約書台帳
         url: /biz-docs/DynamicEntity/Index?entity=jp_contract
         icon: 📜
         section: 国内文書
+      - label: 履歴書
+        url: /biz-docs/DynamicEntity/Index?entity=jp_resume
+        icon: 👤
+        section: その他
+      - label: ファックス表紙
+        url: /biz-docs/DynamicEntity/Index?entity=fax_cover
+        icon: 📠
+        section: その他
+      - label: 会議録
+        url: /biz-docs/DynamicEntity/Index?entity=meeting
+        icon: 📝
+        section: その他
       - label: PDF テンプレート
         url: /biz-docs/DynamicEntity/Index?entity=pdf_template
         icon: 📄
