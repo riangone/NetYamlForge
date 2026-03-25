@@ -14,6 +14,10 @@
     <EmbeddedResource Include="Schemas\dashboard-schema.json" />
   </ItemGroup>
   <ItemGroup>
+    <!-- PDF テンプレート YAML をビルド出力にコピー（AppContext.BaseDirectory で参照） -->
+    <Content Include="Schemas\pdf-templates\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- アナライザープロジェクト: 禁止パターンをビルド時に検出 (DCS001-DCS004) -->
     <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

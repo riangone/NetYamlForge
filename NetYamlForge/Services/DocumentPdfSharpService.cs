@@ -23,43 +23,61 @@ public class DocumentPdfSharpService : IDocumentPdfService
     private static readonly string GlobalTemplatesDir =
         Path.Combine(AppContext.BaseDirectory, "Schemas", "pdf-templates");
 
-    private static readonly (string Path, string Family)[] CjkFontCandidates =
+    // フォント候補: (正体パス, 太字パス or null, CJK対応か)
+    // 優先順位順。CJK対応フォントが望ましいが、なければ Latin フォールバックを使用。
+    private static readonly (string Regular, string? Bold)[] FontCandidates =
     [
-        ("/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",      "IPAPGothic"),
-        ("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",  "Noto Sans CJK JP"),
-        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",  "Noto Sans CJK JP"),
-        ("/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",       "Noto Sans CJK JP"),
-        ("/usr/share/fonts/opentype/ipafont-mincho/ipamp.ttf",       "IPAPMincho"),
-        ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf", "VL Gothic"),
-        ("/Library/Fonts/Arial Unicode.ttf",                         "Arial Unicode MS"),
-        ("C:\\Windows\\Fonts\\msgothic.ttc",                         "MS Gothic"),
+        // CJK 対応フォント（日本語が必要な場合はいずれかをインストールすること）
+        ("/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",       null),
+        ("/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",       null),
+        ("/usr/share/fonts/opentype/ipafont-mincho/ipamp.ttf",        null),
+        ("/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf",  null),
+        ("/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",     "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf"),
+        ("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",    null),
+        ("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",    null),
+        ("/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",         null),
+        ("/Library/Fonts/Arial Unicode.ttf",                           null),
+        ("C:\\Windows\\Fonts\\msgothic.ttc",                           null),
+        // Latin フォールバック（Ubuntu 標準搭載）
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        ("/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+         "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
+        ("/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+         "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
     ];
 
-    private const string EmbeddedFamilyName = "NetYamlForgeCjk";
+    private const string RegularKey = "NetYamlForge|Regular";
+    private const string BoldKey    = "NetYamlForge|Bold";
 
-    /// <summary>PDF 描画に使用するフォントファミリー名</summary>
+    /// <summary>PDF 描画に使用するフォントファミリー名（リゾルバー登録後は任意値でよい）</summary>
     internal static readonly string FontFamilyName;
 
     static DocumentPdfSharpService()
     {
-        // CJK フォントファイルを探してカスタムリゾルバーを登録
-        var found = CjkFontCandidates.FirstOrDefault(c => File.Exists(c.Path));
-        if (found != default)
+        // 使用可能なフォントファイルを先頭から探す
+        var found = FontCandidates.FirstOrDefault(c => File.Exists(c.Regular));
+        if (found == default)
         {
-            try
-            {
-                var fontData = File.ReadAllBytes(found.Path);
-                // カスタムリゾルバー: EmbeddedFamilyName → CJK フォントデータ
-                // それ以外はプラットフォームリゾルバーへフォールバック
-                GlobalFontSettings.FontResolver = new CjkFontResolver(EmbeddedFamilyName, fontData);
-                FontFamilyName = EmbeddedFamilyName;
-            }
-            catch
-            {
-                FontFamilyName = "Arial";
-            }
+            // フォントが一切見つからない場合（通常は起きない）
+            FontFamilyName = "Arial";
+            return;
         }
-        else
+
+        try
+        {
+            var regularData = File.ReadAllBytes(found.Regular);
+            var boldData    = found.Bold != null && File.Exists(found.Bold)
+                              ? File.ReadAllBytes(found.Bold)
+                              : regularData;   // bold がなければ regular で代用
+
+            // UniversalFontResolver: すべてのフォント要求を登録済みデータで処理する。
+            // Linux 上でプラットフォームフォント（Arial 等）が見つからない場合でも
+            // クラッシュしないようにするため、null を返さず常に解決する。
+            GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
+            FontFamilyName = RegularKey;   // リゾルバーが全リクエストを横取りするため任意値でよい
+        }
+        catch
         {
             FontFamilyName = "Arial";
         }
@@ -794,30 +812,39 @@ public class DocumentPdfSharpService : IDocumentPdfService
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // CJK フォントリゾルバー
+    // ユニバーサルフォントリゾルバー
     // ─────────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// CJK フォントファイルを登録し、それ以外のフォントはプラットフォームリゾルバーに委譲します。
+    /// すべてのフォントリクエストを事前ロードしたフォントデータで処理するリゾルバー。
+    /// Linux 上で Arial 等のプラットフォームフォントが見つからない場合でも
+    /// 例外を投げないよう、null を一切返さない設計にしています。
     /// </summary>
-    private sealed class CjkFontResolver : IFontResolver
+    private sealed class UniversalFontResolver : IFontResolver
     {
-        private readonly string _familyName;
-        private readonly byte[] _fontData;
+        private readonly byte[] _regularData;
+        private readonly byte[] _boldData;
 
-        public CjkFontResolver(string familyName, byte[] fontData)
+        public UniversalFontResolver(byte[] regularData, byte[] boldData)
         {
-            _familyName = familyName;
-            _fontData   = fontData;
+            _regularData = regularData;
+            _boldData    = boldData;
         }
 
-        public byte[]? GetFont(string faceName)
-            => faceName.Equals(_familyName, StringComparison.OrdinalIgnoreCase)
-               ? _fontData : null;
+        /// <summary>
+        /// 要求されたフォントファミリー・スタイルに関わらず、
+        /// 常に登録済みフォントの face キーを返します。
+        /// これにより Linux 上でも Arial / Helvetica 等の要求が安全に処理されます。
+        /// </summary>
+        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+            => new(isBold ? BoldKey : RegularKey);
 
-        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
-            => familyName.Equals(_familyName, StringComparison.OrdinalIgnoreCase)
-               ? new FontResolverInfo(_familyName)
-               : null;   // null → プラットフォームリゾルバーへフォールバック
+        /// <summary>face キーに対応するフォントデータを返します。</summary>
+        public byte[]? GetFont(string faceName) => faceName switch
+        {
+            BoldKey    => _boldData,
+            RegularKey => _regularData,
+            _          => _regularData,   // 予期しないキーも regular で代用
+        };
     }
 }
