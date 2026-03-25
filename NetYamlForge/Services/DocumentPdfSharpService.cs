@@ -74,33 +74,48 @@ public class DocumentPdfSharpService : IDocumentPdfService
 
     static DocumentPdfSharpService()
     {
-        // 使用可能なフォントファイルを先頭から探す
-        var found = FontCandidates.FirstOrDefault(c => File.Exists(c.Regular));
+        // フォントリゾルバーは一度しか登録できないため、
+        // 既に設定済みなら何もしない。
+        if (GlobalFontSettings.FontResolver != null)
+            return;
 
-        // 候補リストに見つからない場合はシステムフォントを広域検索する
-        if (found == default)
-            found = FindAnySystemFont();
-
-        if (found == default)
-            return;   // フォントなし: リゾルバー未登録のまま。Windows は Arial で動作継続、Linux はクラッシュ
-
-        try
+        // 候補フォントを上から順に試し、読み込みに成功したものを使う。
+        foreach (var found in EnumerateFontCandidates())
         {
-            var regularData = ExtractFontFromPath(found.Regular);
-            var boldData    = found.Bold != null && File.Exists(found.Bold)
-                              ? ExtractFontFromPath(found.Bold)
-                              : regularData;   // bold がなければ regular で代用
+            try
+            {
+                var regularData = ExtractFontFromPath(found.Regular);
+                var boldData    = found.Bold != null && File.Exists(found.Bold)
+                                  ? ExtractFontFromPath(found.Bold)
+                                  : regularData;   // bold がなければ regular で代用
 
-            // UniversalFontResolver はすべてのフォント要求（"Arial" 含む）を横取りし、
-            // 自前フォントデータを返す。Linux でプラットフォームフォントが存在しなくても
-            // XFont("Arial", ...) が動作するようになる。
-            GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
+                // UniversalFontResolver はすべてのフォント要求（"Arial" 含む）を横取りし、
+                // 自前フォントデータを返す。Linux でプラットフォームフォントが存在しなくても
+                // XFont("Arial", ...) が動作するようになる。
+                GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
+                return;
+            }
+            catch
+            {
+                // 読み込み失敗時は次の候補へ進む。
+            }
         }
-        catch
+        // ここまで来た場合はフォントが見つからないか、
+        // リゾルバー設定がロックされていた可能性がある。
+        // Windows は Arial ネイティブで動作継続、Linux は環境依存。
+    }
+
+    private static IEnumerable<(string Regular, string? Bold)> EnumerateFontCandidates()
+    {
+        foreach (var c in FontCandidates)
         {
-            // リゾルバー登録失敗（XFont 生成後のロック等）は無視。
-            // Windows は Arial ネイティブで動作継続。
+            if (File.Exists(c.Regular))
+                yield return c;
         }
+
+        var any = FindAnySystemFont();
+        if (any != default)
+            yield return any;
     }
 
     /// <summary>
@@ -155,15 +170,21 @@ public class DocumentPdfSharpService : IDocumentPdfService
 
         // 各テーブルの (offset + length) の最大値を求めてフォント全体のサイズを算出
         // テーブルディレクトリは fontOffset + 12 から始まり、各エントリは 16 バイト
-        int maxEnd = fontOffset + 12 + numTables * 16; // テーブルディレクトリ末尾
+        int dirEnd = fontOffset + 12 + numTables * 16;
+        if (dirEnd > ttcData.Length)
+            throw new InvalidDataException("Invalid TTC table directory length");
+
+        int maxEnd = dirEnd; // テーブルディレクトリ末尾
         for (int i = 0; i < numTables; i++)
         {
             int entryPos = fontOffset + 12 + i * 16;
             int tblOffset = ReadBE32(ttcData, entryPos + 8);
             int tblLength = ReadBE32(ttcData, entryPos + 12);
             // テーブルは 4 バイト境界にアラインされる
-            int tblEnd = tblOffset + ((tblLength + 3) & ~3);
-            if (tblEnd > maxEnd) maxEnd = tblEnd;
+            long tblEnd = (long)fontOffset + tblOffset + ((tblLength + 3) & ~3);
+            if (tblEnd > ttcData.Length)
+                throw new InvalidDataException("Invalid table offset in TTC");
+            if (tblEnd > maxEnd) maxEnd = (int)tblEnd;
         }
 
         int fontLength = maxEnd - fontOffset;
