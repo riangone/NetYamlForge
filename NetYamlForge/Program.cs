@@ -9,6 +9,8 @@ using NetYamlForge.Middleware;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Cli;
+using NetYamlForge.Services.AI;
+using NetYamlForge.Services.AI.Providers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
@@ -178,7 +180,22 @@ builder.Services.AddAuthorization(options =>
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge();
 
+// ===== AI Assistant Services =====
+builder.Services.Configure<CliConfig>(builder.Configuration.GetSection(CliConfig.SectionName));
+builder.Services.AddSingleton<ProcessExecutor>();
+builder.Services.AddSingleton<CLIServiceFactory>();
+builder.Services.AddSingleton<ProgressTracker>();
+builder.Services.AddSingleton<TaskQueueService>();
+builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
+builder.Services.AddSingleton<ICLIService, QwenCodeCLIService>();
+builder.Services.AddSingleton<ICLIService, MockCLIService>();
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
+// Start task queue processing
+var taskQueue = app.Services.GetRequiredService<TaskQueueService>();
+taskQueue.StartProcessing();
 
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
 
@@ -217,6 +234,9 @@ app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
 app.UseAuthorization();
+
+// SignalR Hub for AI Progress
+app.MapHub<AIProgressHub>("/aiProgressHub");
 
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(

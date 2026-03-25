@@ -1,0 +1,269 @@
+/* AI Assistant Panel Styles */
+
+/* 侧边滑出面板 */
+.ai-assistant-panel {
+    position: fixed;
+    top: 0;
+    right: -600px;
+    width: 600px;
+    max-width: 100vw;
+    height: 100vh;
+    background-color: hsl(var(--b1));
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-assistant-panel.open {
+    right: 0;
+}
+
+/* 触发按钮 */
+.ai-assistant-trigger {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    z-index: 999;
+    transition: right 0.3s ease-in-out;
+}
+
+.ai-assistant-trigger.hidden {
+    right: -60px;
+}
+
+/* 面板头部 */
+.ai-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid hsl(var(--b3));
+    background-color: hsl(var(--b2));
+}
+
+.ai-panel-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+/* 面板主体 - 消息区域 */
+.ai-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* 消息气泡 */
+.ai-message {
+    max-width: 85%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+}
+
+.ai-message.user {
+    align-self: flex-end;
+    background-color: hsl(var(--p));
+    color: hsl(var(--pc));
+    border-bottom-right-radius: 0.25rem;
+}
+
+.ai-message.assistant {
+    align-self: flex-start;
+    background-color: hsl(var(--b3));
+    color: hsl(var(--bc));
+    border-bottom-left-radius: 0.25rem;
+}
+
+.ai-message.system {
+    align-self: center;
+    background-color: hsl(var(--info));
+    color: hsl(var(--info-content));
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* 进度显示 */
+.ai-progress-container {
+    background-color: hsl(var(--b3));
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.ai-progress-bar {
+    height: 0.5rem;
+    background-color: hsl(var(--b2));
+    border-radius: 0.25rem;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.ai-progress-fill {
+    height: 100%;
+    background-color: hsl(var(--p));
+    transition: width 0.3s ease;
+}
+
+.ai-progress-text {
+    font-size: 0.75rem;
+    color: hsl(var(--bc));
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 日志列表 */
+.ai-logs {
+    font-size: 0.75rem;
+    color: hsl(var(--bc));
+    margin-top: 0.5rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.ai-logs ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ai-logs li {
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-logs li::before {
+    content: "›";
+    font-size: 1rem;
+    color: hsl(var(--p));
+}
+
+/* 面板底部 - 输入区域 */
+.ai-panel-footer {
+    padding: 1rem;
+    border-top: 1px solid hsl(var(--b3));
+    background-color: hsl(var(--b2));
+}
+
+.ai-input-container {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.ai-input-container textarea {
+    flex: 1;
+    resize: none;
+    min-height: 60px;
+    max-height: 120px;
+}
+
+.ai-input-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* CLI 选择器 */
+.ai-cli-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.ai-cli-selector select {
+    max-width: 150px;
+}
+
+/* 状态指示器 */
+.ai-status-indicator {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.ai-status-indicator.idle {
+    background-color: hsl(var(--bc));
+}
+
+.ai-status-indicator.running {
+    background-color: hsl(var(--p));
+    animation: pulse 1s infinite;
+}
+
+.ai-status-indicator.completed {
+    background-color: hsl(var(--s));
+}
+
+.ai-status-indicator.error {
+    background-color: hsl(var(--er));
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 自动滚动按钮 */
+.ai-auto-scroll-btn {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    z-index: 10;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .ai-assistant-panel {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .ai-assistant-trigger {
+        right: 10px;
+    }
+}
+
+/* Markdown 样式（用于 AI 回复） */
+.ai-message-content {
+    line-height: 1.6;
+}
+
+.ai-message-content pre {
+    background-color: hsl(var(--b2));
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+.ai-message-content code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.875rem;
+}
+
+.ai-message-content p {
+    margin: 0.5rem 0;
+}
+
+.ai-message-content ul,
+.ai-message-content ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
