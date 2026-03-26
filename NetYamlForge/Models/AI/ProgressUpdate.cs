@@ -14,6 +14,11 @@ public class ProgressUpdate
     public TaskStatus Status { get; set; }
     
     /// <summary>
+    /// CLI から返された session_id（マルチターン会話の継続に使用）
+    /// </summary>
+    public string? SessionId { get; set; }
+
+    /// <summary>
     /// Stream-JSON 模式的原始数据
     /// </summary>
     public JsonElement? StreamData { get; set; }

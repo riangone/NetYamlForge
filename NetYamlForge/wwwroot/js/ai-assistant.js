@@ -6,6 +6,7 @@
     // 状態
     let connection = null;
     let currentTaskId = null;
+    let currentSessionId = null; // マルチターン会話の継続用セッションID
     let isPanelOpen = false;
     let autoScroll = true;
     let chatHistory = []; // ページ跨ぎ用メモリ上の履歴
@@ -381,7 +382,8 @@
                 body: JSON.stringify({
                     message: message,
                     cliTool: cliSelector.value,
-                    streaming: false  // 禁用流式，使用简单响应
+                    streaming: false,  // 禁用流式，使用简单响应
+                    sessionId: currentSessionId  // マルチターン継続用
                 })
             });
 
@@ -462,6 +464,10 @@
 
                 // 检查完成状态
                 if (data.status === 'Completed' || data.status === 2) {
+                    // セッションIDを保存（次のリクエストで会話を継続）
+                    if (data.sessionId) {
+                        currentSessionId = data.sessionId;
+                    }
                     if (data.result && data.result.trim()) {
                         // Markdown の先頭に文字を付けると見出し等が壊れるため、結果のみを渡す
                         addMessage(data.result, 'assistant');
@@ -816,6 +822,7 @@
             </div>
         `;
         currentTaskId = null;
+        currentSessionId = null; // セッションをリセット（新規会話開始）
         updateStatus('idle');
         setSendingState(false);
     }

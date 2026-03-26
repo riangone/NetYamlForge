@@ -119,6 +119,12 @@ public class TaskQueueService
                         lastMessage = update.Message;
                     }
 
+                    // CLI から返された session_id を保存（次回の --resume に使用）
+                    if (!string.IsNullOrEmpty(update.SessionId))
+                    {
+                        task.SessionId = update.SessionId;
+                    }
+
                     if (update.Status == TaskStatus.Completed)
                     {
                         _tracker.Complete(task.Id, update.Message ?? lastMessage ?? "Task completed");

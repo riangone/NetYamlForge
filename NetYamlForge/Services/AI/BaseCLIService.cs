@@ -158,7 +158,11 @@ public abstract class BaseCLIService : ICLIService
         if (root.TryGetProperty("result", out var r))
             text = r.ValueKind == JsonValueKind.String ? r.GetString() : null;
 
-        return new ProgressUpdate { Message = text, Progress = 100, Status = TaskStatus.Completed };
+        string? sessionId = null;
+        if (root.TryGetProperty("session_id", out var sid))
+            sessionId = sid.GetString();
+
+        return new ProgressUpdate { Message = text, Progress = 100, Status = TaskStatus.Completed, SessionId = sessionId };
     }
 
     private static ProgressUpdate ParseProgressMessage(JsonElement root)
