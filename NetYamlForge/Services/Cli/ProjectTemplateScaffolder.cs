@@ -712,11 +712,11 @@ sections:
   - id: {{primaryEntity}}_list
     title: {{ToDisplayName(primaryEntity!)}} List
     titleKey: projects.{{projectName}}.pages.starterOverview.sections.0.title
-    source_type: table
+    sourceType: table
     source: {{primaryTable}}
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     ui:
       component: DataTable
       selectable: none
@@ -728,12 +728,12 @@ sections:
   - id: starter_sample
     title: Starter Sample
     titleKey: projects.{{projectName}}.pages.starterOverview.sections.0.title
-    source_type: custom
+    sourceType: custom
     source: SELECT 1 AS SampleValue
     columns: [SampleValue]
-    page_size: 20
+    pageSize: 20
     editable: false
-    read_only: true
+    readOnly: true
     ui:
       component: DataTable
       selectable: none

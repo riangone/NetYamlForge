@@ -9,7 +9,7 @@ entities:
     displayName: 納品書
     softDelete: false
     isPublic: true
-    pdfTemplate: domestic/delivery-standard
+    pdfTemplate: delivery
 
     hooks:
       beforeCreate:

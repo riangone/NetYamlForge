@@ -9,7 +9,7 @@ entities:
     displayName: 契約書台帳
     softDelete: false
     isPublic: true
-    pdfTemplate: domestic/contract-standard
+    pdfTemplate: contract
 
     hooks:
       beforeCreate:

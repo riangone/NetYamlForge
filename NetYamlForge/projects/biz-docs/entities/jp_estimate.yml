@@ -9,7 +9,7 @@ entities:
     displayName: 見積書
     softDelete: false
     isPublic: true
-    pdfTemplate: domestic/estimate-standard
+    pdfTemplate: estimate
 
     hooks:
       beforeCreate:
