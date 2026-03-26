@@ -1,0 +1,30 @@
+hero:
+  eyebrow: Scaffold Test
+  title: Welcome to Scaffold Test
+  description: Edit entities/ YAML files to customize your screens. Run --scaffold-entities to regenerate from DB.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /scaffold-test/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /scaffold-test/DynamicEntity/AllDefinitions
+  highlights:
+    - YAML First
+    - Auto CRUD
+    - Multi-language
+
+quickActions:
+  - label: Dashboard
+    url: /scaffold-test/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Schema
+    url: /scaffold-test/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    url: /scaffold-test/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭
+  - label: Docs
+    url: /scaffold-test/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖

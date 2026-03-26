@@ -1,0 +1,25 @@
+title: Starter Overview
+titleKey: projects.scaffold-test.pages.starterOverview.title
+description: Auto-generated starter page
+descriptionKey: projects.scaffold-test.pages.starterOverview.description
+
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: starter_sample
+    title: Starter Sample
+    titleKey: projects.scaffold-test.pages.starterOverview.sections.0.title
+    source_type: custom
+    source: SELECT 1 AS SampleValue
+    columns: [SampleValue]
+    page_size: 20
+    editable: false
+    read_only: true
+    ui:
+      component: DataTable
+      selectable: none
+

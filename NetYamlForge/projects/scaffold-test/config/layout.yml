@@ -1,0 +1,21 @@
+header:
+  title: Scaffold Test
+
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /scaffold-test
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "Scaffold Test — powered by NetYamlForge"

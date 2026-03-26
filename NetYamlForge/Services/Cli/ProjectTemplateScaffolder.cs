@@ -279,10 +279,6 @@ quickActions:
         return $$"""
 header:
   title: {{displayName}}
-  showProjectBadge: true
-
-sidebar:
-  enabled: false
 
 navigation:
   showDashboard: true
@@ -302,7 +298,6 @@ navigation:
 
 footer:
   text: "{{displayName}} — powered by NetYamlForge"
-  showVersion: true
 """ + Environment.NewLine;
     }
 
@@ -783,11 +778,11 @@ sections:
     @if (Model.Any())
     {
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            @foreach (var section in Model)
+            @foreach (var grp in Model)
             {
                 <div class="stat bg-base-100 rounded-box border border-base-300 shadow-sm p-4">
-                    <div class="stat-title text-xs truncate">@section.Key</div>
-                    <div class="stat-value text-2xl">@section.Value.Total</div>
+                    <div class="stat-title text-xs truncate">@grp.Key</div>
+                    <div class="stat-value text-2xl">@grp.Value.Total</div>
                     <div class="stat-desc">records</div>
                 </div>
             }
@@ -812,21 +807,21 @@ sections:
     }
     else
     {
-        @foreach (var section in Model)
+        @foreach (var grp in Model)
         {
             <div class="card bg-base-100 border border-base-300 shadow-sm">
                 <div class="card-body p-4">
                     <div class="flex items-center justify-between mb-2">
-                        <h2 class="card-title text-base">@section.Key</h2>
-                        <span class="badge badge-ghost badge-sm">@section.Value.Total total</span>
+                        <h2 class="card-title text-base">@grp.Key</h2>
+                        <span class="badge badge-ghost badge-sm">@grp.Value.Total total</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="table table-zebra table-sm w-full">
                             <thead>
                                 <tr class="bg-base-200">
-                                    @if (section.Value.Rows.Any())
+                                    @if (grp.Value.Rows.Any())
                                     {
-                                        @foreach (var col in section.Value.Rows.First().Keys)
+                                        @foreach (var col in grp.Value.Rows.First().Keys)
                                         {
                                             <th class="text-xs font-semibold uppercase tracking-wide">@col</th>
                                         }
@@ -834,13 +829,13 @@ sections:
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (!section.Value.Rows.Any())
+                                @if (!grp.Value.Rows.Any())
                                 {
                                     <tr><td colspan="99" class="text-center opacity-50 py-6">No records</td></tr>
                                 }
                                 else
                                 {
-                                    @foreach (var row in section.Value.Rows)
+                                    @foreach (var row in grp.Value.Rows)
                                     {
                                         <tr class="hover">
                                             @foreach (var val in row.Values)
@@ -888,155 +883,506 @@ sections:
     {
         return $$"""
 @using NetYamlForge.Localization
+@using NetYamlForge.Models
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<SharedResource> L
+@inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
+@inject NetYamlForge.Services.ProjectScope ProjectScope
 <!DOCTYPE html>
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="corporate">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : ""){{displayName}}</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+    <link href="/lib/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
+    <script src="/lib/tailwindcss/browser.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-base-200 flex flex-col">
-    @{
-        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "{{projectName}}";
-        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-        var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
-    }
-
-    <!-- ===== Navbar ===== -->
-    <header class="navbar bg-base-100 border-b border-base-300 px-4 shadow-sm sticky top-0 z-50">
-        <div class="navbar-start gap-2">
-            <!-- Mobile hamburger -->
-            <div class="dropdown lg:hidden">
-                <label tabindex="0" class="btn btn-ghost btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </label>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">🏠 Home</a></li>
-                    <li><a asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject">📊 Dashboard</a></li>
-                    <li><a asp-controller="Page" asp-action="Index" asp-route-project="@currentProject" asp-route-pageName="StarterOverview">🧭 Overview</a></li>
-                    <li><a asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject">🧩 Schema</a></li>
-                </ul>
-            </div>
-            <!-- Brand -->
-            <a class="btn btn-ghost text-lg font-bold tracking-tight"
-               asp-controller="Home"
-               asp-action="Project"
-               asp-route-project="@currentProject">
-                {{displayName}}
-            </a>
-        </div>
-
-        <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1 gap-1">
-                <li>
-                    <a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject"
-                       class="@(currentController == "Home" ? "active" : "")">
-                        🏠 Home
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject"
-                       class="@(currentController == "Dashboard" ? "active" : "")">
-                        📊 Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="Page" asp-action="Index" asp-route-project="@currentProject" asp-route-pageName="StarterOverview"
-                       class="@(currentController == "Page" ? "active" : "")">
-                        🧭 Overview
-                    </a>
-                </li>
-                <li>
-                    <a asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject"
-                       class="@(currentController == "DynamicEntity" ? "active" : "")">
-                        🧩 Schema
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="navbar-end gap-2">
-            <!-- Language switcher -->
-            <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-sm btn-circle" title="Language">
-                    🌐
-                </label>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32 z-[1]">
-                    <li><a href="?lang=en-US">English</a></li>
-                    <li><a href="?lang=zh-CN">中文</a></li>
-                    <li><a href="?lang=ja-JP">日本語</a></li>
-                    <li><a href="?lang=ko-KR">한국어</a></li>
-                </ul>
-            </div>
-            <!-- Theme toggle -->
-            <label class="swap swap-rotate btn btn-ghost btn-sm btn-circle" title="Toggle theme">
-                <input type="checkbox" id="theme-toggle" />
-                <svg class="swap-off h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
-                </svg>
-                <svg class="swap-on h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
-                </svg>
-            </label>
-        </div>
-    </header>
-
-    <!-- ===== Breadcrumbs ===== -->
-    @if (ViewData["Breadcrumbs"] is IEnumerable<(string Label, string? Url)> crumbs)
+@functions {
+    private sealed class NavSection
     {
-        <div class="px-4 py-2 bg-base-100 border-b border-base-200">
-            <div class="breadcrumbs text-sm max-w-screen-xl mx-auto">
-                <ul>
-                    <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">{{displayName}}</a></li>
-                    @foreach (var (label, url) in crumbs)
-                    {
-                        if (url != null)
-                        {
-                            <li><a href="@url">@label</a></li>
+        public string? Title { get; }
+        public List<ProjectNavigationItemConfig> Items { get; } = new();
+        public NavSection(string? title) => Title = title;
+    }
+}
+<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
+    @{
+        var showSidebar = User.Identity?.IsAuthenticated ?? false;
+        var isAdminUser = User?.IsInRole("Admin") ?? false;
+        var projectLayout = ProjectScope?.Current?.Layout;
+        var navConfig = projectLayout?.Navigation;
+        var headerConfig = projectLayout?.Header;
+        var footerConfig = projectLayout?.Footer;
+        var allEntities = EntityMetadataProvider.GetAll()
+            .Where(pair => isAdminUser || pair.Value.IsPublic)
+            .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var entityDefinitions = navConfig != null && navConfig.Entities.Count > 0
+            ? allEntities.Where(pair => navConfig.Entities.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))
+                .OrderBy(pair => navConfig.Entities.IndexOf(pair.Key))
+                .ToList()
+            : allEntities;
+        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "{{projectName}}";
+        var headerTitle = headerConfig?.Title ?? "{{displayName}}";
+    }
+    <div class="drawer">
+        <input id="app-sidebar" type="checkbox" class="drawer-toggle" />
+
+        <div class="drawer-content flex flex-col min-h-screen">
+            <!-- ===== Navbar ===== -->
+            <header class="navbar bg-base-100 border-b border-base-300 px-3 lg:px-6 sticky top-0 z-30">
+                @if (showSidebar)
+                {
+                    <div class="flex-none">
+                        <label for="app-sidebar" class="btn btn-ghost btn-square">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </label>
+                    </div>
+                }
+                <div class="flex-1">
+                    <a class="btn btn-ghost text-xl font-bold tracking-tight"
+                       asp-controller="Home"
+                       asp-action="Project"
+                       asp-route-project="@currentProject">@headerTitle</a>
+                </div>
+                <div class="flex-none gap-2">
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                            <div class="w-10 rounded-full bg-base-300 text-base-content grid place-items-center font-semibold">
+                                @if (User.Identity?.IsAuthenticated ?? false)
+                                {
+                                    @((User.Identity?.Name ?? "U").Substring(0, 1).ToUpperInvariant())
+                                }
+                                else
+                                {
+                                    @("G")
+                                }
+                            </div>
+                        </div>
+                        <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-64 p-2 shadow">
+                            @if (User.Identity?.IsAuthenticated ?? false)
+                            {
+                                <li class="menu-title">
+                                    <span>@L["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name)</span>
+                                </li>
+                            }
+                            <li class="menu-title"><span>Language</span></li>
+                            <li>
+                                <div class="flex gap-2 px-2 py-1">
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="en-US" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "en-US" ? "btn-active" : "")" title="English">🇺🇸</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="zh-CN" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-CN" ? "btn-active" : "")" title="中文">🇨🇳</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="ja-JP" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ja-JP" ? "btn-active" : "")" title="日本語">🇯🇵</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="ko-KR" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ko-KR" ? "btn-active" : "")" title="한국어">🇰🇷</button>
+                                    </form>
+                                </div>
+                            </li>
+                            @if (User.Identity?.IsAuthenticated ?? false)
+                            {
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
+                                }
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" asp-route-project="@currentProject" method="post">
+                                        <button type="submit" class="text-left w-full">@L["Logout"]</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><a asp-controller="Account" asp-action="Login" asp-route-project="@currentProject">@L["Login"]</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ===== Breadcrumbs ===== -->
+            @if (ViewData["Breadcrumbs"] is IEnumerable<(string Label, string? Url)> crumbs)
+            {
+                <div class="px-4 py-2 bg-base-100 border-b border-base-200">
+                    <div class="breadcrumbs text-sm max-w-screen-xl mx-auto">
+                        <ul>
+                            <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">{{displayName}}</a></li>
+                            @foreach (var (label, url) in crumbs)
+                            {
+                                if (url != null)
+                                {
+                                    <li><a href="@url">@label</a></li>
+                                }
+                                else
+                                {
+                                    <li>@label</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <!-- ===== Main content ===== -->
+            <main class="p-4 lg:p-6">
+                @RenderBody()
+            </main>
+        </div>
+
+        <!-- ===== Left Sidebar ===== -->
+        @if (showSidebar)
+        {
+            <div class="drawer-side z-40">
+                <label for="app-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
+                <aside class="bg-base-100 w-72 min-h-full border-r border-base-300">
+                    <div class="p-4 border-b border-base-300 flex items-center justify-between">
+                        <div>
+                            <div class="text-sm opacity-70">Navigation</div>
+                            <div class="font-semibold">{{displayName}}</div>
+                        </div>
+                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </label>
+                    </div>
+                    <ul class="menu p-3 gap-1 w-full">
+                        @{
+                            var isDashboard = string.Equals(
+                                Context.Request.RouteValues["controller"]?.ToString(),
+                                "Dashboard",
+                                StringComparison.OrdinalIgnoreCase);
+                            var showDashboard = navConfig?.ShowDashboard ?? true;
+                            var navSections = new List<NavSection>();
+                            if (navConfig?.Items != null && navConfig.Items.Count > 0)
+                            {
+                                foreach (var item in navConfig.Items)
+                                {
+                                    var showItem = !item.AdminOnly || isAdminUser;
+                                    if (!showItem) continue;
+                                    var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
+                                    var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
+                                    if (section == null)
+                                    {
+                                        section = new NavSection(sectionName);
+                                        navSections.Add(section);
+                                    }
+                                    section.Items.Add(item);
+                                }
+                            }
                         }
-                        else
+                        @if (showDashboard)
                         {
-                            <li>@label</li>
+                            <li>
+                                <a class="@(isDashboard ? "active" : "")"
+                                   asp-controller="Dashboard"
+                                   asp-action="Index"
+                                   asp-route-project="@currentProject">📊 Dashboard</a>
+                            </li>
                         }
-                    }
-                </ul>
+                        @if (navSections.Count > 0)
+                        {
+                            foreach (var section in navSections)
+                            {
+                                if (!string.IsNullOrEmpty(section.Title))
+                                {
+                                    <li class="menu-title mt-1"><span>@(section.Title)</span></li>
+                                }
+                                foreach (var item in section.Items)
+                                {
+                                    var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
+                                    @if (!string.IsNullOrEmpty(item.Url))
+                                    {
+                                        <li><a href="@item.Url">@itemLabel</a></li>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.Controller))
+                                    {
+                                        <li>
+                                            <a asp-controller="@item.Controller"
+                                               asp-action="@(item.Action ?? "Index")"
+                                               asp-route-project="@currentProject">@itemLabel</a>
+                                        </li>
+                                    }
+                                }
+                            }
+                        }
+                        @if (entityDefinitions.Count > 0)
+                        {
+                            <li class="menu-title mt-1"><span>Entities</span></li>
+                            @foreach (var definition in entityDefinitions)
+                            {
+                                var isActive = string.Equals(
+                                    Context.Request.RouteValues["controller"]?.ToString(),
+                                    "DynamicEntity",
+                                    StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(
+                                        Context.Request.Query["entity"],
+                                        definition.Key,
+                                        StringComparison.OrdinalIgnoreCase);
+                                var isDefinitionPage = isActive &&
+                                    string.Equals(
+                                        Context.Request.RouteValues["action"]?.ToString(),
+                                        "Definition",
+                                        StringComparison.OrdinalIgnoreCase);
+                                @if (isAdminUser)
+                                {
+                                    <li>
+                                        <details @(isActive ? "open" : "")>
+                                            <summary class="@(isActive && !isDefinitionPage ? "active" : "")">
+                                                @definition.Value.GetDisplayName()
+                                                <span class="badge badge-sm @(definition.Value.IsPublic ? "badge-success" : "badge-ghost") ml-auto">
+                                                    @(definition.Value.IsPublic ? "Pub" : "Priv")
+                                                </span>
+                                            </summary>
+                                            <ul>
+                                                <li>
+                                                    <a class="@(isActive && !isDefinitionPage ? "active" : "")"
+                                                       asp-controller="DynamicEntity"
+                                                       asp-action="Index"
+                                                       asp-route-project="@currentProject"
+                                                       asp-route-entity="@definition.Key">List</a>
+                                                </li>
+                                                <li>
+                                                    <a class="@(isDefinitionPage ? "active" : "")"
+                                                       asp-controller="DynamicEntity"
+                                                       asp-action="Definition"
+                                                       asp-route-project="@currentProject"
+                                                       asp-route-entity="@definition.Key">Definition</a>
+                                                </li>
+                                            </ul>
+                                        </details>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a class="@(isActive ? "active" : "")"
+                                           asp-controller="DynamicEntity"
+                                           asp-action="Index"
+                                           asp-route-project="@currentProject"
+                                           asp-route-entity="@definition.Key">@definition.Value.GetDisplayName()</a>
+                                    </li>
+                                }
+                            }
+                        }
+                        @if (isAdminUser)
+                        {
+                            <li class="menu-title mt-2"><span>Admin</span></li>
+                            <li>
+                                <a asp-controller="BatchJob"
+                                   asp-action="Index"
+                                   asp-route-project="@currentProject"
+                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "BatchJob", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    Batch Jobs
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="DynamicEntity"
+                                   asp-action="AllDefinitions"
+                                   asp-route-project="@currentProject"
+                                   class="@(string.Equals(Context.Request.RouteValues["action"]?.ToString(), "AllDefinitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    Schema
+                                </a>
+                            </li>
+                            <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
+                        }
+                    </ul>
+                </aside>
+            </div>
+        }
+    </div>
+
+    <!-- ===== CRUD 確認ダイアログ ===== -->
+    <dialog id="crud-confirm-modal" class="modal">
+        <div class="modal-box max-w-sm">
+            <h3 class="font-bold text-lg mb-4" id="crud-confirm-msg">確認</h3>
+            <div class="flex gap-3 justify-end">
+                <button id="crud-confirm-ok" class="btn btn-primary btn-sm">OK</button>
+                <button id="crud-confirm-cancel" class="btn btn-ghost btn-sm">キャンセル</button>
             </div>
         </div>
-    }
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
 
-    <!-- ===== Main content ===== -->
-    <main class="flex-1 p-4 lg:p-6 max-w-screen-xl mx-auto w-full">
-        @RenderBody()
-    </main>
-
-    <!-- ===== Footer ===== -->
-    <footer class="footer footer-center p-4 bg-base-100 border-t border-base-300 text-base-content text-xs opacity-60">
-        <div>
-            <p>{{displayName}} — powered by <a href="https://github.com/yourorg/NetYamlForge" class="link link-hover">NetYamlForge</a></p>
+    <!-- ===== Entity Picker モーダル ===== -->
+    <dialog id="entity-picker-modal" class="modal">
+        <div class="modal-box max-w-3xl">
+            <div class="flex items-center justify-between mb-3">
+                <h3 id="entity-picker-title" class="font-bold text-lg">Select</h3>
+                <form method="dialog"><button class="btn btn-ghost btn-sm btn-circle">✕</button></form>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="entity-picker-search" class="input input-bordered w-full"
+                       placeholder="Search..." oninput="entityPickerSearch(this.value)" />
+            </div>
+            <div id="entity-picker-content" class="min-h-32"></div>
+            <div id="entity-picker-multi-footer" class="mt-3 hidden">
+                <form method="dialog"><button class="btn btn-primary btn-sm">Done</button></form>
+            </div>
         </div>
-    </footer>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
 
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="/lib/htmx/htmx.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        // Theme toggle persistence
-        const toggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const saved = localStorage.getItem('nyfTheme');
-        if (saved === 'dark') { html.setAttribute('data-theme', 'dark'); toggle.checked = true; }
-        toggle?.addEventListener('change', () => {
-            const theme = toggle.checked ? 'dark' : 'corporate';
-            html.setAttribute('data-theme', theme);
-            localStorage.setItem('nyfTheme', toggle.checked ? 'dark' : 'light');
+        // CRUD確認ダイアログ
+        var _confirmCallback = null;
+        function showConfirmDialog(msg, onOk) {
+            _confirmCallback = onOk;
+            var msgEl = document.getElementById('crud-confirm-msg');
+            if (msgEl) msgEl.textContent = msg;
+            document.getElementById('crud-confirm-modal')?.showModal();
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('crud-confirm-ok')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                if (_confirmCallback) { var cb = _confirmCallback; _confirmCallback = null; cb(); }
+            });
+            document.getElementById('crud-confirm-cancel')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                _confirmCallback = null;
+            });
         });
+        document.body.addEventListener('htmx:confirm', function (evt) {
+            var msg = evt.detail.question;
+            if (!msg) { evt.preventDefault(); evt.detail.issueRequest(true); return; }
+            evt.preventDefault();
+            showConfirmDialog(msg, function () { evt.detail.issueRequest(true); });
+        });
+        document.addEventListener('submit', function (evt) {
+            var form = evt.target;
+            var msg = form && form.dataset ? form.dataset.confirmMsg : '';
+            if (!msg || msg.length === 0) return;
+            if (form.dataset.skipConfirm === '1') { delete form.dataset.skipConfirm; return; }
+            evt.preventDefault();
+            showConfirmDialog(msg, function () {
+                form.dataset.skipConfirm = '1';
+                if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+            });
+        }, true);
+
+        // Entity Picker
+        var _pickerConfig = null;
+        var _pickerSearchTimer = null;
+        var _pickerBaseUrl = '/@currentProject/DynamicEntity/PickerList';
+        function openEntityPicker(btn) {
+            _pickerConfig = { fieldName: btn.dataset.pickerField, entity: btn.dataset.pickerEntity,
+                displayCol: btn.dataset.pickerDisplayCol || 'Id', query: btn.dataset.pickerQuery || '',
+                multi: btn.dataset.pickerMulti === 'true', sourceButton: btn };
+            var title = document.getElementById('entity-picker-title');
+            if (title) title.textContent = 'Select ' + _pickerConfig.entity;
+            var footer = document.getElementById('entity-picker-multi-footer');
+            if (footer) footer.classList.toggle('hidden', !_pickerConfig.multi);
+            var searchEl = document.getElementById('entity-picker-search');
+            if (searchEl) searchEl.value = '';
+            loadPickerContent('', 1);
+            document.getElementById('entity-picker-modal').showModal();
+        }
+        function loadPickerContent(search, page) {
+            if (!_pickerConfig) return;
+            var cfg = _pickerConfig;
+            var url = _pickerBaseUrl + '?entity=' + encodeURIComponent(cfg.entity)
+                + '&targetField=' + encodeURIComponent(cfg.fieldName)
+                + '&displayColumn=' + encodeURIComponent(cfg.displayCol)
+                + '&displayColumns=' + encodeURIComponent(cfg.displayCol)
+                + '&query=' + encodeURIComponent(cfg.query || '')
+                + '&multi=' + (cfg.multi ? 'true' : 'false')
+                + '&search=' + encodeURIComponent(search || '')
+                + '&page=' + (page || 1);
+            htmx.ajax('GET', url, { target: '#entity-picker-content', swap: 'innerHTML' });
+        }
+        function entityPickerSearch(value) {
+            clearTimeout(_pickerSearchTimer);
+            _pickerSearchTimer = setTimeout(function () { loadPickerContent(value, 1); }, 300);
+        }
+        function loadPickerPage(page) {
+            var search = document.getElementById('entity-picker-search')?.value ?? '';
+            loadPickerContent(search, page);
+        }
+        function pickerSelectFromRow(row) {
+            if (!_pickerConfig) return;
+            var id = row.dataset.pickerId, label = row.dataset.pickerLabel, cfg = _pickerConfig;
+            var container = row.closest('[data-picker-container]');
+            var selector = function(name) {
+                var el = container ? container.querySelector('[id="' + name + '"]') : null;
+                return el || document.querySelector('[id="' + name + '"]');
+            };
+            if (cfg.multi) {
+                var hidden = selector('picker-value-' + cfg.fieldName);
+                if (!hidden) return;
+                var vals = hidden.value ? hidden.value.split(',').filter(function(v) { return v !== ''; }) : [];
+                if (vals.indexOf(id) !== -1) return;
+                vals.push(id);
+                hidden.value = vals.join(',');
+                var chips = selector('picker-chips-' + cfg.fieldName);
+                if (chips) {
+                    var chip = document.createElement('div');
+                    chip.className = 'badge badge-neutral gap-1';
+                    chip.dataset.id = id;
+                    chip.innerHTML = label + ' <button type="button" onclick="removePickerChip(\'' + cfg.fieldName + '\',\'' + id.replace(/'/g, "\\'") + '\',this.parentElement)">✕</button>';
+                    chips.appendChild(chip);
+                }
+            } else {
+                var hidden2 = selector('picker-value-' + cfg.fieldName);
+                var display = selector('picker-display-' + cfg.fieldName);
+                if (hidden2) hidden2.value = id;
+                if (display) { if (display.tagName === 'INPUT') { display.value = label; } else { display.textContent = label; } }
+                document.getElementById('entity-picker-modal').close();
+            }
+        }
+        function removePickerChip(fieldName, id, chipEl) {
+            var container = chipEl?.closest('[data-picker-container]');
+            var hidden = container ? container.querySelector('[id="picker-value-' + fieldName + '"]') : document.querySelector('[id="picker-value-' + fieldName + '"]');
+            if (hidden) { hidden.value = hidden.value.split(',').filter(function(v) { return v !== id && v !== ''; }).join(','); }
+            if (chipEl) chipEl.remove();
+        }
+        function clearPickerValue(fieldName, sourceEl) {
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
+        }
+        function clearPickerFilterValue(fieldName, sourceEl) {
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName), c = sel('picker-chips-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
+            if (c) c.innerHTML = '';
+        }
+        function toggleCheckboxGroup(fieldName, checkbox) {
+            var hidden = document.getElementById('checkbox-group-value-' + fieldName);
+            if (!hidden) return;
+            var values = [];
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(cb) { if (cb.checked) values.push(cb.value); });
+            hidden.value = values.join(',');
+        }
+        function toggleSwitchGroup(fieldName, toggle) {
+            var hidden = document.getElementById('switch-group-value-' + fieldName);
+            if (!hidden) return;
+            var values = [];
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(t) { if (t.checked) values.push(t.value); });
+            hidden.value = values.join(',');
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
