@@ -2,7 +2,7 @@
 // AppUser / AuditLog / AppUserSavedView / AppUserRole / AppRolePermission を
 // CREATE TABLE IF NOT EXISTS で安全に作成します。
 // EnsureColumnAsync でマイグレーション相当の列追加も行います。
-// CRM 関連テーブルは salesforce-crm 専用のため DbInitializer 側でプロジェクト判定後に実行します。
+
 
 using System.Data;
 using Dapper;

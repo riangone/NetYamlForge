@@ -49,10 +49,15 @@ public class ProjectSpecificInitializer
         await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
     }
 
+    // 認証テーブル名（エンティティテーブル判定から除外）
+    private static readonly HashSet<string> AuthTableNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AppUser", "AppUserRole", "AppRolePermission", "AppUserSavedView", "AuditLog"
+    };
+
     /// <summary>
-    /// database/init_seed.sql が存在する場合、冪等な SQL として実行します。
-    /// SQL 内は CREATE TABLE IF NOT EXISTS / INSERT OR IGNORE で記述することで
-    /// 複数回起動しても安全に実行できます。
+    /// エンティティテーブルが存在しない場合のみ、database/init.sql → init_seed.sql の順で実行します。
+    /// 既にテーブルが存在する場合は既存データを保持してスキップします。
     /// </summary>
     private static async Task RunInitSeedSqlIfExistsAsync(
         SqliteConnection? conn,
@@ -61,20 +66,45 @@ public class ProjectSpecificInitializer
     {
         if (conn == null) return;
 
-        var candidates = new[]
+        // エンティティテーブルが既に存在するか確認
+        var tables = await conn.QueryAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type='table'");
+        var hasEntityTables = tables.Any(t => !AuthTableNames.Contains(t) && !t.StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase));
+        if (hasEntityTables)
         {
-            Path.Combine(AppContext.BaseDirectory, "projects", projectName, "database", "init_seed.sql"),
-            Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, "database", "init_seed.sql"),
-            Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName, "database", "init_seed.sql"),
-        };
+            logger.LogDebug("プロジェクト '{Name}' のエンティティテーブルは既に存在します。初期化をスキップします。", projectName);
+            return;
+        }
 
-        var initSqlPath = candidates.FirstOrDefault(File.Exists);
-        if (initSqlPath == null) return;
+        string ResolveDbFile(string fileName) =>
+            new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, "projects", projectName, "database", fileName),
+                Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, "database", fileName),
+                Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName, "database", fileName),
+            }.FirstOrDefault(File.Exists) ?? string.Empty;
 
-        logger.LogInformation("プロジェクト '{Name}' の init_seed.sql を実行します: {Path}", projectName, initSqlPath);
-        var sql = await File.ReadAllTextAsync(initSqlPath);
-        await conn.ExecuteAsync(sql);
-        logger.LogInformation("プロジェクト '{Name}' の init_seed.sql が完了しました。", projectName);
+        // init.sql でテーブルを作成してから init_seed.sql でデータを投入
+        var initSqlPath = ResolveDbFile("init.sql");
+        if (!string.IsNullOrEmpty(initSqlPath))
+        {
+            logger.LogInformation("プロジェクト '{Name}' の init.sql を実行します: {Path}", projectName, initSqlPath);
+            var initSql = await File.ReadAllTextAsync(initSqlPath);
+            await conn.ExecuteAsync(initSql);
+        }
+
+        var seedSqlPath = ResolveDbFile("init_seed.sql");
+        if (!string.IsNullOrEmpty(seedSqlPath))
+        {
+            logger.LogInformation("プロジェクト '{Name}' の init_seed.sql を実行します: {Path}", projectName, seedSqlPath);
+            var seedSql = await File.ReadAllTextAsync(seedSqlPath);
+            await conn.ExecuteAsync(seedSql);
+        }
+
+        if (!string.IsNullOrEmpty(initSqlPath) || !string.IsNullOrEmpty(seedSqlPath))
+        {
+            logger.LogInformation("プロジェクト '{Name}' の DB 初期化が完了しました。", projectName);
+        }
     }
 
     /// <summary>

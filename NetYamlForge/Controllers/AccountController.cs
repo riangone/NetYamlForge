@@ -91,10 +91,6 @@ public class AccountController : Controller
         var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
         if (!string.IsNullOrWhiteSpace(projectName))
         {
-            if (string.Equals(projectName, "salesforce-crm", StringComparison.OrdinalIgnoreCase))
-            {
-                return RedirectToAction("Index", "Page", new { project = projectName, pageName = "OperationWorkbench" });
-            }
             return RedirectToAction("Project", "Home", new { project = projectName });
         }
 

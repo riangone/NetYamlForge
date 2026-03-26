@@ -144,7 +144,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPdfExportService, PdfExportService>();
         // IDocumentPdfService の既定実装は PDFsharp (MIT ライセンス)
         services.AddSingleton<IDocumentPdfService, DocumentPdfService>();
-        services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 
         // バッチジョブサービス
