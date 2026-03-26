@@ -19,14 +19,10 @@ namespace NetYamlForge.Services;
 public interface IDocumentPdfService
 {
     /// <summary>
-    /// プロジェクト固有の PDF テンプレートを読み込みます。
+    /// プロジェクトの pdf-templates/ ディレクトリから PDF テンプレートを読み込みます。
+    /// サブディレクトリも検索します（例: pdf-templates/invoices/invoice.yaml）。
     /// </summary>
     PdfTemplateConfig? LoadTemplate(string projectDir, string templateName);
-
-    /// <summary>
-    /// 核心フレームワークの PDF テンプレートを読み込みます。
-    /// </summary>
-    PdfTemplateConfig? LoadGlobalTemplate(string templateName);
 
     byte[] Generate(
         PdfTemplateConfig template,
@@ -42,10 +38,6 @@ public interface IDocumentPdfService
 /// </summary>
 public class DocumentPdfService : IDocumentPdfService
 {
-    // 核心フレームワークの PDF テンプレートディレクトリ
-    private static readonly string GlobalTemplatesDir =
-        Path.Combine(AppContext.BaseDirectory, "Schemas", "pdf-templates");
-
     // Google Fonts (Noto Sans JP) の TTF ファイルを使用
     // ttc (TrueType Collection) は使用せず、個別の TTF ファイルのみを使用
     private const string RegularKey = "NetYamlForge-Regular";
@@ -181,14 +173,21 @@ public class DocumentPdfService : IDocumentPdfService
 
     public PdfTemplateConfig? LoadTemplate(string projectDir, string templateName)
     {
-        var path = Path.Combine(projectDir, "pdf-templates", templateName + ".yaml");
-        return LoadYaml(path);
-    }
+        var templatesDir = Path.Combine(projectDir, "pdf-templates");
 
-    public PdfTemplateConfig? LoadGlobalTemplate(string templateName)
-    {
-        var path = Path.Combine(GlobalTemplatesDir, templateName + ".yaml");
-        return LoadYaml(path);
+        // 直下を先に検索
+        var direct = Path.Combine(templatesDir, templateName + ".yaml");
+        if (File.Exists(direct)) return LoadYaml(direct);
+
+        // サブディレクトリも再帰検索（例: invoices/invoice-standard）
+        if (Directory.Exists(templatesDir))
+        {
+            var found = Directory.GetFiles(templatesDir, templateName + ".yaml", SearchOption.AllDirectories)
+                .FirstOrDefault();
+            if (found != null) return LoadYaml(found);
+        }
+
+        return null;
     }
 
     private static PdfTemplateConfig? LoadYaml(string path)

@@ -336,10 +336,9 @@ public class DynamicEntityController : BaseProjectController
         var projectDir = _projectScope.Current?.ProjectDir
             ?? throw new InvalidOperationException("No active project scope");
 
-        var template = _docPdf.LoadTemplate(projectDir, templateName)
-                       ?? _docPdf.LoadGlobalTemplate(templateName);
+        var template = _docPdf.LoadTemplate(projectDir, templateName);
         if (template == null)
-            return NotFound($"PDF template '{templateName}' not found in project or global pdf-templates/");
+            return NotFound($"PDF template '{templateName}' not found in projects/<name>/pdf-templates/");
 
         // テンプレートのデータソースクエリを実行
         var dataSources = new Dictionary<string, IList<IDictionary<string, object?>>>();

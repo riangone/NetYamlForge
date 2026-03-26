@@ -8,6 +8,19 @@ public class DocumentPdfServiceTests
 {
     private static readonly DocumentPdfService Svc = new();
 
+    /// <summary>
+    /// biz-docs プロジェクトの pdf-templates/ ディレクトリを解決します。
+    /// テスト実行時の AppContext.BaseDirectory からリポジトリルートを逆算します。
+    /// </summary>
+    private static string BizDocsProjectDir()
+    {
+        // bin/Debug/net10.0 → リポジトリルート → NetYamlForge/projects/biz-docs
+        var dir = AppContext.BaseDirectory;
+        while (dir != null && !Directory.Exists(Path.Combine(dir, "NetYamlForge", "projects")))
+            dir = Path.GetDirectoryName(dir);
+        return Path.Combine(dir ?? AppContext.BaseDirectory, "NetYamlForge", "projects", "biz-docs");
+    }
+
     private static Dictionary<string, object?> InvoiceHeader() => new()
     {
         ["InvoiceNo"]    = "INV-TEST-001",
@@ -48,9 +61,10 @@ public class DocumentPdfServiceTests
     [InlineData("others/fax-cover")]
     [InlineData("others/minutes-03")]
     [InlineData("others/resume-jis")]
-    public void Generate_AllGlobalTemplates_ReturnValidPdf(string templateName)
+    public void Generate_BizDocsTemplates_ReturnValidPdf(string templateName)
     {
-        var template = Svc.LoadGlobalTemplate(templateName);
+        var projectDir = BizDocsProjectDir();
+        var template = Svc.LoadTemplate(projectDir, templateName);
         Assert.NotNull(template);
 
         var pdf = Svc.Generate(template, InvoiceHeader(), EmptyDs());
