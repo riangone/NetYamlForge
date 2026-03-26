@@ -101,6 +101,13 @@ public class QwenCodeCLIService : BaseCLIService
             args.Add(Config.QwenCode.Model);
         }
 
+        // フレームワーク固有のシステムプロンプトを追加
+        if (!string.IsNullOrEmpty(Config.SystemPrompt))
+        {
+            args.Add("--system-prompt");
+            args.Add($"\"{EscapeArgument(Config.SystemPrompt)}\"");
+        }
+
         // セッション再開
         if (!string.IsNullOrEmpty(sessionId))
         {

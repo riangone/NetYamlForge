@@ -30,6 +30,31 @@ public class CliConfig
 
     /// <summary>Qwen Code 固有設定</summary>
     public QwenCodeConfig QwenCode { get; set; } = new();
+
+    /// <summary>
+    /// 全 CLI 呼び出しに追加されるシステムプロンプト。
+    /// フレームワーク固有の操作ガイドを AI に伝えるために使用する。
+    /// </summary>
+    public string? SystemPrompt { get; set; }
+
+    /// <summary>よく使う操作のプロンプトテンプレート一覧（UI のクイックアクション）</summary>
+    public List<AiSkill> Skills { get; set; } = new();
+}
+
+/// <summary>
+/// AI スキル（プロンプトテンプレート）定義
+/// </summary>
+public class AiSkill
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Icon { get; set; } = "⚡";
+    public string Description { get; set; } = string.Empty;
+    /// <summary>クリック時にチャット入力に挿入されるプロンプトテンプレート</summary>
+    public string Prompt { get; set; } = string.Empty;
+    /// <summary>true の場合、ユーザーが追記してから送信する</summary>
+    public bool NeedsInput { get; set; }
+    public string? InputPlaceholder { get; set; }
 }
 
 /// <summary>

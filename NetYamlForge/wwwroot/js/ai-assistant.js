@@ -35,6 +35,7 @@
         initPanel();
         initSignalR();
         loadCliTools();
+        loadSkills();
         configureMarked();
     });
 
@@ -119,6 +120,8 @@
                 </svg>
             </button>
             
+            <div id="ai-skills-bar" class="ai-skills-bar" style="display:none"></div>
+
             <div class="ai-panel-footer">
                 <div class="ai-cli-selector">
                     <label for="ai-cli-tool" class="text-sm">AI:</label>
@@ -277,6 +280,47 @@
             .catch(err => console.error('SignalR connection error:', err));
     }
     
+    // スキル一覧を読み込んでスキルバーに表示
+    async function loadSkills() {
+        try {
+            const response = await fetch(`${CONFIG.apiBaseUrl}/skills`);
+            if (!response.ok) return;
+            const skills = await response.json();
+            if (!skills || skills.length === 0) return;
+
+            const bar = document.getElementById('ai-skills-bar');
+            if (!bar) return;
+
+            bar.innerHTML = '';
+            skills.forEach(function(skill) {
+                const btn = document.createElement('button');
+                btn.className = 'ai-skill-btn';
+                btn.title = skill.description || '';
+                btn.innerHTML = `<span class="ai-skill-icon">${skill.icon || '⚡'}</span><span class="ai-skill-name">${skill.name}</span>`;
+                btn.onclick = function() { applySkill(skill); };
+                bar.appendChild(btn);
+            });
+            bar.style.display = 'flex';
+        } catch (e) {
+            console.error('Failed to load skills:', e);
+        }
+    }
+
+    // スキルをクリックしたときの処理
+    function applySkill(skill) {
+        const input = document.getElementById('ai-input-message');
+        if (!input) return;
+        input.value = skill.prompt;
+        input.focus();
+        // 入力不要なスキルはそのまま送信
+        if (!skill.needsInput) {
+            sendMessage();
+        } else {
+            // カーソルを末尾に移動してユーザーに追記を促す
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+    }
+
     // 加载 CLI 工具列表
     async function loadCliTools() {
         try {

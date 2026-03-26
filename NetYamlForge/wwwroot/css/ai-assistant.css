@@ -406,3 +406,46 @@
 /* strong / em */
 .ai-message-content strong { font-weight: 700; }
 .ai-message-content em { font-style: italic; }
+
+/* スキルバー */
+.ai-skills-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid hsl(var(--b3));
+    background: rgb(250, 250, 250) !important;
+    background-color: rgb(250, 250, 250) !important;
+    flex-shrink: 0;
+    overflow-x: auto;
+}
+
+.ai-skill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    border: 1px solid hsl(var(--b3));
+    border-radius: 1rem;
+    background: rgb(255, 255, 255) !important;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+    color: hsl(var(--bc));
+}
+
+.ai-skill-btn:hover {
+    background: hsl(var(--b2)) !important;
+    border-color: hsl(var(--p));
+    color: hsl(var(--p));
+}
+
+.ai-skill-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.ai-skill-name {
+    font-weight: 500;
+}

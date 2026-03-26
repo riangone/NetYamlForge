@@ -100,6 +100,13 @@ public class ClaudeCLIService : BaseCLIService
             args.Add("--output-format json");
         }
 
+        // フレームワーク固有のシステムプロンプトを追加（既存のシステムプロンプトに追記）
+        if (!string.IsNullOrEmpty(Config.SystemPrompt))
+        {
+            args.Add("--append-system-prompt");
+            args.Add($"\"{EscapeArgument(Config.SystemPrompt)}\"");
+        }
+
         // 会话恢复
         if (!string.IsNullOrEmpty(sessionId))
         {

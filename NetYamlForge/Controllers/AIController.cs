@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TaskStatus = NetYamlForge.Models.AI.TaskStatus;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
@@ -20,18 +21,21 @@ public class AIController : ControllerBase
     private readonly TaskQueueService _taskQueue;
     private readonly ChatHistoryService _chatHistory;
     private readonly ILogger<AIController> _logger;
+    private readonly CliConfig _cliConfig;
 
     public AIController(
         CLIServiceFactory cliFactory,
         ProgressTracker tracker,
         TaskQueueService taskQueue,
         ChatHistoryService chatHistory,
+        IOptions<CliConfig> cliConfig,
         ILogger<AIController> logger)
     {
         _cliFactory = cliFactory;
         _tracker = tracker;
         _taskQueue = taskQueue;
         _chatHistory = chatHistory;
+        _cliConfig = cliConfig.Value;
         _logger = logger;
     }
     
@@ -253,6 +257,15 @@ public class AIController : ControllerBase
         }
     }
     
+    /// <summary>
+    /// スキル（プロンプトテンプレート）一覧を取得します
+    /// </summary>
+    [HttpGet("skills")]
+    public ActionResult GetSkills()
+    {
+        return Ok(_cliConfig.Skills);
+    }
+
     /// <summary>
     /// 健康检查
     /// </summary>
