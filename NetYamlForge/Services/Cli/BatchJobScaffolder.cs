@@ -90,24 +90,8 @@ public static class BatchJobScaffolder
             Console.WriteLine($"SQL テンプレートを生成しました：{sqlFile}");
         }
 
-        // フックテンプレート生成
-        var hookDir = Path.Combine(projectPath, "Hooks");
-        if (!Directory.Exists(hookDir))
-        {
-            Directory.CreateDirectory(hookDir);
-        }
-
-        var beforeHookFile = Path.Combine(hookDir, $"{jobName}_BeforeHook.cs");
-        if (!File.Exists(beforeHookFile))
-        {
-            var hookContent = GenerateBeforeHook(jobName);
-            File.WriteAllText(beforeHookFile, hookContent);
-            Console.WriteLine($"Before フックテンプレートを生成しました：{beforeHookFile}");
-        }
-
         result.GeneratedFiles.Add(yamlFile);
         result.GeneratedFiles.Add(sqlFile);
-        result.GeneratedFiles.Add(beforeHookFile);
 
         Console.WriteLine();
         Console.WriteLine("次のステップ:");
@@ -121,49 +105,30 @@ public static class BatchJobScaffolder
     private static string GenerateJobYaml(string jobName)
     {
         var displayName = ToDisplayName(jobName);
-        
-        return $$"""
-# {{displayName}} - バッチジョブ定義
-# 詳細：docs/guides/batch-jobs.md
 
+        return $$"""
 jobs:
   {{jobName}}:
     displayName: {{displayName}}
     description: "{{displayName}}を実行します"
     enabled: true
-    
-    # スケジュール設定
+
     schedule:
-      cron: "0 2 * * *"  # 毎日 2:00 UTC
+      cron: "0 2 * * *"        # 毎日 02:00
       timezone: "Asia/Tokyo"
-      # intervalSeconds: 3600  # Cron の代わりに間隔で指定も可能
-    
-    # ジョブタイプ：sql_to_csv, sql_command, stored_procedure
+
+    # タイプ: sql_to_csv（SQL 結果を CSV 出力）または sql_command（SQL 実行のみ）
     type: sql_to_csv
-    
-    # ジョブ設定
     settings:
       sqlFile: jobs/sql/{{jobName}}.sql
-      outputFile: jobs/output/stats_{date:yyyyMMdd}.csv
+      outputFile: "jobs/output/{{jobName}}_{date:yyyyMMdd}.csv"
       includeHeader: true
       delimiter: ","
-      outputFormat: csv
-      # notifyEmails: "admin@example.com"
-    
-    # フック
-    beforeRun:
-      - {{jobName}}_check
-    
-    afterRun:
-      - {{jobName}}_notify
-    
-    # 失敗時ポリシー
+
     onFailure:
       retryCount: 3
-      retryInterval: 300  # 5 分
+      retryInterval: 300       # 5 分後にリトライ
       logError: true
-      notify:
-        - admin
 
 """;
     }
@@ -185,45 +150,6 @@ WHERE order_date >= DATE('now', '-1 day')
 GROUP BY DATE('now');
 
 -- 出力結果は CSV ファイルに書き出されます
-
-""";
-    }
-
-    private static string GenerateBeforeHook(string jobName)
-    {
-        var className = $"{ToPascalCase(jobName)}CheckHook";
-        
-        return $$"""
-using System.Data;
-using NetYamlForge.Services.Hooks;
-
-namespace NetYamlForge.Projects.Hooks;
-
-/// <summary>
-/// {{ToDisplayName(jobName)}} の実行前チェックフック
-/// </summary>
-public class {{className}} : IEntityHook
-{
-    public Task<HookResult> BeforeAsync(EntityHookContext context, IDbConnection db, IDbTransaction? tx)
-    {
-        // 実行前のチェックロジック
-        // 例：データが準備されているか確認
-        
-        // var count = db.ExecuteScalar<int>("SELECT COUNT(*) FROM orders WHERE processed = 0", transaction: tx);
-        // if (count == 0)
-        // {
-        //     return Task.FromResult(HookResult.Cancel("処理対象データがありません"));
-        // }
-        
-        return Task.FromResult(HookResult.Continue());
-    }
-
-    public Task AfterAsync(EntityHookContext context, IDbConnection db, IDbTransaction? tx)
-    {
-        // このメソッドは使用されません（Before フック専用）
-        return Task.CompletedTask;
-    }
-}
 
 """;
     }

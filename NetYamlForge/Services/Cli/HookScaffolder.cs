@@ -118,26 +118,29 @@ public static class HookScaffolder
         Console.WriteLine();
         Console.WriteLine("─── 次のステップ ────────────────────────────────────────");
         Console.WriteLine();
-        Console.WriteLine($"1. フックを DI に登録（NetYamlForge/Program.cs）:");
-        Console.WriteLine($"   builder.Services.AddSingleton<IEntityHook, {hookClassName}>();");
+        Console.WriteLine($"1. フック実装クラスのビジネスロジックを埋める:");
+        Console.WriteLine($"   {hookFilePath}");
+        Console.WriteLine();
+        Console.WriteLine($"   ※ DI への手動登録は不要です。");
+        Console.WriteLine($"     ProjectHookLoader が起動時に Hooks/ ディレクトリを自動スキャンして登録します。");
         Console.WriteLine();
         Console.WriteLine($"2. エンティティ YAML にフック名を追加（projects/{projectName}/entities/<entity>.yml）:");
         Console.WriteLine($"   hooks:");
         Console.WriteLine($"     beforeCreate: [{hookYamlName}]");
         Console.WriteLine($"     beforeUpdate: [{hookYamlName}]");
         Console.WriteLine();
-        Console.WriteLine($"3. フック実装クラスのビジネスロジックを埋める:");
-        Console.WriteLine($"   {hookFilePath}");
         if (withTests)
         {
-            Console.WriteLine();
-            Console.WriteLine($"4. テストを追加・実行:");
+            Console.WriteLine($"3. テストを追加・実行:");
             Console.WriteLine($"   dotnet test --filter \"{hookClassName}Tests\"");
+            Console.WriteLine();
         }
+        Console.WriteLine($"4. アプリを再起動してフックが正しく読み込まれるか確認:");
+        Console.WriteLine($"   dotnet run");
         Console.WriteLine();
 
-        result?.NextSteps.Add($"builder.Services.AddSingleton<IEntityHook, {hookClassName}>();");
         result?.NextSteps.Add($"entities/<entity>.yml の hooks.beforeCreate / hooks.beforeUpdate に '{hookYamlName}' を追加");
+        result?.NextSteps.Add($"※ DI 手動登録不要: ProjectHookLoader が Hooks/ を自動スキャンして登録します");
         if (withTests) result?.NextSteps.Add($"dotnet test --filter \"{hookClassName}Tests\"");
 
         return 0;
