@@ -102,6 +102,7 @@ public class TaskQueueService
             {
                 // 实际 CLI 服务
                 var workingDir = GetWorkingDirectory(task.Project);
+                string? lastMessage = null;
 
                 await foreach (var update in aiService.ExecuteStreamingAsync(
                     task.Message,
@@ -112,9 +113,15 @@ public class TaskQueueService
                 {
                     _tracker.UpdateProgress(task.Id, update);
 
+                    // 保存最后的消息
+                    if (!string.IsNullOrEmpty(update.Message))
+                    {
+                        lastMessage = update.Message;
+                    }
+
                     if (update.Status == TaskStatus.Completed)
                     {
-                        _tracker.Complete(task.Id, update.Message);
+                        _tracker.Complete(task.Id, update.Message ?? lastMessage ?? "Task completed");
                         return;
                     }
                     else if (update.Status == TaskStatus.Failed)
@@ -124,8 +131,8 @@ public class TaskQueueService
                     }
                 }
 
-                // 如果流式完成但没有明确状态，标记为完成
-                _tracker.Complete(task.Id, "Task completed");
+                // 如果流式完成但没有明确状态，使用最后的消息
+                _tracker.Complete(task.Id, lastMessage ?? "Task completed");
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested || (timeoutCts?.IsCancellationRequested ?? false))

@@ -169,7 +169,7 @@ NetYamlForge/projects/{project-name}/pdf-templates/invoice.yaml
 
 | 実装クラス | ライセンス | 特徴 |
 |---|---|---|
-| `DocumentPdfService` | MIT (PdfSharpCore) | **既定**。クロスプラットフォーム対応。Google Fonts (Noto Sans JP) で日本語表示に対応 |
+| `DocumentPdfService` | MIT (PDFsharp) | **既定**。クロスプラットフォーム対応。Google Fonts (Noto Sans JP) で日本語表示に対応 |
 
 `IDocumentPdfService` を注入すると `DocumentPdfService` が使われます。
 

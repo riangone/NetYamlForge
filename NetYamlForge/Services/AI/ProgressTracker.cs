@@ -111,9 +111,9 @@ public class ProgressTracker
                 StreamData = update?.StreamData
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // 记录但不抛出异常（避免影响主流程）
+            // SignalR 送信失敗はメインフローに影響させない
         }
     }
 }

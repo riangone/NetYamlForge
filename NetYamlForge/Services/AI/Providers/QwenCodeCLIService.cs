@@ -91,16 +91,8 @@ public class QwenCodeCLIService : BaseCLIService
         args.Add("-p");
         args.Add($"\"{EscapeArgument(message)}\"");
 
-        // 出力フォーマット（stream-json は --verbose も必要）
-        if (streaming)
-        {
-            args.Add("--output-format stream-json");
-            args.Add("--verbose");
-        }
-        else
-        {
-            args.Add("--output-format json");
-        }
+        // 出力フォーマット（Qwen Code は --verbose 未サポート）
+        args.Add(streaming ? "--output-format stream-json" : "--output-format json");
 
         // モデル指定（設定されている場合）
         if (!string.IsNullOrEmpty(Config.QwenCode.Model))

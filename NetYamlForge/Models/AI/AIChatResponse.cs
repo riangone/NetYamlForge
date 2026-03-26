@@ -28,6 +28,11 @@ public class AIChatResponse
     public int Progress { get; set; }
     
     /// <summary>
+    /// タスク完了時の結果テキスト（CLIの最終出力）
+    /// </summary>
+    public string? Result { get; set; }
+
+    /// <summary>
     /// 会话 ID（用于后续对话）
     /// </summary>
     public string? SessionId { get; set; }

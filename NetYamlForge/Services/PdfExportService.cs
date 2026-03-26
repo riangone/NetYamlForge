@@ -1,19 +1,9 @@
 // ファイル概要：YAML 定義に基づいて PDF ファイルを生成するサービスです。
-// iText 9.x (itext7 NuGet パッケージ) を使用します。
-// ライセンス: iText は AGPL v3 または商用ライセンスで提供されます。
+// PDFsharp (MIT ライセンス) を使用します。
 
-using iText.IO.Font;
-using iText.IO.Font.Constants;
-using iText.Kernel.Colors;
-using iText.Kernel.Pdf.Event;
-using iText.Kernel.Font;
-using iText.Kernel.Geom;
-using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas;
-using iText.Layout;
-using iText.Layout.Borders;
-using iText.Layout.Element;
-using iText.Layout.Properties;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf.IO;
 using NetYamlForge.Models;
 
 namespace NetYamlForge.Services;
@@ -33,7 +23,7 @@ public interface IPdfExportService
 
 public class PdfExportService : IPdfExportService
 {
-    // シンプルなデータ行の最低高さ（pt）
+    // シンプルなデータ行の最低高さ（ポイント）
     private const float RowMinHeight = 20f;
 
     // よく使われる CJK フォントのシステムパス候補
@@ -57,125 +47,170 @@ public class PdfExportService : IPdfExportService
         string? projectDir = null)
     {
         using var ms = new MemoryStream();
+        var document = new PdfDocument();
+        document.Info.Title = options.Title ?? "Export";
 
         var pageSize = ResolvePageSize(options);
-        var pdfDoc = new PdfDocument(new PdfWriter(ms));
-        pdfDoc.SetDefaultPageSize(pageSize);
+        var page = document.AddPage();
+        page.Width = pageSize.Width;
+        page.Height = pageSize.Height;
 
-        var bodyFont = LoadFont(options.FontFile, projectDir);
-
-        if (options.ShowPageNumbers)
-            pdfDoc.AddEventHandler(PdfDocumentEvent.END_PAGE, new PageNumberHandler(bodyFont, 8f));
+        var gfx = XGraphics.FromPdfPage(page);
+        var font = LoadFont(options.FontFile, projectDir);
+        var fontNormal = new XFont(font.FontFamily.Name, 9, XFontStyleEx.Regular);
+        var fontBold = new XFont(font.FontFamily.Name, 9, XFontStyleEx.Bold);
 
         // ヘッダー・フッター用の余白を確保
         float topMargin = string.IsNullOrWhiteSpace(options.Title) ? 36f : 50f;
         float bottomMargin = options.ShowPageNumbers ? 40f : 24f;
-        var doc = new Document(pdfDoc, pageSize);
-        doc.SetMargins(topMargin, 36f, bottomMargin, 36f);
-        doc.SetFont(bodyFont).SetFontSize(9f);
+        float leftMargin = 36f;
+        float rightMargin = 36f;
+
+        var usableWidth = pageSize.Width - leftMargin - rightMargin;
+        var usableHeight = pageSize.Height - topMargin - bottomMargin;
 
         // ── タイトルブロック ───────────────────────────────────
+        float y = topMargin;
         if (!string.IsNullOrWhiteSpace(options.Title))
         {
-            doc.Add(new Paragraph(options.Title)
-                .SetFontSize(15f)
-                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
-                .SetMarginBottom(2f));
+            var titleFont = new XFont(font.FontFamily.Name, 15, XFontStyleEx.Bold);
+            gfx.DrawString(options.Title, titleFont, XBrushes.Black,
+                new XRect(leftMargin, y, usableWidth, 20), XStringFormats.TopLeft);
+            y += 20;
         }
 
         if (options.ShowGeneratedAt)
         {
-            doc.Add(new Paragraph($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}")
-                .SetFontSize(8f)
-                .SetFontColor(new DeviceRgb(120, 120, 120))
-                .SetMarginBottom(10f));
+            var dateFont = new XFont(font.FontFamily.Name, 8, XFontStyleEx.Regular);
+            var dateBrush = new XSolidBrush(XColors.Gray);
+            gfx.DrawString($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}", dateFont, dateBrush,
+                new XRect(leftMargin, y, usableWidth, 15), XStringFormats.TopLeft);
+            y += 15;
         }
+
+        y += 10; // スペース追加
 
         // ── テーブル列設定 ────────────────────────────────────
         var colConfigs = BuildColumnConfigs(columns, options);
-        var widthArray = UnitValue.CreatePercentArray(colConfigs.Select(c => c.Width).ToArray());
-
-        // largeTable=true: ストリーミング書き込みで大量データも低メモリで処理
-        var table = new Table(widthArray, largeTable: true).UseAllAvailableWidth();
-        doc.Add(table);
+        var columnWidths = colConfigs.Select(c => c.Width / 100f * usableWidth).ToArray();
 
         // ── ヘッダー行 ────────────────────────────────────────
-        var hdrBg = ParseHex(options.HeaderColor);
-        foreach (var col in colConfigs)
+        var hdrBg = ParseColor(options.HeaderColor);
+        float rowHeight = 25f;
+
+        for (int i = 0; i < colConfigs.Count; i++)
         {
-            table.AddHeaderCell(
-                new Cell()
-                    .SetBackgroundColor(hdrBg)
-                    .SetBorder(Border.NO_BORDER)
-                    .SetPaddingTop(5f).SetPaddingBottom(5f)
-                    .SetPaddingLeft(6f).SetPaddingRight(6f)
-                    .Add(new Paragraph(col.Label)
-                        .SetFontSize(9f)
-                        .SetFontColor(ColorConstants.WHITE)
-                        .SetTextAlignment(MapAlign(col.Align))));
+            var col = colConfigs[i];
+            var x = leftMargin + columnWidths.Take(i).Sum();
+            var rect = new XRect(x, y, columnWidths[i], rowHeight);
+
+            // 背景描画
+            if (hdrBg != null)
+            {
+                gfx.DrawRectangle(hdrBg, rect);
+            }
+
+            // テキスト描画
+            var format = MapStringFormat(col.Align);
+            gfx.DrawString(col.Label, fontBold, XBrushes.White, rect, format);
         }
+
+        y += rowHeight;
 
         // ── データ行 ─────────────────────────────────────────
         var oddBg = string.IsNullOrWhiteSpace(options.OddRowColor)
             ? null
-            : (Color?)ParseHex(options.OddRowColor);
-        var rowBorderColor = new DeviceRgb(220, 220, 220);
+            : ParseColor(options.OddRowColor);
+        var rowBorderColor = XColors.LightGray;
 
         int rowIdx = 0;
         foreach (var row in rows)
         {
             var bg = (rowIdx % 2 == 1 && oddBg != null) ? oddBg : null;
-            foreach (var col in colConfigs)
+            rowHeight = RowMinHeight;
+
+            for (int i = 0; i < colConfigs.Count; i++)
             {
+                var col = colConfigs[i];
+                var x = leftMargin + columnWidths.Take(i).Sum();
+                var rect = new XRect(x, y, columnWidths[i], rowHeight);
+
+                // 背景描画
+                if (bg != null)
+                {
+                    gfx.DrawRectangle(bg, rect);
+                }
+
+                // 罫線描画
+                var pen = new XPen(rowBorderColor, 0.5f);
+                gfx.DrawLine(pen, rect.X, rect.Y + rect.Height, rect.X + rect.Width, rect.Y + rect.Height);
+
+                // テキスト描画
                 row.TryGetValue(col.Key, out var raw);
                 var colDef = meta.Columns.GetValueOrDefault(col.Key);
                 var text = colDef != null
                     ? ColumnValueFormatter.FormatValue(colDef.Type, raw, colDef.OptionLabels)
                     : raw?.ToString() ?? string.Empty;
 
-                var cell = new Cell()
-                    .SetMinHeight(RowMinHeight)
-                    .SetBorderTop(Border.NO_BORDER)
-                    .SetBorderLeft(Border.NO_BORDER)
-                    .SetBorderRight(Border.NO_BORDER)
-                    .SetBorderBottom(new SolidBorder(rowBorderColor, 0.5f))
-                    .SetPaddingTop(4f).SetPaddingBottom(4f)
-                    .SetPaddingLeft(6f).SetPaddingRight(6f)
-                    .Add(new Paragraph(text)
-                        .SetFontSize(9f)
-                        .SetTextAlignment(MapAlign(col.Align)));
-
-                if (bg != null) cell.SetBackgroundColor(bg);
-                table.AddCell(cell);
-
-                // Flush で使用メモリを都度解放する
-                if (rowIdx % 50 == 0) table.Flush();
+                var format = MapStringFormat(col.Align);
+                gfx.DrawString(text, fontNormal, XBrushes.Black, rect, format);
             }
+
+            y += rowHeight;
             rowIdx++;
+
+            // 改ページチェック
+            if (y + rowHeight > pageSize.Height - bottomMargin)
+            {
+                page = document.AddPage();
+                page.Width = pageSize.Width;
+                page.Height = pageSize.Height;
+                gfx.Dispose();
+                gfx = XGraphics.FromPdfPage(page);
+                y = topMargin;
+            }
         }
 
-        table.Complete();
-        doc.Close();
+        // ページ番号
+        if (options.ShowPageNumbers)
+        {
+            for (int i = 0; i < document.Pages.Count; i++)
+            {
+                var p = document.Pages[i];
+                var pageGfx = XGraphics.FromPdfPage(p);
+                var pageNumFont = new XFont(font.FontFamily.Name, 8, XFontStyleEx.Regular);
+                var pageNumBrush = new XSolidBrush(XColors.Gray);
+                var text = $"- {i + 1} -";
+                var size = pageGfx.MeasureString(text, pageNumFont);
+                var x = p.Width / 2 - size.Width / 2;
+                var yPos = p.Height - 24;
+                pageGfx.DrawString(text, pageNumFont, pageNumBrush, x, yPos);
+                pageGfx.Dispose();
+            }
+        }
+
+        gfx.Dispose();
+        document.Save(ms);
         return ms.ToArray();
     }
 
     // ── ヘルパーメソッド ─────────────────────────────────────
 
-    private static iText.Kernel.Geom.PageSize ResolvePageSize(PdfExportOptions options)
+    private static XSize ResolvePageSize(PdfExportOptions options)
     {
         var size = (options.PageSize ?? "A4").ToUpperInvariant() switch
         {
-            "A3"     => iText.Kernel.Geom.PageSize.A3,
-            "LETTER" => iText.Kernel.Geom.PageSize.LETTER,
-            "LEGAL"  => iText.Kernel.Geom.PageSize.LEGAL,
-            _        => iText.Kernel.Geom.PageSize.A4,
+            "A3"     => new XSize(841.89, 1190.55),  // A3: 297mm x 420mm
+            "LETTER" => new XSize(612, 792),         // Letter: 8.5in x 11in
+            "LEGAL"  => new XSize(612, 1008),        // Legal: 8.5in x 14in
+            _        => new XSize(595.28, 841.89),   // A4: 210mm x 297mm
         };
         return (options.Orientation ?? "portrait").ToLowerInvariant() == "landscape"
-            ? size.Rotate()
+            ? new XSize(size.Height, size.Width)
             : size;
     }
 
-    private static PdfFont LoadFont(string? fontFile, string? projectDir)
+    private static XFont LoadFont(string? fontFile, string? projectDir)
     {
         // 1. YAML 指定フォント
         if (!string.IsNullOrWhiteSpace(fontFile))
@@ -184,43 +219,46 @@ public class PdfExportService : IPdfExportService
                 ? fontFile
                 : System.IO.Path.Combine(projectDir ?? Directory.GetCurrentDirectory(), fontFile);
             if (File.Exists(resolvedPath))
-                return CreateEmbeddedFont(resolvedPath);
+                return new XFont(resolvedPath, 9);
         }
 
         // 2. システム上の CJK フォントを自動検出
         foreach (var p in CjkFontPaths)
         {
             if (File.Exists(p))
-                return CreateEmbeddedFont(p);
+                return new XFont(p, 9);
         }
 
         // 3. フォールバック（ラテン文字のみ対応）
-        return PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+        return new XFont("Arial", 9);
     }
 
-    private static PdfFont CreateEmbeddedFont(string path)
-        => PdfFontFactory.CreateFont(path, PdfEncodings.IDENTITY_H,
-               PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
-
-    private static DeviceRgb ParseHex(string hex)
+    private static XSolidBrush? ParseColor(string hex)
     {
+        if (string.IsNullOrWhiteSpace(hex)) return null;
         hex = hex.TrimStart('#');
         if (hex.Length == 6)
         {
             int r = Convert.ToInt32(hex[0..2], 16);
             int g = Convert.ToInt32(hex[2..4], 16);
             int b = Convert.ToInt32(hex[4..6], 16);
-            return new DeviceRgb(r, g, b);
+            return new XSolidBrush(XColor.FromArgb(255, (byte)r, (byte)g, (byte)b));
         }
-        return new DeviceRgb(30, 58, 95); // デフォルト紺色
+        return new XSolidBrush(XColors.DarkBlue);
     }
 
-    private static TextAlignment MapAlign(string align) => align?.ToLowerInvariant() switch
+    private static XStringFormat MapStringFormat(string align)
     {
-        "center" => TextAlignment.CENTER,
-        "right"  => TextAlignment.RIGHT,
-        _        => TextAlignment.LEFT,
-    };
+        var format = new XStringFormat();
+        format.LineAlignment = XLineAlignment.Center;
+        format.Alignment = align?.ToLowerInvariant() switch
+        {
+            "center" => XStringAlignment.Center,
+            "right"  => XStringAlignment.Far,
+            _        => XStringAlignment.Near,
+        };
+        return format;
+    }
 
     /// <summary>
     /// 列幅を決定する。YAML の pdf.columns で指定した幅を優先し、
@@ -248,42 +286,5 @@ public class PdfExportService : IPdfExportService
             var align = opt?.Align ?? "left";
             return (c.Key, label, width, align);
         }).ToList();
-    }
-
-    // ── ページ番号フッターイベントハンドラー ──────────────────
-
-    private sealed class PageNumberHandler : AbstractPdfDocumentEventHandler
-    {
-        private readonly PdfFont _font;
-        private readonly float   _fontSize;
-
-        public PageNumberHandler(PdfFont font, float fontSize)
-        {
-            _font     = font;
-            _fontSize = fontSize;
-        }
-
-        protected override void OnAcceptedEvent(AbstractPdfDocumentEvent abstractEvent)
-        {
-            var ev      = (PdfDocumentEvent)abstractEvent;
-            var pdfDoc  = ev.GetDocument();
-            var page    = ev.GetPage();
-            var pageNum = pdfDoc.GetPageNumber(page);
-            var ps      = pdfDoc.GetDefaultPageSize();
-
-            var canvas = new PdfCanvas(
-                page.NewContentStreamBefore(), page.GetResources(), pdfDoc);
-
-            var footerRect = new Rectangle(36, 16, ps.GetWidth() - 72, 16);
-            using var layoutCanvas = new Canvas(canvas, footerRect);
-            layoutCanvas.Add(
-                new Paragraph($"- {pageNum} -")
-                    .SetFont(_font)
-                    .SetFontSize(_fontSize)
-                    .SetFontColor(new DeviceRgb(140, 140, 140))
-                    .SetTextAlignment(TextAlignment.CENTER));
-
-            canvas.Release();
-        }
     }
 }

@@ -1,113 +1,122 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 
 namespace NetYamlForge.Services.AI;
 
 /// <summary>
-/// 进程执行器（CLI 调用核心）
+/// CLI プロセス実行器
 /// </summary>
 public class ProcessExecutor
 {
     private readonly ILogger<ProcessExecutor> _logger;
-    
+
     public ProcessExecutor(ILogger<ProcessExecutor> logger)
     {
         _logger = logger;
     }
-    
+
     /// <summary>
-    /// 执行 CLI 命令（流式输出）
+    /// CLI をストリーミング実行する。stdout / stderr を並行して読み取り、行単位で yield する。
     /// </summary>
     public async IAsyncEnumerable<string> ExecuteStreamingAsync(
         string command,
         string arguments,
         string? workingDirectory = null,
+        IReadOnlyDictionary<string, string>? environmentVariables = null,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = command,
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
-            }
-        };
-        
+        var process = CreateProcess(command, arguments, workingDirectory, environmentVariables);
+
         _logger.LogInformation("Starting CLI: {Command} {Arguments}", command, arguments);
-        
         process.Start();
         _logger.LogInformation("CLI started with PID: {Pid}", process.Id);
-        
-        // 同时读取标准输出和错误输出
-        var outputTask = ReadStreamAsync(process.StandardOutput, ct);
-        var errorTask = ReadStreamAsync(process.StandardError, ct);
-        
-        await foreach (var line in outputTask.WithCancellation(ct))
+
+        // stdout / stderr を並行して読み込む（逐次だとバッファ枯渇でデッドロックする可能性がある）
+        var channel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleWriter = false });
+
+        var stdoutTask = Task.Run(async () =>
+        {
+            try
+            {
+                string? line;
+                while ((line = await process.StandardOutput.ReadLineAsync(ct)) != null)
+                    await channel.Writer.WriteAsync(line, ct);
+            }
+            catch (OperationCanceledException) { /* expected */ }
+        }, ct);
+
+        var stderrTask = Task.Run(async () =>
+        {
+            try
+            {
+                string? line;
+                while ((line = await process.StandardError.ReadLineAsync(ct)) != null)
+                    await channel.Writer.WriteAsync(line, ct);
+            }
+            catch (OperationCanceledException) { /* expected */ }
+        }, ct);
+
+        _ = Task.WhenAll(stdoutTask, stderrTask).ContinueWith(
+            _ => channel.Writer.Complete(), TaskScheduler.Default);
+
+        await foreach (var line in channel.Reader.ReadAllAsync(ct))
         {
             yield return line;
         }
-        
-        await foreach (var line in errorTask.WithCancellation(ct))
-        {
-            // 错误输出也返回（可能包含有用信息）
-            yield return line;
-        }
-        
+
         await process.WaitForExitAsync(ct);
         _logger.LogInformation("CLI exited with code: {ExitCode}", process.ExitCode);
     }
-    
+
     /// <summary>
-    /// 执行 CLI 命令（一次性）
+    /// CLI を一括実行する（全出力を待ってから返す）。
     /// </summary>
     public async Task<(int ExitCode, string Output, string Error)> ExecuteAsync(
         string command,
         string arguments,
         string? workingDirectory = null,
+        IReadOnlyDictionary<string, string>? environmentVariables = null,
         CancellationToken ct = default)
     {
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = command,
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
-            }
-        };
-        
+        var process = CreateProcess(command, arguments, workingDirectory, environmentVariables);
         process.Start();
-        
-        var output = await process.StandardOutput.ReadToEndAsync();
-        var error = await process.StandardError.ReadToEndAsync();
-        
+
+        var output = await process.StandardOutput.ReadToEndAsync(ct);
+        var error  = await process.StandardError.ReadToEndAsync(ct);
         await process.WaitForExitAsync(ct);
-        
+
         return (process.ExitCode, output, error);
     }
-    
-    private static async IAsyncEnumerable<string> ReadStreamAsync(
-        StreamReader reader,
-        [EnumeratorCancellation] CancellationToken ct = default)
+
+    private static Process CreateProcess(
+        string command,
+        string arguments,
+        string? workingDirectory,
+        IReadOnlyDictionary<string, string>? environmentVariables)
     {
-        while (!reader.EndOfStream && !ct.IsCancellationRequested)
+        var startInfo = new ProcessStartInfo
         {
-            var line = await reader.ReadLineAsync(ct);
-            if (line != null)
+            FileName = command,
+            Arguments = arguments,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
+        };
+
+        // 指定された環境変数を追加・上書きする（他の環境変数は親プロセスから継承）
+        if (environmentVariables != null)
+        {
+            foreach (var kvp in environmentVariables)
             {
-                yield return line;
+                startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
             }
         }
+
+        return new Process { StartInfo = startInfo };
     }
 }

@@ -18,17 +18,20 @@ public class AIController : ControllerBase
     private readonly CLIServiceFactory _cliFactory;
     private readonly ProgressTracker _tracker;
     private readonly TaskQueueService _taskQueue;
+    private readonly ChatHistoryService _chatHistory;
     private readonly ILogger<AIController> _logger;
 
     public AIController(
         CLIServiceFactory cliFactory,
         ProgressTracker tracker,
         TaskQueueService taskQueue,
+        ChatHistoryService chatHistory,
         ILogger<AIController> logger)
     {
         _cliFactory = cliFactory;
         _tracker = tracker;
         _taskQueue = taskQueue;
+        _chatHistory = chatHistory;
         _logger = logger;
     }
     
@@ -53,17 +56,17 @@ public class AIController : ControllerBase
             // 验证 CLI 工具
             var cliService = _cliFactory.GetService(request.CliTool);
             var toolInfo = await cliService.GetToolInfoAsync();
-            
+
             if (!toolInfo.Installed)
             {
                 return BadRequest(new { error = $"CLI tool '{request.CliTool}' is not installed" });
             }
-            
+
             if (!toolInfo.Authenticated)
             {
                 return BadRequest(new { error = $"CLI tool '{request.CliTool}' is not authenticated. Please run '{request.CliTool} login' first." });
             }
-            
+
             // 创建任务
             var task = new AITask
             {
@@ -77,18 +80,49 @@ public class AIController : ControllerBase
                 Progress = 0,
                 CreatedAt = DateTime.UtcNow
             };
-            
+
             _tracker.Add(task);
-            
-            // 加入队列
+
+            // 加入队列并等待完成
             await _taskQueue.EnqueueAsync(task);
             
-            // 返回响应
+            // 等待任务完成（最多 60 秒）
+            for (int i = 0; i < 60; i++)
+            {
+                await Task.Delay(1000);
+                var currentTask = _tracker.GetTask(task.Id);
+                if (currentTask == null) break;
+                
+                if (currentTask.Status == TaskStatus.Completed)
+                {
+                    return Ok(new AIChatResponse
+                    {
+                        TaskId = task.Id,
+                        Message = currentTask.Result,
+                        Status = currentTask.Status,
+                        Progress = currentTask.Progress,
+                        Result = currentTask.Result,
+                        SessionId = task.SessionId
+                    });
+                }
+                else if (currentTask.Status == TaskStatus.Failed || currentTask.Status == TaskStatus.Cancelled)
+                {
+                    return BadRequest(new { 
+                        error = currentTask.Error ?? "Task failed",
+                        taskId = task.Id,
+                        status = currentTask.Status
+                    });
+                }
+            }
+
+            // 超时返回
             return Ok(new AIChatResponse
             {
                 TaskId = task.Id,
+                Message = task.Result,
                 Status = task.Status,
                 Progress = task.Progress,
+                Result = task.Result,
                 SessionId = task.SessionId
             });
         }
@@ -194,17 +228,21 @@ public class AIController : ControllerBase
         {
             var tools = await _cliFactory.GetAvailableToolsAsync();
             
+            // available をオブジェクト（ツール名キー）として返す。
+            // 配列で返すと JS 側で data.available['claude'] が undefined になる。
             return Ok(new
             {
-                available = tools.Values.Select(t => new
-                {
-                    t.Name,
-                    t.DisplayName,
-                    t.Installed,
-                    t.Version,
-                    t.Authenticated,
-                    t.Capabilities
-                }),
+                available = tools.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => new
+                    {
+                        kvp.Value.Name,
+                        kvp.Value.DisplayName,
+                        kvp.Value.Installed,
+                        kvp.Value.Version,
+                        kvp.Value.Authenticated,
+                        kvp.Value.Capabilities
+                    }),
                 defaultTool = "claude"
             });
         }
@@ -226,5 +264,41 @@ public class AIController : ControllerBase
             status = "healthy",
             timestamp = DateTime.UtcNow
         });
+    }
+
+    /// <summary>
+    /// チャット履歴を取得します
+    /// </summary>
+    [HttpGet("history")]
+    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100)
+    {
+        var userId = GetCurrentUserId();
+        var messages = await _chatHistory.GetHistoryAsync(userId, limit);
+        return Ok(messages);
+    }
+
+    /// <summary>
+    /// メッセージを履歴に保存します
+    /// </summary>
+    [HttpPost("history")]
+    public async Task<ActionResult> SaveMessage([FromBody] SaveChatMessageRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Content) || string.IsNullOrWhiteSpace(request.Type))
+            return BadRequest(new { error = "Content and Type are required" });
+
+        var userId = GetCurrentUserId();
+        var id = await _chatHistory.SaveMessageAsync(userId, request.Content, request.Type);
+        return Ok(new { id });
+    }
+
+    /// <summary>
+    /// チャット履歴を全件削除します
+    /// </summary>
+    [HttpDelete("history")]
+    public async Task<ActionResult> ClearHistory()
+    {
+        var userId = GetCurrentUserId();
+        await _chatHistory.ClearHistoryAsync(userId);
+        return Ok();
     }
 }

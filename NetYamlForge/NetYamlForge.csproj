@@ -18,14 +18,11 @@
     <Content Include="Schemas\pdf-templates\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <!-- アナライザープロジェクト: 禁止パターンをビルド時に検出 (DCS001-DCS004) -->
+    <!-- アナライザープロジェクト：禁止パターンをビルド時に検出 (DCS001-DCS004) -->
     <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
-    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.5.0" />
-    <PackageReference Include="itext7" Version="9.5.0" />
-    <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="JsonSchema.Net" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
@@ -37,5 +34,14 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="PDFsharp" Version="7.0.0-preview-1" />
   </ItemGroup>
+  <!-- wwwroot/fonts のフォントファイルをビルド出力にコピー -->
+  <ItemGroup>
+    <None Include="wwwroot\fonts\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="CopyWwwrootFonts" AfterTargets="Build">
+    <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Regular.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Regular.ttf" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Bold.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Bold.ttf" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

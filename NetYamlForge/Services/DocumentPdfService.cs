@@ -5,9 +5,9 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using NetYamlForge.Models;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Fonts;
-using PdfSharpCore.Pdf;
+using PdfSharp.Drawing;
+using PdfSharp.Fonts;
+using PdfSharp.Pdf;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -59,7 +59,7 @@ public class DocumentPdfService : IDocumentPdfService
     static DocumentPdfService()
     {
         // フォントリゾルバーを常に登録する。
-        // PdfSharpCore がデフォルトの FontResolver を自動的に登録する可能性があるため、
+        // PdfSharp がデフォルトの FontResolver を自動的に登録する可能性があるため、
         // 既存のチェックを削除して、常に UniversalFontResolver を使用する。
         try
         {
@@ -351,7 +351,7 @@ public class DocumentPdfService : IDocumentPdfService
         var value = BuildParaText(s, h, ds);
         var main  = (s.Prefix ?? "") + value;
         var color = ResolveXColor(s.Color, t) ?? XColors.Black;
-        var style = s.Bold ? XFontStyle.Bold : XFontStyle.Regular;
+        var style = s.Bold ? XFontStyleEx.Bold : XFontStyleEx.Regular;
         var font  = new XFont(FontFamilyName, s.FontSize, style);
         var brush = new XSolidBrush(color);
 
@@ -360,7 +360,7 @@ public class DocumentPdfService : IDocumentPdfService
         if (s.Suffix != null)
         {
             var sfSize  = s.SuffixFontSize ?? s.FontSize;
-            var sfFont  = new XFont(FontFamilyName, sfSize, XFontStyle.Regular);
+            var sfFont  = new XFont(FontFamilyName, sfSize, XFontStyleEx.Regular);
             var mainW   = gfx.MeasureString(main, font).Width;
             var lineH   = font.GetHeight() * 1.2;
             double sfX  = s.Align?.ToLowerInvariant() == "center"
@@ -441,7 +441,7 @@ public class DocumentPdfService : IDocumentPdfService
             if (row.OmitIfZero  && decimal.TryParse(rawVal, out var dz) && dz == 0m) continue;
 
             var displayVal = FormatValue(rawVal, row.Format);
-            var style = row.Bold ? XFontStyle.Bold : XFontStyle.Regular;
+            var style = row.Bold ? XFontStyleEx.Bold : XFontStyleEx.Regular;
             var font  = new XFont(FontFamilyName, fs, style);
             double rowH = Math.Max(
                 MeasureWrappedH(gfx, row.Label, font, lw - 2 * pad) + 2 * pad,
@@ -485,8 +485,8 @@ public class DocumentPdfService : IDocumentPdfService
             : XColors.White;
         var oddBg       = ResolveXColor(s.OddRowBackground, t) ?? t.OddRow;
         float pad = s.CellPadding, fs = s.FontSize;
-        var font  = new XFont(FontFamilyName, fs, XFontStyle.Regular);
-        var bfont = new XFont(FontFamilyName, fs, XFontStyle.Bold);
+        var font  = new XFont(FontFamilyName, fs, XFontStyleEx.Regular);
+        var bfont = new XFont(FontFamilyName, fs, XFontStyleEx.Bold);
         double rowH = fs * 1.4 + 2 * pad;
         double totalH = 0, cy = y;
 
@@ -659,7 +659,7 @@ public class DocumentPdfService : IDocumentPdfService
     {
         var text = (s.Prefix ?? "") + BuildParaText(s, h, ds);
         var font = new XFont(FontFamilyName, s.FontSize,
-            s.Bold ? XFontStyle.Bold : XFontStyle.Regular);
+            s.Bold ? XFontStyleEx.Bold : XFontStyleEx.Regular);
         return MeasureWrappedH(gfx, text, font, width);
     }
 
@@ -688,7 +688,7 @@ public class DocumentPdfService : IDocumentPdfService
         double  lw = cw[0] / 100.0 * totalWidth;
         double  vw = cw.Length > 1 ? cw[1] / 100.0 * totalWidth : totalWidth - lw;
         float pad = s.CellPadding, fs = s.FontSize;
-        var font = new XFont(FontFamilyName, fs, XFontStyle.Regular);
+        var font = new XFont(FontFamilyName, fs, XFontStyleEx.Regular);
 
         return s.Rows.Where(r =>
         {

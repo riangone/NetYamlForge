@@ -4,6 +4,7 @@
 
 using System.Data;
 using NetYamlForge.Services;
+using NetYamlForge.Services.AI;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.Dialect;
@@ -137,12 +138,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPagePermissionService, PagePermissionService>();
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();
-        // PDF エクスポートサービス
+        // AI チャット履歴サービス (system.db に永続化)
+        services.AddSingleton<ChatHistoryService>();
+        // PDF エクスポートサービス (PDFsharp - MIT ライセンス)
         services.AddSingleton<IPdfExportService, PdfExportService>();
         // IDocumentPdfService の既定実装は PDFsharp (MIT ライセンス)
-        // iText 実装 (DocumentPdfService) は DocumentPdfService を直接注入して利用可能
-        services.AddSingleton<IDocumentPdfService, DocumentPdfSharpService>();
-        services.AddSingleton<DocumentPdfService>();
+        services.AddSingleton<IDocumentPdfService, DocumentPdfService>();
         services.AddHostedService<CrmAutomationHostedService>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 

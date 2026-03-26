@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="~/css/ai-assistant.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-base-200">
+<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
 @functions {
     private sealed class NavSection
     {
@@ -672,6 +672,7 @@
             hidden.value = values.join(',');
         }
     </script>
+    <script src="/lib/marked/marked.min.js"></script>
     <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -107,8 +107,8 @@ PDF テンプレートはグローバル定義 (`NetYamlForge/Schemas/pdf-templa
 
 | クラス | エンジン | ライセンス | 用途 |
 |---|---|---|---|
-| `DocumentPdfService` | PdfSharpCore | MIT | **既定実装** (`IDocumentPdfService`)。Google Fonts (Noto Sans JP) で日本語表示に対応 |
-| `PdfExportService` | PdfSharpCore | MIT | 一覧データの表形式 PDF |
+| `DocumentPdfService` | PDFsharp | MIT | **既定実装** (`IDocumentPdfService`)。Google Fonts (Noto Sans JP) で日本語表示に対応 |
+| `PdfExportService` | PDFsharp | MIT | 一覧データの表形式 PDF |
 
 `PdfTemplateSampleRunner` で全テンプレートのサンプル PDF を生成できます。
 

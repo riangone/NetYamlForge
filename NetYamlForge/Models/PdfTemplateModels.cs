@@ -86,7 +86,7 @@ public class PdfSectionConfig
     public float[]? ColumnWidths { get; set; }
     /// <summary>
     /// セル定義のリスト。複数行にわたる場合は rowSpan/colSpan を使用し、
-    /// iText がカラム数に応じて自動的に行を改めます。
+    /// PDFSharp がカラム数に応じて自動的に行を改めます。
     /// </summary>
     public List<PdfCellConfig> Cells { get; set; } = [];
 

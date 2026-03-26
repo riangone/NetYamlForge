@@ -2,28 +2,50 @@
 
 (function() {
     'use strict';
-    
-    // 状态
+
+    // 状態
     let connection = null;
     let currentTaskId = null;
     let isPanelOpen = false;
     let autoScroll = true;
-    
+    let chatHistory = []; // ページ跨ぎ用メモリ上の履歴
+
+    const STORAGE_KEY = 'ai_chat_history';
+    const TOOL_STORAGE_KEY = 'ai_chat_tool';
+
     // 配置
     const CONFIG = {
         apiBaseUrl: '/api/ai',
         signalRUrl: '/aiProgressHub',
         defaultCliTool: 'claude'
     };
-    
+
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('AI Assistant: DOMContentLoaded');
+        console.log('AI Assistant: data-user-authenticated =', document.body.getAttribute('data-user-authenticated'));
+        
+        // 检查用户是否已登录
+        if (!isUserLoggedIn()) {
+            console.log('AI Assistant: User not logged in, skipping initialization');
+            return; // 未登录时不显示 AI 聊天窗
+        }
+        console.log('AI Assistant: User logged in, initializing...');
         initPanel();
         initSignalR();
         loadCliTools();
         configureMarked();
     });
-    
+
+    // 检查用户登录状态
+    function isUserLoggedIn() {
+        // 检查 body 标签上的 data-user-authenticated 属性
+        const body = document.body;
+        const authValue = body.getAttribute('data-user-authenticated');
+        console.log('AI Assistant: isUserLoggedIn check, authValue =', authValue);
+        return authValue === 'true';
+    }
+
     // 初始化面板
     function initPanel() {
         // 创建触发按钮
@@ -44,6 +66,11 @@
         panel.className = 'ai-assistant-panel';
         panel.innerHTML = buildPanelHTML();
         document.body.appendChild(panel);
+
+        // 1. sessionStorage から即時復元（ちらつき防止）
+        restoreFromStorage();
+        // 2. サーバーから最新履歴を取得して同期（別タブ・ブラウザ再起動対応）
+        restoreFromServer();
 
         // 绑定事件
         bindPanelEvents();
@@ -134,10 +161,32 @@
         `;
     }
     
+    // モバイルキーボード表示時にパネルサイズを visualViewport に合わせる
+    function adjustPanelForKeyboard() {
+        const panel = document.getElementById('ai-assistant-panel');
+        if (!panel || !isPanelOpen) return;
+        const vv = window.visualViewport;
+        panel.style.height = vv.height + 'px';
+        panel.style.top = vv.offsetTop + 'px';
+    }
+
+    function resetPanelSize() {
+        const panel = document.getElementById('ai-assistant-panel');
+        if (!panel) return;
+        panel.style.height = '';
+        panel.style.top = '';
+    }
+
     function bindPanelEvents() {
         // 关闭按钮
         document.getElementById('ai-close-btn').onclick = closePanel;
         document.getElementById('ai-minimize-btn').onclick = minimizePanel;
+
+        // visualViewport で旧 iOS Safari のキーボード対応
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', adjustPanelForKeyboard);
+            window.visualViewport.addEventListener('scroll', adjustPanelForKeyboard);
+        }
         
         // 发送按钮
         document.getElementById('ai-send-btn').onclick = sendMessage;
@@ -159,8 +208,9 @@
             }
         });
         
-        // CLI 工具选择变化
+        // CLI 工具选択変化時に保存
         document.getElementById('ai-cli-tool').addEventListener('change', function() {
+            try { sessionStorage.setItem(TOOL_STORAGE_KEY, this.value); } catch(e) {}
             checkCliStatus(this.value);
         });
     }
@@ -259,9 +309,11 @@
             selector.appendChild(option);
         }
 
-        // 以前の選択値があれば復元、なければ最初のインストール済みツールを選択
-        if (prevValue && selector.querySelector(`option[value="${prevValue}"]`)) {
-            selector.value = prevValue;
+        // sessionStorage → 直前の選択値の順で復元
+        const savedTool = (() => { try { return sessionStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
+        const restoreValue = savedTool || prevValue;
+        if (restoreValue && selector.querySelector(`option[value="${restoreValue}"]:not([disabled])`)) {
+            selector.value = restoreValue;
         }
 
         updateCliStatusDisplay(tools[selector.value]);
@@ -526,7 +578,7 @@
     }
 
     // 添加消息
-    function addMessage(content, type) {
+    function addMessage(content, type, skipSave) {
         const container = document.getElementById('ai-messages-container');
         const messageEl = document.createElement('div');
         messageEl.className = `ai-message ${type}`;
@@ -546,9 +598,71 @@
 
         container.appendChild(messageEl);
 
+        if (!skipSave) {
+            chatHistory.push({ content, type });
+            saveHistory();
+            saveMessageToServer(content, type);
+        }
+
         if (autoScroll) {
             scrollToBottom();
         }
+    }
+
+    function saveHistory() {
+        try {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+        } catch (e) {}
+    }
+
+    // sessionStorage から即時復元（ページ遷移後のちらつき防止）
+    function restoreFromStorage() {
+        try {
+            const saved = sessionStorage.getItem(STORAGE_KEY);
+            if (!saved) return false;
+            const history = JSON.parse(saved);
+            if (!Array.isArray(history) || history.length === 0) return false;
+            chatHistory = history;
+            const container = document.getElementById('ai-messages-container');
+            container.innerHTML = '';
+            history.forEach(function(msg) {
+                addMessage(msg.content, msg.type, true);
+            });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // サーバーから履歴を取得して復元（ブラウザ再起動・別タブ対応）
+    async function restoreFromServer() {
+        try {
+            const resp = await fetch(`${CONFIG.apiBaseUrl}/history?limit=50`);
+            if (!resp.ok) return;
+            const messages = await resp.json();
+            if (!Array.isArray(messages) || messages.length === 0) return;
+            // サーバーデータでローカルキャッシュを上書き
+            chatHistory = messages.map(function(m) {
+                return { content: m.content, type: m.type };
+            });
+            const container = document.getElementById('ai-messages-container');
+            container.innerHTML = '';
+            chatHistory.forEach(function(msg) {
+                addMessage(msg.content, msg.type, true);
+            });
+            saveHistory();
+        } catch (e) {
+            // サーバー取得失敗時は sessionStorage のまま
+        }
+    }
+
+    // サーバーにメッセージを非同期保存（fire-and-forget）
+    function saveMessageToServer(content, type) {
+        fetch(`${CONFIG.apiBaseUrl}/history`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content, type })
+        }).catch(function() {});
     }
 
     // marked.js は _Layout.cshtml で静的に読み込み済み（タイミング問題を回避）
@@ -670,6 +784,8 @@
         panel.classList.add('open');
         trigger.classList.add('hidden');
         isPanelOpen = true;
+        // キーボードが既に出ている場合に備えてサイズ調整
+        if (window.visualViewport) adjustPanelForKeyboard();
     }
 
     function closePanel() {
@@ -679,6 +795,7 @@
         panel.classList.remove('open');
         trigger.classList.remove('hidden');
         isPanelOpen = false;
+        resetPanelSize();
     }
     
     function minimizePanel() {
@@ -687,6 +804,9 @@
     
     // 清除消息
     function clearMessages() {
+        chatHistory = [];
+        try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        fetch(`${CONFIG.apiBaseUrl}/history`, { method: 'DELETE' }).catch(function() {});
         const container = document.getElementById('ai-messages-container');
         container.innerHTML = `
             <div class="ai-message assistant">
