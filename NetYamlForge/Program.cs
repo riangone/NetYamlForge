@@ -183,6 +183,7 @@ builder.Services.AddNetYamlForge();
 // ===== AI Assistant Services =====
 builder.Services.Configure<CliConfig>(builder.Configuration.GetSection(CliConfig.SectionName));
 builder.Services.AddSingleton<ProcessExecutor>();
+builder.Services.AddSingleton<SkillLoader>();
 builder.Services.AddSingleton<CLIServiceFactory>();
 builder.Services.AddSingleton<ProgressTracker>();
 builder.Services.AddSingleton<TaskQueueService>();

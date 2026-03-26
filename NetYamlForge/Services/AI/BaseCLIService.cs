@@ -17,15 +17,18 @@ public abstract class BaseCLIService : ICLIService
     protected readonly CliConfig Config;
     protected readonly ILogger Logger;
     protected readonly string _toolName;
+    protected readonly SkillLoader SkillLoader;
 
     protected BaseCLIService(
         ProcessExecutor executor,
         IOptions<CliConfig> config,
+        SkillLoader skillLoader,
         ILogger logger,
         string toolName)
     {
         Executor = executor;
         Config = config.Value;
+        SkillLoader = skillLoader;
         Logger = logger;
         _toolName = toolName;
     }

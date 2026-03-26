@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using TaskStatus = NetYamlForge.Models.AI.TaskStatus;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
@@ -20,22 +19,22 @@ public class AIController : ControllerBase
     private readonly ProgressTracker _tracker;
     private readonly TaskQueueService _taskQueue;
     private readonly ChatHistoryService _chatHistory;
+    private readonly SkillLoader _skillLoader;
     private readonly ILogger<AIController> _logger;
-    private readonly CliConfig _cliConfig;
 
     public AIController(
         CLIServiceFactory cliFactory,
         ProgressTracker tracker,
         TaskQueueService taskQueue,
         ChatHistoryService chatHistory,
-        IOptions<CliConfig> cliConfig,
+        SkillLoader skillLoader,
         ILogger<AIController> logger)
     {
         _cliFactory = cliFactory;
         _tracker = tracker;
         _taskQueue = taskQueue;
         _chatHistory = chatHistory;
-        _cliConfig = cliConfig.Value;
+        _skillLoader = skillLoader;
         _logger = logger;
     }
     
@@ -263,7 +262,7 @@ public class AIController : ControllerBase
     [HttpGet("skills")]
     public ActionResult GetSkills()
     {
-        return Ok(_cliConfig.Skills);
+        return Ok(_skillLoader.GetSkills());
     }
 
     /// <summary>

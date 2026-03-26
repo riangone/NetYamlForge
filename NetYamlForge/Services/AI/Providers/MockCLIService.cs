@@ -13,8 +13,9 @@ public class MockCLIService : BaseCLIService
     public MockCLIService(
         ProcessExecutor executor,
         IOptions<CliConfig> config,
+        SkillLoader skillLoader,
         ILogger<MockCLIService> logger)
-        : base(executor, config, logger, "mock")
+        : base(executor, config, skillLoader, logger, "mock")
     {
     }
     

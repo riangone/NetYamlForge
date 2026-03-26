@@ -11,8 +11,9 @@ public class ClaudeCLIService : BaseCLIService
     public ClaudeCLIService(
         ProcessExecutor executor,
         IOptions<CliConfig> config,
+        SkillLoader skillLoader,
         ILogger<ClaudeCLIService> logger)
-        : base(executor, config, logger, "claude")
+        : base(executor, config, skillLoader, logger, "claude")
     {
     }
 
@@ -101,10 +102,11 @@ public class ClaudeCLIService : BaseCLIService
         }
 
         // フレームワーク固有のシステムプロンプトを追加（既存のシステムプロンプトに追記）
-        if (!string.IsNullOrEmpty(Config.SystemPrompt))
+        var systemPrompt = SkillLoader.GetSystemPrompt();
+        if (!string.IsNullOrEmpty(systemPrompt))
         {
             args.Add("--append-system-prompt");
-            args.Add($"\"{EscapeArgument(Config.SystemPrompt)}\"");
+            args.Add($"\"{EscapeArgument(systemPrompt)}\"");
         }
 
         // 会话恢复

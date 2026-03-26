@@ -11,8 +11,9 @@ public class QwenCodeCLIService : BaseCLIService
     public QwenCodeCLIService(
         ProcessExecutor executor,
         IOptions<CliConfig> config,
+        SkillLoader skillLoader,
         ILogger<QwenCodeCLIService> logger)
-        : base(executor, config, logger, "qwen")
+        : base(executor, config, skillLoader, logger, "qwen")
     {
     }
 
@@ -102,10 +103,11 @@ public class QwenCodeCLIService : BaseCLIService
         }
 
         // フレームワーク固有のシステムプロンプトを追加
-        if (!string.IsNullOrEmpty(Config.SystemPrompt))
+        var systemPrompt = SkillLoader.GetSystemPrompt();
+        if (!string.IsNullOrEmpty(systemPrompt))
         {
             args.Add("--system-prompt");
-            args.Add($"\"{EscapeArgument(Config.SystemPrompt)}\"");
+            args.Add($"\"{EscapeArgument(systemPrompt)}\"");
         }
 
         // セッション再開
