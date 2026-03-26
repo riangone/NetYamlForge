@@ -38,13 +38,43 @@ public class ProjectSpecificInitializer
         }
 
         // attendance-ops: 承認カラム追加
-        if (!string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
         {
+            await EnsureColumnAsync(conn as SqliteConnection, "LeaveRequest", "ApprovedAt", "TEXT", logger);
+            await EnsureColumnAsync(conn as SqliteConnection, "OvertimeRequest", "ApprovedAt", "TEXT", logger);
             return;
         }
 
-        await EnsureColumnAsync(conn as SqliteConnection, "LeaveRequest", "ApprovedAt", "TEXT", logger);
-        await EnsureColumnAsync(conn as SqliteConnection, "OvertimeRequest", "ApprovedAt", "TEXT", logger);
+        // 汎用フォールバック: database/init_seed.sql が存在すれば実行
+        await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
+    }
+
+    /// <summary>
+    /// database/init_seed.sql が存在する場合、冪等な SQL として実行します。
+    /// SQL 内は CREATE TABLE IF NOT EXISTS / INSERT OR IGNORE で記述することで
+    /// 複数回起動しても安全に実行できます。
+    /// </summary>
+    private static async Task RunInitSeedSqlIfExistsAsync(
+        SqliteConnection? conn,
+        string projectName,
+        ILogger logger)
+    {
+        if (conn == null) return;
+
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "projects", projectName, "database", "init_seed.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, "database", "init_seed.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName, "database", "init_seed.sql"),
+        };
+
+        var initSqlPath = candidates.FirstOrDefault(File.Exists);
+        if (initSqlPath == null) return;
+
+        logger.LogInformation("プロジェクト '{Name}' の init_seed.sql を実行します: {Path}", projectName, initSqlPath);
+        var sql = await File.ReadAllTextAsync(initSqlPath);
+        await conn.ExecuteAsync(sql);
+        logger.LogInformation("プロジェクト '{Name}' の init_seed.sql が完了しました。", projectName);
     }
 
     /// <summary>
