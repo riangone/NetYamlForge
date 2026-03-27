@@ -21,8 +21,7 @@ logs/
 *.nupkg
 packages/
 
-# Runtime data
-*.db
+# Runtime data (SQLite WAL files still ignored)
 *.db-shm
 *.db-wal
 
