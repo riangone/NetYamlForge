@@ -26,50 +26,36 @@ stats:
     icon: ✅
     color: badge-success
 
+  - label: 期限間近（3日以内）
+    entity: task
+    aggregate: count
+    filter: "Status != 'completed' AND date(DueDate) <= date('now', '+3 days') AND date(DueDate) >= date('now')"
+    icon: ⚠️
+    color: badge-danger
+
 charts:
-  - id: status_distribution
-    title: ステータス別タスク数
+  - title: ステータス別タスク数
     type: bar
-    source: "SELECT
-      CASE Status
-        WHEN 'not_started' THEN '未着手'
-        WHEN 'in_progress' THEN '進行中'
-        WHEN 'completed'   THEN '完了'
-        WHEN 'on_hold'     THEN '保留'
-        ELSE Status
-      END AS Status,
-      COUNT(*) AS Count
-      FROM Task
-      GROUP BY Status
-      ORDER BY Count DESC"
-    xAxis: Status
-    yAxis: Count
+    entity: task
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
 
-  - id: priority_distribution
-    title: 優先度別タスク数
-    type: bar
-    source: "SELECT
-      CASE Priority
-        WHEN 'high'   THEN '高'
-        WHEN 'medium' THEN '中'
-        WHEN 'low'    THEN '低'
-        ELSE Priority
-      END AS Priority,
-      COUNT(*) AS Count
-      FROM Task
-      GROUP BY Priority
-      ORDER BY CASE Priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END"
-    xAxis: Priority
-    yAxis: Count
+  - title: 優先度別タスク数
+    type: doughnut
+    entity: task
+    valueAggregate: count
+    groupExpression: Priority
+    orderBy: value
+    orderDir: desc
 
-  - id: assignee_task_count
-    title: 担当者別タスク数
+  - title: 担当者別タスク数（未完了）
     type: bar
-    source: "SELECT AssignedTo, COUNT(*) AS Count
-      FROM Task
-      WHERE Status != 'completed'
-      GROUP BY AssignedTo
-      ORDER BY Count DESC
-      LIMIT 10"
-    xAxis: AssignedTo
-    yAxis: Count
+    entity: task
+    valueAggregate: count
+    groupExpression: AssignedTo
+    filter: "Status != 'completed'"
+    orderBy: value
+    orderDir: desc
+    limit: 10

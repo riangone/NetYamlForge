@@ -10,7 +10,7 @@ features:
   multiLanguage: true
   userAuthentication: true
   dashboard: true
-  pages: false
+  pages: true
 
 layout:
   dashboardTheme: workspace
@@ -20,6 +20,7 @@ layout:
     showDashboard: true
     entities:
       - task
+      - comment
     items:
       - label: ホーム
         url: /task-management
@@ -29,11 +30,11 @@ layout:
         action: Index
         icon: 📊
       - label: タスク一覧
-        controller: DynamicEntity
-        action: List
-        params:
-          entity: task
+        url: /task-management/DynamicEntity/List?entity=task
         icon: 📋
+      - label: コメント一覧
+        url: /task-management/DynamicEntity/List?entity=comment
+        icon: 💬
 
 home_page:
   icon: "📋"

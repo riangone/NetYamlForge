@@ -37,6 +37,14 @@ public class ProjectSpecificInitializer
             return;
         }
 
+        // task-management: CreatedBy 列追加 & TaskComment テーブル作成
+        if (string.Equals(projectName, "task-management", StringComparison.OrdinalIgnoreCase))
+        {
+            await EnsureColumnAsync(conn as SqliteConnection, "Task", "CreatedBy", "TEXT", logger);
+            await EnsureTaskCommentTableAsync(conn as SqliteConnection, logger);
+            return;
+        }
+
         // attendance-ops: 承認カラム追加
         if (string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
         {
@@ -105,6 +113,36 @@ public class ProjectSpecificInitializer
         {
             logger.LogInformation("プロジェクト '{Name}' の DB 初期化が完了しました。", projectName);
         }
+    }
+
+    /// <summary>
+    /// task-management の TaskComment テーブルを作成します（存在しない場合のみ）。
+    /// </summary>
+    private static async Task EnsureTaskCommentTableAsync(SqliteConnection? conn, ILogger logger)
+    {
+        if (conn == null) return;
+
+        var tables = await conn.QueryAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='TaskComment'");
+        if (tables.Any())
+        {
+            logger.LogDebug("TaskComment テーブルは既に存在します。スキップします。");
+            return;
+        }
+
+        // DCS001 抑制理由：ハードコードされたスキーマ定義のため安全
+#pragma warning disable DCS001
+        await conn.ExecuteAsync(@"
+CREATE TABLE ""TaskComment"" (
+    ""Id""          INTEGER PRIMARY KEY AUTOINCREMENT,
+    ""TaskId""      INTEGER NOT NULL,
+    ""CommentText"" TEXT    NOT NULL,
+    ""PostedBy""    TEXT    NOT NULL DEFAULT 'unknown',
+    ""PostedAt""    TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (""TaskId"") REFERENCES ""Task""(""Id"")
+)");
+#pragma warning restore DCS001
+        logger.LogInformation("TaskComment テーブルを作成しました。");
     }
 
     /// <summary>

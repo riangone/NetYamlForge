@@ -5,6 +5,7 @@ navigation:
   showDashboard: true
   entities:
     - task
+    - comment
   items:
     - label: ホーム
       url: /task-management
@@ -14,11 +15,11 @@ navigation:
       action: Index
       icon: 📊
     - label: タスク一覧
-      controller: DynamicEntity
-      action: List
-      params:
-        entity: task
+      url: /task-management/DynamicEntity/List?entity=task
       icon: 📋
+    - label: コメント一覧
+      url: /task-management/DynamicEntity/List?entity=comment
+      icon: 💬
 
 footer:
   text: "タスク管理システム — powered by NetYamlForge"

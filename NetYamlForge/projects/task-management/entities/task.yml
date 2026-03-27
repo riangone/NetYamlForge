@@ -31,6 +31,10 @@ entities:
           - high
           - medium
           - low
+        optionLabels:
+          high: "🔴 高"
+          medium: "🟡 中"
+          low: "🟢 低"
       Status:
         type: string
         label: ステータス
@@ -40,10 +44,19 @@ entities:
           - in_progress
           - completed
           - on_hold
+        optionLabels:
+          not_started: "📋 未着手"
+          in_progress: "🔄 進行中"
+          completed: "✅ 完了"
+          on_hold: "⏸ 保留"
       Notes:
         type: textarea
         label: 備考
         editable: true
+      CreatedBy:
+        type: string
+        label: 登録者
+        editable: false
 
     columns:
       Id:
@@ -81,6 +94,10 @@ entities:
         label: 備考
         searchable: true
         sortable: false
+      CreatedBy:
+        type: string
+        label: 登録者
+        sortable: false
       CreatedAt:
         type: datetime
         label: 登録日時
@@ -92,10 +109,12 @@ entities:
 
     hooks:
       beforeCreate:
-        - set_created_at
+        - now:CreatedAt
+        - validate_due_date
+        - current_user:CreatedBy
       beforeUpdate:
-        - set_updated_at
-        - set_completed_at
+        - now:UpdatedAt
+        - validate_due_date
       afterCreate:
         - audit_log
       afterUpdate:
@@ -116,6 +135,7 @@ entities:
           - Priority
           - Status
           - Notes
+          - CreatedBy
       filters:
         columns: 4
         order:
@@ -176,3 +196,10 @@ entities:
           - Priority
           - Status
           - Notes
+
+    links:
+      comments:
+        label: コメント
+        targetEntity: comment
+        filter:
+          TaskId: Id

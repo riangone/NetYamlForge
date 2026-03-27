@@ -1,0 +1,109 @@
+imports: []
+entities:
+  comment:
+    table: TaskComment
+    key: Id
+    displayName: コメント
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: Task
+        alias: t
+        on: TaskComment.TaskId = t.Id
+
+    forms:
+      TaskId:
+        type: int
+        required: true
+        label: タスクID
+        editable: true
+        foreignKey:
+          entity: task
+          displayColumn: Title
+          picker: false
+          multiPicker: false
+      CommentText:
+        type: textarea
+        required: true
+        label: コメント本文
+        editable: true
+      PostedBy:
+        type: string
+        label: 投稿者
+        editable: false
+      PostedAt:
+        type: datetime
+        label: 投稿日時
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      TaskId:
+        type: int
+        required: true
+        label: タスクID
+        hidden: true
+      TaskTitle:
+        type: string
+        label: タスク名
+        expression: t.Title
+        searchable: true
+        sortable: true
+      CommentText:
+        type: string
+        required: true
+        label: コメント本文
+        searchable: true
+        sortable: false
+      PostedBy:
+        type: string
+        label: 投稿者
+        searchable: true
+        sortable: true
+      PostedAt:
+        type: datetime
+        label: 投稿日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - current_user:PostedBy
+      afterCreate:
+        - audit_log
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - TaskId
+          - CommentText
+          - PostedBy
+          - PostedAt
+      filters:
+        columns: 3
+        order:
+          - TaskId
+          - PostedBy
+
+    filters:
+      PostedBy:
+        type: like
+        label: 投稿者
+      TaskId:
+        type: dropdown
+        label: タスクID
+        expression: TaskComment.TaskId
+        foreignKey:
+          entity: task
+          displayColumn: Title
