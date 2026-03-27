@@ -1,0 +1,178 @@
+imports: []
+entities:
+  task:
+    table: Task
+    key: Id
+    displayName: タスク
+    softDelete: false
+    isPublic: false
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: タスク名
+        editable: true
+      AssignedTo:
+        type: string
+        required: true
+        label: 担当者
+        editable: true
+      DueDate:
+        type: date
+        required: true
+        label: 期限日
+        editable: true
+      Priority:
+        type: string
+        label: 優先度
+        editable: true
+        options:
+          - high
+          - medium
+          - low
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options:
+          - not_started
+          - in_progress
+          - completed
+          - on_hold
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        required: true
+        label: タスク名
+        searchable: true
+        sortable: true
+      AssignedTo:
+        type: string
+        required: true
+        label: 担当者
+        searchable: true
+        sortable: true
+      DueDate:
+        type: date
+        required: true
+        label: 期限日
+        sortable: true
+      Priority:
+        type: string
+        label: 優先度
+        sortable: true
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      Notes:
+        type: string
+        label: 備考
+        searchable: true
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: 登録日時
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - set_created_at
+      beforeUpdate:
+        - set_updated_at
+        - set_completed_at
+      afterCreate:
+        - audit_log
+      afterUpdate:
+        - audit_log
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - AssignedTo
+          - DueDate
+          - Priority
+          - Status
+          - Notes
+      filters:
+        columns: 4
+        order:
+          - Status
+          - Priority
+          - AssignedTo
+          - DueDate
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          not_started: "📋 未着手"
+          in_progress: "🔄 進行中"
+          completed: "✅ 完了"
+          on_hold: "⏸ 保留"
+      Priority:
+        type: dropdown
+        label: 優先度
+        options:
+          - high
+          - medium
+          - low
+      AssignedTo:
+        type: like
+        label: 担当者
+      DueDate:
+        type: date-range
+        label: 期限日
+        expression: Task.DueDate
+
+    actions:
+      mark_completed:
+        label: "完了にする"
+        scope: row
+        confirm: "このタスクを完了にしますか？"
+        handler: mark_done
+      reopen:
+        label: "再オープン"
+        scope: row
+        handler: reopen_task
+        inputs:
+          - name: Reason
+            type: string
+            label: 再オープン理由
+            required: true
+
+    exports:
+      filtered_csv:
+        label: "フィルタ結果 CSV"
+        format: csv
+        filename: "tasks_{date:yyyyMMdd}.csv"
+        columns:
+          - Title
+          - AssignedTo
+          - DueDate
+          - Priority
+          - Status
+          - Notes

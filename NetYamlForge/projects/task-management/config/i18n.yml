@@ -1,0 +1,65 @@
+# i18n translation file for project: task-management
+# Keys are referenced by labelKey / titleKey / descriptionKey in YAML definitions.
+# Supported locales: en-US, zh-CN, ja-JP, ko-KR
+# Add keys here as you add labelKey references to entities/, pages/, dashboard.yml, etc.
+translations:
+  nav.home:
+    en-US: Home
+    zh-CN: 首页
+    ja-JP: ホーム
+    ko-KR: 홈
+  nav.dashboard:
+    en-US: Dashboard
+    zh-CN: 仪表盘
+    ja-JP: ダッシュボード
+    ko-KR: 대시보드
+  nav.schema:
+    en-US: Schema
+    zh-CN: 数据模型
+    ja-JP: スキーマ
+    ko-KR: 스키마
+  common.search:
+    en-US: Search
+    zh-CN: 搜索
+    ja-JP: 検索
+    ko-KR: 검색
+  common.reset:
+    en-US: Reset
+    zh-CN: 重置
+    ja-JP: リセット
+    ko-KR: 초기화
+  common.save:
+    en-US: Save
+    zh-CN: 保存
+    ja-JP: 保存
+    ko-KR: 저장
+  common.delete:
+    en-US: Delete
+    zh-CN: 删除
+    ja-JP: 削除
+    ko-KR: 삭제
+  common.cancel:
+    en-US: Cancel
+    zh-CN: 取消
+    ja-JP: キャンセル
+    ko-KR: 취소
+  common.edit:
+    en-US: Edit
+    zh-CN: 编辑
+    ja-JP: 編集
+    ko-KR: 편집
+  common.create:
+    en-US: Create
+    zh-CN: 新建
+    ja-JP: 作成
+    ko-KR: 만들기
+  common.total:
+    en-US: Total
+    zh-CN: 合计
+    ja-JP: 合計
+    ko-KR: 합계
+  common.loading:
+    en-US: Loading...
+    zh-CN: 加载中...
+    ja-JP: 読み込み中...
+    ko-KR: 로딩 중...

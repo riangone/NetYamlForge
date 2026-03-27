@@ -1,0 +1,75 @@
+stats:
+  - label: 全タスク数
+    entity: task
+    aggregate: count
+    icon: 📋
+    color: badge-info
+
+  - label: 進行中
+    entity: task
+    aggregate: count
+    filter: "Status = 'in_progress'"
+    icon: 🔄
+    color: badge-primary
+
+  - label: 未着手
+    entity: task
+    aggregate: count
+    filter: "Status = 'not_started'"
+    icon: 📂
+    color: badge-warning
+
+  - label: 完了
+    entity: task
+    aggregate: count
+    filter: "Status = 'completed'"
+    icon: ✅
+    color: badge-success
+
+charts:
+  - id: status_distribution
+    title: ステータス別タスク数
+    type: bar
+    source: "SELECT
+      CASE Status
+        WHEN 'not_started' THEN '未着手'
+        WHEN 'in_progress' THEN '進行中'
+        WHEN 'completed'   THEN '完了'
+        WHEN 'on_hold'     THEN '保留'
+        ELSE Status
+      END AS Status,
+      COUNT(*) AS Count
+      FROM Task
+      GROUP BY Status
+      ORDER BY Count DESC"
+    xAxis: Status
+    yAxis: Count
+
+  - id: priority_distribution
+    title: 優先度別タスク数
+    type: bar
+    source: "SELECT
+      CASE Priority
+        WHEN 'high'   THEN '高'
+        WHEN 'medium' THEN '中'
+        WHEN 'low'    THEN '低'
+        ELSE Priority
+      END AS Priority,
+      COUNT(*) AS Count
+      FROM Task
+      GROUP BY Priority
+      ORDER BY CASE Priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END"
+    xAxis: Priority
+    yAxis: Count
+
+  - id: assignee_task_count
+    title: 担当者別タスク数
+    type: bar
+    source: "SELECT AssignedTo, COUNT(*) AS Count
+      FROM Task
+      WHERE Status != 'completed'
+      GROUP BY AssignedTo
+      ORDER BY Count DESC
+      LIMIT 10"
+    xAxis: AssignedTo
+    yAxis: Count

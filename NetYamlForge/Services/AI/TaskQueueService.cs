@@ -17,13 +17,15 @@ public class TaskQueueService
     private readonly CliConfig _config;
     private readonly ILogger<TaskQueueService> _logger;
     private readonly IServiceProvider _serviceProvider;
+    private readonly ChatHistoryService _chatHistory;
 
     public TaskQueueService(
         ProgressTracker tracker,
         CLIServiceFactory factory,
         IOptions<CliConfig> config,
         ILogger<TaskQueueService> logger,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        ChatHistoryService chatHistory)
     {
         _queue = Channel.CreateUnbounded<AITask>();
         _tracker = tracker;
@@ -31,6 +33,7 @@ public class TaskQueueService
         _config = config.Value;
         _logger = logger;
         _serviceProvider = serviceProvider;
+        _chatHistory = chatHistory;
     }
 
     public async Task EnqueueAsync(AITask task, CancellationToken ct = default)
@@ -75,6 +78,20 @@ public class TaskQueueService
     {
         _logger.LogInformation("Processing task {TaskId} with CLI {CliTool}", task.Id, task.CliTool);
 
+        var startedAt = DateTime.UtcNow;
+
+        // コマンド実行ログを開始記録
+        try
+        {
+            await _chatHistory.CreateCommandLogAsync(
+                task.UserId, task.Id, task.CliTool, task.Message,
+                task.Project, task.SessionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to create command log for task {TaskId}", task.Id);
+        }
+
         CancellationTokenSource? timeoutCts = null;
         try
         {
@@ -94,6 +111,7 @@ public class TaskQueueService
                     if (update.Status == TaskStatus.Completed)
                     {
                         _tracker.Complete(task.Id, update.Message);
+                        await SaveCommandLogResultAsync(task.Id, "Completed", update.Message, null, startedAt);
                         return;
                     }
                 }
@@ -129,33 +147,63 @@ public class TaskQueueService
                     {
                         // Qwen Code 等では result フィールドが "Task completed" などのステータス文字列になる場合がある。
                         // assistant メッセージから蓄積した lastMessage を優先し、なければ result フィールドを使用する。
-                        _tracker.Complete(task.Id, lastMessage ?? update.Message ?? "Task completed");
+                        var finalResult = lastMessage ?? update.Message ?? "Task completed";
+                        _tracker.Complete(task.Id, finalResult);
+                        await SaveCommandLogResultAsync(task.Id, "Completed", finalResult, null, startedAt);
                         return;
                     }
                     else if (update.Status == TaskStatus.Failed)
                     {
-                        _tracker.Fail(task.Id, update.Message ?? "Unknown error");
+                        var errMsg = update.Message ?? "Unknown error";
+                        _tracker.Fail(task.Id, errMsg);
+                        await SaveCommandLogResultAsync(task.Id, "Failed", null, errMsg, startedAt);
                         return;
                     }
                 }
 
                 // 如果流式完成但没有明确状态，使用最后的消息
-                _tracker.Complete(task.Id, lastMessage ?? "Task completed");
+                var completedResult = lastMessage ?? "Task completed";
+                _tracker.Complete(task.Id, completedResult);
+                await SaveCommandLogResultAsync(task.Id, "Completed", completedResult, null, startedAt);
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested || (timeoutCts?.IsCancellationRequested ?? false))
         {
             _tracker.Cancel(task.Id);
+            await SaveCommandLogResultAsync(task.Id, "Cancelled", null, "Cancelled", startedAt);
             throw;
         }
         catch (Exception ex)
         {
             _tracker.Fail(task.Id, ex.Message);
+            await SaveCommandLogResultAsync(task.Id, "Failed", null, ex.Message, startedAt);
             throw;
         }
         finally
         {
             timeoutCts?.Dispose();
+        }
+    }
+
+    private async Task SaveCommandLogResultAsync(
+        string taskId, string status, string? result, string? error, DateTime startedAt)
+    {
+        try
+        {
+            var durationMs = (long)(DateTime.UtcNow - startedAt).TotalMilliseconds;
+            await _chatHistory.UpdateCommandLogAsync(taskId, status, result, error, durationMs);
+
+            // 完了した場合はチャット履歴にも AI レスポンスを保存
+            if (status == "Completed" && !string.IsNullOrWhiteSpace(result))
+            {
+                var t = _tracker.GetTask(taskId);
+                if (t != null)
+                    await _chatHistory.SaveMessageAsync(t.UserId, result, "assistant");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to save command log result for task {TaskId}", taskId);
         }
     }
     

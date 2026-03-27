@@ -70,11 +70,16 @@ public class AIController : ControllerBase
                 return BadRequest(new { error = $"CLI tool '{request.CliTool}' is not authenticated. Please run '{request.CliTool} login' first." });
             }
 
+            var userId = GetCurrentUserId();
+
+            // ユーザーのメッセージをチャット履歴に保存
+            await _chatHistory.SaveMessageAsync(userId, request.Message, "user");
+
             // 创建任务
             var task = new AITask
             {
                 Id = $"task_{Guid.NewGuid():N}",
-                UserId = GetCurrentUserId(),
+                UserId = userId,
                 CliTool = request.CliTool,
                 Message = request.Message,
                 Project = request.Project,
@@ -287,6 +292,17 @@ public class AIController : ControllerBase
         var userId = GetCurrentUserId();
         var messages = await _chatHistory.GetHistoryAsync(userId, limit);
         return Ok(messages);
+    }
+
+    /// <summary>
+    /// コマンド実行ログ一覧を取得します
+    /// </summary>
+    [HttpGet("command-logs")]
+    public async Task<ActionResult> GetCommandLogs([FromQuery] int limit = 50)
+    {
+        var userId = GetCurrentUserId();
+        var logs = await _chatHistory.GetCommandLogsAsync(userId, limit);
+        return Ok(logs);
     }
 
     /// <summary>

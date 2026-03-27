@@ -1,7 +1,3 @@
-@* ファイル概要: 全画面共通レイアウト（ヘッダー・サイドメニュー・共通スクリプト）です。
-   このビューは画面表示と操作導線を担当します。
-   データバインディング名や hx-* 属性を変更する場合は、コントローラ側との整合を必ず確認してください。 *@
-
 @using NetYamlForge.Localization
 @using NetYamlForge.Models
 @using Microsoft.Extensions.Localization
@@ -13,16 +9,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - NetYamlForge</title>
-    <script type="importmap"></script>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")タスク管理システム</title>
     <link href="/lib/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
     <script src="/lib/tailwindcss/browser.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/ai-assistant.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
 @functions {
     private sealed class NavSection
     {
@@ -31,40 +24,32 @@
         public NavSection(string? title) => Title = title;
     }
 }
-
-@{
-    var showSidebar = User.Identity?.IsAuthenticated ?? false;
-    var isAdminUser = User?.IsInRole("Admin") ?? false;
-        
-        // プロジェクト固有のレイアウト設定
+<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
+    @{
+        var showSidebar = User.Identity?.IsAuthenticated ?? false;
+        var isAdminUser = User?.IsInRole("Admin") ?? false;
         var projectLayout = ProjectScope?.Current?.Layout;
         var navConfig = projectLayout?.Navigation;
         var headerConfig = projectLayout?.Header;
-        
-        // エンティティ定義の取得（プロジェクト固有のフィルター適用）
+        var footerConfig = projectLayout?.Footer;
         var allEntities = EntityMetadataProvider.GetAll()
             .Where(pair => isAdminUser || pair.Value.IsPublic)
             .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
             .ToList();
-        
-        // ナビゲーション設定がある場合はフィルタリング
         var entityDefinitions = navConfig != null && navConfig.Entities.Count > 0
             ? allEntities.Where(pair => navConfig.Entities.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))
                 .OrderBy(pair => navConfig.Entities.IndexOf(pair.Key))
                 .ToList()
             : allEntities;
-        
-        // プロジェクト名を取得（{project} ルートパラメータから）
-        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "";
-        
-        // ヘッダータイトル（プロジェクト固有の設定を使用）
-        var headerTitle = headerConfig?.Title ?? "NetYamlForge";
+        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "task-management";
+        var headerTitle = headerConfig?.Title ?? "タスク管理システム";
     }
     <div class="drawer">
         <input id="app-sidebar" type="checkbox" class="drawer-toggle" />
 
         <div class="drawer-content flex flex-col min-h-screen">
-            <header class="navbar bg-base-100 border-b border-base-300 px-3 lg:px-6">
+            <!-- ===== Navbar ===== -->
+            <header class="navbar bg-base-100 border-b border-base-300 px-3 lg:px-6 sticky top-0 z-30">
                 @if (showSidebar)
                 {
                     <div class="flex-none">
@@ -75,14 +60,12 @@
                         </label>
                     </div>
                 }
-
                 <div class="flex-1">
-                    <a class="btn btn-ghost text-xl"
+                    <a class="btn btn-ghost text-xl font-bold tracking-tight"
                        asp-controller="Home"
                        asp-action="Project"
                        asp-route-project="@currentProject">@headerTitle</a>
                 </div>
-
                 <div class="flex-none gap-2">
                     <div class="dropdown dropdown-end">
                         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
@@ -129,47 +112,57 @@
                                     </form>
                                 </div>
                             </li>
-
                             @if (User.Identity?.IsAuthenticated ?? false)
                             {
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <li><a asp-controller="Users"
-                                           asp-action="Index"
-                                           asp-route-project="@currentProject">@L["Users"]</a></li>
-                                    <li>
-                                        <button type="button"
-                                                class="text-left w-full text-error font-semibold"
-                                                onclick="document.getElementById('restart-confirm-modal').showModal()">
-                                            ⟳ システム再起動
-                                        </button>
-                                    </li>
+                                    <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
                                 }
                                 <li>
-                                    <form asp-controller="Account"
-                                          asp-action="Logout"
-                                          asp-route-project="@currentProject"
-                                          method="post">
+                                    <form asp-controller="Account" asp-action="Logout" asp-route-project="@currentProject" method="post">
                                         <button type="submit" class="text-left w-full">@L["Logout"]</button>
                                     </form>
                                 </li>
                             }
                             else
                             {
-                                <li><a asp-controller="Account"
-                                       asp-action="Login"
-                                       asp-route-project="@currentProject">@L["Login"]</a></li>
+                                <li><a asp-controller="Account" asp-action="Login" asp-route-project="@currentProject">@L["Login"]</a></li>
                             }
                         </ul>
                     </div>
                 </div>
             </header>
 
+            <!-- ===== Breadcrumbs ===== -->
+            @if (ViewData["Breadcrumbs"] is IEnumerable<(string Label, string? Url)> crumbs)
+            {
+                <div class="px-4 py-2 bg-base-100 border-b border-base-200">
+                    <div class="breadcrumbs text-sm max-w-screen-xl mx-auto">
+                        <ul>
+                            <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">タスク管理システム</a></li>
+                            @foreach (var (label, url) in crumbs)
+                            {
+                                if (url != null)
+                                {
+                                    <li><a href="@url">@label</a></li>
+                                }
+                                else
+                                {
+                                    <li>@label</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <!-- ===== Main content ===== -->
             <main class="p-4 lg:p-6">
                 @RenderBody()
             </main>
         </div>
 
+        <!-- ===== Left Sidebar ===== -->
         @if (showSidebar)
         {
             <div class="drawer-side z-40">
@@ -178,7 +171,7 @@
                     <div class="p-4 border-b border-base-300 flex items-center justify-between">
                         <div>
                             <div class="text-sm opacity-70">Navigation</div>
-                            <div class="font-semibold">@(string.IsNullOrEmpty(currentProject) ? "Definitions" : currentProject)</div>
+                            <div class="font-semibold">タスク管理システム</div>
                         </div>
                         <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -186,46 +179,40 @@
                             </svg>
                         </label>
                     </div>
-
                     <ul class="menu p-3 gap-1 w-full">
                         @{
-                        var isDashboard = string.Equals(
-                            Context.Request.RouteValues["controller"]?.ToString(),
-                            "Dashboard",
-                            StringComparison.OrdinalIgnoreCase);
-                            
-                            // ダッシュボードリンクの表示制御
-                        var showDashboard = navConfig?.ShowDashboard ?? true;
-                        var navSections = new List<NavSection>();
-                        if (navConfig?.Items != null && navConfig.Items.Count > 0)
-                        {
-                            foreach (var item in navConfig.Items)
+                            var isDashboard = string.Equals(
+                                Context.Request.RouteValues["controller"]?.ToString(),
+                                "Dashboard",
+                                StringComparison.OrdinalIgnoreCase);
+                            var showDashboard = navConfig?.ShowDashboard ?? true;
+                            var navSections = new List<NavSection>();
+                            if (navConfig?.Items != null && navConfig.Items.Count > 0)
                             {
-                                var showItem = !item.AdminOnly || isAdminUser;
-                                if (!showItem) continue;
-                                var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
-                                var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
-                                if (section == null)
+                                foreach (var item in navConfig.Items)
                                 {
-                                    section = new NavSection(sectionName);
-                                    navSections.Add(section);
+                                    var showItem = !item.AdminOnly || isAdminUser;
+                                    if (!showItem) continue;
+                                    var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
+                                    var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
+                                    if (section == null)
+                                    {
+                                        section = new NavSection(sectionName);
+                                        navSections.Add(section);
+                                    }
+                                    section.Items.Add(item);
                                 }
-                                section.Items.Add(item);
                             }
                         }
-                        }
-                        
                         @if (showDashboard)
                         {
                             <li>
                                 <a class="@(isDashboard ? "active" : "")"
                                    asp-controller="Dashboard"
                                    asp-action="Index"
-                                   asp-route-project="@currentProject">Dashboard</a>
+                                   asp-route-project="@currentProject">📊 Dashboard</a>
                             </li>
                         }
-                        
-                        @* カスタムナビゲーション項目 *@
                         @if (navSections.Count > 0)
                         {
                             foreach (var section in navSections)
@@ -239,9 +226,7 @@
                                     var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
                                     @if (!string.IsNullOrEmpty(item.Url))
                                     {
-                                        <li>
-                                            <a href="@item.Url">@itemLabel</a>
-                                        </li>
+                                        <li><a href="@item.Url">@itemLabel</a></li>
                                     }
                                     else if (!string.IsNullOrEmpty(item.Controller))
                                     {
@@ -254,7 +239,6 @@
                                 }
                             }
                         }
-                        
                         @if (entityDefinitions.Count > 0)
                         {
                             <li class="menu-title mt-1"><span>Entities</span></li>
@@ -273,7 +257,6 @@
                                         Context.Request.RouteValues["action"]?.ToString(),
                                         "Definition",
                                         StringComparison.OrdinalIgnoreCase);
-
                                 @if (isAdminUser)
                                 {
                                     <li>
@@ -334,17 +317,7 @@
                                     Schema
                                 </a>
                             </li>
-                            <li>
-                                <a asp-controller="DynamicEntity"
-                                   asp-action="ConfigDiagnostics"
-                                   asp-route-project="@currentProject"
-                                   class="@(string.Equals(Context.Request.RouteValues["action"]?.ToString(), "ConfigDiagnostics", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                                    Config
-                                </a>
-                            </li>
-                            <li><a asp-controller="Users"
-                                   asp-action="Index"
-                                   asp-route-project="@currentProject">@L["Users"]</a></li>
+                            <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
                         }
                     </ul>
                 </aside>
@@ -352,7 +325,7 @@
         }
     </div>
 
-    @* CRUD 確認ダイアログモーダル（全ページ共通） *@
+    <!-- ===== CRUD 確認ダイアログ ===== -->
     <dialog id="crud-confirm-modal" class="modal">
         <div class="modal-box max-w-sm">
             <h3 class="font-bold text-lg mb-4" id="crud-confirm-msg">確認</h3>
@@ -361,352 +334,172 @@
                 <button id="crud-confirm-cancel" class="btn btn-ghost btn-sm">キャンセル</button>
             </div>
         </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
-    @* システム再起動確認モーダル（管理者専用） *@
-    @if (isAdminUser)
-    {
-        <dialog id="restart-confirm-modal" class="modal">
-            <div class="modal-box max-w-sm">
-                <h3 class="font-bold text-lg mb-2 text-error">システム再起動</h3>
-                <p class="mb-4 text-sm">アプリケーションを再起動します。<br>処理中のリクエストは中断されます。続行しますか？</p>
-                <div class="flex gap-3 justify-end">
-                    <form id="restart-form"
-                          asp-controller="Admin"
-                          asp-action="Restart"
-                          asp-route-project="@currentProject"
-                          method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-error btn-sm">再起動する</button>
-                    </form>
-                    <button type="button" class="btn btn-ghost btn-sm"
-                            onclick="document.getElementById('restart-confirm-modal').close()">キャンセル</button>
-                </div>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button>close</button>
-            </form>
-        </dialog>
-    }
-
-    @* エンティティ選択ピッカーモーダル（全ページ共通） *@
+    <!-- ===== Entity Picker モーダル ===== -->
     <dialog id="entity-picker-modal" class="modal">
         <div class="modal-box max-w-3xl">
             <div class="flex items-center justify-between mb-3">
                 <h3 id="entity-picker-title" class="font-bold text-lg">Select</h3>
-                <form method="dialog">
-                    <button class="btn btn-ghost btn-sm btn-circle">✕</button>
-                </form>
+                <form method="dialog"><button class="btn btn-ghost btn-sm btn-circle">✕</button></form>
             </div>
             <div class="mb-3">
-                <input type="text" id="entity-picker-search"
-                       class="input input-bordered w-full"
-                       placeholder="Search..."
-                       oninput="entityPickerSearch(this.value)" />
+                <input type="text" id="entity-picker-search" class="input input-bordered w-full"
+                       placeholder="Search..." oninput="entityPickerSearch(this.value)" />
             </div>
             <div id="entity-picker-content" class="min-h-32"></div>
-            @if (true)
-            {
-                @* 複数選択モード時の確定ボタン（単一選択では非表示） *@
-                <div id="entity-picker-multi-footer" class="mt-3 hidden">
-                    <form method="dialog">
-                        <button class="btn btn-primary btn-sm">Done</button>
-                    </form>
-                </div>
-            }
+            <div id="entity-picker-multi-footer" class="mt-3 hidden">
+                <form method="dialog"><button class="btn btn-primary btn-sm">Done</button></form>
+            </div>
         </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
     <script src="/lib/htmx/htmx.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-        // ===== CRUD 確認ダイアログ =====
+        // CRUD確認ダイアログ
         var _confirmCallback = null;
-
-        /**
-         * DaisyUI のカスタム確認ダイアログを表示します。
-         * @@param {string} msg    確認メッセージ
-         * @@param {function} onOk OK ボタン押下時のコールバック
-         */
         function showConfirmDialog(msg, onOk) {
             _confirmCallback = onOk;
             var msgEl = document.getElementById('crud-confirm-msg');
             if (msgEl) msgEl.textContent = msg;
-            var dlg = document.getElementById('crud-confirm-modal');
-            if (dlg) dlg.showModal();
+            document.getElementById('crud-confirm-modal')?.showModal();
         }
-
         document.addEventListener('DOMContentLoaded', function () {
-            var okBtn = document.getElementById('crud-confirm-ok');
-            var cancelBtn = document.getElementById('crud-confirm-cancel');
-
-            if (okBtn) {
-                okBtn.addEventListener('click', function () {
-                    document.getElementById('crud-confirm-modal').close();
-                    if (_confirmCallback) {
-                        var cb = _confirmCallback;
-                        _confirmCallback = null;
-                        cb();
-                    }
-                });
-            }
-
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', function () {
-                    document.getElementById('crud-confirm-modal').close();
-                    _confirmCallback = null;
-                });
-            }
-        });
-
-        /**
-         * HTMX の hx-confirm 属性をカスタム DaisyUI ダイアログで処理します。
-         * Delete ボタンや hx-confirm 付きフォームで使用されます。
-         * evt.detail.issueRequest(true) を呼ぶことで確認後にリクエストを発行します。
-         */
-        document.body.addEventListener('htmx:confirm', function (evt) {
-            var msg = evt.detail.question;
-            if (!msg) {
-                // hx-confirm="" の場合は確認なしでリクエストを発行
-                evt.preventDefault();
-                evt.detail.issueRequest(true);
-                return;
-            }
-            evt.preventDefault();
-            showConfirmDialog(msg, function () {
-                evt.detail.issueRequest(true);
+            document.getElementById('crud-confirm-ok')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                if (_confirmCallback) { var cb = _confirmCallback; _confirmCallback = null; cb(); }
+            });
+            document.getElementById('crud-confirm-cancel')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                _confirmCallback = null;
             });
         });
-
-        /**
-         * ページモード（通常 POST フォーム）の submit イベントを監視し、
-         * data-confirm-msg 属性がある場合に確認ダイアログを挟みます。
-         * HTMX フォームは hx-confirm + htmx:confirm で処理されるため、
-         * data-confirm-msg を持つ非 HTMX フォームのみが対象です。
-         */
+        document.body.addEventListener('htmx:confirm', function (evt) {
+            var msg = evt.detail.question;
+            if (!msg) { evt.preventDefault(); evt.detail.issueRequest(true); return; }
+            evt.preventDefault();
+            showConfirmDialog(msg, function () { evt.detail.issueRequest(true); });
+        });
         document.addEventListener('submit', function (evt) {
             var form = evt.target;
             var msg = form && form.dataset ? form.dataset.confirmMsg : '';
-            if (!msg || msg.length === 0) return;  // 確認不要
-
-            if (form.dataset.skipConfirm === '1') {
-                delete form.dataset.skipConfirm;
-                return;
-            }
-
+            if (!msg || msg.length === 0) return;
+            if (form.dataset.skipConfirm === '1') { delete form.dataset.skipConfirm; return; }
             evt.preventDefault();
             showConfirmDialog(msg, function () {
                 form.dataset.skipConfirm = '1';
-                if (typeof form.requestSubmit === 'function') {
-                    form.requestSubmit();
-                } else {
-                    form.submit();
-                }
+                if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
             });
-        }, true /* capture */);
-    </script>
-    <script>
-        // エンティティ選択ピッカー共通ロジック
+        }, true);
+
+        // Entity Picker
         var _pickerConfig = null;
         var _pickerSearchTimer = null;
-        // ピッカーの API ベース URL（プロジェクトルートを含む）
         var _pickerBaseUrl = '/@currentProject/DynamicEntity/PickerList';
-
-        // ピッカーを開く（Browse ボタンの onclick から呼ばれる）
         function openEntityPicker(btn) {
-            var fieldName = btn.dataset.pickerField;
-            var entity    = btn.dataset.pickerEntity;
-            var displayCol= btn.dataset.pickerDisplayCol || 'Id';
-            var query     = btn.dataset.pickerQuery || '';
-            var multi     = btn.dataset.pickerMulti === 'true';
-
-            _pickerConfig = {
-                fieldName: fieldName,
-                entity: entity,
-                displayCol: displayCol,
-                query: query,
-                multi: multi,
-                sourceButton: btn
-            };
-
+            _pickerConfig = { fieldName: btn.dataset.pickerField, entity: btn.dataset.pickerEntity,
+                displayCol: btn.dataset.pickerDisplayCol || 'Id', query: btn.dataset.pickerQuery || '',
+                multi: btn.dataset.pickerMulti === 'true', sourceButton: btn };
             var title = document.getElementById('entity-picker-title');
-            if (title) title.textContent = 'Select ' + entity;
-
+            if (title) title.textContent = 'Select ' + _pickerConfig.entity;
             var footer = document.getElementById('entity-picker-multi-footer');
-            if (footer) footer.classList.toggle('hidden', !multi);
-
+            if (footer) footer.classList.toggle('hidden', !_pickerConfig.multi);
             var searchEl = document.getElementById('entity-picker-search');
             if (searchEl) searchEl.value = '';
-
             loadPickerContent('', 1);
             document.getElementById('entity-picker-modal').showModal();
         }
-
-        // ピッカーコンテンツを HTMX で読み込む
         function loadPickerContent(search, page) {
             if (!_pickerConfig) return;
-            page = page || 1;
             var cfg = _pickerConfig;
-            var url = _pickerBaseUrl
-                + '?entity=' + encodeURIComponent(cfg.entity)
+            var url = _pickerBaseUrl + '?entity=' + encodeURIComponent(cfg.entity)
                 + '&targetField=' + encodeURIComponent(cfg.fieldName)
                 + '&displayColumn=' + encodeURIComponent(cfg.displayCol)
                 + '&displayColumns=' + encodeURIComponent(cfg.displayCol)
                 + '&query=' + encodeURIComponent(cfg.query || '')
                 + '&multi=' + (cfg.multi ? 'true' : 'false')
                 + '&search=' + encodeURIComponent(search || '')
-                + '&page=' + page;
+                + '&page=' + (page || 1);
             htmx.ajax('GET', url, { target: '#entity-picker-content', swap: 'innerHTML' });
         }
-
-        // 検索入力のデバウンス
         function entityPickerSearch(value) {
             clearTimeout(_pickerSearchTimer);
-            _pickerSearchTimer = setTimeout(function () {
-                loadPickerContent(value, 1);
-            }, 300);
+            _pickerSearchTimer = setTimeout(function () { loadPickerContent(value, 1); }, 300);
         }
-
-        // ピッカーページング
         function loadPickerPage(page) {
-            var searchEl = document.getElementById('entity-picker-search');
-            var search = searchEl ? searchEl.value : '';
+            var search = document.getElementById('entity-picker-search')?.value ?? '';
             loadPickerContent(search, page);
         }
-
-        // テーブル行クリック時の選択処理
         function pickerSelectFromRow(row) {
             if (!_pickerConfig) return;
-            var id    = row.dataset.pickerId;
-            var label = row.dataset.pickerLabel;
-            var cfg   = _pickerConfig;
-            var container = resolvePickerContainer(cfg.sourceButton);
-
+            var id = row.dataset.pickerId, label = row.dataset.pickerLabel, cfg = _pickerConfig;
+            var container = row.closest('[data-picker-container]');
+            var selector = function(name) {
+                var el = container ? container.querySelector('[id="' + name + '"]') : null;
+                return el || document.querySelector('[id="' + name + '"]');
+            };
             if (cfg.multi) {
-                // 複数選択: チップを追加（重複は無視）
-                var hidden = findPickerElement(container, 'picker-value-' + cfg.fieldName);
+                var hidden = selector('picker-value-' + cfg.fieldName);
                 if (!hidden) return;
                 var vals = hidden.value ? hidden.value.split(',').filter(function(v) { return v !== ''; }) : [];
-                if (vals.indexOf(id) !== -1) return; // 既選択済み
+                if (vals.indexOf(id) !== -1) return;
                 vals.push(id);
                 hidden.value = vals.join(',');
-
-                var chips = findPickerElement(container, 'picker-chips-' + cfg.fieldName);
+                var chips = selector('picker-chips-' + cfg.fieldName);
                 if (chips) {
                     var chip = document.createElement('div');
                     chip.className = 'badge badge-neutral gap-1';
                     chip.dataset.id = id;
-                    chip.innerHTML = label
-                        + ' <button type="button" onclick="removePickerChip(\''
-                        + cfg.fieldName + '\',\'' + id.replace(/'/g, "\\'") + '\',this.parentElement)">✕</button>';
+                    chip.innerHTML = label + ' <button type="button" onclick="removePickerChip(\'' + cfg.fieldName + '\',\'' + id.replace(/'/g, "\\'") + '\',this.parentElement)">✕</button>';
                     chips.appendChild(chip);
                 }
-                // 複数選択モードではモーダルを閉じない
             } else {
-                // 単一選択: 値とラベルをセットしてモーダルを閉じる
-                var hidden2 = findPickerElement(container, 'picker-value-' + cfg.fieldName);
-                var display = findPickerElement(container, 'picker-display-' + cfg.fieldName);
+                var hidden2 = selector('picker-value-' + cfg.fieldName);
+                var display = selector('picker-display-' + cfg.fieldName);
                 if (hidden2) hidden2.value = id;
-                if (display) {
-                    if (display.tagName === 'INPUT') {
-                        display.value = label;
-                    } else {
-                        display.textContent = label;
-                    }
-                }
+                if (display) { if (display.tagName === 'INPUT') { display.value = label; } else { display.textContent = label; } }
                 document.getElementById('entity-picker-modal').close();
             }
         }
-
-        function resolvePickerContainer(sourceEl) {
-            if (!sourceEl || typeof sourceEl.closest !== 'function') return null;
-            return sourceEl.closest('[data-picker-container]');
-        }
-
-        function findPickerElement(container, id) {
-            var selector = '[id="' + id + '"]';
-            if (container) {
-                var scoped = container.querySelector(selector);
-                if (scoped) return scoped;
-            }
-            return document.querySelector(selector);
-        }
-
-        // ピッカーチップを削除する
         function removePickerChip(fieldName, id, chipEl) {
-            var container = resolvePickerContainer(chipEl);
-            var hidden = findPickerElement(container, 'picker-value-' + fieldName);
-            if (hidden) {
-                var vals = hidden.value.split(',').filter(function(v) { return v !== id && v !== ''; });
-                hidden.value = vals.join(',');
-            }
+            var container = chipEl?.closest('[data-picker-container]');
+            var hidden = container ? container.querySelector('[id="picker-value-' + fieldName + '"]') : document.querySelector('[id="picker-value-' + fieldName + '"]');
+            if (hidden) { hidden.value = hidden.value.split(',').filter(function(v) { return v !== id && v !== ''; }).join(','); }
             if (chipEl) chipEl.remove();
         }
-
-        // 単一ピッカー値をクリア（フォーム用）
         function clearPickerValue(fieldName, sourceEl) {
-            var container = resolvePickerContainer(sourceEl);
-            var hidden = findPickerElement(container, 'picker-value-' + fieldName);
-            var display = findPickerElement(container, 'picker-display-' + fieldName);
-            if (hidden) hidden.value = '';
-            if (display) {
-                if (display.tagName === 'INPUT') {
-                    display.value = '';
-                } else {
-                    display.textContent = '(All)';
-                }
-            }
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
         }
-
-        // フィルター用ピッカー値クリア
         function clearPickerFilterValue(fieldName, sourceEl) {
-            var container = resolvePickerContainer(sourceEl);
-            var hidden = findPickerElement(container, 'picker-value-' + fieldName);
-            var display = findPickerElement(container, 'picker-display-' + fieldName);
-            var chips = findPickerElement(container, 'picker-chips-' + fieldName);
-            if (hidden) hidden.value = '';
-            if (display) {
-                if (display.tagName === 'INPUT') {
-                    display.value = '';
-                } else {
-                    display.textContent = '(All)';
-                }
-            }
-            if (chips) chips.innerHTML = '';
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName), c = sel('picker-chips-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
+            if (c) c.innerHTML = '';
         }
-
-        // checkbox-group: 複数選択フォームの値を更新
         function toggleCheckboxGroup(fieldName, checkbox) {
             var hidden = document.getElementById('checkbox-group-value-' + fieldName);
             if (!hidden) return;
-            var checkboxes = document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']');
             var values = [];
-            checkboxes.forEach(function(cb) {
-                if (cb.checked) values.push(cb.value);
-            });
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(cb) { if (cb.checked) values.push(cb.value); });
             hidden.value = values.join(',');
         }
-
-        // switch-group: 複数選択フォームの値を更新
         function toggleSwitchGroup(fieldName, toggle) {
             var hidden = document.getElementById('switch-group-value-' + fieldName);
             if (!hidden) return;
-            var toggles = document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']');
             var values = [];
-            toggles.forEach(function(t) {
-                if (t.checked) values.push(t.value);
-            });
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(t) { if (t.checked) values.push(t.value); });
             hidden.value = values.join(',');
         }
     </script>
-    <script src="/lib/marked/marked.min.js"></script>
-    <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

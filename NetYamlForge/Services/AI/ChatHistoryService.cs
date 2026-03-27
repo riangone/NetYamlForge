@@ -40,7 +40,25 @@ CREATE TABLE IF NOT EXISTS AIChatHistory (
     Type      TEXT NOT NULL,
     CreatedAt TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
+CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);
+
+CREATE TABLE IF NOT EXISTS AICommandLog (
+    Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserId      TEXT NOT NULL,
+    TaskId      TEXT NOT NULL UNIQUE,
+    CliTool     TEXT NOT NULL,
+    InputText   TEXT NOT NULL,
+    ProjectName TEXT,
+    SessionId   TEXT,
+    Status      TEXT NOT NULL DEFAULT 'Pending',
+    ResultText  TEXT,
+    ErrorText   TEXT,
+    DurationMs  INTEGER,
+    CreatedAt   TEXT NOT NULL,
+    CompletedAt TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_aicommand_user ON AICommandLog(UserId, Id);
+CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
         }
         catch (Exception ex)
         {
@@ -94,5 +112,78 @@ SELECT last_insert_rowid();",
         await conn.ExecuteAsync(
             "DELETE FROM AIChatHistory WHERE UserId = @UserId",
             new { UserId = userId });
+    }
+
+    // ──────────────────────────────────────────────
+    // AICommandLog（指令実行ログ）
+    // ──────────────────────────────────────────────
+
+    /// <summary>コマンド実行ログを新規作成します（タスク開始時に呼び出す）。</summary>
+    public async Task<long> CreateCommandLogAsync(
+        string userId,
+        string taskId,
+        string cliTool,
+        string inputText,
+        string? projectName,
+        string? sessionId)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        var id = await conn.ExecuteScalarAsync<long>(@"
+INSERT INTO AICommandLog (UserId, TaskId, CliTool, InputText, ProjectName, SessionId, Status, CreatedAt)
+VALUES (@UserId, @TaskId, @CliTool, @InputText, @ProjectName, @SessionId, 'Pending', @CreatedAt);
+SELECT last_insert_rowid();",
+            new
+            {
+                UserId = userId,
+                TaskId = taskId,
+                CliTool = cliTool,
+                InputText = inputText,
+                ProjectName = projectName,
+                SessionId = sessionId,
+                CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            });
+        return id;
+    }
+
+    /// <summary>コマンド実行ログを完了・失敗・キャンセル状態に更新します。</summary>
+    public async Task UpdateCommandLogAsync(
+        string taskId,
+        string status,
+        string? resultText,
+        string? errorText,
+        long durationMs)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        await conn.ExecuteAsync(@"
+UPDATE AICommandLog
+SET Status      = @Status,
+    ResultText  = @ResultText,
+    ErrorText   = @ErrorText,
+    DurationMs  = @DurationMs,
+    CompletedAt = @CompletedAt
+WHERE TaskId = @TaskId",
+            new
+            {
+                TaskId = taskId,
+                Status = status,
+                ResultText = resultText,
+                ErrorText = errorText,
+                DurationMs = durationMs,
+                CompletedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            });
+    }
+
+    /// <summary>ユーザーのコマンド実行ログ一覧を新しい順で取得します。</summary>
+    public async Task<IEnumerable<CommandLog>> GetCommandLogsAsync(string userId, int limit = 50)
+    {
+        await using var conn = new SqliteConnection(_connectionString);
+        return await conn.QueryAsync<CommandLog>(@"
+SELECT Id, UserId, TaskId, CliTool, InputText, ProjectName, SessionId,
+       Status, ResultText, ErrorText, DurationMs, CreatedAt, CompletedAt
+FROM AICommandLog
+WHERE UserId = @UserId
+ORDER BY Id DESC
+LIMIT @Limit",
+            new { UserId = userId, Limit = limit });
     }
 }

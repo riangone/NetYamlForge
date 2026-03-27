@@ -1,0 +1,44 @@
+name: task-management
+displayName: タスク管理システム
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/task-management.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "タスク管理システム"
+  navigation:
+    showDashboard: true
+    entities:
+      - task
+    items:
+      - label: ホーム
+        url: /task-management
+        icon: 🏠
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+      - label: タスク一覧
+        controller: DynamicEntity
+        action: List
+        params:
+          entity: task
+        icon: 📋
+
+home_page:
+  icon: "📋"
+  tagline: "社内タスクを一元管理 — 進捗共有と期限管理を効率化"
+  tags:
+    - タスク管理
+    - 進捗管理
+    - チーム連携

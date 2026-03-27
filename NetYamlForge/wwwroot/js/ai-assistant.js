@@ -833,7 +833,10 @@
                 contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
                 messageEl.appendChild(contentEl);
             } else {
-                messageEl.innerHTML = `<div class="ai-message-content">${escapeHtml(content)}</div>`;
+                const contentEl = document.createElement('div');
+                contentEl.className = 'ai-message-content';
+                contentEl.innerHTML = renderMarkdown(content);
+                messageEl.appendChild(contentEl);
             }
 
             innerEl.appendChild(avatar);

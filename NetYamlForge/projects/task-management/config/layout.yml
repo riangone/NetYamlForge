@@ -1,0 +1,24 @@
+header:
+  title: タスク管理システム
+
+navigation:
+  showDashboard: true
+  entities:
+    - task
+  items:
+    - label: ホーム
+      url: /task-management
+      icon: 🏠
+    - label: ダッシュボード
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: タスク一覧
+      controller: DynamicEntity
+      action: List
+      params:
+        entity: task
+      icon: 📋
+
+footer:
+  text: "タスク管理システム — powered by NetYamlForge"

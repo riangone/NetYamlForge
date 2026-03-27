@@ -1,0 +1,30 @@
+hero:
+  eyebrow: タスク管理システム
+  title: Welcome to タスク管理システム
+  description: Edit entities/ YAML files to customize your screens. Run --scaffold-entities to regenerate from DB.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /task-management/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /task-management/DynamicEntity/AllDefinitions
+  highlights:
+    - YAML First
+    - Auto CRUD
+    - Multi-language
+
+quickActions:
+  - label: Dashboard
+    url: /task-management/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Schema
+    url: /task-management/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    url: /task-management/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭
+  - label: Docs
+    url: /task-management/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖
