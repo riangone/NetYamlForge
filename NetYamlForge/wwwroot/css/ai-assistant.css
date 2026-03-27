@@ -563,3 +563,46 @@
 .ai-skill-name {
     font-weight: 500;
 }
+
+/* ===== メッセージアクションボタン（コピー・引用）===== */
+.ai-message-actions {
+    display: flex;
+    gap: 0.2rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+    padding: 0 0.4rem;
+    margin-top: 0.1rem;
+}
+
+.ai-message-row:hover .ai-message-actions {
+    opacity: 1;
+}
+
+.ai-message-row.user .ai-message-actions {
+    justify-content: flex-end;
+}
+
+.ai-message-row.assistant .ai-message-actions {
+    justify-content: flex-start;
+}
+
+.ai-msg-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.3rem;
+    border: 1px solid hsl(var(--b3));
+    background: hsl(var(--b1));
+    color: hsl(var(--bc) / 0.5);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    padding: 0;
+}
+
+.ai-msg-action-btn:hover {
+    background: hsl(var(--b2));
+    color: hsl(var(--p));
+    border-color: hsl(var(--p));
+}

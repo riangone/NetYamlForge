@@ -12,6 +12,11 @@
     let autoScroll = true;
     let chatHistory = []; // ページ跨ぎ用メモリ上の履歴
 
+    // 入力履歴
+    let inputHistory = [];       // 送信済みメッセージ履歴（新→古）
+    let inputHistoryIndex = -1;  // -1 = 現在の下書き
+    let inputCurrentDraft = '';  // 履歴ナビ開始前の下書き保持
+
     const STORAGE_KEY = 'ai_chat_history';
     const TOOL_STORAGE_KEY = 'ai_chat_tool';
 
@@ -232,11 +237,47 @@
         // 自动滚动按钮
         document.getElementById('ai-auto-scroll-btn').onclick = toggleAutoScroll;
         
-        // 输入框回车发送
+        // 入力欄イベント（Enter送信 + ↑↓ 履歴ナビ）
         document.getElementById('ai-input-message').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
+                return;
+            }
+
+            // ↑キー：カーソルが先頭にある場合に前の履歴へ
+            if (e.key === 'ArrowUp' && this.selectionStart === 0) {
+                if (inputHistory.length === 0) return;
+                e.preventDefault();
+                if (inputHistoryIndex === -1) {
+                    inputCurrentDraft = this.value;
+                }
+                if (inputHistoryIndex < inputHistory.length - 1) {
+                    inputHistoryIndex++;
+                }
+                this.value = inputHistory[inputHistoryIndex] || '';
+                this.setSelectionRange(0, 0);
+                return;
+            }
+
+            // ↓キー：カーソルが末尾にある場合に次の履歴（または下書き）へ
+            if (e.key === 'ArrowDown' && this.selectionStart === this.value.length) {
+                if (inputHistoryIndex === -1) return;
+                e.preventDefault();
+                inputHistoryIndex--;
+                if (inputHistoryIndex === -1) {
+                    this.value = inputCurrentDraft;
+                } else {
+                    this.value = inputHistory[inputHistoryIndex] || '';
+                }
+                const len = this.value.length;
+                this.setSelectionRange(len, len);
+                return;
+            }
+
+            // 他のキーを押した場合は履歴ナビをリセット
+            if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Shift') {
+                inputHistoryIndex = -1;
             }
         });
         
@@ -437,6 +478,14 @@
 
         if (!message) return;
 
+        // 入力履歴に追加（重複を除く）
+        if (inputHistory[0] !== message) {
+            inputHistory.unshift(message);
+            if (inputHistory.length > 100) inputHistory.pop();
+        }
+        inputHistoryIndex = -1;
+        inputCurrentDraft = '';
+
         // 添加用户消息
         addMessage(message, 'user');
         input.value = '';
@@ -536,6 +585,9 @@
                     }
                 }
 
+                // 外部からキャンセルされた場合（stopTask が currentTaskId を null にした）
+                if (!currentTaskId) return;
+
                 // 检查完成状态
                 if (data.status === 'Completed' || data.status === 2) {
                     // セッションIDを保存（次のリクエストで会話を継続）
@@ -543,12 +595,14 @@
                         currentSessionId = data.sessionId;
                     }
                     if (data.result && data.result.trim()) {
-                        // Markdown の先頭に文字を付けると見出し等が壊れるため、結果のみを渡す
                         addMessage(data.result, 'assistant');
                     }
                     return;
-                } else if (data.status === 'Failed' || data.status === 3 || data.status === 'Cancelled' || data.status === 4) {
-                    addMessage(`❌ ${data.error || '任务失败'}`, 'system');
+                } else if (data.status === 'Cancelled' || data.status === 4) {
+                    // 停止ボタンによるキャンセルは stopTask 側でメッセージ表示済み
+                    return;
+                } else if (data.status === 'Failed' || data.status === 3) {
+                    addMessage(`❌ ${data.error || 'タスクが失敗しました'}`, 'system');
                     return;
                 }
 
@@ -643,15 +697,16 @@
     // 停止任务
     async function stopTask() {
         if (!currentTaskId) return;
-        
+
+        // タスクIDを退避してから即座にUIをリセット（ポーリングループも終了させる）
+        const taskId = currentTaskId;
+        currentTaskId = null;
+        setSendingState(false);
+        updateStatus('idle');
+
         try {
-            await fetch(`${CONFIG.apiBaseUrl}/tasks/${currentTaskId}`, {
-                method: 'DELETE'
-            });
-            
-            addMessage('任务已取消', 'system');
-            updateStatus('idle');
-            currentTaskId = null;
+            await fetch(`${CONFIG.apiBaseUrl}/tasks/${taskId}`, { method: 'DELETE' });
+            addMessage('⏹ タスクをキャンセルしました', 'system');
         } catch (error) {
             console.error('Failed to stop task:', error);
         }
@@ -705,6 +760,46 @@
             innerEl.appendChild(avatar);
             innerEl.appendChild(messageEl);
             rowEl.appendChild(innerEl);
+
+            // コピー・引用アクションボタン
+            const actionsEl = document.createElement('div');
+            actionsEl.className = 'ai-message-actions';
+
+            // コピーボタン
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'ai-msg-action-btn';
+            copyBtn.title = 'コピー';
+            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+            copyBtn.onclick = function() {
+                navigator.clipboard.writeText(content).then(function() {
+                    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                    setTimeout(function() {
+                        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+                    }, 2000);
+                }).catch(function() {});
+            };
+            actionsEl.appendChild(copyBtn);
+
+            // 引用ボタン
+            const quoteBtn = document.createElement('button');
+            quoteBtn.className = 'ai-msg-action-btn';
+            quoteBtn.title = '引用して返信';
+            quoteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>';
+            quoteBtn.onclick = function() {
+                const input = document.getElementById('ai-input-message');
+                if (!input) return;
+                const quoted = content.split('\n').map(function(line) { return '> ' + line; }).join('\n');
+                input.value = quoted + '\n' + input.value;
+                input.focus();
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+                // パネルが最小化されていたら展開
+                if (isPanelMinimized) toggleMinimize();
+                if (!isPanelOpen) openPanel();
+            };
+            actionsEl.appendChild(quoteBtn);
+
+            rowEl.appendChild(actionsEl);
             container.appendChild(rowEl);
         }
 
@@ -966,6 +1061,13 @@
 
     // 清除消息
     function clearMessages() {
+        // 実行中のタスクがあればキャンセル
+        if (currentTaskId) {
+            const taskId = currentTaskId;
+            currentTaskId = null;
+            fetch(`${CONFIG.apiBaseUrl}/tasks/${taskId}`, { method: 'DELETE' }).catch(function() {});
+        }
+
         chatHistory = [];
         try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
         fetch(`${CONFIG.apiBaseUrl}/history`, { method: 'DELETE' }).catch(function() {});
