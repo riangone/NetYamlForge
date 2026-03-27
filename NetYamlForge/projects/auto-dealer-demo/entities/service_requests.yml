@@ -1,0 +1,205 @@
+imports: []
+entities:
+  service_requests:
+    table: service_requests
+    key: request_id
+    displayName: サービス依頼
+    softDelete: false
+    isPublic: true
+
+    columns:
+      request_id:
+        type: string
+        length: 64
+        required: true
+        label: 依頼 ID
+        searchable: true
+        sortable: true
+      customer_id:
+        type: string
+        length: 50
+        required: false
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+      vehicle_id:
+        type: string
+        length: 50
+        required: false
+        label: 車両 ID
+        searchable: true
+        sortable: true
+      request_type:
+        type: string
+        length: 30
+        required: true
+        label: 依頼種別
+        options:
+          - inquiry
+          - complaint
+          - quote_request
+          - parts_request
+          - other
+        searchable: true
+        sortable: true
+      subject:
+        type: string
+        length: 200
+        required: true
+        label: 件名
+        searchable: true
+        sortable: true
+      description:
+        type: text
+        required: true
+        label: 依頼内容
+      priority:
+        type: string
+        length: 20
+        required: true
+        label: 優先度
+        default: normal
+        options:
+          - low
+          - normal
+          - high
+          - urgent
+        searchable: true
+        sortable: true
+      status:
+        type: string
+        length: 30
+        required: true
+        label: ステータス
+        default: open
+        options:
+          - open
+          - in_progress
+          - pending_parts
+          - waiting_customer
+          - resolved
+          - closed
+        searchable: true
+        sortable: true
+      assigned_to:
+        type: string
+        length: 50
+        required: false
+        label: 担当者 ID
+        searchable: true
+        sortable: true
+      source:
+        type: string
+        length: 30
+        required: false
+        label: 受付チャネル
+        options:
+          - phone
+          - email
+          - web
+          - line
+          - walk_in
+          - ai_chat
+        searchable: true
+        sortable: true
+      related_appointment_id:
+        type: string
+        length: 64
+        required: false
+        label: 関連予約 ID
+        searchable: true
+        sortable: true
+      estimated_resolution_date:
+        type: date
+        required: false
+        label: 解決予定日
+        sortable: true
+      resolution_date:
+        type: date
+        required: false
+        label: 解決日
+        sortable: true
+      resolution_notes:
+        type: text
+        required: false
+        label: 解決メモ
+      customer_satisfaction:
+        type: int
+        required: false
+        label: 顧客満足度
+        min: 1
+        max: 5
+        sortable: true
+      follow_up_required:
+        type: bool
+        required: false
+        label: フォローアップ必要
+        default: false
+        sortable: true
+      follow_up_date:
+        type: date
+        required: false
+        label: フォローアップ予定日
+        sortable: true
+      follow_up_notes:
+        type: text
+        required: false
+        label: フォローアップメモ
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      request_id:
+        type: string
+        required: true
+        label: 依頼 ID
+        editable: false
+      customer_id:
+        type: string
+        required: false
+        label: 顧客 ID
+        editable: true
+      request_type:
+        type: select
+        required: true
+        label: 依頼種別
+        editable: true
+      subject:
+        type: string
+        required: true
+        label: 件名
+        editable: true
+      description:
+        type: textarea
+        required: true
+        label: 依頼内容
+        editable: true
+        rows: 5
+      priority:
+        type: select
+        required: true
+        label: 優先度
+        editable: true
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+      assigned_to:
+        type: string
+        required: false
+        label: 担当者
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

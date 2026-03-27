@@ -1,0 +1,235 @@
+imports: []
+entities:
+  vehicles:
+    table: vehicles
+    key: vehicle_id
+    displayName: 車両在庫マスタ
+    softDelete: false
+    isPublic: true
+
+    columns:
+      vehicle_id:
+        type: string
+        length: 50
+        required: true
+        label: 車両 ID
+        searchable: true
+        sortable: true
+      vin:
+        type: string
+        length: 17
+        required: false
+        label: 車台番号（VIN）
+        searchable: true
+        sortable: true
+        unique: true
+      maker:
+        type: string
+        length: 50
+        required: true
+        label: メーカー
+        searchable: true
+        sortable: true
+      brand:
+        type: string
+        length: 50
+        required: true
+        label: ブランド
+        searchable: true
+        sortable: true
+      model:
+        type: string
+        length: 50
+        required: true
+        label: 車種名
+        searchable: true
+        sortable: true
+      grade:
+        type: string
+        length: 50
+        required: false
+        label: グレード
+        searchable: true
+        sortable: true
+      year:
+        type: int
+        required: true
+        label: 年式
+        sortable: true
+      color:
+        type: string
+        length: 30
+        required: false
+        label: ボディカラー
+        searchable: true
+        sortable: true
+      mileage:
+        type: int
+        required: false
+        label: 走行距離（km）
+        default: 0
+        sortable: true
+      transmission:
+        type: string
+        length: 20
+        required: false
+        label: トランスミッション
+        options:
+          - AT
+          - MT
+          - CVT
+          - DCT
+        searchable: true
+        sortable: true
+      fuel_type:
+        type: string
+        length: 20
+        required: false
+        label: 燃料種別
+        options:
+          - gasoline
+          - diesel
+          - hybrid
+          - ev
+          - phev
+        searchable: true
+        sortable: true
+      engine_capacity:
+        type: int
+        required: false
+        label: エンジン排気量（cc）
+        sortable: true
+      vehicle_type:
+        type: string
+        length: 30
+        required: true
+        label: 車両タイプ
+        options:
+          - sedan
+          - wagon
+          - suv
+          - minivan
+          - truck
+          - bus
+          - sports
+          - kei
+        searchable: true
+        sortable: true
+      price:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        label: 車両価格（円）
+        sortable: true
+      cost:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 仕入れ価格（円）
+        sortable: true
+      status:
+        type: string
+        length: 20
+        required: true
+        label: 在庫ステータス
+        default: available
+        options:
+          - available
+          - reserved
+          - sold
+          - maintenance
+          - display
+        searchable: true
+        sortable: true
+      arrival_date:
+        type: date
+        required: false
+        label: 入荷日
+        sortable: true
+      inspection_date:
+        type: date
+        required: false
+        label: 車検日
+        sortable: true
+      image_url:
+        type: string
+        length: 500
+        required: false
+        label: 車両画像 URL
+      features:
+        type: text
+        required: false
+        label: 装備情報
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      vehicle_id:
+        type: string
+        required: true
+        label: 車両 ID
+        editable: false
+      maker:
+        type: string
+        required: true
+        label: メーカー
+        editable: true
+      brand:
+        type: string
+        required: true
+        label: ブランド
+        editable: true
+      model:
+        type: string
+        required: true
+        label: 車種名
+        editable: true
+      year:
+        type: number
+        required: true
+        label: 年式
+        editable: true
+      price:
+        type: number
+        required: true
+        label: 車両価格
+        editable: true
+      status:
+        type: select
+        required: true
+        label: 在庫ステータス
+        editable: true
+      vehicle_type:
+        type: select
+        required: true
+        label: 車両タイプ
+        editable: true
+      color:
+        type: string
+        required: false
+        label: ボディカラー
+        editable: true
+      mileage:
+        type: number
+        required: false
+        label: 走行距離
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

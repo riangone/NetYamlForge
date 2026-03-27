@@ -1,0 +1,98 @@
+title: サービス予約管理
+description: "サービス予約のスケジュールとステータス管理ページ"
+
+sections:
+  # 予約統計
+  - id: appointment_stats
+    title: 予約状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '本日予約' AS metric_name, 
+             CAST(COUNT(*) AS TEXT) AS metric_value, 
+             '📅' AS metric_icon, 
+             NULL AS metric_delta
+        FROM service_appointments 
+        WHERE date(preferred_date) = date('now')
+      UNION ALL
+      SELECT '確認待ち', CAST(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS TEXT), '⏰', NULL 
+        FROM service_appointments
+      UNION ALL
+      SELECT '作業中', CAST(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS TEXT), '🔧', NULL 
+        FROM service_appointments
+      UNION ALL
+      SELECT '完了 (今日)', CAST(SUM(CASE WHEN status = 'completed' AND date(completed_at) = date('now') THEN 1 ELSE 0 END) AS TEXT), '✅', NULL 
+        FROM service_appointments
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 本日の予約スケジュール
+  - id: today_schedule
+    title: 本日の予約スケジュール
+    component: table
+    sourceType: custom
+    source: |
+      SELECT a.appointment_id AS 予約 ID,
+             substr(a.preferred_date, 12, 5) AS 時間，
+             a.appointment_type AS 種別，
+             c.name AS 顧客名，
+             a.service_menu AS メニュー，
+             a.status AS ステータス，
+             a.service_bay AS ベイ，
+             a.assigned_staff_id AS 担当
+      FROM service_appointments a
+      INNER JOIN customers c ON a.customer_id = c.customer_id
+      WHERE date(a.preferred_date) = date('now')
+      ORDER BY a.preferred_date ASC
+    columns: [予約 ID, 時間，種別，顧客名，メニュー，ステータス，ベイ，担当]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 予約種別内訳
+  - id: appointment_type_chart
+    title: 予約種別内訳（bar_chart）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT appointment_type AS label, COUNT(*) AS value
+      FROM service_appointments
+      WHERE date(preferred_date) >= date('now', '-7 days')
+      GROUP BY appointment_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 今後の予約
+  - id: upcoming_appointments
+    title: 今後の予約（table）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT a.appointment_id AS 予約 ID,
+             a.preferred_date AS 日時，
+             a.appointment_type AS 種別，
+             c.name AS 顧客名，
+             c.phone AS 電話番号，
+             a.service_menu AS メニュー，
+             a.status AS ステータス
+      FROM service_appointments a
+      INNER JOIN customers c ON a.customer_id = c.customer_id
+      WHERE date(a.preferred_date) > date('now')
+      ORDER BY a.preferred_date ASC
+      LIMIT 15
+    columns: [予約 ID, 日時，種別，顧客名，電話番号，メニュー，ステータス]
+    pageSize: 15
+    editable: false
+    readOnly: true

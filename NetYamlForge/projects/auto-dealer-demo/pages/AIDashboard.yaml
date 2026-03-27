@@ -1,0 +1,146 @@
+title: AI 窓口ダッシュボード
+description: "自動車ディーラー AI 窓口システムの概要ページ - 対話状況・予約・顧客統計を表示"
+
+sections:
+  # KPI カード
+  - id: kpi_summary
+    title: 受付状況 KPI
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'アクティブセッション' AS metric_name, 
+             CAST(COUNT(*) AS TEXT) AS metric_value, 
+             '💬' AS metric_icon, 
+             NULL AS metric_delta
+        FROM ai_conversations WHERE status = 'active'
+      UNION ALL
+      SELECT '完了 (今日)', CAST(COUNT(*) AS TEXT), '✅', NULL 
+        FROM ai_conversations 
+        WHERE status = 'completed' AND date(started_at) = date('now')
+      UNION ALL
+      SELECT 'エスカレーション (保留)', CAST(COUNT(*) AS TEXT), '⚠️', NULL 
+        FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '本日の予約', CAST(COUNT(*) AS TEXT), '📅', NULL 
+        FROM service_appointments 
+        WHERE date(preferred_date) = date('now')
+      UNION ALL
+      SELECT '顧客総数', CAST(COUNT(*) AS TEXT), '👥', NULL 
+        FROM customers
+      UNION ALL
+      SELECT '平均満足度', CAST(ROUND(AVG(rating), 1) AS TEXT), '⭐', NULL 
+        FROM ai_feedback 
+        WHERE date(created_at) = date('now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # チャネル別対話数
+  - id: channel_chart
+    title: チャネル別対話数（doughnut_chart）
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT channel AS label, COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-7 days')
+      GROUP BY channel
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 予約ステータス
+  - id: appointment_status
+    title: 予約ステータス内訳（bar_chart）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT status AS label, COUNT(*) AS value
+      FROM service_appointments
+      GROUP BY status
+      ORDER BY CASE status 
+        WHEN 'pending' THEN 1 
+        WHEN 'confirmed' THEN 2 
+        WHEN 'in_progress' THEN 3 
+        WHEN 'completed' THEN 4 
+        ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(59, 130, 246, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 最近の対話
+  - id: recent_conversations
+    title: 最近の AI 対話（table）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.conversation_id AS 対話 ID,
+             c.customer_id AS 顧客 ID,
+             c.channel AS チャネル,
+             c.status AS ステータス,
+             c.last_intent AS 最終インテント,
+             ROUND(c.last_confidence * 100, 0) || '%' AS 置信度,
+             c.started_at AS 開始日時
+      FROM ai_conversations c
+      ORDER BY c.started_at DESC
+      LIMIT 10
+    columns: [対話 ID, 顧客 ID, チャネル, ステータス, 最終インテント, 置信度，開始日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 本日の予約一覧
+  - id: today_appointments
+    title: 本日の予約（table）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT a.appointment_id AS 予約 ID,
+             a.appointment_type AS 種別，
+             a.preferred_date AS 日時，
+             a.status AS ステータス，
+             a.service_menu AS メニュー，
+             c.name AS 顧客名
+      FROM service_appointments a
+      INNER JOIN customers c ON a.customer_id = c.customer_id
+      WHERE date(a.preferred_date) = date('now')
+      ORDER BY a.preferred_date ASC
+    columns: [予約 ID, 種別，日時，ステータス，メニュー，顧客名]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 顧客ランク内訳
+  - id: customer_tier
+    title: 顧客ランク別人数（pie_chart）
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT tier_level AS label, COUNT(*) AS value
+      FROM customers
+      GROUP BY tier_level
+      ORDER BY CASE tier_level 
+        WHEN 'platinum' THEN 1 
+        WHEN 'vip' THEN 2 
+        WHEN 'gold' THEN 3 
+        WHEN 'silver' THEN 4 
+        ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true

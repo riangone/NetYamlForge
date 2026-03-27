@@ -187,9 +187,21 @@ builder.Services.AddSingleton<SkillLoader>();
 builder.Services.AddSingleton<CLIServiceFactory>();
 builder.Services.AddSingleton<ProgressTracker>();
 builder.Services.AddSingleton<TaskQueueService>();
+
+// HTTP Client for Ollama and LM Studio (本地模型)
+builder.Services.AddHttpClient("OllamaClient");
+builder.Services.AddHttpClient("LmStudioClient");
+
+// AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
 builder.Services.AddSingleton<ICLIService, QwenCodeCLIService>();
 builder.Services.AddSingleton<ICLIService, MockCLIService>();
+builder.Services.AddSingleton<ICLIService, CodexCLIService>();
+builder.Services.AddSingleton<ICLIService, GeminiCLIService>();
+builder.Services.AddSingleton<ICLIService, OllamaCLIService>();
+builder.Services.AddSingleton<ICLIService, LmStudioCLIService>();
+builder.Services.AddSingleton<ICLIService, CopilotCLIService>();
+
 builder.Services.AddSignalR();
 
 var app = builder.Build();

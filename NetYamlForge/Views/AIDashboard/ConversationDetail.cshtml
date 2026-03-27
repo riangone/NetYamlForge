@@ -1,0 +1,325 @@
+@{
+    ViewData["Title"] = "対話詳細";
+    Layout = "_Layout";
+    var conversationId = ViewBag.ConversationId ?? "";
+}
+
+<div class="container-fluid py-4">
+    <!-- ヘッダー -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="/ai/dashboard" class="btn btn-outline-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i> ダッシュボード
+                    </a>
+                    <span class="text-muted">/</span>
+                    <span class="ms-2">対話詳細</span>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary me-2" id="btnExport">
+                        <i class="bi bi-download me-1"></i> エクスポート
+                    </button>
+                    <button class="btn btn-danger" id="btnHandover">
+                        <i class="bi bi-person-x me-1"></i> エスカレーション
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 対話情報カード -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots me-2"></i>対話情報
+                    </h5>
+                    <span class="badge bg-primary" id="conversationStatus">Active</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="text-muted small">対話 ID</label>
+                            <p class="mb-0"><code id="conversationId">@conversationId</code></p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">チャネル</label>
+                            <p class="mb-0"><span class="badge bg-info" id="channel">Web</span></p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">顧客</label>
+                            <p class="mb-0" id="customer">-</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">開始時間</label>
+                            <p class="mb-0" id="startedAt">-</p>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <label class="text-muted small">最終インテント</label>
+                            <p class="mb-0" id="lastIntent">-</p>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <label class="text-muted small">置信度</label>
+                            <p class="mb-0" id="confidence">-</p>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <label class="text-muted small">感情スコア</label>
+                            <p class="mb-0" id="sentiment">-</p>
+                        </div>
+                        <div class="col-md-3 mt-3">
+                            <label class="text-muted small">経過時間</label>
+                            <p class="mb-0" id="elapsedTime">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メッセージ履歴 -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-left-text me-2"></i>メッセージ履歴
+                    </h5>
+                    <span class="text-muted" id="messageCount">0 件</span>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;" id="messagesContainer">
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-hourglass-split me-2"></i>読込中...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- エスカレーション情報 -->
+    <div class="row" id="handoverSection" style="display: none;">
+        <div class="col-md-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>エスカレーション情報
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="text-muted small">エスカレーション ID</label>
+                            <p class="mb-0"><code id="handoverId">-</code></p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">理由</label>
+                            <p class="mb-0" id="handoverReason">-</p>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small">優先度</label>
+                            <p class="mb-0"><span class="badge bg-warning" id="handoverPriority">-</span></p>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="text-muted small">部門</label>
+                            <p class="mb-0" id="handoverDepartment">-</p>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="text-muted small">担当オペレーター</label>
+                            <p class="mb-0" id="handoverOperator">-</p>
+                        </div>
+                        <div class="col-md-4 mt-3">
+                            <label class="text-muted small">ステータス</label>
+                            <p class="mb-0"><span class="badge bg-secondary" id="handoverStatus">-</span></p>
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <label class="text-muted small">引き継ぎメモ</label>
+                            <p class="mb-0" id="handoverNotes">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .message-row {
+        margin-bottom: 16px;
+        display: flex;
+        gap: 12px;
+    }
+    .message-row.customer {
+        justify-content: flex-end;
+    }
+    .message-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .message-avatar.ai {
+        background: #007bff;
+        color: white;
+    }
+    .message-avatar.customer {
+        background: #28a745;
+        color: white;
+    }
+    .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        line-height: 1.5;
+    }
+    .message-row.ai .message-content {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+    .message-row.customer .message-content {
+        background: #007bff;
+        color: white;
+    }
+    .message-meta {
+        font-size: 12px;
+        margin-top: 4px;
+        opacity: 0.7;
+    }
+    .sentiment-positive { color: #28a745; }
+    .sentiment-neutral { color: #6c757d; }
+    .sentiment-negative { color: #dc3545; }
+</style>
+}
+
+@section Scripts {
+<script>
+    const conversationId = '@conversationId';
+
+    $(document).ready(function() {
+        loadConversationDetail();
+        loadMessages();
+        loadHandoverInfo();
+    });
+
+    // 対話詳細読み込み
+    function loadConversationDetail() {
+        $.get(`/api/ai/conversations/${conversationId}`, function(data) {
+            $('#conversationStatus').text(data.status).removeClass('bg-primary bg-success bg-warning').addClass(
+                data.status === 'active' ? 'bg-primary' :
+                data.status === 'completed' ? 'bg-success' : 'bg-warning'
+            );
+            $('#channel').text(data.channel);
+            $('#customer').text(data.customerId || '未認証');
+            $('#startedAt').text(new Date(data.startedAt).toLocaleString('ja-JP'));
+            $('#lastIntent').text(data.lastIntent || '-');
+            $('#confidence').text(data.lastConfidence ? (data.lastConfidence * 100).toFixed(1) + '%' : '-');
+            
+            const sentiment = data.sentimentScore || 0;
+            const sentimentClass = sentiment > 0.3 ? 'sentiment-positive' : sentiment < -0.3 ? 'sentiment-negative' : 'sentiment-neutral';
+            const sentimentLabel = sentiment > 0.3 ? '😊 満足' : sentiment < -0.3 ? '😠 不満' : '😐 普通';
+            $('#sentiment').html(`<span class="${sentimentClass}">${sentimentLabel} (${sentiment.toFixed(2)})</span>`);
+            
+            // 経過時間計算
+            const elapsed = Math.floor((new Date() - new Date(data.startedAt)) / 60000);
+            $('#elapsedTime').text(elapsed + '分');
+        });
+    }
+
+    // メッセージ履歴読み込み
+    function loadMessages() {
+        $.get(`/api/ai/conversations/${conversationId}/messages`, function(data) {
+            $('#messageCount').text(data.length + '件');
+            
+            if (!data || data.length === 0) {
+                $('#messagesContainer').html('<div class="text-center py-5 text-muted">メッセージはありません</div>');
+                return;
+            }
+            
+            let html = '';
+            data.forEach(msg => {
+                const avatarClass = msg.sender === 'ai' ? 'ai' : 'customer';
+                const avatarLabel = msg.sender === 'ai' ? 'AI' : 'C';
+                const time = new Date(msg.timestamp).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+                
+                html += `
+                    <div class="message-row ${msg.sender}">
+                        ${msg.sender === 'ai' ? `<div class="message-avatar ${avatarClass}">${avatarLabel}</div>` : ''}
+                        <div>
+                            <div class="message-content">
+                                ${escapeHtml(msg.content)}
+                                ${msg.intent ? `<div class="message-meta">インテント：${msg.intent} (置信度：${(msg.confidenceScore * 100).toFixed(0)}%)</div>` : ''}
+                            </div>
+                            <div class="message-meta text-end">${time}</div>
+                        </div>
+                        ${msg.sender === 'customer' ? `<div class="message-avatar ${avatarClass}">${avatarLabel}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            $('#messagesContainer').html(html);
+            $('#messagesContainer').scrollTop($('#messagesContainer')[0].scrollHeight);
+        });
+    }
+
+    // エスカレーション情報読み込み
+    function loadHandoverInfo() {
+        $.get(`/api/ai/handovers?conversationId=${conversationId}`, function(data) {
+            if (data && data.length > 0) {
+                const handover = data[0];
+                $('#handoverSection').show();
+                $('#handoverId').text(handover.handoverId);
+                $('#handoverReason').text(handover.reason);
+                $('#handoverPriority').text(handover.priority).removeClass('badge-warning badge-danger badge-info').addClass(
+                    handover.priority === 'high' ? 'badge-danger' :
+                    handover.priority === 'urgent' ? 'badge-danger' : 'badge-warning'
+                );
+                $('#handoverDepartment').text(handover.targetDepartment || '-');
+                $('#handoverOperator').text(handover.assignedOperatorName || '未割り当て');
+                $('#handoverStatus').text(handover.status);
+                $('#handoverNotes').text(handover.handoverNotes || '-');
+            }
+        });
+    }
+
+    // HTML エスケープ
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML.replace(/\n/g, '<br>');
+    }
+
+    // エクスポート
+    $('#btnExport').click(function() {
+        window.location.href = `/api/ai/conversations/${conversationId}/export`;
+    });
+
+    // エスカレーション
+    $('#btnHandover').click(function() {
+        if (confirm('この対話をエスカレーションしますか？')) {
+            $.ajax({
+                url: `/api/ai/conversations/${conversationId}/handover`,
+                method: 'POST',
+                data: JSON.stringify({
+                    reason: 'manual',
+                    priority: 'medium'
+                }),
+                contentType: 'application/json',
+                success: function() {
+                    alert('エスカレーションしました');
+                    loadHandoverInfo();
+                },
+                error: function() {
+                    alert('エスカレーションに失敗しました');
+                }
+            });
+        }
+    });
+</script>
+}

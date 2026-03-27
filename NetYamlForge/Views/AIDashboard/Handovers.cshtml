@@ -1,0 +1,354 @@
+@{
+    ViewData["Title"] = "エスカレーション管理";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4">
+    <!-- ヘッダー -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-exclamation-octagon text-danger me-2"></i>
+                    エスカレーション管理
+                </h1>
+                <div>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-secondary active" data-filter="all">すべて</button>
+                        <button class="btn btn-outline-secondary" data-filter="pending">待機中</button>
+                        <button class="btn btn-outline-secondary" data-filter="assigned">対応中</button>
+                        <button class="btn btn-outline-secondary" data-filter="resolved">解決済み</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-red">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">待機中</p>
+                            <h3 class="mb-0" id="statPending">0</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-orange">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">対応中</p>
+                            <h3 class="mb-0" id="statAssigned">0</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-green">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">今日解決</p>
+                            <h3 class="mb-0" id="statResolvedToday">0</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-blue">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">平均対応時間</p>
+                            <h3 class="mb-0" id="statAvgTime">0 分</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- エスカレーション一覧 -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-task me-2"></i>エスカレーション一覧
+                    </h5>
+                    <button class="btn btn-sm btn-outline-primary" id="btnRefresh">
+                        <i class="bi bi-arrow-clockwise me-1"></i> 更新
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="handoverTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>対話 ID</th>
+                                    <th>理由</th>
+                                    <th>優先度</th>
+                                    <th>部門</th>
+                                    <th>担当者</th>
+                                    <th>ステータス</th>
+                                    <th>受付時間</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="9" class="text-center py-4 text-muted">
+                                        <i class="bi bi-hourglass-split me-2"></i>読込中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- エスカレーション対応モーダル -->
+<div class="modal fade" id="handoverModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">エスカレーション対応</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalHandoverId" />
+                
+                <div class="mb-3">
+                    <label class="form-label">対話 ID</label>
+                    <p class="form-text" id="modalConversationId">-</p>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">理由</label>
+                        <p class="form-text" id="modalReason">-</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">優先度</label>
+                        <p class="form-text" id="modalPriority">-</p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">引き継ぎメモ</label>
+                    <p class="form-text" id="modalNotes">-</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label" for="modalOperator">担当者</label>
+                    <select class="form-select" id="modalOperator">
+                        <option value="">選択してください</option>
+                        <option value="user1">山田太郎</option>
+                        <option value="user2">鈴木花子</option>
+                        <option value="user3">佐藤次郎</option>
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label" for="modalResolution">解決メモ</label>
+                    <textarea class="form-control" id="modalResolution" rows="3" placeholder="対応内容を記入してください"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" id="btnAssign">割り当て</button>
+                <button type="button" class="btn btn-success" id="btnResolve">解決済み</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .stats-card { transition: transform 0.2s; }
+    .stats-card:hover { transform: translateY(-2px); }
+    .stats-card .stats-icon { font-size: 2.5rem; opacity: 0.3; }
+    .stats-card-red .stats-icon { color: #dc3545; }
+    .stats-card-orange .stats-icon { color: #fd7e14; }
+    .stats-card-green .stats-icon { color: #28a745; }
+    .stats-card-blue .stats-icon { color: #007bff; }
+    
+    .priority-urgent { background: #dc3545 !important; color: white; }
+    .priority-high { background: #fd7e14 !important; color: white; }
+    .priority-medium { background: #ffc107 !important; color: #212529; }
+    .priority-low { background: #6c757d !important; color: white; }
+    
+    .status-pending { background: #ffc107 !important; color: #212529; }
+    .status-assigned { background: #007bff !important; color: white; }
+    .status-resolved { background: #28a745 !important; color: white; }
+</style>
+}
+
+@section Scripts {
+<script>
+    let currentFilter = 'all';
+
+    $(document).ready(function() {
+        loadHandoverStats();
+        loadHandoverTable();
+        
+        // フィルターボタン
+        $('.btn-group .btn').click(function() {
+            $('.btn-group .btn').removeClass('active');
+            $(this).addClass('active');
+            currentFilter = $(this).data('filter');
+            loadHandoverTable(currentFilter);
+        });
+        
+        // 更新ボタン
+        $('#btnRefresh').click(function() {
+            loadHandoverStats();
+            loadHandoverTable(currentFilter);
+        });
+        
+        // 割り当てボタン
+        $('#btnAssign').click(function() {
+            const handoverId = $('#modalHandoverId').val();
+            const operatorId = $('#modalOperator').val();
+            
+            if (!operatorId) {
+                alert('担当者を選択してください');
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/ai/handovers/${handoverId}/assign`,
+                method: 'PUT',
+                data: JSON.stringify({ operatorId }),
+                contentType: 'application/json',
+                success: function() {
+                    alert('割り当てました');
+                    $('#handoverModal').modal('hide');
+                    loadHandoverTable();
+                },
+                error: function() {
+                    alert('割り当てに失敗しました');
+                }
+            });
+        });
+        
+        // 解決済みボタン
+        $('#btnResolve').click(function() {
+            const handoverId = $('#modalHandoverId').val();
+            const resolutionNotes = $('#modalResolution').val();
+            
+            $.ajax({
+                url: `/api/ai/handovers/${handoverId}/resolve`,
+                method: 'PUT',
+                data: JSON.stringify({ resolutionNotes }),
+                contentType: 'application/json',
+                success: function() {
+                    alert('解決済みにマークしました');
+                    $('#handoverModal').modal('hide');
+                    loadHandoverTable();
+                },
+                error: function() {
+                    alert('解決処理に失敗しました');
+                }
+            });
+        });
+        
+        // 5 分ごとに自動更新
+        setInterval(function() {
+            loadHandoverStats();
+            loadHandoverTable(currentFilter);
+        }, 300000);
+    });
+
+    // 統計読み込み
+    function loadHandoverStats() {
+        $.get('/api/ai/analytics/handover-stats', function(data) {
+            $('#statPending').text(data.pending);
+            $('#statAssigned').text(data.assigned);
+            $('#statResolvedToday').text(data.resolvedToday);
+            $('#statAvgTime').text(data.avgResolutionTime + '分');
+        });
+    }
+
+    // エスカレーション一覧読み込み
+    function loadHandoverTable(filter = 'all') {
+        let url = '/api/ai/analytics/handover-queue';
+        if (filter !== 'all') {
+            url += `?status=${filter}`;
+        }
+        
+        $.get(url, function(data) {
+            const tbody = $('#handoverTable tbody');
+            
+            if (!data || data.length === 0) {
+                tbody.html('<tr><td colspan="9" class="text-center py-4 text-muted">エスカレーションはありません</td></tr>');
+                return;
+            }
+            
+            let html = '';
+            data.forEach(item => {
+                const priorityClass = 'priority-' + (item.priority || 'medium');
+                const statusClass = 'status-' + (item.status || 'pending');
+                const time = new Date(item.escalatedAt).toLocaleString('ja-JP');
+                
+                html += `
+                    <tr>
+                        <td><code>${item.handoverId}</code></td>
+                        <td><code>${item.conversationId}</code></td>
+                        <td>${item.reason}</td>
+                        <td><span class="badge ${priorityClass}">${item.priority}</span></td>
+                        <td>${item.targetDepartment || '-'}</td>
+                        <td>${item.assignedOperatorName || '未割り当て'}</td>
+                        <td><span class="badge ${statusClass}">${item.status}</span></td>
+                        <td>${time}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openHandoverModal('${item.handoverId}')">対応</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.html(html);
+        });
+    }
+
+    // モーダル表示
+    function openHandoverModal(handoverId) {
+        $.get(`/api/ai/handovers/${handoverId}`, function(data) {
+            $('#modalHandoverId').val(data.handoverId);
+            $('#modalConversationId').text(data.conversationId);
+            $('#modalReason').text(data.reason);
+            $('#modalPriority').text(data.priority);
+            $('#modalNotes').text(data.handoverNotes || '-');
+            $('#modalOperator').val(data.assignedToUserId || '');
+            $('#modalResolution').val('');
+            
+            $('#handoverModal').modal('show');
+        });
+    }
+</script>
+}

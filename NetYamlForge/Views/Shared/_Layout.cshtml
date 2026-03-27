@@ -380,7 +380,7 @@
                           asp-route-project="@currentProject"
                           method="post">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-error btn-sm">再起動する</button>
+                        <button type="submit" id="restart-submit-btn" class="btn btn-error btn-sm">再起動する</button>
                     </form>
                     <button type="button" class="btn btn-ghost btn-sm"
                             onclick="document.getElementById('restart-confirm-modal').close()">キャンセル</button>
@@ -704,6 +704,51 @@
             });
             hidden.value = values.join(',');
         }
+
+        // システム再起動フォームの処理
+        document.addEventListener('DOMContentLoaded', function() {
+            var restartForm = document.getElementById('restart-form');
+            var restartBtn = document.getElementById('restart-submit-btn');
+            if (restartForm && restartBtn) {
+                restartForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    restartBtn.disabled = true;
+                    restartBtn.innerHTML = '<span class="loading loading-spinner loading-sm"></span> 再起動中...';
+                    
+                    fetch(restartForm.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': restartForm.querySelector('[name="__RequestVerificationToken"]').value
+                        }
+                    })
+                    .then(function(response) {
+                        if (response.ok) {
+                            // 再起動成功：モーダルを閉じてメッセージを表示
+                            document.getElementById('restart-confirm-modal').close();
+                            alert('システムを再起動しています。数秒後にページをリロードします...');
+                            // 5 秒後にページをリロード
+                            setTimeout(function() {
+                                location.reload();
+                            }, 5000);
+                        } else {
+                            restartBtn.disabled = false;
+                            restartBtn.textContent = '再起動する';
+                            alert('再起動に失敗しました。管理者にお問い合わせください。');
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Restart error:', error);
+                        // エラーの場合もページをリロード（サーバーが再起動されている可能性）
+                        document.getElementById('restart-confirm-modal').close();
+                        alert('再起動リクエストを送信しました。ページをリロードします...');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 3000);
+                    });
+                });
+            }
+        });
     </script>
     <script src="/lib/marked/marked.min.js"></script>
     <script src="~/js/ai-assistant.js" asp-append-version="true"></script>

@@ -2,19 +2,32 @@
 
 ## 1. 概述
 
-本文档描述为 NetYamlForge 框架添加 AI 交互功能的设计方案。该功能允许用户通过专门的交互界面与 AI CLI（如 Claude Code CLI、Qwen Code CLI 等）进行通信，AI 接收指令并执行任务，同时实时显示任务进度。
+本文档描述为 NetYamlForge 框架添加 AI 交互功能的设计方案。该功能允许用户通过专门的交互界面与 AI CLI（如 Claude Code CLI、Qwen Code CLI、GitHub Copilot CLI 等）进行通信，AI 接收指令并执行任务，同时实时显示任务进度。
 
 ### 1.1 设计目标
 
 - **独立交互空间**：AI 交互界面独立于现有项目页面，不影响业务功能
 - **侧边滑出式 UI**：采用右侧滑出抽屉面板，可打开/关闭，可调整宽度
-- **多 CLI 支持**：用户可选择使用不同的 AI CLI 工具
+- **多 CLI 支持**：用户可选择使用不同的 AI CLI 工具（Claude Code、Qwen Code、GitHub Copilot 等）
 - **实时进度反馈**：任务执行过程中实时显示进度和日志
 - **异步任务处理**：支持长时间运行的任务，不阻塞 UI
 - **CLI 集成**：通过 Process 调用 CLI 命令，而非 HTTP API
 - **OAuth 认证**：利用 CLI 自身的 OAuth 认证机制，无需在应用中处理 API Key
 
-### 1.2 非目标
+### 1.2 支持的 AI CLI 工具
+
+| CLI 工具 | 类型 | 服务类 | 配置类 | 状态 |
+|---------|------|--------|--------|------|
+| **GitHub Copilot CLI** | 云端 | `CopilotCLIService` | `CopilotConfig` | ✅ 已实现 |
+| Claude Code CLI | 云端 | `ClaudeCLIService` | `ClaudeConfig` | ✅ 已实现 |
+| Qwen Code CLI | 云端 | `QwenCodeCLIService` | `QwenCodeConfig` | ✅ 已实现 |
+| OpenAI Codex CLI | 云端 | `CodexCLIService` | `CodexConfig` | ✅ 已实现 |
+| Google Gemini CLI | 云端 | `GeminiCLIService` | `GeminiConfig` | ✅ 已实现 |
+| Ollama CLI | 本地 | `OllamaCLIService` | `OllamaConfig` | ✅ 已实现 |
+| LM Studio | 本地 | `LmStudioCLIService` | `LmStudioConfig` | ✅ 已实现 |
+| Mock CLI | 测试 | `MockCLIService` | - | ✅ 已实现 |
+
+### 1.3 非目标
 
 - 不修改现有项目页面的布局和功能
 - 不强制绑定特定 AI CLI

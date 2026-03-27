@@ -30,10 +30,10 @@ layout:
         action: Index
         icon: 📊
       - label: タスク一覧
-        url: /task-management/DynamicEntity/List?entity=task
+        url: /task-management/DynamicEntity/Index?entity=task
         icon: 📋
       - label: コメント一覧
-        url: /task-management/DynamicEntity/List?entity=comment
+        url: /task-management/DynamicEntity/Index?entity=comment
         icon: 💬
 
 home_page:

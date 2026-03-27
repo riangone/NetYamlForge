@@ -1,0 +1,66 @@
+jobs:
+  # 日次 AI 対話統計
+  daily_conversation_stats:
+    displayName: AI 対話日次統計
+    description: "毎日の AI 対話セッションの統計を収集します"
+    enabled: true
+
+    schedule:
+      cron: "0 23 * * *"           # 毎日 23:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/daily_conversation_stats.sql
+      outputFile: "jobs/output/conversation_stats_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # 翌日予約リマインド
+  appointment_reminder:
+    displayName: 予約リマインド送信
+    description: "翌日の予約顧客にリマインド通知を送信します"
+    enabled: true
+
+    schedule:
+      cron: "0 10 * * *"            # 毎日 10:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/tomorrow_appointments.sql
+      outputFile: "jobs/output/appointment_reminder_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # VIP 顧客フォローアップ
+  vip_customer_followup:
+    displayName: VIP 顧客フォローアップ
+    description: "フォローアップが必要な VIP 顧客を抽出します"
+    enabled: true
+
+    schedule:
+      cron: "0 9 * * 1"             # 毎週月曜 9:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/vip_followup.sql
+      outputFile: "jobs/output/vip_followup_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true

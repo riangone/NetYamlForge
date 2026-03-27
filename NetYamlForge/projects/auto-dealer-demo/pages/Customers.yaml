@@ -1,0 +1,75 @@
+title: 顧客一覧
+description: "顧客マスタの一覧と検索ページ"
+
+sections:
+  # 顧客統計
+  - id: customer_stats
+    title: 顧客統計
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総顧客数' AS metric_name, 
+             CAST(COUNT(*) AS TEXT) AS metric_value, 
+             '👥' AS metric_icon, 
+             NULL AS metric_delta
+        FROM customers
+      UNION ALL
+      SELECT '個人顧客', CAST(SUM(CASE WHEN customer_type = 'individual' THEN 1 ELSE 0 END) AS TEXT), '👤', NULL 
+        FROM customers
+      UNION ALL
+      SELECT '法人顧客', CAST(SUM(CASE WHEN customer_type = 'corporate' THEN 1 ELSE 0 END) AS TEXT), '🏢', NULL 
+        FROM customers
+      UNION ALL
+      SELECT 'VIP/Platinum', CAST(SUM(CASE WHEN tier_level IN ('vip', 'platinum') THEN 1 ELSE 0 END) AS TEXT), '💎', NULL 
+        FROM customers
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 顧客一覧テーブル
+  - id: customer_list
+    title: 顧客一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.customer_id AS 顧客 ID,
+             c.customer_type AS 種別，
+             c.name AS 顧客名，
+             c.name_kana AS フリガナ，
+             c.phone AS 電話番号，
+             c.email AS メール，
+             c.tier_level AS ランク，
+             c.last_visit_date AS 最終来店，
+             c.preferred_contact AS 希望連絡先
+      FROM customers c
+      ORDER BY c.created_at DESC
+      LIMIT 50
+    columns: [顧客 ID, 種別，顧客名，フリガナ，電話番号，メール，ランク，最終来店，希望連絡先]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 最近追加された顧客
+  - id: new_customers
+    title: 最近追加された顧客（table）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT customer_id AS 顧客 ID,
+             name AS 顧客名，
+             customer_type AS 種別，
+             tier_level AS ランク，
+             phone AS 電話番号，
+             created_at AS 作成日
+      FROM customers
+      ORDER BY created_at DESC
+      LIMIT 10
+    columns: [顧客 ID, 顧客名，種別，ランク，電話番号，作成日]
+    pageSize: 10
+    editable: false
+    readOnly: true

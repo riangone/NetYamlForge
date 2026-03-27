@@ -1,0 +1,215 @@
+imports: []
+entities:
+  customers:
+    table: customers
+    key: customer_id
+    displayName: 顧客マスタ
+    softDelete: false
+    isPublic: true
+
+    columns:
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+      customer_type:
+        type: string
+        length: 20
+        required: true
+        label: 顧客種別
+        default: individual
+        options:
+          - individual
+          - corporate
+        searchable: true
+        sortable: true
+      name:
+        type: string
+        length: 100
+        required: true
+        label: 顧客名
+        searchable: true
+        sortable: true
+      name_kana:
+        type: string
+        length: 100
+        required: false
+        label: フリガナ
+        searchable: true
+        sortable: true
+      gender:
+        type: string
+        length: 10
+        required: false
+        label: 性別
+        options:
+          - male
+          - female
+          - other
+        searchable: true
+        sortable: true
+      birth_date:
+        type: date
+        required: false
+        label: 生年月日
+        sortable: true
+      phone:
+        type: string
+        length: 20
+        required: true
+        label: 電話番号
+        searchable: true
+        sortable: true
+      mobile:
+        type: string
+        length: 20
+        required: false
+        label: 携帯電話番号
+        searchable: true
+        sortable: true
+      email:
+        type: string
+        length: 100
+        required: false
+        label: メールアドレス
+        searchable: true
+        sortable: true
+      postal_code:
+        type: string
+        length: 10
+        required: false
+        label: 郵便番号
+        searchable: true
+        sortable: true
+      address:
+        type: string
+        length: 200
+        required: false
+        label: 住所
+        searchable: true
+        sortable: true
+      tier_level:
+        type: string
+        length: 20
+        required: true
+        label: 顧客ランク
+        default: regular
+        options:
+          - regular
+          - silver
+          - gold
+          - vip
+          - platinum
+        searchable: true
+        sortable: true
+      purchase_count:
+        type: int
+        required: false
+        label: 購入回数
+        default: 0
+        sortable: true
+      total_purchase_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 累計購入金額
+        default: 0
+        sortable: true
+      last_visit_date:
+        type: date
+        required: false
+        label: 最終来店日
+        sortable: true
+      preferred_contact:
+        type: string
+        length: 20
+        required: false
+        label: 希望連絡先
+        default: phone
+        options:
+          - phone
+          - email
+          - line
+          - sms
+        searchable: true
+        sortable: true
+      line_user_id:
+        type: string
+        length: 100
+        required: false
+        label: LINE ユーザー ID
+        searchable: true
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: false
+      customer_type:
+        type: select
+        required: true
+        label: 顧客種別
+        editable: true
+      name:
+        type: string
+        required: true
+        label: 顧客名
+        editable: true
+      name_kana:
+        type: string
+        required: false
+        label: フリガナ
+        editable: true
+      phone:
+        type: string
+        required: true
+        label: 電話番号
+        editable: true
+      email:
+        type: email
+        required: false
+        label: メールアドレス
+        editable: true
+      tier_level:
+        type: select
+        required: true
+        label: 顧客ランク
+        editable: true
+      preferred_contact:
+        type: select
+        required: false
+        label: 希望連絡先
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - validate_customer_phone    # 電話番号形式を検証
+        - normalize_customer_name    # 顧客名・フリガナの空白を除去
+      beforeUpdate:
+        - validate_customer_phone
+        - normalize_customer_name
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

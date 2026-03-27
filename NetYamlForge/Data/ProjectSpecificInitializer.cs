@@ -56,6 +56,13 @@ public class ProjectSpecificInitializer
 
         // 汎用フォールバック: database/init_seed.sql が存在すれば実行
         await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
+
+        // auto-dealer-demo: AI 窓口システムテーブル初期化
+        if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
+        {
+            await InitializeAutoDealerDemoAsync(conn as SqliteConnection, logger);
+            return;
+        }
     }
 
     // 認証テーブル名（エンティティテーブル判定から除外）
@@ -244,5 +251,43 @@ CREATE TABLE ""TaskComment"" (
         await conn.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {columnType}");
 #pragma warning restore DCS001
         logger.LogInformation("列を追加しました：{Table}.{Column}", tableName, columnName);
+    }
+
+    /// <summary>
+    /// auto-dealer-demo プロジェクトの初期化（AI 窓口システムテーブル）
+    /// </summary>
+    private static async Task InitializeAutoDealerDemoAsync(SqliteConnection? conn, ILogger logger)
+    {
+        if (conn == null) return;
+
+        // ai_conversations テーブルの存在確認
+        var tables = await conn.QueryAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='ai_conversations'");
+        if (tables.Any())
+        {
+            logger.LogInformation("auto-dealer-demo のテーブルは既に存在します。初期化をスキップします。");
+            return;
+        }
+
+        // init.sql を検索（複数のパスを試行）
+        var candidates = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "projects", "auto-dealer-demo", "database", "init.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "projects", "auto-dealer-demo", "database", "init.sql"),
+            Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", "auto-dealer-demo", "database", "init.sql"),
+        };
+
+        var initSqlPath = candidates.FirstOrDefault(File.Exists);
+        if (initSqlPath == null)
+        {
+            logger.LogWarning("auto-dealer-demo の初期化スクリプトが見つかりません。検索パス：{Paths}",
+                string.Join(", ", candidates));
+            return;
+        }
+
+        logger.LogInformation("auto-dealer-demo の初期化スクリプトを実行します：{Path}", initSqlPath);
+        var sql = await File.ReadAllTextAsync(initSqlPath);
+        await conn.ExecuteAsync(sql);
+        logger.LogInformation("auto-dealer-demo の初期化が完了しました。");
     }
 }

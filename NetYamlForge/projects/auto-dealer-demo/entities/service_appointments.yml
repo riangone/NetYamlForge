@@ -1,0 +1,211 @@
+imports: []
+entities:
+  service_appointments:
+    table: service_appointments
+    key: appointment_id
+    displayName: サービス予約
+    softDelete: false
+    isPublic: true
+
+    columns:
+      appointment_id:
+        type: string
+        length: 64
+        required: true
+        label: 予約 ID
+        searchable: true
+        sortable: true
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+      vehicle_id:
+        type: string
+        length: 50
+        required: false
+        label: 車両 ID
+        searchable: true
+        sortable: true
+      appointment_type:
+        type: string
+        length: 30
+        required: true
+        label: 予約種別
+        options:
+          - inspection
+          - repair
+          - test_drive
+          - delivery
+          - consultation
+          - oil_change
+        searchable: true
+        sortable: true
+      service_menu:
+        type: string
+        length: 100
+        required: false
+        label: 服務メニュー
+        searchable: true
+        sortable: true
+      preferred_date:
+        type: datetime
+        required: true
+        label: 希望日時
+        sortable: true
+      end_date:
+        type: datetime
+        required: false
+        label: 終了予定日時
+        sortable: true
+      duration_minutes:
+        type: int
+        required: false
+        label: 所要時間（分）
+        default: 60
+        sortable: true
+      status:
+        type: string
+        length: 30
+        required: true
+        label: 予約ステータス
+        default: pending
+        options:
+          - pending
+          - confirmed
+          - in_progress
+          - completed
+          - cancelled
+          - no_show
+        searchable: true
+        sortable: true
+      assigned_staff_id:
+        type: string
+        length: 50
+        required: false
+        label: 担当スタッフ ID
+        searchable: true
+        sortable: true
+      service_bay:
+        type: string
+        length: 20
+        required: false
+        label: 作業ベイ
+        searchable: true
+        sortable: true
+      customer_request:
+        type: text
+        required: false
+        label: 顧客要望
+      service_notes:
+        type: text
+        required: false
+        label: 作業メモ
+      estimated_cost:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: false
+        label: 見積金額
+        sortable: true
+      actual_cost:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: false
+        label: 実績金額
+        sortable: true
+      reminder_sent:
+        type: bool
+        required: false
+        label: リマインド送信済み
+        default: false
+        sortable: true
+      reminder_sent_at:
+        type: datetime
+        required: false
+        label: リマインド送信日時
+        sortable: true
+      confirmed_at:
+        type: datetime
+        required: false
+        label: 確定日時
+        sortable: true
+      completed_at:
+        type: datetime
+        required: false
+        label: 完了日時
+        sortable: true
+      cancelled_at:
+        type: datetime
+        required: false
+        label: キャンセル日時
+        sortable: true
+      cancel_reason:
+        type: string
+        length: 200
+        required: false
+        label: キャンセル理由
+        searchable: true
+        sortable: true
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      appointment_id:
+        type: string
+        required: true
+        label: 予約 ID
+        editable: false
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: true
+      vehicle_id:
+        type: string
+        required: false
+        label: 車両 ID
+        editable: true
+      appointment_type:
+        type: select
+        required: true
+        label: 予約種別
+        editable: true
+      preferred_date:
+        type: datetime
+        required: true
+        label: 希望日時
+        editable: true
+      status:
+        type: select
+        required: true
+        label: 予約ステータス
+        editable: true
+      assigned_staff_id:
+        type: string
+        required: false
+        label: 担当スタッフ ID
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - validate_appointment_date      # 過去日付をチェック
+        - validate_appointment_time      # 営業時間（9:00-18:00）をチェック
+      beforeUpdate:
+        - validate_appointment_date
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

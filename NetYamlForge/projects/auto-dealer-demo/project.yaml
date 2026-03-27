@@ -1,0 +1,47 @@
+name: auto-dealer-demo
+displayName: "自動車ディーラー AI 窓口システム"
+version: "1.0.0"
+description: "AI 技術を活用した 24 時間 365 日対応可能な智能客服システム"
+
+database:
+  type: sqlite
+  path: database/auto-dealer-demo.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+  navigation:
+    showDashboard: true
+    entities:
+      - ai_conversations
+      - ai_messages
+      - ai_handovers
+      - ai_feedback
+      - ai_knowledge
+      - customers
+      - vehicles
+      - service_appointments
+      - service_requests
+    items:
+      - label: AI 窓口ダッシュボード
+        url: /auto-dealer-demo/Page/AIDashboard
+        icon: 💬
+        section: AI 窓口
+      - label: 顧客一覧
+        url: /auto-dealer-demo/Page/Customers
+        icon: 👥
+        section: 顧客管理
+      - label: サービス予約
+        url: /auto-dealer-demo/Page/Appointments
+        icon: 📅
+        section: 予約管理
+
+settings:
+  locale: ja-JP
+  timezone: Asia/Tokyo
