@@ -35,7 +35,11 @@ public class CopilotCLIService : BaseCLIService
     }
 
     /// <summary>
-    /// Copilot CLI の出力形式を解析
+    /// Copilot CLI stream-json 出力を解析。
+    /// 実際のフォーマット（--output-format json で確認済み）:
+    ///   {"type":"assistant.message","data":{"content":"text","toolRequests":[],...}}
+    ///   {"type":"result","sessionId":"...","exitCode":0,"usage":{...}}
+    /// ephemeral:true の行（reasoning_delta 等）はスキップする。
     /// </summary>
     protected override ProgressUpdate? ParseStreamLine(string line)
     {
@@ -48,159 +52,54 @@ public class CopilotCLIService : BaseCLIService
 
             Logger.LogDebug("Copilot received JSON: {Json}", line);
 
-            // response フィールドをチェック
-            if (root.TryGetProperty("response", out var responseProp) && responseProp.ValueKind == JsonValueKind.String)
-            {
-                var text = responseProp.GetString();
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    return new ProgressUpdate { Message = text, Logs = new() { text }, Status = TaskStatus.Running };
-                }
-            }
-
-            // output フィールドをチェック
-            if (root.TryGetProperty("output", out var outputProp) && outputProp.ValueKind == JsonValueKind.String)
-            {
-                var text = outputProp.GetString();
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    return new ProgressUpdate { Message = text, Logs = new() { text }, Status = TaskStatus.Running };
-                }
-            }
-
-            // 完了ステータスをチェック
-            if (root.TryGetProperty("status", out var statusProp))
-            {
-                var status = statusProp.GetString();
-                if (status == "completed" || status == "success" || status == "done")
-                {
-                    return new ProgressUpdate
-                    {
-                        Message = root.TryGetProperty("content", out var c) ? c.GetString() : null,
-                        Progress = 100,
-                        Status = TaskStatus.Completed,
-                        SessionId = root.TryGetProperty("session_id", out var sid) ? sid.GetString() : null
-                    };
-                }
-                else if (status == "error" || status == "failed")
-                {
-                    return new ProgressUpdate
-                    {
-                        Message = root.TryGetProperty("error", out var e) ? e.GetString() : "Unknown error",
-                        Status = TaskStatus.Failed
-                    };
-                }
-            }
-
-            // 標準的な type フィールドもサポート
-            if (!root.TryGetProperty("type", out var typeProp))
-            {
+            // ephemeral イベント（reasoning_delta 等）はチャットに表示しない
+            if (root.TryGetProperty("ephemeral", out var ephemeral) && ephemeral.GetBoolean())
                 return null;
-            }
+
+            if (!root.TryGetProperty("type", out var typeProp))
+                return null;
 
             return typeProp.GetString() switch
             {
-                "result"    => ParseResultMessage(root),
-                "assistant" => ParseAssistantMessagePublic(root),
-                "system"    => ParseSystemMessage(root),
-                "progress"  => ParseProgressMessage(root),
-                "error"     => ParseErrorMessage(root),
-                _           => null
+                // {"type":"assistant.message","data":{"content":"Hello","toolRequests":[],...}}
+                "assistant.message" => ParseCopilotAssistantMessage(root),
+                // {"type":"result","sessionId":"...","exitCode":0}
+                "result"            => ParseCopilotResult(root),
+                // その他（user.message, session.*, assistant.turn_start/end 等）はスキップ
+                _                   => null
             };
         }
         catch (JsonException ex)
         {
-            Logger.LogDebug(ex, "Non-JSON line received: {Line}", line);
-            return new ProgressUpdate { Logs = new() { line }, Status = TaskStatus.Running };
+            Logger.LogDebug(ex, "Non-JSON line from Copilot (ignored): {Line}", line);
+            return null;
         }
     }
 
-    /// <summary>
-    /// assistant メッセージを解析（BaseCLIService の ParseAssistantMessage をコピー）
-    /// </summary>
-    private static ProgressUpdate ParseAssistantMessagePublic(JsonElement root)
+    private static ProgressUpdate? ParseCopilotAssistantMessage(JsonElement root)
     {
-        if (!root.TryGetProperty("message", out var msg)) return new ProgressUpdate { Status = TaskStatus.Running };
-        if (!msg.TryGetProperty("content", out var content) || content.ValueKind != JsonValueKind.Array)
-            return new ProgressUpdate { Status = TaskStatus.Running };
+        if (!root.TryGetProperty("data", out var data)) return null;
+        if (!data.TryGetProperty("content", out var contentProp)) return null;
 
-        return ParseContentArrayPublic(content);
+        var text = contentProp.ValueKind == JsonValueKind.String ? contentProp.GetString() : null;
+        if (string.IsNullOrWhiteSpace(text)) return null;
+
+        return new ProgressUpdate { Message = text, Logs = new() { text }, Status = TaskStatus.Running };
     }
 
-    /// <summary>
-    /// content 配列を解析
-    /// </summary>
-    private static ProgressUpdate ParseContentArrayPublic(JsonElement content)
+    private static ProgressUpdate ParseCopilotResult(JsonElement root)
     {
-        var textParts = new List<string>();
+        // {"type":"result","sessionId":"...","exitCode":0,"usage":{...}}
+        var sessionId = root.TryGetProperty("sessionId", out var sid) ? sid.GetString() : null;
+        var exitCode = root.TryGetProperty("exitCode", out var ec) ? ec.GetInt32() : 0;
 
-        foreach (var item in content.EnumerateArray())
+        if (exitCode != 0)
         {
-            if (!item.TryGetProperty("type", out var itemType)) continue;
-
-            switch (itemType.GetString())
-            {
-                case "text":
-                    if (item.TryGetProperty("text", out var text))
-                    {
-                        var txt = text.GetString();
-                        if (!string.IsNullOrWhiteSpace(txt))
-                            textParts.Add(txt);
-                    }
-                    break;
-
-                case "tool_use":
-                    var toolName = item.TryGetProperty("name", out var n) ? n.GetString() ?? "tool" : "tool";
-                    var hint = item.TryGetProperty("input", out var inp) ? GetToolInputHintPublic(toolName, inp) : "";
-                    return new ProgressUpdate { Logs = new() { $"🔧 {toolName}{hint}" }, Status = TaskStatus.Running };
-            }
+            var errMsg = root.TryGetProperty("error", out var e) ? e.GetString() : "Copilot CLI error";
+            return new ProgressUpdate { Message = errMsg, Status = TaskStatus.Failed };
         }
 
-        if (textParts.Count > 0)
-        {
-            var combinedText = string.Join("\n", textParts);
-            return new ProgressUpdate { Message = combinedText, Logs = new() { combinedText }, Status = TaskStatus.Running };
-        }
-
-        return new ProgressUpdate { Status = TaskStatus.Running };
-    }
-
-    /// <summary>
-    /// ツール入力のヒントを取得
-    /// </summary>
-    private static string GetToolInputHintPublic(string toolName, JsonElement input)
-    {
-        try
-        {
-            switch (toolName.ToLowerInvariant())
-            {
-                case "bash":
-                case "execute_command":
-                    if (input.TryGetProperty("command", out var cmd))
-                        return $": {cmd.GetString()?.Split('\n')[0]?.Trim()}";
-                    break;
-                case "read":
-                case "readfile":
-                    if (input.TryGetProperty("file_path", out var fp))
-                        return $": {fp.GetString()}";
-                    break;
-                case "write":
-                case "writefile":
-                    if (input.TryGetProperty("file_path", out var fp2))
-                        return $": {fp2.GetString()}";
-                    break;
-                case "edit":
-                    if (input.TryGetProperty("file_path", out var fp3))
-                        return $": {fp3.GetString()}";
-                    break;
-                case "grep":
-                    if (input.TryGetProperty("pattern", out var pat))
-                        return $": {pat.GetString()}";
-                    break;
-            }
-        }
-        catch { /* ignore */ }
-        return "";
+        return new ProgressUpdate { Message = null, Progress = 100, Status = TaskStatus.Completed, SessionId = sessionId };
     }
 
     public override async Task<CliToolInfo> GetToolInfoAsync(CancellationToken ct = default)
@@ -261,46 +160,21 @@ public class CopilotCLIService : BaseCLIService
     {
         var args = new List<string>();
 
-        // Copilot CLI: copilot <prompt>
-        // 基本的にはメッセージをそのまま渡す
+        // Copilot CLI: copilot --prompt <message> --allow-all-tools --output-format json
+        // -p/--prompt <text>: 非インタラクティブモードでプロンプトを実行する
+        // --allow-all-tools: ツールを確認なしで自動実行（非インタラクティブ必須）
+        // --output-format json: JSONL 形式で出力（stream-json は存在しない）
+        args.Add("--prompt");
+        args.Add(message);
+        args.Add("--allow-all-tools");
+        args.Add("--output-format");
+        args.Add("json");
 
-        // 出力フォーマット
-        if (streaming)
-        {
-            args.Add("--stream");
-            args.Add("--output-format");
-            args.Add("stream-json");
-        }
-        else
-        {
-            args.Add("--output-format");
-            args.Add("json");
-        }
-
-        // フレームワーク固有のシステムプロンプトを追加
-        var systemPrompt = SkillLoader.GetSystemPrompt();
-        if (!string.IsNullOrEmpty(systemPrompt))
-        {
-            args.Add("--system-prompt");
-            args.Add(systemPrompt);
-        }
-
-        // セッション再開
+        // セッション再開（--resume[=sessionId] 形式）
         if (!string.IsNullOrEmpty(sessionId))
         {
-            args.Add("--resume");
-            args.Add(sessionId);
+            args.Add($"--resume={sessionId}");
         }
-
-        // ツール権限制御
-        if (allowedTools != null && allowedTools.Count > 0)
-        {
-            args.Add("--allowed-tools");
-            args.Add(string.Join(",", allowedTools));
-        }
-
-        // メッセージは最後に追加（位置引数として扱われる）
-        args.Add(message);
 
         return args;
     }

@@ -149,6 +149,7 @@
                         <option value="qwen">Qwen Code</option>
                         <option value="codex">OpenAI Codex</option>
                         <option value="gemini">Google Gemini</option>
+                        <option value="copilot">GitHub Copilot</option>
                         <option value="ollama">Ollama (本地模型)</option>
                         <option value="lmstudio">LM Studio (本地)</option>
                         <option value="mock">Mock (Test)</option>
