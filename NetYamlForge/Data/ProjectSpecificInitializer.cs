@@ -37,9 +37,10 @@ public class ProjectSpecificInitializer
             return;
         }
 
-        // task-management: CreatedBy 列追加 & TaskComment テーブル作成
+        // task-management: init.sql でテーブル作成後、CreatedBy 列追加 & TaskComment テーブル作成
         if (string.Equals(projectName, "task-management", StringComparison.OrdinalIgnoreCase))
         {
+            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
             await EnsureColumnAsync(conn as SqliteConnection, "Task", "CreatedBy", "TEXT", logger);
             await EnsureTaskCommentTableAsync(conn as SqliteConnection, logger);
             return;
