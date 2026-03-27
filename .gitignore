@@ -22,6 +22,7 @@ logs/
 packages/
 
 # Runtime data (SQLite WAL files still ignored)
+*.db
 *.db-shm
 *.db-wal
 
