@@ -160,7 +160,19 @@
                         rows="2"></textarea>
                 </div>
                 
+                <div id="ai-history-popup" class="ai-history-popup" style="display:none">
+                    <div class="ai-history-popup-header">
+                        <span>入力履歴</span>
+                        <button id="ai-history-popup-close" class="btn btn-ghost btn-xs btn-circle">✕</button>
+                    </div>
+                    <ul id="ai-history-popup-list" class="ai-history-popup-list"></ul>
+                </div>
                 <div class="ai-input-actions">
+                    <button id="ai-history-popup-btn" class="btn btn-ghost btn-sm" title="入力履歴を表示">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </button>
                     <button id="ai-stop-btn" class="btn btn-ghost btn-sm" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -281,6 +293,28 @@
             }
         });
         
+        // 履歴ポップアップボタン
+        document.getElementById('ai-history-popup-btn').onclick = function(e) {
+            e.stopPropagation();
+            toggleHistoryPopup();
+        };
+
+        // 履歴ポップアップ閉じるボタン
+        document.getElementById('ai-history-popup-close').onclick = function(e) {
+            e.stopPropagation();
+            closeHistoryPopup();
+        };
+
+        // ポップアップ外クリックで閉じる
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('ai-history-popup');
+            const btn = document.getElementById('ai-history-popup-btn');
+            if (popup && popup.style.display !== 'none' &&
+                !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                closeHistoryPopup();
+            }
+        });
+
         // CLI 工具选択変化時に保存
         document.getElementById('ai-cli-tool').addEventListener('change', function() {
             try { sessionStorage.setItem(TOOL_STORAGE_KEY, this.value); } catch(e) {}
@@ -320,6 +354,54 @@
         document.head.appendChild(script);
     }
     
+    // ===== 入力履歴ポップアップ =====
+    function toggleHistoryPopup() {
+        const popup = document.getElementById('ai-history-popup');
+        if (!popup) return;
+        if (popup.style.display === 'none') {
+            openHistoryPopup();
+        } else {
+            closeHistoryPopup();
+        }
+    }
+
+    function openHistoryPopup() {
+        const popup = document.getElementById('ai-history-popup');
+        const list = document.getElementById('ai-history-popup-list');
+        if (!popup || !list) return;
+
+        list.innerHTML = '';
+        if (inputHistory.length === 0) {
+            const empty = document.createElement('li');
+            empty.className = 'ai-history-empty';
+            empty.textContent = '履歴はありません';
+            list.appendChild(empty);
+        } else {
+            inputHistory.forEach(function(text, idx) {
+                const li = document.createElement('li');
+                li.className = 'ai-history-item';
+                li.title = text;
+                li.textContent = text.length > 60 ? text.slice(0, 60) + '…' : text;
+                li.onclick = function() {
+                    const input = document.getElementById('ai-input-message');
+                    if (input) {
+                        input.value = text;
+                        input.focus();
+                        inputHistoryIndex = idx;
+                    }
+                    closeHistoryPopup();
+                };
+                list.appendChild(li);
+            });
+        }
+        popup.style.display = 'block';
+    }
+
+    function closeHistoryPopup() {
+        const popup = document.getElementById('ai-history-popup');
+        if (popup) popup.style.display = 'none';
+    }
+
     // 轮询回退方案（已废弃，使用 pollTaskResult 替代）
     function initPollingFallback() {
         console.log('SignalR not available, using simple polling');
@@ -521,7 +603,8 @@
 
                 if (data.taskId) {
                     currentTaskId = data.taskId;
-                    // タスクIDがある場合はポーリングで結果を取得
+                    // タスクIDがある場合はポーリングで結果を取得（フェーズを「実行中」へ切り替え）
+                    setSendingState(true, 'executing');
                     await pollTaskResult(data.taskId);
                     currentTaskId = null;
                 } else {
@@ -561,12 +644,10 @@
                 // 更新进度
                 if (progressEl) {
                     const fill = progressEl.querySelector('.ai-progress-fill');
-                    const percent = progressEl.querySelector('.progress-percent');
                     const status = progressEl.querySelector('.progress-status');
                     const logsContainer = progressEl.querySelector('.ai-logs ul');
 
                     if (fill) fill.style.width = `${data.progress}%`;
-                    if (percent) percent.textContent = `${data.progress}%`;
                     if (status) status.textContent = translateStatus(data.status);
 
                     // 显示日志（仅新增的）
@@ -648,12 +729,10 @@
         const progressEl = document.querySelector(`[data-task-id="${data.id}"]`);
         if (progressEl) {
             const fill = progressEl.querySelector('.ai-progress-fill');
-            const percent = progressEl.querySelector('.progress-percent');
             const status = progressEl.querySelector('.progress-status');
             const logsContainer = progressEl.querySelector('.ai-logs ul');
 
             if (fill) fill.style.width = `${data.progress || 0}%`;
-            if (percent) percent.textContent = `${data.progress || 0}%`;
             if (status) status.textContent = translateStatus(data.status);
 
             // ログを全件再描画（差分追加よりシンプルで正確）
@@ -918,14 +997,13 @@
         progressEl.className = 'ai-message assistant';
         progressEl.setAttribute('data-task-id', taskId);
         progressEl.innerHTML = `
-            <div>⏳ 任务进行中...</div>
+            <div>⏳ 実行中...</div>
             <div class="ai-progress-container">
                 <div class="ai-progress-bar">
                     <div class="ai-progress-fill" style="width: 0%"></div>
                 </div>
                 <div class="ai-progress-text">
-                    <span class="progress-status">正在处理...</span>
-                    <span class="progress-percent">0%</span>
+                    <span class="progress-status">処理中...</span>
                 </div>
                 <div class="ai-logs">
                     <ul></ul>
@@ -946,23 +1024,23 @@
     }
     
     // 设置发送状态
-    function setSendingState(sending) {
+    // phase: 'sending'（HTTP送信中）| 'executing'（タスク実行中）| false（完了）
+    function setSendingState(sending, phase) {
         const sendBtn = document.getElementById('ai-send-btn');
         const stopBtn = document.getElementById('ai-stop-btn');
         const input = document.getElementById('ai-input-message');
-        
+
         sendBtn.disabled = sending;
         stopBtn.disabled = !sending;
         input.disabled = sending;
-        
+
         if (sending) {
-            sendBtn.innerHTML = `
-                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            const spinnerSvg = `<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                发送中...
-            `;
+                </svg>`;
+            const label = (phase === 'executing') ? '実行中...' : '送信中...';
+            sendBtn.innerHTML = spinnerSvg + label;
         } else {
             sendBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
