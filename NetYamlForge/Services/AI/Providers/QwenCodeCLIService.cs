@@ -89,14 +89,15 @@ public class QwenCodeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
-        // 非インタラクティブモード（-p フラグ + ArgumentList でエスケープ不要）
-        args.Add("-p");
+        // Qwen CLI: qwen --yolo --prompt <message> [options]
+        // --yolo (-y): 自動実行モード（確認不要）
+        // --prompt (-p): プロンプトを指定する（非推奨だが stdin EOF の影響を受けないため使用する）。
+        // stdin が閉じられた状態でも --prompt フラグなら確実に入力を受け取れる。
+        args.Add("--yolo");
+        args.Add("--prompt");
         args.Add(message);
 
-        // ヘッドレス実行時の対話的権限プロンプトをスキップ
-        args.Add("-y");
-
-        // 出力フォーマット（Qwen Code は --verbose 未サポート）
+        // 出力フォーマット
         args.Add("--output-format");
         args.Add(streaming ? "stream-json" : "json");
 
@@ -111,7 +112,7 @@ public class QwenCodeCLIService : BaseCLIService
         var systemPrompt = SkillLoader.GetSystemPrompt();
         if (!string.IsNullOrEmpty(systemPrompt))
         {
-            args.Add("--system-prompt");
+            args.Add("--append-system-prompt");
             args.Add(systemPrompt);
         }
 
@@ -125,7 +126,7 @@ public class QwenCodeCLIService : BaseCLIService
         // ツール権限制御
         if (allowedTools != null && allowedTools.Count > 0)
         {
-            args.Add("--allowedTools");
+            args.Add("--allowed-tools");
             args.Add(string.Join(",", allowedTools));
         }
 

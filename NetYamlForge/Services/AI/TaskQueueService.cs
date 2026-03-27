@@ -121,6 +121,8 @@ public class TaskQueueService
                 // 实际 CLI 服务
                 var workingDir = GetWorkingDirectory(task.Project);
                 string? lastMessage = null;
+                var allMessages = new System.Text.StringBuilder();
+                var hasMessageContent = false;
 
                 await foreach (var update in aiService.ExecuteStreamingAsync(
                     task.Message,
@@ -131,9 +133,18 @@ public class TaskQueueService
                 {
                     _tracker.UpdateProgress(task.Id, update);
 
-                    // 保存最后的消息
+                    // 累积所有 assistant 消息（多个 text part 可能分散在多个消息中）
                     if (!string.IsNullOrEmpty(update.Message))
                     {
+                        if (hasMessageContent)
+                        {
+                            allMessages.AppendLine(update.Message);
+                        }
+                        else
+                        {
+                            allMessages.Append(update.Message);
+                            hasMessageContent = true;
+                        }
                         lastMessage = update.Message;
                     }
 
@@ -145,9 +156,14 @@ public class TaskQueueService
 
                     if (update.Status == TaskStatus.Completed)
                     {
-                        // Qwen Code 等では result フィールドが "Task completed" などのステータス文字列になる場合がある。
-                        // assistant メッセージから蓄積した lastMessage を優先し、なければ result フィールドを使用する。
-                        var finalResult = lastMessage ?? update.Message ?? "Task completed";
+                        // assistant メッセージから蓄積したテキストを優先する。
+                        // result フィールドは "Task completed" などのステータス文字列の場合があるため、
+                        // 実際のテキストコンテンツと区別してフォールバックとして使用する。
+                        var resultText = update.Message;
+                        // "Task completed" のような汎用ステータス文字列はフォールバックとして使わない
+                        if (resultText != null && resultText.Trim().Equals("Task completed", StringComparison.OrdinalIgnoreCase))
+                            resultText = null;
+                        var finalResult = hasMessageContent ? allMessages.ToString() : (resultText ?? lastMessage ?? "");
                         _tracker.Complete(task.Id, finalResult);
                         await SaveCommandLogResultAsync(task.Id, "Completed", finalResult, null, startedAt);
                         return;
@@ -161,8 +177,8 @@ public class TaskQueueService
                     }
                 }
 
-                // 如果流式完成但没有明确状态，使用最后的消息
-                var completedResult = lastMessage ?? "Task completed";
+                // 如果流式完成但没有明确状态，使用累积的消息
+                var completedResult = hasMessageContent ? allMessages.ToString() : (lastMessage ?? "");
                 _tracker.Complete(task.Id, completedResult);
                 await SaveCommandLogResultAsync(task.Id, "Completed", completedResult, null, startedAt);
             }

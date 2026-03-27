@@ -86,11 +86,16 @@ public class ClaudeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
-        // 非インタラクティブモード
+        // Claude CLI: claude -p <prompt> [options]
+        // -p / --print: 非インタラクティブモードでプロンプトを実行する。
+        // メッセージは -p の直後に渡す（"prompt argument" として認識される）。
         args.Add("-p");
         args.Add(message);
 
-        // 出力フォーマット（stream-json は --verbose が必要）
+        // --dangerously-skip-permissions: 権限プロンプトをスキップ
+        args.Add("--dangerously-skip-permissions");
+
+        // 出力フォーマット
         args.Add("--output-format");
         args.Add(streaming ? "stream-json" : "json");
         if (streaming) args.Add("--verbose");

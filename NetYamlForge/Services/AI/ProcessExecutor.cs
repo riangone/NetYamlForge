@@ -34,6 +34,8 @@ public class ProcessExecutor
 
         _logger.LogInformation("Starting CLI: {Command} {Arguments}", command, string.Join(" ", argumentList));
         process.Start();
+        // stdin を即座に閉じる（Claude CLI 等が stdin を待機して 3 秒タイムアウトするのを防ぐ）
+        process.StandardInput.Close();
         _logger.LogInformation("CLI started with PID: {Pid}", process.Id);
 
         // stdout / stderr を並行して読み込む（逐次だとバッファ枯渇でデッドロックする可能性がある）

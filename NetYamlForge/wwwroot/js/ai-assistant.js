@@ -24,7 +24,7 @@
     const CONFIG = {
         apiBaseUrl: '/api/ai',
         signalRUrl: '/aiProgressHub',
-        defaultCliTool: 'claude'
+        defaultCliTool: 'qwen'  // 与 appsettings.json 保持一致
     };
 
     // 初始化
@@ -147,6 +147,10 @@
                     <select id="ai-cli-tool" class="select select-sm select-bordered">
                         <option value="claude">Claude Code</option>
                         <option value="qwen">Qwen Code</option>
+                        <option value="codex">OpenAI Codex</option>
+                        <option value="gemini">Google Gemini</option>
+                        <option value="ollama">Ollama (本地模型)</option>
+                        <option value="lmstudio">LM Studio (本地)</option>
                         <option value="mock">Mock (Test)</option>
                     </select>
                     <span id="cli-status" class="text-xs opacity-50 ml-2"></span>

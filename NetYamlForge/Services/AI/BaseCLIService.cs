@@ -149,15 +149,23 @@ public abstract class BaseCLIService : ICLIService
                 _                  => null
             };
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
             // 非 JSON テキストはそのままログに出力（CLIの補助メッセージ等）
+            Logger.LogDebug(ex, "Non-JSON line received: {Line}", line);
             return new ProgressUpdate { Logs = new() { line }, Status = TaskStatus.Running };
         }
     }
 
-    private static ProgressUpdate ParseResultMessage(JsonElement root)
+    /// <summary>
+    /// result メッセージを解析。
+    /// result フィールドに実際の応答テキストが含まれる場合（Claude Code 等）は Message にセットする。
+    /// TaskQueueService 側で assistant メッセージの蓄積テキストを優先し、
+    /// 取得できなかった場合のフォールバックとして利用される。
+    /// </summary>
+    protected static ProgressUpdate ParseResultMessage(JsonElement root)
     {
+        // result フィールドを読み取る（Claude Code は実際の応答テキストを含む場合がある）
         string? text = null;
         if (root.TryGetProperty("result", out var r))
             text = r.ValueKind == JsonValueKind.String ? r.GetString() : null;
@@ -169,7 +177,7 @@ public abstract class BaseCLIService : ICLIService
         return new ProgressUpdate { Message = text, Progress = 100, Status = TaskStatus.Completed, SessionId = sessionId };
     }
 
-    private static ProgressUpdate ParseProgressMessage(JsonElement root)
+    protected static ProgressUpdate ParseProgressMessage(JsonElement root)
     {
         return new ProgressUpdate
         {
@@ -179,7 +187,7 @@ public abstract class BaseCLIService : ICLIService
         };
     }
 
-    private static ProgressUpdate ParseErrorMessage(JsonElement root)
+    protected static ProgressUpdate ParseErrorMessage(JsonElement root)
     {
         return new ProgressUpdate
         {
@@ -242,7 +250,7 @@ public abstract class BaseCLIService : ICLIService
         return new ProgressUpdate { Status = TaskStatus.Running };
     }
 
-    private static ProgressUpdate ParseSystemMessage(JsonElement root)
+    protected static ProgressUpdate ParseSystemMessage(JsonElement root)
     {
         var parts = new List<string>();
         if (root.TryGetProperty("model", out var model)) parts.Add($"model: {model.GetString()}");
