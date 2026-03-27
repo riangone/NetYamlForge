@@ -29,6 +29,7 @@ packages/
 # App runtime files
 *.pid
 reports/
+projects/*/jobs/output/
 
 # OS
 .DS_Store
