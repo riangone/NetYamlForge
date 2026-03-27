@@ -8,6 +8,7 @@
     let currentTaskId = null;
     let currentSessionId = null; // マルチターン会話の継続用セッションID
     let isPanelOpen = false;
+    let isPanelMinimized = false;
     let autoScroll = true;
     let chatHistory = []; // ページ跨ぎ用メモリ上の履歴
 
@@ -85,13 +86,18 @@
                     <span id="ai-status-indicator" class="ai-status-indicator idle"></span>
                     <h3>AI Assistant</h3>
                 </div>
-                <div class="flex gap-2">
-                    <button id="ai-minimize-btn" class="btn btn-ghost btn-sm btn-circle" title="Minimize">
+                <div class="flex gap-1">
+                    <button id="ai-maximize-btn" class="btn btn-ghost btn-sm btn-circle" title="最大化">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                    </button>
+                    <button id="ai-collapse-btn" class="btn btn-ghost btn-sm btn-circle" title="最小化">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
                         </svg>
                     </button>
-                    <button id="ai-close-btn" class="btn btn-ghost btn-sm btn-circle" title="Close">
+                    <button id="ai-close-btn" class="btn btn-ghost btn-sm btn-circle" title="閉じる">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -100,16 +106,24 @@
             </div>
             
             <div class="ai-panel-body" id="ai-messages-container">
-                <div class="ai-message assistant">
-                    <div class="ai-message-content">
-                        🤖 你好！我是你的 AI 助手。我可以帮助你：
-                        <ul>
-                            <li>创建实体定义</li>
-                            <li>生成页面模板</li>
-                            <li>编写业务逻辑代码</li>
-                            <li>分析项目结构</li>
-                        </ul>
-                        请告诉我你需要什么帮助？
+                <div class="ai-message-row assistant">
+                    <div class="ai-message-sender">AI Assistant</div>
+                    <div class="ai-message-inner">
+                        <div class="ai-message-avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>
+                        </div>
+                        <div class="ai-message assistant">
+                            <div class="ai-message-content">
+                                こんにちは！AI アシスタントです。以下のことをお手伝いできます：
+                                <ul>
+                                    <li>エンティティ定義の作成</li>
+                                    <li>ページテンプレートの生成</li>
+                                    <li>ビジネスロジックのコーディング</li>
+                                    <li>プロジェクト構造の分析</li>
+                                </ul>
+                                何かお手伝いできることはありますか？
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -182,9 +196,23 @@
     }
 
     function bindPanelEvents() {
-        // 关闭按钮
-        document.getElementById('ai-close-btn').onclick = closePanel;
-        document.getElementById('ai-minimize-btn').onclick = minimizePanel;
+        // 最大化ボタン
+        document.getElementById('ai-maximize-btn').onclick = toggleMaximize;
+
+        // 最小化ボタン（折りたたむ）
+        document.getElementById('ai-collapse-btn').onclick = toggleMinimize;
+
+        // 閉じるボタン
+        document.getElementById('ai-close-btn').onclick = function() {
+            if (isPanelOpen) togglePanel();
+        };
+
+        // 最小化中にヘッダーをクリックすると展開
+        document.querySelector('.ai-panel-header').addEventListener('click', function(e) {
+            if (isPanelMinimized && !e.target.closest('button')) {
+                toggleMinimize();
+            }
+        });
 
         // visualViewport で旧 iOS Safari のキーボード対応
         if (window.visualViewport) {
@@ -470,8 +498,10 @@
     async function pollTaskResult(taskId) {
         const progressEl = addProgressContainer(taskId);
         let lastLogCount = 0;
+        const TIMEOUT_MS = 30 * 60 * 1000;  // 最长等待 30 分钟
+        const deadline = Date.now() + TIMEOUT_MS;
 
-        for (let i = 0; i < 60; i++) {  // 最多轮询 60 次
+        while (Date.now() < deadline) {
             try {
                 const response = await fetch(`${CONFIG.apiBaseUrl}/tasks/${taskId}`);
                 if (!response.ok) break;
@@ -485,7 +515,7 @@
                     const percent = progressEl.querySelector('.progress-percent');
                     const status = progressEl.querySelector('.progress-status');
                     const logsContainer = progressEl.querySelector('.ai-logs ul');
-                    
+
                     if (fill) fill.style.width = `${data.progress}%`;
                     if (percent) percent.textContent = `${data.progress}%`;
                     if (status) status.textContent = translateStatus(data.status);
@@ -522,8 +552,8 @@
                     return;
                 }
 
-                // 等待 1 秒后继续轮询
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // 等待 2 秒后继续轮询
+                await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (error) {
                 console.error('Polling error:', error);
                 break;
@@ -630,23 +660,53 @@
     // 添加消息
     function addMessage(content, type, skipSave) {
         const container = document.getElementById('ai-messages-container');
-        const messageEl = document.createElement('div');
-        messageEl.className = `ai-message ${type}`;
 
-        if (type === 'assistant') {
-            const contentEl = document.createElement('div');
-            contentEl.className = 'ai-message-content';
-            contentEl.innerHTML = renderMarkdown(content);
-            // コードブロックにコピーボタンを追加
-            contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
-            messageEl.appendChild(contentEl);
-        } else if (type === 'user') {
-            messageEl.innerHTML = `<div class="ai-message-content">${escapeHtml(content)}</div>`;
-        } else {
+        if (type === 'system') {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'ai-message system';
             messageEl.textContent = content;
-        }
+            container.appendChild(messageEl);
+        } else {
+            const rowEl = document.createElement('div');
+            rowEl.className = `ai-message-row ${type}`;
 
-        container.appendChild(messageEl);
+            // 送信者ラベル
+            const senderEl = document.createElement('div');
+            senderEl.className = 'ai-message-sender';
+            senderEl.textContent = type === 'user' ? 'You' : 'AI Assistant';
+            rowEl.appendChild(senderEl);
+
+            // アバター + バブル の横並びラッパー
+            const innerEl = document.createElement('div');
+            innerEl.className = 'ai-message-inner';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'ai-message-avatar';
+            if (type === 'user') {
+                avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>';
+            } else {
+                avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>';
+            }
+
+            const messageEl = document.createElement('div');
+            messageEl.className = `ai-message ${type}`;
+
+            if (type === 'assistant') {
+                const contentEl = document.createElement('div');
+                contentEl.className = 'ai-message-content';
+                contentEl.innerHTML = renderMarkdown(content);
+                // コードブロックにコピーボタンを追加
+                contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
+                messageEl.appendChild(contentEl);
+            } else {
+                messageEl.innerHTML = `<div class="ai-message-content">${escapeHtml(content)}</div>`;
+            }
+
+            innerEl.appendChild(avatar);
+            innerEl.appendChild(messageEl);
+            rowEl.appendChild(innerEl);
+            container.appendChild(rowEl);
+        }
 
         if (!skipSave) {
             chatHistory.push({ content, type });
@@ -832,7 +892,8 @@
         const trigger = document.getElementById('ai-assistant-trigger');
 
         panel.classList.add('open');
-        trigger.classList.add('hidden');
+        trigger.classList.remove('hidden');
+        trigger.classList.add('panel-open');
         isPanelOpen = true;
         // キーボードが既に出ている場合に備えてサイズ調整
         if (window.visualViewport) adjustPanelForKeyboard();
@@ -843,15 +904,66 @@
         const trigger = document.getElementById('ai-assistant-trigger');
 
         panel.classList.remove('open');
-        trigger.classList.remove('hidden');
+        trigger.classList.remove('panel-open');
         isPanelOpen = false;
         resetPanelSize();
     }
     
-    function minimizePanel() {
-        closePanel();
+    // 最小化（折りたたみ）トグル
+    function toggleMinimize() {
+        const panel = document.getElementById('ai-assistant-panel');
+        const btn = document.getElementById('ai-collapse-btn');
+        if (!panel) return;
+
+        isPanelMinimized = !isPanelMinimized;
+        panel.classList.toggle('ai-panel-minimized', isPanelMinimized);
+
+        if (isPanelMinimized) {
+            // 折りたたみ時：最大化を解除
+            if (isMaximized) toggleMaximize();
+            if (btn) btn.title = '展開';
+            if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>`;
+        } else {
+            if (btn) btn.title = '最小化';
+            if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>`;
+        }
     }
-    
+
+    // 最大化状态
+    let isMaximized = false;
+    let previousWidth = '';
+    let previousRight = '';
+
+    // 切换最大化/还原
+    function toggleMaximize() {
+        const panel = document.getElementById('ai-assistant-panel');
+        const trigger = document.getElementById('ai-assistant-trigger');
+        const btn = document.getElementById('ai-maximize-btn');
+        if (!panel) return;
+
+        if (isMaximized) {
+            // 还原
+            panel.style.width = previousWidth || '';
+            panel.style.right = previousRight || '';
+            panel.classList.remove('ai-panel-maximized');
+            if (trigger) trigger.classList.remove('hidden');
+            isMaximized = false;
+            if (btn) btn.title = 'Maximize';
+            if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>`;
+        } else {
+            // 最大化
+            previousWidth = panel.style.width;
+            previousRight = panel.style.right;
+            panel.style.width = '100vw';
+            panel.style.right = '0';
+            panel.classList.add('ai-panel-maximized');
+            if (trigger) trigger.classList.add('hidden');
+            isMaximized = true;
+            if (btn) btn.title = 'Restore';
+            if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>`;
+        }
+    }
+
     // 清除消息
     function clearMessages() {
         chatHistory = [];

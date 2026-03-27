@@ -57,10 +57,10 @@ public abstract class BaseCLIService : ICLIService
         List<string>? allowedTools = null,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var args = BuildArguments(message, true, sessionId, allowedTools);
+        var argList = BuildArgumentList(message, true, sessionId, allowedTools);
         var workingDir = workingDirectory ?? Config.DefaultWorkingDirectory;
 
-        await foreach (var line in Executor.ExecuteStreamingAsync(CommandPath, args, workingDir, GetEnvironmentVariables(), ct))
+        await foreach (var line in Executor.ExecuteStreamingAsync(CommandPath, argList, workingDir, GetEnvironmentVariables(), ct))
         {
             // 解析 stream-json 输出
             var update = ParseStreamLine(line);
@@ -70,7 +70,7 @@ public abstract class BaseCLIService : ICLIService
             }
         }
     }
-    
+
     public async Task<string> ExecuteAsync(
         string message,
         string? workingDirectory = null,
@@ -78,16 +78,16 @@ public abstract class BaseCLIService : ICLIService
         List<string>? allowedTools = null,
         CancellationToken ct = default)
     {
-        var args = BuildArguments(message, false, sessionId, allowedTools);
+        var argList = BuildArgumentList(message, false, sessionId, allowedTools);
         var workingDir = workingDirectory ?? Config.DefaultWorkingDirectory;
 
-        var result = await Executor.ExecuteAsync(CommandPath, args, workingDir, GetEnvironmentVariables(), ct);
-        
+        var result = await Executor.ExecuteAsync(CommandPath, argList, workingDir, GetEnvironmentVariables(), ct);
+
         if (result.ExitCode != 0)
         {
             throw new InvalidOperationException($"CLI failed: {result.Error}");
         }
-        
+
         return result.Output;
     }
     
@@ -114,9 +114,10 @@ public abstract class BaseCLIService : ICLIService
     }
     
     /// <summary>
-    /// 构建 CLI 参数（由子类实现）
+    /// CLI 引数リストを構築する（サブクラスで実装）。
+    /// ArgumentList に直接渡すため、引用符エスケープ不要。
     /// </summary>
-    protected abstract string BuildArguments(
+    protected abstract List<string> BuildArgumentList(
         string message,
         bool streaming,
         string? sessionId,

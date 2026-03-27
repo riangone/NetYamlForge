@@ -1,0 +1,232 @@
+imports: []
+entities:
+  product:
+    table: Product
+    key: Id
+    displayName: 商品
+    softDelete: false
+    isPublic: false
+
+    hooks:
+      beforeCreate:
+        - normalize_product_code
+        - validate_product_price
+      beforeUpdate:
+        - normalize_product_code
+        - validate_product_price
+
+    joins:
+      - type: left
+        table: Category
+        alias: cat
+        on: Product.CategoryId = cat.Id
+      - type: left
+        table: Supplier
+        alias: sup
+        on: Product.SupplierId = sup.Id
+
+    forms:
+      Code:
+        type: string
+        required: true
+        label: 商品コード
+        editable: true
+      Name:
+        type: string
+        required: true
+        label: 商品名
+        editable: true
+      CategoryId:
+        type: int
+        label: カテゴリ
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      SupplierId:
+        type: int
+        label: 仕入先
+        editable: true
+        foreignKey:
+          entity: supplier
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      Unit:
+        type: string
+        required: true
+        label: 単位
+        editable: true
+        options:
+          - 個
+          - 枚
+          - 本
+          - 台
+          - kg
+          - m
+          - L
+          - pcs
+      CostPrice:
+        type: money
+        label: 原価（円）
+        editable: true
+      SellingPrice:
+        type: money
+        label: 販売価格（円）
+        editable: true
+      ReorderPoint:
+        type: int
+        label: 発注点
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Code:
+        type: string
+        required: true
+        label: 商品コード
+        searchable: true
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: 商品名
+        searchable: true
+        sortable: true
+      CategoryId:
+        type: int
+        label: Category ID
+        hidden: true
+      CategoryName:
+        type: string
+        label: カテゴリ
+        expression: cat.Name
+        searchable: true
+        sortable: true
+      SupplierId:
+        type: int
+        label: Supplier ID
+        hidden: true
+      SupplierName:
+        type: string
+        label: 仕入先
+        expression: sup.Name
+        searchable: true
+        sortable: true
+      Unit:
+        type: string
+        required: true
+        label: 単位
+        sortable: true
+      CostPrice:
+        type: money
+        label: 原価（円）
+        sortable: true
+      SellingPrice:
+        type: money
+        label: 販売価格（円）
+        sortable: true
+      ReorderPoint:
+        type: int
+        label: 発注点
+        sortable: true
+      Description:
+        type: string
+        label: 説明
+        searchable: true
+        sortable: false
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Code
+          - Name
+          - CategoryId
+          - SupplierId
+          - Unit
+          - CostPrice
+          - SellingPrice
+          - ReorderPoint
+          - Description
+      filters:
+        columns: 4
+        order:
+          - CategoryId
+          - SupplierId
+          - Code
+          - Name
+
+    filters:
+      CategoryId:
+        type: dropdown
+        label: カテゴリ
+        expression: Product.CategoryId
+        foreignKey:
+          entity: category
+          displayColumn: Name
+      SupplierId:
+        type: dropdown
+        label: 仕入先
+        expression: Product.SupplierId
+        foreignKey:
+          entity: supplier
+          displayColumn: Name
+      Code:
+        type: like
+        label: 商品コード
+      Name:
+        type: like
+        label: 商品名
+
+    exports:
+      product_csv:
+        label: "商品一覧 CSV"
+        format: csv
+        filename: "products_{date:yyyyMMdd}.csv"
+        columns:
+          - Code
+          - Name
+          - CategoryName
+          - SupplierName
+          - Unit
+          - CostPrice
+          - SellingPrice
+          - ReorderPoint
+
+    links:
+      category:
+        label: カテゴリ
+        targetEntity: category
+        filter:
+          Id: CategoryId
+      supplier:
+        label: 仕入先
+        targetEntity: supplier
+        filter:
+          Id: SupplierId
+      stocks:
+        label: 在庫状況
+        targetEntity: stock
+        filter:
+          ProductId: Id
+      movements:
+        label: 入出庫履歴
+        targetEntity: stock_movement
+        filter:
+          ProductId: Id

@@ -1,0 +1,21 @@
+jobs:
+  monthly_stock_summary:
+    displayName: 月次入出庫サマリー
+    description: "前月の入出庫を商品・種別ごとに集計して CSV に出力します。毎月 1 日 03:00 (JST) に実行。"
+    enabled: true
+
+    schedule:
+      cron: "0 3 1 * *"        # 毎月 1 日 03:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/monthly_stock_summary.sql
+      outputFile: "jobs/output/monthly_summary_{date:yyyyMM}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 600       # 10 分後にリトライ
+      logError: true

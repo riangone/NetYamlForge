@@ -1,0 +1,193 @@
+# 入出庫伝票 帳票テンプレート
+# StockMovement エンティティの pdfTemplate: movement_slip で参照されます。
+name: movement_slip
+filenameTemplate: "入出庫伝票_{date:yyyyMMdd}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "1a5276"
+  labelColor: "2e86c1"
+  labelTextColor: "ffffff"
+  subtleBackground: "eaf4fb"
+  oddRowColor: "f4f9fd"
+  borderColor: "aed6f1"
+
+dataSources:
+  recentMovements:
+    query: "SELECT sm.MovedAt, sm.MovementType, sm.Quantity, sm.UnitPrice, sm.Reason, sm.Notes FROM StockMovement sm WHERE sm.ProductId = @ProductId AND sm.WarehouseId = @WarehouseId ORDER BY sm.MovedAt DESC LIMIT 10"
+
+sections:
+  # ── ドキュメントヘッダー（タイトル | 番号ボックス） ──────────────────────
+  - type: row
+    columnWidths: [60, 40]
+    marginBottom: 2
+    cells:
+      - vAlign: middle
+        elements:
+          - type: paragraph
+            text: "入　出　庫　伝　票"
+            fontSize: 20
+            color: primary
+            align: center
+      - vAlign: bottom
+        paddingLeft: 12
+        elements:
+          - type: labelTable
+            columnWidths: [38, 62]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "伝票番号"
+                field: Id
+              - label: "入出庫日"
+                field: MovedAt
+
+  # ── 太い区切り線 ─────────────────────────────────────────────────────────
+  - type: line
+    lineWeight: 2
+    color: primary
+    marginTop: 4
+    marginBottom: 8
+
+  # ── 商品・倉庫情報 | 移動明細 ────────────────────────────────────────────
+  - type: row
+    columnWidths: [50, 50]
+    marginBottom: 10
+    cells:
+      - vAlign: top
+        elements:
+          - type: labelTable
+            columnWidths: [36, 64]
+            labelBackground: label
+            labelTextColor: labelText
+            borderWeight: 0.5
+            cellPadding: 4
+            fontSize: 9
+            rows:
+              - label: "商品コード"
+                field: ProductCode
+              - label: "商品名"
+                field: ProductName
+              - label: "倉庫"
+                field: WarehouseName
+      - vAlign: top
+        paddingLeft: 8
+        elements:
+          - type: labelTable
+            columnWidths: [36, 64]
+            labelBackground: label
+            labelTextColor: labelText
+            borderWeight: 0.5
+            cellPadding: 4
+            fontSize: 9
+            rows:
+              - label: "種別"
+                field: MovementType
+              - label: "数量"
+                field: Quantity
+                format: quantity
+              - label: "単価（円）"
+                field: UnitPrice
+                format: currency
+
+  # ── 理由欄 ───────────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [12, 88]
+    marginBottom: 8
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "理由"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 24
+        elements:
+          - type: paragraph
+            field: Reason
+            fontSize: 9
+
+  # ── 備考欄 ───────────────────────────────────────────────────────────────
+  - type: row
+    columnWidths: [12, 88]
+    marginBottom: 14
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "備考"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 30
+        elements:
+          - type: paragraph
+            field: Notes
+            fontSize: 9
+
+  # ── 区切り線 ─────────────────────────────────────────────────────────────
+  - type: line
+    lineWeight: 0.5
+    color: primary
+    marginBottom: 6
+
+  # ── 同商品・同倉庫の直近入出庫履歴 ─────────────────────────────────────
+  - type: paragraph
+    text: "同商品・同倉庫の直近入出庫履歴"
+    fontSize: 10
+    bold: true
+    color: primary
+    marginBottom: 4
+
+  - type: dataTable
+    dataSource: recentMovements
+    minRows: 6
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: MovedAt
+        label: "入出庫日"
+        width: 18
+        align: center
+      - field: MovementType
+        label: "種別"
+        width: 13
+        align: center
+      - field: Quantity
+        label: "数量"
+        width: 14
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単価（円）"
+        width: 18
+        align: right
+        format: currency
+      - field: Reason
+        label: "理由"
+        width: 20
+        align: left
+      - field: Notes
+        label: "備考"
+        width: 17
+        align: left

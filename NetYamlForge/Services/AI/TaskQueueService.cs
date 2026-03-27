@@ -127,7 +127,9 @@ public class TaskQueueService
 
                     if (update.Status == TaskStatus.Completed)
                     {
-                        _tracker.Complete(task.Id, update.Message ?? lastMessage ?? "Task completed");
+                        // Qwen Code 等では result フィールドが "Task completed" などのステータス文字列になる場合がある。
+                        // assistant メッセージから蓄積した lastMessage を優先し、なければ result フィールドを使用する。
+                        _tracker.Complete(task.Id, lastMessage ?? update.Message ?? "Task completed");
                         return;
                     }
                     else if (update.Status == TaskStatus.Failed)

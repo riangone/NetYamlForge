@@ -1,0 +1,47 @@
+name: inventory
+displayName: 在庫管理
+description: "商品・在庫・入出庫を管理する在庫管理システム"
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/inventory.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "在庫管理"
+  navigation:
+    showDashboard: true
+    entities:
+      - product
+      - stock
+      - stock_movement
+      - category
+      - supplier
+      - warehouse
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+      - label: 商品一覧
+        url: /inventory/DynamicEntity/Index?entity=product
+        icon: 📦
+      - label: 在庫一覧
+        url: /inventory/DynamicEntity/Index?entity=stock
+        icon: 🗄️
+      - label: 入出庫履歴
+        url: /inventory/DynamicEntity/Index?entity=stock_movement
+        icon: 📋
+
+home_page:
+  icon: "🗄️"
+  tagline: "商品・在庫・入出庫を一元管理"
+  tags: [在庫, 商品, 入出庫, 倉庫]

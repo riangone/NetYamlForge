@@ -42,7 +42,8 @@ public class ClaudeCLIService : BaseCLIService
 
         try
         {
-            var result = await Executor.ExecuteAsync(CommandPath, "--version",
+            var result = await Executor.ExecuteAsync(CommandPath,
+                new[] { "--version" },
                 environmentVariables: GetEnvironmentVariables(), ct: ct);
             if (result.ExitCode == 0)
             {
@@ -59,7 +60,7 @@ public class ClaudeCLIService : BaseCLIService
                     // claude login の認証情報を確認
                     var authResult = await Executor.ExecuteAsync(
                         CommandPath,
-                        "-p \"Hello\" --output-format json",
+                        new[] { "-p", "Hello", "--output-format", "json" },
                         environmentVariables: GetEnvironmentVariables(),
                         ct: ct);
                     info.Authenticated = authResult.ExitCode == 0 &&
@@ -77,7 +78,7 @@ public class ClaudeCLIService : BaseCLIService
         return info;
     }
     
-    protected override string BuildArguments(
+    protected override List<string> BuildArgumentList(
         string message,
         bool streaming,
         string? sessionId,
@@ -85,49 +86,37 @@ public class ClaudeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
-        // -p 标志：非交互模式
+        // 非インタラクティブモード
         args.Add("-p");
-        args.Add($"\"{EscapeArgument(message)}\"");
+        args.Add(message);
 
-        // 输出格式
-        if (streaming)
-        {
-            // stream-json 需要 --verbose 参数
-            args.Add("--output-format stream-json");
-            args.Add("--verbose");
-        }
-        else
-        {
-            args.Add("--output-format json");
-        }
+        // 出力フォーマット（stream-json は --verbose が必要）
+        args.Add("--output-format");
+        args.Add(streaming ? "stream-json" : "json");
+        if (streaming) args.Add("--verbose");
 
-        // フレームワーク固有のシステムプロンプトを追加（既存のシステムプロンプトに追記）
+        // フレームワーク固有のシステムプロンプトを追加
         var systemPrompt = SkillLoader.GetSystemPrompt();
         if (!string.IsNullOrEmpty(systemPrompt))
         {
             args.Add("--append-system-prompt");
-            args.Add($"\"{EscapeArgument(systemPrompt)}\"");
+            args.Add(systemPrompt);
         }
 
-        // 会话恢复
+        // セッション再開
         if (!string.IsNullOrEmpty(sessionId))
         {
             args.Add("--resume");
-            args.Add($"\"{sessionId}\"");
+            args.Add(sessionId);
         }
 
-        // 工具权限控制
+        // ツール権限制御
         if (allowedTools != null && allowedTools.Count > 0)
         {
             args.Add("--allowedTools");
             args.Add(string.Join(",", allowedTools));
         }
 
-        return string.Join(" ", args);
-    }
-    
-    private static string EscapeArgument(string arg)
-    {
-        return arg.Replace("\"", "\\\"").Replace("\n", " ");
+        return args;
     }
 }

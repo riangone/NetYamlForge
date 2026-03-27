@@ -1,0 +1,45 @@
+header:
+  title: 在庫管理
+
+navigation:
+  showDashboard: true
+  entities:
+    - product
+    - stock
+    - stock_movement
+    - category
+    - supplier
+    - warehouse
+  items:
+    - label: ダッシュボード
+      controller: Dashboard
+      action: Index
+      icon: 📊
+      section: 概要
+    - label: 商品一覧
+      url: /inventory/DynamicEntity/Index?entity=product
+      icon: 📦
+      section: 商品管理
+    - label: カテゴリ管理
+      url: /inventory/DynamicEntity/Index?entity=category
+      icon: 🏷️
+      section: 商品管理
+    - label: 仕入先管理
+      url: /inventory/DynamicEntity/Index?entity=supplier
+      icon: 🏭
+      section: 商品管理
+    - label: 在庫一覧
+      url: /inventory/DynamicEntity/Index?entity=stock
+      icon: 🗄️
+      section: 在庫管理
+    - label: 入出庫履歴
+      url: /inventory/DynamicEntity/Index?entity=stock_movement
+      icon: 📋
+      section: 在庫管理
+    - label: 倉庫管理
+      url: /inventory/DynamicEntity/Index?entity=warehouse
+      icon: 🏢
+      section: 在庫管理
+
+footer:
+  text: "在庫管理 — powered by NetYamlForge"

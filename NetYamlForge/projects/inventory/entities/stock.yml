@@ -1,0 +1,170 @@
+imports: []
+entities:
+  stock:
+    table: Stock
+    key: Id
+    displayName: 在庫
+    softDelete: false
+    isPublic: false
+    pdfTemplate: stock_label
+
+    hooks:
+      beforeCreate:
+        - validate_stock_quantity
+        - set_stock_updated_at
+      beforeUpdate:
+        - validate_stock_quantity
+        - set_stock_updated_at
+
+    joins:
+      - type: left
+        table: Product
+        alias: p
+        on: Stock.ProductId = p.Id
+      - type: left
+        table: Warehouse
+        alias: w
+        on: Stock.WarehouseId = w.Id
+      - type: left
+        table: Category
+        alias: cat
+        on: p.CategoryId = cat.Id
+
+    forms:
+      ProductId:
+        type: int
+        required: true
+        label: 商品
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      WarehouseId:
+        type: int
+        required: true
+        label: 倉庫
+        editable: true
+        foreignKey:
+          entity: warehouse
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      Quantity:
+        type: decimal
+        required: true
+        label: 在庫数量
+        editable: true
+      UpdatedAt:
+        type: date
+        label: 更新日
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      ProductId:
+        type: int
+        required: true
+        label: Product ID
+        hidden: true
+      ProductCode:
+        type: string
+        label: 商品コード
+        expression: p.Code
+        searchable: true
+        sortable: true
+      ProductName:
+        type: string
+        label: 商品名
+        expression: p.Name
+        searchable: true
+        sortable: true
+      CategoryName:
+        type: string
+        label: カテゴリ
+        expression: cat.Name
+        searchable: true
+        sortable: true
+      WarehouseId:
+        type: int
+        required: true
+        label: Warehouse ID
+        hidden: true
+      WarehouseName:
+        type: string
+        label: 倉庫
+        expression: w.Name
+        searchable: true
+        sortable: true
+      Quantity:
+        type: decimal
+        required: true
+        label: 在庫数量
+        sortable: true
+      UpdatedAt:
+        type: date
+        label: 更新日
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [ProductId, WarehouseId, Quantity, UpdatedAt]
+      filters:
+        columns: 4
+        order: [ProductId, WarehouseId, CategoryName]
+
+    filters:
+      ProductId:
+        type: dropdown
+        label: 商品
+        expression: Stock.ProductId
+        foreignKey:
+          entity: product
+          displayColumn: Name
+      WarehouseId:
+        type: dropdown
+        label: 倉庫
+        expression: Stock.WarehouseId
+        foreignKey:
+          entity: warehouse
+          displayColumn: Name
+      CategoryName:
+        type: like
+        label: カテゴリ
+        expression: cat.Name
+
+    exports:
+      stock_csv:
+        label: "在庫一覧 CSV"
+        format: csv
+        filename: "stock_{date:yyyyMMdd}.csv"
+        columns:
+          - ProductCode
+          - ProductName
+          - CategoryName
+          - WarehouseName
+          - Quantity
+          - UpdatedAt
+
+    links:
+      product:
+        label: 商品
+        targetEntity: product
+        filter:
+          Id: ProductId
+      warehouse:
+        label: 倉庫
+        targetEntity: warehouse
+        filter:
+          Id: WarehouseId

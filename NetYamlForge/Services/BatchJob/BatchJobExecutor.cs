@@ -29,16 +29,22 @@ public class BatchJobExecutor : IBatchJobExecutor
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly HookExecutionService _hookExecutionService;
+    private readonly IChinaStockService _chinaStockService;
     private readonly ILogger<BatchJobExecutor> _logger;
+    private readonly ILoggerFactory _loggerFactory;
 
     public BatchJobExecutor(
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
-        ILogger<BatchJobExecutor> logger)
+        IChinaStockService chinaStockService,
+        ILogger<BatchJobExecutor> logger,
+        ILoggerFactory loggerFactory)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _hookExecutionService = hookExecutionService;
+        _chinaStockService = chinaStockService;
         _logger = logger;
+        _loggerFactory = loggerFactory;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
@@ -94,6 +100,10 @@ public class BatchJobExecutor : IBatchJobExecutor
 
                 case "stored_procedure":
                     await ExecuteStoredProcedureAsync(job, db, tx, result, cancellationToken);
+                    break;
+
+                case "china_stock_briefing":
+                    await ExecuteChinaStockBriefingAsync(job, db, tx, result, cancellationToken);
                     break;
 
                 default:
@@ -249,6 +259,26 @@ public class BatchJobExecutor : IBatchJobExecutor
         }
 
         return value;
+    }
+
+    /// <summary>
+    /// 中国股市简报任务执行
+    /// </summary>
+    private async Task ExecuteChinaStockBriefingAsync(
+        BatchJobDefinition job,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        var logger = _loggerFactory.CreateLogger<ChinaStockBriefingExecutor>();
+        var executor = new ChinaStockBriefingExecutor(_chinaStockService, logger);
+        var briefResult = await executor.ExecuteAsync(job, db, tx, cancellationToken);
+
+        result.Success = briefResult.Success;
+        result.RowsAffected = briefResult.RowsAffected;
+        result.ErrorMessage = briefResult.ErrorMessage;
+        result.ErrorDetail = briefResult.ErrorDetail;
     }
 }
 

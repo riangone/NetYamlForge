@@ -1,0 +1,30 @@
+hero:
+  eyebrow: 在庫管理
+  title: Welcome to 在庫管理
+  description: Edit entities/ YAML files to customize your screens. Run --scaffold-entities to regenerate from DB.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /inventory/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /inventory/DynamicEntity/AllDefinitions
+  highlights:
+    - YAML First
+    - Auto CRUD
+    - Multi-language
+
+quickActions:
+  - label: Dashboard
+    url: /inventory/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: Entity Schema
+    url: /inventory/DynamicEntity/AllDefinitions
+    style: btn-outline
+    icon: 🧩
+  - label: Starter Page
+    url: /inventory/Page/StarterOverview
+    style: btn-outline
+    icon: 🧭
+  - label: Docs
+    url: /inventory/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖

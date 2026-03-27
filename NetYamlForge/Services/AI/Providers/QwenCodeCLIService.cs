@@ -46,7 +46,8 @@ public class QwenCodeCLIService : BaseCLIService
 
         try
         {
-            var result = await Executor.ExecuteAsync(CommandPath, "--version",
+            var result = await Executor.ExecuteAsync(CommandPath,
+                new[] { "--version" },
                 environmentVariables: GetEnvironmentVariables(), ct: ct);
             if (result.ExitCode == 0)
             {
@@ -62,7 +63,7 @@ public class QwenCodeCLIService : BaseCLIService
                 {
                     var authResult = await Executor.ExecuteAsync(
                         CommandPath,
-                        "-p \"Hello\" --output-format json",
+                        new[] { "Hello", "--output-format", "json" },
                         environmentVariables: GetEnvironmentVariables(),
                         ct: ct);
                     info.Authenticated = authResult.ExitCode == 0 &&
@@ -80,7 +81,7 @@ public class QwenCodeCLIService : BaseCLIService
         return info;
     }
 
-    protected override string BuildArguments(
+    protected override List<string> BuildArgumentList(
         string message,
         bool streaming,
         string? sessionId,
@@ -88,12 +89,16 @@ public class QwenCodeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
-        // 非インタラクティブモード
+        // 非インタラクティブモード（-p フラグ + ArgumentList でエスケープ不要）
         args.Add("-p");
-        args.Add($"\"{EscapeArgument(message)}\"");
+        args.Add(message);
+
+        // ヘッドレス実行時の対話的権限プロンプトをスキップ
+        args.Add("-y");
 
         // 出力フォーマット（Qwen Code は --verbose 未サポート）
-        args.Add(streaming ? "--output-format stream-json" : "--output-format json");
+        args.Add("--output-format");
+        args.Add(streaming ? "stream-json" : "json");
 
         // モデル指定（設定されている場合）
         if (!string.IsNullOrEmpty(Config.QwenCode.Model))
@@ -107,14 +112,14 @@ public class QwenCodeCLIService : BaseCLIService
         if (!string.IsNullOrEmpty(systemPrompt))
         {
             args.Add("--system-prompt");
-            args.Add($"\"{EscapeArgument(systemPrompt)}\"");
+            args.Add(systemPrompt);
         }
 
         // セッション再開
         if (!string.IsNullOrEmpty(sessionId))
         {
             args.Add("--resume");
-            args.Add($"\"{sessionId}\"");
+            args.Add(sessionId);
         }
 
         // ツール権限制御
@@ -124,11 +129,6 @@ public class QwenCodeCLIService : BaseCLIService
             args.Add(string.Join(",", allowedTools));
         }
 
-        return string.Join(" ", args);
-    }
-
-    private static string EscapeArgument(string arg)
-    {
-        return arg.Replace("\"", "\\\"").Replace("\n", " ");
+        return args;
     }
 }

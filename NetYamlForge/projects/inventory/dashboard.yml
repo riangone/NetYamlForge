@@ -1,0 +1,90 @@
+stats:
+  - label: 商品数
+    entity: product
+    aggregate: count
+    icon: 📦
+    color: badge-primary
+  - label: 在庫レコード数
+    entity: stock
+    aggregate: count
+    icon: 🗄️
+    color: badge-info
+  - label: 倉庫数
+    entity: warehouse
+    aggregate: count
+    icon: 🏢
+    color: badge-accent
+  - label: 仕入先数
+    entity: supplier
+    aggregate: count
+    icon: 🏭
+    color: badge-secondary
+  - label: 今月の入庫
+    entity: stock_movement
+    aggregate: count
+    filter: "MovementType='in'"
+    icon: 📥
+    color: badge-success
+  - label: 今月の出庫
+    entity: stock_movement
+    aggregate: count
+    filter: "MovementType='out'"
+    icon: 📤
+    color: badge-warning
+
+charts:
+  - title: カテゴリ別商品数
+    type: doughnut
+    entity: product
+    valueAggregate: count
+    labelJoinEntity: category
+    labelJoinKey: CategoryId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+
+  - title: 倉庫別在庫レコード数
+    type: bar
+    entity: stock
+    valueAggregate: count
+    labelJoinEntity: warehouse
+    labelJoinKey: WarehouseId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: 入出庫種別の分布
+    type: pie
+    entity: stock_movement
+    valueAggregate: count
+    groupExpression: MovementType
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(16, 185, 129, 0.85)
+      - rgba(239, 68, 68, 0.85)
+      - rgba(59, 130, 246, 0.85)
+
+  - title: 仕入先別商品数
+    type: bar
+    entity: product
+    valueAggregate: count
+    labelJoinEntity: supplier
+    labelJoinKey: SupplierId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)

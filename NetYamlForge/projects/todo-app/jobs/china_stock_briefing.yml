@@ -1,0 +1,23 @@
+jobs:
+  # 中国股市简报：每天 09:00 和 16:00（中国时区）发送最新行情及简评
+  china_stock_briefing:
+    displayName: 中国股市最新简报
+    description: "每天 09:00 和 16:00（中国时区）获取并发送中国股市最新行情及简评，涵盖上证指数、深证成指、创业板指等主要指数。"
+    enabled: true
+
+    schedule:
+      cron: "0 9,16 * * *"        # 每天 09:00 和 16:00
+      timezone: "Asia/Shanghai"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/china_stock_briefing.sql
+      outputFile: "jobs/output/china_stock_briefing_{date:yyyyMMdd_HHmm}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300         # 5 分钟后重试
+      logError: true
+      notify: true

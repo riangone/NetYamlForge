@@ -37,6 +37,48 @@
     right: -60px;
 }
 
+/* パネルが開いている時: トリガーをパネルの左端に表示 */
+.ai-assistant-trigger.panel-open {
+    right: 610px;
+}
+
+@media (max-width: 768px) {
+    .ai-assistant-trigger.panel-open {
+        right: -60px;
+    }
+}
+
+/* 最大化状态 */
+.ai-panel-maximized {
+    width: 100vw !important;
+    right: 0 !important;
+}
+
+/* 最小化状態（ヘッダーのみ表示・右下固定） */
+.ai-panel-minimized {
+    height: auto !important;
+    top: auto !important;
+    bottom: 0 !important;
+    right: 20px !important;
+    width: 320px !important;
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    box-shadow: -2px -4px 16px rgba(0, 0, 0, 0.18) !important;
+    transition: none !important;
+}
+
+.ai-panel-minimized .ai-panel-body,
+.ai-panel-minimized .ai-panel-footer,
+.ai-panel-minimized .ai-skills-bar,
+.ai-panel-minimized #ai-auto-scroll-btn {
+    display: none !important;
+}
+
+.ai-panel-minimized .ai-panel-header {
+    border-radius: 0.75rem 0.75rem 0 0;
+    cursor: pointer;
+    user-select: none;
+}
+
 /* 面板头部 */
 .ai-panel-header {
     display: flex;
@@ -82,35 +124,107 @@
     position: relative;
 }
 
-/* 消息气泡 */
-.ai-message {
-    max-width: 85%;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    word-wrap: break-word;
-    background-color: hsl(var(--b3)) !important;
+/* メッセージ行ラッパー（方向制御） */
+.ai-message-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    gap: 0.15rem;
 }
 
-.ai-message.user {
-    align-self: flex-end;
-    background-color: hsl(var(--p)) !important;
+.ai-message-row.user {
+    align-items: flex-end;
+}
+
+.ai-message-row.assistant {
+    align-items: flex-start;
+}
+
+/* 送信者ラベル */
+.ai-message-sender {
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0.55;
+    padding: 0 0.5rem;
+    letter-spacing: 0.03em;
+}
+
+/* アバター + バブル の横並び */
+.ai-message-inner {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    max-width: 88%;
+}
+
+.ai-message-row.user .ai-message-inner {
+    flex-direction: row-reverse;
+}
+
+.ai-message-row.assistant .ai-message-inner {
+    flex-direction: row;
+}
+
+/* アバター */
+.ai-message-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ai-message-row.user .ai-message-avatar {
+    background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--pf, var(--p))));
     color: hsl(var(--pc));
-    border-bottom-right-radius: 0.25rem;
+    box-shadow: 0 2px 6px hsl(var(--p) / 0.4);
 }
 
-.ai-message.assistant {
-    align-self: flex-start;
-    background-color: hsl(var(--b3)) !important;
+.ai-message-row.assistant .ai-message-avatar {
+    background-color: hsl(var(--b3));
     color: hsl(var(--bc));
-    border-bottom-left-radius: 0.25rem;
+    border: 1px solid hsl(var(--b2));
+}
+
+/* 消息気泡 */
+.ai-message {
+    max-width: 100%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 1.1rem;
+    word-wrap: break-word;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+/* 送信メッセージ（右・プライマリ色） */
+.ai-message.user {
+    background: linear-gradient(135deg, hsl(var(--p)), hsl(var(--pf, var(--p)))) !important;
+    color: hsl(var(--pc));
+    border-bottom-right-radius: 0.3rem;
+    box-shadow: 0 2px 8px hsl(var(--p) / 0.25);
+}
+
+/* 受信メッセージ（左・ライトグレー） */
+.ai-message.assistant {
+    background-color: hsl(var(--b2)) !important;
+    color: hsl(var(--bc));
+    border-bottom-left-radius: 0.3rem;
+    border: 1px solid hsl(var(--b3));
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
 }
 
 .ai-message.system {
     align-self: center;
-    background-color: hsl(var(--info));
-    color: hsl(var(--info-content));
-    font-size: 0.875rem;
+    background-color: hsl(var(--info) / 0.15);
+    color: hsl(var(--bc) / 0.7);
+    font-size: 0.78rem;
     text-align: center;
+    border-radius: 1rem;
+    padding: 0.3rem 0.8rem;
+    max-width: 90%;
+    border: 1px solid hsl(var(--b3));
 }
 
 /* 进度显示 */

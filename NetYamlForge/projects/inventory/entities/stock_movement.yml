@@ -1,0 +1,233 @@
+imports: []
+entities:
+  stock_movement:
+    table: StockMovement
+    key: Id
+    displayName: 入出庫履歴
+    softDelete: false
+    isPublic: false
+    pdfTemplate: movement_slip
+
+    hooks:
+      beforeCreate:
+        - set_moved_at_default
+        - validate_movement_type
+        - validate_movement_quantity
+      beforeUpdate:
+        - validate_movement_type
+        - validate_movement_quantity
+      afterCreate:
+        - update_stock_after_movement
+
+    joins:
+      - type: left
+        table: Product
+        alias: p
+        on: StockMovement.ProductId = p.Id
+      - type: left
+        table: Warehouse
+        alias: w
+        on: StockMovement.WarehouseId = w.Id
+
+    forms:
+      ProductId:
+        type: int
+        required: true
+        label: 商品
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      WarehouseId:
+        type: int
+        required: true
+        label: 倉庫
+        editable: true
+        foreignKey:
+          entity: warehouse
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      MovementType:
+        type: string
+        required: true
+        label: 種別
+        editable: true
+        options:
+          - in
+          - out
+          - transfer
+      Quantity:
+        type: decimal
+        required: true
+        label: 数量
+        editable: true
+      UnitPrice:
+        type: money
+        label: 単価（円）
+        editable: true
+      Reason:
+        type: string
+        label: 理由
+        editable: true
+        options:
+          - 定期発注
+          - 緊急発注
+          - 販売出荷
+          - 製造消費
+          - 返品
+          - 棚卸調整
+          - 倉庫間移動
+      MovedAt:
+        type: date
+        label: 入出庫日
+        editable: true
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      MovedAt:
+        type: date
+        label: 入出庫日
+        sortable: true
+      ProductId:
+        type: int
+        required: true
+        label: Product ID
+        hidden: true
+      ProductCode:
+        type: string
+        label: 商品コード
+        expression: p.Code
+        searchable: true
+        sortable: true
+      ProductName:
+        type: string
+        label: 商品名
+        expression: p.Name
+        searchable: true
+        sortable: true
+      WarehouseId:
+        type: int
+        required: true
+        label: Warehouse ID
+        hidden: true
+      WarehouseName:
+        type: string
+        label: 倉庫
+        expression: w.Name
+        searchable: true
+        sortable: true
+      MovementType:
+        type: string
+        required: true
+        label: 種別
+        sortable: true
+      Quantity:
+        type: decimal
+        required: true
+        label: 数量
+        sortable: true
+      UnitPrice:
+        type: money
+        label: 単価（円）
+        sortable: true
+      Reason:
+        type: string
+        label: 理由
+        searchable: true
+        sortable: false
+      Notes:
+        type: string
+        label: 備考
+        searchable: true
+        sortable: false
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - MovedAt
+          - MovementType
+          - ProductId
+          - WarehouseId
+          - Quantity
+          - UnitPrice
+          - Reason
+          - Notes
+      filters:
+        columns: 4
+        order:
+          - MovementType
+          - ProductId
+          - WarehouseId
+          - MovedAt
+
+    filters:
+      MovementType:
+        type: toggle-group
+        label: 種別
+        optionLabels:
+          in: "📥 入庫"
+          out: "📤 出庫"
+          transfer: "🔄 移動"
+      ProductId:
+        type: dropdown
+        label: 商品
+        expression: StockMovement.ProductId
+        foreignKey:
+          entity: product
+          displayColumn: Name
+      WarehouseId:
+        type: dropdown
+        label: 倉庫
+        expression: StockMovement.WarehouseId
+        foreignKey:
+          entity: warehouse
+          displayColumn: Name
+      MovedAt:
+        type: date-range
+        label: 入出庫日
+        expression: StockMovement.MovedAt
+
+    exports:
+      movement_csv:
+        label: "入出庫履歴 CSV"
+        format: csv
+        filename: "stock_movements_{date:yyyyMMdd}.csv"
+        columns:
+          - MovedAt
+          - ProductCode
+          - ProductName
+          - WarehouseName
+          - MovementType
+          - Quantity
+          - UnitPrice
+          - Reason
+          - Notes
+
+    links:
+      product:
+        label: 商品
+        targetEntity: product
+        filter:
+          Id: ProductId
+      warehouse:
+        label: 倉庫
+        targetEntity: warehouse
+        filter:
+          Id: WarehouseId

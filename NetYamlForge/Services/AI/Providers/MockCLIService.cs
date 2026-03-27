@@ -32,13 +32,15 @@ public class MockCLIService : BaseCLIService
         });
     }
     
-    protected override string BuildArguments(
+    protected override List<string> BuildArgumentList(
         string message,
         bool streaming,
         string? sessionId,
         List<string>? allowedTools)
     {
-        return $"-p \"{message}\"" + (streaming ? " --output-format stream-json" : "");
+        var args = new List<string> { "-p", message };
+        if (streaming) { args.Add("--output-format"); args.Add("stream-json"); }
+        return args;
     }
     
     /// <summary>

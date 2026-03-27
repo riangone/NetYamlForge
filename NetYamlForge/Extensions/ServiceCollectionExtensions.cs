@@ -10,6 +10,7 @@ using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
+using NetYamlForge.Services.HotReload;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
@@ -32,6 +33,24 @@ public static class ServiceCollectionExtensions
         services.AddDynamicCrudCore();
         services.AddProjectHooks();
         services.AddEntityHooks();
+        services.AddYamlHotReload();
+        return services;
+    }
+
+    /// <summary>
+    /// YAML ホットリロードサービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddYamlHotReload(this IServiceCollection services)
+    {
+        services.Configure<HotReloadOptions>(options =>
+        {
+            options.Enabled = true;
+            options.OnlyInDevelopment = true;
+            options.DebounceMs = 500;
+        });
+        services.AddSingleton<IYamlFileWatcher, YamlFileWatcher>();
+        services.AddSingleton<ProjectYamlCacheManager>();
+        services.AddHostedService<YamlHotReloadService>();
         return services;
     }
 
@@ -155,6 +174,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<BatchJobHostedService>();
         services.AddSingleton<IBatchJobScheduler>(sp => sp.GetRequiredService<BatchJobHostedService>());
         services.AddHostedService(sp => sp.GetRequiredService<BatchJobHostedService>());
+
+        // 中国股市行情数据服务
+        services.AddHttpClient<IChinaStockService, ChinaStockService>();
 
         return services;
     }

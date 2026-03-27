@@ -1,0 +1,72 @@
+imports: []
+entities:
+  category:
+    table: Category
+    key: Id
+    displayName: 商品カテゴリ
+    softDelete: false
+    isPublic: false
+
+    joins: []
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: カテゴリ名
+        editable: true
+      Color:
+        type: color
+        label: カラー
+        editable: true
+      Description:
+        type: textarea
+        label: 説明
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: カテゴリ名
+        searchable: true
+        sortable: true
+      Color:
+        type: color
+        label: カラー
+        sortable: false
+      Description:
+        type: string
+        label: 説明
+        searchable: true
+        sortable: false
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [Name, Color, Description]
+      filters:
+        columns: 2
+        order: [Name]
+
+    filters:
+      Name:
+        type: like
+        label: カテゴリ名
+
+    links:
+      products:
+        label: 商品一覧
+        targetEntity: product
+        filter:
+          CategoryId: Id

@@ -19,18 +19,20 @@ public class ProcessExecutor
     }
 
     /// <summary>
-    /// CLI をストリーミング実行する。stdout / stderr を並行して読み取り、行単位で yield する。
+    /// CLI をストリーミング実行する（引数リスト版）。
+    /// ArgumentList を使うため、引用符エスケープ不要。
+    /// stdout / stderr を並行して読み取り、行単位で yield する。
     /// </summary>
     public async IAsyncEnumerable<string> ExecuteStreamingAsync(
         string command,
-        string arguments,
+        IReadOnlyList<string> argumentList,
         string? workingDirectory = null,
         IReadOnlyDictionary<string, string>? environmentVariables = null,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var process = CreateProcess(command, arguments, workingDirectory, environmentVariables);
+        var process = CreateProcess(command, argumentList, workingDirectory, environmentVariables);
 
-        _logger.LogInformation("Starting CLI: {Command} {Arguments}", command, arguments);
+        _logger.LogInformation("Starting CLI: {Command} {Arguments}", command, string.Join(" ", argumentList));
         process.Start();
         _logger.LogInformation("CLI started with PID: {Pid}", process.Id);
 
@@ -72,16 +74,16 @@ public class ProcessExecutor
     }
 
     /// <summary>
-    /// CLI を一括実行する（全出力を待ってから返す）。
+    /// CLI を一括実行する（引数リスト版）。
     /// </summary>
     public async Task<(int ExitCode, string Output, string Error)> ExecuteAsync(
         string command,
-        string arguments,
+        IReadOnlyList<string> argumentList,
         string? workingDirectory = null,
         IReadOnlyDictionary<string, string>? environmentVariables = null,
         CancellationToken ct = default)
     {
-        var process = CreateProcess(command, arguments, workingDirectory, environmentVariables);
+        var process = CreateProcess(command, argumentList, workingDirectory, environmentVariables);
         process.Start();
 
         var output = await process.StandardOutput.ReadToEndAsync(ct);
@@ -91,7 +93,63 @@ public class ProcessExecutor
         return (process.ExitCode, output, error);
     }
 
+    /// <summary>
+    /// CLI を一括実行する（単一文字列引数版。simple commands 用）。
+    /// </summary>
+    public async Task<(int ExitCode, string Output, string Error)> ExecuteAsync(
+        string command,
+        string arguments,
+        string? workingDirectory = null,
+        IReadOnlyDictionary<string, string>? environmentVariables = null,
+        CancellationToken ct = default)
+    {
+        var process = CreateProcessFromString(command, arguments, workingDirectory, environmentVariables);
+        process.Start();
+
+        var output = await process.StandardOutput.ReadToEndAsync(ct);
+        var error  = await process.StandardError.ReadToEndAsync(ct);
+        await process.WaitForExitAsync(ct);
+
+        return (process.ExitCode, output, error);
+    }
+
+    /// <summary>
+    /// ArgumentList を使ってプロセスを生成する（推奨）。
+    /// 引数は引用符エスケープ不要でそのまま渡せる。
+    /// </summary>
     private static Process CreateProcess(
+        string command,
+        IReadOnlyList<string> argumentList,
+        string? workingDirectory,
+        IReadOnlyDictionary<string, string>? environmentVariables)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
+        };
+
+        foreach (var arg in argumentList)
+            startInfo.ArgumentList.Add(arg);
+
+        if (environmentVariables != null)
+        {
+            foreach (var kvp in environmentVariables)
+                startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
+        }
+
+        return new Process { StartInfo = startInfo };
+    }
+
+    /// <summary>
+    /// Arguments 文字列を使ってプロセスを生成する（後方互換・simple commands 用）。
+    /// </summary>
+    private static Process CreateProcessFromString(
         string command,
         string arguments,
         string? workingDirectory,
@@ -108,13 +166,10 @@ public class ProcessExecutor
             WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
         };
 
-        // 指定された環境変数を追加・上書きする（他の環境変数は親プロセスから継承）
         if (environmentVariables != null)
         {
             foreach (var kvp in environmentVariables)
-            {
                 startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
-            }
         }
 
         return new Process { StartInfo = startInfo };

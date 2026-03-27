@@ -1,0 +1,21 @@
+jobs:
+  low_stock_alert:
+    displayName: 発注点以下在庫アラート
+    description: "発注点（ReorderPoint）以下の在庫商品を毎朝 07:00 に CSV 出力します。"
+    enabled: true
+
+    schedule:
+      cron: "0 7 * * *"        # 毎日 07:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/low_stock_alert.sql
+      outputFile: "jobs/output/low_stock_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300       # 5 分後にリトライ
+      logError: true

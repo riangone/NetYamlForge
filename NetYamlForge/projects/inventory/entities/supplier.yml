@@ -1,0 +1,94 @@
+imports: []
+entities:
+  supplier:
+    table: Supplier
+    key: Id
+    displayName: 仕入先
+    softDelete: false
+    isPublic: false
+
+    joins: []
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 仕入先名
+        editable: true
+      ContactName:
+        type: string
+        label: 担当者名
+        editable: true
+      Email:
+        type: email
+        label: メールアドレス
+        editable: true
+      Phone:
+        type: string
+        label: 電話番号
+        editable: true
+      Address:
+        type: textarea
+        label: 住所
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: 仕入先名
+        searchable: true
+        sortable: true
+      ContactName:
+        type: string
+        label: 担当者名
+        searchable: true
+        sortable: true
+      Email:
+        type: string
+        label: メールアドレス
+        searchable: true
+        sortable: false
+      Phone:
+        type: string
+        label: 電話番号
+        searchable: true
+        sortable: false
+      Address:
+        type: string
+        label: 住所
+        searchable: true
+        sortable: false
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [Name, ContactName, Email, Phone, Address]
+      filters:
+        columns: 3
+        order: [Name, ContactName]
+
+    filters:
+      Name:
+        type: like
+        label: 仕入先名
+      ContactName:
+        type: like
+        label: 担当者名
+
+    links:
+      products:
+        label: 商品一覧
+        targetEntity: product
+        filter:
+          SupplierId: Id
