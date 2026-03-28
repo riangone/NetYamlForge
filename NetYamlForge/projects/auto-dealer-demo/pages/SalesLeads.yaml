@@ -2,6 +2,7 @@ title: 销售线索管理
 description: "AI 自动识别并评分的高价值销售线索"
 
 sections:
+  # 线索统计卡片
   - id: leads_summary
     title: 线索统计
     component: stat_cards
@@ -19,20 +20,20 @@ sections:
     valueField: metric_value
     iconField: metric_icon
     deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
 
+  # 销售线索表格
   - id: leads_table
     title: 销售线索列表
     component: table
-    sourceType: entity
-    entity: sales_leads
-    columns:
-      - lead_id
-      - customer_id
-      - vehicle_interest
-      - lead_score
-      - status
-      - assigned_to_user_id
-      - created_at
+    sourceType: custom
+    source: |
+      SELECT lead_id, customer_id, vehicle_interest, lead_score, status, assigned_to_user_id, created_at
+      FROM sales_leads
+      ORDER BY created_at DESC
+    columns: [lead_id, customer_id, vehicle_interest, lead_score, status, assigned_to_user_id, created_at]
     pageSize: 15
     actions:
       - label: 编辑

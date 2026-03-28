@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS ai_knowledge (
     channel VARCHAR(50) DEFAULT 'all',
     language VARCHAR(10) NOT NULL DEFAULT 'ja',
     priority INTEGER DEFAULT 0,
+    status VARCHAR(30) NOT NULL DEFAULT 'active',
     is_active BOOLEAN NOT NULL DEFAULT 1,
     usage_count INTEGER DEFAULT 0,
     helpful_count INTEGER DEFAULT 0,
@@ -187,6 +188,27 @@ CREATE TABLE IF NOT EXISTS service_requests (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
 );
+
+-- 販売リード（AI 窓口システム）
+CREATE TABLE IF NOT EXISTS sales_leads (
+    lead_id VARCHAR(50) NOT NULL PRIMARY KEY,
+    customer_id VARCHAR(50) NOT NULL,
+    vehicle_interest VARCHAR(100),
+    budget DECIMAL(12,2),
+    lead_score INTEGER NOT NULL DEFAULT 50,
+    status VARCHAR(20) NOT NULL DEFAULT 'new',
+    source_conversation_id VARCHAR(64),
+    assigned_to_user_id VARCHAR(50),
+    last_contact_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (source_conversation_id) REFERENCES ai_conversations(conversation_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_leads_customer ON sales_leads(customer_id);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON sales_leads(status);
+CREATE INDEX IF NOT EXISTS idx_leads_score ON sales_leads(lead_score);
 
 -- インデックス作成
 CREATE INDEX IF NOT EXISTS idx_conversations_customer ON ai_conversations(customer_id);
