@@ -33,6 +33,10 @@ layout:
         url: /auto-dealer-demo/Page/AIDashboard
         icon: 💬
         section: AI 窓口
+      - label: AI 分析レポート
+        url: /auto-dealer-demo/Page/AIAnalytics
+        icon: 📈
+        section: AI 窓口
       - label: 顧客一覧
         url: /auto-dealer-demo/Page/Customers
         icon: 👥
