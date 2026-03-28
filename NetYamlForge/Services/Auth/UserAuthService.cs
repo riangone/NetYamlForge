@@ -57,6 +57,15 @@ public class UserAuthService : IUserAuthService
         return null;
     }
 
+    public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName)
+    {
+        await using var conn = OpenConnection();
+        var roles = await conn.QueryAsync<string>(
+            "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
+            new { UserName = userName });
+        return roles.Distinct(StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
+    }
+
     public async Task UpdateLastLoginAsync(int userId)
     {
         // ログイン成功時刻の更新は失敗しても認証可否に影響させない方針で呼び出します。

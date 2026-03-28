@@ -55,6 +55,9 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // カスタムロール（AppUserRole）を取得してクレームに追加
+        var customRoles = await _users.GetUserRolesAsync(user.UserName);
+
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -63,6 +66,16 @@ public class AccountController : Controller
             new("lang", user.PreferredLanguage),
             new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
+
+        // Admin/User 以外のカスタムロールを追加（ナビゲーションフィルタリングに使用）
+        foreach (var role in customRoles)
+        {
+            if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(role, "User", StringComparison.OrdinalIgnoreCase))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+        }
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
@@ -79,7 +92,7 @@ public class AccountController : Controller
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
 
-        _logger.LogInformation("User '{UserName}' signed in", user.UserName);
+        _logger.LogInformation("User '{UserName}' signed in (roles: {Roles})", user.UserName, string.Join(", ", customRoles));
         await TryWriteAuditAsync("login", "account", "Sign in", user.UserName);
 
         if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -87,10 +100,22 @@ public class AccountController : Controller
             return Redirect(model.ReturnUrl);
         }
 
-        // プロジェクトスコープが設定されている場合はプロジェクトホームへ
+        // ロール別ランディングページへリダイレクト
         var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
         if (!string.IsNullOrWhiteSpace(projectName))
         {
+            var landingByRole = _projectScope.Current.Layout?.LandingPageByRole;
+            if (landingByRole != null && landingByRole.Count > 0 && customRoles.Count > 0)
+            {
+                foreach (var role in customRoles)
+                {
+                    if (landingByRole.TryGetValue(role, out var landingUrl) && !string.IsNullOrWhiteSpace(landingUrl))
+                    {
+                        _logger.LogInformation("User '{UserName}' redirected to role landing page: {Url}", user.UserName, landingUrl);
+                        return Redirect(landingUrl);
+                    }
+                }
+            }
             return RedirectToAction("Project", "Home", new { project = projectName });
         }
 

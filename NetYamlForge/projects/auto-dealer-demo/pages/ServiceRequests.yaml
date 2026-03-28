@@ -1,0 +1,244 @@
+title: サービス依頼管理
+description: "お客様からのサービス依頼・クレーム・見積もり依頼を一元管理するページ"
+
+sections:
+  # ─────────────────────────────────────────
+  # 依頼状況 KPI カード
+  # ─────────────────────────────────────────
+  - id: request_kpi
+    title: サービス依頼状況サマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総依頼数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📋' AS metric_icon,
+             NULL AS metric_delta
+      FROM service_requests
+      UNION ALL
+      SELECT 'オープン中',
+             CAST(SUM(CASE WHEN status = 'open' THEN 1 ELSE 0 END) AS TEXT),
+             '🔴', NULL
+      FROM service_requests
+      UNION ALL
+      SELECT '対応中',
+             CAST(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS TEXT),
+             '🔧', NULL
+      FROM service_requests
+      UNION ALL
+      SELECT '今月解決',
+             CAST(COUNT(*) AS TEXT),
+             '✅', NULL
+      FROM service_requests
+      WHERE status IN ('resolved', 'closed')
+        AND strftime('%Y-%m', resolution_date) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '緊急・高優先度',
+             CAST(SUM(CASE WHEN priority IN ('urgent','high') AND status NOT IN ('resolved','closed') THEN 1 ELSE 0 END) AS TEXT),
+             '⚠️', NULL
+      FROM service_requests
+      UNION ALL
+      SELECT 'フォローアップ必要',
+             CAST(SUM(CASE WHEN follow_up_required = 1 AND status NOT IN ('resolved','closed') THEN 1 ELSE 0 END) AS TEXT),
+             '📞', NULL
+      FROM service_requests
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 依頼種別内訳（棒グラフ）
+  # ─────────────────────────────────────────
+  - id: request_type_chart
+    title: 依頼種別内訳
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE request_type
+               WHEN 'inquiry'       THEN '❓ 問い合わせ'
+               WHEN 'complaint'     THEN '😡 クレーム'
+               WHEN 'quote_request' THEN '💴 見積り依頼'
+               WHEN 'parts_request' THEN '🔩 部品依頼'
+               WHEN 'other'         THEN '📄 その他'
+               ELSE request_type
+             END AS label,
+             COUNT(*) AS value
+      FROM service_requests
+      GROUP BY request_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(239, 68, 68, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 緊急・高優先度の未解決依頼
+  # ─────────────────────────────────────────
+  - id: urgent_requests
+    title: ⚠️ 緊急・高優先度の未解決依頼
+    component: table
+    sourceType: custom
+    source: |
+      SELECT r.request_id AS 依頼ID,
+             c.name AS 顧客名,
+             CASE r.request_type
+               WHEN 'inquiry'       THEN '❓ 問い合わせ'
+               WHEN 'complaint'     THEN '😡 クレーム'
+               WHEN 'quote_request' THEN '💴 見積り'
+               WHEN 'parts_request' THEN '🔩 部品'
+               ELSE '📄 その他'
+             END AS 種別,
+             r.subject AS 件名,
+             CASE r.priority
+               WHEN 'urgent' THEN '🔴 緊急'
+               WHEN 'high'   THEN '🟠 高'
+               ELSE               '🟡 中'
+             END AS 優先度,
+             CASE r.status
+               WHEN 'open'             THEN '🔴 未対応'
+               WHEN 'in_progress'      THEN '🔧 対応中'
+               WHEN 'pending_parts'    THEN '📦 部品待ち'
+               WHEN 'waiting_customer' THEN '👤 顧客待ち'
+               ELSE r.status
+             END AS ステータス,
+             CASE r.source
+               WHEN 'phone'   THEN '📞'
+               WHEN 'email'   THEN '✉️'
+               WHEN 'web'     THEN '🌐'
+               WHEN 'ai_chat' THEN '🤖'
+               WHEN 'line'    THEN '💬'
+               WHEN 'walk_in' THEN '🏪'
+               ELSE COALESCE(r.source, '−')
+             END AS 受付,
+             COALESCE(r.assigned_to, '未担当') AS 担当者,
+             r.created_at AS 受付日時
+      FROM service_requests r
+      LEFT JOIN customers c ON r.customer_id = c.customer_id
+      WHERE r.priority IN ('urgent', 'high')
+        AND r.status NOT IN ('resolved', 'closed')
+      ORDER BY
+        CASE r.priority WHEN 'urgent' THEN 1 ELSE 2 END,
+        r.created_at ASC
+    columns: [依頼ID, 顧客名, 種別, 件名, 優先度, ステータス, 受付, 担当者, 受付日時]
+    pageSize: 10
+    actions:
+      - label: 対応
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_requests&id={依頼ID}"
+        class: "btn-danger"
+
+  # ─────────────────────────────────────────
+  # 未解決依頼一覧（オープン・対応中）
+  # ─────────────────────────────────────────
+  - id: open_requests
+    title: 未解決依頼一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT r.request_id AS 依頼ID,
+             c.name AS 顧客名,
+             CASE r.request_type
+               WHEN 'inquiry'       THEN '❓ 問い合わせ'
+               WHEN 'complaint'     THEN '😡 クレーム'
+               WHEN 'quote_request' THEN '💴 見積り'
+               WHEN 'parts_request' THEN '🔩 部品'
+               ELSE '📄 その他'
+             END AS 種別,
+             r.subject AS 件名,
+             CASE r.priority
+               WHEN 'urgent' THEN '🔴 緊急'
+               WHEN 'high'   THEN '🟠 高'
+               WHEN 'normal' THEN '🟡 普通'
+               ELSE               '🟢 低'
+             END AS 優先度,
+             CASE r.status
+               WHEN 'open'             THEN '🔴 未対応'
+               WHEN 'in_progress'      THEN '🔧 対応中'
+               WHEN 'pending_parts'    THEN '📦 部品待ち'
+               WHEN 'waiting_customer' THEN '👤 顧客待ち'
+               ELSE r.status
+             END AS ステータス,
+             COALESCE(r.assigned_to, '未担当') AS 担当者,
+             CASE WHEN r.follow_up_required = 1 THEN '✅ 要フォロー' ELSE '−' END AS フォロー,
+             r.created_at AS 受付日時
+      FROM service_requests r
+      LEFT JOIN customers c ON r.customer_id = c.customer_id
+      WHERE r.status NOT IN ('resolved', 'closed')
+      ORDER BY
+        CASE r.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'normal' THEN 3 ELSE 4 END,
+        r.created_at ASC
+    columns: [依頼ID, 顧客名, 種別, 件名, 優先度, ステータス, 担当者, フォロー, 受付日時]
+    pageSize: 15
+    actions:
+      - label: 対応
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_requests&id={依頼ID}"
+        class: "btn-outline-primary"
+
+  # ─────────────────────────────────────────
+  # 受付チャネル別件数（ドーナツ）
+  # ─────────────────────────────────────────
+  - id: channel_chart
+    title: 受付チャネル別件数
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT CASE source
+               WHEN 'phone'   THEN '📞 電話'
+               WHEN 'email'   THEN '✉️ メール'
+               WHEN 'web'     THEN '🌐 Web'
+               WHEN 'ai_chat' THEN '🤖 AI チャット'
+               WHEN 'line'    THEN '💬 LINE'
+               WHEN 'walk_in' THEN '🏪 来店'
+               ELSE COALESCE(source, 'その他')
+             END AS label,
+             COUNT(*) AS value
+      FROM service_requests
+      GROUP BY source
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 解決済み依頼（直近）
+  # ─────────────────────────────────────────
+  - id: resolved_requests
+    title: 解決済み依頼（直近 30 日）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT r.request_id AS 依頼ID,
+             c.name AS 顧客名,
+             CASE r.request_type
+               WHEN 'inquiry'       THEN '❓ 問い合わせ'
+               WHEN 'complaint'     THEN '😡 クレーム'
+               WHEN 'quote_request' THEN '💴 見積り'
+               WHEN 'parts_request' THEN '🔩 部品'
+               ELSE '📄 その他'
+             END AS 種別,
+             r.subject AS 件名,
+             r.resolution_date AS 解決日,
+             CASE WHEN r.customer_satisfaction IS NOT NULL
+                  THEN CAST(r.customer_satisfaction AS TEXT) || ' / 5'
+                  ELSE '未評価'
+             END AS 満足度,
+             COALESCE(r.assigned_to, '未担当') AS 担当者
+      FROM service_requests r
+      LEFT JOIN customers c ON r.customer_id = c.customer_id
+      WHERE r.status IN ('resolved', 'closed')
+        AND date(COALESCE(r.resolution_date, r.updated_at)) >= date('now', '-30 days')
+      ORDER BY r.resolution_date DESC
+    columns: [依頼ID, 顧客名, 種別, 件名, 解決日, 満足度, 担当者]
+    pageSize: 15
+    editable: false
+    readOnly: true

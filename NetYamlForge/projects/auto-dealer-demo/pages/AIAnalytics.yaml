@@ -1,10 +1,12 @@
 title: AI 分析ダッシュボード
-description: "AI 窓口システムの詳細分析 - 意図認識、感情分析、エスカレーション統計"
+description: "AI 窓口システムの詳細分析 - 意図認識・感情・エスカレーション・時間帯別統計・FAQ 効果"
 
 sections:
-  # AI 性能 KPI
+  # ─────────────────────────────────────────
+  # AI 性能 KPI（7 日間）
+  # ─────────────────────────────────────────
   - id: ai_performance_kpi
-    title: AI 性能 KPI
+    title: AI 性能 KPI（直近 7 日間）
     component: stat_cards
     sourceType: custom
     source: |
@@ -12,43 +14,35 @@ sections:
              CAST(COUNT(*) AS TEXT) AS metric_value,
              '💬' AS metric_icon,
              NULL AS metric_delta
-        FROM ai_conversations
-        WHERE date(started_at) >= date('now', '-7 days')
+      FROM ai_conversations WHERE date(started_at) >= date('now', '-7 days')
       UNION ALL
       SELECT 'AI 自動解決',
              CAST(SUM(CASE WHEN status = 'completed' AND assigned_to_user_id IS NULL THEN 1 ELSE 0 END) AS TEXT),
-             '🤖',
-             NULL
-        FROM ai_conversations
-        WHERE date(started_at) >= date('now', '-7 days')
+             '🤖', NULL
+      FROM ai_conversations WHERE date(started_at) >= date('now', '-7 days')
+      UNION ALL
+      SELECT 'AI 自動解決率',
+             CAST(ROUND(
+               SUM(CASE WHEN status='completed' AND assigned_to_user_id IS NULL THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '📈', NULL
+      FROM ai_conversations WHERE date(started_at) >= date('now', '-7 days')
       UNION ALL
       SELECT '平均置信度',
              CAST(ROUND(AVG(last_confidence) * 100, 1) AS TEXT) || '%',
-             '🎯',
-             NULL
-        FROM ai_conversations
-        WHERE date(started_at) >= date('now', '-7 days')
+             '🎯', NULL
+      FROM ai_conversations WHERE date(started_at) >= date('now', '-7 days')
       UNION ALL
       SELECT 'エスカレーション率',
              CAST(ROUND(SUM(CASE WHEN status = 'escalated' THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(*), 1) AS TEXT) || '%',
-             '⚠️',
-             NULL
-        FROM ai_conversations
-        WHERE date(started_at) >= date('now', '-7 days')
+             '⚠️', NULL
+      FROM ai_conversations WHERE date(started_at) >= date('now', '-7 days')
       UNION ALL
       SELECT '平均満足度',
-             CAST(ROUND(AVG(rating), 2) AS TEXT),
-             '⭐',
-             NULL
-        FROM ai_feedback
-        WHERE date(created_at) >= date('now', '-7 days')
-      UNION ALL
-      SELECT '感情スコア (平均)',
-             CAST(ROUND(AVG(sentiment_score), 3) AS TEXT),
-             '😊',
-             NULL
-        FROM ai_conversations
-        WHERE date(started_at) >= date('now', '-7 days')
+             CAST(ROUND(AVG(rating), 2) AS TEXT) || ' / 5',
+             '⭐', NULL
+      FROM ai_feedback WHERE date(created_at) >= date('now', '-7 days')
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -58,9 +52,54 @@ sections:
     editable: false
     readOnly: true
 
-  # 意図認識分析
+  # ─────────────────────────────────────────
+  # 対話数 7 日間推移
+  # ─────────────────────────────────────────
+  - id: daily_trend
+    title: 対話数 7 日間推移（AI 解決 vs エスカレーション）
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT date(started_at) AS label,
+             COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-7 days')
+      GROUP BY date(started_at)
+      ORDER BY label ASC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 時間帯別対話数（ヒートマップ代替：棒グラフ）
+  # ─────────────────────────────────────────
+  - id: hourly_distribution
+    title: 時間帯別対話数（直近 30 日）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CAST(CAST(strftime('%H', started_at) AS INTEGER) AS TEXT) || '時台' AS label,
+             COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-30 days')
+      GROUP BY strftime('%H', started_at)
+      ORDER BY strftime('%H', started_at)
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(245, 158, 11, 0.75)"
+    pageSize: 24
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 意図認識分析 TOP 10
+  # ─────────────────────────────────────────
   - id: intent_analysis
-    title: 意図認識分析（top 10）
+    title: 意図認識分析 TOP 10（直近 30 日）
     component: bar_chart
     sourceType: custom
     source: |
@@ -79,30 +118,25 @@ sections:
     editable: false
     readOnly: true
 
+  # ─────────────────────────────────────────
   # 置信度分布
+  # ─────────────────────────────────────────
   - id: confidence_distribution
-    title: 置信度分布
+    title: 置信度分布（直近 7 日）
     component: doughnut_chart
     sourceType: custom
     source: |
-      SELECT 
-        CASE
-          WHEN last_confidence >= 0.9 THEN '高 (90%+)'
-          WHEN last_confidence >= 0.7 THEN '中 (70-89%)'
-          WHEN last_confidence >= 0.5 THEN '低 (50-69%)'
-          ELSE '極低 (<50%)'
-        END AS label,
-        COUNT(*) AS value
+      SELECT CASE
+               WHEN last_confidence >= 0.9 THEN '🟢 高 (90%+)'
+               WHEN last_confidence >= 0.7 THEN '🔵 中 (70-89%)'
+               WHEN last_confidence >= 0.5 THEN '🟡 低 (50-69%)'
+               ELSE                              '🔴 極低 (<50%)'
+             END AS label,
+             COUNT(*) AS value
       FROM ai_conversations
       WHERE last_confidence IS NOT NULL
         AND date(started_at) >= date('now', '-7 days')
-      GROUP BY 
-        CASE
-          WHEN last_confidence >= 0.9 THEN '高 (90%+)'
-          WHEN last_confidence >= 0.7 THEN '中 (70-89%)'
-          WHEN last_confidence >= 0.5 THEN '低 (50-69%)'
-          ELSE '極低 (<50%)'
-        END
+      GROUP BY label
       ORDER BY value DESC
     columns: [label, value]
     xField: label
@@ -111,15 +145,16 @@ sections:
     editable: false
     readOnly: true
 
-  # 感情分析トレンド
+  # ─────────────────────────────────────────
+  # 感情スコア推移（7 日間）
+  # ─────────────────────────────────────────
   - id: sentiment_trend
-    title: 感情スコア推移（7 日間）
+    title: 感情スコア日別推移（7 日間）
     component: line_chart
     sourceType: custom
     source: |
-      SELECT 
-        date(started_at) AS label,
-        ROUND(AVG(sentiment_score), 3) AS value
+      SELECT date(started_at) AS label,
+             ROUND(AVG(sentiment_score), 3) AS value
       FROM ai_conversations
       WHERE sentiment_score IS NOT NULL
         AND date(started_at) >= date('now', '-7 days')
@@ -133,13 +168,25 @@ sections:
     editable: false
     readOnly: true
 
-  # エスカレーション理由分析
+  # ─────────────────────────────────────────
+  # エスカレーション理由
+  # ─────────────────────────────────────────
   - id: handover_reasons
-    title: エスカレーション理由（pie_chart）
+    title: エスカレーション理由内訳（直近 30 日）
     component: pie_chart
     sourceType: custom
     source: |
-      SELECT reason AS label, COUNT(*) AS value
+      SELECT CASE reason
+               WHEN 'ai_unable'          THEN 'AI 解決不可'
+               WHEN 'customer_request'   THEN 'お客様希望'
+               WHEN 'high_value_deal'    THEN '高額商談'
+               WHEN 'complaint'          THEN '苦情'
+               WHEN 'negative_sentiment' THEN '感情悪化'
+               WHEN 'complex_inquiry'    THEN '複雑な問い合わせ'
+               WHEN 'vip_customer'       THEN 'VIP 対応'
+               ELSE reason
+             END AS label,
+             COUNT(*) AS value
       FROM ai_handovers
       WHERE date(escalated_at) >= date('now', '-30 days')
       GROUP BY reason
@@ -151,68 +198,129 @@ sections:
     editable: false
     readOnly: true
 
-  # 低置信度対話一覧（AI 失敗分析）
-  - id: low_confidence_conversations
-    title: 低置信度対話（AI 失敗分析）
+  # ─────────────────────────────────────────
+  # FAQ 命中率・ナレッジ効果
+  # ─────────────────────────────────────────
+  - id: knowledge_effectiveness
+    title: ナレッジベース効果（FAQ 利用統計）
     component: table
     sourceType: custom
     source: |
-      SELECT c.conversation_id AS 対話 ID,
-             c.customer_id AS 顧客 ID,
-             c.channel AS チャネル，
-             c.last_intent AS 意図，
-             ROUND(c.last_confidence * 100, 1) || '%' AS 置信度，
-             ROUND(c.sentiment_score, 2) AS 感情，
-             c.status AS ステータス，
-             c.started_at AS 開始日時
-      FROM ai_conversations c
-      WHERE c.last_confidence < 0.5
-        AND date(c.started_at) >= date('now', '-7 days')
-      ORDER BY c.last_confidence ASC, c.started_at DESC
-      LIMIT 15
-    columns: [対話 ID, 顧客 ID, チャネル，意図，置信度，感情，ステータス，開始日時]
-    pageSize: 15
-    editable: false
-    readOnly: true
-
-  # エスカレーション一覧
-  - id: handovers_list
-    title: 最近のエスカレーション
-    component: table
-    sourceType: custom
-    source: |
-      SELECT h.handover_id AS エスカレーション ID,
-             h.conversation_id AS 対話 ID,
-             h.reason AS 理由，
-             h.priority AS 優先度，
-             h.target_department AS 部門，
-             h.status AS ステータス，
-             h.escalated_at AS エスカレーション日時
-      FROM ai_handovers h
-      WHERE date(h.escalated_at) >= date('now', '-7 days')
-      ORDER BY h.escalated_at DESC
-      LIMIT 10
-    columns: [エスカレーション ID, 対話 ID, 理由，優先度，部門，ステータス，エスカレーション日時]
+      SELECT CASE category
+               WHEN 'faq'            THEN '❓ FAQ'
+               WHEN 'vehicle_info'   THEN '🚗 車両情報'
+               WHEN 'service_menu'   THEN '🔧 サービス'
+               WHEN 'campaign'       THEN '🎉 キャンペーン'
+               WHEN 'business_hours' THEN '🕐 営業案内'
+               ELSE category
+             END AS カテゴリ,
+             COUNT(*) AS FAQ件数,
+             SUM(usage_count) AS 累計利用回数,
+             SUM(helpful_count) AS 役立ち数,
+             SUM(not_helpful_count) AS 不満数,
+             CASE WHEN SUM(helpful_count) + SUM(not_helpful_count) = 0 THEN '−'
+                  ELSE CAST(ROUND(
+                    CAST(SUM(helpful_count) AS REAL) * 100.0 /
+                    (SUM(helpful_count) + SUM(not_helpful_count)), 1
+                  ) AS TEXT) || '%'
+             END AS 満足率
+      FROM ai_knowledge
+      WHERE is_active = 1
+      GROUP BY category
+      ORDER BY SUM(usage_count) DESC
+    columns: [カテゴリ, FAQ件数, 累計利用回数, 役立ち数, 不満数, 満足率]
     pageSize: 10
     editable: false
     readOnly: true
 
+  # ─────────────────────────────────────────
   # チャネル別性能分析
+  # ─────────────────────────────────────────
   - id: channel_performance
-    title: チャネル別性能分析
+    title: チャネル別性能分析（直近 30 日）
     component: table
     sourceType: custom
     source: |
-      SELECT channel AS チャネル，
-             COUNT(*) AS 対話数，
-             ROUND(AVG(last_confidence) * 100, 1) || '%' AS 平均置信度，
-             ROUND(AVG(sentiment_score), 3) AS 平均感情，
-             ROUND(SUM(CASE WHEN status = 'escalated' THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(*), 1) || '%' AS エスカレーション率
+      SELECT channel AS チャネル,
+             COUNT(*) AS 対話数,
+             SUM(CASE WHEN status='completed' AND assigned_to_user_id IS NULL THEN 1 ELSE 0 END) AS AI解決,
+             CAST(ROUND(AVG(last_confidence) * 100, 1) AS TEXT) || '%' AS 平均置信度,
+             CAST(ROUND(AVG(sentiment_score), 2) AS TEXT) AS 平均感情,
+             CAST(ROUND(SUM(CASE WHEN status='escalated' THEN 1.0 ELSE 0.0 END) * 100.0 / COUNT(*), 1) AS TEXT) || '%' AS エスカレーション率
       FROM ai_conversations
       WHERE date(started_at) >= date('now', '-30 days')
       GROUP BY channel
-      ORDER BY 対話数 DESC
-    columns: [チャネル，対話数，平均置信度，平均感情，エスカレーション率]
+      ORDER BY COUNT(*) DESC
+    columns: [チャネル, 対話数, AI解決, 平均置信度, 平均感情, エスカレーション率]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 低置信度会話（AI 失敗分析）
+  # ─────────────────────────────────────────
+  - id: low_confidence_conversations
+    title: 低置信度対話 — AI 改善候補（直近 7 日）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.conversation_id AS 対話ID,
+             c.customer_id AS 顧客ID,
+             c.channel AS チャネル,
+             c.last_intent AS 意図,
+             CAST(ROUND(c.last_confidence * 100, 1) AS TEXT) || '%' AS 置信度,
+             CAST(ROUND(c.sentiment_score, 2) AS TEXT) AS 感情スコア,
+             CASE c.status
+               WHEN 'completed'  THEN '✅ 完了'
+               WHEN 'escalated'  THEN '⚠️ エスカレーション'
+               WHEN 'abandoned'  THEN '❌ 放棄'
+               ELSE c.status
+             END AS ステータス,
+             c.started_at AS 開始日時
+      FROM ai_conversations c
+      WHERE c.last_confidence < 0.5
+        AND date(c.started_at) >= date('now', '-7 days')
+      ORDER BY c.last_confidence ASC
+      LIMIT 15
+    columns: [対話ID, 顧客ID, チャネル, 意図, 置信度, 感情スコア, ステータス, 開始日時]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # メッセージ統計
+  # ─────────────────────────────────────────
+  - id: message_stats
+    title: メッセージ統計（直近 7 日）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総メッセージ数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_messages
+      WHERE date(timestamp) >= date('now', '-7 days')
+      UNION ALL
+      SELECT '顧客メッセージ',
+             CAST(SUM(CASE WHEN sender = 'customer' THEN 1 ELSE 0 END) AS TEXT),
+             '👤', NULL
+      FROM ai_messages WHERE date(timestamp) >= date('now', '-7 days')
+      UNION ALL
+      SELECT 'AI 返信',
+             CAST(SUM(CASE WHEN sender = 'ai' THEN 1 ELSE 0 END) AS TEXT),
+             '🤖', NULL
+      FROM ai_messages WHERE date(timestamp) >= date('now', '-7 days')
+      UNION ALL
+      SELECT 'オペレーター返信',
+             CAST(SUM(CASE WHEN sender = 'agent' THEN 1 ELSE 0 END) AS TEXT),
+             '🎧', NULL
+      FROM ai_messages WHERE date(timestamp) >= date('now', '-7 days')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
     pageSize: 10
     editable: false
     readOnly: true

@@ -1,0 +1,250 @@
+title: 経営ダッシュボード（ROI 分析）
+description: "AI 窓口システムの投資対効果・転換率ファネル・顧客 LTV・チーム稼働状況を経営層向けに可視化"
+
+sections:
+  # ─────────────────────────────────────────
+  # ROI KPI カード
+  # ─────────────────────────────────────────
+  - id: roi_kpi
+    title: AI 投資対効果 KPI（今月）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'AI 自動解決件数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🤖' AS metric_icon,
+             '@ ¥2,500/件換算' AS metric_delta
+      FROM ai_conversations
+      WHERE status = 'completed'
+        AND assigned_to_user_id IS NULL
+        AND strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'AI 対応コスト削減（推計）',
+             '¥' || printf('%,.0f',
+               COUNT(*) * 2500.0),
+             '💴', NULL
+      FROM ai_conversations
+      WHERE status = 'completed'
+        AND assigned_to_user_id IS NULL
+        AND strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'AI 起点の成約件数',
+             CAST(COUNT(*) AS TEXT),
+             '🏆', NULL
+      FROM sales_leads
+      WHERE status = 'won'
+        AND source_conversation_id IS NOT NULL
+        AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'AI 自動解決率',
+             CAST(ROUND(
+               SUM(CASE WHEN assigned_to_user_id IS NULL AND status = 'completed' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '📈', NULL
+      FROM ai_conversations
+      WHERE strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '平均顧客満足度',
+             CAST(ROUND(AVG(rating), 2) AS TEXT) || ' / 5.0',
+             '⭐', NULL
+      FROM ai_feedback
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '総対話数（今月）',
+             CAST(COUNT(*) AS TEXT),
+             '💬', NULL
+      FROM ai_conversations
+      WHERE strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 全体転換ファネル
+  # ─────────────────────────────────────────
+  - id: conversion_funnel
+    title: 全体転換ファネル（リード → 成約）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT '① 総対話' AS label,
+             COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '② リード化',
+             COUNT(*)
+      FROM sales_leads
+      WHERE date(created_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '③ 接触済',
+             COUNT(*)
+      FROM sales_leads
+      WHERE status IN ('contacted', 'qualified', 'proposal', 'won')
+        AND date(created_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '④ 商談中',
+             COUNT(*)
+      FROM sales_leads
+      WHERE status IN ('qualified', 'proposal', 'won')
+        AND date(created_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '⑤ 提案中',
+             COUNT(*)
+      FROM sales_leads
+      WHERE status IN ('proposal', 'won')
+        AND date(created_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '⑥ 成約',
+             COUNT(*)
+      FROM sales_leads
+      WHERE status = 'won'
+        AND date(updated_at) >= date('now', '-30 days')
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.8)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 対話数 7 日間推移（折れ線）
+  # ─────────────────────────────────────────
+  - id: conversation_trend
+    title: 対話数 7 日間推移
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT date(started_at) AS label, COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-7 days')
+      GROUP BY date(started_at)
+      ORDER BY date(started_at)
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # チャネル別 AI 解決率
+  # ─────────────────────────────────────────
+  - id: channel_performance
+    title: チャネル別 AI パフォーマンス（直近 30 日）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT channel AS チャネル,
+             COUNT(*) AS 総対話数,
+             SUM(CASE WHEN status = 'completed' AND assigned_to_user_id IS NULL THEN 1 ELSE 0 END) AS AI解決,
+             SUM(CASE WHEN status = 'escalated' THEN 1 ELSE 0 END) AS エスカレーション,
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'completed' AND assigned_to_user_id IS NULL THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%' AS AI解決率,
+             CAST(ROUND(AVG(last_confidence) * 100, 1) AS TEXT) || '%' AS 平均置信度,
+             CAST(ROUND(AVG(sentiment_score), 2) AS TEXT) AS 平均感情スコア
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-30 days')
+      GROUP BY channel
+      ORDER BY COUNT(*) DESC
+    columns: [チャネル, 総対話数, AI解決, エスカレーション, AI解決率, 平均置信度, 平均感情スコア]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 顧客ランク別 LTV 分析
+  # ─────────────────────────────────────────
+  - id: customer_ltv
+    title: 顧客ランク別 LTV・ポートフォリオ分析
+    component: table
+    sourceType: custom
+    source: |
+      SELECT CASE tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS ランク,
+             COUNT(*) AS 顧客数,
+             CAST(ROUND(AVG(purchase_count), 1) AS TEXT) AS 平均購入回数,
+             '¥' || printf('%,.0f', COALESCE(AVG(total_purchase_amount), 0)) AS 平均購買金額,
+             '¥' || printf('%,.0f', COALESCE(SUM(total_purchase_amount), 0)) AS 累計購買金額
+      FROM customers
+      GROUP BY tier_level
+      ORDER BY CASE tier_level
+        WHEN 'platinum' THEN 1
+        WHEN 'vip'      THEN 2
+        WHEN 'gold'     THEN 3
+        WHEN 'silver'   THEN 4
+        ELSE 5 END
+    columns: [ランク, 顧客数, 平均購入回数, 平均購買金額, 累計購買金額]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 顧客ランク分布（円グラフ）
+  # ─────────────────────────────────────────
+  - id: tier_distribution
+    title: 顧客ランク分布
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS label,
+             COUNT(*) AS value
+      FROM customers
+      GROUP BY tier_level
+      ORDER BY CASE tier_level
+        WHEN 'platinum' THEN 1
+        WHEN 'vip'      THEN 2
+        WHEN 'gold'     THEN 3
+        WHEN 'silver'   THEN 4
+        ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 担当者別成果（チーム比較）
+  # ─────────────────────────────────────────
+  - id: team_performance
+    title: 担当者別セールス成果（全期間）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT COALESCE(assigned_to_user_id, '未担当') AS 担当者,
+             COUNT(*) AS 担当リード数,
+             SUM(CASE WHEN status = 'won'  THEN 1 ELSE 0 END) AS 成約数,
+             SUM(CASE WHEN status = 'lost' THEN 1 ELSE 0 END) AS 失注数,
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'won' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%' AS 成約率,
+             CAST(ROUND(AVG(lead_score), 0) AS TEXT) AS 平均リードスコア
+      FROM sales_leads
+      GROUP BY assigned_to_user_id
+      ORDER BY 成約数 DESC, 担当リード数 DESC
+    columns: [担当者, 担当リード数, 成約数, 失注数, 成約率, 平均リードスコア]
+    pageSize: 10
+    editable: false
+    readOnly: true

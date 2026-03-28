@@ -1,40 +1,44 @@
-title: セールスリード管理
-description: "AI が自動認識・スコアリングした高価値セールスリードの一元管理"
+title: リードパイプライン管理
+description: "セールスリードの全ステージを可視化。停滞リードの早期発見とアクション管理"
 
 sections:
   # ─────────────────────────────────────────
-  # リード統計 KPI カード
+  # パイプライン KPI カード
   # ─────────────────────────────────────────
-  - id: leads_summary
-    title: リード統計サマリー
+  - id: pipeline_kpi
+    title: パイプライン概要
     component: stat_cards
     sourceType: custom
     source: |
-      SELECT '総リード数' AS metric_name,
+      SELECT '新規リード 🆕' AS metric_name,
              CAST(COUNT(*) AS TEXT) AS metric_value,
-             '📊' AS metric_icon,
+             '📥' AS metric_icon,
              NULL AS metric_delta
-      FROM sales_leads
-      UNION ALL
-      SELECT '新規（未対応）', CAST(COUNT(*) AS TEXT), '🆕', NULL
       FROM sales_leads WHERE status = 'new'
       UNION ALL
-      SELECT '今月成約', CAST(COUNT(*) AS TEXT), '🏆', NULL
+      SELECT '接触済 📞', CAST(COUNT(*) AS TEXT), '📞', NULL
+      FROM sales_leads WHERE status = 'contacted'
+      UNION ALL
+      SELECT '商談中 💼', CAST(COUNT(*) AS TEXT), '💼', NULL
+      FROM sales_leads WHERE status = 'qualified'
+      UNION ALL
+      SELECT '提案中 📋', CAST(COUNT(*) AS TEXT), '📋', NULL
+      FROM sales_leads WHERE status = 'proposal'
+      UNION ALL
+      SELECT '今月成約 🏆',
+             CAST(COUNT(*) AS TEXT),
+             '🏆', NULL
       FROM sales_leads
       WHERE status = 'won'
         AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
       UNION ALL
-      SELECT '平均スコア',
-             CAST(ROUND(AVG(lead_score), 1) AS TEXT),
-             '🎯', NULL
+      SELECT '停滞リード ⚠️',
+             CAST(COUNT(*) AS TEXT),
+             '⚠️', NULL
       FROM sales_leads
-      UNION ALL
-      SELECT 'ホットリード（80+）', CAST(COUNT(*) AS TEXT), '🔥', NULL
-      FROM sales_leads WHERE lead_score >= 80 AND status NOT IN ('won','lost')
-      UNION ALL
-      SELECT '今月新規', CAST(COUNT(*) AS TEXT), '📥', NULL
-      FROM sales_leads
-      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      WHERE status NOT IN ('won', 'lost')
+        AND (last_contact_at IS NULL
+          OR CAST((JULIANDAY('now') - JULIANDAY(last_contact_at)) AS INTEGER) >= 7)
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -45,10 +49,10 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────
-  # ステージ別ファネル（棒グラフ）
+  # ステージ別リード数（ファネル棒グラフ）
   # ─────────────────────────────────────────
-  - id: stage_funnel
-    title: ステージ別リード件数
+  - id: pipeline_funnel
+    title: リードファネル（ステージ別件数）
     component: bar_chart
     sourceType: custom
     source: |
@@ -74,26 +78,26 @@ sections:
     columns: [label, value]
     xField: label
     yField: value
-    color: "rgba(99, 102, 241, 0.75)"
+    color: "rgba(16, 185, 129, 0.75)"
     pageSize: 10
     editable: false
     readOnly: true
 
   # ─────────────────────────────────────────
-  # ホットリード一覧（スコア 80+）
+  # ホットリード（スコア 80+）
   # ─────────────────────────────────────────
   - id: hot_leads
-    title: 🔥 ホットリード一覧（スコア 80 以上）
+    title: 🔥 ホットリード（スコア 80 以上）
     component: table
     sourceType: custom
     source: |
-      SELECT l.lead_id AS リードID,
+      SELECT l.lead_id AS ID,
              c.name AS 顧客名,
              CASE c.tier_level
                WHEN 'platinum' THEN '💎 Platinum'
                WHEN 'vip'      THEN '⭐ VIP'
                WHEN 'gold'     THEN '🥇 Gold'
-               ELSE                 '🔵 Regular'
+               ELSE c.tier_level
              END AS ランク,
              l.vehicle_interest AS 興味車種,
              CASE WHEN l.budget IS NOT NULL
@@ -117,22 +121,60 @@ sections:
       INNER JOIN customers c ON l.customer_id = c.customer_id
       WHERE l.lead_score >= 80 AND l.status NOT IN ('won', 'lost')
       ORDER BY l.lead_score DESC
-    columns: [リードID, 顧客名, ランク, 興味車種, 予算, スコア, ステータス, 担当者, 最終接触]
+    columns: [ID, 顧客名, ランク, 興味車種, 予算, スコア, ステータス, 担当者, 最終接触]
     pageSize: 10
     actions:
-      - label: 対応
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
+      - label: 詳細
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
         class: "btn-primary"
 
   # ─────────────────────────────────────────
-  # セールスリード全件一覧
+  # 停滞リード（7日以上フォローアップなし）
   # ─────────────────────────────────────────
-  - id: leads_table
-    title: セールスリード一覧（全件）
+  - id: stale_leads
+    title: ⚠️ 停滞リード（7日以上フォローアップなし）
     component: table
     sourceType: custom
     source: |
-      SELECT l.lead_id AS リードID,
+      SELECT l.lead_id AS ID,
+             c.name AS 顧客名,
+             l.vehicle_interest AS 興味車種,
+             l.lead_score AS スコア,
+             CASE l.status
+               WHEN 'new'       THEN '🆕 新規'
+               WHEN 'contacted' THEN '📞 接触済'
+               WHEN 'qualified' THEN '💼 商談中'
+               WHEN 'proposal'  THEN '📋 提案中'
+               ELSE l.status
+             END AS ステータス,
+             COALESCE(l.assigned_to_user_id, '未担当') AS 担当者,
+             CASE WHEN l.last_contact_at IS NOT NULL
+                  THEN CAST(CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) AS TEXT) || '日'
+                  ELSE '未接触'
+             END AS 未対応日数
+      FROM sales_leads l
+      INNER JOIN customers c ON l.customer_id = c.customer_id
+      WHERE l.status NOT IN ('won', 'lost')
+        AND (l.last_contact_at IS NULL
+          OR CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) >= 7)
+      ORDER BY l.lead_score DESC,
+               COALESCE(JULIANDAY(l.last_contact_at), JULIANDAY(l.created_at)) ASC
+    columns: [ID, 顧客名, 興味車種, スコア, ステータス, 担当者, 未対応日数]
+    pageSize: 10
+    actions:
+      - label: フォロー開始
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
+        class: "btn-warning"
+
+  # ─────────────────────────────────────────
+  # 全リード一覧
+  # ─────────────────────────────────────────
+  - id: all_leads
+    title: リード全件一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT l.lead_id AS ID,
              c.name AS 顧客名,
              l.vehicle_interest AS 興味車種,
              CASE WHEN l.budget IS NOT NULL
@@ -154,9 +196,9 @@ sections:
       FROM sales_leads l
       INNER JOIN customers c ON l.customer_id = c.customer_id
       ORDER BY l.lead_score DESC, l.created_at DESC
-    columns: [リードID, 顧客名, 興味車種, 予算, スコア, ステータス, 担当者, 登録日]
+    columns: [ID, 顧客名, 興味車種, 予算, スコア, ステータス, 担当者, 登録日]
     pageSize: 15
     actions:
       - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
         class: "btn-outline-secondary"

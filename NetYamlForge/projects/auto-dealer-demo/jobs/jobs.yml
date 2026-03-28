@@ -43,6 +43,28 @@ jobs:
       retryInterval: 300
       logError: true
 
+  # 停滞リードアラート（7 日以上未対応のリードを平日朝に通知）
+  stale_lead_alert:
+    displayName: 停滞リードアラート
+    description: "7 日以上フォローアップが行われていないリードを担当者向けにレポート出力します"
+    enabled: true
+
+    schedule:
+      cron: "0 9 * * 1-5"           # 平日毎朝 9:00
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/stale_lead_alert.sql
+      outputFile: "jobs/output/stale_lead_alert_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
   # VIP 顧客フォローアップ
   vip_customer_followup:
     displayName: VIP 顧客フォローアップ

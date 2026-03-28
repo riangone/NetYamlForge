@@ -14,6 +14,8 @@ public class PageDefinition
     public string? Template { get; set; }
     /// <summary>カレンダーUI向けの追加設定（pages/*.yaml の calendar_ui）。</summary>
     public CalendarUiDefinition? CalendarUi { get; set; }
+    /// <summary>ページ末尾に挿入する JS ファイル URL リスト（pages/*.yaml の scripts）。</summary>
+    public List<string> Scripts { get; set; } = new();
     public List<SectionDefinition> Sections { get; set; } = new();
 }
 

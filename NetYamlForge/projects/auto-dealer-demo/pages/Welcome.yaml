@@ -1,0 +1,244 @@
+title: スタートガイド
+description: "自動車ディーラー AI 窓口システムのスタートガイド。ロール別の業務フローと本日の状況を確認できます。"
+
+sections:
+  # ─────────────────────────────────────────
+  # システム全体 KPI（今日の状況）
+  # ─────────────────────────────────────────
+  - id: system_status
+    title: 📊 本日のシステム状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'アクティブ対話' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_conversations WHERE status = 'active'
+      UNION ALL
+      SELECT '待機中エスカレーション', CAST(COUNT(*) AS TEXT), '⚠️', NULL
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '本日の予約', CAST(COUNT(*) AS TEXT), '📅', NULL
+      FROM service_appointments
+      WHERE date(preferred_date) = date('now')
+      UNION ALL
+      SELECT 'ホットリード', CAST(COUNT(*) AS TEXT), '🔥', NULL
+      FROM sales_leads WHERE lead_score >= 80 AND status NOT IN ('won','lost')
+      UNION ALL
+      SELECT '未解決依頼', CAST(COUNT(*) AS TEXT), '🔧', NULL
+      FROM service_requests WHERE status IN ('open','in_progress')
+      UNION ALL
+      SELECT '顧客総数', CAST(COUNT(*) AS TEXT), '👥', NULL
+      FROM customers
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 要対応アイテム（優先度の高い事項）
+  # ─────────────────────────────────────────
+  - id: urgent_items
+    title: 🚨 今すぐ対応が必要な事項
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        '🔴 AI エスカレーション' AS 種別,
+        COALESCE(c.channel, '不明') || ' チャネル' AS 詳細,
+        h.reason AS 理由,
+        h.priority AS 優先度,
+        CAST(CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 1440 AS INTEGER) AS TEXT) || ' 分前' AS 経過時間
+      FROM ai_handovers h
+      LEFT JOIN ai_conversations c ON h.conversation_id = c.conversation_id
+      WHERE h.status = 'pending'
+      UNION ALL
+      SELECT
+        '🟠 緊急サービス依頼' AS 種別,
+        r.subject AS 詳細,
+        r.request_type AS 理由,
+        r.priority AS 優先度,
+        CAST(CAST((JULIANDAY('now') - JULIANDAY(r.created_at)) * 24 AS INTEGER) AS TEXT) || ' 時間前' AS 経過時間
+      FROM service_requests r
+      WHERE r.priority IN ('urgent', 'high') AND r.status IN ('open', 'in_progress')
+      ORDER BY 優先度 DESC
+      LIMIT 10
+    columns: [種別, 詳細, 理由, 優先度, 経過時間]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 本日の予約タイムライン
+  # ─────────────────────────────────────────
+  - id: todays_appointments
+    title: 📅 本日の予約
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%H:%M', a.preferred_date) AS 時刻,
+        cu.name AS 顧客名,
+        CASE a.appointment_type
+          WHEN 'inspection'    THEN '🔍 点検・車検'
+          WHEN 'repair'        THEN '🔧 修理'
+          WHEN 'test_drive'    THEN '🚗 試乗'
+          WHEN 'delivery'      THEN '🎁 納車'
+          WHEN 'consultation'  THEN '💬 相談'
+          WHEN 'oil_change'    THEN '🛢️ オイル交換'
+          ELSE a.appointment_type
+        END AS 種別,
+        CASE a.status
+          WHEN 'confirmed'    THEN '✅ 確認済'
+          WHEN 'pending'      THEN '⏳ 確認待ち'
+          WHEN 'in_progress'  THEN '🔄 対応中'
+          WHEN 'completed'    THEN '✔️ 完了'
+          WHEN 'cancelled'    THEN '❌ キャンセル'
+          ELSE a.status
+        END AS ステータス,
+        COALESCE(a.estimated_cost, 0) || ' 円' AS 見積金額
+      FROM service_appointments a
+      LEFT JOIN customers cu ON a.customer_id = cu.customer_id
+      WHERE date(a.preferred_date) = date('now')
+      ORDER BY a.preferred_date ASC
+      LIMIT 20
+    columns: [時刻, 顧客名, 種別, ステータス, 見積金額]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ロール別 操作ガイド — AI オペレーター
+  # ─────────────────────────────────────────
+  - id: guide_operator
+    title: 🎧 AI オペレーター — 業務フロー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '① エスカレーション確認' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件 待機中' AS metric_value,
+             '⚠️' AS metric_icon,
+             '/auto-dealer-demo/Page/OperatorConsole' AS metric_delta
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '② 対応中チャット', CAST(COUNT(*) AS TEXT) || ' 件', '💬',
+             '/auto-dealer-demo/Page/OperatorConsole'
+      FROM ai_handovers WHERE status = 'in_progress'
+      UNION ALL
+      SELECT '③ 本日解決件数', CAST(COUNT(*) AS TEXT) || ' 件', '✅',
+             '/auto-dealer-demo/Page/OperatorConsole'
+      FROM ai_handovers
+      WHERE status = 'resolved' AND date(resolved_at) = date('now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ロール別 操作ガイド — 営業担当者
+  # ─────────────────────────────────────────
+  - id: guide_sales
+    title: 🎯 営業担当者 — 業務フロー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '① ホットリード確認' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件（スコア80↑）' AS metric_value,
+             '🔥' AS metric_icon,
+             '/auto-dealer-demo/Page/SalesRepDashboard' AS metric_delta
+      FROM sales_leads WHERE lead_score >= 80 AND status NOT IN ('won','lost')
+      UNION ALL
+      SELECT '② 停滞リードフォロー',
+             CAST(COUNT(*) AS TEXT) || ' 件（7日以上放置）', '⏰',
+             '/auto-dealer-demo/Page/SalesRepDashboard'
+      FROM sales_leads
+      WHERE status NOT IN ('won','lost')
+        AND (last_contact_at IS NULL
+          OR CAST((JULIANDAY('now') - JULIANDAY(last_contact_at)) AS INTEGER) >= 7)
+      UNION ALL
+      SELECT '③ パイプライン全体確認', CAST(COUNT(*) AS TEXT) || ' 件 進行中', '📋',
+             '/auto-dealer-demo/Page/LeadKanban'
+      FROM sales_leads WHERE status NOT IN ('won','lost')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ロール別 操作ガイド — サービス部門
+  # ─────────────────────────────────────────
+  - id: guide_service
+    title: 🔧 サービス部門 — 業務フロー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '① 本日の予約確認' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+             '📅' AS metric_icon,
+             '/auto-dealer-demo/Page/Appointments' AS metric_delta
+      FROM service_appointments
+      WHERE date(preferred_date) = date('now')
+      UNION ALL
+      SELECT '② 未解決の依頼対応',
+             CAST(COUNT(*) AS TEXT) || ' 件 オープン中', '🔧',
+             '/auto-dealer-demo/Page/ServiceRequests'
+      FROM service_requests WHERE status IN ('open','in_progress')
+      UNION ALL
+      SELECT '③ 確認待ち予約', CAST(COUNT(*) AS TEXT) || ' 件', '⏳',
+             '/auto-dealer-demo/Page/Appointments'
+      FROM service_appointments WHERE status = 'pending'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ロール別 操作ガイド — 経営層
+  # ─────────────────────────────────────────
+  - id: guide_exec
+    title: 📊 経営層 — 業務フロー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '① AI ROI 分析' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件 自動解決（今月）' AS metric_value,
+             '🤖' AS metric_icon,
+             '/auto-dealer-demo/Page/ExecDashboard' AS metric_delta
+      FROM ai_conversations
+      WHERE status = 'completed'
+        AND strftime('%Y-%m', ended_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '② 今月の成約実績',
+             CAST(COUNT(*) AS TEXT) || ' 件', '🏆',
+             '/auto-dealer-demo/Page/ExecDashboard'
+      FROM sales_leads
+      WHERE status = 'won'
+        AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '③ AI 分析レポート確認', '全体パフォーマンス', '📈',
+             '/auto-dealer-demo/Page/AIAnalytics'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true

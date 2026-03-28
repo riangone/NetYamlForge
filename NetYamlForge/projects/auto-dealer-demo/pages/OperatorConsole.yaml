@@ -1,65 +1,181 @@
 title: オペレーター・コンソール
-description: "有人対応が必要な対話の管理と、リアルタイムな顧客対応を行うためのワークスペース"
+description: "有人対応が必要な対話の管理・リアルタイム対応・チーム稼働状況を一元管理するワークスペース"
 
 sections:
-  # 待機中キュー
+  # ─────────────────────────────────────────
+  # オペレーター KPI サマリー
+  # ─────────────────────────────────────────
+  - id: operator_kpi
+    title: 本日のオペレーター状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '待機中エスカレーション' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '⏳' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '対応中チャット', CAST(COUNT(*) AS TEXT), '💬', NULL
+      FROM ai_handovers WHERE status IN ('assigned', 'in_progress')
+      UNION ALL
+      SELECT '本日解決件数', CAST(COUNT(*) AS TEXT), '✅', NULL
+      FROM ai_handovers WHERE status = 'resolved' AND date(resolved_at) = date('now')
+      UNION ALL
+      SELECT 'SLA 超過（10分超）', CAST(COUNT(*) AS TEXT), '🔴', NULL
+      FROM ai_handovers
+      WHERE status = 'pending'
+        AND CAST((JULIANDAY('now') - JULIANDAY(escalated_at)) * 24 * 60 AS INTEGER) >= 10
+      UNION ALL
+      SELECT '平均待機時間(分)',
+             CAST(ROUND(AVG(CAST((JULIANDAY('now') - JULIANDAY(escalated_at)) * 24 * 60 AS INTEGER)), 1) AS TEXT),
+             '⏱️', NULL
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '本日の顧客満足度',
+             CAST(ROUND(AVG(rating), 1) AS TEXT) || ' / 5',
+             '⭐', NULL
+      FROM ai_feedback WHERE date(created_at) = date('now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 待機中キュー（優先度・SLA 超過表示付き）
+  # ─────────────────────────────────────────
   - id: pending_handovers
-    title: 待機中のエスカレーション（優先度順）
+    title: 待機中のエスカレーション（優先度順・SLA 表示）
     component: table
     sourceType: custom
     source: |
       SELECT h.handover_id AS ID,
+             h.conversation_id AS 会話ID,
              c.name AS 顧客名,
-             h.reason AS 理由,
-             h.priority AS 優先度,
-             h.escalated_at AS 待機時間,
+             CASE h.reason
+               WHEN 'ai_unable'          THEN 'AI 解決不可'
+               WHEN 'customer_request'   THEN 'お客様希望'
+               WHEN 'high_value_deal'    THEN '高額商談'
+               WHEN 'complaint'          THEN '苦情'
+               WHEN 'negative_sentiment' THEN '感情悪化'
+               WHEN 'complex_inquiry'    THEN '複雑な問い合わせ'
+               WHEN 'vip_customer'       THEN 'VIP 対応'
+               ELSE h.reason
+             END AS 理由,
+             CASE h.priority
+               WHEN 'urgent' THEN '🔴 緊急'
+               WHEN 'high'   THEN '🟠 高'
+               WHEN 'medium' THEN '🟡 中'
+               ELSE               '🟢 低'
+             END AS 優先度,
+             CAST(ROUND(CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER), 0) AS TEXT) || '分' AS 待機時間,
+             CASE WHEN CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER) >= 10
+                  THEN '⚠️ SLA 超過'
+                  ELSE '✅ 正常'
+             END AS SLA状態,
+             h.target_department AS 部門,
              h.handover_notes AS メモ
       FROM ai_handovers h
       INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
       INNER JOIN customers c ON conv.customer_id = c.customer_id
       WHERE h.status = 'pending'
-      ORDER BY 
+      ORDER BY
         CASE h.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
-        h.escalated_at ASC
-    columns: [ID, 顧客名, 理由, 優先度, 待機時間, メモ]
-    pageSize: 5
+        CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER) DESC
+    columns: [ID, 顧客名, 理由, 優先度, 待機時間, SLA状態, 部門, メモ]
+    pageSize: 8
     actions:
       - label: 対応開始
-        url: "/auto-dealer-demo/Page/ChatDetail?id={ID}"
+        url: "/auto-dealer-demo/OperatorChat/Detail/{会話ID}"
         class: "btn-primary"
 
+  # ─────────────────────────────────────────
   # 担当中の対話
+  # ─────────────────────────────────────────
   - id: active_chats
     title: あなたが担当中の対話
     component: table
     sourceType: custom
     source: |
       SELECT h.handover_id AS ID,
+             h.conversation_id AS 会話ID,
              c.name AS 顧客名,
-             h.status AS ステータス,
-             h.assigned_at AS 開始時間
+             CASE h.status WHEN 'assigned' THEN '📋 担当アサイン' ELSE '💬 対応中' END AS ステータス,
+             CASE h.priority
+               WHEN 'urgent' THEN '🔴 緊急'
+               WHEN 'high'   THEN '🟠 高'
+               ELSE               '🟡 中'
+             END AS 優先度,
+             h.target_department AS 部門,
+             h.assigned_at AS 開始時間,
+             CAST(ROUND(CAST((JULIANDAY('now') - JULIANDAY(h.assigned_at)) * 24 * 60 AS INTEGER), 0) AS TEXT) || '分経過' AS 経過時間
       FROM ai_handovers h
       INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
       INNER JOIN customers c ON conv.customer_id = c.customer_id
-      WHERE h.status = 'assigned' AND h.assigned_to_user_id = '@CurrentUser'
+      WHERE h.status IN ('assigned', 'in_progress')
+        AND h.assigned_to_user_id = '@CurrentUser'
       ORDER BY h.assigned_at DESC
-    columns: [ID, 顧客名, ステータス, 開始時間]
+    columns: [ID, 顧客名, ステータス, 優先度, 部門, 開始時間, 経過時間]
     pageSize: 5
     actions:
       - label: チャットを開く
-        url: "/auto-dealer-demo/Page/ChatDetail?id={ID}"
+        url: "/auto-dealer-demo/OperatorChat/Detail/{会話ID}"
         class: "btn-secondary"
 
-  # 最近の解決済み事案
+  # ─────────────────────────────────────────
+  # エスカレーション理由分析（チャート）
+  # ─────────────────────────────────────────
+  - id: escalation_reason_chart
+    title: エスカレーション理由内訳（今週）
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE reason
+               WHEN 'ai_unable'          THEN 'AI 解決不可'
+               WHEN 'customer_request'   THEN 'お客様希望'
+               WHEN 'high_value_deal'    THEN '高額商談'
+               WHEN 'complaint'          THEN '苦情'
+               WHEN 'negative_sentiment' THEN '感情悪化'
+               WHEN 'complex_inquiry'    THEN '複雑な問い合わせ'
+               WHEN 'vip_customer'       THEN 'VIP 対応'
+               ELSE reason
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_handovers
+      WHERE date(escalated_at) >= date('now', '-7 days')
+      GROUP BY reason
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 最近解決した事案
+  # ─────────────────────────────────────────
   - id: resolved_chats
-    title: 最近解決した事案
+    title: 最近解決した事案（直近 10 件）
     component: table
     sourceType: custom
     source: |
       SELECT h.handover_id AS ID,
              c.name AS 顧客名,
-             h.reason AS 理由,
+             CASE h.reason
+               WHEN 'ai_unable'          THEN 'AI 解決不可'
+               WHEN 'customer_request'   THEN 'お客様希望'
+               WHEN 'complaint'          THEN '苦情'
+               WHEN 'negative_sentiment' THEN '感情悪化'
+               ELSE h.reason
+             END AS 理由,
+             h.assigned_to_user_id AS 担当者,
              h.resolved_at AS 解決日時,
+             CAST(ROUND(CAST((JULIANDAY(h.resolved_at) - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER), 0) AS TEXT) || '分' AS 対応時間,
              h.resolution_notes AS 対応結果
       FROM ai_handovers h
       INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
@@ -67,25 +183,37 @@ sections:
       WHERE h.status = 'resolved'
       ORDER BY h.resolved_at DESC
       LIMIT 10
-    columns: [ID, 顧客名, 理由, 解决日時, 対応結果]
+    columns: [ID, 顧客名, 理由, 担当者, 解決日時, 対応時間, 対応結果]
     pageSize: 10
 
-  # AI 補助ツール：よくある回答テンプレート
+  # ─────────────────────────────────────────
+  # AI 推奨回答テンプレート（ナレッジベース）
+  # ─────────────────────────────────────────
   - id: ai_suggest_templates
-    title: AI 推奨回答（ナレッジベースより）
+    title: AI 推奨回答カテゴリ（💡 ナレッジベースより）
     component: stat_cards
     sourceType: custom
     source: |
-      SELECT category AS metric_name,
+      SELECT CASE category
+               WHEN 'faq'            THEN 'よくある質問'
+               WHEN 'vehicle_info'   THEN '車両情報'
+               WHEN 'service_menu'   THEN 'サービスメニュー'
+               WHEN 'campaign'       THEN 'キャンペーン'
+               WHEN 'business_hours' THEN '営業時間・案内'
+               ELSE category
+             END AS metric_name,
              CAST(COUNT(*) AS TEXT) AS metric_value,
              '💡' AS metric_icon,
-             '詳細表示' AS metric_delta
+             CAST(SUM(usage_count) AS TEXT) || '回使用' AS metric_delta
       FROM ai_knowledge
       WHERE is_active = 1
       GROUP BY category
+      ORDER BY SUM(usage_count) DESC
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
     iconField: metric_icon
     deltaField: metric_delta
     pageSize: 10
+    editable: false
+    readOnly: true

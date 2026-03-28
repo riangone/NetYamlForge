@@ -1,0 +1,128 @@
+imports: []
+entities:
+  lead_activities:
+    table: lead_activities
+    key: activity_id
+    displayName: リード活動履歴
+    softDelete: false
+    isPublic: true
+
+    columns:
+      activity_id:
+        type: string
+        length: 64
+        required: true
+        label: アクティビティ ID
+        searchable: true
+        sortable: true
+      lead_id:
+        type: string
+        length: 50
+        required: true
+        label: リード ID
+        searchable: true
+        sortable: true
+      activity_type:
+        type: string
+        length: 30
+        required: true
+        label: アクション種別
+        options:
+          - call
+          - email
+          - visit
+          - proposal_sent
+          - test_drive
+          - ai_message
+        searchable: true
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: メモ
+      outcome:
+        type: string
+        length: 20
+        required: false
+        label: 結果
+        options:
+          - positive
+          - neutral
+          - negative
+          - no_answer
+        searchable: true
+        sortable: true
+      next_action:
+        type: string
+        length: 200
+        required: false
+        label: 次のアクション
+        searchable: true
+      next_action_date:
+        type: datetime
+        required: false
+        label: 次のアクション期限
+        sortable: true
+      created_by:
+        type: string
+        length: 50
+        required: false
+        label: 作成者
+        searchable: true
+        sortable: true
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+
+    forms:
+      activity_id:
+        type: string
+        required: true
+        label: アクティビティ ID
+        editable: false
+      lead_id:
+        type: string
+        required: true
+        label: リード ID
+        editable: true
+      activity_type:
+        type: select
+        required: true
+        label: アクション種別
+        editable: true
+      notes:
+        type: textarea
+        required: false
+        label: メモ
+        editable: true
+      outcome:
+        type: select
+        required: false
+        label: 結果
+        editable: true
+      next_action:
+        type: string
+        required: false
+        label: 次のアクション
+        editable: true
+      next_action_date:
+        type: datetime
+        required: false
+        label: 次のアクション期限
+        editable: true
+      created_by:
+        type: string
+        required: false
+        label: 作成者
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - set_lead_activity_timestamps
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

@@ -71,7 +71,13 @@ public class ProjectLayoutConfig
     /// サイドバーに表示するナビゲーション項目のカスタマイズ。
     /// </summary>
     public ProjectNavigationConfig? Navigation { get; set; }
-    
+
+    /// <summary>
+    /// ロール別ランディングページ（URL）。ログイン後の初回リダイレクト先をロールごとに設定。
+    /// Key: AppUserRole.RoleName, Value: リダイレクト先 URL。
+    /// </summary>
+    public Dictionary<string, string> LandingPageByRole { get; set; } = new();
+
     /// <summary>
     /// ヘッダーのカスタマイズ。
     /// </summary>
@@ -131,6 +137,12 @@ public class ProjectNavigationItemConfig
     
     /// <summary>Admin ロールのみ表示（デフォルト：false）</summary>
     public bool AdminOnly { get; set; }
+
+    /// <summary>
+    /// この項目を表示するカスタムロールのリスト（AppUserRole.RoleName と照合）。
+    /// 空の場合は全ユーザーに表示。AdminOnly=true の場合は無視。
+    /// </summary>
+    public List<string> Roles { get; set; } = new();
 }
 
 /// <summary>

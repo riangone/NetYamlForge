@@ -1,0 +1,237 @@
+title: 対話詳細・オペレーター対応
+description: "エスカレーションされた対話の詳細確認・顧客情報・メッセージ履歴・対応アクションを管理"
+
+sections:
+  # ─────────────────────────────────────────
+  # エスカレーション情報カード
+  # ─────────────────────────────────────────
+  - id: handover_info
+    title: エスカレーション情報
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '優先度' AS metric_name,
+             CASE h.priority
+               WHEN 'urgent' THEN '🔴 緊急'
+               WHEN 'high'   THEN '🟠 高'
+               WHEN 'medium' THEN '🟡 中'
+               ELSE               '🟢 低'
+             END AS metric_value,
+             '⚡' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'ステータス',
+             CASE h.status
+               WHEN 'pending'     THEN '⏳ 待機中'
+               WHEN 'assigned'    THEN '📋 担当アサイン'
+               WHEN 'in_progress' THEN '💬 対応中'
+               WHEN 'resolved'    THEN '✅ 解決済み'
+               ELSE h.status
+             END,
+             '📌', NULL
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'エスカレーション理由',
+             CASE h.reason
+               WHEN 'ai_unable'          THEN 'AI 解決不可'
+               WHEN 'customer_request'   THEN 'お客様希望'
+               WHEN 'high_value_deal'    THEN '高額商談'
+               WHEN 'complaint'          THEN '苦情'
+               WHEN 'negative_sentiment' THEN '感情悪化'
+               WHEN 'complex_inquiry'    THEN '複雑な問い合わせ'
+               WHEN 'vip_customer'       THEN 'VIP 対応'
+               ELSE h.reason
+             END,
+             '⚠️', NULL
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '担当部門',
+             COALESCE(h.target_department, '未設定'),
+             '🏢', NULL
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '待機時間',
+             CAST(ROUND(CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER), 0) AS TEXT) || '分',
+             '⏱️', NULL
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '担当オペレーター',
+             COALESCE(h.assigned_to_user_id, '未担当'),
+             '🎧', NULL
+      FROM ai_handovers h WHERE h.handover_id = '@QueryParam:id'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 顧客プロフィール
+  # ─────────────────────────────────────────
+  - id: customer_profile
+    title: 顧客プロフィール
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.customer_id AS 顧客ID,
+             c.name AS 氏名,
+             CASE c.tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS ランク,
+             c.phone AS 電話,
+             c.mobile AS 携帯,
+             c.email AS メール,
+             CASE c.preferred_contact
+               WHEN 'phone' THEN '📞 電話'
+               WHEN 'email' THEN '✉️ メール'
+               WHEN 'line'  THEN '💬 LINE'
+               WHEN 'sms'   THEN '📱 SMS'
+               ELSE c.preferred_contact
+             END AS 希望連絡先,
+             c.purchase_count AS 購入回数,
+             c.last_visit_date AS 最終来店
+      FROM customers c
+      INNER JOIN ai_conversations conv ON c.customer_id = conv.customer_id
+      INNER JOIN ai_handovers h ON conv.conversation_id = h.conversation_id
+      WHERE h.handover_id = '@QueryParam:id'
+    columns: [顧客ID, 氏名, ランク, 電話, 携帯, メール, 希望連絡先, 購入回数, 最終来店]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 対話メッセージ履歴
+  # ─────────────────────────────────────────
+  - id: message_history
+    title: 💬 対話メッセージ履歴
+    component: table
+    sourceType: custom
+    source: |
+      SELECT m.timestamp AS 時刻,
+             CASE m.sender
+               WHEN 'customer' THEN '👤 顧客'
+               WHEN 'ai'       THEN '🤖 AI'
+               WHEN 'agent'    THEN '🎧 オペレーター'
+               ELSE m.sender
+             END AS 送信者,
+             CASE m.message_type
+               WHEN 'text'             THEN '💬'
+               WHEN 'voice_transcript' THEN '🎤'
+               WHEN 'image'            THEN '🖼️'
+               WHEN 'quick_reply'      THEN '⚡'
+               ELSE '📄'
+             END AS 種別,
+             m.content AS メッセージ内容,
+             CASE WHEN m.intent IS NOT NULL
+                  THEN m.intent || ' (' || CAST(ROUND(m.confidence_score * 100, 0) AS TEXT) || '%)'
+                  ELSE '−'
+             END AS 意図（置信度）,
+             CASE WHEN m.sentiment_score IS NOT NULL
+                  THEN CASE
+                    WHEN m.sentiment_score > 0.3  THEN '😊 ポジティブ'
+                    WHEN m.sentiment_score < -0.3 THEN '😞 ネガティブ'
+                    ELSE                               '😐 ニュートラル'
+                  END
+                  ELSE '−'
+             END AS 感情
+      FROM ai_messages m
+      INNER JOIN ai_conversations conv ON m.conversation_id = conv.conversation_id
+      INNER JOIN ai_handovers h ON conv.conversation_id = h.conversation_id
+      WHERE h.handover_id = '@QueryParam:id'
+      ORDER BY m.timestamp ASC
+    columns: [時刻, 送信者, 種別, メッセージ内容, 意図（置信度）, 感情]
+    pageSize: 30
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 対話・エスカレーション概要（メモ）
+  # ─────────────────────────────────────────
+  - id: handover_notes_detail
+    title: エスカレーション詳細メモ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_notes AS 引継ぎメモ,
+             h.resolution_notes AS 対応結果メモ,
+             h.escalated_at AS エスカレーション日時,
+             h.assigned_at AS 担当割り当て日時,
+             h.resolved_at AS 解決日時
+      FROM ai_handovers h
+      WHERE h.handover_id = '@QueryParam:id'
+    columns: [引継ぎメモ, 対応結果メモ, エスカレーション日時, 担当割り当て日時, 解決日時]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 関連リード情報
+  # ─────────────────────────────────────────
+  - id: related_leads
+    title: 関連セールスリード
+    component: table
+    sourceType: custom
+    source: |
+      SELECT l.lead_id AS リードID,
+             l.vehicle_interest AS 興味車種,
+             CASE WHEN l.budget IS NOT NULL
+                  THEN '¥' || printf('%,.0f', l.budget)
+                  ELSE '−'
+             END AS 予算,
+             l.lead_score AS スコア,
+             CASE l.status
+               WHEN 'new'       THEN '🆕 新規'
+               WHEN 'contacted' THEN '📞 接触済'
+               WHEN 'qualified' THEN '💼 商談中'
+               WHEN 'proposal'  THEN '📋 提案中'
+               WHEN 'won'       THEN '🏆 成約'
+               ELSE l.status
+             END AS ステータス,
+             l.assigned_to_user_id AS 担当営業
+      FROM sales_leads l
+      INNER JOIN ai_conversations conv ON l.source_conversation_id = conv.conversation_id
+      INNER JOIN ai_handovers h ON conv.conversation_id = h.conversation_id
+      WHERE h.handover_id = '@QueryParam:id'
+    columns: [リードID, 興味車種, 予算, スコア, ステータス, 担当営業]
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 顧客の過去の対話履歴（直近 5 件）
+  # ─────────────────────────────────────────
+  - id: past_conversations
+    title: 顧客の過去の AI 対話（直近 5 件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT prev.conversation_id AS 対話ID,
+             prev.channel AS チャネル,
+             CASE prev.status
+               WHEN 'completed'  THEN '✅ 完了'
+               WHEN 'escalated'  THEN '⚠️ エスカレーション'
+               WHEN 'abandoned'  THEN '❌ 放棄'
+               ELSE prev.status
+             END AS ステータス,
+             prev.last_intent AS 最終インテント,
+             CAST(ROUND(prev.last_confidence * 100, 0) AS TEXT) || '%' AS 置信度,
+             prev.started_at AS 開始日時
+      FROM ai_conversations prev
+      INNER JOIN ai_conversations curr ON prev.customer_id = curr.customer_id
+      INNER JOIN ai_handovers h ON curr.conversation_id = h.conversation_id
+      WHERE h.handover_id = '@QueryParam:id'
+        AND prev.conversation_id != curr.conversation_id
+      ORDER BY prev.started_at DESC
+      LIMIT 5
+    columns: [対話ID, チャネル, ステータス, 最終インテント, 置信度, 開始日時]
+    pageSize: 5
+    editable: false
+    readOnly: true

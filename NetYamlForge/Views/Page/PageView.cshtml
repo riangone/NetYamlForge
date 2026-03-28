@@ -121,14 +121,18 @@
     }
 </div>
 
-@if (hasChart)
-{
-    @section Scripts {
+@section Scripts {
+    @if (hasChart)
+    {
         <script src="/lib/chartjs/chart.umd.min.js"></script>
         <script>
             Chart.defaults.font.family = "'Inter','Helvetica Neue',sans-serif";
             Chart.defaults.font.size = 12;
             Chart.defaults.color = 'rgba(100,116,139,0.9)';
         </script>
+    }
+    @foreach (var scriptUrl in pageDef.Scripts)
+    {
+        <script src="@scriptUrl"></script>
     }
 }

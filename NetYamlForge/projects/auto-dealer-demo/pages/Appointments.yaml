@@ -1,28 +1,40 @@
 title: サービス予約管理
-description: "サービス予約のスケジュールとステータス管理ページ"
+description: "予約スケジュール・ステータス管理・スタッフ稼働・キャンセル分析・収益サマリー"
 
 sections:
-  # 予約統計
+  # ─────────────────────────────────────────
+  # 予約 KPI カード
+  # ─────────────────────────────────────────
   - id: appointment_stats
-    title: 予約状況
+    title: 予約状況サマリー
     component: stat_cards
     sourceType: custom
     source: |
-      SELECT '本日予約' AS metric_name, 
-             CAST(COUNT(*) AS TEXT) AS metric_value, 
-             '📅' AS metric_icon, 
+      SELECT '本日予約' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📅' AS metric_icon,
              NULL AS metric_delta
-        FROM service_appointments 
-        WHERE date(preferred_date) = date('now')
+      FROM service_appointments WHERE date(preferred_date) = date('now')
       UNION ALL
-      SELECT '確認待ち', CAST(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS TEXT), '⏰', NULL 
-        FROM service_appointments
+      SELECT '確認待ち', CAST(SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS TEXT), '⏰', NULL
+      FROM service_appointments
       UNION ALL
-      SELECT '作業中', CAST(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS TEXT), '🔧', NULL 
-        FROM service_appointments
+      SELECT '作業中', CAST(SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) AS TEXT), '🔧', NULL
+      FROM service_appointments
       UNION ALL
-      SELECT '完了 (今日)', CAST(SUM(CASE WHEN status = 'completed' AND date(completed_at) = date('now') THEN 1 ELSE 0 END) AS TEXT), '✅', NULL 
-        FROM service_appointments
+      SELECT '今月完了', CAST(COUNT(*) AS TEXT), '✅', NULL
+      FROM service_appointments
+      WHERE status = 'completed' AND strftime('%Y-%m', completed_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '今月キャンセル', CAST(COUNT(*) AS TEXT), '❌', NULL
+      FROM service_appointments
+      WHERE status = 'cancelled' AND strftime('%Y-%m', cancelled_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '今月売上（推計）',
+             '¥' || printf('%,.0f', COALESCE(SUM(actual_cost), SUM(estimated_cost), 0)),
+             '💴', NULL
+      FROM service_appointments
+      WHERE status = 'completed' AND strftime('%Y-%m', completed_at) = strftime('%Y-%m', 'now')
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -32,67 +44,187 @@ sections:
     editable: false
     readOnly: true
 
-  # 本日の予約スケジュール
+  # ─────────────────────────────────────────
+  # 本日のタイムライン
+  # ─────────────────────────────────────────
   - id: today_schedule
-    title: 本日の予約スケジュール
+    title: 本日の予約タイムライン
     component: table
     sourceType: custom
     source: |
-      SELECT a.appointment_id AS 予約 ID,
-             substr(a.preferred_date, 12, 5) AS 時間，
-             a.appointment_type AS 種別，
-             c.name AS 顧客名，
-             a.service_menu AS メニュー，
-             a.status AS ステータス，
-             a.service_bay AS ベイ，
-             a.assigned_staff_id AS 担当
+      SELECT a.appointment_id AS 予約ID,
+             substr(a.preferred_date, 12, 5) AS 時間,
+             CASE a.appointment_type
+               WHEN 'oil_change'    THEN '🔧 オイル交換'
+               WHEN 'inspection'    THEN '🔍 車検・点検'
+               WHEN 'repair'        THEN '🛠️ 修理'
+               WHEN 'test_drive'    THEN '🚗 試乗'
+               WHEN 'delivery'      THEN '🎉 納車'
+               WHEN 'consultation'  THEN '💬 相談'
+               ELSE a.appointment_type
+             END AS 種別,
+             c.name AS 顧客名,
+             a.service_menu AS メニュー,
+             CASE a.status
+               WHEN 'pending'     THEN '⏰ 確認待ち'
+               WHEN 'confirmed'   THEN '✅ 確定'
+               WHEN 'in_progress' THEN '🔧 作業中'
+               WHEN 'completed'   THEN '✔ 完了'
+               WHEN 'cancelled'   THEN '❌ キャンセル'
+               WHEN 'no_show'     THEN '🚫 無断キャンセル'
+               ELSE a.status
+             END AS ステータス,
+             COALESCE(a.service_bay, '−') AS ベイ,
+             COALESCE(a.assigned_staff_id, '未割当') AS 担当,
+             '¥' || printf('%,.0f', COALESCE(a.actual_cost, a.estimated_cost, 0)) AS 料金
       FROM service_appointments a
       INNER JOIN customers c ON a.customer_id = c.customer_id
       WHERE date(a.preferred_date) = date('now')
       ORDER BY a.preferred_date ASC
-    columns: [予約 ID, 時間，種別，顧客名，メニュー，ステータス，ベイ，担当]
+    columns: [予約ID, 時間, 種別, 顧客名, メニュー, ステータス, ベイ, 担当, 料金]
     pageSize: 20
-    editable: false
-    readOnly: true
+    actions:
+      - label: 編集
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_appointments&id={予約ID}"
+        class: "btn-outline-primary"
 
-  # 予約種別内訳
+  # ─────────────────────────────────────────
+  # 予約種別内訳（棒グラフ）
+  # ─────────────────────────────────────────
   - id: appointment_type_chart
-    title: 予約種別内訳（bar_chart）
+    title: 予約種別内訳（直近 30 日）
     component: bar_chart
     sourceType: custom
     source: |
-      SELECT appointment_type AS label, COUNT(*) AS value
+      SELECT CASE appointment_type
+               WHEN 'oil_change'   THEN 'オイル交換'
+               WHEN 'inspection'   THEN '車検・点検'
+               WHEN 'repair'       THEN '修理'
+               WHEN 'test_drive'   THEN '試乗'
+               WHEN 'delivery'     THEN '納車'
+               WHEN 'consultation' THEN '相談'
+               ELSE appointment_type
+             END AS label,
+             COUNT(*) AS value
       FROM service_appointments
-      WHERE date(preferred_date) >= date('now', '-7 days')
+      WHERE date(preferred_date) >= date('now', '-30 days')
       GROUP BY appointment_type
       ORDER BY value DESC
     columns: [label, value]
     xField: label
     yField: value
-    color: "rgba(16, 185, 129, 0.75)"
+    color: "rgba(59, 130, 246, 0.75)"
     pageSize: 10
     editable: false
     readOnly: true
 
-  # 今後の予約
+  # ─────────────────────────────────────────
+  # キャンセル・ノーショウ分析
+  # ─────────────────────────────────────────
+  - id: cancellation_analysis
+    title: キャンセル・ノーショウ分析（直近 30 日）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'キャンセル率' AS metric_name,
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'cancelled' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%' AS metric_value,
+             '❌' AS metric_icon,
+             NULL AS metric_delta
+      FROM service_appointments
+      WHERE date(preferred_date) >= date('now', '-30 days')
+      UNION ALL
+      SELECT 'ノーショウ率',
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'no_show' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '🚫', NULL
+      FROM service_appointments
+      WHERE date(preferred_date) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '完了率',
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'completed' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '✅', NULL
+      FROM service_appointments
+      WHERE date(preferred_date) >= date('now', '-30 days')
+      UNION ALL
+      SELECT '平均作業時間（分）',
+             CAST(ROUND(AVG(duration_minutes), 0) AS TEXT),
+             '⏱️', NULL
+      FROM service_appointments
+      WHERE status = 'completed'
+        AND date(preferred_date) >= date('now', '-30 days')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 今後の予約（7 日先まで）
+  # ─────────────────────────────────────────
   - id: upcoming_appointments
-    title: 今後の予約（table）
+    title: 今後の予約（7 日先）
     component: table
     sourceType: custom
     source: |
-      SELECT a.appointment_id AS 予約 ID,
-             a.preferred_date AS 日時，
-             a.appointment_type AS 種別，
-             c.name AS 顧客名，
-             c.phone AS 電話番号，
-             a.service_menu AS メニュー，
-             a.status AS ステータス
+      SELECT a.appointment_id AS 予約ID,
+             a.preferred_date AS 日時,
+             CASE a.appointment_type
+               WHEN 'oil_change'   THEN '🔧 オイル交換'
+               WHEN 'inspection'   THEN '🔍 車検・点検'
+               WHEN 'repair'       THEN '🛠️ 修理'
+               WHEN 'test_drive'   THEN '🚗 試乗'
+               WHEN 'delivery'     THEN '🎉 納車'
+               WHEN 'consultation' THEN '💬 相談'
+               ELSE a.appointment_type
+             END AS 種別,
+             c.name AS 顧客名,
+             c.mobile AS 携帯,
+             a.service_menu AS メニュー,
+             CASE a.status
+               WHEN 'pending'   THEN '⏰ 確認待ち'
+               WHEN 'confirmed' THEN '✅ 確定'
+               ELSE a.status
+             END AS ステータス,
+             CASE WHEN a.reminder_sent = 1 THEN '✅ 送信済' ELSE '⏳ 未送信' END AS リマインダー
       FROM service_appointments a
       INNER JOIN customers c ON a.customer_id = c.customer_id
       WHERE date(a.preferred_date) > date('now')
+        AND date(a.preferred_date) <= date('now', '+7 days')
+        AND a.status NOT IN ('cancelled', 'no_show')
       ORDER BY a.preferred_date ASC
-      LIMIT 15
-    columns: [予約 ID, 日時，種別，顧客名，電話番号，メニュー，ステータス]
+    columns: [予約ID, 日時, 種別, 顧客名, 携帯, メニュー, ステータス, リマインダー]
     pageSize: 15
+
+  # ─────────────────────────────────────────
+  # 月次収益サマリー
+  # ─────────────────────────────────────────
+  - id: monthly_revenue
+    title: 月次収益サマリー（完了予約）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', preferred_date) AS label,
+             ROUND(SUM(COALESCE(actual_cost, estimated_cost, 0)), 0) AS value
+      FROM service_appointments
+      WHERE status = 'completed'
+        AND preferred_date >= date('now', '-6 months')
+      GROUP BY strftime('%Y-%m', preferred_date)
+      ORDER BY label ASC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
     editable: false
     readOnly: true

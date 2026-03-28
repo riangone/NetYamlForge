@@ -35,6 +35,11 @@
 @{
     var showSidebar = User.Identity?.IsAuthenticated ?? false;
     var isAdminUser = User?.IsInRole("Admin") ?? false;
+    // カスタムロール（AppUserRole）を Claims から取得（ナビゲーションフィルタリング用）
+    var userCustomRoles = User?.Claims
+        .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+        .Select(c => c.Value)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         
         // プロジェクト固有のレイアウト設定
         var projectLayout = ProjectScope?.Current?.Layout;
@@ -203,6 +208,12 @@
                             {
                                 var showItem = !item.AdminOnly || isAdminUser;
                                 if (!showItem) continue;
+                                // カスタムロールフィルター: Roles が指定されている場合 Admin 以外はマッチするロールが必要
+                                if (item.Roles.Count > 0 && !isAdminUser)
+                                {
+                                    if (!item.Roles.Any(r => userCustomRoles.Contains(r)))
+                                        continue;
+                                }
                                 var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
                                 var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
                                 if (section == null)

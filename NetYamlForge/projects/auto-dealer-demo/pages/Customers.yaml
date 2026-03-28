@@ -1,27 +1,42 @@
-title: 顧客一覧
-description: "顧客マスタの一覧と検索ページ"
+title: 顧客管理
+description: "顧客マスタの管理・AI対話/リード/予約の統合サマリー・ランク別分析"
 
 sections:
-  # 顧客統計
+  # ─────────────────────────────────────────
+  # 顧客統計 KPI
+  # ─────────────────────────────────────────
   - id: customer_stats
-    title: 顧客統計
+    title: 顧客統計サマリー
     component: stat_cards
     sourceType: custom
     source: |
-      SELECT '総顧客数' AS metric_name, 
-             CAST(COUNT(*) AS TEXT) AS metric_value, 
-             '👥' AS metric_icon, 
+      SELECT '総顧客数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '👥' AS metric_icon,
              NULL AS metric_delta
-        FROM customers
+      FROM customers
       UNION ALL
-      SELECT '個人顧客', CAST(SUM(CASE WHEN customer_type = 'individual' THEN 1 ELSE 0 END) AS TEXT), '👤', NULL 
-        FROM customers
+      SELECT '個人顧客', CAST(SUM(CASE WHEN customer_type = 'individual' THEN 1 ELSE 0 END) AS TEXT), '👤', NULL
+      FROM customers
       UNION ALL
-      SELECT '法人顧客', CAST(SUM(CASE WHEN customer_type = 'corporate' THEN 1 ELSE 0 END) AS TEXT), '🏢', NULL 
-        FROM customers
+      SELECT '法人顧客', CAST(SUM(CASE WHEN customer_type = 'corporate' THEN 1 ELSE 0 END) AS TEXT), '🏢', NULL
+      FROM customers
       UNION ALL
-      SELECT 'VIP/Platinum', CAST(SUM(CASE WHEN tier_level IN ('vip', 'platinum') THEN 1 ELSE 0 END) AS TEXT), '💎', NULL 
-        FROM customers
+      SELECT 'Platinum / VIP',
+             CAST(SUM(CASE WHEN tier_level IN ('platinum','vip') THEN 1 ELSE 0 END) AS TEXT),
+             '💎', NULL
+      FROM customers
+      UNION ALL
+      SELECT '今月来店',
+             CAST(SUM(CASE WHEN strftime('%Y-%m', last_visit_date) = strftime('%Y-%m','now') THEN 1 ELSE 0 END) AS TEXT),
+             '🏪', NULL
+      FROM customers
+      UNION ALL
+      SELECT '長期未来店（90日超）',
+             CAST(SUM(CASE WHEN CAST((JULIANDAY('now') - JULIANDAY(last_visit_date)) AS INTEGER) > 90
+                            OR last_visit_date IS NULL THEN 1 ELSE 0 END) AS TEXT),
+             '⚠️', NULL
+      FROM customers
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -31,45 +46,179 @@ sections:
     editable: false
     readOnly: true
 
-  # 顧客一覧テーブル
-  - id: customer_list
-    title: 顧客一覧
-    component: table
+  # ─────────────────────────────────────────
+  # 顧客ランク分布（円グラフ）
+  # ─────────────────────────────────────────
+  - id: tier_chart
+    title: 顧客ランク分布
+    component: pie_chart
     sourceType: custom
     source: |
-      SELECT c.customer_id AS 顧客 ID,
-             c.customer_type AS 種別，
-             c.name AS 顧客名，
-             c.name_kana AS フリガナ，
-             c.phone AS 電話番号，
-             c.email AS メール，
-             c.tier_level AS ランク，
-             c.last_visit_date AS 最終来店，
-             c.preferred_contact AS 希望連絡先
-      FROM customers c
-      ORDER BY c.created_at DESC
-      LIMIT 50
-    columns: [顧客 ID, 種別，顧客名，フリガナ，電話番号，メール，ランク，最終来店，希望連絡先]
-    pageSize: 20
-    editable: false
-    readOnly: true
-
-  # 最近追加された顧客
-  - id: new_customers
-    title: 最近追加された顧客（table）
-    component: table
-    sourceType: custom
-    source: |
-      SELECT customer_id AS 顧客 ID,
-             name AS 顧客名，
-             customer_type AS 種別，
-             tier_level AS ランク，
-             phone AS 電話番号，
-             created_at AS 作成日
+      SELECT CASE tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS label,
+             COUNT(*) AS value
       FROM customers
-      ORDER BY created_at DESC
-      LIMIT 10
-    columns: [顧客 ID, 顧客名，種別，ランク，電話番号，作成日]
+      GROUP BY tier_level
+      ORDER BY CASE tier_level
+        WHEN 'platinum' THEN 1 WHEN 'vip' THEN 2 WHEN 'gold' THEN 3 WHEN 'silver' THEN 4 ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
     pageSize: 10
     editable: false
     readOnly: true
+
+  # ─────────────────────────────────────────
+  # 顧客 × AI 対話 × リード 統合サマリー
+  # ─────────────────────────────────────────
+  - id: customer_activity_summary
+    title: 顧客別 AI 活動サマリー（直近 30 日）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.customer_id AS 顧客ID,
+             c.name AS 顧客名,
+             CASE c.tier_level
+               WHEN 'platinum' THEN '💎'
+               WHEN 'vip'      THEN '⭐'
+               WHEN 'gold'     THEN '🥇'
+               WHEN 'silver'   THEN '🥈'
+               ELSE                 '🔵'
+             END AS ランク,
+             CAST(COUNT(DISTINCT conv.conversation_id) AS TEXT) AS AI対話数,
+             CAST(COUNT(DISTINCT l.lead_id) AS TEXT) AS リード数,
+             CAST(MAX(l.lead_score) AS TEXT) AS 最高スコア,
+             CAST(COUNT(DISTINCT a.appointment_id) AS TEXT) AS 予約数,
+             c.last_visit_date AS 最終来店,
+             CASE c.preferred_contact
+               WHEN 'phone' THEN '📞'
+               WHEN 'email' THEN '✉️'
+               WHEN 'line'  THEN '💬'
+               WHEN 'sms'   THEN '📱'
+               ELSE '−'
+             END AS 連絡先
+      FROM customers c
+      LEFT JOIN ai_conversations conv
+        ON c.customer_id = conv.customer_id
+        AND date(conv.started_at) >= date('now', '-30 days')
+      LEFT JOIN sales_leads l ON c.customer_id = l.customer_id
+      LEFT JOIN service_appointments a
+        ON c.customer_id = a.customer_id
+        AND date(a.preferred_date) >= date('now', '-30 days')
+      GROUP BY c.customer_id
+      ORDER BY COUNT(DISTINCT conv.conversation_id) DESC, MAX(l.lead_score) DESC NULLS LAST
+    columns: [顧客ID, 顧客名, ランク, AI対話数, リード数, 最高スコア, 予約数, 最終来店, 連絡先]
+    pageSize: 20
+    actions:
+      - label: 編集
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=customers&id={顧客ID}"
+        class: "btn-outline-primary"
+
+  # ─────────────────────────────────────────
+  # VIP / Platinum 顧客リスト
+  # ─────────────────────────────────────────
+  - id: vip_customers
+    title: 💎 VIP / Platinum 顧客一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.customer_id AS 顧客ID,
+             c.name AS 氏名,
+             CASE c.tier_level WHEN 'platinum' THEN '💎 Platinum' ELSE '⭐ VIP' END AS ランク,
+             c.purchase_count AS 購入回数,
+             '¥' || printf('%,.0f', COALESCE(c.total_purchase_amount, 0)) AS 累計購入額,
+             c.last_visit_date AS 最終来店,
+             CASE
+               WHEN c.last_visit_date IS NULL THEN '未来店'
+               WHEN CAST((JULIANDAY('now') - JULIANDAY(c.last_visit_date)) AS INTEGER) > 180
+                    THEN '🔴 ' || CAST(CAST((JULIANDAY('now') - JULIANDAY(c.last_visit_date)) AS INTEGER) AS TEXT) || '日'
+               WHEN CAST((JULIANDAY('now') - JULIANDAY(c.last_visit_date)) AS INTEGER) > 90
+                    THEN '🟡 ' || CAST(CAST((JULIANDAY('now') - JULIANDAY(c.last_visit_date)) AS INTEGER) AS TEXT) || '日'
+               ELSE '🟢 ' || CAST(CAST((JULIANDAY('now') - JULIANDAY(c.last_visit_date)) AS INTEGER) AS TEXT) || '日'
+             END AS 離脱リスク,
+             c.mobile AS 携帯,
+             CASE c.preferred_contact
+               WHEN 'phone' THEN '📞 電話' WHEN 'email' THEN '✉️ メール'
+               WHEN 'line' THEN '💬 LINE' ELSE c.preferred_contact
+             END AS 希望連絡先
+      FROM customers c
+      WHERE c.tier_level IN ('platinum', 'vip')
+      ORDER BY c.total_purchase_amount DESC NULLS LAST
+    columns: [顧客ID, 氏名, ランク, 購入回数, 累計購入額, 最終来店, 離脱リスク, 携帯, 希望連絡先]
+    pageSize: 10
+
+  # ─────────────────────────────────────────
+  # 長期未来店顧客（要フォロー）
+  # ─────────────────────────────────────────
+  - id: inactive_customers
+    title: ⚠️ 長期未来店顧客（90日以上）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.customer_id AS 顧客ID,
+             c.name AS 氏名,
+             CASE c.tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS ランク,
+             c.last_visit_date AS 最終来店日,
+             CAST(CAST((JULIANDAY('now') - JULIANDAY(COALESCE(c.last_visit_date, c.created_at))) AS INTEGER) AS TEXT) || '日' AS 未来店日数,
+             c.purchase_count AS 購入回数,
+             c.mobile AS 携帯,
+             CASE c.preferred_contact
+               WHEN 'phone' THEN '📞' WHEN 'email' THEN '✉️'
+               WHEN 'line' THEN '💬' ELSE '−'
+             END AS 連絡手段
+      FROM customers c
+      WHERE CAST((JULIANDAY('now') - JULIANDAY(COALESCE(c.last_visit_date, c.created_at))) AS INTEGER) > 90
+      ORDER BY
+        CASE c.tier_level WHEN 'platinum' THEN 1 WHEN 'vip' THEN 2 WHEN 'gold' THEN 3 ELSE 4 END,
+        JULIANDAY(COALESCE(c.last_visit_date, c.created_at)) ASC
+    columns: [顧客ID, 氏名, ランク, 最終来店日, 未来店日数, 購入回数, 携帯, 連絡手段]
+    pageSize: 15
+
+  # ─────────────────────────────────────────
+  # 顧客一覧（全件）
+  # ─────────────────────────────────────────
+  - id: all_customers
+    title: 顧客一覧（全件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT customer_id AS 顧客ID,
+             CASE customer_type WHEN 'individual' THEN '👤 個人' ELSE '🏢 法人' END AS 種別,
+             name AS 顧客名,
+             name_kana AS フリガナ,
+             phone AS 電話番号,
+             email AS メール,
+             CASE tier_level
+               WHEN 'platinum' THEN '💎 Platinum'
+               WHEN 'vip'      THEN '⭐ VIP'
+               WHEN 'gold'     THEN '🥇 Gold'
+               WHEN 'silver'   THEN '🥈 Silver'
+               ELSE                 '🔵 Regular'
+             END AS ランク,
+             last_visit_date AS 最終来店,
+             CASE preferred_contact
+               WHEN 'phone' THEN '📞' WHEN 'email' THEN '✉️'
+               WHEN 'line' THEN '💬 LINE' WHEN 'sms' THEN '📱 SMS'
+               ELSE preferred_contact
+             END AS 連絡先
+      FROM customers
+      ORDER BY
+        CASE tier_level WHEN 'platinum' THEN 1 WHEN 'vip' THEN 2 WHEN 'gold' THEN 3 WHEN 'silver' THEN 4 ELSE 5 END,
+        name ASC
+    columns: [顧客ID, 種別, 顧客名, フリガナ, 電話番号, メール, ランク, 最終来店, 連絡先]
+    pageSize: 20
+    actions:
+      - label: 編集
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=customers&id={顧客ID}"
+        class: "btn-outline-secondary"

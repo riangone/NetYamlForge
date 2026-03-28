@@ -1,0 +1,225 @@
+title: 車両在庫管理
+description: "ディーラー在庫の状況確認・在庫マッチング・車種別分析。顧客希望条件に合致する車両を素早く見つける"
+
+sections:
+  # ─────────────────────────────────────────
+  # 在庫 KPI カード
+  # ─────────────────────────────────────────
+  - id: inventory_kpi
+    title: 在庫状況サマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '販売可能台数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🚗' AS metric_icon,
+             NULL AS metric_delta
+      FROM vehicles WHERE status = 'available' AND customer_id IS NULL
+      UNION ALL
+      SELECT '商談中（予約済）', CAST(COUNT(*) AS TEXT), '📋', NULL
+      FROM vehicles WHERE status = 'reserved'
+      UNION ALL
+      SELECT '展示車', CAST(COUNT(*) AS TEXT), '🏢', NULL
+      FROM vehicles WHERE status = 'display'
+      UNION ALL
+      SELECT '今月入荷', CAST(COUNT(*) AS TEXT), '📦', NULL
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND strftime('%Y-%m', arrival_date) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '平均車両価格',
+             '¥' || printf('%,.0f', AVG(price)),
+             '💴', NULL
+      FROM vehicles WHERE status = 'available' AND customer_id IS NULL
+      UNION ALL
+      SELECT '在庫総額',
+             '¥' || printf('%,.0f', SUM(price)),
+             '💰', NULL
+      FROM vehicles WHERE status IN ('available','display') AND customer_id IS NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 車両タイプ別在庫（ドーナツグラフ）
+  # ─────────────────────────────────────────
+  - id: type_distribution
+    title: 車両タイプ別在庫構成
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT CASE vehicle_type
+               WHEN 'sedan'   THEN 'セダン'
+               WHEN 'suv'     THEN 'SUV'
+               WHEN 'minivan' THEN 'ミニバン'
+               WHEN 'wagon'   THEN 'ワゴン'
+               WHEN 'sports'  THEN 'スポーツ'
+               WHEN 'kei'     THEN '軽自動車'
+               ELSE vehicle_type
+             END AS label,
+             COUNT(*) AS value
+      FROM vehicles
+      WHERE status IN ('available','display') AND customer_id IS NULL
+      GROUP BY vehicle_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 燃料種別在庫（棒グラフ）
+  # ─────────────────────────────────────────
+  - id: fuel_distribution
+    title: 燃料種別在庫
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE fuel_type
+               WHEN 'gasoline' THEN '⛽ ガソリン'
+               WHEN 'hybrid'   THEN '🌿 ハイブリッド'
+               WHEN 'phev'     THEN '🔌 PHEV'
+               WHEN 'ev'       THEN '⚡ EV'
+               WHEN 'diesel'   THEN '🛢️ ディーゼル'
+               ELSE COALESCE(fuel_type, '不明')
+             END AS label,
+             COUNT(*) AS value
+      FROM vehicles
+      WHERE status IN ('available','display') AND customer_id IS NULL
+      GROUP BY fuel_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 在庫一覧（販売可能車両）
+  # ─────────────────────────────────────────
+  - id: available_inventory
+    title: 🚗 販売可能在庫一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT vehicle_id AS 車両ID,
+             maker || ' ' || model AS 車名,
+             grade AS グレード,
+             year || '年式' AS 年式,
+             CASE vehicle_type
+               WHEN 'sedan'   THEN 'セダン'
+               WHEN 'suv'     THEN 'SUV'
+               WHEN 'minivan' THEN 'ミニバン'
+               WHEN 'sports'  THEN 'スポーツ'
+               WHEN 'kei'     THEN '軽'
+               ELSE vehicle_type
+             END AS タイプ,
+             CASE fuel_type
+               WHEN 'gasoline' THEN 'ガソリン'
+               WHEN 'hybrid'   THEN 'HV'
+               WHEN 'phev'     THEN 'PHEV'
+               WHEN 'ev'       THEN 'EV'
+               WHEN 'diesel'   THEN 'ディーゼル'
+               ELSE COALESCE(fuel_type, '−')
+             END AS 燃料,
+             color AS カラー,
+             '¥' || printf('%,.0f', price) AS 価格,
+             CASE status
+               WHEN 'available' THEN '✅ 在庫あり'
+               WHEN 'reserved'  THEN '📋 商談中'
+               WHEN 'display'   THEN '🏢 展示車'
+               ELSE status
+             END AS 状態,
+             COALESCE(SUBSTR(features, 1, 40) || CASE WHEN LENGTH(features) > 40 THEN '...' ELSE '' END, '−') AS 主な装備
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY
+        CASE status WHEN 'available' THEN 1 ELSE 2 END,
+        price ASC
+    columns: [車両ID, 車名, グレード, 年式, タイプ, 燃料, カラー, 価格, 状態, 主な装備]
+    pageSize: 15
+    actions:
+      - label: 詳細
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=vehicles&id={車両ID}"
+        class: "btn-outline-primary"
+
+  # ─────────────────────────────────────────
+  # 価格帯別在庫分布
+  # ─────────────────────────────────────────
+  - id: price_distribution
+    title: 価格帯別在庫台数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE
+               WHEN price < 2000000 THEN '200万未満'
+               WHEN price < 3000000 THEN '200〜300万'
+               WHEN price < 4000000 THEN '300〜400万'
+               WHEN price < 5000000 THEN '400〜500万'
+               WHEN price < 7000000 THEN '500〜700万'
+               ELSE '700万以上'
+             END AS label,
+             COUNT(*) AS value
+      FROM vehicles
+      WHERE status IN ('available','display') AND customer_id IS NULL
+      GROUP BY label
+      ORDER BY MIN(price)
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(99, 102, 241, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ホットリード × 在庫マッチング
+  # ─────────────────────────────────────────
+  - id: lead_vehicle_match
+    title: 🎯 ホットリード × 在庫マッチング（スコア 70+）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT l.lead_id AS リードID,
+             c.name AS 顧客名,
+             l.vehicle_interest AS 希望車種キーワード,
+             '¥' || printf('%,.0f', COALESCE(l.budget, 0)) AS 予算上限,
+             l.lead_score AS スコア,
+             v.vehicle_id AS マッチ車両ID,
+             v.maker || ' ' || v.model AS 推薦車名,
+             '¥' || printf('%,.0f', v.price) AS 車両価格,
+             CASE v.fuel_type
+               WHEN 'hybrid' THEN 'HV'
+               WHEN 'phev'   THEN 'PHEV'
+               WHEN 'ev'     THEN 'EV'
+               ELSE COALESCE(v.fuel_type, '−')
+             END AS 燃料
+      FROM sales_leads l
+      INNER JOIN customers c ON l.customer_id = c.customer_id
+      CROSS JOIN vehicles v
+      WHERE l.lead_score >= 70
+        AND l.status NOT IN ('won', 'lost')
+        AND v.status = 'available'
+        AND v.customer_id IS NULL
+        AND (l.budget IS NULL OR v.price <= l.budget * 1.1)
+        AND (
+          LOWER(v.model) LIKE '%' || LOWER(REPLACE(l.vehicle_interest, '_inquiry', '')) || '%'
+          OR LOWER(v.maker) LIKE '%' || LOWER(REPLACE(l.vehicle_interest, '_inquiry', '')) || '%'
+          OR l.vehicle_interest IN ('price_inquiry','vehicle_inquiry','quote_request','test_drive_request')
+        )
+      ORDER BY l.lead_score DESC, v.price ASC
+      LIMIT 15
+    columns: [リードID, 顧客名, 希望車種キーワード, 予算上限, スコア, マッチ車両ID, 推薦車名, 車両価格, 燃料]
+    pageSize: 10
+    editable: false
+    readOnly: true

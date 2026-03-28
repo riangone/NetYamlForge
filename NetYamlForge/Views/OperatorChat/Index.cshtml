@@ -1,0 +1,134 @@
+@model IEnumerable<OperatorHandoverDetail>
+@{
+    ViewData["Title"] = "エスカレーション対応";
+    Layout = "_Layout";
+    var project = ViewBag.Project as string ?? "auto-dealer-demo";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="bi bi-headset text-warning me-2"></i>
+            エスカレーション対応
+        </h1>
+        <a href="/@project/OperatorChat" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-clockwise me-1"></i> 更新
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5 text-muted">
+                <i class="bi bi-check2-all fs-1 d-block mb-2 text-success"></i>
+                <p class="mb-0">対応待ちのエスカレーションはありません</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var h in Model)
+            {
+                var priorityBadge = h.Priority switch {
+                    "urgent" => "bg-danger",
+                    "high"   => "bg-warning text-dark",
+                    "medium" => "bg-info text-dark",
+                    _        => "bg-secondary"
+                };
+                var statusBadge = h.Status switch {
+                    "pending"     => "bg-warning text-dark",
+                    "assigned"    => "bg-primary",
+                    "in_progress" => "bg-success",
+                    _             => "bg-secondary"
+                };
+                var statusLabel = h.Status switch {
+                    "pending"     => "待機中",
+                    "assigned"    => "担当者決定",
+                    "in_progress" => "対応中",
+                    _             => h.Status
+                };
+                var reasonLabel = h.Reason switch {
+                    "complaint"          => "クレーム",
+                    "human_agent"        => "有人対応希望",
+                    "high_value_deal"    => "大型商談",
+                    "negative_sentiment" => "ネガティブ感情",
+                    "customer_request"   => "顧客要望",
+                    _                    => h.Reason
+                };
+
+                <div class="col-xl-4 col-lg-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                            <div>
+                                <span class="badge @priorityBadge me-1">@h.Priority</span>
+                                <span class="badge @statusBadge">@statusLabel</span>
+                            </div>
+                            <small class="text-muted">@h.EscalatedAt</small>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1">
+                                <i class="bi bi-flag me-1 text-danger"></i>
+                                <strong>理由:</strong> @reasonLabel
+                            </p>
+                            @if (!string.IsNullOrEmpty(h.CustomerName))
+                            {
+                                <p class="mb-1">
+                                    <i class="bi bi-person me-1"></i>
+                                    <strong>顧客:</strong> @h.CustomerName
+                                    @if (!string.IsNullOrEmpty(h.CustomerTier))
+                                    {
+                                        <span class="badge bg-warning text-dark ms-1">@h.CustomerTier</span>
+                                    }
+                                </p>
+                            }
+                            @if (!string.IsNullOrEmpty(h.AssignedToUserId))
+                            {
+                                <p class="mb-1">
+                                    <i class="bi bi-person-check me-1 text-success"></i>
+                                    <strong>担当:</strong> @h.AssignedToUserId
+                                </p>
+                            }
+                            @if (!string.IsNullOrEmpty(h.Notes))
+                            {
+                                <p class="mb-1 text-muted small">
+                                    <i class="bi bi-sticky me-1"></i>@h.Notes
+                                </p>
+                            }
+                        </div>
+                        <div class="card-footer bg-transparent d-flex gap-2">
+                            <a href="/@project/OperatorChat/Detail/@h.ConversationId"
+                               class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="bi bi-chat-dots me-1"></i> 会話を見る
+                            </a>
+                            @if (h.Status == "pending")
+                            {
+                                <form method="post" action="/@project/OperatorChat/Accept/@h.HandoverId" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-hand-index me-1"></i> 引き受ける
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

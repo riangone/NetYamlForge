@@ -148,9 +148,15 @@ entities:
       beforeCreate:
         - validate_ai_conversation       # チャネル・ステータス・置信度を検証
         - set_conversation_timestamps    # 開始日時・作成日時を自動設定
+      afterCreate:
+        - auto_create_lead_from_conversation  # 完了時に sales_leads を自動生成
+        - sentiment_auto_escalation           # 感情スコア低下時に自動エスカレーション
       beforeUpdate:
         - validate_ai_conversation
         - update_conversation_updated_at # 更新日時を自動更新
+      afterUpdate:
+        - auto_create_lead_from_conversation  # 完了時に sales_leads を自動生成
+        - sentiment_auto_escalation           # 感情スコア低下時に自動エスカレーション
 
     paging:
       pageSize: 20

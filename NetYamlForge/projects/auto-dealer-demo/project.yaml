@@ -1,6 +1,6 @@
 name: auto-dealer-demo
 displayName: "自動車ディーラー AI 窓口システム"
-version: "1.0.0"
+version: "1.1.0"
 description: "AI 技術を活用した 24 時間 365 日対応可能な智能客服システム"
 
 database:
@@ -16,8 +16,20 @@ features:
 
 layout:
   dashboardTheme: workspace
+
+  # ─── ロール別ランディングページ ───
+  # ログイン後、ユーザーのロールに応じて最適なページへ自動リダイレクトします
+  landingPageByRole:
+    customer:      /auto-dealer-demo/Page/CustomerDashboard
+    operator:      /auto-dealer-demo/Page/OperatorConsole
+    sales_rep:     /auto-dealer-demo/Page/SalesRepDashboard
+    sales_manager: /auto-dealer-demo/Page/LeadKanban
+    service_staff: /auto-dealer-demo/Page/Appointments
+    ai_admin:      /auto-dealer-demo/Page/AIDashboard
+    executive:     /auto-dealer-demo/Page/ExecDashboard
+
   navigation:
-    showDashboard: true
+    showDashboard: false
     entities:
       - ai_conversations
       - ai_messages
@@ -25,35 +37,105 @@ layout:
       - ai_feedback
       - ai_knowledge
       - sales_leads
+      - lead_activities
       - customers
       - vehicles
       - service_appointments
       - service_requests
     items:
+      # ─── 顧客向けメニュー ───
+      - label: マイページ
+        url: /auto-dealer-demo/Page/CustomerDashboard
+        icon: 👤
+        section: ""
+        roles: [customer]
+      - label: 予約・サービス確認
+        url: /auto-dealer-demo/Page/Appointments
+        icon: 📅
+        section: マイページ
+        roles: [customer]
+      - label: 在庫車両を見る
+        url: /auto-dealer-demo/Page/VehicleInventory
+        icon: 🚗
+        section: マイページ
+        roles: [customer]
+
+      # ─── スタートガイド（スタッフ共通） ───
+      - label: スタートガイド
+        url: /auto-dealer-demo/Page/Welcome
+        icon: 🏠
+        section: ""
+        roles: [operator, sales_rep, sales_manager, service_staff, ai_admin, executive]
+
+      # ─── AI 窓口（operator / ai_admin 向け） ───
       - label: AI 窓口ダッシュボード
         url: /auto-dealer-demo/Page/AIDashboard
         icon: 💬
-        section: AI 窗口
+        section: AI 窓口
+        roles: [operator, ai_admin, sales_manager, executive]
       - label: オペレーター・コンソール
         url: /auto-dealer-demo/Page/OperatorConsole
         icon: 🎧
-        section: AI 窗口
+        section: AI 窓口
+        roles: [operator, ai_admin]
       - label: AI 分析レポート
         url: /auto-dealer-demo/Page/AIAnalytics
         icon: 📈
-        section: AI 窗口
-      - label: 销售线索管理
-        url: /auto-dealer-demo/Page/SalesLeads
+        section: AI 窓口
+        roles: [ai_admin]
+      - label: ナレッジベース管理
+        url: /auto-dealer-demo/Page/KnowledgeBase
+        icon: 📚
+        section: AI 窓口
+        roles: [ai_admin]
+
+      # ─── 販売管理（sales_rep / sales_manager 向け） ───
+      - label: リードパイプライン
+        url: /auto-dealer-demo/Page/LeadKanban
         icon: 🔥
-        section: 销售管理
-      - label: 顧客一覧
+        section: 販売管理
+        roles: [sales_rep, sales_manager, executive]
+      - label: セールスリード管理
+        url: /auto-dealer-demo/Page/SalesLeads
+        icon: 📋
+        section: 販売管理
+        roles: [sales_rep, sales_manager]
+      - label: 担当者パフォーマンス
+        url: /auto-dealer-demo/Page/SalesRepDashboard
+        icon: 🎯
+        section: 販売管理
+        roles: [sales_rep, sales_manager]
+      - label: 車両在庫管理
+        url: /auto-dealer-demo/Page/VehicleInventory
+        icon: 🚗
+        section: 販売管理
+        roles: [sales_rep, sales_manager, service_staff]
+
+      # ─── 顧客管理（営業・サービス共通） ───
+      - label: 顧客管理
         url: /auto-dealer-demo/Page/Customers
         icon: 👥
-        section: 客户管理
+        section: 顧客管理
+        roles: [sales_rep, sales_manager, service_staff]
+
+      # ─── 予約管理（service_staff 向け） ───
       - label: サービス予約
         url: /auto-dealer-demo/Page/Appointments
         icon: 📅
-        section: 预约管理
+        section: 予約管理
+        roles: [service_staff, sales_manager]
+      - label: サービス依頼管理
+        url: /auto-dealer-demo/Page/ServiceRequests
+        icon: 🔧
+        section: 予約管理
+        roles: [service_staff]
+
+      # ─── 経営レポート（executive / sales_manager 向け） ───
+      - label: 経営ダッシュボード（ROI）
+        url: /auto-dealer-demo/Page/ExecDashboard
+        icon: 📊
+        section: 経営レポート
+        roles: [executive, sales_manager]
 
 settings:
   locale: ja-JP

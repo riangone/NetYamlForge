@@ -10,6 +10,7 @@ namespace NetYamlForge.Services.Auth;
 public interface IUserAuthService
 {
     Task<AppUser?> ValidateCredentialsAsync(string userName, string password);
+    Task<IReadOnlyList<string>> GetUserRolesAsync(string userName);
     Task UpdateLastLoginAsync(int userId);
     Task<IReadOnlyList<AppUser>> GetAllAsync();
     Task<AppUser?> GetByIdAsync(int id);

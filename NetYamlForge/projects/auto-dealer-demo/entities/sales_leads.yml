@@ -121,6 +121,14 @@ entities:
         label: 负责人
         editable: true
 
+    hooks:
+      beforeCreate:
+        - set_lead_timestamps    # created_at / updated_at / status / lead_score を自動補完
+        - calculate_lead_score   # lead_score を 0-100 にクランプ
+      beforeUpdate:
+        - update_lead_updated_at # updated_at を自動更新
+        - calculate_lead_score   # lead_score を 0-100 にクランプ
+
     paging:
       pageSize: 20
       mode: numbered

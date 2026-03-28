@@ -6,6 +6,7 @@ using System.Data;
 using System.IO;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using NetYamlForge.Data.Seeders;
 
 namespace NetYamlForge.Data;
 
@@ -57,10 +58,11 @@ public class ProjectSpecificInitializer
         // 汎用フォールバック: database/init_seed.sql が存在すれば実行
         await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
 
-        // auto-dealer-demo: AI 窓口システムテーブル初期化
+        // auto-dealer-demo: AI 窓口システムテーブル初期化 + デモユーザー作成
         if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
         {
             await InitializeAutoDealerDemoAsync(conn as SqliteConnection, logger);
+            await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
             return;
         }
     }

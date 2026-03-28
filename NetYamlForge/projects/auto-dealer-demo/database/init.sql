@@ -114,19 +114,31 @@ CREATE TABLE IF NOT EXISTS customers (
     updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
--- 車両
+-- 車両在庫マスタ（ディーラー在庫 + 顧客所有車両を統合管理）
 CREATE TABLE IF NOT EXISTS vehicles (
     vehicle_id VARCHAR(50) NOT NULL PRIMARY KEY,
-    customer_id VARCHAR(50),
-    vin VARCHAR(17),
+    customer_id VARCHAR(50),               -- 顧客所有車両の場合は顧客 ID（在庫車は NULL）
+    vin VARCHAR(17) UNIQUE,
     maker VARCHAR(50) NOT NULL,
     brand VARCHAR(50) NOT NULL,
     model VARCHAR(50) NOT NULL,
     grade VARCHAR(50),
     year INTEGER NOT NULL,
     color VARCHAR(30),
-    mileage INTEGER,
-    purchase_date DATE,
+    mileage INTEGER DEFAULT 0,
+    transmission VARCHAR(20),              -- AT / MT / CVT / DCT
+    fuel_type VARCHAR(20),                 -- gasoline / diesel / hybrid / ev / phev
+    engine_capacity INTEGER,               -- 排気量（cc）
+    vehicle_type VARCHAR(30) NOT NULL DEFAULT 'sedan',  -- sedan/wagon/suv/minivan/truck/sports/kei
+    price DECIMAL(12,2) NOT NULL DEFAULT 0,
+    cost DECIMAL(12,2),
+    status VARCHAR(20) NOT NULL DEFAULT 'available',    -- available/reserved/sold/maintenance/display
+    arrival_date DATE,
+    inspection_date DATE,
+    image_url VARCHAR(500),
+    features TEXT,
+    notes TEXT,
+    purchase_date DATE,                    -- 顧客購入日（顧客所有車両用）
     created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
     updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
@@ -236,3 +248,20 @@ CREATE INDEX IF NOT EXISTS idx_appointments_date ON service_appointments(preferr
 
 CREATE INDEX IF NOT EXISTS idx_requests_customer ON service_requests(customer_id);
 CREATE INDEX IF NOT EXISTS idx_requests_status ON service_requests(status);
+
+-- リードアクティビティログ（セールス担当者の対応履歴）
+CREATE TABLE IF NOT EXISTS lead_activities (
+    activity_id VARCHAR(64) NOT NULL PRIMARY KEY,
+    lead_id VARCHAR(50) NOT NULL,
+    activity_type VARCHAR(30) NOT NULL,  -- call / email / visit / proposal_sent / test_drive / ai_message
+    notes TEXT,
+    outcome VARCHAR(20),                 -- positive / neutral / negative / no_answer
+    next_action TEXT,
+    next_action_date DATETIME,
+    created_by VARCHAR(50),
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id) REFERENCES sales_leads(lead_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_activities_lead ON lead_activities(lead_id);
+CREATE INDEX IF NOT EXISTS idx_activities_created ON lead_activities(created_at);

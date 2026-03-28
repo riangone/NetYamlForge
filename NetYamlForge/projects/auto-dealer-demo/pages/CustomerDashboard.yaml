@@ -1,0 +1,120 @@
+title: マイページ
+description: "ご利用中のサービス・予約・お気に入り車両などをまとめて確認できます。"
+
+# ページ読み込み時に全画面 AI アシスタントオーバーレイを起動する
+scripts:
+  - /js/customer-ai-overlay.js
+
+sections:
+  # ─── 顧客情報サマリー ───
+  - id: my_info
+    title: 🙋 ようこそ
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '次回のご予約' AS metric_name,
+             COALESCE(
+               (SELECT strftime('%m/%d %H:%M', preferred_date)
+                FROM service_appointments
+                WHERE status IN ('pending','confirmed')
+                ORDER BY preferred_date ASC LIMIT 1),
+               'なし'
+             ) AS metric_value,
+             '📅' AS metric_icon,
+             NULL AS metric_delta
+      UNION ALL
+      SELECT '進行中の商談', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🚗', NULL
+      FROM sales_leads WHERE status NOT IN ('won','lost')
+      UNION ALL
+      SELECT '未解決のサービス依頼', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🔧', NULL
+      FROM service_requests WHERE status IN ('open','in_progress')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 直近の予約 ───
+  - id: upcoming_appointments
+    title: 📅 直近の予約
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y/%m/%d %H:%M', a.preferred_date) AS 日時,
+        CASE a.appointment_type
+          WHEN 'inspection'   THEN '🔍 点検・車検'
+          WHEN 'repair'       THEN '🔧 修理'
+          WHEN 'test_drive'   THEN '🚗 試乗'
+          WHEN 'delivery'     THEN '🎁 納車'
+          WHEN 'consultation' THEN '💬 相談'
+          WHEN 'oil_change'   THEN '🛢️ オイル交換'
+          ELSE a.appointment_type
+        END AS サービス,
+        CASE a.status
+          WHEN 'confirmed' THEN '✅ 確認済'
+          WHEN 'pending'   THEN '⏳ 確認待ち'
+          ELSE a.status
+        END AS ステータス,
+        COALESCE(a.notes, '') AS 備考
+      FROM service_appointments a
+      WHERE a.status IN ('pending','confirmed')
+      ORDER BY a.preferred_date ASC
+      LIMIT 5
+    columns: [日時, サービス, ステータス, 備考]
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 最近のサービス履歴 ───
+  - id: service_history
+    title: 🔧 最近のサービス履歴
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y/%m/%d', a.preferred_date) AS 日付,
+        CASE a.appointment_type
+          WHEN 'inspection'   THEN '🔍 点検・車検'
+          WHEN 'repair'       THEN '🔧 修理'
+          WHEN 'test_drive'   THEN '🚗 試乗'
+          WHEN 'oil_change'   THEN '🛢️ オイル交換'
+          ELSE a.appointment_type
+        END AS サービス,
+        '✔️ 完了' AS ステータス,
+        COALESCE(a.estimated_cost, 0) || ' 円' AS 費用
+      FROM service_appointments a
+      WHERE a.status = 'completed'
+      ORDER BY a.preferred_date DESC
+      LIMIT 5
+    columns: [日付, サービス, ステータス, 費用]
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── おすすめ車両 ───
+  - id: recommended_vehicles
+    title: 🚗 おすすめ在庫車両
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT
+        brand || ' ' || model || ' ' || grade AS title,
+        CAST(year AS TEXT) || '年式 / ' || fuel_type AS subtitle,
+        '¥' || printf('%,d', price) AS badge,
+        COALESCE(color, '') AS description
+      FROM vehicles
+      WHERE status = 'available'
+      ORDER BY RANDOM()
+      LIMIT 4
+    columns: [title, subtitle, badge, description]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    pageSize: 4
+    editable: false
+    readOnly: true

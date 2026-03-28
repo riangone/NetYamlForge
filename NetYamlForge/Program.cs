@@ -192,6 +192,14 @@ builder.Services.AddSingleton<TaskQueueService>();
 builder.Services.AddHttpClient("OllamaClient");
 builder.Services.AddHttpClient("LmStudioClient");
 
+// AI 窓口チャットサービス (auto-dealer-demo)
+builder.Services.AddHttpClient("ClaudeApiClient", client =>
+{
+    client.BaseAddress = new Uri("https://api.anthropic.com/");
+    client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+});
+builder.Services.AddScoped<NetYamlForge.Services.AI.AutoDealerChatService>();
+
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
 builder.Services.AddSingleton<ICLIService, QwenCodeCLIService>();
