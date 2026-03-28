@@ -20,4 +20,3 @@ jobs:
       retryCount: 2
       retryInterval: 300         # 5 分钟后重试
       logError: true
-      notify: true
