@@ -36,4 +36,9 @@ public class AIChatResponse
     /// 会话 ID（用于后续对话）
     /// </summary>
     public string? SessionId { get; set; }
+    
+    /// <summary>
+    /// AI 提供者标识 (qwen, claude, copilot, etc.)
+    /// </summary>
+    public string? Provider { get; set; }
 }

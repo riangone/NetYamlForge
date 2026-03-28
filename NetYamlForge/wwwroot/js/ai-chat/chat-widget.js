@@ -38,7 +38,7 @@
                 <!-- チャットボタン -->
                 <button id="ai-chat-toggle" class="ai-chat-toggle">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" 
+                        <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"
                               fill="white"/>
                     </svg>
                 </button>
@@ -58,7 +58,11 @@
                     <div id="ai-chat-messages" class="ai-chat-messages">
                         <div class="ai-chat-message ai-chat-message-ai">
                             <div class="ai-chat-message-avatar">AI</div>
-                            <div class="ai-chat-message-content">${config.welcomeMessage}</div>
+                            <div class="ai-chat-message-body">
+                                <div class="ai-chat-provider-label">AI</div>
+                                <div class="ai-chat-message-content">${config.welcomeMessage}</div>
+                                <div class="ai-chat-message-time">${formatTimestamp(new Date())}</div>
+                            </div>
                         </div>
                     </div>
 
@@ -67,10 +71,10 @@
                         <div id="ai-chat-typing" class="ai-chat-typing-indicator" style="display: none;">
                             <span></span><span></span><span></span>
                         </div>
-                        <input 
-                            type="text" 
-                            id="ai-chat-input" 
-                            class="ai-chat-input" 
+                        <input
+                            type="text"
+                            id="ai-chat-input"
+                            class="ai-chat-input"
                             placeholder="メッセージを入力..."
                             autocomplete="off"
                         />
@@ -89,6 +93,21 @@
 
         document.body.insertAdjacentHTML('beforeend', chatHTML);
         addStyles();
+    }
+    
+    /**
+     * タイムスタンプをフォーマット
+     * @param {Date} date - 日付オブジェクト
+     * @returns {string} フォーマット済み文字列 (yyyy/MM/dd HH:mm:ss)
+     */
+    function formatTimestamp(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
     }
 
     /**
@@ -238,8 +257,27 @@
                 display: none;
             }
 
-            .ai-chat-message-content {
+            .ai-chat-message-body {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
                 max-width: 75%;
+            }
+
+            .ai-chat-message-user .ai-chat-message-body {
+                align-items: flex-end;
+            }
+
+            .ai-chat-provider-label {
+                font-size: 11px;
+                color: ${config.themeColor};
+                font-weight: 600;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .ai-chat-message-content {
                 padding: 12px 16px;
                 border-radius: 12px;
                 line-height: 1.5;
@@ -254,6 +292,18 @@
             .ai-chat-message-user .ai-chat-message-content {
                 background: ${config.themeColor};
                 color: white;
+            }
+
+            .ai-chat-message-time {
+                font-size: 11px;
+                color: #94a3b8;
+                margin-top: 6px;
+                padding: 0 4px;
+            }
+
+            .ai-chat-message-user .ai-chat-message-time {
+                color: rgba(255, 255, 255, 0.8);
+                text-align: right;
             }
 
             .ai-chat-input-area {
@@ -430,9 +480,9 @@
                 .build();
 
             connection.on('ai_response', (data) => {
-                addMessage('ai', data.message);
+                addMessage('ai', data.message, data.provider);
                 hideTypingIndicator();
-                
+
                 if (data.quickReplies && data.quickReplies.length > 0) {
                     showQuickReplies(data.quickReplies);
                 }
@@ -486,10 +536,10 @@
 
             const data = await response.json();
             hideTypingIndicator();
-            
+
             // AI 応答を表示
-            addMessage('ai', data.responseText);
-            
+            addMessage('ai', data.responseText, data.provider);
+
             if (data.quickReplies && data.quickReplies.length > 0) {
                 showQuickReplies(data.quickReplies);
             }
@@ -502,19 +552,37 @@
 
     /**
      * メッセージを追加
+     * @param {string} sender - 'user' | 'ai'
+     * @param {string} content - メッセージ内容
+     * @param {string} provider - AI プロバイダー名 (qwen, claude, copilot など)
+     * @param {Date} timestamp - タイムスタンプ
      */
-    function addMessage(sender, content) {
+    function addMessage(sender, content, provider = null, timestamp = null) {
         const messagesContainer = document.getElementById('ai-chat-messages');
         const messageDiv = document.createElement('div');
         messageDiv.className = `ai-chat-message ai-chat-message-${sender}`;
         
-        const avatar = sender === 'ai' ? '<div class="ai-chat-message-avatar">AI</div>' : '';
+        const now = timestamp || new Date();
+        const timeStr = formatTimestamp(now);
         
+        // AI アバターとプロバイダー名
+        let avatarHtml = '';
+        let providerLabel = '';
+        if (sender === 'ai') {
+            const providerName = provider || 'AI';
+            avatarHtml = `<div class="ai-chat-message-avatar">${escapeHtml(providerName.toUpperCase())}</div>`;
+            providerLabel = `<div class="ai-chat-provider-label">${escapeHtml(providerName)}</div>`;
+        }
+
         messageDiv.innerHTML = `
-            ${avatar}
-            <div class="ai-chat-message-content">${escapeHtml(content)}</div>
+            ${avatarHtml}
+            <div class="ai-chat-message-body">
+                ${providerLabel}
+                <div class="ai-chat-message-content">${escapeHtml(content)}</div>
+                <div class="ai-chat-message-time">${timeStr}</div>
+            </div>
         `;
-        
+
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }

@@ -1,0 +1,40 @@
+title: 销售线索管理
+description: "AI 自动识别并评分的高价值销售线索"
+
+sections:
+  - id: leads_summary
+    title: 线索统计
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '总线索' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '📊' AS metric_icon, NULL AS metric_delta FROM sales_leads
+      UNION ALL
+      SELECT '待处理', CAST(COUNT(*) AS TEXT), '🆕', NULL FROM sales_leads WHERE status = 'new'
+      UNION ALL
+      SELECT '本月成交', CAST(COUNT(*) AS TEXT), '🏆', NULL FROM sales_leads WHERE status = 'won' AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '平均评分', CAST(ROUND(AVG(lead_score), 1) AS TEXT), '🎯', NULL FROM sales_leads
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+
+  - id: leads_table
+    title: 销售线索列表
+    component: table
+    sourceType: entity
+    entity: sales_leads
+    columns:
+      - lead_id
+      - customer_id
+      - vehicle_interest
+      - lead_score
+      - status
+      - assigned_to_user_id
+      - created_at
+    pageSize: 15
+    actions:
+      - label: 编辑
+        url: "/auto-dealer-demo/Entity/sales_leads/Edit/{lead_id}"
+        class: "btn-sm btn-outline"

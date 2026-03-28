@@ -14,9 +14,8 @@ sections:
              NULL AS metric_delta
         FROM ai_conversations WHERE status = 'active'
       UNION ALL
-      SELECT '完了 (今日)', CAST(COUNT(*) AS TEXT), '✅', NULL 
-        FROM ai_conversations 
-        WHERE status = 'completed' AND date(started_at) = date('now')
+      SELECT 'ホット・リード', CAST(COUNT(*) AS TEXT), '🔥', NULL 
+        FROM sales_leads WHERE lead_score >= 80 AND status = 'new'
       UNION ALL
       SELECT 'エスカレーション (保留)', CAST(COUNT(*) AS TEXT), '⚠️', NULL 
         FROM ai_handovers WHERE status = 'pending'
@@ -28,15 +27,59 @@ sections:
       SELECT '顧客総数', CAST(COUNT(*) AS TEXT), '👥', NULL 
         FROM customers
       UNION ALL
-      SELECT '平均満足度', CAST(ROUND(AVG(rating), 1) AS TEXT), '⭐', NULL 
-        FROM ai_feedback 
-        WHERE date(created_at) = date('now')
+      SELECT '成約率', CAST(ROUND(SUM(CASE WHEN status = 'won' THEN 1.0 ELSE 0.0 END) * 100.0 / NULLIF(COUNT(*), 0), 1) AS TEXT) || '%', '💰', NULL 
+        FROM sales_leads
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
     iconField: metric_icon
     deltaField: metric_delta
     pageSize: 10
+    editable: false
+    readOnly: true
+
+  # リード・コンバージョン・ファネル
+  - id: lead_funnel
+    title: 线索转化漏斗（Lead Funnel）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT status AS label, COUNT(*) AS value
+      FROM sales_leads
+      GROUP BY status
+      ORDER BY CASE status 
+        WHEN 'new' THEN 1 
+        WHEN 'contacted' THEN 2 
+        WHEN 'qualified' THEN 3 
+        WHEN 'proposal' THEN 4 
+        WHEN 'won' THEN 5 
+        ELSE 6 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 热门销售线索
+  - id: hot_leads
+    title: 热门销售线索（TOP 5）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT l.lead_id AS ID,
+             c.name AS 客户名,
+             l.vehicle_interest AS 感兴趣车型,
+             l.lead_score AS 评分,
+             l.status AS 状态
+      FROM sales_leads l
+      INNER JOIN customers c ON l.customer_id = c.customer_id
+      WHERE l.status = 'new'
+      ORDER BY l.lead_score DESC
+      LIMIT 5
+    columns: [ID, 客户名, 感兴趣车型, 评分, 状态]
+    pageSize: 5
     editable: false
     readOnly: true
 

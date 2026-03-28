@@ -42,6 +42,16 @@ public class StartConversationResponse
     public string? WelcomeMessage { get; set; }
 
     /// <summary>
+    /// 使用された AI モデル
+    /// </summary>
+    public string? AiModel { get; set; } = "System";
+
+    /// <summary>
+    /// 送信時間
+    /// </summary>
+    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
     /// セッション有効期限（分）
     /// </summary>
     public int SessionTimeoutMinutes { get; set; } = 30;
@@ -102,6 +112,21 @@ public class SendMessageResponse
     /// クイック返信ボタン
     /// </summary>
     public List<QuickReplyButton>? QuickReplies { get; set; }
+
+    /// <summary>
+    /// 使用された AI モデル
+    /// </summary>
+    public string? AiModel { get; set; }
+
+    /// <summary>
+    /// AI が応答を送信した時間
+    /// </summary>
+    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// AI の処理時間（ミリ秒）
+    /// </summary>
+    public long ProcessingTimeMs { get; set; }
 
     /// <summary>
     /// エスカレーション推奨フラグ

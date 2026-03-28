@@ -61,6 +61,11 @@ public class AIResponse
     public string GenerationMethod { get; set; } = "template";
 
     /// <summary>
+    /// 使用された AI モデル
+    /// </summary>
+    public string AiModel { get; set; } = "Default AI";
+
+    /// <summary>
     /// 処理時間（ミリ秒）
     /// </summary>
     public long ProcessingTimeMs { get; set; }

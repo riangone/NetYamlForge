@@ -1,0 +1,91 @@
+title: オペレーター・コンソール
+description: "有人対応が必要な対話の管理と、リアルタイムな顧客対応を行うためのワークスペース"
+
+sections:
+  # 待機中キュー
+  - id: pending_handovers
+    title: 待機中のエスカレーション（優先度順）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_id AS ID,
+             c.name AS 顧客名,
+             h.reason AS 理由,
+             h.priority AS 優先度,
+             h.escalated_at AS 待機時間,
+             h.handover_notes AS メモ
+      FROM ai_handovers h
+      INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
+      INNER JOIN customers c ON conv.customer_id = c.customer_id
+      WHERE h.status = 'pending'
+      ORDER BY 
+        CASE h.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
+        h.escalated_at ASC
+    columns: [ID, 顧客名, 理由, 優先度, 待機時間, メモ]
+    pageSize: 5
+    actions:
+      - label: 対応開始
+        url: "/auto-dealer-demo/Page/ChatDetail?id={ID}"
+        class: "btn-primary"
+
+  # 担当中の対話
+  - id: active_chats
+    title: あなたが担当中の対話
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_id AS ID,
+             c.name AS 顧客名,
+             h.status AS ステータス,
+             h.assigned_at AS 開始時間
+      FROM ai_handovers h
+      INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
+      INNER JOIN customers c ON conv.customer_id = c.customer_id
+      WHERE h.status = 'assigned' AND h.assigned_to_user_id = '@CurrentUser'
+      ORDER BY h.assigned_at DESC
+    columns: [ID, 顧客名, ステータス, 開始時間]
+    pageSize: 5
+    actions:
+      - label: チャットを開く
+        url: "/auto-dealer-demo/Page/ChatDetail?id={ID}"
+        class: "btn-secondary"
+
+  # 最近の解決済み事案
+  - id: resolved_chats
+    title: 最近解決した事案
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_id AS ID,
+             c.name AS 顧客名,
+             h.reason AS 理由,
+             h.resolved_at AS 解決日時,
+             h.resolution_notes AS 対応結果
+      FROM ai_handovers h
+      INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
+      INNER JOIN customers c ON conv.customer_id = c.customer_id
+      WHERE h.status = 'resolved'
+      ORDER BY h.resolved_at DESC
+      LIMIT 10
+    columns: [ID, 顧客名, 理由, 解决日時, 対応結果]
+    pageSize: 10
+
+  # AI 補助ツール：よくある回答テンプレート
+  - id: ai_suggest_templates
+    title: AI 推奨回答（ナレッジベースより）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT category AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '💡' AS metric_icon,
+             '詳細表示' AS metric_delta
+      FROM ai_knowledge
+      WHERE is_active = 1
+      GROUP BY category
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10

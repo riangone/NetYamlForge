@@ -24,6 +24,7 @@ layout:
       - ai_handovers
       - ai_feedback
       - ai_knowledge
+      - sales_leads
       - customers
       - vehicles
       - service_appointments
@@ -32,19 +33,27 @@ layout:
       - label: AI 窓口ダッシュボード
         url: /auto-dealer-demo/Page/AIDashboard
         icon: 💬
-        section: AI 窓口
+        section: AI 窗口
+      - label: オペレーター・コンソール
+        url: /auto-dealer-demo/Page/OperatorConsole
+        icon: 🎧
+        section: AI 窗口
       - label: AI 分析レポート
         url: /auto-dealer-demo/Page/AIAnalytics
         icon: 📈
-        section: AI 窓口
+        section: AI 窗口
+      - label: 销售线索管理
+        url: /auto-dealer-demo/Page/SalesLeads
+        icon: 🔥
+        section: 销售管理
       - label: 顧客一覧
         url: /auto-dealer-demo/Page/Customers
         icon: 👥
-        section: 顧客管理
+        section: 客户管理
       - label: サービス予約
         url: /auto-dealer-demo/Page/Appointments
         icon: 📅
-        section: 予約管理
+        section: 预约管理
 
 settings:
   locale: ja-JP

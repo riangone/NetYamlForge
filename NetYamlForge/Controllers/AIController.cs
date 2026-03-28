@@ -93,16 +93,19 @@ public class AIController : ControllerBase
 
             // 加入队列并等待完成
             await _taskQueue.EnqueueAsync(task);
-            
+
             // 等待任务完成（最多 60 秒）
             for (int i = 0; i < 60; i++)
             {
                 await Task.Delay(1000);
                 var currentTask = _tracker.GetTask(task.Id);
                 if (currentTask == null) break;
-                
+
                 if (currentTask.Status == TaskStatus.Completed)
                 {
+                    // 保存 AI 响应到历史记录
+                    await _chatHistory.SaveMessageAsync(userId, currentTask.Result ?? "", "assistant", request.CliTool);
+                    
                     return Ok(new AIChatResponse
                     {
                         TaskId = task.Id,
@@ -110,12 +113,13 @@ public class AIController : ControllerBase
                         Status = currentTask.Status,
                         Progress = currentTask.Progress,
                         Result = currentTask.Result,
-                        SessionId = task.SessionId
+                        SessionId = task.SessionId,
+                        Provider = request.CliTool
                     });
                 }
                 else if (currentTask.Status == TaskStatus.Failed || currentTask.Status == TaskStatus.Cancelled)
                 {
-                    return BadRequest(new { 
+                    return BadRequest(new {
                         error = currentTask.Error ?? "Task failed",
                         taskId = task.Id,
                         status = currentTask.Status
@@ -131,7 +135,8 @@ public class AIController : ControllerBase
                 Status = task.Status,
                 Progress = task.Progress,
                 Result = task.Result,
-                SessionId = task.SessionId
+                SessionId = task.SessionId,
+                Provider = request.CliTool
             });
         }
         catch (InvalidOperationException ex)

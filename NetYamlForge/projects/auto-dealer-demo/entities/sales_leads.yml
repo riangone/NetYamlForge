@@ -1,0 +1,127 @@
+imports: []
+entities:
+  sales_leads:
+    table: sales_leads
+    key: lead_id
+    displayName: 销售线索
+    softDelete: false
+    isPublic: true
+
+    columns:
+      lead_id:
+        type: string
+        length: 50
+        required: true
+        label: 线索 ID
+        searchable: true
+        sortable: true
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 客户 ID
+        searchable: true
+        sortable: true
+      vehicle_interest:
+        type: string
+        length: 100
+        required: false
+        label: 感兴趣的车型
+        searchable: true
+        sortable: true
+      budget:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 预算
+        sortable: true
+      lead_score:
+        type: int
+        required: true
+        label: 线索评分
+        default: 50
+        sortable: true
+      status:
+        type: string
+        length: 20
+        required: true
+        label: 状态
+        default: new
+        options:
+          - new
+          - contacted
+          - qualified
+          - proposal
+          - won
+          - lost
+        searchable: true
+        sortable: true
+      source_conversation_id:
+        type: string
+        length: 64
+        required: false
+        label: 来源对话 ID
+      assigned_to_user_id:
+        type: string
+        length: 50
+        required: false
+        label: 负责人
+        searchable: true
+        sortable: true
+      last_contact_at:
+        type: datetime
+        required: false
+        label: 最后联系时间
+      created_at:
+        type: datetime
+        required: true
+        label: 创建时间
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新时间
+        sortable: true
+
+    forms:
+      lead_id:
+        type: string
+        required: true
+        label: 线索 ID
+        editable: false
+      customer_id:
+        type: string
+        required: true
+        label: 客户 ID
+        editable: true
+      vehicle_interest:
+        type: string
+        required: false
+        label: 感兴趣的车型
+        editable: true
+      budget:
+        type: number
+        required: false
+        label: 预算
+        editable: true
+      lead_score:
+        type: number
+        required: true
+        label: 线索评分
+        editable: true
+      status:
+        type: select
+        required: true
+        label: 状态
+        editable: true
+      assigned_to_user_id:
+        type: string
+        required: false
+        label: 负责人
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

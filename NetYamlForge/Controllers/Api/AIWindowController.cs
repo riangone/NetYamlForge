@@ -57,6 +57,8 @@ public class AIWindowController : ControllerBase
             {
                 ConversationId = conversation.ConversationId,
                 WelcomeMessage = welcomeMessage,
+                AiModel = "System",
+                SentAt = DateTime.UtcNow,
                 SessionTimeoutMinutes = 30
             });
         }
@@ -151,6 +153,9 @@ public class AIWindowController : ControllerBase
                 Confidence = intentResult.Confidence,
                 Entities = intentResult.Entities,
                 QuickReplies = response.QuickReplies,
+                AiModel = response.AiModel,
+                SentAt = DateTime.UtcNow,
+                ProcessingTimeMs = response.ProcessingTimeMs,
                 SuggestHandover = handoverEval.NeedsHandover
             });
         }

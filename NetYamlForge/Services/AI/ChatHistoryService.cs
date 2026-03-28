@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS AIChatHistory (
     UserId    TEXT NOT NULL,
     Content   TEXT NOT NULL,
     Type      TEXT NOT NULL,
+    Provider  TEXT,
     CreatedAt TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);
@@ -71,7 +72,7 @@ CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
     {
         await using var conn = new SqliteConnection(_connectionString);
         var rows = await conn.QueryAsync<ChatMessage>(@"
-SELECT Id, UserId, Content, Type, CreatedAt
+SELECT Id, UserId, Content, Type, CreatedAt, Provider
 FROM AIChatHistory
 WHERE UserId = @UserId
 ORDER BY Id DESC
@@ -80,18 +81,19 @@ LIMIT @Limit", new { UserId = userId, Limit = limit });
     }
 
     /// <summary>メッセージを保存します。サーバー側の記録は削除しません。</summary>
-    public async Task<long> SaveMessageAsync(string userId, string content, string type)
+    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null)
     {
         await using var conn = new SqliteConnection(_connectionString);
         var id = await conn.ExecuteScalarAsync<long>(@"
-INSERT INTO AIChatHistory (UserId, Content, Type, CreatedAt)
-VALUES (@UserId, @Content, @Type, @CreatedAt);
+INSERT INTO AIChatHistory (UserId, Content, Type, Provider, CreatedAt)
+VALUES (@UserId, @Content, @Type, @Provider, @CreatedAt);
 SELECT last_insert_rowid();",
             new
             {
                 UserId = userId,
                 Content = content,
                 Type = type,
+                Provider = provider,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             });
 

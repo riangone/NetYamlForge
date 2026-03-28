@@ -104,6 +104,7 @@ public class AIChatHub : Hub
                 confidence = intentResult.Confidence,
                 quickReplies = response.QuickReplies,
                 suggestHandover = handoverEval.NeedsHandover,
+                aiModel = response.AiModel,
                 timestamp = DateTime.UtcNow
             });
 
