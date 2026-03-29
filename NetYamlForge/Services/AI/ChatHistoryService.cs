@@ -41,7 +41,18 @@ CREATE TABLE IF NOT EXISTS AIChatHistory (
     Provider  TEXT,
     CreatedAt TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);
+CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
+
+            // マイグレーション: Provider カラムが存在しない場合は追加
+            var hasProvider = conn.Query<dynamic>("PRAGMA table_info(AIChatHistory)")
+                .Any(c => ((string)c.name).Equals("Provider", StringComparison.OrdinalIgnoreCase));
+            if (!hasProvider)
+            {
+                conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN Provider TEXT");
+                _logger.LogInformation("Migrated AIChatHistory: added Provider column");
+            }
+
+            conn.Execute(@"
 
 CREATE TABLE IF NOT EXISTS AICommandLog (
     Id          INTEGER PRIMARY KEY AUTOINCREMENT,

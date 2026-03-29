@@ -185,7 +185,7 @@
                         </svg>
                         停止
                     </button>
-                    <button id="ai-clear-btn" class="btn btn-ghost btn-sm">
+                    <button id="ai-clear-btn" class="btn btn-ghost btn-sm" style="display:none">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
@@ -796,9 +796,19 @@
         }
     }
 
+    // タイムスタンプを "yyyy/MM/dd HH:mm:ss" 形式にフォーマット
+    function formatTimestamp(date) {
+        const d = (date instanceof Date) ? date : new Date(date);
+        if (!date || isNaN(d.getTime())) d.setTime(Date.now());
+        const pad = function(n) { return String(n).padStart(2, '0'); };
+        return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) +
+               ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
     // 添加消息
-    function addMessage(content, type, skipSave) {
+    function addMessage(content, type, skipSave, timestamp) {
         const container = document.getElementById('ai-messages-container');
+        const timeStr = timestamp ? timestamp : formatTimestamp(new Date());
 
         if (type === 'system') {
             const messageEl = document.createElement('div');
@@ -843,6 +853,12 @@
                 contentEl.innerHTML = renderMarkdown(content);
                 messageEl.appendChild(contentEl);
             }
+
+            // タイムスタンプ
+            const timeEl = document.createElement('div');
+            timeEl.className = 'ai-message-time';
+            timeEl.textContent = timeStr;
+            messageEl.appendChild(timeEl);
 
             innerEl.appendChild(avatar);
             innerEl.appendChild(messageEl);
@@ -891,7 +907,7 @@
         }
 
         if (!skipSave) {
-            chatHistory.push({ content, type });
+            chatHistory.push({ content, type, timestamp: timeStr });
             saveHistory();
             saveMessageToServer(content, type);
         }
@@ -918,7 +934,7 @@
             const container = document.getElementById('ai-messages-container');
             container.innerHTML = '';
             history.forEach(function(msg) {
-                addMessage(msg.content, msg.type, true);
+                addMessage(msg.content, msg.type, true, msg.timestamp);
             });
             return true;
         } catch (e) {
@@ -935,12 +951,12 @@
             if (!Array.isArray(messages) || messages.length === 0) return;
             // サーバーデータでローカルキャッシュを上書き
             chatHistory = messages.map(function(m) {
-                return { content: m.content, type: m.type };
+                return { content: m.content, type: m.type, timestamp: m.displayTime || m.createdAt || '' };
             });
             const container = document.getElementById('ai-messages-container');
             container.innerHTML = '';
             chatHistory.forEach(function(msg) {
-                addMessage(msg.content, msg.type, true);
+                addMessage(msg.content, msg.type, true, msg.timestamp);
             });
             saveHistory();
         } catch (e) {
