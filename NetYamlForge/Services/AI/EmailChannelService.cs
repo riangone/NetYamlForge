@@ -89,8 +89,7 @@ public class EmailChannelService : IEmailChannelService
 {
     private readonly EmailConfig _config;
     private readonly IConversationManager _conversationManager;
-    private readonly IIntentClassifier _intentClassifier;
-    private readonly IResponseGenerator _responseGenerator;
+    private readonly IDirectAIProcessor _aiProcessor;
     private readonly IHandoverManager _handoverManager;
     private readonly ILogger<EmailChannelService> _logger;
 
@@ -100,15 +99,13 @@ public class EmailChannelService : IEmailChannelService
     public EmailChannelService(
         IOptions<EmailConfig> configOptions,
         IConversationManager conversationManager,
-        IIntentClassifier intentClassifier,
-        IResponseGenerator responseGenerator,
+        IDirectAIProcessor aiProcessor,
         IHandoverManager handoverManager,
         ILogger<EmailChannelService> logger)
     {
         _config = configOptions.Value;
         _conversationManager = conversationManager;
-        _intentClassifier = intentClassifier;
-        _responseGenerator = responseGenerator;
+        _aiProcessor = aiProcessor;
         _handoverManager = handoverManager;
         _logger = logger;
     }
@@ -133,40 +130,34 @@ public class EmailChannelService : IEmailChannelService
             // 対話 ID を取得または作成
             var conversationId = await GetOrCreateConversationAsync(customerEmail, email.InReplyTo);
 
-            // 意図分類
-            var intentResult = await _intentClassifier.ClassifyAsync(email.Body);
+            // 直接 AI 処理
+            var aiResult = await _aiProcessor.ProcessAsync(email.Body, new ConversationContext { ConversationId = conversationId });
 
-            // 応答生成
-            var response = await _responseGenerator.GenerateResponseAsync(intentResult);
+            // エスカレーションが必要な場合
+            if (aiResult.NeedsHandover)
+            {
+                await _handoverManager.CreateHandoverAsync(new HandoverRequest
+                {
+                    ConversationId = conversationId,
+                    Reason = aiResult.HandoverReason ?? "ai_unable",
+                    Priority = aiResult.Priority,
+                    TargetDepartment = aiResult.TargetDepartment,
+                    HandoverNotes = $"Email 受信：{email.Subject}\n感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2})"
+                }, null);
 
-            // エスカレーション評価
-            var handoverEval = await _handoverManager.EvaluateHandoverNeedAsync(intentResult);
+                aiResult.Message = _handoverManager.GetHandoverMessage(aiResult.HandoverReason ?? "ai_unable");
+            }
 
             // 応答メール作成
             var responseEmail = new EmailMessage
             {
                 To = customerEmail,
                 From = _config.FromAddress,
-                Subject = GenerateSubject(email.Subject, intentResult.Intent),
-                Body = GenerateEmailBody(response.Message, intentResult),
+                Subject = GenerateSubject(email.Subject, aiResult.Method),
+                Body = GenerateEmailBody(aiResult.Message, aiResult),
                 IsHtml = true,
                 InReplyTo = email.MessageId
             };
-
-            // エスカレーションが必要な場合
-            if (handoverEval.NeedsHandover)
-            {
-                await _handoverManager.CreateHandoverAsync(new HandoverRequest
-                {
-                    ConversationId = conversationId,
-                    Reason = handoverEval.Reason ?? "ai_unable",
-                    Priority = handoverEval.Priority,
-                    TargetDepartment = handoverEval.TargetDepartment,
-                    HandoverNotes = $"Email 受信：{email.Subject}\nインテント：{intentResult.Intent}"
-                });
-
-                responseEmail.Body = GenerateHandoverEmailBody();
-            }
 
             // メール送信
             await SendResponseEmailAsync(responseEmail);
@@ -373,7 +364,7 @@ public class EmailChannelService : IEmailChannelService
         return $"{prefix} Re: {originalSubject}";
     }
 
-    private static string GenerateEmailBody(string responseMessage, IntentResult intentResult)
+    private static string GenerateEmailBody(string responseMessage, AIProcessingResult aiResult)
     {
         var html = $@"
 <html>

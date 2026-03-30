@@ -132,6 +132,11 @@ public class SendMessageResponse
     /// エスカレーション推奨フラグ
     /// </summary>
     public bool SuggestHandover { get; set; }
+
+    /// <summary>
+    /// 感情スコア（-1.0 〜 1.0）
+    /// </summary>
+    public double? SentimentScore { get; set; }
 }
 
 /// <summary>

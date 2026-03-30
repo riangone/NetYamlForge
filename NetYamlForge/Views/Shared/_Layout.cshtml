@@ -356,6 +356,13 @@
                             <li><a asp-controller="Users"
                                    asp-action="Index"
                                    asp-route-project="@currentProject">@L["Users"]</a></li>
+                            <li>
+                                <a asp-controller="AISettings"
+                                   asp-action="Index"
+                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "AISettings", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    AI Settings
+                                </a>
+                            </li>
                         }
                     </ul>
                 </aside>
@@ -763,6 +770,15 @@
     </script>
     <script src="/lib/marked/marked.min.js"></script>
     <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
+    @* auto-dealer-demo: ログイン済みユーザー向け統一 AI チャットウィジェット *@
+    @if (currentProject == "auto-dealer-demo" && (User.Identity?.IsAuthenticated ?? false))
+    {
+        var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
+        <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
+        <script>
+            DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

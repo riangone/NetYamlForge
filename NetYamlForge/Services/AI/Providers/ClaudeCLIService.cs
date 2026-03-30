@@ -82,7 +82,8 @@ public class ClaudeCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         var args = new List<string>();
 
@@ -100,12 +101,22 @@ public class ClaudeCLIService : BaseCLIService
         args.Add(streaming ? "stream-json" : "json");
         if (streaming) args.Add("--verbose");
 
-        // フレームワーク固有のシステムプロンプトを追加
-        var systemPrompt = SkillLoader.GetSystemPrompt();
-        if (!string.IsNullOrEmpty(systemPrompt))
+        // systemPromptOverride が指定された場合: --system-prompt でペルソナを完全置換する。
+        // これにより NetYamlForge 開発コンテキストが混入しない（ロール汚染防止）。
+        // 指定なし: フレームワーク固有のシステムプロンプトを追記する（既存動作）。
+        if (!string.IsNullOrEmpty(systemPromptOverride))
         {
-            args.Add("--append-system-prompt");
-            args.Add(systemPrompt);
+            args.Add("--system-prompt");
+            args.Add(systemPromptOverride);
+        }
+        else
+        {
+            var frameworkPrompt = SkillLoader.GetSystemPrompt();
+            if (!string.IsNullOrEmpty(frameworkPrompt))
+            {
+                args.Add("--append-system-prompt");
+                args.Add(frameworkPrompt);
+            }
         }
 
         // セッション再開

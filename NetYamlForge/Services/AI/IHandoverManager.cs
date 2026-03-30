@@ -36,6 +36,11 @@ public interface IHandoverManager
     /// 待機中のエスカレーションキューを取得
     /// </summary>
     Task<List<HandoverInfo>> GetPendingQueueAsync(string? department = null, string? projectId = null);
+
+    /// <summary>
+    /// エスカレーションメッセージを取得
+    /// </summary>
+    string GetHandoverMessage(string reason);
 }
 
 /// <summary>

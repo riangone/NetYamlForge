@@ -5,6 +5,7 @@
 using System.Globalization;
 using NetYamlForge.Data;
 using NetYamlForge.Extensions;
+using NetYamlForge.Hubs;
 using NetYamlForge.Middleware;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
@@ -137,6 +138,9 @@ if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnor
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ユーザーが管理画面から変更した AI 設定を読み込む（appsettings.json を上書き）
+builder.Configuration.AddJsonFile("ai-user-settings.json", optional: true, reloadOnChange: true);
+
 // Windows サービスとして実行する場合
 if (useWindowsService)
 {
@@ -185,6 +189,7 @@ builder.Services.Configure<CliConfig>(builder.Configuration.GetSection(CliConfig
 builder.Services.AddSingleton<ProcessExecutor>();
 builder.Services.AddSingleton<SkillLoader>();
 builder.Services.AddSingleton<CLIServiceFactory>();
+builder.Services.AddSingleton<AISettingsService>();
 builder.Services.AddSingleton<ProgressTracker>();
 builder.Services.AddSingleton<TaskQueueService>();
 
@@ -200,6 +205,13 @@ builder.Services.AddHttpClient("ClaudeApiClient", client =>
 });
 builder.Services.AddScoped<NetYamlForge.Services.AI.AutoDealerChatService>();
 
+// AI 自然言語クエリサービス（QueryParserService が依存する ILlmProvider を含む）
+builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
+                           NetYamlForge.Services.AI.Providers.CliFirstLlmProvider>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter>();
+
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
 builder.Services.AddSingleton<ICLIService, QwenCodeCLIService>();
@@ -211,6 +223,11 @@ builder.Services.AddSingleton<ICLIService, LmStudioCLIService>();
 builder.Services.AddSingleton<ICLIService, CopilotCLIService>();
 
 builder.Services.AddSignalR();
+
+// AI ディベートサービス
+builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateService>();
+builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateDbService>();
+builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateOrchestrator>();
 
 var app = builder.Build();
 
@@ -256,8 +273,10 @@ app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication �
 app.UseAuthentication();
 app.UseAuthorization();
 
-// SignalR Hub for AI Progress
+// SignalR Hubs for AI
 app.MapHub<AIProgressHub>("/aiProgressHub");
+app.MapHub<NaturalLanguageQueryHub>("/nlQueryHub");
+app.MapHub<AIDebateHub>("/aiDebateHub");
 
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(

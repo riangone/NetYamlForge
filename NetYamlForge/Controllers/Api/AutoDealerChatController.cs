@@ -89,6 +89,47 @@ public class AutoDealerChatController : ControllerBase
     }
 
     // ─────────────────────────────────────────────────────
+    // 社員向けエンドポイント（ログイン必須）
+    // ─────────────────────────────────────────────────────
+
+    /// <summary>社員向けチャットセッションを開始します。</summary>
+    [Authorize]
+    [HttpPost("staff/session")]
+    public async Task<IActionResult> StartStaffSession([FromBody] ChatStartSessionRequest req)
+    {
+        try
+        {
+            var result = await _chat.StartSessionAsync("staff");
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "社員セッション開始エラー");
+            return StatusCode(500, new { error = "セッションの開始に失敗しました。" });
+        }
+    }
+
+    /// <summary>社員メッセージを送信し AI 応答を取得します。</summary>
+    [Authorize]
+    [HttpPost("staff/{conversationId}/message")]
+    public async Task<IActionResult> SendStaffMessage(string conversationId, [FromBody] ChatSendMessageRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.Message))
+            return BadRequest(new { error = "メッセージが空です。" });
+
+        try
+        {
+            var result = await _chat.SendStaffMessageAsync(conversationId, req.Message);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "社員メッセージ処理エラー conv={Id}", conversationId);
+            return StatusCode(500, new { error = "メッセージの処理に失敗しました。" });
+        }
+    }
+
+    // ─────────────────────────────────────────────────────
     // オペレーター向けエンドポイント（ログイン必須）
     // ─────────────────────────────────────────────────────
 
@@ -145,6 +186,19 @@ public class AutoDealerChatController : ControllerBase
     {
         var history = await _chat.GetMessagesAsync(conversationId);
         return Ok(history);
+    }
+
+    /// <summary>会話メッセージ一覧を取得します（顧客・社員向け、認証不要）。</summary>
+    /// <remarks>
+    /// conversationId は UUID 相当のランダム文字列のため、知っている人のみアクセス可能。
+    /// チャットウィジェットがページリロード後に DB から履歴を復元するために使用します。
+    /// </remarks>
+    [AllowAnonymous]
+    [HttpGet("session/{conversationId}/messages")]
+    public async Task<IActionResult> GetSessionMessages(string conversationId)
+    {
+        var messages = await _chat.GetMessagesAsync(conversationId);
+        return Ok(messages);
     }
 }
 

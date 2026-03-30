@@ -254,9 +254,9 @@
         // 自动滚动按钮
         document.getElementById('ai-auto-scroll-btn').onclick = toggleAutoScroll;
         
-        // 入力欄イベント（Enter送信 + ↑↓ 履歴ナビ）
+        // 入力欄イベント（Ctrl+Enter送信 + ↑↓ 履歴ナビ）
         document.getElementById('ai-input-message').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && e.ctrlKey) {
                 e.preventDefault();
                 sendMessage();
                 return;
@@ -483,7 +483,11 @@
             const response = await fetch(`${CONFIG.apiBaseUrl}/cli-tools`);
             if (response.ok) {
                 const data = await response.json();
-                updateCliSelector(data.available);
+                // サーバー側のデフォルト設定を反映
+                if (data.defaultTool) {
+                    CONFIG.defaultCliTool = data.defaultTool;
+                }
+                updateCliSelector(data.available, data.defaultTool);
             }
         } catch (error) {
             console.error('Failed to load CLI tools:', error);
@@ -491,7 +495,7 @@
     }
     
     // tools は { "claude": {...}, "qwen-code": {...}, "mock": {...} } の辞書形式
-    function updateCliSelector(tools) {
+    function updateCliSelector(tools, serverDefault) {
         const selector = document.getElementById('ai-cli-tool');
         if (!selector) return;
 
@@ -510,9 +514,9 @@
             selector.appendChild(option);
         }
 
-        // sessionStorage → 直前の選択値の順で復元
+        // sessionStorage → 直前の選択値 → サーバーのデフォルト の順で復元
         const savedTool = (() => { try { return sessionStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
-        const restoreValue = savedTool || prevValue;
+        const restoreValue = savedTool || prevValue || serverDefault || CONFIG.defaultCliTool;
         if (restoreValue && selector.querySelector(`option[value="${restoreValue}"]:not([disabled])`)) {
             selector.value = restoreValue;
         }
@@ -680,14 +684,18 @@
                     if (data.sessionId) {
                         currentSessionId = data.sessionId;
                     }
+                    // currentTaskId を先に null にして SignalR ハンドラの二重追加を防ぐ
+                    currentTaskId = null;
                     if (data.result && data.result.trim()) {
                         addMessage(data.result, 'assistant');
                     }
                     return;
                 } else if (data.status === 'Cancelled' || data.status === 4) {
                     // 停止ボタンによるキャンセルは stopTask 側でメッセージ表示済み
+                    currentTaskId = null;
                     return;
                 } else if (data.status === 'Failed' || data.status === 3) {
+                    currentTaskId = null;
                     addMessage(`❌ ${data.error || 'タスクが失敗しました'}`, 'system');
                     return;
                 }
@@ -909,6 +917,7 @@
         if (!skipSave) {
             chatHistory.push({ content, type, timestamp: timeStr });
             saveHistory();
+            // サーバーにも非同期保存（別タブ・ブラウザ再起動時に履歴を同期）
             saveMessageToServer(content, type);
         }
 

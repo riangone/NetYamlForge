@@ -88,7 +88,8 @@ public class LmStudioCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         // LM Studio 仅支持 API 模式
         throw new NotSupportedException("LM Studio only supports API mode, not CLI mode.");
@@ -102,6 +103,7 @@ public class LmStudioCLIService : BaseCLIService
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default)
     {
         return await ExecuteViaApiAsync(message, sessionId, false, ct);

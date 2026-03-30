@@ -133,21 +133,6 @@ public class TaskQueueService
                 {
                     _tracker.UpdateProgress(task.Id, update);
 
-                    // 累积所有 assistant 消息（多个 text part 可能分散在多个消息中）
-                    if (!string.IsNullOrEmpty(update.Message))
-                    {
-                        if (hasMessageContent)
-                        {
-                            allMessages.AppendLine(update.Message);
-                        }
-                        else
-                        {
-                            allMessages.Append(update.Message);
-                            hasMessageContent = true;
-                        }
-                        lastMessage = update.Message;
-                    }
-
                     // CLI から返された session_id を保存（次回の --resume に使用）
                     if (!string.IsNullOrEmpty(update.SessionId))
                     {
@@ -174,6 +159,21 @@ public class TaskQueueService
                         _tracker.Fail(task.Id, errMsg);
                         await SaveCommandLogResultAsync(task.Id, "Failed", null, errMsg, startedAt);
                         return;
+                    }
+
+                    // 累积所有 assistant 消息（Completed/Failed 以外のメッセージのみ）
+                    if (!string.IsNullOrEmpty(update.Message))
+                    {
+                        if (hasMessageContent)
+                        {
+                            allMessages.AppendLine(update.Message);
+                        }
+                        else
+                        {
+                            allMessages.Append(update.Message);
+                            hasMessageContent = true;
+                        }
+                        lastMessage = update.Message;
                     }
                 }
 

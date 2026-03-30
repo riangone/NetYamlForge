@@ -85,14 +85,12 @@ public class QwenCodeCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         var args = new List<string>();
 
         // Qwen CLI: qwen --yolo --prompt <message> [options]
-        // --yolo (-y): 自動実行モード（確認不要）
-        // --prompt (-p): プロンプトを指定する（非推奨だが stdin EOF の影響を受けないため使用する）。
-        // stdin が閉じられた状態でも --prompt フラグなら確実に入力を受け取れる。
         args.Add("--yolo");
         args.Add("--prompt");
         args.Add(message);
@@ -108,12 +106,20 @@ public class QwenCodeCLIService : BaseCLIService
             args.Add(Config.QwenCode.Model);
         }
 
-        // フレームワーク固有のシステムプロンプトを追加
-        var systemPrompt = SkillLoader.GetSystemPrompt();
-        if (!string.IsNullOrEmpty(systemPrompt))
+        // systemPromptOverride が指定された場合はペルソナを完全置換（ロール汚染防止）
+        if (!string.IsNullOrEmpty(systemPromptOverride))
         {
-            args.Add("--append-system-prompt");
-            args.Add(systemPrompt);
+            args.Add("--system-prompt");
+            args.Add(systemPromptOverride);
+        }
+        else
+        {
+            var frameworkPrompt = SkillLoader.GetSystemPrompt();
+            if (!string.IsNullOrEmpty(frameworkPrompt))
+            {
+                args.Add("--append-system-prompt");
+                args.Add(frameworkPrompt);
+            }
         }
 
         // セッション再開

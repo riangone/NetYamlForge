@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TaskStatus = NetYamlForge.Models.AI.TaskStatus;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
@@ -20,6 +21,7 @@ public class AIController : ControllerBase
     private readonly TaskQueueService _taskQueue;
     private readonly ChatHistoryService _chatHistory;
     private readonly SkillLoader _skillLoader;
+    private readonly IOptionsMonitor<CliConfig> _cliConfig;
     private readonly ILogger<AIController> _logger;
 
     public AIController(
@@ -28,6 +30,7 @@ public class AIController : ControllerBase
         TaskQueueService taskQueue,
         ChatHistoryService chatHistory,
         SkillLoader skillLoader,
+        IOptionsMonitor<CliConfig> cliConfig,
         ILogger<AIController> logger)
     {
         _cliFactory = cliFactory;
@@ -35,6 +38,7 @@ public class AIController : ControllerBase
         _taskQueue = taskQueue;
         _chatHistory = chatHistory;
         _skillLoader = skillLoader;
+        _cliConfig = cliConfig;
         _logger = logger;
     }
     
@@ -103,9 +107,6 @@ public class AIController : ControllerBase
 
                 if (currentTask.Status == TaskStatus.Completed)
                 {
-                    // 保存 AI 响应到历史记录
-                    await _chatHistory.SaveMessageAsync(userId, currentTask.Result ?? "", "assistant", request.CliTool);
-                    
                     return Ok(new AIChatResponse
                     {
                         TaskId = task.Id,
@@ -256,7 +257,7 @@ public class AIController : ControllerBase
                         kvp.Value.Authenticated,
                         kvp.Value.Capabilities
                     }),
-                defaultTool = "claude"
+                defaultTool = _cliConfig.CurrentValue.DefaultTool
             });
         }
         catch (Exception ex)

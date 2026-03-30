@@ -178,7 +178,8 @@ public class GeminiCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         var args = new List<string>();
 

@@ -10,6 +10,7 @@
     let connection = null;
     let conversationId = null;
     let isTyping = false;
+    let eventListenersRegistered = false;  // イベントリスナー登録フラグ
 
     // 設定
     const config = {
@@ -469,18 +470,68 @@
      * SignalR 接続を開始
      */
     function startSignalRConnection() {
-        // SignalR JavaScript クライアントが必要
-        // CDN から読み込み
+        // 既に接続済みの場合は何もしない（二重登録防止）
+        if (connection && connection.state === signalR.HubConnectionState.Connected) {
+            console.log('SignalR already connected');
+            return;
+        }
+
+        // SignalR スクリプトが既に読み込まれているか確認
+        if (typeof signalR !== 'undefined') {
+            // 既に読み込み済み
+            initializeSignalR();
+            return;
+        }
+
+        // SignalR JavaScript クライアントを CDN から読み込み
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js';
         script.onload = () => {
-            connection = new signalR.HubConnectionBuilder()
-                .withUrl(config.signalRUrl)
-                .withAutomaticReconnect()
-                .build();
+            initializeSignalR();
+        };
+        script.onerror = () => {
+            console.error('Failed to load SignalR library');
+        };
+        document.head.appendChild(script);
+    }
 
+    /**
+     * SignalR 接続を初期化
+     */
+    function initializeSignalR() {
+        // 既に接続済みの場合は何もしない
+        if (connection && connection.state === signalR.HubConnectionState.Connected) {
+            console.log('SignalR already connected');
+            return;
+        }
+
+        // 既に接続が作成されていて、接続中の場合は完了を待つ
+        if (connection && connection.state === signalR.HubConnectionState.Connecting) {
+            console.log('SignalR connection in progress');
+            return;
+        }
+
+        // 接続が作成済みで切断状態の場合は再接続
+        if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
+            connection.start()
+                .then(() => {
+                    console.log('SignalR reconnected');
+                })
+                .catch(err => console.error('SignalR reconnection error:', err));
+            return;
+        }
+
+        // 新しい接続を作成
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl(config.signalRUrl)
+            .withAutomaticReconnect()
+            .build();
+
+        // イベントリスナーは一度だけ登録（重複防止）
+        if (!eventListenersRegistered) {
+            // イベントリスナーを登録
             connection.on('ai_response', (data) => {
-                addMessage('ai', data.message, data.provider);
+                addMessage('ai', data.message, data.aiModel || data.provider);
                 hideTypingIndicator();
 
                 if (data.quickReplies && data.quickReplies.length > 0) {
@@ -496,13 +547,26 @@
                 hideTypingIndicator();
             });
 
-            connection.start()
-                .then(() => {
-                    console.log('SignalR connected');
-                })
-                .catch(err => console.error('SignalR error:', err));
-        };
-        document.head.appendChild(script);
+            connection.on('message_received', (data) => {
+                // 顧客メッセージは既に送信済みなので何もしない
+                console.log('Message received:', data);
+            });
+
+            connection.on('error', (error) => {
+                console.error('SignalR error:', error);
+                addMessage('ai', 'エラーが発生しました。');
+            });
+
+            eventListenersRegistered = true;
+            console.log('SignalR event listeners registered');
+        }
+
+        // 接続開始
+        connection.start()
+            .then(() => {
+                console.log('SignalR connected');
+            })
+            .catch(err => console.error('SignalR error:', err));
     }
 
     /**
@@ -511,7 +575,7 @@
     async function sendMessage() {
         const chatInput = document.getElementById('ai-chat-input');
         const message = chatInput.value.trim();
-        
+
         if (!message || !conversationId) return;
 
         // ユーザーメッセージを表示
@@ -520,6 +584,18 @@
 
         // 入力中インジケーターを表示
         showTypingIndicator();
+
+        // SignalR 接続がある場合は SignalR で送信
+        if (connection && connection.state === 'Connected') {
+            try {
+                await connection.invoke('SendMessage', conversationId, message);
+                // AI 応答は SignalR の ai_response イベントで処理される
+                return;
+            } catch (error) {
+                console.error('Failed to send message via SignalR:', error);
+                // SignalR 失敗時は REST API にフォールバック
+            }
+        }
 
         // REST API で送信（SignalR が使えない場合のフォールバック）
         try {
@@ -632,9 +708,12 @@
     }
 
     // ページ読み込み時に初期化
+    // 二重呼び出しにより SignalR イベントが重複登録されるのを防ぐため、
+    // DOM 読み込み済みの場合もイベント登録のみとする
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initChatWidget);
     } else {
+        // DOM 已加载，直接初始化（只调用一次）
         initChatWidget();
     }
 })();

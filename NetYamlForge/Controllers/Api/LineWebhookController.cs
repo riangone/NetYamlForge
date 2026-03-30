@@ -299,8 +299,8 @@ public class LineMessagingService : ILineMessagingService
     private readonly HttpClient _httpClient;
     private readonly LineConfig _config;
     private readonly IConversationManager _conversationManager;
-    private readonly IIntentClassifier _intentClassifier;
-    private readonly IResponseGenerator _responseGenerator;
+    private readonly IDirectAIProcessor _aiProcessor;
+    private readonly IHandoverManager _handoverManager;
     private readonly ILogger<LineMessagingService> _logger;
 
     // ユーザーごとの対話 ID マップ（本来は永続化が必要）
@@ -310,19 +310,19 @@ public class LineMessagingService : ILineMessagingService
         HttpClient httpClient,
         IOptions<LineConfig> configOptions,
         IConversationManager conversationManager,
-        IIntentClassifier intentClassifier,
-        IResponseGenerator responseGenerator,
+        IDirectAIProcessor aiProcessor,
+        IHandoverManager handoverManager,
         ILogger<LineMessagingService> logger)
     {
         _httpClient = httpClient;
         _config = configOptions.Value;
         _conversationManager = conversationManager;
-        _intentClassifier = intentClassifier;
-        _responseGenerator = responseGenerator;
+        _aiProcessor = aiProcessor;
+        _handoverManager = handoverManager;
         _logger = logger;
-        
+
         _httpClient.BaseAddress = new Uri("https://api.line.me/v2/bot/");
-        _httpClient.DefaultRequestHeaders.Authorization = 
+        _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _config.ChannelAccessToken);
     }
 
@@ -333,18 +333,31 @@ public class LineMessagingService : ILineMessagingService
             // ユーザーの対話 ID を取得または作成
             var conversationId = await GetOrCreateConversationAsync(userId);
 
-            // 意図分類
-            var intentResult = await _intentClassifier.ClassifyAsync(message);
+            // 直接 AI 処理
+            var context = new ConversationContext { ConversationId = conversationId };
+            var aiResult = await _aiProcessor.ProcessAsync(message, context);
 
-            // 応答生成
-            var response = await _responseGenerator.GenerateResponseAsync(intentResult);
+            // エスカレーションが必要か
+            if (aiResult.NeedsHandover)
+            {
+                await _handoverManager.CreateHandoverAsync(new HandoverRequest
+                {
+                    ConversationId = conversationId,
+                    Reason = aiResult.HandoverReason ?? "ai_unable",
+                    Priority = aiResult.Priority,
+                    TargetDepartment = aiResult.TargetDepartment,
+                    HandoverNotes = $"感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2})"
+                }, null);
+
+                aiResult.Message = _handoverManager.GetHandoverMessage(aiResult.HandoverReason ?? "ai_unable");
+            }
 
             // LINE 形式に変換
             return new LineAIResponse
             {
                 Messages = new List<LineMessageBase>
                 {
-                    new LineTextMessage(response.Message)
+                    new LineTextMessage(aiResult.Message)
                 }
             };
         }

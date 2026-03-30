@@ -230,9 +230,9 @@ public class HandoverManager : IHandoverManager
             db.Open();
 
             var sql = @"
-                SELECT * FROM ai_handovers 
+                SELECT * FROM ai_handovers
                 WHERE status = @Status";
-            
+
             if (!string.IsNullOrEmpty(department))
             {
                 sql += " AND target_department = @Department";
@@ -253,6 +253,21 @@ public class HandoverManager : IHandoverManager
             _logger.LogError(ex, "エスカレーションキューの取得に失敗");
             return new List<HandoverInfo>();
         }
+    }
+
+    /// <inheritdoc />
+    public string GetHandoverMessage(string reason)
+    {
+        return reason switch
+        {
+            "customer_unsatisfied" => "ご不便をおかけして誠に申し訳ございません。担当者が詳しく伺い、早急に対応させていただきます。少々お待ちください。",
+            "human_requested" => "担当者が対応いたします。少々お待ちください。",
+            "complaint" => "この度はご不快な思いをさせ、誠に申し訳ございません。責任者が直接対応させていただきます。",
+            "vip_customer" => "VIP 顧客様でございますので、専任の担当者が対応させていただきます。",
+            "negative_sentiment" => "お客様のお話を詳しく伺いたく存じます。担当者が対応させていただきます。",
+            "ai_unable" => "申し訳ございませんが、この件につきましては担当者が対応させていただきます。",
+            _ => "担当者が対応いたします。少々お待ちください。"
+        };
     }
 
     private static string GenerateHandoverId()

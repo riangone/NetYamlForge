@@ -549,6 +549,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             return;
         }
 
+        // 1. YAML定義フィルター（UIフィルター）
         foreach (var f in meta.Filters)
         {
             var key = f.Key;
@@ -572,6 +573,84 @@ public class DynamicCrudRepository : IDynamicCrudRepository
                     break;
             }
         }
+
+        // 2. AI生成動的フィルター（YAML未定義だが有効なカラム）
+        // QueryExecutionService.BuildFilters が生成するキー形式を解析して適用する
+        var yamlFilterKeys = meta.Filters.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var validColumns   = meta.Columns.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kv in filters)
+        {
+            if (string.IsNullOrWhiteSpace(kv.Value)) continue;
+
+            var (baseField, op) = ParseDynamicFilterKey(kv.Key);
+
+            if (yamlFilterKeys.Contains(baseField)) continue;          // YAML定義済み → スキップ
+            if (!validColumns.Contains(baseField)) continue;           // 無効カラム → スキップ
+            if (!SqlSafetyGuard.IsValidIdentifier(baseField)) continue; // 識別子検証
+
+            var expr     = $"{meta.Table}.{baseField}";
+            var pName    = $"dyn_{baseField}_{op}";
+
+            switch (op)
+            {
+                case "eq":
+                    where.Add($"{expr} = @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "ne":
+                    where.Add($"{expr} != @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "gt":
+                    where.Add($"{expr} > @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "lt":
+                    where.Add($"{expr} < @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "gte":
+                    where.Add($"{expr} >= @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "lte":
+                    where.Add($"{expr} <= @{pName}");
+                    param.Add(pName, kv.Value);
+                    break;
+                case "like":
+                    where.Add($"{expr} LIKE @{pName}");
+                    param.Add(pName, kv.Value); // BuildFilters が既に %...% を付けている
+                    break;
+                case "in":
+                    var inVals = kv.Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                    var inParams = inVals.Select((v, i) => $"@{pName}_{i}").ToList();
+                    where.Add($"{expr} IN ({string.Join(", ", inParams)})");
+                    for (var i = 0; i < inVals.Length; i++)
+                        param.Add($"{pName}_{i}", inVals[i].Trim());
+                    break;
+                case "is_null":
+                    where.Add($"{expr} IS NULL");
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// QueryExecutionService.BuildFilters のキー形式を解析してベースフィールド名と演算子を返します。
+    /// 例: "tier_level" → ("tier_level", "eq"), "price>" → ("price", "gt")
+    /// </summary>
+    private static (string BaseField, string Op) ParseDynamicFilterKey(string key)
+    {
+        if (key.EndsWith("!=",     StringComparison.Ordinal)) return (key[..^2], "ne");
+        if (key.EndsWith(">=",     StringComparison.Ordinal)) return (key[..^2], "gte");
+        if (key.EndsWith("<=",     StringComparison.Ordinal)) return (key[..^2], "lte");
+        if (key.EndsWith(">",      StringComparison.Ordinal)) return (key[..^1], "gt");
+        if (key.EndsWith("<",      StringComparison.Ordinal)) return (key[..^1], "lt");
+        if (key.EndsWith(":",      StringComparison.Ordinal)) return (key[..^1], "like");
+        if (key.EndsWith("[]",     StringComparison.Ordinal)) return (key[..^2], "in");
+        if (key.EndsWith("__null", StringComparison.Ordinal)) return (key[..^6], "is_null");
+        return (key, "eq");
     }
 
     private static List<string> BuildWhere(

@@ -168,7 +168,11 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
-            // インテントと言語で検索（有効なナレッジのみ）
+            // 构建带有权重的搜索查询
+            // 1. 首先尝试 intent 精确匹配
+            // 2. 然后尝试关键词匹配（问题、答案、关键词字段）
+            // 3. 考虑实体匹配（如车型、预算范围等）
+            
             var sql = @"
                 SELECT
                     knowledge_id,
@@ -176,21 +180,39 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                     answer,
                     answer_html,
                     priority,
-                    usage_count
+                    usage_count,
+                    keywords,
+                    intent as knowledge_intent,
+                    CASE
+                        WHEN intent = @Intent THEN 100
+                        WHEN instr(',' || intent || ',', ',' || @Intent || ',') > 0 THEN 80
+                        WHEN question LIKE @Keyword THEN 50
+                        WHEN answer LIKE @Keyword THEN 30
+                        WHEN keywords LIKE @Keyword THEN 40
+                        ELSE 10
+                    END as match_score
                 FROM ai_knowledge
                 WHERE is_active = 1
                 AND language = @Language
                 AND (
                     intent = @Intent
                     OR instr(',' || intent || ',', ',' || @Intent || ',') > 0
+                    OR question LIKE @Keyword
+                    OR answer LIKE @Keyword
+                    OR keywords LIKE @Keyword
                 )
-                ORDER BY priority DESC, usage_count DESC
+                ORDER BY match_score DESC, priority DESC, usage_count DESC
                 LIMIT 1";
+
+            // 从实体中提取关键词用于搜索
+            var keyword = ExtractSearchKeywordFromEntities(entities);
+            var keywordParam = $"%{keyword}%";
 
             var result = await db.QueryFirstOrDefaultAsync(sql, new
             {
                 Intent = intent,
-                Language = "ja" // TODO: 多言語対応
+                Keyword = keywordParam,
+                Language = "ja"
             });
 
             if (result == null)
@@ -200,7 +222,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             {
                 KnowledgeId = result.knowledge_id,
                 Message = result.answer,
-                MatchScore = 1.0,
+                MatchScore = result.match_score / 100.0,
                 Source = "knowledge"
             };
         }
@@ -209,6 +231,38 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             _logger.LogError(ex, "ナレッジ検索に失敗：{Intent}", intent);
             return null;
         }
+    }
+
+    /// <summary>
+    /// エンティティから検索キーワードを抽出
+    /// </summary>
+    private static string ExtractSearchKeywordFromEntities(Dictionary<string, string> entities)
+    {
+        if (entities == null || !entities.Any())
+            return "%";
+
+        var keywords = new List<string>();
+
+        // 車種からキーワードを生成
+        if (entities.TryGetValue("vehicle_model", out var model))
+            keywords.Add(model);
+        
+        if (entities.TryGetValue("vehicle_brand", out var brand))
+            keywords.Add(brand);
+
+        // 予算関連
+        if (entities.TryGetValue("budget_amount", out var budget))
+            keywords.Add(budget);
+
+        // サービス类型
+        if (entities.TryGetValue("service_type", out var service))
+            keywords.Add(service);
+
+        // 其他实体
+        if (entities.TryGetValue("vehicle_type", out var type))
+            keywords.Add(type);
+
+        return keywords.Count > 0 ? string.Join(" ", keywords) : "%";
     }
 
     /// <inheritdoc />

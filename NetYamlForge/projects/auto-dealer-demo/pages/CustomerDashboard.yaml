@@ -1,10 +1,6 @@
 title: マイページ
 description: "ご利用中のサービス・予約・お気に入り車両などをまとめて確認できます。"
 
-# ページ読み込み時に全画面 AI アシスタントオーバーレイを起動する
-scripts:
-  - /js/customer-ai-overlay.js
-
 sections:
   # ─── 顧客情報サマリー ───
   - id: my_info

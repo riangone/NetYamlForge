@@ -1,0 +1,333 @@
+/* AI 自然语言查询聊天组件样式 */
+
+.ai-query-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+/* 消息列表区域 */
+.ai-query-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* 欢迎消息 */
+.ai-query-welcome-message {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    align-self: center;
+}
+
+.ai-query-welcome-message h4 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.25rem;
+}
+
+.ai-query-welcome-message p {
+    margin: 0 0 0.75rem 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.ai-query-suggestions {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #555;
+    font-size: 0.875rem;
+}
+
+.ai-query-suggestions li {
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.ai-query-suggestions li:hover {
+    color: #007bff;
+}
+
+/* 用户消息 */
+.ai-query-message {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 85%;
+}
+
+.ai-query-message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.ai-query-message.assistant {
+    align-self: flex-start;
+}
+
+.ai-query-message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+}
+
+.ai-query-message.user .ai-query-message-avatar {
+    background: #007bff;
+    color: white;
+}
+
+.ai-query-message.assistant .ai-query-message-avatar {
+    background: #28a745;
+    color: white;
+}
+
+.ai-query-message-content {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    overflow-wrap: break-word;
+}
+
+.ai-query-message.user .ai-query-message-content {
+    background: #007bff;
+    color: white;
+}
+
+.ai-query-message-text {
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.ai-query-message.user .ai-query-message-text {
+    color: white;
+}
+
+/* Markdown 内容样式 */
+.ai-query-markdown {
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.ai-query-markdown h3 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem 0;
+    color: #333;
+}
+
+.ai-query-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.85rem;
+}
+
+.ai-query-markdown th,
+.ai-query-markdown td {
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.ai-query-markdown th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.ai-query-markdown tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.ai-query-markdown code {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.85em;
+}
+
+.ai-query-markdown pre {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin: 0.5rem 0;
+}
+
+/* 思考状态 */
+.ai-query-thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #fff3cd;
+    border-radius: 0.5rem;
+    margin: 0.5rem 1rem;
+    color: #856404;
+}
+
+.ai-query-thinking.hidden {
+    display: none;
+}
+
+.ai-query-thinking-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ffc107;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: ai-query-spin 0.8s linear infinite;
+}
+
+@keyframes ai-query-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 输入区域 */
+.ai-query-input-area {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid #dee2e6;
+}
+
+.ai-query-input-area textarea {
+    flex: 1;
+    resize: none;
+    max-height: 120px;
+    font-family: inherit;
+}
+
+.ai-query-input-area textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.ai-query-input-area button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    align-self: flex-end;
+}
+
+/* 解析预览 */
+.ai-query-preview {
+    position: absolute;
+    bottom: 80px;
+    right: 1rem;
+    width: 400px;
+    max-width: calc(100% - 2rem);
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid #dee2e6;
+    z-index: 100;
+}
+
+.ai-query-preview.hidden {
+    display: none;
+}
+
+.ai-query-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 0.5rem 0.5rem 0 0;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.ai-query-preview-header button {
+    padding: 0.25rem 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: #6c757d;
+}
+
+.ai-query-preview-header button:hover {
+    color: #dc3545;
+}
+
+.ai-query-preview-content {
+    padding: 0.75rem;
+    margin: 0;
+    font-size: 0.8rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+    max-height: 300px;
+    overflow-y: auto;
+    color: #333;
+    background: #f8f9fa;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* 错误消息 */
+.ai-query-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #f5c6cb;
+}
+
+/* 滚动到底部按钮 */
+.ai-query-scroll-to-bottom {
+    position: absolute;
+    bottom: 100px;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99;
+    transition: opacity 0.3s;
+}
+
+.ai-query-scroll-to-bottom.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .ai-query-chat-container {
+        height: calc(100vh - 60px);
+    }
+
+    .ai-query-input-area {
+        flex-direction: column;
+    }
+
+    .ai-query-input-area button {
+        align-self: stretch;
+    }
+
+    .ai-query-preview {
+        width: calc(100% - 2rem);
+        bottom: 160px;
+    }
+}

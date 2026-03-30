@@ -36,7 +36,8 @@ public class MockCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         var args = new List<string> { "-p", message };
         if (streaming) { args.Add("--output-format"); args.Add("stream-json"); }

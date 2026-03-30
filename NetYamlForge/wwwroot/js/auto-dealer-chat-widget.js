@@ -36,6 +36,48 @@
       .replace(/"/g, '&quot;');
   }
 
+  // Markdown 簡易レンダラー
+  function renderMarkdown(text) {
+    var html = esc(text);
+    
+    // コードブロック（``` で囲まれた部分）
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+      return '<pre class="_adcw-code-block"><code class="language-' + lang + '">' + code.trim() + '</code></pre>';
+    });
+    
+    // インラインコード（` で囲まれた部分）
+    html = html.replace(/`([^`]+)`/g, '<code class="_adcw-inline-code">$1</code>');
+    
+    // 太字（**text**）
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    
+    // 斜体（*text*）
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // リンク（[text](url)）
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    
+    // 箇条書き（- または * で始まる行）
+    html = html.replace(/^[\-\*]\s+(.+)$/gm, '<li class="_adcw-list-item">$1</li>');
+    // リストを<ul>で囲む（連続する<li>をまとめる）
+    html = html.replace(/(<li class="_adcw-list-item">.+<\/li>\n?)+/g, function(match) {
+      return '<ul class="_adcw-list">' + match + '</ul>';
+    });
+    
+    // 見出し（# で始まる行）
+    html = html.replace(/^###\s+(.+)$/gm, '<h3 class="_adcw-heading-3">$1</h3>');
+    html = html.replace(/^##\s+(.+)$/gm, '<h2 class="_adcw-heading-2">$1</h2>');
+    html = html.replace(/^#\s+(.+)$/gm, '<h1 class="_adcw-heading-1">$1</h1>');
+    
+    // 改行を<br>に変換（ただしブロック要素内は除く）
+    html = html.replace(/\n/g, '<br>');
+    
+    // ブロック要素の後の<br>を削除
+    html = html.replace(/<\/(h[1-3]|ul|pre|li)><br>/g, '</$1>');
+    
+    return html;
+  }
+
   function randomId() {
     return 'WID-' + Math.random().toString(36).substr(2, 9).toUpperCase();
   }
@@ -124,6 +166,34 @@
         background: ${primary}; color: #fff; border-bottom-right-radius: 4px;
       }
       ._adcw-time { font-size: 10px; opacity: .55; margin-top: 4px; }
+
+      /* Markdown スタイル */
+      ._adcw-bubble-markdown { text-align: left; }
+      ._adcw-bubble-markdown strong { font-weight: 700; }
+      ._adcw-bubble-markdown em { font-style: italic; }
+      ._adcw-bubble-markdown a { color: ${primary}; text-decoration: underline; }
+      ._adcw-bubble-markdown code {
+        background: rgba(0,0,0,.06); padding: 2px 6px;
+        border-radius: 4px; font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 12px;
+      }
+      ._adcw-bubble-markdown pre {
+        background: #f5f5f5; border: 1px solid #e0e0e0;
+        border-radius: 8px; padding: 12px; margin: 8px 0;
+        overflow-x: auto;
+      }
+      ._adcw-bubble-markdown pre code {
+        background: none; padding: 0; font-size: 12px;
+      }
+      ._adcw-bubble-markdown ul {
+        padding-left: 20px; margin: 8px 0;
+      }
+      ._adcw-bubble-markdown li { margin: 4px 0; }
+      ._adcw-bubble-markdown h1, ._adcw-bubble-markdown h2, ._adcw-bubble-markdown h3 {
+        font-size: 14px; font-weight: 700; margin: 10px 0 6px;
+      }
+      ._adcw-bubble-markdown h1 { font-size: 16px; }
+      ._adcw-bubble-markdown h2 { font-size: 15px; }
 
       ._adcw-vehicle-card {
         background: #fff; border-radius: 12px; overflow: hidden;
@@ -481,7 +551,7 @@
     div.innerHTML =
       '<div class="_adcw-avatar">🤖</div>' +
       '<div>' +
-        '<div class="_adcw-bubble">' + esc(text).replace(/\n/g, '<br>') + '</div>' +
+        '<div class="_adcw-bubble _adcw-bubble-markdown">' + renderMarkdown(text) + '</div>' +
         '<div class="_adcw-time">' + timeStr + '</div>' +
       '</div>';
     this.$msgs.appendChild(div);

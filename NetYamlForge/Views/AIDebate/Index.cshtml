@@ -1,0 +1,162 @@
+@{
+    ViewBag.Title = "AI Discussion Forum";
+    var topics = ViewBag.Topics as List<NetYamlForge.Models.AI.Debate.DebateTopic> ?? new();
+    var tools = ViewBag.AvailableTools as Dictionary<string, NetYamlForge.Models.AI.CliToolInfo> ?? new();
+    bool showCreate = Context.Request.Query["create"] == "1";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="/css/ai-debate.css" />
+}
+
+<div class="debate-page">
+    <div class="debate-header">
+        <div class="debate-header-left">
+            <h1>🤝 AI Discussion Forum</h1>
+            <p class="subtitle">複数のAIがテーマについて議論し、合意を形成します</p>
+        </div>
+        <button class="btn-create-topic" onclick="toggleCreateForm()">
+            ✏️ 新しいトピック
+        </button>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">@TempData["Error"]</div>
+    }
+
+    <!-- トピック作成フォーム -->
+    <div id="createForm" class="create-form @(showCreate ? "show" : "")">
+        <h2>新しいディベートトピックを作成</h2>
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>テーマ / タイトル <span class="required">*</span></label>
+                    <input type="text" name="Title" placeholder="例: 再生可能エネルギーは原子力に取って代わるべきか？" required />
+                </div>
+                <div class="form-group full-width">
+                    <label>詳細説明</label>
+                    <textarea name="Description" rows="3" placeholder="テーマの背景や議論の焦点を記述してください"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>左AI（先攻）</label>
+                    <select name="LeftAi" id="leftAiSelect">
+                        @foreach (var tool in tools)
+                        {
+                            var mark = tool.Value.Installed ? "✓" : "✗";
+                            if (tool.Key == "claude")
+                            {
+                                <option value="@tool.Key" selected>
+                                    @tool.Key @mark
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@tool.Key">
+                                    @tool.Key @mark
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>右AI（後攻）</label>
+                    <select name="RightAi" id="rightAiSelect">
+                        @foreach (var tool in tools)
+                        {
+                            var mark = tool.Value.Installed ? "✓" : "✗";
+                            if (tool.Key == "qwen")
+                            {
+                                <option value="@tool.Key" selected>
+                                    @tool.Key @mark
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@tool.Key">
+                                    @tool.Key @mark
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>左AIの役割 / ペルソナ</label>
+                    <textarea name="LeftRole" rows="3" placeholder="例: あなたは環境保護論者として、再生可能エネルギーの普及を強く支持します。"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>右AIの役割 / ペルソナ</label>
+                    <textarea name="RightRole" rows="3" placeholder="例: あなたはエネルギー経済学者として、現実的なコストとリスクを重視します。"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">トピックを作成して議論を開始準備</button>
+                <button type="button" class="btn-secondary" onclick="toggleCreateForm()">キャンセル</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- トピック一覧 -->
+    <div class="topics-list">
+        <h2>ディベートトピック</h2>
+        @if (!topics.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🤖</div>
+                <p>まだトピックがありません。新しいトピックを作成して、AIの議論を始めましょう！</p>
+            </div>
+        }
+        else
+        {
+            <div class="topics-grid">
+                @foreach (var t in topics)
+                {
+                    <a href="/AIDebate/Topic/@t.Id" class="topic-card status-@t.Status">
+                        <div class="topic-card-header">
+                            <span class="topic-status-badge">@GetStatusLabel(t.Status)</span>
+                            <span class="topic-date">@t.CreatedAt[..10]</span>
+                        </div>
+                        <h3 class="topic-title">@t.Title</h3>
+                        @if (!string.IsNullOrWhiteSpace(t.Description))
+                        {
+                            <p class="topic-desc">@t.Description</p>
+                        }
+                        <div class="topic-ai-info">
+                            <span class="ai-badge left">🤖 @t.LeftAi</span>
+                            <span class="vs">VS</span>
+                            <span class="ai-badge right">🤖 @t.RightAi</span>
+                        </div>
+                        <div class="topic-progress">
+                            <span>左: @t.LeftCount/11</span>
+                            <span>右: @t.RightCount/11</span>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleCreateForm() {
+            const form = document.getElementById('createForm');
+            form.classList.toggle('show');
+            if (form.classList.contains('show')) {
+                form.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+}
+
+@functions {
+    string GetStatusLabel(string status) => status switch {
+        "pending" => "⏳ 待機中",
+        "running" => "🔄 議論中",
+        "completed" => "✅ 完了",
+        "cancelled" => "⛔ キャンセル",
+        "error" => "❌ エラー",
+        _ => status
+    };
+}

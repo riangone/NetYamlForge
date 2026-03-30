@@ -31,10 +31,11 @@ public interface ICLIService
     /// 执行命令（一次性）
     /// </summary>
     Task<string> ExecuteAsync(
-        string message, 
+        string message,
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default);
     
     /// <summary>

@@ -24,6 +24,12 @@ public class CLIServiceFactory
         }
         return service;
     }
+
+    public ICLIService? TryGetService(string toolName)
+    {
+        _services.TryGetValue(toolName, out var service);
+        return service;
+    }
     
     public async Task<Dictionary<string, CliToolInfo>> GetAvailableToolsAsync()
     {

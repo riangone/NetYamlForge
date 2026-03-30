@@ -10,25 +10,19 @@ namespace NetYamlForge.Hubs;
 public class AIChatHub : Hub
 {
     private readonly IConversationManager _conversationManager;
-    private readonly IIntentClassifier _intentClassifier;
-    private readonly IResponseGenerator _responseGenerator;
+    private readonly IDirectAIProcessor _aiProcessor;
     private readonly IHandoverManager _handoverManager;
-    private readonly ISentimentAnalyzer _sentimentAnalyzer;
     private readonly ILogger<AIChatHub> _logger;
 
     public AIChatHub(
         IConversationManager conversationManager,
-        IIntentClassifier intentClassifier,
-        IResponseGenerator responseGenerator,
+        IDirectAIProcessor aiProcessor,
         IHandoverManager handoverManager,
-        ISentimentAnalyzer sentimentAnalyzer,
         ILogger<AIChatHub> logger)
     {
         _conversationManager = conversationManager;
-        _intentClassifier = intentClassifier;
-        _responseGenerator = responseGenerator;
+        _aiProcessor = aiProcessor;
         _handoverManager = handoverManager;
-        _sentimentAnalyzer = sentimentAnalyzer;
         _logger = logger;
     }
 
@@ -75,23 +69,13 @@ public class AIChatHub : Hub
                 return;
             }
 
-            // 感情分析
-            var sentiment = await _sentimentAnalyzer.AnalyzeAsync(content);
-
-            // 意図分類
+            // 直接 AI 処理
             var context = new ConversationContext
             {
                 ConversationId = conversationId,
                 CurrentIntent = conversation.LastIntent
             };
-            var intentResult = await _intentClassifier.ClassifyAsync(content, context);
-            intentResult.SentimentScore = sentiment.Score;
-
-            // エスカレーション評価
-            var handoverEval = await _handoverManager.EvaluateHandoverNeedAsync(intentResult, context);
-
-            // 応答生成
-            var response = await _responseGenerator.GenerateResponseAsync(intentResult, context);
+            var aiResult = await _aiProcessor.ProcessAsync(content, context);
 
             // 入力中インジケーターを消去
             await Clients.Caller.SendAsync("typing_stop");
@@ -99,30 +83,32 @@ public class AIChatHub : Hub
             // AI 応答を送信
             await Clients.Caller.SendAsync("ai_response", new
             {
-                message = response.Message,
-                intent = intentResult.Intent,
-                confidence = intentResult.Confidence,
-                quickReplies = response.QuickReplies,
-                suggestHandover = handoverEval.NeedsHandover,
-                aiModel = response.AiModel,
+                message = aiResult.Message,
+                entities = aiResult.Entities,
+                sentiment = aiResult.SentimentScore,
+                quickReplies = aiResult.QuickReplies,
+                suggestHandover = aiResult.NeedsHandover,
+                handoverReason = aiResult.HandoverReason,
+                priority = aiResult.Priority,
+                aiModel = aiResult.AiModel,
                 timestamp = DateTime.UtcNow
             });
 
             // エスカレーションが必要
-            if (handoverEval.NeedsHandover && !conversation.Status.Equals("escalated", StringComparison.OrdinalIgnoreCase))
+            if (aiResult.NeedsHandover && !conversation.Status.Equals("escalated", StringComparison.OrdinalIgnoreCase))
             {
                 var handoverResult = await _handoverManager.CreateHandoverAsync(new HandoverRequest
                 {
                     ConversationId = conversationId,
-                    Reason = handoverEval.Reason ?? "ai_unable",
-                    Priority = handoverEval.Priority,
-                    TargetDepartment = handoverEval.TargetDepartment,
-                    HandoverNotes = $"インテント：{intentResult.Intent}, 置信度：{intentResult.Confidence:P0}, 感情：{sentiment.Label}"
+                    Reason = aiResult.HandoverReason ?? "ai_unable",
+                    Priority = aiResult.Priority,
+                    TargetDepartment = aiResult.TargetDepartment,
+                    HandoverNotes = $"感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2}), エンティティ：{string.Join(", ", aiResult.Entities.Select(e => $"{e.Key}={e.Value}"))}"
                 }, null);
 
                 if (handoverResult.Success)
                 {
-                    var handoverMessage = _responseGenerator.GenerateHandoverMessage(handoverEval.Reason ?? "ai_unable");
+                    var handoverMessage = _handoverManager.GetHandoverMessage(aiResult.HandoverReason ?? "ai_unable");
                     await Clients.Caller.SendAsync("ai_response", new
                     {
                         message = handoverMessage,

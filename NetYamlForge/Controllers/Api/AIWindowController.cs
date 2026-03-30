@@ -13,29 +13,23 @@ namespace NetYamlForge.Controllers.Api;
 public class AIWindowController : ControllerBase
 {
     private readonly IConversationManager _conversationManager;
-    private readonly IIntentClassifier _intentClassifier;
-    private readonly IResponseGenerator _responseGenerator;
+    private readonly IDirectAIProcessor _aiProcessor;
     private readonly IHandoverManager _handoverManager;
-    private readonly ISentimentAnalyzer _sentimentAnalyzer;
     private readonly ICustomerDataService _customerDataService;
     private readonly IAppointmentService _appointmentService;
     private readonly ILogger<AIWindowController> _logger;
 
     public AIWindowController(
         IConversationManager conversationManager,
-        IIntentClassifier intentClassifier,
-        IResponseGenerator responseGenerator,
+        IDirectAIProcessor aiProcessor,
         IHandoverManager handoverManager,
-        ISentimentAnalyzer sentimentAnalyzer,
         ICustomerDataService customerDataService,
         IAppointmentService appointmentService,
         ILogger<AIWindowController> logger)
     {
         _conversationManager = conversationManager;
-        _intentClassifier = intentClassifier;
-        _responseGenerator = responseGenerator;
+        _aiProcessor = aiProcessor;
         _handoverManager = handoverManager;
-        _sentimentAnalyzer = sentimentAnalyzer;
         _customerDataService = customerDataService;
         _appointmentService = appointmentService;
         _logger = logger;
@@ -51,7 +45,7 @@ public class AIWindowController : ControllerBase
         {
             var conversation = await _conversationManager.StartConversationAsync(request);
 
-            var welcomeMessage = _responseGenerator.GenerateWelcomeMessage(request.Channel);
+            var welcomeMessage = GenerateWelcomeMessage(request.Channel);
 
             return Ok(new StartConversationResponse
             {
@@ -108,55 +102,46 @@ public class AIWindowController : ControllerBase
             if (conversation == null)
                 return NotFound("対話セッションが見つかりません");
 
-            // 感情分析
-            var sentiment = await _sentimentAnalyzer.AnalyzeAsync(request.Content);
-
-            // 意図分類
+            // 直接 AI 処理
             var context = new ConversationContext
             {
                 ConversationId = id,
                 CurrentIntent = conversation.LastIntent
             };
-            var intentResult = await _intentClassifier.ClassifyAsync(request.Content, context);
-            intentResult.SentimentScore = sentiment.Score;
-
-            // エスカレーション評価
-            var handoverEval = await _handoverManager.EvaluateHandoverNeedAsync(intentResult, context);
-
-            // 応答生成
-            var response = await _responseGenerator.GenerateResponseAsync(intentResult, context);
+            var aiResult = await _aiProcessor.ProcessAsync(request.Content, context);
 
             // エスカレーションが必要か
-            if (handoverEval.NeedsHandover && !conversation.Status.Equals("escalated", StringComparison.OrdinalIgnoreCase))
+            if (aiResult.NeedsHandover && !conversation.Status.Equals("escalated", StringComparison.OrdinalIgnoreCase))
             {
                 var handoverResult = await _handoverManager.CreateHandoverAsync(new HandoverRequest
                 {
                     ConversationId = id,
-                    Reason = handoverEval.Reason ?? "ai_unable",
-                    Priority = handoverEval.Priority,
-                    TargetDepartment = handoverEval.TargetDepartment,
-                    HandoverNotes = $"インテント：{intentResult.Intent}, 置信度：{intentResult.Confidence:P0}, 感情：{sentiment.Label}"
+                    Reason = aiResult.HandoverReason ?? "ai_unable",
+                    Priority = aiResult.Priority,
+                    TargetDepartment = aiResult.TargetDepartment,
+                    HandoverNotes = $"感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2}), エンティティ：{string.Join(", ", aiResult.Entities.Select(e => $"{e.Key}={e.Value}"))}"
                 }, null);
 
                 if (handoverResult.Success)
                 {
-                    response.Message = _responseGenerator.GenerateHandoverMessage(handoverEval.Reason ?? "ai_unable");
-                    response.QuickReplies = new List<QuickReplyButton>();
+                    aiResult.Message = _handoverManager.GetHandoverMessage(aiResult.HandoverReason ?? "ai_unable");
+                    aiResult.QuickReplies = new List<QuickReplyButton>();
                 }
             }
 
             return Ok(new SendMessageResponse
             {
                 ConversationId = id,
-                ResponseText = response.Message,
-                Intent = intentResult.Intent,
-                Confidence = intentResult.Confidence,
-                Entities = intentResult.Entities,
-                QuickReplies = response.QuickReplies,
-                AiModel = response.AiModel,
+                ResponseText = aiResult.Message,
+                Intent = aiResult.Method,
+                Confidence = aiResult.NeedsHandover ? 0.0 : 1.0,
+                Entities = aiResult.Entities,
+                QuickReplies = aiResult.QuickReplies,
+                AiModel = aiResult.AiModel,
                 SentAt = DateTime.UtcNow,
-                ProcessingTimeMs = response.ProcessingTimeMs,
-                SuggestHandover = handoverEval.NeedsHandover
+                ProcessingTimeMs = 0,
+                SuggestHandover = aiResult.NeedsHandover,
+                SentimentScore = aiResult.SentimentScore
             });
         }
         catch (Exception ex)
@@ -428,5 +413,19 @@ public class AIWindowController : ControllerBase
     public ActionResult Health()
     {
         return Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+    }
+
+    /// <summary>
+    /// 歓迎メッセージを生成
+    /// </summary>
+    private static string GenerateWelcomeMessage(string channel)
+    {
+        return channel switch
+        {
+            "line" => "こんにちは！自動車ディーラー AI アシスタントです。どのようなご用件でしょうか？",
+            "web" => "ようこそ！自動車ディーラー AI アシスタントです。お気軽にお問い合わせください。",
+            "email" => "お問い合わせいただき、ありがとうございます。自動車ディーラー AI アシスタントが対応させていただきます。",
+            _ => "こんにちは！自動車ディーラー AI アシスタントです。どのようなご用件でしょうか？"
+        };
     }
 }

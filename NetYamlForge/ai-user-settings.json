@@ -1,0 +1,10 @@
+{
+  "AiWindow": {
+    "ProviderPriority": [
+      "qwen",
+      "claude",
+      "gemini",
+      "ollama"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+﻿task_id,title,status,priority,due_date,overdue_days,assigned_to,project_name,category_name
+39,  HookTest  ,pending,low,2020-01-01 00:00:00,2278,,（未設定）,（未設定）
+23,Staging models – orders,in_progress,medium,2026-03-10,18,Karl,Data Warehouse,Database
+4,Landing page animation,in_progress,medium,2026-03-15,13,Alice,Web Redesign,Frontend
+11,Migrate /auth endpoints,in_progress,urgent,2026-03-20,8,Eve,API v2 Migration,Security
+5,SEO metadata & OG tags,pending,low,2026-03-20,8,Carol,Web Redesign,Frontend
+26,JWT issuance service,in_progress,urgent,2026-03-25,3,Leo,Auth Overhaul,Backend
+7,Accessibility audit (WCAG 2.1),review,high,2026-03-25,3,Carol,Web Redesign,Testing
+12,Migrate /users endpoints,in_progress,high,2026-03-25,3,Frank,API v2 Migration,Backend

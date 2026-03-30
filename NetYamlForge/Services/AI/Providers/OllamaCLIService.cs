@@ -100,7 +100,8 @@ public class OllamaCLIService : BaseCLIService
         string message,
         bool streaming,
         string? sessionId,
-        List<string>? allowedTools)
+        List<string>? allowedTools,
+        string? systemPromptOverride = null)
     {
         // CLI 模式（当 UseApi = false 时）
         var args = new List<string>();
@@ -127,6 +128,7 @@ public class OllamaCLIService : BaseCLIService
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default)
     {
         if (Config.Ollama.UseApi)
@@ -135,7 +137,7 @@ public class OllamaCLIService : BaseCLIService
         }
         else
         {
-            return await base.ExecuteAsync(message, workingDirectory, sessionId, allowedTools, ct);
+            return await base.ExecuteAsync(message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct);
         }
     }
 
