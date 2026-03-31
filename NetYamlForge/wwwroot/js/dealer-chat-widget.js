@@ -1,8 +1,8 @@
 /**
  * dealer-chat-widget.js
- * 自動車ディーラー 統一AIチャットウィジェット
- *
- * 顧客モードと社員モードで同じUI構造・異なるテーマを提供します。
+ * 自動車ディーラー 統一 AI チャットウィジェット
+ * コアフレームワークの AI Assistant と同一 UI・機能を実装
+ * トリガーボタンは右下に表示
  *
  * 使用方法:
  *   <script src="/js/dealer-chat-widget.js"></script>
@@ -15,935 +15,1694 @@
 (function (global) {
   'use strict';
 
-  // ── テーマ定義 ────────────────────────────────────────────────
-  const THEMES = {
-    customer: {
-      primaryColor:   '#1a73e8',
-      accentColor:    '#0d47a1',
-      headerBg:       'linear-gradient(135deg, #1a73e8, #0d47a1)',
-      fabIcon:        '💬',
-      headerIcon:     '🚗',
-      avatarIcon:     '🤖',
-      title:          '🚗 AI 窓口',
-      subtitle:       '24時間対応 · 平均応答 < 10秒',
-      placeholder:    'ご用件をお聞かせください...',
-      welcomeDefault: 'こんにちは！AIカスタマーサポートです。\n試乗・ご購入・サービスのご相談は何でもどうぞ！',
-      quickReplies:   ['試乗の予約をしたい', '在庫車両を見たい', '車検・点検について', 'ローンについて聞きたい'],
-      apiPath:        'session',         // POST /{project}/api/chat/session
-      msgPath:        'session',         // POST /{project}/api/chat/session/{id}/message
-    },
-    staff: {
-      primaryColor:   '#2e7d32',
-      accentColor:    '#1b5e20',
-      headerBg:       'linear-gradient(135deg, #2e7d32, #1b5e20)',
-      fabIcon:        '💼',
-      headerIcon:     '🤝',
-      avatarIcon:     '🤖',
-      title:          '🤝 AI 業務アシスタント',
-      subtitle:       '業務支援 · リアルタイム対応',
-      placeholder:    '業務に関する質問をどうぞ...',
-      welcomeDefault: 'こんにちは！AI業務アシスタントです。\nリード管理・予約確認・在庫照会など何でもご相談ください。',
-      quickReplies:   ['今日の予約を確認', 'ホットリードを確認', '顧客情報を検索', '在庫状況を確認'],
-      apiPath:        'staff/session',   // POST /{project}/api/chat/staff/session
-      msgPath:        'staff',           // POST /{project}/api/chat/staff/{id}/message
-    },
+  // ── 状態管理 ────────────────────────────────────────────────
+  let connection = null;
+  let currentTaskId = null;
+  let currentSessionId = null;
+  let dealerConversationId = null; // auto-dealer セッション ID
+  let isPanelOpen = false;
+  let isPanelMinimized = false;
+  let isMaximized = false;
+  let autoScroll = true;
+  let chatHistory = [];
+  let inputHistory = [];
+  let inputHistoryIndex = -1;
+  let inputCurrentDraft = '';
+  let previousWidth = '';
+  let previousRight = '';
+
+  const STORAGE_KEY_PREFIX = 'dealer_chat_history_';
+  const TOOL_STORAGE_KEY = 'dealer_chat_tool';
+
+  // ── 設定 ────────────────────────────────────────────────────
+  const CONFIG = {
+    apiBaseUrl: '',
+    signalRUrl: '/aiProgressHub',
+    defaultCliTool: 'qwen'
   };
 
-  // ── ユーティリティ ─────────────────────────────────────────────
-  function esc(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+  // ── テーマ定義 ──────────────────────────────────────────────
+  const THEMES = {
+    customer: {
+      primaryColor: '#1a73e8',
+      accentColor: '#0d47a1',
+      headerBg: 'linear-gradient(135deg, #1a73e8, #0d47a1)',
+      headerIcon: '🚗',
+      title: '🚗 AI 窓口',
+      subtitle: '24 時間対応 · 平均応答 < 10 秒',
+      placeholder: 'ご用件をお聞かせください...',
+      welcomeMessage: 'こんにちは！AI カスタマーサポートです。\n試乗・ご購入・サービスのご相談は何でもどうぞ！',
+      apiPath: 'session',
+      msgPath: 'session'
+    },
+    staff: {
+      primaryColor: '#2e7d32',
+      accentColor: '#1b5e20',
+      headerBg: 'linear-gradient(135deg, #2e7d32, #1b5e20)',
+      headerIcon: '🤝',
+      title: '🤝 AI 業務アシスタント',
+      subtitle: '業務支援 · リアルタイム対応',
+      placeholder: '業務に関する質問をどうぞ...',
+      welcomeMessage: 'こんにちは！AI 業務アシスタントです。\nリード管理・予約確認・在庫照会など何でもご相談ください。',
+      apiPath: 'staff/session',
+      msgPath: 'staff'
+    }
+  };
 
-  // ── Markdown レンダラー（軽量実装） ───────────────────────────────
-  function renderMarkdown(text) {
-    var lines = String(text).split('\n');
-    var html = '';
-    var inUl = false, inOl = false;
+  let currentTheme = null;
+  let currentMode = 'customer';
+  let currentProject = 'auto-dealer-demo';
 
-    function closeList() {
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (inOl) { html += '</ol>'; inOl = false; }
+  // ── 初期化 ──────────────────────────────────────────────────
+  function init(opts) {
+    opts = opts || {};
+    currentMode = opts.mode || 'customer';
+    currentProject = opts.project || 'auto-dealer-demo';
+    currentTheme = THEMES[currentMode] || THEMES.customer;
+
+    CONFIG.apiBaseUrl = (opts.apiBase || '') + '/' + currentProject + '/api/ai';
+    CONFIG.chatApiBase = CONFIG.apiBaseUrl + '/chat'; // auto-dealer チャット API ベース
+
+    if (!isUserLoggedIn()) {
+      console.log('DealerChat: User not logged in, skipping initialization');
+      return;
     }
 
-    function inlineEsc(str) {
-      // エスケープ後にインライン要素を変換
-      return str
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-        .replace(/_([^_]+)_/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-    }
-
-    lines.forEach(function (line) {
-      // 見出し
-      var hMatch = line.match(/^(#{1,3})\s+(.+)$/);
-      if (hMatch) {
-        closeList();
-        var level = hMatch[1].length;
-        html += '<h' + level + ' class="_dcw-md-h">' + inlineEsc(hMatch[2]) + '</h' + level + '>';
-        return;
-      }
-      // 水平線
-      if (/^---+$/.test(line.trim())) { closeList(); html += '<hr class="_dcw-md-hr">'; return; }
-      // 番号付きリスト
-      var olMatch = line.match(/^\d+\.\s+(.+)$/);
-      if (olMatch) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        if (!inOl) { html += '<ol class="_dcw-md-ol">'; inOl = true; }
-        html += '<li>' + inlineEsc(olMatch[1]) + '</li>';
-        return;
-      }
-      // 箇条書き
-      var ulMatch = line.match(/^[-*]\s+(.+)$/);
-      if (ulMatch) {
-        if (inOl) { html += '</ol>'; inOl = false; }
-        if (!inUl) { html += '<ul class="_dcw-md-ul">'; inUl = true; }
-        html += '<li>' + inlineEsc(ulMatch[1]) + '</li>';
-        return;
-      }
-      // 空行 → リスト終端
-      if (line.trim() === '') { closeList(); html += '<br>'; return; }
-      // 通常行
-      closeList();
-      html += '<span class="_dcw-md-p">' + inlineEsc(line) + '</span><br>';
-    });
-
-    closeList();
-    return html;
+    injectStyles();
+    initPanel();
+    initSignalR();
+    // auto-dealer モードでは CLI ツール不要（フレームワーク AI 専用機能）
+    configureMarked();
   }
 
-  // ── CSS インジェクション ────────────────────────────────────────
-  function injectStyles(theme) {
+  function isUserLoggedIn() {
+    const body = document.body;
+    const authValue = body.getAttribute('data-user-authenticated');
+    return authValue === 'true';
+  }
+
+  // ── スタイル注入 ────────────────────────────────────────────
+  function injectStyles() {
     if (document.getElementById('_dcw-styles')) return;
-    const p = theme.primaryColor;
-    const a = theme.accentColor;
+
     const style = document.createElement('style');
     style.id = '_dcw-styles';
-    style.textContent = `
-      #_dcw-fab {
-        position: fixed; bottom: 24px; right: 24px; z-index: 9998;
-        width: 60px; height: 60px; border-radius: 50%;
-        background: var(--dcw-primary, ${p}); color: #fff;
-        border: none; cursor: pointer; font-size: 26px;
-        box-shadow: 0 4px 16px rgba(0,0,0,.28);
-        display: flex; align-items: center; justify-content: center;
-        transition: transform .2s, box-shadow .2s;
-      }
-      #_dcw-fab:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,.35); }
-      #_dcw-badge {
-        position: absolute; top: -4px; right: -4px;
-        background: #e53935; color: #fff;
-        border-radius: 50%; width: 20px; height: 20px;
-        font-size: 11px; font-weight: 700;
-        display: none; align-items: center; justify-content: center;
-      }
-
-      #_dcw-window {
-        position: fixed; bottom: 96px; right: 24px; z-index: 9999;
-        width: 370px; max-width: calc(100vw - 48px);
-        height: 560px; max-height: calc(100vh - 120px);
-        background: #fff; border-radius: 16px;
-        box-shadow: 0 8px 40px rgba(0,0,0,.22);
-        display: flex; flex-direction: column;
-        overflow: hidden; font-family: 'Segoe UI', sans-serif;
-        font-size: 14px;
-        transform: scale(0); transform-origin: bottom right;
-        transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
-        opacity: 0; pointer-events: none;
-      }
-      #_dcw-window._dcw-open {
-        transform: scale(1); opacity: 1; pointer-events: all;
-      }
-
-      #_dcw-window._dcw-fullscreen {
-        bottom: 0 !important; right: 0 !important;
-        width: 100vw !important; height: 100dvh !important;
-        max-width: 100vw !important; max-height: 100dvh !important;
-        border-radius: 0 !important;
-        transform: scale(1) !important;
-      }
-
-      ._dcw-maximize-btn {
-        background: none; border: none; color: rgba(255,255,255,.75);
-        font-size: 15px; cursor: pointer; padding: 4px 6px; line-height: 1;
-        border-radius: 4px; transition: background .15s, color .15s;
-        flex-shrink: 0;
-      }
-      ._dcw-maximize-btn:hover { background: rgba(255,255,255,.2); color: #fff; }
-
-      ._dcw-header {
-        background: var(--dcw-header-bg, ${theme.headerBg});
-        color: #fff; padding: 14px 16px;
-        display: flex; align-items: center; gap: 12px;
-        flex-shrink: 0;
-      }
-      ._dcw-header-icon { font-size: 28px; }
-      ._dcw-header-text { flex: 1; }
-      ._dcw-header-title { font-weight: 700; font-size: 15px; }
-      ._dcw-header-sub { font-size: 11px; opacity: .85; margin-top: 2px; }
-      ._dcw-close-btn {
-        background: none; border: none; color: rgba(255,255,255,.8);
-        font-size: 20px; cursor: pointer; padding: 4px; line-height: 1;
-      }
-      ._dcw-close-btn:hover { color: #fff; }
-
-      ._dcw-messages {
-        flex: 1; overflow-y: auto; padding: 16px 12px;
-        display: flex; flex-direction: column; gap: 10px;
-        background: #f8f9fa;
-      }
-      ._dcw-msg { display: flex; gap: 8px; }
-      ._dcw-msg-ai   { justify-content: flex-start; }
-      ._dcw-msg-user { justify-content: flex-end; }
-
-      ._dcw-avatar {
-        width: 32px; height: 32px; border-radius: 50%;
-        background: var(--dcw-primary, ${p}); color: #fff;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 16px; flex-shrink: 0; align-self: flex-end;
-      }
-      ._dcw-bubble {
-        max-width: 78%; padding: 10px 13px;
-        border-radius: 18px; line-height: 1.5; word-break: break-word;
-      }
-      ._dcw-msg-ai  ._dcw-bubble {
-        background: #fff; border-bottom-left-radius: 4px;
-        color: #212121; box-shadow: 0 1px 4px rgba(0,0,0,.08);
-      }
-      ._dcw-msg-user ._dcw-bubble {
-        background: var(--dcw-primary, ${p}); color: #fff; border-bottom-right-radius: 4px;
-      }
-      ._dcw-time { font-size: 10px; opacity: .55; margin-top: 4px; }
-
-      ._dcw-quick-replies {
-        padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px; background: #f8f9fa;
-      }
-      ._dcw-qr-btn {
-        background: #fff; border: 1.5px solid var(--dcw-primary, ${p});
-        color: var(--dcw-primary, ${p});
-        border-radius: 99px; padding: 5px 12px; font-size: 12px;
-        cursor: pointer; transition: all .15s; white-space: nowrap;
-      }
-      ._dcw-qr-btn:hover { background: var(--dcw-primary, ${p}); color: #fff; }
-
-      ._dcw-input-row {
-        padding: 10px 12px; background: #fff;
-        border-top: 1px solid #eeeeee;
-        display: flex; gap: 8px; align-items: center; flex-shrink: 0;
-      }
-      ._dcw-input {
-        flex: 1; border: 1.5px solid #e0e0e0; border-radius: 22px;
-        padding: 9px 14px; font-size: 13px; outline: none; resize: none;
-        max-height: 80px; overflow-y: auto; transition: border .2s;
-        font-family: inherit;
-      }
-      ._dcw-input:focus { border-color: var(--dcw-primary, ${p}); }
-      ._dcw-send-btn {
-        width: 38px; height: 38px; border-radius: 50%;
-        background: var(--dcw-primary, ${p});
-        color: #fff; border: none; cursor: pointer; font-size: 16px;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0; transition: background .15s;
-      }
-      ._dcw-send-btn:hover { background: var(--dcw-accent, ${a}); }
-      ._dcw-send-btn:disabled { background: #bdbdbd; cursor: not-allowed; }
-
-      ._dcw-typing {
-        display: flex; gap: 4px; padding: 8px 12px;
-        align-items: center;
-      }
-      ._dcw-dot {
-        width: 7px; height: 7px; border-radius: 50%; background: #9e9e9e;
-        animation: _dcw-bounce .9s infinite;
-      }
-      ._dcw-dot:nth-child(2) { animation-delay: .15s; }
-      ._dcw-dot:nth-child(3) { animation-delay: .3s; }
-      @keyframes _dcw-bounce {
-        0%, 80%, 100% { transform: translateY(0); }
-        40%           { transform: translateY(-6px); }
-      }
-
-      ._dcw-rating {
-        display: flex; gap: 6px; margin-top: 8px;
-        justify-content: center;
-      }
-      ._dcw-star {
-        font-size: 22px; cursor: pointer; transition: transform .1s;
-        filter: grayscale(1); opacity: .5;
-      }
-      ._dcw-star:hover, ._dcw-star._dcw-active {
-        filter: none; opacity: 1; transform: scale(1.2);
-      }
-
-      ._dcw-msg-actions {
-        display: none; gap: 4px; margin-top: 3px;
-      }
-      ._dcw-msg:hover ._dcw-msg-actions { display: flex; }
-      ._dcw-msg-user ._dcw-msg-actions { justify-content: flex-end; }
-      ._dcw-action-btn {
-        background: none; border: 1px solid #ddd; border-radius: 6px;
-        padding: 2px 6px; font-size: 11px; cursor: pointer; color: #757575;
-        transition: background .15s, color .15s;
-      }
-      ._dcw-action-btn:hover { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
-      ._dcw-copy-toast {
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-        background: rgba(0,0,0,.75); color: #fff; padding: 6px 14px;
-        border-radius: 20px; font-size: 12px; z-index: 10000;
-        animation: _dcw-fade-in-out 1.6s forwards;
-        pointer-events: none;
-      }
-      @keyframes _dcw-fade-in-out {
-        0%   { opacity: 0; }
-        15%  { opacity: 1; }
-        70%  { opacity: 1; }
-        100% { opacity: 0; }
-      }
-
-      /* ── DB データテーブル ───────────────────────────────── */
-      ._dcw-data-table-wrap {
-        margin-top: 8px; overflow-x: auto; border-radius: 8px;
-        border: 1px solid #e0e0e0; font-size: 12px;
-      }
-      ._dcw-data-table {
-        width: 100%; border-collapse: collapse; white-space: nowrap;
-        background: #fafafa;
-      }
-      ._dcw-data-table th {
-        background: var(--dcw-primary, ${p}); color: #fff;
-        padding: 5px 8px; font-weight: 600; text-align: left;
-      }
-      ._dcw-data-table td {
-        padding: 4px 8px; border-top: 1px solid #e8e8e8; color: #333;
-      }
-      ._dcw-data-table tr:hover td { background: #f0f4ff; }
-
-      /* ── ナビゲーションボタン ────────────────────────────── */
-      ._dcw-nav-btn-wrap { margin-top: 8px; }
-      ._dcw-nav-btn {
-        display: inline-block;
-        background: var(--dcw-primary, ${p}); color: #fff;
-        border-radius: 6px; padding: 5px 12px; font-size: 12px;
-        text-decoration: none; font-weight: 600;
-        transition: background .15s;
-      }
-      ._dcw-nav-btn:hover { background: var(--dcw-accent, ${a}); color: #fff; }
-
-      /* ── Markdown スタイル ─────────────────────────────── */
-      ._dcw-bubble h1._dcw-md-h, ._dcw-bubble h2._dcw-md-h, ._dcw-bubble h3._dcw-md-h {
-        margin: 6px 0 3px; font-weight: 700; line-height: 1.3;
-      }
-      ._dcw-bubble h1._dcw-md-h { font-size: 15px; }
-      ._dcw-bubble h2._dcw-md-h { font-size: 14px; }
-      ._dcw-bubble h3._dcw-md-h { font-size: 13px; }
-      ._dcw-bubble ul._dcw-md-ul, ._dcw-bubble ol._dcw-md-ol {
-        margin: 4px 0; padding-left: 18px;
-      }
-      ._dcw-bubble li { margin: 2px 0; }
-      ._dcw-bubble hr._dcw-md-hr { border: none; border-top: 1px solid #e0e0e0; margin: 6px 0; }
-      ._dcw-bubble code { background: #f0f0f0; border-radius: 3px; padding: 1px 4px; font-size: 12px; font-family: monospace; }
-      ._dcw-msg-user ._dcw-bubble code { background: rgba(255,255,255,0.2); }
-      ._dcw-bubble strong { font-weight: 700; }
-      ._dcw-bubble em { font-style: italic; }
-      ._dcw-bubble a { color: var(--dcw-primary, ${p}); text-decoration: underline; }
-      ._dcw-msg-user ._dcw-bubble a { color: rgba(255,255,255,0.9); }
-
-      @media (max-width: 400px) {
-        #_dcw-window { width: calc(100vw - 16px); right: 8px; bottom: 80px; }
-      }
-    `;
+    style.textContent = getStylesCSS();
     document.head.appendChild(style);
   }
 
-  // ── HTML テンプレート ──────────────────────────────────────────
-  function buildHTML(theme) {
+  function getStylesCSS() {
+    const p = currentTheme.primaryColor;
+    const a = currentTheme.accentColor;
+
     return `
-      <button id="_dcw-fab" title="チャットを開く" aria-label="チャットを開く">
-        ${theme.fabIcon}<span id="_dcw-badge"></span>
+      /* トリガーボタン（右下） */
+      #dealer-chat-trigger {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: ${p};
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-size: 26px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.28);
+        transition: transform 0.2s, box-shadow 0.2s;
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #dealer-chat-trigger:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      }
+
+      /* パネル */
+      #dealer-chat-panel {
+        position: fixed;
+        bottom: 0;
+        right: -600px;
+        width: 600px;
+        max-width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        background: #fff !important;
+        box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+        transition: right 0.3s ease-in-out;
+        z-index: 2147483647 !important;
+        display: flex;
+        flex-direction: column;
+        isolation: isolate;
+      }
+      #dealer-chat-panel.open {
+        right: 0;
+      }
+
+      /* 最大化 */
+      #dealer-chat-panel.maximized {
+        width: 100vw !important;
+        right: 0 !important;
+      }
+
+      /* 最小化（折りたたみ） */
+      #dealer-chat-panel.minimized {
+        height: auto !important;
+        bottom: 0 !important;
+        right: 20px !important;
+        width: 320px !important;
+        border-radius: 0.75rem 0.75rem 0 0 !important;
+        box-shadow: -2px -4px 16px rgba(0, 0, 0, 0.18) !important;
+        transition: none !important;
+      }
+      #dealer-chat-panel.minimized .dc-panel-body,
+      #dealer-chat-panel.minimized .dc-panel-footer,
+      #dealer-chat-panel.minimized #dc-auto-scroll-btn {
+        display: none !important;
+      }
+      #dealer-chat-panel.minimized .dc-panel-header {
+        border-radius: 0.75rem 0.75rem 0 0;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      /* ヘッダー */
+      .dc-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+        background: ${currentTheme.headerBg};
+        color: #fff;
+        flex-shrink: 0;
+        position: relative;
+      }
+      .dc-panel-header h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .dc-panel-header .dc-header-sub {
+        font-size: 0.75rem;
+        opacity: 0.85;
+        margin-top: 0.25rem;
+      }
+      .dc-panel-header > div.flex {
+        position: relative;
+        z-index: 10;
+      }
+      .dc-panel-header button {
+        pointer-events: auto !important;
+        cursor: pointer !important;
+        position: relative;
+        z-index: 11 !important;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background 0.15s;
+      }
+      .dc-panel-header button:hover {
+        background: rgba(255,255,255,0.2);
+      }
+
+      /* メッセージ領域 */
+      .dc-panel-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        background: #f8f9fa !important;
+        position: relative;
+      }
+
+      .dc-message-row {
+        display: flex;
+        flex-direction: column;
+        max-width: 100%;
+        gap: 0.15rem;
+      }
+      .dc-message-row.user {
+        align-items: flex-end;
+      }
+      .dc-message-row.assistant {
+        align-items: flex-start;
+      }
+
+      .dc-message-sender {
+        font-size: 0.7rem;
+        font-weight: 600;
+        opacity: 0.55;
+        padding: 0 0.5rem;
+        letter-spacing: 0.03em;
+      }
+
+      .dc-message-inner {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        max-width: 88%;
+      }
+      .dc-message-row.user .dc-message-inner {
+        flex-direction: row-reverse;
+      }
+      .dc-message-row.assistant .dc-message-inner {
+        flex-direction: row;
+      }
+
+      .dc-message-avatar {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .dc-message-row.user .dc-message-avatar {
+        background: ${p};
+        color: #fff;
+        box-shadow: 0 2px 6px ${p}40;
+      }
+      .dc-message-row.assistant .dc-message-avatar {
+        background-color: #e0e0e0;
+        color: #333;
+        border: 1px solid #d0d0d0;
+      }
+
+      .dc-message {
+        max-width: 100%;
+        padding: 0.6rem 0.9rem;
+        border-radius: 1.1rem;
+        word-wrap: break-word;
+        font-size: 0.9rem;
+        line-height: 1.55;
+      }
+      .dc-message.user {
+        background: ${p} !important;
+        color: #fff;
+        border-bottom-right-radius: 0.3rem;
+        box-shadow: 0 2px 8px ${p}40;
+      }
+      .dc-message.assistant {
+        background-color: #fff !important;
+        color: #212121;
+        border-bottom-left-radius: 0.3rem;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      }
+      .dc-message.system {
+        align-self: center;
+        background-color: #e3f2fd;
+        color: #1565c0;
+        font-size: 0.78rem;
+        text-align: center;
+        border-radius: 1rem;
+        padding: 0.3rem 0.8rem;
+        max-width: 90%;
+        border: 1px solid #bbdefb;
+      }
+
+      /* 進行状況 */
+      .dc-progress-container {
+        background-color: #f5f5f5;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+      }
+      .dc-progress-bar {
+        height: 0.5rem;
+        background-color: #e0e0e0;
+        border-radius: 0.25rem;
+        overflow: hidden;
+        margin: 0.5rem 0;
+      }
+      .dc-progress-fill {
+        height: 100%;
+        background-color: ${p};
+        transition: width 0.3s ease;
+      }
+      .dc-progress-text {
+        font-size: 0.75rem;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* フッター */
+      .dc-panel-footer {
+        padding: 1rem;
+        border-top: 1px solid #e0e0e0;
+        background: #f5f5f5 !important;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .dc-input-container {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .dc-input-container textarea {
+        flex: 1;
+        resize: none;
+        min-height: 60px;
+        max-height: 120px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13px;
+        outline: none;
+        transition: border 0.2s;
+        font-family: inherit;
+      }
+      .dc-input-container textarea:focus {
+        border-color: ${p};
+      }
+
+      .dc-input-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+      }
+
+      /* CLI 選択器 */
+      .dc-cli-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .dc-cli-selector select {
+        max-width: 150px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+
+      /* ステータスインジケーター */
+      .dc-status-indicator {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+      }
+      .dc-status-indicator.idle {
+        background-color: #9e9e9e;
+      }
+      .dc-status-indicator.running {
+        background-color: ${p};
+        animation: dc-pulse 1s infinite;
+      }
+      .dc-status-indicator.completed {
+        background-color: #4caf50;
+      }
+      .dc-status-indicator.error {
+        background-color: #f44336;
+      }
+
+      @keyframes dc-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      /* 自動スクロールボタン */
+      #dc-auto-scroll-btn {
+        position: absolute;
+        bottom: 80px;
+        right: 20px;
+        z-index: 10;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      #dc-auto-scroll-btn:hover {
+        background: #f5f5f5;
+      }
+
+      /* アクションボタン */
+      .dc-message-actions {
+        display: none;
+        gap: 4px;
+        margin-top: 3px;
+        padding: 0 0.4rem;
+      }
+      .dc-message-row:hover .dc-message-actions {
+        display: flex;
+      }
+      .dc-message-row.user .dc-message-actions {
+        justify-content: flex-end;
+      }
+      .dc-message-row.assistant .dc-message-actions {
+        justify-content: flex-start;
+      }
+
+      .dc-msg-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 0.3rem;
+        border: 1px solid #e0e0e0;
+        background: #fafafa;
+        color: #757575;
+        cursor: pointer;
+        transition: background 0.12s, color 0.12s, border-color 0.12s;
+        padding: 0;
+      }
+      .dc-msg-action-btn:hover {
+        background: #e3f2fd;
+        color: #1565c0;
+        border-color: #90caf9;
+      }
+
+      .dc-message-time {
+        font-size: 0.65rem;
+        opacity: 0.5;
+        margin-top: 0.25rem;
+        padding: 0 0.25rem;
+        white-space: nowrap;
+      }
+
+      /* 履歴ポップアップ */
+      .dc-history-popup {
+        position: absolute;
+        bottom: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12);
+        z-index: 100;
+        max-height: 260px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .dc-history-popup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.4rem 0.75rem;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #666;
+        flex-shrink: 0;
+      }
+      .dc-history-popup-list {
+        list-style: none;
+        margin: 0;
+        padding: 0.25rem 0;
+        overflow-y: auto;
+        flex: 1;
+      }
+      .dc-history-item {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #333;
+        transition: background 0.1s;
+      }
+      .dc-history-item:hover {
+        background: #f5f5f5;
+        color: ${p};
+      }
+      .dc-history-empty {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.8rem;
+        color: #999;
+        text-align: center;
+      }
+
+      /* Markdown スタイル */
+      .dc-message-content p {
+        margin: 0.4rem 0;
+      }
+      .dc-message-content h1,
+      .dc-message-content h2,
+      .dc-message-content h3,
+      .dc-message-content h4 {
+        font-weight: 700;
+        margin: 0.9rem 0 0.4rem;
+        line-height: 1.3;
+      }
+      .dc-message-content h1 { font-size: 1.25rem; }
+      .dc-message-content h2 { font-size: 1.1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.2rem; }
+      .dc-message-content h3 { font-size: 1rem; }
+      .dc-message-content h4 { font-size: 0.9rem; }
+      .dc-message-content ul,
+      .dc-message-content ol {
+        margin: 0.4rem 0;
+        padding-left: 1.4rem;
+      }
+      .dc-message-content li { margin: 0.2rem 0; }
+      .dc-message-content :not(pre) > code {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.85em;
+        background-color: rgba(0, 0, 0, 0.08);
+        color: #c0392b;
+        padding: 0.15em 0.4em;
+        border-radius: 0.3rem;
+        white-space: nowrap;
+      }
+      .dc-message-content pre {
+        position: relative;
+        background-color: #1e1e2e;
+        color: #cdd6f4;
+        padding: 1rem 1rem 0.75rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin: 0.6rem 0;
+        font-size: 0.82rem;
+        line-height: 1.6;
+      }
+      .dc-message-content pre > code {
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        background: none;
+        color: inherit;
+        padding: 0;
+        white-space: pre;
+        font-size: inherit;
+      }
+      .dc-code-copy-btn {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.4rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        background: rgba(255,255,255,0.15);
+        color: #cdd6f4;
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: background 0.15s;
+        line-height: 1.4;
+      }
+      .dc-code-copy-btn:hover {
+        background: rgba(255,255,255,0.25);
+      }
+      .dc-message-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.6rem 0;
+        font-size: 0.875rem;
+      }
+      .dc-message-content th,
+      .dc-message-content td {
+        border: 1px solid #e0e0e0;
+        padding: 0.35rem 0.7rem;
+        text-align: left;
+      }
+      .dc-message-content th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+      }
+      .dc-message-content tr:nth-child(even) td {
+        background-color: #fafafa;
+      }
+      .dc-message-content blockquote {
+        border-left: 3px solid ${p};
+        margin: 0.5rem 0;
+        padding: 0.25rem 0.75rem;
+        background-color: #f5f5f5;
+        border-radius: 0 0.3rem 0.3rem 0;
+        color: #666;
+        font-style: italic;
+      }
+      .dc-message-content hr {
+        border: none;
+        border-top: 1px solid #e0e0e0;
+        margin: 0.75rem 0;
+      }
+      .dc-message-content a {
+        color: ${p};
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      .dc-message-content a:hover {
+        color: ${a};
+      }
+      .dc-message-content strong { font-weight: 700; }
+      .dc-message-content em { font-style: italic; }
+
+      @media (max-width: 768px) {
+        #dealer-chat-panel {
+          width: 100vw;
+          right: -100vw;
+        }
+        #dealer-chat-trigger {
+          bottom: 16px;
+          right: 16px;
+          width: 50px;
+          height: 50px;
+          font-size: 22px;
+        }
+      }
+    `;
+  }
+
+  // ── パネル構築 ──────────────────────────────────────────────
+  function initPanel() {
+    const trigger = document.createElement('button');
+    trigger.id = 'dealer-chat-trigger';
+    trigger.innerHTML = currentTheme.headerIcon;
+    trigger.onclick = togglePanel;
+    document.body.appendChild(trigger);
+
+    const panel = document.createElement('div');
+    panel.id = 'dealer-chat-panel';
+    panel.className = '';
+    panel.innerHTML = buildPanelHTML();
+    document.body.appendChild(panel);
+
+    startDealerSession().then(function() {
+      if (!restoreFromStorage()) {
+        restoreFromServer();
+      }
+    });
+
+    bindPanelEvents();
+  }
+
+  // ── auto-dealer セッション開始 ──────────────────────────────
+  async function startDealerSession() {
+    // セッションキーで sessionStorage から復元
+    const storedConvId = sessionStorage.getItem('dealer_conv_' + currentMode);
+    if (storedConvId) {
+      dealerConversationId = storedConvId;
+      return;
+    }
+
+    try {
+      const resp = await fetch(CONFIG.chatApiBase + '/' + currentTheme.apiPath, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: currentMode })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        dealerConversationId = data.conversationId;
+        sessionStorage.setItem('dealer_conv_' + currentMode, dealerConversationId);
+      } else {
+        console.error('DealerChat: セッション開始失敗', resp.status);
+      }
+    } catch (e) {
+      console.error('DealerChat: セッション開始エラー', e);
+    }
+  }
+
+  function buildPanelHTML() {
+    return `
+      <div class="dc-panel-header">
+        <div>
+          <h3>
+            <span>${currentTheme.headerIcon}</span>
+            <span>${currentTheme.title}</span>
+          </h3>
+          <div class="dc-header-sub">${currentTheme.subtitle}</div>
+        </div>
+        <div class="flex gap-1">
+          <button id="dc-maximize-btn" class="btn btn-ghost btn-sm btn-circle" title="最大化">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </button>
+          <button id="dc-collapse-btn" class="btn btn-ghost btn-sm btn-circle" title="最小化">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+            </svg>
+          </button>
+          <button id="dc-close-btn" class="btn btn-ghost btn-sm btn-circle" title="閉じる">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="dc-panel-body" id="dc-messages-container">
+        <div class="dc-message-row assistant">
+          <div class="dc-message-sender">AI Assistant</div>
+          <div class="dc-message-inner">
+            <div class="dc-message-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/>
+              </svg>
+            </div>
+            <div class="dc-message assistant">
+              <div class="dc-message-content">
+                ${escapeHtml(currentTheme.welcomeMessage)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="dc-auto-scroll-btn" class="btn btn-sm btn-circle opacity-75" title="Auto scroll">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
       </button>
 
-      <div id="_dcw-window" role="dialog" aria-label="AIチャット">
-        <div class="_dcw-header">
-          <div class="_dcw-header-icon">${theme.headerIcon}</div>
-          <div class="_dcw-header-text">
-            <div class="_dcw-header-title">${esc(theme.title)}</div>
-            <div class="_dcw-header-sub">${esc(theme.subtitle)}</div>
-          </div>
-          <button class="_dcw-maximize-btn" id="_dcw-maximize" aria-label="全画面" title="全画面 / 縮小">⛶</button>
-          <button class="_dcw-close-btn" id="_dcw-close" aria-label="閉じる">✕</button>
+      <div class="dc-panel-footer">
+        <div class="dc-cli-selector">
+          <label for="dc-cli-tool" class="text-sm">AI:</label>
+          <select id="dc-cli-tool" class="select select-sm select-bordered">
+            <option value="claude">Claude Code</option>
+            <option value="qwen">Qwen Code</option>
+            <option value="codex">OpenAI Codex</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="copilot">GitHub Copilot</option>
+            <option value="ollama">Ollama (本地模型)</option>
+            <option value="lmstudio">LM Studio (本地)</option>
+            <option value="mock">Mock (Test)</option>
+          </select>
+          <span id="cli-status" class="text-xs opacity-50 ml-2"></span>
         </div>
 
-        <div class="_dcw-messages" id="_dcw-messages"></div>
+        <div class="dc-input-container">
+          <textarea
+            id="dc-input-message"
+            class="textarea textarea-bordered"
+            placeholder="${escapeHtml(currentTheme.placeholder)}"
+            rows="2"></textarea>
+        </div>
 
-        <div class="_dcw-quick-replies" id="_dcw-qr"></div>
+        <div id="dc-history-popup" class="dc-history-popup" style="display:none">
+          <div class="dc-history-popup-header">
+            <span>入力履歴</span>
+            <button id="dc-history-popup-close" class="btn btn-ghost btn-xs btn-circle">✕</button>
+          </div>
+          <ul id="dc-history-popup-list" class="dc-history-popup-list"></ul>
+        </div>
 
-        <div class="_dcw-input-row">
-          <textarea class="_dcw-input" id="_dcw-input"
-            placeholder="${esc(theme.placeholder)}" rows="1"
-            aria-label="メッセージ入力"></textarea>
-          <button class="_dcw-send-btn" id="_dcw-send" aria-label="送信">➤</button>
+        <div class="dc-input-actions">
+          <button id="dc-history-popup-btn" class="btn btn-ghost btn-sm" title="入力履歴を表示">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+          <button id="dc-stop-btn" class="btn btn-ghost btn-sm" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 00-1-1H9z" />
+            </svg>
+            停止
+          </button>
+          <button id="dc-clear-btn" class="btn btn-ghost btn-sm" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+          <button id="dc-send-btn" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            发送
+          </button>
         </div>
       </div>
     `;
   }
 
-  // ── 本体クラス ────────────────────────────────────────────────
-  function ChatWidget(opts, theme) {
-    this.opts = opts;
-    this.theme = theme;
-    this.project = opts.project || 'auto-dealer-demo';
-    this.apiBase = (opts.apiBase || '') + '/' + this.project + '/api/chat';
-    this.conversationId = null;
-    this.open = false;
-    this.msgCount = 0;
-    this.unread = 0;
-    this.pollTimer = null;
-    this.lastPollTime = null;
-    this.ratingShown = false;
-    // localStorage キー（conversationId のみ保持、モード+プロジェクト単位）
-    this._convIdKey = '_dcw_cid_' + (opts.mode || 'customer') + '_' + this.project;
+  // ── イベントバインディング ───────────────────────────────────
+  function bindPanelEvents() {
+    document.getElementById('dc-maximize-btn').onclick = toggleMaximize;
+    document.getElementById('dc-collapse-btn').onclick = toggleMinimize;
+    document.getElementById('dc-close-btn').onclick = function() {
+      if (isPanelOpen) togglePanel();
+    };
+
+    document.querySelector('.dc-panel-header').addEventListener('click', function(e) {
+      if (isPanelMinimized && !e.target.closest('button')) {
+        toggleMinimize();
+      }
+    });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', adjustPanelForKeyboard);
+      window.visualViewport.addEventListener('scroll', adjustPanelForKeyboard);
+    }
+
+    document.getElementById('dc-send-btn').onclick = sendMessage;
+    document.getElementById('dc-stop-btn').onclick = stopTask;
+    document.getElementById('dc-clear-btn').onclick = clearMessages;
+    document.getElementById('dc-auto-scroll-btn').onclick = toggleAutoScroll;
+
+    document.getElementById('dc-input-message').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        sendMessage();
+        return;
+      }
+      if (e.key === 'ArrowUp' && this.selectionStart === 0) {
+        if (inputHistory.length === 0) return;
+        e.preventDefault();
+        if (inputHistoryIndex === -1) {
+          inputCurrentDraft = this.value;
+        }
+        if (inputHistoryIndex < inputHistory.length - 1) {
+          inputHistoryIndex++;
+        }
+        this.value = inputHistory[inputHistoryIndex] || '';
+        this.setSelectionRange(0, 0);
+        return;
+      }
+      if (e.key === 'ArrowDown' && this.selectionStart === this.value.length) {
+        if (inputHistoryIndex === -1) return;
+        e.preventDefault();
+        inputHistoryIndex--;
+        if (inputHistoryIndex === -1) {
+          this.value = inputCurrentDraft;
+        } else {
+          this.value = inputHistory[inputHistoryIndex] || '';
+        }
+        const len = this.value.length;
+        this.setSelectionRange(len, len);
+        return;
+      }
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Shift') {
+        inputHistoryIndex = -1;
+      }
+    });
+
+    document.getElementById('dc-history-popup-btn').onclick = function(e) {
+      e.stopPropagation();
+      toggleHistoryPopup();
+    };
+    document.getElementById('dc-history-popup-close').onclick = function(e) {
+      e.stopPropagation();
+      closeHistoryPopup();
+    };
+
+    document.addEventListener('click', function(e) {
+      const popup = document.getElementById('dc-history-popup');
+      const btn = document.getElementById('dc-history-popup-btn');
+      if (popup && popup.style.display !== 'none' &&
+          !popup.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        closeHistoryPopup();
+      }
+    });
+
+    document.getElementById('dc-cli-tool').addEventListener('change', function() {
+      try { sessionStorage.setItem(TOOL_STORAGE_KEY, this.value); } catch(e) {}
+      checkCliStatus(this.value);
+    });
   }
 
-  ChatWidget.prototype.mount = function () {
-    // テーマの CSS カスタムプロパティを body に適用
-    document.documentElement.style.setProperty('--dcw-primary', this.theme.primaryColor);
-    document.documentElement.style.setProperty('--dcw-accent',  this.theme.accentColor);
-    document.documentElement.style.setProperty('--dcw-header-bg', this.theme.headerBg);
+  // ── SignalR 初期化 ──────────────────────────────────────────
+  function initSignalR() {
+    const signalRSources = [
+      '/lib/microsoft/signalr/dist/browser/signalr.min.js',
+      '/lib/signalr/signalr.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js'
+    ];
+    loadSignalRClient(0, signalRSources);
+  }
 
-    const container = document.createElement('div');
-    container.id = '_dcw-root';
-    container.innerHTML = buildHTML(this.theme);
-    document.body.appendChild(container);
-
-    this.$fab    = document.getElementById('_dcw-fab');
-    this.$window = document.getElementById('_dcw-window');
-    this.$msgs   = document.getElementById('_dcw-messages');
-    this.$qr     = document.getElementById('_dcw-qr');
-    this.$input  = document.getElementById('_dcw-input');
-    this.$send   = document.getElementById('_dcw-send');
-    this.$badge  = document.getElementById('_dcw-badge');
-
-    this.$fab.addEventListener('click', this.toggle.bind(this));
-    document.getElementById('_dcw-close').addEventListener('click', this.toggle.bind(this));
-    document.getElementById('_dcw-maximize').addEventListener('click', this.toggleFullscreen.bind(this));
-    this.$send.addEventListener('click', this.sendUserMessage.bind(this));
-    this.$input.addEventListener('input', function () {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 80) + 'px';
-    });
-
-    // ESC キーで全画面を解除
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && this.fullscreen) this.toggleFullscreen();
-    }.bind(this));
-
-    this.renderQuickReplies(this.theme.quickReplies);
-    this.startSession();
-  };
-
-  ChatWidget.prototype.toggle = function () {
-    this.open = !this.open;
-    if (this.open) {
-      this.$window.classList.add('_dcw-open');
-      this.$fab.innerHTML = '✕<span id="_dcw-badge" style="display:none"></span>';
-      this.$badge = document.getElementById('_dcw-badge');
-      this.setBadge(0);
-      setTimeout(function () { this.$input.focus(); }.bind(this), 300);
-    } else {
-      this.$window.classList.remove('_dcw-open');
-      this.$fab.innerHTML = this.theme.fabIcon + '<span id="_dcw-badge"></span>';
-      this.$badge = document.getElementById('_dcw-badge');
-    }
-  };
-
-  ChatWidget.prototype.toggleFullscreen = function () {
-    this.fullscreen = !this.fullscreen;
-    const btn = document.getElementById('_dcw-maximize');
-
-    if (this.fullscreen) {
-      // 全画面に切り替え
-      this.$window.classList.add('_dcw-fullscreen');
-      if (this.$fab) this.$fab.style.display = 'none';
-      if (btn) btn.textContent = '⊡';
-      if (btn) btn.title = '縮小';
-      // 未オープンの場合は開く
-      if (!this.open) {
-        this.$window.classList.add('_dcw-open');
-        this.open = true;
-      }
-    } else {
-      // 通常サイズに戻す
-      this.$window.classList.remove('_dcw-fullscreen');
-      if (this.$fab) this.$fab.style.display = '';
-      if (btn) btn.textContent = '⛶';
-      if (btn) btn.title = '全画面 / 縮小';
-    }
-    this.scrollBottom();
-  };
-
-  ChatWidget.prototype.setBadge = function (n) {
-    this.unread = n;
-    if (this.$badge) {
-      this.$badge.textContent = n;
-      this.$badge.style.display = n > 0 ? 'flex' : 'none';
-    }
-  };
-
-  ChatWidget.prototype.renderQuickReplies = function (replies) {
-    this.$qr.innerHTML = replies.map(function (r) {
-      return '<button class="_dcw-qr-btn">' + esc(r) + '</button>';
-    }).join('');
-    const self = this;
-    this.$qr.querySelectorAll('._dcw-qr-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        self.sendMessage(btn.textContent);
-      });
-    });
-  };
-
-  ChatWidget.prototype.sendUserMessage = function () {
-    const text = this.$input.value.trim();
-    if (!text) return;
-    this.$input.value = '';
-    this.$input.style.height = 'auto';
-    this.sendMessage(text);
-  };
-
-  // ── API 呼び出し ───────────────────────────────────────────────
-
-  ChatWidget.prototype.startSession = function () {
-    const self = this;
-
-    // localStorage から以前の conversationId を復元し、DB から履歴を取得
-    const storedId = self._getStoredConvId();
-    if (storedId) {
-      self.conversationId = storedId;
-      self._loadHistoryFromDb(storedId).then(function (loaded) {
-        if (!loaded) {
-          // 履歴取得に失敗（セッション期限切れ等）→ 新規セッションを作成
-          self.conversationId = null;
-          self._storeConvId(null);
-          self._createNewSession();
-        }
-      });
+  function loadSignalRClient(index, sources) {
+    if (index >= sources.length) {
+      console.warn('SignalR client not available, using polling fallback');
       return;
     }
+    const script = document.createElement('script');
+    script.src = sources[index];
+    script.onload = function() {
+      console.log('SignalR client loaded from:', sources[index]);
+      connectSignalR();
+    };
+    script.onerror = function() {
+      console.warn('Failed to load SignalR from:', sources[index]);
+      loadSignalRClient(index + 1, sources);
+    };
+    document.head.appendChild(script);
+  }
 
-    self._createNewSession();
-  };
+  function connectSignalR() {
+    if (typeof signalR === 'undefined') {
+      console.warn('SignalR not available');
+      return;
+    }
+    connection = new signalR.HubConnectionBuilder()
+      .withUrl(CONFIG.signalRUrl)
+      .withAutomaticReconnect()
+      .build();
 
-  /** localStorage から conversationId を読み取ります。 */
-  ChatWidget.prototype._getStoredConvId = function () {
-    try { return localStorage.getItem(this._convIdKey) || null; } catch (e) { return null; }
-  };
+    connection.on('ReceiveProgress', function(data) {
+      handleProgressUpdate(data);
+    });
 
-  /** conversationId を localStorage に保存します（null で削除）。 */
-  ChatWidget.prototype._storeConvId = function (id) {
+    connection.start()
+      .then(() => console.log('SignalR connected'))
+      .catch(err => console.error('SignalR connection error:', err));
+  }
+
+  // ── CLI ツール読み込み ──────────────────────────────────────
+  async function loadCliTools() {
     try {
-      if (id) localStorage.setItem(this._convIdKey, id);
-      else    localStorage.removeItem(this._convIdKey);
-    } catch (e) { /* 無視 */ }
-  };
+      const response = await fetch(CONFIG.apiBaseUrl.replace('/api/ai', '/cli-tools'));
+      if (response.ok) {
+        const data = await response.json();
+        if (data.defaultTool) {
+          CONFIG.defaultCliTool = data.defaultTool;
+        }
+        updateCliSelector(data.available, data.defaultTool);
+      }
+    } catch (error) {
+      console.error('Failed to load CLI tools:', error);
+    }
+  }
 
-  /** DB から会話履歴を取得してウィジェットに描画します。 */
-  ChatWidget.prototype._loadHistoryFromDb = function (conversationId) {
-    const self = this;
-    return fetch(self.apiBase + '/session/' + conversationId + '/messages')
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (messages) {
-        if (!messages || messages.length === 0) return false;
-        messages.forEach(function (m) {
-          const t = _timeFromTimestamp(m.timestamp);
-          if (m.sender === 'customer')     self._renderUserMessage(m.content, t, false);
-          else if (m.sender === 'ai')      self._renderAiMessage(m.content, t, false);
-          else if (m.sender === 'agent')   self._renderOperatorMessage(m.content, t, false);
-        });
-        self.msgCount = messages.filter(function (m) { return m.sender === 'customer'; }).length;
-        return true;
-      })
-      .catch(function () { return false; });
-  };
+  function updateCliSelector(tools, serverDefault) {
+    const selector = document.getElementById('dc-cli-tool');
+    if (!selector) return;
 
-  /** 新規セッションを API で作成します。 */
-  ChatWidget.prototype._createNewSession = function () {
-    const self = this;
-    const channel = self.opts.mode === 'staff' ? 'staff' : 'web';
-    const url = self.apiBase + '/' + self.theme.apiPath;
+    const prevValue = selector.value;
+    selector.innerHTML = '';
 
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel: channel })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      self.conversationId = data.conversationId;
-      self._storeConvId(data.conversationId);
-      setTimeout(function () {
-        self.appendAiMessage(data.welcomeMessage || self.theme.welcomeDefault);
-        self.setBadge(1);
-      }, 400);
-    })
-    .catch(function () {
-      setTimeout(function () {
-        self.appendAiMessage(self.theme.welcomeDefault);
-        self.setBadge(1);
-      }, 400);
-    });
-  };
-
-  ChatWidget.prototype.sendMessage = function (text) {
-    this.$qr.innerHTML = '';
-    this.appendUserMessage(text);
-    this.$send.disabled = true;
-    const self = this;
-    this.showTyping();
-
-    if (!self.conversationId) {
-      setTimeout(function () { self.sendMessage(text); }, 600);
-      return;
+    for (const [name, tool] of Object.entries(tools || {})) {
+      const option = document.createElement('option');
+      option.value = name;
+      option.textContent = tool.displayName || name;
+      if (!tool.installed) {
+        option.disabled = true;
+        option.textContent += ' (未安装)';
+      }
+      selector.appendChild(option);
     }
 
-    // 顧客: /session/{id}/message  社員: /staff/{id}/message
-    const msgUrl = self.opts.mode === 'staff'
-      ? self.apiBase + '/staff/' + self.conversationId + '/message'
-      : self.apiBase + '/session/' + self.conversationId + '/message';
+    const savedTool = (() => { try { return sessionStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
+    const restoreValue = savedTool || prevValue || serverDefault || CONFIG.defaultCliTool;
+    if (restoreValue && selector.querySelector(`option[value="${restoreValue}"]:not([disabled])`)) {
+      selector.value = restoreValue;
+    }
 
-    fetch(msgUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      self.hideTyping();
-      self.appendAiMessage(data.responseText, data.dataRows, data.navigationUrl, data.navigationLabel);
-      if (!self.open) self.setBadge(self.unread + 1);
-      self.$send.disabled = false;
+    updateCliStatusDisplay(tools ? tools[selector.value] : null);
+  }
 
-      if (data.suggestHandover) {
-        self.stopPolling();
-        self.startPolling();
+  async function checkCliStatus(toolName) {
+    const statusEl = document.getElementById('cli-status');
+    if (!statusEl) return;
+    try {
+      const response = await fetch(CONFIG.apiBaseUrl.replace('/api/ai', '/cli-tools'));
+      if (response.ok) {
+        const data = await response.json();
+        const tool = data.available ? data.available[toolName] : null;
+        updateCliStatusDisplay(tool, statusEl);
+      }
+    } catch (error) {
+      if (statusEl) statusEl.textContent = '?';
+    }
+  }
+
+  function updateCliStatusDisplay(tool, statusEl) {
+    statusEl = statusEl || document.getElementById('cli-status');
+    if (!statusEl) return;
+    if (!tool) {
+      statusEl.textContent = '';
+      return;
+    }
+    if (tool.installed && tool.authenticated) {
+      statusEl.textContent = '✓ 就绪';
+      statusEl.className = 'text-xs text-success ml-2';
+    } else if (tool.installed) {
+      statusEl.textContent = '⚠ 未认证';
+      statusEl.className = 'text-xs text-warning ml-2';
+    } else {
+      statusEl.textContent = '✗ 未安装';
+      statusEl.className = 'text-xs text-error ml-2';
+    }
+  }
+
+  // ── パネル操作 ──────────────────────────────────────────────
+  function togglePanel() {
+    if (isPanelOpen) {
+      closePanel();
+    } else {
+      openPanel();
+    }
+  }
+
+  function openPanel() {
+    const panel = document.getElementById('dealer-chat-panel');
+    const trigger = document.getElementById('dealer-chat-trigger');
+    panel.classList.add('open');
+    trigger.style.display = 'none';
+    isPanelOpen = true;
+    if (window.visualViewport) adjustPanelForKeyboard();
+  }
+
+  function closePanel() {
+    const panel = document.getElementById('dealer-chat-panel');
+    const trigger = document.getElementById('dealer-chat-trigger');
+    panel.classList.remove('open');
+    trigger.style.display = 'flex';
+    isPanelOpen = false;
+    resetPanelSize();
+  }
+
+  function toggleMinimize() {
+    const panel = document.getElementById('dealer-chat-panel');
+    const btn = document.getElementById('dc-collapse-btn');
+    if (!panel) return;
+
+    isPanelMinimized = !isPanelMinimized;
+    panel.classList.toggle('minimized', isPanelMinimized);
+
+    if (isPanelMinimized) {
+      if (isMaximized) toggleMaximize();
+      if (btn) btn.title = '展開';
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>';
+    } else {
+      if (btn) btn.title = '最小化';
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>';
+    }
+  }
+
+  function toggleMaximize() {
+    const panel = document.getElementById('dealer-chat-panel');
+    const trigger = document.getElementById('dealer-chat-trigger');
+    const btn = document.getElementById('dc-maximize-btn');
+    if (!panel) return;
+
+    if (isMaximized) {
+      panel.style.width = previousWidth || '';
+      panel.style.right = previousRight || '';
+      panel.classList.remove('maximized');
+      if (trigger) trigger.style.display = 'flex';
+      isMaximized = false;
+      if (btn) btn.title = 'Maximize';
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>';
+    } else {
+      previousWidth = panel.style.width;
+      previousRight = panel.style.right;
+      panel.style.width = '100vw';
+      panel.style.right = '0';
+      panel.classList.add('maximized');
+      if (trigger) trigger.style.display = 'none';
+      isMaximized = true;
+      if (btn) btn.title = 'Restore';
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" /></svg>';
+    }
+  }
+
+  function adjustPanelForKeyboard() {
+    const panel = document.getElementById('dealer-chat-panel');
+    if (!panel || !isPanelOpen) return;
+    const vv = window.visualViewport;
+    panel.style.height = vv.height + 'px';
+    panel.style.top = vv.offsetTop + 'px';
+  }
+
+  function resetPanelSize() {
+    const panel = document.getElementById('dealer-chat-panel');
+    if (!panel) return;
+    panel.style.height = '';
+    panel.style.top = '';
+  }
+
+  // ── メッセージ送信 ──────────────────────────────────────────
+  async function sendMessage() {
+    const input = document.getElementById('dc-input-message');
+    const cliSelector = document.getElementById('dc-cli-tool');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    if (inputHistory[0] !== message) {
+      inputHistory.unshift(message);
+      if (inputHistory.length > 100) inputHistory.pop();
+    }
+    inputHistoryIndex = -1;
+    inputCurrentDraft = '';
+
+    addMessage(message, 'user');
+    input.value = '';
+    updateStatus('running');
+    setSendingState(true);
+
+    try {
+      // セッションがなければ先に開始
+      if (!dealerConversationId) {
+        await startDealerSession();
+      }
+      if (!dealerConversationId) {
+        addMessage('セッションを開始できませんでした。ページを再読み込みしてください。', 'system');
+        updateStatus('error');
+        setSendingState(false);
+        return;
       }
 
-      if (data.quickReplies && data.quickReplies.length > 0) {
-        self.renderQuickReplies(data.quickReplies);
+      const msgUrl = CONFIG.chatApiBase + '/' + currentTheme.msgPath + '/' + dealerConversationId + '/message';
+      const response = await fetch(msgUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: message })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const reply = data.responseText || data.result || data.message || '';
+        if (reply.trim()) {
+          addMessage(reply, 'assistant');
+        }
+        updateStatus('completed');
       } else {
-        self.renderQuickReplies(self.theme.quickReplies);
+        let errMsg = 'エラーが発生しました';
+        try {
+          const errBody = await response.json();
+          errMsg = errBody.error || errMsg;
+        } catch (_) {}
+        addMessage(`エラー: ${errMsg}`, 'system');
+        updateStatus('error');
       }
+    } catch (error) {
+      console.error('Send message error:', error);
+      addMessage(`リクエスト失敗: ${error.message}`, 'system');
+      updateStatus('error');
+    } finally {
+      setSendingState(false);
+    }
+  }
 
-      // 顧客モードのみ5回後に評価リクエスト
-      if (self.opts.mode === 'customer') {
-        self.msgCount++;
-        if (self.msgCount >= 5 && !self.ratingShown) {
-          self.ratingShown = true;
-          setTimeout(function () { self.appendRatingRequest(); }, 1000);
+  // ── ポーリング ──────────────────────────────────────────────
+  async function pollTaskResult(taskId) {
+    const progressEl = addProgressContainer(taskId);
+    let lastLogCount = 0;
+    const TIMEOUT_MS = 30 * 60 * 1000;
+    const deadline = Date.now() + TIMEOUT_MS;
+
+    while (Date.now() < deadline) {
+      try {
+        const response = await fetch(CONFIG.apiBaseUrl + '/tasks/' + taskId);
+        if (!response.ok) break;
+
+        const data = await response.json();
+
+        if (progressEl) {
+          const fill = progressEl.querySelector('.dc-progress-fill');
+          const status = progressEl.querySelector('.progress-status');
+          const logsContainer = progressEl.querySelector('.dc-logs ul');
+
+          if (fill) fill.style.width = data.progress + '%';
+          if (status) status.textContent = translateStatus(data.status);
+
+          if (logsContainer && data.logs && data.logs.length > lastLogCount) {
+            for (let j = lastLogCount; j < data.logs.length; j++) {
+              const logText = parseLogEntry(data.logs[j]);
+              if (logText) {
+                const li = document.createElement('li');
+                li.textContent = logText;
+                li.className = 'text-xs text-gray-600 py-1';
+                logsContainer.appendChild(li);
+              }
+            }
+            lastLogCount = data.logs.length;
+            scrollToBottom();
+          }
         }
+
+        if (!currentTaskId) return;
+
+        if (data.status === 'Completed' || data.status === 2) {
+          if (data.sessionId) {
+            currentSessionId = data.sessionId;
+          }
+          currentTaskId = null;
+          if (data.result && data.result.trim()) {
+            addMessage(data.result, 'assistant');
+          }
+          return;
+        } else if (data.status === 'Cancelled' || data.status === 4) {
+          currentTaskId = null;
+          return;
+        } else if (data.status === 'Failed' || data.status === 3) {
+          currentTaskId = null;
+          addMessage('❌ ' + (data.error || 'タスクが失敗しました'), 'system');
+          return;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.error('Polling error:', error);
+        break;
       }
-    })
-    .catch(function () {
-      self.hideTyping();
-      self.appendAiMessage('申し訳ありません。一時的に接続できません。しばらくお待ちください。');
-      self.$send.disabled = false;
-    });
-  };
-
-  // ── オペレーター返信ポーリング（顧客モードのみ） ────────────────
-
-  ChatWidget.prototype.startPolling = function () {
-    if (this.pollTimer || this.opts.mode !== 'customer') return;
-    this.lastPollTime = new Date().toISOString();
-    const self = this;
-    this.pollTimer = setInterval(function () { self.pollUpdates(); }, 8000);
-  };
-
-  ChatWidget.prototype.stopPolling = function () {
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer);
-      this.pollTimer = null;
     }
-  };
 
-  ChatWidget.prototype.pollUpdates = function () {
-    if (!this.conversationId) return;
-    const self = this;
-    const since = encodeURIComponent(self.lastPollTime || '');
-    fetch(self.apiBase + '/session/' + self.conversationId + '/updates?since=' + since)
-    .then(function (r) { return r.json(); })
-    .then(function (msgs) {
-      if (!msgs || msgs.length === 0) return;
-      self.lastPollTime = new Date().toISOString();
-      msgs.forEach(function (msg) {
-        if (msg.sender === 'agent') {
-          self.appendOperatorMessage(msg.content);
-          if (!self.open) self.setBadge(self.unread + 1);
+    addMessage('⚠️ 任务超时或中断', 'system');
+  }
+
+  function translateStatus(status) {
+    if (typeof status === 'number') {
+      switch (status) {
+        case 0: return 'Pending';
+        case 1: return 'Running';
+        case 2: return 'Completed';
+        case 3: return 'Failed';
+        case 4: return 'Cancelled';
+        default: return status;
+      }
+    }
+    return status;
+  }
+
+  function parseLogEntry(logEntry) {
+    if (!logEntry || !logEntry.trim()) return null;
+    return logEntry;
+  }
+
+  function handleProgressUpdate(data) {
+    if (!data) return;
+    const progressEl = document.querySelector('[data-task-id="' + data.id + '"]');
+    if (progressEl) {
+      const fill = progressEl.querySelector('.dc-progress-fill');
+      const status = progressEl.querySelector('.progress-status');
+      const logsContainer = progressEl.querySelector('.dc-logs ul');
+
+      if (fill) fill.style.width = (data.progress || 0) + '%';
+      if (status) status.textContent = translateStatus(data.status);
+
+      if (logsContainer && Array.isArray(data.logs) && data.logs.length > 0) {
+        logsContainer.innerHTML = '';
+        for (const log of data.logs) {
+          if (log && log.trim()) {
+            const li = document.createElement('li');
+            li.textContent = log;
+            li.className = 'text-xs text-gray-600 py-1';
+            logsContainer.appendChild(li);
+          }
         }
-      });
-    })
-    .catch(function () { /* ポーリングエラーは無視 */ });
-  };
-
-  // ── メッセージ描画 ────────────────────────────────────────────
-
-  /** コピー/引用アクションボタン HTML を生成します。 */
-  function _actionsHtml(align) {
-    return '<div class="_dcw-msg-actions" style="justify-content:' + (align === 'right' ? 'flex-end' : 'flex-start') + '">'
-      + '<button class="_dcw-action-btn _dcw-btn-copy" title="コピー">📋 コピー</button>'
-      + '<button class="_dcw-action-btn _dcw-btn-quote" title="引用">💬 引用</button>'
-      + '</div>';
-  }
-
-  /** メッセージ要素にコピー/引用イベントを設定します。 */
-  ChatWidget.prototype._bindActions = function (div, text) {
-    const self = this;
-    const copyBtn = div.querySelector('._dcw-btn-copy');
-    const quoteBtn = div.querySelector('._dcw-btn-quote');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        navigator.clipboard.writeText(text).then(function () {
-          self._showToast('コピーしました');
-        }).catch(function () {
-          // clipboard API が使えない場合のフォールバック
-          const ta = document.createElement('textarea');
-          ta.value = text;
-          ta.style.position = 'fixed'; ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          self._showToast('コピーしました');
-        });
-      });
+        if (autoScroll) scrollToBottom();
+      }
     }
-    if (quoteBtn) {
-      quoteBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const quoted = '> ' + text.replace(/\n/g, '\n> ') + '\n';
-        self.$input.value = quoted + self.$input.value;
-        self.$input.focus();
-        self.$input.style.height = 'auto';
-        self.$input.style.height = Math.min(self.$input.scrollHeight, 80) + 'px';
-      });
+
+    if (data.id !== currentTaskId) return;
+
+    if (data.status === 'Completed' || data.status === 2) {
+      if (data.result && data.result.trim()) {
+        addMessage(data.result, 'assistant');
+      }
+      updateStatus('completed');
+      setSendingState(false);
+      currentTaskId = null;
+    } else if (data.status === 'Failed' || data.status === 3) {
+      addMessage('❌ ' + (data.error || '任务失败'), 'system');
+      updateStatus('error');
+      setSendingState(false);
+      currentTaskId = null;
+    } else if (data.status === 'Cancelled' || data.status === 4) {
+      updateStatus('idle');
+      setSendingState(false);
+      currentTaskId = null;
     }
-  };
-
-  ChatWidget.prototype._showToast = function (msg) {
-    const t = document.createElement('div');
-    t.className = '_dcw-copy-toast';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 1700);
-  };
-
-  /** ユーザーメッセージを描画します。 */
-  ChatWidget.prototype._renderUserMessage = function (text, timeStr) {
-    const div = document.createElement('div');
-    div.className = '_dcw-msg _dcw-msg-user';
-    div.innerHTML = '<div>'
-      + '<div class="_dcw-bubble">' + esc(text).replace(/\n/g, '<br>') + '</div>'
-      + '<div class="_dcw-time" style="text-align:right">' + esc(timeStr) + '</div>'
-      + _actionsHtml('right')
-      + '</div>';
-    this.$msgs.appendChild(div);
-    this._bindActions(div, text);
-    this.scrollBottom();
-  };
-
-  /** データ行テーブル HTML を生成します（スタッフ向け）。 */
-  function _dataTableHtml(rows) {
-    if (!rows || rows.length === 0) return '';
-    var cols = Object.keys(rows[0]);
-    var html = '<div class="_dcw-data-table-wrap"><table class="_dcw-data-table"><thead><tr>';
-    cols.forEach(function (c) { html += '<th>' + esc(c) + '</th>'; });
-    html += '</tr></thead><tbody>';
-    rows.forEach(function (row) {
-      html += '<tr>';
-      cols.forEach(function (c) { html += '<td>' + esc(row[c] || '') + '</td>'; });
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    return html;
   }
 
-  /** ナビゲーションボタン HTML を生成します。 */
-  function _navButtonHtml(url, label) {
-    if (!url) return '';
-    return '<div class="_dcw-nav-btn-wrap"><a class="_dcw-nav-btn" href="' + esc(url) + '" target="_blank">'
-      + esc(label || '画面を開く') + ' →</a></div>';
-  }
-
-  /** AI メッセージを描画します。dataRows/navigationUrl が指定されると DB データとナビボタンも表示します。 */
-  ChatWidget.prototype._renderAiMessage = function (text, timeStr, scroll, dataRows, navigationUrl, navigationLabel) {
-    var div = document.createElement('div');
-    div.className = '_dcw-msg _dcw-msg-ai';
-    div.innerHTML =
-      '<div class="_dcw-avatar">' + this.theme.avatarIcon + '</div>' +
-      '<div style="flex:1;min-width:0">' +
-        '<div class="_dcw-bubble">' + renderMarkdown(text) +
-          _dataTableHtml(dataRows) +
-          _navButtonHtml(navigationUrl, navigationLabel) +
-        '</div>' +
-        '<div class="_dcw-time">' + esc(timeStr) + '</div>' +
-        _actionsHtml('left') +
-      '</div>';
-    this.$msgs.appendChild(div);
-    this._bindActions(div, text);
-    if (scroll !== false) this.scrollBottom();
-  };
-
-  /** オペレーターメッセージを描画します。 */
-  ChatWidget.prototype._renderOperatorMessage = function (text, timeStr) {
-    const div = document.createElement('div');
-    div.className = '_dcw-msg _dcw-msg-ai';
-    div.innerHTML =
-      '<div class="_dcw-avatar" style="background:#28a745">👤</div>' +
-      '<div>' +
-        '<div class="_dcw-bubble" style="background:#d4edda">' + esc(text).replace(/\n/g, '<br>') + '</div>' +
-        '<div class="_dcw-time">担当者 ' + esc(timeStr) + '</div>' +
-        _actionsHtml('left') +
-      '</div>';
-    this.$msgs.appendChild(div);
-    this._bindActions(div, text);
-    this.scrollBottom();
-  };
-
-  ChatWidget.prototype.appendUserMessage = function (text) {
-    this._renderUserMessage(text, _timeStr());
-  };
-
-  ChatWidget.prototype.appendAiMessage = function (text, dataRows, navigationUrl, navigationLabel) {
-    this._renderAiMessage(text, _timeStr(), true, dataRows, navigationUrl, navigationLabel);
-  };
-
-  ChatWidget.prototype.appendOperatorMessage = function (text) {
-    this._renderOperatorMessage(text, _timeStr());
-  };
-
-  ChatWidget.prototype.appendRatingRequest = function () {
-    const self = this;
-    const div = document.createElement('div');
-    div.className = '_dcw-msg _dcw-msg-ai';
-    div.innerHTML = `
-      <div class="_dcw-avatar">${self.theme.avatarIcon}</div>
-      <div>
-        <div class="_dcw-bubble">
-          ご対応はいかがでしたか？<br>評価をお聞かせください。
-          <div class="_dcw-rating" id="_dcw-rating">
-            <span class="_dcw-star" data-v="1">⭐</span>
-            <span class="_dcw-star" data-v="2">⭐</span>
-            <span class="_dcw-star" data-v="3">⭐</span>
-            <span class="_dcw-star" data-v="4">⭐</span>
-            <span class="_dcw-star" data-v="5">⭐</span>
-          </div>
-        </div>
-      </div>
-    `;
-    this.$msgs.appendChild(div);
-    div.querySelectorAll('._dcw-star').forEach(function (star) {
-      star.addEventListener('click', function () {
-        const val = parseInt(star.getAttribute('data-v'));
-        div.querySelectorAll('._dcw-star').forEach(function (s) {
-          s.classList.toggle('_dcw-active', parseInt(s.getAttribute('data-v')) <= val);
-        });
-        if (self.conversationId) {
-          fetch(self.apiBase + '/session/' + self.conversationId + '/feedback', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rating: val, comment: null })
-          }).catch(function () {});
-        }
-        setTimeout(function () {
-          self.appendAiMessage('ありがとうございます！ ' + val + ' 点のご評価をいただきました。\nまたいつでもお気軽にご相談ください 😊');
-          self.stopPolling();
-        }, 500);
-      });
-    });
-    this.scrollBottom();
-  };
-
-  ChatWidget.prototype.showTyping = function () {
-    const div = document.createElement('div');
-    div.id = '_dcw-typing-indicator';
-    div.className = '_dcw-msg _dcw-msg-ai';
-    div.innerHTML = `
-      <div class="_dcw-avatar">${this.theme.avatarIcon}</div>
-      <div class="_dcw-bubble" style="padding:12px 16px">
-        <div class="_dcw-typing">
-          <div class="_dcw-dot"></div><div class="_dcw-dot"></div><div class="_dcw-dot"></div>
-        </div>
-      </div>
-    `;
-    this.$msgs.appendChild(div);
-    this.scrollBottom();
-  };
-
-  ChatWidget.prototype.hideTyping = function () {
-    const el = document.getElementById('_dcw-typing-indicator');
-    if (el) el.remove();
-  };
-
-  ChatWidget.prototype.scrollBottom = function () {
-    this.$msgs.scrollTop = this.$msgs.scrollHeight;
-  };
-
-  // ── 時刻文字列 ────────────────────────────────────────────────
-  function _timeStr() {
-    const now = new Date();
-    return now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
-  }
-
-  /** DB の timestamp 文字列（UTC）を表示用の時刻文字列に変換します。
-   *  当日のメッセージは HH:MM、それ以前は M/D HH:MM で表示します。 */
-  function _timeFromTimestamp(ts) {
-    if (!ts) return _timeStr();
+  async function stopTask() {
+    if (!currentTaskId) return;
+    const taskId = currentTaskId;
+    currentTaskId = null;
+    setSendingState(false);
+    updateStatus('idle');
     try {
-      // SQLite は "yyyy-MM-dd HH:mm:ss" (UTC) で保存しているため末尾に Z を付けて変換
-      const raw = ts.trim().includes('T') ? ts : ts.replace(' ', 'T') + 'Z';
-      const d = new Date(raw);
-      if (isNaN(d.getTime())) return _timeStr();
-      const now = new Date();
-      const sameDay = d.getFullYear() === now.getFullYear()
-                   && d.getMonth()    === now.getMonth()
-                   && d.getDate()     === now.getDate();
-      const hm = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
-      return sameDay ? hm : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + hm;
-    } catch (e) { return _timeStr(); }
+      await fetch(CONFIG.apiBaseUrl + '/tasks/' + taskId, { method: 'DELETE' });
+      addMessage('⏹ タスクをキャンセルしました', 'system');
+    } catch (error) {
+      console.error('Failed to stop task:', error);
+    }
   }
 
-  // ── 公開 API ──────────────────────────────────────────────────
-  let _instance = null;
+  // ── メッセージ表示 ──────────────────────────────────────────
+  function formatTimestamp(date) {
+    const d = (date instanceof Date) ? date : new Date(date);
+    if (!date || isNaN(d.getTime())) d.setTime(Date.now());
+    const pad = function(n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) +
+           ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
 
+  function addMessage(content, type, skipSave, timestamp) {
+    const container = document.getElementById('dc-messages-container');
+    const timeStr = timestamp || formatTimestamp(new Date());
+
+    if (type === 'system') {
+      const messageEl = document.createElement('div');
+      messageEl.className = 'dc-message system';
+      messageEl.textContent = content;
+      container.appendChild(messageEl);
+    } else {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'dc-message-row ' + type;
+
+      const senderEl = document.createElement('div');
+      senderEl.className = 'dc-message-sender';
+      senderEl.textContent = type === 'user' ? 'You' : 'AI Assistant';
+      rowEl.appendChild(senderEl);
+
+      const innerEl = document.createElement('div');
+      innerEl.className = 'dc-message-inner';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'dc-message-avatar';
+      if (type === 'user') {
+        avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>';
+      } else {
+        avatar.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>';
+      }
+
+      const messageEl = document.createElement('div');
+      messageEl.className = 'dc-message ' + type;
+
+      const contentEl = document.createElement('div');
+      contentEl.className = 'dc-message-content';
+      if (type === 'assistant') {
+        contentEl.innerHTML = renderMarkdown(content);
+        contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
+      } else {
+        contentEl.innerHTML = renderMarkdown(content);
+      }
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'dc-message-time';
+      timeEl.textContent = timeStr;
+      contentEl.appendChild(timeEl);
+
+      messageEl.appendChild(contentEl);
+      innerEl.appendChild(avatar);
+      innerEl.appendChild(messageEl);
+      rowEl.appendChild(innerEl);
+
+      const actionsEl = document.createElement('div');
+      actionsEl.className = 'dc-message-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'dc-msg-action-btn';
+      copyBtn.title = 'コピー';
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      copyBtn.onclick = function() {
+        navigator.clipboard.writeText(content).then(function() {
+          copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+          setTimeout(function() {
+            copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+          }, 2000);
+        }).catch(function() {});
+      };
+      actionsEl.appendChild(copyBtn);
+
+      const quoteBtn = document.createElement('button');
+      quoteBtn.className = 'dc-msg-action-btn';
+      quoteBtn.title = '引用して返信';
+      quoteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>';
+      quoteBtn.onclick = function() {
+        const input = document.getElementById('dc-input-message');
+        if (!input) return;
+        const quoted = content.split('\n').map(function(line) { return '> ' + line; }).join('\n');
+        input.value = quoted + '\n' + input.value;
+        input.focus();
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+        if (isPanelMinimized) toggleMinimize();
+        if (!isPanelOpen) openPanel();
+      };
+      actionsEl.appendChild(quoteBtn);
+
+      rowEl.appendChild(actionsEl);
+      container.appendChild(rowEl);
+    }
+
+    if (!skipSave) {
+      chatHistory.push({ content: content, type: type, timestamp: timeStr });
+      saveHistory();
+      saveMessageToServer(content, type);
+    }
+
+    if (autoScroll) {
+      scrollToBottom();
+    }
+  }
+
+  function saveHistory() {
+    try {
+      const key = STORAGE_KEY_PREFIX + currentMode;
+      sessionStorage.setItem(key, JSON.stringify(chatHistory));
+    } catch (e) {}
+  }
+
+  function restoreFromStorage() {
+    try {
+      const key = STORAGE_KEY_PREFIX + currentMode;
+      const saved = sessionStorage.getItem(key);
+      if (!saved) return false;
+      const history = JSON.parse(saved);
+      if (!Array.isArray(history) || history.length === 0) return false;
+      chatHistory = history;
+      const container = document.getElementById('dc-messages-container');
+      container.innerHTML = '';
+      history.forEach(function(msg) {
+        addMessage(msg.content, msg.type, true, msg.timestamp);
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function restoreFromServer() {
+    if (!dealerConversationId) return;
+    try {
+      const resp = await fetch(CONFIG.chatApiBase + '/session/' + dealerConversationId + '/messages');
+      if (!resp.ok) return;
+      const messages = await resp.json();
+      if (!Array.isArray(messages) || messages.length === 0) return;
+      const container = document.getElementById('dc-messages-container');
+      container.innerHTML = '';
+      chatHistory = [];
+      messages.forEach(function(m) {
+        // sender: customer | ai | agent → user | assistant
+        const type = (m.sender === 'customer') ? 'user' : 'assistant';
+        const ts = m.timestamp || '';
+        chatHistory.push({ content: m.content, type: type, timestamp: ts });
+        addMessage(m.content, type, true, ts);
+      });
+      saveHistory();
+    } catch (e) {
+      // サーバー取得失敗時は sessionStorage のまま
+    }
+  }
+
+  function saveMessageToServer(_content, _type) {
+    // auto-dealer では SendMessageAsync / SendStaffMessageAsync がサーバー側で保存するため不要
+  }
+
+  function configureMarked() {
+    if (typeof marked === 'undefined') return;
+    marked.setOptions({
+      breaks: true,
+      gfm: true
+    });
+  }
+
+  function renderMarkdown(text) {
+    if (typeof marked === 'undefined' || !text) {
+      return '<p>' + escapeHtml(text || '') + '</p>';
+    }
+    try {
+      return marked.parse(text);
+    } catch (e) {
+      return '<p>' + escapeHtml(text) + '</p>';
+    }
+  }
+
+  function addCopyButton(codeEl) {
+    const pre = codeEl.parentElement;
+    pre.style.position = 'relative';
+    const btn = document.createElement('button');
+    btn.className = 'dc-code-copy-btn';
+    btn.textContent = 'Copy';
+    btn.onclick = function() {
+      navigator.clipboard.writeText(codeEl.textContent).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      }).catch(function() {
+        btn.textContent = 'Error';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+      });
+    };
+    pre.appendChild(btn);
+  }
+
+  function addProgressContainer(taskId) {
+    const container = document.getElementById('dc-messages-container');
+    const progressEl = document.createElement('div');
+    progressEl.className = 'dc-message assistant';
+    progressEl.setAttribute('data-task-id', taskId);
+    progressEl.innerHTML = `
+      <div>⏳ 実行中...</div>
+      <div class="dc-progress-container">
+        <div class="dc-progress-bar">
+          <div class="dc-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="dc-progress-text">
+          <span class="progress-status">処理中...</span>
+        </div>
+        <div class="dc-logs">
+          <ul></ul>
+        </div>
+      </div>
+    `;
+    container.appendChild(progressEl);
+    scrollToBottom();
+    return progressEl;
+  }
+
+  function updateStatus(status) {
+    const indicator = document.getElementById('dc-status-indicator');
+    if (indicator) {
+      indicator.className = 'dc-status-indicator ' + status;
+    }
+  }
+
+  function setSendingState(sending, phase) {
+    const sendBtn = document.getElementById('dc-send-btn');
+    const stopBtn = document.getElementById('dc-stop-btn');
+    const input = document.getElementById('dc-input-message');
+
+    sendBtn.disabled = sending;
+    stopBtn.disabled = !sending;
+    input.disabled = sending;
+
+    if (sending) {
+      const spinnerSvg = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">' +
+        '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>' +
+        '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>' +
+        '</svg>';
+      const label = (phase === 'executing') ? '実行中...' : '送信中...';
+      sendBtn.innerHTML = spinnerSvg + label;
+    } else {
+      sendBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />' +
+        '</svg> 发送';
+    }
+  }
+
+  function clearMessages() {
+    if (currentTaskId) {
+      const taskId = currentTaskId;
+      currentTaskId = null;
+      fetch(CONFIG.apiBaseUrl + '/tasks/' + taskId, { method: 'DELETE' }).catch(function() {});
+    }
+
+    chatHistory = [];
+    try {
+      const key = STORAGE_KEY_PREFIX + currentMode;
+      sessionStorage.removeItem(key);
+    } catch (e) {}
+    fetch(CONFIG.apiBaseUrl + '/history', { method: 'DELETE' }).catch(function() {});
+
+    const container = document.getElementById('dc-messages-container');
+    container.innerHTML = '<div class="dc-message assistant"><div class="dc-message-content">🤖 对话已清除。有什么可以帮你的？</div></div>';
+
+    currentTaskId = null;
+    currentSessionId = null;
+    updateStatus('idle');
+    setSendingState(false);
+  }
+
+  function toggleAutoScroll() {
+    autoScroll = !autoScroll;
+    const btn = document.getElementById('dc-auto-scroll-btn');
+    btn.classList.toggle('opacity-75');
+    btn.classList.toggle('btn-active');
+  }
+
+  function scrollToBottom() {
+    const container = document.getElementById('dc-messages-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ── 履歴ポップアップ ────────────────────────────────────────
+  function toggleHistoryPopup() {
+    const popup = document.getElementById('dc-history-popup');
+    if (!popup) return;
+    if (popup.style.display === 'none') {
+      openHistoryPopup();
+    } else {
+      closeHistoryPopup();
+    }
+  }
+
+  function openHistoryPopup() {
+    const popup = document.getElementById('dc-history-popup');
+    const list = document.getElementById('dc-history-popup-list');
+    if (!popup || !list) return;
+
+    list.innerHTML = '';
+    if (inputHistory.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'dc-history-empty';
+      empty.textContent = '履歴はありません';
+      list.appendChild(empty);
+    } else {
+      inputHistory.forEach(function(text, idx) {
+        const li = document.createElement('li');
+        li.className = 'dc-history-item';
+        li.title = text;
+        li.textContent = text.length > 60 ? text.slice(0, 60) + '…' : text;
+        li.onclick = function() {
+          const input = document.getElementById('dc-input-message');
+          if (input) {
+            input.value = text;
+            input.focus();
+            inputHistoryIndex = idx;
+          }
+          closeHistoryPopup();
+        };
+        list.appendChild(li);
+      });
+    }
+    popup.style.display = 'block';
+  }
+
+  function closeHistoryPopup() {
+    const popup = document.getElementById('dc-history-popup');
+    if (popup) popup.style.display = 'none';
+  }
+
+  // ── グローバル公開 ──────────────────────────────────────────
   global.DealerChat = {
-    /**
-     * ウィジェットを初期化します。
-     * @param {object} opts
-     * @param {string} opts.mode       - 'customer' | 'staff'
-     * @param {string} opts.project    - プロジェクト名（例: 'auto-dealer-demo'）
-     * @param {string} [opts.apiBase]  - API ベース URL（省略時は同一オリジン）
-     */
-    init: function (opts) {
-      if (_instance) return;
-      const mode  = (opts && opts.mode === 'staff') ? 'staff' : 'customer';
-      const theme = THEMES[mode];
-      injectStyles(theme);
-      _instance = new ChatWidget(Object.assign({ mode: mode }, opts || {}), theme);
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { _instance.mount(); });
-      } else {
-        _instance.mount();
-      }
-    },
-    open:           function () { if (_instance && !_instance.open) _instance.toggle(); },
-    close:          function () { if (_instance && _instance.open)  _instance.toggle(); },
-    fullscreen:     function () { if (_instance && !_instance.fullscreen) _instance.toggleFullscreen(); },
-    exitFullscreen: function () { if (_instance && _instance.fullscreen)  _instance.toggleFullscreen(); },
+    init: init
   };
 
-}(window));
+})(typeof window !== 'undefined' ? window : this);

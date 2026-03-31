@@ -32,25 +32,36 @@ public class ChatHistoryService
         {
             using var conn = new SqliteConnection(_connectionString);
             conn.Open();
+            // テーブル作成（新規 DB 向け）とベースインデックス
             conn.Execute(@"
 CREATE TABLE IF NOT EXISTS AIChatHistory (
-    Id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    UserId    TEXT NOT NULL,
-    Content   TEXT NOT NULL,
-    Type      TEXT NOT NULL,
-    Provider  TEXT,
-    CreatedAt TEXT NOT NULL
+    Id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserId      TEXT NOT NULL,
+    Content     TEXT NOT NULL,
+    Type        TEXT NOT NULL,
+    Provider    TEXT,
+    ChatContext TEXT NOT NULL DEFAULT 'framework',
+    CreatedAt   TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
 
-            // マイグレーション: Provider カラムが存在しない場合は追加
-            var hasProvider = conn.Query<dynamic>("PRAGMA table_info(AIChatHistory)")
-                .Any(c => ((string)c.name).Equals("Provider", StringComparison.OrdinalIgnoreCase));
-            if (!hasProvider)
+            // マイグレーション: カラムが存在しない場合は追加（既存 DB 向け）
+            var columns = conn.Query<dynamic>("PRAGMA table_info(AIChatHistory)")
+                .ToDictionary(c => ((string)c.name).ToLowerInvariant(), c => c);
+
+            if (!columns.ContainsKey("provider"))
             {
                 conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN Provider TEXT");
                 _logger.LogInformation("Migrated AIChatHistory: added Provider column");
             }
+            if (!columns.ContainsKey("chatcontext"))
+            {
+                conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN ChatContext TEXT NOT NULL DEFAULT 'framework'");
+                _logger.LogInformation("Migrated AIChatHistory: added ChatContext column");
+            }
+
+            // ChatContext カラムが確実に存在してからコンテキスト用インデックスを作成
+            conn.Execute("CREATE INDEX IF NOT EXISTS idx_aichat_context ON AIChatHistory(UserId, ChatContext, Id);");
 
             conn.Execute(@"
 
@@ -79,25 +90,28 @@ CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
     }
 
     /// <summary>ユーザーのチャット履歴を時系列順で取得します。</summary>
-    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, int limit = 100)
+    /// <param name="chatContext">絞り込むコンテキスト。null の場合は全件取得。</param>
+    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, int limit = 100, string? chatContext = null)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        var rows = await conn.QueryAsync<ChatMessage>(@"
-SELECT Id, UserId, Content, Type, CreatedAt, Provider
-FROM AIChatHistory
-WHERE UserId = @UserId
-ORDER BY Id DESC
-LIMIT @Limit", new { UserId = userId, Limit = limit });
+        var sql = chatContext == null
+            ? @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
+                FROM AIChatHistory WHERE UserId = @UserId ORDER BY Id DESC LIMIT @Limit"
+            : @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
+                FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext ORDER BY Id DESC LIMIT @Limit";
+        var rows = await conn.QueryAsync<ChatMessage>(sql,
+            new { UserId = userId, Limit = limit, ChatContext = chatContext });
         return rows.Reverse(); // 時系列順に戻す
     }
 
-    /// <summary>メッセージを保存します。サーバー側の記録は削除しません。</summary>
-    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null)
+    /// <summary>メッセージを保存します。</summary>
+    /// <param name="chatContext">チャットのコンテキスト識別子（例: framework / dealer-staff / dealer-customer）。</param>
+    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null, string chatContext = "framework")
     {
         await using var conn = new SqliteConnection(_connectionString);
         var id = await conn.ExecuteScalarAsync<long>(@"
-INSERT INTO AIChatHistory (UserId, Content, Type, Provider, CreatedAt)
-VALUES (@UserId, @Content, @Type, @Provider, @CreatedAt);
+INSERT INTO AIChatHistory (UserId, Content, Type, Provider, ChatContext, CreatedAt)
+VALUES (@UserId, @Content, @Type, @Provider, @ChatContext, @CreatedAt);
 SELECT last_insert_rowid();",
             new
             {
@@ -105,6 +119,7 @@ SELECT last_insert_rowid();",
                 Content = content,
                 Type = type,
                 Provider = provider,
+                ChatContext = chatContext,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             });
 
@@ -118,13 +133,14 @@ SELECT last_insert_rowid();",
         return id;
     }
 
-    /// <summary>ユーザーの全履歴を削除します。</summary>
-    public async Task ClearHistoryAsync(string userId)
+    /// <summary>ユーザーの履歴を削除します。chatContext を指定すると特定コンテキストのみ削除します。</summary>
+    public async Task ClearHistoryAsync(string userId, string? chatContext = null)
     {
         await using var conn = new SqliteConnection(_connectionString);
-        await conn.ExecuteAsync(
-            "DELETE FROM AIChatHistory WHERE UserId = @UserId",
-            new { UserId = userId });
+        var sql = chatContext == null
+            ? "DELETE FROM AIChatHistory WHERE UserId = @UserId"
+            : "DELETE FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext";
+        await conn.ExecuteAsync(sql, new { UserId = userId, ChatContext = chatContext });
     }
 
     // ──────────────────────────────────────────────

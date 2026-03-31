@@ -6,7 +6,6 @@
 using System.Data;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.Extensions.Options;
 using NetYamlForge.Models.AI;
@@ -36,7 +35,7 @@ public class AutoDealerChatService
     private string DealerName => _config["AiWindow:DealerName"] ?? "AI 窓口ディーラー";
     private string BusinessHours => _config["AiWindow:BusinessHours"] ?? "月〜土 9:00〜18:00";
     private bool CliFirst => bool.TryParse(_config["AiWindow:CliFirst"], out var c) ? c : true;
-    private int CliTimeoutSeconds => int.TryParse(_config["AiWindow:CliTimeoutSeconds"], out var t) ? t : 30;
+    private int CliTimeoutSeconds => int.TryParse(_config["AiWindow:CliTimeoutSeconds"], out var t) ? t : 8;
     private string ProjectName => _projectScope.IsSet ? _projectScope.Current.Name : "auto-dealer-demo";
     private string[] ProviderPriority =>
         _config.GetSection("AiWindow:ProviderPriority").Get<string[]>() ?? ["claude", "qwen", "gemini", "ollama"];
@@ -241,29 +240,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
 
         // tool_call JSON でなければそのまま返す
         if (!TryParseCliTool(round1, out var toolName, out var toolJson))
-        {
-            _logger.LogWarning("CLI が tool_call JSON を返さなかった。応答長さ={Length}, 先頭 400 文字={First400}", 
-                round1.Length, round1.Substring(0, Math.Min(400, round1.Length)));
-
-            // データ問い合わせっぽい場合はパーサー経由でクエリ実行（CLI の逸脱を補正）
-            if (LooksLikeDataQuery(message))
-            {
-                try
-                {
-                    var parsed = await _queryParser.ParseAsync(message, ProjectName);
-                    using var doc = JsonDocument.Parse(JsonSerializer.Serialize(parsed));
-                    var parsedElement = doc.RootElement.Clone();
-                    var (rt, rows, qi, qNav, qLabel) = await ExecuteQueryDataToolAsync(parsedElement);
-                    return (rt, qi, rows, qNav, qLabel);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "CLI 非ツール応答のフォールバック解析に失敗");
-                }
-            }
-
             return (round1, "general", null, null, null);
-        }
 
         // ツール実行
         using var toolDoc = JsonDocument.Parse(toolJson);
@@ -298,28 +275,9 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         var round2Prompt = toolName == "query_data"
             ? prompt
             : $"{prompt}\n\n【処理結果】{toolResultText}";
-        
-        _logger.LogInformation("Round 2: toolName={Tool}, toolResultText 長={Len}, sysWithData dbContextMarkdown={HasDb}", 
-            toolName, toolResultText?.Length ?? 0, toolName == "query_data" && !string.IsNullOrEmpty(toolResultText));
-        
         var finalResponse = await TryCliProvidersInOrderAsync(round2Prompt, sysWithData);
-        
-        _logger.LogInformation("Round 2: finalResponse 長={Len}, 先頭 200 文字={Preview}",
-            finalResponse?.Length ?? 0, finalResponse?.Length > 200 ? finalResponse[..200] : finalResponse);
 
-        // 【混合方案】AI 応答が短すぎる場合は toolResultText を使用（フォーマット崩れ防止）
-        if (toolName == "query_data" && !string.IsNullOrEmpty(toolResultText))
-        {
-            // AI 只返回件数など、応答が短すぎる場合はフォーマット済みの toolResultText を使用する
-            if (string.IsNullOrEmpty(finalResponse) || finalResponse.Length < toolResultText.Length * 0.5)
-            {
-                _logger.LogInformation("AI 応答が短いため toolResultText を使用 (AI={AiLen}, toolResult={ToolLen})",
-                    finalResponse?.Length ?? 0, toolResultText.Length);
-                return (toolResultText!, intent, dataRows, navUrl, navLabel);
-            }
-        }
-
-        return (finalResponse!, intent, dataRows, navUrl, navLabel);
+        return (finalResponse ?? toolResultText, intent, dataRows, navUrl, navLabel);
     }
 
     /// <summary>
@@ -359,27 +317,6 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             }
         }
         catch (JsonException) { }
-        return false;
-    }
-
-    private static bool LooksLikeDataQuery(string message)
-    {
-        if (string.IsNullOrWhiteSpace(message)) return false;
-        var m = message.Trim();
-
-        // 明示的な件数・一覧・検索キーワード
-        if (Regex.IsMatch(m, @"(件数|何件|数は|数を|一覧|検索|リスト|全件|件)")) return true;
-
-        // 代表的な業務エンティティ語彙
-        var keywords = new[]
-        {
-            "顧客", "お客様", "予約", "在庫", "車両", "リード", "成約", "販売", "試乗",
-            "customers", "appointments", "vehicles", "sales_leads"
-        };
-        foreach (var k in keywords)
-        {
-            if (m.Contains(k, StringComparison.OrdinalIgnoreCase)) return true;
-        }
         return false;
     }
 
@@ -435,26 +372,20 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             var stopReason = root.TryGetProperty("stop_reason", out var sr) ? sr.GetString() : null;
             var contentArr = root.GetProperty("content");
 
-            _logger.LogInformation("Claude API 応答：round={Round}, stopReason={StopReason}, contentCount={Count}", round, stopReason, contentArr.GetArrayLength());
-
             // AI が直接テキストで回答した場合（DB クエリ不要と判断）
             if (stopReason != "tool_use")
             {
-                _logger.LogInformation("Round {Round}: AI が直接テキストで回答", round);
                 foreach (var block in contentArr.EnumerateArray())
                 {
                     if (block.TryGetProperty("type", out var bt) && bt.GetString() == "text" &&
                         block.TryGetProperty("text", out var txt) &&
                         !string.IsNullOrWhiteSpace(txt.GetString()))
                     {
-                        _logger.LogInformation("Round {Round}: AI テキスト応答を取得", round);
                         return (txt.GetString()!.Trim(), intent, dataRows, navUrl, navLabel);
                     }
                 }
                 break;
             }
-
-            _logger.LogInformation("Round {Round}: AI がツール呼び出しを要求", round);
 
             // AI がツールを呼び出した場合 → 実行して結果を返す
             var assistantContent = new List<object>();
@@ -517,11 +448,8 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
                 new { role = "assistant", content = (object)assistantContent },
                 new { role = "user",      content = (object)toolResults }
             ];
-            
-            _logger.LogInformation("Round {Round}: ツール結果を AI に送信して次ラウンドへ", round);
         }
 
-        _logger.LogWarning("ループ終了：maxRounds に達したか break しました。intent={Intent}", intent);
         return (GetTemplateResponse("general"), intent, dataRows, navUrl, navLabel);
     }
 
@@ -545,30 +473,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
 
             // IDynamicCrudRepository 経由で安全に SQL を生成・実行
             var (data, total) = await _queryExecutor.ExecuteAsync(queryParams, ProjectName);
-
-            // count アクションでも簡潔一覧 + 詳細リンクを提示するために、別途 list を取得する
-            if (string.Equals(queryParams.Action, "count", StringComparison.OrdinalIgnoreCase))
-            {
-                var listTop = queryParams.Top.GetValueOrDefault(5);
-                if (listTop <= 0) listTop = 5;
-
-                var listParams = new ParsedQueryParams
-                {
-                    Entity = queryParams.Entity,
-                    Action = "list",
-                    Filters = queryParams.Filters,
-                    OrderBy = queryParams.OrderBy,
-                    Select = queryParams.Select,
-                    Top = listTop
-                };
-
-                var (listData, listTotal) = await _queryExecutor.ExecuteAsync(listParams, ProjectName);
-                _logger.LogInformation("count アクション：listData.Count={Count}, total={Total}", listData?.Count ?? 0, listTotal);
-                data = listData ?? new List<IDictionary<string, object?>>();
-            }
-
-            _logger.LogInformation("FormatAsMarkdown 呼び出し：data.Count={Count}, total={Total}", data.Count, total);
-            var markdown = _queryFormatter.FormatAsMarkdown(data, queryParams, total, ProjectName);
+            var markdown = _queryFormatter.FormatAsMarkdown(data, queryParams, total);
 
             var dataRows = data.Count > 0
                 ? data.Select(d => d.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString() ?? "")).ToList()
@@ -602,7 +507,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             new
             {
                 name = "query_data",
-                description = "データベースからビジネスデータを検索します。車両在庫・予約・顧客・営業リードの情報を取得できます。ユーザーがデータを尋ねた場合は必ずこのツールを使用してください。**「〜数」「何件」「カウント」などの件数質問には action:\"count\" を使用**し、一覧表示には action:\"list\" を使用してください。",
+                description = "データベースからビジネスデータを検索します。車両在庫・予約・顧客・営業リードの情報を取得できます。ユーザーがデータを尋ねた場合は必ずこのツールを使用してください。",
                 input_schema = new
                 {
                     type = "object",
@@ -617,7 +522,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
                         action = new
                         {
                             type = "string",
-                            description = "クエリ種別：**list=一覧取得（デフォルト）、count=件数取得（「顧客数」「何件」などの質問に使用）**",
+                            description = "クエリ種別: list=一覧取得, count=件数取得",
                             @enum = new[] { "list", "count" }
                         },
                         filters = new
@@ -716,7 +621,6 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             sb.AppendLine("車両購入・試乗・サービスのご相談に対応します。");
             sb.AppendLine("在庫や予約状況が必要な場合は **query_data ツールを使用して** DBから最新情報を取得し、具体的な情報を案内してください。");
             sb.AppendLine("予約を作成する場合は create_appointment_request ツールを使用してください。");
-            sb.AppendLine("**「〜数」「何件」などの件数質問には action:\"count\" を使用**し、一覧表示には action:\"list\" を使用してください。");
         }
 
         sb.AppendLine();
@@ -747,15 +651,6 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         sb.AppendLine("## filters の日付相対指定");
         sb.AppendLine("value に以下の文字列を使用すると自動変換されます:");
         sb.AppendLine("today / yesterday / this_week / last_week / this_month / last_month / this_year / last_year");
-
-        if (isStaff)
-        {
-            sb.AppendLine();
-            sb.AppendLine("## 応答フォーマット");
-            sb.AppendLine("4. 新响应格式 ✅ - 简洁列表 + 详细链接");
-            sb.AppendLine("データ回答は「該当件数 → 簡潔な一覧 → 各行に詳細リンク」の順で出力してください。");
-            sb.AppendLine("件数質問（例:「顧客数」）でも同じ形式で出力してください。");
-        }
 
         if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
         {
@@ -1060,37 +955,8 @@ FROM ai_messages WHERE conversation_id = @Id ORDER BY timestamp ASC",
     private static string ExtractCliResponseText(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return "";
-        
-        // 清理 markdown 代码块标记
-        var cleaned = raw.Trim();
-        if (cleaned.StartsWith("```json"))
-            cleaned = cleaned["```json".Length..];
-        else if (cleaned.StartsWith("```"))
-            cleaned = cleaned["```".Length..];
-        if (cleaned.EndsWith("```"))
-            cleaned = cleaned[..^3];
-        cleaned = cleaned.Trim();
-        
-        var lines = cleaned.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var lines = raw.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        // ① 最初に tool_call JSON をチェック（DB クエリ用の最重要判定）
-        foreach (var line in lines)
-        {
-            if (!line.StartsWith("{")) continue;
-            try
-            {
-                using var doc = JsonDocument.Parse(line);
-                var root = doc.RootElement;
-                // tool_call を検出したらそのまま返す（後続の TryParseCliTool で処理される）
-                if (root.TryGetProperty("tool_call", out var tc))
-                {
-                    return line.Trim();
-                }
-            }
-            catch (JsonException) { }
-        }
-
-        // ② {"type": "result"} 形式の応答
         foreach (var line in lines)
         {
             if (!line.StartsWith("{")) continue;

@@ -93,8 +93,23 @@ public class Conversation
     /// </summary>
     public void SetContextData(Dictionary<string, object>? data)
     {
-        ContextData = data != null 
-            ? System.Text.Json.JsonSerializer.Serialize(data) 
+        ContextData = data != null
+            ? System.Text.Json.JsonSerializer.Serialize(data)
             : null;
     }
+}
+
+/// <summary>
+/// ユーザー別の会話履歴一覧サマリー（業務アシスタント / 顧客アシスタント用）
+/// </summary>
+public class UserConversationSummary
+{
+    public string ConversationId { get; set; } = "";
+    public string Channel { get; set; } = ""; // staff | web
+    public string Status { get; set; } = "";
+    public string? LastIntent { get; set; }
+    public string StartedAt { get; set; } = "";
+    public string? EndedAt { get; set; }
+    public int MessageCount { get; set; }
+    public string? LastAiMessage { get; set; }
 }

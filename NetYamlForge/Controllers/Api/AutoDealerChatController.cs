@@ -9,7 +9,7 @@ using NetYamlForge.Services.AI;
 namespace NetYamlForge.Controllers.Api;
 
 [ApiController]
-[Route("{project}/api/chat")]
+[Route("{project}/api/ai/chat")]
 [Produces("application/json")]
 public class AutoDealerChatController : ControllerBase
 {
@@ -99,6 +99,7 @@ public class AutoDealerChatController : ControllerBase
     {
         try
         {
+            // StartSessionAsync は channel パラメータのみを受け取る
             var result = await _chat.StartSessionAsync("staff");
             return Ok(result);
         }
@@ -107,6 +108,19 @@ public class AutoDealerChatController : ControllerBase
             _logger.LogError(ex, "社員セッション開始エラー");
             return StatusCode(500, new { error = "セッションの開始に失敗しました。" });
         }
+    }
+
+    /// <summary>ログイン社員の業務アシスタント会話一覧を取得します。</summary>
+    [Authorize]
+    [HttpGet("staff/conversations")]
+    public async Task<IActionResult> GetStaffConversations([FromQuery] int limit = 50)
+    {
+        // TODO: 実装予定 - 現在は空のリストを返す
+        // var userId = User.Identity?.Name;
+        // if (string.IsNullOrEmpty(userId))
+        //     return Unauthorized();
+        // var conversations = await _chat.GetUserConversationsAsync(userId, "staff", limit);
+        return Ok(new List<object>());
     }
 
     /// <summary>社員メッセージを送信し AI 応答を取得します。</summary>

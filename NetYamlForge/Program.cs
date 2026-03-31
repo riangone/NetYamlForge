@@ -210,7 +210,7 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
                            NetYamlForge.Services.AI.Providers.CliFirstLlmProvider>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter, NetYamlForge.Services.AI.QueryResultFormatter>();
 
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
@@ -228,6 +228,20 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateService>();
 builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateDbService>();
 builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateOrchestrator>();
+
+// AI 窓口システムサービス (AIWindowController が依存)
+builder.Services.Configure<NetYamlForge.Services.AI.AiWindowConfig>(
+    builder.Configuration.GetSection("AiWindow"));
+builder.Services.AddScoped<NetYamlForge.Services.AI.IConversationManager,
+                           NetYamlForge.Services.AI.ConversationManager>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.IDirectAIProcessor,
+                           NetYamlForge.Services.AI.DirectAIProcessor>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.IHandoverManager,
+                           NetYamlForge.Services.AI.HandoverManager>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.ICustomerDataService,
+                           NetYamlForge.Services.AI.CustomerDataService>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.IAppointmentService,
+                           NetYamlForge.Services.AI.AppointmentService>();
 
 var app = builder.Build();
 
@@ -277,6 +291,9 @@ app.UseAuthorization();
 app.MapHub<AIProgressHub>("/aiProgressHub");
 app.MapHub<NaturalLanguageQueryHub>("/nlQueryHub");
 app.MapHub<AIDebateHub>("/aiDebateHub");
+
+// [ApiController] 属性ルーティングを明示的に登録（MapControllerRoute だけでは登録されない）
+app.MapControllers();
 
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(

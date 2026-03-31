@@ -622,8 +622,12 @@
 
                 updateStatus('completed');
             } else {
-                const error = await response.json();
-                addMessage(`错误：${error.error}`, 'system');
+                let errMsg = `HTTP ${response.status}`;
+                try {
+                    const errBody = await response.json();
+                    errMsg = errBody.error || errBody.title || errMsg;
+                } catch (_) { /* レスポンスボディが空または非 JSON */ }
+                addMessage(`错误：${errMsg}`, 'system');
                 updateStatus('error');
             }
         } catch (error) {

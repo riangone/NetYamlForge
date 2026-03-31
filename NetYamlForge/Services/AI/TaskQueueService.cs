@@ -149,6 +149,11 @@ public class TaskQueueService
                         if (resultText != null && resultText.Trim().Equals("Task completed", StringComparison.OrdinalIgnoreCase))
                             resultText = null;
                         var finalResult = hasMessageContent ? allMessages.ToString() : (resultText ?? lastMessage ?? "");
+                        
+                        _logger.LogInformation("[TaskQueue] Task {TaskId} completed. hasMessageContent={HasContent}, allMessages.Length={Len}, resultText={ResultLen}, finalResult.Length={FinalLen}", 
+                            task.Id, hasMessageContent, allMessages.Length, resultText?.Length ?? 0, finalResult?.Length ?? 0);
+                        _logger.LogInformation("[TaskQueue] finalResult 先頭 200 文字：{Preview}", finalResult?.Length > 200 ? finalResult[..200] : finalResult);
+                        
                         _tracker.Complete(task.Id, finalResult);
                         await SaveCommandLogResultAsync(task.Id, "Completed", finalResult, null, startedAt);
                         return;
@@ -164,6 +169,8 @@ public class TaskQueueService
                     // 累积所有 assistant 消息（Completed/Failed 以外のメッセージのみ）
                     if (!string.IsNullOrEmpty(update.Message))
                     {
+                        _logger.LogDebug("[TaskQueue] 受信メッセージ：{Len}文字，先頭 50 文字={Preview}", update.Message.Length, update.Message.Length > 50 ? update.Message[..50] : update.Message);
+                        
                         if (hasMessageContent)
                         {
                             allMessages.AppendLine(update.Message);

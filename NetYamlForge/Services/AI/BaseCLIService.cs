@@ -99,10 +99,69 @@ public abstract class BaseCLIService : ICLIService
     /// </summary>
     protected virtual string ExtractTextFromOutput(string raw)
     {
+        Logger.LogInformation("[ExtractTextFromOutput] 生出力長：{Length}", raw?.Length ?? 0);
+        
         if (string.IsNullOrWhiteSpace(raw)) return raw;
 
         var trimmed = raw.Trim();
         if (!trimmed.StartsWith('{') && !trimmed.StartsWith('[')) return raw;
+
+        // Qwen CLI 返回 JSON 数组格式：[{...}, {...}, {...}]
+        if (trimmed.StartsWith('['))
+        {
+            try
+            {
+                using var arrDoc = JsonDocument.Parse(trimmed);
+                var arr = arrDoc.RootElement;
+                if (arr.GetArrayLength() > 0)
+                {
+                    string? resultText = null;
+                    var textParts = new List<string>();
+
+                    foreach (var item in arr.EnumerateArray())
+                    {
+                        if (!item.TryGetProperty("type", out var typeEl)) continue;
+                        var eventType = typeEl.GetString();
+
+                        // { "type": "result", "result": "..." } — 最終結果イベント（最優先）
+                        if (eventType == "result" &&
+                            item.TryGetProperty("result", out var resultEl) &&
+                            resultEl.ValueKind == JsonValueKind.String)
+                        {
+                            var t = resultEl.GetString();
+                            if (!string.IsNullOrWhiteSpace(t)) return t;  // 立即返回 result
+                        }
+
+                        // { "type": "assistant", "message": { "content": [{ "type": "text", "text": "..." }] } }
+                        if (eventType == "assistant" &&
+                            item.TryGetProperty("message", out var msgEl) &&
+                            msgEl.TryGetProperty("content", out var contentArr) &&
+                            contentArr.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var c in contentArr.EnumerateArray())
+                            {
+                                if (c.TryGetProperty("type", out var ct) && ct.GetString() == "text" &&
+                                    c.TryGetProperty("text", out var txt))
+                                {
+                                    var s = txt.GetString();
+                                    if (!string.IsNullOrWhiteSpace(s)) textParts.Add(s);
+                                }
+                            }
+                        }
+                    }
+
+                    if (resultText != null) return resultText;
+                    if (textParts.Count > 0)
+                    {
+                        var combined = string.Join("\n", textParts);
+                        Logger.LogInformation("[ExtractTextFromOutput] 抽出テキスト長：{Length}, 先頭 100 文字：{Preview}", combined.Length, combined.Length > 100 ? combined[..100] : combined);
+                        return combined;
+                    }
+                }
+            }
+            catch (JsonException) { }
+            // JSON 数组解析失败，继续下面的 NDJSON 处理
+        }
 
         // NDJSON（stream-json）形式の検出: Claude/Qwen CLI が複数行の JSON イベントを出力する
         var lines = trimmed.Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -152,8 +211,17 @@ public abstract class BaseCLIService : ICLIService
                 catch (JsonException) { }
             }
 
-            if (resultText != null) return resultText;
-            if (textParts.Count > 0) return string.Join("\n", textParts);
+            if (resultText != null)
+            {
+                Logger.LogInformation("[ExtractTextFromOutput] NDJSON: resultText 長={Length}", resultText.Length);
+                return resultText;
+            }
+            if (textParts.Count > 0)
+            {
+                var combined = string.Join("\n", textParts);
+                Logger.LogInformation("[ExtractTextFromOutput] NDJSON: textParts 長={Count}, 結合長={Length}", textParts.Count, combined.Length);
+                return combined;
+            }
         }
 
         // 単一 JSON オブジェクト形式
@@ -167,7 +235,11 @@ public abstract class BaseCLIService : ICLIService
                 resultProp.ValueKind == JsonValueKind.String)
             {
                 var text = resultProp.GetString();
-                if (!string.IsNullOrWhiteSpace(text)) return text;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    Logger.LogInformation("[ExtractTextFromOutput] 単一 JSON: result 長={Length}", text.Length);
+                    return text;
+                }
             }
 
             // { "text": "..." } 形式のフォールバック
@@ -175,7 +247,11 @@ public abstract class BaseCLIService : ICLIService
                 textProp.ValueKind == JsonValueKind.String)
             {
                 var text = textProp.GetString();
-                if (!string.IsNullOrWhiteSpace(text)) return text;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    Logger.LogInformation("[ExtractTextFromOutput] 単一 JSON: text 長={Length}", text.Length);
+                    return text;
+                }
             }
 
             // content 配列形式のフォールバック（一部プロバイダー）

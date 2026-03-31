@@ -14,7 +14,7 @@
 
     // 設定
     const config = {
-        apiBaseUrl: '/api/ai',
+        apiBaseUrl: '/api/aiwindow',
         signalRUrl: '/aiChatHub',
         themeColor: '#007bff',
         position: 'bottom-right',

@@ -9,9 +9,8 @@ jobs:
       cron: "0 9,16 * * *"        # 每天 09:00 和 16:00
       timezone: "Asia/Shanghai"
 
-    type: sql_to_csv
+    type: china_stock_briefing
     settings:
-      sqlFile: jobs/sql/china_stock_briefing.sql
       outputFile: "jobs/output/china_stock_briefing_{date:yyyyMMdd_HHmm}.csv"
       includeHeader: true
       delimiter: ","
@@ -20,3 +19,4 @@ jobs:
       retryCount: 2
       retryInterval: 300         # 5 分钟后重试
       logError: true
+      notify: true

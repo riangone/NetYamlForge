@@ -8,7 +8,8 @@ public class ChatMessage
     public string Type { get; set; } = ""; // user | assistant
     public string CreatedAt { get; set; } = "";
     public string? Provider { get; set; } // AI 提供者标识 (qwen, claude, copilot, etc.)
-    
+    public string? ChatContext { get; set; } // チャットコンテキスト: framework | dealer-staff | dealer-customer
+
     /// <summary>
     /// 格式化的显示时间（包含日期和时间）
     /// </summary>

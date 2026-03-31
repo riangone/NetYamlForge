@@ -13,7 +13,8 @@ namespace NetYamlForge.Controllers;
 /// </summary>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/[controller]")]             // フレームワーク AI: /api/AI/...
+[Route("{project}/api/[controller]")]   // プロジェクト付き: /{project}/api/AI/...
 public class AIController : ControllerBase
 {
     private readonly CLIServiceFactory _cliFactory;
@@ -56,10 +57,16 @@ public class AIController : ControllerBase
     /// 发送聊天请求
     /// </summary>
     [HttpPost("chat")]
-    public async Task<ActionResult<AIChatResponse>> Chat([FromBody] AIChatRequest request)
+    public async Task<ActionResult<AIChatResponse>> Chat([FromBody] AIChatRequest request, [FromRoute] string? project)
     {
         try
         {
+            // 从路由绑定项目名（如果 body 中没有提供）
+            if (string.IsNullOrEmpty(request.Project) && !string.IsNullOrEmpty(project))
+            {
+                request.Project = project;
+            }
+
             // 验证 CLI 工具
             var cliService = _cliFactory.GetService(request.CliTool);
             var toolInfo = await cliService.GetToolInfoAsync();
@@ -77,7 +84,7 @@ public class AIController : ControllerBase
             var userId = GetCurrentUserId();
 
             // ユーザーのメッセージをチャット履歴に保存
-            await _chatHistory.SaveMessageAsync(userId, request.Message, "user");
+            await _chatHistory.SaveMessageAsync(userId, request.Message, "user", chatContext: "framework");
 
             // 创建任务
             var task = new AITask
@@ -292,11 +299,12 @@ public class AIController : ControllerBase
     /// <summary>
     /// チャット履歴を取得します
     /// </summary>
+    /// <param name="context">絞り込みコンテキスト（framework / dealer-staff / dealer-customer）。省略時は全件。</param>
     [HttpGet("history")]
-    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100)
+    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = "framework")
     {
         var userId = GetCurrentUserId();
-        var messages = await _chatHistory.GetHistoryAsync(userId, limit);
+        var messages = await _chatHistory.GetHistoryAsync(userId, limit, string.IsNullOrEmpty(context) ? null : context);
         return Ok(messages);
     }
 
@@ -326,13 +334,13 @@ public class AIController : ControllerBase
     }
 
     /// <summary>
-    /// チャット履歴を全件削除します
+    /// チャット履歴を削除します（context 指定で特定コンテキストのみ削除可）
     /// </summary>
     [HttpDelete("history")]
-    public async Task<ActionResult> ClearHistory()
+    public async Task<ActionResult> ClearHistory([FromQuery] string? context = "framework")
     {
         var userId = GetCurrentUserId();
-        await _chatHistory.ClearHistoryAsync(userId);
+        await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context);
         return Ok();
     }
 }

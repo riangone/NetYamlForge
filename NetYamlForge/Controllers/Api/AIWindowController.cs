@@ -8,7 +8,7 @@ namespace NetYamlForge.Controllers.Api;
 /// AI 窗口 API コントローラー
 /// </summary>
 [ApiController]
-[Route("api/ai")]
+[Route("api/aiwindow")]  // api/ai は AIController ({project?}/api/AI) と競合するため aiwindow に変更
 [Produces("application/json")]
 public class AIWindowController : ControllerBase
 {
