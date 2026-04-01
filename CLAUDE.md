@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Skill Routing
+
+**NetYamlForge フレームワーク AI スキル**
+
+利用可能なスキルがマッチする場合は、直接答えずにまずスキルを呼び出してください。
+
+| ユーザーリクエスト | 呼び出すスキル |
+|------------------|---------------|
+| コードレビュー、マージ前チェック | `/nyf-review` |
+| リリース、デプロイ、PR 作成 | `/nyf-ship` |
+| 足場作り、エンティティ生成 | `/nyf-scaffold` |
+| セキュリティ診断、脆弱性スキャン | `/nyf-security` |
+| 自動車販売、在庫照会 | auto-dealer デモへ転送 |
+
+**auto-dealer-demo サブプロジェクト スキル**
+
+| ユーザーリクエスト | 呼び出すスキル |
+|------------------|---------------|
+| 在庫照会、車両分析 | `/dealer-inventory` |
+| 営業リード管理、成約分析 | `/dealer-sales` |
+| 顧客情報、購入履歴 | `/dealer-customer` |
+| 試乗予約、サービス予約 | `/dealer-appointment` |
+
+---
+
 ## Commands
 
 ```bash
