@@ -117,6 +117,7 @@ public class LmStudioCLIService : BaseCLIService
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default)
     {
         return ExecuteViaApiStreamingAsync(message, sessionId, ct);

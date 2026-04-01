@@ -415,7 +415,7 @@
   // ── バックエンド API 呼び出し ──────────────────────────────────────
 
   ChatWidget.prototype.apiBase = function () {
-    return (this.cfg.apiBase || '') + '/' + this.cfg.project + '/api/chat';
+    return (this.cfg.apiBase || '') + '/' + this.cfg.project + '/api/ai/chat';
   };
 
   ChatWidget.prototype.startSession = function () {

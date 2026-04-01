@@ -149,6 +149,7 @@ public class OllamaCLIService : BaseCLIService
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default)
     {
         if (Config.Ollama.UseApi)
@@ -157,7 +158,7 @@ public class OllamaCLIService : BaseCLIService
         }
         else
         {
-            return base.ExecuteStreamingAsync(message, workingDirectory, sessionId, allowedTools, ct);
+            return base.ExecuteStreamingAsync(message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct);
         }
     }
 

@@ -19,7 +19,7 @@
   const scriptEl = document.currentScript || document.querySelector('script[data-project]');
   const PROJECT = scriptEl?.dataset?.project || 'auto-dealer-demo';
   const DEALER_NAME = scriptEl?.dataset?.dealerName || 'AI アシスタント';
-  const API_BASE = `/${PROJECT}/api/chat`;
+  const API_BASE = `/${PROJECT}/api/ai/chat`;
 
   const QUICK_REPLIES = [
     '試乗の予約をしたい',

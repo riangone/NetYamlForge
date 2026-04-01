@@ -129,6 +129,7 @@ public class TaskQueueService
                     workingDir,
                     task.SessionId,
                     task.AllowedTools ?? _config.DefaultAllowedTools,
+                    systemPromptOverride: null,
                     timeoutCts.Token))
                 {
                     _tracker.UpdateProgress(task.Id, update);

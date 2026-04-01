@@ -21,10 +21,11 @@ public interface ICLIService
     /// 执行命令（流式）
     /// </summary>
     IAsyncEnumerable<ProgressUpdate> ExecuteStreamingAsync(
-        string message, 
+        string message,
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         CancellationToken ct = default);
     
     /// <summary>

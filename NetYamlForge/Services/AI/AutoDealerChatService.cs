@@ -61,7 +61,8 @@ public class AutoDealerChatService
         _dealerName = config["AiWindow:DealerName"] ?? "AI 窓口ディーラー";
         _businessHours = config["AiWindow:BusinessHours"] ?? "月〜土 9:00〜18:00";
         _projectName = _projectScope.IsSet ? _projectScope.Current.Name : "auto-dealer-demo";
-        _defaultProvider = config["AiWindow:DefaultProvider"] ?? "qwen";
+        // AiWindow に DefaultProvider がなければ AICli:DefaultTool をフォールバック
+        _defaultProvider = config["AiWindow:DefaultProvider"] ?? config["AICli:DefaultTool"] ?? "qwen";
     }
 
     // ─────────────────────────────────────────────────────────
@@ -172,6 +173,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
 
     /// <summary>
     /// グローバル AI と同じ CLI サービスを使用して応答を生成
+    /// グローバル AI と同じ流式処理ロジックを使用
     /// </summary>
     private async Task<(string ResponseText, string Intent, List<Dictionary<string, string>>? DataRows, string? NavUrl, string? NavLabel)>
         GenerateAiResponseAsync(string message, bool isStaff, IEnumerable<(string Role, string Content)> history)
@@ -180,7 +182,17 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         var systemPrompt = BuildSystemPrompt(isStaff);
 
         // CLI サービスを取得（グローバル AI と共通）
-        var cliService = _cliFactory.GetService(_defaultProvider);
+        ICLIService? cliService = null;
+        try
+        {
+            cliService = _cliFactory.GetService(_defaultProvider);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CLI サービス {Provider} の取得に失敗しました", _defaultProvider);
+            return (GetTemplateResponse("error"), "error", null, null, null);
+        }
+
         if (cliService == null)
         {
             _logger.LogWarning("CLI サービス {Provider} が見つかりません", _defaultProvider);
@@ -192,21 +204,73 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             // プロンプトを構築（履歴 + 現在のメッセージ）
             var prompt = BuildPromptWithHistory(message, history, systemPrompt);
 
-            // CLI を実行（グローバル AI と共通ロジック）
-            var response = await cliService.ExecuteAsync(
+            _logger.LogDebug("AI 応答生成開始：provider={Provider}, messageLength={Length}",
+                _defaultProvider, message?.Length ?? 0);
+
+            // CLI を実行（非流式処理）
+            var response = await ExecuteCliAsync(
+                cliService,
                 prompt,
-                systemPromptOverride: systemPrompt,
-                ct: CancellationToken.None
-            );
+                systemPrompt,
+                _defaultProvider);
+
+            _logger.LogDebug("AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
 
             // 応答を処理（業務ロジック：DB クエリ実行、分析レポート生成）
             return await ProcessAiResponseAsync(response, message, isStaff);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "AI 応答生成エラー");
+            _logger.LogError(ex, "AI 応答生成エラー：provider={Provider}, message={Message}",
+                _defaultProvider, message);
             return (GetTemplateResponse("error"), "error", null, null, null);
         }
+    }
+
+    /// <summary>
+    /// CLI を実行して AI 応答を取得
+    /// 非流式処理を使用して AI モデルの重複応答を防止
+    /// </summary>
+    private async Task<string> ExecuteCliAsync(
+        ICLIService cliService,
+        string prompt,
+        string systemPrompt,
+        string provider)
+    {
+        // 作業ディレクトリを取得
+        var workingDir = GetWorkingDirectory(_projectName);
+
+        _logger.LogDebug("[AutoDealerChat] AI 実行開始：provider={Provider}", provider);
+
+        // 非流式で CLI を実行（流式より安定）
+        var response = await cliService.ExecuteAsync(
+            prompt,
+            workingDir,
+            sessionId: null,
+            allowedTools: null,
+            systemPromptOverride: systemPrompt,
+            CancellationToken.None);
+
+        _logger.LogInformation("[AutoDealerChat] AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
+
+        return response ?? string.Empty;
+    }
+
+    /// <summary>
+    /// プロジェクトの作業ディレクトリを取得
+    /// </summary>
+    private string? GetWorkingDirectory(string? project)
+    {
+        if (string.IsNullOrEmpty(project))
+        {
+            return Directory.GetCurrentDirectory();
+        }
+
+        // 直接使用源代码中的项目目录
+        // /home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/{project}
+        var projectPath = $"/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/{project}";
+
+        return Directory.Exists(projectPath) ? projectPath : Directory.GetCurrentDirectory();
     }
 
     /// <summary>
@@ -307,25 +371,21 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
     // システムプロンプト（グローバル + 業務固有）
     // ─────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// システムプロンプトを構築
+    /// 子プロジェクト AI は業務固有のプロンプトのみを使用（グローバル AI の制限を適用しない）
+    /// </summary>
     private string BuildSystemPrompt(bool isStaff, string? dbContextMarkdown = null)
     {
-        // グローバル AI と共通の基盤プロンプト
-        var frameworkPrompt = _skillLoader.GetSystemPrompt();
-        
-        // 業務固有のプロンプトを読み込み
-        var autoDealerPrompt = LoadAutoDealerPromptFromMd(isStaff);
-        
-        // 統合
-        var systemPrompt = string.IsNullOrWhiteSpace(frameworkPrompt)
-            ? autoDealerPrompt
-            : $"{frameworkPrompt}\n\n{autoDealerPrompt}";
-        
+        // 業務固有のプロンプトのみを使用（グローバル AI の制限を適用しない）
+        var systemPrompt = LoadAutoDealerPromptFromMd(isStaff);
+
         // プレースホルダーを置換
         systemPrompt = systemPrompt
             .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
             .Replace("{business_hours}", _businessHours)
             .Replace("{dealer_name}", _dealerName);
-        
+
         // DB 検索結果がある場合は追加
         if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
         {
@@ -333,7 +393,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             systemPrompt += "## DB 検索結果（参考）" + Environment.NewLine;
             systemPrompt += dbContextMarkdown;
         }
-        
+
         return systemPrompt;
     }
 
@@ -559,7 +619,7 @@ UPDATE ai_conversations SET status = 'escalated', updated_at = @Now WHERE conver
         return await _db.QueryAsync<(string, string)>(@"
 SELECT sender, content FROM ai_messages
 WHERE conversation_id = @Id
-ORDER BY created_at DESC
+ORDER BY timestamp DESC
 LIMIT @Count",
             new { Id = conversationId, Count = count });
     }
@@ -568,9 +628,9 @@ LIMIT @Count",
     {
         await _db.ExecuteAsync(@"
 INSERT INTO ai_messages
-  (message_id, conversation_id, sender, content, intent, confidence, sentiment_score, created_at)
+  (message_id, conversation_id, sender, message_type, content, intent, confidence_score, sentiment_score, timestamp)
 VALUES
-  (@MessageId, @ConversationId, @Sender, @Content, @Intent, @Confidence, @Sentiment, @Timestamp)",
+  (@MessageId, @ConversationId, @Sender, 'text', @Content, @Intent, @Confidence, @Sentiment, @Timestamp)",
             new { MessageId = messageId, ConversationId = conversationId, Sender = sender, Content = content, Intent = intent ?? "general", Confidence = confidence, Sentiment = sentiment, Timestamp = timestamp });
     }
 
@@ -703,10 +763,10 @@ ORDER BY CASE h.priority WHEN 'urgent' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' T
     public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(string conversationId)
     {
         return await _db.QueryAsync<ChatMessage>(@"
-SELECT message_id AS MessageId, sender AS Sender, content AS Content, created_at AS Timestamp, intent AS Intent
+SELECT message_id AS MessageId, sender AS Sender, content AS Content, timestamp AS Timestamp, intent AS Intent
 FROM ai_messages
 WHERE conversation_id = @Id
-ORDER BY created_at ASC",
+ORDER BY timestamp ASC",
             new { Id = conversationId });
     }
 

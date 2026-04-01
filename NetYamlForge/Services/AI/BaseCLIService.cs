@@ -55,9 +55,10 @@ public abstract class BaseCLIService : ICLIService
         string? workingDirectory = null,
         string? sessionId = null,
         List<string>? allowedTools = null,
+        string? systemPromptOverride = null,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var argList = BuildArgumentList(message, true, sessionId, allowedTools, null);
+        var argList = BuildArgumentList(message, true, sessionId, allowedTools, systemPromptOverride);
         var workingDir = workingDirectory ?? Config.DefaultWorkingDirectory;
 
         await foreach (var line in Executor.ExecuteStreamingAsync(CommandPath, argList, workingDir, GetEnvironmentVariables(), ct))
