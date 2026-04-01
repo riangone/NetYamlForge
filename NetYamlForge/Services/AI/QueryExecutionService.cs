@@ -164,6 +164,7 @@ public class QueryExecutionService
                 "in" => FormatInValue(filter.Value),
                 "is_null" => "true",
                 "like" => $"%{filter.Value}%",
+                "lt" or "lte" or "gt" or "gte" or "eq" or "ne" => FormatDateValue(filter.Value),
                 _ => filter.Value?.ToString()
             };
 
@@ -171,6 +172,29 @@ public class QueryExecutionService
         }
 
         return filterDict;
+    }
+
+    /// <summary>
+    /// 格式化日期值（处理相对日期如 today、yesterday 等）
+    /// </summary>
+    private string? FormatDateValue(object? value)
+    {
+        if (value is string strValue)
+        {
+            // 检查是否是相对日期
+            try
+            {
+                var (start, end) = RelativeDateRanges.GetDateRange(strValue);
+                // 对于 lt/lte 操作，使用当天结束时间；对于 gt/gte 操作，使用当天开始时间
+                return start.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+            catch
+            {
+                // 不是相对日期，按原样处理
+            }
+        }
+
+        return value?.ToString();
     }
 
     /// <summary>

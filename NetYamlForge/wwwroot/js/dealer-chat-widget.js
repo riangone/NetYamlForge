@@ -715,24 +715,44 @@
     const storedConvId = sessionStorage.getItem('dealer_conv_' + currentMode);
     if (storedConvId) {
       dealerConversationId = storedConvId;
+      console.log('DealerChat: セッションを復元しました', dealerConversationId);
       return;
     }
 
     try {
-      const resp = await fetch(CONFIG.chatApiBase + '/' + currentTheme.apiPath, {
+      const sessionUrl = CONFIG.chatApiBase + '/' + currentTheme.apiPath;
+      console.log('DealerChat: セッション開始 URL:', sessionUrl);
+      
+      const resp = await fetch(sessionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: currentMode })
       });
+      
       if (resp.ok) {
         const data = await resp.json();
         dealerConversationId = data.conversationId;
         sessionStorage.setItem('dealer_conv_' + currentMode, dealerConversationId);
+        console.log('DealerChat: セッションを開始しました', dealerConversationId);
       } else {
-        console.error('DealerChat: セッション開始失敗', resp.status);
+        const errText = await resp.text().catch(() => '');
+        console.error('DealerChat: セッション開始失敗', resp.status, errText);
+        // エラーメッセージを表示
+        if (resp.status === 401) {
+          addMessage('ログインが必要です。ログインしてください。', 'system');
+        } else if (resp.status === 500) {
+          addMessage('サーバーエラーが発生しました。しばらくお待ちください。', 'system');
+        } else {
+          addMessage('セッションの開始に失敗しました：' + resp.status, 'system');
+        }
       }
     } catch (e) {
       console.error('DealerChat: セッション開始エラー', e);
+      let errorMsg = 'セッション開始エラー：' + e.message;
+      if (e.message.includes('Failed to fetch')) {
+        errorMsg = 'サーバーに接続できません。サーバーが起動しているか確認してください。';
+      }
+      addMessage(errorMsg, 'system');
     }
   }
 
@@ -1203,7 +1223,7 @@
       }
     } catch (error) {
       console.error('Send message error:', error);
-      addMessage(`リクエスト失敗: ${error.message}`, 'system');
+      let errorMsg = error.message || '不明なエラー'; if (errorMsg.includes('Failed to fetch')) { errorMsg = 'サーバーに接続できません。サーバーが起動しているか確認してください。'; } addMessage(`リクエスト失敗：${errorMsg}`, 'system');
       updateStatus('error');
     } finally {
       setSendingState(false);

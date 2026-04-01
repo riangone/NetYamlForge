@@ -25,7 +25,6 @@ public class AutoDealerChatService
     private readonly QueryParserService _queryParser;
     private readonly QueryExecutionService _queryExecutor;
     private readonly QueryResultFormatter _queryFormatter;
-    private readonly BusinessInsightService _businessInsight;
     private readonly TaskQueueService _taskQueue;
     private readonly ProgressTracker _tracker;
 
@@ -44,7 +43,6 @@ public class AutoDealerChatService
         QueryParserService queryParser,
         QueryExecutionService queryExecutor,
         QueryResultFormatter queryFormatter,
-        BusinessInsightService businessInsight,
         TaskQueueService taskQueue,
         ProgressTracker tracker,
         IConfiguration config)
@@ -57,7 +55,6 @@ public class AutoDealerChatService
         _queryParser = queryParser;
         _queryExecutor = queryExecutor;
         _queryFormatter = queryFormatter;
-        _businessInsight = businessInsight;
         _taskQueue = taskQueue;
         _tracker = tracker;
         
@@ -253,19 +250,8 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             var (resultText, dataRows, intent, navUrl, navLabel) =
                 await ExecuteQueryDataToolAsync(queryData, userMessage);
             
-            // 分析レポートを生成（業務ロジック）
-            if (LooksLikeBusinessQuery(userMessage))
-            {
-                var dataForInsight = dataRows != null 
-                    ? dataRows.Select(d => (IDictionary<string, object?>)d.ToDictionary(kv => kv.Key, kv => (object?)kv.Value)).ToList()
-                    : new List<IDictionary<string, object?>>();
-                    
-                var insight = await _businessInsight.GenerateInsightAsync(
-                    dataForInsight,
-                    queryData, userMessage);
-                return (insight.Markdown, intent, dataRows, navUrl, navLabel);
-            }
-            
+            // 分析レポートは AI がシステムプロンプトに従って生成する
+            // ここでは追加の処理は行わない
             return (resultText, intent, dataRows, navUrl, navLabel);
         }
         
@@ -441,14 +427,15 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             }
 
             // 業務分析レポートを生成
+            // AI がシステムプロンプトに従って分析レポート形式で応答を生成するため、
+            // ここでは簡潔な Markdown 形式に変換するのみ
             string markdown;
             if (!string.IsNullOrEmpty(userMessage) && LooksLikeBusinessQuery(userMessage))
             {
-                _logger.LogInformation("業務分析レポート生成：userMessage={Message}", userMessage);
-                var insight = await _businessInsight.GenerateInsightAsync(
-                    data,
-                    queryParams, userMessage);
-                markdown = insight.Markdown;
+                _logger.LogInformation("業務クエリ検出：userMessage={Message}", userMessage);
+                // 業務クエリの場合は、AI に分析レポート生成を委ねる
+                // queryFormatter は基本的な Markdown 形式を生成
+                markdown = _queryFormatter.FormatAsMarkdown(data, queryParams, total, _projectName);
             }
             else
             {

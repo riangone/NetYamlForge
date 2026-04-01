@@ -207,7 +207,6 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter, NetYamlForge.Services.AI.QueryResultFormatter>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.BusinessInsightService>();
 
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
