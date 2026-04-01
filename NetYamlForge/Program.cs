@@ -198,11 +198,7 @@ builder.Services.AddHttpClient("OllamaClient");
 builder.Services.AddHttpClient("LmStudioClient");
 
 // AI 窓口チャットサービス (auto-dealer-demo)
-builder.Services.AddHttpClient("ClaudeApiClient", client =>
-{
-    client.BaseAddress = new Uri("https://api.anthropic.com/");
-    client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
-});
+// グローバル AI と共通のサービス（CLIServiceFactory, SkillLoader, TaskQueueService, ProgressTracker）を再利用
 builder.Services.AddScoped<NetYamlForge.Services.AI.AutoDealerChatService>();
 
 // AI 自然言語クエリサービス（QueryParserService が依存する ILlmProvider を含む）
@@ -211,6 +207,7 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter, NetYamlForge.Services.AI.QueryResultFormatter>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.BusinessInsightService>();
 
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
