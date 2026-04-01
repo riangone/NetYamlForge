@@ -1,0 +1,201 @@
+name: lead_nurturing_generator
+displayName: "线索培育任务生成器"
+description: "每日 9:00 扫描客户行为，AI 自动生成跟进任务"
+schedule: "0 9 * * *"  # 每天 9:00 执行
+timeout: 300
+enabled: true
+
+# 执行环境配置
+environment:
+  LOG_LEVEL: Information
+  BATCH_SIZE: 100
+
+tasks:
+  # ─── 任务 1: 检测高意向客户 ───
+  - name: detect_high_intent_customers
+    type: script
+    description: "浏览特定车型 3 次以上的高意向客户"
+    script: |
+      -- 过去 7 天内浏览同一车型 3 次以上的客户
+      INSERT OR IGNORE INTO lead_nurturing_tasks
+        (task_id, lead_id, customer_id, task_type, trigger_reason, priority_score, status, due_date)
+      SELECT
+        'TASK-' || strftime('%Y%m%d%H%M%S', 'now') || '-' || substr(hex(randomblob(4)), 1, 6),
+        sl.lead_id,
+        sl.customer_id,
+        'test_drive_invite',
+        '客户在过去 7 天内浏览 ' || la.vehicle_interest || ' 达 ' || COUNT(*) || ' 次，意向度高',
+        MIN(50 + COUNT(*) * 10, 95),
+        'pending',
+        datetime('now', '+1 day')
+      FROM lead_activities la
+      JOIN sales_leads sl ON la.lead_id = sl.lead_id
+      WHERE la.activity_type = 'vehicle_view'
+        AND la.created_at >= datetime('now', '-7 days')
+        AND sl.status IN ('new', 'contacted')
+      GROUP BY la.lead_id, la.vehicle_interest
+      HAVING COUNT(*) >= 3
+        AND NOT EXISTS (
+          SELECT 1 FROM lead_nurturing_tasks lnt
+          WHERE lnt.lead_id = la.lead_id
+            AND lnt.task_type = 'test_drive_invite'
+            AND lnt.status = 'pending'
+        );
+
+  # ─── 任务 2: 检测长时间未联系线索 ───
+  - name: detect_stale_leads
+    type: script
+    description: "超过 3 天未联系的新线索"
+    script: |
+      INSERT OR IGNORE INTO lead_nurturing_tasks
+        (task_id, lead_id, customer_id, task_type, trigger_reason, priority_score, status, due_date)
+      SELECT
+        'TASK-' || strftime('%Y%m%d%H%M%S', 'now') || '-' || substr(hex(randomblob(4)), 1, 6),
+        lead_id,
+        customer_id,
+        'followup_call',
+        '新线索创建后 ' || CAST(julianday('now') - julianday(created_at) AS INT) || ' 天未联系',
+        MIN(lead_score + 20, 90),
+        'pending',
+        datetime('now', '+1 day')
+      FROM sales_leads
+      WHERE status = 'new'
+        AND last_contact_at IS NULL
+        AND julianday('now') - julianday(created_at) >= 3
+        AND NOT EXISTS (
+          SELECT 1 FROM lead_nurturing_tasks lnt
+          WHERE lnt.lead_id = sales_leads.lead_id
+            AND lnt.status = 'pending'
+        );
+
+  # ─── 任务 3: 试驾后跟进 ───
+  - name: post_test_drive_followup
+    type: script
+    description: "试驾完成后 7 天未跟进的客户"
+    script: |
+      INSERT OR IGNORE INTO lead_nurturing_tasks
+        (task_id, lead_id, customer_id, task_type, trigger_reason, priority_score, status, due_date)
+      SELECT
+        'TASK-' || strftime('%Y%m%d%H%M%S', 'now') || '-' || substr(hex(randomblob(4)), 1, 6),
+        sl.lead_id,
+        sa.customer_id,
+        'followup_call',
+        '试驾完成于 ' || sa.completed_at || '，已过去 ' ||
+          CAST(julianday('now') - julianday(sa.completed_at) AS INT) || ' 天未跟进',
+        80,
+        'pending',
+        datetime('now', '+1 day')
+      FROM service_appointments sa
+      LEFT JOIN sales_leads sl ON sa.customer_id = sl.customer_id
+      WHERE sa.appointment_type = 'test_drive'
+        AND sa.status = 'completed'
+        AND sa.completed_at >= datetime('now', '-14 days')
+        AND sa.completed_at < datetime('now', '-7 days')
+        AND (sl.status IS NULL OR sl.status IN ('new', 'contacted'))
+        AND NOT EXISTS (
+          SELECT 1 FROM lead_nurturing_tasks lnt
+          WHERE lnt.customer_id = sa.customer_id
+            AND lnt.status = 'pending'
+        );
+
+  # ─── 任务 4: 价格变动提醒 ───
+  - name: price_change_alerts
+    type: script
+    description: "客户关注车型价格下降时发送提醒"
+    script: |
+      INSERT OR IGNORE INTO lead_nurturing_tasks
+        (task_id, lead_id, customer_id, task_type, trigger_reason, priority_score, status, due_date)
+      SELECT
+        'TASK-' || strftime('%Y%m%d%H%M%S', 'now') || '-' || substr(hex(randomblob(4)), 1, 6),
+        sl.lead_id,
+        sl.customer_id,
+        'price_alert',
+        '关注车型 ' || sl.vehicle_interest || ' 价格下调，是联系的好时机',
+        75,
+        'pending',
+        datetime('now', '+2 days')
+      FROM sales_leads sl
+      JOIN vehicles v ON sl.vehicle_interest LIKE '%' || v.model || '%'
+      WHERE v.status = 'available'
+        AND v.updated_at >= datetime('now', '-7 days')
+        AND sl.status IN ('new', 'contacted', 'qualified')
+        AND NOT EXISTS (
+          SELECT 1 FROM lead_nurturing_tasks lnt
+          WHERE lnt.lead_id = sl.lead_id
+            AND lnt.task_type = 'price_alert'
+            AND lnt.status = 'pending'
+        );
+
+  # ─── 任务 5: AI 生成推荐话术 ───
+  - name: generate_ai_recommendations
+    type: script
+    description: "为新生成的任务 AI 推荐话术"
+    script: |
+      -- 更新任务，添加 AI 推荐话术
+      -- 实际项目中这里会调用 AI API 生成个性化话术
+      UPDATE lead_nurturing_tasks
+      SET ai_recommendation =
+        CASE task_type
+          WHEN 'followup_call' THEN
+            '【开场白】您好，我是 XX 车行的销售顾问 [姓名]。之前您咨询的 [车型] 最近有优惠活动...' || CHAR(10) ||
+            '【要点】强调限时优惠、试驾邀请' || CHAR(10) ||
+            '【异议处理】价格方面我们可以详细谈谈，今天来店还有额外礼品...'
+
+          WHEN 'test_drive_invite' THEN
+            '【邀请话术】您好，您关注的 [车型] 现车已到店，本周六/日有试驾会活动...' || CHAR(10) ||
+            '【要点】强调现车紧张、试驾会专属优惠' || CHAR(10) ||
+            '【时间建议】上午 10 点或下午 2 点客户到店率较高'
+
+          WHEN 'price_alert' THEN
+            '【通知话术】好消息！您关注的 [车型] 现在有特别优惠，直降 XX 万元...' || CHAR(10) ||
+            '【要点】强调限时优惠、库存有限' || CHAR(10) ||
+            '【促成】本周内签约可享受额外 XX 优惠'
+
+          ELSE '请根据客户情况制定合适的沟通策略'
+        END,
+        ai_reasoning =
+        CASE task_type
+          WHEN 'followup_call' THEN '长时间未联系可能导致客户流失，需及时跟进保持联系'
+          WHEN 'test_drive_invite' THEN '多次浏览表明客户意向度高，试驾可进一步提升购买意愿'
+          WHEN 'price_alert' THEN '价格下调是促成交易的好时机，客户可能会重新考虑'
+          ELSE '根据任务类型自动生成跟进策略'
+        END,
+        updated_at = datetime('now')
+      WHERE ai_recommendation IS NULL
+        AND status = 'pending';
+
+  # ─── 任务 6: 发送通知 ───
+  - name: notify_sales_reps
+    type: script
+    description: "通知销售人员有新任务"
+    script: |
+      -- 统计每个销售人员的新任务数
+      SELECT
+        assigned_to,
+        COUNT(*) as new_task_count,
+        GROUP_CONCAT(task_type) as task_types
+      FROM lead_nurturing_tasks
+      WHERE status = 'pending'
+        AND created_at >= datetime('now', '-1 day')
+      GROUP BY assigned_to;
+
+      -- 实际项目中这里会发送站内信/邮件/短信通知
+
+# 执行后处理
+onComplete:
+  - type: log
+    message: "线索培育任务生成完成"
+
+  - type: script
+    description: "记录执行统计"
+    script: |
+      SELECT
+        '今日生成任务数：' || COUNT(*) as summary
+      FROM lead_nurturing_tasks
+      WHERE created_at >= datetime('now', '-1 day');
+
+# 监控配置
+monitoring:
+  alertOnFailure: true
+  alertEmail: sales_manager@example.com
+  maxExecutionTime: 300

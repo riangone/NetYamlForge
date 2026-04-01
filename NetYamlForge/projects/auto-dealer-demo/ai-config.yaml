@@ -1,0 +1,264 @@
+# 汽车销售 AI 配置指南
+
+> **版本**: 1.0
+> **最后更新**: 2026 年 4 月 1 日
+
+---
+
+## 📋 配置说明
+
+### appsettings.json 配置
+
+```json
+{
+  "AiWindow": {
+    // 基本設定
+    "DealerName": "AI 自動車販売",
+    "BusinessHours": "月〜土 9:00-18:00",
+    
+    // AI プロバイダー設定
+    "ProviderPriority": ["claude", "qwen", "gemini", "ollama"],
+    
+    // Claude 設定
+    "Claude": {
+      "ApiKey": "${ANTHROPIC_API_KEY}",
+      "Model": "claude-haiku-4-5-20251001",
+      "MaxTokens": 1024
+    },
+    
+    // CLI 優先モード（開発用）
+    "CliFirst": true,
+    "CliTimeoutSeconds": 30,
+    
+    // 機能フラグ
+    "EnableProactiveSuggestions": true,
+    "EnableSentimentAnalysis": true,
+    "EnableCompetitorAnalysis": true,
+    
+    // 分析しきい値
+    "MaxRecommendations": 5,
+    "ChurnRiskThreshold": 0.7,
+    "LeadFollowupDays": 3,
+    "InventoryAgingDays": 90
+  }
+}
+```
+
+---
+
+## 🎯 機能フラグ説明
+
+| フラグ | 説明 | デフォルト |
+|-------|------|----------|
+| `EnableProactiveSuggestions` | 積極的な提案機能を有効化 | `true` |
+| `EnableSentimentAnalysis` | 感情分析を有効化 | `true` |
+| `EnableCompetitorAnalysis` | 競合分析を有効化 | `true` |
+
+---
+
+## 📊 しきい値設定
+
+| 設定 | 説明 | デフォルト |
+|-----|------|----------|
+| `MaxRecommendations` | 推奨アクションの最大表示数 | `5` |
+| `ChurnRiskThreshold` | 流失リスクしきい値（0-1） | `0.7` |
+| `LeadFollowupDays` | リードフォローアップ日数 | `3` |
+| `InventoryAgingDays` | 長期在庫日数しきい値 | `90` |
+
+---
+
+## 🔧 AI プロバイダー設定
+
+### クラウドプロバイダー
+
+#### Claude (Anthropic)
+```json
+{
+  "Claude": {
+    "ApiKey": "${ANTHROPIC_API_KEY}",
+    "Model": "claude-haiku-4-5-20251001",
+    "MaxTokens": 1024
+  }
+}
+```
+
+#### Qwen Code (Alibaba)
+```json
+{
+  "QwenCode": {
+    "ApiKey": "${QWEN_API_KEY}",
+    "Model": "qwen-max"
+  }
+}
+```
+
+#### Gemini (Google)
+```json
+{
+  "Gemini": {
+    "ApiKey": "${GOOGLE_API_KEY}",
+    "Model": "gemini-2.0-flash"
+  }
+}
+```
+
+### ローカルプロバイダー
+
+#### Ollama
+```json
+{
+  "Ollama": {
+    "BaseUrl": "http://localhost:11434",
+    "Model": "qwen2.5-coder:7b",
+    "ContextSize": 4096,
+    "Temperature": 0.7
+  }
+}
+```
+
+#### LM Studio
+```json
+{
+  "LmStudio": {
+    "BaseUrl": "http://localhost:1234",
+    "Model": "qwen2.5-coder-7b-instruct",
+    "ContextSize": 4096,
+    "Temperature": 0.7
+  }
+}
+```
+
+---
+
+## 📁 独立提示詞ファイル構造
+
+```
+NetYamlForge/
+└── skills/
+    ├── _system-prompt.md              # フレームワーク共通
+    └── auto-dealer/                   # 自動車販売専用（独立）
+        ├── _system-prompt-staff.md    # 従業員向けシステムプロンプト
+        ├── _system-prompt-customer.md # 顧客向けシステムプロンプト
+        ├── _tools-definition.md       # ツール定義（独立）
+        ├── _entity-reference.md       # エンティティ定義（独立）
+        └── _response-templates.md     # 応答テンプレート（独立）
+```
+
+---
+
+## 🔄 运作原理
+
+### フレームワーク AI との統合
+
+1. **システムプロンプトの読み込み**
+   - `AutoDealerChatService` が `skills/auto-dealer/` からプロンプトを読み込む
+   - 従業員/顧客モードに応じて適切なファイルを選択
+
+2. **ツール呼び出し**
+   - `query_data` ツールで DB からデータを取得
+   - 取得したデータを基に分析・分類レポートを生成
+
+3. **応答生成**
+   - 独立ドキュメントのテンプレートに従って回答を構築
+   - 詳細ページへのリンクを自動追加
+
+### 設定の優先順位
+
+```
+環境変数 > appsettings.Production.json > appsettings.json
+```
+
+---
+
+## 🧪 開発環境設定
+
+### appsettings.Development.json
+
+```json
+{
+  "AiWindow": {
+    "CliFirst": true,
+    "CliTimeoutSeconds": 60,
+    "EnableProactiveSuggestions": true,
+    "Ollama": {
+      "BaseUrl": "http://localhost:11434",
+      "Model": "qwen2.5-coder:7b"
+    }
+  }
+}
+```
+
+---
+
+## 📈 効果測定指標
+
+| 指標 | 説明 | 目標値 |
+|-----|------|--------|
+| 采纳率 | 推奨アクションの採用率 | >60% |
+| 转化率 | リード→成約の转化率 | >25% |
+| 响应时间 | AI 平均応答時間 | <3 秒 |
+| 満足度 | ユーザー評価（1-5） | >4.5 |
+| 試乗予約率 | 相談→試乗の转化率 | >20% |
+| フォローアップ率 | 24 時間以内フォローアップ率 | >95% |
+
+---
+
+## 🔐 セキュリティ設定
+
+### API キー管理
+
+**⚠️ 重要**: API キーは環境変数で管理し、git にコミットしないでください。
+
+```bash
+# .env ファイル（gitignore 対象）
+ANTHROPIC_API_KEY=sk-ant-xxxxx
+QWEN_API_KEY=sk-xxxxx
+GOOGLE_API_KEY=xxxxx
+```
+
+```json
+// appsettings.json
+{
+  "AiWindow": {
+    "Claude": {
+      "ApiKey": "${ANTHROPIC_API_KEY}"  // 環境変数を参照
+    }
+  }
+}
+```
+
+---
+
+## 🚀 本番環境設定
+
+### appsettings.Production.json
+
+```json
+{
+  "AiWindow": {
+    "CliFirst": false,
+    "ProviderPriority": ["claude", "gemini"],
+    "Claude": {
+      "Model": "claude-sonnet-4-5-20251001",
+      "MaxTokens": 2048
+    },
+    "EnableProactiveSuggestions": true,
+    "MaxRecommendations": 3,
+    "ChurnRiskThreshold": 0.8
+  }
+}
+```
+
+---
+
+## 📚 関連ドキュメント
+
+- [システムプロンプト（従業員）](../../skills/auto-dealer/_system-prompt-staff.md)
+- [システムプロンプト（顧客）](../../skills/auto-dealer/_system-prompt-customer.md)
+- [ツール定義](../../skills/auto-dealer/_tools-definition.md)
+- [エンティティ定義](../../skills/auto-dealer/_entity-reference.md)
+- [応答テンプレート](../../skills/auto-dealer/_response-templates.md)
+
+---
+
+*最終更新：2026 年 4 月 1 日*

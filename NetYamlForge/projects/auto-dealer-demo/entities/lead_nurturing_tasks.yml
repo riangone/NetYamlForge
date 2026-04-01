@@ -1,0 +1,234 @@
+imports: []
+entities:
+  lead_nurturing_tasks:
+    table: lead_nurturing_tasks
+    key: task_id
+    displayName: 线索培育任务
+    description: AI 自动生成的客户跟进任务，包含推荐话术和优先级
+    softDelete: false
+    isPublic: true
+
+    columns:
+      task_id:
+        type: string
+        length: 50
+        required: true
+        label: 任务 ID
+        searchable: true
+        sortable: true
+
+      lead_id:
+        type: string
+        length: 50
+        required: true
+        label: 线索 ID
+        searchable: true
+        sortable: true
+
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 客户 ID
+        searchable: true
+        sortable: true
+
+      task_type:
+        type: string
+        length: 30
+        required: true
+        label: 任务类型
+        options:
+          - followup_call        # 跟进电话
+          - send_info           # 发送资料
+          - test_drive_invite   # 试驾邀请
+          - special_offer       # 特别优惠通知
+          - competitor_counter  # 竞品应对
+          - price_alert         # 价格变动提醒
+        searchable: true
+        sortable: true
+
+      trigger_reason:
+        type: string
+        length: 300
+        required: false
+        label: 触发原因
+        description: AI 自动生成，说明为何创建此任务
+        searchable: true
+
+      priority_score:
+        type: int
+        required: true
+        label: 优先级评分
+        description: AI 计算 0-100 分，分数越高越紧急
+        default: 50
+        sortable: true
+
+      status:
+        type: string
+        length: 20
+        required: true
+        label: 状态
+        options:
+          - pending      # 待处理
+          - in_progress  # 进行中
+          - completed    # 已完成
+          - cancelled    # 已取消
+        default: pending
+        searchable: true
+        sortable: true
+
+      assigned_to:
+        type: string
+        length: 50
+        required: false
+        label: 负责人
+        description: 销售人员 ID
+        searchable: true
+        sortable: true
+
+      ai_recommendation:
+        type: text
+        required: false
+        label: AI 推荐话术
+        description: AI 生成的具体沟通话术和要点
+
+      ai_reasoning:
+        type: text
+        required: false
+        label: AI 推荐理由
+        description: 解释为何推荐此行动
+
+      due_date:
+        type: datetime
+        required: false
+        label: 截止日期
+        sortable: true
+
+      completed_at:
+        type: datetime
+        required: false
+        label: 完成时间
+        sortable: true
+
+      completed_by:
+        type: string
+        length: 50
+        required: false
+        label: 完成者
+
+      result_notes:
+        type: text
+        required: false
+        label: 结果记录
+        description: 销售人员填写的任务执行结果
+
+      created_at:
+        type: datetime
+        required: true
+        label: 创建时间
+        sortable: true
+
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新时间
+        sortable: true
+
+    forms:
+      task_id:
+        type: string
+        required: true
+        label: 任务 ID
+        editable: false
+
+      lead_id:
+        type: string
+        required: true
+        label: 线索 ID
+        editable: true
+
+      customer_id:
+        type: string
+        required: true
+        label: 客户 ID
+        editable: true
+
+      task_type:
+        type: select
+        required: true
+        label: 任务类型
+        editable: true
+
+      priority_score:
+        type: number
+        required: true
+        label: 优先级评分
+        editable: true
+
+      status:
+        type: select
+        required: true
+        label: 状态
+        editable: true
+
+      assigned_to:
+        type: string
+        required: false
+        label: 负责人
+        editable: true
+
+      ai_recommendation:
+        type: textarea
+        required: false
+        label: AI 推荐话术
+        editable: true
+        rows: 5
+
+      ai_reasoning:
+        type: textarea
+        required: false
+        label: AI 推荐理由
+        editable: true
+        rows: 3
+
+      due_date:
+        type: datetime
+        required: false
+        label: 截止日期
+        editable: true
+
+      result_notes:
+        type: textarea
+        required: false
+        label: 结果记录
+        editable: true
+        rows: 4
+
+    hooks:
+      beforeCreate:
+        - set_nurturing_task_timestamps
+        - calculate_nurturing_priority
+      beforeUpdate:
+        - update_nurturing_task_timestamps
+
+    list:
+      titleColumns:
+        - task_id
+        - task_type
+        - priority_score
+        - status
+        - due_date
+      defaultSort:
+        field: priority_score
+        dir: desc
+      filters:
+        - field: status
+          default: pending
+        - field: assigned_to
+          type: select
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

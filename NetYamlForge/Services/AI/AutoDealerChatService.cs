@@ -216,6 +216,13 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
 
         // ③ テンプレートフォールバック
         var (fallbackIntent, _, _) = DetectEscalation(message);
+        
+        // データ照会クエリの場合は、ツールが利用できないことを明示
+        if (LooksLikeDataQuery(message))
+        {
+            return ("申し訳ございませんが、現在データ照会機能が利用できない状態です。しばらくお待ちください。", fallbackIntent, null, null, null);
+        }
+        
         return (GetTemplateResponse(fallbackIntent), fallbackIntent, null, null, null);
     }
 
@@ -299,9 +306,10 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             ? prompt
             : $"{prompt}\n\n【処理結果】{toolResultText}";
         
-        _logger.LogInformation("Round 2: toolName={Tool}, toolResultText 長={Len}, sysWithData dbContextMarkdown={HasDb}", 
+        _logger.LogInformation("Round 2: toolName={Tool}, toolResultText 長={Len}, sysWithData dbContextMarkdown={HasDb}",
             toolName, toolResultText?.Length ?? 0, toolName == "query_data" && !string.IsNullOrEmpty(toolResultText));
-        
+        _logger.LogInformation("Round 2: sysWithData 長={SysLen}, round2Prompt 長={PromptLen}", sysWithData?.Length ?? 0, round2Prompt.Length);
+
         var finalResponse = await TryCliProvidersInOrderAsync(round2Prompt, sysWithData);
         
         _logger.LogInformation("Round 2: finalResponse 長={Len}, 先頭 200 文字={Preview}",
@@ -330,22 +338,43 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         var sb = new StringBuilder(systemPrompt);
         sb.AppendLine();
         sb.AppendLine("## ツール呼び出しルール");
-        sb.AppendLine("DBデータが必要な場合は、以下のJSON**だけ**を出力してください（説明文・前後のテキスト一切不要）:");
-        sb.AppendLine("{\"tool_call\":\"query_data\",\"entity\":\"テーブル名\",\"filters\":[{\"field\":\"フィールド名\",\"op\":\"eq|like|gt|lt|gte|lte\",\"value\":\"値\"}],\"orderBy\":{\"field\":\"フィールド名\",\"dir\":\"asc|desc\"},\"top\":20}");
-        sb.AppendLine("DBが不要な場合は通常の日本語で回答してください。");
+        sb.AppendLine("## 重要：ツール呼び出しルール");
+        sb.AppendLine("ユーザーがデータ（顧客・車両・予約・リードなど）について尋ねた場合は、**必ず** 以下の JSON 形式**だけ**を出力してください。");
+        sb.AppendLine("説明文・前後のテキスト・markdown コードブロック（```）は一切不要です。JSON 文字列のみを出力してください。");
+        
+        // query_data ツールの形式
+        sb.AppendLine("データ検索 (query_data) を使用する場合:");
+        sb.AppendLine("{\"tool_call\":\"query_data\",\"entity\":\"customers|vehicles|service_appointments|sales_leads\",\"action\":\"count|list\",\"filters\":[],\"top\":20}");
+        sb.AppendLine("※ action:\"count\" は件数質問（「顧客数」「何件」など）に使用し、action:\"list\" は一覧表示に使用してください");
+        
         if (!isStaff)
-            sb.AppendLine("予約を作成する場合: {\"tool_call\":\"create_appointment_request\",\"customer_name\":\"名前\",\"appointment_type\":\"test_drive|service|consultation\"}");
+        {
+            sb.AppendLine();
+            sb.AppendLine("予約を作成する場合:");
+            sb.AppendLine("{\"tool_call\":\"create_appointment_request\",\"customer_name\":\"名前\",\"appointment_type\":\"test_drive|service|consultation\"}");
+        }
+        
         return sb.ToString();
     }
 
     /// <summary>
     /// CLI の応答が tool_call JSON かどうかを判定します。
+    /// コードブロック形式（```json ... ```）にも対応します。
     /// </summary>
     private static bool TryParseCliTool(string response, out string toolName, out string rawJson)
     {
         toolName = "";
         rawJson = "";
         var trimmed = response.Trim();
+        
+        // コードブロック形式を除去
+        if (trimmed.StartsWith("```json"))
+            trimmed = trimmed["```json".Length..].Trim();
+        else if (trimmed.StartsWith("```"))
+            trimmed = trimmed["```".Length..].Trim();
+        if (trimmed.EndsWith("```"))
+            trimmed = trimmed[..^3].Trim();
+        
         if (!trimmed.StartsWith("{")) return false;
 
         try
@@ -358,7 +387,10 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
                 return !string.IsNullOrWhiteSpace(toolName);
             }
         }
-        catch (JsonException) { }
+        catch (JsonException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"JSON parse error: {ex.Message}");
+        }
         return false;
     }
 
@@ -602,7 +634,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             new
             {
                 name = "query_data",
-                description = "データベースからビジネスデータを検索します。車両在庫・予約・顧客・営業リードの情報を取得できます。ユーザーがデータを尋ねた場合は必ずこのツールを使用してください。**「〜数」「何件」「カウント」などの件数質問には action:\"count\" を使用**し、一覧表示には action:\"list\" を使用してください。",
+                description = "データベースからビジネスデータを検索します。車両在庫・予約・顧客・営業リードの情報を取得できます。ユーザーがデータを尋ねた場合は必ずこのツールを使用してください。**「〜数」「何件」「カウント」などの件数質問には action:\"count\" を使用**し、一覧表示には action:\"list\" を使用してください。**優先度分析・分類レポートを作成する場合は、select パラメータで必要なフィールドを明示的に指定してください**（例：sales_leads なら last_contact_at, created_at, status, vehicle_interest / customers なら tier_level, last_visit_date）。",
                 input_schema = new
                 {
                     type = "object",
@@ -651,12 +683,12 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
                         {
                             type = "array",
                             items = new { type = "string" },
-                            description = "取得するフィールド名（省略時は全フィールド）"
+                            description = "取得するフィールド名（省略時は全フィールド）。**分析レポート作成時は必須フィールドを取得してください**：sales_leads=[customer_id,status,vehicle_interest,last_contact_at,created_at,lead_score] / customers=[name,tier_level,last_visit_date,phone,purchase_count]"
                         },
                         top = new
                         {
                             type = "integer",
-                            description = "最大取得件数（デフォルト: 20）"
+                            description = "最大取得件数（デフォルト: 20）。**分析レポートでは 50-100 件程度を取得**して十分なサンプルを確保してください"
                         }
                     },
                     required = new[] { "entity" }
@@ -692,80 +724,137 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         return tools;
     }
 
-    // ─────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────
     // システムプロンプト
     // ─────────────────────────────────────────────────────────
 
     /// <summary>
     /// 顧客・スタッフ共通のシステムプロンプトを構築します。
-    /// 利用可能なエンティティのフィールド情報と相対日付構文を含みます。
+    /// skills/auto-dealer/ ディレクトリの MD ファイルから読み込みます。
     /// </summary>
     private string BuildSystemPrompt(bool isStaff, string? dbContextMarkdown = null)
+    {
+        // skills/auto-dealer/ ディレクトリからシステムプロンプトを読み込む
+        var systemPromptMd = LoadSystemPromptFromMd(isStaff);
+
+        // プレースホルダーを置換
+        systemPromptMd = systemPromptMd
+            .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
+            .Replace("{business_hours}", BusinessHours)
+            .Replace("{dealer_name}", DealerName);
+
+        // DB 検索結果がある場合は追加
+        if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
+        {
+            systemPromptMd += Environment.NewLine + Environment.NewLine;
+            systemPromptMd += "## DB 検索結果（参考）" + Environment.NewLine;
+            systemPromptMd += dbContextMarkdown;
+            
+            // 分析レポート形式の指示を追加（重要！）
+            systemPromptMd += Environment.NewLine + Environment.NewLine;
+            systemPromptMd += "## 🚨 重要：回答形式の指示" + Environment.NewLine;
+            systemPromptMd += "上記の DB 検索結果を基に、**必ず分析・分類レポート形式で回答してください**。" + Environment.NewLine;
+            systemPromptMd += "単なる一覧表示ではなく、**優先度分類・統計情報・推奨アクション**を含めてください。" + Environment.NewLine;
+            systemPromptMd += "例：「優先度：高（3 日以上未連絡）」→ リスト →「優先度：中」→ リスト →「統計」→「推奨アクション」" + Environment.NewLine;
+        }
+
+        return systemPromptMd;
+    }
+
+    /// <summary>
+    /// skills/auto-dealer/ ディレクトリからシステムプロンプト MD ファイルを読み込みます。
+    /// </summary>
+    private string LoadSystemPromptFromMd(bool isStaff)
+    {
+        // 複数の候補ディレクトリから skills/auto-dealer を探す
+        var baseDir = AppContext.BaseDirectory;
+        var candidateDirs = new[]
+        {
+            Path.Combine(baseDir, "skills", "auto-dealer"),
+            Path.Combine(baseDir, "..", "..", "..", "skills", "auto-dealer"),
+            Path.Combine(Directory.GetCurrentDirectory(), "skills", "auto-dealer"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "skills", "auto-dealer")
+        };
+
+        string? skillsDir = null;
+        foreach (var candidate in candidateDirs)
+        {
+            if (Directory.Exists(candidate))
+            {
+                skillsDir = candidate;
+                break;
+            }
+        }
+
+        if (skillsDir == null)
+        {
+            _logger.LogWarning("skills/auto-dealer ディレクトリが見つかりません。フォールバックプロンプトを使用します。");
+            return BuildFallbackSystemPrompt(isStaff);
+        }
+
+        var fileName = isStaff ? "_system-prompt-staff.md" : "_system-prompt-customer.md";
+        var filePath = Path.Combine(skillsDir, fileName);
+
+        if (!File.Exists(filePath))
+        {
+            _logger.LogWarning("システムプロンプトファイル {File} が見つかりません。フォールバックプロンプトを使用します。", filePath);
+            return BuildFallbackSystemPrompt(isStaff);
+        }
+
+        var content = File.ReadAllText(filePath).Trim();
+
+        // frontmatter (--- で囲まれた部分) を除去
+        if (content.StartsWith("---"))
+        {
+            var end = content.IndexOf("---", 3);
+            if (end >= 0)
+            {
+                content = content[(end + 3)..].Trim();
+            }
+        }
+
+        _logger.LogInformation("【システムプロンプト読込】ファイル：{File}, isStaff={IsStaff}, 文字数={Length}", filePath, isStaff, content.Length);
+        
+        // 重要なセクションが含まれているか確認
+        if (isStaff && content.Contains("分析・分類レポート"))
+        {
+            _logger.LogInformation("【システムプロンプト検証】「分析・分類レポート」セクションを確認しました");
+        }
+        else if (isStaff)
+        {
+            _logger.LogWarning("【システムプロンプト検証】「分析・分類レポート」セクションが見つかりません！");
+        }
+        
+        // システムプロンプトの先頭 500 文字をログ出力（デバッグ用）
+        var previewLength = Math.Min(500, content.Length);
+        _logger.LogDebug("【システムプロンプト先頭】{Preview}", content.Substring(0, previewLength));
+        
+        return content;
+    }
+
+    /// <summary>
+    /// フォールバック用のシステムプロンプトを構築します（MD ファイルが見つからない場合）。
+    /// </summary>
+    private string BuildFallbackSystemPrompt(bool isStaff)
     {
         var sb = new StringBuilder();
 
         if (isStaff)
         {
-            sb.AppendLine($"あなたは{DealerName}の社員向けAI業務アシスタントです。");
+            sb.AppendLine($"あなたは{DealerName}の社員向け AI 業務アシスタントです。");
             sb.AppendLine("リード管理・予約確認・在庫照会・顧客情報の照会など業務全般を支援します。");
-            sb.AppendLine("ユーザーがデータを尋ねた場合は **必ず query_data ツールを使用して** DBから最新情報を取得し、その結果に基づいて回答してください。");
-        }
-        else
-        {
-            sb.AppendLine($"あなたは{DealerName}のAIカスタマーサポートです。");
-            sb.AppendLine("車両購入・試乗・サービスのご相談に対応します。");
-            sb.AppendLine("在庫や予約状況が必要な場合は **query_data ツールを使用して** DBから最新情報を取得し、具体的な情報を案内してください。");
-            sb.AppendLine("予約を作成する場合は create_appointment_request ツールを使用してください。");
-            sb.AppendLine("**「〜数」「何件」などの件数質問には action:\"count\" を使用**し、一覧表示には action:\"list\" を使用してください。");
-        }
-
-        sb.AppendLine();
-        sb.AppendLine($"現在の日時: {DateTime.Now:yyyy-MM-dd HH:mm}");
-        sb.AppendLine($"営業時間: {BusinessHours}");
-
-        sb.AppendLine();
-        sb.AppendLine("## query_data で利用可能なエンティティとフィールド");
-        sb.AppendLine("**vehicles** (車両在庫)");
-        sb.AppendLine("  フィールド: brand, model, grade, year, fuel_type, price, color, mileage, status");
-        sb.AppendLine("  status の値: available(販売中) / reserved(商談中) / sold(売約済)");
-        sb.AppendLine("  fuel_type の値: ガソリン / ハイブリッド / 電気 / ディーゼル");
-        sb.AppendLine();
-        sb.AppendLine("**service_appointments** (予約)");
-        sb.AppendLine("  フィールド: appointment_type, preferred_date, status, notes");
-        sb.AppendLine("  appointment_type: test_drive(試乗) / service(整備) / consultation(相談)");
-        sb.AppendLine("  status: pending(未確認) / confirmed(確定) / completed(完了) / cancelled(キャンセル)");
-        sb.AppendLine();
-        sb.AppendLine("**sales_leads** (営業リード)");
-        sb.AppendLine("  フィールド: customer_id, status, vehicle_interest, budget_range, created_at");
-        sb.AppendLine("  status: new / active / won / lost");
-        sb.AppendLine();
-        sb.AppendLine("**customers** (顧客)");
-        sb.AppendLine("  フィールド: name, phone, email, tier_level");
-        sb.AppendLine("  tier_level: standard / silver / gold / vip");
-
-        sb.AppendLine();
-        sb.AppendLine("## filters の日付相対指定");
-        sb.AppendLine("value に以下の文字列を使用すると自動変換されます:");
-        sb.AppendLine("today / yesterday / this_week / last_week / this_month / last_month / this_year / last_year");
-
-        if (isStaff)
-        {
+            sb.AppendLine("ユーザーがデータを尋ねた場合は **必ず query_data ツールを使用して** DB から最新情報を取得し、その結果に基づいて回答してください。");
             sb.AppendLine();
             sb.AppendLine("## 応答フォーマット");
-            sb.AppendLine("4. 新响应格式 ✅ - 简洁列表 + 详细链接");
             sb.AppendLine("データ回答は「該当件数 → 簡潔な一覧 → 各行に詳細リンク」の順で出力してください。");
             sb.AppendLine("件数質問（例:「顧客数」）でも同じ形式で出力してください。");
         }
-
-        if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
+        else
         {
-            sb.AppendLine();
-            sb.AppendLine("## DB 検索結果（参考）");
-            sb.AppendLine(dbContextMarkdown);
-        }
-
-        if (!isStaff)
-        {
+            sb.AppendLine($"あなたは{DealerName}の AI カスタマーサポートです。");
+            sb.AppendLine("車両購入・試乗・サービスのご相談に対応します。");
+            sb.AppendLine("在庫や予約状況が必要な場合は **query_data ツールを使用して** DB から最新情報を取得し、具体的な情報を案内してください。");
+            sb.AppendLine("予約を作成する場合は create_appointment_request ツールを使用してください。");
             sb.AppendLine();
             sb.AppendLine("## 応答ルール");
             sb.AppendLine("- 丁寧な敬語で回答してください");
@@ -773,10 +862,51 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             sb.AppendLine("- 具体的な価格交渉・特別割引は「担当者にお繋ぎします」と案内してください");
         }
 
+        sb.AppendLine();
+        sb.AppendLine($"現在の日時：{DateTime.Now:yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"営業時間：{BusinessHours}");
+
+        sb.AppendLine();
+        sb.AppendLine("## query_data で利用可能なエンティティとフィールド");
+        sb.AppendLine("**vehicles** (車両在庫)");
+        sb.AppendLine("  フィールド：brand, model, grade, year, fuel_type, price, color, mileage, status");
+        sb.AppendLine("  status の値：available(販売中) / reserved(商談中) / sold(売約済)");
+        sb.AppendLine("  fuel_type の値：ガソリン / ハイブリッド / 電気 / ディーゼル");
+        sb.AppendLine();
+        sb.AppendLine("**service_appointments** (予約)");
+        sb.AppendLine("  フィールド：appointment_type, preferred_date, status, notes");
+        sb.AppendLine("  appointment_type: test_drive(試乗) / service(整備) / consultation(相談)");
+        sb.AppendLine("  status: pending(未確認) / confirmed(確定) / completed(完了) / cancelled(キャンセル)");
+        sb.AppendLine();
+        sb.AppendLine("**sales_leads** (営業リード)");
+        sb.AppendLine("  フィールド：customer_id, status, vehicle_interest, budget_range, created_at");
+        sb.AppendLine("  status: new / active / won / lost");
+        sb.AppendLine();
+        sb.AppendLine("**customers** (顧客)");
+        sb.AppendLine("  フィールド：name, phone, email, tier_level");
+        sb.AppendLine("  tier_level: standard / silver / gold / vip");
+
+        sb.AppendLine();
+        sb.AppendLine("## filters の日付相対指定");
+        sb.AppendLine("value に以下の文字列を使用すると自動変換されます:");
+        sb.AppendLine("today / yesterday / this_week / last_week / this_month / last_month / this_year / last_year");
+
+        // 詳細リンクのフォーマット（スタッフ向け）
+        if (isStaff)
+        {
+            sb.AppendLine();
+            sb.AppendLine("## 詳細ページへのリンク形式");
+            sb.AppendLine("各レコードには以下の形式で詳細ページへのリンクを付けてください:");
+            sb.AppendLine("- vehicles: `[詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={id})`");
+            sb.AppendLine("- sales_leads: `[詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={id})`");
+            sb.AppendLine("- service_appointments: `[詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=service_appointments&id={id})`");
+            sb.AppendLine("- customers: `[詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=customers&id={id})`");
+        }
+
         return sb.ToString();
     }
 
-    /// <summary>CLI 向け: 最終応答生成用のプロンプトを構築します。</summary>
+/// <summary>CLI 向け: 最終応答生成用のプロンプトを構築します。</summary>
     private static string BuildFinalResponsePrompt(string message, IEnumerable<(string Role, string Content)> history)
     {
         var sb = new StringBuilder();

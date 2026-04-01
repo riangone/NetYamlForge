@@ -16,6 +16,8 @@
   <ItemGroup>
     <!-- プロジェクト固有の pdf-templates/ ディレクトリをビルド出力にコピー -->
     <Content Include="projects\**\pdf-templates\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <!-- スキル（プロンプトテンプレート）ディレクトリをコピー -->
+    <Content Include="skills\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <!-- アナライザープロジェクト：禁止パターンをビルド時に検出 (DCS001-DCS004) -->
