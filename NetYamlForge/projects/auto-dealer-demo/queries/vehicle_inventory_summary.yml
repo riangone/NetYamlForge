@@ -1,0 +1,26 @@
+name: vehicle_inventory_summary
+description: 车辆库存汇总 - 按车辆类型统计
+entity: vehicles
+action: aggregate
+groupBy:
+  - vehicle_type
+aggregations:
+  - function: count
+    field: vehicle_id
+    alias: count
+  - function: avg
+    field: mileage
+    alias: avg_mileage
+  - function: min
+    field: price
+    alias: min_price
+  - function: max
+    field: price
+    alias: max_price
+filters:
+  - field: status
+    op: eq
+    value: available
+orderBy:
+  field: count
+  dir: desc

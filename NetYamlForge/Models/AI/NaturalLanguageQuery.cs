@@ -77,6 +77,36 @@ public class ParsedQueryParams
     public string Action { get; set; } = "list";
 
     /// <summary>
+    /// 查询模式 (structured, raw_sql, template)
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = "structured";
+
+    /// <summary>
+    /// 模板名称（当 mode=template 时使用）
+    /// </summary>
+    [JsonPropertyName("template")]
+    public string? TemplateName { get; set; }
+
+    /// <summary>
+    /// 模板参数（当 mode=template 时使用）
+    /// </summary>
+    [JsonPropertyName("templateParams")]
+    public Dictionary<string, object?>? TemplateParams { get; set; }
+
+    /// <summary>
+    /// 原始 SQL（当 mode=raw_sql 时使用，需要特殊权限）
+    /// </summary>
+    [JsonPropertyName("raw_sql")]
+    public string? RawSql { get; set; }
+
+    /// <summary>
+    /// SQL 参数（当 mode=raw_sql 时使用）
+    /// </summary>
+    [JsonPropertyName("sql_params")]
+    public Dictionary<string, object?>? SqlParams { get; set; }
+
+    /// <summary>
     /// 过滤条件
     /// </summary>
     [JsonPropertyName("filters")]

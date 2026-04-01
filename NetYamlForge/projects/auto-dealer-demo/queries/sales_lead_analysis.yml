@@ -1,0 +1,27 @@
+name: sales_lead_analysis
+description: 销售线索分析 - 按状态和优先级统计线索数量
+entity: sales_leads
+action: aggregate
+groupBy:
+  - status
+  - priority
+aggregations:
+  - function: count
+    field: id
+    alias: lead_count
+  - function: avg
+    field: lead_score
+    alias: avg_score
+filters:
+  - field: created_at
+    op: gte
+    value: "{from_date}"
+orderBy:
+  field: lead_count
+  dir: desc
+parameters:
+  - name: from_date
+    type: string
+    required: false
+    default: "this_month"
+    description: 起始日期（支持相对日期：today, this_week, this_month）

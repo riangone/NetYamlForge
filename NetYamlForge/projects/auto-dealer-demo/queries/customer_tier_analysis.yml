@@ -1,0 +1,19 @@
+name: customer_tier_analysis
+description: 顾客等级分析 - 按顾客等级统计数量和购买次数
+entity: customers
+action: aggregate
+groupBy:
+  - tier_level
+aggregations:
+  - function: count
+    field: id
+    alias: customer_count
+  - function: avg
+    field: purchase_count
+    alias: avg_purchases
+  - function: sum
+    field: purchase_count
+    alias: total_purchases
+orderBy:
+  field: customer_count
+  dir: desc

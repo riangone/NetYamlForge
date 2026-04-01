@@ -9,17 +9,31 @@ description: query_data 和其他工具的完整定义
 
 **重要**: ユーザーがデータ（顧客・車両・予約・リードなど）について尋ねた場合は、**必ず `query_data` ツールを呼び出してください**。
 
-### ツール呼び出し形式
+### クエリモード
+
+| モード | 説明 | 用途 |
+|-------|------|------|
+| `structured` | 構造化クエリパラメータ（デフォルト） | 通常の CRUD 操作 |
+| `template` | 事前定義済みクエリテンプレート使用 | 複雑な集計・分析クエリ |
+| `raw_sql` | 生 SQL 実行（要特別権限） | 高度な分析・カスタムクエリ |
+
+### ツール呼び出し形式（構造化クエリ - デフォルト）
 
 ```json
 {
+  "mode": "structured",
   "entity": "vehicles|sales_leads|service_appointments|customers",
-  "action": "list|count",
+  "action": "list|count|aggregate",
   "filters": [
     { "field": "status", "op": "eq", "value": "available" },
     { "field": "created_at", "op": "gte", "value": "this_week" }
   ],
   "orderBy": { "field": "created_at", "dir": "desc" },
+  "groupBy": ["brand", "vehicle_type"],
+  "aggregations": [
+    { "function": "count", "field": "id", "alias": "total_count" },
+    { "function": "avg", "field": "price", "alias": "avg_price" }
+  ],
   "top": 20,
   "select": ["field1", "field2"]
 }
@@ -29,10 +43,13 @@ description: query_data 和其他工具的完整定义
 
 | パラメータ | 型 | 必須 | 説明 |
 |-----------|----|----|------|
+| `mode` | string | ❌ | クエリモード (`structured`/`template`/`raw_sql`)。デフォルトは `structured` |
 | `entity` | string | ✅ | 対象エンティティ名 |
-| `action` | string | ❌ | `list` (一覧) または `count` (件数)。デフォルトは `list` |
+| `action` | string | ❌ | `list` (一覧) / `count` (件数) / `aggregate` (集計)。デフォルトは `list` |
 | `filters` | array | ❌ | 絞り込み条件 |
 | `orderBy` | object | ❌ | ソート指定 |
+| `groupBy` | array | ❌ | グループ化フィールド（`action: aggregate` の場合） |
+| `aggregations` | array | ❌ | 集計関数（`action: aggregate` の場合） |
 | `top` | int | ❌ | 取得件数上限 |
 | `select` | array | ❌ | 取得フィールド指定（省略時は全フィールド） |
 
@@ -133,6 +150,110 @@ description: query_data 和其他工具的完整定义
   ],
   "orderBy": { "field": "last_contact_at", "dir": "asc" },
   "top": 50
+}
+```
+
+#### 例 5: 聚合查询 - 按品牌和车型统计库存
+
+```json
+{
+  "entity": "vehicles",
+  "action": "aggregate",
+  "groupBy": ["brand", "model"],
+  "aggregations": [
+    { "function": "count", "field": "vehicle_id", "alias": "vehicle_count" },
+    { "function": "avg", "field": "price", "alias": "avg_price" },
+    { "function": "sum", "field": "price", "alias": "total_value" }
+  ],
+  "filters": [
+    { "field": "status", "op": "eq", "value": "available" }
+  ],
+  "orderBy": { "field": "vehicle_count", "dir": "desc" },
+  "top": 20
+}
+```
+
+#### 例 6: 模板查询 - 使用预定义模板
+
+```json
+{
+  "mode": "template",
+  "template": "inventory_analysis",
+  "templateParams": {
+    "status": "available"
+  }
+}
+```
+
+**可用模板列表:**
+- `inventory_analysis` - 库存分析（按品牌/车型统计）
+- `sales_lead_analysis` - 销售线索分析（按状态/优先级）
+- `vehicle_inventory_summary` - 车辆库存汇总（按车型分类）
+- `customer_tier_analysis` - 顾客等级分析
+
+#### 例 7: 原始 SQL 查询（需要特殊权限）
+
+```json
+{
+  "mode": "raw_sql",
+  "raw_sql": "SELECT brand, COUNT(*) as count, AVG(price) as avg_price FROM vehicles WHERE status = @status GROUP BY brand",
+  "sql_params": {
+    "status": "available"
+  }
+}
+```
+
+⚠️ **注意**: `raw_sql` 模式需要特殊权限，默认情况下仅使用 `structured` 或 `template` 模式。
+
+---
+
+## クエリテンプレート
+
+クエリテンプレートは `projects/<project-name>/queries/` ディレクトリの YAML ファイルとして定義されます。
+
+### テンプレート定義例
+
+```yaml
+name: inventory_analysis
+description: 在庫分析レポート - ブランドとモデル別統計
+entity: vehicles
+action: aggregate
+groupBy:
+  - brand
+  - model
+aggregations:
+  - function: count
+    field: vehicle_id
+    alias: vehicle_count
+  - function: avg
+    field: price
+    alias: avg_price
+filters:
+  - field: status
+    op: eq
+    value: "{status}"
+orderBy:
+  field: vehicle_count
+  dir: desc
+parameters:
+  - name: status
+    type: string
+    required: false
+    default: available
+    description: 車両ステータス
+```
+
+### テンプレートの使用
+
+AI は以下の形式でテンプレートを呼び出します：
+
+```json
+{
+  "mode": "template",
+  "template": "inventory_analysis",
+  "templateParams": {
+    "status": "available"
+  }
 }
 ```
 
