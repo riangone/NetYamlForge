@@ -1,5 +1,6 @@
 // ファイル概要：システムデータベース (system.db) の初期化クラス
 // マルチテナント認証に必要な app_user, app_user_project_role, projects テーブルを作成
+// AI チャット履歴 (AIChatHistory, AICommandLog) も同時に初期化
 
 using System.Data;
 using Dapper;
@@ -11,12 +12,12 @@ namespace NetYamlForge.Data.Schemas;
 
 /// <summary>
 /// システムデータベースのスキーマ初期化。
-/// マルチテナント認証に必要なテーブルを作成します。
+// マルチテナント認証と AI チャット履歴に必要なテーブルを作成します。
 /// </summary>
 public static class SystemDatabaseInitializer
 {
-    // アプリケーションのベースディレクトリにある system.db を使用
-    private static readonly string DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "system.db");
+    // プロジェクトルートにある system.db を使用（bin/ ではなく）
+    private static readonly string DbPath = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
 
     /// <summary>
     /// システムデータベースを初期化します
@@ -88,6 +89,46 @@ public static class SystemDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS IX_app_user_user_type ON app_user(user_type);
                 CREATE INDEX IF NOT EXISTS IX_app_user_project_role_user_id ON app_user_project_role(user_id);
                 CREATE INDEX IF NOT EXISTS IX_app_user_project_role_project_name ON app_user_project_role(project_name);
+            ");
+
+            // AI チャット履歴テーブル（存在しない場合のみ作成）
+            await conn.ExecuteAsync(@"
+                CREATE TABLE IF NOT EXISTS AIChatHistory (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NOT NULL,
+                    Content TEXT NOT NULL,
+                    Type TEXT NOT NULL,
+                    Provider TEXT,
+                    ChatContext TEXT NOT NULL DEFAULT 'framework',
+                    CreatedAt TEXT NOT NULL
+                )
+            ");
+
+            await conn.ExecuteAsync(@"
+                CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);
+                CREATE INDEX IF NOT EXISTS idx_aichat_context ON AIChatHistory(UserId, ChatContext, Id);
+            ");
+
+            // AI コマンドログテーブル（存在しない場合のみ作成）
+            await conn.ExecuteAsync(@"
+                CREATE TABLE IF NOT EXISTS AICommandLog (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    UserId TEXT NOT NULL,
+                    TaskId TEXT NOT NULL,
+                    CliTool TEXT NOT NULL,
+                    InputText TEXT NOT NULL,
+                    Status TEXT NOT NULL DEFAULT 'pending',
+                    OutputText TEXT,
+                    ErrorMessage TEXT,
+                    StartedAt TEXT NOT NULL,
+                    CompletedAt TEXT,
+                    ChatContext TEXT NOT NULL DEFAULT 'framework'
+                )
+            ");
+
+            await conn.ExecuteAsync(@"
+                CREATE INDEX IF NOT EXISTS idx_aicommand_user ON AICommandLog(UserId, Id);
+                CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);
             ");
 
             // デフォルト管理者ユーザーを作成（存在しない場合）
