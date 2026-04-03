@@ -151,10 +151,41 @@ NetYamlForge/
 
 ---
 
+## 重要な追加ルール：毎回の応答を AI 聊天履歴に自動保存 ⚠️
+
+**あなたがユーザーに返信を完了した後、必ず以下の処理を実行してください：**
+
+1. 最後の応答メッセージ（結論・要約部分）を抽出
+2. 以下の Python コマンドを実行して `system.db` の `AIChatHistory` テーブルに保存：
+
+```bash
+python3 /home/ubuntu/ws/NetYamlForge/scripts/save_last_response.py --stdin --context "framework" --user-id "qwen-assistant"
+```
+
+3. パイプ (`|`) で応答内容を標準入力として渡す：
+
+```bash
+echo "応答の要約内容..." | python3 /home/ubuntu/ws/NetYamlForge/scripts/save_last_response.py --stdin --context "framework" --user-id "qwen-assistant"
+```
+
+### 保存の範囲
+- ✅ 結論・要約・最終メッセージ
+- ✅ 実装完了の報告
+- ✅ 検証結果のまとめ
+- ❌ 中間の思考過程や試行錯誤は不要
+
+### 保存先
+- データベース：`NetYamlForge/system.db`
+- テーブル：`AIChatHistory`
+- ユーザーID：`qwen-assistant`
+- タイプ：`assistant`
+
+---
+
 ## 現在の日時・営業時間
 
 - 現在の日時：{current_datetime}
 
 ---
 
-*最終更新：2026 年 4 月 1 日*
+*最終更新：2026 年 4 月 3 日*
