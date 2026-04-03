@@ -22,9 +22,17 @@ public class QwenCodeCLIService : BaseCLIService
         string.IsNullOrEmpty(Config.QwenCode.Path) ? ToolName : Config.QwenCode.Path;
 
     // DASHSCOPE_API_KEY / DASHSCOPE_BASE_URL を環境変数として渡す
+    // PATH も含めて node コマンドが見つかるようにする
     protected override IReadOnlyDictionary<string, string>? GetEnvironmentVariables()
     {
         var env = new Dictionary<string, string>();
+
+        // 既存の PATH を継承（node コマンドを見つけるために必要）
+        var existingPath = Environment.GetEnvironmentVariable("PATH");
+        if (!string.IsNullOrEmpty(existingPath))
+        {
+            env["PATH"] = existingPath;
+        }
 
         if (!string.IsNullOrEmpty(Config.QwenCode.ApiKey))
             env["DASHSCOPE_API_KEY"] = Config.QwenCode.ApiKey;

@@ -242,7 +242,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             // プロンプトを構築（履歴 + 現在のメッセージ）
             var prompt = BuildPromptWithHistory(message, history, systemPrompt);
 
-            _logger.LogDebug("AI 応答生成開始：provider={Provider}, messageLength={Length}",
+            _logger.LogInformation("AI 応答生成開始：provider={Provider}, messageLength={Length}",
                 _defaultProvider, message?.Length ?? 0);
 
             // CLI を実行（非流式処理）
@@ -252,7 +252,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
                 systemPrompt,
                 _defaultProvider);
 
-            _logger.LogDebug("AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
+            _logger.LogInformation("AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
 
             // 応答を処理（業務ロジック：DB クエリ実行、分析レポート生成）
             return await ProcessAiResponseAsync(response, message, isStaff);
@@ -278,7 +278,7 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
         // 作業ディレクトリを取得
         var workingDir = GetWorkingDirectory(_projectName);
 
-        _logger.LogDebug("[AutoDealerChat] AI 実行開始：provider={Provider}", provider);
+        _logger.LogInformation("[AutoDealerChat] AI 実行開始：provider={Provider}", provider);
 
         // 非流式で CLI を実行（流式より安定）
         var response = await cliService.ExecuteAsync(
@@ -289,7 +289,9 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             systemPromptOverride: systemPrompt,
             CancellationToken.None);
 
-        _logger.LogInformation("[AutoDealerChat] AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
+        _logger.LogInformation("[AutoDealerChat] AI 応答取得完了：responseLength={Length}, responsePreview={Response}", 
+            response?.Length ?? 0, 
+            response?.Substring(0, Math.Min(100, response?.Length ?? 0)));
 
         return response ?? string.Empty;
     }
@@ -415,33 +417,54 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
     /// </summary>
     private string BuildSystemPrompt(bool isStaff, string? dbContextMarkdown = null)
     {
-        // 1. グローバル AI の提示詞を取得（フレームワーク開発 AI としての基本指示）
-        //    但し、auto-dealer-demo は業務データアクセスが許可されているため、
-        //    権限制限部分は業務用に上書きする
-        var frameworkPrompt = _skillLoader.GetSystemPrompt();
+        string systemPrompt;
 
-        // 2. 業務固有のプロンプトを取得
-        var autoDealerPrompt = LoadAutoDealerPromptFromMd(isStaff);
+        if (isStaff)
+        {
+            _logger.LogInformation("[BuildSystemPrompt] スタッフモード - グローバル AI + 業務提示詞");
+            // スタッフモード：グローバル AI 提示詞 + 業務固有提示詞
+            var frameworkPrompt = _skillLoader.GetSystemPrompt();
 
-        // 3. グローバル AI 提示詞から「権限制限」セクションを業務用に置換
-        //    auto-dealer-demo は顧客情報・車両在庫・販売リードの照会が許可されている
-        var systemPrompt = frameworkPrompt
-            .Replace("❌ **auto-dealer-demo の業務データへのアクセス**", "✅ **auto-dealer-demo の業務データへのアクセス**")
-            .Replace("顧客情報・車両在庫・販売リードの照会は禁止", "顧客情報・車両在庫・販売リードの照会が可能")
-            .Replace("業務ロジックの変更は禁止", "業務ロジックの変更は禁止（読み取り専用）");
+            // auto-dealer-demo は顧客情報・車両在庫・販売リードの照会が許可されている
+            systemPrompt = frameworkPrompt
+                .Replace("❌ **auto-dealer-demo の業務データへのアクセス**", "✅ **auto-dealer-demo の業務データへのアクセス**")
+                .Replace("顧客情報・車両在庫・販売リードの照会は禁止", "顧客情報・車両在庫・販売リードの照会が可能")
+                .Replace("業務ロジックの変更は禁止", "業務ロジックの変更は禁止（読み取り専用）");
 
-        // 4. 業務固有プロンプトを追加
-        systemPrompt += Environment.NewLine + Environment.NewLine;
-        systemPrompt += "# 🚗 自動車販売ディーラー業務指示" + Environment.NewLine;
-        systemPrompt += autoDealerPrompt;
+            // 業務固有プロンプトを追加
+            var autoDealerPrompt = LoadAutoDealerPromptFromMd(isStaff: true);
+            systemPrompt += Environment.NewLine + Environment.NewLine;
+            systemPrompt += "# 🤝 自動車販売ディーラー社員向け AI 業務アシスタント" + Environment.NewLine;
+            systemPrompt += autoDealerPrompt;
+            
+            _logger.LogInformation("[BuildSystemPrompt] スタッフプロンプト長: {Length} 文字", systemPrompt.Length);
+        }
+        else
+        {
+            _logger.LogInformation("[BuildSystemPrompt] 顧客モード - 顧客専用プロンプトのみ");
+            // 顧客モード：顧客専用プロンプトのみ使用（グローバル AI 提示詞は使用しない）
+            // 顧客は車両案内・試乗予約・サービス案内などのカスタマーサポートのみが必要
+            systemPrompt = LoadAutoDealerPromptFromMd(isStaff: false);
 
-        // 5. プレースホルダーを置換
+            // 顧客モード用の権限情報を追加
+            systemPrompt += Environment.NewLine + Environment.NewLine;
+            systemPrompt += "## 権限情報" + Environment.NewLine;
+            systemPrompt += $"- あなたは{_dealerName}の AI カスタマーサポートです" + Environment.NewLine;
+            systemPrompt += "- 顧客情報・車両在庫の読み取り専用アクセスが許可されています" + Environment.NewLine;
+            systemPrompt += "- コード変更・システム設定はできません" + Environment.NewLine;
+            systemPrompt += "- 丁寧な敬語で回答してください" + Environment.NewLine;
+            
+            _logger.LogInformation("[BuildSystemPrompt] 顧客プロンプト長: {Length} 文字", systemPrompt.Length);
+            _logger.LogInformation("[BuildSystemPrompt] 顧客プロンプト先頭200文字: {Prompt}", systemPrompt.Substring(0, Math.Min(200, systemPrompt.Length)));
+        }
+
+        // プレースホルダーを置換
         systemPrompt = systemPrompt
             .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
             .Replace("{business_hours}", _businessHours)
             .Replace("{dealer_name}", _dealerName);
 
-        // 6. DB 検索結果がある場合は追加
+        // DB 検索結果がある場合は追加
         if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
         {
             systemPrompt += Environment.NewLine + Environment.NewLine;

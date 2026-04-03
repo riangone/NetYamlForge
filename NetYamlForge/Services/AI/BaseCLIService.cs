@@ -83,10 +83,18 @@ public abstract class BaseCLIService : ICLIService
         var argList = BuildArgumentList(message, false, sessionId, allowedTools, systemPromptOverride);
         var workingDir = workingDirectory ?? Config.DefaultWorkingDirectory;
 
+        Logger.LogInformation("[CLI执行] 開始：Command={Command}, Args={Args}, WorkingDir={WorkingDir}", 
+            CommandPath, string.Join(" ", argList), workingDir);
+
         var result = await Executor.ExecuteAsync(CommandPath, argList, workingDir, GetEnvironmentVariables(), ct);
+
+        Logger.LogInformation("[CLI执行] 完了：ExitCode={ExitCode}, OutputLength={OutputLength}, ErrorLength={ErrorLength}", 
+            result.ExitCode, result.Output?.Length ?? 0, result.Error?.Length ?? 0);
 
         if (result.ExitCode != 0)
         {
+            Logger.LogError("[CLI执行] エラー：ExitCode={ExitCode}, Error={Error}, Output={Output}", 
+                result.ExitCode, result.Error, result.Output?.Substring(0, Math.Min(200, result.Output?.Length ?? 0)));
             throw new InvalidOperationException($"CLI failed: {result.Error}");
         }
 

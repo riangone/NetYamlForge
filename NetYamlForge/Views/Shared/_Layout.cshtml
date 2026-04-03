@@ -5,6 +5,7 @@
 @using NetYamlForge.Localization
 @using NetYamlForge.Models
 @using Microsoft.Extensions.Localization
+@using Dapper
 @inject IStringLocalizer<SharedResource> L
 @inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
 @inject NetYamlForge.Services.ProjectScope ProjectScope
@@ -35,13 +36,50 @@
 @{
     var showSidebar = User.Identity?.IsAuthenticated ?? false;
     var isAdminUser = User?.IsInRole("Admin") ?? false;
+    
     // カスタムロール（AppUserRole）を Claims から取得（ナビゲーションフィルタリング用）
     var userCustomRoles = User?.Claims
         .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
         .Select(c => c.Value)
         .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        
-        // プロジェクト固有のレイアウト設定
+
+    // Claims にカスタムロールが含まれていない場合、プロジェクトデータベースから直接取得
+    // これは auto-dealer-demo の customer ロールなどを正しく識別するために必要
+    if (showSidebar && userCustomRoles.Count == 0 && ProjectScope?.IsSet == true)
+    {
+        var userName = User.Identity?.Name;
+        if (!string.IsNullOrEmpty(userName))
+        {
+            try
+            {
+                var projectDbPath = System.IO.Path.Combine(
+                    ProjectScope.Current.ProjectDir,
+                    "database",
+                    "auto-dealer-demo.db");
+                
+                if (System.IO.File.Exists(projectDbPath))
+                {
+                    using var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={projectDbPath}");
+                    await connection.OpenAsync();
+                    var roles = await connection.QueryAsync<string>(
+                        "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
+                        new { UserName = userName });
+                    
+                    foreach (var role in roles)
+                    {
+                        userCustomRoles.Add(role);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // ロール取得エラーはログに記録して処理を継続
+                System.Diagnostics.Debug.WriteLine($"カスタムロール取得エラー: {ex.Message}");
+            }
+        }
+    }
+
+    // プロジェクト固有のレイアウト設定
         var projectLayout = ProjectScope?.Current?.Layout;
         var navConfig = projectLayout?.Navigation;
         var headerConfig = projectLayout?.Header;
@@ -782,7 +820,11 @@
         });
     </script>
     <script src="/lib/marked/marked.min.js"></script>
-    <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
+    @* ai-assistant.js: auto-dealer-demo 以外の場合のみ読み込む（customer は dealer-chat-widget を使用） *@
+    @if (currentProject != "auto-dealer-demo" || !userCustomRoles.Contains("customer"))
+    {
+        <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
+    }
     @* auto-dealer-demo: ログイン済みユーザー向け統一 AI チャットウィジェット *@
     @if (currentProject == "auto-dealer-demo" && (User.Identity?.IsAuthenticated ?? false))
     {
