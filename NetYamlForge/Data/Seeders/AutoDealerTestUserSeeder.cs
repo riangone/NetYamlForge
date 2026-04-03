@@ -361,17 +361,16 @@ INSERT INTO employees (
 
         await conn.ExecuteAsync(@"
 INSERT INTO customers (
-    customer_id, app_user_id, user_name, customer_type, name, name_kana,
+    customer_id, user_name, customer_type, name, name_kana,
     gender, phone, mobile, email, tier_level, purchase_count, 
     total_purchase_amount, preferred_contact, created_at, updated_at
 ) VALUES (
-    @CustomerId, @AppUserId, @UserName, @CustomerType, @Name, @NameKana,
+    @CustomerId, @UserName, @CustomerType, @Name, @NameKana,
     @Gender, @Phone, @Mobile, @Email, @TierLevel, 0,
     0, 'phone', @Now, @Now
 )", new
         {
             CustomerId = customerId,
-            AppUserId = appUserId,
             UserName = userName,
             CustomerType = customerType,
             Name = name,
