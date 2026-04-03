@@ -183,22 +183,23 @@ SELECT last_insert_rowid();",
         return id;
     }
 
-    /// <summary>ユーザーの履歴を削除します。chatContext を指定すると特定コンテキストのみ削除します。</summary>
-    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
-    public async Task ClearHistoryAsync(string userId, string? chatContext = null, string? projectName = null)
-    {
-        var connString = GetConnectionString(projectName);
-        await using var conn = new SqliteConnection(connString);
-        
-        // デフォルトのチャットコンテキストを設定
-        var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
-        
-        var sql = chatContext == null
-            ? "DELETE FROM AIChatHistory WHERE UserId = @UserId"
-            : "DELETE FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext";
-        
-        await conn.ExecuteAsync(sql, new { UserId = userId, ChatContext = chatContext ?? defaultContext });
-    }
+    // [已禁用] 禁止清空聊天记录 - 2026-04-03
+    // /// <summary>ユーザーの履歴を削除します。chatContext を指定すると特定コンテキストのみ削除します。</summary>
+    // /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
+    // public async Task ClearHistoryAsync(string userId, string? chatContext = null, string? projectName = null)
+    // {
+    //     var connString = GetConnectionString(projectName);
+    //     await using var conn = new SqliteConnection(connString);
+    //
+    //     // デフォルトのチャットコンテキストを設定
+    //     var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
+    //
+    //     var sql = chatContext == null
+    //         ? "DELETE FROM AIChatHistory WHERE UserId = @UserId"
+    //         : "DELETE FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext";
+    //
+    //     await conn.ExecuteAsync(sql, new { UserId = userId, ChatContext = chatContext ?? defaultContext });
+    // }
 
     // ──────────────────────────────────────────────
     // AICommandLog（指令実行ログ）

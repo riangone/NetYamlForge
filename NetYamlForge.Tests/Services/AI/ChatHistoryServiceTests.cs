@@ -87,24 +87,25 @@ public class ChatHistoryServiceTests : IDisposable
         Assert.Equal(3, messages.Count);
     }
 
-    [Fact]
-    public async Task ClearHistoryAsync_ClearsByChatContext()
-    {
-        // Arrange
-        await _service.SaveMessageAsync(_testUserId, "Framework message 1", "user", chatContext: "framework", projectName: null);
-        await _service.SaveMessageAsync(_testUserId, "Framework message 2", "user", chatContext: "framework", projectName: null);
-        await _service.SaveMessageAsync(_testUserId, "Dealer message", "user", chatContext: "dealer-customer", projectName: null);
-
-        // Act
-        await _service.ClearHistoryAsync(_testUserId, chatContext: "framework", projectName: null);
-
-        // Assert
-        var frameworkHistory = await _service.GetHistoryAsync(_testUserId, projectName: null, limit: 10, chatContext: "framework");
-        Assert.Empty(frameworkHistory);
-
-        var dealerHistory = await _service.GetHistoryAsync(_testUserId, projectName: null, limit: 10, chatContext: "dealer-customer");
-        Assert.Single(dealerHistory);
-    }
+    // [已禁用] 禁止清空聊天记录 - 2026-04-03
+    // [Fact]
+    // public async Task ClearHistoryAsync_ClearsByChatContext()
+    // {
+    //     // Arrange
+    //     await _service.SaveMessageAsync(_testUserId, "Framework message 1", "user", chatContext: "framework", projectName: null);
+    //     await _service.SaveMessageAsync(_testUserId, "Framework message 2", "user", chatContext: "framework", projectName: null);
+    //     await _service.SaveMessageAsync(_testUserId, "Dealer message", "user", chatContext: "dealer-customer", projectName: null);
+    //
+    //     // Act
+    //     await _service.ClearHistoryAsync(_testUserId, chatContext: "framework", projectName: null);
+    //
+    //     // Assert
+    //     var frameworkHistory = await _service.GetHistoryAsync(_testUserId, projectName: null, limit: 10, chatContext: "framework");
+    //     Assert.Empty(frameworkHistory);
+    //
+    //     var dealerHistory = await _service.GetHistoryAsync(_testUserId, projectName: null, limit: 10, chatContext: "dealer-customer");
+    //     Assert.Single(dealerHistory);
+    // }
 
     [Fact]
     public async Task SaveMessageAsync_StoresProvider()

@@ -342,15 +342,16 @@ public class AIController : ControllerBase
         return Ok(new { id });
     }
 
-    /// <summary>
-    /// チャット履歴を削除します（context 指定で特定コンテキストのみ削除可）
-    /// </summary>
-    /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から削除</param>
-    [HttpDelete("history")]
-    public async Task<ActionResult> ClearHistory([FromQuery] string? context = "framework", [FromRoute] string? project = null)
-    {
-        var userId = GetCurrentUserId();
-        await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context, projectName: project);
-        return Ok();
-    }
+    // [已禁用] 禁止清空聊天记录 - 2026-04-03
+    // /// <summary>
+    // /// チャット履歴を削除します（context 指定で特定コンテキストのみ削除可）
+    // /// </summary>
+    // /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から削除</param>
+    // [HttpDelete("history")]
+    // public async Task<ActionResult> ClearHistory([FromQuery] string? context = "framework", [FromRoute] string? project = null)
+    // {
+    //     var userId = GetCurrentUserId();
+    //     await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context, projectName: project);
+    //     return Ok();
+    // }
 }
