@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using NetYamlForge.Services.Tenant;
 
 namespace NetYamlForge.Controllers;
 
@@ -23,13 +24,15 @@ public class AccountController : Controller
     private readonly ILogger<AccountController> _logger;
     private readonly IAuditLogService _audit;
     private readonly ProjectScope _projectScope;
+    private readonly ITenantUserService _tenantUsers;
 
-    public AccountController(IUserAuthService users, ILogger<AccountController> logger, IAuditLogService audit, ProjectScope projectScope)
+    public AccountController(IUserAuthService users, ILogger<AccountController> logger, IAuditLogService audit, ProjectScope projectScope, ITenantUserService tenantUsers)
     {
         _users = users;
         _logger = logger;
         _audit = audit;
         _projectScope = projectScope;
+        _tenantUsers = tenantUsers;
     }
 
     [AllowAnonymous]
@@ -56,7 +59,23 @@ public class AccountController : Controller
         }
 
         // カスタムロール（AppUserRole）を取得してクレームに追加
-        var customRoles = await _users.GetUserRolesAsync(user.UserName);
+        var customRolesList = (await _users.GetUserRolesAsync(user.UserName)).ToList();
+        
+        // プロジェクト固有のロールも取得（マルチテナント対応）
+        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+        if (!string.IsNullOrWhiteSpace(projectName))
+        {
+            var projectRoles = await _tenantUsers.GetProjectRolesAsync(user.Id, projectName);
+            foreach (var role in projectRoles)
+            {
+                if (!customRolesList.Contains(role, StringComparer.OrdinalIgnoreCase))
+                {
+                    customRolesList.Add(role);
+                }
+            }
+        }
+        
+        var customRoles = customRolesList.AsReadOnly();
 
         var claims = new List<Claim>
         {
@@ -66,6 +85,13 @@ public class AccountController : Controller
             new("lang", user.PreferredLanguage),
             new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
+
+        // マルチテナント用の UserType を取得
+        var userDetail = await _tenantUsers.GetUserDetailAsync(user.Id);
+        if (userDetail != null)
+        {
+            claims.Add(new("user_type", userDetail.UserType));
+        }
 
         // Admin/User 以外のカスタムロールを追加（ナビゲーションフィルタリングに使用）
         foreach (var role in customRoles)
@@ -101,7 +127,6 @@ public class AccountController : Controller
         }
 
         // ロール別ランディングページへリダイレクト
-        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
         if (!string.IsNullOrWhiteSpace(projectName))
         {
             var landingByRole = _projectScope.Current.Layout?.LandingPageByRole;
@@ -119,8 +144,8 @@ public class AccountController : Controller
             return RedirectToAction("Project", "Home", new { project = projectName });
         }
 
-        // デフォルト：framework プロジェクトへリダイレクト（存在しない場合はプロジェクト一覧）
-        return RedirectToAction("Index", "Home");
+        // デフォルト：ユーザー個人主ページへリダイレクト（MyHome）
+        return RedirectToAction("Index", "UserHome");
     }
 
     [Authorize]

@@ -306,6 +306,12 @@ app.MapHub<AIDebateHub>("/aiDebateHub");
 // [ApiController] 属性ルーティングを明示的に登録（MapControllerRoute だけでは登録されない）
 app.MapControllers();
 
+// 用户个人主页（必须在 project-home 之前）
+app.MapControllerRoute(
+    name: "user-home",
+    pattern: "MyHome",
+    defaults: new { controller = "UserHome", action = "Index" });
+
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(
     name: "project-home",

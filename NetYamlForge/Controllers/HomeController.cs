@@ -3,6 +3,7 @@
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
@@ -22,6 +23,12 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        // 已登录用户自动跳转到个人主页
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "UserHome");
+        }
+
         if (_projectManager.TryGet("home", out var homeProject) && homeProject != null)
         {
             return RedirectToAction(nameof(Project), new { project = homeProject.Name });

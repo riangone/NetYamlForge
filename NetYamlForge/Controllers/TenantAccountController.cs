@@ -110,8 +110,8 @@ public class TenantAccountController : Controller
             return Redirect(returnUrl);
         }
 
-        // 重定向到默认项目
-        return Redirect($"/{defaultProject}/Dashboard");
+        // 重定向到用户个人主页
+        return RedirectToAction("Index", "UserHome");
     }
 
     /// <summary>

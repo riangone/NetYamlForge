@@ -1,0 +1,106 @@
+title: 在庫車両一覧
+description: "現在販売可能な車両をご覧いただけます。"
+
+sections:
+  # ─── 在庫車両数 ───
+  - id: vehicle_count
+    title: 🚗 販売可能台数
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '販売可能台数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🚗' AS metric_icon,
+             NULL AS metric_delta
+      FROM vehicles WHERE status = 'available' AND customer_id IS NULL
+      UNION ALL
+      SELECT '今月入荷', CAST(COUNT(*) AS TEXT), '📦', NULL
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND strftime('%Y-%m', arrival_date) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 在庫車両一覧 ───
+  - id: available_vehicles
+    title: 🚗 在庫車両一覧
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT
+        maker || ' ' || model || ' ' || grade AS title,
+        CAST(year AS TEXT) || '年式 / ' ||
+        CASE fuel_type
+          WHEN 'gasoline' THEN 'ガソリン'
+          WHEN 'hybrid'   THEN 'ハイブリッド'
+          WHEN 'phev'     THEN 'PHEV'
+          WHEN 'ev'       THEN 'EV'
+          WHEN 'diesel'   THEN 'ディーゼル'
+          ELSE COALESCE(fuel_type, '不明')
+        END AS subtitle,
+        '¥' || printf('%,d', price) AS badge,
+        COALESCE(color, '') ||
+        CASE WHEN features IS NOT NULL AND features != '' THEN
+          ' / ' || SUBSTR(features, 1, 50) || CASE WHEN LENGTH(features) > 50 THEN '...' ELSE '' END
+        ELSE ''
+        END AS description
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY price ASC
+    columns: [title, subtitle, badge, description]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    pageSize: 12
+    editable: false
+    readOnly: true
+
+  # ─── 詳細テーブル ───
+  - id: vehicles_table
+    title: 📋 車両詳細
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        maker || ' ' || model AS 車両名,
+        grade AS グレード,
+        year || '年式' AS 年式,
+        CASE vehicle_type
+          WHEN 'sedan'   THEN 'セダン'
+          WHEN 'suv'     THEN 'SUV'
+          WHEN 'minivan' THEN 'ミニバン'
+          WHEN 'sports'  THEN 'スポーツ'
+          WHEN 'kei'     THEN '軽自動車'
+          ELSE vehicle_type
+        END AS タイプ,
+        CASE fuel_type
+          WHEN 'gasoline' THEN 'ガソリン'
+          WHEN 'hybrid'   THEN 'ハイブリッド'
+          WHEN 'phev'     THEN 'PHEV'
+          WHEN 'ev'       THEN 'EV'
+          WHEN 'diesel'   THEN 'ディーゼル'
+          ELSE COALESCE(fuel_type, '不明')
+        END AS 燃料,
+        color AS カラー,
+        '¥' || printf('%,d', price) AS 価格,
+        CASE status
+          WHEN 'available' THEN '✅ 販売可能'
+          WHEN 'display'   THEN '🏢 展示車'
+          ELSE status
+        END AS 状態
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY price ASC
+    columns: [車両名, グレード, 年式, タイプ, 燃料, カラー, 価格, 状態]
+    pageSize: 15
+    editable: false
+    readOnly: true

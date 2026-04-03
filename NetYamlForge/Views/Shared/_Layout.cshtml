@@ -90,10 +90,10 @@
             .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
             .ToList();
         
-        // ナビゲーション設定がある場合はフィルタリング
-        var entityDefinitions = navConfig != null && navConfig.Entities.Count > 0
+        // ナビゲーション設定がある場合はフィルタリング（空のリストが指定されている場合は何も表示しない）
+        var entityDefinitions = navConfig != null
             ? allEntities.Where(pair => navConfig.Entities.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))
-                .OrderBy(pair => navConfig.Entities.IndexOf(pair.Key))
+                .OrderBy(pair => navConfig.Entities.Count > 0 ? navConfig.Entities.IndexOf(pair.Key) : 0)
                 .ToList()
             : allEntities;
         

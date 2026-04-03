@@ -30,19 +30,7 @@ layout:
 
   navigation:
     showDashboard: false
-    entities:
-      - ai_conversations
-      - ai_messages
-      - ai_handovers
-      - ai_feedback
-      - ai_knowledge
-      - sales_leads
-      - lead_activities
-      - customers
-      - employees
-      - vehicles
-      - service_appointments
-      - service_requests
+    entities: []
     items:
       # ─── 顧客向けメニュー ───
       - label: マイページ
@@ -51,12 +39,12 @@ layout:
         section: ""
         roles: [customer]
       - label: 予約・サービス確認
-        url: /auto-dealer-demo/Page/Appointments
+        url: /auto-dealer-demo/Page/CustomerAppointments
         icon: 📅
         section: マイページ
         roles: [customer]
       - label: 在庫車両を見る
-        url: /auto-dealer-demo/Page/VehicleInventory
+        url: /auto-dealer-demo/Page/CustomerVehicles
         icon: 🚗
         section: マイページ
         roles: [customer]
@@ -144,6 +132,23 @@ layout:
         icon: 📊
         section: 経営レポート
         roles: [executive, sales_manager]
+
+      # ─── データ管理（ai_admin / 管理職向け） ───
+      - label: 会話データ
+        url: /auto-dealer-demo/DynamicEntity/Index?entity=ai_conversations
+        icon: 🗂️
+        section: システム管理
+        roles: [ai_admin, operator]
+      - label: 車両マスタ
+        url: /auto-dealer-demo/DynamicEntity/Index?entity=vehicles
+        icon: 🏎️
+        section: システム管理
+        roles: [ai_admin, sales_manager]
+      - label: サービス履歴データ
+        url: /auto-dealer-demo/DynamicEntity/Index?entity=service_appointments
+        icon: 🛠️
+        section: システム管理
+        roles: [ai_admin, service_staff]
 
 settings:
   locale: ja-JP
