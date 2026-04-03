@@ -16,6 +16,9 @@ namespace NetYamlForge.Data;
 /// </summary>
 public class ProjectSpecificInitializer
 {
+    private readonly CommonTestUserSeeder _commonTestUserSeeder = new();
+    private readonly AutoDealerTestUserSeeder _autoDealerTestUserSeeder = new();
+    private readonly ProjectSpecificTestUserSeeder _projectSpecificTestUserSeeder = new();
     /// <summary>
     /// プロジェクト固有の列追加を実行します。
     /// </summary>
@@ -24,6 +27,7 @@ public class ProjectSpecificInitializer
         string projectName,
         ILogger logger)
     {
+        // 首先运行项目特定的初始化和数据种子
         // contact-manager: 初期データロード
         if (string.Equals(projectName, "contact-manager", StringComparison.OrdinalIgnoreCase))
         {
@@ -35,6 +39,8 @@ public class ProjectSpecificInitializer
         if (string.Equals(projectName, "todo-app", StringComparison.OrdinalIgnoreCase))
         {
             await InitializeTodoAppAsync(conn as SqliteConnection, logger);
+            // 创建 todo-app 测试用户
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
             return;
         }
 
@@ -44,6 +50,8 @@ public class ProjectSpecificInitializer
             await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
             await EnsureColumnAsync(conn as SqliteConnection, "Task", "CreatedBy", "TEXT", logger);
             await EnsureTaskCommentTableAsync(conn as SqliteConnection, logger);
+            // 创建 task-management 测试用户
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
             return;
         }
 
@@ -58,13 +66,46 @@ public class ProjectSpecificInitializer
         // 汎用フォールバック: database/init_seed.sql が存在すれば実行
         await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
 
-        // auto-dealer-demo: AI 窓口システムテーブル初期化 + デモユーザー作成
+        // auto-dealer-demo: AI 窓口システムテーブル初期化 + デモユーザー作成 + テストユーザー作成
         if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
         {
             await InitializeAutoDealerDemoAsync(conn as SqliteConnection, logger);
             await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
+            // 创建汽车销售项目的全面测试用户
+            await _autoDealerTestUserSeeder.EnsureAutoDealerTestUsersAsync(conn, logger);
             return;
         }
+
+        // framework: 框架管理测试用户
+        if (string.Equals(projectName, "framework", StringComparison.OrdinalIgnoreCase))
+        {
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            return;
+        }
+
+        // biz-docs: 业务文档测试用户
+        if (string.Equals(projectName, "biz-docs", StringComparison.OrdinalIgnoreCase))
+        {
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            return;
+        }
+
+        // inventory: 库存管理测试用户
+        if (string.Equals(projectName, "inventory", StringComparison.OrdinalIgnoreCase))
+        {
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            return;
+        }
+
+        // ui-showcase: UI 展示测试用户
+        if (string.Equals(projectName, "ui-showcase", StringComparison.OrdinalIgnoreCase))
+        {
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            return;
+        }
+
+        // 其他项目使用通用测试用户
+        await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
     }
 
     // 認証テーブル名（エンティティテーブル判定から除外）

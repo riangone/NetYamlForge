@@ -98,6 +98,12 @@ public static class DbInitializer
         await new SqliteAuthSchemaInitializer().InitializeAsync(conn, logger);
         await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
         await new RbacSeeder().EnsureRbacRolesAsync(conn, logger);
+        
+        // 创建全局通用测试用户
+        var commonTestUserSeeder = new CommonTestUserSeeder();
+        await commonTestUserSeeder.EnsureCommonTestUsersAsync(conn, logger);
+        
+        // 运行项目特定的初始化和测试用户创建
         await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(conn, project.Name, logger);
     }
 }
