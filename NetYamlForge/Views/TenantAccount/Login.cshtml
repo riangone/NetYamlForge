@@ -1,0 +1,96 @@
+@* 多租户登录页面 *@
+@model NetYamlForge.Models.Auth.LoginViewModel
+@{
+    ViewData["Title"] = "登录";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4">
+    <div class="max-w-md w-full">
+        @* 项目 Logo/名称 *@
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-primary">NetYamlForge</h1>
+            <p class="text-sm text-base-content/60 mt-2">多租户管理系统</p>
+        </div>
+
+        @* 登录卡片 *@
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title justify-center text-2xl mb-4">用户登录</h2>
+                
+                <form method="post" class="space-y-4">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    
+                    @* 用户名 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">用户名</span>
+                        </label>
+                        <input asp-for="UserName" 
+                               class="input input-bordered" 
+                               placeholder="请输入用户名"
+                               autofocus />
+                        <span asp-validation-for="UserName" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 密码 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">密码</span>
+                        </label>
+                        <input asp-for="Password" 
+                               class="input input-bordered" 
+                               type="password"
+                               placeholder="请输入密码" />
+                        <span asp-validation-for="Password" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 记住我 *@
+                    <div class="form-control">
+                        <label class="cursor-pointer label justify-start gap-2">
+                            <input asp-for="RememberMe" type="checkbox" class="checkbox checkbox-sm" />
+                            <span class="label-text">记住我</span>
+                        </label>
+                    </div>
+                    
+                    @* 验证错误汇总 *@
+                    <div asp-validation-summary="ModelOnly" class="text-error text-sm bg-error/10 p-3 rounded"></div>
+                    
+                    @* 登录按钮 *@
+                    <button type="submit" class="btn btn-primary w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        登录
+                    </button>
+                </form>
+                
+                <div class="divider">或者</div>
+                
+                @* 注册链接 *@
+                <div class="text-center space-y-2">
+                    <p class="text-sm">
+                        还没有账户？
+                        <a asp-action="Register" class="link link-primary">立即注册</a>
+                    </p>
+                    @if (!string.IsNullOrEmpty(ViewData["ProjectName"] as string))
+                    {
+                        <p class="text-xs text-base-content/60">
+                            客户注册 
+                            <a asp-action="CustomerRegister" asp-route-project="@(ViewData["ProjectName"] as string)" class="link">请点击这里</a>
+                        </p>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        @* 页脚信息 *@
+        <div class="text-center mt-6 text-xs text-base-content/60">
+            <p>&copy; @DateTime.Now.Year NetYamlForge. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

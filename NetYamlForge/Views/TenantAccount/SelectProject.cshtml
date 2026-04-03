@@ -1,0 +1,75 @@
+@* 项目选择器页面 - 用户选择要访问的项目 *@
+@model NetYamlForge.Models.Auth.SelectProjectViewModel
+@{
+    ViewData["Title"] = "选择项目";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4">
+    <div class="max-w-2xl w-full">
+        @* 页面标题 *@
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold">选择项目</h1>
+            <p class="text-base-content/60 mt-2">请选择您要访问的项目</p>
+        </div>
+
+        @* 项目列表卡片 *@
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                @if (Model.Projects.Any())
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach (var project in Model.Projects)
+                        {
+                            var isDefault = project.IsDefault;
+                            var url = $"/{project.Name}/Dashboard";
+                            
+                            <a href="@url" class="card card-side bg-base-200 hover:bg-base-300 transition-all shadow-sm hover:shadow-md @(isDefault ? "border-2 border-primary" : "")">
+                                <div class="card-body flex-1">
+                                    @if (isDefault)
+                                    {
+                                        <div class="badge badge-primary badge-sm absolute top-2 right-2">默认</div>
+                                    }
+                                    
+                                    <h3 class="card-title text-lg">@project.DisplayName</h3>
+                                    <p class="text-xs text-base-content/60 mt-1">
+                                        角色：@project.DefaultRole
+                                    </p>
+                                    
+                                    <div class="card-actions justify-end mt-2">
+                                        <span class="btn btn-sm btn-primary">
+                                            进入项目
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-base-content/30 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        <p class="text-base-content/60">您还没有可访问的项目</p>
+                        <p class="text-sm text-base-content/40 mt-2">请联系管理员为您分配项目权限</p>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        @* 返回链接 *@
+        <div class="text-center mt-6">
+            <a href="/" class="link link-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                返回首页
+            </a>
+        </div>
+    </div>
+</div>

@@ -57,13 +57,27 @@ public class ProjectMiddleware
                     }
                 }
 
-                // それでも未設定の場合は最初のプロジェクトをフォールバックとして使用
+                // それでも未設定の場合は以下の優先度でプロジェクトを選択
+                // 1. framework プロジェクト（フレームワーク管理用）
+                // 2. 最初のプロジェクト（フォールバック）
                 if (!scope.IsSet)
                 {
-                    var firstProject = pm.GetAll().FirstOrDefault();
-                    if (firstProject != null)
+                    var allProjects = pm.GetAll().ToList();
+                    
+                    // framework プロジェクトを優先的に選択（デフォルトプロジェクト）
+                    var frameworkProject = allProjects.FirstOrDefault(p => p.Name == "framework");
+                    if (frameworkProject != null)
                     {
-                        scope.Set(firstProject);
+                        scope.Set(frameworkProject);
+                    }
+                    else
+                    {
+                        // フォールバック：最初のプロジェクト
+                        var firstProject = allProjects.FirstOrDefault();
+                        if (firstProject != null)
+                        {
+                            scope.Set(firstProject);
+                        }
                     }
                 }
             }

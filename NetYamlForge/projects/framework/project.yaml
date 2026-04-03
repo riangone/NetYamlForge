@@ -1,0 +1,53 @@
+name: framework
+displayName: "NetYamlForge Framework"
+version: "1.0.0"
+description: "框架管理専用プロジェクト - YAML 駆動型 ASP.NET Core MVC フレームワーク"
+
+database:
+  type: sqlite
+  path: database/framework.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+
+  navigation:
+    showDashboard: true
+    items:
+      # ─── システム管理 ───
+      - label: ダッシュボード
+        url: /framework/Dashboard
+        icon: 🏠
+        section: ""
+      - label: 用户管理
+        url: /framework/Users
+        icon: 👥
+        section: 系统管理
+      - label: 动态实体配置
+        url: /framework/DynamicEntity/Index?entity=users
+        icon: 🔧
+        section: 开发工具
+
+      # ─── 框架开发工具 ───
+      - label: 所有项目一览
+        url: /Home/Index
+        icon: 📁
+        section: 开发工具
+      - label: YAML スキーマ
+        url: /framework/Page/Schemas
+        icon: 📄
+        section: 开发工具
+      - label: AI 助手
+        url: /framework/Page/ChatDetail
+        icon: 🤖
+        section: 开发工具
+
+settings:
+  locale: ja-JP
+  timezone: Asia/Tokyo

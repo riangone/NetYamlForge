@@ -701,9 +701,8 @@
     document.body.appendChild(panel);
 
     startDealerSession().then(function() {
-      if (!restoreFromStorage()) {
-        restoreFromServer();
-      }
+      // サーバーから履歴を復元（sessionStorage はフォールバック用）
+      restoreFromServer();
     });
 
     bindPanelEvents();
@@ -1512,6 +1511,45 @@
   }
 
   async function restoreFromServer() {
+    // まずサーバーから履歴を取得（chatContext: dealer-customer / dealer-staff）
+    const chatContext = currentMode === 'customer' ? 'dealer-customer' : 'dealer-staff';
+    try {
+      const resp = await fetch(CONFIG.apiBaseUrl + '/history?limit=50&context=' + chatContext);
+      if (!resp.ok) {
+        // サーバーに履歴がない場合は sessionStorage から復元（フォールバック）
+        restoreFromStorage();
+        return;
+      }
+      const messages = await resp.json();
+      if (!Array.isArray(messages) || messages.length === 0) {
+        // サーバーに履歴がない場合は sessionStorage もクリア（整合性保持）
+        const key = STORAGE_KEY_PREFIX + currentMode;
+        sessionStorage.removeItem(key);
+        // セッション ID があればセッションベースの復元も試行
+        if (dealerConversationId) {
+          restoreFromSessionApi();
+        }
+        return;
+      }
+      // サーバーデータでローカルキャッシュを上書き
+      chatHistory = messages.map(function(m) {
+        return { content: m.content, type: m.type, timestamp: m.displayTime || m.createdAt || '' };
+      });
+      const container = document.getElementById('dc-messages-container');
+      container.innerHTML = '';
+      chatHistory.forEach(function(msg) {
+        addMessage(msg.content, msg.type, true, msg.timestamp);
+      });
+      // sessionStorage もサーバーデータで更新
+      saveHistory();
+    } catch (e) {
+      // サーバー取得失敗時は sessionStorage から復元（フォールバック）
+      restoreFromStorage();
+    }
+  }
+
+  // セッション API から履歴を復元（旧バージョンとの互換性）
+  async function restoreFromSessionApi() {
     if (!dealerConversationId) return;
     try {
       const resp = await fetch(CONFIG.chatApiBase + '/session/' + dealerConversationId + '/messages');
@@ -1530,12 +1568,18 @@
       });
       saveHistory();
     } catch (e) {
-      // サーバー取得失敗時は sessionStorage のまま
+      // セッション API も失敗した場合は何もしない
     }
   }
 
-  function saveMessageToServer(_content, _type) {
-    // auto-dealer では SendMessageAsync / SendStaffMessageAsync がサーバー側で保存するため不要
+  function saveMessageToServer(content, type) {
+    // グローバル AI 履歴にも保存（別タブ・ブラウザ再起動対応）
+    const chatContext = currentMode === 'customer' ? 'dealer-customer' : 'dealer-staff';
+    fetch(CONFIG.apiBaseUrl + '/history', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: content, type: type, chatContext: chatContext })
+    }).catch(function() {});
   }
 
   function configureMarked() {

@@ -39,6 +39,7 @@ layout:
       - sales_leads
       - lead_activities
       - customers
+      - employees
       - vehicles
       - service_appointments
       - service_requests
@@ -117,6 +118,13 @@ layout:
         icon: 👥
         section: 顧客管理
         roles: [sales_rep, sales_manager, service_staff]
+
+      # ─── 従業員管理（ai_admin / executive 向け） ───
+      - label: 従業員マスタ
+        url: /auto-dealer-demo/Page/Employees
+        icon: 👨‍💼
+        section: 従業員管理
+        roles: [ai_admin, executive]
 
       # ─── 予約管理（service_staff 向け） ───
       - label: サービス予約

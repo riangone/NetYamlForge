@@ -1,0 +1,63 @@
+@* 访问拒绝页面 *@
+@model NetYamlForge.Models.Auth.AccessDeniedViewModel
+@{
+    ViewData["Title"] = "访问被拒绝";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4">
+    <div class="max-w-md w-full text-center">
+        @* 错误图标 *@
+        <div class="mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        
+        @* 错误卡片 *@
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title justify-center text-2xl text-error">访问被拒绝</h2>
+                
+                <div class="alert alert-error mt-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>@Model.Message</span>
+                </div>
+                
+                @if (!string.IsNullOrEmpty(Model.ProjectName))
+                {
+                    <div class="mt-4 p-3 bg-base-200 rounded">
+                        <p class="text-sm">
+                            项目：<strong>@Model.ProjectName</strong>
+                        </p>
+                        <p class="text-xs text-base-content/60 mt-1">
+                            您没有访问该项目的权限，请联系项目管理员为您分配权限。
+                        </p>
+                    </div>
+                }
+                
+                <div class="card-actions justify-center mt-6 space-x-4">
+                    <a asp-controller="TenantAccount" asp-action="Login" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        返回登录
+                    </a>
+                    <a href="/" class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        首页
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        @* 帮助信息 *@
+        <div class="mt-6 text-sm text-base-content/60">
+            <p>需要帮助？请联系您的项目管理员</p>
+        </div>
+    </div>
+</div>

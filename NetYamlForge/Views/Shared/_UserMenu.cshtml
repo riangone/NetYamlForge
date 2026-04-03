@@ -1,0 +1,107 @@
+@* 用户菜单组件 - 显示在导航栏中 *@
+@{
+    var userName = User.Identity?.Name ?? "";
+    var displayNameClaim = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName);
+    var displayName = displayNameClaim?.Value ?? userName;
+    var userTypeClaim = User.FindFirst("user_type");
+    var userType = userTypeClaim?.Value ?? "user";
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+                <img src="https://ui-avatars.com/api/?name=@displayName&background=random" alt="@displayName" />
+            </div>
+        </label>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            @* 用户信息 *@
+            <li class="menu-title">
+                <div class="flex items-center gap-2">
+                    <div class="avatar placeholder">
+                        <div class="bg-neutral text-neutral-content rounded-full w-8">
+                            <span class="text-xs">@displayName.Substring(0, Math.Min(2, displayName.Length)).ToUpper()</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">@displayName</div>
+                        <div class="text-xs text-base-content/60">@userName</div>
+                    </div>
+                </div>
+            </li>
+            
+            @* 用户类型标签 *@
+            <li>
+                <a class="cursor-default">
+                    <span class="badge badge-sm @(userType switch {
+                        "employee" => "badge-primary",
+                        "customer" => "badge-secondary",
+                        "third_party" => "badge-accent",
+                        _ => "badge-ghost"
+                    })">
+                        @userType
+                    </span>
+                </a>
+            </li>
+            
+            <li class="menu-divider"></li>
+            
+            @* 菜单项 *@
+            <li>
+                <a asp-controller="TenantAccount" asp-action="SelectProject">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    选择项目
+                </a>
+            </li>
+            
+            @* 个人资料（如果有） *@
+            <li>
+                <a href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    个人资料
+                </a>
+            </li>
+            
+            @* 设置（如果有） *@
+            <li>
+                <a href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    设置
+                </a>
+            </li>
+            
+            <li class="menu-divider"></li>
+            
+            @* 登出 *@
+            <li>
+                <form method="post" asp-controller="TenantAccount" asp-action="Logout">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="w-full text-start text-error">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        退出登录
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+}
+else
+{
+    @* 未登录时显示登录按钮 *@
+    <a asp-controller="TenantAccount" asp-action="Login" class="btn btn-ghost btn-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+        登录
+    </a>
+}

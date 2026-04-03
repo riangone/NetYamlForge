@@ -185,11 +185,24 @@
                             <div class="text-sm opacity-70">Navigation</div>
                             <div class="font-semibold">@(string.IsNullOrEmpty(currentProject) ? "Definitions" : currentProject)</div>
                         </div>
-                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </label>
+                        <div class="flex gap-1">
+                            @if (!string.IsNullOrEmpty(currentProject))
+                            {
+                                <a asp-controller="Home"
+                                   asp-action="Index"
+                                   class="btn btn-ghost btn-sm btn-square"
+                                   title="プロジェクト選択に戻る">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                    </svg>
+                                </a>
+                            }
+                            <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </label>
+                        </div>
                     </div>
 
                     <ul class="menu p-3 gap-1 w-full">

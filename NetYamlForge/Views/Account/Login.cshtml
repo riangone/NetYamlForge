@@ -8,6 +8,7 @@
 @inject IStringLocalizer<SharedResource> L
 @{
     ViewData["Title"] = L["Login"];
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "";
 }
 
 <div class="max-w-md mx-auto card bg-base-100 shadow">
@@ -28,5 +29,15 @@
             <div asp-validation-summary="ModelOnly" class="text-error text-sm"></div>
             <button type="submit" class="btn btn-primary btn-sm w-full">@L["Login"]</button>
         </form>
+        <div class="divider"></div>
+        <div class="text-center space-y-2">
+            <p class="text-sm">
+                アカウントをお持ちでない方は
+                <a asp-controller="Account" asp-action="CustomerRegister" asp-route-project="@currentProject" class="link link-primary">こちらから登録</a>
+            </p>
+            <p class="text-xs text-base-content/60">
+                一般登録は <a asp-controller="Account" asp-action="Register" asp-route-project="@currentProject" class="link">こちら</a>
+            </p>
+        </div>
     </div>
 </div>

@@ -1,0 +1,197 @@
+imports: []
+entities:
+  third_party_users:
+    table: third_party_users
+    key: third_party_id
+    displayName: 第三方用户
+    description: 供应商、物流、金融服务等第三方合作伙伴
+    softDelete: false
+    isPublic: true
+
+    columns:
+      third_party_id:
+        type: string
+        length: 50
+        required: true
+        label: 第三方用户 ID
+        searchable: true
+        sortable: true
+      app_user_id:
+        type: int
+        required: true
+        label: 全局用户 ID
+        description: 关联到全局 AppUser 表
+        reference:
+          entity: app_user
+          key: id
+          display: display_name
+          crossProject: true
+      company_name:
+        type: string
+        length: 200
+        required: true
+        label: 公司名称
+        searchable: true
+        sortable: true
+      service_type:
+        type: string
+        length: 30
+        required: true
+        label: 服务类型
+        enum:
+          - vendor
+          - logistics
+          - finance
+          - insurance
+          - inspection
+          - other
+        default: vendor
+        searchable: true
+        sortable: true
+      contact_person:
+        type: string
+        length: 100
+        required: false
+        label: 联系人
+        searchable: true
+        sortable: true
+      contact_phone:
+        type: string
+        length: 20
+        required: false
+        label: 联系电话
+        searchable: true
+        sortable: true
+      contact_email:
+        type: string
+        length: 100
+        required: false
+        label: 联系邮箱
+        searchable: true
+        sortable: true
+      service_area:
+        type: string
+        length: 200
+        required: false
+        label: 服务区域
+        description: JSON 数组，如 ["関東", "関西"]
+      contract_start_date:
+        type: date
+        required: false
+        label: 合同开始日
+        sortable: true
+      contract_end_date:
+        type: date
+        required: false
+        label: 合同结束日
+        sortable: true
+      status:
+        type: string
+        length: 20
+        required: true
+        label: 状态
+        enum:
+          - active
+          - suspended
+          - terminated
+        default: active
+        searchable: true
+        sortable: true
+      rating:
+        type: int
+        required: false
+        label: 评级
+        description: 1-5 星
+        min: 1
+        max: 5
+        default: 3
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: 备注
+      created_at:
+        type: datetime
+        required: true
+        label: 创建时间
+        default: utcnow
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新时间
+        default: utcnow
+        sortable: true
+
+    forms:
+      third_party_id:
+        type: string
+        required: true
+        label: 第三方用户 ID
+        editable: false
+      app_user_id:
+        type: select
+        required: true
+        label: 全局用户
+        editable: true
+      company_name:
+        type: string
+        required: true
+        label: 公司名称
+        editable: true
+      service_type:
+        type: select
+        required: true
+        label: 服务类型
+        editable: true
+      contact_person:
+        type: string
+        required: false
+        label: 联系人
+        editable: true
+      contact_email:
+        type: email
+        required: false
+        label: 联系邮箱
+        editable: true
+      status:
+        type: select
+        required: true
+        label: 状态
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - validate_third_party_email
+        - sync_third_party_to_auth_user
+      beforeUpdate:
+        - sync_third_party_to_auth_user
+
+    list:
+      columns:
+        - third_party_id
+        - company_name
+        - service_type
+        - contact_person
+        - contact_email
+        - status
+        - rating
+        - created_at
+      defaultSort:
+        column: company_name
+        direction: asc
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    permissions:
+      view:
+        roles: [admin, sales_manager]
+      create:
+        roles: [admin]
+      edit:
+        roles: [admin]
+      delete:
+        roles: [admin]

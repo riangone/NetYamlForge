@@ -27,6 +27,7 @@ public class AutoDealerChatService
     private readonly QueryResultFormatter _queryFormatter;
     private readonly TaskQueueService _taskQueue;
     private readonly ProgressTracker _tracker;
+    private readonly ChatHistoryService _chatHistory;
 
     // 設定値
     private readonly string _dealerName;
@@ -45,6 +46,7 @@ public class AutoDealerChatService
         QueryResultFormatter queryFormatter,
         TaskQueueService taskQueue,
         ProgressTracker tracker,
+        ChatHistoryService chatHistory,
         IConfiguration config)
     {
         _db = db;
@@ -57,7 +59,8 @@ public class AutoDealerChatService
         _queryFormatter = queryFormatter;
         _taskQueue = taskQueue;
         _tracker = tracker;
-        
+        _chatHistory = chatHistory;
+
         _dealerName = config["AiWindow:DealerName"] ?? "AI 窓口ディーラー";
         _businessHours = config["AiWindow:BusinessHours"] ?? "月〜土 9:00〜18:00";
         _projectName = _projectScope.IsSet ? _projectScope.Current.Name : "auto-dealer-demo";
@@ -121,6 +124,24 @@ SET last_intent = @Intent, last_confidence = 0.9, sentiment_score = @Sentiment, 
 WHERE conversation_id = @Id",
             new { Intent = resolvedIntent, Sentiment = sentimentScore, Now = now, Id = conversationId });
 
+        // 6. グローバル AI 履歴にも保存（別タブ・ブラウザ再起動対応）
+        // UserId は顧客識別子（conversationId を使用）
+        // プロジェクト独立 DB に保存して他プロジェクトと隔離
+        await _chatHistory.SaveMessageAsync(
+            conversationId,
+            customerMessage,
+            "user",
+            provider: _defaultProvider,
+            chatContext: "dealer-customer",
+            projectName: _projectName);
+        await _chatHistory.SaveMessageAsync(
+            conversationId,
+            responseText,
+            "assistant",
+            provider: _defaultProvider,
+            chatContext: "dealer-customer",
+            projectName: _projectName);
+
         sw.Stop();
         return new ChatMessageResult
         {
@@ -152,6 +173,23 @@ WHERE conversation_id = @Id",
         await _db.ExecuteAsync(@"
 UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conversation_id = @Id",
             new { Intent = entityLabel, Now = now, Id = conversationId });
+
+        // グローバル AI 履歴にも保存（別タブ・ブラウザ再起動対応）
+        // プロジェクト独立 DB に保存して他プロジェクトと隔離
+        await _chatHistory.SaveMessageAsync(
+            conversationId,
+            staffMessage,
+            "user",
+            provider: _defaultProvider,
+            chatContext: "dealer-staff",
+            projectName: _projectName);
+        await _chatHistory.SaveMessageAsync(
+            conversationId,
+            responseText,
+            "assistant",
+            provider: _defaultProvider,
+            chatContext: "dealer-staff",
+            projectName: _projectName);
 
         sw.Stop();
         return new ChatMessageResult
@@ -373,20 +411,37 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
 
     /// <summary>
     /// システムプロンプトを構築
-    /// 子プロジェクト AI は業務固有のプロンプトのみを使用（グローバル AI の制限を適用しない）
+    /// グローバル AI の提示詞 + 業務固有の提示詞を統合（方案 A：完全统一）
     /// </summary>
     private string BuildSystemPrompt(bool isStaff, string? dbContextMarkdown = null)
     {
-        // 業務固有のプロンプトのみを使用（グローバル AI の制限を適用しない）
-        var systemPrompt = LoadAutoDealerPromptFromMd(isStaff);
+        // 1. グローバル AI の提示詞を取得（フレームワーク開発 AI としての基本指示）
+        //    但し、auto-dealer-demo は業務データアクセスが許可されているため、
+        //    権限制限部分は業務用に上書きする
+        var frameworkPrompt = _skillLoader.GetSystemPrompt();
 
-        // プレースホルダーを置換
+        // 2. 業務固有のプロンプトを取得
+        var autoDealerPrompt = LoadAutoDealerPromptFromMd(isStaff);
+
+        // 3. グローバル AI 提示詞から「権限制限」セクションを業務用に置換
+        //    auto-dealer-demo は顧客情報・車両在庫・販売リードの照会が許可されている
+        var systemPrompt = frameworkPrompt
+            .Replace("❌ **auto-dealer-demo の業務データへのアクセス**", "✅ **auto-dealer-demo の業務データへのアクセス**")
+            .Replace("顧客情報・車両在庫・販売リードの照会は禁止", "顧客情報・車両在庫・販売リードの照会が可能")
+            .Replace("業務ロジックの変更は禁止", "業務ロジックの変更は禁止（読み取り専用）");
+
+        // 4. 業務固有プロンプトを追加
+        systemPrompt += Environment.NewLine + Environment.NewLine;
+        systemPrompt += "# 🚗 自動車販売ディーラー業務指示" + Environment.NewLine;
+        systemPrompt += autoDealerPrompt;
+
+        // 5. プレースホルダーを置換
         systemPrompt = systemPrompt
             .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
             .Replace("{business_hours}", _businessHours)
             .Replace("{dealer_name}", _dealerName);
 
-        // DB 検索結果がある場合は追加
+        // 6. DB 検索結果がある場合は追加
         if (!string.IsNullOrWhiteSpace(dbContextMarkdown))
         {
             systemPrompt += Environment.NewLine + Environment.NewLine;

@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using NetYamlForge.Data;
+using NetYamlForge.Data.Schemas;
 using NetYamlForge.Extensions;
 using NetYamlForge.Hubs;
 using NetYamlForge.Middleware;
@@ -163,11 +164,15 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.Razor.RazorViewEngineOptions
     options.ViewLocationExpanders.Add(new NetYamlForge.Services.ProjectViewLocationExpander());
 });
 
+// ===== 多租户认证服务 =====
+builder.Services.AddScoped<NetYamlForge.Services.Tenant.ITenantUserService, NetYamlForge.Services.Tenant.TenantUserService>();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.LoginPath = "/TenantAccount/Login";
+        options.LogoutPath = "/TenantAccount/Logout";
+        options.AccessDeniedPath = "/TenantAccount/AccessDenied";
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
     });
@@ -245,7 +250,16 @@ var app = builder.Build();
 var taskQueue = app.Services.GetRequiredService<TaskQueueService>();
 taskQueue.StartProcessing();
 
+// システムデータベース初期化（マルチテナント認証用）
+var sysLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("SystemDatabase");
+await SystemDatabaseInitializer.InitializeAsync(sysLogger);
+
+// プロジェクトデータベース初期化
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
+
+// プロジェクトメタデータをシステムデータベースに同期
+var projectManager = app.Services.GetRequiredService<ProjectManager>();
+await SystemDatabaseInitializer.SyncProjectsAsync(projectManager.GetAll(), sysLogger);
 
 var supportedCultures = new[] { "en-US", "zh-CN", "ja-JP", "ko-KR" }
     .Select(x => new CultureInfo(x))
@@ -282,6 +296,7 @@ app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<NetYamlForge.Services.Tenant.ProjectScopeMiddleware>(); // 项目范围验证中间件
 
 // SignalR Hubs for AI
 app.MapHub<AIProgressHub>("/aiProgressHub");

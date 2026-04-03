@@ -5,7 +5,7 @@ hero:
   primaryActionLabel: KPI Overview
   primaryActionUrl: /ui-showcase/Page/KpiOverview
   secondaryActionLabel: Form & Filter Demo
-  secondaryActionUrl: /ui-showcase/DynamicEntity/component_demo
+  secondaryActionUrl: /ui-showcase/DynamicEntity/Index?entity=component_demo
   highlights:
     - All Page Components
     - All Form Field Types
@@ -24,7 +24,7 @@ quickActions:
     style: btn-outline
     icon: 🖼️
   - label: Form & Filter
-    url: /ui-showcase/DynamicEntity/component_demo
+    url: /ui-showcase/DynamicEntity/Index?entity=component_demo
     style: btn-outline
     icon: 🧩
   - label: Heat Map

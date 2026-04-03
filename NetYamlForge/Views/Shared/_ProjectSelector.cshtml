@@ -1,0 +1,71 @@
+@* 项目选择器组件 - 显示在导航栏中 *@
+@using NetYamlForge.Services.Tenant
+@inject ITenantUserService TenantUsers
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "";
+    var projectName = !string.IsNullOrEmpty(currentProject) ? currentProject : Context.Items["ProjectName"] as string;
+    
+    // 获取当前项目名称
+    var displayName = projectName ?? "选择项目";
+    
+    // 获取用户可访问的项目列表
+    var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+    var projects = new List<ProjectInfo>();
+    
+    if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+    {
+        try
+        {
+            projects = (await TenantUsers.GetAccessibleProjectsAsync(userId)).ToList();
+        }
+        catch
+        {
+            // 忽略错误，使用空列表
+        }
+    }
+}
+
+@if (User.Identity?.IsAuthenticated == true && projects.Any())
+{
+    <div class="dropdown dropdown-hover">
+        <label tabindex="0" class="btn btn-ghost gap-2 normal-case">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+            <span>@displayName</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </label>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-64">
+            @foreach (var project in projects)
+            {
+                var isActive = project.Name == projectName;
+                <li>
+                    <a href="/@project.Name/Dashboard" class="@(isActive ? "active" : "")">
+                        @if (isActive)
+                        {
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        }
+                        @project.DisplayName
+                        @if (project.IsDefault)
+                        {
+                            <span class="badge badge-xs badge-primary ml-2">默认</span>
+                        }
+                    </a>
+                </li>
+            }
+            <li class="menu-divider"></li>
+            <li>
+                <a asp-controller="TenantAccount" asp-action="SelectProject">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    所有项目
+                </a>
+            </li>
+        </ul>
+    </div>
+}

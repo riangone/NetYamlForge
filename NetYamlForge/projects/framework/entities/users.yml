@@ -1,0 +1,180 @@
+imports: []
+entities:
+  users:
+    table: AppUser
+    key: Id
+    displayName: 用户管理
+    description: 系统用户的账号管理
+    softDelete: false
+    isPublic: false
+
+    joins: []
+
+    forms:
+      UserName:
+        type: string
+        required: true
+        label: ユーザー名
+        editable: true
+        unique: true
+      DisplayName:
+        type: string
+        required: true
+        label: 表示名
+        editable: true
+      Email:
+        type: email
+        required: true
+        label: メールアドレス
+        editable: true
+        unique: true
+      Password:
+        type: password
+        label: パスワード
+        editable: true
+        required: false
+        placeholder: "変更しない場合は空欄"
+      IsAdmin:
+        type: boolean
+        label: 管理者権限
+        editable: true
+        default: false
+      IsActive:
+        type: boolean
+        label: アクティブ
+        editable: true
+        default: true
+      PreferredLanguage:
+        type: string
+        label: 言語
+        editable: true
+        options:
+          - ja-JP
+          - en-US
+          - zh-CN
+        default: ja-JP
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      UserName:
+        type: string
+        required: true
+        label: 用户名
+        searchable: true
+        sortable: true
+      PasswordHash:
+        type: string
+        required: true
+        label: 密码哈希
+        visible: false
+      DisplayName:
+        type: string
+        required: true
+        label: 显示名
+        searchable: true
+        sortable: true
+      Email:
+        type: string
+        required: true
+        label: 邮箱
+        searchable: true
+        sortable: true
+      PreferredLanguage:
+        type: string
+        label: 语言
+        sortable: true
+      IsAdmin:
+        type: boolean
+        label: 管理员
+        sortable: true
+      IsActive:
+        type: boolean
+        label: 活跃状态
+        sortable: true
+      CreatedAt:
+        type: date
+        label: 创建时间
+        sortable: true
+      LastLoginAt:
+        type: date
+        label: 最后登录
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - validate_username
+        - hash_password
+      beforeUpdate:
+        - validate_username
+        - hash_password_if_changed
+
+    paging:
+      pageSize: 20
+      mode: numbered
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - UserName
+          - DisplayName
+          - Email
+          - Password
+          - IsAdmin
+          - IsActive
+          - PreferredLanguage
+      filters:
+        columns: 3
+        order:
+          - IsAdmin
+          - IsActive
+          - PreferredLanguage
+
+    filters:
+      UserName:
+        type: like
+        label: ユーザー名
+      DisplayName:
+        type: like
+        label: 表示名
+      Email:
+        type: like
+        label: メールアドレス
+      IsAdmin:
+        type: dropdown
+        label: 管理者
+        options:
+          - "true"
+          - "false"
+      IsActive:
+        type: dropdown
+        label: アクティブ
+        options:
+          - "true"
+          - "false"
+      PreferredLanguage:
+        type: dropdown
+        label: 言語
+        options:
+          - ja-JP
+          - en-US
+          - zh-CN
+
+    exports:
+      users_csv:
+        label: "ユーザー一覧 CSV"
+        format: csv
+        filename: "users_{date:yyyyMMdd}.csv"
+        columns:
+          - UserName
+          - DisplayName
+          - Email
+          - IsAdmin
+          - IsActive
+          - PreferredLanguage
+          - CreatedAt
+          - LastLoginAt

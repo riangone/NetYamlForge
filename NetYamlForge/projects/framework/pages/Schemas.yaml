@@ -1,0 +1,71 @@
+title: "YAML スキーマ管理"
+description: "NetYamlForge の YAML スキーマ定義と検証"
+
+sections:
+  - id: schema_intro
+    title: "YAML スキーマ概要"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'intro' AS dummy"
+    content: |
+      # YAML スキーマ管理
+      
+      NetYamlForge フレームワークでは、すべての設定ファイルが JSON Schema によって検証されます。
+      
+      ## 主なスキーマファイル
+      
+      | スキーマ名 | 用途 | 場所 |
+      |-----------|------|------|
+      | project-schema.json | プロジェクト設定 (project.yaml) | `/Schemas/` |
+      | entity-schema.json | エンティティ定義 (*.yml) | `/Schemas/` |
+      | dashboard-schema.json | ダッシュボード設定 (dashboard.yaml) | `/Schemas/` |
+      | ui-page-schema.json | UI ページ設定 (pages/*.yaml) | `/Schemas/` |
+
+  - id: schema_list
+    title: "スキーマ一覧"
+    component: cards
+    sourceType: custom
+    source: |
+      SELECT '📁' AS icon, 'プロジェクトスキーマ' AS title, 'project.yaml の構造を検証' AS description, '/framework/files/Schemas/project-schema.json' AS url
+      UNION ALL SELECT '📊', 'エンティティスキーマ', 'エンティティ定義の構造を検証', '/framework/files/Schemas/entity-schema.json'
+      UNION ALL SELECT '📈', 'ダッシュボードスキーマ', 'dashboard.yaml の構造を検証', '/framework/files/Schemas/dashboard-schema.json'
+      UNION ALL SELECT '📄', 'UI ページスキーマ', 'pages/*.yaml の構造を検証', '/framework/files/Schemas/ui-page-schema.json'
+    columns: [icon, title, description, url]
+    iconField: icon
+    titleField: title
+    descriptionField: description
+    urlField: url
+
+  - id: validation_info
+    title: "バリデーション情報"
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'スキーマ数' AS metric_name, '4' AS metric_value, '📋' AS metric_icon, NULL AS metric_delta
+      UNION ALL SELECT 'エンティティ数', '2', '📦', NULL
+      UNION ALL SELECT 'ページ数', '2', '📄', NULL
+      UNION ALL SELECT 'プロジェクト', '1', '🏗️', NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+
+  - id: schema_docs
+    title: "ドキュメント"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'docs' AS dummy"
+    content: |
+      ## 関連ドキュメント
+      
+      - [クイックスタートガイド](/docs/quickstart-ja.md)
+      - [アーキテクチャマップ](/docs/architecture-map-ja.md)
+      - [YAML 駆動設計](/docs/yaml-driven-design-zh.md)
+      - [共通フックリスト](/docs/COMMON_HOOKS.md)
+      
+      ## スキーマ検証の仕組み
+      
+      1. YAML ファイルが保存されると、対応する JSON Schema で自動検証
+      2. 無効な構造の場合はエラーメッセージを表示
+      3. 開発モードではリアルタイム検証を実行

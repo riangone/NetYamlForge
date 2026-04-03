@@ -84,7 +84,11 @@ public class AIController : ControllerBase
             var userId = GetCurrentUserId();
 
             // ユーザーのメッセージをチャット履歴に保存
-            await _chatHistory.SaveMessageAsync(userId, request.Message, "user", chatContext: "framework");
+            // プロジェクトが指定されていればそのプロジェクトの DB、なければ全局 DB を使用
+            await _chatHistory.SaveMessageAsync(userId, request.Message, "user", 
+                provider: request.CliTool, 
+                chatContext: string.IsNullOrEmpty(request.Project) ? "framework" : request.Project,
+                projectName: request.Project);
 
             // 创建任务
             var task = new AITask
@@ -300,47 +304,53 @@ public class AIController : ControllerBase
     /// チャット履歴を取得します
     /// </summary>
     /// <param name="context">絞り込みコンテキスト（framework / dealer-staff / dealer-customer）。省略時は全件。</param>
+    /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から取得</param>
     [HttpGet("history")]
-    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = "framework")
+    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = "framework", [FromRoute] string? project = null)
     {
         var userId = GetCurrentUserId();
-        var messages = await _chatHistory.GetHistoryAsync(userId, limit, string.IsNullOrEmpty(context) ? null : context);
+        // プロジェクトが指定されていればそのプロジェクトの DB、なければ全局 DB を使用
+        var messages = await _chatHistory.GetHistoryAsync(userId, projectName: project, limit: limit, chatContext: string.IsNullOrEmpty(context) ? null : context);
         return Ok(messages);
     }
 
     /// <summary>
     /// コマンド実行ログ一覧を取得します
     /// </summary>
+    /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から取得</param>
     [HttpGet("command-logs")]
-    public async Task<ActionResult> GetCommandLogs([FromQuery] int limit = 50)
+    public async Task<ActionResult> GetCommandLogs([FromQuery] int limit = 50, [FromRoute] string? project = null)
     {
         var userId = GetCurrentUserId();
-        var logs = await _chatHistory.GetCommandLogsAsync(userId, limit);
+        var logs = await _chatHistory.GetCommandLogsAsync(userId, projectName: project, limit: limit);
         return Ok(logs);
     }
 
     /// <summary>
     /// メッセージを履歴に保存します
     /// </summary>
+    /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB に保存</param>
     [HttpPost("history")]
-    public async Task<ActionResult> SaveMessage([FromBody] SaveChatMessageRequest request)
+    public async Task<ActionResult> SaveMessage([FromBody] SaveChatMessageRequest request, [FromRoute] string? project = null)
     {
         if (string.IsNullOrWhiteSpace(request.Content) || string.IsNullOrWhiteSpace(request.Type))
             return BadRequest(new { error = "Content and Type are required" });
 
         var userId = GetCurrentUserId();
-        var id = await _chatHistory.SaveMessageAsync(userId, request.Content, request.Type);
+        var chatContext = string.IsNullOrEmpty(request.ChatContext) ? (string.IsNullOrEmpty(project) ? "framework" : project) : request.ChatContext;
+        var id = await _chatHistory.SaveMessageAsync(userId, request.Content, request.Type, provider: request.Provider, chatContext: chatContext, projectName: project);
         return Ok(new { id });
     }
 
     /// <summary>
     /// チャット履歴を削除します（context 指定で特定コンテキストのみ削除可）
     /// </summary>
+    /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から削除</param>
     [HttpDelete("history")]
-    public async Task<ActionResult> ClearHistory([FromQuery] string? context = "framework")
+    public async Task<ActionResult> ClearHistory([FromQuery] string? context = "framework", [FromRoute] string? project = null)
     {
         var userId = GetCurrentUserId();
-        await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context);
+        await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context, projectName: project);
         return Ok();
     }
 }

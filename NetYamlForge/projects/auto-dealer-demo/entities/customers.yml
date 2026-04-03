@@ -15,6 +15,27 @@ entities:
         label: 顧客 ID
         searchable: true
         sortable: true
+      app_user_id:
+        type: int
+        required: false
+        label: 全局用户 ID
+        description: 关联到全局 AppUser 表，未注册用户为空
+        searchable: false
+        sortable: true
+        reference:
+          entity: app_user
+          key: id
+          display: display_name
+          crossProject: true
+      user_name:
+        type: string
+        length: 50
+        required: false
+        label: ユーザー名
+        description: ログイン認証用のユーザー名（顧客登録時に自動設定）
+        searchable: true
+        sortable: true
+        unique: true
       customer_type:
         type: string
         length: 20
@@ -165,6 +186,12 @@ entities:
         required: true
         label: 顧客 ID
         editable: false
+      user_name:
+        type: string
+        required: false
+        label: ユーザー名
+        editable: false
+        description: ログイン認証用のユーザー名
       customer_type:
         type: select
         required: true
@@ -205,6 +232,9 @@ entities:
       beforeCreate:
         - validate_customer_phone    # 電話番号形式を検証
         - normalize_customer_name    # 顧客名・フリガナの空白を除去
+        - validate_customer_registration  # ユーザー名の一意性を検証
+      afterCreate:
+        - sync_customer_to_auth_user  # AppUser テーブルに同期
       beforeUpdate:
         - validate_customer_phone
         - normalize_customer_name

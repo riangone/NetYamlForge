@@ -1,0 +1,53 @@
+stats:
+  - label: 全局用户数
+    labelKey: dashboard.stats.total_users
+    entity: users
+    aggregate: count
+    icon: 👥
+    color: badge-primary
+  - label: 活跃用户
+    labelKey: dashboard.stats.active_users
+    entity: users
+    aggregate: count
+    filter: IsActive=1
+    icon: ✅
+    color: badge-success
+  - label: 管理员用户
+    labelKey: dashboard.stats.admin_users
+    entity: users
+    aggregate: count
+    filter: IsAdmin=1
+    icon: 🔐
+    color: badge-warning
+  - label: 项目总数
+    labelKey: dashboard.stats.total_projects
+    entity: users
+    aggregate: count
+    icon: 📊
+    color: badge-accent
+    note: "统计有用户的项目数"
+
+charts:
+  - title: 用户活跃度分布
+    titleKey: dashboard.charts.active_dist
+    type: pie
+    entity: users
+    valueAggregate: count
+    groupExpression: IsActive
+    orderBy: value
+    orderDir: desc
+    colors:
+      - rgba(16, 185, 129, 0.85)
+      - rgba(239, 68, 68, 0.85)
+
+  - title: 管理员分布
+    titleKey: dashboard.charts.admin_dist
+    type: doughnut
+    entity: users
+    valueAggregate: count
+    groupExpression: IsAdmin
+    orderBy: value
+    orderDir: desc
+    colors:
+      - rgba(245, 158, 11, 0.85)
+      - rgba(59, 130, 246, 0.85)

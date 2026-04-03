@@ -26,6 +26,7 @@
 - **动态 SQL 生成**: 基于 YAML 定义自动生成安全的 SQL 语句（使用 `SqlSafetyGuard`）
 - **钩子系统**: 支持在 CRUD 操作前后执行业务逻辑
 - **热重载**: 开发模式下支持 YAML 配置热更新
+- **AI 集成**: 内置 AI CLI 工具支持（Qwen Code、Claude、Gemini、Ollama、LM Studio 等）
 
 ---
 
@@ -294,58 +295,6 @@ dotnet test --configuration Release -- --parallel-threads 4
 
 ---
 
-## 文档资源
-
-### 核心文档（日语）
-
-- [5 分钟快速入门](docs/quickstart-ja.md)
-- [架构映射](docs/architecture-map-ja.md)
-- [框架概览](docs/framework-overview-tutorial-ja.md)
-- [开发者教程](docs/developer-tutorial-ja.md)
-
-### 技术指南
-
-- [通用钩子列表](docs/COMMON_HOOKS.md)
-- [YAML 示例集](docs/chinook-yaml-examples.md)
-- [批处理作业实现](docs/guides/batch-jobs.md)
-- [热重载说明](docs/HOTRELOAD.md)
-
-### 参考文档
-
-- [为什么不用 ORM](docs/why-no-orm-zh.md) (中文)
-- [YAML 驱动设计思想](docs/yaml-driven-design-zh.md) (中文)
-
----
-
-## 常见问题排查
-
-### 构建问题
-
-```bash
-# 清理并重新构建
-dotnet clean && dotnet build
-
-# 还原 NuGet 包
-dotnet restore
-```
-
-### 数据库问题
-
-```bash
-# 重置 SQLite 数据库
-rm projects/<name>/database/*.db
-# 重新启动应用会自动初始化
-```
-
-### 热重载问题
-
-如果 YAML 更改未生效：
-1. 检查 `appsettings.json` 中 `HotReload.Enabled` 是否为 `true`
-2. 确认文件修改时间戳已更新
-3. 开发模式下默认 500ms 防抖
-
----
-
 ## AI 助手集成
 
 项目内置了 AI CLI 工具支持：
@@ -401,11 +350,57 @@ ollama serve
 1. 从 [lmstudio.ai](https://lmstudio.ai) 下载安装
 2. 下载模型并启动 Local Server
 
-### 相关文档
+---
 
-- [AI 助手完全指南](docs/ai-assistant-guide.md)
-- [本地模型配置指南](docs/guides/ai-local-model-setup.md)
-- [配置参考手册](docs/configuration-reference.md)
+## 文档资源
+
+### 核心文档（日语）
+
+- [5 分钟快速入门](docs/quickstart-ja.md)
+- [架构映射](docs/architecture-map-ja.md)
+- [框架概览](docs/framework-overview-tutorial-ja.md)
+- [开发者教程](docs/developer-tutorial-ja.md)
+
+### 技术指南
+
+- [通用钩子列表](docs/COMMON_HOOKS.md)
+- [YAML 示例集](docs/chinook-yaml-examples.md)
+- [批处理作业实现](docs/guides/batch-jobs.md)
+- [热重载说明](docs/HOTRELOAD.md)
+
+### 参考文档
+
+- [为什么不用 ORM](docs/why-no-orm-zh.md) (中文)
+- [YAML 驱动设计思想](docs/yaml-driven-design-zh.md) (中文)
+
+---
+
+## 常见问题排查
+
+### 构建问题
+
+```bash
+# 清理并重新构建
+dotnet clean && dotnet build
+
+# 还原 NuGet 包
+dotnet restore
+```
+
+### 数据库问题
+
+```bash
+# 重置 SQLite 数据库
+rm projects/<name>/database/*.db
+# 重新启动应用会自动初始化
+```
+
+### 热重载问题
+
+如果 YAML 更改未生效：
+1. 检查 `appsettings.json` 中 `HotReload.Enabled` 是否为 `true`
+2. 确认文件修改时间戳已更新
+3. 开发模式下默认 500ms 防抖
 
 ---
 
@@ -421,4 +416,4 @@ ollama serve
 
 ---
 
-*本文档最后更新：2026 年 3 月*
+*本文档最后更新：2026 年 4 月*

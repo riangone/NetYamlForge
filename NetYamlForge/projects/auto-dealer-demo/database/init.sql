@@ -265,3 +265,40 @@ CREATE TABLE IF NOT EXISTS lead_activities (
 
 CREATE INDEX IF NOT EXISTS idx_activities_lead ON lead_activities(lead_id);
 CREATE INDEX IF NOT EXISTS idx_activities_created ON lead_activities(created_at);
+
+-- 従業員マスタ
+CREATE TABLE IF NOT EXISTS employees (
+    employee_id VARCHAR(50) NOT NULL PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL UNIQUE,
+    employee_number VARCHAR(20) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    name_kana VARCHAR(100),
+    gender VARCHAR(10),
+    birth_date DATE,
+    phone VARCHAR(20),
+    mobile VARCHAR(20),
+    email VARCHAR(100) NOT NULL UNIQUE,
+    postal_code VARCHAR(10),
+    address VARCHAR(200),
+    department VARCHAR(50),
+    position VARCHAR(50),
+    role VARCHAR(50) NOT NULL,
+    supervisor_id VARCHAR(50),
+    hire_date DATE NOT NULL,
+    employment_type VARCHAR(30) NOT NULL,
+    salary DECIMAL(12,2),
+    hourly_rate DECIMAL(10,2),
+    commission_rate DECIMAL(5,2) DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'active',
+    termination_date DATE,
+    termination_reason TEXT,
+    notes TEXT,
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (supervisor_id) REFERENCES employees(employee_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_employees_employee_number ON employees(employee_number);
+CREATE INDEX IF NOT EXISTS idx_employees_name ON employees(name);
+CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department);
+CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);

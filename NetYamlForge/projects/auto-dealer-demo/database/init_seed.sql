@@ -232,3 +232,25 @@ INSERT OR IGNORE INTO service_appointments (appointment_id, customer_id, vehicle
 ('APPT-H010', 'CUST-010', 'VEH-010', 'oil_change',   datetime('now', '-1 day', '9 hours'),   'completed', 'オイル交換',            8000,   8000,  45, datetime('now', '-1 day', '10 hours')),
 ('APPT-H011', 'CUST-001', 'VEH-001', 'inspection',   datetime('now', '-1 day', '10 hours'),  'completed', '車検整備',            120000, 128000, 420, datetime('now', '-1 day', '17 hours')),
 ('APPT-H012', 'CUST-003', 'VEH-003', 'test_drive',   datetime('now', '-6 days', '14 hours'), 'completed', '試乗（新型プリウス PHV）', 0,      0,  60, datetime('now', '-6 days', '15 hours'));
+
+-- 従業員マスタ（テストデータ）
+INSERT OR IGNORE INTO employees (employee_id, user_name, employee_number, name, name_kana, gender, email, department, position, role, supervisor_id, hire_date, employment_type, status) VALUES
+-- 経営陣
+('EMP-001', 'admin', '0001', '田中一郎', 'タナカイチロウ', 'male', 'tanaka@auto-dealer.com', 'management', 'general_manager', 'ai_admin', NULL, '2015-04-01', 'full_time', 'active'),
+('EMP-002', 'executive', '0002', '鈴木美咲', 'スズキミサキ', 'female', 'suzuki@auto-dealer.com', 'management', 'executive', 'executive', 'EMP-001', '2016-04-01', 'full_time', 'active'),
+-- 営業部
+('EMP-003', 'sales_manager', '1001', '佐藤健太', 'サトウケンタ', 'male', 'sato@auto-dealer.com', 'sales', 'manager', 'sales_manager', 'EMP-001', '2017-04-01', 'full_time', 'active'),
+('EMP-004', 'sales_rep1', '1002', '高橋愛', 'タカハシアイ', 'female', 'takahashi@auto-dealer.com', 'sales', 'senior_staff', 'sales_rep', 'EMP-003', '2018-04-01', 'full_time', 'active'),
+('EMP-005', 'sales_rep2', '1003', '伊藤大輔', 'イトウダイスケ', 'male', 'ito@auto-dealer.com', 'sales', 'staff', 'sales_rep', 'EMP-003', '2020-04-01', 'full_time', 'active'),
+('EMP-006', 'sales_rep3', '1004', '中村結衣', 'ナカムラユイ', 'female', 'nakamura@auto-dealer.com', 'sales', 'staff', 'sales_rep', 'EMP-003', '2021-04-01', 'full_time', 'active'),
+('EMP-007', 'sales_intern', '1005', '小林拓也', 'コバヤシタクヤ', 'male', 'kobayashi@auto-dealer.com', 'sales', 'intern', 'operator', 'EMP-003', '2025-04-01', 'intern', 'active'),
+-- サービス部
+('EMP-008', 'service_manager', '2001', '渡辺浩', 'ワタナベヒロシ', 'male', 'watanabe@auto-dealer.com', 'service', 'manager', 'service_staff', 'EMP-001', '2016-04-01', 'full_time', 'active'),
+('EMP-009', 'service_staff1', '2002', '木村誠', 'キムラマコト', 'male', 'kimura@auto-dealer.com', 'service', 'senior_staff', 'service_staff', 'EMP-008', '2018-04-01', 'full_time', 'active'),
+('EMP-010', 'service_staff2', '2003', '山本恵', 'ヤマモトメグミ', 'female', 'yamamoto@auto-dealer.com', 'service', 'staff', 'service_staff', 'EMP-008', '2020-04-01', 'full_time', 'active'),
+('EMP-011', 'service_staff3', '2004', '松本隆', 'マツモトタカシ', 'male', 'matsumoto@auto-dealer.com', 'service', 'staff', 'service_staff', 'EMP-008', '2022-04-01', 'full_time', 'active'),
+-- 管理部
+('EMP-012', 'admin_staff', '3001', '井上千秋', 'イノウチアキ', 'female', 'inoue@auto-dealer.com', 'administration', 'staff', 'operator', 'EMP-001', '2019-04-01', 'full_time', 'active'),
+-- パーツ部
+('EMP-013', 'parts_staff', '4001', '林大樹', 'ハヤシダイキ', 'male', 'hayashi@auto-dealer.com', 'parts', 'staff', 'service_staff', 'EMP-008', '2021-04-01', 'full_time', 'active');
+

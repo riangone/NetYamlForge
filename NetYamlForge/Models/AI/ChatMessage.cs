@@ -32,4 +32,5 @@ public class SaveChatMessageRequest
     public string Content { get; set; } = "";
     public string Type { get; set; } = "";
     public string? Provider { get; set; } // AI 提供者标识
+    public string? ChatContext { get; set; } // チャットコンテキスト
 }

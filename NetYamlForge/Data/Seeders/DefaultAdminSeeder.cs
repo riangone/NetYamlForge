@@ -39,12 +39,12 @@ public class DefaultAdminSeeder
         };
 
         var hasher = new PasswordHasher<AppUser>();
-        admin.PasswordHash = hasher.HashPassword(admin, "Admin@123");
+        admin.PasswordHash = hasher.HashPassword(admin, "Admin123!");
 
         await conn.ExecuteAsync(@"
 INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
 VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)", admin);
 
-        logger.LogWarning("デフォルト管理者を作成しました。user=admin password=Admin@123 — 直ちに変更してください。");
+        logger.LogWarning("デフォルト管理者を作成しました。user=admin password=Admin123! — 直ちに変更してください。");
     }
 }

@@ -1,0 +1,2 @@
+﻿appointment_id,customer_id,customer_name,phone,email,preferred_contact,appointment_type,preferred_date,service_menu,status
+APPT-003,CUST-003,東京自動車株式会社,03-3456-7890,info@tokyo-auto.co.jp,email,repair,2026-04-03 16:30:59,ブレーキ点検,confirmed

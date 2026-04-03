@@ -62,7 +62,7 @@ layout:
         icon: 🧩
         section: Forms & Filters
       - label: All Components (New!)
-        url: /ui-showcase/DynamicEntity/CreatePage?entity=component_demo
+        url: /ui-showcase/DynamicEntity/Index?entity=component_demo
         icon: ✨
         section: Forms & Filters
       - label: New Components Demo

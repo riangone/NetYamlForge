@@ -4,8 +4,9 @@
 // YAML での参照例:
 //   customers.yml:
 //     hooks:
-//       beforeCreate: [validate_customer_phone, normalize_customer_name]
+//       beforeCreate: [validate_customer_phone, normalize_customer_name, validate_customer_registration]
 //       beforeUpdate: [validate_customer_phone, normalize_customer_name]
+//       afterCreate: [sync_customer_to_auth_user]
 //   ai_conversations.yml:
 //     hooks:
 //       beforeCreate: [validate_ai_conversation, set_conversation_timestamps]
@@ -26,6 +27,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
+using Microsoft.AspNetCore.Identity;
+using NetYamlForge.Models.Auth;
 
 namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
@@ -608,4 +611,464 @@ public class CalculateNurturingPriorityHook : IEntityHook
         "send_info" => 50,              // 发送资料：低优先级
         _ => 50                          // 默认
     };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 以下：顧客登録関連フック
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// 顧客登録時のユーザー名を検証するフック。
+/// YAML: beforeCreate (customers) に指定します。
+/// </summary>
+public class ValidateCustomerRegistrationHook : IEntityHook
+{
+    public string Name => "validate_customer_registration";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        // user_name が指定されている場合、一意性を検証
+        if (ctx.Values.TryGetValue("user_name", out var userName) && userName != null)
+        {
+            var userNameStr = userName.ToString()!;
+            if (!string.IsNullOrWhiteSpace(userNameStr))
+            {
+                // 既に使用されているユーザー名かチェック
+                var cmd = db.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = "SELECT COUNT(*) FROM customers WHERE user_name = @userName";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@userName";
+                param.Value = userNameStr;
+                cmd.Parameters.Add(param);
+                
+                var count = Convert.ToInt32(cmd.ExecuteScalar() ?? 0L);
+                if (count > 0)
+                {
+                    return Task.FromResult(HookResult.Abort("このユーザー名は既に使用されています。"));
+                }
+            }
+        }
+
+        return Task.FromResult(HookResult.Continue());
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.CompletedTask;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 顧客・従業員 Auth 同期フック
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// 顧客登録時に AppUser テーブルにも同期するフック。
+/// YAML: afterCreate (customers) に指定します。
+/// 注意：RegisterCustomerAsync で既に AppUser と customers の両方が作成されるため、
+/// このフックは customers テーブルを直接操作する場合にのみ使用されます。
+/// </summary>
+public class SyncCustomerToAuthUserHook : IEntityHook
+{
+    public string Name => "sync_customer_to_auth_user";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.FromResult(HookResult.Continue());
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        // user_name が指定されていない場合はスキップ
+        if (!ctx.Values.TryGetValue("user_name", out var userNameObj) || userNameObj == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var userName = userNameObj.ToString()!;
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            return Task.CompletedTask;
+        }
+
+        // customer_id を取得
+        if (!ctx.Values.TryGetValue("customer_id", out var customerIdObj) || customerIdObj == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var customerId = customerIdObj.ToString()!;
+        var customerName = ctx.Values.TryGetValue("name", out var nameObj) ? (nameObj?.ToString() ?? userName) : userName;
+
+        // AppUser テーブルに存在するかチェック（表名は AppUser）
+        var checkCmd = db.CreateCommand();
+        checkCmd.Transaction = tx;
+        checkCmd.CommandText = "SELECT COUNT(*) FROM AppUser WHERE UserName = @userName";
+        var userNameParam = checkCmd.CreateParameter();
+        userNameParam.ParameterName = "@userName";
+        userNameParam.Value = userName;
+        checkCmd.Parameters.Add(userNameParam);
+
+        var count = Convert.ToInt32(checkCmd.ExecuteScalar() ?? 0L);
+        if (count > 0)
+        {
+            // 既に存在する場合はスキップ
+            return Task.CompletedTask;
+        }
+
+        // AppUser に新規登録（customers 表から作成する場合のみ）
+        var insertCmd = db.CreateCommand();
+        insertCmd.Transaction = tx;
+        insertCmd.CommandText = @"
+            INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+            VALUES (@userName, @passwordHash, @displayName, @language, @isAdmin, @isActive, @createdAt)";
+
+        var passwordParam = insertCmd.CreateParameter();
+        passwordParam.ParameterName = "@passwordHash";
+        // 初期パスワードは顧客 ID を使用（後で変更を促す）
+        var passwordHasher = new PasswordHasher<AppUser>();
+        passwordParam.Value = passwordHasher.HashPassword(null, customerId);
+        insertCmd.Parameters.Add(passwordParam);
+
+        var displayNameParam = insertCmd.CreateParameter();
+        displayNameParam.ParameterName = "@displayName";
+        displayNameParam.Value = customerName;
+        insertCmd.Parameters.Add(displayNameParam);
+
+        var langParam = insertCmd.CreateParameter();
+        langParam.ParameterName = "@language";
+        langParam.Value = "ja-JP";
+        insertCmd.Parameters.Add(langParam);
+
+        var adminParam = insertCmd.CreateParameter();
+        adminParam.ParameterName = "@isAdmin";
+        adminParam.Value = false;
+        insertCmd.Parameters.Add(adminParam);
+
+        var activeParam = insertCmd.CreateParameter();
+        activeParam.ParameterName = "@isActive";
+        activeParam.Value = true;
+        insertCmd.Parameters.Add(activeParam);
+
+        var createdAtParam = insertCmd.CreateParameter();
+        createdAtParam.ParameterName = "@createdAt";
+        createdAtParam.Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+        insertCmd.Parameters.Add(createdAtParam);
+
+        insertCmd.ExecuteNonQuery();
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// 従業員登録時に AppUser テーブルにも同期するフック。
+/// YAML: beforeCreate (employees) に指定します。
+/// </summary>
+public class SyncEmployeeToAuthUserHook : IEntityHook
+{
+    public string Name => "sync_employee_to_auth_user";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        // user_name が必須か検証
+        if (!ctx.Values.TryGetValue("user_name", out var userNameObj) || userNameObj == null)
+        {
+            return Task.FromResult(HookResult.Abort("ユーザー名は必須です。"));
+        }
+
+        var userName = userNameObj.ToString()!;
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            return Task.FromResult(HookResult.Abort("ユーザー名は必須です。"));
+        }
+
+        // role が指定されているか確認
+        if (!ctx.Values.TryGetValue("role", out var roleObj) || roleObj == null)
+        {
+            return Task.FromResult(HookResult.Abort("ロールは必須です。"));
+        }
+
+        return Task.FromResult(HookResult.Continue());
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        var userName = ctx.Values.TryGetValue("user_name", out var uo) ? uo?.ToString() : null;
+        if (string.IsNullOrWhiteSpace(userName))
+        {
+            return Task.CompletedTask;
+        }
+
+        var employeeId = ctx.Values.TryGetValue("employee_id", out var eo) ? eo?.ToString() : null;
+        if (string.IsNullOrWhiteSpace(employeeId))
+        {
+            return Task.CompletedTask;
+        }
+
+        var employeeName = ctx.Values.TryGetValue("name", out var no) ? no?.ToString() : userName;
+        var role = ctx.Values.TryGetValue("role", out var ro) ? ro?.ToString() : "operator";
+
+        // AppUser テーブルに存在するかチェック
+        var checkCmd = db.CreateCommand();
+        checkCmd.Transaction = tx;
+        checkCmd.CommandText = "SELECT COUNT(*) FROM AppUsers WHERE UserName = @userName";
+        var userNameParam = checkCmd.CreateParameter();
+        userNameParam.ParameterName = "@userName";
+        userNameParam.Value = userName;
+        checkCmd.Parameters.Add(userNameParam);
+
+        var count = Convert.ToInt32(checkCmd.ExecuteScalar() ?? 0L);
+        if (count > 0)
+        {
+            // 既に存在する場合は更新
+            var updateCmd = db.CreateCommand();
+            updateCmd.Transaction = tx;
+            updateCmd.CommandText = @"
+                UPDATE AppUsers 
+                SET DisplayName = @displayName, 
+                    PreferredLanguage = @language,
+                    IsAdmin = @isAdmin,
+                    UpdatedAt = @updatedAt
+                WHERE UserName = @userName";
+
+            var displayNameParam = updateCmd.CreateParameter();
+            displayNameParam.ParameterName = "@displayName";
+            displayNameParam.Value = employeeName;
+            updateCmd.Parameters.Add(displayNameParam);
+
+            var langParam = updateCmd.CreateParameter();
+            langParam.ParameterName = "@language";
+            langParam.Value = "ja-JP";
+            updateCmd.Parameters.Add(langParam);
+
+            var adminParam = updateCmd.CreateParameter();
+            adminParam.ParameterName = "@isAdmin";
+            adminParam.Value = IsAdminRole(role);
+            updateCmd.Parameters.Add(adminParam);
+
+            var updatedAtParam = updateCmd.CreateParameter();
+            updatedAtParam.ParameterName = "@updatedAt";
+            updatedAtParam.Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            updateCmd.Parameters.Add(updatedAtParam);
+
+            var userNameUpdateParam = updateCmd.CreateParameter();
+            userNameUpdateParam.ParameterName = "@userName";
+            userNameUpdateParam.Value = userName;
+            updateCmd.Parameters.Add(userNameUpdateParam);
+
+            updateCmd.ExecuteNonQuery();
+        }
+        else
+        {
+            // 新規登録
+            var insertCmd = db.CreateCommand();
+            insertCmd.Transaction = tx;
+            insertCmd.CommandText = @"
+                INSERT INTO AppUsers (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+                VALUES (@userName, @passwordHash, @displayName, @language, @isAdmin, @isActive, @createdAt)";
+
+            var passwordParam = insertCmd.CreateParameter();
+            passwordParam.ParameterName = "@passwordHash";
+            // 初期パスワードは従業員 ID を使用
+            var passwordHasher = new PasswordHasher<AppUser>();
+            passwordParam.Value = passwordHasher.HashPassword(null, employeeId);
+            insertCmd.Parameters.Add(passwordParam);
+
+            var displayNameParam = insertCmd.CreateParameter();
+            displayNameParam.ParameterName = "@displayName";
+            displayNameParam.Value = employeeName;
+            insertCmd.Parameters.Add(displayNameParam);
+
+            var langParam = insertCmd.CreateParameter();
+            langParam.ParameterName = "@language";
+            langParam.Value = "ja-JP";
+            insertCmd.Parameters.Add(langParam);
+
+            var adminParam = insertCmd.CreateParameter();
+            adminParam.ParameterName = "@isAdmin";
+            adminParam.Value = IsAdminRole(role);
+            insertCmd.Parameters.Add(adminParam);
+
+            var activeParam = insertCmd.CreateParameter();
+            activeParam.ParameterName = "@isActive";
+            activeParam.Value = true;
+            insertCmd.Parameters.Add(activeParam);
+
+            var createdAtParam = insertCmd.CreateParameter();
+            createdAtParam.ParameterName = "@createdAt";
+            createdAtParam.Value = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            insertCmd.Parameters.Add(createdAtParam);
+
+            insertCmd.ExecuteNonQuery();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static bool IsAdminRole(string? role) => role switch
+    {
+        "ai_admin" => true,
+        "executive" => true,
+        "general_manager" => true,
+        _ => false
+    };
+}
+
+/// <summary>
+/// 従業員作成をログに記録するフック。
+/// YAML: afterCreate (employees) に指定します。
+/// </summary>
+public class LogEmployeeCreationHook : IEntityHook
+{
+    public string Name => "log_employee_creation";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.FromResult(HookResult.Continue());
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        var employeeId = ctx.Values.TryGetValue("employee_id", out var eo) ? eo?.ToString() : null;
+        var employeeName = ctx.Values.TryGetValue("name", out var no) ? no?.ToString() : null;
+        
+        if (!string.IsNullOrEmpty(employeeId) && !string.IsNullOrEmpty(employeeName))
+        {
+            Console.WriteLine($"[EmployeeHook] 従業員が作成されました：{employeeId} - {employeeName}");
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// 従業員更新をログに記録するフック。
+/// YAML: afterUpdate (employees) に指定します。
+/// </summary>
+public class LogEmployeeUpdateHook : IEntityHook
+{
+    public string Name => "log_employee_update";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.FromResult(HookResult.Continue());
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        var employeeId = ctx.Values.TryGetValue("employee_id", out var eo) ? eo?.ToString() : null;
+        var employeeName = ctx.Values.TryGetValue("name", out var no) ? no?.ToString() : null;
+        
+        if (!string.IsNullOrEmpty(employeeId) && !string.IsNullOrEmpty(employeeName))
+        {
+            Console.WriteLine($"[EmployeeHook] 従業員が更新されました：{employeeId} - {employeeName}");
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// 従業員のメールアドレス形式を検証するフック。
+/// YAML: beforeCreate / beforeUpdate (employees) に指定します。
+/// </summary>
+public class ValidateEmployeeEmailHook : IEntityHook
+{
+    public string Name => "validate_employee_email";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        if (ctx.Values.TryGetValue("email", out var emailObj) && emailObj is string email)
+        {
+            // 簡易的なメール形式検証
+            if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                return Task.FromResult(HookResult.Abort("メールアドレスの形式が無効です。"));
+            }
+        }
+        return Task.FromResult(HookResult.Continue());
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.CompletedTask;
+}
+
+/// <summary>
+/// 従業員名を正規化するフック（前後の空白を除去）。
+/// YAML: beforeCreate / beforeUpdate (employees) に指定します。
+/// </summary>
+public class NormalizeEmployeeNameHook : IEntityHook
+{
+    public string Name => "normalize_employee_name";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        if (ctx.Values.TryGetValue("name", out var name) && name is string s)
+        {
+            ctx.Values["name"] = s.Trim();
+        }
+        if (ctx.Values.TryGetValue("name_kana", out var kana) && kana is string k)
+        {
+            ctx.Values["name_kana"] = k.Trim();
+        }
+        return Task.FromResult(HookResult.Continue());
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.CompletedTask;
+}
+
+/// <summary>
+/// 従業員登録時のユーザー名・メールアドレスの一意性を検証するフック。
+/// YAML: beforeCreate (employees) に指定します。
+/// </summary>
+public class ValidateEmployeeRegistrationHook : IEntityHook
+{
+    public string Name => "validate_employee_registration";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        // user_name の一意性を検証
+        if (ctx.Values.TryGetValue("user_name", out var userName) && userName != null)
+        {
+            var userNameStr = userName.ToString()!;
+            if (!string.IsNullOrWhiteSpace(userNameStr))
+            {
+                var cmd = db.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = "SELECT COUNT(*) FROM employees WHERE user_name = @userName";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@userName";
+                param.Value = userNameStr;
+                cmd.Parameters.Add(param);
+
+                var count = Convert.ToInt32(cmd.ExecuteScalar() ?? 0L);
+                if (count > 0)
+                {
+                    return Task.FromResult(HookResult.Abort("このユーザー名は既に使用されています。"));
+                }
+            }
+        }
+
+        // email の一意性を検証
+        if (ctx.Values.TryGetValue("email", out var email) && email != null)
+        {
+            var emailStr = email.ToString()!;
+            if (!string.IsNullOrWhiteSpace(emailStr))
+            {
+                var cmd = db.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = "SELECT COUNT(*) FROM employees WHERE email = @email";
+                var param = cmd.CreateParameter();
+                param.ParameterName = "@email";
+                param.Value = emailStr;
+                cmd.Parameters.Add(param);
+
+                var count = Convert.ToInt32(cmd.ExecuteScalar() ?? 0L);
+                if (count > 0)
+                {
+                    return Task.FromResult(HookResult.Abort("このメールアドレスは既に使用されています。"));
+                }
+            }
+        }
+
+        return Task.FromResult(HookResult.Continue());
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.CompletedTask;
 }

@@ -1,0 +1,126 @@
+@* 用户注册页面 *@
+@model NetYamlForge.Models.Auth.RegisterViewModel
+@{
+    ViewData["Title"] = "用户注册";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center bg-base-200 py-12 px-4">
+    <div class="max-w-md w-full">
+        @* 页面标题 *@
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold">用户注册</h1>
+            <p class="text-base-content/60 mt-2">创建您的账户</p>
+        </div>
+
+        @* 注册表单卡片 *@
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <form method="post" class="space-y-4">
+                    <input type="hidden" name="project" value="@ViewData["ProjectName"]" />
+                    <input type="hidden" name="token" value="@ViewData["Token"]" />
+                    
+                    @* 用户名 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">用户名 <span class="text-error">*</span></span>
+                        </label>
+                        <input asp-for="UserName" 
+                               class="input input-bordered" 
+                               placeholder="请输入用户名（3-50 个字符）" />
+                        <span asp-validation-for="UserName" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 显示名称 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">显示名称 <span class="text-error">*</span></span>
+                        </label>
+                        <input asp-for="DisplayName" 
+                               class="input input-bordered" 
+                               placeholder="请输入显示名称" />
+                        <span asp-validation-for="DisplayName" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 密码 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">密码 <span class="text-error">*</span></span>
+                        </label>
+                        <input asp-for="Password" 
+                               class="input input-bordered" 
+                               type="password"
+                               placeholder="请输入密码（至少 6 位）" />
+                        <span asp-validation-for="Password" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 确认密码 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">确认密码 <span class="text-error">*</span></span>
+                        </label>
+                        <input asp-for="ConfirmPassword" 
+                               class="input input-bordered" 
+                               type="password"
+                               placeholder="请再次输入密码" />
+                        <span asp-validation-for="ConfirmPassword" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 邮箱 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">邮箱</span>
+                        </label>
+                        <input asp-for="Email" 
+                               class="input input-bordered" 
+                               type="email"
+                               placeholder="example@email.com" />
+                        <span asp-validation-for="Email" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 电话 *@
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">电话</span>
+                        </label>
+                        <input asp-for="Phone" 
+                               class="input input-bordered" 
+                               type="tel"
+                               placeholder="13800138000" />
+                        <span asp-validation-for="Phone" class="text-error text-sm mt-1"></span>
+                    </div>
+                    
+                    @* 验证错误汇总 *@
+                    <div asp-validation-summary="ModelOnly" class="text-error text-sm bg-error/10 p-3 rounded"></div>
+                    
+                    @* 注册按钮 *@
+                    <button type="submit" class="btn btn-primary w-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        注册
+                    </button>
+                </form>
+                
+                <div class="divider">或者</div>
+                
+                @* 登录链接 *@
+                <div class="text-center">
+                    <p class="text-sm">
+                        已有账户？
+                        <a asp-action="Login" class="link link-primary">立即登录</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        @* 页脚信息 *@
+        <div class="text-center mt-6 text-xs text-base-content/60">
+            <p>注册即表示您同意我们的服务条款和隐私政策</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

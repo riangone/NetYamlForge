@@ -16,4 +16,19 @@ public interface IUserAuthService
     Task<AppUser?> GetByIdAsync(int id);
     Task<int> CreateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
     Task UpdateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
+    
+    /// <summary>
+    /// ユーザー登録（一般向け）
+    /// </summary>
+    Task<int> RegisterAsync(RegisterViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
+    
+    /// <summary>
+    /// 顧客登録（顧客向けセルフ登録）
+    /// </summary>
+    Task<int> RegisterCustomerAsync(CustomerRegisterViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
+    
+    /// <summary>
+    /// ユーザー名の一意性を検証
+    /// </summary>
+    Task<bool> IsUserNameTakenAsync(string userName);
 }

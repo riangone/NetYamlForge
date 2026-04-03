@@ -119,6 +119,7 @@ public class AccountController : Controller
             return RedirectToAction("Project", "Home", new { project = projectName });
         }
 
+        // デフォルト：framework プロジェクトへリダイレクト（存在しない場合はプロジェクト一覧）
         return RedirectToAction("Index", "Home");
     }
 
@@ -140,6 +141,150 @@ public class AccountController : Controller
     public IActionResult AccessDenied()
     {
         return View();
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult Register(string? returnUrl = null)
+    {
+        return View(new RegisterViewModel { ReturnUrl = returnUrl });
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // ユーザー名チェック
+        if (await _users.IsUserNameTakenAsync(model.UserName))
+        {
+            ModelState.AddModelError(string.Empty, "このユーザー名は既に使用されています。");
+            return View(model);
+        }
+
+        try
+        {
+            await _users.RegisterAsync(model);
+            
+            // 自動ログイン
+            var user = await _users.ValidateCredentialsAsync(model.UserName, model.Password);
+            if (user != null)
+            {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, user.UserName),
+                    new(ClaimTypes.GivenName, user.DisplayName),
+                    new("lang", user.PreferredLanguage),
+                    new(ClaimTypes.Role, "customer")
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+                
+                Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
+
+                _logger.LogInformation("New user registered: {UserName}", model.UserName);
+                
+                if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                {
+                    return Redirect(model.ReturnUrl);
+                }
+                
+                var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+                if (!string.IsNullOrWhiteSpace(projectName))
+                {
+                    return RedirectToAction("Project", "Home", new { project = projectName });
+                }
+                
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Registration failed for user: {UserName}", model.UserName);
+            ModelState.AddModelError(string.Empty, "登録中にエラーが発生しました。");
+        }
+
+        return View(model);
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult CustomerRegister(string? returnUrl = null)
+    {
+        return View(new CustomerRegisterViewModel { ReturnUrl = returnUrl });
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> CustomerRegister(CustomerRegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // ユーザー名チェック
+        if (await _users.IsUserNameTakenAsync(model.UserName))
+        {
+            ModelState.AddModelError(string.Empty, "このユーザー名は既に使用されています。");
+            return View(model);
+        }
+
+        try
+        {
+            await _users.RegisterCustomerAsync(model);
+            
+            // 自動ログイン
+            var user = await _users.ValidateCredentialsAsync(model.UserName, model.Password);
+            if (user != null)
+            {
+                var claims = new List<Claim>
+                {
+                    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new(ClaimTypes.Name, user.UserName),
+                    new(ClaimTypes.GivenName, user.DisplayName),
+                    new("lang", user.PreferredLanguage),
+                    new(ClaimTypes.Role, "customer")
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+                
+                Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
+
+                _logger.LogInformation("New customer registered: {UserName}", model.UserName);
+                
+                // 顧客ダッシュボードへリダイレクト
+                var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+                if (!string.IsNullOrWhiteSpace(projectName))
+                {
+                    return RedirectToAction("Page", "Home", new 
+                    { 
+                        project = projectName,
+                        pageName = "CustomerDashboard"
+                    });
+                }
+                
+                return RedirectToAction("Index", "Home");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Customer registration failed for user: {UserName}", model.UserName);
+            ModelState.AddModelError(string.Empty, "登録中にエラーが発生しました。");
+        }
+
+        return View(model);
     }
 
     private async Task TryWriteAuditAsync(string action, string? entity, string? detail, string? userName)

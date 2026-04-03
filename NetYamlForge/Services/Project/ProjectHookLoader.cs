@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace NetYamlForge.Services;
 
@@ -286,6 +288,52 @@ public class ProjectHookLoader : IProjectHookLoader
             }
         }
         catch { }
+
+        // Microsoft.Extensions.Options の参照を追加（IOptions<> に必要）
+        try
+        {
+            var optionsAssembly = typeof(Microsoft.Extensions.Options.IOptions<>).Assembly;
+            if (!string.IsNullOrEmpty(optionsAssembly.Location))
+            {
+                references.Add(MetadataReference.CreateFromFile(optionsAssembly.Location));
+                _logger.LogDebug("Microsoft.Extensions.Options.dll をロード：{Location}", optionsAssembly.Location);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("Microsoft.Extensions.Options のロード中にエラーが発生しました：{Message}", ex.Message);
+        }
+
+        // System.Console の参照を追加（Console.WriteLine に必要）
+        try
+        {
+            var consoleAssembly = typeof(System.Console).Assembly;
+            if (!string.IsNullOrEmpty(consoleAssembly.Location))
+            {
+                references.Add(MetadataReference.CreateFromFile(consoleAssembly.Location));
+                _logger.LogDebug("System.Console.dll をロード：{Location}", consoleAssembly.Location);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("System.Console のロード中にエラーが発生しました：{Message}", ex.Message);
+        }
+
+        // Microsoft.AspNetCore.Identity の参照を追加（PasswordHasher<T> に必要）
+        try
+        {
+            // PasswordHasher<T> 型からアセンブリを取得
+            var identityAssembly = typeof(Microsoft.AspNetCore.Identity.PasswordHasher<>).Assembly;
+            if (!string.IsNullOrEmpty(identityAssembly.Location))
+            {
+                references.Add(MetadataReference.CreateFromFile(identityAssembly.Location));
+                _logger.LogDebug("Microsoft.AspNetCore.Identity.dll をロード：{Location}", identityAssembly.Location);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("Microsoft.AspNetCore.Identity のロード中にエラーが発生しました：{Message}", ex.Message);
+        }
 
         var compilation = CSharpCompilation.Create(
             $"ProjectHooks_{projectName}",

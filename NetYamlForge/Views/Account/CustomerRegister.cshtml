@@ -1,0 +1,154 @@
+@* ファイル概要：顧客向けセルフ登録フォーム画面です。
+   このビューは自動車ディーラーの顧客が自ら登録を行うための画面です。 *@
+
+@using NetYamlForge.Localization
+@using Microsoft.Extensions.Localization
+@model NetYamlForge.Models.Auth.CustomerRegisterViewModel
+@{
+    ViewData["Title"] = "顧客登録";
+}
+
+<div class="max-w-2xl mx-auto card bg-base-100 shadow-lg">
+    <div class="card-body">
+        <h1 class="card-title text-2xl mb-4">🚗 顧客登録</h1>
+        <p class="text-sm text-base-content/70 mb-6">
+            新車・中古車のご購入、サービス予約、AI 相談をご利用いただくためには、顧客登録が必要です。
+        </p>
+        
+        <form method="post" class="space-y-4">
+            <input type="hidden" asp-for="ReturnUrl" />
+            
+            @* ─── アカウント情報 ─── *@
+            <div class="divider">アカウント情報</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">ユーザー名 <span class="text-error">*</span></span>
+                    </label>
+                    <input asp-for="UserName" class="input input-bordered w-full" placeholder="3-50 文字" />
+                    <span asp-validation-for="UserName" class="text-error text-sm"></span>
+                    <p class="text-xs text-base-content/50 mt-1">ログインに使用するユーザー名を入力してください</p>
+                </div>
+                
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">パスワード <span class="text-error">*</span></span>
+                    </label>
+                    <input asp-for="Password" class="input input-bordered w-full" type="password" placeholder="6 文字以上" />
+                    <span asp-validation-for="Password" class="text-error text-sm"></span>
+                </div>
+            </div>
+            
+            <div>
+                <label class="label font-semibold">
+                    <span class="label-text">パスワード確認 <span class="text-error">*</span></span>
+                </label>
+                <input asp-for="ConfirmPassword" class="input input-bordered w-full" type="password" />
+                <span asp-validation-for="ConfirmPassword" class="text-error text-sm"></span>
+            </div>
+            
+            @* ─── 顧客情報 ─── *@
+            <div class="divider">顧客情報</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">お名前 <span class="text-error">*</span></span>
+                    </label>
+                    <input asp-for="Name" class="input input-bordered w-full" />
+                    <span asp-validation-for="Name" class="text-error text-sm"></span>
+                </div>
+                
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">フリガナ</span>
+                    </label>
+                    <input asp-for="NameKana" class="input input-bordered w-full" placeholder="ヤマダタロウ" />
+                    <span asp-validation-for="NameKana" class="text-error text-sm"></span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">電話番号 <span class="text-error">*</span></span>
+                    </label>
+                    <input asp-for="Phone" class="input input-bordered w-full" placeholder="03-1234-5678" />
+                    <span asp-validation-for="Phone" class="text-error text-sm"></span>
+                </div>
+                
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">携帯電話番号</span>
+                    </label>
+                    <input asp-for="Mobile" class="input input-bordered w-full" placeholder="090-1234-5678" />
+                    <span asp-validation-for="Mobile" class="text-error text-sm"></span>
+                </div>
+            </div>
+            
+            <div>
+                <label class="label font-semibold">
+                    <span class="label-text">メールアドレス</span>
+                </label>
+                <input asp-for="Email" class="input input-bordered w-full" placeholder="example@email.com" />
+                <span asp-validation-for="Email" class="text-error text-sm"></span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">郵便番号</span>
+                    </label>
+                    <input asp-for="PostalCode" class="input input-bordered w-full" placeholder="100-0001" />
+                    <span asp-validation-for="PostalCode" class="text-error text-sm"></span>
+                </div>
+                
+                <div>
+                    <label class="label font-semibold">
+                        <span class="label-text">住所</span>
+                    </label>
+                    <input asp-for="Address" class="input input-bordered w-full" placeholder="東京都千代田区..." />
+                    <span asp-validation-for="Address" class="text-error text-sm"></span>
+                </div>
+            </div>
+            
+            <div>
+                <label class="label font-semibold">
+                    <span class="label-text">希望連絡先</span>
+                </label>
+                <select asp-for="PreferredContact" class="select select-bordered w-full">
+                    <option value="phone">電話</option>
+                    <option value="email">メール</option>
+                    <option value="line">LINE</option>
+                    <option value="sms">SMS</option>
+                </select>
+                <span asp-validation-for="PreferredContact" class="text-error text-sm"></span>
+            </div>
+            
+            <div asp-validation-summary="ModelOnly" class="text-error text-sm"></div>
+            
+            @* ─── 送信ボタン ─── *@
+            <div class="mt-6">
+                <button type="submit" class="btn btn-primary btn-lg w-full">
+                    登録する
+                </button>
+            </div>
+        </form>
+        
+        <div class="divider"></div>
+
+        <div class="text-center text-sm">
+            <span>既にアカウントをお持ちですか？</span>
+            <a asp-action="Login" asp-route-project="@Context.GetRouteValue("project")" class="link link-primary">ログイン</a>
+        </div>
+
+        <div class="text-center text-xs text-base-content/50 mt-4">
+            <p>登録することで、<a href="#" class="link">利用規約</a>と<a href="#" class="link">プライバシーポリシー</a>に同意したものとみなされます。</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

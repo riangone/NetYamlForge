@@ -31,7 +31,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('AI Assistant: DOMContentLoaded');
         console.log('AI Assistant: data-user-authenticated =', document.body.getAttribute('data-user-authenticated'));
-        
+
         // 检查用户是否已登录
         if (!isUserLoggedIn()) {
             console.log('AI Assistant: User not logged in, skipping initialization');
@@ -75,9 +75,8 @@
         panel.innerHTML = buildPanelHTML();
         document.body.appendChild(panel);
 
-        // 1. sessionStorage から即時復元（ちらつき防止）
-        restoreFromStorage();
-        // 2. サーバーから最新履歴を取得して同期（別タブ・ブラウザ再起動対応）
+        // 1. サーバーから最新履歴を取得して復元（別タブ・ブラウザ再起動対応）
+        // restoreFromServer の中で sessionStorage も更新するため、restoreFromStorage は不要
         restoreFromServer();
 
         // 绑定事件
@@ -320,9 +319,9 @@
             }
         });
 
-        // CLI 工具选択変化時に保存
+        // CLI 工具選択変化時に保存（localStorage で永続化）
         document.getElementById('ai-cli-tool').addEventListener('change', function() {
-            try { sessionStorage.setItem(TOOL_STORAGE_KEY, this.value); } catch(e) {}
+            try { localStorage.setItem(TOOL_STORAGE_KEY, this.value); } catch(e) {}
             checkCliStatus(this.value);
         });
     }
@@ -514,8 +513,8 @@
             selector.appendChild(option);
         }
 
-        // sessionStorage → 直前の選択値 → サーバーのデフォルト の順で復元
-        const savedTool = (() => { try { return sessionStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
+        // localStorage → 直前の選択値 → サーバーのデフォルト の順で復元
+        const savedTool = (() => { try { return localStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
         const restoreValue = savedTool || prevValue || serverDefault || CONFIG.defaultCliTool;
         if (restoreValue && selector.querySelector(`option[value="${restoreValue}"]:not([disabled])`)) {
             selector.value = restoreValue;
@@ -961,7 +960,11 @@
             const resp = await fetch(`${CONFIG.apiBaseUrl}/history?limit=50`);
             if (!resp.ok) return;
             const messages = await resp.json();
-            if (!Array.isArray(messages) || messages.length === 0) return;
+            if (!Array.isArray(messages) || messages.length === 0) {
+                // サーバーに履歴がない場合は sessionStorage もクリア（整合性保持）
+                sessionStorage.removeItem(STORAGE_KEY);
+                return;
+            }
             // サーバーデータでローカルキャッシュを上書き
             chatHistory = messages.map(function(m) {
                 return { content: m.content, type: m.type, timestamp: m.displayTime || m.createdAt || '' };
@@ -971,9 +974,11 @@
             chatHistory.forEach(function(msg) {
                 addMessage(msg.content, msg.type, true, msg.timestamp);
             });
+            // sessionStorage もサーバーデータで更新
             saveHistory();
         } catch (e) {
-            // サーバー取得失敗時は sessionStorage のまま
+            // サーバー取得失敗時は sessionStorage から復元（フォールバック）
+            restoreFromStorage();
         }
     }
 

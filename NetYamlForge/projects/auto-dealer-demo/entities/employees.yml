@@ -1,0 +1,359 @@
+imports: []
+entities:
+  employees:
+    table: employees
+    key: employee_id
+    displayName: 従業員マスタ
+    description: 従業員情報を管理します
+    softDelete: false
+    isPublic: false
+
+    columns:
+      employee_id:
+        type: string
+        length: 50
+        required: true
+        label: 従業員 ID
+        searchable: true
+        sortable: true
+        unique: true
+      app_user_id:
+        type: int
+        required: true
+        label: 全局用户 ID
+        description: 关联到全局 AppUser 表
+        searchable: false
+        sortable: true
+        reference:
+          entity: app_user
+          key: id
+          display: display_name
+          crossProject: true
+      user_name:
+        type: string
+        length: 50
+        required: true
+        label: ユーザー名
+        description: ログイン認証用のユーザー名
+        searchable: true
+        sortable: true
+        unique: true
+      employee_number:
+        type: string
+        length: 20
+        required: true
+        label: 従業員番号
+        searchable: true
+        sortable: true
+        unique: true
+      name:
+        type: string
+        length: 100
+        required: true
+        label: 氏名
+        searchable: true
+        sortable: true
+      name_kana:
+        type: string
+        length: 100
+        required: false
+        label: フリガナ
+        searchable: true
+        sortable: true
+      gender:
+        type: string
+        length: 10
+        required: false
+        label: 性別
+        options:
+          - male
+          - female
+          - other
+        searchable: true
+        sortable: true
+      birth_date:
+        type: date
+        required: false
+        label: 生年月日
+        sortable: true
+      phone:
+        type: string
+        length: 20
+        required: false
+        label: 電話番号
+        searchable: true
+        sortable: true
+      mobile:
+        type: string
+        length: 20
+        required: false
+        label: 携帯電話番号
+        searchable: true
+        sortable: true
+      email:
+        type: string
+        length: 100
+        required: true
+        label: メールアドレス
+        searchable: true
+        sortable: true
+        unique: true
+      postal_code:
+        type: string
+        length: 10
+        required: false
+        label: 郵便番号
+        searchable: true
+        sortable: true
+      address:
+        type: string
+        length: 200
+        required: false
+        label: 住所
+        searchable: true
+        sortable: true
+      department:
+        type: string
+        length: 50
+        required: false
+        label: 部署
+        options:
+          - sales
+          - service
+          - parts
+          - administration
+          - management
+        searchable: true
+        sortable: true
+      position:
+        type: string
+        length: 50
+        required: false
+        label: 役職
+        options:
+          - intern
+          - staff
+          - senior_staff
+          - assistant_manager
+          - manager
+          - general_manager
+          - executive
+        searchable: true
+        sortable: true
+      role:
+        type: string
+        length: 50
+        required: true
+        label: ロール
+        description: システムアクセス権限
+        options:
+          - operator
+          - sales_rep
+          - sales_manager
+          - service_staff
+          - ai_admin
+          - executive
+        searchable: true
+        sortable: true
+      supervisor_id:
+        type: string
+        length: 50
+        required: false
+        label: 上司 ID
+        description: 直属の上司の従業員 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: employees
+          key: employee_id
+          display: name
+      hire_date:
+        type: date
+        required: true
+        label: 入社日
+        sortable: true
+      employment_type:
+        type: string
+        length: 30
+        required: true
+        label: 雇用形態
+        options:
+          - full_time
+          - part_time
+          - contract
+          - temporary
+          - intern
+        searchable: true
+        sortable: true
+      salary:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 基本給
+        sortable: false
+      hourly_rate:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: false
+        label: 時給
+        sortable: false
+      commission_rate:
+        type: decimal
+        precision: 5
+        scale: 2
+        required: false
+        label: 歩合率 (%)
+        default: 0
+        sortable: false
+      status:
+        type: string
+        length: 20
+        required: true
+        label: 在籍状態
+        default: active
+        options:
+          - active
+          - on_leave
+          - terminated
+          - retired
+        searchable: true
+        sortable: true
+      termination_date:
+        type: date
+        required: false
+        label: 退職日
+        sortable: true
+      termination_reason:
+        type: text
+        required: false
+        label: 退職理由
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+        default: now
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+        default: now
+
+    forms:
+      employee_id:
+        type: string
+        required: true
+        label: 従業員 ID
+        editable: false
+      user_name:
+        type: string
+        required: true
+        label: ユーザー名
+        editable: true
+      employee_number:
+        type: string
+        required: true
+        label: 従業員番号
+        editable: true
+      name:
+        type: string
+        required: true
+        label: 氏名
+        editable: true
+      name_kana:
+        type: string
+        required: false
+        label: フリガナ
+        editable: true
+      email:
+        type: email
+        required: true
+        label: メールアドレス
+        editable: true
+      department:
+        type: select
+        required: false
+        label: 部署
+        editable: true
+      position:
+        type: select
+        required: false
+        label: 役職
+        editable: true
+      role:
+        type: select
+        required: true
+        label: ロール
+        editable: true
+      supervisor_id:
+        type: select
+        required: false
+        label: 上司
+        editable: true
+      hire_date:
+        type: date
+        required: true
+        label: 入社日
+        editable: true
+      employment_type:
+        type: select
+        required: true
+        label: 雇用形態
+        editable: true
+      status:
+        type: select
+        required: true
+        label: 在籍状態
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - validate_employee_email
+        - normalize_employee_name
+        - validate_employee_registration
+        - sync_employee_to_auth_user
+      beforeUpdate:
+        - validate_employee_email
+        - normalize_employee_name
+        - sync_employee_to_auth_user
+      afterCreate:
+        - log_employee_creation
+      afterUpdate:
+        - log_employee_update
+
+    list:
+      columns:
+        - employee_id
+        - employee_number
+        - name
+        - name_kana
+        - department
+        - position
+        - role
+        - status
+        - hire_date
+      defaultSort:
+        column: employee_number
+        direction: asc
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    permissions:
+      view:
+        roles: [ai_admin, executive, sales_manager]
+      create:
+        roles: [ai_admin, executive]
+      edit:
+        roles: [ai_admin, executive]
+      delete:
+        roles: [ai_admin]

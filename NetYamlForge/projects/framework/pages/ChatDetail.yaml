@@ -1,0 +1,92 @@
+title: "AI チャット詳細"
+description: "AI チャットの対話履歴と詳細情報"
+
+sections:
+  - id: chat_info
+    title: "チャット情報"
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '対話 ID' AS metric_name,
+             conversation_id AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'ステータス',
+             CASE status
+               WHEN 'active' THEN '🟢 アクティブ'
+               WHEN 'completed' THEN '✅ 完了'
+               WHEN 'escalated' THEN '⚠️ エスカレーション'
+               ELSE status
+             END,
+             '📌', NULL
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'チャネル',
+             CASE channel
+               WHEN 'web' THEN '🌐 Web'
+               WHEN 'line' THEN '💬 LINE'
+               WHEN 'chatbot' THEN '🤖 チャットボット'
+               ELSE channel
+             END,
+             '📱', NULL
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: message_history
+    title: "メッセージ履歴"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 
+        datetime(timestamp, 'localtime') AS 時刻，
+        CASE sender
+          WHEN 'user' THEN '👤 ユーザー'
+          WHEN 'ai' THEN '🤖 AI'
+          WHEN 'agent' THEN '🎧 エージェント'
+          ELSE sender
+        END AS 送信者，
+        message_type AS 種別，
+        content AS メッセージ，
+        COALESCE(intent, '-') AS インテント，
+        CASE 
+          WHEN sentiment_score > 0.3 THEN '😊 ポジティブ'
+          WHEN sentiment_score < -0.3 THEN '😞 ネガティブ'
+          ELSE '😐 ニュートラル'
+        END AS 感情
+      FROM ai_messages
+      WHERE conversation_id = '@QueryParam:id'
+      ORDER BY timestamp ASC
+    columns: [時刻，送信者，種別，メッセージ，インテント，感情]
+    pageSize: 50
+    editable: false
+    readOnly: true
+
+  - id: conversation_notes
+    title: "メモ"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'notes' AS dummy"
+    content: |
+      ## AI チャット詳細
+      
+      このページは AI との対話履歴を確認するためのデモページです。
+      
+      ### 機能
+      - メッセージ履歴の表示
+      - 感情分析結果の確認
+      - インテント（意図）の追跡
+      
+      > **注**: 実際のデータを表示するには、framework プロジェクトに
+      > ai_conversations と ai_messages エンティティを追加する必要があります。

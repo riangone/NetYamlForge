@@ -51,7 +51,7 @@ public class CliConfig
 /// <summary>
 /// Claude Code 設定
 /// </summary>
-public class ClaudeConfig
+public partial class ClaudeConfig
 {
     /// <summary>
     /// Anthropic API キー（ANTHROPIC_API_KEY）。
@@ -66,7 +66,7 @@ public class ClaudeConfig
 /// <summary>
 /// Qwen Code 設定
 /// </summary>
-public class QwenCodeConfig
+public partial class QwenCodeConfig
 {
     /// <summary>
     /// Alibaba Cloud DashScope API キー（DASHSCOPE_API_KEY）。
@@ -93,7 +93,7 @@ public class QwenCodeConfig
 /// <summary>
 /// Codex CLI 設定
 /// </summary>
-public class CodexConfig
+public partial class CodexConfig
 {
     /// <summary>
     /// OpenAI API キー（OPENAI_API_KEY）。
@@ -126,7 +126,7 @@ public class CodexConfig
 /// <summary>
 /// Gemini CLI 設定
 /// </summary>
-public class GeminiConfig
+public partial class GeminiConfig
 {
     /// <summary>
     /// Google API キー（GOOGLE_API_KEY）。
@@ -225,7 +225,7 @@ public class LmStudioConfig
 /// <summary>
 /// GitHub Copilot CLI 設定
 /// </summary>
-public class CopilotConfig
+public partial class CopilotConfig
 {
     /// <summary>
     /// GitHub Copilot トークン（GITHUB_COPILOT_TOKEN）。
@@ -235,4 +235,39 @@ public class CopilotConfig
 
     /// <summary>copilot コマンドのフルパス（省略時は PATH から検索）</summary>
     public string? Path { get; set; }
+}
+
+/// <summary>
+/// Codex CLI 設定（拡張）
+/// </summary>
+public partial class CodexConfig
+{
+}
+
+/// <summary>
+/// Gemini CLI 設定（拡張）
+/// </summary>
+public partial class GeminiConfig
+{
+}
+
+/// <summary>
+/// GitHub Copilot CLI 設定（拡張）
+/// </summary>
+public partial class CopilotConfig
+{
+}
+
+/// <summary>
+/// Claude Code 設定（拡張）
+/// </summary>
+public partial class ClaudeConfig
+{
+}
+
+/// <summary>
+/// Qwen Code 設定（拡張）
+/// </summary>
+public partial class QwenCodeConfig
+{
 }

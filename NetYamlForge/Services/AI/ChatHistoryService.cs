@@ -1,4 +1,4 @@
-// DCS003 抑制理由: ChatHistory は全プロジェクト共通の system.db を使うため
+// DCS003 抑制理由：ChatHistory はプロジェクトごとに異なる DB を使用するため
 // ProjectScope とは独立した接続を直接生成します。
 #pragma warning disable DCS003
 
@@ -9,28 +9,63 @@ using NetYamlForge.Models.AI;
 namespace NetYamlForge.Services.AI;
 
 /// <summary>
-/// AI チャット履歴をサーバー側 SQLite (system.db) に保存するサービス。
-/// Singleton で登録し、起動時にテーブルを初期化します。
+/// AI チャット履歴を SQLite に保存するサービス。
+/// 全局 AI は system.db、子プロジェクトは projects/&lt;name&gt;/chat.db を使用。
+/// 各プロジェクトの聊天记录は完全に隔離されます。
 /// </summary>
 public class ChatHistoryService
 {
-    private readonly string _connectionString;
+    private readonly string _globalConnectionString;
+    private readonly IWebHostEnvironment _env;
     private readonly ILogger<ChatHistoryService> _logger;
     private const int MaxMessagesPerUser = 200;
 
-    public ChatHistoryService(IConfiguration config, ILogger<ChatHistoryService> logger)
+    public ChatHistoryService(IConfiguration config, IWebHostEnvironment env, ILogger<ChatHistoryService> logger)
     {
-        var dbPath = config["ChatHistory:DbPath"] ?? "system.db";
-        _connectionString = $"Data Source={dbPath}";
+        var globalDbPath = config["ChatHistory:DbPath"] ?? "system.db";
+        _globalConnectionString = $"Data Source={globalDbPath}";
+        _env = env;
         _logger = logger;
-        InitializeSchema();
+        
+        // 全局数据库初始化
+        InitializeSchema(_globalConnectionString, "framework");
     }
 
-    private void InitializeSchema()
+    /// <summary>
+    /// プロジェクト別のデータベース接続文字列を取得
+    /// </summary>
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
+    /// <returns>SQLite 接続文字列</returns>
+    private string GetConnectionString(string? projectName)
+    {
+        if (string.IsNullOrEmpty(projectName))
+        {
+            return _globalConnectionString;
+        }
+
+        // プロジェクトディレクトリ内の chat.db を使用
+        var projectChatDbPath = Path.Combine(_env.ContentRootPath, "projects", projectName, "chat.db");
+        
+        // ディレクトリが存在することを確認
+        var projectDir = Path.GetDirectoryName(projectChatDbPath);
+        if (!string.IsNullOrEmpty(projectDir) && !Directory.Exists(projectDir))
+        {
+            Directory.CreateDirectory(projectDir);
+        }
+
+        var projectConnectionString = $"Data Source={projectChatDbPath}";
+        
+        // プロジェクト DB のスキーマを初期化
+        InitializeSchema(projectConnectionString, projectName);
+        
+        return projectConnectionString;
+    }
+
+    private void InitializeSchema(string connectionString, string contextName)
     {
         try
         {
-            using var conn = new SqliteConnection(_connectionString);
+            using var conn = new SqliteConnection(connectionString);
             conn.Open();
             // テーブル作成（新規 DB 向け）とベースインデックス
             conn.Execute(@"
@@ -45,26 +80,25 @@ CREATE TABLE IF NOT EXISTS AIChatHistory (
 );
 CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
 
-            // マイグレーション: カラムが存在しない場合は追加（既存 DB 向け）
+            // マイグレーション：カラムが存在しない場合は追加（既存 DB 向け）
             var columns = conn.Query<dynamic>("PRAGMA table_info(AIChatHistory)")
                 .ToDictionary(c => ((string)c.name).ToLowerInvariant(), c => c);
 
             if (!columns.ContainsKey("provider"))
             {
                 conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN Provider TEXT");
-                _logger.LogInformation("Migrated AIChatHistory: added Provider column");
+                _logger.LogInformation("Migrated AIChatHistory ({Context}): added Provider column", contextName);
             }
             if (!columns.ContainsKey("chatcontext"))
             {
                 conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN ChatContext TEXT NOT NULL DEFAULT 'framework'");
-                _logger.LogInformation("Migrated AIChatHistory: added ChatContext column");
+                _logger.LogInformation("Migrated AIChatHistory ({Context}): added ChatContext column", contextName);
             }
 
             // ChatContext カラムが確実に存在してからコンテキスト用インデックスを作成
             conn.Execute("CREATE INDEX IF NOT EXISTS idx_aichat_context ON AIChatHistory(UserId, ChatContext, Id);");
 
             conn.Execute(@"
-
 CREATE TABLE IF NOT EXISTS AICommandLog (
     Id          INTEGER PRIMARY KEY AUTOINCREMENT,
     UserId      TEXT NOT NULL,
@@ -75,40 +109,56 @@ CREATE TABLE IF NOT EXISTS AICommandLog (
     SessionId   TEXT,
     Status      TEXT NOT NULL DEFAULT 'Pending',
     ResultText  TEXT,
-    ErrorText   TEXT,
+    ErrorText  TEXT,
     DurationMs  INTEGER,
     CreatedAt   TEXT NOT NULL,
     CompletedAt TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_aicommand_user ON AICommandLog(UserId, Id);
 CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
+
+            _logger.LogDebug("Initialized AIChatHistory schema for context: {Context}", contextName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to initialize AIChatHistory schema");
+            _logger.LogError(ex, "Failed to initialize AIChatHistory schema for context: {Context}", contextName);
         }
     }
 
     /// <summary>ユーザーのチャット履歴を時系列順で取得します。</summary>
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
     /// <param name="chatContext">絞り込むコンテキスト。null の場合は全件取得。</param>
-    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, int limit = 100, string? chatContext = null)
+    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, string? projectName = null, int limit = 100, string? chatContext = null)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
+        
+        // デフォルトのチャットコンテキストを設定
+        var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
+        
         var sql = chatContext == null
             ? @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
                 FROM AIChatHistory WHERE UserId = @UserId ORDER BY Id DESC LIMIT @Limit"
             : @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
                 FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext ORDER BY Id DESC LIMIT @Limit";
+        
         var rows = await conn.QueryAsync<ChatMessage>(sql,
-            new { UserId = userId, Limit = limit, ChatContext = chatContext });
+            new { UserId = userId, Limit = limit, ChatContext = chatContext ?? defaultContext });
         return rows.Reverse(); // 時系列順に戻す
     }
 
     /// <summary>メッセージを保存します。</summary>
-    /// <param name="chatContext">チャットのコンテキスト識別子（例: framework / dealer-staff / dealer-customer）。</param>
-    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null, string chatContext = "framework")
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
+    /// <param name="chatContext">チャットのコンテキスト識別子（例：framework / dealer-staff / dealer-customer）。</param>
+    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null, string chatContext = "framework", string? projectName = null)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
+        
+        // デフォルトのチャットコンテキストを設定
+        var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
+        var actualContext = string.IsNullOrEmpty(chatContext) ? defaultContext : chatContext;
+        
         var id = await conn.ExecuteScalarAsync<long>(@"
 INSERT INTO AIChatHistory (UserId, Content, Type, Provider, ChatContext, CreatedAt)
 VALUES (@UserId, @Content, @Type, @Provider, @ChatContext, @CreatedAt);
@@ -119,7 +169,7 @@ SELECT last_insert_rowid();",
                 Content = content,
                 Type = type,
                 Provider = provider,
-                ChatContext = chatContext,
+                ChatContext = actualContext,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             });
 
@@ -134,13 +184,20 @@ SELECT last_insert_rowid();",
     }
 
     /// <summary>ユーザーの履歴を削除します。chatContext を指定すると特定コンテキストのみ削除します。</summary>
-    public async Task ClearHistoryAsync(string userId, string? chatContext = null)
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
+    public async Task ClearHistoryAsync(string userId, string? chatContext = null, string? projectName = null)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
+        
+        // デフォルトのチャットコンテキストを設定
+        var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
+        
         var sql = chatContext == null
             ? "DELETE FROM AIChatHistory WHERE UserId = @UserId"
             : "DELETE FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext";
-        await conn.ExecuteAsync(sql, new { UserId = userId, ChatContext = chatContext });
+        
+        await conn.ExecuteAsync(sql, new { UserId = userId, ChatContext = chatContext ?? defaultContext });
     }
 
     // ──────────────────────────────────────────────
@@ -148,6 +205,7 @@ SELECT last_insert_rowid();",
     // ──────────────────────────────────────────────
 
     /// <summary>コマンド実行ログを新規作成します（タスク開始時に呼び出す）。</summary>
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
     public async Task<long> CreateCommandLogAsync(
         string userId,
         string taskId,
@@ -156,7 +214,8 @@ SELECT last_insert_rowid();",
         string? projectName,
         string? sessionId)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
         var id = await conn.ExecuteScalarAsync<long>(@"
 INSERT INTO AICommandLog (UserId, TaskId, CliTool, InputText, ProjectName, SessionId, Status, CreatedAt)
 VALUES (@UserId, @TaskId, @CliTool, @InputText, @ProjectName, @SessionId, 'Pending', @CreatedAt);
@@ -182,7 +241,7 @@ SELECT last_insert_rowid();",
         string? errorText,
         long durationMs)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        await using var conn = new SqliteConnection(_globalConnectionString);
         await conn.ExecuteAsync(@"
 UPDATE AICommandLog
 SET Status      = @Status,
@@ -203,9 +262,11 @@ WHERE TaskId = @TaskId",
     }
 
     /// <summary>ユーザーのコマンド実行ログ一覧を新しい順で取得します。</summary>
-    public async Task<IEnumerable<CommandLog>> GetCommandLogsAsync(string userId, int limit = 50)
+    /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
+    public async Task<IEnumerable<CommandLog>> GetCommandLogsAsync(string userId, string? projectName = null, int limit = 50)
     {
-        await using var conn = new SqliteConnection(_connectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
         return await conn.QueryAsync<CommandLog>(@"
 SELECT Id, UserId, TaskId, CliTool, InputText, ProjectName, SessionId,
        Status, ResultText, ErrorText, DurationMs, CreatedAt, CompletedAt
