@@ -302,17 +302,16 @@ VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @I
 
         await conn.ExecuteAsync(@"
 INSERT INTO employees (
-    employee_id, app_user_id, user_name, employee_number, name, name_kana,
+    employee_id, user_name, employee_number, name, name_kana,
     gender, email, mobile, department, position, role, hire_date, 
     employment_type, status, created_at, updated_at
 ) VALUES (
-    @EmployeeId, @AppUserId, @UserName, @EmpNumber, @Name, '',
+    @EmployeeId, @UserName, @EmpNumber, @Name, '',
     '', @Email, @Mobile, @Department, @Position, @Role, date('now'),
     'full_time', 'active', @Now, @Now
 )", new
         {
             EmployeeId = employeeId,
-            AppUserId = appUserId.Value,
             UserName = userName,
             EmpNumber = employeeId,
             Name = name,
@@ -424,15 +423,14 @@ INSERT INTO customers (
 
         await conn.ExecuteAsync(@"
 INSERT INTO third_party_users (
-    third_party_id, app_user_id, company_name, service_type, 
+    third_party_id, company_name, service_type, 
     contact_person, contact_email, status, rating, created_at, updated_at
 ) VALUES (
-    @ThirdPartyId, @AppUserId, @CompanyName, @ServiceType,
+    @ThirdPartyId, @CompanyName, @ServiceType,
     @ContactPerson, @Email, @Status, 5, @Now, @Now
 )", new
         {
             ThirdPartyId = thirdPartyId,
-            AppUserId = appUserId.Value,
             CompanyName = companyName,
             ServiceType = serviceType,
             ContactPerson = contactPerson,
