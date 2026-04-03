@@ -48,6 +48,36 @@ public static class DbInitializer
                 throw;
             }
         }
+
+        // 全プロジェクト初期化完了後、テストユーザーを system.db に同期
+        await SyncTestUsersToSystemDbAsync(projects, logger);
+    }
+
+    /// <summary>
+    /// 全プロジェクトのテストユーザーを system.db に同期します。
+    /// </summary>
+    private static async Task SyncTestUsersToSystemDbAsync(IReadOnlyCollection<ProjectInfo> projects, ILogger logger)
+    {
+        var systemDbPath = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+        if (!File.Exists(systemDbPath))
+        {
+            logger.LogWarning("system.db が見つかりません。テストユーザーの同期をスキップします。");
+            return;
+        }
+
+        var projectUserInfos = projects.Select(p =>
+        {
+            var sqliteBuilder = new SqliteConnectionStringBuilder(p.ConnectionString);
+            return new ProjectUserInfo
+            {
+                Name = p.Name,
+                DisplayName = p.DisplayName ?? p.Name,
+                DbPath = sqliteBuilder.DataSource
+            };
+        }).ToList();
+
+        var seeder = new SystemDbTestUserSeeder();
+        await seeder.SyncTestUsersToSystemDbAsync(systemDbPath, projectUserInfos, logger);
     }
 
     private static async Task InitializeProjectAsync(ProjectInfo project, ILogger logger)

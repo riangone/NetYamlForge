@@ -43,9 +43,9 @@ public class ProjectScopeMiddleware
                     if (!hasAccess)
                     {
                         _logger.LogWarning("用户 {UserId} 尝试访问未授权的项目 {ProjectName}", userId, projectName);
-                        
-                        // 重定向到访问拒绝页面或项目选择器
-                        context.Response.Redirect($"/Account/AccessDenied?project={projectName}");
+
+                        // 重定向到访问拒绝页面
+                        context.Response.Redirect($"/TenantAccount/AccessDenied?project={projectName}");
                         return;
                     }
                 }
@@ -66,7 +66,9 @@ public class ProjectScopeMiddleware
         
         // 跳过认证相关路径
         if (path.StartsWith("/Account/", StringComparison.OrdinalIgnoreCase) ||
-            path.Equals("/Account", StringComparison.OrdinalIgnoreCase))
+            path.Equals("/Account", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/TenantAccount/", StringComparison.OrdinalIgnoreCase) ||
+            path.Equals("/TenantAccount", StringComparison.OrdinalIgnoreCase))
             return null;
         
         // 跳过静态资源
