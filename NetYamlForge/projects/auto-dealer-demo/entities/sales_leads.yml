@@ -62,6 +62,20 @@ entities:
         length: 64
         required: false
         label: 来源对话 ID
+      lead_source:
+        type: string
+        length: 30
+        required: false
+        label: 线索来源
+        default: ai_conversation
+        options:
+          - ai_conversation
+          - guest_ai
+          - web_inquiry
+          - phone
+          - walk_in
+        searchable: true
+        sortable: true
       assigned_to_user_id:
         type: string
         length: 50

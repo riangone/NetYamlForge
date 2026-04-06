@@ -72,17 +72,17 @@ public class AutoDealerChatService
     // セッション管理
     // ─────────────────────────────────────────────────────────
 
-    public async Task<ChatSessionResult> StartSessionAsync(string channel = "web")
+    public async Task<ChatSessionResult> StartSessionAsync(string channel = "web", string? guestSessionId = null, string? customerId = null)
     {
         var conversationId = $"CONV-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}"[..32];
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
         await _db.ExecuteAsync(@"
 INSERT INTO ai_conversations
-  (conversation_id, channel, status, started_at, created_at, updated_at)
+  (conversation_id, channel, status, started_at, created_at, updated_at, guest_session_id, customer_id)
 VALUES
-  (@ConversationId, @Channel, 'active', @Now, @Now, @Now)",
-            new { ConversationId = conversationId, Channel = channel, Now = now });
+  (@ConversationId, @Channel, 'active', @Now, @Now, @Now, @GuestSessionId, @CustomerId)",
+            new { ConversationId = conversationId, Channel = channel, Now = now, GuestSessionId = (object?)guestSessionId ?? DBNull.Value, CustomerId = (object?)customerId ?? DBNull.Value });
 
         var welcome = channel == "staff"
             ? $"こんにちは！{_dealerName}の AI 業務アシスタントです。🤝\nリード管理・予約確認・在庫照会など、業務に関することは何でもご相談ください！"

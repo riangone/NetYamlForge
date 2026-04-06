@@ -275,8 +275,11 @@ public class AutoCreateLeadFromConversationHook : IEntityHook
         ctx.Values.TryGetValue("customer_id", out var customerId);
         ctx.Values.TryGetValue("last_confidence", out var confidenceVal);
         ctx.Values.TryGetValue("sentiment_score", out var sentimentVal);
+        ctx.Values.TryGetValue("channel", out var channelVal);
+        ctx.Values.TryGetValue("contact_info", out var contactInfoVal);
 
-        if (customerId == null || convId == null) return Task.CompletedTask;
+        // 会話 ID 必須
+        if (convId == null) return Task.CompletedTask;
 
         // 同一会話からのリードが既に存在する場合はスキップ
         var checkCmd = db.CreateCommand();
@@ -296,18 +299,24 @@ public class AutoCreateLeadFromConversationHook : IEntityHook
         var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         var leadId = $"LEAD-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
 
+        // 顧客 ID が NULL の場合（ゲスト）、contact_info から連絡先を抽出してリード作成
+        // ゲストリードとして customer_id を NULL のまま保存し、後で紐付け可能にする
+        object? customerIdValue = customerId?.ToString();
+        string leadSource = customerIdValue != null ? "ai_conversation" : "guest_ai";
+
         var insertCmd = db.CreateCommand();
         insertCmd.Transaction = tx;
         insertCmd.CommandText = @"
             INSERT OR IGNORE INTO sales_leads
                 (lead_id, customer_id, vehicle_interest, lead_score, status,
-                 source_conversation_id, created_at, updated_at)
-            VALUES (@leadId, @cust, @intent, @score, 'new', @convId, @now, @now)";
+                 source_conversation_id, lead_source, created_at, updated_at)
+            VALUES (@leadId, @cust, @intent, @score, 'new', @convId, @source, @now, @now)";
         AddParam(insertCmd, "@leadId", leadId);
-        AddParam(insertCmd, "@cust",   customerId.ToString()!);
+        AddParam(insertCmd, "@cust",   customerIdValue);
         AddParam(insertCmd, "@intent", intentStr);
         AddParam(insertCmd, "@score",  score);
         AddParam(insertCmd, "@convId", convId.ToString()!);
+        AddParam(insertCmd, "@source", leadSource);
         AddParam(insertCmd, "@now",    now);
         insertCmd.ExecuteNonQuery();
 
@@ -616,6 +625,125 @@ public class CalculateNurturingPriorityHook : IEntityHook
 // ─────────────────────────────────────────────────────────────────────────────
 // 以下：顧客登録関連フック
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>
+/// 顧客登録後に、ゲストセッション ID を持つ AI 会話と sales_leads を顧客に紐付けるフック。
+/// YAML: afterCreate (customers) に指定します。
+/// </summary>
+public class LinkGuestSessionsHook : IEntityHook
+{
+    public string Name => "link_guest_sessions";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.FromResult(HookResult.Continue());
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        // 顧客 ID を取得
+        if (!ctx.Values.TryGetValue("customer_id", out var customerIdVal) || customerIdVal == null)
+            return Task.CompletedTask;
+
+        var customerId = customerIdVal.ToString()!;
+        if (string.IsNullOrWhiteSpace(customerId))
+            return Task.CompletedTask;
+
+        // user_name または email からゲストセッション ID を特定
+        // 方法 1: 同じトランザクションで guest_session_id が渡されている場合
+        ctx.Values.TryGetValue("guest_session_id", out var guestSessionIdVal);
+        
+        // 方法 2: 最近のゲストセッションを検索（過去 30 分以内）
+        var fallbackSessionIds = new List<string>();
+        
+        if (guestSessionIdVal != null && !string.IsNullOrWhiteSpace(guestSessionIdVal.ToString()))
+        {
+            fallbackSessionIds.Add(guestSessionIdVal.ToString()!);
+        }
+        else
+        {
+            // 直近 30 分以内に作成されたゲストセッション（customer_id が NULL）を検索
+            var recentCmd = db.CreateCommand();
+            recentCmd.Transaction = tx;
+            recentCmd.CommandText = @"
+                SELECT conversation_id 
+                FROM ai_conversations 
+                WHERE customer_id IS NULL 
+                  AND guest_session_id IS NOT NULL
+                  AND created_at >= datetime('now', '-30 minutes')
+                ORDER BY created_at DESC";
+            
+            using var reader = recentCmd.ExecuteReader();
+            while (reader.Read())
+            {
+                fallbackSessionIds.Add(reader.GetString(0));
+            }
+            reader.Close();
+        }
+
+        // 見つかったゲストセッションを顧客に紐付け
+        var linkedCount = 0;
+        foreach (var sessionId in fallbackSessionIds)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId)) continue;
+
+            var updateCmd = db.CreateCommand();
+            updateCmd.Transaction = tx;
+            updateCmd.CommandText = @"
+                UPDATE ai_conversations 
+                SET customer_id = @CustomerId, updated_at = datetime('now', 'localtime')
+                WHERE conversation_id = @SessionId AND customer_id IS NULL";
+            
+            var param1 = updateCmd.CreateParameter();
+            param1.ParameterName = "@CustomerId";
+            param1.Value = customerId;
+            updateCmd.Parameters.Add(param1);
+            
+            var param2 = updateCmd.CreateParameter();
+            param2.ParameterName = "@SessionId";
+            param2.Value = sessionId;
+            updateCmd.Parameters.Add(param2);
+            
+            linkedCount += updateCmd.ExecuteNonQuery();
+        }
+
+        // 紐付いた会話から sales_leads も更新
+        if (linkedCount > 0)
+        {
+            var updateLeadsCmd = db.CreateCommand();
+            updateLeadsCmd.Transaction = tx;
+            updateLeadsCmd.CommandText = @"
+                UPDATE sales_leads 
+                SET customer_id = @CustomerId, 
+                    lead_source = CASE WHEN lead_source = 'guest_ai' THEN 'ai_conversation' ELSE lead_source END,
+                    updated_at = datetime('now', 'localtime')
+                WHERE customer_id IS NULL 
+                  AND source_conversation_id IN (
+                      SELECT conversation_id 
+                      FROM ai_conversations 
+                      WHERE customer_id = @CustomerId
+                  )";
+            
+            var param = updateLeadsCmd.CreateParameter();
+            param.ParameterName = "@CustomerId";
+            param.Value = customerId;
+            updateLeadsCmd.Parameters.Add(param);
+            
+            updateLeadsCmd.ExecuteNonQuery();
+        }
+
+        _logger?.LogInformation(
+            "顧客 {CustomerId} に {LinkedCount} 件のゲストセッションと関連リードを紐付けました",
+            customerId, linkedCount);
+
+        return Task.CompletedTask;
+    }
+
+    private ILogger? _logger;
+    
+    public LinkGuestSessionsHook(ILogger<LinkGuestSessionsHook>? logger = null)
+    {
+        _logger = logger;
+    }
+}
 
 /// <summary>
 /// 顧客登録時のユーザー名を検証するフック。

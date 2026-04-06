@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace NetYamlForge.Controllers;
 
-[Authorize]
 [Route("{project}/Page")]
 public class PageController : BaseProjectController
 {
@@ -73,6 +72,7 @@ public class PageController : BaseProjectController
 
     // GET /{project}/Page/{pageName}
     [HttpGet("{pageName}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Index(string project, string pageName)
     {
         var proj = _projectScope.Current;
@@ -80,10 +80,19 @@ public class PageController : BaseProjectController
         if (!proj.PageMetadata.TryGet(pageName, out var pageDef))
             return NotFound($"ページ '{pageName}' が見つかりません。");
 
-        if (AdminOnlyPages.Contains(pageName) && !UserIsAdmin())
-            return Forbid();
-        if (!await _pagePermission.CanReadPageAsync(proj.Name, pageName, User.Identity?.Name, UserIsAdmin()))
-            return Forbid();
+        // 公開ページでない場合は認証チェック
+        if (!pageDef.IsPublic)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Challenge(); // ログインページへリダイレクト
+            }
+
+            if (AdminOnlyPages.Contains(pageName) && !UserIsAdmin())
+                return Forbid();
+            if (!await _pagePermission.CanReadPageAsync(proj.Name, pageName, User.Identity?.Name, UserIsAdmin()))
+                return Forbid();
+        }
 
         var filters = Request.Query
             .ToDictionary(k => k.Key, v => v.Value.ToString());
@@ -141,6 +150,7 @@ public class PageController : BaseProjectController
     }
 
     // GET /{project}/Page/{pageName}/section/{sectionId}  ── HTMX セクション部分更新
+    [Authorize]
     [HttpGet("{pageName}/section/{sectionId}")]
     public async Task<IActionResult> SectionTable(string project, string pageName, string sectionId)
     {
@@ -158,6 +168,7 @@ public class PageController : BaseProjectController
     }
 
     // GET /{project}/Page/{pageName}/section/{sectionId}/row-form
+    [Authorize]
     [HttpGet("{pageName}/section/{sectionId}/row-form")]
     public async Task<IActionResult> SectionRowForm(string project, string pageName, string sectionId, [FromQuery] string? rowId)
     {
@@ -177,6 +188,7 @@ public class PageController : BaseProjectController
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/insert-row
+    [Authorize]
     [HttpPost("{pageName}/section/{sectionId}/insert-row")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> InsertRow(string project, string pageName, string sectionId)
@@ -208,6 +220,7 @@ public class PageController : BaseProjectController
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/update-all-fields
+    [Authorize]
     [HttpPost("{pageName}/section/{sectionId}/update-all-fields")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateAllFields(
@@ -245,6 +258,7 @@ public class PageController : BaseProjectController
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/update-row
+    [Authorize]
     [HttpPost("{pageName}/section/{sectionId}/update-row")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateRow(
@@ -300,6 +314,7 @@ public class PageController : BaseProjectController
         return Content("", "text/html");
     }
 
+    [Authorize]
     [HttpPost("{pageName}/save-view")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SaveView(string project, string pageName, [FromForm] string viewName, [FromForm] string? isDefault)
@@ -338,6 +353,7 @@ public class PageController : BaseProjectController
         return RedirectToAction(nameof(Index), new { project = _projectScope.Current.Name, pageName });
     }
 
+    [Authorize]
     [HttpPost("{pageName}/delete-view")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteView(string project, string pageName, [FromForm] string viewName)
@@ -366,6 +382,7 @@ public class PageController : BaseProjectController
     }
 
     // POST /{project}/Page/{pageName}/section/{sectionId}/delete-row
+    [Authorize]
     [HttpPost("{pageName}/section/{sectionId}/delete-row")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteRow(

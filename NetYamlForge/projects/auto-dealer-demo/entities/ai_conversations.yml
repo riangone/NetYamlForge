@@ -22,6 +22,14 @@ entities:
         label: 顧客 ID
         searchable: true
         sortable: true
+      guest_session_id:
+        type: string
+        length: 64
+        required: false
+        label: ゲストセッション ID
+        searchable: true
+        sortable: true
+        description: 未登録ユーザーのセッション識別子（登録後に customer_id に紐付け）
       channel:
         type: string
         length: 20

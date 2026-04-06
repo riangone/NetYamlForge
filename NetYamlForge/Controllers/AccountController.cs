@@ -242,9 +242,9 @@ public class AccountController : Controller
 
     [AllowAnonymous]
     [HttpGet]
-    public IActionResult CustomerRegister(string? returnUrl = null)
+    public IActionResult CustomerRegister(string? returnUrl = null, string? guestSessionId = null)
     {
-        return View(new CustomerRegisterViewModel { ReturnUrl = returnUrl });
+        return View(new CustomerRegisterViewModel { ReturnUrl = returnUrl, GuestSessionId = guestSessionId });
     }
 
     [AllowAnonymous]

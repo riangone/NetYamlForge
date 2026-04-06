@@ -33,7 +33,17 @@ public class AutoDealerChatController : ControllerBase
     {
         try
         {
-            var result = await _chat.StartSessionAsync(req.Channel ?? "web");
+            // 顧客 ID は認証済みユーザーのみ有効、ゲストは guestSessionId を使用
+            string? customerId = null;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                customerId = User.FindFirst("UserName")?.Value;
+            }
+
+            var result = await _chat.StartSessionAsync(
+                req.Channel ?? "web",
+                req.GuestSessionId,
+                customerId);
             return Ok(result);
         }
         catch (Exception ex)
@@ -220,7 +230,7 @@ public class AutoDealerChatController : ControllerBase
 // Request DTOs
 // ─────────────────────────────────────────────────────
 
-public record ChatStartSessionRequest(string? Channel);
+public record ChatStartSessionRequest(string? Channel, string? GuestSessionId);
 public record ChatSendMessageRequest(string Message);
 public record ChatFeedbackRequest(int Rating, string? Comment);
 public record ChatOperatorReplyRequest(string Message);

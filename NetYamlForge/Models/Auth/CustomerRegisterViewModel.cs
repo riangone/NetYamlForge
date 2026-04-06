@@ -49,4 +49,7 @@ public class CustomerRegisterViewModel
     public string? PreferredLanguage { get; set; } = "ja-JP";
 
     public string? ReturnUrl { get; set; }
+
+    // ゲストセッション ID（登録前に AI 相談していた場合）
+    public string? GuestSessionId { get; set; }
 }

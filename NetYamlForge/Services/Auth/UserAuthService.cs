@@ -377,7 +377,13 @@ SELECT last_insert_rowid();";
 
             // customers テーブルにもレコードを作成（auto-dealer-demo など）
             // 既存の customers レコードがある場合は user_name を更新する
-            await SyncCustomerRecordAsync(conn, input, userId, transaction);
+            var customerId = await SyncCustomerRecordAsync(conn, input, userId, transaction);
+
+            // ゲストセッション ID があれば、関連フックを呼び出して過去のセッションとリードを紐付け
+            if (!string.IsNullOrWhiteSpace(input.GuestSessionId))
+            {
+                await LinkGuestSessionsAfterRegistrationAsync(conn, customerId, input.GuestSessionId, transaction);
+            }
 
             _logger.LogInformation("Registered customer '{UserName}' with user id {UserId}", user.UserName, userId);
             return (int)userId;
@@ -396,14 +402,14 @@ SELECT last_insert_rowid();";
     /// user_name/UserName 列を持つテーブルのみが対象（auto-dealer-demo など）。
     /// 取引先マスタ（biz-docs）など、ユーザー認証と関係ない Customer 表は対象外。
     /// </summary>
-    private async Task SyncCustomerRecordAsync(IDbConnection conn, CustomerRegisterViewModel input, long userId, IDbTransaction? transaction)
+    private async Task<string?> SyncCustomerRecordAsync(IDbConnection conn, CustomerRegisterViewModel input, long userId, IDbTransaction? transaction)
     {
         // 対象テーブルを検索（customers, Customer, customer の順でチェック）
         var targetTable = await FindCustomerTableAsync(conn, transaction);
         if (targetTable == null)
         {
             _logger.LogDebug("Customer table with user_name column does not exist, skipping sync");
-            return;
+            return null;
         }
 
         // テーブル構造情報を取得
@@ -411,7 +417,7 @@ SELECT last_insert_rowid();";
         if (tableInfo == null)
         {
             _logger.LogDebug("Failed to get table info for {Table}, skipping sync", targetTable);
-            return;
+            return null;
         }
 
         // 既に同じ user_name の顧客レコードが存在するかチェック
@@ -422,7 +428,7 @@ SELECT last_insert_rowid();";
             new { UserName = input.UserName }, transaction);
 
         var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        var customerId = tableInfo.PrimaryKeyIsIdentity 
+        var customerId = tableInfo.PrimaryKeyIsIdentity
             ? existingCustomerId ?? $"CUST-{DateTime.Now:yyyyMMddHHmmss}-{userId:D6}"
             : $"CUST-{DateTime.Now:yyyyMMddHHmmss}-{userId:D6}";
 
@@ -448,20 +454,23 @@ SELECT last_insert_rowid();";
 
             await conn.ExecuteAsync(insertSql, insertParams, transaction);
 
-            _logger.LogDebug("Created customer record '{CustomerId}' for user '{UserName}' in table {Table}", 
+            _logger.LogDebug("Created customer record '{CustomerId}' for user '{UserName}' in table {Table}",
                 customerId, input.UserName, tableInfo.TableName);
         }
         else
         {
+            customerId = existingCustomerId;
             // 既存レコードの user_name を更新（既に顧客レコードがある場合）
             var updateSql = $"UPDATE {tableInfo.TableName} SET {tableInfo.UserNameColumn} = @UserName, {tableInfo.UpdatedAtColumn} = @UpdatedAt WHERE {tableInfo.PrimaryKeyColumn} = @CustomerId";
-            await conn.ExecuteAsync(updateSql, 
-                new { UserName = input.UserName, UpdatedAt = now, CustomerId = existingCustomerId }, 
+            await conn.ExecuteAsync(updateSql,
+                new { UserName = input.UserName, UpdatedAt = now, CustomerId = existingCustomerId },
                 transaction);
 
-            _logger.LogDebug("Updated customer record '{CustomerId}' with user_name '{UserName}' in table {Table}", 
+            _logger.LogDebug("Updated customer record '{CustomerId}' with user_name '{UserName}' in table {Table}",
                 existingCustomerId, input.UserName, tableInfo.TableName);
         }
+
+        return customerId;
     }
 
     /// <summary>
@@ -756,6 +765,129 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
             var conn = new SqliteConnection(_connectionString);
             conn.Open();
             return conn;
+        }
+    }
+
+    /// <summary>
+    /// 顧客登録後、ゲストセッション ID を持つ AI 会話と販売リードを顧客に紐付けます。
+    /// </summary>
+    private async Task LinkGuestSessionsAfterRegistrationAsync(IDbConnection conn, string? customerId, string guestSessionId, IDbTransaction? transaction)
+    {
+        if (string.IsNullOrWhiteSpace(customerId))
+        {
+            _logger.LogDebug("Customer ID is empty, skipping guest session link");
+            return;
+        }
+
+        var linkedCount = 0;
+
+        try
+        {
+            // 1. 指定されたゲストセッションを顧客に紐付け
+            var updateConvCmd = conn.CreateCommand();
+            updateConvCmd.Transaction = transaction;
+            updateConvCmd.CommandText = @"
+                UPDATE ai_conversations 
+                SET customer_id = @CustomerId, updated_at = datetime('now', 'localtime')
+                WHERE conversation_id = @GuestSessionId AND customer_id IS NULL";
+            
+            var param1 = updateConvCmd.CreateParameter();
+            param1.ParameterName = "@CustomerId";
+            param1.Value = customerId;
+            updateConvCmd.Parameters.Add(param1);
+            
+            var param2 = updateConvCmd.CreateParameter();
+            param2.ParameterName = "@GuestSessionId";
+            param2.Value = guestSessionId;
+            updateConvCmd.Parameters.Add(param2);
+            
+            linkedCount = await Task.Run(() => updateConvCmd.ExecuteNonQuery(), CancellationToken.None);
+
+            // 2. 紐付いた会話から sales_leads も更新
+            if (linkedCount > 0)
+            {
+                var updateLeadsCmd = conn.CreateCommand();
+                updateLeadsCmd.Transaction = transaction;
+                updateLeadsCmd.CommandText = @"
+                    UPDATE sales_leads 
+                    SET customer_id = @CustomerId, 
+                        lead_source = CASE WHEN lead_source = 'guest_ai' THEN 'ai_conversation' ELSE lead_source END,
+                        updated_at = datetime('now', 'localtime')
+                    WHERE customer_id IS NULL 
+                      AND source_conversation_id = @GuestSessionId";
+                
+                var param = updateLeadsCmd.CreateParameter();
+                param.ParameterName = "@CustomerId";
+                param.Value = customerId;
+                updateLeadsCmd.Parameters.Add(param);
+                
+                var paramLeads2 = updateLeadsCmd.CreateParameter();
+                paramLeads2.ParameterName = "@GuestSessionId";
+                paramLeads2.Value = guestSessionId;
+                updateLeadsCmd.Parameters.Add(paramLeads2);
+                
+                await Task.Run(() => updateLeadsCmd.ExecuteNonQuery(), CancellationToken.None);
+            }
+
+            // 3. 過去 30 分以内の他のゲストセッションも紐付け（同じ電話番号またはメールアドレス）
+            var findMoreCmd = conn.CreateCommand();
+            findMoreCmd.Transaction = transaction;
+            findMoreCmd.CommandText = @"
+                SELECT c.conversation_id 
+                FROM ai_conversations c
+                WHERE c.customer_id IS NULL 
+                  AND c.guest_session_id IS NOT NULL
+                  AND c.created_at >= datetime('now', '-30 minutes')
+                  AND EXISTS (
+                      SELECT 1 FROM customers cust 
+                      WHERE cust.customer_id = @CustomerId 
+                        AND (cust.phone = c.contact_info OR cust.email = c.contact_info)
+                  )";
+            
+            var param3 = findMoreCmd.CreateParameter();
+            param3.ParameterName = "@CustomerId";
+            param3.Value = customerId;
+            findMoreCmd.Parameters.Add(param3);
+            
+            var additionalSessions = new List<string>();
+            using var reader = await Task.Run(() => findMoreCmd.ExecuteReader(), CancellationToken.None);
+            while (await Task.Run(() => reader.Read(), CancellationToken.None))
+            {
+                additionalSessions.Add(reader.GetString(0));
+            }
+            await Task.Run(() => reader.Close(), CancellationToken.None);
+
+            foreach (var sessionId in additionalSessions)
+            {
+                var updateCmd = conn.CreateCommand();
+                updateCmd.Transaction = transaction;
+                updateCmd.CommandText = @"
+                    UPDATE ai_conversations 
+                    SET customer_id = @CustomerId, updated_at = datetime('now', 'localtime')
+                    WHERE conversation_id = @SessionId AND customer_id IS NULL";
+                
+                var p1 = updateCmd.CreateParameter();
+                p1.ParameterName = "@CustomerId";
+                p1.Value = customerId;
+                updateCmd.Parameters.Add(p1);
+                
+                var p2 = updateCmd.CreateParameter();
+                p2.ParameterName = "@SessionId";
+                p2.Value = sessionId;
+                updateCmd.Parameters.Add(p2);
+                
+                linkedCount += await Task.Run(() => updateCmd.ExecuteNonQuery(), CancellationToken.None);
+            }
+
+            _logger.LogInformation(
+                "顧客 {CustomerId} に {LinkedCount} 件のゲストセッション（指定: {GuestSessionId}）を紐付けました",
+                customerId, linkedCount, guestSessionId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ゲストセッションの紐付けに失敗しました: CustomerId={CustomerId}, GuestSessionId={GuestSessionId}",
+                customerId, guestSessionId);
+            // 例外をスローしない（登録処理自体は成功させる）
         }
     }
 }

@@ -5,6 +5,7 @@
 CREATE TABLE IF NOT EXISTS ai_conversations (
     conversation_id VARCHAR(64) NOT NULL PRIMARY KEY,
     customer_id VARCHAR(50),
+    guest_session_id VARCHAR(64),
     channel VARCHAR(20) NOT NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'active',
     last_intent VARCHAR(100),
@@ -204,12 +205,13 @@ CREATE TABLE IF NOT EXISTS service_requests (
 -- 販売リード（AI 窓口システム）
 CREATE TABLE IF NOT EXISTS sales_leads (
     lead_id VARCHAR(50) NOT NULL PRIMARY KEY,
-    customer_id VARCHAR(50) NOT NULL,
+    customer_id VARCHAR(50),
     vehicle_interest VARCHAR(100),
     budget DECIMAL(12,2),
     lead_score INTEGER NOT NULL DEFAULT 50,
     status VARCHAR(20) NOT NULL DEFAULT 'new',
     source_conversation_id VARCHAR(64),
+    lead_source VARCHAR(30) DEFAULT 'ai_conversation',
     assigned_to_user_id VARCHAR(50),
     last_contact_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),

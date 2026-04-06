@@ -235,6 +235,7 @@ entities:
         - validate_customer_registration  # ユーザー名の一意性を検証
       afterCreate:
         - sync_customer_to_auth_user  # AppUser テーブルに同期
+        - link_guest_sessions         # ゲストセッションとリードを顧客に紐付け
       beforeUpdate:
         - validate_customer_phone
         - normalize_customer_name
