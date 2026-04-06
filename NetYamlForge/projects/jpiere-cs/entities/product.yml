@@ -1,0 +1,177 @@
+entities:
+  product:
+    table: products
+    key: id
+    displayName: 商品マスタ
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - code
+        - name
+        - description
+        - product_category_id
+        - uom
+        - product_type
+        - is_purchased
+        - is_sold
+        - list_price
+        - std_price
+        - cost_price
+        - tax_rate
+        - is_active
+        - created_at
+        - updated_at
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id:
+        type: int
+        identity: true
+        label: Id
+        sortable: true
+      code:
+        type: string
+        required: true
+        label: Code
+        searchable: true
+        sortable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      description:
+        type: string
+        label: Description
+        searchable: true
+        sortable: true
+      product_category_id:
+        type: int
+        required: true
+        label: Product Category Id
+        sortable: true
+      uom:
+        type: string
+        label: Uom
+        searchable: true
+        sortable: true
+      product_type:
+        type: string
+        label: Product Type
+        searchable: true
+        sortable: true
+      is_purchased:
+        type: int
+        label: Is Purchased
+        sortable: true
+      is_sold:
+        type: int
+        label: Is Sold
+        sortable: true
+      list_price:
+        type: decimal
+        label: List Price
+        sortable: true
+      std_price:
+        type: decimal
+        label: Std Price
+        sortable: true
+      cost_price:
+        type: decimal
+        label: Cost Price
+        sortable: true
+      tax_rate:
+        type: decimal
+        label: Tax Rate
+        sortable: true
+      is_active:
+        type: int
+        label: Is Active
+        sortable: true
+      created_at:
+        type: string
+        label: Created At
+        searchable: true
+        sortable: true
+      updated_at:
+        type: string
+        label: Updated At
+        searchable: true
+        sortable: true
+    forms:
+      code:
+        type: string
+        required: true
+        label: Code
+        editable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      description:
+        type: string
+        label: Description
+        editable: true
+      product_category_id:
+        type: int
+        required: true
+        label: Product Category Id
+        editable: true
+        foreignKey:
+          entity: product_category
+          displayColumn: name
+      uom:
+        type: string
+        label: Uom
+        editable: true
+      product_type:
+        type: string
+        label: Product Type
+        editable: true
+      is_purchased:
+        type: int
+        label: Is Purchased
+        editable: true
+      is_sold:
+        type: int
+        label: Is Sold
+        editable: true
+      list_price:
+        type: decimal
+        label: List Price
+        editable: true
+      std_price:
+        type: decimal
+        label: Std Price
+        editable: true
+      cost_price:
+        type: decimal
+        label: Cost Price
+        editable: true
+      tax_rate:
+        type: decimal
+        label: Tax Rate
+        editable: true
+      is_active:
+        type: int
+        label: Is Active
+        editable: true
+      created_at:
+        type: string
+        label: Created At
+        editable: true
+      updated_at:
+        type: string
+        label: Updated At
+        editable: true
+    filters: {}
+    links: {}
+    description: 販売・購買商品（SKU）を管理します

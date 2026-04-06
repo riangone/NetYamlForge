@@ -1,0 +1,64 @@
+entities:
+  approval_step:
+    table: 'approval_steps'
+    key: 'id'
+    displayName: '承認ステップ'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['request_id', 'step_no', 'approver', 'approver_role', 'label', 'status', 'approved_at', 'comments', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      request_id: { type: int, required: true, label: '申請ID', sortable: true }
+      step_no: { type: int, required: true, label: 'ステップ番号', sortable: true }
+      approver: { type: string, label: '承認者', searchable: true, sortable: true }
+      approver_role: { type: string, label: '承認者役割', searchable: true, sortable: true }
+      label: { type: string, label: 'ラベル', searchable: true, sortable: true }
+      status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      approved_at: { type: string, label: '承認日時', searchable: true, sortable: true }
+      comments: { type: string, label: 'コメント', searchable: true, sortable: true }
+      created_at: { type: string, label: '作成日時', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日時', searchable: true, sortable: true }
+    forms:
+      request_id:
+        type: int
+        required: true
+        label: '申請ID'
+        editable: true
+        foreignKey:
+          entity: approval_request
+          displayColumn: 'id'
+      step_no: { type: int, required: true, label: 'ステップ番号', editable: true }
+      approver: { type: string, label: '承認者', editable: true }
+      approver_role: { type: string, label: '承認者役割', editable: true }
+      label: { type: string, label: 'ラベル', editable: true }
+      status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        optionLabels:
+          PENDING: 承認待ち
+          APPROVED: 承認済み
+          REJECTED: 却下
+      approved_at: { type: string, label: '承認日時', editable: true }
+      comments: { type: string, label: 'コメント', editable: true }
+      created_at: { type: string, label: '作成日時', editable: true }
+      updated_at: { type: string, label: '更新日時', editable: true }
+    filters: {}
+    links: {}
+    hooks:
+      afterUpdate:
+        - approval_step_complete
+        - approval_reject

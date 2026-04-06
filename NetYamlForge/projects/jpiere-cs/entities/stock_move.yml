@@ -1,0 +1,62 @@
+entities:
+  stock_move:
+    table: 'stock_moves'
+    key: 'id'
+    displayName: '在庫移動'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['move_type', 'product_id', 'qty', 'unit_cost', 'date_moved', 'source_table', 'source_id', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      move_type: { type: string, required: true, label: '移動種別', searchable: true, sortable: true }
+      product_id: { type: int, required: true, label: '商品', sortable: true }
+      qty: { type: decimal, required: true, label: '数量', sortable: true }
+      unit_cost: { type: decimal, label: '原価', sortable: true }
+      date_moved: { type: string, required: true, label: '移動日', searchable: true, sortable: true }
+      source_table: { type: string, label: '送信元', searchable: true, sortable: true }
+      source_id: { type: int, label: '送信元ID', sortable: true }
+      description: { type: string, label: '備考', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      move_type:
+        type: string
+        required: true
+        label: '移動種別'
+        editable: true
+        options:
+          - IN
+          - OUT
+          - TF
+        optionLabels:
+          IN: 入庫
+          OUT: 出庫
+          TF: 転送
+      product_id:
+        type: int
+        required: true
+        label: '商品'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      qty: { type: decimal, required: true, label: '数量', editable: true }
+      unit_cost: { type: decimal, label: '原価', editable: true }
+      date_moved: { type: string, required: true, label: '移動日', editable: true }
+      source_table: { type: string, label: '送信元', editable: true }
+      source_id: { type: int, label: '送信元ID', editable: true }
+      description: { type: string, label: '備考', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

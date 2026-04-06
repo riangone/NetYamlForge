@@ -1,0 +1,57 @@
+ja:
+  business_partners:
+    name: 取引先マスタ
+    fields:
+      code: 取引先コード
+      name: 取引先名
+      name2: 取引先名2（カナ）
+      bp_type: 取引先種別
+      tax_id: 法人番号
+      phone: 電話番号
+      email: メールアドレス
+      credit_limit: 与信限度額
+      payment_term_days: 支払期日（日数）
+  products:
+    name: 商品マスタ
+    fields:
+      code: 商品コード
+      name: 商品名
+      product_category_id: 商品カテゴリ
+      std_price: 標準価格
+      list_price: 定価
+      tax_rate: 消費税率
+  contracts:
+    name: 契約管理
+    fields:
+      document_no: 契約番号
+      name: 契約名称
+      contract_type: 契約種別
+      doc_status: 書類状態
+      contract_status: 契約状態
+      business_partner_id: 取引先
+      period_date_from: 契約開始日
+      period_date_to: 契約終了日
+      total_doc_amt: 契約総額
+      monthly_revenue_amt: 月次売上
+  estimations:
+    name: 見積管理
+    fields:
+      document_no: 見積番号
+      estimation_date: 見積日
+      doc_status: 状態
+      grand_total: 合計（税込）
+  bills:
+    name: 請求管理
+    fields:
+      document_no: 請求番号
+      date_billed: 請求日
+      date_due: 支払期限
+      grand_total: 請求額
+      outstanding_amt: 未収残高
+  todos:
+    name: TODOタスク
+    fields:
+      title: タイトル
+      todo_status: 状態
+      assigned_to: 担当者
+      scheduled_start: 予定開始

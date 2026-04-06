@@ -1,0 +1,59 @@
+entities:
+  recognition:
+    table: 'recognitions'
+    key: 'id'
+    displayName: 'Recognition'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'doc_status', 'is_so_trx', 'business_partner_id', 'date_acct', 'grand_total', 'description', 'linked_contract_id', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: 'Document No', searchable: true, sortable: true }
+      doc_status: { type: string, label: 'Doc Status', searchable: true, sortable: true }
+      is_so_trx: { type: int, label: 'Is So Trx', sortable: true }
+      business_partner_id: { type: int, required: true, label: 'Business Partner Id', sortable: true }
+      date_acct: { type: string, required: true, label: 'Date Acct', searchable: true, sortable: true }
+      grand_total: { type: decimal, label: 'Grand Total', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      linked_contract_id: { type: int, label: 'Linked Contract Id', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: 'Document No', editable: true }
+      doc_status: { type: string, label: 'Doc Status', editable: true }
+      is_so_trx: { type: int, label: 'Is So Trx', editable: true }
+      business_partner_id:
+        type: int
+        required: true
+        label: 'Business Partner Id'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      date_acct: { type: string, required: true, label: 'Date Acct', editable: true }
+      grand_total: { type: decimal, label: 'Grand Total', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      linked_contract_id:
+        type: int
+        label: 'Linked Contract Id'
+        editable: true
+        foreignKey:
+          entity: contract
+          displayColumn: 'name'
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}
+    hooks:
+      afterUpdate:
+        - recognition_complete

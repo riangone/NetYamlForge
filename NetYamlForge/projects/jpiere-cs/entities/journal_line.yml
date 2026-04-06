@@ -1,0 +1,53 @@
+entities:
+  journal_line:
+    table: 'journal_lines'
+    key: 'id'
+    displayName: '仕訳明細'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['journal_id', 'line_no', 'account_id', 'debit_amt', 'credit_amt', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      journal_id: { type: int, required: true, label: '仕訳ID', sortable: true }
+      line_no: { type: int, required: true, label: '行番号', sortable: true }
+      account_id: { type: int, required: true, label: '勘定科目', sortable: true }
+      debit_amt: { type: decimal, label: '借方金額', sortable: true }
+      credit_amt: { type: decimal, label: '貸方金額', sortable: true }
+      description: { type: string, label: '明細説明', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      journal_id:
+        type: int
+        required: true
+        label: '仕訳ID'
+        editable: true
+        foreignKey:
+          entity: journal
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: '行番号', editable: true }
+      account_id:
+        type: int
+        required: true
+        label: '勘定科目'
+        editable: true
+        foreignKey:
+          entity: account
+          displayColumn: 'name'
+      debit_amt: { type: decimal, label: '借方金額', editable: true }
+      credit_amt: { type: decimal, label: '貸方金額', editable: true }
+      description: { type: string, label: '明細説明', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

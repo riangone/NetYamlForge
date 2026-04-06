@@ -1,0 +1,60 @@
+entities:
+  purchase_receipt_line:
+    table: 'purchase_receipt_lines'
+    key: 'id'
+    displayName: '受入明細'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['receipt_id', 'po_line_id', 'product_id', 'qty_received', 'unit_cost', 'line_amt', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      receipt_id: { type: int, required: true, label: '受入ID', sortable: true }
+      po_line_id: { type: int, label: '発注明細ID', sortable: true }
+      product_id: { type: int, label: '商品', sortable: true }
+      qty_received: { type: decimal, required: true, label: '受入数量', sortable: true }
+      unit_cost: { type: decimal, label: '原価', sortable: true }
+      line_amt: { type: decimal, label: '行金額', sortable: true }
+      description: { type: string, label: '説明', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      receipt_id:
+        type: int
+        required: true
+        label: '受入ID'
+        editable: true
+        foreignKey:
+          entity: purchase_receipt
+          displayColumn: 'document_no'
+      po_line_id:
+        type: int
+        label: '発注明細ID'
+        editable: true
+        foreignKey:
+          entity: purchase_order_line
+          displayColumn: 'id'
+      product_id:
+        type: int
+        label: '商品'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      qty_received: { type: decimal, required: true, label: '受入数量', editable: true }
+      unit_cost: { type: decimal, label: '原価', editable: true }
+      line_amt: { type: decimal, label: '行金額', editable: true }
+      description: { type: string, label: '説明', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

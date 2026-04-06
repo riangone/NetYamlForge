@@ -1,0 +1,173 @@
+title: AI 自動車ディーラー
+description: "AI 技術を活用した 24 時間 365 日対応可能な智能客服システム。会員登録なしですぐに AI 相談体験！"
+isPublic: true
+
+sections:
+  # ─── ヒーローバナー ───
+  - id: hero
+    title: 🤖 AI 自動車ディーラーへようこそ
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🤖 AI 車両相談' AS metric_name,
+             '24時間365日、AI が最適な車をご提案' AS metric_value,
+             '💬' AS metric_icon,
+             '/auto-dealer-demo/api/ai/chat/session' AS metric_delta
+      UNION ALL
+      SELECT '🚗 在庫車両閲覧', '登録なしですぐに閲覧可能', '🔍', '/auto-dealer-demo/Page/PublicVehicles'
+      UNION ALL
+      SELECT '📅 試乗予約', '会員登録后すぐ予約', '🎯', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '⭐ 会員特典', '限定割引・優先案内・マイ車両管理', '🎁', '/Account/CustomerRegister'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── システム特徴 ───
+  - id: features
+    title: 🌟 こんな方におすすめです
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🚗 初めて购车する方' AS metric_name,
+             'AI が丁寧に車種選びをサポート' AS metric_value,
+             '🤖' AS metric_icon,
+             '/auto-dealer-demo/api/ai/chat/session' AS metric_delta
+      UNION ALL
+      SELECT '⚡ EV・PHEV を検討中', '最新電気自動車情報をお届け', '🔋', '/auto-dealer-demo/api/ai/chat/session'
+      UNION ALL
+      SELECT '💰 予算から探したい', 'ご予算に合った車両をご提案', '💴', '/auto-dealer-demo/api/ai/chat/session'
+      UNION ALL
+      SELECT '🔄 買替えを検討中', '下取り査定から新車選びまで', '🔄', '/auto-dealer-demo/api/ai/chat/session'
+      UNION ALL
+      SELECT '🔧 整備・車検をお探し', 'オンラインで簡単予約', '📅', '/Account/CustomerRegister'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 在庫サマリー ───
+  - id: inventory_summary
+    title: 🚗 現在の在庫状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🚗 販売可能台数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 台' AS metric_value,
+             '🚗' AS metric_icon,
+             '/auto-dealer-demo/Page/PublicVehicles' AS metric_delta
+      FROM vehicles WHERE status = 'available' AND customer_id IS NULL
+      UNION ALL
+      SELECT '⚡ EV 車両', CAST(COUNT(*) AS TEXT) || ' 台', '⚡', '/auto-dealer-demo/Page/PublicVehicles'
+      FROM vehicles WHERE customer_id IS NULL AND status = 'available' AND fuel_type = 'ev'
+      UNION ALL
+      SELECT '🔥 ハイブリッド', CAST(COUNT(*) AS TEXT) || ' 台', '🔥', '/auto-dealer-demo/Page/PublicVehicles'
+      FROM vehicles WHERE customer_id IS NULL AND status = 'available' AND fuel_type = 'hybrid'
+      UNION ALL
+      SELECT '💰 300万円以下', CAST(COUNT(*) AS TEXT) || ' 台', '💰', '/auto-dealer-demo/Page/PublicVehicles'
+      FROM vehicles WHERE customer_id IS NULL AND status = 'available' AND price <= 3000000
+      UNION ALL
+      SELECT '📦 今月入荷', CAST(COUNT(*) AS TEXT) || ' 台', '📦', '/auto-dealer-demo/Page/PublicVehicles'
+      FROM vehicles WHERE customer_id IS NULL AND strftime('%Y-%m', arrival_date) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 注目車両（ランダム 4 台） ───
+  - id: featured_vehicles
+    title: ⭐ 注目の車両
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT
+        maker || ' ' || model || ' ' || grade AS title,
+        CAST(year AS TEXT) || '年式 / ' ||
+        CASE fuel_type
+          WHEN 'gasoline' THEN 'ガソリン'
+          WHEN 'hybrid'   THEN 'ハイブリッド'
+          WHEN 'phev'     THEN 'PHEV'
+          WHEN 'ev'       THEN 'EV'
+          WHEN 'diesel'   THEN 'ディーゼル'
+          ELSE COALESCE(fuel_type, '不明')
+        END AS subtitle,
+        '¥' || printf('%,d', price) AS badge,
+        COALESCE(color, '') ||
+        CASE WHEN features IS NOT NULL AND features != '' THEN
+          ' / ' || SUBSTR(features, 1, 60) || CASE WHEN LENGTH(features) > 60 THEN '...' ELSE '' END
+        ELSE ''
+        END AS description
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY RANDOM()
+      LIMIT 4
+    columns: [title, subtitle, badge, description]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    pageSize: 4
+    editable: false
+    readOnly: true
+
+  # ─── AI 相談開始 CTA ───
+  - id: ai_cta
+    title: 💬 AI 相談を開始
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🤖 AI にご相談' AS metric_name,
+             '今すぐ AI が車両のご提案・試乗予約をサポート' AS metric_value,
+             '💬' AS metric_icon,
+             '/auto-dealer-demo/api/ai/chat/session' AS metric_delta
+      UNION ALL
+      SELECT '📞 お電話でのご相談', '03-XXXX-XXXX（営業時間 9:00-19:00）', '📞', 'tel:03XXXXXXX'
+      UNION ALL
+      SELECT '📧 メールでのご相談', '24 時間受付、担当者より折り返し', '📧', 'mailto:info@example.com'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 会員登録促進 ───
+  - id: register_cta
+    title: ⭐ 会員登録（無料）でもっと便利に
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🚗 マイ車両管理' AS metric_name,
+             '購入車両を一覧管理・サービス履歴も確認' AS metric_value,
+             '📱' AS metric_icon,
+             '/Account/CustomerRegister' AS metric_delta
+      UNION ALL
+      SELECT '📅 オンライン予約', '試乗・整備予約を 24 時間いつでも', '⏰', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '🔧 サービス履歴', '過去の整備履歴・保証状況を確認', '📋', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '🎁 会員限定特典', '專屬割引・先行案内・優先対応', '🎁', '/Account/CustomerRegister'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true

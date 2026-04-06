@@ -1,0 +1,70 @@
+entities:
+  recognition_line:
+    table: 'recognition_lines'
+    key: 'id'
+    displayName: 'Recognition Line'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['recognition_id', 'line_no', 'contract_line_id', 'product_id', 'description', 'qty_recognized', 'unit_price', 'line_amt', 'tax_rate', 'tax_amt', 'period_from', 'period_to', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      recognition_id: { type: int, required: true, label: 'Recognition Id', sortable: true }
+      line_no: { type: int, required: true, label: 'Line No', sortable: true }
+      contract_line_id: { type: int, label: 'Contract Line Id', sortable: true }
+      product_id: { type: int, label: 'Product Id', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      qty_recognized: { type: decimal, label: 'Qty Recognized', sortable: true }
+      unit_price: { type: decimal, label: 'Unit Price', sortable: true }
+      line_amt: { type: decimal, label: 'Line Amt', sortable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', sortable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', sortable: true }
+      period_from: { type: string, label: 'Period From', searchable: true, sortable: true }
+      period_to: { type: string, label: 'Period To', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      recognition_id:
+        type: int
+        required: true
+        label: 'Recognition Id'
+        editable: true
+        foreignKey:
+          entity: recognition
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: 'Line No', editable: true }
+      contract_line_id:
+        type: int
+        label: 'Contract Line Id'
+        editable: true
+        foreignKey:
+          entity: contract_line
+          displayColumn: 'description'
+      product_id:
+        type: int
+        label: 'Product Id'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      description: { type: string, label: 'Description', editable: true }
+      qty_recognized: { type: decimal, label: 'Qty Recognized', editable: true }
+      unit_price: { type: decimal, label: 'Unit Price', editable: true }
+      line_amt: { type: decimal, label: 'Line Amt', editable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', editable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', editable: true }
+      period_from: { type: string, label: 'Period From', editable: true }
+      period_to: { type: string, label: 'Period To', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

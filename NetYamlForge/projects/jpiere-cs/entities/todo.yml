@@ -1,0 +1,69 @@
+entities:
+  todo:
+    table: 'todos'
+    key: 'id'
+    displayName: 'Todo'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'description', 'todo_type', 'todo_status', 'todo_category_id', 'assigned_to', 'scheduled_start', 'scheduled_end', 'actual_start', 'actual_end', 'linked_contract_id', 'linked_partner_id', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      todo_type: { type: string, label: 'Todo Type', searchable: true, sortable: true }
+      todo_status: { type: string, label: 'Todo Status', searchable: true, sortable: true }
+      todo_category_id: { type: int, label: 'Todo Category Id', sortable: true }
+      assigned_to: { type: string, label: 'Assigned To', searchable: true, sortable: true }
+      scheduled_start: { type: string, label: 'Scheduled Start', searchable: true, sortable: true }
+      scheduled_end: { type: string, label: 'Scheduled End', searchable: true, sortable: true }
+      actual_start: { type: string, label: 'Actual Start', searchable: true, sortable: true }
+      actual_end: { type: string, label: 'Actual End', searchable: true, sortable: true }
+      linked_contract_id: { type: int, label: 'Linked Contract Id', sortable: true }
+      linked_partner_id: { type: int, label: 'Linked Partner Id', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      title: { type: string, required: true, label: 'Title', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      todo_type: { type: string, label: 'Todo Type', editable: true }
+      todo_status: { type: string, label: 'Todo Status', editable: true }
+      todo_category_id:
+        type: int
+        label: 'Todo Category Id'
+        editable: true
+        foreignKey:
+          entity: todo_category
+          displayColumn: 'name'
+      assigned_to: { type: string, label: 'Assigned To', editable: true }
+      scheduled_start: { type: string, label: 'Scheduled Start', editable: true }
+      scheduled_end: { type: string, label: 'Scheduled End', editable: true }
+      actual_start: { type: string, label: 'Actual Start', editable: true }
+      actual_end: { type: string, label: 'Actual End', editable: true }
+      linked_contract_id:
+        type: int
+        label: 'Linked Contract Id'
+        editable: true
+        foreignKey:
+          entity: contract
+          displayColumn: 'name'
+      linked_partner_id:
+        type: int
+        label: 'Linked Partner Id'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

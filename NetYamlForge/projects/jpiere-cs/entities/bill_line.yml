@@ -1,0 +1,52 @@
+entities:
+  bill_line:
+    table: 'bill_lines'
+    key: 'id'
+    displayName: 'Bill Line'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['bill_id', 'line_no', 'description', 'period_from', 'period_to', 'total_lines', 'grand_total', 'tax_amt', 'pay_amt', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      bill_id: { type: int, required: true, label: 'Bill Id', sortable: true }
+      line_no: { type: int, required: true, label: 'Line No', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      period_from: { type: string, label: 'Period From', searchable: true, sortable: true }
+      period_to: { type: string, label: 'Period To', searchable: true, sortable: true }
+      total_lines: { type: decimal, label: 'Total Lines', sortable: true }
+      grand_total: { type: decimal, label: 'Grand Total', sortable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', sortable: true }
+      pay_amt: { type: decimal, label: 'Pay Amt', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      bill_id:
+        type: int
+        required: true
+        label: 'Bill Id'
+        editable: true
+        foreignKey:
+          entity: bill
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: 'Line No', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      period_from: { type: string, label: 'Period From', editable: true }
+      period_to: { type: string, label: 'Period To', editable: true }
+      total_lines: { type: decimal, label: 'Total Lines', editable: true }
+      grand_total: { type: decimal, label: 'Grand Total', editable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', editable: true }
+      pay_amt: { type: decimal, label: 'Pay Amt', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

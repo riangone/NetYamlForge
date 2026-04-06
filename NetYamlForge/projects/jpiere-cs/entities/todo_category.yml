@@ -1,0 +1,33 @@
+entities:
+  todo_category:
+    table: 'todo_categories'
+    key: 'id'
+    displayName: 'Todo Category'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name', 'description', 'color', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      color: { type: string, label: 'Color', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      color: { type: string, label: 'Color', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

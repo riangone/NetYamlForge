@@ -1,0 +1,98 @@
+title: 見積詳細
+description: "見積ヘッダ情報と明細・金額サマリーを表示"
+
+sections:
+  # 見積ヘッダ情報
+  - id: estimation_header
+    title: 見積情報
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        e.document_no AS 見積番号,
+        e.estimation_date AS 見積日,
+        e.version AS バージョン,
+        CASE e.doc_status
+          WHEN 'DR' THEN '下書き'
+          WHEN 'IN' THEN '提出済み'
+          WHEN 'CO' THEN '受注確定'
+          WHEN 'VO' THEN '失注'
+        END AS 状態,
+        bp.name AS 取引先,
+        e.sales_rep AS 担当者,
+        e.date_promised AS 納期,
+        e.total_lines AS 小計,
+        e.tax_amt AS 税額,
+        e.grand_total AS 合計,
+        CASE WHEN e.linked_contract_id IS NOT NULL THEN '✓ 連携済' ELSE '—' END AS 契約連携
+      FROM estimations e
+      JOIN business_partners bp ON e.business_partner_id = bp.id
+      WHERE e.id = @entityId
+    columns: [見積番号, 見積日, バージョン, 状態, 取引先, 担当者, 納期, 小計, 税額, 合計, 契約連携]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # 見積明細
+  - id: estimation_lines
+    title: 見積明細
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        el.line_no AS 行番,
+        p.name AS 商品,
+        el.description AS 説明,
+        el.date_ordered AS 受注日,
+        el.date_promised AS 納期,
+        el.qty_ordered AS 数量,
+        el.uom AS 単位,
+        el.unit_price AS 単価,
+        el.line_amt AS 明細金額,
+        el.discount AS 割引率
+      FROM estimation_lines el
+      LEFT JOIN products p ON el.product_id = p.id
+      WHERE el.estimation_id = @entityId AND el.is_active = 1
+      ORDER BY el.line_no ASC
+    columns: [行番, 商品, 説明, 受注日, 納期, 数量, 単位, 単価, 明細金額, 割引率]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 金額サマリー
+  - id: amount_summary
+    title: 金額サマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '小計（税抜）' AS metric_name,
+             CASE WHEN total_lines >= 1000000
+               THEN CAST(ROUND(total_lines / 10000, 1) AS TEXT) || '万円'
+               ELSE CAST(total_lines AS TEXT)
+             END AS metric_value,
+             '💰' AS metric_icon, NULL AS metric_delta
+      FROM estimations WHERE id = @entityId
+      UNION ALL
+      SELECT '税額',
+             CASE WHEN tax_amt >= 1000000
+               THEN CAST(ROUND(tax_amt / 10000, 1) AS TEXT) || '万円'
+               ELSE CAST(tax_amt AS TEXT)
+             END,
+             '🏛️', NULL
+      FROM estimations WHERE id = @entityId
+      UNION ALL
+      SELECT '合計（税込）',
+             CASE WHEN grand_total >= 1000000
+               THEN CAST(ROUND(grand_total / 10000, 1) AS TEXT) || '万円'
+               ELSE CAST(grand_total AS TEXT)
+             END,
+             '📊', NULL
+      FROM estimations WHERE id = @entityId
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true

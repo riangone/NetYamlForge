@@ -1,0 +1,66 @@
+entities:
+  contract_line:
+    table: 'contract_lines'
+    key: 'id'
+    displayName: 'Contract Line'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['contract_id', 'line_no', 'product_id', 'description', 'qty', 'uom', 'unit_price', 'line_amt', 'tax_rate', 'tax_amt', 'billing_policy', 'billing_start_date', 'billing_end_date', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      contract_id: { type: int, required: true, label: 'Contract Id', sortable: true }
+      line_no: { type: int, required: true, label: 'Line No', sortable: true }
+      product_id: { type: int, label: 'Product Id', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      qty: { type: decimal, label: 'Qty', sortable: true }
+      uom: { type: string, label: 'Uom', searchable: true, sortable: true }
+      unit_price: { type: decimal, label: 'Unit Price', sortable: true }
+      line_amt: { type: decimal, label: 'Line Amt', sortable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', sortable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', sortable: true }
+      billing_policy: { type: string, label: 'Billing Policy', searchable: true, sortable: true }
+      billing_start_date: { type: string, label: 'Billing Start Date', searchable: true, sortable: true }
+      billing_end_date: { type: string, label: 'Billing End Date', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      contract_id:
+        type: int
+        required: true
+        label: 'Contract Id'
+        editable: true
+        foreignKey:
+          entity: contract
+          displayColumn: 'name'
+      line_no: { type: int, required: true, label: 'Line No', editable: true }
+      product_id:
+        type: int
+        label: 'Product Id'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      description: { type: string, label: 'Description', editable: true }
+      qty: { type: decimal, label: 'Qty', editable: true }
+      uom: { type: string, label: 'Uom', editable: true }
+      unit_price: { type: decimal, label: 'Unit Price', editable: true }
+      line_amt: { type: decimal, label: 'Line Amt', editable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', editable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', editable: true }
+      billing_policy: { type: string, label: 'Billing Policy', editable: true }
+      billing_start_date: { type: string, label: 'Billing Start Date', editable: true }
+      billing_end_date: { type: string, label: 'Billing End Date', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

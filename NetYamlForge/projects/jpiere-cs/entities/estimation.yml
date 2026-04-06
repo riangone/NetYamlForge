@@ -1,0 +1,70 @@
+entities:
+  estimation:
+    table: 'estimations'
+    key: 'id'
+    displayName: 'Estimation'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'estimation_date', 'version', 'doc_status', 'is_so_trx', 'business_partner_id', 'sales_rep', 'date_promised', 'currency', 'total_lines', 'grand_total', 'tax_base_amt', 'tax_amt', 'description', 'linked_contract_id', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: 'Document No', searchable: true, sortable: true }
+      estimation_date: { type: string, label: 'Estimation Date', searchable: true, sortable: true }
+      version: { type: int, label: 'Version', sortable: true }
+      doc_status: { type: string, label: 'Doc Status', searchable: true, sortable: true }
+      is_so_trx: { type: int, label: 'Is So Trx', sortable: true }
+      business_partner_id: { type: int, required: true, label: 'Business Partner Id', sortable: true }
+      sales_rep: { type: string, label: 'Sales Rep', searchable: true, sortable: true }
+      date_promised: { type: string, label: 'Date Promised', searchable: true, sortable: true }
+      currency: { type: string, label: 'Currency', searchable: true, sortable: true }
+      total_lines: { type: decimal, label: 'Total Lines', sortable: true }
+      grand_total: { type: decimal, label: 'Grand Total', sortable: true }
+      tax_base_amt: { type: decimal, label: 'Tax Base Amt', sortable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      linked_contract_id: { type: int, label: 'Linked Contract Id', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: 'Document No', editable: true }
+      estimation_date: { type: string, label: 'Estimation Date', editable: true }
+      version: { type: int, label: 'Version', editable: true }
+      doc_status: { type: string, label: 'Doc Status', editable: true }
+      is_so_trx: { type: int, label: 'Is So Trx', editable: true }
+      business_partner_id:
+        type: int
+        required: true
+        label: 'Business Partner Id'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      sales_rep: { type: string, label: 'Sales Rep', editable: true }
+      date_promised: { type: string, label: 'Date Promised', editable: true }
+      currency: { type: string, label: 'Currency', editable: true }
+      total_lines: { type: decimal, label: 'Total Lines', editable: true }
+      grand_total: { type: decimal, label: 'Grand Total', editable: true }
+      tax_base_amt: { type: decimal, label: 'Tax Base Amt', editable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      linked_contract_id:
+        type: int
+        label: 'Linked Contract Id'
+        editable: true
+        foreignKey:
+          entity: contract
+          displayColumn: 'name'
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

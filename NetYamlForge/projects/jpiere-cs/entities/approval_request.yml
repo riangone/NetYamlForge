@@ -1,0 +1,58 @@
+entities:
+  approval_request:
+    table: 'approval_requests'
+    key: 'id'
+    displayName: '承認申請'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['source_table', 'source_id', 'requester', 'current_step', 'total_steps', 'status', 'grand_total', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      source_table: { type: string, required: true, label: '対象テーブル', searchable: true, sortable: true }
+      source_id: { type: int, required: true, label: '対象ID', sortable: true }
+      requester: { type: string, label: '申請者', searchable: true, sortable: true }
+      current_step: { type: int, label: '現在ステップ', sortable: true }
+      total_steps: { type: int, label: '総ステップ数', sortable: true }
+      status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      grand_total: { type: decimal, label: '金額', sortable: true }
+      created_at: { type: string, label: '申請日時', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日時', searchable: true, sortable: true }
+    forms:
+      source_table: { type: string, required: true, label: '対象テーブル', editable: true }
+      source_id: { type: int, required: true, label: '対象ID', editable: true }
+      requester: { type: string, label: '申請者', editable: true }
+      current_step: { type: int, label: '現在ステップ', editable: true }
+      total_steps: { type: int, label: '総ステップ数', editable: true }
+      status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - CANCELLED
+        optionLabels:
+          PENDING: 承認待ち
+          APPROVED: 承認済み
+          REJECTED: 却下
+          CANCELLED: 取消
+      grand_total: { type: decimal, label: '金額', editable: true }
+      created_at: { type: string, label: '申請日時', editable: true }
+      updated_at: { type: string, label: '更新日時', editable: true }
+    filters: {}
+    links:
+      approval_steps:
+        label: 承認ステップ
+        targetEntity: approval_step
+        filter:
+          request_id: id

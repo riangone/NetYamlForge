@@ -1,0 +1,20 @@
+name: contract_expiry_alert
+displayName: 契約期限アラート
+description: 90日以内に期限切れとなる契約を検出しCSV出力
+schedule: "0 9 * * 1"
+type: sql_to_csv
+outputPath: jobs/output/contract_expiry_{date}.csv
+query: |
+  SELECT
+    c.document_no,
+    c.name,
+    bp.name AS partner_name,
+    c.period_date_to,
+    CAST(julianday(c.period_date_to) - julianday('now') AS INTEGER) AS days_remaining
+  FROM contracts c
+  JOIN business_partners bp ON c.business_partner_id = bp.id
+  WHERE c.contract_status = 'AC'
+    AND c.is_active = 1
+    AND c.period_date_to IS NOT NULL
+    AND julianday(c.period_date_to) - julianday('now') BETWEEN 0 AND 90
+  ORDER BY c.period_date_to ASC

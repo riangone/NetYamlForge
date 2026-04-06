@@ -1,0 +1,56 @@
+title: 在庫照会
+description: "商品別の現在庫数量と金額を確認"
+
+sections:
+  - id: stock_summary
+    title: 商品別現在庫
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.code          AS 商品コード,
+        p.name          AS 商品名,
+        pc.name         AS カテゴリ,
+        COALESCE(SUM(CASE sm.move_type WHEN 'IN' THEN sm.qty ELSE -sm.qty END), 0) AS 現在庫数量,
+        COALESCE(MAX(sm.unit_cost), 0) AS 最終原価,
+        COALESCE(SUM(CASE sm.move_type WHEN 'IN' THEN sm.qty ELSE -sm.qty END), 0) * COALESCE(MAX(sm.unit_cost), 0) AS 在庫金額
+      FROM products p
+      LEFT JOIN product_categories pc ON pc.id = p.product_category_id
+      LEFT JOIN stock_moves sm ON sm.product_id = p.id AND sm.is_active = 1
+      WHERE p.product_type = 'I'
+        AND p.is_active = 1
+      GROUP BY p.id, p.code, p.name, pc.name
+      HAVING 現在庫数量 > 0
+      ORDER BY p.code
+    columns: [商品コード, 商品名, カテゴリ, 現在庫数量, 最終原価, 在庫金額]
+    pageSize: 50
+    editable: false
+    readOnly: true
+
+  - id: stock_moves_recent
+    title: 直近の在庫移動
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        sm.date_moved     AS 移動日,
+        CASE sm.move_type
+          WHEN 'IN' THEN '入庫'
+          WHEN 'OUT' THEN '出庫'
+          WHEN 'TF' THEN '転送'
+          ELSE sm.move_type
+        END AS 移動種別,
+        p.code            AS 商品コード,
+        p.name            AS 商品名,
+        sm.qty            AS 数量,
+        sm.unit_cost      AS 原価,
+        sm.description    AS 備考
+      FROM stock_moves sm
+      JOIN products p ON p.id = sm.product_id
+      WHERE sm.is_active = 1
+      ORDER BY sm.date_moved DESC, sm.id DESC
+      LIMIT 20
+    columns: [移動日, 移動種別, 商品コード, 商品名, 数量, 原価, 備考]
+    pageSize: 20
+    editable: false
+    readOnly: true

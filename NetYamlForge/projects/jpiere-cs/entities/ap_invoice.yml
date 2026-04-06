@@ -1,0 +1,85 @@
+entities:
+  ap_invoice:
+    table: 'ap_invoices'
+    key: 'id'
+    displayName: '仕入請求'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'doc_status', 'business_partner_id', 'purchase_order_id', 'date_invoiced', 'date_due', 'total_lines', 'grand_total', 'tax_base_amt', 'tax_amt', 'pay_amt', 'outstanding_amt', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: '請求番号', searchable: true, sortable: true }
+      doc_status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      business_partner_id: { type: int, required: true, label: '仕入先', sortable: true }
+      purchase_order_id: { type: int, label: '発注書', sortable: true }
+      date_invoiced: { type: string, label: '請求日', searchable: true, sortable: true }
+      date_due: { type: string, label: '支払期限', searchable: true, sortable: true }
+      total_lines: { type: decimal, label: '明細合計', sortable: true }
+      grand_total: { type: decimal, label: '総額', sortable: true }
+      tax_base_amt: { type: decimal, label: '税抜額', sortable: true }
+      tax_amt: { type: decimal, label: '税額', sortable: true }
+      pay_amt: { type: decimal, label: '支払済額', sortable: true }
+      outstanding_amt: { type: decimal, label: '未払残高', sortable: true }
+      description: { type: string, label: '備考', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: '請求番号', editable: true }
+      doc_status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - DR
+          - CO
+          - CL
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          CL: 完了
+          VO: 無効
+      business_partner_id:
+        type: int
+        required: true
+        label: '仕入先'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      purchase_order_id:
+        type: int
+        label: '発注書'
+        editable: true
+        foreignKey:
+          entity: purchase_order
+          displayColumn: 'document_no'
+      date_invoiced: { type: string, label: '請求日', editable: true }
+      date_due: { type: string, label: '支払期限', editable: true }
+      total_lines: { type: decimal, label: '明細合計', editable: true }
+      grand_total: { type: decimal, label: '総額', editable: true }
+      tax_base_amt: { type: decimal, label: '税抜額', editable: true }
+      tax_amt: { type: decimal, label: '税額', editable: true }
+      pay_amt: { type: decimal, label: '支払済額', editable: true }
+      outstanding_amt: { type: decimal, label: '未払残高', editable: true }
+      description: { type: string, label: '備考', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links:
+      ap_invoice_lines:
+        label: 請求明細
+        targetEntity: ap_invoice_line
+        filter:
+          ap_invoice_id: id

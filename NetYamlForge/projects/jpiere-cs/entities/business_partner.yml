@@ -1,0 +1,235 @@
+entities:
+  business_partner:
+    table: business_partners
+    key: id
+    displayName: 取引先マスタ
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - code
+        - name
+        - name2
+        - bp_type
+        - is_customer
+        - is_vendor
+        - tax_id
+        - url
+        - phone
+        - email
+        - address1
+        - address2
+        - city
+        - postal_code
+        - credit_limit
+        - payment_rule
+        - payment_term_days
+        - description
+        - is_active
+        - created_at
+        - updated_at
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id:
+        type: int
+        identity: true
+        label: Id
+        sortable: true
+      code:
+        type: string
+        required: true
+        label: Code
+        searchable: true
+        sortable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      name2:
+        type: string
+        label: Name2
+        searchable: true
+        sortable: true
+      bp_type:
+        type: string
+        label: Bp Type
+        searchable: true
+        sortable: true
+      is_customer:
+        type: int
+        label: Is Customer
+        sortable: true
+      is_vendor:
+        type: int
+        label: Is Vendor
+        sortable: true
+      tax_id:
+        type: string
+        label: Tax Id
+        searchable: true
+        sortable: true
+      url:
+        type: string
+        label: Url
+        searchable: true
+        sortable: true
+      phone:
+        type: string
+        label: Phone
+        searchable: true
+        sortable: true
+      email:
+        type: string
+        label: Email
+        searchable: true
+        sortable: true
+      address1:
+        type: string
+        label: Address1
+        searchable: true
+        sortable: true
+      address2:
+        type: string
+        label: Address2
+        searchable: true
+        sortable: true
+      city:
+        type: string
+        label: City
+        searchable: true
+        sortable: true
+      postal_code:
+        type: string
+        label: Postal Code
+        searchable: true
+        sortable: true
+      credit_limit:
+        type: decimal
+        label: Credit Limit
+        sortable: true
+      payment_rule:
+        type: string
+        label: Payment Rule
+        searchable: true
+        sortable: true
+      payment_term_days:
+        type: int
+        label: Payment Term Days
+        sortable: true
+      description:
+        type: string
+        label: Description
+        searchable: true
+        sortable: true
+      is_active:
+        type: int
+        label: Is Active
+        sortable: true
+      created_at:
+        type: string
+        label: Created At
+        searchable: true
+        sortable: true
+      updated_at:
+        type: string
+        label: Updated At
+        searchable: true
+        sortable: true
+    forms:
+      code:
+        type: string
+        required: true
+        label: Code
+        editable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      name2:
+        type: string
+        label: Name2
+        editable: true
+      bp_type:
+        type: string
+        label: Bp Type
+        editable: true
+      is_customer:
+        type: int
+        label: Is Customer
+        editable: true
+      is_vendor:
+        type: int
+        label: Is Vendor
+        editable: true
+      tax_id:
+        type: string
+        label: Tax Id
+        editable: true
+      url:
+        type: string
+        label: Url
+        editable: true
+      phone:
+        type: string
+        label: Phone
+        editable: true
+      email:
+        type: string
+        label: Email
+        editable: true
+      address1:
+        type: string
+        label: Address1
+        editable: true
+      address2:
+        type: string
+        label: Address2
+        editable: true
+      city:
+        type: string
+        label: City
+        editable: true
+      postal_code:
+        type: string
+        label: Postal Code
+        editable: true
+      credit_limit:
+        type: decimal
+        label: Credit Limit
+        editable: true
+      payment_rule:
+        type: string
+        label: Payment Rule
+        editable: true
+      payment_term_days:
+        type: int
+        label: Payment Term Days
+        editable: true
+      description:
+        type: string
+        label: Description
+        editable: true
+      is_active:
+        type: int
+        label: Is Active
+        editable: true
+      created_at:
+        type: string
+        label: Created At
+        editable: true
+      updated_at:
+        type: string
+        label: Updated At
+        editable: true
+    filters: {}
+    links: {}
+    description: 顧客・仕入先・その他取引先を管理します

@@ -1,0 +1,67 @@
+title: 資金繰り照会
+description: "入金・支払状況と資金繰り推移を確認"
+
+sections:
+  - id: cash_flow_summary
+    title: 資金繰りサマリー
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        'AR入金' AS 種別,
+        COUNT(*) AS 件数,
+        COALESCE(SUM(pay_amt), 0) AS 合計額
+      FROM payments
+      WHERE payment_type = 'AR' AND doc_status = 'CO'
+      UNION ALL
+      SELECT
+        'AP支払',
+        COUNT(*),
+        COALESCE(SUM(pay_amt), 0)
+      FROM payments
+      WHERE payment_type = 'AP' AND doc_status = 'CO'
+      UNION ALL
+      SELECT
+        '未収請求',
+        COUNT(*),
+        COALESCE(SUM(outstanding_amt), 0)
+      FROM bills
+      WHERE doc_status = 'CO' AND outstanding_amt > 0
+      UNION ALL
+      SELECT
+        '未払請求',
+        COUNT(*),
+        COALESCE(SUM(outstanding_amt), 0)
+      FROM ap_invoices
+      WHERE doc_status = 'CO' AND outstanding_amt > 0
+    columns: [種別, 件数, 合計額]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: cash_flow_trend
+    title: 月次資金繰り推移（直近6ヶ月）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y-%m', payment_date) AS label,
+        CASE payment_type
+          WHEN 'AR' THEN COALESCE(SUM(pay_amt), 0)
+          ELSE 0
+        END AS 入金,
+        CASE payment_type
+          WHEN 'AP' THEN COALESCE(SUM(pay_amt), 0)
+          ELSE 0
+        END AS 支払
+      FROM payments
+      WHERE doc_status = 'CO'
+        AND payment_date >= date('now', '-6 months')
+      GROUP BY strftime('%Y-%m', payment_date), payment_type
+      ORDER BY label ASC
+    columns: [label, 入金, 支払]
+    xField: label
+    yField: 入金
+    pageSize: 12
+    editable: false
+    readOnly: true

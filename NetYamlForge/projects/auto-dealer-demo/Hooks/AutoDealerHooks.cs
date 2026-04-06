@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Identity;
 using NetYamlForge.Models.Auth;
+using Microsoft.Extensions.Logging;
 
 namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 

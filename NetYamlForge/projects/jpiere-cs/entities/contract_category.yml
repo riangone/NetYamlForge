@@ -1,0 +1,101 @@
+entities:
+  contract_category:
+    table: contract_categories
+    key: id
+    displayName: 契約カテゴリ
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order:
+        - code
+        - name
+        - parent_id
+        - description
+        - is_active
+        - created_at
+        - updated_at
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id:
+        type: int
+        identity: true
+        label: Id
+        sortable: true
+      code:
+        type: string
+        required: true
+        label: Code
+        searchable: true
+        sortable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      parent_id:
+        type: int
+        label: Parent Id
+        sortable: true
+      description:
+        type: string
+        label: Description
+        searchable: true
+        sortable: true
+      is_active:
+        type: int
+        label: Is Active
+        sortable: true
+      created_at:
+        type: string
+        label: Created At
+        searchable: true
+        sortable: true
+      updated_at:
+        type: string
+        label: Updated At
+        searchable: true
+        sortable: true
+    forms:
+      code:
+        type: string
+        required: true
+        label: Code
+        editable: true
+      name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      parent_id:
+        type: int
+        label: Parent Id
+        editable: true
+        foreignKey:
+          entity: contract_category
+          displayColumn: name
+      description:
+        type: string
+        label: Description
+        editable: true
+      is_active:
+        type: int
+        label: Is Active
+        editable: true
+      created_at:
+        type: string
+        label: Created At
+        editable: true
+      updated_at:
+        type: string
+        label: Updated At
+        editable: true
+    filters: {}
+    links: {}
+    description: 契約の種類を分類するカテゴリを管理します

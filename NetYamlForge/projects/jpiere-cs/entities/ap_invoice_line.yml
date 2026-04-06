@@ -1,0 +1,58 @@
+entities:
+  ap_invoice_line:
+    table: 'ap_invoice_lines'
+    key: 'id'
+    displayName: '仕入請求明細'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ap_invoice_id', 'line_no', 'product_id', 'description', 'qty', 'unit_price', 'line_amt', 'tax_rate', 'tax_amt', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      ap_invoice_id: { type: int, required: true, label: '請求ID', sortable: true }
+      line_no: { type: int, required: true, label: '行番号', sortable: true }
+      product_id: { type: int, label: '商品', sortable: true }
+      description: { type: string, label: '説明', searchable: true, sortable: true }
+      qty: { type: decimal, required: true, label: '数量', sortable: true }
+      unit_price: { type: decimal, label: '単価', sortable: true }
+      line_amt: { type: decimal, label: '行金額', sortable: true }
+      tax_rate: { type: decimal, label: '税率', sortable: true }
+      tax_amt: { type: decimal, label: '税額', sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      ap_invoice_id:
+        type: int
+        required: true
+        label: '請求ID'
+        editable: true
+        foreignKey:
+          entity: ap_invoice
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: '行番号', editable: true }
+      product_id:
+        type: int
+        label: '商品'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      description: { type: string, label: '説明', editable: true }
+      qty: { type: decimal, required: true, label: '数量', editable: true }
+      unit_price: { type: decimal, label: '単価', editable: true }
+      line_amt: { type: decimal, label: '行金額', editable: true }
+      tax_rate: { type: decimal, label: '税率', editable: true }
+      tax_amt: { type: decimal, label: '税額', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

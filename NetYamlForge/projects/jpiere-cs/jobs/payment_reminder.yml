@@ -1,0 +1,18 @@
+name: payment_reminder
+display_name: 未収入金督促レポート
+schedule: "0 9 * * 1"
+type: sql_to_csv
+output: jobs/output/payment_reminder_{date}.csv
+sql: |
+  SELECT
+    b.document_no AS 請求番号,
+    bp.name AS 取引先,
+    b.date_due AS 支払期限,
+    b.outstanding_amt AS 未収金額,
+    CAST(julianday('now') - julianday(b.date_due) AS INT) AS 延滞日数
+  FROM bills b
+  JOIN business_partners bp ON bp.id = b.business_partner_id
+  WHERE b.doc_status = 'CO'
+    AND b.outstanding_amt > 0
+    AND b.date_due < date('now')
+  ORDER BY 延滞日数 DESC

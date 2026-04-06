@@ -1,0 +1,17 @@
+name: journal_close
+display_name: 月次仕訳締め処理
+schedule: "0 0 1 * *"
+type: sql_to_csv
+output: jobs/output/journal_unclosed_{date}.csv
+sql: |
+  SELECT
+    document_no AS 仕訳番号,
+    journal_type AS 種別,
+    date_acct AS 計上日,
+    description AS 摘要,
+    total_debit AS 借方合計,
+    total_credit AS 貸方合計
+  FROM journals
+  WHERE doc_status = 'DR'
+    AND date_acct < date('now', 'start of month')
+  ORDER BY date_acct

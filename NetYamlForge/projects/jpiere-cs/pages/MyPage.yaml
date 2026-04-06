@@ -1,0 +1,462 @@
+title: マイページ — 作業状況と次のアクション
+description: "現在の業務状態・要対応事項・業務フローガイドを一画面で確認できます"
+
+sections:
+
+  # ─────────────────────────────────────────────
+  # 1. 要対応アクション（緊急度の高い件数サマリー）
+  # ─────────────────────────────────────────────
+  - id: urgent_actions
+    title: 今すぐ対応が必要な事項
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        '支払期限超過の請求' AS metric_name,
+        CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+        '🚨' AS metric_icon,
+        '/jpiere-cs/DynamicEntity/Index?entity=bill' AS metric_delta
+      FROM bills
+      WHERE doc_status = 'CO'
+        AND outstanding_amt > 0
+        AND date_due < date('now')
+        AND is_active = 1
+      UNION ALL
+      SELECT
+        '30日以内に期限切れる契約',
+        CAST(COUNT(*) AS TEXT) || ' 件',
+        '⏰',
+        '/jpiere-cs/DynamicEntity/Index?entity=contract'
+      FROM contracts
+      WHERE contract_status = 'AC'
+        AND period_date_to IS NOT NULL
+        AND julianday(period_date_to) - julianday('now') BETWEEN 0 AND 30
+        AND is_active = 1
+      UNION ALL
+      SELECT
+        '下書きのまま未確定の書類',
+        CAST(
+          (SELECT COUNT(*) FROM estimations WHERE doc_status = 'DR' AND is_active = 1) +
+          (SELECT COUNT(*) FROM bills WHERE doc_status = 'DR' AND is_active = 1) +
+          (SELECT COUNT(*) FROM contracts WHERE doc_status = 'DR' AND is_active = 1) +
+          (SELECT COUNT(*) FROM recognitions WHERE doc_status = 'DR' AND is_active = 1)
+        AS TEXT) || ' 件',
+        '📝',
+        '/jpiere-cs/Page/MyPage'
+      UNION ALL
+      SELECT
+        '期限付きTODO（今週締め切り）',
+        CAST(COUNT(*) AS TEXT) || ' 件',
+        '✅',
+        '/jpiere-cs/DynamicEntity/Index?entity=todo'
+      FROM todos
+      WHERE todo_status IN ('NY', 'IP')
+        AND scheduled_end IS NOT NULL
+        AND julianday(scheduled_end) - julianday('now') BETWEEN 0 AND 7
+        AND is_active = 1
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 2. 業務フロー ガイド
+  # ─────────────────────────────────────────────
+  - id: workflow_guide
+    title: JPiere 契約サービス — 業務フロー ガイド
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        'Step 1　取引先登録' AS metric_name,
+        '顧客・仕入先のマスタを登録します。法人番号・与信限度額・支払条件も設定します。' AS metric_value,
+        '🏢' AS metric_icon,
+        '/jpiere-cs/DynamicEntity/Index?entity=business_partner' AS metric_delta
+      UNION ALL
+      SELECT
+        'Step 2　見積作成 → 提出',
+        '取引先に見積書(EST-)を作成し、doc_status を IN（提出中）に変更して送付します。受注後は CO（受注確定）へ変更します。',
+        '📋',
+        '/jpiere-cs/DynamicEntity/Index?entity=estimation'
+      UNION ALL
+      SELECT
+        'Step 3　契約締結',
+        '受注確定後、契約書(CON-)を作成します。contract_status を WP → AC に変更して有効化します。月次売上・期間・自動更新の設定を忘れずに。',
+        '📄',
+        '/jpiere-cs/DynamicEntity/Index?entity=contract'
+      UNION ALL
+      SELECT
+        'Step 4　月次売上認識',
+        '毎月の作業実績を売上認識(REC-)として記録します。doc_status を CO に確定すると仕訳が自動起票されます（会計基盤実装後）。',
+        '📊',
+        '/jpiere-cs/DynamicEntity/Index?entity=recognition'
+      UNION ALL
+      SELECT
+        'Step 5　請求書発行',
+        '月次バッチ、または手動で請求書(BILL-)を作成します。doc_status を CO に確定すると売掛金仕訳が自動起票されます（会計基盤実装後）。',
+        '💴',
+        '/jpiere-cs/DynamicEntity/Index?entity=bill'
+      UNION ALL
+      SELECT
+        'Step 6　入金確認・消込（今後実装）',
+        '入金確認後、支払処理(PAY-)を記録します。outstanding_amt が 0 になると請求書が CL（入金完了）に自動遷移します。',
+        '🏦',
+        '/jpiere-cs/DynamicEntity/Index?entity=bill'
+      UNION ALL
+      SELECT
+        'Step 7　契約更新・解約管理',
+        '期限切れ前に auto_renewal を確認します。更新の場合は period_date_to を延長、解約の場合は contract_status を CL に変更します。',
+        '🔄',
+        '/jpiere-cs/DynamicEntity/Index?entity=contract'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 3. 現在の業務状況サマリー（全体KPI）
+  # ─────────────────────────────────────────────
+  - id: kpi_overview
+    title: 現在の業務状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '有効契約' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+             '📄' AS metric_icon,
+             NULL AS metric_delta
+      FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+      UNION ALL
+      SELECT '提出中見積',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '📋', NULL
+      FROM estimations WHERE doc_status = 'IN' AND is_active = 1
+      UNION ALL
+      SELECT '確定済み請求（未入金）',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '💴', NULL
+      FROM bills WHERE doc_status = 'CO' AND outstanding_amt > 0 AND is_active = 1
+      UNION ALL
+      SELECT '未収残高合計',
+             CASE WHEN SUM(outstanding_amt) >= 1000000
+               THEN CAST(ROUND(SUM(outstanding_amt) / 10000, 1) AS TEXT) || ' 万円'
+               ELSE CAST(COALESCE(SUM(outstanding_amt), 0) AS TEXT) || ' 円'
+             END,
+             '📊', NULL
+      FROM bills WHERE doc_status = 'CO' AND is_active = 1
+      UNION ALL
+      SELECT '今月の月次売上',
+             CASE WHEN SUM(monthly_revenue_amt) >= 1000000
+               THEN CAST(ROUND(SUM(monthly_revenue_amt) / 10000, 1) AS TEXT) || ' 万円'
+               ELSE CAST(COALESCE(SUM(monthly_revenue_amt), 0) AS TEXT) || ' 円'
+             END,
+             '💹', NULL
+      FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+      UNION ALL
+      SELECT '進行中TODO',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '✅', NULL
+      FROM todos WHERE todo_status IN ('NY', 'IP') AND is_active = 1
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 4. 要対応書類一覧（ドラフト・進行中）
+  # ─────────────────────────────────────────────
+  - id: pending_documents
+    title: 対応待ち書類一覧（下書き・処理中）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        '見積' AS 種類,
+        e.document_no AS 書類番号,
+        bp.name AS 取引先,
+        CASE e.doc_status
+          WHEN 'DR' THEN '下書き'
+          WHEN 'IN' THEN '提出中（受注待ち）'
+          ELSE e.doc_status
+        END AS 状態,
+        e.estimation_date AS 日付,
+        CASE WHEN e.grand_total >= 1000000
+          THEN CAST(ROUND(e.grand_total / 10000, 1) AS TEXT) || '万円'
+          ELSE CAST(e.grand_total AS TEXT) || '円'
+        END AS 金額,
+        '次のアクション: 受注確定 → doc_status を CO へ変更' AS ヒント
+      FROM estimations e
+      JOIN business_partners bp ON bp.id = e.business_partner_id
+      WHERE e.doc_status IN ('DR', 'IN') AND e.is_active = 1
+
+      UNION ALL
+
+      SELECT
+        '請求',
+        b.document_no,
+        bp.name,
+        '下書き（未送付）',
+        b.date_billed,
+        CASE WHEN b.grand_total >= 1000000
+          THEN CAST(ROUND(b.grand_total / 10000, 1) AS TEXT) || '万円'
+          ELSE CAST(b.grand_total AS TEXT) || '円'
+        END,
+        '次のアクション: 内容確認後 doc_status を CO へ確定'
+      FROM bills b
+      JOIN business_partners bp ON bp.id = b.business_partner_id
+      WHERE b.doc_status = 'DR' AND b.is_active = 1
+
+      UNION ALL
+
+      SELECT
+        '売上認識',
+        r.document_no,
+        bp.name,
+        '下書き（未確定）',
+        r.date_acct,
+        CASE WHEN r.grand_total >= 1000000
+          THEN CAST(ROUND(r.grand_total / 10000, 1) AS TEXT) || '万円'
+          ELSE CAST(r.grand_total AS TEXT) || '円'
+        END,
+        '次のアクション: 実績確認後 doc_status を CO へ確定'
+      FROM recognitions r
+      JOIN business_partners bp ON bp.id = r.business_partner_id
+      WHERE r.doc_status = 'DR' AND r.is_active = 1
+
+      UNION ALL
+
+      SELECT
+        '契約',
+        c.document_no,
+        bp.name,
+        CASE c.doc_status
+          WHEN 'DR' THEN '下書き'
+          WHEN 'IN' THEN '交渉中'
+          ELSE c.doc_status
+        END,
+        c.date_acct,
+        CASE WHEN c.total_doc_amt >= 1000000
+          THEN CAST(ROUND(c.total_doc_amt / 10000, 1) AS TEXT) || '万円'
+          ELSE CAST(c.total_doc_amt AS TEXT) || '円'
+        END,
+        '次のアクション: 合意後 doc_status を CO・contract_status を AC へ変更'
+      FROM contracts c
+      JOIN business_partners bp ON bp.id = c.business_partner_id
+      WHERE c.doc_status IN ('DR', 'IN') AND c.is_active = 1
+
+      ORDER BY 日付 ASC
+    columns: [種類, 書類番号, 取引先, 状態, 日付, 金額, ヒント]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 5. 支払期限アラート（請求超過・近日期限）
+  # ─────────────────────────────────────────────
+  - id: payment_alerts
+    title: 請求 — 支払期限アラート
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        b.document_no AS 請求番号,
+        bp.name AS 取引先,
+        b.date_due AS 支払期限,
+        CASE WHEN b.outstanding_amt >= 1000000
+          THEN CAST(ROUND(b.outstanding_amt / 10000, 1) AS TEXT) || '万円'
+          ELSE CAST(b.outstanding_amt AS TEXT) || '円'
+        END AS 未収残高,
+        CASE
+          WHEN b.date_due < date('now') THEN
+            '超過 ' || CAST(CAST(julianday('now') - julianday(b.date_due) AS INT) AS TEXT) || ' 日'
+          ELSE
+            '残り ' || CAST(CAST(julianday(b.date_due) - julianday('now') AS INT) AS TEXT) || ' 日'
+        END AS 残日数,
+        CASE
+          WHEN b.date_due < date('now') THEN '支払期限超過 — 至急督促してください'
+          WHEN julianday(b.date_due) - julianday('now') <= 7 THEN '1週間以内に期限切れ — 入金確認してください'
+          ELSE '30日以内に期限 — 確認推奨'
+        END AS アクション
+      FROM bills b
+      JOIN business_partners bp ON bp.id = b.business_partner_id
+      WHERE b.doc_status = 'CO'
+        AND b.outstanding_amt > 0
+        AND (b.date_due < date('now') OR julianday(b.date_due) - julianday('now') <= 30)
+        AND b.is_active = 1
+      ORDER BY b.date_due ASC
+    columns: [請求番号, 取引先, 支払期限, 未収残高, 残日数, アクション]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 6. 契約期限アラート（90日以内）
+  # ─────────────────────────────────────────────
+  - id: contract_expiry_alerts
+    title: 契約 — 期限切れ予告（90日以内）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.document_no AS 契約番号,
+        c.name AS 契約名称,
+        bp.name AS 取引先,
+        c.period_date_to AS 契約終了日,
+        CAST(julianday(c.period_date_to) - julianday('now') AS INT) AS 残日数,
+        CASE c.auto_renewal
+          WHEN 1 THEN '自動更新あり — 更新可否を確認'
+          ELSE '手動更新 — 更新または解約を決定してください'
+        END AS アクション,
+        CASE WHEN c.monthly_revenue_amt >= 1000000
+          THEN CAST(ROUND(c.monthly_revenue_amt / 10000, 1) AS TEXT) || '万円/月'
+          ELSE CAST(COALESCE(c.monthly_revenue_amt, 0) AS TEXT) || '円/月'
+        END AS 月次売上
+      FROM contracts c
+      JOIN business_partners bp ON bp.id = c.business_partner_id
+      WHERE c.contract_status = 'AC'
+        AND c.period_date_to IS NOT NULL
+        AND julianday(c.period_date_to) - julianday('now') BETWEEN 0 AND 90
+        AND c.is_active = 1
+      ORDER BY c.period_date_to ASC
+    columns: [契約番号, 契約名称, 取引先, 契約終了日, 残日数, 月次売上, アクション]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 7. 未完了TODO（優先度順）
+  # ─────────────────────────────────────────────
+  - id: my_todos
+    title: 未完了TODO（直近スケジュール順）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        t.title AS タスク,
+        CASE t.todo_status
+          WHEN 'NY' THEN '未着手'
+          WHEN 'IP' THEN '進行中'
+        END AS 状態,
+        tc.name AS カテゴリ,
+        t.assigned_to AS 担当者,
+        t.scheduled_start AS 予定開始,
+        t.scheduled_end AS 予定終了,
+        CASE
+          WHEN t.scheduled_end IS NOT NULL AND t.scheduled_end < date('now') THEN '期限超過 — 至急対応'
+          WHEN t.scheduled_end IS NOT NULL AND julianday(t.scheduled_end) - julianday('now') <= 3 THEN '3日以内に期限'
+          WHEN t.todo_status = 'IP' THEN '進行中'
+          ELSE '未着手'
+        END AS 緊急度,
+        COALESCE(c.name, '—') AS 関連契約
+      FROM todos t
+      LEFT JOIN todo_categories tc ON t.todo_category_id = tc.id
+      LEFT JOIN contracts c ON t.linked_contract_id = c.id
+      WHERE t.todo_status IN ('NY', 'IP') AND t.is_active = 1
+      ORDER BY
+        CASE
+          WHEN t.scheduled_end IS NOT NULL AND t.scheduled_end < date('now') THEN 1
+          WHEN t.scheduled_end IS NOT NULL AND julianday(t.scheduled_end) - julianday('now') <= 3 THEN 2
+          WHEN t.todo_status = 'IP' THEN 3
+          ELSE 4
+        END,
+        t.scheduled_end ASC,
+        t.scheduled_start ASC
+      LIMIT 20
+    columns: [タスク, 状態, 緊急度, カテゴリ, 担当者, 予定開始, 予定終了, 関連契約]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 8. ドキュメントステータス別状況マップ
+  #    （今どの書類が何件あるかをひと目で確認）
+  # ─────────────────────────────────────────────
+  - id: document_status_map
+    title: 書類ステータス マップ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        '見積' AS 書類種別,
+        CAST(SUM(CASE WHEN doc_status = 'DR' THEN 1 ELSE 0 END) AS TEXT) AS 下書き,
+        CAST(SUM(CASE WHEN doc_status = 'IN' THEN 1 ELSE 0 END) AS TEXT) AS 進行中,
+        CAST(SUM(CASE WHEN doc_status = 'CO' THEN 1 ELSE 0 END) AS TEXT) AS 確定済み,
+        CAST(SUM(CASE WHEN doc_status IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT) AS 完了/無効,
+        CAST(COUNT(*) AS TEXT) AS 合計
+      FROM estimations WHERE is_active = 1
+      UNION ALL
+      SELECT
+        '契約',
+        CAST(SUM(CASE WHEN doc_status = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN doc_status = 'IN' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN doc_status = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN doc_status IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM contracts WHERE is_active = 1
+      UNION ALL
+      SELECT
+        '請求',
+        CAST(SUM(CASE WHEN doc_status = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        '—',
+        CAST(SUM(CASE WHEN doc_status = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN doc_status IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM bills WHERE is_active = 1
+      UNION ALL
+      SELECT
+        '売上認識',
+        CAST(SUM(CASE WHEN doc_status = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        '—',
+        CAST(SUM(CASE WHEN doc_status = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN doc_status IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM recognitions WHERE is_active = 1
+    columns: [書類種別, 下書き, 進行中, 確定済み, 完了/無効, 合計]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 9. ステータスコード辞書（操作リファレンス）
+  # ─────────────────────────────────────────────
+  - id: status_reference
+    title: ステータスコード リファレンス
+    component: table
+    sourceType: custom
+    source: |
+      SELECT '書類状態 (doc_status)' AS 区分, 'DR' AS コード, '下書き (Draft)' AS 意味,
+             '作成直後。編集可能。まだ業務効力なし。' AS 説明 , '→ IN または CO へ変更して処理を進める' AS 次のアクション
+      UNION ALL SELECT '書類状態', 'IN', '進行中 (In Progress)',
+             '見積提出中・契約交渉中など処理が進行している状態。', '→ 結果に応じて CO (確定) または VO (無効) へ'
+      UNION ALL SELECT '書類状態', 'CO', '確定 (Completed)',
+             '業務処理が確定した状態。請求・認識では仕訳が自動起票される。', '→ 取消は RE (反転仕訳) または CL (完了) へ'
+      UNION ALL SELECT '書類状態', 'CL', '完了/解約 (Closed)',
+             '全処理完了または契約解約済み。入金完了の請求も CL になる。', '→ これ以上の操作は原則不可'
+      UNION ALL SELECT '書類状態', 'VO', '無効 (Voided)',
+             '処理を行わずにキャンセルした書類。', '→ 必要なら新規作成し直す'
+      UNION ALL SELECT '書類状態', 'RE', '取消 (Reversed)',
+             '確定後に取消した書類。逆仕訳が自動起票される。', '→ 修正後に新規書類を作成'
+      UNION ALL SELECT '契約状態 (contract_status)', 'WP', '交渉中 (Work in Progress)',
+             '契約はまだ有効化されていない交渉段階。', '→ 合意後 AC に変更'
+      UNION ALL SELECT '契約状態', 'AC', '有効 (Active)',
+             '締結済みで有効な契約。月次売上・請求の基準になる。', '→ 期限後 EX に自動移行'
+      UNION ALL SELECT '契約状態', 'EX', '期限切れ (Expired)',
+             '有効期限が過ぎた契約。自動更新設定がある場合は要確認。', '→ 更新 or CL (解約) へ変更'
+      UNION ALL SELECT '契約状態', 'CL', '解約 (Cancelled)',
+             '解約合意済み。月次売上の計算対象から除外される。', '→ 確認のみ。変更不要'
+    columns: [区分, コード, 意味, 説明, 次のアクション]
+    pageSize: 15
+    editable: false
+    readOnly: true

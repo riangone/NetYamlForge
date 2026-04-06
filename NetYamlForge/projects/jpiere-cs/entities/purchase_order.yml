@@ -1,0 +1,111 @@
+entities:
+  purchase_order:
+    table: 'purchase_orders'
+    key: 'id'
+    displayName: '発注書'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'doc_status', 'business_partner_id', 'date_ordered', 'date_promised', 'total_lines', 'grand_total', 'tax_amt', 'approved_by', 'approved_at', 'approval_status', 'linked_contract_id', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: '発注番号', searchable: true, sortable: true }
+      doc_status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      business_partner_id: { type: int, required: true, label: '仕入先', sortable: true }
+      date_ordered: { type: string, required: true, label: '発注日', searchable: true, sortable: true }
+      date_promised: { type: string, label: '納期', searchable: true, sortable: true }
+      total_lines: { type: decimal, label: '明細合計', sortable: true }
+      grand_total: { type: decimal, label: '総額', sortable: true }
+      tax_amt: { type: decimal, label: '税額', sortable: true }
+      approved_by: { type: string, label: '承認者', searchable: true, sortable: true }
+      approved_at: { type: string, label: '承認日時', searchable: true, sortable: true }
+      approval_status: { type: string, label: '承認状態', searchable: true, sortable: true }
+      linked_contract_id: { type: int, label: '関連契約', sortable: true }
+      description: { type: string, label: '備考', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: '発注番号', editable: true }
+      doc_status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - DR
+          - IP
+          - CO
+          - CL
+          - VO
+        optionLabels:
+          DR: 下書き
+          IP: 発注済み
+          CO: 完了
+          CL: 解約
+          VO: 無効
+      business_partner_id:
+        type: int
+        required: true
+        label: '仕入先'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      date_ordered: { type: string, required: true, label: '発注日', editable: true }
+      date_promised: { type: string, label: '納期', editable: true }
+      total_lines: { type: decimal, label: '明細合計', editable: true }
+      grand_total: { type: decimal, label: '総額', editable: true }
+      tax_amt: { type: decimal, label: '税額', editable: true }
+      approved_by: { type: string, label: '承認者', editable: true }
+      approved_at: { type: string, label: '承認日時', editable: true }
+      approval_status:
+        type: string
+        label: '承認状態'
+        editable: true
+        options:
+          - PENDING
+          - APPROVED
+          - REJECTED
+        optionLabels:
+          PENDING: 承認待ち
+          APPROVED: 承認済み
+          REJECTED: 却下
+      linked_contract_id:
+        type: int
+        label: '関連契約'
+        editable: true
+        foreignKey:
+          entity: contract
+          displayColumn: 'name'
+      description: { type: string, label: '備考', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links:
+      purchase_order_lines:
+        label: 発注明細
+        targetEntity: purchase_order_line
+        filter:
+          purchase_order_id: id
+      purchase_receipts:
+        label: 受入処理
+        targetEntity: purchase_receipt
+        filter:
+          purchase_order_id: id
+      ap_invoices:
+        label: 仕入請求
+        targetEntity: ap_invoice
+        filter:
+          purchase_order_id: id
+    hooks:
+      afterUpdate:
+        - purchase_order_approval

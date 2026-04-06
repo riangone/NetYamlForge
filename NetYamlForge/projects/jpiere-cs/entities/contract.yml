@@ -1,0 +1,88 @@
+entities:
+  contract:
+    table: 'contracts'
+    key: 'id'
+    displayName: 'Contract'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'name', 'contract_type', 'doc_status', 'contract_status', 'contract_category_id', 'contract_template_id', 'business_partner_id', 'sales_rep', 'date_acct', 'period_date_from', 'period_date_to', 'auto_renewal', 'cancel_deadline', 'cancel_date', 'cancel_cause', 'monthly_revenue_amt', 'monthly_expense_amt', 'total_doc_amt', 'currency', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: 'Document No', searchable: true, sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      contract_type: { type: string, label: 'Contract Type', searchable: true, sortable: true }
+      doc_status: { type: string, label: 'Doc Status', searchable: true, sortable: true }
+      contract_status: { type: string, label: 'Contract Status', searchable: true, sortable: true }
+      contract_category_id: { type: int, label: 'Contract Category Id', sortable: true }
+      contract_template_id: { type: int, label: 'Contract Template Id', sortable: true }
+      business_partner_id: { type: int, required: true, label: 'Business Partner Id', sortable: true }
+      sales_rep: { type: string, label: 'Sales Rep', searchable: true, sortable: true }
+      date_acct: { type: string, required: true, label: 'Date Acct', searchable: true, sortable: true }
+      period_date_from: { type: string, required: true, label: 'Period Date From', searchable: true, sortable: true }
+      period_date_to: { type: string, label: 'Period Date To', searchable: true, sortable: true }
+      auto_renewal: { type: int, label: 'Auto Renewal', sortable: true }
+      cancel_deadline: { type: string, label: 'Cancel Deadline', searchable: true, sortable: true }
+      cancel_date: { type: string, label: 'Cancel Date', searchable: true, sortable: true }
+      cancel_cause: { type: string, label: 'Cancel Cause', searchable: true, sortable: true }
+      monthly_revenue_amt: { type: decimal, label: 'Monthly Revenue Amt', sortable: true }
+      monthly_expense_amt: { type: decimal, label: 'Monthly Expense Amt', sortable: true }
+      total_doc_amt: { type: decimal, label: 'Total Doc Amt', sortable: true }
+      currency: { type: string, label: 'Currency', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: 'Document No', editable: true }
+      name: { type: string, required: true, label: 'Name', editable: true }
+      contract_type: { type: string, label: 'Contract Type', editable: true }
+      doc_status: { type: string, label: 'Doc Status', editable: true }
+      contract_status: { type: string, label: 'Contract Status', editable: true }
+      contract_category_id:
+        type: int
+        label: 'Contract Category Id'
+        editable: true
+        foreignKey:
+          entity: contract_category
+          displayColumn: 'name'
+      contract_template_id:
+        type: int
+        label: 'Contract Template Id'
+        editable: true
+        foreignKey:
+          entity: contract_template
+          displayColumn: 'name'
+      business_partner_id:
+        type: int
+        required: true
+        label: 'Business Partner Id'
+        editable: true
+        foreignKey:
+          entity: business_partner
+          displayColumn: 'name'
+      sales_rep: { type: string, label: 'Sales Rep', editable: true }
+      date_acct: { type: string, required: true, label: 'Date Acct', editable: true }
+      period_date_from: { type: string, required: true, label: 'Period Date From', editable: true }
+      period_date_to: { type: string, label: 'Period Date To', editable: true }
+      auto_renewal: { type: int, label: 'Auto Renewal', editable: true }
+      cancel_deadline: { type: string, label: 'Cancel Deadline', editable: true }
+      cancel_date: { type: string, label: 'Cancel Date', editable: true }
+      cancel_cause: { type: string, label: 'Cancel Cause', editable: true }
+      monthly_revenue_amt: { type: decimal, label: 'Monthly Revenue Amt', editable: true }
+      monthly_expense_amt: { type: decimal, label: 'Monthly Expense Amt', editable: true }
+      total_doc_amt: { type: decimal, label: 'Total Doc Amt', editable: true }
+      currency: { type: string, label: 'Currency', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

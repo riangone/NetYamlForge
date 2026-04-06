@@ -1,0 +1,69 @@
+title: 承認照会
+description: "承認申請一覧と承認ステップの状況を確認"
+
+sections:
+  - id: approval_summary
+    title: 承認申請一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ar.id AS 申請ID,
+        ar.source_table AS 対象テーブル,
+        CASE ar.source_table
+          WHEN 'purchase_orders' THEN po.document_no
+          ELSE NULL
+        END AS 対象番号,
+        ar.requester AS 申請者,
+        ar.current_step AS 現在ステップ,
+        ar.total_steps AS 総ステップ,
+        CASE ar.status
+          WHEN 'PENDING' THEN '承認待ち'
+          WHEN 'APPROVED' THEN '承認済み'
+          WHEN 'REJECTED' THEN '却下'
+          WHEN 'CANCELLED' THEN '取消'
+          ELSE ar.status
+        END AS 状態,
+        ar.grand_total AS 金額,
+        ar.created_at AS 申請日時
+      FROM approval_requests ar
+      LEFT JOIN purchase_orders po ON po.id = ar.source_id AND ar.source_table = 'purchase_orders'
+      WHERE ar.status != 'CANCELLED'
+      ORDER BY ar.created_at DESC
+    columns: [申請ID, 対象番号, 申請者, 現在ステップ, 総ステップ, 状態, 金額, 申請日時]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  - id: approval_steps_detail
+    title: 承認ステップ詳細
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ar.id AS 申請ID,
+        CASE ar.source_table
+          WHEN 'purchase_orders' THEN po.document_no
+          ELSE NULL
+        END AS 対象番号,
+        ast.step_no AS ステップ,
+        ast.label AS 承認ラベル,
+        ast.approver AS 承認者,
+        ast.approver_role AS 役割,
+        CASE ast.status
+          WHEN 'PENDING' THEN '承認待ち'
+          WHEN 'APPROVED' THEN '承認済み'
+          WHEN 'REJECTED' THEN '却下'
+          ELSE ast.status
+        END AS 状態,
+        ast.approved_at AS 承認日時,
+        ast.comments AS コメント
+      FROM approval_requests ar
+      JOIN approval_steps ast ON ast.request_id = ar.id
+      LEFT JOIN purchase_orders po ON po.id = ar.source_id AND ar.source_table = 'purchase_orders'
+      WHERE ar.status IN ('PENDING', 'APPROVED')
+      ORDER BY ar.created_at DESC, ast.step_no ASC
+    columns: [申請ID, 対象番号, ステップ, 承認ラベル, 承認者, 役割, 状態, 承認日時, コメント]
+    pageSize: 50
+    editable: false
+    readOnly: true

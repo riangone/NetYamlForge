@@ -1,0 +1,217 @@
+imports: []
+entities:
+  todos:
+    table: todos
+    key: id
+    displayName: TODOタスク
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: todo_categories
+        alias: tc
+        on: todos.todo_category_id = tc.id
+      - type: left
+        table: business_partners
+        alias: bp
+        on: todos.linked_partner_id = bp.id
+
+    forms:
+      title:
+        type: string
+        required: true
+        label: タイトル
+        editable: true
+      description:
+        type: textarea
+        label: 説明
+        editable: true
+      todo_type:
+        type: string
+        required: true
+        label: 種別
+        editable: true
+        options:
+          - T
+          - M
+          - C
+        optionLabels:
+          T: タスク
+          M: ミーティング
+          C: 電話
+      todo_status:
+        type: string
+        required: true
+        label: 状態
+        editable: true
+        options:
+          - NY
+          - IP
+          - DN
+          - CA
+        optionLabels:
+          NY: 未着手
+          IP: 進行中
+          DN: 完了
+          CA: キャンセル
+      todo_category_id:
+        type: int
+        label: カテゴリ
+        editable: true
+        foreignKey:
+          entity: todo_categories
+          displayColumn: name
+      assigned_to:
+        type: string
+        label: 担当者
+        editable: true
+      scheduled_start:
+        type: date
+        label: 予定開始
+        editable: true
+      scheduled_end:
+        type: date
+        label: 予定終了
+        editable: true
+      actual_start:
+        type: date
+        label: 実績開始
+        editable: true
+      actual_end:
+        type: date
+        label: 実績終了
+        editable: true
+      linked_contract_id:
+        type: int
+        label: 関連契約
+        editable: true
+        foreignKey:
+          entity: contracts
+          displayColumn: document_no
+      linked_partner_id:
+        type: int
+        label: 関連取引先
+        editable: true
+        foreignKey:
+          entity: business_partners
+          displayColumn: name
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      title:
+        type: string
+        required: true
+        label: タイトル
+        searchable: true
+        sortable: true
+      todo_type:
+        type: string
+        label: 種別
+        sortable: true
+      todo_status:
+        type: string
+        label: 状態
+        sortable: true
+      category_name:
+        type: string
+        label: カテゴリ
+        expression: tc.name
+        searchable: true
+      assigned_to:
+        type: string
+        label: 担当者
+        sortable: true
+      scheduled_start:
+        type: date
+        label: 予定開始
+        sortable: true
+      scheduled_end:
+        type: date
+        label: 予定終了
+        sortable: true
+      partner_name:
+        type: string
+        label: 取引先
+        expression: bp.name
+        searchable: true
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - title
+          - todo_type
+          - todo_status
+          - todo_category_id
+          - assigned_to
+          - scheduled_start
+          - scheduled_end
+          - actual_start
+          - actual_end
+          - linked_contract_id
+          - linked_partner_id
+          - description
+          - is_active
+      filters:
+        columns: 4
+        order:
+          - todo_status
+          - todo_type
+          - todo_category_id
+          - assigned_to
+
+    filters:
+      todo_status:
+        type: dropdown
+        label: 状態
+        expression: todos.todo_status
+        options:
+          - NY
+          - IP
+          - DN
+          - CA
+        optionLabels:
+          NY: 未着手
+          IP: 進行中
+          DN: 完了
+          CA: キャンセル
+      todo_type:
+        type: dropdown
+        label: 種別
+        expression: todos.todo_type
+        options:
+          - T
+          - M
+          - C
+        optionLabels:
+          T: タスク
+          M: ミーティング
+          C: 電話
+      todo_category_id:
+        type: dropdown
+        label: カテゴリ
+        expression: todos.todo_category_id
+        foreignKey:
+          entity: todo_categories
+          displayColumn: name
+      assigned_to:
+        type: like
+        label: 担当者
+      title:
+        type: like
+        label: タイトル

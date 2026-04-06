@@ -1,0 +1,19 @@
+name: monthly_billing
+displayName: 月次請求サマリー
+description: 前月の請求合計・入金・未収残高を取引先別に集計
+schedule: "0 8 1 * *"
+type: sql_to_csv
+outputPath: jobs/output/monthly_billing_{date}.csv
+query: |
+  SELECT
+    bp.name AS partner_name,
+    SUM(b.grand_total) AS total_billed,
+    SUM(b.pay_amt) AS total_paid,
+    SUM(b.outstanding_amt) AS total_outstanding,
+    COUNT(*) AS bill_count
+  FROM bills b
+  JOIN business_partners bp ON b.business_partner_id = bp.id
+  WHERE b.doc_status = 'CO'
+    AND strftime('%Y-%m', b.date_billed) = strftime('%Y-%m', 'now', '-1 month')
+  GROUP BY bp.id, bp.name
+  ORDER BY total_outstanding DESC

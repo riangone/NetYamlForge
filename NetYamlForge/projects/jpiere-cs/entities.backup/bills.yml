@@ -1,0 +1,208 @@
+imports: []
+entities:
+  bills:
+    table: bills
+    key: id
+    displayName: 請求管理
+    softDelete: false
+    isPublic: false
+
+    hooks:
+      beforeCreate:
+        - bill_document_no
+        - bill_due_date
+      beforeUpdate:
+        - bill_outstanding
+
+    joins:
+      - type: left
+        table: business_partners
+        alias: bp
+        on: bills.business_partner_id = bp.id
+
+    forms:
+      document_no:
+        type: string
+        required: true
+        label: 請求番号
+        editable: true
+      doc_status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options:
+          - DR
+          - CO
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+      business_partner_id:
+        type: int
+        required: true
+        label: 取引先
+        editable: true
+        foreignKey:
+          entity: business_partners
+          displayColumn: name
+      date_billed:
+        type: date
+        required: true
+        label: 請求日
+        editable: true
+      date_due:
+        type: date
+        label: 支払期限
+        editable: true
+      date_sent:
+        type: date
+        label: 送付日
+        editable: true
+      payment_rule:
+        type: string
+        label: 支払方法
+        editable: true
+        options:
+          - T
+          - I
+        optionLabels:
+          T: 翌月払い
+          I: 即時払い
+      payment_term_days:
+        type: int
+        label: 支払期日（日数）
+        editable: true
+      currency:
+        type: string
+        label: 通貨
+        editable: true
+      grand_total:
+        type: decimal
+        label: 合計（税込）
+        editable: false
+      pay_amt:
+        type: decimal
+        label: 入金額
+        editable: true
+      outstanding_amt:
+        type: decimal
+        label: 残高
+        editable: false
+      linked_contract_id:
+        type: int
+        label: 関連契約
+        editable: true
+        foreignKey:
+          entity: contracts
+          displayColumn: document_no
+      description:
+        type: textarea
+        label: 備考
+        editable: true
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      document_no:
+        type: string
+        required: true
+        label: 請求番号
+        searchable: true
+        sortable: true
+      partner_name:
+        type: string
+        label: 取引先
+        expression: bp.name
+        searchable: true
+        sortable: true
+      doc_status:
+        type: string
+        label: ステータス
+        sortable: true
+      date_billed:
+        type: date
+        label: 請求日
+        sortable: true
+      date_due:
+        type: date
+        label: 支払期限
+        sortable: true
+      grand_total:
+        type: decimal
+        label: 合計
+        sortable: true
+      outstanding_amt:
+        type: decimal
+        label: 残高
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - document_no
+          - doc_status
+          - business_partner_id
+          - linked_contract_id
+          - date_billed
+          - date_due
+          - date_sent
+          - payment_rule
+          - payment_term_days
+          - currency
+          - grand_total
+          - pay_amt
+          - outstanding_amt
+          - description
+          - is_active
+      filters:
+        columns: 4
+        order:
+          - business_partner_id
+          - doc_status
+          - document_no
+
+    filters:
+      business_partner_id:
+        type: dropdown
+        label: 取引先
+        expression: bills.business_partner_id
+        foreignKey:
+          entity: business_partners
+          displayColumn: name
+      doc_status:
+        type: dropdown
+        label: ステータス
+        expression: bills.doc_status
+        options:
+          - DR
+          - CO
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+      document_no:
+        type: like
+        label: 請求番号
+
+    links:
+      bill_lines:
+        label: 請求明細
+        targetEntity: bill_lines
+        filter:
+          bill_id: id

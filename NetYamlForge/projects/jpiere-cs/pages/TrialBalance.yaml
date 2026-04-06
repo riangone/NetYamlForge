@@ -1,0 +1,36 @@
+title: 試算表
+description: "勘定科目別の借方・貸方合計と残高を表示する試算表"
+
+sections:
+  - id: trial_balance_table
+    title: 試算表
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        a.code          AS 勘定科目コード,
+        a.name          AS 勘定科目名,
+        CASE a.account_type
+          WHEN 'A' THEN '資産'
+          WHEN 'L' THEN '負債'
+          WHEN 'E' THEN '純資産'
+          WHEN 'R' THEN '収益'
+          WHEN 'X' THEN '費用'
+          ELSE a.account_type
+        END AS 区分,
+        COALESCE(SUM(jl.debit_amt), 0)  AS 借方合計,
+        COALESCE(SUM(jl.credit_amt), 0) AS 貸方合計,
+        CASE a.normal_balance
+          WHEN 'D' THEN COALESCE(SUM(jl.debit_amt), 0) - COALESCE(SUM(jl.credit_amt), 0)
+          WHEN 'C' THEN COALESCE(SUM(jl.credit_amt), 0) - COALESCE(SUM(jl.debit_amt), 0)
+        END AS 残高
+      FROM accounts a
+      LEFT JOIN journal_lines jl ON jl.account_id = a.id
+      LEFT JOIN journals j ON j.id = jl.journal_id AND j.doc_status = 'CO'
+      WHERE a.is_active = 1
+      GROUP BY a.id, a.code, a.name, a.account_type, a.normal_balance
+      ORDER BY a.code
+    columns: [勘定科目コード, 勘定科目名, 区分, 借方合計, 貸方合計, 残高]
+    pageSize: 50
+    editable: false
+    readOnly: true

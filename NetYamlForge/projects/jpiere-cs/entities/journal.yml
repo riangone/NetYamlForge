@@ -1,0 +1,86 @@
+entities:
+  journal:
+    table: 'journals'
+    key: 'id'
+    displayName: '仕訳'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'doc_status', 'journal_type', 'date_acct', 'description', 'source_table', 'source_id', 'total_debit', 'total_credit', 'is_balanced', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: '仕訳番号', searchable: true, sortable: true }
+      doc_status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      journal_type: { type: string, required: true, label: '種別', searchable: true, sortable: true }
+      date_acct: { type: string, required: true, label: '計上日', searchable: true, sortable: true }
+      description: { type: string, label: '摘要', searchable: true, sortable: true }
+      source_table: { type: string, label: '送信元テーブル', searchable: true, sortable: true }
+      source_id: { type: int, label: '送信元ID', sortable: true }
+      total_debit: { type: decimal, label: '借方合計', sortable: true }
+      total_credit: { type: decimal, label: '貸方合計', sortable: true }
+      is_balanced: { type: int, label: '均衡', sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: '仕訳番号', editable: true }
+      doc_status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - DR
+          - CO
+          - VO
+          - RE
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+          RE: 取消
+      journal_type:
+        type: string
+        required: true
+        label: '種別'
+        editable: true
+        options:
+          - AR
+          - AP
+          - GL
+          - MAN
+        optionLabels:
+          AR: 売掛
+          AP: 買掛
+          GL: 総勘定元帳
+          MAN: 手動
+      date_acct: { type: string, required: true, label: '計上日', editable: true }
+      description: { type: string, label: '摘要', editable: true }
+      source_table: { type: string, label: '送信元テーブル', editable: true }
+      source_id: { type: int, label: '送信元ID', editable: true }
+      total_debit: { type: decimal, label: '借方合計', editable: true }
+      total_credit: { type: decimal, label: '貸方合計', editable: true }
+      is_balanced: { type: int, label: '均衡', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links:
+      journal_lines:
+        label: 仕訳明細
+        targetEntity: journal_line
+        filter:
+          journal_id: id
+    hooks:
+      beforeCreate:
+        - journal_document_no
+        - journal_balance_validation
+      beforeUpdate:
+        - journal_balance_validation

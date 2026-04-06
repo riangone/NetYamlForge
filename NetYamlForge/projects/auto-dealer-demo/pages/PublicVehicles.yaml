@@ -1,0 +1,159 @@
+title: 車両一覧
+description: "AI 自動車ディーラーの展示車両をご覧いただけます。会員登録なしで閲覧可能です。"
+isPublic: true
+
+sections:
+  # ─── ヒーローセクション ───
+  - id: hero
+    title: 🚗 AI 自動車ディーラーへようこそ
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🤖 AI 車両相談' AS metric_name,
+             'AI が最適な車をご提案' AS metric_value,
+             '💬' AS metric_icon,
+             '/auto-dealer-demo/api/ai/chat/session' AS metric_delta
+      UNION ALL
+      SELECT '📅 試乗予約', '会員登録后すぐ予約', '🎯', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '👥 会員特典', '限定割引&優先案内', '⭐', '/Account/CustomerRegister'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 在庫車両数 ───
+  - id: vehicle_count
+    title: 🚗 販売可能台数
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '販売可能台数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🚗' AS metric_icon,
+             NULL AS metric_delta
+      FROM vehicles WHERE status = 'available' AND customer_id IS NULL
+      UNION ALL
+      SELECT '今月入荷', CAST(COUNT(*) AS TEXT), '📦', NULL
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND strftime('%Y-%m', arrival_date) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'EV 車両数', CAST(COUNT(*) AS TEXT), '⚡', NULL
+      FROM vehicles
+      WHERE customer_id IS NULL AND status = 'available' AND fuel_type = 'ev'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── 在庫車両一覧（カード） ───
+  - id: available_vehicles
+    title: 🚗 在庫車両一覧
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT
+        maker || ' ' || model || ' ' || grade AS title,
+        CAST(year AS TEXT) || '年式 / ' ||
+        CASE fuel_type
+          WHEN 'gasoline' THEN 'ガソリン'
+          WHEN 'hybrid'   THEN 'ハイブリッド'
+          WHEN 'phev'     THEN 'PHEV'
+          WHEN 'ev'       THEN 'EV'
+          WHEN 'diesel'   THEN 'ディーゼル'
+          ELSE COALESCE(fuel_type, '不明')
+        END AS subtitle,
+        '¥' || printf('%,d', price) AS badge,
+        COALESCE(color, '') ||
+        CASE WHEN features IS NOT NULL AND features != '' THEN
+          ' / ' || SUBSTR(features, 1, 50) || CASE WHEN LENGTH(features) > 50 THEN '...' ELSE '' END
+        ELSE ''
+        END AS description
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY price ASC
+    columns: [title, subtitle, badge, description]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    pageSize: 12
+    editable: false
+    readOnly: true
+
+  # ─── 詳細テーブル ───
+  - id: vehicles_table
+    title: 📋 車両詳細
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        maker || ' ' || model AS 車両名,
+        grade AS グレード,
+        year || '年式' AS 年式,
+        CASE vehicle_type
+          WHEN 'sedan'   THEN 'セダン'
+          WHEN 'suv'     THEN 'SUV'
+          WHEN 'minivan' THEN 'ミニバン'
+          WHEN 'sports'  THEN 'スポーツ'
+          WHEN 'kei'     THEN '軽自動車'
+          ELSE vehicle_type
+        END AS タイプ,
+        CASE fuel_type
+          WHEN 'gasoline' THEN 'ガソリン'
+          WHEN 'hybrid'   THEN 'ハイブリッド'
+          WHEN 'phev'     THEN 'PHEV'
+          WHEN 'ev'       THEN 'EV'
+          WHEN 'diesel'   THEN 'ディーゼル'
+          ELSE COALESCE(fuel_type, '不明')
+        END AS 燃料,
+        color AS カラー,
+        '¥' || printf('%,d', price) AS 価格,
+        CASE status
+          WHEN 'available' THEN '✅ 販売可能'
+          WHEN 'display'   THEN '🏢 展示車'
+          ELSE status
+        END AS 状態
+      FROM vehicles
+      WHERE customer_id IS NULL
+        AND status IN ('available', 'display')
+      ORDER BY price ASC
+    columns: [車両名, グレード, 年式, タイプ, 燃料, カラー, 価格, 状態]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─── CTA（会員登録促進） ───
+  - id: cta_register
+    title: ⭐ 会員登録でさらに便利なサービス
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🚗 マイ車両管理' AS metric_name,
+             '購入車両を一覧管理' AS metric_value,
+             '📱' AS metric_icon,
+             '/Account/CustomerRegister' AS metric_delta
+      UNION ALL
+      SELECT '📅 予約管理', '試乗・整備予約をオンラインで', '⏰', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '🔧 サービス履歴', '過去のサービス履歴を確認', '📋', '/Account/CustomerRegister'
+      UNION ALL
+      SELECT '💬 AI 相談', 'AI が購入相談に回答', '🤖', '/auto-dealer-demo/api/ai/chat/session'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true

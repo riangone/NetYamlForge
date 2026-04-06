@@ -81,7 +81,9 @@ public class PageController : BaseProjectController
             return NotFound($"ページ '{pageName}' が見つかりません。");
 
         // 公開ページでない場合は認証チェック
-        if (!pageDef.IsPublic)
+        // Note: IsPublic may not exist in all PageDefinition implementations
+        var isPublic = pageDef.GetType().GetProperty("IsPublic")?.GetValue(pageDef) as bool? ?? false;
+        if (!isPublic)
         {
             if (User.Identity?.IsAuthenticated != true)
             {

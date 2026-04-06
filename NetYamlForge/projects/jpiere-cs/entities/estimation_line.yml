@@ -1,0 +1,66 @@
+entities:
+  estimation_line:
+    table: 'estimation_lines'
+    key: 'id'
+    displayName: 'Estimation Line'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['estimation_id', 'line_no', 'product_id', 'description', 'date_ordered', 'date_promised', 'qty_ordered', 'uom', 'unit_price', 'line_amt', 'tax_rate', 'tax_amt', 'discount', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      estimation_id: { type: int, required: true, label: 'Estimation Id', sortable: true }
+      line_no: { type: int, required: true, label: 'Line No', sortable: true }
+      product_id: { type: int, label: 'Product Id', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      date_ordered: { type: string, label: 'Date Ordered', searchable: true, sortable: true }
+      date_promised: { type: string, label: 'Date Promised', searchable: true, sortable: true }
+      qty_ordered: { type: decimal, label: 'Qty Ordered', sortable: true }
+      uom: { type: string, label: 'Uom', searchable: true, sortable: true }
+      unit_price: { type: decimal, label: 'Unit Price', sortable: true }
+      line_amt: { type: decimal, label: 'Line Amt', sortable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', sortable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', sortable: true }
+      discount: { type: decimal, label: 'Discount', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      estimation_id:
+        type: int
+        required: true
+        label: 'Estimation Id'
+        editable: true
+        foreignKey:
+          entity: estimation
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: 'Line No', editable: true }
+      product_id:
+        type: int
+        label: 'Product Id'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      description: { type: string, label: 'Description', editable: true }
+      date_ordered: { type: string, label: 'Date Ordered', editable: true }
+      date_promised: { type: string, label: 'Date Promised', editable: true }
+      qty_ordered: { type: decimal, label: 'Qty Ordered', editable: true }
+      uom: { type: string, label: 'Uom', editable: true }
+      unit_price: { type: decimal, label: 'Unit Price', editable: true }
+      line_amt: { type: decimal, label: 'Line Amt', editable: true }
+      tax_rate: { type: decimal, label: 'Tax Rate', editable: true }
+      tax_amt: { type: decimal, label: 'Tax Amt', editable: true }
+      discount: { type: decimal, label: 'Discount', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

@@ -1,0 +1,71 @@
+entities:
+  account:
+    table: 'accounts'
+    key: 'id'
+    displayName: '勘定科目'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['code', 'name', 'account_type', 'normal_balance', 'parent_id', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      code: { type: string, required: true, label: '科目コード', searchable: true, sortable: true }
+      name: { type: string, required: true, label: '科目名', searchable: true, sortable: true }
+      account_type: { type: string, required: true, label: '種別', searchable: true, sortable: true }
+      normal_balance: { type: string, required: true, label: '正常残高', searchable: true, sortable: true }
+      parent_id: { type: int, label: '親科目', sortable: true }
+      description: { type: string, label: '説明', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      code: { type: string, required: true, label: '科目コード', editable: true }
+      name: { type: string, required: true, label: '科目名', editable: true }
+      account_type:
+        type: string
+        required: true
+        label: '種別'
+        editable: true
+        options:
+          - A
+          - L
+          - E
+          - R
+          - X
+        optionLabels:
+          A: 資産
+          L: 負債
+          E: 純資産
+          R: 収益
+          X: 費用
+      normal_balance:
+        type: string
+        required: true
+        label: '正常残高'
+        editable: true
+        options:
+          - D
+          - C
+        optionLabels:
+          D: 借方
+          C: 貸方
+      parent_id:
+        type: int
+        label: '親科目'
+        editable: true
+        foreignKey:
+          entity: account
+          displayColumn: 'name'
+      description: { type: string, label: '説明', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

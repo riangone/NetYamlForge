@@ -1,0 +1,62 @@
+entities:
+  purchase_order_line:
+    table: 'purchase_order_lines'
+    key: 'id'
+    displayName: '発注明細'
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['purchase_order_id', 'line_no', 'product_id', 'description', 'qty_ordered', 'uom', 'unit_price', 'line_amt', 'qty_received', 'tax_rate', 'tax_amt', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      purchase_order_id: { type: int, required: true, label: '発注書ID', sortable: true }
+      line_no: { type: int, required: true, label: '行番号', sortable: true }
+      product_id: { type: int, label: '商品', sortable: true }
+      description: { type: string, label: '説明', searchable: true, sortable: true }
+      qty_ordered: { type: decimal, required: true, label: '発注数量', sortable: true }
+      uom: { type: string, label: '単位', searchable: true, sortable: true }
+      unit_price: { type: decimal, label: '単価', sortable: true }
+      line_amt: { type: decimal, label: '行金額', sortable: true }
+      qty_received: { type: decimal, label: '受入済数量', sortable: true }
+      tax_rate: { type: decimal, label: '税率', sortable: true }
+      tax_amt: { type: decimal, label: '税額', sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      purchase_order_id:
+        type: int
+        required: true
+        label: '発注書ID'
+        editable: true
+        foreignKey:
+          entity: purchase_order
+          displayColumn: 'document_no'
+      line_no: { type: int, required: true, label: '行番号', editable: true }
+      product_id:
+        type: int
+        label: '商品'
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: 'name'
+      description: { type: string, label: '説明', editable: true }
+      qty_ordered: { type: decimal, required: true, label: '発注数量', editable: true }
+      uom: { type: string, label: '単位', editable: true }
+      unit_price: { type: decimal, label: '単価', editable: true }
+      line_amt: { type: decimal, label: '行金額', editable: true }
+      qty_received: { type: decimal, label: '受入済数量', editable: true }
+      tax_rate: { type: decimal, label: '税率', editable: true }
+      tax_amt: { type: decimal, label: '税額', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links: {}

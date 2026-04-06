@@ -1,0 +1,63 @@
+entities:
+  purchase_receipt:
+    table: 'purchase_receipts'
+    key: 'id'
+    displayName: '受入処理'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['document_no', 'doc_status', 'purchase_order_id', 'date_received', 'total_received_amt', 'description', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      document_no: { type: string, required: true, label: '受入番号', searchable: true, sortable: true }
+      doc_status: { type: string, required: true, label: '状態', searchable: true, sortable: true }
+      purchase_order_id: { type: int, required: true, label: '発注書', sortable: true }
+      date_received: { type: string, required: true, label: '受入日', searchable: true, sortable: true }
+      total_received_amt: { type: decimal, label: '受入合計額', sortable: true }
+      description: { type: string, label: '備考', searchable: true, sortable: true }
+      is_active: { type: int, label: '有効', sortable: true }
+      created_at: { type: string, label: '作成日', searchable: true, sortable: true }
+      updated_at: { type: string, label: '更新日', searchable: true, sortable: true }
+    forms:
+      document_no: { type: string, required: true, label: '受入番号', editable: true }
+      doc_status:
+        type: string
+        required: true
+        label: '状態'
+        editable: true
+        options:
+          - DR
+          - CO
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+      purchase_order_id:
+        type: int
+        required: true
+        label: '発注書'
+        editable: true
+        foreignKey:
+          entity: purchase_order
+          displayColumn: 'document_no'
+      date_received: { type: string, required: true, label: '受入日', editable: true }
+      total_received_amt: { type: decimal, label: '受入合計額', editable: true }
+      description: { type: string, label: '備考', editable: true }
+      is_active: { type: int, label: '有効', editable: true }
+      created_at: { type: string, label: '作成日', editable: true }
+      updated_at: { type: string, label: '更新日', editable: true }
+    filters: {}
+    links:
+      purchase_receipt_lines:
+        label: 受入明細
+        targetEntity: purchase_receipt_line
+        filter:
+          receipt_id: id

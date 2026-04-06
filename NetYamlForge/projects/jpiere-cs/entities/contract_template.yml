@@ -1,0 +1,48 @@
+entities:
+  contract_template:
+    table: 'contract_templates'
+    key: 'id'
+    displayName: 'Contract Template'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['code', 'name', 'contract_type', 'contract_category_id', 'description', 'default_payment_term_days', 'auto_renewal', 'is_active', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      code: { type: string, required: true, label: 'Code', searchable: true, sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      contract_type: { type: string, label: 'Contract Type', searchable: true, sortable: true }
+      contract_category_id: { type: int, required: true, label: 'Contract Category Id', sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      default_payment_term_days: { type: int, label: 'Default Payment Term Days', sortable: true }
+      auto_renewal: { type: int, label: 'Auto Renewal', sortable: true }
+      is_active: { type: int, label: 'Is Active', sortable: true }
+      created_at: { type: string, label: 'Created At', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', searchable: true, sortable: true }
+    forms:
+      code: { type: string, required: true, label: 'Code', editable: true }
+      name: { type: string, required: true, label: 'Name', editable: true }
+      contract_type: { type: string, label: 'Contract Type', editable: true }
+      contract_category_id:
+        type: int
+        required: true
+        label: 'Contract Category Id'
+        editable: true
+        foreignKey:
+          entity: contract_category
+          displayColumn: 'name'
+      description: { type: string, label: 'Description', editable: true }
+      default_payment_term_days: { type: int, label: 'Default Payment Term Days', editable: true }
+      auto_renewal: { type: int, label: 'Auto Renewal', editable: true }
+      is_active: { type: int, label: 'Is Active', editable: true }
+      created_at: { type: string, label: 'Created At', editable: true }
+      updated_at: { type: string, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

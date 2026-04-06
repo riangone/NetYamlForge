@@ -1,0 +1,79 @@
+navigation:
+  showDashboard: true
+  items:
+    - label: マイページ
+      url: /jpiere-cs/Page/MyPage
+      icon: home
+    - label: 取引先管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=business_partner
+      icon: users
+    - label: 商品管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=product_category
+      icon: box
+    - label: 契約管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=contract_category
+      icon: file-contract
+    - label: 見積管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=estimation
+      icon: file-invoice
+    - label: 請求管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=bill
+      icon: yen-sign
+    - label: 売上計上
+      url: /jpiere-cs/DynamicEntity/Index?entity=recognition
+      icon: chart-line
+    - label: タスク管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=todo
+      icon: tasks
+    - label: 勘定科目
+      url: /jpiere-cs/DynamicEntity/Index?entity=account
+      icon: list
+      section: 会計
+    - label: 仕訳
+      url: /jpiere-cs/DynamicEntity/Index?entity=journal
+      icon: book
+      section: 会計
+    - label: 残高照会
+      url: /jpiere-cs/page/AccountBalance
+      icon: balance-scale
+      section: 会計
+    - label: 試算表
+      url: /jpiere-cs/page/TrialBalance
+      icon: table
+      section: 会計
+    - label: 発注管理
+      url: /jpiere-cs/DynamicEntity/Index?entity=purchase_order
+      icon: shopping-cart
+      section: 購買
+    - label: 受入処理
+      url: /jpiere-cs/DynamicEntity/Index?entity=purchase_receipt
+      icon: truck-loading
+      section: 購買
+    - label: 仕入請求
+      url: /jpiere-cs/DynamicEntity/Index?entity=ap_invoice
+      icon: file-invoice-dollar
+      section: 購買
+    - label: 入金/支払
+      url: /jpiere-cs/DynamicEntity/Index?entity=payment
+      icon: money-check-alt
+      section: 購買
+    - label: 在庫照会
+      url: /jpiere-cs/page/StockInquiry
+      icon: boxes
+      section: 購買
+    - label: 資金繰り
+      url: /jpiere-cs/page/CashFlow
+      icon: cash-flow
+      section: 購買
+    - label: 承認申請
+      url: /jpiere-cs/DynamicEntity/Index?entity=approval_request
+      icon: user-check
+      section: 承認
+    - label: 承認ステップ
+      url: /jpiere-cs/DynamicEntity/Index?entity=approval_step
+      icon: list-ol
+      section: 承認
+    - label: 承認照会
+      url: /jpiere-cs/page/ApprovalInquiry
+      icon: clipboard-check
+      section: 承認
