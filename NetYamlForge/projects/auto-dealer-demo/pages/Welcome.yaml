@@ -117,6 +117,7 @@ sections:
   # ─────────────────────────────────────────
   - id: guide_operator
     title: 🎧 AI オペレーター — 業務フロー
+    visibleToRoles: [operator, ai_admin]
     component: stat_cards
     sourceType: custom
     source: |
@@ -148,6 +149,7 @@ sections:
   # ─────────────────────────────────────────
   - id: guide_sales
     title: 🎯 営業担当者 — 業務フロー
+    visibleToRoles: [sales_rep, sales_manager]
     component: stat_cards
     sourceType: custom
     source: |
@@ -182,6 +184,7 @@ sections:
   # ─────────────────────────────────────────
   - id: guide_service
     title: 🔧 サービス部門 — 業務フロー
+    visibleToRoles: [service_staff, sales_manager]
     component: stat_cards
     sourceType: custom
     source: |
@@ -214,6 +217,7 @@ sections:
   # ─────────────────────────────────────────
   - id: guide_exec
     title: 📊 経営層 — 業務フロー
+    visibleToRoles: [executive, ai_admin]
     component: stat_cards
     sourceType: custom
     source: |
@@ -234,6 +238,36 @@ sections:
       UNION ALL
       SELECT '③ AI 分析レポート確認', '全体パフォーマンス', '📈',
              '/auto-dealer-demo/Page/AIAnalytics'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ロール別 操作ガイド — 顧客
+  # ─────────────────────────────────────────
+  - id: guide_customer
+    title: 🧭 ご利用ガイド
+    visibleToRoles: [customer]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '予約確認' AS metric_name,
+             '試乗・点検の予約状況を確認できます' AS metric_value,
+             '📅' AS metric_icon,
+             '/auto-dealer-demo/Page/CustomerDashboard' AS metric_delta
+      UNION ALL
+      SELECT 'AI 車両相談',
+             '24時間 AI がご相談に対応します',
+             '🤖', '/auto-dealer-demo/api/ai/chat/session'
+      UNION ALL
+      SELECT '車両在庫閲覧',
+             '最新の在庫車両を検索できます',
+             '🚗', '/auto-dealer-demo/Page/PublicVehicles'
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value

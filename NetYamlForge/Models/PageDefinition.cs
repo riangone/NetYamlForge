@@ -162,6 +162,12 @@ public class SectionDefinition
 {
     public string Id { get; set; } = "";
     public string? Title { get; set; }
+    /// <summary>
+    /// このセクションを表示するロールのホワイトリスト。
+    /// 未設定（null/空）なら全ユーザーに表示。管理者は常に表示。
+    /// YAML: visibleToRoles: [sales_rep, manager]
+    /// </summary>
+    public List<string>? VisibleToRoles { get; set; }
     /// <summary>ソース種別: table | custom</summary>
     public string SourceType { get; set; } = "table";
     /// <summary>テーブル名 (table) または SQL クエリ (custom)</summary>

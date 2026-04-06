@@ -100,6 +100,75 @@ public class PageDataQueryServiceTests
         Assert.Equal(2, result["items"].Rows.Count());
     }
 
+    [Fact]
+    public async Task LoadPageDataAsync_InjectsCurrentUser_ForCustomSource()
+    {
+        await using var conn = new SqliteConnection("Data Source=:memory:");
+        await conn.OpenAsync();
+        await SeedSchemaAsync(conn);
+
+        await conn.ExecuteAsync(
+            """
+            INSERT INTO DemoItem(Id, Name, CategoryId, CreatedAt) VALUES(1, 'Alpha', 10, '2026-03-01 10:00:00');
+            INSERT INTO DemoItem(Id, Name, CategoryId, CreatedAt) VALUES(2, 'Beta', 10, '2026-03-02 10:00:00');
+            """);
+
+        var service = new PageDataQueryService(conn, NullLogger<PageDataQueryService>.Instance);
+        var page = new PageDefinition
+        {
+            Sections = new List<SectionDefinition>
+            {
+                new()
+                {
+                    Id = "my_items",
+                    SourceType = "custom",
+                    Source = "SELECT * FROM DemoItem WHERE Name = @currentUser",
+                    Columns = new Dictionary<string, SectionColumnDef> { ["Id"] = new(), ["Name"] = new() }
+                }
+            }
+        };
+
+        var userCtx = new PageUserContext("Alpha", "Alpha User", "1", new[] { "User" }, false, true);
+        var result = await service.LoadPageDataAsync(page, new Dictionary<string, string>(), userCtx);
+
+        Assert.Equal(1, result["my_items"].Total);
+        var row = Assert.Single(result["my_items"].Rows);
+        Assert.Equal("Alpha", row["Name"]);
+    }
+
+    [Fact]
+    public async Task LoadPageDataAsync_HandlesIsAdminFlag()
+    {
+        await using var conn = new SqliteConnection("Data Source=:memory:");
+        await conn.OpenAsync();
+        await SeedSchemaAsync(conn);
+
+        var service = new PageDataQueryService(conn, NullLogger<PageDataQueryService>.Instance);
+        var page = new PageDefinition
+        {
+            Sections = new List<SectionDefinition>
+            {
+                new()
+                {
+                    Id = "admin_check",
+                    SourceType = "custom",
+                    Source = "SELECT @isAdmin AS IsAdminValue",
+                    Columns = new Dictionary<string, SectionColumnDef> { ["IsAdminValue"] = new() }
+                }
+            }
+        };
+
+        var adminCtx = new PageUserContext("admin", "Admin", "1", new[] { "Admin" }, true, true);
+        var adminResult = await service.LoadPageDataAsync(page, new Dictionary<string, string>(), adminCtx);
+        var adminRow = Assert.Single(adminResult["admin_check"].Rows);
+        Assert.Equal(1L, adminRow["IsAdminValue"]); // SQLite returns 1 as long
+
+        var userCtx = new PageUserContext("user", "User", "2", new[] { "User" }, false, true);
+        var userResult = await service.LoadPageDataAsync(page, new Dictionary<string, string>(), userCtx);
+        var userRow = Assert.Single(userResult["admin_check"].Rows);
+        Assert.Equal(0L, userRow["IsAdminValue"]);
+    }
+
     private static async Task SeedSchemaAsync(SqliteConnection conn)
     {
         await conn.ExecuteAsync(

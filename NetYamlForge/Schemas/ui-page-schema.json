@@ -48,6 +48,10 @@
           "title": {
             "type": "string"
           },
+          "visibleToRoles": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
           "sourceType": {
             "enum": ["table", "custom"]
           },

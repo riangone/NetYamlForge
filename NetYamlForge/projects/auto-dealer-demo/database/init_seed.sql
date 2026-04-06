@@ -2,17 +2,17 @@
 -- AI 窓口システムのサンプルデータを初期化します
 
 -- 顧客マスタ
-INSERT OR IGNORE INTO customers (customer_id, customer_type, name, name_kana, gender, phone, mobile, email, tier_level, preferred_contact) VALUES
-('CUST-001', 'individual', '山田太郎', 'ヤマダタロウ', 'male', '03-1234-5678', '090-1234-5678', 'yamada@example.com', 'gold', 'email'),
-('CUST-002', 'individual', '佐藤花子', 'サトウハナコ', 'female', '03-2345-6789', '090-2345-6789', 'hanako@example.com', 'silver', 'phone'),
-('CUST-003', 'corporate', '東京自動車株式会社', 'トウキョウジドウシャ', NULL, '03-3456-7890', '090-3456-7890', 'info@tokyo-auto.co.jp', 'platinum', 'email'),
-('CUST-004', 'individual', '鈴木一郎', 'スズキイチロウ', 'male', '04-4567-8901', '090-4567-8901', 'suzuki@example.com', 'regular', 'line'),
-('CUST-005', 'individual', '高橋美咲', 'タカハシミサキ', 'female', '05-5678-9012', '090-5678-9012', 'misaki@example.com', 'vip', 'phone'),
-('CUST-006', 'corporate', '大阪モータース株式会社', 'オオサカモータース', NULL, '06-6789-0123', '090-6789-0123', 'sales@osaka-motors.co.jp', 'gold', 'email'),
-('CUST-007', 'individual', '伊藤健太', 'イトウケンタ', 'male', '07-7890-1234', '090-7890-1234', 'kenta@example.com', 'regular', 'phone'),
-('CUST-008', 'individual', '中村愛', 'ナカムラアイ', 'female', '08-8901-2345', '090-8901-2345', 'ai.nakamura@example.com', 'silver', 'email'),
-('CUST-009', 'individual', '小林大輔', 'コバヤシダイスケ', 'male', '09-9012-3456', '090-9012-3456', 'daisuke@example.com', 'regular', 'sms'),
-('CUST-010', 'corporate', '横浜カーズ株式会社', 'ヨコハマカーズ', NULL, '04-0123-4567', '090-0123-4567', 'info@yokohama-cars.co.jp', 'silver', 'email');
+INSERT OR IGNORE INTO customers (customer_id, customer_type, name, name_kana, gender, phone, mobile, email, tier_level, preferred_contact, login_username) VALUES
+('CUST-001', 'individual', '山田太郎', 'ヤマダタロウ', 'male', '03-1234-5678', '090-1234-5678', 'yamada@example.com', 'gold', 'email', 'customer1'),
+('CUST-002', 'individual', '佐藤花子', 'サトウハナコ', 'female', '03-2345-6789', '090-2345-6789', 'hanako@example.com', 'silver', 'phone', 'customer2'),
+('CUST-003', 'corporate', '東京自動車株式会社', 'トウキョウジドウシャ', NULL, '03-3456-7890', '090-3456-7890', 'info@tokyo-auto.co.jp', 'platinum', 'email', 'customer3'),
+('CUST-004', 'individual', '鈴木一郎', 'スズキイチロウ', 'male', '04-4567-8901', '090-4567-8901', 'suzuki@example.com', 'regular', 'line', 'customer4'),
+('CUST-005', 'individual', '高橋美咲', 'タカハシミサキ', 'female', '05-5678-9012', '090-5678-9012', 'misaki@example.com', 'vip', 'phone', 'customer5'),
+('CUST-006', 'corporate', '大阪モータース株式会社', 'オオサカモータース', NULL, '06-6789-0123', '090-6789-0123', 'sales@osaka-motors.co.jp', 'gold', 'email', 'customer6'),
+('CUST-007', 'individual', '伊藤健太', 'イトウケンタ', 'male', '07-7890-1234', '090-7890-1234', 'kenta@example.com', 'regular', 'phone', 'customer7'),
+('CUST-008', 'individual', '中村愛', 'ナカムラアイ', 'female', '08-8901-2345', '090-8901-2345', 'ai.nakamura@example.com', 'silver', 'email', 'customer8'),
+('CUST-009', 'individual', '小林大輔', 'コバヤシダイスケ', 'male', '09-9012-3456', '090-9012-3456', 'daisuke@example.com', 'regular', 'sms', 'customer9'),
+('CUST-010', 'corporate', '横浜カーズ株式会社', 'ヨコハマカーズ', NULL, '04-0123-4567', '090-0123-4567', 'info@yokohama-cars.co.jp', 'silver', 'email', 'customer10');
 
 -- 車両マスタ（顧客所有車両 + ディーラー在庫）
 -- 顧客所有車両（customer_id あり、status='sold'）
@@ -114,17 +114,17 @@ INSERT OR IGNORE INTO service_requests (request_id, customer_id, vehicle_id, req
 ('REQ-010', 'CUST-010', 'VEH-010', 'inquiry', ' warranty について', '保証期間の延長は可能ですか？', 'normal', 'closed', 'web');
 
 -- 販売リード（AI 窓口から自動生成・手動登録）
-INSERT OR IGNORE INTO sales_leads (lead_id, customer_id, vehicle_interest, budget, lead_score, status, source_conversation_id, assigned_to_user_id, last_contact_at, created_at, updated_at) VALUES
-('LEAD-001', 'CUST-001', 'test_drive_request', 4500000, 85, 'contacted',  'CONV-005', 'admin', datetime('now', '-2 days'), datetime('now', '-3 days'), datetime('now', '-2 days')),
-('LEAD-002', 'CUST-002', 'price_inquiry',       3000000, 62, 'new',        'CONV-003', NULL,    NULL,                       datetime('now', '-1 day'),  datetime('now', '-1 day')),
-('LEAD-003', 'CUST-003', 'vehicle_inquiry',      8000000, 91, 'qualified',  NULL,       'admin', datetime('now', '-1 day'), datetime('now', '-5 days'), datetime('now', '-1 day')),
-('LEAD-004', 'CUST-004', 'quote_request',        2500000, 45, 'new',        NULL,       NULL,    NULL,                       datetime('now', '-7 days'), datetime('now', '-7 days')),
-('LEAD-005', 'CUST-005', 'financing_inquiry',    5000000, 78, 'proposal',   'CONV-001', 'admin', datetime('now'),           datetime('now', '-4 days'), datetime('now')),
-('LEAD-006', 'CUST-006', 'test_drive_request',   6000000, 88, 'won',        NULL,       'admin', datetime('now', '-1 day'), datetime('now', '-10 days'),datetime('now', '-1 day')),
-('LEAD-007', 'CUST-007', 'new_car_inquiry',       2000000, 35, 'lost',       NULL,       NULL,    datetime('now', '-14 days'),datetime('now', '-20 days'),datetime('now', '-14 days')),
-('LEAD-008', 'CUST-008', 'vehicle_inquiry',      3500000, 55, 'contacted',  NULL,       'admin', datetime('now', '-3 days'), datetime('now', '-5 days'), datetime('now', '-3 days')),
-('LEAD-009', 'CUST-009', 'price_inquiry',        2800000, 48, 'new',        NULL,       NULL,    NULL,                       datetime('now', '-8 days'), datetime('now', '-8 days')),
-('LEAD-010', 'CUST-010', 'test_drive_request',   7000000, 92, 'qualified',  'CONV-010', 'admin', datetime('now'),           datetime('now', '-2 days'), datetime('now'));
+INSERT OR IGNORE INTO sales_leads (lead_id, customer_id, vehicle_interest, budget, lead_score, status, source_conversation_id, assigned_to_user_id, assigned_sales, last_contact_at, created_at, updated_at) VALUES
+('LEAD-001', 'CUST-001', 'test_drive_request', 4500000, 85, 'contacted',  'CONV-005', 'admin', 'sales_rep1', datetime('now', '-2 days'), datetime('now', '-3 days'), datetime('now', '-2 days')),
+('LEAD-002', 'CUST-002', 'price_inquiry',       3000000, 62, 'new',        'CONV-003', NULL,    'sales_rep1', NULL,                       datetime('now', '-1 day'),  datetime('now', '-1 day')),
+('LEAD-003', 'CUST-003', 'vehicle_inquiry',      8000000, 91, 'qualified',  NULL,       'admin','sales_rep1', datetime('now', '-1 day'), datetime('now', '-5 days'), datetime('now', '-1 day')),
+('LEAD-004', 'CUST-004', 'quote_request',        2500000, 45, 'new',        NULL,       NULL,   'sales_rep2', NULL,                       datetime('now', '-7 days'), datetime('now', '-7 days')),
+('LEAD-005', 'CUST-005', 'financing_inquiry',    5000000, 78, 'proposal',   'CONV-001', 'admin','sales_rep2', datetime('now'),           datetime('now', '-4 days'), datetime('now')),
+('LEAD-006', 'CUST-006', 'test_drive_request',   6000000, 88, 'won',        NULL,       'admin','sales_rep2', datetime('now', '-1 day'), datetime('now', '-10 days'),datetime('now', '-1 day')),
+('LEAD-007', 'CUST-007', 'new_car_inquiry',       2000000, 35, 'lost',       NULL,       NULL,   'sales_rep3', datetime('now', '-14 days'),datetime('now', '-20 days'),datetime('now', '-14 days')),
+('LEAD-008', 'CUST-008', 'vehicle_inquiry',      3500000, 55, 'contacted',  NULL,       'admin','sales_rep1', datetime('now', '-3 days'), datetime('now', '-5 days'), datetime('now', '-3 days')),
+('LEAD-009', 'CUST-009', 'price_inquiry',        2800000, 48, 'new',        NULL,       NULL,   'sales_rep3', NULL,                       datetime('now', '-8 days'), datetime('now', '-8 days')),
+('LEAD-010', 'CUST-010', 'test_drive_request',   7000000, 92, 'qualified',  'CONV-010', 'admin','sales_rep2', datetime('now'),           datetime('now', '-2 days'), datetime('now'));
 
 -- リードアクティビティ（対応履歴）
 INSERT OR IGNORE INTO lead_activities (activity_id, lead_id, activity_type, notes, outcome, next_action, next_action_date, created_by, created_at) VALUES
@@ -253,4 +253,3 @@ INSERT OR IGNORE INTO employees (employee_id, user_name, employee_number, name, 
 ('EMP-012', 'admin_staff', '3001', '井上千秋', 'イノウチアキ', 'female', 'inoue@auto-dealer.com', 'administration', 'staff', 'operator', 'EMP-001', '2019-04-01', 'full_time', 'active'),
 -- パーツ部
 ('EMP-013', 'parts_staff', '4001', '林大樹', 'ハヤシダイキ', 'male', 'hayashi@auto-dealer.com', 'parts', 'staff', 'service_staff', 'EMP-008', '2021-04-01', 'full_time', 'active');
-

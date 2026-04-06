@@ -199,7 +199,9 @@ sections:
         '次のアクション: 受注確定 → doc_status を CO へ変更' AS ヒント
       FROM estimations e
       JOIN business_partners bp ON bp.id = e.business_partner_id
-      WHERE e.doc_status IN ('DR', 'IN') AND e.is_active = 1
+      WHERE e.doc_status IN ('DR', 'IN')
+        AND e.is_active = 1
+        AND (@isAdmin = 1 OR e.sales_rep = @currentUser)
 
       UNION ALL
 
@@ -254,7 +256,9 @@ sections:
         '次のアクション: 合意後 doc_status を CO・contract_status を AC へ変更'
       FROM contracts c
       JOIN business_partners bp ON bp.id = c.business_partner_id
-      WHERE c.doc_status IN ('DR', 'IN') AND c.is_active = 1
+      WHERE c.doc_status IN ('DR', 'IN')
+        AND c.is_active = 1
+        AND (@isAdmin = 1 OR c.sales_rep = @currentUser)
 
       ORDER BY 日付 ASC
     columns: [種類, 書類番号, 取引先, 状態, 日付, 金額, ヒント]
@@ -267,6 +271,7 @@ sections:
   # ─────────────────────────────────────────────
   - id: payment_alerts
     title: 請求 — 支払期限アラート
+    visibleToRoles: [finance, manager, admin]
     component: table
     sourceType: custom
     source: |
@@ -363,7 +368,9 @@ sections:
       FROM todos t
       LEFT JOIN todo_categories tc ON t.todo_category_id = tc.id
       LEFT JOIN contracts c ON t.linked_contract_id = c.id
-      WHERE t.todo_status IN ('NY', 'IP') AND t.is_active = 1
+      WHERE t.todo_status IN ('NY', 'IP')
+        AND t.is_active = 1
+        AND (@isAdmin = 1 OR t.assigned_to = @currentUser)
       ORDER BY
         CASE
           WHEN t.scheduled_end IS NOT NULL AND t.scheduled_end < date('now') THEN 1
@@ -380,7 +387,37 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────────
-  # 8. ドキュメントステータス別状況マップ
+  # 8. 会計状況（経理担当向け）
+  # ─────────────────────────────────────────────
+  - id: accounting_overview
+    title: 会計状況（経理担当向け）
+    visibleToRoles: [finance, admin, manager]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '未確定仕訳' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+             '📒' AS metric_icon,
+             NULL AS metric_delta
+      FROM journals WHERE doc_status = 'DR'
+      UNION ALL
+      SELECT '今月の売上認識合計',
+             CAST(ROUND(COALESCE(SUM(grand_total), 0) / 10000, 1) AS TEXT) || '万円',
+             '💹', NULL
+      FROM recognitions
+      WHERE doc_status = 'CO'
+        AND strftime('%Y-%m', date_acct) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 9. ドキュメントステータス別状況マップ
   #    （今どの書類が何件あるかをひと目で確認）
   # ─────────────────────────────────────────────
   - id: document_status_map
@@ -429,7 +466,7 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────────
-  # 9. ステータスコード辞書（操作リファレンス）
+  # 10. ステータスコード辞書（操作リファレンス）
   # ─────────────────────────────────────────────
   - id: status_reference
     title: ステータスコード リファレンス

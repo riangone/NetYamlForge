@@ -1,3 +1,4 @@
+@using System
 @using NetYamlForge.Models
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
@@ -9,6 +10,8 @@
     var localizedTitle = T($"{pageKeyBase}.title", pageDef.Title);
     ViewData["Title"] = localizedTitle;
     ViewData["ActivePage"] = "Page";
+    var userRoles = (ViewData["UserRoles"] as IReadOnlyList<string>) ?? Array.Empty<string>();
+    var isAdmin = (bool)(ViewData["IsAdmin"] ?? false);
 
     // グラフ系コンポーネントが存在するか判定（Chart.js ロード制御）
     var chartComponents = new HashSet<string> { "bar_chart", "line_chart", "pie_chart", "radar_chart" };
@@ -32,6 +35,12 @@
 
     @foreach (var sec in pageDef.Sections)
     {
+        if (sec.VisibleToRoles?.Count > 0 && !isAdmin)
+        {
+            var hasRole = sec.VisibleToRoles.Any(r => userRoles.Contains(r, StringComparer.OrdinalIgnoreCase));
+            if (!hasRole) continue;
+        }
+
         var sectionData = Model.TryGetValue(sec.Id, out var sd)
             ? sd : (Enumerable.Empty<Dictionary<string, object>>(), 0);
         var rows = sectionData.Item1.ToList();

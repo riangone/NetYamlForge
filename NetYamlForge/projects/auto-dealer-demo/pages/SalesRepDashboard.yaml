@@ -7,6 +7,7 @@ sections:
   # ─────────────────────────────────────────
   - id: my_kpi
     title: 自分の KPI（今月）
+    visibleToRoles: [sales_rep, sales_manager]
     component: stat_cards
     sourceType: custom
     source: |
@@ -15,18 +16,18 @@ sections:
              '📊' AS metric_icon,
              NULL AS metric_delta
       FROM sales_leads
-      WHERE assigned_to_user_id = '@CurrentUser'
+      WHERE assigned_sales = @currentUser
         AND status NOT IN ('won', 'lost')
       UNION ALL
       SELECT '今月成約', CAST(COUNT(*) AS TEXT), '🏆', NULL
       FROM sales_leads
-      WHERE assigned_to_user_id = '@CurrentUser'
+      WHERE assigned_sales = @currentUser
         AND status = 'won'
         AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
       UNION ALL
       SELECT '今月新規リード', CAST(COUNT(*) AS TEXT), '🆕', NULL
       FROM sales_leads
-      WHERE assigned_to_user_id = '@CurrentUser'
+      WHERE assigned_sales = @currentUser
         AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
       UNION ALL
       SELECT '成約率',
@@ -35,18 +36,18 @@ sections:
                NULLIF(COUNT(*), 0), 1
              ) AS TEXT) || '%',
              '💰', NULL
-      FROM sales_leads WHERE assigned_to_user_id = '@CurrentUser'
+      FROM sales_leads WHERE assigned_sales = @currentUser
       UNION ALL
       SELECT '停滞リード', CAST(COUNT(*) AS TEXT), '⚠️', NULL
       FROM sales_leads
-      WHERE assigned_to_user_id = '@CurrentUser'
+      WHERE assigned_sales = @currentUser
         AND status NOT IN ('won', 'lost')
         AND (last_contact_at IS NULL
           OR CAST((JULIANDAY('now') - JULIANDAY(last_contact_at)) AS INTEGER) >= 7)
       UNION ALL
       SELECT 'フォロー予定（今週）', CAST(COUNT(*) AS TEXT), '📅', NULL
       FROM lead_activities
-      WHERE created_by = '@CurrentUser'
+      WHERE created_by = @currentUser
         AND next_action IS NOT NULL
         AND next_action_date IS NOT NULL
         AND date(next_action_date) BETWEEN date('now') AND date('now', '+7 days')
@@ -64,6 +65,7 @@ sections:
   # ─────────────────────────────────────────
   - id: my_hot_leads
     title: 🔥 自分のホットリード（スコア 70+）
+    visibleToRoles: [sales_rep, sales_manager]
     component: table
     sourceType: custom
     source: |
@@ -95,7 +97,7 @@ sections:
              COALESCE(c.preferred_contact, '−') AS 希望連絡手段
       FROM sales_leads l
       INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE l.assigned_to_user_id = '@CurrentUser'
+      WHERE l.assigned_sales = @currentUser
         AND l.lead_score >= 70
         AND l.status NOT IN ('won', 'lost')
       ORDER BY l.lead_score DESC
@@ -111,6 +113,7 @@ sections:
   # ─────────────────────────────────────────
   - id: followup_reminders
     title: 📅 フォローアップリマインダー（今週期限）
+    visibleToRoles: [sales_rep, sales_manager]
     component: table
     sourceType: custom
     source: |
@@ -127,7 +130,7 @@ sections:
       FROM lead_activities a
       INNER JOIN sales_leads l ON a.lead_id = l.lead_id
       INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE a.created_by = '@CurrentUser'
+      WHERE a.created_by = @currentUser
         AND a.next_action IS NOT NULL
         AND a.next_action_date IS NOT NULL
         AND date(a.next_action_date) <= date('now', '+7 days')
@@ -141,6 +144,7 @@ sections:
   # ─────────────────────────────────────────
   - id: my_leads_all
     title: 担当リード一覧
+    visibleToRoles: [sales_rep, sales_manager]
     component: table
     sourceType: custom
     source: |
@@ -164,7 +168,7 @@ sections:
              l.created_at AS 登録日
       FROM sales_leads l
       INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE l.assigned_to_user_id = '@CurrentUser'
+      WHERE l.assigned_sales = @currentUser
       ORDER BY
         CASE l.status WHEN 'new' THEN 1 WHEN 'contacted' THEN 2 WHEN 'qualified' THEN 3 WHEN 'proposal' THEN 4 ELSE 5 END,
         l.lead_score DESC
@@ -180,6 +184,7 @@ sections:
   # ─────────────────────────────────────────
   - id: recent_activities
     title: 最近の活動履歴（直近 15 件）
+    visibleToRoles: [sales_rep, sales_manager]
     component: table
     sourceType: custom
     source: |
@@ -212,7 +217,7 @@ sections:
       FROM lead_activities a
       INNER JOIN sales_leads l ON a.lead_id = l.lead_id
       INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE a.created_by = '@CurrentUser'
+      WHERE a.created_by = @currentUser
       ORDER BY a.created_at DESC
       LIMIT 15
     columns: [ID, 顧客名, アクション種別, 結果, メモ, 日時]

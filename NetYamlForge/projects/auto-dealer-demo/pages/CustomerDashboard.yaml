@@ -5,6 +5,7 @@ sections:
   # ─── 顧客情報サマリー ───
   - id: my_info
     title: 🙋 ようこそ
+    visibleToRoles: [customer]
     component: stat_cards
     sourceType: custom
     source: |
@@ -13,6 +14,7 @@ sections:
                (SELECT strftime('%m/%d %H:%M', preferred_date)
                 FROM service_appointments
                 WHERE status IN ('pending','confirmed')
+                  AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
                 ORDER BY preferred_date ASC LIMIT 1),
                'なし'
              ) AS metric_value,
@@ -20,10 +22,14 @@ sections:
              NULL AS metric_delta
       UNION ALL
       SELECT '進行中の商談', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🚗', NULL
-      FROM sales_leads WHERE status NOT IN ('won','lost')
+      FROM sales_leads
+      WHERE status NOT IN ('won','lost')
+        AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
       UNION ALL
       SELECT '未解決のサービス依頼', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🔧', NULL
-      FROM service_requests WHERE status IN ('open','in_progress')
+      FROM service_requests
+      WHERE status IN ('open','in_progress')
+        AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -36,6 +42,7 @@ sections:
   # ─── 直近の予約 ───
   - id: upcoming_appointments
     title: 📅 直近の予約
+    visibleToRoles: [customer]
     component: table
     sourceType: custom
     source: |
@@ -57,7 +64,9 @@ sections:
         END AS ステータス,
         COALESCE(a.notes, '') AS 備考
       FROM service_appointments a
+      JOIN customers cu ON a.customer_id = cu.customer_id
       WHERE a.status IN ('pending','confirmed')
+        AND cu.login_username = @currentUser
       ORDER BY a.preferred_date ASC
       LIMIT 5
     columns: [日時, サービス, ステータス, 備考]
@@ -68,6 +77,7 @@ sections:
   # ─── 最近のサービス履歴 ───
   - id: service_history
     title: 🔧 最近のサービス履歴
+    visibleToRoles: [customer]
     component: table
     sourceType: custom
     source: |
@@ -83,7 +93,9 @@ sections:
         '✔️ 完了' AS ステータス,
         COALESCE(a.estimated_cost, 0) || ' 円' AS 費用
       FROM service_appointments a
+      JOIN customers cu ON a.customer_id = cu.customer_id
       WHERE a.status = 'completed'
+        AND cu.login_username = @currentUser
       ORDER BY a.preferred_date DESC
       LIMIT 5
     columns: [日付, サービス, ステータス, 費用]
@@ -91,9 +103,38 @@ sections:
     editable: false
     readOnly: true
 
+  # ─── 進行中の商談 ───
+  - id: my_leads
+    title: 🚗 進行中の商談
+    visibleToRoles: [customer]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        sl.vehicle_interest AS 車種,
+        CASE
+          WHEN sl.budget IS NOT NULL THEN CAST(sl.budget / 10000 AS TEXT) || '万円'
+          ELSE '—'
+        END AS 価格目安,
+        CASE sl.status
+          WHEN 'new'         THEN '新規問合せ'
+          WHEN 'contacted'   THEN '連絡済み'
+          WHEN 'negotiating' THEN '商談中'
+          ELSE sl.status
+        END AS 状況
+      FROM sales_leads sl
+      JOIN customers cu ON sl.customer_id = cu.customer_id
+      WHERE cu.login_username = @currentUser
+        AND sl.status NOT IN ('won', 'lost')
+    columns: [車種, 価格目安, 状況]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
   # ─── おすすめ車両 ───
   - id: recommended_vehicles
     title: 🚗 おすすめ在庫車両
+    visibleToRoles: [customer]
     component: card_list
     sourceType: custom
     source: |

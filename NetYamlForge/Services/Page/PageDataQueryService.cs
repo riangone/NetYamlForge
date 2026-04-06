@@ -29,12 +29,14 @@ public sealed class PageDataQueryService
     /// </summary>
     public Task<(IEnumerable<Dictionary<string, object>> Rows, int Total)> LoadSectionDataAsync(
         SectionDefinition section,
-        IDictionary<string, string> allFilters)
-        => GetSectionDataAsync(section, ExtractSectionFilters(section, allFilters));
+        IDictionary<string, string> allFilters,
+        PageUserContext? userContext = null)
+        => GetSectionDataAsync(section, ExtractSectionFilters(section, allFilters), userContext);
 
     public async Task<Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>> LoadPageDataAsync(
         PageDefinition page,
-        IDictionary<string, string> filters)
+        IDictionary<string, string> filters,
+        PageUserContext? userContext = null)
     {
         var result = new Dictionary<string, (IEnumerable<Dictionary<string, object>>, int)>();
 
@@ -42,7 +44,10 @@ public sealed class PageDataQueryService
         {
             try
             {
-                var (rows, total) = await GetSectionDataAsync(section, ExtractSectionFilters(section, filters));
+                var (rows, total) = await GetSectionDataAsync(
+                    section,
+                    ExtractSectionFilters(section, filters),
+                    userContext);
                 result[section.Id] = (rows, total);
             }
             catch (Exception ex)
@@ -77,9 +82,11 @@ public sealed class PageDataQueryService
 
     private async Task<(IEnumerable<Dictionary<string, object>> Rows, int Total)> GetSectionDataAsync(
         SectionDefinition section,
-        IDictionary<string, string?> filters)
+        IDictionary<string, string?> filters,
+        PageUserContext? userContext = null)
     {
         var param = new DynamicParameters();
+        InjectUserContext(param, userContext);
         string sql;
         string countSql;
 
@@ -241,5 +248,19 @@ public sealed class PageDataQueryService
         return where;
     }
 
-}
+    /// <summary>
+    /// DynamicParameters にログインユーザー情報を注入する。
+    /// SQL 内で @currentUser / @isAdmin 等として参照可能になる。
+    /// </summary>
+    private static void InjectUserContext(DynamicParameters param, PageUserContext? ctx)
+    {
+        var user = ctx ?? PageUserContext.Anonymous;
+        param.Add("currentUser", user.UserName);
+        param.Add("currentUserDisplayName", user.DisplayName);
+        param.Add("currentUserId", user.UserId);
+        param.Add("currentUserRole", user.Roles.FirstOrDefault() ?? "");
+        param.Add("isAdmin", user.IsAdmin ? 1 : 0);
+        param.Add("isAuthenticated", user.IsAuthenticated ? 1 : 0);
+    }
 
+}

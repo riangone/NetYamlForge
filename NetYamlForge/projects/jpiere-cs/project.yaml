@@ -9,7 +9,7 @@ database:
 
 features:
   multiLanguage: true
-  userAuthentication: false
+  userAuthentication: true
   dashboard: true
   pages: true
   crud: true

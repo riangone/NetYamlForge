@@ -117,7 +117,7 @@ sections:
       INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
       INNER JOIN customers c ON conv.customer_id = c.customer_id
       WHERE h.status IN ('assigned', 'in_progress')
-        AND h.assigned_to_user_id = '@CurrentUser'
+        AND h.assigned_to_user_id = @currentUser
       ORDER BY h.assigned_at DESC
     columns: [ID, 顧客名, ステータス, 優先度, 部門, 開始時間, 経過時間]
     pageSize: 5

@@ -112,15 +112,17 @@ public class PageController : BaseProjectController
             }
         }
 
-        var model = await _pageDataQueryService.LoadPageDataAsync(pageDef, filters);
+        var userCtx = BuildUserContext();
+        var model = await _pageDataQueryService.LoadPageDataAsync(pageDef, filters, userCtx);
 
         ViewData["PageDef"] = pageDef;
         ViewData["PageName"] = pageName;
         ViewData["Project"] = proj.Name;
         ViewData["Title"] = pageDef.Title;
         ViewData["ProjectCalendar"] = proj.Calendar;
-        ViewData["IsAdmin"] = UserIsAdmin();
+        ViewData["IsAdmin"] = userCtx.IsAdmin;
         ViewData["SavedViews"] = savedViews;
+        ViewData["UserRoles"] = userCtx.Roles;
 
         // プロジェクト固有のビューを検索
         var projectViewPath = Path.Combine(proj.ProjectDir, "views", pageName + ".cshtml");
@@ -165,8 +167,11 @@ public class PageController : BaseProjectController
             return NotFound();
 
         var filters = Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
+        var userCtx = BuildUserContext();
+        if (!CanViewSection(section, userCtx))
+            return Forbid();
         return PartialView("Components/_SectionTable",
-            await BuildSectionRenderModelAsync(proj, section, pageName, filters));
+            await BuildSectionRenderModelAsync(proj, section, pageName, filters, userCtx));
     }
 
     // GET /{project}/Page/{pageName}/section/{sectionId}/row-form
@@ -482,9 +487,10 @@ public class PageController : BaseProjectController
         ProjectInfo proj,
         SectionDefinition section,
         string pageName,
-        IDictionary<string, string> allFilters)
+        IDictionary<string, string> allFilters,
+        PageUserContext? userContext = null)
     {
-        var (rows, total) = await _pageDataQueryService.LoadSectionDataAsync(section, allFilters);
+        var (rows, total) = await _pageDataQueryService.LoadSectionDataAsync(section, allFilters, userContext);
         return new SectionRenderModel
         {
             Sec = section,
@@ -508,7 +514,12 @@ public class PageController : BaseProjectController
             Response.Headers["HX-Retarget"] = $"#section-{sectionId}";
             Response.Headers["HX-Reswap"] = "innerHTML";
             return PartialView("Components/_SectionTable",
-                await BuildSectionRenderModelAsync(proj, section, pageName, GetFiltersFromHtmxCurrentUrl()));
+                await BuildSectionRenderModelAsync(
+                    proj,
+                    section,
+                    pageName,
+                    GetFiltersFromHtmxCurrentUrl(),
+                    BuildUserContext()));
         }
         return Redirect($"/{proj.Name}/Page/{pageName}");
     }
@@ -520,6 +531,27 @@ public class PageController : BaseProjectController
 
         return string.Equals(targetTable, "AppUser", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(targetTable, "AuditLog", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private PageUserContext BuildUserContext() => new(
+        UserName: User.Identity?.Name ?? "",
+        DisplayName: User.FindFirst(ClaimTypes.GivenName)?.Value ?? "",
+        UserId: User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "",
+        Roles: User.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList(),
+        IsAdmin: UserIsAdmin(),
+        IsAuthenticated: User.Identity?.IsAuthenticated == true
+    );
+
+    private static bool CanViewSection(SectionDefinition section, PageUserContext userContext)
+    {
+        if (section.VisibleToRoles == null || section.VisibleToRoles.Count == 0)
+            return true;
+        if (userContext.IsAdmin)
+            return true;
+        return userContext.HasAnyRole(section.VisibleToRoles);
     }
 
 }
