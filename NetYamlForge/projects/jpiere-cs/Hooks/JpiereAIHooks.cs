@@ -107,7 +107,8 @@ public class AutoEscalationHook
         // 感情スコアが閾値未満の場合、エスカレーションを提案
         if (sentimentScore < _sentimentThreshold)
         {
-            var conversationId = data.GetValueOrDefault("conversation_id")?.ToString();
+            data.TryGetValue("conversation_id", out var convIdObj);
+            var conversationId = convIdObj?.ToString();
             if (string.IsNullOrEmpty(conversationId))
             {
                 await Task.CompletedTask;
@@ -140,10 +141,15 @@ public class AutoCreateTodoFromAiHook
         // AI 会話から TODO を自動生成するロジック
         // 例：有効期限切れ契約の更新TODO、未請求の請求書作成TODO など
 
-        var conversationId = data.GetValueOrDefault("conversation_id")?.ToString();
-        var userId = data.GetValueOrDefault("user_id")?.ToString();
-        var userRole = data.GetValueOrDefault("user_role")?.ToString();
-        var lastIntent = data.GetValueOrDefault("last_intent")?.ToString();
+        data.TryGetValue("conversation_id", out var convIdObj);
+        data.TryGetValue("user_id", out var userIdObj);
+        data.TryGetValue("user_role", out var userRoleObj);
+        data.TryGetValue("last_intent", out var lastIntentObj);
+        
+        var conversationId = convIdObj?.ToString();
+        var userId = userIdObj?.ToString();
+        var userRole = userRoleObj?.ToString();
+        var lastIntent = lastIntentObj?.ToString();
 
         if (string.IsNullOrEmpty(conversationId) || string.IsNullOrEmpty(userId))
         {
@@ -180,7 +186,8 @@ public class LinkAiToBusinessEntityHook
         // 会話内容から業務エンティティを自動検出・関連付け
         // 例：メッセージ内に契約番号が含まれていれば linked_contract_id を設定
 
-        var conversationId = data.GetValueOrDefault("conversation_id")?.ToString();
+        data.TryGetValue("conversation_id", out var convIdObj);
+        var conversationId = convIdObj?.ToString();
         if (string.IsNullOrEmpty(conversationId))
         {
             await Task.CompletedTask;
@@ -243,7 +250,8 @@ public class UpdateSentimentTrendHook
     {
         if (hookType != "afterUpdate") return;
 
-        var conversationId = data.GetValueOrDefault("conversation_id")?.ToString();
+        data.TryGetValue("conversation_id", out var convIdObj);
+        var conversationId = convIdObj?.ToString();
         if (string.IsNullOrEmpty(conversationId))
         {
             await Task.CompletedTask;
@@ -276,9 +284,13 @@ public class AutoAssignHandoverHook
     {
         if (hookType != "afterCreate") return;
 
-        var handoverId = data.GetValueOrDefault("handover_id")?.ToString();
-        var targetDept = data.GetValueOrDefault("target_department")?.ToString();
-        var priority = data.GetValueOrDefault("priority")?.ToString();
+        data.TryGetValue("handover_id", out var handoverIdObj);
+        data.TryGetValue("target_department", out var targetDeptObj);
+        data.TryGetValue("priority", out var priorityObj);
+        
+        var handoverId = handoverIdObj?.ToString();
+        var targetDept = targetDeptObj?.ToString();
+        var priority = priorityObj?.ToString();
 
         if (string.IsNullOrEmpty(handoverId) || string.IsNullOrEmpty(targetDept))
         {
@@ -318,8 +330,11 @@ public class UpdateResolutionMetricsHook
     {
         if (hookType != "afterUpdate") return;
 
-        var handoverId = data.GetValueOrDefault("handover_id")?.ToString();
-        var status = data.GetValueOrDefault("status")?.ToString();
+        data.TryGetValue("handover_id", out var handoverIdObj);
+        data.TryGetValue("status", out var statusObj);
+        
+        var handoverId = handoverIdObj?.ToString();
+        var status = statusObj?.ToString();
 
         if (string.IsNullOrEmpty(handoverId) || status != "completed")
         {
