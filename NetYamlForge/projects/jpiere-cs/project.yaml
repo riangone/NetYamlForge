@@ -16,6 +16,7 @@ features:
   api: true
   export: true
   batchJobs: true
+  aiAssistant: true
 
 theme:
   primaryColor: "#1a5276"
@@ -24,3 +25,152 @@ theme:
 
 layout:
   dashboardTheme: workspace
+
+# AI アシスタント設定
+aiConfig:
+  enabled: true
+  configPath: ai-config.yaml
+  skillsPath: skills/jpiere
+  defaultProvider: qwen
+  businessHours: "月〜金 9:00-18:00"
+  
+  # エスカレーションしきい値
+  escalationSentimentThreshold: -0.5
+  lowConfidenceThreshold: 0.6
+  
+  # 機能フラグ
+  enableProactiveSuggestions: true
+  enableSentimentAnalysis: true
+  enableEscalation: true
+  enableAutoTodoCreation: true
+
+# 役割定義
+roles:
+  - id: employee
+    name: 一般社員
+    description: 全般的な業務サポート（契約・見積・TODOの照会）
+    redirectUrl: /Page/MyPage
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere の AI 業務アシスタントです。📋\n契約・見積・TODO の照会など、業務全般を支援します！"
+    
+  - id: contract_manager
+    name: 契約担当
+    description: 契約・見積・請求の作成・管理・分析
+    redirectUrl: /Page/ContractDetail
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere 契約担当 AI アシスタントです。💼\n契約・見積・請求の作成・分析をお手伝いします！"
+    
+  - id: accountant
+    name: 会計担当
+    description: 仕訳・会計・入金・支払・資金管理
+    redirectUrl: /Page/AccountBalance
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere 会計担当 AI アシスタントです。💰\n仕訳・会計・入金・支払の管理を支援します！"
+    
+  - id: purchaser
+    name: 購買担当
+    description: 購買フロー（発注・受入・AP請求・支払）
+    redirectUrl: /Entity/PurchaseOrder
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere 購買担当 AI アシスタントです。📦\n発注・受入・AP請求・支払のフローを支援します！"
+    
+  - id: approver
+    name: 承認者
+    description: 承認ワークフローの確認・承認・却下
+    redirectUrl: /Page/ApprovalInquiry
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere 承認 AI アシスタントです。✅\n承認ワークフローの確認・処理を支援します！"
+    
+  - id: admin
+    name: 管理者
+    description: システム管理・マスタメンテナンス・権限管理
+    redirectUrl: /Page/Dashboard
+    aiEnabled: true
+    aiWelcomeMessage: "こんにちは！JPiere 管理者 AI アシスタントです。⚙️\nシステム全体的管理・設定変更を支援します！"
+
+# ナビゲーションメニュー
+navigation:
+  groups:
+    - name: 主要機能
+      items:
+        - label: ダッシュボード
+          url: /Page/Dashboard
+          icon: dashboard
+        - label: 個人工作台
+          url: /Page/MyPage
+          icon: user
+        - label: AI ダッシュボード
+          url: /Page/AIDashboard
+          icon: robot
+          roles: [admin, contract_manager, accountant]
+    
+    - name: 契約管理
+      items:
+        - label: 契約一覧
+          url: /Entity/contracts
+          icon: file-contract
+        - label: 見積一覧
+          url: /Entity/estimations
+          icon: file-invoice
+        - label: 請求一覧
+          url: /Entity/bills
+          icon: file-invoice-dollar
+    
+    - name: 会計
+      items:
+        - label: 仕訳一覧
+          url: /Entity/journals
+          icon: book
+        - label: 科目残高
+          url: /Page/AccountBalance
+          icon: chart-bar
+        - label: 試算平衡表
+          url: /Page/TrialBalance
+          icon: balance-scale
+    
+    - name: 購買
+      items:
+        - label: 発注書
+          url: /Entity/purchase_orders
+          icon: shopping-cart
+        - label: 入荷確認
+          url: /Entity/purchase_receipts
+          icon: truck-loading
+        - label: 仕入請求
+          url: /Entity/ap_invoices
+          icon: file-invoice
+    
+    - name: 承認
+      items:
+        - label: 承認依頼
+          url: /Entity/approval_requests
+          icon: check-circle
+        - label: 承認照会
+          url: /Page/ApprovalInquiry
+          icon: clipboard-check
+    
+    - name: AI・分析
+      items:
+        - label: AI 会話詳細
+          url: /Page/ChatDetail
+          icon: comments
+          roles: [admin, contract_manager]
+        - label: ナレッジベース
+          url: /Entity/ai_knowledge
+          icon: book-open
+          roles: [admin]
+        - label: 引継ぎ管理
+          url: /Entity/ai_handovers
+          icon: exchange-alt
+          roles: [admin, contract_manager]
+    
+    - name: システム
+      items:
+        - label: ユーザー管理
+          url: /Entity/users
+          icon: users
+          roles: [admin]
+        - label: 権限管理
+          url: /Entity/roles
+          icon: user-shield
+          roles: [admin]

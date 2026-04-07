@@ -1,0 +1,287 @@
+# AI 人工引継ぎ定義
+# バージョン: 1.0
+# 作成日: 2026-04-07
+
+name: ai_handovers
+displayName: "AI 人工引継ぎ"
+description: "AI から担当者への引継ぎリクエストを管理・追跡"
+
+# データベース設定
+tableName: ai_handovers
+primaryKey: id
+
+# 機能設定
+features:
+  searchable: true
+  filterable: true
+  sortable: true
+  exportable: true
+  apiEnabled: true
+  auditLog: true
+
+# フィールド定義
+fields:
+  # 基本フィールド
+  - name: id
+    type: integer
+    primaryKey: true
+    autoIncrement: true
+    displayName: "ID"
+    hidden: true
+
+  - name: handover_id
+    type: string
+    maxLength: 64
+    displayName: "引継ぎ ID"
+    required: true
+    unique: true
+    description: "一意の引継ぎ識別子 (例: HO-xxxx)"
+    index: true
+
+  # 関連情報
+  - name: conversation_id
+    type: string
+    maxLength: 64
+    displayName: "会話 ID"
+    required: true
+    description: "引継ぎ対象の会話 ID"
+    foreignKey:
+      table: ai_conversations
+      column: conversation_id
+    index: true
+
+  - name: user_id
+    type: string
+    maxLength: 64
+    displayName: "ユーザー ID"
+    required: true
+    description: "引継ぎを要求したユーザー ID"
+    index: true
+
+  - name: user_role
+    type: string
+    maxLength: 32
+    displayName: "ユーザー役割"
+    lookup:
+      values:
+        - employee: "一般社員"
+        - contract_manager: "契約担当"
+        - accountant: "会計担当"
+        - purchaser: "購買担当"
+        - approver: "承認者"
+        - admin: "管理者"
+        - guest: "ゲスト"
+    description: "引継ぎ要求時のユーザー役割"
+
+  # 引継ぎ情報
+  - name: reason
+    type: string
+    maxLength: 128
+    displayName: "引継ぎ理由"
+    required: true
+    lookup:
+      values:
+        - complaint: "苦情対応"
+        - urgent: "緊急対応"
+        - complex_query: "複雑な問い合わせ"
+        - low_confidence: "AI 信頼度低下"
+        - negative_sentiment: "否定的感情検出"
+        - manual_request: "ユーザー手動作業"
+        - system_error: "システムエラー"
+    description: "引継ぎ理由"
+    index: true
+
+  - name: reason_detail
+    type: text
+    displayName: "理由詳細"
+    description: "引継ぎ理由の詳細説明"
+    searchable: true
+
+  - name: priority
+    type: string
+    maxLength: 16
+    displayName: "優先度"
+    required: true
+    defaultValue: "normal"
+    lookup:
+      values:
+        - high: "高（即時対応）"
+        - medium: "中（30分以内）"
+        - low: "低（営業日以内）"
+    description: "引継ぎ優先度"
+    index: true
+
+  - name: target_department
+    type: string
+    maxLength: 32
+    displayName: "対象部門"
+    required: true
+    lookup:
+      values:
+        - contract: "契約部門"
+        - billing: "請求部門"
+        - accounting: "会計部門"
+        - purchasing: "購買部門"
+        - management: "管理部門"
+        - support: "サポート部門"
+    description: "引継ぎ先部門"
+    index: true
+
+  # 対応情報
+  - name: assigned_to
+    type: string
+    maxLength: 64
+    displayName: "担当者"
+    description: "引継ぎ先担当者 ID"
+    index: true
+
+  - name: status
+    type: string
+    maxLength: 16
+    displayName: "ステータス"
+    required: true
+    defaultValue: "pending"
+    lookup:
+      values:
+        - pending: "対応待ち"
+        - in_progress: "対応中"
+        - completed: "対応完了"
+        - closed: "クローズ"
+        - cancelled: "キャンセル"
+    description: "引継ぎステータス"
+    index: true
+
+  - name: assigned_at
+    type: datetime
+    displayName: "割り当て日時"
+    description: "担当者割り当て時刻"
+
+  - name: started_at
+    type: datetime
+    displayName: "対応開始日時"
+    description: "対応開始時刻"
+
+  - name: completed_at
+    type: datetime
+    displayName: "対応完了日時"
+    description: "対応完了時刻"
+
+  - name: notes
+    type: text
+    displayName: "対応メモ"
+    description: "対応内容のメモ"
+    searchable: true
+
+  # 分析情報
+  - name: sentiment_score
+    type: decimal
+    precision: 5
+    scale: 4
+    displayName: "感情スコア"
+    description: "引継ぎ時の感情スコア (-1.0 〜 +1.0)"
+    defaultValue: 0.0
+
+  - name: resolution_time_minutes
+    type: integer
+    displayName: "解決時間（分）"
+    description: "引継ぎから解決までの時間（分）"
+
+  - name: user_satisfaction
+    type: integer
+    displayName: "ユーザー満足度"
+    description: "引継ぎ後のユーザー評価 (1-5)"
+    lookup:
+      values:
+        - 1: "★ (非常に悪い)"
+        - 2: "★★ (悪い)"
+        - 3: "★★★ (普通)"
+        - 4: "★★★★ (良い)"
+        - 5: "★★★★★ (非常に良い)"
+
+  # 時間情報
+  - name: created_at
+    type: datetime
+    displayName: "作成日時"
+    required: true
+    autoGenerate: true
+    index: true
+
+  - name: updated_at
+    type: datetime
+    displayName: "更新日時"
+    required: true
+    autoGenerate: true
+
+# リスト表示設定
+listView:
+  columns:
+    - field: handover_id
+      width: 120
+    - field: reason
+      width: 120
+    - field: priority
+      width: 100
+    - field: target_department
+      width: 120
+    - field: assigned_to
+      width: 120
+    - field: status
+      width: 100
+    - field: sentiment_score
+      width: 100
+    - field: created_at
+      width: 150
+
+  filters:
+    - field: status
+      type: dropdown
+    - field: priority
+      type: dropdown
+    - field: target_department
+      type: dropdown
+    - field: assigned_to
+      type: dropdown
+    - field: created_at
+      type: date_range
+
+  sorting:
+    default:
+      field: priority
+      direction: desc
+    options:
+      - field: created_at
+        direction: desc
+      - field: priority
+        direction: desc
+      - field: status
+        direction: asc
+
+# バリデーション
+validation:
+  rules:
+    - field: handover_id
+      required: true
+      pattern: "^HO-[a-zA-Z0-9]+$"
+      message: "引継ぎ ID は HO-xxxx 形式で指定してください"
+    
+    - field: sentiment_score
+      min: -1.0
+      max: 1.0
+      message: "感情スコアは -1.0 から +1.0 の範囲で指定してください"
+    
+    - field: user_satisfaction
+      min: 1
+      max: 5
+      message: "満足度は 1 から 5 の範囲で指定してください"
+
+# フック設定
+hooks:
+  afterCreate:
+    - name: auto_assign_handover
+      description: "引継ぎ自動割り当て"
+    - name: notify_target_department
+      description: "対象部門に通知"
+  
+  afterUpdate:
+    - name: update_resolution_metrics
+      description: "解決指標更新"

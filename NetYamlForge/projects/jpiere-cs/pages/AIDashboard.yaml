@@ -1,0 +1,271 @@
+title: JPiere AI ダッシュボード
+description: "JPiere 契約サービス AI アシスタントの概要ページ - 対話状況・エスカレーション・役割別利用状況を表示"
+
+sections:
+  # ─────────────────────────────────────────
+  # AI 利用状況 KPI カード
+  # ─────────────────────────────────────────
+  - id: kpi_summary
+    title: AI 利用状況 KPI
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'アクティブセッション' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_conversations WHERE status = 'active'
+      UNION ALL
+      SELECT 'エスカレーション（保留）', CAST(COUNT(*) AS TEXT), '⚠️', NULL
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '今月の対話数', CAST(COUNT(*) AS TEXT), '📊', NULL
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', 'start of month')
+      UNION ALL
+      SELECT '平均感情スコア',
+             CAST(ROUND(AVG(sentiment_score), 2) AS TEXT),
+             '😊', NULL
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-7 days')
+      UNION ALL
+      SELECT 'AI 解決率',
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'completed' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '✅', NULL
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-30 days')
+      UNION ALL
+      SELECT 'ナレッジベース', CAST(COUNT(*) AS TEXT), '📚', NULL
+      FROM ai_knowledge WHERE status = 'active'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 役割別対話数（円グラフ）
+  # ─────────────────────────────────────────
+  - id: role_distribution
+    title: 役割別対話数
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE user_role
+               WHEN 'employee'        THEN '👤 一般社員'
+               WHEN 'contract_manager' THEN '💼 契約担当'
+               WHEN 'accountant'      THEN '💰 会計担当'
+               WHEN 'purchaser'       THEN '📦 購買担当'
+               WHEN 'approver'        THEN '✅ 承認者'
+               WHEN 'admin'           THEN '⚙️ 管理者'
+               ELSE                        '👥 その他'
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-30 days')
+      GROUP BY user_role
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 感情分析トレンド（折れ線グラフ）
+  # ─────────────────────────────────────────
+  - id: sentiment_trend
+    title: 感情スコアトレンド（直近 7 日）
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT date(started_at) AS label,
+             ROUND(AVG(sentiment_score), 2) AS value
+      FROM ai_conversations
+      WHERE date(started_at) >= date('now', '-7 days')
+      GROUP BY date(started_at)
+      ORDER BY date(started_at) ASC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # エスカレーション状況
+  # ─────────────────────────────────────────
+  - id: escalation_status
+    title: エスカレーション状況
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE status
+               WHEN 'pending'     THEN '⏰ 対応待ち'
+               WHEN 'in_progress' THEN '🔧 対応中'
+               WHEN 'completed'   THEN '✔ 完了'
+               WHEN 'closed'      THEN '❌ クローズ'
+               ELSE status
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_handovers
+      WHERE date(escalated_at) >= date('now', '-30 days')
+      GROUP BY status
+      ORDER BY CASE status
+        WHEN 'pending'     THEN 1
+        WHEN 'in_progress' THEN 2
+        WHEN 'completed'   THEN 3
+        ELSE 4 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(239, 68, 68, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 保留中エスカレーション
+  # ─────────────────────────────────────────
+  - id: pending_escalations
+    title: 保留中エスカレーション
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_id AS 引継ぎID,
+             h.conversation_id AS 会話ID,
+             CASE h.reason
+               WHEN 'complaint'       THEN '😡 苦情'
+               WHEN 'urgent'          THEN '🚨 緊急'
+               WHEN 'complex_query'   THEN '❓ 複雑な問い合わせ'
+               WHEN 'low_confidence'  THEN '🤔 低信頼度'
+               WHEN 'negative_sentiment' THEN '😞 否定的感情'
+               ELSE                        h.reason
+             END AS 理由,
+             CASE h.priority
+               WHEN 'high'   THEN '🔴 高'
+               WHEN 'medium' THEN '🟡 中'
+               WHEN 'low'    THEN '🟢 低'
+               ELSE               h.priority
+             END AS 優先度,
+             CASE h.target_department
+               WHEN 'contract'   THEN '💼 契約'
+               WHEN 'billing'    THEN '💰 請求'
+               WHEN 'accounting' THEN '📊 会計'
+               WHEN 'purchasing' THEN '📦 購買'
+               WHEN 'management' THEN '👔 管理'
+               ELSE                   h.target_department
+             END AS 部門,
+             h.handover_notes AS メモ,
+             h.escalated_at AS エスカレーション日時
+      FROM ai_handovers h
+      WHERE h.status = 'pending'
+      ORDER BY CASE h.priority
+        WHEN 'high'   THEN 1
+        WHEN 'medium' THEN 2
+        WHEN 'low'    THEN 3
+        ELSE 4 END,
+        h.escalated_at DESC
+      LIMIT 10
+    columns: [引継ぎID, 会話ID, 理由, 優先度, 部門, メモ, エスカレーション日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 最近の AI 対話
+  # ─────────────────────────────────────────
+  - id: recent_conversations
+    title: 最近の AI 対話（直近 10 件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.conversation_id AS 会話ID,
+             CASE c.user_role
+               WHEN 'employee'        THEN '👤'
+               WHEN 'contract_manager' THEN '💼'
+               WHEN 'accountant'      THEN '💰'
+               WHEN 'purchaser'       THEN '📦'
+               WHEN 'approver'        THEN '✅'
+               WHEN 'admin'           THEN '⚙️'
+               ELSE                        '👥'
+             END || ' ' || c.user_role AS 役割,
+             CASE c.status
+               WHEN 'active'     THEN '💬 対話中'
+               WHEN 'completed'  THEN '✅ 完了'
+               WHEN 'escalated'  THEN '⚠️ エスカレーション'
+               WHEN 'closed'     THEN '❌ クローズ'
+               ELSE c.status
+             END AS ステータス,
+             c.last_intent AS 最終意図,
+             CAST(ROUND(c.sentiment_score, 2) AS TEXT) AS 感情スコア,
+             c.started_at AS 開始日時
+      FROM ai_conversations c
+      ORDER BY c.started_at DESC
+      LIMIT 10
+    columns: [会話ID, 役割, ステータス, 最終意図, 感情スコア, 開始日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # エンティティ別クエリ数
+  # ─────────────────────────────────────────
+  - id: entity_query_stats
+    title: エンティティ別クエリ数（直近 30 日）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT m.intent AS label,
+             COUNT(*) AS value
+      FROM ai_messages m
+      INNER JOIN ai_conversations c ON m.conversation_id = c.conversation_id
+      WHERE m.tool_called = 'query_data'
+        AND date(m.sent_at) >= date('now', '-30 days')
+        AND m.intent IN ('contracts', 'estimations', 'bills', 'journals', 'purchase_orders', 'approval_requests', 'todos')
+      GROUP BY m.intent
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(59, 130, 246, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # ナレッジベース使用 TOP 5
+  # ─────────────────────────────────────────
+  - id: top_knowledge
+    title: ナレッジベース使用 TOP 5
+    component: table
+    sourceType: custom
+    source: |
+      SELECT k.knowledge_id AS ナレッジID,
+             k.category AS カテゴリ,
+             k.title AS タイトル,
+             k.usage_count AS 使用回数,
+             k.helpful_count AS 役に立った,
+             k.not_helpful_count AS 役に立たなかった,
+             CASE
+               WHEN k.not_helpful_count = 0 THEN '100%'
+               ELSE CAST(ROUND(k.helpful_count * 100.0 / (k.helpful_count + k.not_helpful_count), 0) AS TEXT) || '%'
+             END AS 満足率
+      FROM ai_knowledge k
+      WHERE k.status = 'active'
+        AND k.usage_count > 0
+      ORDER BY k.usage_count DESC
+      LIMIT 5
+    columns: [ナレッジID, カテゴリ, タイトル, 使用回数, 役に立った, 役に立たなかった, 満足率]
+    pageSize: 5
+    editable: false
+    readOnly: true

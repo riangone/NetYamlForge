@@ -1,0 +1,253 @@
+title: AI 会話詳細
+description: "AI アシスタントとの会話詳細 - メッセージ履歴・エスカレーション情報・関連業務データを表示"
+
+sections:
+  # ─────────────────────────────────────────
+  # 会話概要情報
+  # ─────────────────────────────────────────
+  - id: conversation_info
+    title: 会話概要
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '会話 ID' AS metric_name,
+             c.conversation_id AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_conversations c
+      WHERE c.conversation_id = @conversation_id
+      UNION ALL
+      SELECT '役割',
+             CASE c.user_role
+               WHEN 'employee'        THEN '👤 一般社員'
+               WHEN 'contract_manager' THEN '💼 契約担当'
+               WHEN 'accountant'      THEN '💰 会計担当'
+               WHEN 'purchaser'       THEN '📦 購買担当'
+               WHEN 'approver'        THEN '✅ 承認者'
+               WHEN 'admin'           THEN '⚙️ 管理者'
+               ELSE                        '👥 ' || c.user_role
+             END,
+             '👤', NULL
+      FROM ai_conversations c
+      WHERE c.conversation_id = @conversation_id
+      UNION ALL
+      SELECT 'ステータス',
+             CASE c.status
+               WHEN 'active'     THEN '💬 対話中'
+               WHEN 'completed'  THEN '✅ 完了'
+               WHEN 'escalated'  THEN '⚠️ エスカレーション'
+               WHEN 'closed'     THEN '❌ クローズ'
+               ELSE c.status
+             END,
+             '📊', NULL
+      FROM ai_conversations c
+      WHERE c.conversation_id = @conversation_id
+      UNION ALL
+      SELECT 'メッセージ数', CAST(COUNT(*) AS TEXT), '📝', NULL
+      FROM ai_messages m
+      WHERE m.conversation_id = @conversation_id
+      UNION ALL
+      SELECT '感情スコア', CAST(ROUND(c.sentiment_score, 2) AS TEXT),
+             CASE
+               WHEN c.sentiment_score > 0.3 THEN '😊'
+               WHEN c.sentiment_score < -0.3 THEN '😞'
+               ELSE '😐'
+             END,
+             NULL
+      FROM ai_conversations c
+      WHERE c.conversation_id = @conversation_id
+      UNION ALL
+      SELECT '開始日時', substr(c.started_at, 1, 16), '🕐', NULL
+      FROM ai_conversations c
+      WHERE c.conversation_id = @conversation_id
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # メッセージ履歴
+  # ─────────────────────────────────────────
+  - id: message_history
+    title: メッセージ履歴
+    component: table
+    sourceType: custom
+    source: |
+      SELECT m.sent_at AS 時刻,
+             CASE m.sender
+               WHEN 'user' THEN '👤 ユーザー'
+               WHEN 'ai'   THEN '🤖 AI'
+               WHEN 'system' THEN '⚙️ システム'
+               ELSE m.sender
+             END AS 送信者,
+             m.content AS メッセージ,
+             m.intent AS 意図,
+             CAST(ROUND(m.confidence_score * 100, 0) AS TEXT) || '%' AS 信頼度,
+             CASE m.tool_called
+               WHEN 'query_data' THEN '📊 データクエリ'
+               WHEN 'create_record' THEN '➕ 作成'
+               WHEN 'update_record' THEN '✏️ 更新'
+               WHEN 'approve_record' THEN '✅ 承認'
+               ELSE '-'
+             END AS 使用ツール,
+             CASE m.sentiment_score
+               WHEN NULL THEN '😐'
+               WHEN score > 0.3 THEN '😊'
+               WHEN score < -0.3 THEN '😞'
+               ELSE '😐'
+             END AS 感情
+      FROM ai_messages m
+      WHERE m.conversation_id = @conversation_id
+      ORDER BY m.sent_at ASC
+    columns: [時刻, 送信者, メッセージ, 意図, 信頼度, 使用ツール, 感情]
+    pageSize: 50
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # エスカレーション情報（存在する場合）
+  # ─────────────────────────────────────────
+  - id: escalation_info
+    title: エスカレーション情報
+    component: table
+    sourceType: custom
+    source: |
+      SELECT h.handover_id AS 引継ぎID,
+             CASE h.reason
+               WHEN 'complaint'       THEN '😡 苦情'
+               WHEN 'urgent'          THEN '🚨 緊急'
+               WHEN 'complex_query'   THEN '❓ 複雑な問い合わせ'
+               WHEN 'low_confidence'  THEN '🤔 低信頼度'
+               WHEN 'negative_sentiment' THEN '😞 否定的感情'
+               ELSE                        h.reason
+             END AS 理由,
+             CASE h.priority
+               WHEN 'high'   THEN '🔴 高'
+               WHEN 'medium' THEN '🟡 中'
+               WHEN 'low'    THEN '🟢 低'
+               ELSE               h.priority
+             END AS 優先度,
+             CASE h.status
+               WHEN 'pending'     THEN '⏰ 対応待ち'
+               WHEN 'in_progress' THEN '🔧 対応中'
+               WHEN 'completed'   THEN '✔ 完了'
+               WHEN 'closed'      THEN '❌ クローズ'
+               ELSE h.status
+             END AS ステータス,
+             CASE h.target_department
+               WHEN 'contract'   THEN '💼 契約'
+               WHEN 'billing'    THEN '💰 請求'
+               WHEN 'accounting' THEN '📊 会計'
+               WHEN 'purchasing' THEN '📦 購買'
+               WHEN 'management' THEN '👔 管理'
+               ELSE                   h.target_department
+             END AS 部門,
+             h.assigned_to AS 担当者,
+             h.resolution_time_minutes AS 解決時間,
+             h.escalated_at AS エスカレーション日時
+      FROM ai_handovers h
+      WHERE h.conversation_id = @conversation_id
+      ORDER BY h.escalated_at DESC
+      LIMIT 1
+    columns: [引継ぎID, 理由, 優先度, ステータス, 部門, 担当者, 解決時間, エスカレーション日時]
+    pageSize: 1
+    editable: false
+    readOnly: true
+    hidden: true  # エスカレーションが存在する場合のみ表示
+
+  # ─────────────────────────────────────────
+  # 関連業務データ
+  # ─────────────────────────────────────────
+  - id: related_contract
+    title: 関連契約情報
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.contract_no AS 契約番号,
+             c.title AS タイトル,
+             CASE c.status
+               WHEN 'DR' THEN '📝 下書'
+               WHEN 'IN' THEN '⏳ 承認中'
+               WHEN 'CO' THEN '✅ 確定'
+               WHEN 'CL' THEN '🔒 クローズ'
+               ELSE c.status
+             END AS ステータス,
+             c.total_doc_amt AS 金額,
+             c.start_date AS 開始日,
+             c.end_date AS 終了日
+      FROM contracts c
+      WHERE c.id = (
+        SELECT linked_contract_id FROM ai_conversations WHERE conversation_id = @conversation_id
+      )
+    columns: [契約番号, タイトル, ステータス, 金額, 開始日, 終了日]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  - id: related_bill
+    title: 関連請求情報
+    component: table
+    sourceType: custom
+    source: |
+      SELECT b.bill_no AS 請求番号,
+             b.title AS タイトル,
+             CASE b.status
+               WHEN 'DR' THEN '📝 下書'
+               WHEN 'CO' THEN '✅ 確定'
+               WHEN 'CN' THEN '❌ 取消'
+               WHEN 'PA' THEN '💰 支払済'
+               ELSE b.status
+             END AS ステータス,
+             b.grand_total AS 合計金額,
+             b.outstanding_amt AS 未収残高,
+             b.due_date AS 支払期日
+      FROM bills b
+      WHERE b.id = (
+        SELECT linked_bill_id FROM ai_conversations WHERE conversation_id = @conversation_id
+      )
+    columns: [請求番号, タイトル, ステータス, 合計金額, 未収残高, 支払期日]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # フィードバック（存在する場合）
+  # ─────────────────────────────────────────
+  - id: feedback
+    title: ユーザーフィードバック
+    component: table
+    sourceType: custom
+    source: |
+      SELECT f.feedback_id AS フィードバックID,
+             CASE f.rating
+               WHEN 1 THEN '★'
+               WHEN 2 THEN '★★'
+               WHEN 3 THEN '★★★'
+               WHEN 4 THEN '★★★★'
+               WHEN 5 THEN '★★★★★'
+             END AS 評価,
+             f.category AS カテゴリ,
+             f.feedback_text AS フィードバック内容,
+             CASE f.sentiment
+               WHEN 'positive' THEN '😊 肯定的'
+               WHEN 'neutral'  THEN '😐 中立的'
+               WHEN 'negative' THEN '😞 否定的'
+               ELSE f.sentiment
+             END AS 感情,
+             CASE f.resolved
+               WHEN 1 THEN '✅ 対応済'
+               ELSE '⏰ 未対応'
+             END AS 対応状況,
+             f.created_at AS 作成日時
+      FROM ai_feedback f
+      WHERE f.conversation_id = @conversation_id
+      ORDER BY f.created_at DESC
+      LIMIT 5
+    columns: [フィードバックID, 評価, カテゴリ, フィードバック内容, 感情, 対応状況, 作成日時]
+    pageSize: 5
+    editable: false
+    readOnly: true

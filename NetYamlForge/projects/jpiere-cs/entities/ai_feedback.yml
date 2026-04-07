@@ -1,0 +1,218 @@
+# AI ユーザーフィードバック定義
+# バージョン: 1.0
+# 作成日: 2026-04-07
+
+name: ai_feedback
+displayName: "AI フィードバック"
+description: "AI アシスタントへのユーザー評価・フィードバックを記録"
+
+# データベース設定
+tableName: ai_feedback
+primaryKey: id
+
+# 機能設定
+features:
+  searchable: true
+  filterable: true
+  sortable: true
+  exportable: true
+  apiEnabled: true
+  auditLog: false
+
+# フィールド定義
+fields:
+  # 基本フィールド
+  - name: id
+    type: integer
+    primaryKey: true
+    autoIncrement: true
+    displayName: "ID"
+    hidden: true
+
+  - name: feedback_id
+    type: string
+    maxLength: 64
+    displayName: "フィードバック ID"
+    required: true
+    unique: true
+    description: "一意のフィードバック識別子 (例: FB-xxxx)"
+    index: true
+
+  # 関連情報
+  - name: conversation_id
+    type: string
+    maxLength: 64
+    displayName: "会話 ID"
+    required: true
+    description: "フィードバック対象の会話 ID"
+    foreignKey:
+      table: ai_conversations
+      column: conversation_id
+    index: true
+
+  - name: message_id
+    type: string
+    maxLength: 64
+    displayName: "メッセージ ID"
+    description: "フィードバック対象のメッセージ ID"
+    foreignKey:
+      table: ai_messages
+      column: message_id
+    index: true
+
+  - name: user_id
+    type: string
+    maxLength: 64
+    displayName: "ユーザー ID"
+    required: true
+    description: "フィードバックユーザー ID"
+    index: true
+
+  # 評価情報
+  - name: rating
+    type: integer
+    displayName: "評価"
+    required: true
+    description: "評価スコア (1-5)"
+    lookup:
+      values:
+        - 1: "★ (非常に悪い)"
+        - 2: "★★ (悪い)"
+        - 3: "★★★ (普通)"
+        - 4: "★★★★ (良い)"
+        - 5: "★★★★★ (非常に良い)"
+    index: true
+
+  - name: category
+    type: string
+    maxLength: 32
+    displayName: "フィードバックカテゴリ"
+    lookup:
+      values:
+        - accuracy: "正確性"
+        - helpfulness: "有用性"
+        - speed: "応答速度"
+        - clarity: "明確さ"
+        - tone: "トーン・態度"
+        - other: "その他"
+    description: "フィードバックカテゴリ"
+    index: true
+
+  # フィードバック内容
+  - name: feedback_text
+    type: text
+    displayName: "フィードバック内容"
+    description: "自由記入欄"
+    searchable: true
+
+  # AI 分析情報
+  - name: sentiment
+    type: string
+    maxLength: 16
+    displayName: "感情分類"
+    lookup:
+      values:
+        - positive: "肯定的"
+        - neutral: "中立的"
+        - negative: "否定的"
+    description: "フィードバックの感情分類"
+    index: true
+
+  - name: ai_analysis
+    type: text
+    displayName: "AI 分析"
+    description: "AI によるフィードバック分析結果"
+
+  # 対応情報
+  - name: resolved
+    type: boolean
+    displayName: "対応済み"
+    defaultValue: false
+    description: "フィードバックに対応済みか"
+    index: true
+
+  - name: resolved_by
+    type: string
+    maxLength: 64
+    displayName: "対応者"
+    description: "対応担当者 ID"
+
+  - name: resolved_at
+    type: datetime
+    displayName: "対応日時"
+    description: "フィードバック対応日時"
+
+  - name: resolution_notes
+    type: text
+    displayName: "対応メモ"
+    description: "対応内容のメモ"
+
+  # 時間情報
+  - name: created_at
+    type: datetime
+    displayName: "作成日時"
+    required: true
+    autoGenerate: true
+    index: true
+
+  - name: updated_at
+    type: datetime
+    displayName: "更新日時"
+    required: true
+    autoGenerate: true
+
+# リスト表示設定
+listView:
+  columns:
+    - field: feedback_id
+      width: 120
+    - field: rating
+      width: 80
+    - field: category
+      width: 120
+    - field: feedback_text
+      width: 300
+    - field: sentiment
+      width: 100
+    - field: resolved
+      width: 80
+    - field: created_at
+      width: 150
+
+  filters:
+    - field: rating
+      type: dropdown
+    - field: category
+      type: dropdown
+    - field: sentiment
+      type: dropdown
+    - field: resolved
+      type: boolean
+    - field: created_at
+      type: date_range
+
+  sorting:
+    default:
+      field: created_at
+      direction: desc
+
+# バリデーション
+validation:
+  rules:
+    - field: feedback_id
+      required: true
+      pattern: "^FB-[a-zA-Z0-9]+$"
+      message: "フィードバック ID は FB-xxxx 形式で指定してください"
+    
+    - field: rating
+      min: 1
+      max: 5
+      message: "評価は 1 から 5 の範囲で指定してください"
+    
+    - field: conversation_id
+      required: true
+      message: "会話 ID は必須です"
+    
+    - field: user_id
+      required: true
+      message: "ユーザー ID は必須です"
