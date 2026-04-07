@@ -1,197 +1,36 @@
-# AI メッセージ記録定義
-# バージョン: 1.0
-# 作成日: 2026-04-07
+entities:
+  ai_messages:
+    table: ai_messages
+    key: id
+    displayName: AI メッセージ
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+      enableCount: true
 
-name: ai_messages
-displayName: "AI メッセージ"
-description: "AI アシスタントとの個々のメッセージを記録・追跡"
+    columns:
+      id: { type: int, identity: true, label: ID, sortable: true }
+      message_id: { type: string, length: 64, required: true, label: メッセージ ID, searchable: true, sortable: true }
+      conversation_id: { type: string, length: 64, required: true, label: 会話 ID, searchable: true, sortable: true }
+      sender: { type: string, length: 16, required: true, label: 送信者, searchable: true, sortable: true }
+      content: { type: text, required: true, label: メッセージ内容, searchable: true }
+      intent: { type: string, length: 64, label: 意図, searchable: true, sortable: true }
+      confidence_score: { type: decimal, precision: 5, scale: 4, label: 信頼度, sortable: true }
+      sentiment_score: { type: decimal, precision: 5, scale: 4, label: 感情スコア, sortable: true }
+      tool_called: { type: string, length: 32, label: 呼び出しツール, searchable: true, sortable: true }
+      tool_response: { type: text, label: ツール応答 }
+      related_entity: { type: string, length: 64, label: 関連エンティティ, searchable: true, sortable: true }
+      related_entity_id: { type: int, label: 関連エンティティ ID, sortable: true }
+      sent_at: { type: datetime, required: true, label: 送信時刻, sortable: true }
+      created_at: { type: datetime, required: true, label: 作成日時, sortable: true }
+      updated_at: { type: datetime, required: true, label: 更新日時, sortable: true }
 
-# データベース設定
-tableName: ai_messages
-primaryKey: id
-
-# 機能設定
-features:
-  searchable: true
-  filterable: true
-  sortable: true
-  exportable: false
-  apiEnabled: true
-  auditLog: false
-
-# フィールド定義
-fields:
-  # 基本フィールド
-  - name: id
-    type: integer
-    primaryKey: true
-    autoIncrement: true
-    displayName: "ID"
-    hidden: true
-
-  - name: message_id
-    type: string
-    maxLength: 64
-    displayName: "メッセージ ID"
-    required: true
-    unique: true
-    description: "一意のメッセージ識別子 (例: MSG-xxxx)"
-    index: true
-
-  - name: conversation_id
-    type: string
-    maxLength: 64
-    displayName: "会話 ID"
-    required: true
-    description: "所属する会話 ID"
-    foreignKey:
-      table: ai_conversations
-      column: conversation_id
-    index: true
-
-  # メッセージ内容
-  - name: sender
-    type: string
-    maxLength: 16
-    displayName: "送信者"
-    required: true
-    lookup:
-      values:
-        - user: "ユーザー"
-        - ai: "AI"
-        - system: "システム"
-    description: "メッセージ送信者"
-    index: true
-
-  - name: content
-    type: text
-    displayName: "メッセージ内容"
-    required: true
-    description: "メッセージ本文"
-
-  # AI 分析情報
-  - name: intent
-    type: string
-    maxLength: 64
-    displayName: "意図"
-    description: "検出されたメッセージ意図"
-    index: true
-
-  - name: confidence_score
-    type: decimal
-    precision: 5
-    scale: 4
-    displayName: "信頼度"
-    description: "意図検出の信頼度 (0.0-1.0)"
-    defaultValue: 0.0
-
-  - name: sentiment_score
-    type: decimal
-    precision: 5
-    scale: 4
-    displayName: "感情スコア"
-    description: "感情分析スコア (-1.0 〜 +1.0)"
-    defaultValue: 0.0
-
-  # ツール実行情報
-  - name: tool_called
-    type: string
-    maxLength: 32
-    displayName: "呼び出しツール"
-    description: "AI によって呼び出されたツール名"
-    lookup:
-      values:
-        - query_data: "データクエリ"
-        - create_record: "レコード作成"
-        - update_record: "レコード更新"
-        - approve_record: "承認"
-        - none: "なし"
-
-  - name: tool_response
-    type: text
-    displayName: "ツール応答"
-    description: "ツール実行結果の JSON"
-
-  # 関連情報
-  - name: related_entity
-    type: string
-    maxLength: 64
-    displayName: "関連エンティティ"
-    description: "このメッセージで参照されたエンティティ"
-
-  - name: related_entity_id
-    type: integer
-    displayName: "関連エンティティ ID"
-    description: "関連エンティティの ID"
-
-  # 時間情報
-  - name: sent_at
-    type: datetime
-    displayName: "送信時刻"
-    required: true
-    description: "メッセージ送信時刻"
-    index: true
-
-  # システムフィールド
-  - name: created_at
-    type: datetime
-    displayName: "作成日時"
-    required: true
-    autoGenerate: true
-    hidden: true
-
-  - name: updated_at
-    type: datetime
-    displayName: "更新日時"
-    required: true
-    autoGenerate: true
-    hidden: true
-
-# リスト表示設定
-listView:
-  columns:
-    - field: message_id
-      width: 150
-    - field: sender
-      width: 80
-    - field: content
-      width: 400
-    - field: intent
-      width: 120
-    - field: sentiment_score
-      width: 100
-    - field: sent_at
-      width: 150
-
-  filters:
-    - field: conversation_id
-      type: text
-    - field: sender
-      type: dropdown
-    - field: intent
-      type: dropdown
-    - field: sent_at
-      type: date_range
-
-  sorting:
-    default:
-      field: sent_at
-      direction: asc
-
-# バリデーション
-validation:
-  rules:
-    - field: message_id
-      required: true
-      pattern: "^MSG-[a-zA-Z0-9]+$"
-      message: "メッセージ ID は MSG-xxxx 形式で指定してください"
-    
-    - field: confidence_score
-      min: 0.0
-      max: 1.0
-      message: "信頼度は 0.0 から 1.0 の範囲で指定してください"
-    
-    - field: sentiment_score
-      min: -1.0
-      max: 1.0
-      message: "感情スコアは -1.0 から +1.0 の範囲で指定してください"
+    forms:
+      message_id: { type: string, required: true, label: メッセージ ID, editable: true }
+      conversation_id: { type: string, required: true, label: 会話 ID, editable: true }
+      sender: { type: select, required: true, label: 送信者, editable: true, options: [user, ai, system] }
+      content: { type: textarea, required: true, label: メッセージ内容, editable: true }
+      intent: { type: string, label: 意図, editable: true }
+      tool_called: { type: select, label: 呼び出しツール, editable: true, options: [query_data, create_record, update_record, approve_record, none] }
+      sent_at: { type: datetime, required: true, label: 送信時刻, editable: true }

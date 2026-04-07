@@ -1,269 +1,52 @@
-# AI 会話セッション定義
-# バージョン: 1.0
-# 作成日: 2026-04-07
+entities:
+  ai_conversations:
+    table: ai_conversations
+    key: id
+    displayName: AI 会話セッション
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
 
-name: ai_conversations
-displayName: "AI 会話セッション"
-description: "AI アシスタントとの会話セッションを追跡・管理"
+    columns:
+      id: { type: int, identity: true, label: ID, sortable: true }
+      conversation_id: { type: string, length: 64, required: true, label: 会話 ID, searchable: true, sortable: true }
+      channel: { type: string, length: 32, required: true, label: チャネル, searchable: true, sortable: true }
+      status: { type: string, length: 16, required: true, label: ステータス, searchable: true, sortable: true }
+      user_id: { type: string, length: 64, label: ユーザー ID, searchable: true, sortable: true }
+      user_role: { type: string, length: 32, label: ユーザー役割, searchable: true, sortable: true }
+      linked_contract_id: { type: int, label: 関連契約 ID, sortable: true }
+      linked_bill_id: { type: int, label: 関連請求 ID, sortable: true }
+      linked_estimation_id: { type: int, label: 関連見積 ID, sortable: true }
+      last_intent: { type: string, length: 64, label: 最終意図, searchable: true, sortable: true }
+      last_confidence: { type: decimal, precision: 5, scale: 4, label: 最終信頼度, sortable: true }
+      sentiment_score: { type: decimal, precision: 5, scale: 4, label: 感情スコア, sortable: true }
+      guest_session_id: { type: string, length: 64, label: ゲストセッション ID, searchable: true, sortable: true }
+      customer_id: { type: string, length: 64, label: 顧客 ID, searchable: true, sortable: true }
+      started_at: { type: datetime, required: true, label: 開始時刻, sortable: true }
+      ended_at: { type: datetime, label: 終了時刻, sortable: true }
+      message_count: { type: int, label: メッセージ数, sortable: true }
+      escalation_count: { type: int, label: エスカレーション数, sortable: true }
+      created_at: { type: datetime, required: true, label: 作成日時, sortable: true }
+      updated_at: { type: datetime, required: true, label: 更新日時, sortable: true }
 
-# データベース設定
-tableName: ai_conversations
-primaryKey: id
+    forms:
+      conversation_id: { type: string, required: true, label: 会話 ID, editable: true }
+      channel: { type: select, required: true, label: チャネル, editable: true, options: [web, api, mobile] }
+      status: { type: select, required: true, label: ステータス, editable: true, options: [active, completed, escalated, closed] }
+      user_id: { type: string, label: ユーザー ID, editable: true }
+      user_role: { type: select, label: ユーザー役割, editable: true, options: [employee, contract_manager, accountant, purchaser, approver, admin, guest] }
+      last_intent: { type: string, label: 最終意図, editable: true }
+      sentiment_score: { type: decimal, label: 感情スコア, editable: true }
+      started_at: { type: datetime, required: true, label: 開始時刻, editable: true }
+      ended_at: { type: datetime, label: 終了時刻, editable: true }
+      message_count: { type: int, label: メッセージ数, editable: true }
 
-# 機能設定
-features:
-  searchable: true
-  filterable: true
-  sortable: true
-  exportable: true
-  apiEnabled: true
-  auditLog: false
-
-# フィールド定義
-fields:
-  # 基本フィールド
-  - name: id
-    type: integer
-    primaryKey: true
-    autoIncrement: true
-    displayName: "ID"
-    hidden: true
-
-  - name: conversation_id
-    type: string
-    maxLength: 64
-    displayName: "会話 ID"
-    required: true
-    unique: true
-    description: "一意の会話識別子 (例: CONV-20260407-xxxx)"
-    index: true
-
-  - name: channel
-    type: string
-    maxLength: 32
-    displayName: "チャネル"
-    required: true
-    defaultValue: "web"
-    lookup:
-      values:
-        - web: "Web チャット"
-        - api: "API"
-        - mobile: "モバイル"
-    description: "会話チャネル"
-
-  - name: status
-    type: string
-    maxLength: 16
-    displayName: "ステータス"
-    required: true
-    defaultValue: "active"
-    lookup:
-      values:
-        - active: "アクティブ"
-        - completed: "完了"
-        - escalated: "エスカレーション済み"
-        - closed: "クローズ"
-    description: "会話ステータス"
-    index: true
-
-  # ユーザー情報
-  - name: user_id
-    type: string
-    maxLength: 64
-    displayName: "ユーザー ID"
-    description: "会話ユーザー ID (社員番号またはゲスト ID)"
-    index: true
-
-  - name: user_role
-    type: string
-    maxLength: 32
-    displayName: "ユーザー役割"
-    lookup:
-      values:
-        - employee: "一般社員"
-        - contract_manager: "契約担当"
-        - accountant: "会計担当"
-        - purchaser: "購買担当"
-        - approver: "承認者"
-        - admin: "管理者"
-        - guest: "ゲスト"
-    description: "会話開始時のユーザー役割"
-
-  # 関連業務エンティティ
-  - name: linked_contract_id
-    type: integer
-    displayName: "関連契約 ID"
-    description: "この会話で参照された契約 ID"
-    foreignKey:
-      table: contracts
-      column: id
-
-  - name: linked_bill_id
-    type: integer
-    displayName: "関連請求 ID"
-    description: "この会話で参照された請求 ID"
-    foreignKey:
-      table: bills
-      column: id
-
-  - name: linked_estimation_id
-    type: integer
-    displayName: "関連見積 ID"
-    description: "この会話で参照された見積 ID"
-    foreignKey:
-      table: estimations
-      column: id
-
-  # AI 分析情報
-  - name: last_intent
-    type: string
-    maxLength: 64
-    displayName: "最終意図"
-    description: "最後のユーザーメッセージで検出された意図"
-    index: true
-
-  - name: last_confidence
-    type: decimal
-    precision: 5
-    scale: 4
-    displayName: "最終信頼度"
-    description: "意図検出の信頼度 (0.0-1.0)"
-    defaultValue: 0.0
-
-  - name: sentiment_score
-    type: decimal
-    precision: 5
-    scale: 4
-    displayName: "感情スコア"
-    description: "感情分析スコア (-1.0 〜 +1.0)"
-    defaultValue: 0.0
-    index: true
-
-  # セッション情報
-  - name: guest_session_id
-    type: string
-    maxLength: 64
-    displayName: "ゲストセッション ID"
-    description: "ゲストユーザーのセッション ID"
-    index: true
-
-  - name: customer_id
-    type: string
-    maxLength: 64
-    displayName: "顧客 ID"
-    description: "関連する顧客 ID"
-    foreignKey:
-      table: business_partners
-      column: id
-
-  # 時間情報
-  - name: started_at
-    type: datetime
-    displayName: "開始時刻"
-    required: true
-    description: "会話開始時刻"
-    index: true
-
-  - name: ended_at
-    type: datetime
-    displayName: "終了時刻"
-    description: "会話終了時刻"
-
-  # 統計情報
-  - name: message_count
-    type: integer
-    displayName: "メッセージ数"
-    defaultValue: 0
-    description: "この会話のメッセージ総数"
-
-  - name: escalation_count
-    type: integer
-    displayName: "エスカレーション数"
-    defaultValue: 0
-    description: "エスカレーション発生回数"
-
-  # システムフィールド
-  - name: created_at
-    type: datetime
-    displayName: "作成日時"
-    required: true
-    autoGenerate: true
-    hidden: true
-
-  - name: updated_at
-    type: datetime
-    displayName: "更新日時"
-    required: true
-    autoGenerate: true
-    hidden: true
-
-# リスト表示設定
-listView:
-  columns:
-    - field: conversation_id
-      width: 180
-    - field: channel
-      width: 100
-    - field: status
-      width: 120
-    - field: user_role
-      width: 120
-    - field: last_intent
-      width: 150
-    - field: sentiment_score
-      width: 100
-    - field: started_at
-      width: 150
-    - field: message_count
-      width: 100
-
-  filters:
-    - field: status
-      type: dropdown
-    - field: channel
-      type: dropdown
-    - field: user_role
-      type: dropdown
-    - field: sentiment_score
-      type: range
-      min: -1.0
-      max: 1.0
-
-  sorting:
-    default:
-      field: started_at
-      direction: desc
-
-# フック設定
-hooks:
-  beforeCreate:
-    - name: validate_ai_conversation
-      description: "AI 会話データの検証"
-    - name: set_conversation_timestamps
-      description: "時間戳自動設定"
-  
-  afterCreate:
-    - name: auto_create_todo_from_ai
-      description: "AI 提案から自動 TODO 作成"
-  
-  afterUpdate:
-    - name: update_sentiment_trend
-      description: "感情トレンド更新"
-
-# バリデーション
-validation:
-  rules:
-    - field: conversation_id
-      required: true
-      pattern: "^CONV-[0-9]{8}-[a-zA-Z0-9]+$"
-      message: "会話 ID は CONV-YYYYMMDD-xxxx 形式で指定してください"
-    
-    - field: sentiment_score
-      min: -1.0
-      max: 1.0
-      message: "感情スコアは -1.0 から +1.0 の範囲で指定してください"
-    
-    - field: last_confidence
-      min: 0.0
-      max: 1.0
-      message: "信頼度は 0.0 から 1.0 の範囲で指定してください"
+    hooks:
+      beforeCreate:
+        - validate_ai_conversation
+        - set_conversation_timestamps
+      beforeUpdate:
+        - validate_ai_conversation
+        - update_conversation_updated_at

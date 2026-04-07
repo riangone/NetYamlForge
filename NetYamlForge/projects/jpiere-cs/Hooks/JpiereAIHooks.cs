@@ -1,7 +1,10 @@
 // ファイル概要：jpiere-cs AI 関連フック処理
 // AI 会話・メッセージ・引継ぎの前後処理を実装
 
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace NetYamlForge.ProjectHooks.JpiereCs;
@@ -209,13 +212,13 @@ LIMIT 5",
             if (contractMatch.Success && data.ContainsKey("linked_contract_id"))
             {
                 var contractNo = contractMatch.Value;
-                var contract = await db.QueryFirstOrDefaultAsync<dynamic>(@"
+                var contract = await db.QueryFirstOrDefaultAsync<IDictionary<string, object?>>(@"
 SELECT id FROM contracts WHERE contract_no = @ContractNo",
                     new { ContractNo = contractNo });
 
-                if (contract != null)
+                if (contract != null && contract.TryGetValue("id", out var cid))
                 {
-                    data["linked_contract_id"] = contract.id;
+                    data["linked_contract_id"] = cid;
                     break;
                 }
             }
@@ -225,13 +228,13 @@ SELECT id FROM contracts WHERE contract_no = @ContractNo",
             if (billMatch.Success && data.ContainsKey("linked_bill_id"))
             {
                 var billNo = billMatch.Value;
-                var bill = await db.QueryFirstOrDefaultAsync<dynamic>(@"
+                var bill = await db.QueryFirstOrDefaultAsync<IDictionary<string, object?>>(@"
 SELECT id FROM bills WHERE bill_no = @BillNo",
                     new { BillNo = billNo });
 
-                if (bill != null)
+                if (bill != null && bill.TryGetValue("id", out var bid))
                 {
-                    data["linked_bill_id"] = bill.id;
+                    data["linked_bill_id"] = bid;
                     break;
                 }
             }
@@ -345,21 +348,24 @@ public class UpdateResolutionMetricsHook
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
         // 解決時間を計算
-        var handover = await db.QueryFirstOrDefaultAsync<dynamic>(@"
-SELECT escalated_at, assigned_at FROM ai_handovers WHERE handover_id = @HId",
+        var handover = await db.QueryFirstOrDefaultAsync<IDictionary<string, object?>>(@"
+SELECT created_at FROM ai_handovers WHERE handover_id = @HId",
             new { HId = handoverId });
 
         if (handover != null)
         {
-            var escalatedAt = DateTime.Parse(handover.escalated_at);
-            var resolvedAt = DateTime.Parse(now);
-            var resolutionMinutes = (resolvedAt - escalatedAt).TotalMinutes;
+            var createdAtVal = handover.TryGetValue("created_at", out var cat) ? cat?.ToString() : null;
+            if (!string.IsNullOrEmpty(createdAtVal) && DateTime.TryParse(createdAtVal, out var createdAt))
+            {
+                var resolvedAt = DateTime.Parse(now);
+                var resolutionMinutes = (int)(resolvedAt - createdAt).TotalMinutes;
 
-            await db.ExecuteAsync(@"
-UPDATE ai_handovers 
+                await db.ExecuteAsync(@"
+UPDATE ai_handovers
 SET completed_at = @Now, resolution_time_minutes = @Minutes
 WHERE handover_id = @HId",
-                new { Now = now, Minutes = resolutionMinutes, HId = handoverId });
+                    new { Now = now, Minutes = resolutionMinutes, HId = handoverId });
+            }
         }
 
         await Task.CompletedTask;

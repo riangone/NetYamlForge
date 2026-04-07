@@ -3,7 +3,9 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NetYamlForge.Models;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
 using Xunit;
 using Moq;
@@ -101,7 +103,7 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
 
         var projectScopeMock = new Mock<ProjectScope>();
         projectScopeMock.Setup(p => p.IsSet).Returns(true);
-        projectScopeMock.Setup(p => p.Current).Returns(new ProjectConfig { Name = "jpiere-cs" });
+        projectScopeMock.Setup(p => p.Current).Returns(new ProjectInfo { Name = "jpiere-cs", DisplayName = "jpiere-cs", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! });
 
         var skillLoaderMock = new Mock<SkillLoader>();
         skillLoaderMock.Setup(s => s.GetSystemPrompt()).Returns("You are a helpful assistant.");
@@ -115,9 +117,9 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         var loggerMock = new Mock<ILogger<JpiereChatService>>();
 
         chatHistoryMock
-            .Setup(c => c.SaveMessageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+            .Setup(c => c.SaveMessageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(0L);
 
         return new JpiereChatService(
             db,
