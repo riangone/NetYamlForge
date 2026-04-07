@@ -20,17 +20,66 @@
     const STORAGE_KEY = 'ai_chat_history';
     const TOOL_STORAGE_KEY = 'ai_chat_tool';
 
+    // jpiere-cs 役割別設定
+    const JPIERE_ROLE_CONFIGS = {
+        employee: {
+            icon: '👤',
+            title: 'AI 業務アシスタント',
+            subtitle: '契約・見積・TODO の照会をサポート',
+            welcomeMessage: 'こんにちは！JPiere の AI 業務アシスタントです。📋\n契約・見積・TODO の照会など、業務全般を支援します！'
+        },
+        contract_manager: {
+            icon: '💼',
+            title: 'AI 契約アシスタント',
+            subtitle: '契約・見積・請求の作成・分析',
+            welcomeMessage: 'こんにちは！JPiere 契約担当 AI アシスタントです。💼\n契約・見積・請求の作成・分析をお手伝いします！'
+        },
+        accountant: {
+            icon: '💰',
+            title: 'AI 会計アシスタント',
+            subtitle: '仕訳・会計・資金管理',
+            welcomeMessage: 'こんにちは！JPiere 会計担当 AI アシスタントです。💰\n仕訳・会計・入金・支払の管理を支援します！'
+        },
+        purchaser: {
+            icon: '📦',
+            title: 'AI 購買アシスタント',
+            subtitle: '発注・受入・AP請求・支払',
+            welcomeMessage: 'こんにちは！JPiere 購買担当 AI アシスタントです。📦\n発注・受入・AP請求・支払のフローを支援します！'
+        },
+        approver: {
+            icon: '✅',
+            title: 'AI 承認アシスタント',
+            subtitle: '承認ワークフローの確認・処理',
+            welcomeMessage: 'こんにちは！JPiere 承認 AI アシスタントです。✅\n承認ワークフローの確認・処理を支援します！'
+        },
+        admin: {
+            icon: '⚙️',
+            title: 'AI 管理アシスタント',
+            subtitle: 'システム管理・設定・分析',
+            welcomeMessage: 'こんにちは！JPiere 管理者 AI アシスタントです。⚙️\nシステム全体的管理・設定変更を支援します！'
+        }
+    };
+
     // 配置
     const CONFIG = {
         apiBaseUrl: '/api/ai',
         signalRUrl: '/aiProgressHub',
-        defaultCliTool: 'qwen'  // 与 appsettings.json 保持一致
+        defaultCliTool: 'qwen',  // 与 appsettings.json 保持一致
+        isJpiereCS: false,
+        jpiereRole: 'employee'
     };
 
     // 初始化
     document.addEventListener('DOMContentLoaded', function() {
         console.log('AI Assistant: DOMContentLoaded');
         console.log('AI Assistant: data-user-authenticated =', document.body.getAttribute('data-user-authenticated'));
+
+        // jpiere-cs 専用の設定があれば適用
+        if (window.JPIERE_CHAT_CONFIG) {
+            CONFIG.isJpiereCS = true;
+            CONFIG.jpiereRole = window.JPIERE_CHAT_CONFIG.userRole || 'employee';
+            console.log('AI Assistant: jpiere-cs mode enabled, role =', CONFIG.jpiereRole);
+        }
 
         // 检查用户是否已登录
         if (!isUserLoggedIn()) {
@@ -84,11 +133,27 @@
     }
     
     function buildPanelHTML() {
+        // jpiere-cs モード用の設定を取得
+        const isJpiere = CONFIG.isJpiereCS;
+        const roleConfig = isJpiere ? (JPIERE_ROLE_CONFIGS[CONFIG.jpiereRole] || JPIERE_ROLE_CONFIGS.employee) : null;
+
+        const panelTitle = roleConfig ? `${roleConfig.icon} ${roleConfig.title}` : 'AI Assistant';
+        const welcomeMessage = roleConfig
+            ? roleConfig.welcomeMessage
+            : `こんにちは！AI アシスタントです。以下のことをお手伝いできます：
+                <ul>
+                    <li>エンティティ定義の作成</li>
+                    <li>ページテンプレートの生成</li>
+                    <li>ビジネスロジックのコーディング</li>
+                    <li>プロジェクト構造の分析</li>
+                </ul>
+                何かお手伝いできることはありますか？`;
+
         return `
             <div class="ai-panel-header">
                 <div class="flex items-center gap-2">
                     <span id="ai-status-indicator" class="ai-status-indicator idle"></span>
-                    <h3>AI Assistant</h3>
+                    <h3>${panelTitle}</h3>
                 </div>
                 <div class="flex gap-1">
                     <button id="ai-maximize-btn" class="btn btn-ghost btn-sm btn-circle" title="最大化">
@@ -108,7 +173,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div class="ai-panel-body" id="ai-messages-container">
                 <div class="ai-message-row assistant">
                     <div class="ai-message-sender">AI Assistant</div>
@@ -118,26 +183,19 @@
                         </div>
                         <div class="ai-message assistant">
                             <div class="ai-message-content">
-                                こんにちは！AI アシスタントです。以下のことをお手伝いできます：
-                                <ul>
-                                    <li>エンティティ定義の作成</li>
-                                    <li>ページテンプレートの生成</li>
-                                    <li>ビジネスロジックのコーディング</li>
-                                    <li>プロジェクト構造の分析</li>
-                                </ul>
-                                何かお手伝いできることはありますか？
+                                ${welcomeMessage}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <button id="ai-auto-scroll-btn" class="ai-auto-scroll-btn btn btn-sm btn-circle opacity-75" title="Auto scroll">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
             </button>
-            
+
             <div id="ai-skills-bar" class="ai-skills-bar" style="display:none"></div>
 
             <div class="ai-panel-footer">
@@ -155,15 +213,15 @@
                     </select>
                     <span id="cli-status" class="text-xs opacity-50 ml-2"></span>
                 </div>
-                
+
                 <div class="ai-input-container">
-                    <textarea 
-                        id="ai-input-message" 
-                        class="textarea textarea-bordered" 
-                        placeholder="输入指令..."
+                    <textarea
+                        id="ai-input-message"
+                        class="textarea textarea-bordered"
+                        placeholder="${roleConfig ? roleConfig.subtitle || '输入指令...' : '输入指令...'}"
                         rows="2"></textarea>
                 </div>
-                
+
                 <div id="ai-history-popup" class="ai-history-popup" style="display:none">
                     <div class="ai-history-popup-header">
                         <span>入力履歴</span>

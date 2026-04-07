@@ -820,10 +820,22 @@
         });
     </script>
     <script src="/lib/marked/marked.min.js"></script>
-    @* ai-assistant.js: auto-dealer-demo と jpiere-cs 以外の場合のみ読み込む *@
-    @if (currentProject != "auto-dealer-demo" && currentProject != "jpiere-cs")
+    @* ai-assistant.js: auto-dealer-demo 以外の場合のみ読み込む（jpiere-cs を含む） *@
+    @if (currentProject != "auto-dealer-demo")
     {
         <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
+        @* jpiere-cs: ログイン済みユーザー向け AI チャット初期化（役割別） *@
+        @if (currentProject == "jpiere-cs" && (User.Identity?.IsAuthenticated ?? false))
+        {
+            var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
+            <script>
+                // jpiere-cs 専用の役割別設定を ai-assistant.js に渡す
+                window.JPIERE_CHAT_CONFIG = {
+                    project: 'jpiere-cs',
+                    userRole: '@jpiereUserRole'
+                };
+            </script>
+        }
     }
     @* auto-dealer-demo: ログイン済みユーザー向け統一 AI チャットウィジェット *@
     @if (currentProject == "auto-dealer-demo" && (User.Identity?.IsAuthenticated ?? false))
@@ -832,15 +844,6 @@
         <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
         <script>
             DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
-        </script>
-    }
-    @* jpiere-cs: ログイン済みユーザー向け AI チャットウィジェット（役割別） *@
-    @if (currentProject == "jpiere-cs" && (User.Identity?.IsAuthenticated ?? false))
-    {
-        var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
-        <script src="~/js/jpiere-chat-widget.js" asp-append-version="true"></script>
-        <script>
-            JpiereChat.init({ project: 'jpiere-cs', userRole: '@jpiereUserRole' });
         </script>
     }
     @await RenderSectionAsync("Scripts", required: false)
