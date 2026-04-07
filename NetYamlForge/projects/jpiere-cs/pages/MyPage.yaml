@@ -4,6 +4,27 @@ description: "現在の業務状態・要対応事項・業務フローガイド
 sections:
 
   # ─────────────────────────────────────────────
+  # 0. AI アシスタント案内（右下のチャットウィジェットを使用）
+  # ─────────────────────────────────────────────
+  - id: ai_assistant_guide
+    title: 💬 AI アシスタント
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        'AI アシスタントを利用する' AS metric_name,
+        '右下の💬アイコンをクリックしてAI業務アシスタントを開けます。契約照会・データ分析・TODO作成など何でもどうぞ！' AS metric_value,
+        '🤖' AS metric_icon,
+        NULL AS metric_delta
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
   # 1. 要対応アクション（緊急度の高い件数サマリー）
   # ─────────────────────────────────────────────
   - id: urgent_actions

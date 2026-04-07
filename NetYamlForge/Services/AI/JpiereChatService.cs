@@ -669,4 +669,52 @@ VALUES
             _ => "お問い合わせいただき、ありがとうございます。担当者よりご連絡いたします。"
         };
     }
+
+    // ─────────────────────────────────────────────────────────
+    // メッセージ取得・フィードバック（Controller 用）
+    // ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 会話のメッセージ一覧を取得
+    /// </summary>
+    public async Task<List<Dictionary<string, object?>>> GetMessagesAsync(string conversationId)
+    {
+        var messages = await _db.QueryAsync(@"
+SELECT message_id, sender, content, intent, confidence_score, sentiment_score, sent_at
+FROM ai_messages
+WHERE conversation_id = @Id
+ORDER BY sent_at ASC",
+            new { Id = conversationId });
+
+        var result = new List<Dictionary<string, object?>>();
+        foreach (var msg in messages)
+        {
+            result.Add(new Dictionary<string, object?>
+            {
+                ["messageId"] = msg.message_id,
+                ["sender"] = msg.sender,
+                ["content"] = msg.content,
+                ["intent"] = msg.intent,
+                ["confidenceScore"] = msg.confidence_score,
+                ["sentimentScore"] = msg.sentiment_score,
+                ["sentAt"] = msg.sent_at
+            });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 会話の評価を保存
+    /// </summary>
+    public async Task SubmitFeedbackAsync(string conversationId, int rating, string? comment)
+    {
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+        await _db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET feedback_rating = @Rating, feedback_comment = @Comment, updated_at = @Now
+WHERE conversation_id = @Id",
+            new { Rating = rating, Comment = (object?)comment ?? DBNull.Value, Now = now, Id = conversationId });
+
+        _logger.LogInformation("[JpiereChat] フィードバック受信：conv={Id}, rating={Rating}", conversationId, rating);
+    }
 }

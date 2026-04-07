@@ -206,6 +206,9 @@ builder.Services.AddHttpClient("LmStudioClient");
 // グローバル AI と共通のサービス（CLIServiceFactory, SkillLoader, TaskQueueService, ProgressTracker）を再利用
 builder.Services.AddScoped<NetYamlForge.Services.AI.AutoDealerChatService>();
 
+// JPiere 契約サービス AI チャットサービス
+builder.Services.AddScoped<NetYamlForge.Services.AI.JpiereChatService>();
+
 // AI 自然言語クエリサービス（QueryParserService が依存する ILlmProvider を含む）
 builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
                            NetYamlForge.Services.AI.Providers.CliFirstLlmProvider>();

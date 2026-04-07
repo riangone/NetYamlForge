@@ -820,8 +820,8 @@
         });
     </script>
     <script src="/lib/marked/marked.min.js"></script>
-    @* ai-assistant.js: auto-dealer-demo 以外の場合のみ読み込む（customer は dealer-chat-widget を使用） *@
-    @if (currentProject != "auto-dealer-demo" || !userCustomRoles.Contains("customer"))
+    @* ai-assistant.js: auto-dealer-demo と jpiere-cs 以外の場合のみ読み込む *@
+    @if (currentProject != "auto-dealer-demo" && currentProject != "jpiere-cs")
     {
         <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
     }
@@ -832,6 +832,15 @@
         <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
         <script>
             DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
+        </script>
+    }
+    @* jpiere-cs: ログイン済みユーザー向け AI チャットウィジェット（役割別） *@
+    @if (currentProject == "jpiere-cs" && (User.Identity?.IsAuthenticated ?? false))
+    {
+        var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
+        <script src="~/js/jpiere-chat-widget.js" asp-append-version="true"></script>
+        <script>
+            JpiereChat.init({ project: 'jpiere-cs', userRole: '@jpiereUserRole' });
         </script>
     }
     @await RenderSectionAsync("Scripts", required: false)
