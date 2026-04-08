@@ -216,6 +216,14 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter, NetYamlForge.Services.AI.QueryResultFormatter>();
 
+// 意図分類器（試乗予約Slot-filling用）
+builder.Services.AddScoped<NetYamlForge.Services.AI.IIntentClassifier,
+                           NetYamlForge.Services.AI.HybridIntentClassifier>();
+
+// スロットフィリングマネージャー（試乗予約情報収集用）
+builder.Services.AddSingleton<NetYamlForge.Services.AI.ISlotFillingManager,
+                              NetYamlForge.Services.AI.SlotFillingManager>();
+
 // AI CLI Services
 builder.Services.AddSingleton<ICLIService, ClaudeCLIService>();
 builder.Services.AddSingleton<ICLIService, QwenCodeCLIService>();
@@ -246,6 +254,8 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.ICustomerDataService,
                            NetYamlForge.Services.AI.CustomerDataService>();
 builder.Services.AddScoped<NetYamlForge.Services.AI.IAppointmentService,
                            NetYamlForge.Services.AI.AppointmentService>();
+builder.Services.AddScoped<NetYamlForge.Services.AI.IOperatorChatService,
+                           NetYamlForge.Services.AI.OperatorChatService>();
 
 var app = builder.Build();
 

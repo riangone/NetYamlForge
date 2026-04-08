@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
@@ -147,21 +148,33 @@ public class UnansweredQuestion
 public class KnowledgeBaseService : IKnowledgeBaseService
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<KnowledgeBaseService> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public KnowledgeBaseService(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<KnowledgeBaseService> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
     public async Task<KnowledgeResult?> SearchAsync(string intent, Dictionary<string, string> entities, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -268,7 +281,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<List<KnowledgeResult>> SearchByKeywordAsync(string keyword, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var results = new List<KnowledgeResult>();
 
         try
@@ -323,7 +336,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<KnowledgeItem?> GetByIdAsync(string knowledgeId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -349,7 +362,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<string> CreateAsync(KnowledgeCreateRequest request, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var knowledgeId = GenerateKnowledgeId();
 
         try
@@ -395,7 +408,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<bool> UpdateAsync(string knowledgeId, KnowledgeUpdateRequest request, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -498,7 +511,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<bool> DeleteAsync(string knowledgeId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -526,7 +539,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<bool> RecordFeedbackAsync(string knowledgeId, bool isHelpful, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -566,7 +579,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task IncrementUsageAsync(string knowledgeId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -592,7 +605,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task<List<KnowledgeItem>> GetByCategoryAsync(string category, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var items = new List<KnowledgeItem>();
 
         try
@@ -624,7 +637,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     /// <inheritdoc />
     public async Task RecordUnansweredQuestionAsync(string question, string intent, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {

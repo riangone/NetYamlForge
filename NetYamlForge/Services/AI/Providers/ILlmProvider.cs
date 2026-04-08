@@ -10,7 +10,8 @@ public interface ILlmProvider
     /// </summary>
     /// <param name="prompt">入力プロンプト</param>
     /// <param name="cancellationToken">キャンセルトークン</param>
-    Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default);
+    /// <param name="systemPromptOverride">オプション：システムプロンプトを上書き（CLIモードで使用）</param>
+    Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default, string? systemPromptOverride = null);
 
     /// <summary>
     /// チャット補完を生成

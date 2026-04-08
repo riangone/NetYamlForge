@@ -20,10 +20,11 @@
     <script src="/lib/tailwindcss/browser.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/ai-assistant.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
+<body class="min-h-screen bg-base-200" 
+      data-user-authenticated="@((User.Identity?.IsAuthenticated ?? false) || (User?.IsInRole("Admin") ?? false) ? "true" : "false")"
+      data-username="@User.Identity?.Name">
 @functions {
     private sealed class NavSection
     {
@@ -820,31 +821,40 @@
         });
     </script>
     <script src="/lib/marked/marked.min.js"></script>
-    @* ai-assistant.js: auto-dealer-demo 以外の場合のみ読み込む（jpiere-cs を含む） *@
-    @if (currentProject != "auto-dealer-demo")
+    @* 統合 AI チャットウィジェット（全プロジェクト共通）*@
+    @if (User.Identity?.IsAuthenticated ?? false)
     {
-        <script src="~/js/ai-assistant.js" asp-append-version="true"></script>
-        @* jpiere-cs: ログイン済みユーザー向け AI チャット初期化（役割別） *@
-        @if (currentProject == "jpiere-cs" && (User.Identity?.IsAuthenticated ?? false))
+        <script src="~/js/ai-chat-widget.js" asp-append-version="true"></script>
+        @if (currentProject == "auto-dealer-demo")
         {
+            @* auto-dealer-demo: セッションベース dealer モード *@
+            var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
+            <script>
+                DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
+            </script>
+        }
+        else if (currentProject == "jpiere-cs")
+        {
+            @* jpiere-cs: フレームワーク AI・役割別設定 *@
             var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
             <script>
-                // jpiere-cs 専用の役割別設定を ai-assistant.js に渡す
-                window.JPIERE_CHAT_CONFIG = {
-                    project: 'jpiere-cs',
-                    userRole: '@jpiereUserRole'
+                window.AI_CHAT_CONFIG = {
+                    apiMode: 'framework',
+                    framework: { project: 'jpiere-cs', role: '@jpiereUserRole', defaultCliTool: 'qwen' }
+                };
+                window.JPIERE_CHAT_CONFIG = { project: 'jpiere-cs', userRole: '@jpiereUserRole' };
+            </script>
+        }
+        else
+        {
+            @* その他プロジェクト: フレームワーク AI（デフォルト） *@
+            <script>
+                window.AI_CHAT_CONFIG = {
+                    apiMode: 'framework',
+                    framework: { project: '@(currentProject ?? "")', defaultCliTool: 'qwen' }
                 };
             </script>
         }
-    }
-    @* auto-dealer-demo: ログイン済みユーザー向け統一 AI チャットウィジェット *@
-    @if (currentProject == "auto-dealer-demo" && (User.Identity?.IsAuthenticated ?? false))
-    {
-        var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
-        <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
-        <script>
-            DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
-        </script>
     }
     @await RenderSectionAsync("Scripts", required: false)
 </body>

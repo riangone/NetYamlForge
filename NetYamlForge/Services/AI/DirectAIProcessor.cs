@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json;
+using System.IO;
 using Microsoft.Extensions.Options;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.AI.Providers;
 
 namespace NetYamlForge.Services.AI;
@@ -76,23 +78,31 @@ public class DirectAIProcessor : IDirectAIProcessor
     private readonly AiWindowConfig _config;
     private readonly ILogger<DirectAIProcessor> _logger;
     private readonly ISentimentAnalyzer? _sentimentAnalyzer;
+    private readonly SkillLoader _skillLoader;
+    private readonly ProjectScope _projectScope;
 
     public DirectAIProcessor(
         ILlmProvider? llmProvider,
         IOptions<AiWindowConfig> configOptions,
         ILogger<DirectAIProcessor> logger,
+        SkillLoader skillLoader,
+        ProjectScope projectScope,
         ISentimentAnalyzer? sentimentAnalyzer = null)
     {
         _llmProvider = llmProvider;
         _config = configOptions.Value;
         _logger = logger;
         _sentimentAnalyzer = sentimentAnalyzer;
+        _skillLoader = skillLoader;
+        _projectScope = projectScope;
     }
 
     /// <inheritdoc />
     public async Task<AIProcessingResult> ProcessAsync(string message, ConversationContext? context = null, string? projectId = null)
     {
         _logger.LogDebug("直接 AI 処理開始：{MessageLength} 文字", message.Length);
+        var project = ResolveProject(projectId);
+        var systemPrompt = BuildSystemPrompt(project);
 
         // 1. 感情分析（利用可能な場合）
         double sentimentScore = 0;
@@ -110,7 +120,7 @@ public class DirectAIProcessor : IDirectAIProcessor
         {
             try
             {
-                return await ProcessWithLlmAsync(message, context, sentimentScore, sentimentLabel);
+                return await ProcessWithLlmAsync(message, context, sentimentScore, sentimentLabel, systemPrompt);
             }
             catch (Exception ex)
             {
@@ -143,12 +153,13 @@ public class DirectAIProcessor : IDirectAIProcessor
         string message,
         ConversationContext? context,
         double sentimentScore,
-        string sentimentLabel)
+        string sentimentLabel,
+        string systemPrompt)
     {
         if (_llmProvider == null)
             throw new InvalidOperationException("LLM プロバイダーが設定されていません");
 
-        var prompt = BuildDirectProcessingPrompt(message, context, sentimentScore, sentimentLabel);
+        var prompt = BuildDirectProcessingPrompt(message, context, sentimentScore, sentimentLabel, systemPrompt);
         var response = await _llmProvider.CompleteAsync(prompt);
 
         return ParseLlmResponse(response, message, sentimentScore, sentimentLabel);
@@ -161,11 +172,17 @@ public class DirectAIProcessor : IDirectAIProcessor
         string message,
         ConversationContext? context,
         double sentimentScore,
-        string sentimentLabel)
+        string sentimentLabel,
+        string systemPrompt)
     {
         var sb = new StringBuilder();
 
-        sb.AppendLine("あなたは自動車ディーラーの AI アシスタントです。顧客のメッセージに対して、以下のステップで直接応答を生成してください：");
+        if (!string.IsNullOrWhiteSpace(systemPrompt))
+        {
+            sb.AppendLine(systemPrompt.Trim());
+            sb.AppendLine();
+        }
+        sb.AppendLine("顧客のメッセージに対して、以下のステップで直接応答を生成してください：");
         sb.AppendLine();
         sb.AppendLine("【処理ステップ】");
         sb.AppendLine("1. 顧客の意図と要望を理解する");
@@ -219,6 +236,44 @@ public class DirectAIProcessor : IDirectAIProcessor
         sb.AppendLine("}");
 
         return sb.ToString();
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return "auto-dealer-demo";
+    }
+
+    private string BuildSystemPrompt(string project)
+    {
+        var basePrompt = _skillLoader.GetSystemPrompt() ?? string.Empty;
+        var projectPrompt = LoadPromptFromMd(project, "_system-prompt-customer.md")
+            ?? LoadPromptFromMd(project, "_system-prompt.md");
+
+        var systemPrompt = string.IsNullOrWhiteSpace(projectPrompt)
+            ? basePrompt
+            : basePrompt + Environment.NewLine + Environment.NewLine + projectPrompt;
+
+        return systemPrompt
+            .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
+            .Replace("{project_name}", project);
+    }
+
+    private string? LoadPromptFromMd(string skillDir, string fileName)
+    {
+        var filePath = Path.Combine(AppContext.BaseDirectory, "skills", skillDir, fileName);
+        if (!File.Exists(filePath)) return null;
+
+        var content = File.ReadAllText(filePath).Trim();
+        if (content.StartsWith("---"))
+        {
+            var end = content.IndexOf("---", 3);
+            if (end >= 0) content = content[(end + 3)..].Trim();
+        }
+        return content;
     }
 
     /// <summary>

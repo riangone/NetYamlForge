@@ -79,7 +79,7 @@ public class EmailConfig
     public string FromAddress { get; set; } = string.Empty;
     public string FromName { get; set; } = "自動車ディーラー AI アシスタント";
 
-    public int PollingIntervalMinutes { get; set; } = 5;
+    public int PollingIntervalMinutes { get; set; } = 60;
 }
 
 /// <summary>

@@ -1,3 +1,4 @@
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 using System.Data;
 using Dapper;
@@ -92,21 +93,33 @@ public class TrendData
 public class AIReportPdfService : IAIReportPdfService
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<AIReportPdfService> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public AIReportPdfService(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<AIReportPdfService> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
     public async Task<byte[]> GenerateDailyReportAsync(DateTime date, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var reportData = await CollectReportDataAsync(date, date.AddDays(1).AddSeconds(-1), project);
         reportData.ReportType = "日次レポート";
         
@@ -116,7 +129,7 @@ public class AIReportPdfService : IAIReportPdfService
     /// <inheritdoc />
     public async Task<byte[]> GenerateWeeklyReportAsync(DateTime startDate, DateTime endDate, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var reportData = await CollectReportDataAsync(startDate, endDate, project);
         reportData.ReportType = "週次レポート";
         
@@ -126,7 +139,7 @@ public class AIReportPdfService : IAIReportPdfService
     /// <inheritdoc />
     public async Task<byte[]> GenerateMonthlyReportAsync(int year, int month, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var startDate = new DateTime(year, month, 1);
         var endDate = startDate.AddMonths(1).AddSeconds(-1);
         

@@ -73,7 +73,7 @@ public class ChinaStockService : IChinaStockService
         _httpClient = httpClient;
         _logger = logger;
         _httpClient.BaseAddress = new Uri(BaseUrl);
-        _httpClient.Timeout = TimeSpan.FromSeconds(10);
+        _httpClient.Timeout = TimeSpan.FromSeconds(3600);
     }
 
     /// <summary>

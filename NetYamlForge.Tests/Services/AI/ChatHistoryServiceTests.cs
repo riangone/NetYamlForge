@@ -122,11 +122,46 @@ public class ChatHistoryServiceTests : IDisposable
     [Fact]
     public async Task SaveMessageAsync_UsesProjectDatabase()
     {
-        // Arrange
+        // Arrange - 使用独立的数据库文件避免测试干扰
+        var projectTestDbPath = Path.Combine(Path.GetTempPath(), $"test_project_chat_{Guid.NewGuid():N}.db");
         var projectEnvMock = new Mock<IWebHostEnvironment>();
-        var projectTestDb = Path.Combine(Path.GetTempPath(), $"test_project_chat_{Guid.NewGuid():N}.db");
+        // 设置为临时目录的根，这样 projects/auto-dealer-demo/chat.db 会创建在这里
         projectEnvMock.Setup(e => e.ContentRootPath).Returns(Path.GetTempPath());
+
+        var projectConfig = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ChatHistory:DbPath"] = projectTestDbPath  // 这个配置实际上不会被使用
+            })!
+            .Build();
+        var projectLogger = new LoggerFactory().CreateLogger<ChatHistoryService>();
+        var projectService = new ChatHistoryService(projectConfig, projectEnvMock.Object, projectLogger);
+
+        // Act - Save to project DB (会使用 projects/auto-dealer-demo/chat.db)
+        await projectService.SaveMessageAsync(_testUserId, "Project message", "user", chatContext: "auto-dealer-demo", projectName: "auto-dealer-demo");
+
+        // Assert - Message should be in project DB
+        var projectDbPath = Path.Combine(Path.GetTempPath(), "projects", "auto-dealer-demo", "chat.db");
+        Assert.True(File.Exists(projectDbPath), $"Project DB should exist at {projectDbPath}");
         
+        var projectHistory = await projectService.GetHistoryAsync(_testUserId, projectName: "auto-dealer-demo", limit: 10, chatContext: "auto-dealer-demo");
+        Assert.Single(projectHistory);
+        Assert.Contains("Project message", projectHistory.First().Content);
+
+        // Clean up
+        if (File.Exists(projectTestDbPath))
+        {
+            File.Delete(projectTestDbPath);
+        }
+    }
+
+    [Fact]
+    public async Task SaveMessageAsync_ProjectChat_UsesProjectNameAsUserId()
+    {
+        // 模拟子项目聊天记录：使用项目名称作为 userId（修复后的行为）
+        var projectEnvMock = new Mock<IWebHostEnvironment>();
+        projectEnvMock.Setup(e => e.ContentRootPath).Returns(Path.GetTempPath());
+
         var projectConfig = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -136,18 +171,34 @@ public class ChatHistoryServiceTests : IDisposable
         var projectLogger = new LoggerFactory().CreateLogger<ChatHistoryService>();
         var projectService = new ChatHistoryService(projectConfig, projectEnvMock.Object, projectLogger);
 
-        // Act - Save to project DB
-        await projectService.SaveMessageAsync(_testUserId, "Project message", "user", chatContext: "auto-dealer-demo", projectName: "auto-dealer-demo");
+        // Act - 使用独立的项目名称避免测试间冲突
+        var projectName = $"test-project-{Guid.NewGuid():N}";
+        await projectService.SaveMessageAsync(projectName, "Customer message 1", "user",
+            provider: "qwen", chatContext: "dealer-customer", projectName: projectName);
+        await projectService.SaveMessageAsync(projectName, "AI response 1", "assistant",
+            provider: "qwen", chatContext: "dealer-customer", projectName: projectName);
+        await projectService.SaveMessageAsync(projectName, "Staff message 1", "user",
+            provider: "qwen", chatContext: "dealer-staff", projectName: projectName);
 
-        // Assert - Message should be in project DB, not global DB
-        var projectHistory = await projectService.GetHistoryAsync(_testUserId, projectName: "auto-dealer-demo", limit: 10, chatContext: "auto-dealer-demo");
-        Assert.Single(projectHistory);
-        Assert.Contains("Project message", projectHistory.First().Content);
+        // Assert - 验证可以通过项目名称查询到聊天记录
+        var customerHistory = await projectService.GetHistoryAsync(projectName, projectName: projectName, limit: 10, chatContext: "dealer-customer");
+        var customerMessages = customerHistory.ToList();
+        Assert.Equal(2, customerMessages.Count);
+        Assert.Contains("Customer message 1", customerMessages[0].Content);
+        Assert.Contains("AI response 1", customerMessages[1].Content);
 
-        // Clean up
-        if (File.Exists(projectTestDb))
+        var staffHistory = await projectService.GetHistoryAsync(projectName, projectName: projectName, limit: 10, chatContext: "dealer-staff");
+        Assert.Single(staffHistory);
+        Assert.Contains("Staff message 1", staffHistory.First().Content);
+
+        // 验证不会查询到其他上下文的消息
+        Assert.DoesNotContain("Staff message 1", customerMessages.Select(m => m.Content));
+
+        // Clean up - 删除测试数据库
+        var projectDbPath = Path.Combine(Path.GetTempPath(), "projects", projectName, "chat.db");
+        if (File.Exists(projectDbPath))
         {
-            File.Delete(projectTestDb);
+            File.Delete(projectDbPath);
         }
     }
 

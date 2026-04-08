@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Controllers.Api;
@@ -10,19 +11,32 @@ namespace NetYamlForge.Controllers.Api;
 /// </summary>
 [ApiController]
 [Route("api/ai/analytics")]
+[Route("{project}/api/ai/analytics")]
 [Produces("application/json")]
 public class AIAnalyticsController : ControllerBase
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<AIAnalyticsController> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public AIAnalyticsController(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<AIAnalyticsController> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? project)
+    {
+        if (!string.IsNullOrWhiteSpace(project))
+            return project;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <summary>
@@ -30,11 +44,12 @@ public class AIAnalyticsController : ControllerBase
     /// </summary>
     [HttpGet("conversations-trend")]
     public async Task<ActionResult<List<ConversationTrendDto>>> GetConversationsTrend(
-        [FromQuery] int days = 7)
+        [FromQuery] int days = 7,
+        [FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -63,11 +78,12 @@ public class AIAnalyticsController : ControllerBase
     /// </summary>
     [HttpGet("intent-distribution")]
     public async Task<ActionResult<List<IntentDistributionDto>>> GetIntentDistribution(
-        [FromQuery] string? date = null)
+        [FromQuery] string? date = null,
+        [FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             // パラメータ化クエリを使用（文字列連結なし）
@@ -112,11 +128,11 @@ public class AIAnalyticsController : ControllerBase
     /// 感情分析サマリーを取得
     /// </summary>
     [HttpGet("sentiment-summary")]
-    public async Task<ActionResult<List<SentimentSummaryDto>>> GetSentimentSummary()
+    public async Task<ActionResult<List<SentimentSummaryDto>>> GetSentimentSummary([FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -152,11 +168,12 @@ public class AIAnalyticsController : ControllerBase
     /// </summary>
     [HttpGet("channel-breakdown")]
     public async Task<ActionResult<List<ChannelBreakdownDto>>> GetChannelBreakdown(
-        [FromQuery] int days = 7)
+        [FromQuery] int days = 7,
+        [FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -182,11 +199,11 @@ public class AIAnalyticsController : ControllerBase
     /// ダッシュボード統計を取得
     /// </summary>
     [HttpGet("dashboard-stats")]
-    public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats()
+    public async Task<ActionResult<DashboardStatsDto>> GetDashboardStats([FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var stats = new DashboardStatsDto();
@@ -227,11 +244,12 @@ public class AIAnalyticsController : ControllerBase
     /// </summary>
     [HttpGet("handover-queue")]
     public async Task<ActionResult<List<HandoverQueueItemDto>>> GetHandoverQueue(
-        [FromQuery] string? department = null)
+        [FromQuery] string? department = null,
+        [FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -271,11 +289,11 @@ public class AIAnalyticsController : ControllerBase
     /// エスカレーション統計取得
     /// </summary>
     [HttpGet("handover-stats")]
-    public async Task<ActionResult<HandoverStatsDto>> GetHandoverStats()
+    public async Task<ActionResult<HandoverStatsDto>> GetHandoverStats([FromRoute] string? project = null)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var stats = new HandoverStatsDto();
@@ -304,11 +322,11 @@ public class AIAnalyticsController : ControllerBase
     /// エスカレーション詳細取得
     /// </summary>
     [HttpGet("handovers/{id}")]
-    public async Task<ActionResult<HandoverDetailDto>> GetHandover(string id)
+    public async Task<ActionResult<HandoverDetailDto>> GetHandover(string id, [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"SELECT h.*, u.name as assigned_operator_name FROM ai_handovers h
@@ -347,11 +365,14 @@ public class AIAnalyticsController : ControllerBase
     /// エスカレーションを割り当て
     /// </summary>
     [HttpPut("handovers/{id}/assign")]
-    public async Task<ActionResult> AssignHandover(string id, [FromBody] AssignHandoverRequest request)
+    public async Task<ActionResult> AssignHandover(
+        string id,
+        [FromBody] AssignHandoverRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             await db.ExecuteAsync(@"UPDATE ai_handovers SET 
@@ -371,11 +392,14 @@ public class AIAnalyticsController : ControllerBase
     /// エスカレーションを解決
     /// </summary>
     [HttpPut("handovers/{id}/resolve")]
-    public async Task<ActionResult> ResolveHandover(string id, [FromBody] ResolveHandoverRequest request)
+    public async Task<ActionResult> ResolveHandover(
+        string id,
+        [FromBody] ResolveHandoverRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             await db.ExecuteAsync(@"UPDATE ai_handovers SET 

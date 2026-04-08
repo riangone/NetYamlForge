@@ -1108,79 +1108,8 @@ public class PatternMatchResult
 
 ### 5.1 Web チャット UI
 
-#### `wwwroot/ai-chat/chat-widget.js`（抜粋）
-
-```javascript
-class AiChatWidget {
-    constructor(options = {}) {
-        this.sessionId = options.sessionId || this.generateSessionId();
-        this.apiUrl = options.apiUrl || '/api/v1/aiwindow';
-        this.container = document.querySelector(options.container || '#ai-chat');
-        this.init();
-    }
-
-    async sendMessage(message) {
-        // ステップ 1: NLU 処理
-        const nluResponse = await fetch(`${this.apiUrl}/nlu`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                session_id: this.sessionId,
-                message: message,
-                channel: 'web'
-            })
-        }).then(r => r.json());
-
-        // ステップ 2: 対話管理
-        const dialogResponse = await fetch(`${this.apiUrl}/dialog`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                session_id: this.sessionId,
-                intent: nluResponse.intent,
-                entities: nluResponse.entities,
-                context: { previous_actions: this.previousActions }
-            })
-        }).then(r => r.json());
-
-        // ステップ 3: 応答生成
-        const generateResponse = await fetch(`${this.apiUrl}/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                session_id: this.sessionId,
-                template_name: dialogResponse.response_template,
-                slots: dialogResponse.slots,
-                channel: 'web',
-                tone: 'formal'
-            })
-        }).then(r => r.json());
-
-        // 応答表示
-        this.displayMessage(generateResponse.response_text, 'ai');
-        if (generateResponse.quick_replies) {
-            this.displayQuickReplies(generateResponse.quick_replies);
-        }
-
-        // エスカレーション処理
-        if (dialogResponse.action === 'escalate') {
-            this.displayEscalationMessage();
-        }
-    }
-
-    displayQuickReplies(replies) {
-        const container = document.createElement('div');
-        container.className = 'quick-replies';
-        replies.forEach(reply => {
-            const button = document.createElement('button');
-            button.textContent = reply.label;
-            button.onclick = () => this.sendMessage(reply.payload);
-            container.appendChild(button);
-        });
-        this.container.appendChild(container);
-    }
-}
-```
+`wwwroot/js/ai-chat-widget.js` が統合 UI 実装です。  
+旧 `wwwroot/ai-chat/chat-widget.js` は廃止されました。
 
 ### 5.2 LINE 連携
 

@@ -2,8 +2,10 @@
 // 顧客向けエンドポイント (AllowAnonymous) と
 // オペレーター向けエンドポイント (Authorize) を提供します。
 
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Controllers.Api;
@@ -15,6 +17,7 @@ public class AutoDealerChatController : ControllerBase
 {
     private readonly AutoDealerChatService _chat;
     private readonly ILogger<AutoDealerChatController> _logger;
+    private const int RequestTimeoutSeconds = 3600; // 最大リクエスト処理時間（60分）
 
     public AutoDealerChatController(AutoDealerChatService chat, ILogger<AutoDealerChatController> logger)
     {
@@ -37,7 +40,10 @@ public class AutoDealerChatController : ControllerBase
             string? customerId = null;
             if (User.Identity?.IsAuthenticated == true)
             {
-                customerId = User.FindFirst("UserName")?.Value;
+                // ✅ 修正: ClaimTypes.Name からユーザー名を取得
+                customerId = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
+                             ?? User.Identity?.Name;
+                _logger.LogInformation("認証済みユーザーのセッション開始: customerId={CustomerId}", customerId);
             }
 
             var result = await _chat.StartSessionAsync(
@@ -63,8 +69,23 @@ public class AutoDealerChatController : ControllerBase
 
         try
         {
-            var result = await _chat.SendMessageAsync(conversationId, req.Message);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds));
+            var task = _chat.SendMessageAsync(conversationId, req.Message);
+            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cts.Token));
+
+            if (completedTask != task)
+            {
+                _logger.LogWarning("メッセージ処理タイムアウト conv={Id} ({Timeout}秒)", conversationId, RequestTimeoutSeconds);
+                return StatusCode(504, new { error = $"応答がタイムアウトしました（{RequestTimeoutSeconds}秒）。もう一度お試しください。" });
+            }
+
+            var result = await task;
             return Ok(result);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("メッセージ処理キャンセル conv={Id}", conversationId);
+            return StatusCode(504, new { error = "リクエストがキャンセルされました。もう一度お試しください。" });
         }
         catch (Exception ex)
         {
@@ -109,14 +130,20 @@ public class AutoDealerChatController : ControllerBase
     {
         try
         {
+            // デバッグログを追加
+            _logger.LogInformation("社員セッション開始リクエストを受信しました。channel: {Channel}", req?.Channel ?? "staff");
+            
             // StartSessionAsync は channel パラメータのみを受け取る
             var result = await _chat.StartSessionAsync("staff");
+            
+            _logger.LogInformation("社員セッションを開始しました。conversationId: {ConversationId}", result.ConversationId);
             return Ok(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "社員セッション開始エラー");
-            return StatusCode(500, new { error = "セッションの開始に失敗しました。" });
+            // 詳細なエラーログ（スタックトレース含む）
+            _logger.LogError(ex, "社員セッション開始エラー。詳細: {Message}\nスタックトレース: {StackTrace}", ex.Message, ex.StackTrace);
+            return StatusCode(500, new { error = "セッションの開始に失敗しました。", detail = ex.Message });
         }
     }
 
@@ -143,8 +170,23 @@ public class AutoDealerChatController : ControllerBase
 
         try
         {
-            var result = await _chat.SendStaffMessageAsync(conversationId, req.Message);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds));
+            var task = _chat.SendStaffMessageAsync(conversationId, req.Message);
+            var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cts.Token));
+
+            if (completedTask != task)
+            {
+                _logger.LogWarning("社員メッセージ処理タイムアウト conv={Id} ({Timeout}秒)", conversationId, RequestTimeoutSeconds);
+                return StatusCode(504, new { error = $"応答がタイムアウトしました（{RequestTimeoutSeconds}秒）。もう一度お試しください。" });
+            }
+
+            var result = await task;
             return Ok(result);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("社員メッセージ処理キャンセル conv={Id}", conversationId);
+            return StatusCode(504, new { error = "リクエストがキャンセルされました。もう一度お試しください。" });
         }
         catch (Exception ex)
         {
@@ -224,15 +266,58 @@ public class AutoDealerChatController : ControllerBase
         var messages = await _chat.GetMessagesAsync(conversationId);
         return Ok(messages);
     }
+
+    /// <summary>ログイン済みユーザー自身の最近の会話IDを取得します（認証セッションベース）。</summary>
+    /// <remarks>
+    /// クッキー認証からユーザーを特定するため、どのブラウザ・端末からでも同じ会話を復元できます。
+    /// </remarks>
+    [Authorize]
+    [HttpGet("my-session")]
+    public async Task<IActionResult> GetMySession([FromQuery] string? mode = null)
+    {
+        var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
+        {
+            var conversations = await _chat.GetUserRecentConversationsAsync(userId, 1);
+            var mostRecent = conversations.FirstOrDefault();
+            return Ok(new { conversationId = mostRecent?.ConversationId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "my-session 取得エラー userId={UserId}", userId);
+            return StatusCode(500, new { error = "会話IDの取得に失敗しました。" });
+        }
+    }
+
+    /// <summary>ユーザーの最近の会话IDを取得します（历史记录恢复用）。</summary>
+    /// <remarks>
+    /// ページリロード後に conversationId がlostされた場合、
+    /// userId から最近のアクティブな会话を特定するために使用します。
+    /// </remarks>
+    [AllowAnonymous]
+    [HttpGet("user-history")]
+    public async Task<IActionResult> GetUserRecentHistory([FromQuery] string userId, [FromQuery] int limit = 1)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return BadRequest(new { error = "userId が必要です。" });
+
+        try
+        {
+            var conversations = await _chat.GetUserRecentConversationsAsync(userId, limit);
+            var mostRecent = conversations.FirstOrDefault();
+            
+            if (mostRecent == null)
+                return Ok(new { conversationId = (string?)null, message = "会话が見つかりません。" });
+
+            return Ok(new { conversationId = mostRecent.ConversationId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ユーザー履歴取得エラー userId={UserId}", userId);
+            return StatusCode(500, new { error = "履歴の取得に失敗しました。" });
+        }
+    }
 }
-
-// ─────────────────────────────────────────────────────
-// Request DTOs
-// ─────────────────────────────────────────────────────
-
-public record ChatStartSessionRequest(string? Channel, string? GuestSessionId);
-public record ChatSendMessageRequest(string Message);
-public record ChatFeedbackRequest(int Rating, string? Comment);
-public record ChatOperatorReplyRequest(string Message);
-public record ChatAcceptHandoverRequest(string HandoverId);
-public record ChatResolveRequest(string? ResolutionNotes);

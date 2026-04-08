@@ -18,6 +18,7 @@ public class TaskQueueService
     private readonly ILogger<TaskQueueService> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly ChatHistoryService _chatHistory;
+    private readonly SkillLoader? _skillLoader;
 
     public TaskQueueService(
         ProgressTracker tracker,
@@ -25,7 +26,8 @@ public class TaskQueueService
         IOptions<CliConfig> config,
         ILogger<TaskQueueService> logger,
         IServiceProvider serviceProvider,
-        ChatHistoryService chatHistory)
+        ChatHistoryService chatHistory,
+        SkillLoader? skillLoader = null)
     {
         _queue = Channel.CreateUnbounded<AITask>();
         _tracker = tracker;
@@ -34,6 +36,7 @@ public class TaskQueueService
         _logger = logger;
         _serviceProvider = serviceProvider;
         _chatHistory = chatHistory;
+        _skillLoader = skillLoader;
     }
 
     public async Task EnqueueAsync(AITask task, CancellationToken ct = default)
@@ -124,12 +127,15 @@ public class TaskQueueService
                 var allMessages = new System.Text.StringBuilder();
                 var hasMessageContent = false;
 
+                // ✨ 构建项目特定的系统提示词（如果指定了项目）
+                var systemPrompt = BuildSystemPromptForTask(task);
+
                 await foreach (var update in aiService.ExecuteStreamingAsync(
                     task.Message,
                     workingDir,
                     task.SessionId,
                     task.AllowedTools ?? _config.DefaultAllowedTools,
-                    systemPromptOverride: null,
+                    systemPromptOverride: systemPrompt,
                     timeoutCts.Token))
                 {
                     _tracker.UpdateProgress(task.Id, update);
@@ -237,13 +243,88 @@ public class TaskQueueService
         {
             return _config.DefaultWorkingDirectory;
         }
-        
+
         // 获取项目目录路径
         var projectPath = Path.Combine(
             AppContext.BaseDirectory,
             "projects",
             project);
-        
+
         return Directory.Exists(projectPath) ? projectPath : _config.DefaultWorkingDirectory;
+    }
+
+    /// <summary>
+    /// ✨ 根据任务的项目和上下文构建系统提示词
+    /// </summary>
+    private string? BuildSystemPromptForTask(AITask task)
+    {
+        // 如果没有 SkillLoader，返回 null（使用 CLI 默认提示词）
+        if (_skillLoader == null) return null;
+
+        // 如果指定了项目，尝试加载项目特定的提示词
+        if (!string.IsNullOrEmpty(task.Project))
+        {
+            var projectSkillsDir = Path.Combine(
+                AppContext.BaseDirectory,
+                "skills",
+                task.Project);
+
+            // ✨ 使用明确的 Context 字段，如果没有则默认为 customer
+            var context = task.Context ?? "customer";
+
+            // 根据项目和上下文选择合适的提示词文件
+            var rolePromptFile = task.Project switch
+            {
+                "auto-dealer-demo" => context == "staff"
+                    ? "_system-prompt-staff.md"
+                    : "_system-prompt-customer.md",
+                "jpiere-cs" => context switch
+                {
+                    "employee" => "_system-prompt-employee.md",
+                    "contract_manager" => "_system-prompt-contract-manager.md",
+                    "accountant" => "_system-prompt-accountant.md",
+                    "purchaser" => "_system-prompt-purchaser.md",
+                    "approver" => "_system-prompt-approver.md",
+                    _ => "_system-prompt-employee.md"
+                },
+                _ => null
+            };
+
+            if (rolePromptFile != null)
+            {
+                var promptPath = Path.Combine(projectSkillsDir, rolePromptFile);
+                if (File.Exists(promptPath))
+                {
+                    var frameworkPrompt = _skillLoader.GetSystemPrompt();
+                    var rolePrompt = File.ReadAllText(promptPath).Trim();
+
+                    // 去除 YAML frontmatter
+                    if (rolePrompt.StartsWith("---"))
+                    {
+                        var end = rolePrompt.IndexOf("---", 3);
+                        if (end >= 0) rolePrompt = rolePrompt[(end + 3)..].Trim();
+                    }
+
+                    var systemPrompt = frameworkPrompt + "\n\n" + rolePrompt;
+
+                    // 替换占位符
+                    systemPrompt = systemPrompt
+                        .Replace("{current_datetime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
+                        .Replace("{project_name}", task.Project);
+
+                    _logger.LogInformation("为任务构建系统提示词：project={Project}, context={Context}, promptFile={File}, length={Length}",
+                        task.Project, context, rolePromptFile, systemPrompt.Length);
+
+                    return systemPrompt;
+                }
+                else
+                {
+                    _logger.LogWarning("提示词文件不存在：project={Project}, file={File}", task.Project, promptPath);
+                }
+            }
+        }
+
+        // 默认：使用全局框架提示词
+        return _skillLoader.GetSystemPrompt();
     }
 }

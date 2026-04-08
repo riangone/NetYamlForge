@@ -1,14 +1,17 @@
 // ファイル概要: jpiere-cs AI チャット REST API コントローラー。
 // JPiere 契約サービスの業務役割に特化した AI チャットエンドポイントを提供します。
 
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Controllers.Api;
 
 [ApiController]
 [Route("jpiere-cs/api/ai/chat")]
+[Route("{project:regex(^jpiere-cs$)}/api/ai/chat")]
 [Produces("application/json")]
 public class JpiereChatController : ControllerBase
 {
@@ -28,7 +31,7 @@ public class JpiereChatController : ControllerBase
     /// <summary>新規チャットセッションを開始します。</summary>
     [Authorize]
     [HttpPost("session")]
-    public async Task<IActionResult> StartSession([FromBody] JpiereChatStartSessionRequest req)
+    public async Task<IActionResult> StartSession([FromBody] ChatStartSessionRequest req)
     {
         try
         {
@@ -58,7 +61,7 @@ public class JpiereChatController : ControllerBase
     /// <summary>ユーザーーメッセージを送信し AI 応答を取得します。</summary>
     [Authorize]
     [HttpPost("session/{conversationId}/message")]
-    public async Task<IActionResult> SendMessage(string conversationId, [FromBody] JpiereChatSendMessageRequest req)
+    public async Task<IActionResult> SendMessage(string conversationId, [FromBody] ChatSendMessageRequest req)
     {
         if (string.IsNullOrWhiteSpace(req.Message))
             return BadRequest(new { error = "メッセージが空です。" });
@@ -96,10 +99,32 @@ public class JpiereChatController : ControllerBase
         }
     }
 
+    /// <summary>ログイン済みユーザー自身の最近の会話IDを取得します（認証セッションベース）。</summary>
+    [Authorize]
+    [HttpGet("my-session")]
+    public async Task<IActionResult> GetMySession()
+    {
+        var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? User.Identity?.Name;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        try
+        {
+            var conversations = await _chat.GetUserRecentConversationsAsync(userId, 1);
+            var mostRecent = conversations.FirstOrDefault();
+            return Ok(new { conversationId = mostRecent?.ConversationId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "JPiere my-session 取得エラー userId={UserId}", userId);
+            return StatusCode(500, new { error = "会話IDの取得に失敗しました。" });
+        }
+    }
+
     /// <summary>会話の評価を送信します。</summary>
     [Authorize]
     [HttpPost("session/{conversationId}/feedback")]
-    public async Task<IActionResult> SubmitFeedback(string conversationId, [FromBody] JpiereChatFeedbackRequest req)
+    public async Task<IActionResult> SubmitFeedback(string conversationId, [FromBody] ChatFeedbackRequest req)
     {
         if (req.Rating < 1 || req.Rating > 5)
             return BadRequest(new { error = "評価は 1〜5 で入力してください。" });
@@ -116,11 +141,3 @@ public class JpiereChatController : ControllerBase
         }
     }
 }
-
-// ─────────────────────────────────────────────────────
-// Request DTOs
-// ─────────────────────────────────────────────────────
-
-public record JpiereChatStartSessionRequest(string? Channel, string? GuestSessionId);
-public record JpiereChatSendMessageRequest(string Message);
-public record JpiereChatFeedbackRequest(int Rating, string? Comment);

@@ -167,7 +167,7 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
                 _logger.LogError(ex, "ジョブスケジューリング中にエラーが発生しました");
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(60), stoppingToken);
         }
     }
 

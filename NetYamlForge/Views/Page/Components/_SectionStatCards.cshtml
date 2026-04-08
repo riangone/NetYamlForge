@@ -26,24 +26,52 @@
 
         var isPositiveDelta = delta.StartsWith("+");
         var isNegativeDelta = delta.StartsWith("-");
+        var isUrl = delta.StartsWith("/");
         var deltaClass = isPositiveDelta ? "text-success" : isNegativeDelta ? "text-error" : "text-gray-400";
 
-        <div class="stat bg-base-100 shadow rounded-box">
-            @if (!string.IsNullOrEmpty(icon))
-            {
-                <div class="stat-figure text-3xl">@icon</div>
-            }
-            <div class="stat-title text-xs opacity-70">@label</div>
-            <div class="stat-value text-xl">@value</div>
-            @if (!string.IsNullOrEmpty(delta))
-            {
-                <div class="stat-desc @deltaClass">@delta</div>
-            }
-            else if (!string.IsNullOrEmpty(subValue))
-            {
-                <div class="stat-desc text-gray-400">@subValue</div>
-            }
-        </div>
+        // Tooltip for long values
+        var maxDisplayLength = 30;
+        var displayValue = value;
+        var needsTooltip = value.Length > maxDisplayLength;
+        if (needsTooltip)
+        {
+            displayValue = value.Substring(0, maxDisplayLength) + "...";
+        }
+
+        @if (isUrl)
+        {
+            <a href="@delta" class="stat bg-base-100 shadow rounded-box hover:shadow-md transition-shadow cursor-pointer block text-decoration-none" @(needsTooltip ? $"title=\"{value}\"" : "")>
+                @if (!string.IsNullOrEmpty(icon))
+                {
+                    <div class="stat-figure text-3xl">@icon</div>
+                }
+                <div class="stat-title text-xs opacity-70">@label</div>
+                <div class="stat-value text-sm truncate" @(needsTooltip ? $"title=\"{value}\"" : "")>@Html.Raw(displayValue)</div>
+                @if (!string.IsNullOrEmpty(subValue))
+                {
+                    <div class="stat-desc text-gray-400 text-xs">@subValue</div>
+                }
+            </a>
+        }
+        else
+        {
+            <div class="stat bg-base-100 shadow rounded-box" @(needsTooltip ? $"title=\"{value}\"" : "")>
+                @if (!string.IsNullOrEmpty(icon))
+                {
+                    <div class="stat-figure text-3xl">@icon</div>
+                }
+                <div class="stat-title text-xs opacity-70">@label</div>
+                <div class="stat-value text-sm truncate" @(needsTooltip ? $"title=\"{value}\"" : "")>@Html.Raw(displayValue)</div>
+                @if (!string.IsNullOrEmpty(delta))
+                {
+                    <div class="stat-desc @deltaClass text-xs">@delta</div>
+                }
+                else if (!string.IsNullOrEmpty(subValue))
+                {
+                    <div class="stat-desc text-gray-400 text-xs">@subValue</div>
+                }
+            </div>
+        }
     }
     @if (!rows.Any())
     {

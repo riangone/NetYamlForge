@@ -30,7 +30,7 @@ public class GoogleFontService
     private readonly string _boldFontPath;
     private static readonly HttpClient HttpClient = new()
     {
-        Timeout = TimeSpan.FromSeconds(30)
+        Timeout = TimeSpan.FromSeconds(3600)
     };
 
     public GoogleFontService(string baseDirectory)

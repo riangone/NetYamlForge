@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
@@ -10,21 +11,33 @@ namespace NetYamlForge.Services.AI;
 public class AppointmentService : IAppointmentService
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<AppointmentService> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public AppointmentService(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<AppointmentService> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
     public async Task<List<TimeSlot>> GetAvailableSlotsAsync(DateTime startDate, int days = 7, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var slots = new List<TimeSlot>();
 
         try
@@ -77,7 +90,7 @@ public class AppointmentService : IAppointmentService
     /// <inheritdoc />
     public async Task<AppointmentResult> CreateAppointmentAsync(AppointmentRequest request, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var appointmentId = GenerateAppointmentId();
 
         try
@@ -146,7 +159,7 @@ public class AppointmentService : IAppointmentService
         AppointmentUpdateRequest request, 
         string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -239,7 +252,7 @@ public class AppointmentService : IAppointmentService
     /// <inheritdoc />
     public async Task<bool> CancelAppointmentAsync(string appointmentId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -274,7 +287,7 @@ public class AppointmentService : IAppointmentService
     /// <inheritdoc />
     public async Task<AppointmentInfo?> GetAppointmentAsync(string appointmentId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {

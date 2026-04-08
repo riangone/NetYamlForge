@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -101,12 +102,15 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         configMock.Setup(c => c["AiWindow:BusinessHours"]).Returns("月〜金 9:00-18:00");
         configMock.Setup(c => c["AiWindow:EscalationSentimentThreshold"]).Returns("-0.5");
 
-        var projectScopeMock = new Mock<ProjectScope>();
-        projectScopeMock.Setup(p => p.IsSet).Returns(true);
-        projectScopeMock.Setup(p => p.Current).Returns(new ProjectInfo { Name = "jpiere-cs", DisplayName = "jpiere-cs", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! });
+        // ProjectScope has internal Set, use reflection to set it
+        var projectScope = new ProjectScope();
+        var setMethod = typeof(ProjectScope).GetMethod("Set", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        setMethod?.Invoke(projectScope, [new ProjectInfo { Name = "jpiere-cs", DisplayName = "jpiere-cs", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! }]);
 
-        var skillLoaderMock = new Mock<SkillLoader>();
-        skillLoaderMock.Setup(s => s.GetSystemPrompt()).Returns("You are a helpful assistant.");
+        // SkillLoader is not virtual, use real instance
+        var envMock = new Mock<IWebHostEnvironment>();
+        envMock.Setup(e => e.ContentRootPath).Returns(Directory.GetCurrentDirectory());
+        var skillLoader = new SkillLoader(envMock.Object, Mock.Of<ILogger<SkillLoader>>());
 
         var queryParserMock = new Mock<QueryParserService>();
         var queryExecutorMock = new Mock<QueryExecutionService>();
@@ -115,6 +119,7 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         var progressTrackerMock = new Mock<ProgressTracker>();
         var chatHistoryMock = new Mock<ChatHistoryService>();
         var loggerMock = new Mock<ILogger<JpiereChatService>>();
+        var llmProviderMock = new Mock<NetYamlForge.Services.AI.Providers.ILlmProvider>();
 
         chatHistoryMock
             .Setup(c => c.SaveMessageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
@@ -124,8 +129,9 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         return new JpiereChatService(
             db,
             cliFactoryMock?.Object ?? Mock.Of<CLIServiceFactory>(),
-            skillLoaderMock.Object,
-            projectScopeMock.Object,
+            llmProviderMock.Object,
+            skillLoader,
+            projectScope,
             loggerMock.Object,
             queryParserMock.Object,
             queryExecutorMock.Object,

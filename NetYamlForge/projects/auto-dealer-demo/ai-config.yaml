@@ -28,8 +28,8 @@
     
     // CLI 優先モード（開発用）
     "CliFirst": true,
-    "CliTimeoutSeconds": 30,
-    
+    "CliTimeoutSeconds": 3600,
+
     // 機能フラグ
     "EnableProactiveSuggestions": true,
     "EnableSentimentAnalysis": true,
@@ -178,7 +178,7 @@ NetYamlForge/
 {
   "AiWindow": {
     "CliFirst": true,
-    "CliTimeoutSeconds": 60,
+    "CliTimeoutSeconds": 3600,
     "EnableProactiveSuggestions": true,
     "Ollama": {
       "BaseUrl": "http://localhost:11434",

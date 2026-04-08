@@ -146,8 +146,7 @@ NetYamlForge/
 │       ├── QwenCodeCLIService.cs
 │       └── MockCLIService.cs
 ├── wwwroot/
-│   ├── css/ai-assistant.css
-│   └── js/ai-assistant.js
+│   └── js/ai-chat-widget.js
 └── Views/Shared/_Layout.cshtml (已更新)
 ```
 

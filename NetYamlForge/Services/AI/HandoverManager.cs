@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using Microsoft.Extensions.Options;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
@@ -12,6 +13,7 @@ namespace NetYamlForge.Services.AI;
 public class HandoverManager : IHandoverManager
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly IConversationManager _conversationManager;
     private readonly AiWindowConfig _config;
     private readonly ILogger<HandoverManager> _logger;
@@ -19,14 +21,25 @@ public class HandoverManager : IHandoverManager
 
     public HandoverManager(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         IConversationManager conversationManager,
         IOptions<AiWindowConfig> configOptions,
         ILogger<HandoverManager> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _conversationManager = conversationManager;
         _logger = logger;
         _config = configOptions.Value;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
@@ -85,7 +98,7 @@ public class HandoverManager : IHandoverManager
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(projectId));
             db.Open();
 
             // 対話をエスカレーション状態に更新
@@ -141,7 +154,7 @@ public class HandoverManager : IHandoverManager
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(projectId));
             db.Open();
 
             var sql = "SELECT * FROM ai_handovers WHERE handover_id = @HandoverId";
@@ -164,7 +177,7 @@ public class HandoverManager : IHandoverManager
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(projectId));
             db.Open();
 
             var sql = @"
@@ -195,7 +208,7 @@ public class HandoverManager : IHandoverManager
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(projectId));
             db.Open();
 
             var sql = @"
@@ -226,7 +239,7 @@ public class HandoverManager : IHandoverManager
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(projectId));
             db.Open();
 
             var sql = @"

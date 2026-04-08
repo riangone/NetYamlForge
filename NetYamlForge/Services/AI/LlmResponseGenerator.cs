@@ -244,7 +244,7 @@ public class LlmConfig
     public string Model { get; set; } = "qwen2.5-coder:7b";
     public double Temperature { get; set; } = 0.7;
     public int MaxTokens { get; set; } = 1000;
-    public int TimeoutSeconds { get; set; } = 30;
+    public int TimeoutSeconds { get; set; } = 3600;
 }
 
 /// <summary>

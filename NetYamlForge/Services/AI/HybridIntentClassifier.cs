@@ -30,27 +30,30 @@ public class HybridIntentClassifier : IIntentClassifier
     /// <inheritdoc />
     public async Task<IntentResult> ClassifyAsync(string message, ConversationContext? conversationContext = null, string? projectId = null)
     {
-        // 1. ルールベースマッチング（高速）
-        var ruleResult = TryRuleMatching(message, conversationContext);
-        if (ruleResult != null && ruleResult.Confidence >= _config.Intent.ConfidenceThreshold)
-        {
-            _logger.LogDebug("ルールマッチ：{Intent} (置信度：{Confidence})", ruleResult.Intent, ruleResult.Confidence);
-            return ruleResult;
-        }
-
-        // 2. LLM 分析（高精度）
+        // 1. LLM 分析（高精度、文脈理解）
         if (_config.Intent.LlmEnabled && _llmProvider != null)
         {
             try
             {
                 var llmResult = await ClassifyWithLlmAsync(message, conversationContext);
-                _logger.LogDebug("LLM 分類：{Intent} (置信度：{Confidence})", llmResult.Intent, llmResult.Confidence);
-                return llmResult;
+                if (llmResult.Confidence >= _config.Intent.ConfidenceThreshold)
+                {
+                    _logger.LogDebug("LLM 分類：{Intent} (置信度：{Confidence})", llmResult.Intent, llmResult.Confidence);
+                    return llmResult;
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "LLM 分類に失敗、ルールベースにフォールバック");
+                _logger.LogWarning(ex, "LLM 分類に失敗、ルールベースにフォールバック");
             }
+        }
+
+        // 2. ルールベースフォールバック（高速・安定）
+        var ruleResult = TryRuleMatching(message, conversationContext);
+        if (ruleResult != null)
+        {
+            _logger.LogDebug("ルールマッチ：{Intent} (置信度：{Confidence})", ruleResult.Intent, ruleResult.Confidence);
+            return ruleResult;
         }
 
         // 3. フォールバック：デフォルト意図
@@ -550,11 +553,24 @@ public class IntentRules
         // ─────────────────────────────────────────────
         // 車両関連（詳細な意図分類）
         // ─────────────────────────────────────────────
+        // ⚠️ 重要: test_drive_booking は vehicle_inquiry より先に定義する
+        // 「試乗」キーワードが両方のルールにある場合、先に定義された方が優先される
+        new IntentRule
+        {
+            Id = "test_drive_booking",
+            Intent = "test_drive_booking",
+            Patterns = new[] { "試乗", "テストドライブ", "運転してみたい", "乗り心地", "実際に乗る", "実際に乗ってみたい", "試乗予約", "試乗したい" },
+            DefaultConfidence = 0.9,
+            QuickReplies = new List<QuickReplyButton>
+            {
+                new() { Label = "試乗予約する", ActionType = "link", ActionValue = "/appointments/new?type=test_drive" }
+            }
+        },
         new IntentRule
         {
             Id = "vehicle_inquiry",
             Intent = "vehicle_inquiry",
-            Patterns = new[] { "車種", "車両", "在庫", "納期", "試乗", "カタログ", "車について", "クルマ", "自動車", "新車", "中古車" },
+            Patterns = new[] { "車種", "車両", "在庫", "納期", "カタログ", "車について", "クルマ", "自動車", "新車", "中古車" },
             DefaultConfidence = 0.8,
             QuickReplies = new List<QuickReplyButton>
             {
@@ -575,17 +591,6 @@ public class IntentRules
             Intent = "vehicle_availability",
             Patterns = new[] { "在庫ありますか", "あります", "納車", "いつ頃", "待ち", "即納", "展示車" },
             DefaultConfidence = 0.85
-        },
-        new IntentRule
-        {
-            Id = "test_drive_booking",
-            Intent = "test_drive_booking",
-            Patterns = new[] { "試乗", "テストドライブ", "運転してみたい", "乗り心地", "実際に乗る" },
-            DefaultConfidence = 0.9,
-            QuickReplies = new List<QuickReplyButton>
-            {
-                new() { Label = "試乗予約する", ActionType = "link", ActionValue = "/appointments/new?type=test_drive" }
-            }
         },
 
         // ─────────────────────────────────────────────

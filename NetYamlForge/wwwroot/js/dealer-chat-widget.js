@@ -372,6 +372,7 @@
         display: flex;
         gap: 0.5rem;
         margin-bottom: 0.5rem;
+        position: relative;
       }
       .dc-input-container textarea {
         flex: 1;
@@ -385,9 +386,30 @@
         outline: none;
         transition: border 0.2s;
         font-family: inherit;
+        padding-right: 2.5rem;
       }
       .dc-input-container textarea:focus {
         border-color: ${p};
+      }
+      .dc-clear-input-btn {
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.5rem;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.05);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: background 0.15s, color 0.15s;
+      }
+      .dc-clear-input-btn:hover {
+        background: rgba(0,0,0,0.1);
+        color: #333;
       }
 
       .dc-input-actions {
@@ -710,28 +732,69 @@
 
   // ── auto-dealer セッション開始 ──────────────────────────────
   async function startDealerSession() {
-    // セッションキーで sessionStorage から復元
-    const storedConvId = sessionStorage.getItem('dealer_conv_' + currentMode);
-    if (storedConvId) {
-      dealerConversationId = storedConvId;
-      console.log('DealerChat: セッションを復元しました', dealerConversationId);
-      return;
+    const lsKey = 'aw_dealer_conv_' + (CONFIG.project || 'auto-dealer-demo') + '_' + currentMode;
+
+    // 1️⃣ localStorage から復元（クロスブラウザ対応）
+    try {
+      const storedConvId = localStorage.getItem(lsKey);
+      if (storedConvId) {
+        dealerConversationId = storedConvId;
+        console.log('DealerChat: localStorage から conversationId を復元しました', dealerConversationId);
+        return;
+      }
+    } catch(e) {}
+
+    // 2️⃣ 認証セッションからサーバー側で検索（クロスブラウザ・クロスデバイス対応）
+    try {
+      const mySessionResp = await fetch(CONFIG.chatApiBase + '/my-session');
+      if (mySessionResp.ok) {
+        const data = await mySessionResp.json();
+        if (data.conversationId) {
+          dealerConversationId = data.conversationId;
+          try { localStorage.setItem(lsKey, dealerConversationId); } catch(e) {}
+          console.log('DealerChat: サーバー認証セッションから conversationId を復元しました', dealerConversationId);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('DealerChat: my-session 取得失敗、次のフォールバックへ', e);
     }
 
+    // 3️⃣ userId ベースのフォールバック（未ログインゲスト向け）
+    try {
+      const userId = getUserId();
+      if (userId) {
+        const historyUrl = CONFIG.chatApiBase + '/user-history?userId=' + encodeURIComponent(userId) + '&limit=1';
+        const resp = await fetch(historyUrl);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.conversationId) {
+            dealerConversationId = data.conversationId;
+            try { localStorage.setItem(lsKey, dealerConversationId); } catch(e) {}
+            console.log('DealerChat: user-history から conversationId を復元しました', dealerConversationId);
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('DealerChat: user-history 取得失敗、新規セッションを作成します', e);
+    }
+
+    // 4️⃣ 新規セッション作成
     try {
       const sessionUrl = CONFIG.chatApiBase + '/' + currentTheme.apiPath;
       console.log('DealerChat: セッション開始 URL:', sessionUrl);
-      
+
       const resp = await fetch(sessionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel: currentMode })
       });
-      
+
       if (resp.ok) {
         const data = await resp.json();
         dealerConversationId = data.conversationId;
-        sessionStorage.setItem('dealer_conv_' + currentMode, dealerConversationId);
+        try { localStorage.setItem(lsKey, dealerConversationId); } catch(e) {}
         console.log('DealerChat: セッションを開始しました', dealerConversationId);
       } else {
         const errText = await resp.text().catch(() => '');
@@ -753,6 +816,16 @@
       }
       addMessage(errorMsg, 'system');
     }
+  }
+
+  // ── 获取当前用户 ID ──────────────────────────────
+  function getUserId() {
+    // 从页面 data 属性或 localStorage 获取用户 ID
+    const body = document.body;
+    const userId = body.getAttribute('data-user-id') || 
+                   body.getAttribute('data-username') ||
+                   localStorage.getItem('userName');
+    return userId || null;
   }
 
   function buildPanelHTML() {
@@ -830,6 +903,11 @@
             class="textarea textarea-bordered"
             placeholder="${escapeHtml(currentTheme.placeholder)}"
             rows="2"></textarea>
+          <button id="dc-clear-input-btn" class="dc-clear-input-btn" title="清空输入" style="display:none">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
 
         <div id="dc-history-popup" class="dc-history-popup" style="display:none">
@@ -892,6 +970,25 @@
     document.getElementById('dc-stop-btn').onclick = stopTask;
     document.getElementById('dc-clear-btn').onclick = clearMessages;
     document.getElementById('dc-auto-scroll-btn').onclick = toggleAutoScroll;
+
+    const dcInput = document.getElementById('dc-input-message');
+    const dcClearInputBtn = document.getElementById('dc-clear-input-btn');
+
+    // 清空输入框按钮
+    if (dcClearInputBtn) {
+      dcClearInputBtn.onclick = function() {
+        dcInput.value = '';
+        dcClearInputBtn.style.display = 'none';
+        dcInput.focus();
+      };
+    }
+
+    // 监听输入框变化，显示/隐藏清空按钮
+    dcInput.addEventListener('input', function() {
+      if (dcClearInputBtn) {
+        dcClearInputBtn.style.display = this.value.length > 0 ? 'flex' : 'none';
+      }
+    });
 
     document.getElementById('dc-input-message').addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && e.ctrlKey) {
@@ -1511,7 +1608,34 @@
   }
 
   async function restoreFromServer() {
-    // まずサーバーから履歴を取得（chatContext: dealer-customer / dealer-staff）
+    // ✅ 修复: 优先使用业务 API (ai_messages 表) 而不是 AI CLI 历史 (chat.db)
+    // 如果有会话 ID,从业务数据库获取消息
+    if (dealerConversationId) {
+      try {
+        const resp = await fetch(CONFIG.chatApiBase + '/session/' + dealerConversationId + '/messages');
+        if (resp.ok) {
+          const messages = await resp.json();
+          if (Array.isArray(messages) && messages.length > 0) {
+            const container = document.getElementById('dc-messages-container');
+            container.innerHTML = '';
+            chatHistory = [];
+            messages.forEach(function(m) {
+              // sender: customer | ai | agent → user | assistant
+              const type = (m.sender === 'customer') ? 'user' : 'assistant';
+              const ts = m.timestamp || '';
+              chatHistory.push({ content: m.content, type: type, timestamp: ts });
+              addMessage(m.content, type, true, ts);
+            });
+            saveHistory();
+            return; // ✅ 成功获取,直接返回
+          }
+        }
+      } catch (e) {
+        console.warn('从业务 API 恢复失败,尝试 AI CLI 历史 API:', e);
+      }
+    }
+
+    // フォールバック: AI CLI 历史 API (chat.db)
     const chatContext = currentMode === 'customer' ? 'dealer-customer' : 'dealer-staff';
     try {
       const resp = await fetch(CONFIG.apiBaseUrl + '/history?limit=50&context=' + chatContext);
@@ -1525,10 +1649,7 @@
         // サーバーに履歴がない場合は sessionStorage もクリア（整合性保持）
         const key = STORAGE_KEY_PREFIX + currentMode;
         sessionStorage.removeItem(key);
-        // セッション ID があればセッションベースの復元も試行
-        if (dealerConversationId) {
-          restoreFromSessionApi();
-        }
+        restoreFromStorage();
         return;
       }
       // サーバーデータでローカルキャッシュを上書き

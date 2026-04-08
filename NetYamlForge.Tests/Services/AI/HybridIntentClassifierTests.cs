@@ -135,4 +135,54 @@ public class HybridIntentClassifierTests
         // 文脈により置信度が上昇
         Assert.True(result.Confidence >= 0.6);
     }
+
+    // ─────────────────────────────────────────────
+    // 試乗予約インテントのテスト（修正検証）
+    // ─────────────────────────────────────────────
+
+    [Theory]
+    [InlineData("試乗を予約したい")]
+    [InlineData("試乗したい")]
+    [InlineData("テストドライブをお願いします")]
+    [InlineData("実際に乗ってみたいです")]
+    [InlineData("試乗予約")]
+    public async Task ClassifyAsync_TestDriveBooking_ReturnsTestDriveIntent(string message)
+    {
+        // Act
+        var result = await _classifier.ClassifyAsync(message);
+
+        // Assert
+        Assert.Equal("test_drive_booking", result.Intent);
+        Assert.True(result.Confidence >= 0.8);
+        Assert.Equal("rule", result.Method);
+    }
+
+    [Theory]
+    [InlineData("プリウスの試乗を予約したい")]
+    [InlineData("ランドクルーザーを試乗したい")]
+    public async Task ClassifyAsync_TestDriveWithVehicle_ReturnsTestDriveIntent(string message)
+    {
+        // Act
+        var result = await _classifier.ClassifyAsync(message);
+
+        // Assert
+        // 試乗キーワードがtest_drive_bookingルールにのみ含まれるため、
+        // vehicle_inquiryではなくtest_drive_bookingが優先される
+        Assert.Equal("test_drive_booking", result.Intent);
+        Assert.True(result.Confidence >= 0.8);
+    }
+
+    [Theory]
+    [InlineData("在庫のある車種を教えてください")]
+    [InlineData("新車のカタログを見せて")]
+    public async Task ClassifyAsync_VehicleInquiry_ReturnsVehicleInquiryIntent(string message)
+    {
+        // Act
+        var result = await _classifier.ClassifyAsync(message);
+
+        // Assert
+        // 試乗キーワードを含まない車両問い合わせはvehicle_inquiryになる
+        Assert.Equal("vehicle_inquiry", result.Intent);
+        Assert.True(result.Confidence >= 0.6);
+    }
 }

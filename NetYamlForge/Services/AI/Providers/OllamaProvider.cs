@@ -24,12 +24,16 @@ public class OllamaProvider : ILlmProvider
     }
 
     /// <inheritdoc />
-    public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default)
+    public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default, string? systemPromptOverride = null)
     {
+        var finalPrompt = systemPromptOverride != null
+            ? $"{systemPromptOverride}\n\n---\n\n{prompt}"
+            : prompt;
+
         var request = new
         {
             model = _config.Model,
-            prompt = prompt,
+            prompt = finalPrompt,
             stream = false,
             options = new
             {

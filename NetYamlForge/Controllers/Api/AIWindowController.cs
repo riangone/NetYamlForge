@@ -9,6 +9,7 @@ namespace NetYamlForge.Controllers.Api;
 /// </summary>
 [ApiController]
 [Route("api/aiwindow")]  // api/ai は AIController ({project?}/api/AI) と競合するため aiwindow に変更
+[Route("{project}/api/aiwindow")]
 [Produces("application/json")]
 public class AIWindowController : ControllerBase
 {
@@ -39,11 +40,13 @@ public class AIWindowController : ControllerBase
     /// 対話セッションを開始
     /// </summary>
     [HttpPost("conversations")]
-    public async Task<ActionResult<StartConversationResponse>> StartConversation([FromBody] StartConversationRequest request)
+    public async Task<ActionResult<StartConversationResponse>> StartConversation(
+        [FromBody] StartConversationRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            var conversation = await _conversationManager.StartConversationAsync(request);
+            var conversation = await _conversationManager.StartConversationAsync(request, project);
 
             var welcomeMessage = GenerateWelcomeMessage(request.Channel);
 
@@ -53,7 +56,7 @@ public class AIWindowController : ControllerBase
                 WelcomeMessage = welcomeMessage,
                 AiModel = "System",
                 SentAt = DateTime.UtcNow,
-                SessionTimeoutMinutes = 30
+                SessionTimeoutMinutes = 60
             });
         }
         catch (Exception ex)
@@ -67,9 +70,9 @@ public class AIWindowController : ControllerBase
     /// 対話セッションを取得
     /// </summary>
     [HttpGet("conversations/{id}")]
-    public async Task<ActionResult<Conversation>> GetConversation(string id)
+    public async Task<ActionResult<Conversation>> GetConversation(string id, [FromRoute] string? project)
     {
-        var conversation = await _conversationManager.GetConversationAsync(id);
+        var conversation = await _conversationManager.GetConversationAsync(id, project);
         if (conversation == null)
             return NotFound();
 
@@ -80,9 +83,9 @@ public class AIWindowController : ControllerBase
     /// 対話セッションを終了
     /// </summary>
     [HttpPost("conversations/{id}/close")]
-    public async Task<ActionResult> CloseConversation(string id)
+    public async Task<ActionResult> CloseConversation(string id, [FromRoute] string? project)
     {
-        var success = await _conversationManager.CloseConversationAsync(id);
+        var success = await _conversationManager.CloseConversationAsync(id, project);
         if (!success)
             return NotFound();
 
@@ -93,12 +96,15 @@ public class AIWindowController : ControllerBase
     /// メッセージを送信して応答を取得
     /// </summary>
     [HttpPost("conversations/{id}/messages")]
-    public async Task<ActionResult<SendMessageResponse>> SendMessage(string id, [FromBody] SendMessageRequest request)
+    public async Task<ActionResult<SendMessageResponse>> SendMessage(
+        string id,
+        [FromBody] SendMessageRequest request,
+        [FromRoute] string? project)
     {
         try
         {
             // 対話セッションの存在確認
-            var conversation = await _conversationManager.GetConversationAsync(id);
+            var conversation = await _conversationManager.GetConversationAsync(id, project);
             if (conversation == null)
                 return NotFound("対話セッションが見つかりません");
 
@@ -108,7 +114,7 @@ public class AIWindowController : ControllerBase
                 ConversationId = id,
                 CurrentIntent = conversation.LastIntent
             };
-            var aiResult = await _aiProcessor.ProcessAsync(request.Content, context);
+            var aiResult = await _aiProcessor.ProcessAsync(request.Content, context, project);
 
             // エスカレーションが必要か
             if (aiResult.NeedsHandover && !conversation.Status.Equals("escalated", StringComparison.OrdinalIgnoreCase))
@@ -120,7 +126,7 @@ public class AIWindowController : ControllerBase
                     Priority = aiResult.Priority,
                     TargetDepartment = aiResult.TargetDepartment,
                     HandoverNotes = $"感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2}), エンティティ：{string.Join(", ", aiResult.Entities.Select(e => $"{e.Key}={e.Value}"))}"
-                }, null);
+                }, project);
 
                 if (handoverResult.Success)
                 {
@@ -155,7 +161,9 @@ public class AIWindowController : ControllerBase
     /// 顧客認証
     /// </summary>
     [HttpPost("customers/verify")]
-    public async Task<ActionResult<VerifyCustomerResponse>> VerifyCustomer([FromBody] VerifyCustomerRequest request)
+    public async Task<ActionResult<VerifyCustomerResponse>> VerifyCustomer(
+        [FromBody] VerifyCustomerRequest request,
+        [FromRoute] string? project)
     {
         try
         {
@@ -171,7 +179,8 @@ public class AIWindowController : ControllerBase
             // 顧客認証実行
             var result = await _customerDataService.VerifyCustomerAsync(
                 request.Identifier,
-                request.VerificationCode);
+                request.VerificationCode,
+                project);
 
             if (!result.Success)
             {
@@ -200,11 +209,11 @@ public class AIWindowController : ControllerBase
     /// 顧客情報取得
     /// </summary>
     [HttpGet("customers/{id}")]
-    public async Task<ActionResult<CustomerInfo>> GetCustomer(string id)
+    public async Task<ActionResult<CustomerInfo>> GetCustomer(string id, [FromRoute] string? project)
     {
         try
         {
-            var customer = await _customerDataService.GetCustomerByIdAsync(id);
+            var customer = await _customerDataService.GetCustomerByIdAsync(id, project);
             
             if (customer == null)
                 return NotFound();
@@ -222,11 +231,11 @@ public class AIWindowController : ControllerBase
     /// 顧客サービス履歴取得
     /// </summary>
     [HttpGet("customers/{id}/history")]
-    public async Task<ActionResult<object>> GetCustomerHistory(string id)
+    public async Task<ActionResult<object>> GetCustomerHistory(string id, [FromRoute] string? project)
     {
         try
         {
-            var history = await _customerDataService.GetCustomerServiceHistoryAsync(id);
+            var history = await _customerDataService.GetCustomerServiceHistoryAsync(id, project);
             
             if (history == null)
                 return NotFound();
@@ -246,13 +255,15 @@ public class AIWindowController : ControllerBase
     [HttpGet("appointments/available")]
     public async Task<ActionResult<List<TimeSlot>>> GetAvailableSlots(
         [FromQuery] DateTime? startDate = null,
-        [FromQuery] int days = 7)
+        [FromQuery] int days = 7,
+        [FromRoute] string? project = null)
     {
         try
         {
             var slots = await _appointmentService.GetAvailableSlotsAsync(
                 startDate ?? DateTime.Today,
-                days);
+                days,
+                project);
 
             return Ok(slots);
         }
@@ -268,7 +279,8 @@ public class AIWindowController : ControllerBase
     /// </summary>
     [HttpPost("appointments")]
     public async Task<ActionResult<AppointmentResult>> CreateAppointment(
-        [FromBody] CreateAppointmentRequest request)
+        [FromBody] CreateAppointmentRequest request,
+        [FromRoute] string? project)
     {
         try
         {
@@ -279,7 +291,7 @@ public class AIWindowController : ControllerBase
                 VehicleId = request.VehicleId,
                 PreferredDateTime = request.PreferredDateTime,
                 Details = request.Details
-            });
+            }, project);
 
             if (!result.Success)
             {
@@ -301,11 +313,12 @@ public class AIWindowController : ControllerBase
     [HttpPut("appointments/{id}")]
     public async Task<ActionResult<AppointmentResult>> UpdateAppointment(
         string id,
-        [FromBody] AppointmentUpdateRequest request)
+        [FromBody] AppointmentUpdateRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            var result = await _appointmentService.UpdateAppointmentAsync(id, request);
+            var result = await _appointmentService.UpdateAppointmentAsync(id, request, project);
 
             if (!result.Success)
             {
@@ -325,11 +338,11 @@ public class AIWindowController : ControllerBase
     /// 予約キャンセル
     /// </summary>
     [HttpDelete("appointments/{id}")]
-    public async Task<ActionResult> CancelAppointment(string id)
+    public async Task<ActionResult> CancelAppointment(string id, [FromRoute] string? project)
     {
         try
         {
-            var success = await _appointmentService.CancelAppointmentAsync(id);
+            var success = await _appointmentService.CancelAppointmentAsync(id, project);
 
             if (!success)
             {
@@ -349,11 +362,11 @@ public class AIWindowController : ControllerBase
     /// 予約詳細取得
     /// </summary>
     [HttpGet("appointments/{id}")]
-    public async Task<ActionResult<AppointmentInfo>> GetAppointment(string id)
+    public async Task<ActionResult<AppointmentInfo>> GetAppointment(string id, [FromRoute] string? project)
     {
         try
         {
-            var appointment = await _appointmentService.GetAppointmentAsync(id);
+            var appointment = await _appointmentService.GetAppointmentAsync(id, project);
 
             if (appointment == null)
                 return NotFound();
@@ -371,11 +384,13 @@ public class AIWindowController : ControllerBase
     /// エスカレーションキューを取得（オペレーター用）
     /// </summary>
     [HttpGet("handovers/queue")]
-    public async Task<ActionResult<List<HandoverInfo>>> GetHandoverQueue(string? department = null)
+    public async Task<ActionResult<List<HandoverInfo>>> GetHandoverQueue(
+        string? department = null,
+        [FromRoute] string? project = null)
     {
         try
         {
-            var queue = await _handoverManager.GetPendingQueueAsync(department);
+            var queue = await _handoverManager.GetPendingQueueAsync(department, project);
             return Ok(queue);
         }
         catch (Exception ex)
@@ -389,11 +404,14 @@ public class AIWindowController : ControllerBase
     /// エスカレーションを解決（オペレーター用）
     /// </summary>
     [HttpPut("handovers/{id}/resolve")]
-    public async Task<ActionResult> ResolveHandover(string id, [FromBody] ResolveHandoverRequest request)
+    public async Task<ActionResult> ResolveHandover(
+        string id,
+        [FromBody] ResolveHandoverRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            var success = await _handoverManager.ResolveHandoverAsync(id, request.ResolutionNotes);
+            var success = await _handoverManager.ResolveHandoverAsync(id, request.ResolutionNotes, project);
             if (!success)
                 return NotFound();
 

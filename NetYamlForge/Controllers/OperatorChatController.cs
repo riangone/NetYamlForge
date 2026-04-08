@@ -12,10 +12,10 @@ namespace NetYamlForge.Controllers;
 [Route("{project}/OperatorChat")]
 public class OperatorChatController : BaseProjectController
 {
-    private readonly AutoDealerChatService _chat;
+    private readonly IOperatorChatService _chat;
     private readonly ILogger<OperatorChatController> _logger;
 
-    public OperatorChatController(AutoDealerChatService chat, ILogger<OperatorChatController> logger)
+    public OperatorChatController(IOperatorChatService chat, ILogger<OperatorChatController> logger)
     {
         _chat = chat;
         _logger = logger;

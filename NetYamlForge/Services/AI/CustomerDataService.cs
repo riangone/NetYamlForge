@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
@@ -11,21 +12,33 @@ namespace NetYamlForge.Services.AI;
 public class CustomerDataService : ICustomerDataService
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<CustomerDataService> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public CustomerDataService(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<CustomerDataService> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
     public async Task<CustomerInfo?> GetCustomerByIdentifierAsync(string identifier, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -68,7 +81,7 @@ public class CustomerDataService : ICustomerDataService
     /// <inheritdoc />
     public async Task<CustomerInfo?> GetCustomerByIdAsync(string customerId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -109,7 +122,7 @@ public class CustomerDataService : ICustomerDataService
     /// <inheritdoc />
     public async Task<object?> GetCustomerContractsAsync(string customerId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -150,7 +163,7 @@ public class CustomerDataService : ICustomerDataService
     /// <inheritdoc />
     public async Task<object?> GetCustomerServiceHistoryAsync(string customerId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
@@ -211,7 +224,7 @@ public class CustomerDataService : ICustomerDataService
         string verificationCode,
         string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {

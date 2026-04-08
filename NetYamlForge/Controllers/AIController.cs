@@ -99,6 +99,7 @@ public class AIController : ControllerBase
                 Message = request.Message,
                 Project = request.Project,
                 SessionId = request.SessionId,
+                Context = request.Context,  // ✨ 传递角色上下文
                 Status = TaskStatus.Pending,
                 Progress = 0,
                 CreatedAt = DateTime.UtcNow
@@ -118,6 +119,16 @@ public class AIController : ControllerBase
 
                 if (currentTask.Status == TaskStatus.Completed)
                 {
+                    // ✨ AIの返信メッセージをチャット履歴に自動保存
+                    var chatContext = string.IsNullOrEmpty(request.Project) ? "framework" : request.Project;
+                    if (!string.IsNullOrEmpty(currentTask.Result))
+                    {
+                        await _chatHistory.SaveMessageAsync(userId, currentTask.Result, "assistant",
+                            provider: request.CliTool,
+                            chatContext: chatContext,
+                            projectName: request.Project);
+                    }
+
                     return Ok(new AIChatResponse
                     {
                         TaskId = task.Id,
@@ -140,6 +151,16 @@ public class AIController : ControllerBase
             }
 
             // 超时返回
+            // ✨ 即使超时，如果AI已有回复，也保存到数据库
+            if (!string.IsNullOrEmpty(task.Result))
+            {
+                var chatContext = string.IsNullOrEmpty(request.Project) ? "framework" : request.Project;
+                await _chatHistory.SaveMessageAsync(userId, task.Result, "assistant",
+                    provider: request.CliTool,
+                    chatContext: chatContext,
+                    projectName: request.Project);
+            }
+
             return Ok(new AIChatResponse
             {
                 TaskId = task.Id,

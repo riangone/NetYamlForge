@@ -11,7 +11,7 @@ public class CliConfig
     public string DefaultTool { get; set; } = "claude";
 
     /// <summary>タスクタイムアウト（秒）</summary>
-    public int TaskTimeoutSeconds { get; set; } = 1800;
+    public int TaskTimeoutSeconds { get; set; } = 3600;
 
     /// <summary>最大同時実行タスク数</summary>
     public int MaxConcurrentTasks { get; set; } = 2;

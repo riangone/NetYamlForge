@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
 using Xunit;
@@ -22,6 +23,11 @@ public class HandoverManagerTests
         _mockDbFactory = new Mock<IDbConnectionFactory>();
         _mockConversationManager = new Mock<IConversationManager>();
 
+        // ProjectScope has internal Set, use reflection to set it
+        var projectScope = new ProjectScope();
+        var setMethod = typeof(ProjectScope).GetMethod("Set", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        setMethod?.Invoke(projectScope, [new ProjectInfo { Name = "auto-dealer-demo", DisplayName = "", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! }]);
+
         var config = new AiWindowConfig
         {
             Handover = new HandoverConfig
@@ -37,6 +43,7 @@ public class HandoverManagerTests
 
         _handoverManager = new HandoverManager(
             _mockDbFactory.Object,
+            projectScope,
             _mockConversationManager.Object,
             Options.Create(config),
             logger);

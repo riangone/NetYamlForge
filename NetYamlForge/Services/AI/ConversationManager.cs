@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.Json;
 using Dapper;
 using NetYamlForge.Models.AI;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
@@ -12,21 +13,33 @@ namespace NetYamlForge.Services.AI;
 public class ConversationManager : IConversationManager
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<ConversationManager> _logger;
-    private readonly string DefaultProjectId = "auto-dealer-demo";
+    private const string DefaultProjectId = "auto-dealer-demo";
 
     public ConversationManager(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<ConversationManager> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <inheritdoc />
     public async Task<Conversation> StartConversationAsync(StartConversationRequest request, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var conversationId = GenerateConversationId();
 
         var conversation = new Conversation
@@ -42,7 +55,7 @@ public class ConversationManager : IConversationManager
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"
@@ -76,11 +89,11 @@ public class ConversationManager : IConversationManager
     /// <inheritdoc />
     public async Task<Conversation?> GetConversationAsync(string conversationId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = "SELECT * FROM ai_conversations WHERE conversation_id = @ConversationId";
@@ -101,11 +114,11 @@ public class ConversationManager : IConversationManager
     /// <inheritdoc />
     public async Task<bool> CloseConversationAsync(string conversationId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"
@@ -134,11 +147,11 @@ public class ConversationManager : IConversationManager
     /// <inheritdoc />
     public async Task<bool> MarkConversationAsEscalatedAsync(string conversationId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"
@@ -166,11 +179,11 @@ public class ConversationManager : IConversationManager
     /// <inheritdoc />
     public async Task<bool> LinkCustomerToConversationAsync(string conversationId, string customerId, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"
@@ -198,11 +211,11 @@ public class ConversationManager : IConversationManager
     /// <inheritdoc />
     public async Task<bool> UpdateContextAsync(string conversationId, Dictionary<string, object> context, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"
@@ -227,14 +240,14 @@ public class ConversationManager : IConversationManager
     }
 
     /// <inheritdoc />
-    public async Task<int> CleanupExpiredSessionsAsync(int timeoutMinutes = 30, string? projectId = null)
+    public async Task<int> CleanupExpiredSessionsAsync(int timeoutMinutes = 60, string? projectId = null)
     {
-        var project = projectId ?? DefaultProjectId;
+        var project = ResolveProject(projectId);
         var cutoffTime = DateTime.UtcNow.AddMinutes(-timeoutMinutes);
 
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(projectId ?? DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(project);
             db.Open();
 
             var sql = @"

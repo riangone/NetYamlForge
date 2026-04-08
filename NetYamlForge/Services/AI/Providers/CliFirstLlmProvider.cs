@@ -7,52 +7,38 @@ namespace NetYamlForge.Services.AI.Providers;
 /// <summary>
 /// CLI ファーストの ILlmProvider 実装。
 /// 設定された CLI プロバイダーチェーン（QwenCode / Claude CLI / Gemini …）を順に試み、
-/// すべて失敗した場合は Claude API（直接）にフォールバックします。
+/// すべて失敗した場合は例外をスローします（API フォールバックなし）。
 /// </summary>
 public class CliFirstLlmProvider : ILlmProvider
 {
     private readonly CLIServiceFactory _cliFactory;
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _config;
     private readonly ILogger<CliFirstLlmProvider> _logger;
 
     private string[] ProviderPriority =>
         _config.GetSection("AiWindow:ProviderPriority").Get<string[]>()
-        ?? ["claude", "qwen", "gemini", "ollama"];
+        ?? ["qwen", "claude", "gemini", "ollama"];
     private int CliTimeoutSeconds =>
-        int.TryParse(_config["AiWindow:CliTimeoutSeconds"], out var t) ? t : 8;
-    private string ClaudeApiKey =>
-        _config["AiWindow:Claude:ApiKey"] ?? Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY") ?? "";
-    private string ClaudeModel =>
-        _config["AiWindow:Claude:Model"] ?? "claude-haiku-4-5-20251001";
+        int.TryParse(_config["AiWindow:CliTimeoutSeconds"], out var t) && t > 0 ? t : 3600;
 
     public CliFirstLlmProvider(
         CLIServiceFactory cliFactory,
-        IHttpClientFactory httpClientFactory,
         IConfiguration config,
         ILogger<CliFirstLlmProvider> logger)
     {
         _cliFactory = cliFactory;
-        _httpClientFactory = httpClientFactory;
         _config = config;
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default)
+    public async Task<string> CompleteAsync(string prompt, CancellationToken cancellationToken = default, string? systemPromptOverride = null)
     {
-        // 1. CLI プロバイダーチェーン
-        var cliResult = await TryCliAsync(prompt, cancellationToken);
+        // CLI プロバイダーチェーンのみ実行（API フォールバックなし）
+        var cliResult = await TryCliAsync(prompt, systemPromptOverride, cancellationToken);
         if (cliResult != null) return cliResult;
 
-        // 2. Claude API フォールバック
-        if (!string.IsNullOrWhiteSpace(ClaudeApiKey))
-        {
-            try { return await CallClaudeAsync(prompt, cancellationToken); }
-            catch (Exception ex) { _logger.LogWarning(ex, "Claude API フォールバック失敗"); }
-        }
-
-        throw new InvalidOperationException("利用可能な LLM プロバイダーがありません。CLI または Claude API キーを設定してください。");
+        throw new InvalidOperationException("利用可能な CLI プロバイダーがありません。CLI ツールのインストールと設定を確認してください。");
     }
 
     /// <inheritdoc />
@@ -72,7 +58,7 @@ public class CliFirstLlmProvider : ILlmProvider
     // 内部: CLI チェーン
     // ─────────────────────────────────────────────────────────
 
-    private async Task<string?> TryCliAsync(string prompt, CancellationToken ct)
+    private async Task<string?> TryCliAsync(string prompt, string? systemPromptOverride, CancellationToken ct)
     {
         foreach (var name in ProviderPriority)
         {
@@ -89,13 +75,13 @@ public class CliFirstLlmProvider : ILlmProvider
                     workingDirectory: Path.GetTempPath(),
                     sessionId: null,
                     allowedTools: [],
-                    systemPromptOverride: null,
+                    systemPromptOverride: systemPromptOverride,  // ✨ 修正：systemPromptOverride を渡す
                     ct: cts.Token);
 
                 var text = ExtractText(raw);
                 if (!string.IsNullOrWhiteSpace(text))
                 {
-                    _logger.LogInformation("CliFirstLlmProvider: CLI応答成功 provider={Name}", name);
+                    _logger.LogInformation("CliFirstLlmProvider: CLI応答成功 provider={Name}, systemPromptOverride={HasOverride}", name, !string.IsNullOrEmpty(systemPromptOverride));
                     return text;
                 }
             }
@@ -178,47 +164,5 @@ public class CliFirstLlmProvider : ILlmProvider
         }
 
         return raw.Trim();
-    }
-
-    // ─────────────────────────────────────────────────────────
-    // 内部: Claude API（直接）
-    // ─────────────────────────────────────────────────────────
-
-    private async Task<string> CallClaudeAsync(string prompt, CancellationToken ct)
-    {
-        var client = _httpClientFactory.CreateClient("ClaudeApiClient");
-        client.DefaultRequestHeaders.Remove("x-api-key");
-        client.DefaultRequestHeaders.Add("x-api-key", ClaudeApiKey);
-
-        var body = new
-        {
-            model = ClaudeModel,
-            max_tokens = 1024,
-            messages = new[] { new { role = "user", content = prompt } }
-        };
-
-        var json = JsonSerializer.Serialize(body);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("v1/messages", content, ct);
-        response.EnsureSuccessStatusCode();
-
-        var responseJson = await response.Content.ReadAsStringAsync(ct);
-        using var doc = JsonDocument.Parse(responseJson);
-        var root = doc.RootElement;
-
-        if (root.TryGetProperty("content", out var contentArr) &&
-            contentArr.ValueKind == JsonValueKind.Array)
-        {
-            foreach (var item in contentArr.EnumerateArray())
-            {
-                if (item.TryGetProperty("type", out var tp) && tp.GetString() == "text" &&
-                    item.TryGetProperty("text", out var textProp))
-                {
-                    return textProp.GetString()?.Trim() ?? "";
-                }
-            }
-        }
-
-        throw new InvalidOperationException("Claude API レスポンスからテキストを取り出せませんでした");
     }
 }

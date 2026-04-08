@@ -20,6 +20,7 @@ public class AITask
     public List<string> Logs { get; set; } = new();
     public int? ProcessId { get; set; }     // CLI 进程 ID（用于取消）
     public List<string>? AllowedTools { get; set; }  // 允许使用的工具列表
+    public string? Context { get; set; }  // ✨ 角色上下文（staff/customer/employee 等）
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

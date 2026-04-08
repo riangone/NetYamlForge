@@ -40,5 +40,5 @@ public interface IConversationManager
     /// <summary>
     /// 有効期限切れの対話セッションをクリーンアップ
     /// </summary>
-    Task<int> CleanupExpiredSessionsAsync(int timeoutMinutes = 30, string? projectId = null);
+    Task<int> CleanupExpiredSessionsAsync(int timeoutMinutes = 60, string? projectId = null);
 }

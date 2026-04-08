@@ -54,7 +54,7 @@ public class StartConversationResponse
     /// <summary>
     /// セッション有効期限（分）
     /// </summary>
-    public int SessionTimeoutMinutes { get; set; } = 30;
+    public int SessionTimeoutMinutes { get; set; } = 60;
 }
 
 /// <summary>

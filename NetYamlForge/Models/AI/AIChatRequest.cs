@@ -36,4 +36,9 @@ public class AIChatRequest
     /// 允许的工具列表 (--allowedTools)
     /// </summary>
     public List<string>? AllowedTools { get; set; }
+
+    /// <summary>
+    /// ✨ 角色上下文（staff/customer/employee/contract_manager 等）
+    /// </summary>
+    public string? Context { get; set; }
 }

@@ -1,6 +1,7 @@
 using System.Data;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Controllers.Api;
@@ -10,30 +11,43 @@ namespace NetYamlForge.Controllers.Api;
 /// </summary>
 [ApiController]
 [Route("api/ai/conversations")]
+[Route("{project}/api/ai/conversations")]
 [Produces("application/json")]
 public class AIConversationDetailController : ControllerBase
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<AIConversationDetailController> _logger;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     public AIConversationDetailController(
         IDbConnectionFactory dbConnectionFactory,
+        ProjectScope projectScope,
         ILogger<AIConversationDetailController> logger)
     {
         _dbConnectionFactory = dbConnectionFactory;
+        _projectScope = projectScope;
         _logger = logger;
+    }
+
+    private string ResolveProject(string? project)
+    {
+        if (!string.IsNullOrWhiteSpace(project))
+            return project;
+        if (_projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
     }
 
     /// <summary>
     /// 対話詳細取得
     /// </summary>
     [HttpGet("{id}")]
-    public async Task<ActionResult<ConversationDetailDto>> GetConversation(string id)
+    public async Task<ActionResult<ConversationDetailDto>> GetConversation(string id, [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -87,11 +101,11 @@ public class AIConversationDetailController : ControllerBase
     /// メッセージ履歴取得
     /// </summary>
     [HttpGet("{id}/messages")]
-    public async Task<ActionResult<List<MessageDetailDto>>> GetMessages(string id)
+    public async Task<ActionResult<List<MessageDetailDto>>> GetMessages(string id, [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var sql = @"
@@ -137,11 +151,11 @@ public class AIConversationDetailController : ControllerBase
     /// 対話をエクスポート
     /// </summary>
     [HttpGet("{id}/export")]
-    public async Task<IActionResult> ExportConversation(string id)
+    public async Task<IActionResult> ExportConversation(string id, [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             // 対話情報取得
@@ -181,11 +195,14 @@ public class AIConversationDetailController : ControllerBase
     /// エスカレーション作成
     /// </summary>
     [HttpPost("{id}/handover")]
-    public async Task<ActionResult> CreateHandover(string id, [FromBody] CreateHandoverRequest request)
+    public async Task<ActionResult> CreateHandover(
+        string id,
+        [FromBody] CreateHandoverRequest request,
+        [FromRoute] string? project)
     {
         try
         {
-            using var db = _dbConnectionFactory.CreateConnection(DefaultProjectId);
+            using var db = _dbConnectionFactory.CreateConnection(ResolveProject(project));
             db.Open();
 
             var handoverId = $"HO-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N8}";
