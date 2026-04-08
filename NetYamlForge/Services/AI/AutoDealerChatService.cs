@@ -500,150 +500,98 @@ WHERE conversation_id = @Id",
         }
     }
 
+    /// <summary>
+    /// AI を使用してメッセージからスロット値を抽出
+    /// 正規表現や辞書の代わりに LLM で自然言語理解を行う
+    /// </summary>
     private async Task ExtractSlotValuesFromMessageAsync(string conversationId, string message, string scenario)
     {
         if (_slotFilling == null) return;
 
-        var lowerMessage = message.ToLowerInvariant();
-
-        var datePatterns = new Dictionary<string, string>
+        try
         {
-            { "明日", "tomorrow" },
-            { "明後日", "day_after_tomorrow" },
-            { "今日", "today" },
-            { "来週", "next_week" },
-            { "今週", "this_week" }
-        };
-
-        foreach (var (pattern, value) in datePatterns)
-        {
-            if (lowerMessage.Contains(pattern))
+            // シナリオに応じて抽出するスロットを定義
+            var slotsToExtract = scenario switch
             {
-                await _slotFilling.UpdateSlotAsync(conversationId, "preferred_date", value, _projectName);
-                break;
+                "test_drive" => "vehicle_model, preferred_date, preferred_time, customer_name, customer_phone",
+                "estimate" => "vehicle_model, grade, budget, customer_name, customer_phone",
+                "appointment_service" => "service_type, preferred_date, preferred_time, customer_name, customer_phone",
+                "trade_in" => "vehicle_model, vehicle_year, mileage, customer_name, customer_phone",
+                _ => "customer_name, customer_phone"
+            };
+
+            // AI に抽出を依頼するプロンプト
+            var extractionPrompt = $@"あなたは情報抽出アシスタントです。以下のメッセージから、指定されたスロットの値を抽出してください。
+
+メッセージ: {message}
+
+抽出するスロット: {slotsToExtract}
+
+以下の JSON 形式のみで返してください。値がないスロットは null にしてください。
+{{
+  ""vehicle_model"": ""車種名"",
+  ""preferred_date"": ""日付"",
+  ""preferred_time"": ""時間"",
+  ""customer_name"": ""名前"",
+  ""customer_phone"": ""電話番号"",
+  ""service_type"": ""サービス種類"",
+  ""grade"": ""グレード"",
+  ""budget"": ""予算"",
+  ""vehicle_year"": ""車両年"",
+  ""mileage"": ""走行距離""
+}}
+
+ルール:
+- 日本語の日付表現（明日、来週、等）はそのまま抽出
+- 時間表現（午前10時、午後2時、等）もそのまま抽出  
+- 名前は敬語表現（です、と申します、等）を除いた部分のみを抽出
+- 電話番号は数字とハイフンをそのまま抽出
+- 見つからない値は null にしてください
+- JSON のみ出力し、他の説明は不要です";
+
+            var response = await _llmProvider.CompleteAsync(extractionPrompt, System.Threading.CancellationToken.None);
+            
+            // JSON をパースしてスロットを更新
+            var jsonStart = response.IndexOf('{');
+            var jsonEnd = response.LastIndexOf('}');
+            
+            if (jsonStart >= 0 && jsonEnd > jsonStart)
+            {
+                var jsonStr = response.Substring(jsonStart, jsonEnd - jsonStart + 1);
+                var extracted = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonStr);
+                
+                if (extracted != null)
+                {
+                    var updated = false;
+                    foreach (var kvp in extracted)
+                    {
+                        if (kvp.Value.ValueKind == JsonValueKind.String)
+                        {
+                            var value = kvp.Value.GetString()?.Trim();
+                            if (!string.IsNullOrWhiteSpace(value))
+                            {
+                                await _slotFilling.UpdateSlotAsync(conversationId, kvp.Key, value, _projectName);
+                                updated = true;
+                                _logger.LogInformation("AIスロット抽出成功: Scenario={Scenario}, Slot={Slot}, Value={Value}",
+                                    scenario, kvp.Key, value);
+                            }
+                        }
+                    }
+                    
+                    if (updated)
+                    {
+                        _logger.LogInformation("スロット更新完了: Scenario={Scenario}", scenario);
+                    }
+                }
             }
         }
-
-        var dateMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d{4})[-/](\d{1,2})[-/](\d{1,2})");
-        if (dateMatch.Success)
+        catch (Exception ex)
         {
-            await _slotFilling.UpdateSlotAsync(conversationId, "preferred_date", dateMatch.Value, _projectName);
-        }
-
-        var timePatterns = new Dictionary<string, string>
-        {
-            { "午前", "morning" },
-            { "午後", "afternoon" },
-            { "朝", "morning" },
-            { "昼", "afternoon" },
-            { "夕方", "evening" },
-            { "夜", "evening" },
-            { "10時", "10:00" },
-            { "14時", "14:00" },
-            { "2時", "14:00" },
-            { "15時", "15:00" },
-            { "3時", "15:00" }
-        };
-
-        foreach (var (pattern, value) in timePatterns)
-        {
-            if (lowerMessage.Contains(pattern))
-            {
-                await _slotFilling.UpdateSlotAsync(conversationId, "preferred_time", value, _projectName);
-                break;
-            }
-        }
-
-        var phoneMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d{2,4}-\d{1,4}-\d{4})");
-        if (phoneMatch.Success)
-        {
-            await _slotFilling.UpdateSlotAsync(conversationId, "customer_phone", phoneMatch.Value, _projectName);
-        }
-
-        var knownVehicles = new Dictionary<string, string>
-        {
-            { "プリウス", "プリウス PHV" },
-            { "ランドクルーザー", "ランドクルーザー 300" },
-            { "アルファード", "アルファード" },
-            { "camry", "カムリ" },
-            { "カローラ", "カローラ" },
-            { "ヤリス", "ヤリス" },
-            { "rav4", "RAV4" },
-            { "ハイラックス", "ハイラックス" },
-            { "クラウン", "クラウン" },
-            { "スープラ", "スープラ" },
-            { "gtr", "GT-R" },
-            { "フィット", "フィット" },
-            { "アクセラ", "アクセラ" },
-            { "cx", "CXシリーズ" },
-            { "インプレッサ", "インプレッサ" },
-            { "レヴォーグ", "レヴォーグ" },
-            // ✅ 添加制造商名称作为回退选项
-            { "マツダ", "マツダ車" },
-            { "トヨタ", "トヨタ車" },
-            { "ホンダ", "ホンダ車" },
-            { "日産", "日産車" },
-            { "bmw", "BMW車" },
-            { "メルセデス", "メルセデス・ベンツ" },
-            { "ベンツ", "メルセデス・ベンツ" }
-        };
-
-        foreach (var (keyword, vehicleName) in knownVehicles)
-        {
-            if (lowerMessage.Contains(keyword))
-            {
-                await _slotFilling.UpdateSlotAsync(conversationId, "vehicle_model", vehicleName, _projectName);
-                break;
-            }
-        }
-
-        // グレード抽出（estimate シナリオ）
-        var gradePatterns = new[] { "G", "Z", "X", "S", "プレミアム", "スタンダード", "エグゼクティブ" };
-        foreach (var grade in gradePatterns)
-        {
-            if (message.Contains(grade, StringComparison.OrdinalIgnoreCase))
-            {
-                await _slotFilling.UpdateSlotAsync(conversationId, "grade", grade, _projectName);
-                break;
-            }
-        }
-
-        // 年式抽出（trade_in シナリオ）
-        var yearMatch = System.Text.RegularExpressions.Regex.Match(message, @"(20\d{2}|平成\d+|令和\d+)年");
-        if (yearMatch.Success)
-            await _slotFilling.UpdateSlotAsync(conversationId, "vehicle_year", yearMatch.Value, _projectName);
-
-        // 走行距離抽出（trade_in シナリオ）
-        var mileageMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d+(?:\.\d+)?)\s*万\s*km");
-        if (mileageMatch.Success)
-            await _slotFilling.UpdateSlotAsync(conversationId, "mileage", mileageMatch.Value, _projectName);
-
-        // サービス種別抽出（appointment_service シナリオ）
-        var serviceKeywords = new Dictionary<string, string>
-        {
-            { "車検" , "車検" }, { "点検" , "定期点検" }, { "オイル" , "オイル交換" },
-            { "タイヤ" , "タイヤ交換" }, { "修理" , "修理" }, { "板金" , "板金塗装" }
-        };
-        foreach (var (keyword, serviceType) in serviceKeywords)
-        {
-            if (lowerMessage.Contains(keyword))
-            {
-                await _slotFilling.UpdateSlotAsync(conversationId, "service_type", serviceType, _projectName);
-                break;
-            }
-        }
-
-        var namePatterns = new System.Text.RegularExpressions.Regex(@"(.+?)(?:です|と申します|でございます)");
-        var nameMatch = namePatterns.Match(message);
-        if (nameMatch.Success && !string.IsNullOrWhiteSpace(nameMatch.Groups[1].Value.Trim()))
-        {
-            var candidateName = nameMatch.Groups[1].Value.Trim();
-            if (candidateName.Length >= 2 && candidateName.Length <= 20)
-            {
-                await _slotFilling.UpdateSlotAsync(conversationId, "customer_name", candidateName, _projectName);
-            }
+            _logger.LogWarning(ex, "AIスロット抽出に失敗しました");
+            // AI に失敗した場合は何もしない（既存のセッションを保持）
         }
     }
+
 
     private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteScenarioAsync(
         string conversationId, string scenario, Dictionary<string, string> slots) => scenario switch
