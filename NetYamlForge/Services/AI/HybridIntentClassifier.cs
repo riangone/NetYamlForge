@@ -49,7 +49,7 @@ public class HybridIntentClassifier : IIntentClassifier
         }
 
         // 2. ルールベースフォールバック（高速・安定）
-        var ruleResult = TryRuleMatching(message, conversationContext);
+        var ruleResult = await TryRuleMatchingAsync(message, conversationContext);
         if (ruleResult != null)
         {
             _logger.LogDebug("ルールマッチ：{Intent} (置信度：{Confidence})", ruleResult.Intent, ruleResult.Confidence);
@@ -77,7 +77,7 @@ public class HybridIntentClassifier : IIntentClassifier
     /// <summary>
     /// ルールベースマッチング
     /// </summary>
-    private IntentResult? TryRuleMatching(string message, ConversationContext? context)
+    private async Task<IntentResult?> TryRuleMatchingAsync(string message, ConversationContext? context)
     {
         var lowerMessage = message.ToLowerInvariant();
 
@@ -93,7 +93,7 @@ public class HybridIntentClassifier : IIntentClassifier
                         Confidence = rule.DefaultConfidence,
                         Method = "rule",
                         MatchedRuleId = rule.Id,
-                        Entities = ExtractEntities(message, rule.Intent),
+                        Entities = await ExtractEntitiesAsync(message, rule.Intent),
                         QuickReplies = rule.QuickReplies
                     };
 
@@ -226,260 +226,116 @@ public class HybridIntentClassifier : IIntentClassifier
     /// <summary>
     /// エンティティ抽出 - 自動車販売向け拡張版
     /// </summary>
-    private Dictionary<string, string> ExtractEntities(string message, string intent)
+    /// <summary>
+    /// AI を使用してメッセージからエンティティを抽出
+    /// 正規表現や辞書の代わりに LLM で自然言語理解を行う
+    /// </summary>
+    private async Task<Dictionary<string, string>> ExtractEntitiesAsync(string message, string intent)
+    {
+        // LLM が利用可能な場合は AI で抽出
+        if (_llmProvider != null && _config.Intent.LlmEnabled)
+        {
+            try
+            {
+                var prompt = $@"あなたは情報抽出アシスタントです。以下のメッセージからエンティティを抽出してください。
+
+メッセージ: {message}
+インテント: {intent}
+
+以下の JSON 形式で返してください。該当しない値は null にしてください。
+
+{{
+  ""vehicle_brand"": ""トヨタ/ホンダ/日産等"",
+  ""vehicle_model"": ""カローラ/フィット/ノート等"",
+  ""vehicle_type"": ""セダン/SUV/ミニバン/軽自動車等"",
+  ""vehicle_condition"": ""新車/中古車"",
+  ""vehicle_color"": ""白/黒/銀等"",
+  ""preferred_date"": ""明日/2024-03-15/来週等"",
+  ""preferred_time"": ""午前10時/午後2時/14:30等"",
+  ""preferred_period"": ""今週中/来月末等"",
+  ""budget_amount"": ""300万円/50万等"",
+  ""budget_type"": ""max/min/range/exact"",
+  ""monthly_payment"": ""月々5万円等"",
+  ""down_payment"": ""頭金100万円等"",
+  ""payment_method"": ""ローン/現金/リース/残価設定"",
+  ""service_type"": ""車検/点検/整備/修理/オイル交換/タイヤ交換"",
+  ""customer_type"": ""個人/法人"",
+  ""vehicle_use"": ""通勤/通学/家族/レジャー/配送"",
+  ""is_first_purchase"": ""true/false"",
+  ""has_trade_in"": ""true/false"",
+  ""current_vehicle"": ""true/false"",
+  ""location"": ""東京/大阪/名古屋等""
+}}
+
+ルール:
+- 日本語、中国語、英語の表現を理解して抽出
+- 日付・時間は自然言語表現をそのまま保持
+- 金額は「万円」「円」等单位を含めて抽出
+- 車種はメーカー名とモデル名の両方を抽出
+- 推測ではなく、明確に言及されている情報のみを抽出
+- JSON のみ出力し、他の説明は不要です";
+
+                var response = await _llmProvider.CompleteAsync(prompt, System.Threading.CancellationToken.None);
+
+                if (string.IsNullOrWhiteSpace(response))
+                    return new Dictionary<string, string>();
+
+                var jsonStart = response.IndexOf('{');
+                var jsonEnd = response.LastIndexOf('}');
+
+                if (jsonStart >= 0 && jsonEnd > jsonStart)
+                {
+                    var jsonStr = response.Substring(jsonStart, jsonEnd - jsonStart + 1);
+                    var extracted = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonStr);
+                    return extracted ?? new Dictionary<string, string>();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "AI エンティティ抽出に失敗しました。フォールバックします");
+            }
+        }
+
+        // フォールバック：基本的なパターンマッチング（LLM 使用不可時）
+        return ExtractEntitiesFallback(message);
+    }
+
+    /// <summary>
+    /// エンティティ抽出のフォールバック（ルールベース）
+    /// </summary>
+    private static Dictionary<string, string> ExtractEntitiesFallback(string message)
     {
         var entities = new Dictionary<string, string>();
         var lowerMessage = message.ToLowerInvariant();
 
-        // ─────────────────────────────────────────────
-        // 日付・時間抽出
-        // ─────────────────────────────────────────────
-        var datePatterns = new[] { "明日", "今日", "来週", "来月", "再来週", "再来月", "先週", "先月", "○月○日", "\\d{1,2}月\\d{1,2}日", "\\d{4}年\\d{1,2}月\\d{1,2}日" };
-        foreach (var pattern in datePatterns)
+        // 日付表現の抽出
+        var dateKeywords = new[] { "明日", "今日", "昨日", "来週", "今週", "先週" };
+        foreach (var keyword in dateKeywords)
         {
-            var match = System.Text.RegularExpressions.Regex.Match(message, pattern);
-            if (match.Success)
+            if (lowerMessage.Contains(keyword))
             {
-                entities["preferred_date"] = match.Value;
+                entities["preferred_date"] = keyword;
                 break;
             }
         }
 
-        // 時間抽出（「10 時」「14:30」「午後 3 時」など）
-        var timePatterns = new[] { "\\d{1,2}時", "\\d{1,2}:\\d{2}", "\\d{1,2}時\\d{1,2}分", "午前\\d{1,2}時", "午後\\d{1,2}時", "朝", "昼", "夜", "午前", "午後" };
-        foreach (var pattern in timePatterns)
+        // 日付パターン（YYYY-MM-DD）
+        var dateMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d{4})[-/](\d{1,2})[-/](\d{1,2})");
+        if (dateMatch.Success)
         {
-            var match = System.Text.RegularExpressions.Regex.Match(message, pattern);
-            if (match.Success)
-            {
-                entities["preferred_time"] = match.Value;
-                break;
-            }
+            entities["preferred_date"] = dateMatch.Value;
         }
 
-        // 期間（「今週中」「来週末」「3 月まで」など）
-        var periodPatterns = new[] { "今週中", "来週中", "今月中", "来月中", "今週末", "来週末", "\\d{1,2}月まで", "\\d{1,2}月中" };
-        foreach (var pattern in periodPatterns)
+        // 時間表現の抽出
+        var timeMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d{1,2})時");
+        if (timeMatch.Success)
         {
-            var match = System.Text.RegularExpressions.Regex.Match(message, pattern);
-            if (match.Success)
-            {
-                entities["preferred_period"] = match.Value;
-                break;
-            }
-        }
-
-        // ─────────────────────────────────────────────
-        // 車両関連エンティティ
-        // ─────────────────────────────────────────────
-        // 車種抽出（日本市場の主要車種）
-        var carBrands = new Dictionary<string, string[]>
-        {
-            ["トヨタ"] = ["カローラ", "クラウン", "プリウス", "RAV4", "ヤリス", "ハリアー", "アルファード", "ヴェルファイア", "ランドクルーザー", "ハイラックス", "C-HR", "アクア", "シエンタ", "ノア", "ヴォクシー", "エスティマ", "カムリ", "86", "スープラ", "ミライ"],
-            ["ホンダ"] = ["フィット", "アクア", "シビック", "アコード", "CR-V", "ヴェゼル", "N-BOX", "N-VAN", "オデッセイ", "ステップワゴン", "フリード", "インサイト"],
-            ["日産"] = ["ノート", "デイズ", "ルークス", "エクストレイル", "セレナ", "エルグランド", "GT-R", "フェアレディ Z", "リーフ", "サクラ", "アリア"],
-            ["マツダ"] = ["アクセラ", "アテンザ", "CX-5", "CX-30", "ロードスター", "デミオ", "CX-3", "CX-8", "MX-30"],
-            ["スバル"] = ["インプレッサ", "レヴォーグ", "アウトバック", "フォレスター", "XV", "BRZ", "レガシィ"],
-            ["スズキ"] = ["スイフト", "アルト", "ワゴン R", "スペーシア", "ジムニー", "ハスラー", "ソリオ", "エスクード"],
-            ["ダイハツ"] = ["ミライース", "タント", "ムーヴ", "ウェイク", "キャスト", "ロッキー", "タフト"],
-            ["BMW"] = ["3 シリーズ", "5 シリーズ", "X1", "X3", "X5", "i3", "iX"],
-            ["メルセデス"] = ["C クラス", "E クラス", "S クラス", "GLC", "GLE", "EQC"],
-            ["アウディ"] = ["A3", "A4", "A6", "Q3", "Q5", "Q7", "e-tron"],
-            ["フォルクスワーゲン"] = ["ゴルフ", "ポロ", "T-ROC", "トゥアレグ", "ID.4"]
-        };
-
-        foreach (var brand in carBrands)
-        {
-            if (message.Contains(brand.Key))
-            {
-                entities["vehicle_brand"] = brand.Key;
-            }
-            foreach (var model in brand.Value)
-            {
-                if (message.Contains(model))
-                {
-                    entities["vehicle_model"] = model;
-                    entities["vehicle_brand"] = brand.Key;
-                    break;
-                }
-            }
-        }
-
-        // 車両タイプ
-        var vehicleTypes = new Dictionary<string, string[]>
-        {
-            ["セダン"] = ["セダン"],
-            ["SUV"] = ["SUV", "クロスオーバー", "クロカン"],
-            ["ミニバン"] = ["ミニバン", "ワンボックス"],
-            ["ワゴン"] = ["ワゴン", "ステーションワゴン"],
-            ["ハッチバック"] = ["ハッチバック", "5 ドア"],
-            ["クーペ"] = ["クーペ", "2 ドア"],
-            ["オープンカー"] = ["オープンカー", "カブリオレ", "ロードスター"],
-            ["軽自動車"] = ["軽", "軽自動車", "K カー"],
-            ["トラック"] = ["トラック", "トレーラー"],
-            ["バン"] = ["バン", "コミューター"]
-        };
-
-        foreach (var type in vehicleTypes)
-        {
-            foreach (var keyword in type.Value)
-            {
-                if (message.Contains(keyword))
-                {
-                    entities["vehicle_type"] = type.Key;
-                    break;
-                }
-            }
-        }
-
-        // 車両状態
-        if (ContainsAny(lowerMessage, "新車", "ニューカー", "new"))
-            entities["vehicle_condition"] = "new";
-        else if (ContainsAny(lowerMessage, "中古", "USED", "未使用", "展示車", "試乗車"))
-            entities["vehicle_condition"] = "used";
-
-        // 車両カラー
-        var colors = new[] { "白", "黒", "銀", "グレー", "赤", "青", "緑", "黄", "橙", "茶", "紫", "ピンク", "ゴールド", "パール", "メタリック", "マット" };
-        foreach (var color in colors)
-        {
-            if (message.Contains(color))
-            {
-                entities["vehicle_color"] = color;
-                break;
-            }
-        }
-
-        // ─────────────────────────────────────────────
-        // 価格・予算エンティティ
-        // ─────────────────────────────────────────────
-        // 予算範囲抽出（「300 万」「50 万円以内」「100 万〜200 万」など）
-        var budgetPattern = @"(\d{1,3}(?:,\d{3})*|\d{1,8})\s*(万|万円|円|MAN|まん)";
-        var budgetMatch = System.Text.RegularExpressions.Regex.Match(message, budgetPattern);
-        if (budgetMatch.Success)
-        {
-            entities["budget_amount"] = budgetMatch.Value;
-            
-            // 予算上限か
-            if (message.Contains("以内") || message.Contains("以下") || message.Contains("max") || message.Contains("MAX"))
-                entities["budget_type"] = "max";
-            // 予算下限か
-            else if (message.Contains("以上") || message.Contains("min") || message.Contains("MIN"))
-                entities["budget_type"] = "min";
-            // 予算範囲か（「〜」や「-」で接続）
-            else if (message.Contains("〜") || message.Contains("-") || message.Contains("から") || message.Contains("まで"))
-                entities["budget_type"] = "range";
-            else
-                entities["budget_type"] = "exact";
-        }
-
-        // 頭金
-        var downPaymentPattern = @"頭金\s*(\d{1,3}(?:,\d{3})*|\d{1,8})\s*(万|万円|円)";
-        var downPaymentMatch = System.Text.RegularExpressions.Regex.Match(message, downPaymentPattern);
-        if (downPaymentMatch.Success)
-            entities["down_payment"] = downPaymentMatch.Value;
-
-        // 月々支払い
-        var monthlyPattern = @"月々\s*(\d{1,3}(?:,\d{3})*|\d{1,8})\s*(万|万円|円)|月額|毎月";
-        var monthlyMatch = System.Text.RegularExpressions.Regex.Match(message, monthlyPattern);
-        if (monthlyMatch.Success)
-            entities["monthly_payment"] = monthlyMatch.Value;
-
-        // ─────────────────────────────────────────────
-        // 支払い方法エンティティ
-        // ─────────────────────────────────────────────
-        if (ContainsAny(lowerMessage, "ローン", "分割", "クレジット"))
-            entities["payment_method"] = "loan";
-        else if (ContainsAny(lowerMessage, "現金", "一括", "全額"))
-            entities["payment_method"] = "cash";
-        else if (ContainsAny(lowerMessage, "リース", "サブスク"))
-            entities["payment_method"] = "lease";
-        else if (ContainsAny(lowerMessage, "残価設定"))
-            entities["payment_method"] = "residual";
-
-        // ─────────────────────────────────────────────
-        // 下取り・買取エンティティ
-        // ─────────────────────────────────────────────
-        if (ContainsAny(message, "下取り", "乗り換え", "trade"))
-            entities["has_trade_in"] = "true";
-        
-        // 現在の車両
-        var currentCarPatterns = new[] { "現在.*乗ってる", "今の車", "愛車", "乗り換え" };
-        foreach (var pattern in currentCarPatterns)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(message, pattern);
-            if (match.Success)
-                entities["current_vehicle"] = "true";
-        }
-
-        // ─────────────────────────────────────────────
-        // 顧客属性エンティティ
-        // ─────────────────────────────────────────────
-        // 初回購入か
-        if (ContainsAny(message, "初めて", "初回", "初めての車", "初心者", "ペーパードライバー"))
-            entities["is_first_purchase"] = "true";
-
-        // 法人か
-        if (ContainsAny(message, "法人", "会社", "業務用", "仕事用", "商用"))
-            entities["customer_type"] = "business";
-        else if (ContainsAny(message, "個人", "自宅用", "通勤", "通学", "家族"))
-            entities["customer_type"] = "personal";
-
-        // 用途
-        var useCases = new Dictionary<string, string[]>
-        {
-            ["通勤"] = ["通勤", "通勤", "仕事用", "ビジネス"],
-            ["通学"] = ["通学", "学校", "大学", "高校"],
-            ["家族"] = ["家族", "子供", "子ども", "育児"],
-            ["レジャー"] = ["レジャー", "旅行", "キャンプ", "スキー", "ゴルフ"],
-            ["送货"] = ["配送", "配達", "運送", "荷物"]
-        };
-
-        foreach (var useCase in useCases)
-        {
-            if (ContainsAny(message, useCase.Value))
-            {
-                entities["vehicle_use"] = useCase.Key;
-                break;
-            }
-        }
-
-        // ─────────────────────────────────────────────
-        // 地域・店舗エンティティ
-        // ─────────────────────────────────────────────
-        var prefectures = new[] { "東京", "神奈川", "埼玉", "千葉", "大阪", "京都", "兵庫", "愛知", "名古屋", "福岡", "北海道", "沖縄" };
-        foreach (var pref in prefectures)
-        {
-            if (message.Contains(pref))
-            {
-                entities["location"] = pref;
-                break;
-            }
-        }
-
-        // ─────────────────────────────────────────────
-        // サービス类型エンティティ
-        // ─────────────────────────────────────────────
-        var serviceTypes = new Dictionary<string, string[]>
-        {
-            ["車検"] = ["車検", " shaken"],
-            ["点検"] = ["点検", "検査"],
-            ["整備"] = ["整備", "メンテナンス"],
-            ["修理"] = ["修理", "修復", "直す"],
-            ["オイル交換"] = ["オイル交換", "エンジンオイル"],
-            ["タイヤ交換"] = ["タイヤ交換", "タイヤ"]
-        };
-
-        foreach (var service in serviceTypes)
-        {
-            if (ContainsAny(message, service.Value))
-            {
-                entities["service_type"] = service.Key;
-                break;
-            }
+            entities["preferred_time"] = timeMatch.Groups[1].Value + "時";
         }
 
         return entities;
     }
+
 
     /// <summary>
     /// 複数のキーワードのいずれかが含まれているかチェック
