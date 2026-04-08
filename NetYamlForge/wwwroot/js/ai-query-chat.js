@@ -23,9 +23,89 @@
         currentProject = container.dataset.project;
         console.log('AI Query Chat: 初始化，项目 =', currentProject);
 
+        injectStyles();
         initSignalR();
         bindEvents();
     });
+
+    // 注入样式
+    function injectStyles() {
+        if (document.getElementById('ai-query-chat-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'ai-query-chat-styles';
+        style.textContent = `
+            .ai-query-input-wrapper {
+                position: relative;
+                flex: 1;
+            }
+            .ai-query-input-wrapper textarea {
+                padding-right: 2.5rem;
+            }
+            .ai-query-clear-input-btn {
+                position: absolute;
+                right: 0.5rem;
+                bottom: 0.5rem;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: rgba(0,0,0,0.05);
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #666;
+                transition: background 0.15s, color 0.15s;
+            }
+            .ai-query-clear-input-btn:hover {
+                background: rgba(0,0,0,0.1);
+                color: #333;
+            }
+            .ai-query-message {
+                position: relative;
+            }
+            .ai-query-message-inner {
+                display: flex;
+                gap: 0.5rem;
+            }
+            .ai-query-msg-actions {
+                display: none;
+                gap: 4px;
+                margin-top: 4px;
+                padding: 0 2.5rem 0 2.5rem;
+            }
+            .ai-query-message:hover .ai-query-msg-actions {
+                display: flex;
+            }
+            .ai-query-message.user .ai-query-msg-actions {
+                justify-content: flex-end;
+            }
+            .ai-query-message.assistant .ai-query-msg-actions {
+                justify-content: flex-start;
+            }
+            .ai-query-msg-action-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 1.5rem;
+                height: 1.5rem;
+                border-radius: 0.3rem;
+                border: 1px solid #e0e0e0;
+                background: #fafafa;
+                color: #757575;
+                cursor: pointer;
+                transition: background 0.12s, color 0.12s, border-color 0.12s;
+                padding: 0;
+            }
+            .ai-query-msg-action-btn:hover {
+                background: #e3f2fd;
+                color: #1565c0;
+                border-color: #90caf9;
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
     // 初始化 SignalR 连接
     function initSignalR() {
@@ -137,12 +217,31 @@
     function bindEvents() {
         const sendBtn = document.getElementById('ai-query-send-btn');
         const input = document.getElementById('ai-query-input');
+        const clearInputBtn = document.getElementById('ai-query-clear-input-btn');
         const previewClose = document.getElementById('ai-query-preview-close');
         const suggestions = document.querySelectorAll('.ai-query-suggestions li');
 
         // 发送按钮点击
         if (sendBtn) {
             sendBtn.addEventListener('click', sendQuery);
+        }
+
+        // 清空输入框按钮
+        if (clearInputBtn) {
+            clearInputBtn.onclick = function() {
+                input.value = '';
+                clearInputBtn.style.display = 'none';
+                input.focus();
+            };
+        }
+
+        // 监听输入框变化，显示/隐藏清空按钮
+        if (input) {
+            input.addEventListener('input', function() {
+                if (clearInputBtn) {
+                    clearInputBtn.style.display = this.value.length > 0 ? 'flex' : 'none';
+                }
+            });
         }
 
         // 输入框键盘事件
@@ -210,15 +309,63 @@
 
         const messageDiv = document.createElement('div');
         messageDiv.className = 'ai-query-message assistant';
-        messageDiv.innerHTML = `
-            <div class="ai-query-message-avatar">🤖</div>
-            <div class="ai-query-message-content">
-                <div class="ai-query-message-text ai-query-markdown">${htmlContent}</div>
-                <div class="ai-query-message-meta" style="font-size: 0.75rem; color: #999; margin-top: 0.5rem;">
-                    耗时：${data.executionTimeMs}ms | 结果：${data.total}条
-                </div>
-            </div>
-        `;
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'ai-query-message-content';
+        contentEl.innerHTML = `<div class="ai-query-message-text ai-query-markdown">${htmlContent}</div>`;
+
+        const metaEl = document.createElement('div');
+        metaEl.className = 'ai-query-message-meta';
+        metaEl.style.cssText = 'font-size: 0.75rem; color: #999; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;';
+        const now = new Date();
+        const timeStr = now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0') + ' ' +
+            String(now.getHours()).padStart(2, '0') + ':' +
+            String(now.getMinutes()).padStart(2, '0') + ':' +
+            String(now.getSeconds()).padStart(2, '0');
+        metaEl.innerHTML = `<span>耗时：${data.executionTimeMs}ms | 结果：${data.total}条</span><span class="ai-query-message-time">${timeStr}</span>`;
+        contentEl.appendChild(metaEl);
+
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'ai-query-message-inner';
+        innerDiv.innerHTML = '<div class="ai-query-message-avatar">🤖</div>';
+        innerDiv.appendChild(contentEl);
+
+        messageDiv.appendChild(innerDiv);
+
+        // 添加复制和引用按钮
+        const actionsEl = document.createElement('div');
+        actionsEl.className = 'ai-query-msg-actions';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-query-msg-action-btn';
+        copyBtn.title = '复制';
+        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(markdown).then(function() {
+                copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                setTimeout(function() {
+                    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+                }, 2000);
+            }).catch(function() {});
+        };
+        actionsEl.appendChild(copyBtn);
+
+        const quoteBtn = document.createElement('button');
+        quoteBtn.className = 'ai-query-msg-action-btn';
+        quoteBtn.title = '引用回复';
+        quoteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>';
+        quoteBtn.onclick = function() {
+            const input = document.getElementById('ai-query-input');
+            if (!input) return;
+            const quoted = markdown.split('\n').map(function(line) { return '> ' + line; }).join('\n');
+            input.value = quoted + '\n' + input.value;
+            input.focus();
+        };
+        actionsEl.appendChild(quoteBtn);
+
+        messageDiv.appendChild(actionsEl);
 
         messagesContainer.appendChild(messageDiv);
         scrollToBottom();
@@ -231,14 +378,67 @@
         div.className = `ai-query-message ${type}`;
 
         const avatar = type === 'user' ? '👤' : '🤖';
-        const textClass = type === 'user' ? 'ai-query-message-text' : 'ai-query-message-text ai-query-markdown';
+        // 用户消息和助手消息都支持 Markdown 渲染
+        const textClass = type === 'user' ? 'ai-query-message-text ai-query-markdown' : 'ai-query-message-text ai-query-markdown';
 
-        div.innerHTML = `
-            <div class="ai-query-message-avatar">${avatar}</div>
-            <div class="ai-query-message-content">
-                <div class="${textClass}">${type === 'user' ? escapeHtml(content) : renderMarkdown(content)}</div>
-            </div>
-        `;
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'ai-query-message-content';
+        contentDiv.innerHTML = `<div class="${textClass}">${renderMarkdown(content)}</div>`;
+
+        // 添加时间戳
+        const now = new Date();
+        const timeStr = now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0') + ' ' +
+            String(now.getHours()).padStart(2, '0') + ':' +
+            String(now.getMinutes()).padStart(2, '0') + ':' +
+            String(now.getSeconds()).padStart(2, '0');
+        const timeEl = document.createElement('div');
+        timeEl.className = 'ai-query-message-time';
+        timeEl.textContent = timeStr;
+        contentDiv.appendChild(timeEl);
+
+        const innerDiv = document.createElement('div');
+        innerDiv.className = 'ai-query-message-inner';
+        innerDiv.innerHTML = `<div class="ai-query-message-avatar">${avatar}</div>`;
+        innerDiv.appendChild(contentDiv);
+
+        div.appendChild(innerDiv);
+
+        // 添加复制和引用按钮
+        const actionsEl = document.createElement('div');
+        actionsEl.className = 'ai-query-msg-actions';
+
+        // 复制按钮
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'ai-query-msg-action-btn';
+        copyBtn.title = '复制';
+        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(content).then(function() {
+                copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                setTimeout(function() {
+                    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+                }, 2000);
+            }).catch(function() {});
+        };
+        actionsEl.appendChild(copyBtn);
+
+        // 引用按钮
+        const quoteBtn = document.createElement('button');
+        quoteBtn.className = 'ai-query-msg-action-btn';
+        quoteBtn.title = '引用回复';
+        quoteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>';
+        quoteBtn.onclick = function() {
+            const input = document.getElementById('ai-query-input');
+            if (!input) return;
+            const quoted = content.split('\n').map(function(line) { return '> ' + line; }).join('\n');
+            input.value = quoted + '\n' + input.value;
+            input.focus();
+        };
+        actionsEl.appendChild(quoteBtn);
+
+        div.appendChild(actionsEl);
 
         return div;
     }

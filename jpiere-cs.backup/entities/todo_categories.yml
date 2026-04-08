@@ -1,0 +1,70 @@
+imports: []
+entities:
+  todo_categories:
+    table: todo_categories
+    key: id
+    displayName: TODOカテゴリ
+    softDelete: false
+    isPublic: false
+
+    forms:
+      name:
+        type: string
+        required: true
+        label: カテゴリ名
+        editable: true
+      description:
+        type: textarea
+        label: 説明
+        editable: true
+      color:
+        type: string
+        label: カラー（hex）
+        editable: true
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      name:
+        type: string
+        required: true
+        label: カテゴリ名
+        searchable: true
+        sortable: true
+      color:
+        type: string
+        label: カラー
+      is_active:
+        type: boolean
+        label: 有効
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - name
+          - color
+          - description
+          - is_active
+      filters:
+        columns: 3
+        order:
+          - name
+
+    filters:
+      name:
+        type: like
+        label: カテゴリ名

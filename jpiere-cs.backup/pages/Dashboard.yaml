@@ -1,0 +1,143 @@
+title: JPiere 契約サービス — ダッシュボード
+description: "契約・見積・請求のKPIサマリーと分析グラフ"
+
+sections:
+  # KPI stat cards
+  - id: kpi_summary
+    title: 契約KPI
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '有効契約数' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '📄' AS metric_icon, NULL AS metric_delta
+      FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+      UNION ALL
+      SELECT '今月の月次売上',
+             CASE WHEN SUM(monthly_revenue_amt) >= 1000000
+               THEN CAST(ROUND(SUM(monthly_revenue_amt) / 10000, 1) AS TEXT) || '万円'
+               ELSE CAST(COALESCE(SUM(monthly_revenue_amt), 0) AS TEXT)
+             END,
+             '💴', NULL
+      FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+      UNION ALL
+      SELECT '90日以内期限切れ', CAST(COUNT(*) AS TEXT), '⏰', NULL
+      FROM contracts WHERE contract_status = 'AC' AND period_date_to IS NOT NULL
+        AND julianday(period_date_to) - julianday('now') BETWEEN 0 AND 90
+      UNION ALL
+      SELECT '未収残高合計',
+             CASE WHEN SUM(outstanding_amt) >= 1000000
+               THEN CAST(ROUND(SUM(outstanding_amt) / 10000, 1) AS TEXT) || '万円'
+               ELSE CAST(COALESCE(SUM(outstanding_amt), 0) AS TEXT)
+             END,
+             '📊', NULL
+      FROM bills WHERE doc_status = 'CO'
+      UNION ALL
+      SELECT '提出中見積', CAST(COUNT(*) AS TEXT), '📝', NULL
+      FROM estimations WHERE doc_status = 'IN' AND is_active = 1
+      UNION ALL
+      SELECT '未完了TODO', CAST(COUNT(*) AS TEXT), '✅', NULL
+      FROM todos WHERE todo_status IN ('NY', 'IP') AND is_active = 1
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 契約種別円グラフ
+  - id: contract_type_pie
+    title: 契約種別分布
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT
+        CASE contract_type
+          WHEN 'SAL' THEN '販売契約'
+          WHEN 'PUR' THEN '購買契約'
+          WHEN 'BOT' THEN '両方'
+          ELSE contract_type
+        END AS label,
+        COUNT(*) AS value
+      FROM contracts WHERE is_active = 1
+      GROUP BY contract_type
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 月次売上トレンド
+  - id: revenue_trend
+    title: 月次売上トレンド（直近12ヶ月）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', date_acct) AS label,
+             CASE WHEN SUM(grand_total) >= 1000000
+               THEN CAST(ROUND(SUM(grand_total) / 10000, 1) AS TEXT)
+               ELSE CAST(COALESCE(SUM(grand_total), 0) AS TEXT)
+             END AS value
+      FROM recognitions
+      WHERE is_active = 1 AND date_acct >= date('now', '-12 months')
+      GROUP BY strftime('%Y-%m', date_acct)
+      ORDER BY label ASC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16,185,129,0.75)"
+    pageSize: 12
+    editable: false
+    readOnly: true
+
+  # 期限切れ予告リスト
+  - id: expiring_contracts
+    title: 期限切れ予告（90日以内）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.document_no AS 契約番号,
+        c.name AS 契約名称,
+        bp.name AS 取引先,
+        c.period_date_to AS 契約終了日,
+        CAST(julianday(c.period_date_to) - julianday('now') AS INTEGER) AS 残日数
+      FROM contracts c
+      JOIN business_partners bp ON c.business_partner_id = bp.id
+      WHERE c.contract_status = 'AC'
+        AND c.period_date_to IS NOT NULL
+        AND julianday(c.period_date_to) - julianday('now') BETWEEN 0 AND 90
+      ORDER BY c.period_date_to ASC
+    columns: [契約番号, 契約名称, 取引先, 契約終了日, 残日数]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 未完了TODOリスト
+  - id: incomplete_todos
+    title: 未完了TODO
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        t.title AS タイトル,
+        CASE t.todo_status
+          WHEN 'NY' THEN '未着手'
+          WHEN 'IP' THEN '進行中'
+          ELSE t.todo_status
+        END AS 状態,
+        tc.name AS カテゴリ,
+        t.assigned_to AS 担当者,
+        t.scheduled_start AS 予定開始
+      FROM todos t
+      LEFT JOIN todo_categories tc ON t.todo_category_id = tc.id
+      WHERE t.todo_status IN ('NY', 'IP') AND t.is_active = 1
+      ORDER BY
+        CASE t.todo_status WHEN 'IP' THEN 1 ELSE 2 END,
+        t.scheduled_start ASC
+      LIMIT 10
+    columns: [タイトル, 状態, カテゴリ, 担当者, 予定開始]
+    pageSize: 10
+    editable: false
+    readOnly: true

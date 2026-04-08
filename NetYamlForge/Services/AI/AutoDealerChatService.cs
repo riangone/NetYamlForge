@@ -3,6 +3,8 @@
 
 using System.Data;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Dapper;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI.Providers;
@@ -136,6 +138,69 @@ VALUES
         };
     }
 
+    public async Task CloseConversationAsync(string conversationId)
+    {
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+        await _db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET status = 'completed', ended_at = @Now, updated_at = @Now
+WHERE conversation_id = @ConversationId",
+            new { ConversationId = conversationId, Now = now });
+
+        if (_slotFilling != null)
+            await _slotFilling.ResetAsync(conversationId, _projectName);
+
+        var messages = (await GetRecentMessagesAsync(conversationId, 20)).ToList();
+        if (messages.Count > 2)
+        {
+            var lastIntent = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT last_intent FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            var summary = new
+            {
+                closed_at = now,
+                message_count = messages.Count,
+                last_intent = lastIntent
+            };
+
+            var contextJson = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT context_data FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            JsonObject context;
+            if (string.IsNullOrWhiteSpace(contextJson))
+            {
+                context = new JsonObject();
+            }
+            else
+            {
+                try
+                {
+                    context = JsonNode.Parse(contextJson) as JsonObject ?? new JsonObject();
+                }
+                catch (JsonException)
+                {
+                    context = new JsonObject();
+                }
+            }
+
+            context.Remove("slot_sessions");
+            context["summary"] = JsonSerializer.SerializeToNode(summary);
+
+            await _db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET context_data = @ContextData, updated_at = @Now
+WHERE conversation_id = @ConversationId",
+                new
+                {
+                    ContextData = context.ToJsonString(new JsonSerializerOptions { WriteIndented = false }),
+                    Now = now,
+                    ConversationId = conversationId
+                });
+        }
+    }
+
     // ─────────────────────────────────────────────────────────
     // メッセージ処理（顧客）
     // ─────────────────────────────────────────────────────────
@@ -165,16 +230,106 @@ VALUES
         var navUrl = "";
         var navLabel = "";
 
+        // 0. アクティブなSlot-fillingセッションがあれば、インテント分類前に優先して継続
+        if (_slotFilling != null)
+        {
+            var activeScenario = await _slotFilling.GetActiveScenarioAsync(conversationId);
+            if (activeScenario != null)
+            {
+                // 今のメッセージからスロット値を抽出して更新
+                await ExtractSlotValuesFromMessageAsync(conversationId, customerMessage, activeScenario);
+                var activeSession = await _slotFilling.GetSessionAsync(conversationId, activeScenario, _projectName);
+
+                _logger.LogInformation("アクティブSlot-fillingセッション継続: Conv={ConvId}, Scenario={Scenario}, Complete={Done}",
+                    conversationId, activeScenario, activeSession.IsComplete);
+
+                if (activeSession.IsComplete)
+                {
+                    var slots = activeSession.GetCollectedValues();
+                    var (completionText, completionNavUrl, completionNavLabel) =
+                        await CompleteScenarioAsync(conversationId, activeScenario, slots);
+                    responseText = completionText;
+                    navUrl = completionNavUrl ?? "";
+                    navLabel = completionNavLabel ?? "";
+                    resolvedIntent = MapScenarioToIntent(activeScenario);
+
+                    var completionTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                    await SaveMessageAsync($"MSG-{Guid.NewGuid():N}"[..32], conversationId, "ai", responseText, completionTime, resolvedIntent, 0.9, sentimentScore);
+                    await _db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET last_intent = @Intent, last_confidence = 0.9, sentiment_score = @Sentiment, updated_at = @Now
+WHERE conversation_id = @Id",
+                        new { Intent = resolvedIntent, Sentiment = sentimentScore, Now = now, Id = conversationId });
+
+                    await _chatHistory.SaveMessageAsync(customerId ?? _projectName, customerMessage, "user",
+                        provider: _defaultProvider, chatContext: "dealer-customer", projectName: _projectName);
+                    await _chatHistory.SaveMessageAsync(customerId ?? _projectName, responseText, "assistant",
+                        provider: _defaultProvider, chatContext: "dealer-customer", projectName: _projectName);
+
+                    sw.Stop();
+                    return new ChatMessageResult
+                    {
+                        ResponseText = responseText,
+                        Intent = resolvedIntent,
+                        SuggestHandover = false,
+                        QuickReplies = GetCustomerQuickReplies(resolvedIntent),
+                        ProcessingTimeMs = (int)sw.ElapsedMilliseconds,
+                        AiProvider = _defaultProvider,
+                        MessageTimestamp = completionTime,
+                        NavigationUrl = navUrl,
+                        NavigationLabel = navLabel
+                    };
+                }
+
+                // スロット値が更新されたか確認（更新があれば次のスロットを聞く、なければLLMで回答してから継続）
+                var collectedAfter = activeSession.GetCollectedValues();
+                var nextSlot = await _slotFilling.GetNextRequiredSlotAsync(conversationId, activeScenario, _projectName);
+                if (collectedAfter.Count > 0 && nextSlot != null)
+                {
+                    // 何らかのスロット値が収集済み → 次の質問を返す
+                    resolvedIntent = MapScenarioToIntent(activeScenario);
+                    responseText = nextSlot.Prompt;
+
+                    var slotTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+                    await SaveMessageAsync($"MSG-{Guid.NewGuid():N}"[..32], conversationId, "ai", responseText, slotTime, resolvedIntent, 0.9, sentimentScore);
+                    await _db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET last_intent = @Intent, last_confidence = 0.9, sentiment_score = @Sentiment, updated_at = @Now
+WHERE conversation_id = @Id",
+                        new { Intent = resolvedIntent, Sentiment = sentimentScore, Now = now, Id = conversationId });
+
+                    await _chatHistory.SaveMessageAsync(customerId ?? _projectName, customerMessage, "user",
+                        provider: _defaultProvider, chatContext: "dealer-customer", projectName: _projectName);
+                    await _chatHistory.SaveMessageAsync(customerId ?? _projectName, responseText, "assistant",
+                        provider: _defaultProvider, chatContext: "dealer-customer", projectName: _projectName);
+
+                    sw.Stop();
+                    return new ChatMessageResult
+                    {
+                        ResponseText = responseText,
+                        Intent = resolvedIntent,
+                        SuggestHandover = false,
+                        QuickReplies = GetCustomerQuickReplies(resolvedIntent),
+                        ProcessingTimeMs = (int)sw.ElapsedMilliseconds,
+                        AiProvider = _defaultProvider,
+                        MessageTimestamp = slotTime
+                    };
+                }
+                // スロット値が取れなかった（「どんな車がある？」等の脱線質問）→ LLMで回答し、後続で継続プロンプトを付加
+            }
+        }
+
         // 1. インテント分類を試みる
         if (_intentClassifier != null)
         {
             var intentResult = await _intentClassifier.ClassifyAsync(customerMessage, projectId: _projectName);
             resolvedIntent = intentResult.Intent;
 
-            // 2. 試乗予約インテントの場合、Slot-fillingフローを実行
-            if (resolvedIntent == "test_drive_booking" && _slotFilling != null)
+            // 2. Slot-filling 対象インテントの場合、Slot-fillingフローを実行
+            var slotScenario = MapIntentToScenario(resolvedIntent);
+            if (slotScenario != null && _slotFilling != null)
             {
-                var slotResult = await ProcessTestDriveSlotFillingAsync(conversationId, customerMessage);
+                var slotResult = await ProcessSlotFillingAsync(conversationId, customerMessage, slotScenario);
                 responseText = slotResult.ResponseText;
                 navUrl = slotResult.NavUrl;
                 navLabel = slotResult.NavLabel;
@@ -215,6 +370,21 @@ WHERE conversation_id = @Id",
             resolvedIntent = aiIntent;
             navUrl = aiNavUrl ?? "";
             navLabel = aiNavLabel ?? "";
+
+            // アクティブなSlot-fillingセッションがある場合、LLM回答の後に次の質問を付加
+            if (_slotFilling != null)
+            {
+                var stillActive = await _slotFilling.GetActiveScenarioAsync(conversationId);
+                if (stillActive != null)
+                {
+                    var nextSlot = await _slotFilling.GetNextRequiredSlotAsync(conversationId, stillActive, _projectName);
+                    if (nextSlot != null)
+                    {
+                        responseText += $"\n\n---\n{BuildScenarioContinuation(stillActive)}{nextSlot.Prompt}";
+                        resolvedIntent = MapScenarioToIntent(stillActive);
+                    }
+                }
+            }
         }
 
         // ✅ AI 回复的消息时间戳
@@ -249,16 +419,46 @@ WHERE conversation_id = @Id",
     // 試乗予約 Slot-filling フロー
     // ─────────────────────────────────────────────────────────
 
-    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> ProcessTestDriveSlotFillingAsync(
-        string conversationId, string customerMessage)
+    private static string? MapIntentToScenario(string intent) => intent switch
+    {
+        "test_drive_booking" => "test_drive",
+        "estimate_request" => "estimate",
+        "service_booking" => "appointment_service",
+        "trade_inquiry" => "trade_in",
+        _ => null
+    };
+
+    private static string MapScenarioToIntent(string scenario) => scenario switch
+    {
+        "test_drive" => "test_drive_booking",
+        "estimate" => "estimate_request",
+        "appointment_service" => "service_booking",
+        "trade_in" => "trade_inquiry",
+        _ => scenario
+    };
+
+    private static string BuildScenarioContinuation(string scenario) => scenario switch
+    {
+        "test_drive" => "引き続き試乗予約を承ります。",
+        "estimate" => "引き続き見積もり依頼を承ります。",
+        "appointment_service" => "引き続きサービス予約を承ります。",
+        "trade_in" => "引き続き下取り査定のご依頼を承ります。",
+        _ => "引き続きご予約を承ります。"
+    };
+
+    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> ProcessSlotFillingAsync(
+        string conversationId, string customerMessage, string scenario)
     {
         try
         {
-            var scenario = SlotFillingManager.DetectScenarioFromMessage(customerMessage, "test_drive_booking");
-            if (scenario != "test_drive" || _slotFilling == null)
+            if (_slotFilling == null)
             {
-                return ("試乗予約をご希望ですね。ご希望の車種・日時をお知らせください。", null, null);
+                return ("ご希望内容を承りました。必要な情報を順にお伺いします。", null, null);
             }
+
+            var mappedScenario = SlotFillingManager.DetectScenarioFromMessage(customerMessage, MapScenarioToIntent(scenario));
+            if (!string.IsNullOrEmpty(mappedScenario))
+                scenario = mappedScenario!;
 
             // ✅ 修正 1: 最初にセッションを取得（または作成）
             var session = await _slotFilling.GetSessionAsync(conversationId, scenario, _projectName);
@@ -271,31 +471,32 @@ WHERE conversation_id = @Id",
 
             // ✅ デバッグログ：現在のslot状態を記録
             var collectedSlots = session.GetCollectedValues();
-            _logger.LogInformation("試乗予約 Slot-filling: Conv={ConvId}, 収集済みSlots={Slots}, 完了={IsComplete}",
+            _logger.LogInformation("Slot-filling: Conv={ConvId}, Scenario={Scenario}, 収集済みSlots={Slots}, 完了={IsComplete}",
                 conversationId, 
+                scenario,
                 string.Join(", ", collectedSlots.Select(kv => $"{kv.Key}={kv.Value}")),
                 session.IsComplete);
 
             if (session.IsComplete)
             {
                 var slots = session.GetCollectedValues();
-                return await CompleteTestDriveBookingAsync(conversationId, slots);
+                return await CompleteScenarioAsync(conversationId, scenario, slots);
             }
 
             var nextSlot = await _slotFilling.GetNextRequiredSlotAsync(conversationId, scenario, _projectName);
             if (nextSlot != null)
             {
-                _logger.LogInformation("試乗予約: 次の質問スロット={Slot}, プロンプト={Prompt}", 
+                _logger.LogInformation("Slot-filling: 次の質問スロット={Slot}, プロンプト={Prompt}", 
                     nextSlot.SlotName, nextSlot.Prompt);
                 return ($"{nextSlot.Prompt}", null, null);
             }
 
-            return ("試乗予約をご希望ですね！ 🚗\n\n試乗したい車種と、ご希望の日時をお知らせください。", null, null);
+            return ("ご希望内容を承りました。必要な情報を順にお伺いします。", null, null);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "試乗予約Slot-fillingエラー");
-            return ("試乗予約のご連絡ありがとうございます。車種・ご希望日時・お名前・ご連絡先をお知らせください。", null, null);
+            _logger.LogError(ex, "Slot-fillingエラー");
+            return ("ご連絡ありがとうございます。必要な情報（車種・ご希望日時・お名前・ご連絡先など）をお知らせください。", null, null);
         }
     }
 
@@ -396,6 +597,42 @@ WHERE conversation_id = @Id",
             }
         }
 
+        // グレード抽出（estimate シナリオ）
+        var gradePatterns = new[] { "G", "Z", "X", "S", "プレミアム", "スタンダード", "エグゼクティブ" };
+        foreach (var grade in gradePatterns)
+        {
+            if (message.Contains(grade, StringComparison.OrdinalIgnoreCase))
+            {
+                await _slotFilling.UpdateSlotAsync(conversationId, "grade", grade, _projectName);
+                break;
+            }
+        }
+
+        // 年式抽出（trade_in シナリオ）
+        var yearMatch = System.Text.RegularExpressions.Regex.Match(message, @"(20\d{2}|平成\d+|令和\d+)年");
+        if (yearMatch.Success)
+            await _slotFilling.UpdateSlotAsync(conversationId, "vehicle_year", yearMatch.Value, _projectName);
+
+        // 走行距離抽出（trade_in シナリオ）
+        var mileageMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d+(?:\.\d+)?)\s*万\s*km");
+        if (mileageMatch.Success)
+            await _slotFilling.UpdateSlotAsync(conversationId, "mileage", mileageMatch.Value, _projectName);
+
+        // サービス種別抽出（appointment_service シナリオ）
+        var serviceKeywords = new Dictionary<string, string>
+        {
+            { "車検" , "車検" }, { "点検" , "定期点検" }, { "オイル" , "オイル交換" },
+            { "タイヤ" , "タイヤ交換" }, { "修理" , "修理" }, { "板金" , "板金塗装" }
+        };
+        foreach (var (keyword, serviceType) in serviceKeywords)
+        {
+            if (lowerMessage.Contains(keyword))
+            {
+                await _slotFilling.UpdateSlotAsync(conversationId, "service_type", serviceType, _projectName);
+                break;
+            }
+        }
+
         var namePatterns = new System.Text.RegularExpressions.Regex(@"(.+?)(?:です|と申します|でございます)");
         var nameMatch = namePatterns.Match(message);
         if (nameMatch.Success && !string.IsNullOrWhiteSpace(nameMatch.Groups[1].Value.Trim()))
@@ -407,6 +644,16 @@ WHERE conversation_id = @Id",
             }
         }
     }
+
+    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteScenarioAsync(
+        string conversationId, string scenario, Dictionary<string, string> slots) => scenario switch
+    {
+        "test_drive" => await CompleteTestDriveBookingAsync(conversationId, slots),
+        "estimate" => await CompleteEstimateRequestAsync(conversationId, slots),
+        "appointment_service" => await CompleteServiceBookingAsync(conversationId, slots),
+        "trade_in" => await CompleteTradeInRequestAsync(conversationId, slots),
+        _ => ("ご依頼を承りました。担当者よりご連絡いたします。", null, null)
+    };
 
     private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteTestDriveBookingAsync(
         string conversationId, Dictionary<string, string> slots)
@@ -422,18 +669,23 @@ WHERE conversation_id = @Id",
             var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
             var appointmentId = $"APT-{Guid.NewGuid():N}"[..16];
 
+            var customerId = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT customer_id FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            var dateTimeStr = $"{preferredDate} {preferredTime}";
+
             await _db.ExecuteAsync(@"
 INSERT INTO service_appointments
-  (appointment_id, appointment_type, preferred_date, preferred_time, customer_name, phone, vehicle_id, status, created_at, updated_at)
+  (appointment_id, customer_id, appointment_type, preferred_date, customer_request, status, created_at, updated_at)
 VALUES
-  (@AppointmentId, 'test_drive', @PreferredDate, @PreferredTime, @CustomerName, @Phone, NULL, 'pending', @Now, @Now)",
+  (@AppointmentId, @CustomerId, 'test_drive', @PreferredDate, @CustomerRequest, 'pending', @Now, @Now)",
                 new
                 {
                     AppointmentId = appointmentId,
-                    PreferredDate = preferredDate,
-                    PreferredTime = preferredTime,
-                    CustomerName = customerName,
-                    Phone = customerPhone,
+                    CustomerId = customerId ?? "CUST-UNKNOWN",
+                    PreferredDate = dateTimeStr,
+                    CustomerRequest = $"お名前: {customerName} / 電話: {customerPhone} / 希望車種: {vehicleName}",
                     Now = now
                 });
 
@@ -464,6 +716,172 @@ VALUES
         }
     }
 
+    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteEstimateRequestAsync(
+        string conversationId, Dictionary<string, string> slots)
+    {
+        try
+        {
+            var vehicleName = slots.GetValueOrDefault("vehicle_model", "未指定");
+            var grade = slots.GetValueOrDefault("grade", "未指定");
+            var customerName = slots.GetValueOrDefault("customer_name", "未入力");
+            var customerPhone = slots.GetValueOrDefault("customer_phone", "未入力");
+
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var leadId = $"LEAD-{Guid.NewGuid():N}"[..16];
+
+            var customerId = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT customer_id FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            await _db.ExecuteAsync(@"
+INSERT INTO sales_leads
+  (lead_id, customer_id, vehicle_interest, status, source_conversation_id, lead_source, created_at, updated_at)
+VALUES
+  (@LeadId, @CustomerId, @VehicleInterest, 'new', @ConversationId, 'ai_conversation', @Now, @Now)",
+                new
+                {
+                    LeadId = leadId,
+                    CustomerId = customerId ?? "CUST-UNKNOWN",
+                    VehicleInterest = vehicleName,
+                    ConversationId = conversationId,
+                    Now = now
+                });
+
+            var responseText = $"""
+                見積もりリクエストを承りました。✅
+
+                **ご依頼内容:**
+                - 車種: {vehicleName}
+                - グレード: {grade}
+                - お名前: {customerName}
+                - 電話番号: {customerPhone}
+
+                担当者より {customerName} 様にご連絡いたします。
+                """;
+
+            return (responseText, null, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "見積もり依頼確定エラー");
+            return ("見積もり依頼の処理中にエラーが発生しました。お手数ですがお電話にてご連絡ください。", null, null);
+        }
+    }
+
+    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteServiceBookingAsync(
+        string conversationId, Dictionary<string, string> slots)
+    {
+        try
+        {
+            var serviceType = slots.GetValueOrDefault("service_type", "未指定");
+            var vehicleName = slots.GetValueOrDefault("vehicle_model", "未指定");
+            var preferredDate = slots.GetValueOrDefault("preferred_date", "未指定");
+            var preferredTime = slots.GetValueOrDefault("preferred_time", "未指定");
+            var customerName = slots.GetValueOrDefault("customer_name", "未入力");
+            var customerPhone = slots.GetValueOrDefault("customer_phone", "未入力");
+
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var appointmentId = $"APT-{Guid.NewGuid():N}"[..16];
+
+            var customerId = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT customer_id FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            var dateTimeStr = $"{preferredDate} {preferredTime}";
+
+            await _db.ExecuteAsync(@"
+INSERT INTO service_appointments
+  (appointment_id, customer_id, appointment_type, preferred_date, customer_request, status, created_at, updated_at)
+VALUES
+  (@AppointmentId, @CustomerId, 'service', @PreferredDate, @CustomerRequest, 'pending', @Now, @Now)",
+                new
+                {
+                    AppointmentId = appointmentId,
+                    CustomerId = customerId ?? "CUST-UNKNOWN",
+                    PreferredDate = dateTimeStr,
+                    CustomerRequest = $"サービス種別: {serviceType} / 車種: {vehicleName} / お名前: {customerName} / 電話: {customerPhone}",
+                    Now = now
+                });
+
+            var responseText = $"""
+                サービス予約を承りました。✅
+
+                **ご予約内容:**
+                - サービス: {serviceType}
+                - 車種: {vehicleName}
+                - 希望日: {preferredDate}
+                - 時間: {preferredTime}
+                - お名前: {customerName}
+                - 電話番号: {customerPhone}
+
+                予約番号: `{appointmentId}`
+                """;
+
+            return (responseText, $"/{_projectName}/DynamicEntity/DetailPage?entity=service_appointments&id={appointmentId}", "予約詳細を見る");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "サービス予約確定エラー");
+            return ("サービス予約の処理中にエラーが発生しました。お手数ですがお電話にてご連絡ください。", null, null);
+        }
+    }
+
+    private async Task<(string ResponseText, string? NavUrl, string? NavLabel)> CompleteTradeInRequestAsync(
+        string conversationId, Dictionary<string, string> slots)
+    {
+        try
+        {
+            var vehicleBrand = slots.GetValueOrDefault("vehicle_brand", "未指定");
+            var vehicleName = slots.GetValueOrDefault("vehicle_model", "未指定");
+            var vehicleYear = slots.GetValueOrDefault("vehicle_year", "未指定");
+            var mileage = slots.GetValueOrDefault("mileage", "未指定");
+            var customerName = slots.GetValueOrDefault("customer_name", "未入力");
+            var customerPhone = slots.GetValueOrDefault("customer_phone", "未入力");
+
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var leadId = $"LEAD-{Guid.NewGuid():N}"[..16];
+
+            var customerId = await _db.QueryFirstOrDefaultAsync<string>(
+                "SELECT customer_id FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+
+            await _db.ExecuteAsync(@"
+INSERT INTO sales_leads
+  (lead_id, customer_id, vehicle_interest, status, source_conversation_id, lead_source, created_at, updated_at)
+VALUES
+  (@LeadId, @CustomerId, @VehicleInterest, 'new', @ConversationId, 'ai_conversation', @Now, @Now)",
+                new
+                {
+                    LeadId = leadId,
+                    CustomerId = customerId ?? "CUST-UNKNOWN",
+                    VehicleInterest = vehicleName,
+                    ConversationId = conversationId,
+                    Now = now
+                });
+
+            var responseText = $"""
+                下取り査定のご依頼を承りました。✅
+
+                **ご依頼内容:**
+                - メーカー: {vehicleBrand}
+                - 車種: {vehicleName}
+                - 年式: {vehicleYear}
+                - 走行距離: {mileage}
+                - お名前: {customerName}
+                - 電話番号: {customerPhone}
+
+                担当者より {customerName} 様にご連絡いたします。
+                """;
+
+            return (responseText, null, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "下取り査定確定エラー");
+            return ("下取り査定の処理中にエラーが発生しました。お手数ですがお電話にてご連絡ください。", null, null);
+        }
+    }
+
     // ─────────────────────────────────────────────────────────
     // メッセージ処理（スタッフ）
     // ─────────────────────────────────────────────────────────
@@ -476,8 +894,33 @@ VALUES
         var history = await GetRecentMessagesAsync(conversationId, 10);
         await SaveMessageAsync($"MSG-{Guid.NewGuid():N}"[..32], conversationId, "customer", staffMessage, now);
 
-        var (responseText, entityLabel, dataRows, navUrl, navLabel) =
-            await GenerateAiResponseAsync(staffMessage, "staff", history);
+        var responseText = "";
+        var entityLabel = "general";
+        List<Dictionary<string, string>>? dataRows = null;
+        string? navUrl = null;
+        string? navLabel = null;
+
+        var staffIntent = DetectStaffAnalysisIntent(staffMessage);
+        if (staffIntent == "priority_leads")
+        {
+            responseText = await GenerateLeadPriorityReportAsync();
+            entityLabel = staffIntent;
+        }
+        else if (staffIntent == "today_followup")
+        {
+            responseText = await GenerateTodayFollowupReportAsync();
+            entityLabel = staffIntent;
+        }
+        else if (staffIntent == "appointment_summary")
+        {
+            responseText = await GenerateAppointmentSummaryAsync();
+            entityLabel = staffIntent;
+        }
+        else
+        {
+            (responseText, entityLabel, dataRows, navUrl, navLabel) =
+                await GenerateAiResponseAsync(staffMessage, "staff", history);
+        }
 
         // ✅ AI 回复的消息时间戳
         var aiResponseTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -506,6 +949,96 @@ UPDATE ai_conversations SET last_intent = @Intent, updated_at = @Now WHERE conve
             AiProvider = _defaultProvider,  // ✅ AI 提供商标识
             MessageTimestamp = aiResponseTime  // ✅ 详细时间戳
         };
+    }
+
+    private static string DetectStaffAnalysisIntent(string message) => message switch
+    {
+        var m when m.Contains("フォロー") || m.Contains("連絡") => "today_followup",
+        var m when m.Contains("リード") && (m.Contains("優先") || m.Contains("今日")) => "priority_leads",
+        var m when m.Contains("予約") && (m.Contains("今日") || m.Contains("明日")) => "appointment_summary",
+        _ => "general"
+    };
+
+    private async Task<string> GenerateLeadPriorityReportAsync()
+    {
+        var leads = await _db.QueryAsync<(string LeadId, string CustomerId, int LeadScore, string Status, string? VehicleInterest)>(@"
+SELECT lead_id AS LeadId, customer_id AS CustomerId, lead_score AS LeadScore,
+       status AS Status, vehicle_interest AS VehicleInterest
+FROM sales_leads
+ORDER BY lead_score DESC
+LIMIT 10");
+
+        var sb = new StringBuilder();
+        sb.AppendLine("# 📊 優先リードレポート");
+        sb.AppendLine();
+        sb.AppendLine("| 優先度 | リードID | 顧客ID | 車種 | スコア | ステータス |");
+        sb.AppendLine("| --- | --- | --- | --- | --- | --- |");
+        foreach (var lead in leads)
+        {
+            var priority = lead.LeadScore >= 80 ? "高" : lead.LeadScore >= 60 ? "中" : "低";
+            sb.AppendLine($"| {priority} | {lead.LeadId} | {lead.CustomerId} | {lead.VehicleInterest ?? "-"} | {lead.LeadScore} | {lead.Status} |");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("**推奨アクション:** 高優先度リードから順に当日中にフォローしてください。");
+        return sb.ToString();
+    }
+
+    private async Task<string> GenerateTodayFollowupReportAsync()
+    {
+        var cutoff = DateTime.UtcNow.AddDays(-7).ToString("yyyy-MM-dd HH:mm:ss");
+        var leads = await _db.QueryAsync<(string LeadId, string CustomerId, int LeadScore, string? VehicleInterest, string? LastContactAt)>(@"
+SELECT lead_id AS LeadId, customer_id AS CustomerId, lead_score AS LeadScore,
+       vehicle_interest AS VehicleInterest, last_contact_at AS LastContactAt
+FROM sales_leads
+WHERE last_contact_at IS NULL OR last_contact_at <= @Cutoff
+ORDER BY lead_score DESC
+LIMIT 20",
+            new { Cutoff = cutoff });
+
+        var sb = new StringBuilder();
+        sb.AppendLine("# 📌 本日フォローアップ対象");
+        sb.AppendLine();
+        sb.AppendLine("| 優先度 | リードID | 顧客ID | 車種 | 最終連絡日 |");
+        sb.AppendLine("| --- | --- | --- | --- | --- |");
+        foreach (var lead in leads)
+        {
+            var priority = lead.LeadScore >= 80 ? "高" : lead.LeadScore >= 60 ? "中" : "低";
+            var lastContact = string.IsNullOrWhiteSpace(lead.LastContactAt) ? "未連絡" : lead.LastContactAt;
+            sb.AppendLine($"| {priority} | {lead.LeadId} | {lead.CustomerId} | {lead.VehicleInterest ?? "-"} | {lastContact} |");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("**推奨アクション:** 7 日以上未連絡の顧客を優先的にフォローしてください。");
+        return sb.ToString();
+    }
+
+    private async Task<string> GenerateAppointmentSummaryAsync()
+    {
+        var start = DateTime.UtcNow.Date.ToString("yyyy-MM-dd HH:mm:ss");
+        var end = DateTime.UtcNow.Date.AddDays(2).ToString("yyyy-MM-dd HH:mm:ss");
+
+        var appointments = await _db.QueryAsync<(string AppointmentId, string CustomerId, string AppointmentType, string PreferredDate, string Status)>(@"
+SELECT appointment_id AS AppointmentId, customer_id AS CustomerId,
+       appointment_type AS AppointmentType, preferred_date AS PreferredDate, status AS Status
+FROM service_appointments
+WHERE preferred_date >= @Start AND preferred_date < @End
+ORDER BY preferred_date ASC",
+            new { Start = start, End = end });
+
+        var sb = new StringBuilder();
+        sb.AppendLine("# 📅 本日〜明日の予約サマリー");
+        sb.AppendLine();
+        sb.AppendLine("| 予約ID | 顧客ID | 種別 | 予約日時 | ステータス |");
+        sb.AppendLine("| --- | --- | --- | --- | --- |");
+        foreach (var appt in appointments)
+        {
+            sb.AppendLine($"| {appt.AppointmentId} | {appt.CustomerId} | {appt.AppointmentType} | {appt.PreferredDate} | {appt.Status} |");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("**推奨アクション:** 予約前日・当日の顧客へリマインド連絡を実施してください。");
+        return sb.ToString();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -726,13 +1259,21 @@ LIMIT 1",
 
     private List<string> GetCustomerQuickReplies(string intent) => intent switch
     {
-        "vehicle_inquiry" => new List<string> { "在庫を確認", "試乗を予約", "価格を聞く" },
-        "appointment" => new List<string> { "予約を変更", "予約をキャンセル", "新しい予約" },
-        _ => new List<string> { "車両を探す", "試乗を予約する", "お問い合わせ" }
+        "vehicle_inquiry" => new List<string> { "在庫を確認", "試乗を予約", "見積もりを依頼" },
+        "test_drive_booking" => new List<string> { "別の車種に変更", "日時を変更", "キャンセル" },
+        "estimate_request" => new List<string> { "ローンで計算", "現金購入で計算", "下取り査定も依頼" },
+        "service_booking" => new List<string> { "予約を変更", "他のサービスを追加", "費用の目安を確認" },
+        "trade_inquiry" => new List<string> { "査定を依頼", "新車への乗り換えを検討", "現金で売却" },
+        "appointment" => new List<string> { "予約を変更", "キャンセル", "新しい予約" },
+        "escalation" => new List<string> { "担当者に繋ぐ", "折り返し連絡を希望" },
+        _ => new List<string> { "車両を探す", "試乗を予約", "見積もりを依頼" }
     };
 
     private List<string> GetStaffQuickReplies(string intent) => intent switch
     {
+        "priority_leads" => new List<string> { "全リードを見る", "未対応のみ表示", "本日の予約確認" },
+        "today_followup" => new List<string> { "フォローアップ完了にする", "全顧客リスト" },
+        "appointment_summary" => new List<string> { "予約詳細を見る", "スタッフ割り当て" },
         "sales_leads" => new List<string> { "新規リード", "フォローアップ必要", "成約済み" },
         "customers" => new List<string> { "VIP 顧客", "未連絡顧客", "購入履歴" },
         _ => new List<string> { "顧客を検索", "リードを確認", "予約を確認" }

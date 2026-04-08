@@ -137,11 +137,14 @@ public class HybridIntentClassifier : IIntentClassifier
         sb.AppendLine("- greeting: 挨拶");
         sb.AppendLine("- hours_inquiry: 営業時間の問い合わせ");
         sb.AppendLine("- price_inquiry: 価格の問い合わせ");
+        sb.AppendLine("- estimate_request: 見積もり依頼");
         sb.AppendLine("- appointment_booking: 予約の申し込み");
         sb.AppendLine("- appointment_change: 予約の変更");
         sb.AppendLine("- appointment_cancel: 予約のキャンセル");
         sb.AppendLine("- vehicle_inquiry: 車両の問い合わせ");
         sb.AppendLine("- service_inquiry: サービス内容の問い合わせ");
+        sb.AppendLine("- service_booking: サービス・車検予約");
+        sb.AppendLine("- trade_inquiry: 下取り・査定の問い合わせ");
         sb.AppendLine("- complaint: 苦情");
         sb.AppendLine("- human_agent: 担当者への接続希望");
         sb.AppendLine("- general_inquiry: その他の問い合わせ");
@@ -568,6 +571,31 @@ public class IntentRules
         },
         new IntentRule
         {
+            Id = "service_booking",
+            Intent = "service_booking",
+            Patterns = new[] { "車検", "点検", "オイル交換", "タイヤ", "修理", "整備", "板金", "サービス予約", "メンテナンス", "故障", "部品交換" },
+            DefaultConfidence = 0.88
+        },
+        new IntentRule
+        {
+            Id = "estimate_request",
+            Intent = "estimate_request",
+            Patterns = new[] { "見積もり", "見積", "価格を知りたい", "いくら", "費用", "金額", "予算", "価格表", "値段", "ローン", "月々" },
+            DefaultConfidence = 0.85
+        },
+        new IntentRule
+        {
+            Id = "trade_inquiry",
+            Intent = "trade_inquiry",
+            Patterns = new[] { "下取り", "買取", "売却", "乗り換え", "査定", "いくらで売れる", "廃車" },
+            DefaultConfidence = 0.85,
+            QuickReplies = new List<QuickReplyButton>
+            {
+                new() { Label = "無料査定を予約", ActionType = "link", ActionValue = "/appointments/new?type=appraisal" }
+            }
+        },
+        new IntentRule
+        {
             Id = "vehicle_inquiry",
             Intent = "vehicle_inquiry",
             Patterns = new[] { "車種", "車両", "在庫", "納期", "カタログ", "車について", "クルマ", "自動車", "新車", "中古車" },
@@ -616,17 +644,6 @@ public class IntentRules
             QuickReplies = new List<QuickReplyButton>
             {
                 new() { Label = "ローンシミュレーション", ActionType = "link", ActionValue = "/finance/simulator" }
-            }
-        },
-        new IntentRule
-        {
-            Id = "trade_inquiry",
-            Intent = "trade_inquiry",
-            Patterns = new[] { "下取り", "買取", "売却", "乗り換え", "査定", "いくらで売れる", "廃車" },
-            DefaultConfidence = 0.85,
-            QuickReplies = new List<QuickReplyButton>
-            {
-                new() { Label = "無料査定を予約", ActionType = "link", ActionValue = "/appointments/new?type=appraisal" }
             }
         },
         new IntentRule

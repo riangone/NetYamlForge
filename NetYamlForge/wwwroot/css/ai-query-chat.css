@@ -117,6 +117,19 @@
     color: white;
 }
 
+/* 时间戳样式 */
+.ai-query-message-time {
+    font-size: 0.7rem;
+    color: rgba(0, 0, 0, 0.45);
+    text-align: right;
+    margin-top: 0.25rem;
+    line-height: 1;
+}
+
+.ai-query-message.user .ai-query-message-time {
+    color: rgba(255, 255, 255, 0.7);
+}
+
 /* Markdown 内容样式 */
 .ai-query-markdown {
     font-size: 0.875rem;

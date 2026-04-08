@@ -1,0 +1,14 @@
+﻿task_id,title,status,priority,due_date,overdue_days,assigned_to,project_name,category_name
+39,  HookTest  ,pending,low,2020-01-01 00:00:00,2285,,（未設定）,（未設定）
+23,Staging models – orders,in_progress,medium,2026-03-10,25,Karl,Data Warehouse,Database
+4,Landing page animation,in_progress,medium,2026-03-15,20,Alice,Web Redesign,Frontend
+11,Migrate /auth endpoints,in_progress,urgent,2026-03-20,15,Eve,API v2 Migration,Security
+5,SEO metadata & OG tags,pending,low,2026-03-20,15,Carol,Web Redesign,Frontend
+26,JWT issuance service,in_progress,urgent,2026-03-25,10,Leo,Auth Overhaul,Backend
+7,Accessibility audit (WCAG 2.1),review,high,2026-03-25,10,Carol,Web Redesign,Testing
+12,Migrate /users endpoints,in_progress,high,2026-03-25,10,Frank,API v2 Migration,Backend
+37,Renew wildcard TLS certificate,pending,urgent,2026-03-28,7,Leo,（未設定）,Security
+27,OAuth2 provider integration,in_progress,high,2026-03-28,7,Mia,Auth Overhaul,Backend
+36,Upgrade Node.js to v22 LTS,pending,medium,2026-03-31,4,Frank,（未設定）,DevOps
+24,Redshift cluster sizing,pending,low,2026-04-01,3,Judy,Data Warehouse,DevOps
+15,Integration test suite,review,high,2026-04-01,3,Dave,API v2 Migration,Testing

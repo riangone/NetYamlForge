@@ -2,6 +2,13 @@
 // 自動車販売の主要シナリオ（予約、見積もり、下取りなど）に必要なスロットを定義
 
 using System.Collections.Concurrent;
+using System.Data;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using Dapper;
+using Microsoft.Extensions.DependencyInjection;
+using NetYamlForge.Services;
+using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services.AI;
 
@@ -40,6 +47,11 @@ public interface ISlotFillingManager
     /// 収集済みスロットを取得
     /// </summary>
     Task<Dictionary<string, string>> GetCollectedSlotsAsync(string conversationId, string? projectId = null);
+
+    /// <summary>
+    /// アクティブ（未完了）なセッションのシナリオ名を返す。なければ null
+    /// </summary>
+    Task<string?> GetActiveScenarioAsync(string conversationId);
 }
 
 /// <summary>
@@ -108,6 +120,8 @@ public class SlotFillingManager : ISlotFillingManager
 {
     private readonly ConcurrentDictionary<string, SlotSession> _sessions = new();
     private readonly ILogger<SlotFillingManager> _logger;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private const string DefaultProjectId = "auto-dealer-demo";
 
     // 自動車販売向けシナリオ定義
     private static readonly Dictionary<string, ScenarioDefinition> Scenarios = new()
@@ -208,29 +222,40 @@ public class SlotFillingManager : ISlotFillingManager
         }
     };
 
-    public SlotFillingManager(ILogger<SlotFillingManager> logger)
+    public SlotFillingManager(ILogger<SlotFillingManager> logger, IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
+        _scopeFactory = scopeFactory;
     }
 
     /// <inheritdoc />
-    public Task<SlotSession> GetSessionAsync(string conversationId, string scenario, string? projectId = null)
+    public async Task<SlotSession> GetSessionAsync(string conversationId, string scenario, string? projectId = null)
     {
         var key = $"{conversationId}:{scenario}";
         
-        if (!_sessions.TryGetValue(key, out var session))
-        {
-            // 新規セッション作成
-            session = CreateNewSession(conversationId, scenario);
-            _sessions[key] = session;
-        }
+        if (_sessions.TryGetValue(key, out var session))
+            return session;
 
-        return Task.FromResult(session);
+        await EnsureSessionsLoadedAsync(conversationId, projectId);
+
+        if (_sessions.TryGetValue(key, out session))
+            return session;
+
+        // 新規セッション作成
+        session = CreateNewSession(conversationId, scenario);
+        _sessions[key] = session;
+        await PersistSessionsAsync(conversationId, projectId);
+
+        return session;
     }
 
     /// <inheritdoc />
-    public Task UpdateSlotAsync(string conversationId, string slotName, string value, string? projectId = null)
+    public async Task UpdateSlotAsync(string conversationId, string slotName, string value, string? projectId = null)
     {
+        await EnsureSessionsLoadedAsync(conversationId, projectId);
+
+        var updated = false;
+
         // 全てのシナリオを検索して該当スロットを更新
         foreach (var kvp in _sessions)
         {
@@ -239,43 +264,53 @@ public class SlotFillingManager : ISlotFillingManager
             {
                 slot.Value = value;
                 kvp.Value.UpdatedAt = DateTime.UtcNow;
+                updated = true;
                 _logger.LogInformation("スロット更新：Conv={ConvId}, Slot={Slot}, Value={Value}", 
                     conversationId, slotName, value);
             }
         }
 
-        return Task.CompletedTask;
+        if (updated)
+            await PersistSessionsAsync(conversationId, projectId);
     }
 
     /// <inheritdoc />
-    public Task<bool> IsCompleteAsync(string conversationId, string scenario, string? projectId = null)
+    public async Task<bool> IsCompleteAsync(string conversationId, string scenario, string? projectId = null)
     {
         var key = $"{conversationId}:{scenario}";
-        return Task.FromResult(_sessions.TryGetValue(key, out var session) && session.IsComplete);
+        if (_sessions.TryGetValue(key, out var session))
+            return session.IsComplete;
+
+        await EnsureSessionsLoadedAsync(conversationId, projectId);
+        return _sessions.TryGetValue(key, out session) && session.IsComplete;
     }
 
     /// <inheritdoc />
-    public Task<SlotRequest?> GetNextRequiredSlotAsync(string conversationId, string scenario, string? projectId = null)
+    public async Task<SlotRequest?> GetNextRequiredSlotAsync(string conversationId, string scenario, string? projectId = null)
     {
         var key = $"{conversationId}:{scenario}";
-        
+
         if (!_sessions.TryGetValue(key, out var session))
-            return Task.FromResult<SlotRequest?>(null);
+        {
+            await EnsureSessionsLoadedAsync(conversationId, projectId);
+            if (!_sessions.TryGetValue(key, out session))
+                return null;
+        }
 
         var missingSlot = session.GetMissingSlots().FirstOrDefault(s => s.IsRequired);
         if (missingSlot == null)
-            return Task.FromResult<SlotRequest?>(null);
+            return null;
 
-        return Task.FromResult<SlotRequest?>(new SlotRequest
+        return new SlotRequest
         {
             SlotName = missingSlot.Name,
             Prompt = missingSlot.Prompt,
             QuickReplies = missingSlot.AllowedValues
-        });
+        };
     }
 
     /// <inheritdoc />
-    public Task ResetAsync(string conversationId, string? projectId = null)
+    public async Task ResetAsync(string conversationId, string? projectId = null)
     {
         var keysToRemove = _sessions.Keys.Where(k => k.StartsWith($"{conversationId}:")).ToList();
         foreach (var key in keysToRemove)
@@ -284,12 +319,33 @@ public class SlotFillingManager : ISlotFillingManager
         }
 
         _logger.LogInformation("スロットセッションリセット：Conv={ConvId}", conversationId);
-        return Task.CompletedTask;
+        await RemoveSessionsFromContextAsync(conversationId, projectId);
     }
 
     /// <inheritdoc />
-    public Task<Dictionary<string, string>> GetCollectedSlotsAsync(string conversationId, string? projectId = null)
+    public async Task<string?> GetActiveScenarioAsync(string conversationId)
     {
+        var prefix = $"{conversationId}:";
+        var activeSession = _sessions
+            .Where(kvp => kvp.Key.StartsWith(prefix) && !kvp.Value.IsComplete)
+            .Select(kvp => kvp.Value.Scenario)
+            .FirstOrDefault();
+        if (activeSession != null)
+            return activeSession;
+
+        await EnsureSessionsLoadedAsync(conversationId, null);
+        activeSession = _sessions
+            .Where(kvp => kvp.Key.StartsWith(prefix) && !kvp.Value.IsComplete)
+            .Select(kvp => kvp.Value.Scenario)
+            .FirstOrDefault();
+        return activeSession;
+    }
+
+    /// <inheritdoc />
+    public async Task<Dictionary<string, string>> GetCollectedSlotsAsync(string conversationId, string? projectId = null)
+    {
+        await EnsureSessionsLoadedAsync(conversationId, projectId);
+
         var slots = new Dictionary<string, string>();
         
         foreach (var kvp in _sessions)
@@ -304,7 +360,7 @@ public class SlotFillingManager : ISlotFillingManager
             }
         }
 
-        return Task.FromResult(slots);
+        return slots;
     }
 
     /// <summary>
@@ -352,10 +408,169 @@ public class SlotFillingManager : ISlotFillingManager
         {
             "test_drive_booking" => "test_drive",
             "price_inquiry" or "estimate_request" => "estimate",
-            "service_inquiry" or "maintenance" => "appointment_service",
+            "service_booking" or "service_inquiry" or "maintenance" => "appointment_service",
             "trade_inquiry" => "trade_in",
             "vehicle_inquiry" => "vehicle_inquiry",
             _ => null
         };
+    }
+
+    private async Task EnsureSessionsLoadedAsync(string conversationId, string? projectId)
+    {
+        if (_sessions.Keys.Any(k => k.StartsWith($"{conversationId}:")))
+            return;
+
+        var context = await LoadContextDataAsync(conversationId, projectId);
+        var slotSessionsNode = context["slot_sessions"] as JsonObject;
+        if (slotSessionsNode == null)
+            return;
+
+        foreach (var entry in slotSessionsNode)
+        {
+            if (entry.Value is not JsonObject sessionObj)
+                continue;
+
+            var scenario = entry.Key;
+            var session = CreateSessionFromPayload(conversationId, scenario, sessionObj);
+            _sessions[$"{conversationId}:{scenario}"] = session;
+        }
+    }
+
+    private async Task<JsonObject> LoadContextDataAsync(string conversationId, string? projectId)
+    {
+        return await WithDbAsync(projectId, async db =>
+        {
+            var contextJson = await db.QueryFirstOrDefaultAsync<string>(
+                "SELECT context_data FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+            return ParseContextData(contextJson);
+        });
+    }
+
+    private async Task PersistSessionsAsync(string conversationId, string? projectId)
+    {
+        var slotSessions = new JsonObject();
+        foreach (var kvp in _sessions.Where(kvp => kvp.Key.StartsWith($"{conversationId}:")))
+        {
+            var session = kvp.Value;
+            var slotsNode = new JsonObject();
+            foreach (var slot in session.Slots)
+            {
+                slotsNode[slot.Key] = new JsonObject
+                {
+                    ["value"] = slot.Value.Value,
+                    ["filled"] = slot.Value.IsFilled
+                };
+            }
+
+            slotSessions[session.Scenario] = new JsonObject
+            {
+                ["scenario"] = session.Scenario,
+                ["slots"] = slotsNode,
+                ["created_at"] = session.CreatedAt.ToString("O"),
+                ["updated_at"] = session.UpdatedAt.ToString("O")
+            };
+        }
+
+        await UpdateContextDataAsync(conversationId, projectId, ctx =>
+        {
+            ctx["slot_sessions"] = slotSessions;
+        });
+    }
+
+    private async Task RemoveSessionsFromContextAsync(string conversationId, string? projectId)
+    {
+        await UpdateContextDataAsync(conversationId, projectId, ctx =>
+        {
+            ctx.Remove("slot_sessions");
+        });
+    }
+
+    private async Task UpdateContextDataAsync(string conversationId, string? projectId, Action<JsonObject> mutator)
+    {
+        await WithDbAsync(projectId, async db =>
+        {
+            var contextJsonRaw = await db.QueryFirstOrDefaultAsync<string>(
+                "SELECT context_data FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+            var context = ParseContextData(contextJsonRaw);
+            mutator(context);
+            var contextJsonUpdated = context.ToJsonString(new JsonSerializerOptions
+            {
+                WriteIndented = false
+            });
+
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            await db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET context_data = @ContextData, updated_at = @Now
+WHERE conversation_id = @ConversationId",
+                new { ContextData = contextJsonUpdated, Now = now, ConversationId = conversationId });
+            return 0;
+        });
+    }
+
+    private static JsonObject ParseContextData(string? contextJson)
+    {
+        if (string.IsNullOrWhiteSpace(contextJson))
+            return new JsonObject();
+
+        try
+        {
+            var node = JsonNode.Parse(contextJson) as JsonObject;
+            return node ?? new JsonObject();
+        }
+        catch (JsonException)
+        {
+            return new JsonObject();
+        }
+    }
+
+    private SlotSession CreateSessionFromPayload(string conversationId, string scenario, JsonObject payload)
+    {
+        var session = CreateNewSession(conversationId, scenario);
+
+        if (payload["created_at"]?.GetValue<string>() is string createdStr &&
+            DateTime.TryParse(createdStr, out var createdAt))
+            session.CreatedAt = createdAt;
+
+        if (payload["updated_at"]?.GetValue<string>() is string updatedStr &&
+            DateTime.TryParse(updatedStr, out var updatedAt))
+            session.UpdatedAt = updatedAt;
+
+        if (payload["slots"] is JsonObject slotsNode)
+        {
+            foreach (var slotEntry in slotsNode)
+            {
+                if (!session.Slots.TryGetValue(slotEntry.Key, out var slotInfo))
+                    continue;
+                if (slotEntry.Value is not JsonObject slotValueObj)
+                    continue;
+
+                if (slotValueObj["value"]?.GetValue<string>() is string slotValue)
+                    slotInfo.Value = slotValue;
+            }
+        }
+
+        return session;
+    }
+
+    private async Task<T> WithDbAsync<T>(string? projectId, Func<IDbConnection, Task<T>> action)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var factory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+        var resolvedProject = ResolveProjectId(projectId, scope.ServiceProvider.GetService<ProjectScope>());
+        using var db = factory.CreateConnection(resolvedProject);
+        db.Open();
+        return await action(db);
+    }
+
+    private static string ResolveProjectId(string? projectId, ProjectScope? projectScope)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (projectScope != null && projectScope.IsSet)
+            return projectScope.Current.Name;
+        return DefaultProjectId;
     }
 }

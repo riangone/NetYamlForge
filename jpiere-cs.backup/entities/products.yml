@@ -1,0 +1,73 @@
+name: products
+displayName: 商品マスタ
+description: 販売・購買商品（SKU）を管理します
+
+columns:
+  - name: id
+    type: integer
+    primaryKey: true
+  - name: code
+    type: string
+    required: true
+    maxLength: 40
+  - name: name
+    type: string
+    required: true
+    maxLength: 120
+  - name: description
+    type: text
+  - name: product_category_id
+    type: integer
+    required: true
+    foreignKey:
+      table: product_categories
+      displayColumn: name
+  - name: uom
+    type: string
+    default: EA
+  - name: product_type
+    type: string
+    required: true
+    enum: [I, S, R]
+    enumLabels: [在庫品, サービス, リソース]
+    default: I
+  - name: is_purchased
+    type: boolean
+    default: true
+  - name: is_sold
+    type: boolean
+    default: true
+  - name: list_price
+    type: decimal
+    default: 0
+  - name: std_price
+    type: decimal
+    default: 0
+  - name: cost_price
+    type: decimal
+    default: 0
+  - name: tax_rate
+    type: decimal
+    default: 0.10
+  - name: is_active
+    type: boolean
+    default: true
+  - name: created_at
+    type: datetime
+  - name: updated_at
+    type: datetime
+
+listView:
+  columns: [code, name, product_category_id, product_type, std_price, list_price, tax_rate]
+  searchFields: [code, name]
+  defaultSort: code ASC
+
+formFields:
+  - section: 基本情報
+    fields: [code, name, description, product_category_id]
+  - section: 分類・単位
+    fields: [product_type, uom, is_purchased, is_sold]
+  - section: 価格
+    fields: [list_price, std_price, cost_price, tax_rate]
+  - section: ステータス
+    fields: [is_active]

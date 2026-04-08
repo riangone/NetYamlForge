@@ -1,0 +1,41 @@
+name: product_categories
+displayName: 商品カテゴリ
+description: 商品の分類カテゴリを管理します
+
+columns:
+  - name: id
+    type: integer
+    primaryKey: true
+  - name: code
+    type: string
+    required: true
+    maxLength: 20
+  - name: name
+    type: string
+    required: true
+    maxLength: 60
+  - name: parent_id
+    type: integer
+    foreignKey:
+      table: product_categories
+      displayColumn: name
+  - name: description
+    type: text
+  - name: is_active
+    type: boolean
+    default: true
+  - name: created_at
+    type: datetime
+  - name: updated_at
+    type: datetime
+
+listView:
+  columns: [code, name, parent_id, description]
+  searchFields: [code, name]
+  defaultSort: code ASC
+
+formFields:
+  - section: 基本情報
+    fields: [code, name, parent_id, description]
+  - section: ステータス
+    fields: [is_active]

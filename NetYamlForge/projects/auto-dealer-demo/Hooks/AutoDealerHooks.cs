@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Dapper;
 using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Identity;
@@ -234,102 +235,58 @@ public class AutoCreateLeadFromConversationHook : IEntityHook
 {
     public string Name => "auto_create_lead_from_conversation";
 
-    // 販売意図として判定するインテント名の集合
-    private static readonly HashSet<string> SalesIntents = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "price_inquiry", "vehicle_inquiry", "test_drive_request",
-        "financing_inquiry", "trade_in_inquiry", "visit_intent",
-        "quote_request", "new_car_inquiry"
-    };
-
-    // 意図ごとの基本スコア
-    private static int BaseScore(string intent) => intent switch
-    {
-        "test_drive_request"  => 65,
-        "visit_intent"        => 70,
-        "quote_request"       => 60,
-        "financing_inquiry"   => 58,
-        "price_inquiry"       => 55,
-        "trade_in_inquiry"    => 50,
-        "vehicle_inquiry"     => 45,
-        "new_car_inquiry"     => 45,
-        _                     => 40,
-    };
-
     public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
         => Task.FromResult(HookResult.Continue());
 
-    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    public async Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
     {
-        // 完了ステータス以外は無視
-        if (!ctx.Values.TryGetValue("status", out var status) || status?.ToString() != "completed")
-            return Task.CompletedTask;
+        var status = ctx.Values.GetValueOrDefault("status")?.ToString();
+        if (status != "completed") return;
 
-        if (!ctx.Values.TryGetValue("last_intent", out var intentVal) || intentVal == null)
-            return Task.CompletedTask;
+        var conversationId = ctx.Values.GetValueOrDefault("conversation_id")?.ToString()
+                             ?? ctx.KeyValues?.GetValueOrDefault("conversation_id")?.ToString();
+        var customerId = ctx.Values.GetValueOrDefault("customer_id")?.ToString();
+        var lastIntent = ctx.Values.GetValueOrDefault("last_intent")?.ToString();
 
-        var intentStr = intentVal.ToString()!;
-        if (!SalesIntents.Contains(intentStr))
-            return Task.CompletedTask;
+        if (string.IsNullOrEmpty(conversationId))
+            return;
 
-        ctx.Values.TryGetValue("conversation_id", out var convId);
-        ctx.Values.TryGetValue("customer_id", out var customerId);
-        ctx.Values.TryGetValue("last_confidence", out var confidenceVal);
-        ctx.Values.TryGetValue("sentiment_score", out var sentimentVal);
-        ctx.Values.TryGetValue("channel", out var channelVal);
-        ctx.Values.TryGetValue("contact_info", out var contactInfoVal);
+        if (string.IsNullOrEmpty(customerId) || string.IsNullOrEmpty(lastIntent))
+        {
+            var conv = await db.QueryFirstOrDefaultAsync<(string? CustomerId, string? LastIntent)>(
+                "SELECT customer_id AS CustomerId, last_intent AS LastIntent FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId }, tx);
+            customerId ??= conv.CustomerId;
+            lastIntent ??= conv.LastIntent;
+        }
 
-        // 会話 ID 必須
-        if (convId == null) return Task.CompletedTask;
+        if (string.IsNullOrEmpty(customerId) || customerId.StartsWith("guest_", StringComparison.OrdinalIgnoreCase))
+            return;
 
-        // 同一会話からのリードが既に存在する場合はスキップ
-        var checkCmd = db.CreateCommand();
-        checkCmd.Transaction = tx;
-        checkCmd.CommandText = "SELECT COUNT(*) FROM sales_leads WHERE source_conversation_id = @cid";
-        AddParam(checkCmd, "@cid", convId.ToString()!);
-        var existing = Convert.ToInt64(checkCmd.ExecuteScalar() ?? 0L);
-        if (existing > 0) return Task.CompletedTask;
+        var leadId = $"LEAD-{Guid.NewGuid():N}"[..16];
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
-        // リードスコア計算
-        var score = BaseScore(intentStr);
-        if (decimal.TryParse(confidenceVal?.ToString(), out var conf))
-            score = (int)(score * conf);
-        if (decimal.TryParse(sentimentVal?.ToString(), out var sent) && sent > 0)
-            score = Math.Min(100, score + (int)(sent * 10));
+        var leadScore = lastIntent switch
+        {
+            "test_drive_booking" => 80,
+            "estimate_request" => 70,
+            "trade_inquiry" => 60,
+            _ => 50
+        };
 
-        var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        var leadId = $"LEAD-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
-
-        // 顧客 ID が NULL の場合（ゲスト）、contact_info から連絡先を抽出してリード作成
-        // ゲストリードとして customer_id を NULL のまま保存し、後で紐付け可能にする
-        object? customerIdValue = customerId?.ToString();
-        string leadSource = customerIdValue != null ? "ai_conversation" : "guest_ai";
-
-        var insertCmd = db.CreateCommand();
-        insertCmd.Transaction = tx;
-        insertCmd.CommandText = @"
-            INSERT OR IGNORE INTO sales_leads
-                (lead_id, customer_id, vehicle_interest, lead_score, status,
-                 source_conversation_id, lead_source, created_at, updated_at)
-            VALUES (@leadId, @cust, @intent, @score, 'new', @convId, @source, @now, @now)";
-        AddParam(insertCmd, "@leadId", leadId);
-        AddParam(insertCmd, "@cust",   customerIdValue);
-        AddParam(insertCmd, "@intent", intentStr);
-        AddParam(insertCmd, "@score",  score);
-        AddParam(insertCmd, "@convId", convId.ToString()!);
-        AddParam(insertCmd, "@source", leadSource);
-        AddParam(insertCmd, "@now",    now);
-        insertCmd.ExecuteNonQuery();
-
-        return Task.CompletedTask;
-    }
-
-    private static void AddParam(IDbCommand cmd, string name, object? val)
-    {
-        var p = cmd.CreateParameter();
-        p.ParameterName = name;
-        p.Value = val ?? (object)DBNull.Value;
-        cmd.Parameters.Add(p);
+        await db.ExecuteAsync(@"
+INSERT OR IGNORE INTO sales_leads
+  (lead_id, customer_id, lead_score, status, source_conversation_id, lead_source, created_at, updated_at)
+VALUES
+  (@LeadId, @CustomerId, @LeadScore, 'new', @ConversationId, 'ai_conversation', @Now, @Now)",
+            new
+            {
+                LeadId = leadId,
+                CustomerId = customerId,
+                LeadScore = leadScore,
+                ConversationId = conversationId,
+                Now = now
+            }, tx);
     }
 }
 

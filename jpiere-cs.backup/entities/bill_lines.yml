@@ -1,0 +1,128 @@
+imports: []
+entities:
+  bill_lines:
+    table: bill_lines
+    key: id
+    displayName: 請求明細
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: bills
+        alias: b
+        on: bill_lines.bill_id = b.id
+
+    forms:
+      bill_id:
+        type: int
+        required: true
+        label: 請求
+        editable: true
+        foreignKey:
+          entity: bills
+          displayColumn: document_no
+      line_no:
+        type: int
+        required: true
+        label: 行番号
+        editable: true
+      description:
+        type: textarea
+        label: 説明
+        editable: true
+      period_from:
+        type: date
+        label: 対象期間（開始）
+        editable: true
+      period_to:
+        type: date
+        label: 対象期間（終了）
+        editable: true
+      total_lines:
+        type: decimal
+        label: 小計
+        editable: true
+      grand_total:
+        type: decimal
+        label: 合計
+        editable: true
+      tax_amt:
+        type: decimal
+        label: 消費税額
+        editable: true
+      pay_amt:
+        type: decimal
+        label: 入金額
+        editable: true
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      bill_no:
+        type: string
+        label: 請求番号
+        expression: b.document_no
+        searchable: true
+        sortable: true
+      line_no:
+        type: int
+        required: true
+        label: 行番号
+        sortable: true
+      description:
+        type: string
+        label: 説明
+        searchable: true
+      period_from:
+        type: date
+        label: 期間開始
+        sortable: true
+      period_to:
+        type: date
+        label: 期間終了
+        sortable: true
+      grand_total:
+        type: decimal
+        label: 合計
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - bill_id
+          - line_no
+          - period_from
+          - period_to
+          - total_lines
+          - grand_total
+          - tax_amt
+          - pay_amt
+          - description
+          - is_active
+      filters:
+        columns: 3
+        order:
+          - bill_id
+
+    filters:
+      bill_id:
+        type: dropdown
+        label: 請求
+        expression: bill_lines.bill_id
+        foreignKey:
+          entity: bills
+          displayColumn: document_no

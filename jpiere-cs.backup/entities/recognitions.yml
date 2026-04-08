@@ -1,0 +1,154 @@
+imports: []
+entities:
+  recognitions:
+    table: recognitions
+    key: id
+    displayName: 売上計上
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: business_partners
+        alias: bp
+        on: recognitions.business_partner_id = bp.id
+
+    forms:
+      document_no:
+        type: string
+        required: true
+        label: 計上番号
+        editable: true
+      doc_status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options:
+          - DR
+          - CO
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+      business_partner_id:
+        type: int
+        required: true
+        label: 取引先
+        editable: true
+        foreignKey:
+          entity: business_partners
+          displayColumn: name
+      date_acct:
+        type: date
+        required: true
+        label: 計上日付
+        editable: true
+      grand_total:
+        type: decimal
+        required: true
+        label: 計上金額
+        editable: true
+      linked_contract_id:
+        type: int
+        label: 関連契約
+        editable: true
+        foreignKey:
+          entity: contracts
+          displayColumn: document_no
+      description:
+        type: textarea
+        label: 備考
+        editable: true
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      document_no:
+        type: string
+        required: true
+        label: 計上番号
+        searchable: true
+        sortable: true
+      partner_name:
+        type: string
+        label: 取引先
+        expression: bp.name
+        searchable: true
+        sortable: true
+      doc_status:
+        type: string
+        label: ステータス
+        sortable: true
+      date_acct:
+        type: date
+        label: 計上日付
+        sortable: true
+      grand_total:
+        type: decimal
+        required: true
+        label: 計上金額
+        sortable: true
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - document_no
+          - doc_status
+          - business_partner_id
+          - linked_contract_id
+          - date_acct
+          - grand_total
+          - description
+          - is_active
+      filters:
+        columns: 4
+        order:
+          - business_partner_id
+          - doc_status
+          - document_no
+
+    filters:
+      business_partner_id:
+        type: dropdown
+        label: 取引先
+        expression: recognitions.business_partner_id
+        foreignKey:
+          entity: business_partners
+          displayColumn: name
+      doc_status:
+        type: dropdown
+        label: ステータス
+        expression: recognitions.doc_status
+        options:
+          - DR
+          - CO
+          - VO
+        optionLabels:
+          DR: 下書き
+          CO: 確定
+          VO: 無効
+      document_no:
+        type: like
+        label: 計上番号
+
+    links:
+      recognition_lines:
+        label: 売上計上明細
+        targetEntity: recognition_lines
+        filter:
+          recognition_id: id

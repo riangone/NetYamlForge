@@ -119,6 +119,23 @@ public class AutoDealerChatController : ControllerBase
         return Ok(new { success = true });
     }
 
+    /// <summary>チャットセッションを終了します。</summary>
+    [AllowAnonymous]
+    [HttpPost("session/{conversationId}/close")]
+    public async Task<IActionResult> CloseSession(string conversationId)
+    {
+        try
+        {
+            await _chat.CloseConversationAsync(conversationId);
+            return Ok(new { message = "対話セッションを終了しました" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "セッション終了エラー conv={Id}", conversationId);
+            return StatusCode(500, new { error = "セッションの終了に失敗しました。" });
+        }
+    }
+
     // ─────────────────────────────────────────────────────
     // 社員向けエンドポイント（ログイン必須）
     // ─────────────────────────────────────────────────────

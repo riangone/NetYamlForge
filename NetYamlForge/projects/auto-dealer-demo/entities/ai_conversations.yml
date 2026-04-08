@@ -82,6 +82,14 @@ entities:
         type: text
         required: false
         label: コンテキスト情報
+      feedback_rating:
+        type: int
+        required: false
+        label: 評価（1〜5）
+      feedback_comment:
+        type: text
+        required: false
+        label: フィードバックコメント
       assigned_to_user_id:
         type: string
         length: 50

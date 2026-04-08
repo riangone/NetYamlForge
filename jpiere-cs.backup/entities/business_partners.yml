@@ -1,0 +1,83 @@
+name: business_partners
+displayName: 取引先マスタ
+description: 顧客・仕入先・その他取引先を管理します
+
+columns:
+  - name: id
+    type: integer
+    primaryKey: true
+  - name: code
+    type: string
+    required: true
+    maxLength: 40
+  - name: name
+    type: string
+    required: true
+    maxLength: 120
+  - name: name2
+    type: string
+    maxLength: 60
+  - name: bp_type
+    type: string
+    required: true
+    enum: [C, V, B]
+    enumLabels: [顧客, 仕入先, 両方]
+    default: C
+  - name: is_customer
+    type: boolean
+    default: true
+  - name: is_vendor
+    type: boolean
+    default: false
+  - name: tax_id
+    type: string
+    maxLength: 20
+  - name: url
+    type: string
+  - name: phone
+    type: string
+  - name: email
+    type: string
+  - name: address1
+    type: string
+  - name: address2
+    type: string
+  - name: city
+    type: string
+  - name: postal_code
+    type: string
+  - name: credit_limit
+    type: decimal
+    default: 0
+  - name: payment_rule
+    type: string
+    enum: [T, I]
+    enumLabels: [翌月払い, 即時]
+    default: T
+  - name: payment_term_days
+    type: integer
+    default: 30
+  - name: description
+    type: text
+  - name: is_active
+    type: boolean
+    default: true
+  - name: created_at
+    type: datetime
+  - name: updated_at
+    type: datetime
+
+listView:
+  columns: [code, name, bp_type, phone, email, credit_limit]
+  searchFields: [code, name, tax_id]
+  defaultSort: name ASC
+
+formFields:
+  - section: 基本情報
+    fields: [code, name, name2, bp_type, tax_id, url]
+  - section: 連絡先
+    fields: [phone, email, address1, address2, city, postal_code]
+  - section: 支払条件
+    fields: [payment_rule, payment_term_days, credit_limit]
+  - section: その他
+    fields: [description, is_active]

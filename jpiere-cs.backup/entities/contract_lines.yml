@@ -1,0 +1,168 @@
+imports: []
+entities:
+  contract_lines:
+    table: contract_lines
+    key: id
+    displayName: 契約明細
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: contracts
+        alias: c
+        on: contract_lines.contract_id = c.id
+      - type: left
+        table: products
+        alias: p
+        on: contract_lines.product_id = p.id
+
+    forms:
+      contract_id:
+        type: int
+        required: true
+        label: 契約
+        editable: true
+        foreignKey:
+          entity: contracts
+          displayColumn: document_no
+      line_no:
+        type: int
+        required: true
+        label: 行番号
+        editable: true
+      product_id:
+        type: int
+        label: 商品
+        editable: true
+        foreignKey:
+          entity: products
+          displayColumn: name
+      description:
+        type: textarea
+        label: 説明
+        editable: true
+      qty:
+        type: decimal
+        required: true
+        label: 数量
+        editable: true
+      uom:
+        type: string
+        label: 単位
+        editable: true
+      unit_price:
+        type: decimal
+        required: true
+        label: 単価
+        editable: true
+      line_amt:
+        type: decimal
+        required: true
+        label: 明細金額
+        editable: true
+      tax_rate:
+        type: decimal
+        label: 消費税率
+        editable: true
+      billing_policy:
+        type: string
+        label: 請求方法
+        editable: true
+        options:
+          - M
+          - Y
+          - O
+        optionLabels:
+          M: 月次
+          Y: 年次
+          O: 一括
+      billing_start_date:
+        type: date
+        label: 請求開始日
+        editable: true
+      billing_end_date:
+        type: date
+        label: 請求終了日
+        editable: true
+      is_active:
+        type: boolean
+        label: 有効
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      contract_no:
+        type: string
+        label: 契約番号
+        expression: c.document_no
+        searchable: true
+        sortable: true
+      line_no:
+        type: int
+        required: true
+        label: 行番号
+        sortable: true
+      product_name:
+        type: string
+        label: 商品
+        expression: p.name
+        searchable: true
+      qty:
+        type: decimal
+        required: true
+        label: 数量
+        sortable: true
+      unit_price:
+        type: decimal
+        required: true
+        label: 単価
+        sortable: true
+      line_amt:
+        type: decimal
+        required: true
+        label: 明細金額
+        sortable: true
+      billing_policy:
+        type: string
+        label: 請求方法
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - contract_id
+          - line_no
+          - product_id
+          - qty
+          - uom
+          - unit_price
+          - line_amt
+          - tax_rate
+          - billing_policy
+          - billing_start_date
+          - billing_end_date
+          - description
+          - is_active
+      filters:
+        columns: 3
+        order:
+          - contract_id
+
+    filters:
+      contract_id:
+        type: dropdown
+        label: 契約
+        expression: contract_lines.contract_id
+        foreignKey:
+          entity: contracts
+          displayColumn: document_no

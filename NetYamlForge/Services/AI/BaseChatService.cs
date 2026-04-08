@@ -253,15 +253,26 @@ public abstract class BaseChatService
     // エスカレーション処理（共通）
     // ─────────────────────────────────────────────────────────
 
+    private static readonly string[] EscalationKeywords =
+    {
+        // 直接的な不満
+        "苦情", "クレーム", "怒り", "不満", "訴える", "返金", "責任者", "解約",
+        // 繰り返し・放置
+        "何度も", "また同じ", "前回も", "ずっと待って", "いつになったら", "まだですか",
+        // 強い否定
+        "最悪", "ひどい", "あり得ない", "絶対おかしい", "誠意がない",
+        // 脅し
+        "弁護士", "消費者センター", "SNS", "口コミ", "評判", "炎上"
+    };
+
     protected (string Intent, bool NeedsHandover, string Priority) DetectEscalation(string message)
     {
-        var complaintKeywords = new[] { "苦情", "不満", "怒り", "問題", "投诉", "complaint" };
         var urgentKeywords = new[] { "緊急", "至急", "すぐ", "立刻", "urgent", "emergency" };
 
-        var isComplaint = complaintKeywords.Any(k => message.Contains(k, StringComparison.OrdinalIgnoreCase));
+        var isEscalation = EscalationKeywords.Any(k => message.Contains(k, StringComparison.OrdinalIgnoreCase));
         var isUrgent = urgentKeywords.Any(k => message.Contains(k, StringComparison.OrdinalIgnoreCase));
 
-        if (isComplaint) return ("complaint", true, "high");
+        if (isEscalation) return ("complaint", true, "high");
         if (isUrgent) return ("urgent", true, "high");
 
         return ("general", false, "normal");
@@ -269,15 +280,27 @@ public abstract class BaseChatService
 
     protected double EstimateSentiment(string message)
     {
-        var negativeKeywords = new[] { "最悪", "ひどい", "ダメ", "悪い", "不满", "terrible", "awful" };
-        var positiveKeywords = new[] { "最高", "良い", "素晴らしい", "满意", "great", "excellent" };
+        var score = 0.0f;
+        var lowerMsg = message.ToLowerInvariant();
 
-        var lower = message.ToLower();
+        var negativeWeights = new Dictionary<string, float>
+        {
+            { "最悪" , -0.6f }, { "ひどい" , -0.5f }, { "怒り" , -0.5f },
+            { "不満" , -0.4f }, { "何度も" , -0.35f }, { "まだですか" , -0.3f },
+            { "クレーム" , -0.5f }, { "あり得ない" , -0.5f }
+        };
+        var positiveWeights = new Dictionary<string, float>
+        {
+            { "ありがとう" , 0.4f }, { "良かった" , 0.3f }, { "助かりました" , 0.4f },
+            { "素晴らしい" , 0.5f }, { "丁寧" , 0.3f }
+        };
 
-        if (negativeKeywords.Any(k => lower.Contains(k))) return -0.8;
-        if (positiveKeywords.Any(k => lower.Contains(k))) return 0.8;
+        foreach (var (word, weight) in negativeWeights)
+            if (lowerMsg.Contains(word)) score += weight;
+        foreach (var (word, weight) in positiveWeights)
+            if (lowerMsg.Contains(word)) score += weight;
 
-        return 0.0;
+        return Math.Clamp(score, -1.0f, 1.0f);
     }
 
     // ─────────────────────────────────────────────────────────

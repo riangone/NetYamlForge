@@ -1,0 +1,73 @@
+stats:
+  - label: 有効契約数
+    query: SELECT COUNT(*) FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+    icon: 📄
+    color: badge-primary
+  - label: 今月の月次売上
+    query: SELECT COALESCE(SUM(monthly_revenue_amt), 0) FROM contracts WHERE contract_status = 'AC' AND is_active = 1
+    icon: 💴
+    color: badge-success
+  - label: 90日以内に期限切れ
+    query: SELECT COUNT(*) FROM contracts WHERE contract_status = 'AC' AND period_date_to IS NOT NULL AND julianday(period_date_to) - julianday('now') BETWEEN 0 AND 90
+    icon: ⏰
+    color: badge-warning
+  - label: 未収残高合計
+    query: SELECT COALESCE(SUM(outstanding_amt), 0) FROM bills WHERE doc_status = 'CO'
+    icon: 📊
+    color: badge-danger
+  - label: 見積提出中
+    query: SELECT COUNT(*) FROM estimations WHERE doc_status = 'IN' AND is_active = 1
+    icon: 📝
+    color: badge-info
+  - label: 未完了TODO
+    query: SELECT COUNT(*) FROM todos WHERE todo_status IN ('NY', 'IP') AND is_active = 1
+    icon: ✅
+    color: badge-secondary
+
+charts:
+  - title: 契約種別分布
+    type: pie
+    query: |
+      SELECT contract_type AS label, COUNT(*) AS value
+      FROM contracts WHERE is_active = 1
+      GROUP BY contract_type
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+
+  - title: 月次売上トレンド（直近12ヶ月）
+    type: bar
+    query: |
+      SELECT strftime('%Y-%m', date_acct) AS label, SUM(grand_total) AS value
+      FROM recognitions
+      WHERE is_active = 1
+        AND date_acct >= date('now', '-12 months')
+      GROUP BY strftime('%Y-%m', date_acct)
+      ORDER BY label ASC
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: 取引先別契約数
+    type: bar
+    query: |
+      SELECT bp.name AS label, COUNT(*) AS value
+      FROM contracts c
+      JOIN business_partners bp ON c.business_partner_id = bp.id
+      WHERE c.is_active = 1
+      GROUP BY bp.id, bp.name
+      ORDER BY value DESC
+      LIMIT 10
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)
+
+  - title: 請求ステータス分布
+    type: doughnut
+    query: |
+      SELECT doc_status AS label, COUNT(*) AS value
+      FROM bills WHERE is_active = 1
+      GROUP BY doc_status
+    colors:
+      - rgba(156, 163, 175, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(239, 68, 68, 0.85)
