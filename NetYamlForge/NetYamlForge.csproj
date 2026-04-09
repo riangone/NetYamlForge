@@ -35,8 +35,11 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
     <PackageReference Include="MySql.Data" Version="9.2.0" />
     <PackageReference Include="Npgsql" Version="8.0.6" />
+    <PackageReference Include="Polly" Version="8.6.6" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Stateless" Version="5.20.1" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="PDFsharp" Version="7.0.0-preview-1" />
   </ItemGroup>

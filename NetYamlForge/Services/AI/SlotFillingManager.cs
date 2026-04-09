@@ -1,6 +1,3 @@
-// ファイル概要：スロットフィリング管理 - 複数対話での情報収集を管理します
-// 自動車販売の主要シナリオ（予約、見積もり、下取りなど）に必要なスロットを定義
-
 using System.Collections.Concurrent;
 using System.Data;
 using System.Text.Json;
@@ -15,6 +12,7 @@ namespace NetYamlForge.Services.AI;
 /// <summary>
 /// スロットフィリング管理サービス
 /// 複数対話を通じて必要な情報を収集・管理します
+/// FSM 状態機を統合したバージョン
 /// </summary>
 public interface ISlotFillingManager
 {
@@ -52,6 +50,26 @@ public interface ISlotFillingManager
     /// アクティブ（未完了）なセッションのシナリオ名を返す。なければ null
     /// </summary>
     Task<string?> GetActiveScenarioAsync(string conversationId);
+
+    /// <summary>
+    /// FSM 状態を更新
+    /// </summary>
+    Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0);
+
+    /// <summary>
+    /// 現在の FSM 状態を取得
+    /// </summary>
+    Task<AppointmentStateMachine.State?> GetCurrentFsmStateAsync(string conversationId);
+
+    /// <summary>
+    /// 状態に基づいて許可された Tool リストを取得
+    /// </summary>
+    Task<HashSet<string>> GetAllowedToolsAsync(string conversationId);
+
+    /// <summary>
+    /// Tool 呼び出しが現在の状態で許可されているかチェック
+    /// </summary>
+    Task<bool> IsToolAllowedAsync(string conversationId, string toolName);
 }
 
 /// <summary>
@@ -119,6 +137,7 @@ public class ScenarioDefinition
 public class SlotFillingManager : ISlotFillingManager
 {
     private readonly ConcurrentDictionary<string, SlotSession> _sessions = new();
+    private readonly ConcurrentDictionary<string, AppointmentStateMachine> _fsmStates = new(); // FSM 状態管理
     private readonly ILogger<SlotFillingManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private const string DefaultProjectId = "auto-dealer-demo";
@@ -572,5 +591,107 @@ WHERE conversation_id = @ConversationId",
         if (projectScope != null && projectScope.IsSet)
             return projectScope.Current.Name;
         return DefaultProjectId;
+    }
+
+    // ===== FSM 統合メソッド =====
+
+    /// <inheritdoc />
+    public Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0)
+    {
+        var fsm = GetOrCreateFsm(conversationId);
+
+        // 低信頼度の検出
+        if (confidence < 0.6)
+        {
+            fsm.TriggerLowConfidence(confidence);
+            _logger.LogInformation(
+                "[FSM] 低信頼度検出 Conv={ConvId}, Confidence={Confidence}, State={State}",
+                conversationId,
+                confidence,
+                fsm.CurrentState);
+        }
+        else
+        {
+            // 標準トリガー
+            if (fsm.CanFire(trigger))
+            {
+                fsm.Fire(trigger);
+                _logger.LogInformation(
+                    "[FSM] 状態更新 Conv={ConvId}, Trigger={Trigger}, State={State}",
+                    conversationId,
+                    trigger,
+                    fsm.CurrentState);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc />
+    public Task<AppointmentStateMachine.State?> GetCurrentFsmStateAsync(string conversationId)
+    {
+        var fsm = GetOrCreateFsm(conversationId);
+        return Task.FromResult<AppointmentStateMachine.State?>(fsm.CurrentState);
+    }
+
+    /// <inheritdoc />
+    public Task<HashSet<string>> GetAllowedToolsAsync(string conversationId)
+    {
+        var fsm = GetOrCreateFsm(conversationId);
+        return Task.FromResult(fsm.GetAllowedTools());
+    }
+
+    /// <inheritdoc />
+    public Task<bool> IsToolAllowedAsync(string conversationId, string toolName)
+    {
+        var fsm = GetOrCreateFsm(conversationId);
+        return Task.FromResult(fsm.IsToolAllowed(toolName));
+    }
+
+    /// <summary>
+    /// FSM 状態機を取得または作成
+    /// </summary>
+    private AppointmentStateMachine GetOrCreateFsm(string conversationId)
+    {
+        return _fsmStates.GetOrAdd(conversationId, id => new AppointmentStateMachine(id));
+    }
+
+    /// <summary>
+    /// FSM 状態をリセット
+    /// </summary>
+    public void ResetFsm(string conversationId)
+    {
+        _fsmStates.TryRemove(conversationId, out _);
+        _logger.LogInformation("[FSM] 状態リセット Conv={ConvId}", conversationId);
+    }
+
+    /// <summary>
+    /// 槽位更新時に FSM を自動進行
+    /// </summary>
+    public async Task UpdateSlotWithFsmAsync(
+        string conversationId,
+        string slotName,
+        string value,
+        string? projectId = null)
+    {
+        // スロットを更新
+        await UpdateSlotAsync(conversationId, slotName, value, projectId);
+
+        // スロット名に基づいて FSM トリガーを決定
+        var trigger = slotName switch
+        {
+            "vehicle_model" => AppointmentStateMachine.Trigger.VehicleProvided,
+            "preferred_date" => AppointmentStateMachine.Trigger.DateProvided,
+            "preferred_time" => AppointmentStateMachine.Trigger.TimeProvided,
+            "customer_name" => AppointmentStateMachine.Trigger.NameProvided,
+            "customer_phone" => AppointmentStateMachine.Trigger.PhoneProvided,
+            _ => default
+        };
+
+        // トリガーが存在する場合、FSM を進行
+        if (trigger != default || Enum.IsDefined(trigger))
+        {
+            await UpdateFsmStateAsync(conversationId, trigger);
+        }
     }
 }

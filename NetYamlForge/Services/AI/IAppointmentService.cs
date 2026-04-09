@@ -29,6 +29,35 @@ public interface IAppointmentService
     /// 予約詳細を取得
     /// </summary>
     Task<AppointmentInfo?> GetAppointmentAsync(string appointmentId, string? projectId = null);
+
+    /// <summary>
+    /// 指定时间段的预约可用性检查(档期冲突检测)
+    /// </summary>
+    Task<SlotAvailability> CheckAvailabilityAsync(
+        string appointmentType,
+        DateTime preferredDate,
+        string preferredTime,
+        string? projectId = null);
+}
+
+/// <summary>
+/// 时间段可用性结果
+/// </summary>
+public class SlotAvailability
+{
+    public bool IsAvailable { get; set; }
+    public int ConflictCount { get; set; }
+    public int MaxSlots { get; set; }
+    public List<TimeSlotOption> AlternativeSlots { get; set; } = new();
+}
+
+/// <summary>
+/// 可选时间段
+/// </summary>
+public class TimeSlotOption
+{
+    public string Time { get; set; } = string.Empty;
+    public bool IsAvailable { get; set; }
 }
 
 /// <summary>

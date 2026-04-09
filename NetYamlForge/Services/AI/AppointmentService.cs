@@ -327,6 +327,75 @@ public class AppointmentService : IAppointmentService
         }
     }
 
+    /// <inheritdoc />
+    public async Task<SlotAvailability> CheckAvailabilityAsync(
+        string appointmentType,
+        DateTime preferredDate,
+        string preferredTime,
+        string? projectId = null)
+    {
+        var project = ResolveProject(projectId);
+
+        using var db = _dbConnectionFactory.CreateConnection(project);
+
+        // 计算时间段(假设每个预约 1 小时)
+        var start = preferredDate.Date + ParseTime(preferredTime);
+        var end = start.AddHours(1);
+
+        // 查询冲突预约
+        var conflictCount = await db.QuerySingleAsync<int>(@"
+            SELECT COUNT(*) FROM service_appointments
+            WHERE appointment_type = @Type
+              AND status NOT IN ('cancelled', 'no_show')
+              AND preferred_date >= @Start
+              AND preferred_date < @End",
+            new { Type = appointmentType, Start = start, End = end });
+
+        var maxSlotsPerTime = 2; // 默认每个时间段最大预约数
+
+        return new SlotAvailability
+        {
+            IsAvailable = conflictCount < maxSlotsPerTime,
+            ConflictCount = conflictCount,
+            MaxSlots = maxSlotsPerTime,
+            AlternativeSlots = await FindAlternativeSlotsAsync(appointmentType, preferredDate, projectId)
+        };
+    }
+
+    /// <summary>
+    /// 查找可替代的预约时间段
+    /// </summary>
+    private async Task<List<TimeSlotOption>> FindAlternativeSlotsAsync(
+        string appointmentType,
+        DateTime preferredDate,
+        string? projectId = null)
+    {
+        // 返回同一天的可用时间段(9:00-18:00,每小时一段)
+        var slots = new List<TimeSlotOption>();
+        for (int hour = 9; hour < 18; hour++)
+        {
+            var time = $"{hour:D2}:00";
+            var availability = await CheckAvailabilityAsync(appointmentType, preferredDate, time, projectId);
+            if (availability.IsAvailable)
+            {
+                slots.Add(new TimeSlotOption { Time = time, IsAvailable = true });
+            }
+        }
+        return slots;
+    }
+
+    /// <summary>
+    /// 解析时间字符串为 TimeSpan
+    /// </summary>
+    private static TimeSpan ParseTime(string timeStr)
+    {
+        if (TimeSpan.TryParse(timeStr, out var result))
+            return result;
+
+        // 默认返回 9:00
+        return TimeSpan.FromHours(9);
+    }
+
     /// <summary>
     /// 予約枠が既に埋まっているかチェック
     /// </summary>

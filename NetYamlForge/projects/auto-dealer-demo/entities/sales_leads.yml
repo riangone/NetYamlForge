@@ -98,6 +98,32 @@ entities:
         label: 更新时间
         sortable: true
 
+      # AI 归因字段
+      ai_first_touch_conversation_id:
+        type: string
+        length: 64
+        required: false
+        label: 首次触达对话 ID
+        searchable: true
+        sortable: true
+      ai_last_touch_conversation_id:
+        type: string
+        length: 64
+        required: false
+        label: 最终触达对话 ID
+        searchable: true
+        sortable: true
+      ai_touch_count:
+        type: int
+        required: false
+        label: AI 对话触达次数
+        default: 0
+        sortable: true
+      ai_conversion_path:
+        type: text
+        required: false
+        label: 转化路径 JSON
+
     forms:
       lead_id:
         type: string

@@ -1,0 +1,102 @@
+using System.Data;
+using Dapper;
+using NetYamlForge.Services.Hooks;
+
+namespace AutoDealer.Hooks;
+
+/// <summary>
+/// AI 对话后自动更新销售线索评分钩子
+/// 
+/// 功能:
+/// 1. AI 对话完成后自动更新线索的 ai_touch_count
+/// 2. 根据意图类型和情感分析调整 lead_score
+/// 3. 记录首次/末次触达对话 ID
+/// 
+/// YAML 配置示例:
+///   hooks:
+///     afterCreate: "ai_lead_scoring"
+/// </summary>
+public class AiLeadScoringHook : IEntityHook
+{
+    public string Name => "ai_lead_scoring";
+
+    public Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+        => Task.FromResult(HookResult.Continue());
+
+    public async Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        try
+        {
+            // 获取关联的线索 ID(从 ctx.Data 或 ctx.Values)
+            var leadId = ctx.Data.GetValueOrDefault("related_lead_id")?.ToString();
+            if (string.IsNullOrEmpty(leadId) || !int.TryParse(leadId, out var leadIdInt))
+            {
+                return; // 无关联线索,跳过
+            }
+
+            // 计算评分增量
+            var scoreDelta = CalculateScoreDelta(ctx);
+            var touchCount = ctx.Data.GetValueOrDefault("previous_touch_count") as int? ?? 0;
+
+            // 更新线索表
+            const string sql = @"
+UPDATE sales_leads
+SET
+    ai_touch_count = COALESCE(ai_touch_count, 0) + 1,
+    lead_score = MIN(100, MAX(0, COALESCE(lead_score, 50) + @ScoreDelta)),
+    ai_last_touch_conversation_id = @ConversationId,
+    ai_first_touch_conversation_id = COALESCE(ai_first_touch_conversation_id, @ConversationId),
+    updated_at = @UpdatedAt
+WHERE id = @LeadId";
+
+            var param = new
+            {
+                ScoreDelta = scoreDelta,
+                ConversationId = ctx.Id?.ToString() ?? ctx.Values.GetValueOrDefault("conversation_id"),
+                UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                LeadId = leadIdInt
+            };
+
+            await db.ExecuteAsync(sql, param, tx);
+        }
+        catch (Exception ex)
+        {
+            // 评分失败不阻断主流程
+            // 实际项目中应记录到错误队列或重试队列
+        }
+    }
+
+    /// <summary>
+    /// 根据对话内容计算评分增量
+    /// </summary>
+    private static int CalculateScoreDelta(EntityHookContext ctx)
+    {
+        var delta = 0;
+
+        // 意图评分
+        var intent = ctx.Values.GetValueOrDefault("detected_intent")?.ToString();
+        delta += intent switch
+        {
+            "test_drive_request" => 15,
+            "price_inquiry" => 10,
+            "vehicle_comparison" => 12,
+            "finance_inquiry" => 8,
+            "general_inquiry" => 3,
+            _ => 0
+        };
+
+        // 情感分析加分
+        if (ctx.Data.TryGetValue("sentiment_score", out var sentiment) &&
+            double.TryParse(sentiment?.ToString(), out var score))
+        {
+            if (score > 0.7) delta += 5;  // 正面情感
+            else if (score < 0.3) delta -= 3; // 负面情感
+        }
+
+        // 槽位完成度加分
+        var slotsCount = ctx.Data.GetValueOrDefault("slots_filled") as int? ?? 0;
+        if (slotsCount >= 5) delta += 10; // 信息收集完整
+
+        return delta;
+    }
+}
