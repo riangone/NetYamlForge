@@ -7,10 +7,12 @@ using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
@@ -80,34 +82,53 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddDatabaseServices(this IServiceCollection services)
     {
+        // 连接池配置（Phase 2 优化：提高并发能力）
+        services.Configure<ConnectionPoolOptions>(options =>
+        {
+            options.MaxPoolSize = 64;             // 从 32 提升到 64，支持更高并发
+            options.IdleTimeoutMs = 120000;       // 从 1 分钟提升到 2 分钟，减少频繁创建
+            options.MaxLifetimeMs = 600000;       // 从 5 分钟提升到 10 分钟，延长连接复用窗口
+            options.Enabled = true;
+        });
+
+        // 注册连接管理器（Singleton，管理所有项目的连接池）
+        services.AddSingleton<IConnectionManager, ConnectionManager>();
+        
+        // 注册 HttpContextAccessor（用于访问预加载的连接）
+        services.AddHttpContextAccessor();
+
         // IDbConnection: プロジェクトの DatabaseType に応じた接続を生成します。
-        // DCS003 抑制理由: ここはDIファクトリ登録であり、接続を直接生成する唯一の正当な場所です。
-        // 他の全サービスはDIから IDbConnection を受け取るべきです。
-#pragma warning disable DCS003
+        // 优化：优先使用预加载的连接（避免同步阻塞异步）
         services.AddScoped<IDbConnection>(sp =>
         {
-            var scope = sp.GetRequiredService<ProjectScope>();
-            if (!scope.IsSet)
+            var httpContext = sp.GetService<IHttpContextAccessor>()?.HttpContext;
+
+            // 1. 尝试使用预加载的连接
+            if (httpContext?.Items["PreloadedConnection"] is IDbConnection preloadedConn)
+            {
+                return preloadedConn;
+            }
+
+            // 2. 项目未设置时，尝试从请求作用域获取 ProjectScope
+            var scope = sp.GetService<ProjectScope>();
+            if (scope == null || !scope.IsSet)
             {
                 // プロジェクトスコープ外（ルートページ等）はフォールバック
+#pragma warning disable DCS003
                 return new SqliteConnection("Data Source=chinook.db");
-            }
-            var dbType = scope.Current.DatabaseType.ToLowerInvariant();
-            return dbType switch
-            {
-                "sqlserver" => new SqlConnection(scope.Current.ConnectionString),
-                "postgresql" or "postgres" => new NpgsqlConnection(scope.Current.ConnectionString),
-                "mysql" or "mariadb" => new MySqlConnection(scope.Current.ConnectionString),
-                _ => new SqliteConnection(scope.Current.ConnectionString)
-            };
-        });
 #pragma warning restore DCS003
+            }
+
+            // 3. 最后手段：同步等待异步获取（不推荐，但保持向后兼容）
+            var connectionManager = sp.GetRequiredService<IConnectionManager>();
+            return connectionManager.GetConnectionAsync(scope.Current.Name).GetAwaiter().GetResult();
+        });
 
         // ISqlDialect: プロジェクトの DatabaseType に応じた方言を提供します。
         services.AddScoped<ISqlDialect>(sp =>
         {
-            var scope = sp.GetRequiredService<ProjectScope>();
-            if (!scope.IsSet) return new SqliteDialect();
+            var scope = sp.GetService<ProjectScope>();
+            if (scope == null || !scope.IsSet) return new SqliteDialect();
             var dbType = scope.Current.DatabaseType.ToLowerInvariant();
             return dbType switch
             {

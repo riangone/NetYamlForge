@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS ai_messages (
     confidence_score DECIMAL(10,4),
     sentiment_score DECIMAL(10,4),
     metadata_json TEXT,
+    components_json TEXT,
     timestamp DATETIME NOT NULL,
     FOREIGN KEY (conversation_id) REFERENCES ai_conversations(conversation_id)
 );

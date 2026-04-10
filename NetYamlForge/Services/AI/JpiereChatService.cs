@@ -90,18 +90,39 @@ public class JpiereChatService : BaseChatService
 
     protected override async Task SaveMessageAsync(
         string messageId, string conversationId, string sender, string content,
-        string timestamp, string? intent = null, double confidence = 0.9, double sentiment = 0)
+        string timestamp, string? intent = null, double confidence = 0.9, double sentiment = 0,
+        List<NetYamlForge.Models.AI.UiComponent>? components = null)
     {
+        // jpiere-cs スキーマでは components_json をサポート
+        string? componentsJson = null;
+        if (components?.Count > 0)
+        {
+            try
+            {
+                componentsJson = System.Text.Json.JsonSerializer.Serialize(components, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    WriteIndented = false
+                });
+            }
+            catch (Exception ex)
+            {
+                // ログ警告は省略
+            }
+        }
+
         await _db.ExecuteAsync(@"
 INSERT INTO ai_messages
-  (message_id, conversation_id, sender, content, intent, confidence_score, sentiment_score, sent_at, created_at)
+  (message_id, conversation_id, sender, content, intent, confidence_score, sentiment_score, components_json, sent_at, created_at)
 VALUES
-  (@MessageId, @ConversationId, @Sender, @Content, @Intent, @Confidence, @Sentiment, @Timestamp, @Timestamp)",
+  (@MessageId, @ConversationId, @Sender, @Content, @Intent, @Confidence, @Sentiment, @ComponentsJson, @Timestamp, @Timestamp)",
             new
             {
                 MessageId = messageId, ConversationId = conversationId, Sender = sender,
                 Content = content, Intent = intent ?? "general",
-                Confidence = confidence, Sentiment = sentiment, Timestamp = timestamp
+                Confidence = confidence, Sentiment = sentiment,
+                ComponentsJson = (object?)componentsJson ?? DBNull.Value,
+                Timestamp = timestamp
             });
     }
 

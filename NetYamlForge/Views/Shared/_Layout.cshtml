@@ -824,10 +824,13 @@
     @* 統合 AI チャットウィジェット（全プロジェクト共通）*@
     @if (User.Identity?.IsAuthenticated ?? false)
     {
+        <link rel="stylesheet" href="~/css/ai-chat-components.css" asp-append-version="true" />
+        <script src="~/js/ai-chat-components.js" asp-append-version="true"></script>
         <script src="~/js/ai-chat-widget.js" asp-append-version="true"></script>
         @if (currentProject == "auto-dealer-demo")
         {
             @* auto-dealer-demo: セッションベース dealer モード *@
+            <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
             var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
             <script>
                 DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });

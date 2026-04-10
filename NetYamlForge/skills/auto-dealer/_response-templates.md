@@ -104,10 +104,31 @@ description: 各种场景的标准响应格式模板
 - **{brand} {model} {grade}** ({year}) — ¥{price} — {color} — 在庫 {days} 日 — [詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={id})
 - **{brand} {model} {grade}** ({year}) — ¥{price} — {color} — 在庫 {days} 日 — [詳細を見る](/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={id})
 
+```json
+{
+  "components": [
+    {
+      "type": "card_carousel",
+      "items": [
+        {
+          "title": "{brand} {model}",
+          "subtitle": "¥{price} — {mileage}km",
+          "badgeLabel": "販売中",
+          "actions": [
+            { "label": "詳細を見る", "value": "/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={id}" },
+            { "label": "試乗予約", "value": "{brand} {model} の試乗を予約したい" }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
 📈 **トレンド**:
 - {人気車種} は閲覧数 {count} 回で人気です
 - {長期在庫車} は在庫 {days} 日で資金コスト ¥{cost}/月
-
+```
 💡 **推奨アクション**:
 1. **{車種} を重点推广**
    - 理由：閲覧数が高い

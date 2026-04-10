@@ -24,6 +24,14 @@ public class JpiereChatController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>認証済みユーザーのロールを取得します。</summary>
+    private string GetUserRole() =>
+        User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value ?? "employee";
+
+    /// <summary>認証済みユーザーのIDを取得します。</summary>
+    private string? GetUserId() =>
+        User.Identity?.Name;
+
     // ─────────────────────────────────────────────────────
     // 顧客・社員向けエンドポイント（認証必須）
     // ─────────────────────────────────────────────────────
@@ -35,10 +43,8 @@ public class JpiereChatController : ControllerBase
     {
         try
         {
-            // 認証済みユーザーの ID とロールを取得
-            string? userId = User.Identity?.Name;
-            string? userRole = User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "employee";
+            string? userId = GetUserId();
+            string userRole = GetUserRole();
 
             var result = await _chat.StartSessionAsync(
                 req.Channel ?? "web",
@@ -68,10 +74,7 @@ public class JpiereChatController : ControllerBase
 
         try
         {
-            // ユーザーロールを取得
-            string userRole = User.Claims
-                .FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "employee";
-
+            string userRole = GetUserRole();
             var result = await _chat.SendMessageAsync(conversationId, req.Message, userRole);
             return Ok(result);
         }

@@ -98,6 +98,12 @@ public class QwenCodeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
+        // ─────────────────────────────────────────────────────────
+        // チャットモード判定：systemPromptOverride あり＋ツールなし＝チャット用途
+        // ─────────────────────────────────────────────────────────
+        var isChatMode = !string.IsNullOrEmpty(systemPromptOverride)
+                         && (allowedTools == null || allowedTools.Count == 0);
+
         // Qwen CLI: qwen --yolo --prompt <message> [options]
         args.Add("--yolo");
         args.Add("--prompt");
@@ -137,8 +143,8 @@ public class QwenCodeCLIService : BaseCLIService
             args.Add(sessionId);
         }
 
-        // ツール権限制御
-        if (allowedTools != null && allowedTools.Count > 0)
+        // ツール権限制御（チャットモード以外）
+        if (!isChatMode && allowedTools != null && allowedTools.Count > 0)
         {
             args.Add("--allowed-tools");
             args.Add(string.Join(",", allowedTools));

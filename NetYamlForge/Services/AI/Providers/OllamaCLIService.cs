@@ -25,8 +25,8 @@ public class OllamaCLIService : BaseCLIService
         : base(executor, config, skillLoader, logger, "ollama")
     {
         _httpClient = httpClient ?? new HttpClient();
-        _baseUrl = string.IsNullOrEmpty(Config.Ollama.BaseUrl) 
-            ? "http://localhost:11434" 
+        _baseUrl = string.IsNullOrEmpty(Config.Ollama.BaseUrl)
+            ? "http://localhost:11434"
             : Config.Ollama.BaseUrl.TrimEnd('/');
     }
 

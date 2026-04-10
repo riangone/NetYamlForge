@@ -25,6 +25,9 @@ public class CliConfig
         "Read", "Write", "Edit", "Bash", "Git"
     };
 
+    /// <summary>CLI プロセスプール設定</summary>
+    public CliProcessPoolConfig ProcessPool { get; set; } = new();
+
     /// <summary>Claude Code 固有設定</summary>
     public ClaudeConfig Claude { get; set; } = new();
 
@@ -49,6 +52,39 @@ public class CliConfig
 }
 
 /// <summary>
+/// CLI プロセスプール設定
+/// </summary>
+public class CliProcessPoolConfig
+{
+    /// <summary>デーモンモードを有効化（プロセス常駐）</summary>
+    public bool EnableDaemonMode { get; set; } = true;
+
+    /// <summary>プール最大サイズ（ツールごと）</summary>
+    public int MaxPoolSize { get; set; } = 3;
+
+    /// <summary>アイドルタイムアウト（分）- これを超えるとプロセス終了</summary>
+    public int IdleTimeoutMinutes { get; set; } = 10;
+
+    /// <summary>ヘルスチェック間隔（秒）</summary>
+    public int HealthCheckIntervalSeconds { get; set; } = 30;
+
+    /// <summary>起動リトライ最大回数</summary>
+    public int MaxStartRetries { get; set; } = 3;
+
+    /// <summary>クールダウン期間（秒）- 再利用前の待機時間</summary>
+    public int CooldownSeconds { get; set; } = 2;
+
+    /// <summary>セッション永続化を有効化（--resume 対応）</summary>
+    public bool EnablePersistentSessions { get; set; } = true;
+
+    /// <summary>プロセス最大存活時間（分）、0 は無制限</summary>
+    public int MaxLifetimeMinutes { get; set; } = 60;
+
+    /// <summary>プロセスあたり最大リクエスト数、0 は無制限</summary>
+    public int MaxRequestsPerProcess { get; set; } = 100;
+}
+
+/// <summary>
 /// Claude Code 設定
 /// </summary>
 public partial class ClaudeConfig
@@ -61,6 +97,20 @@ public partial class ClaudeConfig
 
     /// <summary>claude コマンドのフルパス（省略時は PATH から検索）</summary>
     public string? Path { get; set; }
+
+    /// <summary>
+    /// 使用するモデル名。エイリアス（"haiku", "sonnet", "opus"）またはフルモデル名を指定。
+    /// チャット用途には "haiku" を推奨（Sonnet 比 3〜5倍高速）。
+    /// 省略時は Claude CLI のデフォルトモデルを使用する。
+    /// </summary>
+    public string? Model { get; set; }
+
+    /// <summary>
+    /// チャット応答生成時の Effort レベル（low / medium / high / max）。
+    /// "low" を指定すると Extended Thinking が無効化され応答が大幅に高速化する。
+    /// 省略時は Claude CLI のデフォルト（medium）を使用する。
+    /// </summary>
+    public string? ChatEffort { get; set; }
 }
 
 /// <summary>

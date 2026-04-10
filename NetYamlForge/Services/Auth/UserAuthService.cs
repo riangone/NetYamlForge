@@ -2,14 +2,14 @@
 // このファイルはアプリの重要な構成要素を定義します。
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 //
-// DCS003 抑制理由: このサービスは認証専用の接続を管理するため、OpenConnection() で
-// 直接接続を生成します（認証DB接続のライフサイクルが通常の DI スコープと異なるため）。
-#pragma warning disable DCS001, DCS003
+// Phase 2 改进：使用 IConnectionManager 替代直接创建连接，实现连接复用
+#pragma warning disable DCS001
 
 using System.Data;
 using System.Data.Common;
 using Dapper;
 using NetYamlForge.Models.Auth;
+using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -20,22 +20,25 @@ namespace NetYamlForge.Services.Auth;
 
 public class UserAuthService : IUserAuthService
 {
-    private readonly string _connectionString;
-    private readonly string _dbType;
+    private readonly IConnectionManager _connectionManager;
+    private readonly ProjectScope _scope;
     private readonly ILogger<UserAuthService> _logger;
     private readonly PasswordHasher<AppUser> _passwordHasher = new();
 
-    public UserAuthService(ProjectScope scope, ILogger<UserAuthService> logger)
+    public UserAuthService(
+        IConnectionManager connectionManager,
+        ProjectScope scope,
+        ILogger<UserAuthService> logger)
     {
-        _connectionString = scope.Current.ConnectionString;
-        _dbType = scope.Current.DatabaseType;
+        _connectionManager = connectionManager;
+        _scope = scope;
         _logger = logger;
     }
 
     public async Task<AppUser?> ValidateCredentialsAsync(string userName, string password)
     {
         // アクティブなユーザーのみを対象にパスワードハッシュ検証を行います。
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         var user = await conn.QueryFirstOrDefaultAsync<AppUser>(
             "SELECT * FROM AppUser WHERE UserName = @UserName AND IsActive = 1",
             new { UserName = userName });
@@ -59,7 +62,7 @@ public class UserAuthService : IUserAuthService
 
     public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName)
     {
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         var roles = await conn.QueryAsync<string>(
             "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
             new { UserName = userName });
@@ -69,7 +72,7 @@ public class UserAuthService : IUserAuthService
     public async Task UpdateLastLoginAsync(int userId)
     {
         // ログイン成功時刻の更新は失敗しても認証可否に影響させない方針で呼び出します。
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         await conn.ExecuteAsync(
             "UPDATE AppUser SET LastLoginAt = @Now WHERE Id = @Id",
@@ -78,14 +81,14 @@ public class UserAuthService : IUserAuthService
 
     public async Task<IReadOnlyList<AppUser>> GetAllAsync()
     {
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         var items = await conn.QueryAsync<AppUser>("SELECT * FROM AppUser ORDER BY Id ASC");
         return items.ToList();
     }
 
     public async Task<AppUser?> GetByIdAsync(int id)
     {
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         return await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = id });
     }
 
@@ -93,7 +96,7 @@ public class UserAuthService : IUserAuthService
     {
         // 外部Txが渡された場合はその接続を使い、監査ログとの原子性を維持します。
         var ownConnection = connection == null;
-        var conn = connection ?? OpenConnection();
+        var conn = connection ?? await GetConnectionAsync();
         try
         {
             var existing = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName", new { input.UserName }, transaction);
@@ -116,7 +119,7 @@ public class UserAuthService : IUserAuthService
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
             long id;
-            var dbType = _dbType.ToLowerInvariant();
+            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
             if (dbType == "sqlserver")
             {
                 var sql = @"
@@ -155,9 +158,10 @@ SELECT last_insert_rowid();";
         }
         finally
         {
-            if (ownConnection && conn is IDisposable disposable)
+            if (ownConnection && conn != null)
             {
-                disposable.Dispose();
+                // Phase 2: 释放连接回池（而不是关闭）
+                _connectionManager.ReleaseConnection(conn);
             }
         }
     }
@@ -171,7 +175,7 @@ SELECT last_insert_rowid();";
         }
 
         var ownConnection = connection == null;
-        var conn = connection ?? OpenConnection();
+        var conn = connection ?? await GetConnectionAsync();
         try
         {
             var current = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = input.Id.Value }, transaction);
@@ -210,16 +214,16 @@ WHERE Id = @Id", new
         }
         finally
         {
-            if (ownConnection && conn is IDisposable disposable)
+            if (ownConnection && conn != null)
             {
-                disposable.Dispose();
+                _connectionManager.ReleaseConnection(conn);
             }
         }
     }
 
     public async Task<bool> IsUserNameTakenAsync(string userName)
     {
-        await using var conn = OpenConnection();
+        await using var conn = await GetConnectionAsync();
         var count = await conn.ExecuteScalarAsync<int>(
             "SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName",
             new { UserName = userName });
@@ -229,7 +233,7 @@ WHERE Id = @Id", new
     public async Task<int> RegisterAsync(RegisterViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null)
     {
         var ownConnection = connection == null;
-        var conn = connection ?? OpenConnection();
+        var conn = connection ?? await GetConnectionAsync();
         try
         {
             // ユーザー名チェック
@@ -255,7 +259,7 @@ WHERE Id = @Id", new
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
             long id;
-            var dbType = _dbType.ToLowerInvariant();
+            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
             if (dbType == "sqlserver")
             {
                 var sql = @"
@@ -299,9 +303,9 @@ SELECT last_insert_rowid();";
         }
         finally
         {
-            if (ownConnection && conn is IDisposable disposable)
+            if (ownConnection && conn != null)
             {
-                disposable.Dispose();
+                _connectionManager.ReleaseConnection(conn);
             }
         }
     }
@@ -309,7 +313,7 @@ SELECT last_insert_rowid();";
     public async Task<int> RegisterCustomerAsync(CustomerRegisterViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null)
     {
         var ownConnection = connection == null;
-        var conn = connection ?? OpenConnection();
+        var conn = connection ?? await GetConnectionAsync();
         try
         {
             // ユーザー名チェック
@@ -336,7 +340,7 @@ SELECT last_insert_rowid();";
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
             long userId;
-            var dbType = _dbType.ToLowerInvariant();
+            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
             if (dbType == "sqlserver")
             {
                 var sql = @"
@@ -390,9 +394,9 @@ SELECT last_insert_rowid();";
         }
         finally
         {
-            if (ownConnection && conn is IDisposable disposable)
+            if (ownConnection && conn != null)
             {
-                disposable.Dispose();
+                _connectionManager.ReleaseConnection(conn);
             }
         }
     }
@@ -505,7 +509,7 @@ SELECT last_insert_rowid();";
     /// </summary>
     private async Task<CustomerTableInfo?> GetCustomerTableInfoAsync(IDbConnection conn, string tableName, IDbTransaction? transaction)
     {
-        var dbType = _dbType.ToLowerInvariant();
+        var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
         
         // 主キー列と user_name 列、updated_at 列を検出
         string primaryKeyColumn = "customer_id"; // デフォルト
@@ -636,7 +640,7 @@ WHERE c.TABLE_NAME = @tableName"
     /// </summary>
     private async Task<bool> CheckColumnExistsAsync(IDbConnection conn, string tableName, string[] columnNames, IDbTransaction? transaction)
     {
-        var dbType = _dbType.ToLowerInvariant();
+        var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
         
         foreach (var columnName in columnNames)
         {
@@ -722,7 +726,7 @@ VALUES (
     /// </summary>
     private async Task<bool> CheckTableExistsAsync(IDbConnection conn, string tableName, IDbTransaction? transaction)
     {
-        var dbType = _dbType.ToLowerInvariant();
+        var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
         string sql = dbType switch
         {
             "sqlserver" => @"
@@ -738,34 +742,13 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
         return result > 0;
     }
 
-    private DbConnection OpenConnection()
+    /// <summary>
+    /// Phase 2: 从连接管理器获取连接（复用连接池）
+    /// </summary>
+    private async Task<DbConnection> GetConnectionAsync()
     {
-        // DbConnection は IAsyncDisposable を実装するため await using が使えます。
-        var dbType = _dbType.ToLowerInvariant();
-        if (dbType == "sqlserver")
-        {
-            var conn = new SqlConnection(_connectionString);
-            conn.Open();
-            return conn;
-        }
-        else if (dbType == "postgresql" || dbType == "postgres")
-        {
-            var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-            return conn;
-        }
-        else if (dbType == "mysql" || dbType == "mariadb")
-        {
-            var conn = new MySqlConnection(_connectionString);
-            conn.Open();
-            return conn;
-        }
-        else
-        {
-            var conn = new SqliteConnection(_connectionString);
-            conn.Open();
-            return conn;
-        }
+        var conn = await _connectionManager.GetConnectionAsync();
+        return (DbConnection)conn;
     }
 
     /// <summary>

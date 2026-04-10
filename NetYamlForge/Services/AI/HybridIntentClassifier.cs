@@ -30,7 +30,16 @@ public class HybridIntentClassifier : IIntentClassifier
     /// <inheritdoc />
     public async Task<IntentResult> ClassifyAsync(string message, ConversationContext? conversationContext = null, string? projectId = null)
     {
-        // 1. LLM 分析（高精度、文脈理解）
+        // 1. 首先尝试规则匹配（快速、稳定、可预测）
+        var ruleResult = await TryRuleMatchingAsync(message, conversationContext);
+        if (ruleResult != null && ruleResult.Confidence >= 0.8)
+        {
+            _logger.LogInformation("✅ ルールマッチ成功: {Intent} (置信度：{Confidence}), メッセージ: {Message}", 
+                ruleResult.Intent, ruleResult.Confidence, message);
+            return ruleResult;
+        }
+
+        // 2. LLM 分析（高精度、文脈理解）- 当规则匹配置信度低时
         if (_config.Intent.LlmEnabled && _llmProvider != null)
         {
             try
@@ -48,15 +57,15 @@ public class HybridIntentClassifier : IIntentClassifier
             }
         }
 
-        // 2. ルールベースフォールバック（高速・安定）
-        var ruleResult = await TryRuleMatchingAsync(message, conversationContext);
+        // 3. 规则回退（即使置信度低）
         if (ruleResult != null)
         {
-            _logger.LogDebug("ルールマッチ：{Intent} (置信度：{Confidence})", ruleResult.Intent, ruleResult.Confidence);
+            _logger.LogDebug("ルールマッチ（低置信度）：{Intent} (置信度：{Confidence})", ruleResult.Intent, ruleResult.Confidence);
             return ruleResult;
         }
 
-        // 3. フォールバック：デフォルト意図
+        // 4. フォールバック：デフォルト意図
+        _logger.LogWarning("⚠️ 意図分類失敗、general_inquiry にフォールバック: {Message}", message);
         return new IntentResult
         {
             Intent = "general_inquiry",
@@ -93,7 +102,8 @@ public class HybridIntentClassifier : IIntentClassifier
                         Confidence = rule.DefaultConfidence,
                         Method = "rule",
                         MatchedRuleId = rule.Id,
-                        Entities = await ExtractEntitiesAsync(message, rule.Intent),
+                        // ✅ 延迟实体抽取：Slot-filling 场景由规则提取，不需要 LLM
+                        Entities = new Dictionary<string, string>(),
                         QuickReplies = rule.QuickReplies
                     };
 
@@ -138,7 +148,8 @@ public class HybridIntentClassifier : IIntentClassifier
         sb.AppendLine("- hours_inquiry: 営業時間の問い合わせ");
         sb.AppendLine("- price_inquiry: 価格の問い合わせ");
         sb.AppendLine("- estimate_request: 見積もり依頼");
-        sb.AppendLine("- appointment_booking: 予約の申し込み");
+        sb.AppendLine("- test_drive_booking: 試乗予約（キーワード：試乗、テストドライブ、運転してみたい）");
+        sb.AppendLine("- appointment_booking: 予約の申し込み（試乗以外）");
         sb.AppendLine("- appointment_change: 予約の変更");
         sb.AppendLine("- appointment_cancel: 予約のキャンセル");
         sb.AppendLine("- vehicle_inquiry: 車両の問い合わせ");
@@ -148,6 +159,10 @@ public class HybridIntentClassifier : IIntentClassifier
         sb.AppendLine("- complaint: 苦情");
         sb.AppendLine("- human_agent: 担当者への接続希望");
         sb.AppendLine("- general_inquiry: その他の問い合わせ");
+        sb.AppendLine();
+        sb.AppendLine("【重要】");
+        sb.AppendLine("- 「試乗」「テストドライブ」「運転してみたい」というキーワードがあったら、必ず test_drive_booking に分類してください");
+        sb.AppendLine("- 置信度は 0.9 以上に設定してください");
         sb.AppendLine();
 
         if (context != null && context.PreviousMessages.Any())
@@ -331,6 +346,77 @@ public class HybridIntentClassifier : IIntentClassifier
         if (timeMatch.Success)
         {
             entities["preferred_time"] = timeMatch.Groups[1].Value + "時";
+        }
+
+        // 車両状態の抽出
+        if (lowerMessage.Contains("新車"))
+        {
+            entities["vehicle_condition"] = "new";
+        }
+        else if (lowerMessage.Contains("中古車") || lowerMessage.Contains("中古"))
+        {
+            entities["vehicle_condition"] = "used";
+        }
+
+        // 顧客タイプの抽出
+        if (lowerMessage.Contains("法人") || lowerMessage.Contains("会社"))
+        {
+            entities["customer_type"] = "business";
+        }
+        else if (lowerMessage.Contains("個人") || lowerMessage.Contains("自分"))
+        {
+            entities["customer_type"] = "personal";
+        }
+
+        // 初回購入フラグ
+        if (lowerMessage.Contains("初めて") || lowerMessage.Contains("初回") || lowerMessage.Contains("最初の車"))
+        {
+            entities["is_first_purchase"] = "true";
+        }
+
+        // 下取りフラグ
+        if (lowerMessage.Contains("下取り") || lowerMessage.Contains("乗り換え"))
+        {
+            entities["has_trade_in"] = "true";
+        }
+
+        // 支払方法の抽出
+        if (lowerMessage.Contains("ローン") || lowerMessage.Contains("分割"))
+        {
+            entities["payment_method"] = "loan";
+        }
+        else if (lowerMessage.Contains("現金") || lowerMessage.Contains("一括"))
+        {
+            entities["payment_method"] = "cash";
+        }
+        else if (lowerMessage.Contains("リース") || lowerMessage.Contains("レンタカー"))
+        {
+            entities["payment_method"] = "lease";
+        }
+
+        // 予算金額の抽出（「万円」または「円」パターン）
+        var budgetMatch = System.Text.RegularExpressions.Regex.Match(message, @"(\d+(?:\.\d+)?)\s*万円");
+        if (budgetMatch.Success)
+        {
+            entities["budget_amount"] = budgetMatch.Groups[1].Value + "万円";
+            
+            // 予算タイプの判定
+            if (lowerMessage.Contains("以下") || lowerMessage.Contains("以内") || lowerMessage.Contains("未満"))
+            {
+                entities["budget_type"] = "max";
+            }
+            else if (lowerMessage.Contains("以上") || lowerMessage.Contains("より"))
+            {
+                entities["budget_type"] = "min";
+            }
+            else if (lowerMessage.Contains("総額") || lowerMessage.Contains("ぴったり"))
+            {
+                entities["budget_type"] = "exact";
+            }
+            else
+            {
+                entities["budget_type"] = "range";
+            }
         }
 
         return entities;

@@ -75,8 +75,12 @@ public class CliFirstLlmProvider : ILlmProvider
                     workingDirectory: Path.GetTempPath(),
                     sessionId: null,
                     allowedTools: [],
-                    systemPromptOverride: systemPromptOverride,  // ✨ 修正：systemPromptOverride を渡す
+                    systemPromptOverride: systemPromptOverride,
                     ct: cts.Token);
+
+                // ✨ デバッグログ：生出力を記録
+                _logger.LogDebug("[CliFirstLlmProvider] Raw output (first 500 chars):\n{RawOutput}",
+                    raw != null && raw.Length > 500 ? raw[..500] + "..." : raw);
 
                 var text = ExtractText(raw);
                 if (!string.IsNullOrWhiteSpace(text))
@@ -123,7 +127,11 @@ public class CliFirstLlmProvider : ILlmProvider
                     root.TryGetProperty("result", out var r) && r.ValueKind == JsonValueKind.String)
                 {
                     var text = r.GetString();
-                    if (!string.IsNullOrWhiteSpace(text)) return text.Trim();
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        // ✨ Markdown コードブロック内の JSON を抽出
+                        return ExtractJsonFromMarkdown(text);
+                    }
                 }
             }
             catch (JsonException) { }
@@ -148,7 +156,11 @@ public class CliFirstLlmProvider : ILlmProvider
                     if (item.TryGetProperty("text", out var tp))
                     {
                         var txt = tp.GetString();
-                        if (!string.IsNullOrWhiteSpace(txt)) parts.Add(txt);
+                        if (!string.IsNullOrWhiteSpace(txt))
+                        {
+                            // ✨ Markdown コードブロック内の JSON を抽出
+                            parts.Add(ExtractJsonFromMarkdown(txt));
+                        }
                     }
                 }
                 if (parts.Count > 0) return string.Join("\n", parts).Trim();
@@ -164,5 +176,30 @@ public class CliFirstLlmProvider : ILlmProvider
         }
 
         return raw.Trim();
+    }
+
+    /// <summary>
+    /// Markdown コードブロック内の JSON を抽出します。
+    /// ```json ... ``` 形式から JSON 文字列を返します。
+    /// </summary>
+    private static string ExtractJsonFromMarkdown(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return text;
+
+        // ```json ... ``` パターンを検索
+        var jsonStart = text.IndexOf("```json");
+        if (jsonStart >= 0)
+        {
+            var jsonEnd = text.IndexOf("```", jsonStart + 7);
+            if (jsonEnd > jsonStart)
+            {
+                // ```json と ``` の間の JSON を抽出
+                var jsonContent = text.Substring(jsonStart + 7, jsonEnd - jsonStart - 7).Trim();
+                return jsonContent;
+            }
+        }
+
+        // コードブロックがない場合はそのまま返す
+        return text.Trim();
     }
 }

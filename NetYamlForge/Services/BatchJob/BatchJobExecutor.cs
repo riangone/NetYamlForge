@@ -7,6 +7,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using Npgsql;
+using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Hooks;
 
 namespace NetYamlForge.Services.BatchJob;
@@ -291,14 +292,18 @@ public interface IDbConnectionFactory
 }
 
 /// <summary>
-/// DB コネクションファクトリ実装
+/// DB コネクションファクトリ実装 - 使用连接池
 /// </summary>
 public class DbConnectionFactory : IDbConnectionFactory
 {
+    private readonly IConnectionManager _connectionManager;
     private readonly ProjectManager _projectManager;
 
-    public DbConnectionFactory(ProjectManager projectManager)
+    public DbConnectionFactory(
+        IConnectionManager connectionManager,
+        ProjectManager projectManager)
     {
+        _connectionManager = connectionManager;
         _projectManager = projectManager;
     }
 
@@ -314,15 +319,8 @@ public class DbConnectionFactory : IDbConnectionFactory
             throw new InvalidOperationException($"Project not found: {projectName}");
         }
 
-        var dbType = project.DatabaseType.ToLowerInvariant();
-        return dbType switch
-        {
-#pragma warning disable DCS003
-            "sqlserver" => new SqlConnection(project.ConnectionString),
-            "postgresql" or "postgres" => new NpgsqlConnection(project.ConnectionString),
-            "mysql" or "mariadb" => new MySqlConnection(project.ConnectionString),
-            _ => new SqliteConnection(project.ConnectionString)
-#pragma warning restore DCS003
-        };
+        // 使用连接管理器获取连接（从池中复用）
+        var connection = _connectionManager.GetConnectionAsync(projectName).GetAwaiter().GetResult();
+        return connection;
     }
 }

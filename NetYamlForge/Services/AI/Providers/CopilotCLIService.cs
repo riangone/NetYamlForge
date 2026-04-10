@@ -162,12 +162,19 @@ public class CopilotCLIService : BaseCLIService
         var args = new List<string>();
 
         // Copilot CLI: copilot --prompt <message> --allow-all-tools --output-format json
-        // -p/--prompt <text>: 非インタラクティブモードでプロンプトを実行する
-        // --allow-all-tools: ツールを確認なしで自動実行（非インタラクティブ必須）
-        // --output-format json: JSONL 形式で出力（stream-json は存在しない）
+        // --allow-all-tools: 非インタラクティブモードに必須
+        // Copilot CLI は --system-prompt 未対応のため、システムプロンプトはメッセージ先頭に埋め込む
+        var copilotPrompt = !string.IsNullOrEmpty(systemPromptOverride)
+            ? $"{systemPromptOverride}\n\n---\n\n{message}"
+            : message;
+
         args.Add("--prompt");
-        args.Add(message);
+        args.Add(copilotPrompt);
+
+        // --allow-all-tools: 非インタラクティブモード（--prompt）に必須
         args.Add("--allow-all-tools");
+
+        // --output-format json: JSONL 形式で出力（stream-json は存在しない）
         args.Add("--output-format");
         args.Add("json");
 

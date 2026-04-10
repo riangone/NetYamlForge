@@ -23,6 +23,7 @@ public class AIController : ControllerBase
     private readonly ChatHistoryService _chatHistory;
     private readonly SkillLoader _skillLoader;
     private readonly IOptionsMonitor<CliConfig> _cliConfig;
+    private readonly AIProcessPoolManager _poolManager;
     private readonly ILogger<AIController> _logger;
 
     public AIController(
@@ -32,6 +33,7 @@ public class AIController : ControllerBase
         ChatHistoryService chatHistory,
         SkillLoader skillLoader,
         IOptionsMonitor<CliConfig> cliConfig,
+        AIProcessPoolManager poolManager,
         ILogger<AIController> logger)
     {
         _cliFactory = cliFactory;
@@ -40,6 +42,7 @@ public class AIController : ControllerBase
         _chatHistory = chatHistory;
         _skillLoader = skillLoader;
         _cliConfig = cliConfig;
+        _poolManager = poolManager;
         _logger = logger;
     }
     
@@ -375,4 +378,78 @@ public class AIController : ControllerBase
     //     await _chatHistory.ClearHistoryAsync(userId, string.IsNullOrEmpty(context) ? null : context, projectName: project);
     //     return Ok();
     // }
+
+    /// <summary>
+    /// 获取进程池统计信息
+    /// </summary>
+    [HttpGet("pool/stats")]
+    public ActionResult GetPoolStats()
+    {
+        try
+        {
+            var stats = _poolManager.GetPoolStats();
+            return Ok(new
+            {
+                success = true,
+                data = stats,
+                timestamp = DateTime.UtcNow
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "获取进程池统计信息失败");
+            return StatusCode(500, new
+            {
+                success = false,
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// 清理指定提供者的进程池
+    /// </summary>
+    [HttpPost("pool/clear")]
+    public ActionResult ClearPool([FromBody] ClearPoolRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(request.Provider))
+            {
+                _poolManager.ClearAllPools();
+                return Ok(new
+                {
+                    success = true,
+                    message = "所有进程池已清理"
+                });
+            }
+
+            _poolManager.ClearPool(request.Provider);
+            return Ok(new
+            {
+                success = true,
+                message = $"进程池已清理: {request.Provider}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "清理进程池失败");
+            return StatusCode(500, new
+            {
+                success = false,
+                error = ex.Message
+            });
+        }
+    }
+}
+
+/// <summary>
+/// 清理进程池请求
+/// </summary>
+public class ClearPoolRequest
+{
+    /// <summary>
+    /// CLI 提供者名称（qwen/claude 等），为空时清理所有
+    /// </summary>
+    public string? Provider { get; set; }
 }

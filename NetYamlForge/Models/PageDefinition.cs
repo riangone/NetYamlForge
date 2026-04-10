@@ -157,6 +157,29 @@ public class PageFilterDefinition
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
+/// <summary>
+/// セクション行アクション（ボタン）定義。
+/// YAML: actions: [{ label: 詳細, url: "/path/{id}", class: "btn-outline-primary" }]
+/// </summary>
+public class SectionActionDefinition
+{
+    /// <summary>ボタンラベル</summary>
+    public string Label { get; set; } = "";
+    /// <summary>
+    /// リンクURL。{column_name} プレースホルダーを行の値で置換可能。
+    /// 例: "/auto-dealer-demo/DynamicEntity/Edit?entity=vehicles&id={vehicle_id}"
+    /// </summary>
+    public string Url { get; set; } = "";
+    /// <summary>CSSクラス（任意）。未設定時は "btn-outline" を使用。</summary>
+    public string? Class { get; set; }
+    /// <summary>HTMX 属性（任意）。設定時は AJAX リクエストとして送信。</summary>
+    public string? HxGet { get; set; }
+    public string? HxTarget { get; set; }
+    public string? HxSwap { get; set; }
+    /// <summary>確認ダイアログメッセージ（任意）。設定時はクリック時に確認表示。</summary>
+    public string? Confirm { get; set; }
+}
+
 /// <summary>ページのセクション（データグリッド）定義</summary>
 public class SectionDefinition
 {
@@ -235,6 +258,13 @@ public class SectionDefinition
     public string? TargetPrimaryKey { get; set; }
     /// <summary>update-row で更新を許可するカラム名ホワイトリスト。未設定時は Forms または Columns を使用。</summary>
     public List<string>? UpdatableFields { get; set; }
+
+    // ── アクション定義 ─────────────────────────────────────────────────
+    /// <summary>
+    /// 行レベルアクション（ボタン）定義。
+    /// YAML: actions: [{ label: 詳細, url: "/path/{id}", class: "btn-outline-primary" }]
+    /// </summary>
+    public List<SectionActionDefinition>? Actions { get; set; }
 
     // ── ヘルパーメソッド ─────────────────────────────────────────────
     /// <summary>有効なページサイズ（Paging.PageSize > PageSize の優先順）</summary>

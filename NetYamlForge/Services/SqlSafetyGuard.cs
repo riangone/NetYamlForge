@@ -38,6 +38,14 @@ public static class SqlSafetyGuard
         if (!IsValidIdentifier(value))
             throw new InvalidOperationException(
                 $"Unsafe identifier in '{context}': '{value}'. Must match [A-Za-z_][A-Za-z0-9_]*");
+        
+        // 危険なSQLキーワードをチェック（識別子としてSQLコマンドを拒否）
+        // 注意: "CREATE" は許可される（一般的な識別子として使用されるため）
+        var dangerousKeywords = new[] { "DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "EXEC", "EXECUTE", "TRUNCATE", "REPLACE" };
+        foreach (var kw in dangerousKeywords)
+            if (value.Equals(kw, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException(
+                    $"Unsafe identifier in '{context}': '{value}'. SQL keywords are not allowed.");
     }
 
     /// <summary>式の安全性を確保する（危険な場合は例外を投げる）</summary>

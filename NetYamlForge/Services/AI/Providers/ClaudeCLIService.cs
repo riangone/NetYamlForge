@@ -87,14 +87,43 @@ public class ClaudeCLIService : BaseCLIService
     {
         var args = new List<string>();
 
+        // ─────────────────────────────────────────────────────────
+        // チャットモード判定：systemPromptOverride あり＋ツールなし＝チャット用途
+        // ─────────────────────────────────────────────────────────
+        var isChatMode = !string.IsNullOrEmpty(systemPromptOverride)
+                         && (allowedTools == null || allowedTools.Count == 0);
+
         // Claude CLI: claude -p <prompt> [options]
-        // -p / --print: 非インタラクティブモードでプロンプトを実行する。
-        // メッセージは -p の直後に渡す（"prompt argument" として認識される）。
         args.Add("-p");
         args.Add(message);
 
         // --dangerously-skip-permissions: 権限プロンプトをスキップ
         args.Add("--dangerously-skip-permissions");
+
+        // ─── モデル指定（haiku 推奨：Sonnet 比 3〜5倍高速）─────────
+        if (!string.IsNullOrEmpty(Config.Claude.Model))
+        {
+            args.Add("--model");
+            args.Add(Config.Claude.Model);
+        }
+
+        // ─── チャットモード専用: 起動オーバーヘッド最小化 ────────
+        if (isChatMode)
+        {
+            // --no-session-persistence: セッションをディスクに保存しない（I/O 削減）
+            args.Add("--no-session-persistence");
+
+            // --effort: Extended Thinking レベル制御
+            // "low" = Thinking OFF → 応答時間が大幅短縮
+            var effort = Config.Claude.ChatEffort ?? "low";
+            args.Add("--effort");
+            args.Add(effort);
+
+            // ツールを無効化（チャット応答にファイルツールは不要）
+            // "" = 空文字で全ツール無効化（"none" は無効なツール名）
+            args.Add("--tools");
+            args.Add("");
+        }
 
         // 出力フォーマット
         args.Add("--output-format");
@@ -126,8 +155,8 @@ public class ClaudeCLIService : BaseCLIService
             args.Add(sessionId);
         }
 
-        // ツール権限制御
-        if (allowedTools != null && allowedTools.Count > 0)
+        // ツール権限制御（チャットモード以外）
+        if (!isChatMode && allowedTools != null && allowedTools.Count > 0)
         {
             args.Add("--allowedTools");
             args.Add(string.Join(",", allowedTools));

@@ -91,7 +91,8 @@
     injectStyles();
     initPanel();
     initSignalR();
-    // auto-dealer モードでは CLI ツール不要（フレームワーク AI 専用機能）
+    // AI プロバイダー選択器を動的に読み込み
+    loadCliTools();
     configureMarked();
   }
 
@@ -692,6 +693,307 @@
       .dc-message-content strong { font-weight: 700; }
       .dc-message-content em { font-style: italic; }
 
+      /* ── UI コンポーネント スタイル ─────────────────────────── */
+      .aic-components {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+      }
+
+      /* クイック返信 */
+      .aic-qr-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .aic-qr-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        border-radius: 1rem;
+        background: #fff;
+        color: #333;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .aic-qr-btn:hover {
+        background: ${p}20;
+        border-color: ${p};
+      }
+      .aic-qr-btn.primary {
+        background: ${p};
+        color: #fff;
+        border-color: ${p};
+      }
+      .aic-qr-btn .aic-icon { margin-right: 0.25rem; }
+
+      /* 選択系 */
+      .aic-select-group {
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+      }
+      .aic-select-title {
+        margin: 0 0 0.75rem 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .aic-select-hint {
+        font-size: 0.8rem;
+        color: #666;
+        margin: 0.5rem 0;
+      }
+      .aic-radio-label, .aic-check-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        border-radius: 0.3rem;
+      }
+      .aic-radio-label:hover, .aic-check-label:hover {
+        background: rgba(0,0,0,0.02);
+      }
+      .aic-radio-label input, .aic-check-label input {
+        cursor: pointer;
+        accent-color: ${p};
+      }
+      .aic-opt-label {
+        font-weight: 500;
+      }
+      .aic-opt-desc {
+        display: block;
+        color: #999;
+        font-size: 0.8rem;
+      }
+
+      /* 日時ピッカー */
+      .aic-datetime-picker {
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+      }
+      .aic-date-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 0.3rem;
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+      }
+
+      /* レンジスライダー */
+      .aic-range-slider {
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+      }
+      .aic-range-display {
+        text-align: center;
+        font-weight: 600;
+        margin: 0.75rem 0;
+        color: ${p};
+      }
+      .aic-slider {
+        width: 100%;
+        margin: 0.5rem 0;
+        accent-color: ${p};
+      }
+
+      /* カードカルーセル */
+      .aic-carousel {
+        padding: 0.75rem 0;
+      }
+      .aic-carousel-title {
+        margin: 0 0 0.75rem 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .aic-carousel-track {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        padding: 0.5rem 0;
+        scroll-behavior: smooth;
+      }
+      .aic-carousel-track::-webkit-scrollbar {
+        height: 4px;
+      }
+      .aic-carousel-track::-webkit-scrollbar-track {
+        background: #e0e0e0;
+        border-radius: 2px;
+      }
+      .aic-carousel-track::-webkit-scrollbar-thumb {
+        background: ${p};
+        border-radius: 2px;
+      }
+
+      .aic-card {
+        flex-shrink: 0;
+        width: 220px;
+        border: 1px solid #ddd;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transition: box-shadow 0.2s;
+      }
+      .aic-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      }
+
+      .aic-card-img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+      }
+
+      .aic-card-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .aic-card-badge.success { background: #10b981; color: #fff; }
+      .aic-card-badge.warning { background: #f59e0b; color: #fff; }
+      .aic-card-badge.danger { background: #ef4444; color: #fff; }
+      .aic-card-badge.default { background: #d1d5db; color: #333; }
+
+      .aic-card-body {
+        padding: 0.75rem;
+        min-height: 60px;
+      }
+      .aic-card-title {
+        display: block;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+      .aic-card-subtitle {
+        display: block;
+        color: #666;
+        font-size: 0.8rem;
+      }
+
+      .aic-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0 0.75rem 0.75rem;
+      }
+      .aic-card-action-btn {
+        flex: 1;
+        padding: 0.4rem 0.5rem;
+        border: 1px solid ${p};
+        background: #fff;
+        color: ${p};
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .aic-card-action-btn:hover {
+        background: ${p}20;
+      }
+
+      /* 確認ダイアログ */
+      .aic-confirm {
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+        border-left: 3px solid ${p};
+      }
+      .aic-confirm-question {
+        margin: 0 0 0.75rem 0;
+        font-weight: 500;
+      }
+      .aic-confirm-btns {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .aic-confirm-btn {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 0.3rem;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.15s;
+      }
+      .aic-confirm-btn.confirm { background: ${p}; color: #fff; border-color: ${p}; }
+      .aic-confirm-btn.confirm:hover { opacity: 0.9; }
+      .aic-confirm-btn.cancel:hover { background: #f5f5f5; }
+
+      /* 評価ウィジェット */
+      .aic-rating {
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border-radius: 0.5rem;
+      }
+      .aic-stars {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.75rem 0;
+      }
+      .aic-star {
+        font-size: 2rem;
+        cursor: pointer;
+        opacity: 0.4;
+        transition: opacity 0.1s;
+      }
+      .aic-star:hover, .aic-star.active {
+        opacity: 1;
+      }
+
+      /* テキスト提案 */
+      .aic-suggestion-chip {
+        display: inline-flex;
+        padding: 0.5rem 1rem;
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 1rem;
+        margin: 0.25rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.15s;
+      }
+      .aic-suggestion-chip:hover {
+        background: ${p}20;
+        border-color: ${p};
+      }
+
+      /* カルーセルナビ */
+      .aic-carousel-nav {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+      }
+      .aic-carousel-prev, .aic-carousel-next {
+        padding: 0.4rem 0.8rem;
+        border: 1px solid #ddd;
+        background: #fff;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        font-size: 1.2rem;
+        opacity: 0.6;
+        transition: opacity 0.15s;
+      }
+      .aic-carousel-prev:hover, .aic-carousel-next:hover {
+        opacity: 1;
+      }
+
+      /* dismissed 状態 */
+      .aic-dismissed {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
       @media (max-width: 768px) {
         #dealer-chat-panel {
           width: 100vw;
@@ -703,6 +1005,9 @@
           width: 50px;
           height: 50px;
           font-size: 22px;
+        }
+        .aic-card {
+          width: 180px;
         }
       }
     `;
@@ -1098,19 +1403,31 @@
       .catch(err => console.error('SignalR connection error:', err));
   }
 
-  // ── CLI ツール読み込み ──────────────────────────────────────
+  // ── AI プロバイダー読み込み ──────────────────────────────────
   async function loadCliTools() {
     try {
-      const response = await fetch(CONFIG.apiBaseUrl.replace('/api/ai', '/cli-tools'));
+      // auto-dealer チャット API から利用可能な AI プロバイダーを取得
+      const response = await fetch(CONFIG.chatApiBase + '/providers');
       if (response.ok) {
-        const data = await response.json();
-        if (data.defaultTool) {
-          CONFIG.defaultCliTool = data.defaultTool;
+        const providers = await response.json();
+        const toolsMap = {};
+        providers.forEach(function(p) {
+          toolsMap[p.id] = {
+            displayName: p.name,
+            installed: p.installed && p.authenticated,
+            authenticated: p.authenticated
+          };
+        });
+        // 最初の有効なツールをデフォルトに設定
+        const defaultProvider = providers.find(function(p) { return p.installed && p.authenticated; });
+        if (defaultProvider) {
+          CONFIG.defaultCliTool = defaultProvider.id;
         }
-        updateCliSelector(data.available, data.defaultTool);
+        updateCliSelector(toolsMap, CONFIG.defaultCliTool);
       }
     } catch (error) {
-      console.error('Failed to load CLI tools:', error);
+      console.error('Failed to load AI providers:', error);
+      // エラー時は静的な選択器を使用
     }
   }
 
@@ -1295,17 +1612,24 @@
       }
 
       const msgUrl = CONFIG.chatApiBase + '/' + currentTheme.msgPath + '/' + dealerConversationId + '/message';
+      
+      // 現在選択中の AI プロバイダーを取得
+      const selectedProvider = document.getElementById('dc-cli-tool')?.value || null;
+      
       const response = await fetch(msgUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ 
+          message: message,
+          provider: selectedProvider
+        })
       });
 
       if (response.ok) {
         const data = await response.json();
         const reply = data.responseText || data.result || data.message || '';
         if (reply.trim()) {
-          addMessage(reply, 'assistant');
+          addMessage(reply, 'assistant', false, null, data);
         }
         updateStatus('completed');
       } else {
@@ -1481,7 +1805,7 @@
            ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
   }
 
-  function addMessage(content, type, skipSave, timestamp) {
+  function addMessage(content, type, skipSave, timestamp, extra) {
     const container = document.getElementById('dc-messages-container');
     const timeStr = timestamp || formatTimestamp(new Date());
 
@@ -1515,9 +1839,19 @@
 
       const contentEl = document.createElement('div');
       contentEl.className = 'dc-message-content';
+      
+      // ✅ 修复: 当消息包含组件时，不显示原始 JSON 内容
+      const hasComponents = extra?.components?.length && typeof AiChatComponents !== 'undefined';
+      
       if (type === 'assistant') {
-        contentEl.innerHTML = renderMarkdown(content);
-        contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
+        // 如果有组件且内容看起来像 JSON，则只渲染 Markdown 文本（可能是标题/说明）
+        if (hasComponents && content && (content.trim().startsWith('{') || content.trim().startsWith('['))) {
+          // 内容是 JSON 格式，不显示，只显示组件
+          contentEl.innerHTML = '';
+        } else {
+          contentEl.innerHTML = renderMarkdown(content);
+          contentEl.querySelectorAll('pre > code').forEach(addCopyButton);
+        }
       } else {
         contentEl.innerHTML = renderMarkdown(content);
       }
@@ -1531,6 +1865,20 @@
       innerEl.appendChild(avatar);
       innerEl.appendChild(messageEl);
       rowEl.appendChild(innerEl);
+
+      // ---- Rich UI Components (Cards/Buttons) ----
+      // ✅ 修复: 将组件添加到 messageEl（气泡内）而不是 rowEl
+      if (extra?.components?.length && typeof AiChatComponents !== 'undefined') {
+        const compEl = AiChatComponents.render(extra.components, (value) => {
+          const inputEl = document.getElementById('dc-input-message');
+          if (inputEl) {
+            inputEl.value = value;
+            sendMessage();
+          }
+        });
+        // ✅ 将组件添加到消息气泡内部，而不是外部
+        messageEl.appendChild(compEl);
+      }
 
       const actionsEl = document.createElement('div');
       actionsEl.className = 'dc-message-actions';
@@ -1571,9 +1919,9 @@
     }
 
     if (!skipSave) {
-      chatHistory.push({ content: content, type: type, timestamp: timeStr });
+      chatHistory.push({ content: content, type: type, timestamp: timeStr, extra: extra });
       saveHistory();
-      saveMessageToServer(content, type);
+      saveMessageToServer(content, type, extra);
     }
 
     if (autoScroll) {
@@ -1599,7 +1947,7 @@
       const container = document.getElementById('dc-messages-container');
       container.innerHTML = '';
       history.forEach(function(msg) {
-        addMessage(msg.content, msg.type, true, msg.timestamp);
+        addMessage(msg.content, msg.type, true, msg.timestamp, msg.extra);
       });
       return true;
     } catch (e) {
@@ -1623,8 +1971,20 @@
               // sender: customer | ai | agent → user | assistant
               const type = (m.sender === 'customer') ? 'user' : 'assistant';
               const ts = m.timestamp || '';
-              chatHistory.push({ content: m.content, type: type, timestamp: ts });
-              addMessage(m.content, type, true, ts);
+              
+              // 解析 components_json
+              let components = null;
+              if (m.componentsJson) {
+                try {
+                  components = JSON.parse(m.componentsJson);
+                } catch (e) {
+                  console.warn('Failed to parse components:', e);
+                }
+              }
+              
+              const extra = components ? { components: components } : null;
+              chatHistory.push({ content: m.content, type: type, timestamp: ts, extra: extra });
+              addMessage(m.content, type, true, ts, extra);
             });
             saveHistory();
             return; // ✅ 成功获取,直接返回

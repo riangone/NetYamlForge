@@ -18,19 +18,22 @@ public abstract class BaseCLIService : ICLIService
     protected readonly ILogger Logger;
     protected readonly string _toolName;
     protected readonly SkillLoader SkillLoader;
+    protected readonly CliProcessPoolManager? ProcessPool;
 
     protected BaseCLIService(
         ProcessExecutor executor,
         IOptions<CliConfig> config,
         SkillLoader skillLoader,
         ILogger logger,
-        string toolName)
+        string toolName,
+        CliProcessPoolManager? processPool = null)
     {
         Executor = executor;
         Config = config.Value;
         SkillLoader = skillLoader;
         Logger = logger;
         _toolName = toolName;
+        ProcessPool = processPool;
     }
 
     public virtual string ToolName => _toolName;
@@ -83,17 +86,17 @@ public abstract class BaseCLIService : ICLIService
         var argList = BuildArgumentList(message, false, sessionId, allowedTools, systemPromptOverride);
         var workingDir = workingDirectory ?? Config.DefaultWorkingDirectory;
 
-        Logger.LogInformation("[CLI执行] 開始：Command={Command}, Args={Args}, WorkingDir={WorkingDir}", 
+        Logger.LogInformation("[CLI执行] 開始：Command={Command}, Args={Args}, WorkingDir={WorkingDir}",
             CommandPath, string.Join(" ", argList), workingDir);
 
         var result = await Executor.ExecuteAsync(CommandPath, argList, workingDir, GetEnvironmentVariables(), ct);
 
-        Logger.LogInformation("[CLI执行] 完了：ExitCode={ExitCode}, OutputLength={OutputLength}, ErrorLength={ErrorLength}", 
+        Logger.LogInformation("[CLI执行] 完了：ExitCode={ExitCode}, OutputLength={OutputLength}, ErrorLength={ErrorLength}",
             result.ExitCode, result.Output?.Length ?? 0, result.Error?.Length ?? 0);
 
         if (result.ExitCode != 0)
         {
-            Logger.LogError("[CLI执行] エラー：ExitCode={ExitCode}, Error={Error}, Output={Output}", 
+            Logger.LogError("[CLI执行] エラー：ExitCode={ExitCode}, Error={Error}, Output={Output}",
                 result.ExitCode, result.Error, result.Output?.Substring(0, Math.Min(200, result.Output?.Length ?? 0)));
             throw new InvalidOperationException($"CLI failed: {result.Error}");
         }

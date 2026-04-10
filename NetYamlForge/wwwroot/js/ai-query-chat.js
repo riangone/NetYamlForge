@@ -314,6 +314,48 @@
         contentEl.className = 'ai-query-message-content';
         contentEl.innerHTML = `<div class="ai-query-message-text ai-query-markdown">${htmlContent}</div>`;
 
+        // 如果有数据，显示数据表格
+        if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+            const tableContainer = document.createElement('div');
+            tableContainer.className = 'ai-query-data-table-container';
+            tableContainer.style.cssText = 'margin-top: 1rem; overflow-x: auto;';
+
+            const table = document.createElement('table');
+            table.className = 'ai-query-data-table';
+            table.style.cssText = 'width: 100%; border-collapse: collapse; font-size: 0.85rem;';
+
+            // 创建表头
+            const headers = Object.keys(data.data[0]);
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                th.style.cssText = 'background: #f3f4f6; padding: 0.5rem; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb;';
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 创建表体
+            const tbody = document.createElement('tbody');
+            data.data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.style.cssText = 'padding: 0.5rem; border-bottom: 1px solid #e5e7eb;';
+                    const value = row[header];
+                    td.textContent = formatCellValue(value);
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            tableContainer.appendChild(table);
+            contentEl.appendChild(tableContainer);
+        }
+
         const metaEl = document.createElement('div');
         metaEl.className = 'ai-query-message-meta';
         metaEl.style.cssText = 'font-size: 0.75rem; color: #999; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;';
@@ -530,6 +572,37 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // 格式化单元格值
+    function formatCellValue(value) {
+        if (value === null || value === undefined) {
+            return '-';
+        }
+        if (value instanceof Date) {
+            return value.toLocaleDateString('zh-CN');
+        }
+        // 检查是否是日期时间字符串
+        if (typeof value === 'string') {
+            const dateMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (dateMatch) {
+                return value.substring(0, 10).replace(/-/g, '/');
+            }
+        }
+        // 数字格式化
+        if (typeof value === 'number') {
+            return value.toLocaleString('zh-CN');
+        }
+        // 布尔值
+        if (typeof value === 'boolean') {
+            return value ? '✓' : '✗';
+        }
+        // 字符串截断
+        const str = String(value);
+        if (str.length > 100) {
+            return str.substring(0, 97) + '...';
+        }
+        return str;
     }
 
     // 暴露全局函数（用于调试）

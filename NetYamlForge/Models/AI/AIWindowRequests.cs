@@ -137,6 +137,11 @@ public class SendMessageResponse
     /// 感情スコア（-1.0 〜 1.0）
     /// </summary>
     public double? SentimentScore { get; set; }
+
+    /// <summary>
+    /// 構造化UIコンポーネント。quickReplies より優先して表示する
+    /// </summary>
+    public List<UiComponent>? Components { get; set; }
 }
 
 /// <summary>

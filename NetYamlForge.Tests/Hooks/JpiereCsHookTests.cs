@@ -13,7 +13,7 @@ namespace NetYamlForge.Tests.JpiereCs.Hooks;
 
 public class ContractDocumentNoHookTests : IDisposable
 {
-    private readonly ContractDocumentNoHook _hook = new();
+    private readonly NetYamlForge.Projects.JpiereCs.Hooks.ContractDocumentNoHook _hook = new();
     private readonly SqliteConnection _db;
 
     public ContractDocumentNoHookTests()
@@ -111,7 +111,7 @@ public class ContractAmountCalculateHookTests
 
 public class EstimationDocumentNoHookTests : IDisposable
 {
-    private readonly EstimationDocumentNoHook _hook = new();
+    private readonly NetYamlForge.Projects.JpiereCs.Hooks.EstimationDocumentNoHook _hook = new();
     private readonly SqliteConnection _db;
 
     public EstimationDocumentNoHookTests()
@@ -147,7 +147,7 @@ public class EstimationDocumentNoHookTests : IDisposable
 
 public class BillDocumentNoHookTests : IDisposable
 {
-    private readonly BillDocumentNoHook _hook = new();
+    private readonly NetYamlForge.Projects.JpiereCs.Hooks.BillDocumentNoHook _hook = new();
     private readonly SqliteConnection _db;
 
     public BillDocumentNoHookTests()

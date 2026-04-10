@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,6 +22,25 @@ public class TestDriveRepetitionFixTests
         _output = output;
         _logger = new Mock<ILogger<SlotFillingManager>>();
         _scopeFactory = new Mock<IServiceScopeFactory>();
+        
+        // Setup mock service scope factory to return a mock scope
+        var mockScope = new Mock<IServiceScope>();
+        var mockServiceProvider = new Mock<IServiceProvider>();
+        
+        // Mock IDbConnectionFactory
+        var mockDbConnectionFactory = new Mock<IDbConnectionFactory>();
+        
+        // Setup the chain: scopeFactory.CreateScope() -> scope -> scope.ServiceProvider
+        _scopeFactory.Setup(x => x.CreateScope()).Returns(mockScope.Object);
+        mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
+        
+        // Setup IDbConnectionFactory to return null (test will use in-memory sessions only)
+        mockServiceProvider.Setup(x => x.GetService(typeof(IDbConnectionFactory)))
+            .Returns(mockDbConnectionFactory.Object);
+            
+        // Mock ProjectScope (return null for tests)
+        mockServiceProvider.Setup(x => x.GetService(typeof(NetYamlForge.Services.ProjectScope)))
+            .Returns((NetYamlForge.Services.ProjectScope?)null);
     }
 
     [Fact]

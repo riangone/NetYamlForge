@@ -183,13 +183,22 @@ public class GeminiCLIService : BaseCLIService
     {
         var args = new List<string>();
 
+        // ─────────────────────────────────────────────────────────
+        // チャットモード判定：systemPromptOverride あり＋ツールなし＝チャット用途
+        // ─────────────────────────────────────────────────────────
+        var isChatMode = !string.IsNullOrEmpty(systemPromptOverride)
+                         && (allowedTools == null || allowedTools.Count == 0);
+
         // Gemini CLI: gemini --yolo --prompt <message> [options]
         // --yolo (-y): 自動実行モード（確認不要）
-        // --prompt (-p): 非インタラクティブモードでプロンプトを実行する（文字列オプション）。
-        // メッセージは --prompt の直後に渡す必要がある。
+        // Gemini CLI は --system-prompt 未対応のため、システムプロンプトはメッセージ先頭に埋め込む
+        var geminiPrompt = !string.IsNullOrEmpty(systemPromptOverride)
+            ? $"{systemPromptOverride}\n\n---\n\n{message}"
+            : message;
+
         args.Add("--yolo");
         args.Add("--prompt");
-        args.Add(message);
+        args.Add(geminiPrompt);
 
         // 出力フォーマット
         args.Add("--output-format");
@@ -202,11 +211,18 @@ public class GeminiCLIService : BaseCLIService
             args.Add(Config.Gemini.Model);
         }
 
-        // セッション再開
-        if (!string.IsNullOrEmpty(sessionId))
+        // セッション再開（チャットモード以外）
+        if (!isChatMode && !string.IsNullOrEmpty(sessionId))
         {
             args.Add("--resume");
             args.Add(sessionId);
+        }
+
+        // ツール権限制御（チャットモード以外）
+        if (!isChatMode && allowedTools != null && allowedTools.Count > 0)
+        {
+            args.Add("--allowed-tools");
+            args.Add(string.Join(",", allowedTools));
         }
 
         return args;

@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NetYamlForge.Controllers;
@@ -24,9 +26,27 @@ public class TenantAccountControllerTests
         _tenantUsersMock = new Mock<ITenantUserService>();
         _loggerMock = new Mock<ILogger<TenantAccountController>>();
         _controller = new TenantAccountController(_tenantUsersMock.Object, _loggerMock.Object);
-        
-        // 设置 HTTP Context
+
+        // 设置 HTTP Context 与认证服务
         var httpContext = new DefaultHttpContext();
+        
+        // 设置 mock 认证服务
+        var mockAuthService = new Mock<IAuthenticationService>();
+        mockAuthService
+            .Setup(x => x.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), 
+                It.IsAny<ClaimsPrincipal>(), It.IsAny<AuthenticationProperties>()))
+            .Returns(Task.CompletedTask);
+        mockAuthService
+            .Setup(x => x.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), 
+                It.IsAny<AuthenticationProperties>()))
+            .Returns(Task.CompletedTask);
+        
+        var serviceProvider = new Mock<IServiceProvider>();
+        serviceProvider
+            .Setup(x => x.GetService(typeof(IAuthenticationService)))
+            .Returns(mockAuthService.Object);
+        httpContext.RequestServices = serviceProvider.Object;
+        
         _controller.ControllerContext.HttpContext = httpContext;
     }
 

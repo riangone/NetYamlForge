@@ -22,9 +22,8 @@
         var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? st?.ToString() ?? "" : "";
         var description = !string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d) ? d?.ToString() ?? "" : "";
         var imageUrl = !string.IsNullOrEmpty(imageField) && row.TryGetValue(imageField, out var img) ? img?.ToString() ?? "" : "";
-        
-        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer"
-             @(actionUrl != null ? $"onclick=\"window.location.href='{actionUrl.Replace("{id}", title)}'\"" : "")>
+
+        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow">
             @if (!string.IsNullOrEmpty(imageUrl))
             {
                 <figure class="px-4 pt-4">
@@ -42,6 +41,34 @@
                 @if (!string.IsNullOrEmpty(description))
                 {
                     <p class="text-sm text-gray-500 line-clamp-2">@description</p>
+                }
+                
+                @* ── アクションボタン ──────────────────────────────────── *@
+                @if (sec.Actions != null && sec.Actions.Count > 0)
+                {
+                    <div class="card-actions justify-end mt-3 pt-3 border-t border-gray-100">
+                        @foreach (var action in sec.Actions)
+                        {
+                            var url = action.Url;
+                            // プレースホルダーを行の値で置換
+                            foreach (var kv in row)
+                            {
+                                var placeholder = $"{{{kv.Key}}}";
+                                if (url.Contains(placeholder))
+                                {
+                                    url = url.Replace(placeholder, kv.Value?.ToString() ?? "");
+                                }
+                            }
+                            
+                            var btnClass = string.IsNullOrEmpty(action.Class) 
+                                ? "btn btn-outline btn-sm" 
+                                : $"btn {action.Class} btn-sm";
+                            
+                            <a href="@url" class="@btnClass">
+                                @action.Label
+                            </a>
+                        }
+                    </div>
                 }
             </div>
         </div>

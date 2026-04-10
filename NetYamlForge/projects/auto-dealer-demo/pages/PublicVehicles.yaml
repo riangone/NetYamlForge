@@ -62,6 +62,7 @@ sections:
     sourceType: custom
     source: |
       SELECT
+        vehicle_id,
         maker || ' ' || model || ' ' || grade AS title,
         CAST(year AS TEXT) || '年式 / ' ||
         CASE fuel_type
@@ -82,7 +83,7 @@ sections:
       WHERE customer_id IS NULL
         AND status IN ('available', 'display')
       ORDER BY price ASC
-    columns: [title, subtitle, badge, description]
+    columns: [vehicle_id, title, subtitle, badge, description]
     titleField: title
     subtitleField: subtitle
     badgeField: badge
@@ -90,6 +91,13 @@ sections:
     pageSize: 12
     editable: false
     readOnly: true
+    actions:
+      - label: 詳細
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=vehicles&id={vehicle_id}"
+        class: "btn-outline-primary"
+      - label: 試乗予約
+        url: "/Account/CustomerRegister"
+        class: "btn-outline-secondary"
 
   # ─── 詳細テーブル ───
   - id: vehicles_table

@@ -63,10 +63,55 @@ entities:
         label: ステータス
         editable: true
         required: true
-        options: [draft, sent, accepted, rejected, expired, issued, paid, overdue, cancelled, cleared, delivered, received, active, inactive, completed, terminated, submitted, approved]
-      Notes:
+        options: [draft, active, completed, terminated]
+      SignedDate:
+        type: date
+        label: 締結日
+        editable: true
+      ContractType:
+        type: string
+        label: 契約種別
+        editable: true
+        options: [sales, purchase, service, license, partnership, other]
+      AutoRenew:
+        type: bool
+        label: 自動更新
+        editable: true
+      IsElectronic:
+        type: bool
+        label: 電子契約
+        editable: true
+      OurSignatory:
+        type: string
+        label: 乙側署名者
+        editable: true
+      TheirSignatory:
+        type: string
+        label: 甲側署名者
+        editable: true
+      PaymentTerms:
+        type: string
+        label: 支払条件
+        editable: true
+      ContractFormLabel:
+        type: string
+        label: 契約形態
+        editable: true
+      JurisdictionCourt:
+        type: string
+        label: 合意管轄
+        editable: true
+      GoverningLaw:
+        type: string
+        label: 準拠法
+        editable: true
+      Remarks:
         type: string
         label: 備考
+        editable: true
+      Notes:
+        type: string
+        label: 備考（簡易）
         editable: true
 
     columns:
@@ -104,9 +149,53 @@ entities:
         type: string
         label: ステータス
         sortable: true
-      Notes:
+      SignedDate:
+        type: date
+        label: 締結日
+        sortable: true
+      ContractType:
+        type: string
+        label: 契約種別
+        sortable: true
+      AutoRenew:
+        type: bool
+        label: 自動更新
+        sortable: true
+      IsElectronic:
+        type: bool
+        label: 電子契約
+        sortable: true
+      OurSignatory:
+        type: string
+        label: 乙側署名者
+        sortable: true
+      TheirSignatory:
+        type: string
+        label: 甲側署名者
+        sortable: true
+      PaymentTerms:
+        type: string
+        label: 支払条件
+        sortable: true
+      ContractFormLabel:
+        type: string
+        label: 契約形態
+        sortable: true
+      JurisdictionCourt:
+        type: string
+        label: 合意管轄
+        sortable: true
+      GoverningLaw:
+        type: string
+        label: 準拠法
+        sortable: true
+      Remarks:
         type: string
         label: 備考
+        sortable: true
+      Notes:
+        type: string
+        label: 備考（簡易）
         sortable: true
       CreatedAt:
         type: datetime
@@ -144,13 +233,22 @@ entities:
         filename: "jp_contract_{date:yyyyMMdd}.pdf"
         columns:
           - ContractNo
-          - CustomerId
           - Title
           - StartDate
           - EndDate
+          - SignedDate
+          - ContractType
           - Amount
+          - AutoRenew
+          - IsElectronic
+          - OurSignatory
+          - TheirSignatory
+          - PaymentTerms
+          - ContractFormLabel
+          - JurisdictionCourt
+          - GoverningLaw
           - Status
-          - Notes
+          - Remarks
         pdf:
           title: "契約書台帳"
           pageSize: A4
@@ -166,10 +264,12 @@ entities:
         filename: "jp_contracts_{date:yyyyMMdd}.csv"
         columns:
           - ContractNo
-          - CustomerId
           - Title
           - StartDate
           - EndDate
+          - SignedDate
+          - ContractType
           - Amount
+          - AutoRenew
           - Status
-          - Notes
+          - Remarks

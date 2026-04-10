@@ -244,8 +244,12 @@ public class CodexCLIService : BaseCLIService
         // Note: --resume フラグは存在しない。再開は "codex exec resume <id>" サブコマンド。
         // ここでは sessionId が指定されていてもシンプルな exec として扱う（マルチターン非対応）。
 
+        // Codex exec は --instructions フラグ未対応のため、システムプロンプトはメッセージ先頭に埋め込む
         // メッセージは位置引数として渡す（stdin ではなく引数として渡すことで stdin EOF 問題を回避）
-        args.Add(message);
+        var codexMessage = !string.IsNullOrEmpty(systemPromptOverride)
+            ? $"{systemPromptOverride}\n\n---\n\n{message}"
+            : message;
+        args.Add(codexMessage);
 
         return args;
     }

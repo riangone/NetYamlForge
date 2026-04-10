@@ -108,24 +108,27 @@ public abstract class BaseChatService
     /// <summary>
     /// CLI ファーストの ILlmProvider を使用して応答を生成（複数プロバイダー自動フォールバック）
     /// </summary>
+    /// <param name="message">ユーザーメッセージ</param>
+    /// <param name="context">コンテキスト（customer/staff 等）</param>
+    /// <param name="history">会話履歴</param>
+    /// <param name="providerOverride">使用する CLI プロバイダー名。null の場合はデフォルトチェーンを使用</param>
     protected async Task<(string ResponseText, string Intent, List<Dictionary<string, string>>? DataRows, string? NavUrl, string? NavLabel)>
-        GenerateAiResponseAsync(string message, string context, IEnumerable<(string Role, string Content)> history)
+        GenerateAiResponseAsync(string message, string context, IEnumerable<(string Role, string Content)> history,
+            string? providerOverride = null)
     {
         var systemPrompt = BuildSystemPrompt(context);
 
         try
         {
             var prompt = BuildPromptWithHistory(message, history);
+            var providerLabel = providerOverride ?? "CliFirstChain";
 
-            _logger.LogInformation("AI 応答生成開始：provider=CliFirstChain, context={Context}, length={Length}, systemPromptLength={SystemPromptLength}",
-                context, message?.Length ?? 0, systemPrompt?.Length ?? 0);
+            _logger.LogInformation("AI 応答生成開始：provider={Provider}, context={Context}, length={Length}, systemPromptLength={SystemPromptLength}",
+                providerLabel, context, message?.Length ?? 0, systemPrompt?.Length ?? 0);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_chatResponseTimeoutSeconds));
-            
-            // ✨ 重要：systemPrompt を systemPromptOverride として渡す
-            // これにより、CLI サービスは SkillLoader.GetSystemPrompt() ではなく、
-            // ビジネス固有のシステムプロンプトを使用します
-            var response = await ExecuteWithSystemPromptOverrideAsync(prompt, systemPrompt, cts.Token);
+
+            var response = await ExecuteWithSystemPromptOverrideAsync(prompt, systemPrompt, cts.Token, providerOverride);
 
             _logger.LogInformation("AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
 
@@ -156,15 +159,89 @@ public abstract class BaseChatService
 
     /// <summary>
     /// システムプロンプトを上書きして CLI を実行します。
+    /// providerOverride が指定された場合はそのプロバイダーを優先して使用します。
     /// </summary>
     private async Task<string> ExecuteWithSystemPromptOverrideAsync(
-        string prompt, string systemPrompt, CancellationToken ct)
+        string prompt, string systemPrompt, CancellationToken ct, string? providerOverride = null)
     {
-        // ✨ 重要：systemPrompt を systemPromptOverride として渡す
-        // これにより、CLI サービス（QwenCode/Claude等）は SkillLoader.GetSystemPrompt() ではなく、
-        // ビジネス固有のシステムプロンプト（例：汽车销售客服）を使用します
-        return await _llmProvider.CompleteAsync(
-            prompt, ct, systemPromptOverride: systemPrompt);
+        // プロバイダー指定がある場合、そのプロバイダーを直接使用
+        if (!string.IsNullOrWhiteSpace(providerOverride))
+        {
+            var cli = _cliFactory.TryGetService(providerOverride);
+            if (cli != null)
+            {
+                try
+                {
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    var raw = await cli.ExecuteAsync(
+                        prompt,
+                        workingDirectory: Path.GetTempPath(),
+                        sessionId: null,
+                        allowedTools: [],
+                        systemPromptOverride: systemPrompt,
+                        ct: cts.Token);
+                    // テキスト抽出はプロバイダーに任せる（CliFirstLlmProvider と同ロジック）
+                    var extracted = ExtractResponseText(raw);
+                    if (!string.IsNullOrWhiteSpace(extracted))
+                    {
+                        _logger.LogInformation("プロバイダー指定実行成功: provider={Provider}", providerOverride);
+                        return extracted;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "指定プロバイダー失敗、デフォルトチェーンへフォールバック: provider={Provider}", providerOverride);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("指定プロバイダーが見つかりません、デフォルトチェーンへフォールバック: provider={Provider}", providerOverride);
+            }
+        }
+
+        return await _llmProvider.CompleteAsync(prompt, ct, systemPromptOverride: systemPrompt);
+    }
+
+    /// <summary>
+    /// CLI 生出力からテキストを抽出します（JSON 形式対応）。
+    /// </summary>
+    private static string ExtractResponseText(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "";
+        var lines = raw.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        foreach (var line in lines)
+        {
+            if (!line.StartsWith("{")) continue;
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(line);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("type", out var t) && t.GetString() == "result" &&
+                    root.TryGetProperty("result", out var r) && r.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    var text = r.GetString();
+                    if (!string.IsNullOrWhiteSpace(text)) return text;
+                }
+                if (root.TryGetProperty("type", out var t2) && t2.GetString() == "assistant" &&
+                    root.TryGetProperty("message", out var msg))
+                {
+                    if (msg.TryGetProperty("content", out var content) && content.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var item in content.EnumerateArray())
+                        {
+                            if (item.TryGetProperty("type", out var ct2) && ct2.GetString() == "text" &&
+                                item.TryGetProperty("text", out var txt))
+                            {
+                                var text = txt.GetString();
+                                if (!string.IsNullOrWhiteSpace(text)) return text;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* ignore */ }
+        }
+        return raw;
     }
 
     /// <summary>
@@ -180,14 +257,26 @@ public abstract class BaseChatService
         ProcessAiResponseAsync(string response, string? userMessage, string context)
     {
         var queryData = TryParseQueryDataToolCall(response);
+        
+        _logger.LogInformation("[ProcessAiResponse] 工具调用解析结果: HasQueryData={HasData}, ResponseLength={Length}, ResponsePreview={Preview}",
+            queryData != null, response?.Length, 
+            response?.Substring(0, Math.Min(200, response?.Length ?? 0)));
 
         if (queryData != null)
         {
+            _logger.LogInformation("[ProcessAiResponse] 执行查询工具: Entity={Entity}, Action={Action}",
+                queryData.Entity, queryData.Action);
+            
             var (resultText, dataRows, intent, navUrl, navLabel) =
                 await ExecuteQueryDataToolAsync(queryData, userMessage, context);
+            
+            _logger.LogInformation("[ProcessAiResponse] 查询完成: DataRowsCount={Count}, ResultLength={Length}",
+                dataRows?.Count ?? 0, resultText?.Length ?? 0);
+            
             return (resultText, intent, dataRows, navUrl, navLabel);
         }
 
+        _logger.LogWarning("[ProcessAiResponse] AI 未输出工具调用，返回纯文本");
         return (response, "general", null, null, null);
     }
 
@@ -309,19 +398,40 @@ public abstract class BaseChatService
 
     protected virtual async Task SaveMessageAsync(
         string messageId, string conversationId, string sender, string content,
-        string timestamp, string? intent = null, double confidence = 0.9, double sentiment = 0)
+        string timestamp, string? intent = null, double confidence = 0.9, double sentiment = 0,
+        List<UiComponent>? components = null)
     {
+        // コンポーネントを JSON にシリアライズ
+        string? componentsJson = null;
+        if (components?.Count > 0)
+        {
+            try
+            {
+                componentsJson = JsonSerializer.Serialize(components, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = false
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "コンポーネントのシリアライズに失敗しました");
+            }
+        }
+
         // デフォルト実装：auto-dealer-demo スキーマ（timestamp カラム）
         await _db.ExecuteAsync(@"
 INSERT INTO ai_messages
-  (message_id, conversation_id, sender, message_type, content, intent, confidence_score, sentiment_score, timestamp)
+  (message_id, conversation_id, sender, message_type, content, intent, confidence_score, sentiment_score, components_json, timestamp)
 VALUES
-  (@MessageId, @ConversationId, @Sender, 'text', @Content, @Intent, @Confidence, @Sentiment, @Timestamp)",
+  (@MessageId, @ConversationId, @Sender, 'text', @Content, @Intent, @Confidence, @Sentiment, @ComponentsJson, @Timestamp)",
             new
             {
                 MessageId = messageId, ConversationId = conversationId, Sender = sender,
                 Content = content, Intent = intent ?? "general",
-                Confidence = confidence, Sentiment = sentiment, Timestamp = timestamp
+                Confidence = confidence, Sentiment = sentiment,
+                ComponentsJson = (object?)componentsJson ?? DBNull.Value,
+                Timestamp = timestamp
             });
     }
 
@@ -364,7 +474,8 @@ WHERE conversation_id = @Id",
         sb.AppendLine("【会話履歴】");
         foreach (var (role, content) in history.Reverse().Take(10))
         {
-            sb.AppendLine($"{(role == "ai" ? "AI" : "ユーザー")}: {content}");
+            var label = role switch { "ai" => "AI", "system" => "システム", _ => "ユーザー" };
+            sb.AppendLine($"{label}: {content}");
         }
         sb.AppendLine();
         sb.AppendLine("【現在のメッセージ】");
@@ -477,6 +588,22 @@ WHERE conversation_id = @Id",
         "error" => "申し訳ございませんが、現在データ照会機能が利用できない状態です。しばらくお待ちください。",
         _ => "お問い合わせいただき、ありがとうございます。担当者よりご連絡いたします。"
     };
+
+    // ─────────────────────────────────────────────────────────
+    // UI コンポーネント生成（virtual：派生クラスで override 可）
+    // ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// インテントに応じたUIコンポーネントを生成する。
+    /// デフォルトは null を返す（コンポーネント不使用）。派生クラスで override して実装する。
+    /// </summary>
+    protected virtual List<UiComponent>? BuildComponents(
+        string intent,
+        List<Dictionary<string, string>>? dataRows,
+        string? context)
+    {
+        return null;
+    }
 
     protected string? GetWorkingDirectory(string? project)
     {

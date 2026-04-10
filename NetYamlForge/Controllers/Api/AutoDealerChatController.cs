@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Models.AI;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.AI.Providers;
 
 namespace NetYamlForge.Controllers.Api;
 
@@ -16,13 +17,44 @@ namespace NetYamlForge.Controllers.Api;
 public class AutoDealerChatController : ControllerBase
 {
     private readonly AutoDealerChatService _chat;
+    private readonly CLIServiceFactory _cliFactory;
     private readonly ILogger<AutoDealerChatController> _logger;
     private const int RequestTimeoutSeconds = 3600; // 最大リクエスト処理時間（60分）
 
-    public AutoDealerChatController(AutoDealerChatService chat, ILogger<AutoDealerChatController> logger)
+    public AutoDealerChatController(AutoDealerChatService chat, CLIServiceFactory cliFactory, ILogger<AutoDealerChatController> logger)
     {
         _chat = chat;
+        _cliFactory = cliFactory;
         _logger = logger;
+    }
+
+    // ─────────────────────────────────────────────────────
+    // AI プロバイダー情報エンドポイント（認証不要）
+    // ─────────────────────────────────────────────────────
+
+    /// <summary>利用可能な AI プロバイダー一覧を返します。</summary>
+    [AllowAnonymous]
+    [HttpGet("providers")]
+    public async Task<IActionResult> GetProviders()
+    {
+        try
+        {
+            var tools = await _cliFactory.GetAvailableToolsAsync();
+            var result = tools.Select(kv => new
+            {
+                id = kv.Key,
+                name = kv.Value.DisplayName ?? kv.Key,
+                installed = kv.Value.Installed,
+                authenticated = kv.Value.Authenticated,
+                version = kv.Value.Version
+            }).OrderByDescending(p => p.installed).ThenBy(p => p.id);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "プロバイダー一覧取得エラー");
+            return StatusCode(500, new { error = "プロバイダー情報の取得に失敗しました。" });
+        }
     }
 
     // ─────────────────────────────────────────────────────
@@ -70,7 +102,7 @@ public class AutoDealerChatController : ControllerBase
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds));
-            var task = _chat.SendMessageAsync(conversationId, req.Message);
+            var task = _chat.SendMessageAsync(conversationId, req.Message, req.Provider);
             var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cts.Token));
 
             if (completedTask != task)
@@ -90,7 +122,12 @@ public class AutoDealerChatController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "メッセージ処理エラー conv={Id}", conversationId);
+            // 开发环境下返回详细错误信息，生产环境下返回通用消息
+#if DEBUG
+            return StatusCode(500, new { error = $"メッセージの処理に失敗しました: {ex.Message}", type = ex.GetType().Name, stackTrace = ex.StackTrace });
+#else
             return StatusCode(500, new { error = "メッセージの処理に失敗しました。" });
+#endif
         }
     }
 
@@ -188,7 +225,7 @@ public class AutoDealerChatController : ControllerBase
         try
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(RequestTimeoutSeconds));
-            var task = _chat.SendStaffMessageAsync(conversationId, req.Message);
+            var task = _chat.SendStaffMessageAsync(conversationId, req.Message, req.Provider);
             var completedTask = await Task.WhenAny(task, Task.Delay(Timeout.Infinite, cts.Token));
 
             if (completedTask != task)

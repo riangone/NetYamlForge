@@ -92,7 +92,8 @@
       loadCliTools();
       restoreFromServer();
     } else if (cfg.apiMode === 'dealer') {
-      // ✅ 修复：dealer mode 也需要加载聊天记录
+      // dealer mode: プロバイダー一覧を取得し、チャット履歴を復元
+      loadDealerProviders();
       restoreDealerHistoryFromServer();
     }
     configureMarked();
@@ -508,7 +509,14 @@
             <option value="mock">Mock (Test)</option>
           </select>
           <span id="aw-cli-status" style="font-size:0.75rem;opacity:0.5;margin-left:0.5rem"></span>
-        </div>` : ''}
+        </div>` : `
+        <div class="aw-cli-row" id="aw-dealer-provider-row" style="display:none">
+          <label for="aw-dealer-provider" style="color:#555">AI:</label>
+          <select id="aw-dealer-provider">
+            <option value="">読み込み中...</option>
+          </select>
+          <span id="aw-dealer-provider-status" style="font-size:0.75rem;margin-left:0.4rem"></span>
+        </div>`}
 
         <div class="aw-input-row">
           <div class="aw-input-wrapper">
@@ -633,6 +641,21 @@
       const saved = (() => { try { return sessionStorage.getItem(TOOL_STORAGE_KEY); } catch(e) { return null; } })();
       if (saved) cliTool.value = saved;
       if (cfg.framework?.defaultCliTool) cliTool.value = cfg.framework.defaultCliTool;
+    }
+
+    const dealerProvider = document.getElementById('aw-dealer-provider');
+    if (dealerProvider) {
+      dealerProvider.addEventListener('change', function() {
+        try { sessionStorage.setItem('aw_dealer_provider', this.value); } catch(e) {}
+        const status = document.getElementById('aw-dealer-provider-status');
+        if (status) {
+          const sel = dealerProvider.options[dealerProvider.selectedIndex];
+          const isAvail = sel?.dataset?.installed === 'true';
+          status.textContent = isAvail ? '✓' : '⚠';
+          status.style.color = isAvail ? '#4caf50' : '#ff9800';
+          status.title = isAvail ? '利用可能' : '未インストールまたは未認証';
+        }
+      });
     }
 
     document.getElementById('aw-messages').addEventListener('scroll', e => {
@@ -792,8 +815,27 @@
 
       row.appendChild(actionsEl);
 
-      // クイックリプライ（dealer mode）
-      if (extra?.quickReplies?.length) {
+      // ---- 新規: 構造化コンポーネントを優先表示 ----
+      if (extra?.components?.length && typeof AiChatComponents !== 'undefined') {
+        const compEl = AiChatComponents.render(extra.components, (value, label) => {
+          // コンポーネント操作をメッセージとして送信
+          // label（表示用テキスト）があればそれを使う、なければ value
+          const displayValue = label || value;
+
+          // ユーザーメッセージとして表示
+          renderMessage(displayValue, 'user');
+
+          // 入力欄をクリアして送信
+          const inputEl = document.getElementById('aw-input');
+          if (inputEl) inputEl.value = '';
+
+          // コンポーネント値で送信（バックエンドでは value が使われる）
+          sendDealerMessageWithComponentValue(value);
+        });
+        row.appendChild(compEl);
+      }
+      // ---- 後方互換: 旧 quickReplies ----
+      else if (extra?.quickReplies?.length) {
         const qr = document.createElement('div');
         qr.className = 'aw-quick-replies';
         extra.quickReplies.forEach(r => {
@@ -807,8 +849,14 @@
       }
 
       // データテーブル（dealer mode）
+      console.log('[renderMessage] 数据表格渲染检查:', {
+        hasDataRows: !!extra?.dataRows,
+        dataRowsLength: extra?.dataRows?.length || 0,
+        firstRow: extra?.dataRows?.[0]
+      });
       if (extra?.dataRows?.length) {
         const keys = Object.keys(extra.dataRows[0]);
+        console.log('[renderMessage] 渲染数据表格，字段:', keys);
         const tbl = document.createElement('table');
         tbl.className = 'aw-data-table';
         tbl.innerHTML = `<thead><tr>${keys.map(k => `<th>${escapeHtml(k)}</th>`).join('')}</tr></thead>
@@ -954,22 +1002,34 @@
     const msgPath = getDealerMsgPath();
     const url = `${apiBase}/${msgPath}/${dealerConversationId}/message`;
 
+    // dealer モードの選択プロバイダーを取得
+    const dealerProviderSel = document.getElementById('aw-dealer-provider');
+    const selectedProvider = dealerProviderSel?.value || null;
+
+    const body = { message };
+    if (selectedProvider) body.provider = selectedProvider;
+
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message })
+      body: JSON.stringify(body)
     });
 
     if (res.ok) {
       const data = await res.json();
+      console.log('[DealerChat] API 响应:', data);
       const reply = data.responseText || data.result || data.message || '';
+      const usedProvider = data.aiProvider || data.provider || selectedProvider || null;
+      console.log('[DealerChat] responseText:', reply);
+      console.log('[DealerChat] dataRows:', data.dataRows);
       if (reply.trim()) {
         renderMessage(reply, 'assistant', {
+          components: data.components,
           quickReplies: data.quickReplies,
           dataRows: data.dataRows,
           navigationUrl: data.navigationUrl,
           navigationLabel: data.navigationLabel,
-          provider: data.provider || cfg.framework?.defaultCliTool
+          provider: usedProvider
         });
       }
       updateStatusDot('completed');
@@ -982,11 +1042,22 @@
     }
   }
 
+  // コンポーネント操作からの送信（ユーザーメッセージ表示済みなので応答のみ処理）
+  async function sendDealerMessageWithComponentValue(value) {
+    setSending(true);
+    try {
+      await sendDealerMessage(value);
+    } finally {
+      setSending(false);
+    }
+  }
+
   // ── Framework Adapter ────────────────────────────────────────
 
+  // 注意：全局 AI 聊天始终使用 /api/AI（不带 project 前缀）
+  // 因为聊天记录存储在 system.db 中，而不是项目级的 chat.db
   function getFrameworkApiBase() {
-    const project = cfg.framework?.project;
-    return project ? `/${project}/api/AI` : '/api/AI';
+    return '/api/AI';
   }
 
   async function sendFrameworkMessage(message) {
@@ -994,9 +1065,8 @@
     const cliTool = document.getElementById('aw-cli-tool')?.value
       || cfg.framework?.defaultCliTool || 'qwen';
 
+    // 注意：全局 AI 聊天不传递 projectName，消息始终存储到 system.db
     const body = { message, cliTool, sessionId: currentSessionId || undefined };
-    const project = cfg.framework?.project;
-    if (project) body.projectName = project;
 
     const res = await fetch(`${apiBase}/chat`, {
       method: 'POST',
@@ -1245,6 +1315,60 @@
       if (saved) sel.value = saved;
       else if (cfg.framework?.defaultCliTool) sel.value = cfg.framework.defaultCliTool;
     } catch(e) { /* ignore */ }
+  }
+
+  // ── dealer モード: プロバイダー一覧を読み込み ────────────────
+
+  async function loadDealerProviders() {
+    const row = document.getElementById('aw-dealer-provider-row');
+    const sel = document.getElementById('aw-dealer-provider');
+    if (!sel) return;
+
+    try {
+      const apiBase = getDealerApiBase();
+      const res = await fetch(`${apiBase}/providers`);
+      if (!res.ok) return;
+      const providers = await res.json();
+      if (!providers?.length) return;
+
+      sel.innerHTML = '';
+      providers.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.dataset.installed = p.installed ? 'true' : 'false';
+        let label = p.name || p.id;
+        if (!p.installed) label += ' (未インストール)';
+        else if (!p.authenticated) label += ' (未認証)';
+        opt.textContent = label;
+        if (!p.installed) opt.style.color = '#999';
+        sel.appendChild(opt);
+      });
+
+      // セッションストレージから復元
+      const saved = (() => { try { return sessionStorage.getItem('aw_dealer_provider'); } catch(e) { return null; } })();
+      if (saved && [...sel.options].some(o => o.value === saved)) {
+        sel.value = saved;
+      } else {
+        // デフォルト: インストール済みの最初のプロバイダーを選択
+        const firstAvail = providers.find(p => p.installed);
+        if (firstAvail) sel.value = firstAvail.id;
+      }
+
+      // ステータス表示
+      const status = document.getElementById('aw-dealer-provider-status');
+      if (status) {
+        const cur = providers.find(p => p.id === sel.value);
+        if (cur) {
+          status.textContent = cur.installed && cur.authenticated ? '✓' : (cur.installed ? '⚠' : '✗');
+          status.style.color = cur.installed && cur.authenticated ? '#4caf50' : (cur.installed ? '#ff9800' : '#f44336');
+        }
+      }
+
+      // プロバイダー行を表示
+      if (row) row.style.display = 'flex';
+    } catch(e) {
+      console.warn('[AIChatWidget] dealer providers 読み込み失敗:', e);
+    }
   }
 
   // ── サーバーから履歴を復元（framework モード） ────────────────
