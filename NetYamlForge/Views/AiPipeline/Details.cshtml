@@ -1,0 +1,156 @@
+@model NetYamlForge.Controllers.AiTaskDetailsModel
+@{
+    ViewData["Title"] = "AI Pipeline 任务详情";
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">AI Pipeline 任务详情</h1>
+        <a asp-action="Index" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            返回列表
+        </a>
+    </div>
+
+    @if (Model.TaskRecord == null)
+    {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            任务记录不存在
+        </div>
+    }
+    else
+    {
+        <!-- 任务基本信息 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">基本信息</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">任务 ID</label>
+                    <p class="font-mono text-sm">@Model.TaskRecord.TaskId</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">状态</label>
+                    <p>
+                        @if (Model.TaskRecord.Status == "completed")
+                        {
+                            <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded">成功</span>
+                        }
+                        else if (Model.TaskRecord.Status == "failed")
+                        {
+                            <span class="bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded">失败</span>
+                        }
+                        else
+                        {
+                            <span class="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded">@Model.TaskRecord.Status</span>
+                        }
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">项目</label>
+                    <p>@(Model.TaskRecord.ProjectName ?? "-")</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">生成文件数</label>
+                    <p>@Model.TaskRecord.GeneratedFilesCount</p>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1">创建时间</label>
+                    <p>@Model.TaskRecord.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                </div>
+                @if (Model.TaskRecord.CompletedAt.HasValue)
+                {
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-1">完成时间</label>
+                        <p>@Model.TaskRecord.CompletedAt.Value.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-gray-700 text-sm font-bold mb-1">Prompt</label>
+                <div class="bg-gray-50 rounded p-3 font-mono text-sm">
+                    @Model.TaskRecord.Prompt
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <label class="block text-gray-700 text-sm font-bold mb-1">工作目录</label>
+                <p class="font-mono text-sm">@Model.WorkDirectory</p>
+            </div>
+        </div>
+
+        <!-- 生成的文件 -->
+        @if (Model.Files.Count > 0)
+        {
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">生成的文件</h2>
+                <div class="grid gap-2">
+                    @foreach (var file in Model.Files)
+                    {
+                        <div class="flex items-center justify-between bg-gray-50 rounded px-3 py-2">
+                            <span class="font-mono text-sm flex-1 truncate">@file</span>
+                            <div class="flex gap-2 ml-4">
+                                <a asp-action="ViewFile" asp-route-taskId="@Model.TaskRecord.TaskId" asp-route-path="@file"
+                                   class="text-blue-500 hover:text-blue-700 text-sm" target="_blank">
+                                    查看
+                                </a>
+                                <a asp-action="DownloadFile" asp-route-taskId="@Model.TaskRecord.TaskId" asp-route-path="@file"
+                                   class="text-green-500 hover:text-green-700 text-sm">
+                                    下载
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- 应用到项目表单 -->
+        @if (Model.TaskRecord.Status == "completed")
+        {
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">应用到项目</h2>
+                <form asp-action="ApplyToProject" asp-route-taskId="@Model.TaskRecord.TaskId" method="post" class="flex gap-4">
+                    @Html.AntiForgeryToken()
+                    <input 
+                        type="text" 
+                        name="targetProject" 
+                        class="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="项目名称"
+                        required>
+                    <button 
+                        type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        应用
+                    </button>
+                </form>
+                <p class="text-sm text-gray-500 mt-2">
+                    注意：这将把生成的文件复制到指定项目中，可能会覆盖现有文件。
+                </p>
+            </div>
+        }
+
+        <!-- 日志输出 -->
+        @if (Model.Logs.Count > 0)
+        {
+            <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">执行日志</h2>
+                <div class="bg-gray-900 text-gray-100 rounded p-4 overflow-x-auto">
+                    <pre class="text-sm whitespace-pre-wrap">@string.Join("\n", Model.Logs)</pre>
+                </div>
+            </div>
+        }
+
+        <!-- 删除按钮 -->
+        <div class="flex justify-end">
+            <form asp-action="Delete" asp-route-taskId="@Model.TaskRecord.TaskId" method="post"
+                  onsubmit="return confirm('确定要删除此任务吗？此操作不可撤销。');">
+                @Html.AntiForgeryToken()
+                <button 
+                    type="submit" 
+                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    删除任务
+                </button>
+            </form>
+        </div>
+    }
+</div>

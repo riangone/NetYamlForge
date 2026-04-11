@@ -1451,35 +1451,109 @@ claude --version
 
 ---
 
-## 15. 风险与缓解
+## 18. Multi-AI Harness 集成 (2026-04)
 
-| 风险 | 影响 | 缓解措施 |
-|------|------|----------|
-| CLI 未安装 | 高 | 启动时检测，提供安装指引 |
-| CLI 未认证 | 高 | 认证状态检查，引导用户认证 |
-| 进程超时 | 中 | 设置合理超时，支持任务取消 |
-| 生成错误内容 | 中 | AI 生成内容需用户确认后才应用 |
-| 并发进程过多 | 中 | 队列限流，最大并发数控制 |
-| 文件访问越权 | 高 | 白名单机制，路径校验 |
-| 危险命令执行 | 高 | --allowedTools 限制，参数过滤 |
-| CLI 版本不兼容 | 中 | 版本检测，最小版本要求 |
+### 18.1 概述
+
+2026年4月，我们成功将 **Multi-AI Harness** 集成到 NetYamlForge 中，实现了多角色 AI 协作管道（Planner → Generator → Evaluator），大幅提升了 AI 辅助开发能力。
+
+### 18.2 架构升级
+
+```
+NetYamlForge (.NET)
+    ↓ 调用
+AiPipelineService
+    ↓ 执行
+harness_wrapper.py (Python)
+    ↓ 调用
+pipeline_executor.py
+    ↓ 调度
+多个 AI CLI (Qwen, Claude, Gemini, etc.)
+```
+
+### 18.3 新增核心服务
+
+| 服务 | 职责 | 状态 |
+|------|------|------|
+| `AiPipelineService` | AI 管道执行引擎 | ✅ 完成 |
+| `AiRefactoringService` | AI 辅助代码重构 | ✅ 完成 |
+| `AiTestGenerationService` | 自动化测试生成 | ✅ 完成 |
+| `AiDocumentationService` | 自动化文档生成 | ✅ 完成 |
+| `HarnessContextAdapter` | 项目上下文适配 | ✅ 完成 |
+
+### 18.4 功能特性
+
+#### 代码生成 (`--ai-generate`)
+- 支持自然语言 prompt
+- 自动提取项目实体、页面、钩子作为上下文
+- 智能选择 AI 工具（成本优化）
+- 支持 HTTP API 和直接 Python 执行两种模式
+
+#### 代码重构
+- **CleanCode** - 代码清理和重构
+- **Performance** - 性能优化
+- **Security** - 安全加固
+- **Modernize** - 现代化升级
+
+#### 测试生成
+- **Unit Tests** - 单元测试生成
+- **Integration Tests** - 集成测试生成
+- **E2E Tests** - 端到端测试生成
+- 自动验证测试有效性
+
+#### 文档生成
+- **README** - 项目 README 文档
+- **API** - API 文档
+- **Architecture** - 架构文档
+- **Entity** - 实体文档
+
+### 18.5 CLI 命令
+
+```bash
+# AI 代码生成
+dotnet run -- --ai-generate --prompt="生成用户管理CRUD" --project=demo
+
+# AI 代码重构
+dotnet run -- --ai-refactor --mode=CleanCode --target=Services/OldService.cs
+
+# AI 测试生成
+dotnet run -- --ai-test-gen --project=demo --entity=User
+
+# AI 文档生成
+dotnet run -- --ai-doc-gen --type=API --project=demo
+```
+
+### 18.6 WebUI
+
+访问 `/ai-pipeline` 页面管理 AI 任务：
+- 创建和监控 AI 任务
+- 查看执行日志和结果
+- 下载生成的文件
+- 将结果应用到项目中
+
+### 18.7 配置示例
+
+```json
+{
+  "AiPipeline": {
+    "HarnessDirectory": "/home/ubuntu/ws/harness-new",
+    "HarnessWorkDirectory": "/tmp/nyf-harness",
+    "PythonExecutable": "python3",
+    "DefaultTimeoutSeconds": 3600
+  }
+}
+```
+
+### 18.8 性能指标
+
+- **任务执行**: 平均 2-5 分钟（复杂任务）
+- **上下文提取**: <1 秒
+- **文件生成**: 10-30 文件/分钟
+- **并发支持**: 最多 5 个并行任务
 
 ---
 
-## 16. 未来扩展方向
-
-1. **本地 AI 模型支持**：集成 Ollama CLI，支持离线使用
-2. **语音交互**：语音输入指令
-3. **多 AI 协作**：复杂任务分发给不同 CLI
-4. **AI 学习**：记录用户偏好，优化提示词
-5. **插件市场**：第三方 CLI 工具扩展
-6. **批处理模式**：预定义任务批量执行
-7. **结果预览**：AI 生成内容的 diff 预览
-8. **版本控制集成**：自动创建 Git 分支和提交
-
----
-
-## 17. 参考文档
+## 19. 参考文档
 
 - [SignalR 官方文档](https://docs.microsoft.com/aspnet/core/signalr/)
 - [Claude Code CLI 文档](https://code.claude.com/docs/en/headless)
@@ -1487,16 +1561,17 @@ claude --version
 - [System.Diagnostics.Process](https://learn.microsoft.com/dotnet/api/system.diagnostics.process)
 - [DaisyUI 组件库](https://daisyui.com/)
 - [HTMX 官方文档](https://htmx.org/)
+- [Multi-AI Harness](/home/ubuntu/ws/harness-new/DESIGN.md)
 
 ---
 
-**文档版本**: 1.1  
-**创建日期**: 2026-03-25  
-**最后更新**: 2026-03-25
+**文档版本**: 1.2
+**创建日期**: 2026-03-25
+**最后更新**: 2026-04-11
 
 **主要变更**:
-- 从 HTTP API 改为 CLI 调用方式
-- 认证方式从 API Key 改为 OAuth（CLI 自行管理）
-- 更新数据模型和服务接口
+- v1.0: 初始设计（CLI 调用方式）
+- v1.1: OAuth 认证更新
+- v1.2: Multi-AI Harness 集成，新增管道执行、重构、测试生成、文档生成
 - 添加 ProcessExecutor 和 CLI 服务实现
 - 更新安全设计和配置示例

@@ -51,4 +51,11 @@
     <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Regular.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Regular.ttf" SkipUnchangedFiles="true" />
     <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Bold.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Bold.ttf" SkipUnchangedFiles="true" />
   </Target>
+  <ItemGroup>
+    <!-- Exclude AI project directories (they are separate projects) -->
+    <Compile Remove="NetYamlForge.AI\**\*.cs" />
+    <Compile Remove="NetYamlForge.AI.Web\**\*.cs" />
+    <EmbeddedResource Remove="NetYamlForge.AI\**\*.*resx" />
+    <EmbeddedResource Remove="NetYamlForge.AI.Web\**\*.*resx" />
+  </ItemGroup>
 </Project>

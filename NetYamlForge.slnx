@@ -2,4 +2,6 @@
   <Project Path="NetYamlForge.Analyzers/NetYamlForge.Analyzers.csproj" />
   <Project Path="NetYamlForge.Tests/NetYamlForge.Tests.csproj" />
   <Project Path="NetYamlForge/NetYamlForge.csproj" />
+  <Project Path="NetYamlForge/NetYamlForge.AI/NetYamlForge.AI.csproj" />
+  <Project Path="NetYamlForge/NetYamlForge.AI.Web/NetYamlForge.AI.Web.csproj" />
 </Solution>

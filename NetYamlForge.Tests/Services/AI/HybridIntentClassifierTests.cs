@@ -13,13 +13,13 @@ namespace NetYamlForge.Tests.Services.AI;
 public class HybridIntentClassifierTests
 {
     private readonly HybridIntentClassifier _classifier;
-    private readonly AiWindowConfig _config;
+    private readonly NetYamlForge.Services.AI.AiWindowConfig _config;
 
     public HybridIntentClassifierTests()
     {
-        _config = new AiWindowConfig
+        _config = new NetYamlForge.Services.AI.AiWindowConfig
         {
-            Intent = new IntentConfig
+            Intent = new NetYamlForge.Services.AI.IntentConfig
             {
                 RuleBasedEnabled = true,
                 LlmEnabled = false, // テストではルールベースのみ

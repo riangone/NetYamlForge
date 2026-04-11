@@ -28,9 +28,9 @@ public class HandoverManagerTests
         var setMethod = typeof(ProjectScope).GetMethod("Set", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
         setMethod?.Invoke(projectScope, [new ProjectInfo { Name = "auto-dealer-demo", DisplayName = "", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! }]);
 
-        var config = new AiWindowConfig
+        var config = new NetYamlForge.Services.AI.AiWindowConfig
         {
-            Handover = new HandoverConfig
+            Handover = new NetYamlForge.Services.AI.HandoverConfig
             {
                 AutoEnabled = true,
                 ConfidenceThreshold = 0.6,
