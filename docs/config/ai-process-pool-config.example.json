@@ -1,0 +1,32 @@
+{
+  "AICli": {
+    "DefaultTool": "qwen",
+    "TaskTimeoutSeconds": 1800,
+    "MaxConcurrentTasks": 2,
+    "DefaultAllowedTools": ["Read", "Write", "Edit", "Bash", "Git"],
+
+    "ProcessPool": {
+      "EnableDaemonMode": true,
+      "MaxPoolSize": 3,
+      "IdleTimeoutMinutes": 10,
+      "HealthCheckIntervalSeconds": 30,
+      "MaxStartRetries": 3,
+      "CooldownSeconds": 2,
+      "EnablePersistentSessions": true
+    },
+
+    "QwenCode": {
+      "ApiKey": "",
+      "BaseUrl": "",
+      "Model": "",
+      "Path": ""
+    },
+
+    "Claude": {
+      "ApiKey": "",
+      "Path": "",
+      "Model": "",
+      "ChatEffort": "low"
+    }
+  }
+}

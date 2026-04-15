@@ -1,0 +1,108 @@
+title: "AI 会話詳細"
+description: "AI 会話の詳細情報と対話履歴を確認できます"
+
+sections:
+  - id: conversation_info
+    title: "会話情報"
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '会話 ID' AS metric_name,
+             conversation_id AS metric_value,
+             '💬' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'ステータス',
+             CASE status
+               WHEN 'active' THEN '🟢 アクティブ'
+               WHEN 'completed' THEN '✅ 完了'
+               WHEN 'escalated' THEN '⚠️ エスカレーション'
+               WHEN 'closed' THEN '🔒 クローズ'
+               ELSE status
+             END,
+             '📌', NULL
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT 'チャネル',
+             CASE channel
+               WHEN 'web' THEN '🌐 Web'
+               WHEN 'api' THEN '🔌 API'
+               WHEN 'mobile' THEN '📱 Mobile'
+               ELSE channel
+             END,
+             '📡', NULL
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '感情スコア',
+             COALESCE(CAST(sentiment_score AS TEXT), '0') ,
+             '🙂', NULL
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: message_history
+    title: "メッセージ履歴"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        datetime(sent_at, 'localtime') AS 時刻,
+        CASE sender
+          WHEN 'user' THEN '👤 ユーザー'
+          WHEN 'ai' THEN '🤖 AI'
+          WHEN 'agent' THEN '🎧 担当者'
+          ELSE sender
+        END AS 送信者,
+        COALESCE(message_type, 'text') AS 種別,
+        content AS メッセージ,
+        COALESCE(intent, '-') AS インテント,
+        CASE
+          WHEN sentiment_score > 0.3 THEN '😊 ポジティブ'
+          WHEN sentiment_score < -0.3 THEN '😞 ネガティブ'
+          ELSE '😐 ニュートラル'
+        END AS 感情
+      FROM ai_messages
+      WHERE conversation_id = '@QueryParam:id'
+      ORDER BY sent_at ASC
+    columns: [時刻, 送信者, 種別, メッセージ, インテント, 感情]
+    pageSize: 50
+    editable: false
+    readOnly: true
+
+  - id: related_links
+    title: "関連業務リンク"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT '関連契約' AS 種別,
+             COALESCE(CAST(linked_contract_id AS TEXT), '-') AS 参照ID,
+             '/jpiere-cs/DynamicEntity/Index?entity=contract' AS リンク
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '関連見積',
+             COALESCE(CAST(linked_estimation_id AS TEXT), '-') ,
+             '/jpiere-cs/DynamicEntity/Index?entity=estimation'
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+      UNION ALL
+      SELECT '関連請求',
+             COALESCE(CAST(linked_bill_id AS TEXT), '-') ,
+             '/jpiere-cs/DynamicEntity/Index?entity=bill'
+      FROM ai_conversations
+      WHERE conversation_id = '@QueryParam:id'
+    columns: [種別, 参照ID, リンク]
+    pageSize: 10
+    editable: false
+    readOnly: true
