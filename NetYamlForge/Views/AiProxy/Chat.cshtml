@@ -1,0 +1,17 @@
+@{
+    var project = ViewBag.Project as string;
+    var aiServiceUrl = ViewBag.AiServiceUrl as string ?? "http://localhost:5200";
+    ViewData["Title"] = "AI アシスタント";
+}
+
+<div class="container-fluid py-3">
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-3">
+                <i class="bi bi-robot"></i> AI アシスタント
+            </h4>
+        </div>
+    </div>
+
+    @await Html.PartialAsync("_AiChat")
+</div>

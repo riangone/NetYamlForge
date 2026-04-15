@@ -76,6 +76,9 @@ app.MapHub<AIProgressHub>("/aiProgressHub");
 app.MapHub<AIDebateHub>("/aiDebateHub");
 app.MapHub<NaturalLanguageQueryHub>("/nlQueryHub");
 
+// ===== ヘルスチェック =====
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "NetYamlForge.AI", timestamp = DateTime.UtcNow }));
+
 // ===== MVC ルート =====
 app.MapControllerRoute(
     name: "default",

@@ -1,0 +1,128 @@
+@{
+    var project = ViewBag.Project as string ?? RouteData.Values["project"]?.ToString() ?? "";
+    var aiServiceUrl = ViewBag.AiServiceUrl as string
+        ?? ViewContext.HttpContext.RequestServices
+            .GetService<IConfiguration>()
+            ?["AI:ServiceBaseUrl"]
+        ?? "http://localhost:5200";
+
+    // プロキシ経由 API の基底パス（/{project}/ai/proxy/...）
+    var proxyBase = string.IsNullOrEmpty(project) ? "/ai/proxy" : $"/{project}/ai/proxy";
+}
+
+<div id="ai-chat-widget" class="card shadow-sm" style="max-width:600px;">
+    <div class="card-header d-flex align-items-center gap-2">
+        <span class="badge bg-success" id="ai-status-badge">●</span>
+        <strong>AI チャット</strong>
+        <small class="text-muted ms-auto" id="ai-status-text">接続確認中...</small>
+    </div>
+
+    <div class="card-body p-0">
+        <div id="ai-messages"
+             style="height:400px; overflow-y:auto; padding:1rem;"
+             class="d-flex flex-column gap-2">
+            <div class="text-muted text-center small mt-auto">会話を開始してください</div>
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <div class="input-group">
+            <input type="text" id="ai-input" class="form-control"
+                   placeholder="メッセージを入力..." autocomplete="off" />
+            <button class="btn btn-primary" id="ai-send-btn" onclick="aiSendMessage()">
+                送信
+            </button>
+        </div>
+        <div id="ai-typing" class="text-muted small mt-1" style="display:none;">
+            AI が応答中...
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const PROXY_BASE = '@Html.Raw(proxyBase)';
+    const PROJECT = '@Html.Raw(project)';
+    let conversationId = null;
+
+    // ステータス確認
+    fetch('@Url.Action("Status", "AiProxy", new { project })')
+        .then(r => r.json())
+        .then(d => {
+            const ok = d.status === 'healthy';
+            document.getElementById('ai-status-badge').className = `badge ${ok ? 'bg-success' : 'bg-danger'}`;
+            document.getElementById('ai-status-text').textContent = ok ? 'オンライン' : '利用不可';
+        })
+        .catch(() => {
+            document.getElementById('ai-status-badge').className = 'badge bg-danger';
+            document.getElementById('ai-status-text').textContent = '接続エラー';
+        });
+
+    // セッション開始
+    async function startSession() {
+        const resp = await fetch(`${PROXY_BASE}/aiwindow/conversations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ channel: 'web', userId: 'user', userRole: 'employee' })
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        conversationId = data.conversationId;
+        if (data.welcomeMessage) appendMessage('ai', data.welcomeMessage);
+    }
+
+    // メッセージ送信
+    window.aiSendMessage = async function () {
+        const input = document.getElementById('ai-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        if (!conversationId) await startSession();
+        input.value = '';
+        appendMessage('user', text);
+
+        document.getElementById('ai-typing').style.display = 'block';
+        document.getElementById('ai-send-btn').disabled = true;
+
+        try {
+            const resp = await fetch(`${PROXY_BASE}/aiwindow/conversations/${conversationId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: text })
+            });
+
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            appendMessage('ai', data.content ?? data.message ?? JSON.stringify(data));
+        } catch (err) {
+            appendMessage('error', `エラー: ${err.message}`);
+        } finally {
+            document.getElementById('ai-typing').style.display = 'none';
+            document.getElementById('ai-send-btn').disabled = false;
+            input.focus();
+        }
+    };
+
+    function appendMessage(role, text) {
+        const box = document.getElementById('ai-messages');
+        // 初回メッセージ時のプレースホルダーを削除
+        const placeholder = box.querySelector('.text-muted.text-center');
+        if (placeholder) placeholder.remove();
+
+        const div = document.createElement('div');
+        div.className = role === 'user'
+            ? 'align-self-end bg-primary text-white rounded px-3 py-2 small'
+            : role === 'error'
+                ? 'align-self-start bg-danger text-white rounded px-3 py-2 small'
+                : 'align-self-start bg-light border rounded px-3 py-2 small';
+        div.textContent = text;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // Enter キーで送信
+    document.getElementById('ai-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiSendMessage(); }
+    });
+})();
+</script>

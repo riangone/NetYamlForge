@@ -179,7 +179,7 @@ builder.Services.AddAuthorization(options =>
 
 // ===== サービス登録（Extensions/ServiceCollectionExtensions.cs に委譲）=====
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
-builder.Services.AddNetYamlForge();
+builder.Services.AddNetYamlForge(builder.Configuration);
 
 var app = builder.Build();
 

@@ -27,7 +27,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// 全サービスを一括登録するファサードメソッド。Program.cs から呼び出してください。
     /// </summary>
-    public static IServiceCollection AddNetYamlForge(this IServiceCollection services)
+    public static IServiceCollection AddNetYamlForge(this IServiceCollection services, IConfiguration? configuration = null)
     {
         services.AddMultiProjectInfrastructure();
         services.AddDatabaseServices();
@@ -35,6 +35,24 @@ public static class ServiceCollectionExtensions
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
+        services.AddAiProxyHttpClient(configuration);
+        return services;
+    }
+
+    /// <summary>
+    /// AI サービス（standalone）向け HttpClient を登録します。
+    /// NetYamlForge.AI への直接参照は不要です。
+    /// </summary>
+    public static IServiceCollection AddAiProxyHttpClient(
+        this IServiceCollection services,
+        IConfiguration? configuration = null)
+    {
+        var baseUrl = configuration?["AI:ServiceBaseUrl"] ?? "http://localhost:5200";
+        services.AddHttpClient("AiService", client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromMinutes(5);
+        });
         return services;
     }
 
