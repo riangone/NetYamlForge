@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.AI.Models;
@@ -6,10 +7,12 @@ using NetYamlForge.AI.Services;
 namespace NetYamlForge.AI.Controllers.Api;
 
 /// <summary>
-/// AI 窗口 API コントローラー
+/// AI 窓口 API コントローラー
+/// スタンドアロンモードで主アプリのプロキシ経由から呼ばれるため認証不要
 /// </summary>
 [ApiController]
-[Route("api/aiwindow")]  // api/ai は AIController ({project?}/api/AI) と競合するため aiwindow に変更
+[AllowAnonymous]
+[Route("api/aiwindow")]
 [Route("{project}/api/aiwindow")]
 [Produces("application/json")]
 public class AIWindowController : ControllerBase

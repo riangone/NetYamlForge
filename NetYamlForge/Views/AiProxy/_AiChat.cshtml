@@ -58,17 +58,32 @@
             document.getElementById('ai-status-text').textContent = '接続エラー';
         });
 
+    // JSON プロパティ名を PascalCase / camelCase 両対応で取得
+    function pick(obj, ...keys) {
+        for (const k of keys) {
+            if (obj[k] != null) return obj[k];
+            const p = k.charAt(0).toUpperCase() + k.slice(1);
+            if (obj[p] != null) return obj[p];
+        }
+        return undefined;
+    }
+
     // セッション開始
     async function startSession() {
         const resp = await fetch(`${PROXY_BASE}/aiwindow/conversations`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ channel: 'web', userId: 'user', userRole: 'employee' })
+            body: JSON.stringify({ Channel: 'web' })
         });
-        if (!resp.ok) return;
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            appendMessage('error', pick(err, 'error', 'hint') ?? `AI サービスに接続できません (${resp.status})`);
+            return;
+        }
         const data = await resp.json();
-        conversationId = data.conversationId;
-        if (data.welcomeMessage) appendMessage('ai', data.welcomeMessage);
+        conversationId = pick(data, 'conversationId', 'ConversationId');
+        const welcome = pick(data, 'welcomeMessage', 'WelcomeMessage');
+        if (welcome) appendMessage('ai', welcome);
     }
 
     // メッセージ送信
@@ -78,6 +93,7 @@
         if (!text) return;
 
         if (!conversationId) await startSession();
+        if (!conversationId) return;
         input.value = '';
         appendMessage('user', text);
 
@@ -88,12 +104,13 @@
             const resp = await fetch(`${PROXY_BASE}/aiwindow/conversations/${conversationId}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: text })
+                body: JSON.stringify({ Content: text })
             });
 
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             const data = await resp.json();
-            appendMessage('ai', data.content ?? data.message ?? JSON.stringify(data));
+            const msg = pick(data, 'responseText', 'ResponseText', 'content', 'message');
+            if (resp.ok && msg) appendMessage('ai', msg);
+            else appendMessage('error', pick(data, 'error') ?? `エラー: HTTP ${resp.status}`);
         } catch (err) {
             appendMessage('error', `エラー: ${err.message}`);
         } finally {

@@ -47,11 +47,16 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration? configuration = null)
     {
-        var baseUrl = configuration?["AI:ServiceBaseUrl"] ?? "http://localhost:5200";
+        var baseUrl = configuration?["AI:ServiceBaseUrl"] ?? "http://localhost:5005";
         services.AddHttpClient("AiService", client =>
         {
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromMinutes(5);
+        })
+        // リダイレクト自動追従を無効化（ログインページHTML返却を防止）
+        .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+        {
+            AllowAutoRedirect = false
         });
         return services;
     }

@@ -900,24 +900,41 @@
                 if(panelOpen && !convId) aiStartSession();
             };
 
+            // JSON プロパティ名を両方向（PascalCase / camelCase）で検索するヘルパー
+            function pick(obj, ...keys){
+                for(const k of keys){
+                    if(obj[k] !== undefined && obj[k] !== null) return obj[k];
+                    // PascalCase 変換
+                    const pascal = k.charAt(0).toUpperCase()+k.slice(1);
+                    if(obj[pascal] !== undefined && obj[pascal] !== null) return obj[pascal];
+                }
+                return undefined;
+            }
+
             async function aiStartSession(){
                 try{
                     const r = await fetch(PROXY+'/aiwindow/conversations',{
                         method:'POST',
                         headers:{'Content-Type':'application/json'},
-                        body:JSON.stringify({channel:'web',userId:'@Html.Raw(User.Identity?.Name ?? "guest")',userRole:'employee'})
+                        body:JSON.stringify({Channel:'web'})
                     });
-                    if(!r.ok) return;
+                    if(!r.ok){
+                        const err = await r.json().catch(()=>({error:'HTTP '+r.status}));
+                        aiAppend('err', pick(err,'error','hint') ?? 'AI サービスに接続できません ('+r.status+')');
+                        return;
+                    }
                     const d = await r.json();
-                    convId = d.conversationId;
-                    if(d.welcomeMessage) aiAppend('ai', d.welcomeMessage);
-                }catch(e){ aiAppend('err','AI サービスに接続できません'); }
+                    convId = pick(d,'conversationId','ConversationId');
+                    const welcome = pick(d,'welcomeMessage','WelcomeMessage');
+                    if(welcome) aiAppend('ai', welcome);
+                }catch(e){ aiAppend('err','AI サービスに接続できません: '+e.message); }
             }
 
             window.aiFloatSend = async function(){
                 const inp = document.getElementById('ai-msg-input');
                 const txt = inp.value.trim();
-                if(!txt || !convId) return;
+                if(!txt) return;
+                if(!convId){ await aiStartSession(); if(!convId) return; }
                 inp.value = '';
                 aiAppend('user', txt);
                 document.getElementById('ai-typing-ind').style.display='block';
@@ -926,10 +943,13 @@
                     const r = await fetch(`${PROXY}/aiwindow/conversations/${convId}/messages`,{
                         method:'POST',
                         headers:{'Content-Type':'application/json'},
-                        body:JSON.stringify({content:txt})
+                        body:JSON.stringify({Content:txt})
                     });
                     const d = await r.json();
-                    aiAppend('ai', d.content ?? d.message ?? JSON.stringify(d));
+                    // SendMessageResponse: ResponseText / responseText
+                    const msg = pick(d,'responseText','ResponseText','content','Content','message','Message');
+                    if(r.ok && msg) aiAppend('ai', msg);
+                    else aiAppend('err', pick(d,'error','Error') ?? 'エラー: HTTP '+r.status);
                 }catch(e){ aiAppend('err', 'エラー: '+e.message); }
                 finally{
                     document.getElementById('ai-typing-ind').style.display='none';

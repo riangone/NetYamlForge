@@ -93,13 +93,43 @@ public class AiProxyController : Controller
             if (Request.Headers.TryGetValue("Authorization", out var auth))
                 upstreamRequest.Headers.TryAddWithoutValidation("Authorization", (string?)auth);
 
-            var upstream = await client.SendAsync(upstreamRequest, cancellationToken);
+            var upstream = await client.SendAsync(
+                upstreamRequest,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+
+            // リダイレクト（ログインページ等）を透過せず JSON エラーに変換
+            if (upstream.StatusCode == System.Net.HttpStatusCode.Found ||
+                upstream.StatusCode == System.Net.HttpStatusCode.MovedPermanently ||
+                upstream.StatusCode == System.Net.HttpStatusCode.Unauthorized ||
+                upstream.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                var location = upstream.Headers.Location?.ToString();
+                _logger.LogWarning("AI サービスが認証リダイレクト: {Status} → {Location}", upstream.StatusCode, location);
+                return StatusCode(503, new
+                {
+                    error = "AI サービスへの認証が必要です",
+                    detail = $"HTTP {(int)upstream.StatusCode}",
+                    hint = "AI サービス (http://localhost:5005) に直接ログインしてください"
+                });
+            }
 
             Response.StatusCode = (int)upstream.StatusCode;
 
-            if (upstream.Content.Headers.ContentType?.MediaType is string ct)
-                Response.ContentType = ct;
+            var contentType = upstream.Content.Headers.ContentType?.MediaType;
+            // HTML が返ってきた場合（エラーページ等）は JSON エラーに変換
+            if (contentType != null && contentType.Contains("text/html"))
+            {
+                var html = await upstream.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning("AI サービスが HTML を返却（エラーページの可能性）: {Url}", targetUrl);
+                return StatusCode(upstream.IsSuccessStatusCode ? 200 : 502, new
+                {
+                    error = "AI サービスが予期しない応答を返しました",
+                    detail = html.Length > 200 ? html[..200] + "..." : html
+                });
+            }
 
+            if (contentType != null) Response.ContentType = contentType;
             await upstream.Content.CopyToAsync(Response.Body, cancellationToken);
             return new EmptyResult();
         }
