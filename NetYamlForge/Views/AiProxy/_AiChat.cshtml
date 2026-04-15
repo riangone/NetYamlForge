@@ -1,10 +1,10 @@
 @{
-    var project = ViewBag.Project as string ?? RouteData.Values["project"]?.ToString() ?? "";
+    var project = ViewBag.Project as string ?? ViewContext.RouteData.Values["project"]?.ToString() ?? "";
     var aiServiceUrl = ViewBag.AiServiceUrl as string
         ?? ViewContext.HttpContext.RequestServices
             .GetService<IConfiguration>()
             ?["AI:ServiceBaseUrl"]
-        ?? "http://localhost:5200";
+        ?? "http://localhost:5005";
 
     // プロキシ経由 API の基底パス（/{project}/ai/proxy/...）
     var proxyBase = string.IsNullOrEmpty(project) ? "/ai/proxy" : $"/{project}/ai/proxy";
