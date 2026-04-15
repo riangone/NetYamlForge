@@ -22,12 +22,14 @@
   <ItemGroup>
     <!-- アナライザープロジェクト：禁止パターンをビルド時に検出 (DCS001-DCS004) -->
     <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- AI プロジェクト参照 -->
+    <ProjectReference Include="..\NetYamlForge.AI\NetYamlForge.AI.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="JsonSchema.Net" Version="8.0.0" />
-    <PackageReference Include="MailKit" Version="4.6.0" />
-    <PackageReference Include="MimeKit" Version="4.6.0" />
+    <PackageReference Include="MailKit" Version="4.15.1" />
+    <PackageReference Include="MimeKit" Version="4.15.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
@@ -52,10 +54,12 @@
     <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Bold.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Bold.ttf" SkipUnchangedFiles="true" />
   </Target>
   <ItemGroup>
-    <!-- Exclude AI project directories (they are separate projects) -->
-    <Compile Remove="NetYamlForge.AI\**\*.cs" />
-    <Compile Remove="NetYamlForge.AI.Web\**\*.cs" />
-    <EmbeddedResource Remove="NetYamlForge.AI\**\*.*resx" />
-    <EmbeddedResource Remove="NetYamlForge.AI.Web\**\*.*resx" />
+    <!-- Exclude AI project directories (they are separate projects with their own compilation) -->
+    <Compile Remove="..\NetYamlForge.AI\**\*.cs" />
+    <Compile Remove="..\NetYamlForge.AI.Web\**\*.cs" />
+    <EmbeddedResource Remove="..\NetYamlForge.AI\**\*.*resx" />
+    <EmbeddedResource Remove="..\NetYamlForge.AI.Web\**\*.*resx" />
+    <None Include="..\NetYamlForge.AI\**\*.*" />
+    <None Include="..\NetYamlForge.AI.Web\**\*.*" />
   </ItemGroup>
 </Project>
