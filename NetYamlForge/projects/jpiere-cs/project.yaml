@@ -70,7 +70,7 @@ roles:
   - id: purchaser
     name: 購買担当
     description: 購買フロー（発注・受入・AP請求・支払）
-    redirectUrl: /Entity/PurchaseOrder
+    redirectUrl: /Entity/purchase_orders
     aiEnabled: true
     aiWelcomeMessage: "こんにちは！JPiere 購買担当 AI アシスタントです。📦\n発注・受入・AP請求・支払のフローを支援します！"
     

@@ -21,15 +21,15 @@ public class PurchaseOrderApprovalHook : IEntityHook
         if (!ctx.Values.TryGetValue("Id", out var idObj) || idObj == null) return;
 
         var orderId = Convert.ToInt32(idObj);
-        var order = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var order = (IDictionary<string, object?>)await db.QuerySingleAsync(
             "SELECT * FROM purchase_orders WHERE id = @id", new { id = orderId }, tx);
 
         var grandTotal = DictHelper.Get<double>(order, "GrandTotal", "grand_total", 0.0);
 
-        var existingApproval = await db.QueryFirstOrDefaultAsync<Dictionary<string, object?>>(
+        var existingApproval = await db.ExecuteScalarAsync<int?>(
             "SELECT id FROM approval_requests WHERE source_table = 'purchase_orders' AND source_id = @orderId",
             new { orderId }, tx);
-        if (existingApproval != null) return;
+        if (existingApproval.HasValue) return;
 
         int totalSteps;
         if (grandTotal < 100000)
@@ -53,10 +53,10 @@ public class PurchaseOrderApprovalHook : IEntityHook
             new { orderId, requester = ctx.UserName ?? "system", totalSteps, grandTotal }, tx);
 
         if (totalSteps >= 1)
-            await db.ExecuteAsync("INSERT INTO approval_steps (request_id, step_no, approver_role, label, status) VALUES (@requestId, 1, 'manager', '上長承認', 'PENDING')", new { requestId }, tx);
+            await db.ExecuteAsync("INSERT INTO approval_steps (request_id, step_no, approver_role, label, status) VALUES (@requestId, 1, 'approver', '上長承認', 'PENDING')", new { requestId }, tx);
 
         if (totalSteps >= 2)
-            await db.ExecuteAsync("INSERT INTO approval_steps (request_id, step_no, approver_role, label, status) VALUES (@requestId, 2, 'director', '取締役承認', 'PENDING')", new { requestId }, tx);
+            await db.ExecuteAsync("INSERT INTO approval_steps (request_id, step_no, approver_role, label, status) VALUES (@requestId, 2, 'admin', '取締役承認', 'PENDING')", new { requestId }, tx);
 
         await db.ExecuteAsync("UPDATE purchase_orders SET ApprovalStatus = 'PENDING' WHERE id = @orderId", new { orderId }, tx);
     }
@@ -82,7 +82,7 @@ public class ApprovalStepCompleteHook : IEntityHook
         var requestId = Convert.ToInt32(reqIdObj);
         var stepNo = Convert.ToInt32(stepNoObj);
 
-        var approvalRequest = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var approvalRequest = (IDictionary<string, object?>)await db.QuerySingleAsync(
             "SELECT * FROM approval_requests WHERE id = @id", new { id = requestId }, tx);
 
         var totalSteps = DictHelper.Get<int>(approvalRequest, "TotalSteps", "total_steps", 1);
@@ -124,7 +124,7 @@ public class ApprovalRejectHook : IEntityHook
         if (!ctx.Values.TryGetValue("RequestId", out var reqIdObj) || reqIdObj == null) return;
 
         var requestId = Convert.ToInt32(reqIdObj);
-        var approvalRequest = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var approvalRequest = (IDictionary<string, object?>)await db.QuerySingleAsync(
             "SELECT * FROM approval_requests WHERE id = @id", new { id = requestId }, tx);
 
         var sourceTable = DictHelper.GetStr(approvalRequest, "SourceTable", "source_table") ?? string.Empty;

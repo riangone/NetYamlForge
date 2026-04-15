@@ -408,13 +408,6 @@
                             <li><a asp-controller="Users"
                                    asp-action="Index"
                                    asp-route-project="@currentProject">@L["Users"]</a></li>
-                            <li>
-                                <a asp-controller="AISettings"
-                                   asp-action="Index"
-                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "AISettings", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                                    AI Settings
-                                </a>
-                            </li>
                         }
                     </ul>
                 </aside>
@@ -820,45 +813,6 @@
             }
         });
     </script>
-    <script src="/lib/marked/marked.min.js"></script>
-    @* 統合 AI チャットウィジェット（全プロジェクト共通）*@
-    @if (User.Identity?.IsAuthenticated ?? false)
-    {
-        <link rel="stylesheet" href="~/css/ai-chat-components.css" asp-append-version="true" />
-        <script src="~/js/ai-chat-components.js" asp-append-version="true"></script>
-        <script src="~/js/ai-chat-widget.js" asp-append-version="true"></script>
-        @if (currentProject == "auto-dealer-demo")
-        {
-            @* auto-dealer-demo: セッションベース dealer モード *@
-            <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
-            var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
-            <script>
-                DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
-            </script>
-        }
-        else if (currentProject == "jpiere-cs")
-        {
-            @* jpiere-cs: フレームワーク AI・役割別設定 *@
-            var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
-            <script>
-                window.AI_CHAT_CONFIG = {
-                    apiMode: 'framework',
-                    framework: { project: 'jpiere-cs', role: '@jpiereUserRole', defaultCliTool: 'qwen' }
-                };
-                window.JPIERE_CHAT_CONFIG = { project: 'jpiere-cs', userRole: '@jpiereUserRole' };
-            </script>
-        }
-        else
-        {
-            @* その他プロジェクト: フレームワーク AI（デフォルト） *@
-            <script>
-                window.AI_CHAT_CONFIG = {
-                    apiMode: 'framework',
-                    framework: { project: '@(currentProject ?? "")', defaultCliTool: 'qwen' }
-                };
-            </script>
-        }
-    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -292,7 +292,7 @@ sections:
   # ─────────────────────────────────────────────
   - id: payment_alerts
     title: 請求 — 支払期限アラート
-    visibleToRoles: [finance, manager, admin]
+    visibleToRoles: [accountant, admin]
     component: table
     sourceType: custom
     source: |
@@ -412,7 +412,7 @@ sections:
   # ─────────────────────────────────────────────
   - id: accounting_overview
     title: 会計状況（経理担当向け）
-    visibleToRoles: [finance, admin, manager]
+    visibleToRoles: [accountant, admin]
     component: stat_cards
     sourceType: custom
     source: |

@@ -4,13 +4,13 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using NetYamlForge.Models.AI;
-using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Controllers.Api;
 
 /// <summary>
 /// LINE Messaging API Webhook コントローラー
+/// AI 処理は NetYamlForge.AI.Web (standalone) が担当します。
+/// このコントローラーは Webhook の受信と AI サービスへの転送のみを行います。
 /// </summary>
 [ApiController]
 [Route("api/line")]
@@ -113,7 +113,7 @@ public class LineWebhookController : ControllerBase
         if (message == null || string.IsNullOrEmpty(userId))
             return;
 
-        // AI にメッセージを送信して応答を取得
+        // AI サービス（NetYamlForge.AI.Web）に転送して応答を取得
         var aiResponse = await _lineService.GetAIResponseAsync(userId, message.Text);
 
         // LINE に返信
@@ -129,7 +129,7 @@ public class LineWebhookController : ControllerBase
         // 友達追加歓迎メッセージ
         await _lineService.PushMessageAsync(userId, new[]
         {
-            new LineTextMessage("こんにちは！自動車ディーラー AI アシスタントです。\n営業時間、予約、車両のお問い合わせなど、お気軽にお尋ねください！")
+            new LineTextMessage("こんにちは！AI アシスタントです。\nお気軽にメッセージをどうぞ！")
         });
     }
 
@@ -137,7 +137,6 @@ public class LineWebhookController : ControllerBase
     {
         var userId = @event.Source.UserId;
         _logger.LogInformation("LINE 友達解除：{UserId}", userId);
-        // ユーザーステータスを更新
     }
 
     private async Task HandlePostbackEvent(LineEvent @event)
@@ -148,23 +147,18 @@ public class LineWebhookController : ControllerBase
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(data))
             return;
 
-        // クイック返信アクションを処理
         var aiResponse = await _lineService.GetAIResponseAsync(userId, data);
         await _lineService.ReplyMessageAsync(@event.ReplyToken, aiResponse);
     }
 }
 
-/// <summary>
-/// LINE Webhook リクエスト
-/// </summary>
+/// <summary>LINE Webhook リクエスト</summary>
 public class LineWebhookRequest
 {
     public List<LineEvent> Events { get; set; } = new();
 }
 
-/// <summary>
-/// LINE イベント
-/// </summary>
+/// <summary>LINE イベント</summary>
 public class LineEvent
 {
     public string Type { get; set; } = string.Empty;
@@ -174,18 +168,14 @@ public class LineEvent
     public LinePostback? Postback { get; set; }
 }
 
-/// <summary>
-/// LINE ソース
-/// </summary>
+/// <summary>LINE ソース</summary>
 public class LineSource
 {
     public string Type { get; set; } = string.Empty;
     public string? UserId { get; set; }
 }
 
-/// <summary>
-/// LINE メッセージ
-/// </summary>
+/// <summary>LINE メッセージ</summary>
 public class LineMessage
 {
     public string Id { get; set; } = string.Empty;
@@ -193,25 +183,19 @@ public class LineMessage
     public string Text { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// LINE ポストバック
-/// </summary>
+/// <summary>LINE ポストバック</summary>
 public class LinePostback
 {
     public string Data { get; set; } = string.Empty;
 }
 
-/// <summary>
-/// LINE メッセージインターフェース
-/// </summary>
+/// <summary>LINE メッセージ基底</summary>
 public abstract class LineMessageBase
 {
     public string Type { get; set; } = "text";
 }
 
-/// <summary>
-/// LINE テキストメッセージ
-/// </summary>
+/// <summary>LINE テキストメッセージ</summary>
 public class LineTextMessage : LineMessageBase
 {
     public string Text { get; set; } = string.Empty;
@@ -223,9 +207,7 @@ public class LineTextMessage : LineMessageBase
     }
 }
 
-/// <summary>
-/// LINE ボタンテンプレートメッセージ
-/// </summary>
+/// <summary>LINE ボタンテンプレートメッセージ</summary>
 public class LineTemplateMessage : LineMessageBase
 {
     public LineTemplate Template { get; set; } = new();
@@ -242,9 +224,7 @@ public class LineTemplateMessage : LineMessageBase
     }
 }
 
-/// <summary>
-/// LINE テンプレート
-/// </summary>
+/// <summary>LINE テンプレート</summary>
 public class LineTemplate
 {
     public string Type { get; set; } = "buttons";
@@ -252,9 +232,7 @@ public class LineTemplate
     public List<LineAction> Actions { get; set; } = new();
 }
 
-/// <summary>
-/// LINE アクション
-/// </summary>
+/// <summary>LINE アクション</summary>
 public class LineAction
 {
     public string Type { get; set; } = "message";
@@ -263,27 +241,23 @@ public class LineAction
     public string? Data { get; set; }
 }
 
-/// <summary>
-/// LINE 応答
-/// </summary>
+/// <summary>LINE AI 応答</summary>
 public class LineAIResponse
 {
     public List<LineMessageBase> Messages { get; set; } = new();
 }
 
-/// <summary>
-/// LINE 設定
-/// </summary>
+/// <summary>LINE 設定</summary>
 public class LineConfig
 {
     public bool Enabled { get; set; }
     public string ChannelAccessToken { get; set; } = string.Empty;
     public string ChannelSecret { get; set; } = string.Empty;
+    /// <summary>AI サービス (NetYamlForge.AI.Web) のベース URL</summary>
+    public string AIServiceBaseUrl { get; set; } = "http://localhost:5200";
 }
 
-/// <summary>
-/// LINE Messaging サービス
-/// </summary>
+/// <summary>LINE Messaging サービスインターフェース</summary>
 public interface ILineMessagingService
 {
     Task<LineAIResponse> GetAIResponseAsync(string userId, string message);
@@ -293,85 +267,80 @@ public interface ILineMessagingService
 
 /// <summary>
 /// LINE Messaging サービス実装
+/// AI 処理は NetYamlForge.AI.Web へ HTTP 転送します。
 /// </summary>
 public class LineMessagingService : ILineMessagingService
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _lineHttpClient;
+    private readonly HttpClient _aiHttpClient;
     private readonly LineConfig _config;
-    private readonly IConversationManager _conversationManager;
-    private readonly IDirectAIProcessor _aiProcessor;
-    private readonly IHandoverManager _handoverManager;
     private readonly ILogger<LineMessagingService> _logger;
 
-    // ユーザーごとの対話 ID マップ（本来は永続化が必要）
-    private static readonly ConcurrentDictionary<string, string> UserConversationMap = new();
+    // ユーザーごとのセッション ID マップ（本来は永続化が必要）
+    private static readonly ConcurrentDictionary<string, string> UserSessionMap = new();
 
     public LineMessagingService(
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IOptions<LineConfig> configOptions,
-        IConversationManager conversationManager,
-        IDirectAIProcessor aiProcessor,
-        IHandoverManager handoverManager,
         ILogger<LineMessagingService> logger)
     {
-        _httpClient = httpClient;
         _config = configOptions.Value;
-        _conversationManager = conversationManager;
-        _aiProcessor = aiProcessor;
-        _handoverManager = handoverManager;
         _logger = logger;
 
-        _httpClient.BaseAddress = new Uri("https://api.line.me/v2/bot/");
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _config.ChannelAccessToken);
+        _lineHttpClient = httpClientFactory.CreateClient("LineApi");
+        _lineHttpClient.BaseAddress = new Uri("https://api.line.me/v2/bot/");
+        _lineHttpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", _config.ChannelAccessToken);
+
+        _aiHttpClient = httpClientFactory.CreateClient("AIService");
+        _aiHttpClient.BaseAddress = new Uri(_config.AIServiceBaseUrl.TrimEnd('/') + "/");
+        _aiHttpClient.Timeout = TimeSpan.FromSeconds(30);
     }
 
     public async Task<LineAIResponse> GetAIResponseAsync(string userId, string message)
     {
         try
         {
-            // ユーザーの対話 ID を取得または作成
-            var conversationId = await GetOrCreateConversationAsync(userId);
-
-            // 直接 AI 処理
-            var context = new ConversationContext { ConversationId = conversationId };
-            var aiResult = await _aiProcessor.ProcessAsync(message, context);
-
-            // エスカレーションが必要か
-            if (aiResult.NeedsHandover)
+            // NetYamlForge.AI.Web の API エンドポイントに転送
+            var sessionId = UserSessionMap.GetOrAdd(userId, _ => Guid.NewGuid().ToString());
+            var payload = JsonSerializer.Serialize(new
             {
-                await _handoverManager.CreateHandoverAsync(new HandoverRequest
-                {
-                    ConversationId = conversationId,
-                    Reason = aiResult.HandoverReason ?? "ai_unable",
-                    Priority = aiResult.Priority,
-                    TargetDepartment = aiResult.TargetDepartment,
-                    HandoverNotes = $"感情：{aiResult.SentimentLabel} ({aiResult.SentimentScore:F2})"
-                }, null);
+                sessionId,
+                userId,
+                message,
+                channel = "line"
+            });
 
-                aiResult.Message = _handoverManager.GetHandoverMessage(aiResult.HandoverReason ?? "ai_unable");
+            var response = await _aiHttpClient.PostAsync(
+                "api/ai/chat",
+                new StringContent(payload, Encoding.UTF8, "application/json"));
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<JsonElement>(json);
+                var replyText = result.TryGetProperty("message", out var msgProp)
+                    ? msgProp.GetString() ?? "応答を受信しました。"
+                    : "応答を受信しました。";
+
+                return new LineAIResponse
+                {
+                    Messages = new List<LineMessageBase> { new LineTextMessage(replyText) }
+                };
             }
-
-            // LINE 形式に変換
-            return new LineAIResponse
-            {
-                Messages = new List<LineMessageBase>
-                {
-                    new LineTextMessage(aiResult.Message)
-                }
-            };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "LINE AI 応答生成に失敗");
-            return new LineAIResponse
-            {
-                Messages = new List<LineMessageBase>
-                {
-                    new LineTextMessage("申し訳ございませんが、エラーが発生しました。")
-                }
-            };
+            _logger.LogWarning(ex, "AI サービスへの転送に失敗しました");
         }
+
+        return new LineAIResponse
+        {
+            Messages = new List<LineMessageBase>
+            {
+                new LineTextMessage("現在 AI サービスに接続できません。しばらく後にお試しください。")
+            }
+        };
     }
 
     public async Task ReplyMessageAsync(string replyToken, LineAIResponse response)
@@ -380,11 +349,10 @@ public class LineMessagingService : ILineMessagingService
         {
             var content = new StringContent(
                 JsonSerializer.Serialize(new { replyToken, messages = response.Messages }),
-                System.Text.Encoding.UTF8,
+                Encoding.UTF8,
                 "application/json"
             );
-
-            await _httpClient.PostAsync("message/reply", content);
+            await _lineHttpClient.PostAsync("message/reply", content);
         }
         catch (Exception ex)
         {
@@ -398,30 +366,14 @@ public class LineMessagingService : ILineMessagingService
         {
             var content = new StringContent(
                 JsonSerializer.Serialize(new { to = userId, messages }),
-                System.Text.Encoding.UTF8,
+                Encoding.UTF8,
                 "application/json"
             );
-
-            await _httpClient.PostAsync("message/push", content);
+            await _lineHttpClient.PostAsync("message/push", content);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "LINE プッシュメッセージ送信に失敗");
         }
-    }
-
-    private async Task<string> GetOrCreateConversationAsync(string userId)
-    {
-        if (UserConversationMap.TryGetValue(userId, out var conversationId))
-        {
-            return conversationId;
-        }
-
-        // 新しい対話を開始
-        var conversation = await _conversationManager.StartConversationAsync(
-            new StartConversationRequest { Channel = "line" });
-
-        UserConversationMap[userId] = conversation.ConversationId;
-        return conversation.ConversationId;
     }
 }

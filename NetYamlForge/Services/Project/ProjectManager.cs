@@ -189,4 +189,12 @@ public class ProjectManager
         _projects.TryGetValue(name, out info);
 
     public IReadOnlyCollection<ProjectInfo> GetAll() => _projects.Values;
+
+    /// <summary>
+    /// プロジェクトのディレクトリパスを取得します。
+    /// </summary>
+    public string? GetProjectDirectory(string projectName)
+    {
+        return TryGet(projectName, out var info) ? info.ProjectDir : null;
+    }
 }

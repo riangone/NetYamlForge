@@ -5,7 +5,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$SCRIPT_DIR/NetYamlForge/NetYamlForge.AI.Web"
+PROJECT_DIR="$SCRIPT_DIR/NetYamlForge.AI.Web"
 
 echo "========================================="
 echo "NetYamlForge.AI.Web 启动脚本"
@@ -32,7 +32,7 @@ fi
 # 构建项目
 echo "1. 构建项目..."
 cd "$SCRIPT_DIR"
-dotnet build NetYamlForge/NetYamlForge.AI.Web/NetYamlForge.AI.Web.csproj --no-incremental
+dotnet build NetYamlForge.AI.Web/NetYamlForge.AI.Web.csproj --no-incremental
 echo ""
 
 # 启动服务

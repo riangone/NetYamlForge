@@ -104,7 +104,9 @@ public record CardItem(
     string? ImageUrl = null,
     string? BadgeLabel = null,
     string? BadgeStyle = null,
-    List<CardAction>? Actions = null
+    List<CardAction>? Actions = null,
+    Dictionary<string, string>? Metadata = null,
+    List<string>? Tags = null
 );
 
 public record CardAction(

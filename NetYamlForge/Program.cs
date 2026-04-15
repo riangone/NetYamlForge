@@ -3,17 +3,14 @@
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
 using System.Globalization;
+using System.Linq;
 using NetYamlForge.Data;
 using NetYamlForge.Data.Schemas;
 using NetYamlForge.Extensions;
-using NetYamlForge.Hubs;
 using NetYamlForge.Middleware;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Cli;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.AI.Providers;
-using NetYamlForge.AI.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
@@ -120,80 +117,6 @@ if (args.Any(a => a.Equals("--init-project", StringComparison.OrdinalIgnoreCase)
     return;
 }
 
-if (args.Any(a => a.Equals("--ai-generate", StringComparison.OrdinalIgnoreCase)))
-{
-    var promptArg = args.FirstOrDefault(a => a.StartsWith("--prompt=", StringComparison.OrdinalIgnoreCase));
-    var prompt = promptArg?.Split('=', 2).ElementAtOrDefault(1) 
-        ?? throw new ArgumentException("--prompt 参数是必需的");
-    
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    
-    var targetDirArg = args.FirstOrDefault(a => a.StartsWith("--target-dir=", StringComparison.OrdinalIgnoreCase));
-    var targetDir = targetDirArg?.Split('=', 2).ElementAtOrDefault(1);
-    
-    var timeoutArg = args.FirstOrDefault(a => a.StartsWith("--timeout=", StringComparison.OrdinalIgnoreCase));
-    int? timeout = timeoutArg != null ? int.Parse(timeoutArg.Split('=', 2).ElementAtOrDefault(1)) : null;
-    
-    var pipelineMode = args.Any(a => a.Equals("--pipeline-mode=single", StringComparison.OrdinalIgnoreCase)) 
-        ? "single" : "full";
-    
-    Console.WriteLine($"[AI-Pipeline] 开始生成 - Prompt: {prompt}");
-    if (!string.IsNullOrEmpty(projectName))
-        Console.WriteLine($"[AI-Pipeline] 项目: {projectName}");
-    if (!string.IsNullOrEmpty(targetDir))
-        Console.WriteLine($"[AI-Pipeline] 目标目录: {targetDir}");
-    
-    // 创建临时服务提供者
-    var services = new ServiceCollection()
-        .AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
-        .AddOptions()
-        .Configure<AiPipelineConfig>(b => 
-        {
-            b.HarnessDirectory = "/home/ubuntu/ws/harness-new";
-            b.HarnessWorkDirectory = "/tmp/nyf-harness";
-            b.PythonExecutable = "python3";
-            b.DefaultTimeoutSeconds = timeout ?? 3600;
-        })
-        .AddHttpClient<AiPipelineService>(c => c.Timeout = TimeSpan.FromHours(1))
-        .BuildServiceProvider();
-    
-    var pipelineService = services.GetRequiredService<AiPipelineService>();
-    var cts = new CancellationTokenSource();
-    
-    var result = await pipelineService.ExecutePipelineAsync(
-        prompt: prompt,
-        projectName: projectName,
-        targetProjectDir: targetDir,
-        timeout: timeout,
-        ct: cts.Token);
-    
-    if (result.Success)
-    {
-        Console.WriteLine($"\n[AI-Pipeline] ✅ 生成成功!");
-        Console.WriteLine($"[AI-Pipeline] 工作目录: {result.WorkDirectory}");
-        if (result.GeneratedFiles.Count > 0)
-        {
-            Console.WriteLine($"[AI-Pipeline] 生成的文件:");
-            foreach (var file in result.GeneratedFiles)
-                Console.WriteLine($"  - {file}");
-        }
-        Environment.Exit(0);
-    }
-    else
-    {
-        Console.WriteLine($"\n[AI-Pipeline] ❌ 生成失败: {result.ErrorMessage}");
-        if (result.Logs.Count > 0)
-        {
-            Console.WriteLine("\n[AI-Pipeline] 日志:");
-            foreach (var log in result.Logs.TakeLast(20))
-                Console.WriteLine($"  {log}");
-        }
-        Environment.Exit(1);
-    }
-    return;
-}
-
 if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnoreCase)))
 {
     var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
@@ -213,9 +136,6 @@ if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnor
 }
 
 var builder = WebApplication.CreateBuilder(args);
-
-// ユーザーが管理画面から変更した AI 設定を読み込む（appsettings.json を上書き）
-builder.Configuration.AddJsonFile("ai-user-settings.json", optional: true, reloadOnChange: true);
 
 // Windows サービスとして実行する場合
 if (useWindowsService)
@@ -239,7 +159,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.Razor.RazorViewEngineOptions
     options.ViewLocationExpanders.Add(new NetYamlForge.Services.ProjectViewLocationExpander());
 });
 
-// ===== 多租户认证服务 =====
+// ===== 多テナント認証サービス =====
 builder.Services.AddScoped<NetYamlForge.Services.Tenant.ITenantUserService, NetYamlForge.Services.Tenant.TenantUserService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -255,271 +175,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
 });
 
 // ===== サービス登録（Extensions/ServiceCollectionExtensions.cs に委譲）=====
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge();
 
-// ===== AI Assistant Services =====
-// 双モード対応：
-// - embedded (デフォルト): AI サービスを主プロセス内で実行
-// - standalone: 独立プロセスの AI サービスを HTTP API + SignalR で呼び出し
-var aiMode = builder.Configuration["AI:Mode"] ?? "embedded";
-
-if (aiMode.Equals("standalone", StringComparison.OrdinalIgnoreCase))
-{
-    // 独立进程模式：使用 HTTP API クライアント
-    builder.Services.AddHttpClient<AIServiceClient>(client =>
-    {
-        var baseUrl = builder.Configuration["AI:ServiceBaseUrl"] ?? "http://localhost:5200";
-        client.BaseAddress = new Uri(baseUrl);
-        client.Timeout = TimeSpan.FromMinutes(30);
-    });
-    builder.Services.AddSingleton(sp => sp.GetRequiredService<AIServiceClient>());
-    Log.Information("AI服务模式：独立进程 (HTTP API @ {BaseUrl})", builder.Configuration["AI:ServiceBaseUrl"]);
-}
-else
-{
-    // 嵌入式模式：直接在主进程内运行 AI 服务（现有逻辑保持不变）
-builder.Services.Configure<CliConfig>(builder.Configuration.GetSection(CliConfig.SectionName));
-builder.Services.AddSingleton<ProcessExecutor>();
-builder.Services.AddSingleton<SkillLoader>();
-builder.Services.AddSingleton<CLIServiceFactory>();
-builder.Services.AddSingleton<AISettingsService>();
-builder.Services.AddSingleton<ProgressTracker>();
-builder.Services.AddSingleton<TaskQueueService>();
-
-// HTTP Client for Ollama and LM Studio (本地模型)
-builder.Services.AddHttpClient("OllamaClient");
-builder.Services.AddHttpClient("LmStudioClient");
-
-// AI 窓口チャットサービス (auto-dealer-demo)
-// グローバル AI と共通のサービス（CLIServiceFactory, SkillLoader, TaskQueueService, ProgressTracker）を再利用
-builder.Services.AddScoped<NetYamlForge.Services.AI.AutoDealerChatService>();
-
-// JPiere 契約サービス AI チャットサービス
-builder.Services.AddScoped<NetYamlForge.Services.AI.JpiereChatService>();
-
-// AI 自然言語クエリサービス（QueryParserService が依存する ILlmProvider を含む）
-// HybridLlmProvider: API ファースト + CLI フォールバック（高速応答）
-builder.Services.AddScoped<NetYamlForge.Services.AI.Providers.ILlmProvider,
-                           NetYamlForge.Services.AI.Providers.HybridLlmProvider>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.QueryParserService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.QueryExecutionService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.QueryResultFormatter, NetYamlForge.Services.AI.QueryResultFormatter>();
-
-// 意図分類器（試乗予約Slot-filling用）
-builder.Services.AddScoped<NetYamlForge.Services.AI.IIntentClassifier,
-                           NetYamlForge.Services.AI.HybridIntentClassifier>();
-
-// スロットフィリングマネージャー（試乗予約情報収集用）
-builder.Services.AddSingleton<NetYamlForge.Services.AI.ISlotFillingManager,
-                              NetYamlForge.Services.AI.SlotFillingManager>();
-
-// AI CLI Services
-// 进程池管理器（需要在 CLI 服务之前注册）
-var processPoolConfig = new NetYamlForge.Services.AI.CliProcessPoolConfig();
-builder.Configuration.GetSection("AICli:ProcessPool").Bind(processPoolConfig);
-builder.Services.AddSingleton(processPoolConfig);
-builder.Services.AddSingleton<NetYamlForge.Services.AI.AIProcessPoolManager>();
-
-// 常驻进程聊天服务工厂
-builder.Services.AddSingleton<NetYamlForge.Services.AI.DaemonChatServiceFactory>(sp =>
-{
-    return new NetYamlForge.Services.AI.DaemonChatServiceFactory(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILoggerFactory>());
-});
-
-// 注册装饰器包装的 CLI 服务（进程池支持）
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new ClaudeCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<ClaudeCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new QwenCodeCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<QwenCodeCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new MockCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<MockCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new CodexCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<CodexCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new GeminiCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<GeminiCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new OllamaCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<OllamaCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new LmStudioCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<LmStudioCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-builder.Services.AddSingleton<ICLIService>(sp =>
-{
-    var inner = new CopilotCLIService(
-        sp.GetRequiredService<ProcessExecutor>(),
-        sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<NetYamlForge.Services.AI.CliConfig>>(),
-        sp.GetRequiredService<SkillLoader>(),
-        sp.GetRequiredService<ILogger<CopilotCLIService>>());
-
-    var poolManager = sp.GetRequiredService<NetYamlForge.Services.AI.AIProcessPoolManager>();
-    var executor = sp.GetRequiredService<ProcessExecutor>();
-    var daemonFactory = sp.GetRequiredService<NetYamlForge.Services.AI.DaemonChatServiceFactory>();
-    var logger = sp.GetRequiredService<ILogger<NetYamlForge.Services.AI.PooledCLIService>>();
-
-    return new NetYamlForge.Services.AI.PooledCLIService(
-        inner, poolManager, executor, processPoolConfig, daemonFactory, logger);
-});
-
-// DashScope 直接 API プロバイダー（高速応答用）
-builder.Services.AddSingleton<NetYamlForge.Services.AI.DashScopeApiProvider>();
-
-builder.Services.AddSignalR();
-
-// AI ディベートサービス
-builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateService>();
-builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateDbService>();
-builder.Services.AddSingleton<NetYamlForge.Services.AI.AIDebateOrchestrator>();
-
-// AI 窓口システムサービス (AIWindowController が依存)
-builder.Services.Configure<NetYamlForge.Services.AI.AiWindowConfig>(
-    builder.Configuration.GetSection("AiWindow"));
-builder.Services.AddScoped<NetYamlForge.Services.AI.IConversationManager,
-                           NetYamlForge.Services.AI.ConversationManager>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.IDirectAIProcessor,
-                           NetYamlForge.Services.AI.DirectAIProcessor>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.IHandoverManager,
-                           NetYamlForge.Services.AI.HandoverManager>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.ICustomerDataService,
-                           NetYamlForge.Services.AI.CustomerDataService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.IAppointmentService,
-                           NetYamlForge.Services.AI.AppointmentService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.IOperatorChatService,
-                           NetYamlForge.Services.AI.OperatorChatService>();
-
-// AI Pipeline Service (Harness 統合)
-builder.Services.Configure<NetYamlForge.Services.AI.AiPipelineConfig>(
-    builder.Configuration.GetSection("AiPipeline"));
-builder.Services.AddHttpClient<NetYamlForge.Services.AI.AiPipelineService>(client =>
-{
-    client.Timeout = TimeSpan.FromHours(1);
-});
-builder.Services.AddScoped<NetYamlForge.Services.AI.HarnessContextAdapter>();
-
-// AI 辅助服务（阶段 3）
-builder.Services.AddScoped<NetYamlForge.Services.AI.AiRefactoringService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.AiTestGenerationService>();
-builder.Services.AddScoped<NetYamlForge.Services.AI.AiDocumentationService>();
-} // end else (embedded mode)
-
 var app = builder.Build();
-
-// Start task queue processing
-var taskQueue = app.Services.GetRequiredService<TaskQueueService>();
-taskQueue.StartProcessing();
 
 // システムデータベース初期化（マルチテナント認証用）
 var sysLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("SystemDatabase");
@@ -567,18 +229,10 @@ app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<NetYamlForge.Services.Tenant.ProjectScopeMiddleware>(); // 项目范围验证中间件
-app.UseMiddleware<NetYamlForge.Services.Connection.ConnectionPreloadingMiddleware>(); // 连接预加载（Phase 2）- 必须在 ProjectScope 之后
+app.UseMiddleware<NetYamlForge.Services.Tenant.ProjectScopeMiddleware>();
+app.UseMiddleware<NetYamlForge.Services.Connection.ConnectionPreloadingMiddleware>();
 
-// SignalR Hubs for AI（嵌入式模式下才需要映射）
-if (aiMode.Equals("embedded", StringComparison.OrdinalIgnoreCase))
-{
-    app.MapHub<AIProgressHub>("/aiProgressHub");
-    app.MapHub<NaturalLanguageQueryHub>("/nlQueryHub");
-    app.MapHub<AIDebateHub>("/aiDebateHub");
-}
-
-// [ApiController] 属性ルーティングを明示的に登録（MapControllerRoute だけでは登録されない）
+// [ApiController] 属性ルーティングを明示的に登録
 app.MapControllers();
 
 // 用户个人主页（必须在 project-home 之前）
