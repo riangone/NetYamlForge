@@ -4,7 +4,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using NetYamlForge.Services.BatchJob;
 using Xunit;
 using Xunit.Abstractions;

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Xunit;
 using Xunit.Abstractions;
 

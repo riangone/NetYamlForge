@@ -1,0 +1,1073 @@
+/* =====================================================
+   AI Debate Platform — スタイルシート
+   ===================================================== */
+
+.ai-debate-app {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+}
+
+/* ── ヘッダー ── */
+.debate-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.debate-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.debate-subtitle {
+    color: #666;
+    font-size: 1rem;
+}
+
+/* ── 作成フォーム ── */
+.debate-create-panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.debate-create-panel h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 20px;
+}
+
+.debate-topic-input {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    resize: vertical;
+    transition: border-color 0.2s;
+}
+
+.debate-topic-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+}
+
+/* ── AI セレクター ── */
+.ai-selector-row {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin: 24px 0;
+}
+
+.ai-selector {
+    flex: 1;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 18px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.left-selector {
+    border-color: #4f46e5;
+    background: linear-gradient(135deg, #f0f0ff 0%, #fff 100%);
+}
+
+.right-selector {
+    border-color: #0ea5e9;
+    background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%);
+}
+
+.ai-selector-header {
+    margin-bottom: 14px;
+}
+
+.ai-side-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.left-badge {
+    background: #4f46e5;
+    color: #fff;
+}
+
+.right-badge {
+    background: #0ea5e9;
+    color: #fff;
+}
+
+.vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #999;
+    padding: 0 8px;
+    min-width: 48px;
+}
+
+/* ── フォームグループ ── */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.15);
+}
+
+.required { color: #e53e3e; }
+
+/* ── 作成ボタン ── */
+.create-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.debate-info {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* ── ディベートビューア ── */
+.debate-viewer {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* セッション情報バー */
+.session-info-bar {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.session-topic {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1rem;
+    min-width: 200px;
+}
+
+.session-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.session-status {
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.15);
+}
+
+/* AI ラベル行 */
+.debate-ai-labels {
+    display: flex;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.ai-label {
+    flex: 1;
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.left-label {
+    background: #f5f3ff;
+    border-right: 1px solid #e0e0e0;
+}
+
+.right-label {
+    background: #f0f9ff;
+    text-align: right;
+}
+
+.ai-provider-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.left-label .ai-provider-name { color: #4f46e5; }
+.right-label .ai-provider-name { color: #0ea5e9; }
+
+.ai-role-name {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* ── メッセージコンテナ ── */
+.debate-messages-container {
+    padding: 20px;
+    min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fafafa;
+}
+
+/* ── メッセージバブル ── */
+.debate-message {
+    display: flex;
+    gap: 12px;
+    animation: fadeInUp 0.3s ease;
+    max-width: 100%;
+}
+
+.debate-message.left-message {
+    align-self: flex-start;
+    flex-direction: row;
+    max-width: 80%;
+}
+
+.debate-message.right-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+    max-width: 80%;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    font-weight: 700;
+}
+
+.left-message .message-avatar {
+    background: #4f46e5;
+    color: #fff;
+}
+
+.right-message .message-avatar {
+    background: #0ea5e9;
+    color: #fff;
+}
+
+.message-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #888;
+}
+
+.left-message .message-meta { flex-direction: row; }
+.right-message .message-meta { flex-direction: row-reverse; }
+
+.message-provider {
+    font-weight: 600;
+    color: #555;
+}
+
+.message-round {
+    background: #e5e7eb;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 0.72rem;
+}
+
+.message-final-badge {
+    background: #fef3c7;
+    color: #92400e;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.message-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.left-message .message-bubble {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-top-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(79,70,229,0.08);
+}
+
+.right-message .message-bubble {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-top-right-radius: 4px;
+    box-shadow: 0 1px 3px rgba(14,165,233,0.08);
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #bbb;
+    text-align: right;
+}
+
+/* 最終メッセージのスタイル強調 */
+.debate-message.is-final .message-bubble {
+    border-width: 2px;
+}
+
+.left-message.is-final .message-bubble {
+    border-color: #4f46e5;
+    background: #f5f3ff;
+}
+
+.right-message.is-final .message-bubble {
+    border-color: #0ea5e9;
+    background: #e0f2fe;
+}
+
+/* ── ローディング表示 ── */
+.debate-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: #4f46e5;
+    border-radius: 50%;
+    animation: typingBounce 1.2s ease infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 完了通知 ── */
+.debate-completed-notice {
+    text-align: center;
+    padding: 16px;
+    background: #f0fdf4;
+    border-top: 1px solid #bbf7d0;
+    color: #166534;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* ── セッション一覧 ── */
+.debate-sessions-panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.debate-sessions-panel h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+}
+
+.sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.session-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.session-card:hover {
+    border-color: #4f46e5;
+    box-shadow: 0 2px 8px rgba(79,70,229,0.12);
+    background: #f9f8ff;
+}
+
+.session-card-topic {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.session-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+}
+
+.provider-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.left-tag { background: #ede9fe; color: #5b21b6; }
+.right-tag { background: #e0f2fe; color: #0369a1; }
+
+.vs-small { color: #999; font-size: 0.75rem; }
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pending { background: #fef9c3; color: #713f12; }
+.status-active { background: #dcfce7; color: #166534; }
+.status-completed { background: #e0f2fe; color: #0369a1; }
+.status-error { background: #fee2e2; color: #991b1b; }
+
+.session-date { color: #aaa; }
+
+/* ── ボタン ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #4f46e5;
+    color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #4338ca;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+}
+
+.btn-primary:disabled {
+    background: #a5b4fc;
+    cursor: not-allowed;
+}
+
+.btn-lg { padding: 12px 28px; font-size: 1rem; }
+
+.btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+
+.btn-outline-secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ── アラート ── */
+.alert {
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 0.9rem;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.d-none { display: none !important; }
+
+/* ── レスポンシブ ── */
+@media (max-width: 768px) {
+    .ai-selector-row {
+        flex-direction: column;
+    }
+
+    .vs-divider {
+        padding: 8px 0;
+    }
+
+    .debate-message.left-message,
+    .debate-message.right-message {
+        max-width: 95%;
+    }
+
+    .session-info-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* =====================================================
+   Topic.cshtml 用スタイル (AIDebateOrchestrator)
+   ===================================================== */
+:root {
+    --left-color: #4f46e5;
+    --left-light: #eef2ff;
+    --right-color: #0891b2;
+    --right-light: #ecfeff;
+    --status-pending: #f59e0b;
+    --status-running: #3b82f6;
+    --status-completed: #10b981;
+    --status-cancelled: #6b7280;
+    --status-error: #ef4444;
+}
+
+.debate-page, .debate-topic-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.debate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.debate-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin: 4px 0 0;
+    font-size: 14px;
+}
+
+.btn-create-topic {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+}
+
+.btn-create-topic:hover { opacity: 0.9; }
+
+.btn-start {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 10px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    transition: transform 0.1s;
+}
+
+.btn-start:hover { transform: scale(1.02); }
+
+.btn-cancel {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* 作成フォーム */
+.create-form {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.create-form.show { display: block; animation: slideDown 0.2s ease; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.create-form h2 { margin: 0 0 20px; font-size: 18px; color: #111827; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full-width { grid-column: 1 / -1; }
+.form-group label { font-size: 13px; font-weight: 600; color: #374151; }
+.form-group input, .form-group select, .form-group textarea {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79,70,229,0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+/* トピック一覧 */
+.topics-list h2 { font-size: 20px; color: #111827; margin-bottom: 16px; }
+
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.topic-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: block;
+    border-left: 4px solid #e5e7eb;
+}
+
+.topic-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.topic-card.status-running { border-left-color: var(--status-running); }
+.topic-card.status-completed { border-left-color: var(--status-completed); }
+.topic-card.status-pending { border-left-color: var(--status-pending); }
+.topic-card.status-error { border-left-color: var(--status-error); }
+.topic-card.status-cancelled { border-left-color: var(--status-cancelled); }
+
+.topic-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.topic-status-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.topic-date { font-size: 12px; color: #9ca3af; }
+
+.topic-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.topic-desc {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.topic-ai-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.ai-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.ai-badge.left { background: var(--left-light); color: var(--left-color); }
+.ai-badge.right { background: var(--right-light); color: var(--right-color); }
+
+.topic-progress {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+
+/* トピック詳細ページ */
+.back-link {
+    color: #4f46e5;
+    text-decoration: none;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.back-link:hover { text-decoration: underline; }
+
+.topic-info h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 8px;
+}
+
+.topic-description { color: #6b7280; margin: 0 0 10px; font-size: 15px; }
+
+.topic-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.status-badge {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-running { background: #dbeafe; color: #1e40af; }
+.status-completed { background: #d1fae5; color: #065f46; }
+.status-cancelled { background: #f3f4f6; color: #4b5563; }
+.status-error { background: #fee2e2; color: #991b1b; }
+
+.created-at { font-size: 13px; color: #9ca3af; }
+
+/* AI 情報バー */
+.ai-info-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.ai-panel.left-panel { text-align: left; }
+.ai-panel.right-panel { text-align: right; }
+
+.ai-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.left-panel .ai-name { color: var(--left-color); }
+.right-panel .ai-name { color: var(--right-color); }
+
+.turn-counter { font-size: 13px; font-weight: 500; color: #6b7280; }
+
+.ai-role {
+    font-size: 12px;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+/* コントロールバー */
+.control-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 12px 0;
+}
+
+.running-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--status-running);
+    font-weight: 600;
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #bfdbfe;
+    border-top-color: var(--status-running);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.completed-badge { color: var(--status-completed); font-weight: 600; font-size: 15px; }
+.cancelled-badge { color: var(--status-cancelled); font-weight: 600; font-size: 15px; }
+.error-badge { color: var(--status-error); font-weight: 600; font-size: 15px; }
+
+/* チャットエリア */
+.chat-area {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chat-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.chat-col-header {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.chat-col-header.left { color: var(--left-color); border-right: 1px solid #e5e7eb; }
+.chat-col-header.right { color: var(--right-color); text-align: right; }
+
+.messages-container {
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* メッセージ */
+.message-row {
+    display: flex;
+    width: 100%;
+}
+
+.message-row.left-side { justify-content: flex-start; }
+.message-row.right-side { justify-content: flex-end; }
+
+.message-bubble {
+    max-width: 70%;
+    border-radius: 12px;
+    padding: 12px 16px;
+    animation: fadeInMessage 0.3s ease;
+}
+
+@keyframes fadeInMessage {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message-bubble.left {
+    background: var(--left-light);
+    border: 1px solid #c7d2fe;
+    border-bottom-left-radius: 4px;
+}
+
+.message-bubble.right {
+    background: var(--right-light);
+    border: 1px solid #a5f3fc;
+    border-bottom-right-radius: 4px;
+}
+
+.message-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.message-bubble.left .message-meta { flex-direction: row; }
+.message-bubble.right .message-meta { flex-direction: row-reverse; }
+
+.message-sender { font-weight: 700; }
+.message-bubble.left .message-sender { color: var(--left-color); }
+.message-bubble.right .message-sender { color: var(--right-color); }
+
+.message-turn {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.message-time { color: #9ca3af; font-size: 11px; }
+
+.message-content {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #111827;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* タイピングインジケーター */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    align-items: center;
+}
+
+.typing-indicator.hidden { display: none; }
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: #9ca3af;
+    border-radius: 50%;
+    animation: typingAnim 1.2s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingAnim {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.3); opacity: 1; }
+}
+
+/* アラート */
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .ai-info-bar { grid-template-columns: 1fr; text-align: center; }
+    .ai-panel.right-panel { text-align: left; }
+    .message-bubble { max-width: 90%; }
+    .debate-header { flex-direction: column; gap: 12px; }
+}

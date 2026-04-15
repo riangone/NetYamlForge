@@ -1,10 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using NetYamlForge.Models.AI;
-using NetYamlForge.Services;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.BatchJob;
+using NetYamlForge.AI.Models;
+using NetYamlForge.AI.Infrastructure;
+using NetYamlForge.AI.Services;
 using Xunit;
 
 namespace NetYamlForge.Tests.Services.AI;
@@ -14,23 +13,22 @@ namespace NetYamlForge.Tests.Services.AI;
 /// </summary>
 public class HandoverManagerTests
 {
-    private readonly Mock<IDbConnectionFactory> _mockDbFactory;
+    private readonly Mock<IAIDbConnectionFactory> _mockDbFactory;
     private readonly Mock<IConversationManager> _mockConversationManager;
     private readonly HandoverManager _handoverManager;
 
     public HandoverManagerTests()
     {
-        _mockDbFactory = new Mock<IDbConnectionFactory>();
+        _mockDbFactory = new Mock<IAIDbConnectionFactory>();
         _mockConversationManager = new Mock<IConversationManager>();
 
-        // ProjectScope has internal Set, use reflection to set it
-        var projectScope = new ProjectScope();
-        var setMethod = typeof(ProjectScope).GetMethod("Set", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        setMethod?.Invoke(projectScope, [new ProjectInfo { Name = "auto-dealer-demo", DisplayName = "", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! }]);
+        var mockProjectContext = new Mock<IAIProjectContext>();
+        mockProjectContext.Setup(p => p.ProjectName).Returns("auto-dealer-demo");
+        mockProjectContext.Setup(p => p.IsSet).Returns(true);
 
-        var config = new NetYamlForge.Services.AI.AiWindowConfig
+        var config = new NetYamlForge.AI.Services.AiWindowConfig
         {
-            Handover = new NetYamlForge.Services.AI.HandoverConfig
+            Handover = new NetYamlForge.AI.Services.HandoverConfig
             {
                 AutoEnabled = true,
                 ConfidenceThreshold = 0.6,
@@ -43,7 +41,7 @@ public class HandoverManagerTests
 
         _handoverManager = new HandoverManager(
             _mockDbFactory.Object,
-            projectScope,
+            mockProjectContext.Object,
             _mockConversationManager.Object,
             Options.Create(config),
             logger);

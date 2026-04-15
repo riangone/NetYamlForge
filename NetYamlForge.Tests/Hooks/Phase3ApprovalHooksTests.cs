@@ -107,9 +107,11 @@ public class Phase3ApprovalHooksTests
 
             var reqCount = _db.ExecuteScalar<int>("SELECT COUNT(*) FROM approval_requests");
             var stepCount = _db.ExecuteScalar<int>("SELECT COUNT(*) FROM approval_steps");
+            var roles = _db.Query<string>("SELECT approver_role FROM approval_steps ORDER BY step_no").AsList();
 
             Assert.Equal(1, reqCount);
             Assert.Equal(1, stepCount);
+            Assert.Equal(new[] { "approver" }, roles);
 
             var order = _db.QuerySingle<dynamic>("SELECT * FROM purchase_orders WHERE id = 1");
             Assert.Equal("PENDING", order.ApprovalStatus);
@@ -131,9 +133,11 @@ public class Phase3ApprovalHooksTests
 
             var reqCount = _db.ExecuteScalar<int>("SELECT COUNT(*) FROM approval_requests");
             var stepCount = _db.ExecuteScalar<int>("SELECT COUNT(*) FROM approval_steps");
+            var roles = _db.Query<string>("SELECT approver_role FROM approval_steps ORDER BY step_no").AsList();
 
             Assert.Equal(1, reqCount);
             Assert.Equal(2, stepCount);
+            Assert.Equal(new[] { "approver", "admin" }, roles);
         }
     }
 

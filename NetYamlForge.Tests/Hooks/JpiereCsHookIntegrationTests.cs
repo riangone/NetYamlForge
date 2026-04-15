@@ -112,7 +112,7 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task ContractDocumentNoHook_GeneratesCorrectFormat()
     {
-        var hook = new ContractDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.ContractDocumentNoHook();
 
         var ctx = new EntityHookContext
         {
@@ -131,7 +131,7 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task EstimationDocumentNoHook_GeneratesSequentialNumbers()
     {
-        var hook = new EstimationDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.EstimationDocumentNoHook();
 
         var ctx = new EntityHookContext
         {
@@ -146,7 +146,7 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task BillDocumentNoHook_GeneratesSequentialNumbers()
     {
-        var hook = new BillDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.BillDocumentNoHook();
 
         var ctx = new EntityHookContext
         {

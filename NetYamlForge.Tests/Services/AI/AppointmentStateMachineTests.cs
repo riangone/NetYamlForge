@@ -1,4 +1,4 @@
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Xunit;
 using Microsoft.Extensions.Logging;
 using Moq;

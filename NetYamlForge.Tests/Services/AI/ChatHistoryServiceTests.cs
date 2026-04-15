@@ -1,4 +1,4 @@
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;

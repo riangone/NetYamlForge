@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Xunit;
 
 namespace NetYamlForge.Tests.Services.AI;

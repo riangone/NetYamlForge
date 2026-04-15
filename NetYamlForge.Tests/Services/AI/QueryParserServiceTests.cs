@@ -2,11 +2,10 @@ using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Models.AI;
-using NetYamlForge.Services.AI.Providers;
-using NetYamlForge.Services;
-using NetYamlForge.Models;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Models;
+using NetYamlForge.AI.Services.Providers;
+using NetYamlForge.AI.Infrastructure;
 
 namespace NetYamlForge.Tests.Services.AI;
 
@@ -16,7 +15,7 @@ namespace NetYamlForge.Tests.Services.AI;
 public class QueryParserServiceTests
 {
     private readonly Mock<ILlmProvider> _mockLlmProvider;
-    private readonly Mock<IEntityMetadataProvider> _mockMetadata;
+    private readonly Mock<IAIQueryExecutor> _mockQueryExecutor;
     private readonly Mock<ILogger<QueryParserService>> _mockLogger;
     private readonly Mock<IOptions<CliConfig>> _mockConfig;
     private readonly QueryParserService _parser;
@@ -24,15 +23,15 @@ public class QueryParserServiceTests
     public QueryParserServiceTests()
     {
         _mockLlmProvider = new Mock<ILlmProvider>();
-        _mockMetadata = new Mock<IEntityMetadataProvider>();
+        _mockQueryExecutor = new Mock<IAIQueryExecutor>();
         _mockLogger = new Mock<ILogger<QueryParserService>>();
         _mockConfig = new Mock<IOptions<CliConfig>>();
-        
+
         _mockConfig.Setup(x => x.Value).Returns(new CliConfig());
-        
+
         _parser = new QueryParserService(
             _mockLlmProvider.Object,
-            _mockMetadata.Object,
+            _mockQueryExecutor.Object,
             _mockLogger.Object,
             _mockConfig.Object);
     }
@@ -54,8 +53,9 @@ public class QueryParserServiceTests
             .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(llmResponse);
 
-        var mockEntity = CreateMockEntityMetadata("products");
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        var mockEntity = CreateMockAIEntityMetadata("products");
+        _mockQueryExecutor.Setup(x => x.GetEntityMetadataAsync("products", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockEntity);
 
         // Act
         var result = await _parser.ParseAsync(naturalLanguage, null, "products");
@@ -72,7 +72,7 @@ public class QueryParserServiceTests
     {
         // Arrange
         var naturalLanguage = "找出库存低于 5 的商品";
-        
+
         var llmResponse = @"{
             ""entity"": ""products"",
             ""action"": ""list"",
@@ -85,13 +85,14 @@ public class QueryParserServiceTests
             ],
             ""select"": [""id"", ""name"", ""stock_quantity""]
         }";
-        
+
         _mockLlmProvider
             .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(llmResponse);
 
-        var mockEntity = CreateMockEntityMetadata("products");
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        var mockEntity = CreateMockAIEntityMetadata("products");
+        _mockQueryExecutor.Setup(x => x.GetEntityMetadataAsync("products", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockEntity);
 
         // Act
         var result = await _parser.ParseAsync(naturalLanguage, null, "products");
@@ -109,7 +110,7 @@ public class QueryParserServiceTests
     {
         // Arrange
         var naturalLanguage = "显示销售额前 10 的产品";
-        
+
         var llmResponse = @"{
             ""entity"": ""products"",
             ""action"": ""list"",
@@ -121,13 +122,14 @@ public class QueryParserServiceTests
             ""top"": 10,
             ""select"": [""id"", ""name"", ""sales_amount""]
         }";
-        
+
         _mockLlmProvider
             .Setup(x => x.CompleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(llmResponse);
 
-        var mockEntity = CreateMockEntityMetadata("products");
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        var mockEntity = CreateMockAIEntityMetadata("products");
+        _mockQueryExecutor.Setup(x => x.GetEntityMetadataAsync("products", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockEntity);
 
         // Act
         var result = await _parser.ParseAsync(naturalLanguage, null, "products");
@@ -165,21 +167,22 @@ public class QueryParserServiceTests
         Assert.Equal(new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddTicks(-1), end);
     }
 
-    private EntityDefinition CreateMockEntityMetadata(string name)
+    private static AIEntityMetadata CreateMockAIEntityMetadata(string name)
     {
-        var metadata = new EntityDefinition
+        return new AIEntityMetadata
         {
+            Name = name,
+            TableName = name,
             DisplayName = name,
-            Columns = new Dictionary<string, ColumnDefinition>
+            Columns = new List<AIEntityColumn>
             {
-                ["id"] = new ColumnDefinition { Type = "int", Hidden = false },
-                ["name"] = new ColumnDefinition { Type = "string", Hidden = false },
-                ["price"] = new ColumnDefinition { Type = "decimal", Hidden = false },
-                ["stock_quantity"] = new ColumnDefinition { Type = "int", Hidden = false },
-                ["sales_amount"] = new ColumnDefinition { Type = "decimal", Hidden = false },
-                ["created_at"] = new ColumnDefinition { Type = "datetime", Hidden = false }
+                new() { Name = "id",             Type = "int" },
+                new() { Name = "name",           Type = "string" },
+                new() { Name = "price",          Type = "decimal" },
+                new() { Name = "stock_quantity", Type = "int" },
+                new() { Name = "sales_amount",   Type = "decimal" },
+                new() { Name = "created_at",     Type = "datetime" }
             }
         };
-        return metadata;
     }
 }

@@ -5,9 +5,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Models;
-using NetYamlForge.Models.AI;
+using NetYamlForge.AI.Models;
 using NetYamlForge.Services;
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Xunit;
 using Moq;
 
@@ -102,10 +102,9 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         configMock.Setup(c => c["AiWindow:BusinessHours"]).Returns("月〜金 9:00-18:00");
         configMock.Setup(c => c["AiWindow:EscalationSentimentThreshold"]).Returns("-0.5");
 
-        // ProjectScope has internal Set, use reflection to set it
-        var projectScope = new ProjectScope();
-        var setMethod = typeof(ProjectScope).GetMethod("Set", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        setMethod?.Invoke(projectScope, [new ProjectInfo { Name = "jpiere-cs", DisplayName = "jpiere-cs", ProjectDir = "", ConnectionString = "", EntityMetadata = null!, DashboardConfig = null! }]);
+        var mockProjectContext = new Mock<NetYamlForge.AI.Infrastructure.IAIProjectContext>();
+        mockProjectContext.Setup(p => p.ProjectName).Returns("jpiere-cs");
+        mockProjectContext.Setup(p => p.IsSet).Returns(true);
 
         // SkillLoader is not virtual, use real instance
         var envMock = new Mock<IWebHostEnvironment>();
@@ -119,7 +118,7 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
         var progressTrackerMock = new Mock<ProgressTracker>();
         var chatHistoryMock = new Mock<ChatHistoryService>();
         var loggerMock = new Mock<ILogger<JpiereChatService>>();
-        var llmProviderMock = new Mock<NetYamlForge.Services.AI.Providers.ILlmProvider>();
+        var llmProviderMock = new Mock<NetYamlForge.AI.Services.Providers.ILlmProvider>();
 
         chatHistoryMock
             .Setup(c => c.SaveMessageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
@@ -131,7 +130,7 @@ CREATE TABLE IF NOT EXISTS ai_handovers (
             cliFactoryMock?.Object ?? Mock.Of<CLIServiceFactory>(),
             llmProviderMock.Object,
             skillLoader,
-            projectScope,
+            mockProjectContext.Object,
             loggerMock.Object,
             queryParserMock.Object,
             queryExecutorMock.Object,

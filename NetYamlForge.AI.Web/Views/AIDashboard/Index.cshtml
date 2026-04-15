@@ -1,0 +1,466 @@
+@{
+    ViewData["Title"] = "AI 窓口ダッシュボード";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4">
+    <!-- ヘッダー -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-chat-dots-fill text-primary me-2"></i>
+                    AI 窓口ダッシュボード
+                </h1>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="btnRefresh">
+                        <i class="bi bi-arrow-clockwise me-1"></i> リフレッシュ
+                    </button>
+                    <button class="btn btn-primary" id="btnExport">
+                        <i class="bi bi-download me-1"></i> エクスポート
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-blue">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">アクティブ対話数</p>
+                            <h3 class="mb-0" id="statActiveConversations">-</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-red">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">待機中エスカレーション</p>
+                            <h3 class="mb-0" id="statPendingHandovers">-</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-green">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">今日 AI 回答数</p>
+                            <h3 class="mb-0" id="statTodayResponses">-</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card stats-card-purple">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">平均回答率</p>
+                            <h3 class="mb-0" id="statResponseRate">-%</h3>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="row">
+        <!-- 対話数推移 -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>対話数推移（7 日間）</h5>
+                    <select class="form-select form-select-sm" id="trendPeriod" style="width: auto;">
+                        <option value="7">7 日間</option>
+                        <option value="14">14 日間</option>
+                        <option value="30">30 日間</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- インテント内訳 -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>インテント内訳（今日）</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="intentChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- アクティブ対話一覧 -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>アクティブ対話一覧</h5>
+                    <span class="badge bg-primary" id="activeCount">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="activeConversationsTable">
+                            <thead>
+                                <tr>
+                                    <th>対話 ID</th>
+                                    <th>チャネル</th>
+                                    <th>インテント</th>
+                                    <th>感情</th>
+                                    <th>開始時間</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="bi bi-hourglass-split me-2"></i>読込中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- エスカレーションキュー -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-octagon me-2"></i>エスカレーションキュー</h5>
+                    <span class="badge bg-danger" id="handoverCount">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="handoverQueueTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>理由</th>
+                                    <th>優先度</th>
+                                    <th>部門</th>
+                                    <th>受付時間</th>
+                                    <th>アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        <i class="bi bi-hourglass-split me-2"></i>読込中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .stats-card {
+        transition: transform 0.2s;
+    }
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+    .stats-card .stats-icon {
+        font-size: 2.5rem;
+        opacity: 0.3;
+    }
+    .stats-card-blue .stats-icon { color: #007bff; }
+    .stats-card-red .stats-icon { color: #dc3545; }
+    .stats-card-green .stats-icon { color: #28a745; }
+    .stats-card-purple .stats-icon { color: #6f42c1; }
+    
+    .priority-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+    .priority-urgent { background: #dc3545; color: white; }
+    .priority-high { background: #fd7e14; color: white; }
+    .priority-medium { background: #ffc107; color: #212529; }
+    .priority-low { background: #6c757d; color: white; }
+    
+    .channel-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    .channel-web { background: #007bff; color: white; }
+    .channel-line { background: #00c300; color: white; }
+    .channel-email { background: #6c757d; color: white; }
+    
+    .sentiment-positive { color: #28a745; }
+    .sentiment-neutral { color: #6c757d; }
+    .sentiment-negative { color: #dc3545; }
+</style>
+}
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // ダッシュボードデータ
+    let trendChart = null;
+    let intentChart = null;
+
+    $(document).ready(function() {
+        loadDashboardStats();
+        loadActiveConversations();
+        loadHandoverQueue();
+        loadTrendData();
+        loadIntentData();
+
+        // リフレッシュボタン
+        $('#btnRefresh').click(function() {
+            loadAllData();
+        });
+
+        // 期間変更
+        $('#trendPeriod').change(function() {
+            loadTrendData($(this).val());
+        });
+
+        // 30 秒ごとに自動更新
+        setInterval(loadDashboardStats, 30000);
+    });
+
+    function loadAllData() {
+        loadDashboardStats();
+        loadActiveConversations();
+        loadHandoverQueue();
+    }
+
+    // 統計データ読み込み
+    function loadDashboardStats() {
+        $.get('/api/ai/analytics/dashboard-stats', function(data) {
+            $('#statActiveConversations').text(data.activeConversations);
+            $('#statPendingHandovers').text(data.pendingHandovers);
+            $('#statTodayResponses').text(data.todayAiResponses);
+            $('#statResponseRate').text(data.avgResponseRate + '%');
+            $('#activeCount').text(data.activeConversations);
+        });
+    }
+
+    // アクティブ対話一覧
+    function loadActiveConversations() {
+        $.get('/api/ai/conversations', { status: 'active', limit: 10 }, function(data) {
+            const tbody = $('#activeConversationsTable tbody');
+            if (!data || data.length === 0) {
+                tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">対話はありません</td></tr>');
+                return;
+            }
+            
+            let html = '';
+            data.forEach(item => {
+                const channelClass = 'channel-' + (item.channel || 'web');
+                const sentimentClass = getSentimentClass(item.sentimentScore);
+                const sentimentLabel = getSentimentLabel(item.sentimentScore);
+                
+                html += `
+                    <tr>
+                        <td><code>${item.conversationId}</code></td>
+                        <td><span class="channel-badge ${channelClass}">${item.channel}</span></td>
+                        <td>${item.lastIntent || '-'}</td>
+                        <td class="${sentimentClass}">${sentimentLabel}</td>
+                        <td>${formatTime(item.startedAt)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewConversation('${item.conversationId}')">表示</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.html(html);
+        });
+    }
+
+    // エスカレーションキュー
+    function loadHandoverQueue() {
+        $.get('/api/ai/analytics/handover-queue', function(data) {
+            const tbody = $('#handoverQueueTable tbody');
+            $('#handoverCount').text(data.length);
+            
+            if (!data || data.length === 0) {
+                tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">待機中のエスカレーションはありません</td></tr>');
+                return;
+            }
+            
+            let html = '';
+            data.forEach(item => {
+                const priorityClass = 'priority-' + (item.priority || 'medium');
+                
+                html += `
+                    <tr>
+                        <td><code>${item.handoverId}</code></td>
+                        <td>${item.reason}</td>
+                        <td><span class="priority-badge ${priorityClass}">${item.priority}</span></td>
+                        <td>${item.targetDepartment || '-'}</td>
+                        <td>${formatTime(item.escalatedAt)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="assignHandover('${item.handoverId}')">対応開始</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.html(html);
+        });
+    }
+
+    // 対話数推移チャート
+    function loadTrendData(days = 7) {
+        $.get('/api/ai/analytics/conversations-trend', { days: days }, function(data) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })),
+                    datasets: [
+                        {
+                            label: '総対話数',
+                            data: data.map(d => d.total),
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'AI 解決',
+                            data: data.map(d => d.resolvedByAi),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: '転接',
+                            data: data.map(d => d.handedOver),
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // インテント内訳チャート
+    function loadIntentData() {
+        $.get('/api/ai/analytics/intent-distribution', function(data) {
+            const ctx = document.getElementById('intentChart').getContext('2d');
+            
+            if (intentChart) {
+                intentChart.destroy();
+            }
+            
+            intentChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.intent),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: [
+                            '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1',
+                            '#fd7e14', '#20c997', '#e83e8c', '#6c757d', '#343a40'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        });
+    }
+
+    // ヘルパー関数
+    function getSentimentClass(score) {
+        if (score > 0.3) return 'sentiment-positive';
+        if (score < -0.3) return 'sentiment-negative';
+        return 'sentiment-neutral';
+    }
+
+    function getSentimentLabel(score) {
+        if (score > 0.3) return '😊 満足';
+        if (score < -0.3) return '😠 不満';
+        return '😐 普通';
+    }
+
+    function formatTime(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function viewConversation(id) {
+        window.location.href = '/ai/conversations/' + id;
+    }
+
+    function assignHandover(id) {
+        if (confirm('このエスカレーションの対応を開始しますか？')) {
+            // TODO: 割り当て API コール
+            alert('割り当て機能は今後実装予定です');
+        }
+    }
+</script>
+}

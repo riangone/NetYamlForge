@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NetYamlForge.Models.AI;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.AI.Providers;
+using NetYamlForge.AI.Models;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Services.Providers;
 using Xunit;
 
 namespace NetYamlForge.Tests.Services.AI;
@@ -13,13 +13,13 @@ namespace NetYamlForge.Tests.Services.AI;
 public class HybridIntentClassifierTests
 {
     private readonly HybridIntentClassifier _classifier;
-    private readonly NetYamlForge.Services.AI.AiWindowConfig _config;
+    private readonly NetYamlForge.AI.Services.AiWindowConfig _config;
 
     public HybridIntentClassifierTests()
     {
-        _config = new NetYamlForge.Services.AI.AiWindowConfig
+        _config = new NetYamlForge.AI.Services.AiWindowConfig
         {
-            Intent = new NetYamlForge.Services.AI.IntentConfig
+            Intent = new NetYamlForge.AI.Services.IntentConfig
             {
                 RuleBasedEnabled = true,
                 LlmEnabled = false, // テストではルールベースのみ

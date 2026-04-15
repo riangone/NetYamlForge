@@ -1,10 +1,9 @@
 using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Models.AI;
-using NetYamlForge.Models;
-using NetYamlForge.Services;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Models;
+using NetYamlForge.AI.Infrastructure;
 
 namespace NetYamlForge.Tests.Services.AI;
 
@@ -13,20 +12,18 @@ namespace NetYamlForge.Tests.Services.AI;
 /// </summary>
 public class QueryExecutionServiceTests
 {
-    private readonly Mock<IDynamicCrudRepository> _mockRepo;
-    private readonly Mock<IEntityMetadataProvider> _mockMetadata;
+    private readonly Mock<IAIQueryExecutor> _mockQueryExecutor;
     private readonly Mock<ILogger<QueryExecutionService>> _mockLogger;
     private readonly QueryExecutionService _executor;
 
     public QueryExecutionServiceTests()
     {
-        _mockRepo = new Mock<IDynamicCrudRepository>();
-        _mockMetadata = new Mock<IEntityMetadataProvider>();
+        _mockQueryExecutor = new Mock<IAIQueryExecutor>();
         _mockLogger = new Mock<ILogger<QueryExecutionService>>();
-        
+
         _executor = new QueryExecutionService(
-            _mockRepo.Object,
-            _mockMetadata.Object,
+            _mockQueryExecutor.Object,
+            new DefaultSqlSafetyGuard(),
             _mockLogger.Object);
     }
 
@@ -43,43 +40,23 @@ public class QueryExecutionServiceTests
             Top = 10
         };
 
-        var mockData = new List<dynamic>
+        var mockRows = new List<Dictionary<string, object?>>
         {
-            new System.Dynamic.ExpandoObject(),
-            new System.Dynamic.ExpandoObject()
+            new() { ["id"] = 1, ["name"] = "A", ["price"] = 100.0 },
+            new() { ["id"] = 2, ["name"] = "B", ["price"] = 200.0 }
         };
 
-        _mockRepo
-            .Setup(x => x.GetAllAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string?>>(),
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(mockData);
+        _mockQueryExecutor
+            .Setup(x => x.ExecuteQueryAsync("products", It.IsAny<QueryParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockRows.Cast<Dictionary<string, object?>>());
 
-        _mockRepo
-            .Setup(x => x.CountAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string?>>()))
-            .ReturnsAsync(2);
+        _mockQueryExecutor
+            .Setup(x => x.CountAsync("products", It.IsAny<QueryParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(2L);
 
-        var mockEntity = new EntityDefinition
-        {
-            DisplayName = "产品",
-            Columns = new Dictionary<string, ColumnDefinition>
-            {
-                ["id"] = new ColumnDefinition { Type = "int" },
-                ["name"] = new ColumnDefinition { Type = "string" },
-                ["price"] = new ColumnDefinition { Type = "decimal" }
-            }
-        };
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        _mockQueryExecutor
+            .Setup(x => x.GetEntityMetadataAsync("products", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AIEntityMetadata { Name = "products", TableName = "products" });
 
         // Act
         var (data, total) = await _executor.ExecuteAsync(query, "test-project");
@@ -104,23 +81,9 @@ public class QueryExecutionServiceTests
             }
         };
 
-        _mockRepo
-            .Setup(x => x.CountAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string?>>()))
-            .ReturnsAsync(5);
-
-        var mockEntity = new EntityDefinition
-        {
-            DisplayName = "产品",
-            Columns = new Dictionary<string, ColumnDefinition>
-            {
-                ["id"] = new ColumnDefinition { Type = "int" },
-                ["price"] = new ColumnDefinition { Type = "decimal" }
-            }
-        };
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        _mockQueryExecutor
+            .Setup(x => x.CountAsync("products", It.IsAny<QueryParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(5L);
 
         // Act
         var (data, total) = await _executor.ExecuteAsync(query, "test-project");
@@ -131,7 +94,7 @@ public class QueryExecutionServiceTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithFilters_BuildsFilterDictionary()
+    public async Task ExecuteAsync_WithFilters_ReturnsFilteredData()
     {
         // Arrange
         var query = new ParsedQueryParams
@@ -146,49 +109,28 @@ public class QueryExecutionServiceTests
             Select = new List<string> { "id", "name" }
         };
 
-        var mockData = new List<dynamic>
+        var mockRows = new List<Dictionary<string, object?>>
         {
-            new System.Dynamic.ExpandoObject()
+            new() { ["id"] = 1, ["name"] = "A" }
         };
 
-        _mockRepo
-            .Setup(x => x.GetAllAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string?>>(),
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-            .ReturnsAsync(mockData);
+        _mockQueryExecutor
+            .Setup(x => x.ExecuteQueryAsync("products", It.IsAny<QueryParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mockRows.Cast<Dictionary<string, object?>>());
 
-        _mockRepo
-            .Setup(x => x.CountAsync(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string?>>()))
-            .ReturnsAsync(1);
+        _mockQueryExecutor
+            .Setup(x => x.CountAsync("products", It.IsAny<QueryParameters>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1L);
 
-        var mockEntity = new EntityDefinition
-        {
-            DisplayName = "产品",
-            Columns = new Dictionary<string, ColumnDefinition>
-            {
-                ["id"] = new ColumnDefinition { Type = "int" },
-                ["name"] = new ColumnDefinition { Type = "string" },
-                ["price"] = new ColumnDefinition { Type = "decimal" },
-                ["stock_quantity"] = new ColumnDefinition { Type = "int" }
-            }
-        };
-        _mockMetadata.Setup(x => x.Get("products")).Returns(mockEntity);
+        _mockQueryExecutor
+            .Setup(x => x.GetEntityMetadataAsync("products", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AIEntityMetadata { Name = "products", TableName = "products" });
 
         // Act
         var (data, total) = await _executor.ExecuteAsync(query, "test-project");
 
         // Assert
         Assert.NotNull(data);
-        Assert.Equal(1, data.Count);
+        Assert.Single(data);
     }
 }

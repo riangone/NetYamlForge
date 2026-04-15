@@ -2,8 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Services.ToolValidation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -31,7 +31,7 @@ public class AIDialogueIntegrationTests
     {
         _output = output;
         var loggerMock = new Mock<ILogger<ToolCallValidator>>();
-        _toolValidator = new ToolCallValidator(loggerMock.Object);
+        _toolValidator = new ToolCallValidator(loggerMock.Object, new NetYamlForge.AI.Infrastructure.DefaultSqlSafetyGuard());
     }
 
     #region 测试场景 1: 意图识别

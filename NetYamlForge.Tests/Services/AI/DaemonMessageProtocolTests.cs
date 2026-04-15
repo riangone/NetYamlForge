@@ -1,5 +1,5 @@
 using System.Text.Json;
-using NetYamlForge.Services.AI;
+using NetYamlForge.AI.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -125,7 +125,7 @@ public class DaemonMessageProtocolTests
         Assert.NotNull(update);
         Assert.Equal("Done", update.Message);
         Assert.Equal(100, update.Progress);
-        Assert.Equal(Models.AI.TaskStatus.Completed, update.Status);
+        Assert.Equal(NetYamlForge.AI.Models.TaskStatus.Completed, update.Status);
         Assert.Equal("abc-123", update.SessionId);
     }
 
@@ -142,7 +142,7 @@ public class DaemonMessageProtocolTests
         // Assert
         Assert.NotNull(update);
         Assert.Equal("Processing...", update.Message);
-        Assert.Equal(Models.AI.TaskStatus.Running, update.Status);
+        Assert.Equal(NetYamlForge.AI.Models.TaskStatus.Running, update.Status);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class DaemonMessageProtocolTests
         // Assert
         Assert.NotNull(update);
         Assert.Equal("Something went wrong", update.Message);
-        Assert.Equal(Models.AI.TaskStatus.Failed, update.Status);
+        Assert.Equal(NetYamlForge.AI.Models.TaskStatus.Failed, update.Status);
     }
 
     [Fact]

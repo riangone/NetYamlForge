@@ -2,8 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Moq;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Services.ToolValidation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -40,7 +40,7 @@ public class AutoDealerTestDriveIntegrationTests : IDisposable
         _fsm = new AppointmentStateMachine(_conversationId);
         
         var toolValidatorLogger = new Mock<ILogger<ToolCallValidator>>();
-        _toolValidator = new ToolCallValidator(toolValidatorLogger.Object);
+        _toolValidator = new ToolCallValidator(toolValidatorLogger.Object, new NetYamlForge.AI.Infrastructure.DefaultSqlSafetyGuard());
     }
 
     public void Dispose()

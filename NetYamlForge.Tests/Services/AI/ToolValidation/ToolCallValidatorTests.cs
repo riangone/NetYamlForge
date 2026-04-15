@@ -2,8 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
-using NetYamlForge.Services.AI;
-using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.AI.Services;
+using NetYamlForge.AI.Services.ToolValidation;
 using Xunit;
 using Moq;
 
@@ -20,7 +20,7 @@ public class ToolCallValidatorTests
     public ToolCallValidatorTests()
     {
         _loggerMock = new Mock<ILogger<ToolCallValidator>>();
-        _validator = new ToolCallValidator(_loggerMock.Object);
+        _validator = new ToolCallValidator(_loggerMock.Object, new NetYamlForge.AI.Infrastructure.DefaultSqlSafetyGuard());
     }
 
     [Fact]

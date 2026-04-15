@@ -194,14 +194,15 @@ public class ConnectionManagerTests
             .Returns(false);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         var loggerFactoryMock = new Mock<ILoggerFactory>();
         loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
-        
+
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
+            scopeFactoryMock.Object,
             loggerFactoryMock.Object,
             _testOptions);
 
@@ -226,14 +227,15 @@ public class ConnectionManagerTests
             .Returns(true);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         var loggerFactoryMock = new Mock<ILoggerFactory>();
         loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
-        
+
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
+            scopeFactoryMock.Object,
             loggerFactoryMock.Object,
             _testOptions);
 
@@ -271,14 +273,15 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("project2", out outProject2)).Returns(true);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         var loggerFactoryMock = new Mock<ILoggerFactory>();
         loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
-        
+
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
+            scopeFactoryMock.Object,
             loggerFactoryMock.Object,
             _testOptions);
 
@@ -312,6 +315,7 @@ public class ConnectionManagerTests
             .Returns(true);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         var loggerFactoryMock = new Mock<ILoggerFactory>();
         loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
@@ -319,7 +323,7 @@ public class ConnectionManagerTests
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
+            scopeFactoryMock.Object,
             loggerFactoryMock.Object,
             _testOptions);
 
@@ -363,6 +367,7 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("project2", out outProject2)).Returns(true);
 
         var serviceProviderMock = new Mock<IServiceProvider>();
+        var scopeFactoryMock = new Mock<IServiceScopeFactory>();
         var loggerFactoryMock = new Mock<ILoggerFactory>();
         loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
@@ -370,7 +375,7 @@ public class ConnectionManagerTests
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
+            scopeFactoryMock.Object,
             loggerFactoryMock.Object,
             _testOptions);
 

@@ -1,0 +1,210 @@
+@{
+    ViewData["Title"] = "AI Chat";
+    Layout = null; // 全画面レイアウト — 独自 HTML を出力
+    var userName    = User.Identity?.Name ?? "User";
+    var userInitial = userName.Length > 0 ? userName[0].ToString().ToUpper() : "U";
+    var userId      = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NetYaml AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body data-user-authenticated="true">
+
+<div class="chat-layout" id="chatLayout">
+
+    <!-- ===== サイドバー ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <span class="brand-icon">🤖</span>
+                <span class="brand-name">NetYaml AI</span>
+            </div>
+            <button class="icon-btn sidebar-close-btn" id="sidebarCloseBtn" title="閉じる">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <button class="new-chat-btn" id="newChatBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+            新しい会話
+        </button>
+
+        <div class="conv-section-label">最近の会話</div>
+        <nav class="conv-list" id="convList">
+            <div class="conv-empty">会話履歴を読み込み中...</div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/AISettings" class="footer-link" title="AI設定">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                設定
+            </a>
+            <div class="user-chip">
+                <div class="user-avatar">@userInitial</div>
+                <span class="user-name">@userName</span>
+                <a href="/Account/Logout" class="icon-btn logout-btn" title="ログアウト">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== メインエリア ===== -->
+    <main class="main-area" id="mainArea">
+
+        <!-- ヘッダー -->
+        <div class="chat-header">
+            <button class="icon-btn sidebar-toggle-btn" id="sidebarToggleBtn" title="サイドバー">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+
+            <div class="model-picker">
+                <select id="modelSelect" title="AI モデルを選択">
+                    <option value="claude">Claude</option>
+                    <option value="qwen" selected>Qwen Code</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="ollama">Ollama</option>
+                    <option value="lmstudio">LM Studio</option>
+                </select>
+            </div>
+
+            <div class="header-status" id="headerStatus">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">準備完了</span>
+            </div>
+        </div>
+
+        <!-- メッセージエリア -->
+        <div class="messages-area" id="messagesArea">
+
+            <!-- ウェルカム画面 -->
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-glow"></div>
+                <div class="welcome-icon">🤖</div>
+                <h1 class="welcome-title">NetYaml AI</h1>
+                <p class="welcome-sub">コード・YAML・フレームワーク開発の専門アシスタント</p>
+                <div class="suggestions-grid">
+                    <button class="suggestion-card" data-msg="現在のプロジェクト構造を説明してください">
+                        <span class="suggestion-icon">📁</span>
+                        <span class="suggestion-label">プロジェクト構造を説明</span>
+                    </button>
+                    <button class="suggestion-card" data-msg="新しい Entity YAML のサンプルを作成してください">
+                        <span class="suggestion-icon">📝</span>
+                        <span class="suggestion-label">Entity YAML を作成</span>
+                    </button>
+                    <button class="suggestion-card" data-msg="このコードをレビューしてください">
+                        <span class="suggestion-icon">🔍</span>
+                        <span class="suggestion-label">コードレビュー</span>
+                    </button>
+                    <button class="suggestion-card" data-msg="エラーを調査して修正してください">
+                        <span class="suggestion-icon">🐛</span>
+                        <span class="suggestion-label">エラーを調査・修正</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- メッセージリスト -->
+            <div class="messages-list" id="messagesList"></div>
+
+        </div>
+
+        <!-- タイピングインジケーター -->
+        <div class="typing-indicator" id="typingIndicator" style="display:none">
+            <div class="typing-avatar">🤖</div>
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <span class="typing-label" id="typingLabel">考え中...</span>
+        </div>
+
+        <!-- 入力エリア -->
+        <div class="input-area">
+            <div class="input-wrapper" id="inputWrapper">
+                <textarea
+                    id="messageInput"
+                    class="message-textarea"
+                    placeholder="メッセージを入力... (Enter で送信 / Shift+Enter で改行)"
+                    rows="1"
+                    maxlength="50000"
+                    autocomplete="off"
+                    spellcheck="false"></textarea>
+                <div class="input-actions">
+                    <button class="send-btn" id="sendBtn" title="送信 (Enter)">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="input-footer">
+                <span class="char-count" id="charCount">0 / 50000</span>
+                <span class="input-hint">Enter で送信  Shift+Enter で改行</span>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<!-- テンプレート: メッセージバブル -->
+<template id="tplUserMsg">
+    <div class="msg msg-user">
+        <div class="msg-bubble"></div>
+        <div class="msg-meta"><span class="msg-time"></span></div>
+    </div>
+</template>
+
+<template id="tplAiMsg">
+    <div class="msg msg-ai">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-body">
+            <div class="msg-bubble"></div>
+            <div class="msg-meta">
+                <span class="msg-provider"></span>
+                <span class="msg-time"></span>
+                <button class="copy-btn" title="コピー">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="tplConvItem">
+    <div class="conv-item" role="button" tabindex="0">
+        <span class="conv-item-text"></span>
+    </div>
+</template>
+
+<script>
+    // サーバーからユーザー情報を注入
+    window.__AI_USER__ = { id: '@userId', name: '@Html.Raw(System.Text.Json.JsonSerializer.Serialize(userName))' };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js" crossorigin="anonymous"></script>
+<script src="~/js/chat-app.js" asp-append-version="true"></script>
+<script>ChatApp.init();</script>
+</body>
+</html>

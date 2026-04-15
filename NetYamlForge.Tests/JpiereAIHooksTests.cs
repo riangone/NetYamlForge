@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using NetYamlForge.ProjectHooks.JpiereCs;
+using NetYamlForge.Services.Hooks;
 using Xunit;
 
 namespace NetYamlForge.Tests;
@@ -144,6 +145,62 @@ CREATE TABLE IF NOT EXISTS todos (
         var ex = await Assert.ThrowsAsync<ArgumentException>(() => 
             hook.ExecuteAsync("beforeCreate", data, db));
         Assert.Contains("信頼度", ex.Message);
+    }
+
+    #endregion
+
+    #region IEntityHook Wrapper Tests
+
+    [Fact]
+    public void ValidateAiConversationEntityHook_Name_IsRegisteredName()
+    {
+        var hook = new ValidateAiConversationEntityHook();
+
+        Assert.Equal("validate_ai_conversation", hook.Name);
+    }
+
+    [Fact]
+    public async Task SetConversationTimestampsEntityHook_BeforeCreate_SetsExpectedFields()
+    {
+        await using var db = CreateInMemoryDb();
+        var hook = new SetConversationTimestampsEntityHook();
+        var ctx = new EntityHookContext
+        {
+            Values = new Dictionary<string, object?>(),
+            Operation = CrudOperation.Create
+        };
+
+        var result = await hook.BeforeAsync(ctx, db, null);
+
+        Assert.False(result.Cancel);
+        Assert.Equal("active", ctx.Values["status"]);
+        Assert.NotNull(ctx.Values["started_at"]);
+        Assert.NotNull(ctx.Values["created_at"]);
+        Assert.NotNull(ctx.Values["updated_at"]);
+    }
+
+    [Fact]
+    public async Task UpdateConversationUpdatedAtEntityHook_BeforeUpdate_UpdatesTimestampOnly()
+    {
+        await using var db = CreateInMemoryDb();
+        var hook = new UpdateConversationUpdatedAtEntityHook();
+        var ctx = new EntityHookContext
+        {
+            Values = new Dictionary<string, object?>
+            {
+                ["started_at"] = "2026-04-01 09:00:00",
+                ["created_at"] = "2026-04-01 09:00:00",
+                ["updated_at"] = "2026-04-01 09:00:00"
+            },
+            Operation = CrudOperation.Update
+        };
+
+        var result = await hook.BeforeAsync(ctx, db, null);
+
+        Assert.False(result.Cancel);
+        Assert.Equal("2026-04-01 09:00:00", ctx.Values["started_at"]);
+        Assert.Equal("2026-04-01 09:00:00", ctx.Values["created_at"]);
+        Assert.NotEqual("2026-04-01 09:00:00", ctx.Values["updated_at"]);
     }
 
     #endregion

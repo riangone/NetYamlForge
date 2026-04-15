@@ -1,0 +1,102 @@
+@{
+    ViewData["Title"] = "ログイン";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ログイン — NetYaml AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body class="login-body">
+
+<div class="login-container">
+    <div class="login-card">
+        <!-- ロゴ -->
+        <div class="login-logo">
+            <span class="login-logo-icon">🤖</span>
+            <h1 class="login-title">NetYaml AI</h1>
+            <p class="login-subtitle">AI チャット開発アシスタント</p>
+        </div>
+
+        <!-- エラーメッセージ -->
+        @if (ViewBag.Error is string error)
+        {
+            <div class="alert alert-error">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                @error
+            </div>
+        }
+
+        <!-- フォーム -->
+        <form method="post" action="/Account/Login" autocomplete="on">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+            <div class="form-group">
+                <label class="form-label" for="username">ユーザー名</label>
+                <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    class="form-input"
+                    placeholder="admin"
+                    autocomplete="username"
+                    autofocus
+                    required />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">パスワード</label>
+                <div class="password-wrapper">
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        class="form-input"
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                        required />
+                    <button type="button" class="toggle-pw" onclick="togglePw()" title="パスワードを表示">
+                        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                </svg>
+                ログイン
+            </button>
+        </form>
+
+        <p class="login-hint">デフォルト: <code>admin</code> / <code>Admin@@123</code></p>
+    </div>
+</div>
+
+<script>
+function togglePw() {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+        pw.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+}
+</script>
+</body>
+</html>
