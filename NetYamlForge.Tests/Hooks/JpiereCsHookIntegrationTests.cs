@@ -112,12 +112,12 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task ContractDocumentNoHook_GeneratesCorrectFormat()
     {
-        var hook = new ContractDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.ContractDocumentNoHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>(),
-            Operation = CrudOperation.Create
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Create
         };
         await hook.BeforeAsync(ctx, _connection, null);
         var docNo = ctx.Values["DocumentNo"]?.ToString();
@@ -131,12 +131,12 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task EstimationDocumentNoHook_GeneratesSequentialNumbers()
     {
-        var hook = new EstimationDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.EstimationDocumentNoHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>(),
-            Operation = CrudOperation.Create
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Create
         };
         await hook.BeforeAsync(ctx, _connection, null);
         Assert.Matches(@"^EST-\d{6}-0001$", ctx.Values["DocumentNo"]?.ToString());
@@ -146,12 +146,12 @@ public class JpiereCsHookIntegrationTests : IDisposable
     [Fact]
     public async Task BillDocumentNoHook_GeneratesSequentialNumbers()
     {
-        var hook = new BillDocumentNoHook();
+        var hook = new NetYamlForge.Projects.JpiereCs.Hooks.BillDocumentNoHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>(),
-            Operation = CrudOperation.Create
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Create
         };
         await hook.BeforeAsync(ctx, _connection, null);
         Assert.Matches(@"^BILL-\d{6}-0001$", ctx.Values["DocumentNo"]?.ToString());
@@ -163,14 +163,14 @@ public class JpiereCsHookIntegrationTests : IDisposable
     {
         var hook = new BillDueDateHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>
             {
                 ["DateBilled"] = "2026-04-01",
                 ["PaymentTermDays"] = 30
             },
-            Operation = CrudOperation.Create
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Create
         };
 
         await hook.BeforeAsync(ctx, _connection, null);
@@ -186,14 +186,14 @@ public class JpiereCsHookIntegrationTests : IDisposable
     {
         var hook = new BillOutstandingHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>
             {
                 ["GrandTotal"] = grandTotal,
                 ["PayAmt"] = payAmt
             },
-            Operation = CrudOperation.Update
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Update
         };
 
         await hook.BeforeAsync(ctx, _connection, null);
@@ -206,10 +206,10 @@ public class JpiereCsHookIntegrationTests : IDisposable
     {
         var hook = new ContractAmountCalculateHook();
 
-        var ctx = new EntityHookContext
+        var ctx = new NetYamlForge.Services.Hooks.EntityHookContext
         {
             Values = new Dictionary<string, object?>(),
-            Operation = CrudOperation.Create
+            Operation = NetYamlForge.Services.Hooks.CrudOperation.Create
         };
 
         var result = await hook.BeforeAsync(ctx, _connection, null);

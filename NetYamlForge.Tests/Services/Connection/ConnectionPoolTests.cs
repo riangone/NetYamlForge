@@ -193,16 +193,16 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet(It.IsAny<string>(), out It.Ref<ProjectInfo>.IsAny))
             .Returns(false);
 
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var loggerFactoryMock = new Mock<ILoggerFactory>();
-        loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+        var scopeFactory = new Mock<IServiceScopeFactory>();
+        var loggerFactory = new Mock<ILoggerFactory>();
+        loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
-            loggerFactoryMock.Object,
+            scopeFactory.Object,
+            loggerFactory.Object,
             _testOptions);
 
         // Act & Assert
@@ -225,16 +225,16 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("test-project", out outProject))
             .Returns(true);
 
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var loggerFactoryMock = new Mock<ILoggerFactory>();
-        loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+        var scopeFactory = new Mock<IServiceScopeFactory>();
+        var loggerFactory = new Mock<ILoggerFactory>();
+        loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
-            loggerFactoryMock.Object,
+            scopeFactory.Object,
+            loggerFactory.Object,
             _testOptions);
 
         // Act
@@ -270,16 +270,16 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("project1", out outProject1)).Returns(true);
         _projectManagerMock.Setup(pm => pm.TryGet("project2", out outProject2)).Returns(true);
 
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var loggerFactoryMock = new Mock<ILoggerFactory>();
-        loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+        var scopeFactory = new Mock<IServiceScopeFactory>();
+        var loggerFactory = new Mock<ILoggerFactory>();
+        loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
-            loggerFactoryMock.Object,
+            scopeFactory.Object,
+            loggerFactory.Object,
             _testOptions);
 
         // Act - 先创建一些连接
@@ -311,16 +311,16 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("test-project", out outProject))
             .Returns(true);
 
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var loggerFactoryMock = new Mock<ILoggerFactory>();
-        loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+        var scopeFactory = new Mock<IServiceScopeFactory>();
+        var loggerFactory = new Mock<ILoggerFactory>();
+        loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
 
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
-            loggerFactoryMock.Object,
+            scopeFactory.Object,
+            loggerFactory.Object,
             _testOptions);
 
         // Act - 创建连接池
@@ -362,16 +362,16 @@ public class ConnectionManagerTests
         _projectManagerMock.Setup(pm => pm.TryGet("project1", out outProject1)).Returns(true);
         _projectManagerMock.Setup(pm => pm.TryGet("project2", out outProject2)).Returns(true);
 
-        var serviceProviderMock = new Mock<IServiceProvider>();
-        var loggerFactoryMock = new Mock<ILoggerFactory>();
-        loggerFactoryMock.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
+        var scopeFactory = new Mock<IServiceScopeFactory>();
+        var loggerFactory = new Mock<ILoggerFactory>();
+        loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
 
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
-            serviceProviderMock.Object,
-            loggerFactoryMock.Object,
+            scopeFactory.Object,
+            loggerFactory.Object,
             _testOptions);
 
         // Act - 创建一些连接池

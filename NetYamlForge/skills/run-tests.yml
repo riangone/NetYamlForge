@@ -1,0 +1,237 @@
+apiVersion: skills.netyamlforge.io/v1
+kind: Skill
+metadata:
+  name: run-tests
+  version: "1.0.0"
+  displayName: テスト実行
+  description: |
+    dotnet test を実行して全テストスイートの結果を確認します。
+    失敗したテストを分析し、修正案を提示します。
+  category: testing
+  tier: 7
+  icon: "🧪"
+  tags:
+    - testing
+    - quality-assurance
+    - xunit
+  author: NetYamlForge Team
+  createdAt: "2026-04-16T00:00:00Z"
+  updatedAt: "2026-04-16T00:00:00Z"
+
+spec:
+  # 入力パラメータ定義
+  inputs:
+    required: []
+    properties:
+      filter:
+        type: string
+        description: |
+          テストフィルタ（オプション）
+          FullyQualifiedName でテストをフィルタリング
+          例: "DynamicEntityControllerTests.Create_ValidInput_Success"
+        example: "DynamicEntityControllerTests"
+
+      configuration:
+        type: string
+        enum: ["Debug", "Release"]
+        description: |
+          ビルド構成
+          - Debug: デバッグシンボル付き（低速、詳細情報）
+          - Release: 最適化（高速、本番環境シミュレーション）
+        default: "Debug"
+        example: "Debug"
+
+      verbose:
+        type: boolean
+        description: |
+          詳細ログ出力
+          true の場合、各テストのコンソール出力も表示
+        default: false
+        example: false
+
+      collect-coverage:
+        type: boolean
+        description: |
+          コードカバレッジ収集
+          true の場合、XPlat Code Coverage データを生成
+        default: false
+        example: false
+
+      parallel:
+        type: boolean
+        description: |
+          並列テスト実行
+          true の場合、複数スレッドでテストを並列実行（高速）
+        default: true
+        example: true
+
+  # 実行の前提条件
+  requirements:
+    dotnetVersion: ">=10.0.0"
+    tools:
+      - dotnet
+      - git
+    fileExists:
+      - "NetYamlForge.Tests/NetYamlForge.Tests.csproj"
+
+  # 実行ステップ
+  execution:
+    type: dotnet-cli
+    steps:
+      - name: "ビルド"
+        type: validation
+        description: |
+          テストプロジェクトとメインプロジェクトをビルド
+        command: |
+          dotnet build \
+            --configuration {configuration} \
+            --no-restore \
+            /p:TreatWarningsAsErrors=false
+        onError: abort
+        timeout: 180
+
+      - name: "テスト実行"
+        type: execution
+        description: |
+          dotnet test で全テストを実行
+          カバレッジ収集、フィルタリング、並列実行オプションを適用
+        command: |
+          dotnet test \
+            --configuration {configuration} \
+            --no-build \
+            --verbosity {% if verbose %}detailed{% else %}minimal{% endif %} \
+            {% if filter %}--filter "{filter}"{% endif %} \
+            {% if collect_coverage %}--collect:"XPlat Code Coverage"{% endif %} \
+            {% if parallel %}--parallel{% endif %}
+        onError: continue
+        timeout: 600
+
+      - name: "結果分析"
+        type: transformation
+        description: |
+          テスト実行結果を解析し、失敗したテストを特定
+          各失敗テストの原因分析と修正案を生成
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --analyze-test-results \
+               --configuration {configuration} \
+               {% if collect_coverage %}--with-coverage{% endif %}
+        onError: continue
+        timeout: 60
+
+  # 出力仕様
+  outputs:
+    successCriteria:
+      - "全テストが成功したか、または既知の失敗テストのみ"
+      - "ビルド成功"
+      - "テスト実行エラーなし（テストの失敗ではなく実行エラー）"
+
+    outputFormat:
+      type: markdown
+      structure:
+        summary: |
+          実行サマリー
+          - 総テスト数
+          - 成功数・失敗数・スキップ数
+          - 実行時間
+        results: |
+          テスト結果の詳細
+          - カテゴリ別の結果
+          - 失敗テスト一覧（あれば）
+        analysis: |
+          失敗テストの分析
+          - 各失敗の原因
+          - スタックトレース
+          - 修正案
+        coverage: |
+          コードカバレッジ（--collect-coverage 時）
+          - 全体カバレッジ率
+          - ファイル別カバレッジ
+        recommendations: "推奨される次のアクション"
+
+    files:
+      - pattern: "**/coverage.opencover.xml"
+        description: |
+          コードカバレッジレポート（--collect-coverage 時）
+          OpenCover 形式
+
+  # 許可ツール
+  allowedTools:
+    - bash
+    - dotnet
+    - file-read
+    - file-glob
+
+  # 学習・改善フィードバック
+  learning:
+    successMetrics:
+      - name: all_tests_passed
+        type: boolean
+        description: "全テストが成功したか"
+
+      - name: execution_time
+        type: time
+        unit: seconds
+        target: 120
+        description: "テスト実行時間の目標"
+
+      - name: code_coverage_percentage
+        type: percentage
+        unit: "%"
+        target: 80
+        description: "コードカバレッジの目標（--collect-coverage 時）"
+
+    feedbackTemplate: |
+      テスト結果のフィードバック（任意）:
+      
+      1. テスト結果は期待通りでしたか？
+         - [ ] はい（全て成功）
+         - [ ] 一部失敗
+         - [ ] その他
+      
+      2. 失敗テストの原因は明確でしたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] テストは全て成功
+      
+      3. テスト実行速度は許容範囲でしたか？
+         - [ ] はい
+         - [ ] 遅い
+         - [ ] 非常に遅い
+      
+      4. 改善提案（オプション）:
+         [ここに改善提案を記入]
+
+    improvementLog:
+      - date: "2026-04-16T00:00:00Z"
+        change: "初版リリース"
+        impact: "dotnet test スイートの統一実行が可能"
+
+# 依存関係
+dependencies:
+  requires: []
+  recommends:
+    - build-check
+
+# 既知の問題・制限事項
+limitations:
+  - description: |
+      並列実行時（--parallel）、一部テストの実行順序が非決定的になる可能性がある
+    workaround: |
+      テスト失敗時は --parallel なしで再実行して確認してください
+
+  - description: |
+      コードカバレッジ収集（--collect-coverage）で実行時間が大幅に増加
+    workaround: |
+      デバッグ時は --collect-coverage なしで実行し、
+      CI/CD パイプラインのみ有効にしてください
+
+  - description: |
+      テストフィルタが複雑な場合、フィルタ解析がエラーになる可能性
+    workaround: |
+      dotnet test --help で --filter の正確な構文を確認してください
+
+  - description: |
+      一部プラットフォーム（macOS/Linux）でテスト実行時に微妙な時間的問題が発生する可能性
+    workaround: |
+      --parallel なしで実行してみてください

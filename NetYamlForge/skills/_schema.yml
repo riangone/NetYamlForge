@@ -1,0 +1,472 @@
+# NetYamlForge YAML スキル仕様書
+# 全スキル定義が従うべき共通スキーマ
+
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://netyamlforge.example.com/skill.schema.json"
+
+type: object
+required:
+  - apiVersion
+  - kind
+  - metadata
+  - spec
+
+properties:
+  # スキーマバージョン
+  apiVersion:
+    type: string
+    description: スキーマバージョン（例：skills.netyamlforge.io/v1）
+    pattern: "^[a-z0-9]+\\.netyamlforge\\.io/v\\d+$"
+    example: "skills.netyamlforge.io/v1"
+
+  # リソースタイプ（常に "Skill"）
+  kind:
+    type: string
+    enum: ["Skill"]
+    description: リソースタイプ
+
+  # メタデータ
+  metadata:
+    type: object
+    required: [name, version]
+    properties:
+      name:
+        type: string
+        description: スキル識別子（kebab-case）
+        pattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+        example: "scaffold-entities"
+
+      version:
+        type: string
+        description: セマンティックバージョン
+        pattern: "^\\d+\\.\\d+\\.\\d+$"
+        example: "1.0.0"
+
+      displayName:
+        type: string
+        description: UI に表示するスキル名
+        example: "エンティティ生成"
+
+      description:
+        type: string
+        description: スキルの詳細説明（複数行可）
+        example: |
+          DB スキーマからエンティティ YAML を自動生成します。
+          既存テーブルの構造を解析して、Entity 定義ファイルを作成します。
+
+      category:
+        type: string
+        enum:
+          - scaffolding
+          - development
+          - testing
+          - deployment
+          - data-management
+          - configuration
+          - system
+        description: スキルのカテゴリ
+        example: "scaffolding"
+
+      tier:
+        type: integer
+        description: UI での表示順序（低い値が上）
+        minimum: 1
+        maximum: 10
+        example: 2
+
+      icon:
+        type: string
+        description: UI でのアイコン（emoji または Font Awesome class）
+        example: "📋"
+
+      tags:
+        type: array
+        items:
+          type: string
+        description: タグ（検索・フィルタリング用）
+        example: ["database", "yaml", "scaffolding"]
+
+      author:
+        type: string
+        description: スキル作成者
+        example: "NetYamlForge Team"
+
+      maintainers:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+        description: メンテナー情報
+        example:
+          - name: "Developer A"
+            email: "dev-a@example.com"
+
+      createdAt:
+        type: string
+        format: "date-time"
+        description: 作成日時（ISO 8601）
+        example: "2026-04-16T00:00:00Z"
+
+      updatedAt:
+        type: string
+        format: "date-time"
+        description: 最終更新日時
+        example: "2026-04-16T12:00:00Z"
+
+  # スキル定義（実装）
+  spec:
+    type: object
+    required: [inputs, execution]
+    properties:
+      # 入力パラメータ定義
+      inputs:
+        type: object
+        description: スキルが受け取るパラメータ
+        properties:
+          required:
+            type: array
+            items:
+              type: string
+            description: 必須パラメータ名一覧
+            example: ["project"]
+
+          properties:
+            type: object
+            additionalProperties:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [string, integer, boolean, array, object]
+                  description: パラメータ型
+                  example: "string"
+
+                description:
+                  type: string
+                  description: パラメータの説明
+                  example: "プロジェクト名（kebab-case）"
+
+                default:
+                  description: デフォルト値
+                  example: null
+
+                enum:
+                  type: array
+                  description: 選択肢（enum 型の場合）
+                  example: ["sqlite", "sqlserver", "postgresql", "mysql"]
+
+                pattern:
+                  type: string
+                  description: 値の正規表現制約
+                  example: "^[a-z0-9-]+$"
+
+                minLength:
+                  type: integer
+                  example: 1
+
+                maxLength:
+                  type: integer
+                  example: 255
+
+                example:
+                  description: 使用例
+                  example: "my-project"
+
+      # 前提条件
+      requirements:
+        type: object
+        description: スキル実行の前提条件
+        properties:
+          dotnetVersion:
+            type: string
+            description: 必須 .NET バージョン
+            example: ">=10.0.0"
+
+          tools:
+            type: array
+            items:
+              type: string
+            description: 必須ツール一覧
+            example: ["dotnet", "git"]
+
+          environment:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                required:
+                  type: boolean
+            description: 必須環境変数
+            example:
+              - name: "NETYAMLFORGE_HOME"
+                required: true
+
+          projectExists:
+            type: boolean
+            description: プロジェクトが存在することを要求
+            example: true
+
+          fileExists:
+            type: array
+            items:
+              type: string
+            description: 特定ファイルが存在することを要求（相対パス）
+            example:
+              - "projects/{project}/project.yaml"
+              - "projects/{project}/entities/"
+
+      # 実行仕様
+      execution:
+        type: object
+        required: [type, steps]
+        properties:
+          type:
+            type: string
+            enum: [bash, dotnet-cli, csharp, http, multi-step]
+            description: スキル実行タイプ
+            example: "dotnet-cli"
+
+          steps:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: ステップ名
+                  example: "Validate project"
+
+                description:
+                  type: string
+                  description: ステップの説明
+                  example: "プロジェクトが存在することを確認します"
+
+                type:
+                  type: string
+                  enum: [validation, execution, transformation, output]
+                  description: ステップタイプ
+
+                command:
+                  type: string
+                  description: 実行コマンド（テンプレート変数展開対応）
+                  example: "dotnet run -- --scaffold-entities --project={project}"
+
+                onError:
+                  type: string
+                  enum: [abort, continue, retry]
+                  description: エラー時の動作
+                  default: "abort"
+
+                timeout:
+                  type: integer
+                  description: タイムアウト（秒）
+                  example: 300
+
+            description: 実行ステップ一覧
+
+      # 成功基準・出力形式
+      outputs:
+        type: object
+        description: スキル実行の出力
+        properties:
+          successCriteria:
+            type: array
+            items:
+              type: string
+            description: スキル成功の判定条件
+            example:
+              - "コマンド終了コード 0"
+              - "生成ファイル数 > 0"
+              - "validation エラーなし"
+
+          outputFormat:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [text, json, markdown, files]
+                description: 出力形式
+                example: "markdown"
+
+              structure:
+                type: object
+                description: 出力構造の説明
+                example:
+                  summary: "実行サマリー"
+                  generatedFiles: "生成ファイル一覧"
+                  nextSteps: "推奨される次のアクション"
+
+          files:
+            type: array
+            items:
+              type: object
+              properties:
+                pattern:
+                  type: string
+                  description: 生成ファイルのパターン
+                  example: "projects/{project}/entities/*.yml"
+
+                description:
+                  type: string
+                  description: ファイルの説明
+                  example: "エンティティ定義 YAML ファイル"
+
+            description: 生成される可能性があるファイル一覧
+
+      # 許可されるツール
+      allowedTools:
+        type: array
+        items:
+          type: string
+          enum:
+            - bash
+            - dotnet
+            - file-read
+            - file-write
+            - file-edit
+            - file-glob
+            - file-grep
+            - git
+            - http
+            - database
+        description: スキル実行で使用可能なツール
+        example: ["bash", "dotnet", "file-read", "file-write"]
+
+      # 学習フィードバック
+      learning:
+        type: object
+        description: スキル改善用のフィードバック定義
+        properties:
+          successMetrics:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: メトリクス名
+                  example: "execution_time"
+
+                type:
+                  type: string
+                  enum: [time, count, percentage, boolean]
+                  description: メトリクス型
+
+                unit:
+                  type: string
+                  description: 単位
+                  example: "seconds"
+
+                target:
+                  description: 目標値
+                  example: 30
+
+            description: 成功メトリクス一覧
+
+          feedbackTemplate:
+            type: string
+            description: フィードバック入力テンプレート
+            example: |
+              - スキル実行は成功しましたか？（はい/いいえ）
+              - 実行時間は許容範囲でしたか？（はい/いいえ）
+              - 改善提案（オプション）
+
+          improvementLog:
+            type: array
+            items:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: "date-time"
+
+                change:
+                  type: string
+                  description: 改善内容
+
+                impact:
+                  type: string
+                  description: 期待される効果
+            description: 改善履歴ログ
+
+  # 関連スキル・依存関係
+  dependencies:
+    type: object
+    description: 他スキルとの依存関係
+    properties:
+      requires:
+        type: array
+        items:
+          type: string
+          description: 必須スキル（実行前に完了すべき）
+        example: ["new-project"]
+
+      recommends:
+        type: array
+        items:
+          type: string
+          description: 推奨スキル（実行後に次に実行すべき）
+        example: ["scaffold-hook", "run-tests"]
+
+      incompatible:
+        type: array
+        items:
+          type: string
+          description: 互換性のない/同時実行不可のスキル
+        example: ["scaffold-entities-interactive"]
+
+  # 既知の問題・制限事項
+  limitations:
+    type: array
+    items:
+      type: object
+      properties:
+        description:
+          type: string
+          description: 制限事項の説明
+          example: "PostgreSQL での自動インクリメント列は SERIAL 型のみ対応"
+
+        workaround:
+          type: string
+          description: 回避方法
+          example: "BigSerial を使う場合は手動で修正してください"
+
+    description: 既知の問題・制限事項一覧
+
+# 追加プロパティを許可しない
+additionalProperties: false
+
+# 例
+examples:
+  - apiVersion: "skills.netyamlforge.io/v1"
+    kind: "Skill"
+    metadata:
+      name: "scaffold-entities"
+      version: "1.0.0"
+      displayName: "エンティティ生成"
+      category: "scaffolding"
+      tier: 2
+      icon: "📋"
+    spec:
+      inputs:
+        required: ["project"]
+        properties:
+          project:
+            type: string
+            description: "プロジェクト名"
+          no-overwrite:
+            type: boolean
+            default: false
+      execution:
+        type: "dotnet-cli"
+        steps:
+          - name: "Validate project"
+            type: "validation"
+          - name: "Generate YAML"
+            type: "execution"

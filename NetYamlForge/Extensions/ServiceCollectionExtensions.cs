@@ -12,6 +12,7 @@ using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
+using NetYamlForge.Services.Cli;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -36,6 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
+        services.AddYamlSkillRegistry();
         return services;
     }
 
@@ -265,6 +267,27 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEntityHook, SoftDeleteHook>();
 
         services.AddSingleton<IEntityHookRegistry, EntityHookRegistry>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// YAML スキルレジストリを登録します。
+    /// スキル定義の読み込み・依存関係管理・メタデータ提供を行います。
+    /// </summary>
+    public static IServiceCollection AddYamlSkillRegistry(this IServiceCollection services)
+    {
+        // スキルレジストリ（Singleton: 起動時に読み込んでキャッシュ）
+        services.AddSingleton<IYamlSkillRegistry>(sp =>
+            new YamlSkillRegistry(
+                sp.GetRequiredService<ILogger<YamlSkillRegistry>>(),
+                "NetYamlForge/skills"));
+
+        // スキルローダー（Singleton: 初期化制御）
+        services.AddSingleton<IYamlSkillLoader, YamlSkillLoader>();
+
+        // ホストされサービス（起動時に自動実行）
+        services.AddHostedService<YamlSkillInitializationHostedService>();
 
         return services;
     }

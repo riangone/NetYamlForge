@@ -1,0 +1,296 @@
+apiVersion: skills.netyamlforge.io/v1
+kind: Skill
+metadata:
+  name: new-project
+  version: "1.0.0"
+  displayName: 新規プロジェクト
+  description: |
+    新しいマルチテナントプロジェクトを初期化します。
+    DB タイプ・接続情報・機能フラグを設定し、
+    プロジェクトに必要な基本ファイル（project.yaml、entities、config など）を生成します。
+  category: scaffolding
+  tier: 1
+  icon: "🏗️"
+  tags:
+    - project-initialization
+    - multi-tenancy
+    - scaffolding
+    - database
+  author: NetYamlForge Team
+  createdAt: "2026-04-16T00:00:00Z"
+  updatedAt: "2026-04-16T00:00:00Z"
+
+spec:
+  # 入力パラメータ定義
+  inputs:
+    required:
+      - project
+      - display-name
+    properties:
+      project:
+        type: string
+        description: |
+          プロジェクト識別子（kebab-case）
+          例: my-project, sales-system, customer-db
+        pattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+        minLength: 3
+        maxLength: 64
+        example: "my-project"
+
+      display-name:
+        type: string
+        description: |
+          プロジェクト表示名（日本語対応）
+          UI やレポートで表示される名前
+        minLength: 1
+        maxLength: 128
+        example: "営業管理システム"
+
+      db-type:
+        type: string
+        enum:
+          - sqlite
+          - sqlserver
+          - postgresql
+          - mysql
+        description: |
+          データベースタイプ
+          - sqlite: SQLite（ファイルベース、開発向け）
+          - sqlserver: SQL Server
+          - postgresql: PostgreSQL
+          - mysql: MySQL/MariaDB
+        default: "sqlite"
+        example: "sqlite"
+
+      db-path:
+        type: string
+        description: |
+          SQLite DB ファイルパス（sqlite 時のみ）
+          デフォルト: database/{project}.db
+        default: "database/{project}.db"
+        example: "database/my-project.db"
+
+      db-connection:
+        type: string
+        description: |
+          接続文字列（sqlite 以外で必須）
+          SQL Server 例: "Server=localhost;Database=mydb;Integrated Security=true;"
+          PostgreSQL 例: "Host=localhost;Database=mydb;Username=user;Password=pass;"
+        example: "Server=localhost;Database=mydb;Integrated Security=true;"
+
+      no-auto-scaffold:
+        type: boolean
+        description: |
+          true の場合、DB からのエンティティ自動生成をスキップ
+          false の場合、既存テーブルから entities/*.yml を自動生成
+        default: false
+        example: false
+
+      force:
+        type: boolean
+        description: |
+          true の場合、既存プロジェクトを上書き
+          false の場合、既存プロジェクトがあるとエラー
+        default: false
+        example: false
+
+  # 実行の前提条件
+  requirements:
+    dotnetVersion: ">=10.0.0"
+    tools:
+      - dotnet
+      - git
+    fileExists:
+      - "NetYamlForge/program.cs"
+      - "projects/"
+
+  # 実行ステップ
+  execution:
+    type: dotnet-cli
+    steps:
+      - name: "パラメータ検証"
+        type: validation
+        description: |
+          プロジェクト名・DB タイプ・接続情報の妥当性をチェック
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --validate-init-project \
+               --project={project} \
+               --display-name="{display-name}" \
+               --db-type={db-type} \
+               {% if db_type != 'sqlite' %}--db-connection="{db-connection}"{% endif %}
+        onError: abort
+        timeout: 30
+
+      - name: "プロジェクト初期化"
+        type: execution
+        description: |
+          プロジェクトディレクトリ・ファイル・DB スキーマを初期化
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --init-project \
+               --project={project} \
+               --display-name="{display-name}" \
+               --db-type={db-type} \
+               {% if db_type == 'sqlite' %}--db-path="{db-path}"{% else %}--db-connection="{db-connection}"{% endif %} \
+               {% if no_auto_scaffold %}--no-auto-scaffold{% endif %} \
+               {% if force %}--force{% endif %}
+        onError: abort
+        timeout: 120
+
+      - name: "エンティティ自動生成"
+        type: execution
+        description: |
+          既存 DB テーブルから entities/*.yml を自動生成（--no-auto-scaffold でない場合）
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --scaffold-entities \
+               --project={project}
+        onError: continue
+        timeout: 120
+
+      - name: "ビルド検証"
+        type: validation
+        description: |
+          生成されたプロジェクトがビルド可能か確認
+        command: |
+          dotnet build --configuration Debug \
+            --no-restore \
+            /p:TreatWarningsAsErrors=false
+        onError: abort
+        timeout: 180
+
+  # 出力仕様
+  outputs:
+    successCriteria:
+      - "dotnet コマンド終了コード: 0"
+      - "projects/{project}/ ディレクトリが作成された"
+      - "project.yaml が生成された"
+      - "DB スキーマ初期化成功"
+      - "ビルド成功"
+
+    outputFormat:
+      type: markdown
+      structure:
+        summary: |
+          実行サマリー
+          - プロジェクト名
+          - DB タイプ・接続情報
+          - 生成ファイル数
+        projectStructure: |
+          作成されたプロジェクト構造
+          - ディレクトリ一覧
+          - 主要ファイル一覧
+        configuration: |
+          設定情報
+          - project.yaml 設定概要
+          - DB 接続情報（接続文字列は除外）
+        nextSteps: "推奨される次のアクション"
+        notes: "注意事項・確認事項"
+
+    files:
+      - pattern: "projects/{project}/"
+        description: |
+          新規プロジェクトルートディレクトリ
+
+      - pattern: "projects/{project}/project.yaml"
+        description: |
+          プロジェクト設定ファイル
+          - DB タイプ・接続情報
+          - 機能フラグ
+          - プロジェクトメタデータ
+
+      - pattern: "projects/{project}/config/"
+        description: |
+          設定ファイルディレクトリ
+          - layout.yml（ナビゲーション）
+          - i18n.yml（ローカライズ）
+
+      - pattern: "projects/{project}/entities/*.yml"
+        description: |
+          エンティティ定義ファイル（自動生成）
+
+  # 許可ツール
+  allowedTools:
+    - bash
+    - dotnet
+    - file-read
+    - file-write
+    - file-edit
+    - file-glob
+    - git
+
+  # 学習・改善フィードバック
+  learning:
+    successMetrics:
+      - name: project_creation_success
+        type: boolean
+        description: "プロジェクト作成が成功したか"
+
+      - name: db_initialization_success
+        type: boolean
+        description: "DB スキーマ初期化が成功したか"
+
+      - name: build_success
+        type: boolean
+        description: "ビルドが成功したか"
+
+      - name: execution_time
+        type: time
+        unit: seconds
+        target: 120
+        description: "全体実行時間の目標"
+
+    feedbackTemplate: |
+      プロジェクト作成結果のフィードバック（任意）:
+      
+      1. プロジェクト作成は成功しましたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 部分的
+      
+      2. DB 接続は正常に動作していますか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 未確認
+      
+      3. 自動生成されたエンティティは適切でしたか？
+         - [ ] はい
+         - [ ] 修正が必要
+         - [ ] 大幅な改善が必要
+      
+      4. 改善提案（オプション）:
+         [ここに改善提案を記入]
+
+    improvementLog:
+      - date: "2026-04-16T00:00:00Z"
+        change: "初版リリース"
+        impact: "新規マルチテナントプロジェクト初期化が可能"
+
+# 依存関係
+dependencies:
+  requires: []
+  recommends:
+    - scaffold-entities
+    - scaffold-hook
+    - run-tests
+
+# 既知の問題・制限事項
+limitations:
+  - description: |
+      PostgreSQL/MySQL での自動スキーマ生成時、
+      一部データ型が正確に検出されない場合がある
+    workaround: |
+      生成後に entities/*.yml を手動で確認・修正してください
+
+  - description: |
+      大規模データベース（テーブル数 > 100）の場合、
+      自動生成に時間がかかる可能性がある
+    workaround: |
+      --no-auto-scaffold で初期化し、後から段階的に scaffold してください
+
+  - description: |
+      既存プロジェクトを --force で上書き時、
+      カスタマイズ設定が失われる可能性がある
+    workaround: |
+      必ずバックアップを作成してから --force を実行してください

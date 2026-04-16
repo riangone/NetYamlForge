@@ -1,0 +1,224 @@
+apiVersion: skills.netyamlforge.io/v1
+kind: Skill
+metadata:
+  name: scaffold-entities
+  version: "1.0.0"
+  displayName: エンティティ生成
+  description: |
+    DB スキーマからエンティティ YAML を自動生成します。
+    既存テーブルの構造を解析して、Entity 定義ファイルを作成します。
+  category: scaffolding
+  tier: 2
+  icon: "📋"
+  tags:
+    - database
+    - yaml
+    - scaffolding
+    - automation
+  author: NetYamlForge Team
+  createdAt: "2026-04-16T00:00:00Z"
+  updatedAt: "2026-04-16T00:00:00Z"
+
+spec:
+  # 入力パラメータ定義
+  inputs:
+    required:
+      - project
+    properties:
+      project:
+        type: string
+        description: |
+          プロジェクト名（kebab-case）
+          例: my-project, sales-system
+        pattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+        minLength: 3
+        maxLength: 64
+        example: "my-project"
+
+      no-overwrite:
+        type: boolean
+        description: |
+          true の場合、既存ファイルをスキップして新規テーブルのみ生成
+          false の場合、全テーブルを上書き生成
+        default: false
+        example: false
+
+      output-dir:
+        type: string
+        description: |
+          出力先ディレクトリ名（projects/{project}/ の相対パス）
+          デフォルト: entities.generated
+        default: "entities.generated"
+        example: "entities.generated"
+
+      with-label-keys:
+        type: boolean
+        description: |
+          true の場合、i18n の labelKey フィールドを生成 YAML に含める
+          false の場合、labelKey は含めない
+        default: false
+        example: false
+
+  # 実行の前提条件
+  requirements:
+    dotnetVersion: ">=10.0.0"
+    tools:
+      - dotnet
+      - git
+    projectExists: true
+    fileExists:
+      - "projects/{project}/project.yaml"
+      - "projects/{project}/"
+
+  # 実行ステップ
+  execution:
+    type: dotnet-cli
+    steps:
+      - name: "プロジェクト検証"
+        type: validation
+        description: |
+          プロジェクトが存在し、project.yaml が有効かチェック
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --validate-project --project={project}
+        onError: abort
+        timeout: 30
+
+      - name: "データベーススキーマ取得"
+        type: execution
+        description: |
+          project.yaml から DB 接続情報を取得し、テーブルスキーマを解析
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --scaffold-entities \
+               --project={project} \
+               --output-dir={output-dir} \
+               {% if no_overwrite %}--no-overwrite{% endif %} \
+               {% if with_label_keys %}--with-label-keys{% endif %}
+        onError: abort
+        timeout: 300
+
+      - name: "生成ファイル検証"
+        type: validation
+        description: |
+          生成された YAML ファイルが有効な schema に従っているかチェック
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --validate-entities-yaml \
+               --project={project} \
+               --path=projects/{project}/{output-dir}/
+        onError: abort
+        timeout: 60
+
+  # 出力仕様
+  outputs:
+    successCriteria:
+      - "dotnet コマンド終了コード: 0"
+      - "エンティティ YAML ファイル数 > 0"
+      - "YAML スキーマ検証: 全エラーなし"
+      - "型・必須フィールド整合性チェック: 合格"
+
+    outputFormat:
+      type: markdown
+      structure:
+        summary: "実行サマリー（生成ファイル数、テーブル数、警告数）"
+        generatedFiles: "生成されたエンティティ YAML ファイル一覧（相対パス）"
+        validation: |
+          検証結果
+          - 型サポート状況
+          - 外部キー参照状況
+          - 推奨スキーマ変更点
+        nextSteps: "推奨される次のアクション"
+        notes: "注意事項・確認事項"
+
+    files:
+      - pattern: "projects/{project}/{output-dir}/*.yml"
+        description: |
+          生成されたエンティティ定義ファイル
+          - テーブルごとに 1 ファイル
+          - キャメルケース名で生成
+          - 列定義、フォーム設定、バリデーション、フィルター、ページング
+
+  # 許可ツール
+  allowedTools:
+    - bash
+    - dotnet
+    - file-read
+    - file-write
+    - file-glob
+    - file-grep
+    - git
+
+  # 学習・改善フィードバック
+  learning:
+    successMetrics:
+      - name: execution_time
+        type: time
+        unit: seconds
+        target: 60
+        description: "全体実行時間の目標"
+
+      - name: file_generation_success_rate
+        type: percentage
+        unit: "%"
+        target: 100
+        description: "エンティティ生成成功率"
+
+      - name: schema_validation_success
+        type: boolean
+        description: "スキーマ検証が全て成功したか"
+
+    feedbackTemplate: |
+      実行結果のフィードバック（任意）:
+      
+      1. エンティティ生成は期待通りでしたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 部分的
+      
+      2. 生成されたファイルに修正が必要でしたか？
+         - [ ] いいえ（そのまま使用可能）
+         - [ ] わずか（1-2 ファイルのみ）
+         - [ ] かなり（複数ファイルの修正が必要）
+      
+      3. 改善提案（オプション）:
+         [ここに改善提案を記入]
+
+    improvementLog:
+      - date: "2026-04-16T00:00:00Z"
+        change: "初版リリース"
+        impact: "基本的なテーブル定義の自動生成が可能"
+
+# 依存関係
+dependencies:
+  requires:
+    - new-project
+  recommends:
+    - scaffold-hook
+    - run-tests
+    - upgrade-entity-yaml
+  incompatible:
+    - scaffold-entities-interactive
+
+# 既知の問題・制限事項
+limitations:
+  - description: |
+      PostgreSQL での AUTO_INCREMENT は SERIAL/BIGSERIAL 型のみ対応
+    workaround: |
+      GENERATED ALWAYS AS IDENTITY を使う場合は、生成後に手動修正してください
+
+  - description: |
+      JSON/JSONB 型のカラムは string 型で生成される
+    workaround: |
+      生成後に object 型に変更し、スキーマ定義を追加してください
+
+  - description: |
+      複数テーブルの外部キー参照（循環参照）がある場合、リレーション定義が不完全
+    workaround: |
+      生成後に relationships セクションを手動で補完してください
+
+  - description: |
+      --no-overwrite オプションと --with-label-keys の同時使用時、
+      既存ラベルキーが保持されない場合がある
+    workaround: |
+      必要に応じて手動でマージしてください
