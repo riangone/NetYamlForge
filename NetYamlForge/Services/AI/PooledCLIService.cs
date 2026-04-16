@@ -49,8 +49,11 @@ public class PooledCLIService : ICLIService
         string? systemPromptOverride = null,
         [EnumeratorCancellation] CancellationToken ct = default)
     {
-        // 流式执行使用 DaemonChatService（支持常驻进程）
-        var daemonService = _daemonFactory.GetService(this);
+        // DaemonChatService には実際の内部サービス (_innerService) を渡す。
+        // this (PooledCLIService) を渡すと、EnableDaemonMode=false 時に
+        // _innerService.ExecuteStreamingAsync → PooledCLIService.ExecuteStreamingAsync
+        // と無限再帰になってスタックオーバーフローが発生する。
+        var daemonService = _daemonFactory.GetService(_innerService);
         await foreach (var update in daemonService.ChatStreamingAsync(
             message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct))
         {
@@ -92,7 +95,8 @@ public class PooledCLIService : ICLIService
                 ToolName, message.Substring(0, Math.Min(50, message.Length)));
 
             // 使用 DaemonChatService 执行（支持常驻进程复用）
-            var daemonService = _daemonFactory.GetService(this);
+            // _innerService を渡すことで DaemonChatService の再帰呼び出しを防ぐ
+            var daemonService = _daemonFactory.GetService(_innerService);
             var result = await daemonService.ChatAsync(
                 message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct);
 

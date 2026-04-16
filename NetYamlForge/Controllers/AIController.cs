@@ -330,11 +330,12 @@ public class AIController : ControllerBase
     /// <param name="context">絞り込みコンテキスト（framework / dealer-staff / dealer-customer）。省略時は全件。</param>
     /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から取得</param>
     [HttpGet("history")]
-    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = "framework", [FromRoute] string? project = null)
+    public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = null, [FromRoute] string? project = null)
     {
         var userId = GetCurrentUserId();
         // プロジェクトが指定されていればそのプロジェクトの DB、なければ全局 DB を使用
-        var messages = await _chatHistory.GetHistoryAsync(userId, projectName: project, limit: limit, chatContext: string.IsNullOrEmpty(context) ? null : context);
+        // context が null または空の場合は、全コンテキストの履歴を取得
+        var messages = await _chatHistory.GetHistoryAsync(userId, projectName: project, limit: limit, chatContext: string.IsNullOrWhiteSpace(context) ? null : context);
         return Ok(messages);
     }
 

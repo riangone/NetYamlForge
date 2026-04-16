@@ -1382,16 +1382,25 @@
         return;
       }
       const msgs = await res.json();
-      if (!msgs?.length) return;
       const container = document.getElementById('aw-messages');
       if (!container) return;
-      container.innerHTML = ''; // ウェルカムメッセージをクリア
-      msgs.forEach(m => {
-        const role = m.type === 'assistant' ? 'assistant' : 'user';
-        // 使用服务器的时间戳
-        const ts = m.displayTime || m.createdAt || '';
-        renderMessage(m.content || '', role, { timestamp: ts, provider: m.provider || undefined });
-      });
+      
+      // 注意：取得したメッセージがある場合のみクリアし、メッセージをレンダリングする
+      // メッセージがない場合はウェルカムメッセージを残す
+      if (msgs && msgs.length > 0) {
+        container.innerHTML = '';
+        msgs.forEach(m => {
+          const type = m.type || m.Type || '';
+          const role = type === 'assistant' ? 'assistant' : 'user';
+          const content = m.content || m.Content || '';
+          const ts = m.displayTime || m.DisplayTime || m.createdAt || m.CreatedAt || '';
+          const provider = m.provider || m.Provider || undefined;
+          
+          if (content) {
+            renderMessage(content, role, { timestamp: ts, provider: provider });
+          }
+        });
+      }
     } catch(e) {
       console.warn('[AIChatWidget] 履歴取得エラー:', e);
       // サイレント失敗: ウェルカムメッセージはそのまま表示

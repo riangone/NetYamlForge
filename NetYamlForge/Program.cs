@@ -145,8 +145,8 @@ if (args.Any(a => a.Equals("--ai-generate", StringComparison.OrdinalIgnoreCase))
         Console.WriteLine($"[AI-Pipeline] 目标目录: {targetDir}");
     
     // 创建临时服务提供者
-    var services = new ServiceCollection()
-        .AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
+    var serviceCollection = new ServiceCollection();
+    serviceCollection.AddLogging(b => b.AddConsole().SetMinimumLevel(LogLevel.Information))
         .AddOptions()
         .Configure<AiPipelineConfig>(b => 
         {
@@ -155,8 +155,9 @@ if (args.Any(a => a.Equals("--ai-generate", StringComparison.OrdinalIgnoreCase))
             b.PythonExecutable = "python3";
             b.DefaultTimeoutSeconds = timeout ?? 3600;
         })
-        .AddHttpClient<AiPipelineService>(c => c.Timeout = TimeSpan.FromHours(1))
-        .BuildServiceProvider();
+        .AddHttpClient<AiPipelineService>(c => c.Timeout = TimeSpan.FromHours(1));
+        
+    var services = serviceCollection.BuildServiceProvider();
     
     var pipelineService = services.GetRequiredService<AiPipelineService>();
     var cts = new CancellationTokenSource();

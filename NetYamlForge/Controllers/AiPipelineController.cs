@@ -211,7 +211,7 @@ public class AiPipelineController : Controller
 
         try
         {
-            var projectDir = _projectManager.GetProjectDirectory(targetProject);
+            var projectDir = _projectManager.TryGet(targetProject, out var p) ? p!.ProjectDir : null;
             if (string.IsNullOrEmpty(projectDir))
             {
                 TempData["Error"] = $"项目不存在: {targetProject}";

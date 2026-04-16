@@ -13,9 +13,9 @@ namespace NetYamlForge.AI.Controllers;
 /// AI 助手控制器
 /// </summary>
 [Authorize]
-[ApiController]
+/* [ApiController]
 [Route("api/[controller]")]             // フレームワーク AI: /api/AI/...
-[Route("{project}/api/[controller]")]   // プロジェクト付き: /{project}/api/AI/...
+[Route("{project}/api/[controller]")]   // プロジェクト付き: /{project}/api/AI/... */
 public class AIController : ControllerBase
 {
     private readonly CLIServiceFactory _cliFactory;

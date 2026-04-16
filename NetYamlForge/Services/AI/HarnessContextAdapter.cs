@@ -19,16 +19,13 @@ public class HarnessContextAdapter
 {
     private readonly ILogger<HarnessContextAdapter> _logger;
     private readonly ProjectManager _projectManager;
-    private readonly EntityResolver _entityResolver;
 
     public HarnessContextAdapter(
         ILogger<HarnessContextAdapter> logger,
-        ProjectManager projectManager,
-        EntityResolver entityResolver)
+        ProjectManager projectManager)
     {
         _logger = logger;
         _projectManager = projectManager;
-        _entityResolver = entityResolver;
     }
 
     /// <summary>
@@ -50,16 +47,15 @@ public class HarnessContextAdapter
         var contextParts = new List<string>();
 
         // 项目基本信息
-        var project = _projectManager.GetProject(projectName);
-        if (project != null)
+        if (_projectManager.TryGet(projectName, out var project))
         {
-            contextParts.Add(BuildProjectInfoContext(project));
+            contextParts.Add(BuildProjectInfoContext(project!));
         }
 
         // 实体定义
-        if (includeEntities)
+        if (includeEntities && project != null)
         {
-            var entitiesContext = await BuildEntitiesContextAsync(projectName, ct);
+            var entitiesContext = await BuildEntitiesContextAsync(project, ct);
             if (!string.IsNullOrEmpty(entitiesContext))
             {
                 contextParts.Add(entitiesContext);
@@ -67,9 +63,9 @@ public class HarnessContextAdapter
         }
 
         // 页面配置
-        if (includePages)
+        if (includePages && project != null)
         {
-            var pagesContext = await BuildPagesContextAsync(projectName, ct);
+            var pagesContext = await BuildPagesContextAsync(project, ct);
             if (!string.IsNullOrEmpty(pagesContext))
             {
                 contextParts.Add(pagesContext);
@@ -77,9 +73,9 @@ public class HarnessContextAdapter
         }
 
         // 项目结构
-        if (includeProjectStructure)
+        if (includeProjectStructure && project != null)
         {
-            var structureContext = BuildProjectStructureContext(projectName);
+            var structureContext = BuildProjectStructureContext(project);
             if (!string.IsNullOrEmpty(structureContext))
             {
                 contextParts.Add(structureContext);
@@ -92,22 +88,18 @@ public class HarnessContextAdapter
     /// <summary>
     /// 构建项目基本信息上下文
     /// </summary>
-    private string BuildProjectInfoContext(Project project)
+    private string BuildProjectInfoContext(ProjectInfo project)
     {
         var sb = new StringBuilder();
         sb.AppendLine("# 项目信息");
         sb.AppendLine($"- 名称: {project.Name}");
         sb.AppendLine($"- 显示名称: {project.DisplayName}");
-        sb.AppendLine($"- 版本: {project.Version}");
-        sb.AppendLine($"- 数据库类型: {project.Database?.Type ?? "sqlite"}");
+        sb.AppendLine($"- 数据库类型: {project.DatabaseType}");
 
-        if (project.Features != null)
+        if (project.Layout != null)
         {
-            sb.AppendLine("- 启用的功能:");
-            foreach (var feature in project.Features)
-            {
-                sb.AppendLine($"  - {feature.Key}: {feature.Value}");
-            }
+            sb.AppendLine("- 布局配置:");
+            sb.AppendLine($"  - ダッシュボードテーマ: {project.Layout.DashboardTheme ?? "default"}");
         }
 
         return sb.ToString();
@@ -116,9 +108,9 @@ public class HarnessContextAdapter
     /// <summary>
     /// 构建实体定义上下文
     /// </summary>
-    private async Task<string> BuildEntitiesContextAsync(string projectName, CancellationToken ct)
+    private async Task<string> BuildEntitiesContextAsync(ProjectInfo project, CancellationToken ct)
     {
-        var entities = _entityResolver.GetEntitiesForProject(projectName);
+        var entities = project.EntityMetadata.GetAll();
         if (entities == null || entities.Count == 0)
             return string.Empty;
 
@@ -126,36 +118,41 @@ public class HarnessContextAdapter
         sb.AppendLine("# 实体定义");
         sb.AppendLine($"共 {entities.Count} 个实体");
 
-        foreach (var entity in entities.Take(10)) // 限制数量避免上下文过长
+        foreach (var kvp in entities.Take(10)) // 限制数量避免上下文过长
         {
             if (ct.IsCancellationRequested) break;
 
-            sb.AppendLine($"\n## 实体: {entity.Name}");
-            sb.AppendLine($"- 表名: {entity.TableName}");
+            var entityName = kvp.Key;
+            var entity = kvp.Value;
+
+            sb.AppendLine($"\n## 实体: {entityName}");
+            sb.AppendLine($"- 表名: {entity.Table}");
             sb.AppendLine($"- 显示名称: {entity.DisplayName}");
 
-            if (entity.Fields != null && entity.Fields.Count > 0)
+            if (entity.Columns != null && entity.Columns.Count > 0)
             {
-                sb.AppendLine($"- 字段 ({entity.Fields.Count} 个):");
-                foreach (var field in entity.Fields.Take(20)) // 限制字段数量
+                sb.AppendLine($"- 字段 ({entity.Columns.Count} 个):");
+                foreach (var colKvp in entity.Columns.Take(20)) // 限制字段数量
                 {
-                    var required = field.Required ? " [必需]" : "";
-                    var type = field.Type ?? "string";
-                    sb.AppendLine($"  - {field.Name} ({type}){required}");
+                    var colName = colKvp.Key;
+                    var col = colKvp.Value;
+                    var required = col.Required ? " [必需]" : "";
+                    var type = col.Type ?? "string";
+                    sb.AppendLine($"  - {colName} ({type}){required}");
                 }
 
-                if (entity.Fields.Count > 20)
+                if (entity.Columns.Count > 20)
                 {
-                    sb.AppendLine($"  ... 还有 {entity.Fields.Count - 20} 个字段");
+                    sb.AppendLine($"  ... 还有 {entity.Columns.Count - 20} 个字段");
                 }
             }
 
-            if (entity.Relations != null && entity.Relations.Count > 0)
+            if (entity.Joins != null && entity.Joins.Count > 0)
             {
-                sb.AppendLine($"- 关系:");
-                foreach (var rel in entity.Relations)
+                sb.AppendLine($"- 关系 (Joins):");
+                foreach (var join in entity.Joins)
                 {
-                    sb.AppendLine($"  - {rel.Type} -> {rel.TargetEntity}");
+                    sb.AppendLine($"  - {join.Type} -> {join.Table} ON {join.On}");
                 }
             }
         }
@@ -171,9 +168,9 @@ public class HarnessContextAdapter
     /// <summary>
     /// 构建页面配置上下文
     /// </summary>
-    private async Task<string> BuildPagesContextAsync(string projectName, CancellationToken ct)
+    private async Task<string> BuildPagesContextAsync(ProjectInfo project, CancellationToken ct)
     {
-        var projectDir = _projectManager.GetProjectDirectory(projectName);
+        var projectDir = project.ProjectDir;
         if (string.IsNullOrEmpty(projectDir))
             return string.Empty;
 
@@ -227,9 +224,9 @@ public class HarnessContextAdapter
     /// <summary>
     /// 构建项目结构上下文
     /// </summary>
-    private string BuildProjectStructureContext(string projectName)
+    private string BuildProjectStructureContext(ProjectInfo project)
     {
-        var projectDir = _projectManager.GetProjectDirectory(projectName);
+        var projectDir = project.ProjectDir;
         if (string.IsNullOrEmpty(projectDir) || !Directory.Exists(projectDir))
             return string.Empty;
 

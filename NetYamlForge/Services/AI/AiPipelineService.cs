@@ -141,7 +141,7 @@ public class AiPipelineService
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<HarnessPipelineResponse>(ct: ct);
+        var result = await response.Content.ReadFromJsonAsync<HarnessPipelineResponse>(cancellationToken: ct);
         
         if (result == null)
         {
