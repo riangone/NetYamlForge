@@ -1,0 +1,285 @@
+imports: []
+entities:
+  messages:
+    table: messages
+    key: Id
+    displayName: メッセージ
+    description: AIとユーザーの会話メッセージを管理します
+    softDelete: false
+    isPublic: false
+
+    # ── テーブル結合：会話情報を取得 ────────────────────────
+    joins:
+      - type: left
+        table: conversations
+        alias: conv
+        on: messages.ConversationId = conv.Id
+
+    # ── フォーム ────────────────────────────────────────────
+    forms:
+      ConversationId:
+        type: int
+        required: true
+        label: 会話
+        editable: true
+        foreignKey:
+          entity: conversations
+          displayColumn: Title
+          picker: false
+      Role:
+        type: string
+        required: true
+        label: 役割
+        editable: false
+        options:
+          - user
+          - assistant
+          - system
+      Content:
+        type: textarea
+        required: true
+        label: メッセージ内容
+        editable: true
+      TokenCount:
+        type: int
+        label: トークン数
+        editable: false
+      Model:
+        type: string
+        label: 使用モデル
+        editable: false
+      FinishReason:
+        type: string
+        label: 終了理由
+        editable: false
+        options:
+          - stop
+          - length
+          - tool_calls
+          - error
+      IsEdited:
+        type: bool
+        label: 編集済み
+        editable: false
+      EditedAt:
+        type: datetime
+        label: 編集日時
+        editable: false
+
+    # ── 一覧表示列 ────────────────────────────────────────────
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      ConversationId:
+        type: int
+        label: 会話ID
+        hidden: true
+      ConversationTitle:
+        type: string
+        label: 会話
+        expression: conv.Title
+        searchable: true
+        sortable: true
+      Role:
+        type: string
+        required: true
+        label: 役割
+        sortable: true
+        optionLabels:
+          user: "👤 ユーザー"
+          assistant: "🤖 アシスタント"
+          system: "⚙️ システム"
+      Content:
+        type: string
+        required: true
+        label: メッセージ内容
+        searchable: true
+      TokenCount:
+        type: int
+        label: トークン数
+        sortable: true
+      Model:
+        type: string
+        label: モデル
+        sortable: true
+      FinishReason:
+        type: string
+        label: 終了理由
+        sortable: true
+        optionLabels:
+          stop: "✅ 正常終了"
+          length: "⚠️ 長さ制限"
+          tool_calls: "🔧 ツール呼び出し"
+          error: "❌ エラー"
+      IsEdited:
+        type: bool
+        label: 編集済み
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 作成日
+        sortable: true
+      EditedAt:
+        type: datetime
+        label: 編集日
+        sortable: true
+
+    # ── フィルター ──────────────────────────────────────────
+    filters:
+      Role:
+        type: toggle-group
+        label: 役割
+        optionLabels:
+          user: "👤 ユーザー"
+          assistant: "🤖 アシスタント"
+          system: "⚙️ システム"
+      ConversationId:
+        type: dropdown
+        label: 会話
+        expression: messages.ConversationId
+        foreignKey:
+          entity: conversations
+          displayColumn: Title
+      Content:
+        type: like
+        label: メッセージ検索
+      FinishReason:
+        type: dropdown
+        label: 終了理由
+        options:
+          - stop
+          - length
+          - tool_calls
+          - error
+      IsEdited:
+        type: bool
+        label: 編集済みのみ
+      TokenCount:
+        type: number-range
+        label: トークン数範囲
+        expression: messages.TokenCount
+      CreatedAt:
+        type: date-range
+        label: 作成日範囲
+        expression: messages.CreatedAt
+
+    # ── 組み込みフック ────────────────────────────────────────
+    hooks:
+      afterCreate:
+        - audit_log
+      beforeUpdate:
+        - set_completed_at
+      afterUpdate:
+        - audit_log
+      beforeDelete:
+        - audit_log
+
+    # ── エンティティ間ナビゲーション ─────────────────────────
+    links:
+      conversations:
+        label: 会話詳細
+        targetEntity: conversations
+        filter:
+          Id: ConversationId
+
+    # ── カスタムアクション ──────────────────────────────────
+    actions:
+      copy_content:
+        label: "メッセージをコピー"
+        scope: row
+        handler: assistant_hub_copy_message
+      regenerate:
+        label: "再生成（アシスタント用）"
+        scope: row
+        confirm: "このメッセージを再生成しますか？"
+        handler: assistant_hub_regenerate_message
+      delete_after:
+        label: "以降を削除"
+        scope: row
+        confirm: "このメッセージ以降のすべてのメッセージを削除しますか？"
+        handler: assistant_hub_delete_after
+      bulk_export:
+        label: "全件エクスポート"
+        scope: header
+        handler: assistant_hub_bulk_export_messages
+
+    # ── エクスポート ────────────────────────────────────────
+    exports:
+      messages_csv:
+        label: "メッセージ CSV"
+        format: csv
+        filename: "messages_{date:yyyyMMdd}.csv"
+        columns:
+          - ConversationTitle
+          - Role
+          - Content
+          - TokenCount
+          - Model
+          - CreatedAt
+
+      messages_json:
+        label: "メッセージ JSON"
+        format: json
+        filename: "messages_{date:yyyyMMdd}.json"
+
+      conversation_transcript_pdf:
+        label: "会話トランスクリプト PDF"
+        format: pdf
+        filename: "transcript_{date:yyyyMMdd}.pdf"
+        columns:
+          - ConversationTitle
+          - Role
+          - Content
+          - CreatedAt
+        pdf:
+          title: "会話トランスクリプト"
+          pageSize: A4
+          orientation: portrait
+          headerColor: "#1E3A8A"
+          oddRowColor: "#DBEAFE"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: ConversationTitle
+              width: 25
+            - key: Role
+              width: 15
+              align: center
+            - key: Content
+              width: 40
+            - key: CreatedAt
+              width: 20
+              align: center
+
+    # ── フォーム・フィルターレイアウト ────────────────────────
+    layout:
+      forms:
+        columns: 1
+        order:
+          - ConversationId
+          - Role
+          - Content
+          - TokenCount
+          - Model
+          - FinishReason
+          - IsEdited
+          - EditedAt
+      filters:
+        columns: 4
+        order:
+          - Role
+          - ConversationId
+          - Content
+          - FinishReason
+          - IsEdited
+          - TokenCount
+          - CreatedAt
+
+    # ── ページング ────────────────────────────────────────────
+    paging:
+      pageSize: 30
+      mode: numbered
+      enableCount: true

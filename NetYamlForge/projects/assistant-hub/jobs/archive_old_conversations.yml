@@ -1,0 +1,21 @@
+jobs:
+  archive_old_conversations:
+    displayName: 古い会話のアーカイブ
+    description: "30日以上更新されていない非アクティブな会話を自動的にアーカイブします。毎日午前2時に実行。"
+    enabled: true
+
+    schedule:
+      cron: "0 2 * * *"
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/archive_old_conversations.sql
+      outputFile: "jobs/output/archived_conversations_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 300
+      logError: true

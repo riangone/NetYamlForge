@@ -1,0 +1,112 @@
+stats:
+  - label: 総会話数
+    entity: conversations
+    aggregate: count
+    icon: 💬
+    color: badge-primary
+  - label: 進行中の会話
+    entity: conversations
+    aggregate: count
+    filter: "Status = 'active'"
+    icon: 🔄
+    color: badge-info
+  - label: 総メッセージ数
+    entity: messages
+    aggregate: count
+    icon: 💭
+    color: badge-secondary
+  - label: 有効なモデル
+    entity: ai_models
+    aggregate: count
+    filter: "IsActive = 1"
+    icon: 🤖
+    color: badge-success
+  - label: 総トークン使用数
+    entity: messages
+    aggregate: sum
+    column: TokenCount
+    icon: 🔑
+    color: badge-accent
+  - label: 設定済みユーザー
+    entity: user_settings
+    aggregate: count
+    icon: 👤
+    color: badge-warning
+
+charts:
+  - title: AI別メッセージ数
+    type: doughnut
+    entity: messages
+    valueAggregate: count
+    groupExpression: Model
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(99, 102, 241, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(236, 72, 153, 0.85)
+      - rgba(248, 113, 113, 0.85)
+      - rgba(251, 146, 60, 0.85)
+      - rgba(250, 204, 21, 0.85)
+      - rgba(34, 197, 94, 0.85)
+      - rgba(20, 184, 166, 0.85)
+      - rgba(14, 165, 233, 0.85)
+
+  - title: 役割別メッセージ件数
+    type: bar
+    entity: messages
+    valueAggregate: count
+    groupExpression: Role
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: モデル別会話数
+    type: bar
+    entity: conversations
+    valueAggregate: count
+    labelJoinEntity: ai_models
+    labelJoinKey: ModelId
+    labelJoinDisplay: DisplayName
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)
+
+  - title: 日別メッセージ数
+    type: line
+    entity: messages
+    valueAggregate: count
+    groupExpression: "strftime('%Y-%m-%d', CreatedAt)"
+    orderBy: label
+    orderDir: asc
+    limit: 30
+    colorBg: rgba(59, 130, 246, 0.2)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: ステータス別会話数
+    type: bar
+    entity: conversations
+    valueAggregate: count
+    groupExpression: "CASE WHEN Status = 'archived' THEN 'アーカイブ' WHEN Status = 'paused' THEN '一時停止' ELSE '進行中' END"
+    orderBy: value
+    orderDir: desc
+    colorBg: rgba(168, 85, 247, 0.7)
+    colorBorder: rgba(168, 85, 247, 1)
+
+recent:
+  - label: "最近のメッセージ"
+    entity: messages
+    limit: 10
+    sort: CreatedAt
+    dir: desc
+  - label: "最近の会話"
+    entity: conversations
+    limit: 5
+    sort: UpdatedAt
+    dir: desc
