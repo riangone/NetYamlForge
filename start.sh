@@ -22,7 +22,7 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 
 cd "$PROJECT_DIR" || { echo "Cannot change to project directory: $PROJECT_DIR"; exit 1; }
 
-ASPNETCORE_URLS=http://localhost:5000 dotnet run >> "$LOG_FILE" 2>&1 &
+ASPNETCORE_URLS=http://localhost:5001 /home/ubuntu/.dotnet/dotnet bin/Debug/net10.0/NetYamlForge.dll >> "$LOG_FILE" 2>&1 &
 
 APP_PID=$!
 echo $APP_PID > "$PID_FILE"

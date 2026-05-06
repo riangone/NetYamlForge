@@ -118,6 +118,11 @@ entities:
         label: ユーザーID
         searchable: true
         sortable: true
+        dbColumn: user_id
+      user_id:
+        type: string
+        label: ユーザーID
+        hidden: true
       Theme:
         type: string
         required: true

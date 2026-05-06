@@ -5,7 +5,6 @@
 @using NetYamlForge.Localization
 @using NetYamlForge.Models
 @using Microsoft.Extensions.Localization
-@using Dapper
 @inject IStringLocalizer<SharedResource> L
 @inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
 @inject NetYamlForge.Services.ProjectScope ProjectScope
@@ -15,16 +14,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - NetYamlForge</title>
+    <script>
+        window.NetYamlForgeConfig = {
+            pathBase: '@Url.Content("~/").TrimEnd('/')',
+            currentProject: '@Context.GetRouteValue("project")?.ToString()'
+        };
+    </script>
     <script type="importmap"></script>
-    <link href="/lib/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
-    <script src="/lib/tailwindcss/browser.min.js"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
+    <link href="@Url.Content("~/lib/daisyui/daisyui.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
+    <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
+    <!-- <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" /> -->
+    <link rel="stylesheet" href="@Url.Content("~/css/ai-chat-components.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="min-h-screen bg-base-200" 
-      data-user-authenticated="@((User.Identity?.IsAuthenticated ?? false) || (User?.IsInRole("Admin") ?? false) ? "true" : "false")"
-      data-username="@User.Identity?.Name">
+<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
 @functions {
     private sealed class NavSection
     {
@@ -37,50 +42,8 @@
 @{
     var showSidebar = User.Identity?.IsAuthenticated ?? false;
     var isAdminUser = User?.IsInRole("Admin") ?? false;
-    
-    // カスタムロール（AppUserRole）を Claims から取得（ナビゲーションフィルタリング用）
-    var userCustomRoles = User?.Claims
-        .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
-        .Select(c => c.Value)
-        .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-    // Claims にカスタムロールが含まれていない場合、プロジェクトデータベースから直接取得
-    // これは auto-dealer-demo の customer ロールなどを正しく識別するために必要
-    if (showSidebar && userCustomRoles.Count == 0 && ProjectScope?.IsSet == true)
-    {
-        var userName = User.Identity?.Name;
-        if (!string.IsNullOrEmpty(userName))
-        {
-            try
-            {
-                var projectDbPath = System.IO.Path.Combine(
-                    ProjectScope.Current.ProjectDir,
-                    "database",
-                    "auto-dealer-demo.db");
-                
-                if (System.IO.File.Exists(projectDbPath))
-                {
-                    using var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={projectDbPath}");
-                    await connection.OpenAsync();
-                    var roles = await connection.QueryAsync<string>(
-                        "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
-                        new { UserName = userName });
-                    
-                    foreach (var role in roles)
-                    {
-                        userCustomRoles.Add(role);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // ロール取得エラーはログに記録して処理を継続
-                System.Diagnostics.Debug.WriteLine($"カスタムロール取得エラー: {ex.Message}");
-            }
-        }
-    }
-
-    // プロジェクト固有のレイアウト設定
+        
+        // プロジェクト固有のレイアウト設定
         var projectLayout = ProjectScope?.Current?.Layout;
         var navConfig = projectLayout?.Navigation;
         var headerConfig = projectLayout?.Header;
@@ -91,10 +54,10 @@
             .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
             .ToList();
         
-        // ナビゲーション設定がある場合はフィルタリング（空のリストが指定されている場合は何も表示しない）
-        var entityDefinitions = navConfig != null
+        // ナビゲーション設定がある場合はフィルタリング
+        var entityDefinitions = navConfig != null && navConfig.Entities.Count > 0
             ? allEntities.Where(pair => navConfig.Entities.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))
-                .OrderBy(pair => navConfig.Entities.Count > 0 ? navConfig.Entities.IndexOf(pair.Key) : 0)
+                .OrderBy(pair => navConfig.Entities.IndexOf(pair.Key))
                 .ToList()
             : allEntities;
         
@@ -224,24 +187,11 @@
                             <div class="text-sm opacity-70">Navigation</div>
                             <div class="font-semibold">@(string.IsNullOrEmpty(currentProject) ? "Definitions" : currentProject)</div>
                         </div>
-                        <div class="flex gap-1">
-                            @if (!string.IsNullOrEmpty(currentProject))
-                            {
-                                <a asp-controller="Home"
-                                   asp-action="Index"
-                                   class="btn btn-ghost btn-sm btn-square"
-                                   title="プロジェクト選択に戻る">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                                    </svg>
-                                </a>
-                            }
-                            <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </label>
-                        </div>
+                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </label>
                     </div>
 
                     <ul class="menu p-3 gap-1 w-full">
@@ -260,12 +210,6 @@
                             {
                                 var showItem = !item.AdminOnly || isAdminUser;
                                 if (!showItem) continue;
-                                // カスタムロールフィルター: Roles が指定されている場合 Admin 以外はマッチするロールが必要
-                                if (item.Roles.Count > 0 && !isAdminUser)
-                                {
-                                    if (!item.Roles.Any(r => userCustomRoles.Contains(r)))
-                                        continue;
-                                }
                                 var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
                                 var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
                                 if (section == null)
@@ -408,13 +352,6 @@
                             <li><a asp-controller="Users"
                                    asp-action="Index"
                                    asp-route-project="@currentProject">@L["Users"]</a></li>
-                            <li>
-                                <a asp-controller="AISettings"
-                                   asp-action="Index"
-                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "AISettings", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                                    AI Settings
-                                </a>
-                            </li>
                         }
                     </ul>
                 </aside>
@@ -450,7 +387,7 @@
                           asp-route-project="@currentProject"
                           method="post">
                         @Html.AntiForgeryToken()
-                        <button type="submit" id="restart-submit-btn" class="btn btn-error btn-sm">再起動する</button>
+                        <button type="submit" class="btn btn-error btn-sm">再起動する</button>
                     </form>
                     <button type="button" class="btn btn-ghost btn-sm"
                             onclick="document.getElementById('restart-confirm-modal').close()">キャンセル</button>
@@ -493,8 +430,8 @@
         </form>
     </dialog>
 
-    <script src="/lib/htmx/htmx.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="@Url.Content("~/lib/htmx/htmx.min.js")"></script>
+    <script src="@Url.Content("~/js/site.js")" asp-append-version="true"></script>
     <script>
         // ===== CRUD 確認ダイアログ =====
         var _confirmCallback = null;
@@ -586,7 +523,7 @@
         var _pickerConfig = null;
         var _pickerSearchTimer = null;
         // ピッカーの API ベース URL（プロジェクトルートを含む）
-        var _pickerBaseUrl = '/@currentProject/DynamicEntity/PickerList';
+        var _pickerBaseUrl = '@Url.Content("~/" + currentProject + "/DynamicEntity/PickerList")';
 
         // ピッカーを開く（Browse ボタンの onclick から呼ばれる）
         function openEntityPicker(btn) {
@@ -774,91 +711,10 @@
             });
             hidden.value = values.join(',');
         }
-
-        // システム再起動フォームの処理
-        document.addEventListener('DOMContentLoaded', function() {
-            var restartForm = document.getElementById('restart-form');
-            var restartBtn = document.getElementById('restart-submit-btn');
-            if (restartForm && restartBtn) {
-                restartForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    restartBtn.disabled = true;
-                    restartBtn.innerHTML = '<span class="loading loading-spinner loading-sm"></span> 再起動中...';
-                    
-                    fetch(restartForm.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'RequestVerificationToken': restartForm.querySelector('[name="__RequestVerificationToken"]').value
-                        }
-                    })
-                    .then(function(response) {
-                        if (response.ok) {
-                            // 再起動成功：モーダルを閉じてメッセージを表示
-                            document.getElementById('restart-confirm-modal').close();
-                            alert('システムを再起動しています。数秒後にページをリロードします...');
-                            // 5 秒後にページをリロード
-                            setTimeout(function() {
-                                location.reload();
-                            }, 5000);
-                        } else {
-                            restartBtn.disabled = false;
-                            restartBtn.textContent = '再起動する';
-                            alert('再起動に失敗しました。管理者にお問い合わせください。');
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error('Restart error:', error);
-                        // エラーの場合もページをリロード（サーバーが再起動されている可能性）
-                        document.getElementById('restart-confirm-modal').close();
-                        alert('再起動リクエストを送信しました。ページをリロードします...');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 3000);
-                    });
-                });
-            }
-        });
     </script>
-    <script src="/lib/marked/marked.min.js"></script>
-    @* 統合 AI チャットウィジェット（全プロジェクト共通）*@
-    @if (User.Identity?.IsAuthenticated ?? false)
-    {
-        <link rel="stylesheet" href="~/css/ai-chat-components.css" asp-append-version="true" />
-        <script src="~/js/ai-chat-components.js" asp-append-version="true"></script>
-        <script src="~/js/ai-chat-widget.js" asp-append-version="true"></script>
-        @if (currentProject == "auto-dealer-demo")
-        {
-            @* auto-dealer-demo: セッションベース dealer モード *@
-            <script src="~/js/dealer-chat-widget.js" asp-append-version="true"></script>
-            var dealerChatMode = userCustomRoles.Contains("customer") ? "customer" : "staff";
-            <script>
-                DealerChat.init({ mode: '@dealerChatMode', project: 'auto-dealer-demo' });
-            </script>
-        }
-        else if (currentProject == "jpiere-cs")
-        {
-            @* jpiere-cs: フレームワーク AI・役割別設定 *@
-            var jpiereUserRole = userCustomRoles.FirstOrDefault() ?? "employee";
-            <script>
-                window.AI_CHAT_CONFIG = {
-                    apiMode: 'framework',
-                    framework: { project: 'jpiere-cs', role: '@jpiereUserRole', defaultCliTool: 'qwen' }
-                };
-                window.JPIERE_CHAT_CONFIG = { project: 'jpiere-cs', userRole: '@jpiereUserRole' };
-            </script>
-        }
-        else
-        {
-            @* その他プロジェクト: フレームワーク AI（デフォルト） *@
-            <script>
-                window.AI_CHAT_CONFIG = {
-                    apiMode: 'framework',
-                    framework: { project: '@(currentProject ?? "")', defaultCliTool: 'qwen' }
-                };
-            </script>
-        }
-    }
+    <script src="@Url.Content("~/lib/marked/marked.min.js")"></script>
+    <script src="@Url.Content("~/js/ai-chat-components.js")" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/ai-chat-widget.js")" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

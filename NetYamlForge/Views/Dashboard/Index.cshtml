@@ -20,7 +20,7 @@
 @section Scripts {
     @if (Model.Charts.Count > 0)
     {
-        <script src="/lib/chartjs/chart.umd.min.js"></script>
+        <script src="@Url.Content("~/lib/chartjs/chart.umd.min.js")"></script>
         <script>
             Chart.defaults.font.family = "'Inter', 'Helvetica Neue', sans-serif";
             Chart.defaults.font.size = 12;

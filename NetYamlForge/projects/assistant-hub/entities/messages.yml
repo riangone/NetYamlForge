@@ -77,6 +77,11 @@ entities:
         type: int
         label: 会話ID
         hidden: true
+        dbColumn: conversation_id
+      conversation_id:
+        type: int
+        label: 会話ID
+        hidden: true
       ConversationTitle:
         type: string
         label: 会話

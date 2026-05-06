@@ -3,7 +3,7 @@
 @{
     var sec = Model.Sec;
     var rows = Model.Rows;
-    var uploadUrl = sec.UploadUrl ?? "/api/upload";
+    var uploadUrl = sec.UploadUrl ?? Url.Content("~/api/upload");
     var maxFileSize = sec.MaxFileSize ?? 10485760; // 10MB
     var allowedTypes = sec.AllowedTypes ?? "*";
     var multiple = sec.Multiple ?? true;

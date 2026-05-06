@@ -3,6 +3,7 @@
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
 using System.Globalization;
+using Microsoft.AspNetCore.HttpOverrides;
 using NetYamlForge.Data;
 using NetYamlForge.Data.Schemas;
 using NetYamlForge.Extensions;
@@ -517,6 +518,35 @@ builder.Services.AddScoped<NetYamlForge.Services.AI.AiDocumentationService>();
 } // end else (embedded mode)
 
 var app = builder.Build();
+
+app.UsePathBase("/nyf");
+
+// 处理代理服务器转发的协议头（Caddy 设置的 X-Forwarded-Proto 等）
+app.Use(async (context, next) =>
+{
+    var forwardedProto = context.Request.Headers["X-Forwarded-Proto"].FirstOrDefault();
+    if (!string.IsNullOrEmpty(forwardedProto))
+    {
+        context.Request.Scheme = forwardedProto;
+    }
+    
+    // Caddy の handle_path で /nyf が剥がされると UsePathBase だけでは PathBase が空のままになる。
+    // その場合でも Razor/Url.Content が正しく /nyf を含む URL を生成できるように補正する。
+    if (!context.Request.PathBase.HasValue)
+    {
+        var forwardedPrefix = context.Request.Headers["X-Forwarded-Prefix"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(forwardedPrefix))
+        {
+            context.Request.PathBase = new PathString(forwardedPrefix);
+        }
+        else
+        {
+            context.Request.PathBase = new PathString("/nyf");
+        }
+    }
+
+    await next();
+});
 
 // Start task queue processing
 var taskQueue = app.Services.GetRequiredService<TaskQueueService>();

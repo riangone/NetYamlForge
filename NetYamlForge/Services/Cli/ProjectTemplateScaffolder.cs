@@ -894,10 +894,16 @@ sections:
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : ""){{displayName}}</title>
-    <link href="/lib/daisyui/daisyui.min.css" rel="stylesheet" type="text/css" />
-    <script src="/lib/tailwindcss/browser.min.js"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/NetYamlForge.styles.css" asp-append-version="true" />
+    <script>
+        window.NetYamlForgeConfig = {
+            pathBase: '@Url.Content("~/").TrimEnd('/')',
+            currentProject: '@Context.GetRouteValue("project")?.ToString()'
+        };
+    </script>
+    <link href="@Url.Content("~/lib/daisyui/daisyui.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
+    <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/css/ai-chat-components.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 @functions {
@@ -1240,8 +1246,8 @@ sections:
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
-    <script src="/lib/htmx/htmx.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="@Url.Content("~/lib/htmx/htmx.min.js")"></script>
+    <script src="@Url.Content("~/js/site.js")" asp-append-version="true"></script>
     <script>
         // CRUD確認ダイアログ
         var _confirmCallback = null;
@@ -1282,8 +1288,9 @@ sections:
         // Entity Picker
         var _pickerConfig = null;
         var _pickerSearchTimer = null;
-        var _pickerBaseUrl = '/@currentProject/DynamicEntity/PickerList';
+        var _pickerBaseUrl = '@@Url.Content("~/" + currentProject + "/DynamicEntity/PickerList")';
         function openEntityPicker(btn) {
+
             _pickerConfig = { fieldName: btn.dataset.pickerField, entity: btn.dataset.pickerEntity,
                 displayCol: btn.dataset.pickerDisplayCol || 'Id', query: btn.dataset.pickerQuery || '',
                 multi: btn.dataset.pickerMulti === 'true', sourceButton: btn };
@@ -1384,6 +1391,9 @@ sections:
             hidden.value = values.join(',');
         }
     </script>
+    <script src="@Url.Content("~/lib/marked/marked.min.js")"></script>
+    <script src="@Url.Content("~/js/ai-chat-components.js")" asp-append-version="true"></script>
+    <script src="@Url.Content("~/js/ai-chat-widget.js")" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
