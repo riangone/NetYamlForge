@@ -903,7 +903,8 @@ sections:
     <link href="@Url.Content("~/lib/daisyui/daisyui.min.css")" rel="stylesheet" type="text/css" />
     <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
     <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
-    <link rel="stylesheet" href="@Url.Content("~/css/ai-chat-components.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 @functions {
@@ -1391,9 +1392,6 @@ sections:
             hidden.value = values.join(',');
         }
     </script>
-    <script src="@Url.Content("~/lib/marked/marked.min.js")"></script>
-    <script src="@Url.Content("~/js/ai-chat-components.js")" asp-append-version="true"></script>
-    <script src="@Url.Content("~/js/ai-chat-widget.js")" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

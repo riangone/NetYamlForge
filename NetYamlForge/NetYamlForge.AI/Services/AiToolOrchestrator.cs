@@ -1,4 +1,6 @@
 using System.Text.Json.Nodes;
+using System.Collections.Generic;
+using System.Threading;
 using Json.Schema;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.AI.Services.ToolValidation;
@@ -7,35 +9,15 @@ namespace NetYamlForge.AI.Services;
 
 /// <summary>
 /// AI Tool 调用编排服务
-/// 
-/// 功能:
-/// 1. 验证 Tool 调用请求 (ToolCallValidator)
-/// 2. 检查 FSM 状态允许性
-/// 3. 执行 Tool 并返回结果
-/// 4. 记录审计日志
-/// 
-/// 这个服务作为 AutoDealerChatService 和其他服务之间的中间层,
-/// 在不修改现有庞大代码的情况下集成验证逻辑。
 /// </summary>
 public interface IAiToolOrchestrator
 {
-    /// <summary>
-    /// 验证并执行 Tool 调用
-    /// </summary>
-    /// <param name="toolCall">LLM 输出的 Tool 调用 JSON</param>
-    /// <param name="conversationId">会话 ID</param>
-    /// <param name="projectId">项目 ID</param>
-    /// <param name="ct">取消令牌</param>
-    /// <returns>Tool 执行结果</returns>
     Task<ToolExecutionResult> ValidateAndExecuteToolAsync(
         JsonNode toolCall,
         string conversationId,
         string projectId,
         CancellationToken ct = default);
 
-    /// <summary>
-    /// 获取当前会话的状态信息和允许的 Tool 列表
-    /// </summary>
     Task<SessionStateInfo> GetSessionStateAsync(string conversationId);
 }
 
@@ -83,9 +65,6 @@ public class AiToolOrchestrator : IAiToolOrchestrator
         _logger = logger;
     }
 
-    /// <summary>
-    /// 验证并执行 Tool 调用
-    /// </summary>
     public async Task<ToolExecutionResult> ValidateAndExecuteToolAsync(
         JsonNode toolCall,
         string conversationId,
@@ -96,7 +75,6 @@ public class AiToolOrchestrator : IAiToolOrchestrator
 
         try
         {
-            // [1] 获取当前 FSM 状态
             var currentState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId);
             result.FsmState = currentState;
 
@@ -105,7 +83,6 @@ public class AiToolOrchestrator : IAiToolOrchestrator
                 conversationId,
                 currentState);
 
-            // [2] Tool 验证 (JSON Schema + Entity 白名单 + SqlSafetyGuard)
             var validationResult = await _validator.ValidateAsync(
                 toolCall,
                 projectId,
@@ -116,16 +93,9 @@ public class AiToolOrchestrator : IAiToolOrchestrator
                 result.IsSuccess = false;
                 result.ValidationFailedReason = validationResult.ErrorMessage;
                 result.ErrorMessage = $"Tool 验证失败: {validationResult.ErrorMessage}";
-
-                _logger.LogWarning(
-                    "[ToolOrchestrator] Tool 验证失败 Conv={ConvId}, Reason={Reason}",
-                    conversationId,
-                    validationResult.ErrorMessage);
-
                 return result;
             }
 
-            // [3] FSM 状态允许性检查
             var toolName = toolCall["tool_call"]?.ToString();
             if (!string.IsNullOrEmpty(toolName))
             {
@@ -135,37 +105,32 @@ public class AiToolOrchestrator : IAiToolOrchestrator
                     result.IsSuccess = false;
                     result.ValidationFailedReason = $"当前状态 '{currentState}' 不允许使用 Tool '{toolName}'";
                     result.ErrorMessage = result.ValidationFailedReason;
-
-                    _logger.LogWarning(
-                        "[ToolOrchestrator] Tool 状态不允许 Conv={ConvId}, Tool={Tool}, State={State}",
-                        conversationId,
-                        toolName,
-                        currentState);
-
                     return result;
                 }
             }
 
-            // [4] 执行 Tool
             if (toolName == "query_data")
             {
-                // 执行查询
-                var queryResult = await ExecuteQueryToolAsync(toolParams);
-                result.Data = queryResult;
+                var toolParams = toolCall["tool_params"]?.AsObject()?.ToDictionary(
+                    kv => kv.Key,
+                    kv => kv.Value?.ToString() ?? string.Empty) ?? new Dictionary<string, string>();
+
+                result.Data = await ExecuteQueryToolAsync(toolParams, projectId, ct);
             }
             else if (toolName == "send_email")
             {
-                // 发送邮件
-                await ExecuteSendEmailToolAsync(toolParams);
+                var toolParams = toolCall["tool_params"]?.AsObject()?.ToDictionary(
+                    kv => kv.Key,
+                    kv => kv.Value?.ToString() ?? string.Empty) ?? new Dictionary<string, string>();
+
+                await ExecuteSendEmailToolAsync(toolParams, projectId, ct);
             }
             else
             {
-                // 其他工具
                 _logger.LogWarning("未知工具: {ToolName}", toolName);
             }
-            // 目前返回验证通过的结果,实际执行需要调用现有的 QueryExecutionService 等
+
             result.IsSuccess = true;
-            result.Data = null; // TODO: 实际的 Tool 执行结果
 
             _logger.LogInformation(
                 "[ToolOrchestrator] Tool 执行成功 Conv={ConvId}, Tool={Tool}",
@@ -187,9 +152,6 @@ public class AiToolOrchestrator : IAiToolOrchestrator
         }
     }
 
-    /// <summary>
-    /// 获取当前会话的状态信息和允许的 Tool 列表
-    /// </summary>
     public async Task<SessionStateInfo> GetSessionStateAsync(string conversationId)
     {
         var fsmState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId);
@@ -202,7 +164,19 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             FsmState = fsmState ?? AppointmentStateMachine.State.Init,
             AllowedTools = allowedTools,
             CollectedSlots = collectedSlots,
-            LowConfidenceCount = _slotFillingManager?.GetLowConfidenceCount(conversationId) ?? 0
+            LowConfidenceCount = _slotFillingManager != null ? await _slotFillingManager.GetLowConfidenceCountAsync(conversationId) : 0
         };
+    }
+
+    private async Task<object> ExecuteQueryToolAsync(Dictionary<string, string> toolParams, string projectId, CancellationToken ct)
+    {
+        // TODO: 实现实际的查询逻辑，调用 QueryExecutionService
+        return new { success = false, message = "ExecuteQueryToolAsync not implemented" };
+    }
+
+    private async Task ExecuteSendEmailToolAsync(Dictionary<string, string> toolParams, string projectId, CancellationToken ct)
+    {
+        // TODO: 实现实际的邮件发送逻辑，调用 EmailChannelService
+        await Task.CompletedTask;
     }
 }

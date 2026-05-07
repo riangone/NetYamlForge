@@ -80,6 +80,11 @@ public interface ISlotFillingManager
     /// シナリオ定義から必須スロット名一覧を返す
     /// </summary>
     IReadOnlyList<string> GetRequiredSlotNames(string scenario);
+
+    /// <summary>
+    /// 获取指定会话的连续低置信度计数
+    /// </summary>
+    Task<int> GetLowConfidenceCountAsync(string conversationId);
 }
 
 /// <summary>
@@ -763,5 +768,13 @@ WHERE conversation_id = @ConversationId",
         if (Scenarios.TryGetValue(scenario, out var def))
             return def.RequiredSlots.Select(s => s.Name).ToArray();
         return Array.Empty<string>();
+    }
+
+    /// <inheritdoc />
+    public Task<int> GetLowConfidenceCountAsync(string conversationId)
+    {
+        if (_fsmStates.TryGetValue(conversationId, out var fsm))
+            return Task.FromResult(fsm.LowConfidenceCount);
+        return Task.FromResult(0);
     }
 }
