@@ -101,7 +101,7 @@ public abstract class BaseCLIService : ICLIService
             throw new InvalidOperationException($"CLI failed: {result.Error}");
         }
 
-        return ExtractTextFromOutput(result.Output);
+        return ExtractTextFromOutput(result.Output ?? string.Empty);
     }
 
     /// <summary>
@@ -111,9 +111,9 @@ public abstract class BaseCLIService : ICLIService
     /// </summary>
     protected virtual string ExtractTextFromOutput(string raw)
     {
-        Logger.LogInformation("[ExtractTextFromOutput] 生出力長：{Length}", raw?.Length ?? 0);
+        Logger.LogInformation("[ExtractTextFromOutput] 生出力长：{Length}", raw?.Length ?? 0);
         
-        if (string.IsNullOrWhiteSpace(raw)) return raw;
+        if (string.IsNullOrWhiteSpace(raw)) return raw ?? string.Empty;
 
         var trimmed = raw.Trim();
         if (!trimmed.StartsWith('{') && !trimmed.StartsWith('[')) return raw;

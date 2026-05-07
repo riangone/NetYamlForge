@@ -192,8 +192,27 @@ public class DaemonProcessInstance : IDisposable
     {
         try
         {
-            while (_process?.StandardOutput.EndOfStream == false && !ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && _process != null && !_process.HasExited)
             {
+                if (_process.StandardOutput.Peek() == -1)
+                {
+                    await Task.Delay(50, ct);
+                    continue;
+                }
+                
+                var line = await _process.StandardOutput.ReadLineAsync(ct);
+                if (line == null) continue;
+
+                lock (_bufferLock)
+                {
+                    _stdoutBuffer.AppendLine(line);
+                }
+
+                // 尝试解析 JSON 消息
+                await TryProcessJsonMessageAsync(line, ct);
+            }
+        }
+                
                 var line = await _process.StandardOutput.ReadLineAsync(ct);
                 if (line == null) continue;
 

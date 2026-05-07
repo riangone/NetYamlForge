@@ -105,7 +105,7 @@ public class JpiereChatService : BaseChatService
                     WriteIndented = false
                 });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ログ警告は省略
             }

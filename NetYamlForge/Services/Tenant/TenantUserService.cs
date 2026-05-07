@@ -281,16 +281,12 @@ public class TenantUserService : ITenantUserService
     #region Helper Methods
 
     /// <summary>
-    /// 哈希密码（使用 BCrypt 或 PBKDF2）
+    /// 哈希密码（使用 ASP.NET Core PasswordHasher）
     /// </summary>
     private static string HashPassword(string password)
     {
-        // TODO: 使用 BCrypt.Net.HashPassword 或 ASP.NET Core PasswordHasher
-        // 这里使用简单的 SHA256 作为示例，生产环境应使用更强的算法
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
+        return passwordHasher.HashPassword(null!, password);
     }
 
     /// <summary>
@@ -298,8 +294,9 @@ public class TenantUserService : ITenantUserService
     /// </summary>
     private static bool VerifyPasswordHash(string password, string storedHash)
     {
-        var computedHash = HashPassword(password);
-        return computedHash == storedHash;
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
+        var result = passwordHasher.VerifyHashedPassword(null!, storedHash, password);
+        return result == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success;
     }
 
     #endregion

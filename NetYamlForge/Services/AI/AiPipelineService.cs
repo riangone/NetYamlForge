@@ -232,8 +232,14 @@ public class AiPipelineService
         // 异步读取输出
         var outputTask = Task.Run(async () =>
         {
-            while (!process.StandardOutput.EndOfStream)
+            while (!ct.IsCancellationRequested && !process.HasExited)
             {
+                if (process.StandardOutput.Peek() == -1)
+                {
+                    await Task.Delay(50, ct);
+                    continue;
+                }
+                
                 var line = await process.StandardOutput.ReadLineAsync(ct);
                 if (line != null)
                 {
@@ -242,11 +248,36 @@ public class AiPipelineService
                 }
             }
         }, ct);
-
+        
         var errorTask = Task.Run(async () =>
         {
-            while (!process.StandardError.EndOfStream)
+            while (!ct.IsCancellationRequested && !process.HasExited)
             {
+                if (process.StandardError.Peek() == -1)
+                {
+                    await Task.Delay(50, ct);
+                    continue;
+                }
+                
+                var line = await process.StandardError.ReadLineAsync(ct);
+                if (line != null)
+                {
+                    errorLines.Add(line);
+                    _logger.LogWarning("[AI-Pipeline-stderr] {Line}", line);
+                }
+            }
+        }, ct);
+        
+        var errorTask = Task.Run(async () =>
+        {
+            while (!ct.IsCancellationRequested && !process.HasExited)
+            {
+                if (process.StandardError.Peek() == -1)
+                {
+                    await Task.Delay(50, ct);
+                    continue;
+                }
+                
                 var line = await process.StandardError.ReadLineAsync(ct);
                 if (line != null)
                 {

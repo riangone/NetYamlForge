@@ -153,8 +153,25 @@ public class PersistentAIProcess : IDisposable
     {
         try
         {
-            while (_process?.StandardOutput.EndOfStream == false && !ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && _process != null && !_process.HasExited)
             {
+                if (_process.StandardOutput.Peek() == -1)
+                {
+                    await Task.Delay(50, ct);
+                    continue;
+                }
+                
+                var line = await _process.StandardOutput.ReadLineAsync(ct);
+                if (line != null)
+                {
+                    lock (_stdoutBuffer)
+                    {
+                        _stdoutBuffer.AppendLine(line);
+                    }
+                }
+            }
+        }
+                
                 var line = await _process.StandardOutput.ReadLineAsync(ct);
                 if (line != null)
                 {

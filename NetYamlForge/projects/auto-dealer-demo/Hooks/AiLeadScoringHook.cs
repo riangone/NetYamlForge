@@ -63,7 +63,7 @@ WHERE id = @LeadId";
 
             await db.ExecuteAsync(sql, param, tx);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // 评分失败不阻断主流程
             // 实际项目中应记录到错误队列或重试队列

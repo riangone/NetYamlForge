@@ -62,7 +62,7 @@ public class PurchaseReceiptCompleteHook : IEntityHook
                 var product = await db.QueryFirstOrDefaultAsync<Dictionary<string, object?>>(
                     "SELECT ProductType FROM products WHERE id = @id", new { id = productId }, tx);
 
-                var productType = DictHelper.GetStr(product, "ProductType", "product_type");
+                var productType = DictHelper.GetStr(product, "ProductType", "product_type") ?? string.Empty;
 
                 if (productType == "I")
                 {

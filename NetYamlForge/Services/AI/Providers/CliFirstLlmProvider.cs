@@ -82,7 +82,7 @@ public class CliFirstLlmProvider : ILlmProvider
                 _logger.LogDebug("[CliFirstLlmProvider] Raw output (first 500 chars):\n{RawOutput}",
                     raw != null && raw.Length > 500 ? raw[..500] + "..." : raw);
 
-                var text = ExtractText(raw);
+                var text = ExtractText(raw ?? string.Empty);
                 if (!string.IsNullOrWhiteSpace(text))
                 {
                     _logger.LogInformation("CliFirstLlmProvider: CLI応答成功 provider={Name}, systemPromptOverride={HasOverride}", name, !string.IsNullOrEmpty(systemPromptOverride));

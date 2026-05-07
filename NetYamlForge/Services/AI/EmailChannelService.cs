@@ -263,7 +263,7 @@ public class EmailChannelService : IEmailChannelService
                     {
                         email.Attachments.Add(new EmailAttachment
                         {
-                            FileName = mimePart.FileName,
+                            FileName = mimePart.FileName ?? string.Empty,
                             ContentType = mimePart.ContentType?.MimeType ?? "application/octet-stream",
                             Size = mimePart.Content?.Stream?.Length ?? 0
                         });
@@ -307,7 +307,7 @@ public class EmailChannelService : IEmailChannelService
             {
                 if (part is MimePart mimePart && mimePart.ContentType.IsMimeType("text", "plain"))
                 {
-                    using var reader = new StreamReader(mimePart.Content.Stream);
+                    using var reader = new StreamReader(mimePart.Content.Stream ?? Stream.Null);
                     return reader.ReadToEnd();
                 }
             }

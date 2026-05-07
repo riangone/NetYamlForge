@@ -134,7 +134,15 @@ if (args.Any(a => a.Equals("--ai-generate", StringComparison.OrdinalIgnoreCase))
     var targetDir = targetDirArg?.Split('=', 2).ElementAtOrDefault(1);
     
     var timeoutArg = args.FirstOrDefault(a => a.StartsWith("--timeout=", StringComparison.OrdinalIgnoreCase));
-    int? timeout = timeoutArg != null ? int.Parse(timeoutArg.Split('=', 2).ElementAtOrDefault(1)) : null;
+    int? timeout = null;
+    if (timeoutArg != null)
+    {
+        var timeoutStr = timeoutArg.Split('=', 2).ElementAtOrDefault(1);
+        if (int.TryParse(timeoutStr, out var parsedTimeout))
+        {
+            timeout = parsedTimeout;
+        }
+    }
     
     var pipelineMode = args.Any(a => a.Equals("--pipeline-mode=single", StringComparison.OrdinalIgnoreCase)) 
         ? "single" : "full";

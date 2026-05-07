@@ -128,7 +128,7 @@ public abstract class BaseChatService
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(_chatResponseTimeoutSeconds));
 
-            var response = await ExecuteWithSystemPromptOverrideAsync(prompt, systemPrompt, cts.Token, providerOverride);
+            var response = await ExecuteWithSystemPromptOverrideAsync(prompt ?? string.Empty, systemPrompt ?? string.Empty, cts.Token, providerOverride);
 
             _logger.LogInformation("AI 応答取得完了：responseLength={Length}", response?.Length ?? 0);
 
@@ -273,11 +273,11 @@ public abstract class BaseChatService
             _logger.LogInformation("[ProcessAiResponse] 查询完成: DataRowsCount={Count}, ResultLength={Length}",
                 dataRows?.Count ?? 0, resultText?.Length ?? 0);
             
-            return (resultText, intent, dataRows, navUrl, navLabel);
+            return (resultText ?? string.Empty, intent ?? "general", dataRows, navUrl, navLabel);
         }
 
         _logger.LogWarning("[ProcessAiResponse] AI 未输出工具调用，返回纯文本");
-        return (response, "general", null, null, null);
+        return (response ?? string.Empty, "general", null, null, null);
     }
 
     // ─────────────────────────────────────────────────────────
