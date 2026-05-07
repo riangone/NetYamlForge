@@ -1,0 +1,62 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET 10.0 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+    
+    - name: Run tests
+      run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+      timeout-minutes: 10
+    
+    - name: Upload coverage
+      uses: codecov/codecov-action@v5
+      with:
+        files: './**/coverage.cobertura.xml'
+        fail-ci-if-error: true
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET 10.0 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Check code style
+      run: dotnet format --verify --no-restore
+      continue-on-error: true
+    
+    - name: Security scan (NuGet vulnerabilities)
+      run: |
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
+        if grep -q "vulnerable" vuln-report.txt; then
+          echo "⚠️ Vulnerable packages found!"
+          exit 1
+        fi
+      continue-on-error: true
