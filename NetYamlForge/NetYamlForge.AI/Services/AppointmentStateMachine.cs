@@ -219,9 +219,24 @@ public class AppointmentStateMachine
     /// </summary>
     public string GenerateStateDiagram()
     {
-        // TODO: 需要安装 Stateless.Graph 包
-        // return UmlDotGraph.Format(_machine.GetGraph());
-        return $"Current State: {_machine.State}";
+        try
+        {
+            // 使用 Stateless.Graph 生成 UML 图
+            return UmlDotGraph.Format(_machine.GetGraph());
+        }
+        catch (Exception ex)
+        {
+            // 如果 Stateless.Graph 不可用，返回简单状态信息
+            return $"Current State: {_machine.State} (Graph generation failed: {ex.Message})";
+        }
+    }
+
+    /// <summary>
+    /// 获取状态机 UML Dot Graph（需要 Stateless.Graph）
+    /// </summary>
+    public string GetUmlDotGraph()
+    {
+        return UmlDotGraph.Format(_machine.GetGraph());
     }
 
     // ===== 事件处理器 =====
