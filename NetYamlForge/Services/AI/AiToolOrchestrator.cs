@@ -146,7 +146,23 @@ public class AiToolOrchestrator : IAiToolOrchestrator
                 }
             }
 
-            // [4] 执行 Tool (TODO: 这里需要集成到实际的 Tool 执行逻辑)
+            // [4] 执行 Tool
+            if (toolName == "query_data")
+            {
+                // 执行查询
+                var queryResult = await ExecuteQueryToolAsync(toolParams);
+                result.Data = queryResult;
+            }
+            else if (toolName == "send_email")
+            {
+                // 发送邮件
+                await ExecuteSendEmailToolAsync(toolParams);
+            }
+            else
+            {
+                // 其他工具
+                _logger.LogWarning("未知工具: {ToolName}", toolName);
+            }
             // 目前返回验证通过的结果,实际执行需要调用现有的 QueryExecutionService 等
             result.IsSuccess = true;
             result.Data = null; // TODO: 实际的 Tool 执行结果

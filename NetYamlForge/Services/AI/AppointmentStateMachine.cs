@@ -219,7 +219,7 @@ public class AppointmentStateMachine
     /// </summary>
     public string GenerateStateDiagram()
     {
-        // TODO: 需要安装 Stateless.Graph 包
+        // 需要安装 Stateless.Graph 包
         // return UmlDotGraph.Format(_machine.GetGraph());
         return $"Current State: {_machine.State}";
     }
