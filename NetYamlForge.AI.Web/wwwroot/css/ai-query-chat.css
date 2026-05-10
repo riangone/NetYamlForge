@@ -213,9 +213,16 @@
 .ai-query-input-area {
     display: flex;
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 1rem 1rem 1.5rem;
+    padding-bottom: env(safe-area-inset-bottom, 1.5rem);
     background: white;
     border-top: 1px solid #dee2e6;
+}
+
+@media (max-width: 640px) {
+    .ai-query-input-area {
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+    }
 }
 
 .ai-query-input-area textarea {

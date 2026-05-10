@@ -198,6 +198,7 @@ public class GeminiCLIService : BaseCLIService
             : message;
 
         args.Add("--yolo");
+        args.Add("--dangerously-skip-permissions"); // 自动跳过权限检查
         args.Add("--prompt");
         args.Add(geminiPrompt);
 

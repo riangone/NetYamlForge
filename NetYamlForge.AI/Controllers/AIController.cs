@@ -60,6 +60,7 @@ public class AIController : ControllerBase
     /// <summary>
     /// 发送聊天请求
     /// </summary>
+    [AllowAnonymous]
     [HttpPost("chat")]
     public async Task<ActionResult<AIChatResponse>> Chat([FromBody] AIChatRequest request, [FromRoute] string? project)
     {
@@ -92,7 +93,8 @@ public class AIController : ControllerBase
             await _chatHistory.SaveMessageAsync(userId, request.Message, "user", 
                 provider: request.CliTool, 
                 chatContext: string.IsNullOrEmpty(request.Project) ? "framework" : request.Project,
-                projectName: request.Project);
+                projectName: request.Project,
+                sessionId: request.SessionId);
 
             // 创建任务
             var task = new AITask
@@ -123,16 +125,6 @@ public class AIController : ControllerBase
 
                 if (currentTask.Status == TaskStatus.Completed)
                 {
-                    // ✨ AIの返信メッセージをチャット履歴に自動保存
-                    var chatContext = string.IsNullOrEmpty(request.Project) ? "framework" : request.Project;
-                    if (!string.IsNullOrEmpty(currentTask.Result))
-                    {
-                        await _chatHistory.SaveMessageAsync(userId, currentTask.Result, "assistant",
-                            provider: request.CliTool,
-                            chatContext: chatContext,
-                            projectName: request.Project);
-                    }
-
                     return Ok(new AIChatResponse
                     {
                         TaskId = task.Id,
@@ -155,16 +147,6 @@ public class AIController : ControllerBase
             }
 
             // 超时返回
-            // ✨ 即使超时，如果AI已有回复，也保存到数据库
-            if (!string.IsNullOrEmpty(task.Result))
-            {
-                var chatContext = string.IsNullOrEmpty(request.Project) ? "framework" : request.Project;
-                await _chatHistory.SaveMessageAsync(userId, task.Result, "assistant",
-                    provider: request.CliTool,
-                    chatContext: chatContext,
-                    projectName: request.Project);
-            }
-
             return Ok(new AIChatResponse
             {
                 TaskId = task.Id,
@@ -178,13 +160,14 @@ public class AIController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogWarning(ex, "Invalid CLI tool request");
+            _logger.LogWarning(ex, "Invalid CLI tool request: {Message}", ex.Message);
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Chat request failed");
-            return StatusCode(500, new { error = "Internal server error" });
+            _logger.LogError(ex, "Chat request failed. User: {UserId}, Tool: {Tool}, Project: {Project}", 
+                GetCurrentUserId(), request.CliTool, request.Project);
+            return StatusCode(500, new { error = "Internal server error: " + ex.Message });
         }
     }
     
@@ -276,8 +259,9 @@ public class AIController : ControllerBase
     {
         try
         {
-            var tools = await _cliFactory.GetAvailableToolsAsync();
-            
+            var defaultTool = _cliConfig.CurrentValue.DefaultTool;
+            var tools = await _cliFactory.GetAvailableToolsAsync(defaultTool);
+
             // available をオブジェクト（ツール名キー）として返す。
             // 配列で返すと JS 側で data.available['claude'] が undefined になる。
             return Ok(new
@@ -293,7 +277,7 @@ public class AIController : ControllerBase
                         kvp.Value.Authenticated,
                         kvp.Value.Capabilities
                     }),
-                defaultTool = _cliConfig.CurrentValue.DefaultTool
+                defaultTool = defaultTool
             });
         }
         catch (Exception ex)
@@ -326,10 +310,23 @@ public class AIController : ControllerBase
     }
 
     /// <summary>
+    /// 获取指定会话的历史记录
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("history/{sessionId}")]
+    public async Task<ActionResult> GetSessionHistory(string sessionId, [FromRoute] string? project = null)
+    {
+        var userId = GetCurrentUserId();
+        var messages = await _chatHistory.GetHistoryAsync(userId, projectName: project, sessionId: sessionId);
+        return Ok(messages);
+    }
+
+    /// <summary>
     /// チャット履歴を取得します
     /// </summary>
     /// <param name="context">絞り込みコンテキスト（framework / dealer-staff / dealer-customer）。省略時は全件。</param>
     /// <param name="project">プロジェクト名。指定された場合はそのプロジェクトの DB から取得</param>
+    [AllowAnonymous]
     [HttpGet("history")]
     public async Task<ActionResult> GetHistory([FromQuery] int limit = 100, [FromQuery] string? context = "framework", [FromRoute] string? project = null)
     {
@@ -363,7 +360,7 @@ public class AIController : ControllerBase
 
         var userId = GetCurrentUserId();
         var chatContext = string.IsNullOrEmpty(request.ChatContext) ? (string.IsNullOrEmpty(project) ? "framework" : project) : request.ChatContext;
-        var id = await _chatHistory.SaveMessageAsync(userId, request.Content, request.Type, provider: request.Provider, chatContext: chatContext, projectName: project);
+        var id = await _chatHistory.SaveMessageAsync(userId, request.Content, request.Type, provider: request.Provider, chatContext: chatContext, projectName: project, sessionId: request.SessionId);
         return Ok(new { id });
     }
 

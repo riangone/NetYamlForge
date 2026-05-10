@@ -37,3 +37,6 @@ Thumbs.db
 
 # Claude memory
 memory/
+
+.gemini/
+gha-creds-*.json

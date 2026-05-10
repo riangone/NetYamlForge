@@ -153,11 +153,34 @@ AI 服务在独立进程中运行，主应用通过 HTTP 客户端代理调用�
 - `IAIProjectContext` - 项目上下文
 - `IAIReportPdfService` - AI 报告 PDF 生成
 
+## CLI 聊天集成
+
+本项目支持通过 CLI 客户端进行聊天。除了内置的 Web 界面外，您还可以使用 API 进行集成。
+
+### 使用 Python 演示脚本
+
+我们提供了一个示例脚本 `cli-chat-demo.py`，演示了如何调用 AI 窗口 API：
+
+```bash
+# 首先启动 AI.Web 服务
+./start-ai-web.sh
+
+# 在另一个终端运行演示脚本
+cd NetYamlForge.AI
+python3 cli-chat-demo.py
+```
+
+### 独立性说明
+
+`NetYamlForge.AI` 项目在架构上独立于 `NetYamlForge` 主项目：
+1. **零依赖**：`NetYamlForge.AI.csproj` 不引用 `NetYamlForge.csproj`。
+2. **独立启动**：`NetYamlForge.AI.Web` 可以完全独立运行。
+3. **隔离存储**：默认使用独立的 SQLite 数据库（`ai-chat.db`, `chat-history.db`）。
+4. **灵活部署**：可以作为微服务部署，也可通过类库形式嵌入到其他应用。
+
 ## 开发指南
 
 ### 添加新的 LLM 提供商
-
-1. 在 `Services/Providers/` 中实现 `ICLIService` 接口
 2. 在 `AIServiceCollectionExtensions.cs` 中注册服务
 3. 更新配置支持新的提供商
 

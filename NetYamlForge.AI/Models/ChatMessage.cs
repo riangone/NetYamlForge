@@ -9,6 +9,7 @@ public class ChatMessage
     public string CreatedAt { get; set; } = "";
     public string? Provider { get; set; } // AI 提供者标识 (qwen, claude, copilot, etc.)
     public string? ChatContext { get; set; } // チャットコンテキスト: framework | dealer-staff | dealer-customer
+    public string? SessionId { get; set; } // セッション ID
 
     /// <summary>
     /// 格式化的显示时间（包含日期和时间）
@@ -33,4 +34,5 @@ public class SaveChatMessageRequest
     public string Type { get; set; } = "";
     public string? Provider { get; set; } // AI 提供者标识
     public string? ChatContext { get; set; } // チャットコンテキスト
+    public string? SessionId { get; set; } // セッション ID
 }

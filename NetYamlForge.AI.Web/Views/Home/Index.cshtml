@@ -168,7 +168,14 @@
 <template id="tplUserMsg">
     <div class="msg msg-user">
         <div class="msg-bubble"></div>
-        <div class="msg-meta"><span class="msg-time"></span></div>
+        <div class="msg-meta">
+            <span class="msg-time"></span>
+            <button class="msg-action-btn forward-btn" title="転送">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7"/>
+                </svg>
+            </button>
+        </div>
     </div>
 </template>
 
@@ -180,12 +187,19 @@
             <div class="msg-meta">
                 <span class="msg-provider"></span>
                 <span class="msg-time"></span>
-                <button class="copy-btn" title="コピー">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2"/>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                    </svg>
-                </button>
+                <div class="msg-actions">
+                    <button class="msg-action-btn copy-btn" title="コピー">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                    <button class="msg-action-btn forward-btn" title="転送">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

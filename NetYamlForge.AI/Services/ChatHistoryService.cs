@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS AIChatHistory (
     Type        TEXT NOT NULL,
     Provider    TEXT,
     ChatContext TEXT NOT NULL DEFAULT 'framework',
+    SessionId   TEXT,
     CreatedAt   TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
@@ -97,8 +98,14 @@ CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);");
                 conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN ChatContext TEXT NOT NULL DEFAULT 'framework'");
                 _logger.LogInformation("Migrated AIChatHistory ({Context}): added ChatContext column", contextName);
             }
+            if (!columns.ContainsKey("sessionid"))
+            {
+                conn.Execute("ALTER TABLE AIChatHistory ADD COLUMN SessionId TEXT");
+                _logger.LogInformation("Migrated AIChatHistory ({Context}): added SessionId column", contextName);
+            }
 
-            // ChatContext カラムが確実に存在してからコンテキスト用インデックスを作成
+            // SessionId と ChatContext カラムが確実に存在してからインデックスを作成
+            conn.Execute("CREATE INDEX IF NOT EXISTS idx_aichat_session ON AIChatHistory(UserId, SessionId, Id);");
             conn.Execute("CREATE INDEX IF NOT EXISTS idx_aichat_context ON AIChatHistory(UserId, ChatContext, Id);");
 
             conn.Execute(@"
@@ -120,6 +127,16 @@ CREATE TABLE IF NOT EXISTS AICommandLog (
 CREATE INDEX IF NOT EXISTS idx_aicommand_user ON AICommandLog(UserId, Id);
 CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
 
+            // AICommandLog 向けのマイグレーション
+            var commandColumns = conn.Query<dynamic>("PRAGMA table_info(AICommandLog)")
+                .ToDictionary(c => ((string)c.name).ToLowerInvariant(), c => c);
+
+            if (!commandColumns.ContainsKey("sessionid"))
+            {
+                conn.Execute("ALTER TABLE AICommandLog ADD COLUMN SessionId TEXT");
+                _logger.LogInformation("Migrated AICommandLog ({Context}): added SessionId column", contextName);
+            }
+
             _logger.LogDebug("Initialized AIChatHistory schema for context: {Context}", contextName);
         }
         catch (Exception ex)
@@ -131,7 +148,8 @@ CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
     /// <summary>ユーザーのチャット履歴を時系列順で取得します。</summary>
     /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
     /// <param name="chatContext">絞り込むコンテキスト。null の場合は全件取得。</param>
-    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, string? projectName = null, int limit = 100, string? chatContext = null)
+    /// <param name="sessionId">セッションIDで絞り込む場合。</param>
+    public async Task<IEnumerable<ChatMessage>> GetHistoryAsync(string userId, string? projectName = null, int limit = 100, string? chatContext = null, string? sessionId = null)
     {
         var connString = GetConnectionString(projectName);
         await using var conn = new SqliteConnection(connString);
@@ -139,21 +157,32 @@ CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
         // デフォルトのチャットコンテキストを設定
         var defaultContext = string.IsNullOrEmpty(projectName) ? "framework" : projectName;
         
-        var sql = chatContext == null
-            ? @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
-                FROM AIChatHistory WHERE UserId = @UserId ORDER BY Id DESC LIMIT @Limit"
-            : @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext
-                FROM AIChatHistory WHERE UserId = @UserId AND ChatContext = @ChatContext ORDER BY Id DESC LIMIT @Limit";
+        var sql = @"SELECT Id, UserId, Content, Type, CreatedAt, Provider, ChatContext, SessionId
+                    FROM AIChatHistory WHERE UserId = @UserId ";
+
+        if (chatContext != null)
+            sql += " AND ChatContext = @ChatContext ";
+        
+        if (sessionId != null)
+            sql += " AND SessionId = @SessionId ";
+        
+        sql += " ORDER BY Id DESC LIMIT @Limit";
         
         var rows = await conn.QueryAsync<ChatMessage>(sql,
-            new { UserId = userId, Limit = limit, ChatContext = chatContext ?? defaultContext });
+            new { 
+                UserId = userId, 
+                Limit = limit, 
+                ChatContext = chatContext ?? defaultContext,
+                SessionId = sessionId
+            });
         return rows.Reverse(); // 時系列順に戻す
     }
 
     /// <summary>メッセージを保存します。</summary>
     /// <param name="projectName">プロジェクト名。null の場合は全局 DB</param>
     /// <param name="chatContext">チャットのコンテキスト識別子（例：framework / dealer-staff / dealer-customer）。</param>
-    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null, string chatContext = "framework", string? projectName = null)
+    /// <param name="sessionId">セッションID（任意）。</param>
+    public async Task<long> SaveMessageAsync(string userId, string content, string type, string? provider = null, string chatContext = "framework", string? projectName = null, string? sessionId = null)
     {
         var connString = GetConnectionString(projectName);
         await using var conn = new SqliteConnection(connString);
@@ -163,8 +192,8 @@ CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);");
         var actualContext = string.IsNullOrEmpty(chatContext) ? defaultContext : chatContext;
         
         var id = await conn.ExecuteScalarAsync<long>(@"
-INSERT INTO AIChatHistory (UserId, Content, Type, Provider, ChatContext, CreatedAt)
-VALUES (@UserId, @Content, @Type, @Provider, @ChatContext, @CreatedAt);
+INSERT INTO AIChatHistory (UserId, Content, Type, Provider, ChatContext, SessionId, CreatedAt)
+VALUES (@UserId, @Content, @Type, @Provider, @ChatContext, @SessionId, @CreatedAt);
 SELECT last_insert_rowid();",
             new
             {
@@ -173,6 +202,7 @@ SELECT last_insert_rowid();",
                 Type = type,
                 Provider = provider,
                 ChatContext = actualContext,
+                SessionId = sessionId,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             });
 
@@ -243,9 +273,11 @@ SELECT last_insert_rowid();",
         string status,
         string? resultText,
         string? errorText,
-        long durationMs)
+        long durationMs,
+        string? projectName = null)
     {
-        await using var conn = new SqliteConnection(_globalConnectionString);
+        var connString = GetConnectionString(projectName);
+        await using var conn = new SqliteConnection(connString);
         await conn.ExecuteAsync(@"
 UPDATE AICommandLog
 SET Status      = @Status,

@@ -53,12 +53,21 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    {
+        policy.SetIsOriginAllowed(_ => true) // 允许所有来源（包括带凭据的）
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // SignalR 必要
+    });
 });
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage(); // 开启详细错误页
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
 }

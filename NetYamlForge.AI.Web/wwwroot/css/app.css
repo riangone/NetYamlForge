@@ -4,6 +4,7 @@
 
 /* ── CSS 変数 ─────────────────────────────────────────── */
 :root {
+  --vh: 1vh; /* JSで動的に上書きされる */
   --bg-base:       #0d0d0d;
   --bg-sidebar:    #111111;
   --bg-surface:    #1a1a1a;
@@ -69,6 +70,8 @@ svg { display: block; flex-shrink: 0; }
 .chat-layout {
   display: flex;
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100); /* JSで計算された高さ */
+  height: 100dvh; /* モダンブラウザ用 */
   overflow: hidden;
   position: relative;
 }
@@ -507,15 +510,24 @@ svg { display: block; flex-shrink: 0; }
   letter-spacing: 0.05em;
 }
 
-.copy-btn {
-  padding: 3px;
+.msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.msg-action-btn {
+  padding: 4px;
   border-radius: 4px;
   color: var(--text-muted);
   transition: background var(--transition), color var(--transition);
-  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.copy-btn svg { width: 13px; height: 13px; }
-.copy-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.msg-action-btn svg { width: 14px; height: 14px; }
+.msg-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
 /* Markdown 内スタイル */
 .msg-ai .msg-bubble h1,
@@ -616,9 +628,20 @@ svg { display: block; flex-shrink: 0; }
 /* ── 入力エリア ─────────────────────────────────────── */
 .input-area {
   flex-shrink: 0;
-  padding: 10px 16px 14px;
+  padding: 12px 16px;
+  /* 底部余白を環境変数（iOSなどのセーフエリア）に合わせて調整 */
+  padding-bottom: calc(env(safe-area-inset-bottom, 12px) + 12px);
   background: var(--bg-base);
   border-top: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+}
+
+@media (max-width: 640px) {
+  .input-area {
+    /* モバイルではアドレスバーが頻繁に動くため、少し多めに余白を取る */
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  }
 }
 
 .input-wrapper {

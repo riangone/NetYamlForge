@@ -97,9 +97,9 @@ public abstract class BaseCLIService : ICLIService
 
         if (result.ExitCode != 0)
         {
-            Logger.LogError("[CLI执行] エラー：ExitCode={ExitCode}, Error={Error}, Output={Output}",
-                result.ExitCode, result.Error, result.Output?.Substring(0, Math.Min(200, result.Output?.Length ?? 0)));
-            throw new InvalidOperationException($"CLI failed: {result.Error}");
+            var errorDetail = !string.IsNullOrWhiteSpace(result.Error) ? result.Error : (result.Output ?? "Unknown error");
+            Logger.LogError("[CLI执行] エラー：ExitCode={ExitCode}, Error={Error}", result.ExitCode, errorDetail);
+            throw new InvalidOperationException($"CLI 运行失败 (Code {result.ExitCode}): {errorDetail}");
         }
 
         return ExtractTextFromOutput(result.Output);

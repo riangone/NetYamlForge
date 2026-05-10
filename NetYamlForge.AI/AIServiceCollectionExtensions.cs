@@ -174,19 +174,11 @@ public static class AIServiceCollectionExtensions
 
         services.AddSingleton<ICLIService>(sp =>
         {
-            var inner = new GeminiCLIService(
+            return new GeminiCLIService(
                 sp.GetRequiredService<ProcessExecutor>(),
                 sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<CliConfig>>(),
                 sp.GetRequiredService<SkillLoader>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<GeminiCLIService>>());
-
-            var poolManager = sp.GetRequiredService<AIProcessPoolManager>();
-            var executor = sp.GetRequiredService<ProcessExecutor>();
-            var daemonFactory = sp.GetRequiredService<DaemonChatServiceFactory>();
-            var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<PooledCLIService>>();
-            var poolConfig = sp.GetRequiredService<CliProcessPoolConfig>();
-
-            return new PooledCLIService(inner, poolManager, executor, poolConfig, daemonFactory, logger);
         });
 
         services.AddSingleton<ICLIService>(sp =>

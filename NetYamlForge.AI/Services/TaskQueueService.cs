@@ -115,7 +115,7 @@ public class TaskQueueService
                     if (update.Status == TaskStatus.Completed)
                     {
                         _tracker.Complete(task.Id, update.Message);
-                        await SaveCommandLogResultAsync(task.Id, "Completed", update.Message, null, startedAt);
+                        await SaveCommandLogResultAsync(task, "Completed", update.Message, null, startedAt);
                         return;
                     }
                 }
@@ -163,14 +163,14 @@ public class TaskQueueService
                         _logger.LogInformation("[TaskQueue] finalResult 先頭 200 文字：{Preview}", finalResult?.Length > 200 ? finalResult[..200] : finalResult);
                         
                         _tracker.Complete(task.Id, finalResult);
-                        await SaveCommandLogResultAsync(task.Id, "Completed", finalResult, null, startedAt);
+                        await SaveCommandLogResultAsync(task, "Completed", finalResult, null, startedAt);
                         return;
                     }
                     else if (update.Status == TaskStatus.Failed)
                     {
                         var errMsg = update.Message ?? "Unknown error";
                         _tracker.Fail(task.Id, errMsg);
-                        await SaveCommandLogResultAsync(task.Id, "Failed", null, errMsg, startedAt);
+                        await SaveCommandLogResultAsync(task, "Failed", null, errMsg, startedAt);
                         return;
                     }
 
@@ -195,19 +195,19 @@ public class TaskQueueService
                 // 如果流式完成但没有明确状态，使用累积的消息
                 var completedResult = hasMessageContent ? allMessages.ToString() : (lastMessage ?? "");
                 _tracker.Complete(task.Id, completedResult);
-                await SaveCommandLogResultAsync(task.Id, "Completed", completedResult, null, startedAt);
+                await SaveCommandLogResultAsync(task, "Completed", completedResult, null, startedAt);
             }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested || (timeoutCts?.IsCancellationRequested ?? false))
         {
             _tracker.Cancel(task.Id);
-            await SaveCommandLogResultAsync(task.Id, "Cancelled", null, "Cancelled", startedAt);
+            await SaveCommandLogResultAsync(task, "Cancelled", null, "Cancelled", startedAt);
             throw;
         }
         catch (Exception ex)
         {
             _tracker.Fail(task.Id, ex.Message);
-            await SaveCommandLogResultAsync(task.Id, "Failed", null, ex.Message, startedAt);
+            await SaveCommandLogResultAsync(task, "Failed", null, ex.Message, startedAt);
             throw;
         }
         finally
@@ -217,41 +217,53 @@ public class TaskQueueService
     }
 
     private async Task SaveCommandLogResultAsync(
-        string taskId, string status, string? result, string? error, DateTime startedAt)
+        AITask task, string status, string? result, string? error, DateTime startedAt)
     {
         try
         {
             var durationMs = (long)(DateTime.UtcNow - startedAt).TotalMilliseconds;
-            await _chatHistory.UpdateCommandLogAsync(taskId, status, result, error, durationMs);
+            await _chatHistory.UpdateCommandLogAsync(task.Id, status, result, error, durationMs, task.Project);
 
             // 完了した場合はチャット履歴にも AI レスポンスを保存
             if (status == "Completed" && !string.IsNullOrWhiteSpace(result))
             {
-                var t = _tracker.GetTask(taskId);
-                if (t != null)
-                    await _chatHistory.SaveMessageAsync(t.UserId, result, "assistant");
+                var chatContext = string.IsNullOrEmpty(task.Project) ? "framework" : task.Project;
+                await _chatHistory.SaveMessageAsync(
+                    task.UserId, 
+                    result, 
+                    "assistant",
+                    provider: task.CliTool,
+                    chatContext: chatContext,
+                    projectName: task.Project,
+                    sessionId: task.SessionId);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to save command log result for task {TaskId}", taskId);
+            _logger.LogWarning(ex, "Failed to save command log result for task {TaskId}", task.Id);
         }
     }
     
     private string? GetWorkingDirectory(string? project)
     {
+        // 寻找项目根目录（向上递归寻找 .slnx 或 NetYamlForge.AI 目录）
+        var rootDir = AppContext.BaseDirectory;
+        while (!string.IsNullOrEmpty(rootDir) && !File.Exists(Path.Combine(rootDir, "NetYamlForge.slnx")))
+        {
+            var parent = Directory.GetParent(rootDir)?.FullName;
+            if (parent == null || parent == rootDir) break;
+            rootDir = parent;
+        }
+
         if (string.IsNullOrEmpty(project))
         {
-            return _config.DefaultWorkingDirectory;
+            return rootDir ?? _config.DefaultWorkingDirectory;
         }
 
         // 获取项目目录路径
-        var projectPath = Path.Combine(
-            AppContext.BaseDirectory,
-            "projects",
-            project);
+        var projectPath = Path.Combine(rootDir ?? AppContext.BaseDirectory, "projects", project);
 
-        return Directory.Exists(projectPath) ? projectPath : _config.DefaultWorkingDirectory;
+        return Directory.Exists(projectPath) ? projectPath : (rootDir ?? _config.DefaultWorkingDirectory);
     }
 
     /// <summary>

@@ -74,10 +74,8 @@ public class DaemonChatService
             yield break;
         }
 
-        var updates = await ExecuteWithDaemonFallbackAsync(
-            message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct);
-
-        foreach (var update in updates)
+        await foreach (var update in ExecuteWithDaemonFallbackAsync(
+            message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct))
         {
             yield return update;
         }
@@ -86,51 +84,75 @@ public class DaemonChatService
     /// <summary>
     /// 执行常驻进程，失败时回退到标准执行
     /// </summary>
-    private async Task<List<ProgressUpdate>> ExecuteWithDaemonFallbackAsync(
+    private async IAsyncEnumerable<ProgressUpdate> ExecuteWithDaemonFallbackAsync(
         string message,
         string? workingDirectory,
         string? sessionId,
         List<string>? allowedTools,
         string? systemPromptOverride,
-        CancellationToken ct)
+        [EnumeratorCancellation] CancellationToken ct)
     {
         DaemonProcessInstance? process = null;
         bool processAcquired = false;
-        var results = new List<ProgressUpdate>();
+        bool hasError = false;
 
         try
         {
             process = await AcquireOrCreateProcessAsync(sessionId, ct);
-            if (process == null)
+            if (process != null)
             {
-                _logger.LogWarning("[常驻服务] 无法获取常驻进程，回退到标准执行");
-                return await CollectStreamingResultsAsync(
-                    _innerService.ExecuteStreamingAsync(
-                        message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct));
+                processAcquired = true;
+                process.Touch();
+
+                _logger.LogDebug(
+                    "[常驻服务] 使用常驻进程: Provider={Provider}, PID={PID}, SessionId={SessionId}",
+                    _provider, process.ProcessId, sessionId);
             }
-
-            processAcquired = true;
-            process.Touch();
-
-            _logger.LogDebug(
-                "[常驻服务] 使用常驻进程: Provider={Provider}, PID={PID}, SessionId={SessionId}",
-                _provider, process.ProcessId, sessionId);
-
-            await foreach (var response in SendDaemonMessageAsync(
-                process, message, sessionId, systemPromptOverride, allowedTools, ct))
-            {
-                results.Add(response);
-            }
-
-            return results;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(
-                ex,
-                "[常驻服务] 常驻进程执行异常: Provider={Provider}, Error={Error}",
-                _provider, ex.Message);
+            _logger.LogWarning(ex, "[常驻服务] 获取进程异常: Provider={Provider}", _provider);
+            hasError = true;
+        }
 
+        if (!hasError && processAcquired && process != null)
+        {
+            IAsyncEnumerator<ProgressUpdate>? enumerator = null;
+            try
+            {
+                enumerator = SendDaemonMessageAsync(process, message, sessionId, systemPromptOverride, allowedTools, ct).GetAsyncEnumerator(ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[常驻服务] 启动发送异常: Provider={Provider}", _provider);
+                hasError = true;
+            }
+
+            if (!hasError && enumerator != null)
+            {
+                while (true)
+                {
+                    ProgressUpdate? update = null;
+                    try
+                    {
+                        if (!await enumerator.MoveNextAsync()) break;
+                        update = enumerator.Current;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[常驻服务] 迭代响应异常: Provider={Provider}", _provider);
+                        hasError = true;
+                        break;
+                    }
+
+                    if (update != null) yield return update;
+                }
+            }
+        }
+
+        // 回退逻辑
+        if (hasError || !processAcquired || process == null)
+        {
             if (process != null)
             {
                 RemoveProcessFromPool(process);
@@ -138,20 +160,18 @@ public class DaemonChatService
             }
 
             _logger.LogInformation("[常驻服务] 回退到标准执行");
-            return await CollectStreamingResultsAsync(
-                _innerService.ExecuteStreamingAsync(
-                    message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct));
+            await foreach (var update in _innerService.ExecuteStreamingAsync(
+                message, workingDirectory, sessionId, allowedTools, systemPromptOverride, ct))
+            {
+                yield return update;
+            }
         }
-        finally
+        else if (processAcquired && process != null)
         {
-            if (processAcquired && process != null && process.IsHealthy)
-            {
+            if (process.IsHealthy)
                 ReturnProcessToPool(process);
-            }
-            else if (process != null)
-            {
+            else
                 RemoveProcessFromPool(process);
-            }
         }
     }
 
