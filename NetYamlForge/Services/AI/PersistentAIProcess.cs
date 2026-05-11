@@ -171,17 +171,6 @@ public class PersistentAIProcess : IDisposable
                 }
             }
         }
-                
-                var line = await _process.StandardOutput.ReadLineAsync(ct);
-                if (line != null)
-                {
-                    lock (_stdoutBuffer)
-                    {
-                        _stdoutBuffer.AppendLine(line);
-                    }
-                }
-            }
-        }
         catch (OperationCanceledException)
         {
             // 正常取消

@@ -212,19 +212,6 @@ public class DaemonProcessInstance : IDisposable
                 await TryProcessJsonMessageAsync(line, ct);
             }
         }
-                
-                var line = await _process.StandardOutput.ReadLineAsync(ct);
-                if (line == null) continue;
-
-                lock (_bufferLock)
-                {
-                    _stdoutBuffer.AppendLine(line);
-                }
-
-                // 尝试解析 JSON 消息
-                await TryProcessJsonMessageAsync(line, ct);
-            }
-        }
         catch (OperationCanceledException)
         {
             // 正常取消

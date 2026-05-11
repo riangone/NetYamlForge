@@ -149,14 +149,14 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             // [4] 执行 Tool
             if (toolName == "query_data")
             {
-                // 执行查询
-                var queryResult = await ExecuteQueryToolAsync(toolParams);
-                result.Data = queryResult;
+                // 执行查询 - TODO: 集成 QueryExecutionService
+                result.Data = new { success = false, message = "query_data 工具暂未实现" };
+                _logger.LogWarning("query_data 工具调用但未实现，ToolName={ToolName}", toolName);
             }
             else if (toolName == "send_email")
             {
-                // 发送邮件
-                await ExecuteSendEmailToolAsync(toolParams);
+                // 发送邮件 - TODO: 集成邮件服务
+                _logger.LogWarning("send_email 工具调用但未实现，ToolName={ToolName}", toolName);
             }
             else
             {

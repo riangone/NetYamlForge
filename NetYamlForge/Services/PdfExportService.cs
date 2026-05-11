@@ -61,10 +61,10 @@ public class PdfExportService : IPdfExportService
         var fontBold = new XFont(font.FontFamily.Name, XUnit.FromPoint(9), XFontStyleEx.Bold);
 
         // ヘッダー・フッター用の余白を確保
-        float topMargin = string.IsNullOrWhiteSpace(options.Title) ? XUnit.FromPoint(36f).Point : XUnit.FromPoint(50f).Point;
-        float bottomMargin = options.ShowPageNumbers ? XUnit.FromPoint(40f).Point : XUnit.FromPoint(24f).Point;
-        float leftMargin = XUnit.FromPoint(36f).Point;
-        float rightMargin = XUnit.FromPoint(36f).Point;
+        float topMargin = string.IsNullOrWhiteSpace(options.Title) ? (float)XUnit.FromPoint(36f).Point : (float)XUnit.FromPoint(50f).Point;
+        float bottomMargin = options.ShowPageNumbers ? (float)XUnit.FromPoint(40f).Point : (float)XUnit.FromPoint(24f).Point;
+        float leftMargin = (float)XUnit.FromPoint(36f).Point;
+        float rightMargin = (float)XUnit.FromPoint(36f).Point;
 
         var usableWidth = pageSize.Width - leftMargin - rightMargin;
         var usableHeight = pageSize.Height - topMargin - bottomMargin;
@@ -88,7 +88,7 @@ public class PdfExportService : IPdfExportService
             y += 15;
         }
 
-        y += XUnit.FromPoint(10).Point; // スペース追加
+        y += (float)XUnit.FromPoint(10).Point; // スペース追加
 
         // ── テーブル列設定 ────────────────────────────────────
         var colConfigs = BuildColumnConfigs(columns, options);

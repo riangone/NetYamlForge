@@ -1,5 +1,7 @@
 // ファイル概要：AI サービス登録の拡張メソッド。Program.cs の重複コードを解消します。
 
+using Microsoft.Extensions.Options;
+using NetYamlForge.AI.Client;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.AI.Providers;
 

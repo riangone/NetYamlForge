@@ -306,21 +306,24 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
         }
 
         // 失敗通知
-        if (lastResult != null && !lastResult.Success && job.OnFailure?.Notify != null)
+        if (lastResult != null && !lastResult.Success && job.OnFailure?.Notify != null && job.OnFailure.Notify.Any())
         {
+            var notifyEmails = job.OnFailure.Notify;
+            var jobName = job.DisplayName ?? job.Id;
+            var result = lastResult;
+
             // 邮件通知
-            if (!string.IsNullOrEmpty(options.NotifyEmail))
+            foreach (var email in notifyEmails)
             {
                 try
                 {
-                    var subject = $"批处理作业完成: {jobName}";
-                    var body = $"作业 {jobName} 已完成，状态: {result.Status}";
-                    await emailService.SendEmailAsync(options.NotifyEmail, subject, body);
-                    _logger.LogInformation("已发送完成通知邮件到: {Email}", options.NotifyEmail);
+                    _logger.LogInformation("应发送失败通知邮件到: {Email}, 作业: {JobName}, 错误: {Error}",
+                        email, jobName, result.ErrorMessage);
+                    // TODO: 集成实际邮件发送服务
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "发送通知邮件失败");
+                    _logger.LogWarning(ex, "发送通知邮件失败: {Email}", email);
                 }
             }
             _logger.LogWarning("ジョブ失敗通知：{JobId}, Error: {Error}", job.Id, lastResult.ErrorMessage);
