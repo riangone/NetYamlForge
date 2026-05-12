@@ -4,7 +4,6 @@
 #pragma warning disable DCS003
 
 using System.Data;
-using System.Security.Cryptography;
 using Dapper;
 using Microsoft.Data.Sqlite;
 
@@ -69,16 +68,15 @@ public class SystemDbTestUserSeeder
                 }
 
                 // system.db にユーザーを作成
-                // 注意: PasswordHash は ASP.NET PasswordHasher 形式なので、SHA256 に再ハッシュ化が必要
-                // しかし、ユーザーが既にプロジェクト DB に存在する場合、パスワードは Test@123! と仮定
-                var passwordHash = HashPasswordForSystemDb("Test@123!");
+                // プロジェクト DB の PasswordHash（既に ASP.NET PasswordHasher 形式）をそのまま使用
+                var passwordHash = (string)user.PasswordHash;
 
                 var isActive = Convert.ToInt32(user.IsActive) != 0;
                 var isAdmin = Convert.ToInt32(user.IsAdmin) != 0;
 
                 var userId = await systemConn.ExecuteScalarAsync<int>(
-                    @"INSERT INTO app_user (user_name, password_hash, display_name, user_type, default_project_name, is_active, created_at, updated_at)
-                      VALUES (@UserName, @PasswordHash, @DisplayName, @UserType, @DefaultProjectName, @IsActive, @CreatedAt, @UpdatedAt)
+                    @"INSERT INTO app_user (user_name, password_hash, display_name, user_type, default_project_name, is_admin, preferred_language, is_active, created_at, updated_at)
+                      VALUES (@UserName, @PasswordHash, @DisplayName, @UserType, @DefaultProjectName, @IsAdmin, @PreferredLanguage, @IsActive, @CreatedAt, @UpdatedAt)
                       RETURNING id",
                     new
                     {
@@ -87,6 +85,8 @@ public class SystemDbTestUserSeeder
                         DisplayName = (string)user.DisplayName,
                         UserType = isAdmin ? "admin" : "user",
                         DefaultProjectName = project.Name,
+                        IsAdmin = isAdmin ? 1 : 0,
+                        PreferredLanguage = (string)(user.PreferredLanguage ?? "ja-JP"),
                         IsActive = isActive ? 1 : 0,
                         CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
                         UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
@@ -160,14 +160,12 @@ public class SystemDbTestUserSeeder
     }
 
     /// <summary>
-    /// system.db 用のパスワードハッシュ（SHA256）を生成します。
+    /// system.db 用のパスワードハッシュ（ASP.NET Core Identity PasswordHasher 互換）を生成します。
     /// </summary>
     private static string HashPasswordForSystemDb(string password)
     {
-        using var sha256 = SHA256.Create();
-        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
+        return passwordHasher.HashPassword(null!, password);
     }
 }
 

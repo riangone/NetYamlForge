@@ -28,6 +28,10 @@ public static class DbInitializer
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbInitializer");
         var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
 
+        // システムデータベース（system.db）を初期化
+        await SystemDatabaseInitializer.InitializeAsync(logger);
+        logger.LogInformation("システムデータベース初期化完了");
+
         var projects = projectManager.GetAll();
         if (projects.Count == 0)
         {

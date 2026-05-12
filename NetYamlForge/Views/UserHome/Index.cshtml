@@ -181,7 +181,7 @@
             <div class="flex flex-wrap gap-2">
                 @foreach (var project in Model.RecentProjects)
                 {
-                    <a href="/@project/Dashboard" class="badge badge-lg badge-outline hover:badge-primary">@project</a>
+                    <a href="@Url.Content($"~/{project}/Dashboard")" class="badge badge-lg badge-outline hover:badge-primary">@project</a>
                 }
             </div>
         </section>

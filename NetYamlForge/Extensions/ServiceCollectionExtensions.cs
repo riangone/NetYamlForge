@@ -12,6 +12,7 @@ using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
+using NetYamlForge.Services.Tenant;
 using NetYamlForge.Services.Cli;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
@@ -175,6 +176,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DynamicEntityFormValidationService>();
         services.AddScoped<CommandErrorHttpMapper>();
         services.AddScoped<IUserAuthService, UserAuthService>();
+        services.AddScoped<ITenantUserService, TenantUserService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IHookExecutionTelemetry, HookExecutionTelemetryLogger>();
         services.AddScoped<IPagePermissionService, PagePermissionService>();

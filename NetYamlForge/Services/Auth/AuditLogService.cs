@@ -19,13 +19,16 @@ namespace NetYamlForge.Services.Auth;
 public class AuditLogService : IAuditLogService
 {
     private readonly IConnectionManager _connectionManager;
+    private readonly ProjectScope _scope;
     private readonly ILogger<AuditLogService> _logger;
 
     public AuditLogService(
         IConnectionManager connectionManager,
+        ProjectScope scope,
         ILogger<AuditLogService> logger)
     {
         _connectionManager = connectionManager;
+        _scope = scope;
         _logger = logger;
     }
 
@@ -58,7 +61,7 @@ VALUES (@UserName, @Action, @Entity, @Detail, @CreatedAt)";
         }
 
         // Phase 2: 使用连接管理器获取连接（复用连接池）
-        var newConn = await _connectionManager.GetConnectionAsync();
+        var newConn = await _connectionManager.GetConnectionAsync(_scope.Current.Name);
         try
         {
             await newConn.ExecuteAsync(sql, param);

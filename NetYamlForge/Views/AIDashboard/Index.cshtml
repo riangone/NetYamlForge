@@ -453,7 +453,8 @@
     }
 
     function viewConversation(id) {
-        window.location.href = '/ai/conversations/' + id;
+        const base = (window.NetYamlForgeConfig?.pathBase) || '';
+        window.location.href = base + '/ai/conversations/' + id;
     }
 
     function assignHandover(id) {

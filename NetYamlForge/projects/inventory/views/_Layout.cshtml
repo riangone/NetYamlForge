@@ -48,6 +48,7 @@
                 .ToList()
             : allEntities;
         var currentProject = Context.GetRouteValue("project")?.ToString() ?? "inventory";
+        var pathBase = Url.Content("~/").TrimEnd('/');
         var headerTitle = headerConfig?.Title ?? "在庫管理";
     }
     <div class="drawer">
@@ -232,7 +233,8 @@
                                     var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
                                     @if (!string.IsNullOrEmpty(item.Url))
                                     {
-                                        <li><a href="@item.Url">@itemLabel</a></li>
+                                        var url = item.Url.StartsWith('/') ? pathBase + item.Url : item.Url;
+                                        <li><a href="@url">@itemLabel</a></li>
                                     }
                                     else if (!string.IsNullOrEmpty(item.Controller))
                                     {

@@ -51,6 +51,8 @@ public static class SystemDatabaseInitializer
                     phone TEXT,
                     user_type TEXT NOT NULL DEFAULT 'employee',
                     default_project_name TEXT,
+                    is_admin INTEGER NOT NULL DEFAULT 0,
+                    preferred_language TEXT NOT NULL DEFAULT 'ja-JP',
                     is_active INTEGER NOT NULL DEFAULT 1,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
@@ -68,6 +70,17 @@ public static class SystemDatabaseInitializer
                     assigned_by INTEGER,
                     created_at TEXT NOT NULL,
                     UNIQUE(user_id, project_name)
+                )
+            ");
+
+            // app_user_role テーブル (全局角色)
+            await conn.ExecuteAsync(@"
+                CREATE TABLE IF NOT EXISTS app_user_role (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_name TEXT NOT NULL,
+                    role_name TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    UNIQUE(user_name, role_name)
                 )
             ");
 
@@ -90,6 +103,21 @@ public static class SystemDatabaseInitializer
                 CREATE INDEX IF NOT EXISTS IX_app_user_project_role_user_id ON app_user_project_role(user_id);
                 CREATE INDEX IF NOT EXISTS IX_app_user_project_role_project_name ON app_user_project_role(project_name);
             ");
+
+            // 既存の app_user テーブルに新しいカラムを追加 (マイグレーション)
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE app_user ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;");
+                logger.LogInformation("app_user テーブルに is_admin カラムを追加しました");
+            }
+            catch { /* カラムが既に存在する場合の例外は無視 */ }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE app_user ADD COLUMN preferred_language TEXT NOT NULL DEFAULT 'ja-JP';");
+                logger.LogInformation("app_user テーブルに preferred_language カラムを追加しました");
+            }
+            catch { /* カラムが既に存在する場合の例外は無視 */ }
 
             // AI チャット履歴テーブル（存在しない場合のみ作成）
             await conn.ExecuteAsync(@"
@@ -157,22 +185,22 @@ public static class SystemDatabaseInitializer
 
         if (existing == 0)
         {
-            var passwordHash = HashPassword("Admin123!");
+            var passwordHash = HashPassword("Admin@123");
             await conn.ExecuteAsync(@"
-                INSERT INTO app_user (user_name, password_hash, display_name, email, user_type, is_active, created_at, updated_at)
-                VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @UserType, 1, @CreatedAt, @UpdatedAt)
+                INSERT INTO app_user (user_name, password_hash, display_name, email, user_type, is_admin, preferred_language, is_active, created_at, updated_at)
+                VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @UserType, 1, 'ja-JP', 1, @CreatedAt, @UpdatedAt)
             ", new
             {
                 UserName = "admin",
                 PasswordHash = passwordHash,
-                DisplayName = "システム管理者",
+                DisplayName = "系统管理者",
                 Email = "admin@example.com",
                 UserType = "employee",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             });
 
-            logger.LogInformation("デフォルト管理者ユーザーを作成しました：admin / Admin123!");
+            logger.LogInformation("デフォルト管理者ユーザーを作成しました：admin / Admin@123");
         }
     }
 
@@ -277,13 +305,11 @@ public static class SystemDatabaseInitializer
     }
 
     /// <summary>
-    /// パスワードをハッシュします
+    /// パスワードをハッシュします（ASP.NET Core Identity PasswordHasher 互換）
     /// </summary>
     private static string HashPassword(string password)
     {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
+        return passwordHasher.HashPassword(null!, password);
     }
 }

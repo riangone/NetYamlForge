@@ -62,6 +62,7 @@
         
         // プロジェクト名を取得（{project} ルートパラメータから）
         var currentProject = Context.GetRouteValue("project")?.ToString() ?? "";
+        var pathBase = Url.Content("~/").TrimEnd('/');
         
         // ヘッダータイトル（プロジェクト固有の設定を使用）
         var headerTitle = headerConfig?.Title ?? "NetYamlForge";
@@ -245,8 +246,9 @@
                                     var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
                                     @if (!string.IsNullOrEmpty(item.Url))
                                     {
+                                        var url = item.Url.StartsWith('/') ? pathBase + item.Url : item.Url;
                                         <li>
-                                            <a href="@item.Url">@itemLabel</a>
+                                            <a href="@url">@itemLabel</a>
                                         </li>
                                     }
                                     else if (!string.IsNullOrEmpty(item.Controller))

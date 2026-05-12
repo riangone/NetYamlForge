@@ -77,7 +77,7 @@ public class TenantAccountControllerTests
             Password = "TestPass123"
         };
 
-        var user = new NetYamlForge.Services.Tenant.AppUser
+        var user = new AppUser
         {
             Id = 1,
             UserName = "testuser",
@@ -116,7 +116,7 @@ public class TenantAccountControllerTests
         };
 
         _tenantUsersMock.Setup(x => x.ValidateCredentialsAsync(model.UserName, model.Password))
-            .ReturnsAsync((NetYamlForge.Services.Tenant.AppUser?)null);
+            .ReturnsAsync((AppUser?)null);
         
         // Act
         var result = await _controller.Login(model);
@@ -136,7 +136,7 @@ public class TenantAccountControllerTests
             Password = "TestPass123"
         };
         
-        var user = new NetYamlForge.Services.Tenant.AppUser
+        var user = new AppUser
         {
             Id = 1,
             UserName = "testuser",

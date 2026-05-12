@@ -1,4 +1,5 @@
 using System.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -198,11 +199,14 @@ public class ConnectionManagerTests
         loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
             scopeFactory.Object,
             loggerFactory.Object,
+            httpContextAccessor.Object,
             _testOptions);
 
         // Act & Assert
@@ -230,11 +234,14 @@ public class ConnectionManagerTests
         loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
             scopeFactory.Object,
             loggerFactory.Object,
+            httpContextAccessor.Object,
             _testOptions);
 
         // Act
@@ -275,11 +282,14 @@ public class ConnectionManagerTests
         loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
         
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
             scopeFactory.Object,
             loggerFactory.Object,
+            httpContextAccessor.Object,
             _testOptions);
 
         // Act - 先创建一些连接
@@ -316,11 +326,14 @@ public class ConnectionManagerTests
         loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
 
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
             scopeFactory.Object,
             loggerFactory.Object,
+            httpContextAccessor.Object,
             _testOptions);
 
         // Act - 创建连接池
@@ -367,11 +380,14 @@ public class ConnectionManagerTests
         loggerFactory.Setup(lf => lf.CreateLogger(It.IsAny<string>()))
             .Returns(new Mock<ILogger>().Object);
 
+        var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        
         var manager = new ConnectionManager(
             _projectManagerMock.Object,
             _loggerMock.Object,
             scopeFactory.Object,
             loggerFactory.Object,
+            httpContextAccessor.Object,
             _testOptions);
 
         // Act - 创建一些连接池

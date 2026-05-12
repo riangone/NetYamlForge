@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
@@ -60,6 +61,7 @@ public class ConnectionManager : IConnectionManager
     private readonly ProjectManager _projectManager;
     private readonly ILogger<ConnectionManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ConcurrentDictionary<string, ConnectionPool> _pools;
     private readonly ConnectionPoolOptions _defaultOptions;
     private readonly ILoggerFactory _loggerFactory;
@@ -69,12 +71,14 @@ public class ConnectionManager : IConnectionManager
         ILogger<ConnectionManager> logger,
         IServiceScopeFactory scopeFactory,
         ILoggerFactory loggerFactory,
+        IHttpContextAccessor httpContextAccessor,
         ConnectionPoolOptions? defaultOptions = null)
     {
         _projectManager = projectManager;
         _logger = logger;
         _scopeFactory = scopeFactory;
         _loggerFactory = loggerFactory;
+        _httpContextAccessor = httpContextAccessor;
         _pools = new ConcurrentDictionary<string, ConnectionPool>();
         _defaultOptions = defaultOptions ?? new ConnectionPoolOptions();
     }
@@ -168,16 +172,27 @@ public class ConnectionManager : IConnectionManager
 
     public async Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
     {
-        // 从当前请求作用域获取 ProjectScope
-        using var scope = _scopeFactory.CreateScope();
-        var projectScope = scope.ServiceProvider.GetService<ProjectScope>();
-        
-        if (projectScope == null || !projectScope.IsSet)
+        // 1. 尝试从 HttpContext 获取当前项目的 ProjectScope（最高优先级，最准确）
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext != null)
         {
-            throw new InvalidOperationException("No project scope set. Use GetConnectionAsync(projectName) instead.");
+            var projectScope = httpContext.RequestServices.GetService<ProjectScope>();
+            if (projectScope != null && projectScope.IsSet)
+            {
+                return await GetConnectionAsync(projectScope.Current.Name, cancellationToken);
+            }
         }
 
-        return await GetConnectionAsync(projectScope.Current.Name, cancellationToken);
+        // 2. 备选方案：尝试从 ScopeFactory 获取（可能在某些后台任务中手动设置了作用域）
+        using var scope = _scopeFactory.CreateScope();
+        var spProjectScope = scope.ServiceProvider.GetService<ProjectScope>();
+        
+        if (spProjectScope != null && spProjectScope.IsSet)
+        {
+            return await GetConnectionAsync(spProjectScope.Current.Name, cancellationToken);
+        }
+
+        throw new InvalidOperationException("No project scope set. Use GetConnectionAsync(projectName) instead.");
     }
 
     public async Task<IDbConnection> GetConnectionAsync(string projectName, CancellationToken cancellationToken = default)

@@ -747,7 +747,7 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
     /// </summary>
     private async Task<DbConnection> GetConnectionAsync()
     {
-        var conn = await _connectionManager.GetConnectionAsync();
+        var conn = await _connectionManager.GetConnectionAsync(_scope.Current.Name);
         return (DbConnection)conn;
     }
 

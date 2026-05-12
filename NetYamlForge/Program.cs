@@ -2,6 +2,7 @@
 // このファイルはアプリの重要な構成要素を定義します。
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
+using NetYamlForge.Services.Tenant;
 using System.Globalization;
 using NetYamlForge.Data;
 using NetYamlForge.Extensions;
@@ -166,6 +167,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied";
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.Cookie.Path = "/";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
 builder.Services.AddAuthorization(options =>
@@ -179,6 +184,9 @@ builder.Services.AddAuthorization(options =>
 // ===== サービス登録（Extensions/ServiceCollectionExtensions.cs に委譲）=====
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge();
+
+// 显式确保 ITenantUserService 已注册（解决 AccountController 的 DI 错误）
+builder.Services.AddScoped<ITenantUserService, TenantUserService>();
 
 // ===== AI Assistant Services =====
 builder.Services.Configure<CliConfig>(builder.Configuration.GetSection(CliConfig.SectionName));

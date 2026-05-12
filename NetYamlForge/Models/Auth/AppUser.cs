@@ -10,9 +10,14 @@ public class AppUser
     public string UserName { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
-    public string PreferredLanguage { get; set; } = "en-US";
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string UserType { get; set; } = "employee";
+    public string? DefaultProjectName { get; set; }
+    public string PreferredLanguage { get; set; } = "ja-JP";
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; } = true;
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+    public string? UpdatedAt { get; set; }
     public string? LastLoginAt { get; set; }
 }

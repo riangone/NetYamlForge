@@ -13,7 +13,10 @@ public class LocalizationController : Controller
     public IActionResult SetLanguage(string culture, string? returnUrl = null)
     {
         var value = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
-        Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, value);
+        Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            value,
+            new CookieOptions { Path = "/", HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
 
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {

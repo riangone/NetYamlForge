@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Dapper;
 using NetYamlForge.Models;
+using NetYamlForge.Models.Auth;
 
 namespace NetYamlForge.Services.Tenant;
 
@@ -30,9 +31,19 @@ public interface ITenantUserService
     Task<IReadOnlyList<ProjectInfo>> GetAccessibleProjectsAsync(int userId);
     
     /// <summary>
-    /// 检查用户是否有指定项目的访问权限
+    /// 获取用户在指定项目的访问权限
     /// </summary>
     Task<bool> HasProjectAccessAsync(int userId, string projectName);
+
+    /// <summary>
+    /// 获取用户的全局角色列表
+    /// </summary>
+    Task<IReadOnlyList<string>> GetUserRolesAsync(string userName);
+
+    /// <summary>
+    /// 更新最后登录时间
+    /// </summary>
+    Task UpdateLastLoginAsync(int userId);
     
     /// <summary>
     /// 创建新用户并分配到项目

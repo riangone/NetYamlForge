@@ -83,7 +83,7 @@ public class UserHomeController : Controller
             return Redirect(returnUrl);
         }
 
-        return Redirect($"/{projectName}/Dashboard");
+        return Redirect(Url.Content($"~/{projectName}/Dashboard"));
     }
 
     /// <summary>

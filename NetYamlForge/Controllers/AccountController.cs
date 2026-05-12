@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Services.Tenant;
+using AppUser = NetYamlForge.Models.Auth.AppUser;
 
 namespace NetYamlForge.Controllers;
 
@@ -51,7 +52,7 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var user = await _users.ValidateCredentialsAsync(model.UserName, model.Password);
+        var user = await _tenantUsers.ValidateCredentialsAsync(model.UserName, model.Password);
         if (user == null)
         {
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
@@ -59,7 +60,7 @@ public class AccountController : Controller
         }
 
         // カスタムロール（AppUserRole）を取得してクレームに追加
-        var customRolesList = (await _users.GetUserRolesAsync(user.UserName)).ToList();
+        var customRolesList = (await _tenantUsers.GetUserRolesAsync(user.UserName)).ToList();
         
         // プロジェクト固有のロールも取得（マルチテナント対応）
         var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
@@ -107,7 +108,7 @@ public class AccountController : Controller
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
         try
         {
-            await _users.UpdateLastLoginAsync(user.Id);
+            await _tenantUsers.UpdateLastLoginAsync(user.Id);
         }
         catch (Exception ex)
         {
@@ -116,7 +117,8 @@ public class AccountController : Controller
 
         Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
-            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
+            new CookieOptions { Path = "/", HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
 
         _logger.LogInformation("User '{UserName}' signed in (roles: {Roles})", user.UserName, string.Join(", ", customRoles));
         await TryWriteAuditAsync("login", "account", "Sign in", user.UserName);
@@ -136,6 +138,7 @@ public class AccountController : Controller
                 {
                     if (landingByRole.TryGetValue(role, out var landingUrl) && !string.IsNullOrWhiteSpace(landingUrl))
                     {
+                        landingUrl = landingUrl.StartsWith('/') ? Url.Content("~" + landingUrl) : landingUrl;
                         _logger.LogInformation("User '{UserName}' redirected to role landing page: {Url}", user.UserName, landingUrl);
                         return Redirect(landingUrl);
                     }
@@ -213,7 +216,8 @@ public class AccountController : Controller
                 
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
-                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
+                    new CookieOptions { Path = "/", HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
 
                 _logger.LogInformation("New user registered: {UserName}", model.UserName);
                 
@@ -285,7 +289,8 @@ public class AccountController : Controller
                 
                 Response.Cookies.Append(
                     CookieRequestCultureProvider.DefaultCookieName,
-                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)));
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(user.PreferredLanguage)),
+                    new CookieOptions { Path = "/", HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
 
                 _logger.LogInformation("New customer registered: {UserName}", model.UserName);
                 

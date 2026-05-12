@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.Sqlite;
+using NetYamlForge.Models.Auth;
 
 namespace NetYamlForge.Services.Tenant;
 
@@ -77,9 +78,12 @@ public class TenantUserService : ITenantUserService
                 phone as Phone,
                 user_type as UserType,
                 default_project_name as DefaultProjectName,
+                is_admin as IsAdmin,
+                preferred_language as PreferredLanguage,
                 is_active as IsActive,
                 created_at as CreatedAt,
-                updated_at as UpdatedAt
+                updated_at as UpdatedAt,
+                last_login_at as LastLoginAt
             FROM app_user
             WHERE user_name = @UserName AND is_active = 1
         ";
@@ -183,6 +187,53 @@ public class TenantUserService : ITenantUserService
         using var db = CreateSystemDbConnection();
         var count = await db.ExecuteScalarAsync<int>(sql, new { UserId = userId, ProjectName = projectName });
         return count > 0;
+    }
+
+    /// <summary>
+    /// 获取用户的全局角色列表
+    /// </summary>
+    public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName)
+    {
+        // 先获取全局角色
+        const string sqlGlobal = @"
+            SELECT role_name 
+            FROM app_user_role 
+            WHERE user_name = @UserName
+        ";
+
+        using var db = CreateSystemDbConnection();
+        var roles = (await db.QueryAsync<string>(sqlGlobal, new { UserName = userName })).ToList();
+
+        // 再获取该用户在所有项目中的角色（作为补充）
+        const string sqlProject = @"
+            SELECT DISTINCT role_name 
+            FROM app_user_project_role r
+            JOIN app_user u ON r.user_id = u.id
+            WHERE u.user_name = @UserName
+        ";
+        var projectRoles = await db.QueryAsync<string>(sqlProject, new { UserName = userName });
+        
+        foreach (var role in projectRoles)
+        {
+            if (!roles.Contains(role, StringComparer.OrdinalIgnoreCase))
+            {
+                roles.Add(role);
+            }
+        }
+
+        return roles.AsReadOnly();
+    }
+
+    public async Task UpdateLastLoginAsync(int userId)
+    {
+        const string sql = @"
+            UPDATE app_user 
+            SET last_login_at = @Now 
+            WHERE id = @Id
+        ";
+
+        using var db = CreateSystemDbConnection();
+        await db.ExecuteAsync(sql, new { Id = userId, Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") });
     }
 
     /// <summary>
@@ -300,22 +351,4 @@ public class TenantUserService : ITenantUserService
     }
 
     #endregion
-}
-
-/// <summary>
-/// 全局用户模型
-/// </summary>
-public class AppUser
-{
-    public int Id { get; set; }
-    public string UserName { get; set; } = "";
-    public string PasswordHash { get; set; } = "";
-    public string DisplayName { get; set; } = "";
-    public string? Email { get; set; }
-    public string? Phone { get; set; }
-    public string UserType { get; set; } = "";
-    public string? DefaultProjectName { get; set; }
-    public bool IsActive { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 }
