@@ -25,7 +25,6 @@
     <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
     <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
     <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
-    <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
@@ -713,8 +712,6 @@
             hidden.value = values.join(',');
         }
     </script>
-    <script src="@Url.Content("~/lib/marked/marked.min.js")"></script>
-    <script src="@Url.Content("~/js/ai-assistant.js")" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

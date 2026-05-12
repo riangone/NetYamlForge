@@ -16,14 +16,10 @@
   <ItemGroup>
     <!-- プロジェクト固有の pdf-templates/ ディレクトリをビルド出力にコピー -->
     <Content Include="projects\**\pdf-templates\**\*" CopyToOutputDirectory="PreserveNewest" />
-    <!-- スキル（プロンプトテンプレート）ディレクトリをコピー -->
-    <Content Include="skills\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <!-- アナライザープロジェクト：禁止パターンをビルド時に検出 (DCS001-DCS004) -->
     <ProjectReference Include="..\NetYamlForge.Analyzers\NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <!-- AI プロジェクト参照 (実際の場所がプロジェクトフォルダ内のため修正) -->
-    <ProjectReference Include="NetYamlForge.AI\NetYamlForge.AI.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
@@ -53,19 +49,4 @@
     <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Regular.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Regular.ttf" SkipUnchangedFiles="true" />
     <Copy SourceFiles="wwwroot/fonts/NotoSansJP-Bold.ttf" DestinationFiles="$(OutDir)wwwroot/fonts/NotoSansJP-Bold.ttf" SkipUnchangedFiles="true" />
   </Target>
-  <ItemGroup>
-    <!-- Exclude AI project directories (they are separate projects with their own compilation) -->
-    <Compile Remove="..\NetYamlForge.AI\**\*.cs" />
-    <Compile Remove="..\NetYamlForge.AI.Web\**\*.cs" />
-    <Compile Remove="NetYamlForge.AI\**\*.cs" />
-    <Compile Remove="NetYamlForge.AI.Web\**\*.cs" />
-    <EmbeddedResource Remove="..\NetYamlForge.AI\**\*.*resx" />
-    <EmbeddedResource Remove="..\NetYamlForge.AI.Web\**\*.*resx" />
-    <EmbeddedResource Remove="NetYamlForge.AI\**\*.*resx" />
-    <EmbeddedResource Remove="NetYamlForge.AI.Web\**\*.*resx" />
-    <None Include="..\NetYamlForge.AI\**\*.*" />
-    <None Include="..\NetYamlForge.AI.Web\**\*.*" />
-    <None Include="NetYamlForge.AI\**\*.*" />
-    <None Include="NetYamlForge.AI.Web\**\*.*" />
-  </ItemGroup>
 </Project>

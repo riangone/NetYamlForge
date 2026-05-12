@@ -1,2 +1,0 @@
-﻿appointment_id,customer_id,customer_name,phone,email,preferred_contact,appointment_type,preferred_date,service_menu,status
-APPT-006,CUST-006,大阪モータース株式会社,06-6789-0123,sales@osaka-motors.co.jp,email,repair,2026-04-01 19:51:59,エアコン点検,confirmed

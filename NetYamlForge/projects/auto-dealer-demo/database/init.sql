@@ -1,96 +1,5 @@
 -- auto-dealer-demo プロジェクト固有のテーブル定義
--- AI 窓口システムのエンティティテーブルを作成します
-
--- AI 対話セッション
-CREATE TABLE IF NOT EXISTS ai_conversations (
-    conversation_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    customer_id VARCHAR(50),
-    guest_session_id VARCHAR(64),
-    channel VARCHAR(20) NOT NULL,
-    status VARCHAR(30) NOT NULL DEFAULT 'active',
-    last_intent VARCHAR(100),
-    last_confidence DECIMAL(10,4),
-    sentiment_score DECIMAL(10,4),
-    context_data TEXT,
-    assigned_to_user_id VARCHAR(50),
-    started_at DATETIME NOT NULL,
-    ended_at DATETIME,
-    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-    updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
-);
-
--- AI メッセージ
-CREATE TABLE IF NOT EXISTS ai_messages (
-    message_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    conversation_id VARCHAR(64) NOT NULL,
-    sender VARCHAR(20) NOT NULL,
-    message_type VARCHAR(20) NOT NULL DEFAULT 'text',
-    content TEXT NOT NULL,
-    intent VARCHAR(100),
-    entities_json TEXT,
-    confidence_score DECIMAL(10,4),
-    sentiment_score DECIMAL(10,4),
-    metadata_json TEXT,
-    components_json TEXT,
-    timestamp DATETIME NOT NULL,
-    FOREIGN KEY (conversation_id) REFERENCES ai_conversations(conversation_id)
-);
-
--- AI 引継ぎ
-CREATE TABLE IF NOT EXISTS ai_handovers (
-    handover_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    conversation_id VARCHAR(64) NOT NULL,
-    ticket_id VARCHAR(64),
-    reason VARCHAR(50) NOT NULL,
-    priority VARCHAR(20) NOT NULL DEFAULT 'medium',
-    target_department VARCHAR(50),
-    assigned_to_user_id VARCHAR(50),
-    status VARCHAR(30) NOT NULL DEFAULT 'pending',
-    handover_notes TEXT,
-    resolution_notes TEXT,
-    escalated_at DATETIME NOT NULL,
-    assigned_at DATETIME,
-    resolved_at DATETIME,
-    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (conversation_id) REFERENCES ai_conversations(conversation_id)
-);
-
--- AI フィードバック
-CREATE TABLE IF NOT EXISTS ai_feedback (
-    feedback_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    conversation_id VARCHAR(64) NOT NULL,
-    message_id VARCHAR(64),
-    rating INTEGER NOT NULL,
-    feedback_text TEXT,
-    category VARCHAR(50),
-    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (conversation_id) REFERENCES ai_conversations(conversation_id),
-    FOREIGN KEY (message_id) REFERENCES ai_messages(message_id)
-);
-
--- AI 知識ベース
-CREATE TABLE IF NOT EXISTS ai_knowledge (
-    knowledge_id VARCHAR(64) NOT NULL PRIMARY KEY,
-    category VARCHAR(50) NOT NULL,
-    intent VARCHAR(50) NOT NULL,
-    question VARCHAR(500) NOT NULL,
-    answer TEXT NOT NULL,
-    answer_html TEXT,
-    keywords TEXT,
-    channel VARCHAR(50) DEFAULT 'all',
-    language VARCHAR(10) NOT NULL DEFAULT 'ja',
-    priority INTEGER DEFAULT 0,
-    status VARCHAR(30) NOT NULL DEFAULT 'active',
-    is_active BOOLEAN NOT NULL DEFAULT 1,
-    usage_count INTEGER DEFAULT 0,
-    helpful_count INTEGER DEFAULT 0,
-    not_helpful_count INTEGER DEFAULT 0,
-    last_used_at DATETIME,
-    created_by VARCHAR(50),
-    updated_by VARCHAR(50),
-    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-    updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
-);
+-- 自動車ディーラー管理システムのエンティティテーブルを作成します
 
 -- 顧客
 CREATE TABLE IF NOT EXISTS customers (
@@ -204,7 +113,7 @@ CREATE TABLE IF NOT EXISTS service_requests (
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
 );
 
--- 販売リード（AI 窓口システム）
+-- 販売リード
 CREATE TABLE IF NOT EXISTS sales_leads (
     lead_id VARCHAR(50) NOT NULL PRIMARY KEY,
     customer_id VARCHAR(50),
@@ -212,37 +121,18 @@ CREATE TABLE IF NOT EXISTS sales_leads (
     budget DECIMAL(12,2),
     lead_score INTEGER NOT NULL DEFAULT 50,
     status VARCHAR(20) NOT NULL DEFAULT 'new',
-    source_conversation_id VARCHAR(64),
-    lead_source VARCHAR(30) DEFAULT 'ai_conversation',
+    lead_source VARCHAR(30) DEFAULT 'web',
     assigned_to_user_id VARCHAR(50),
     assigned_sales VARCHAR(50),
     last_contact_at DATETIME,
     created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
     updated_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY (source_conversation_id) REFERENCES ai_conversations(conversation_id)
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_leads_customer ON sales_leads(customer_id);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON sales_leads(status);
 CREATE INDEX IF NOT EXISTS idx_leads_score ON sales_leads(lead_score);
-
--- インデックス作成
-CREATE INDEX IF NOT EXISTS idx_conversations_customer ON ai_conversations(customer_id);
-CREATE INDEX IF NOT EXISTS idx_conversations_status ON ai_conversations(status);
-CREATE INDEX IF NOT EXISTS idx_conversations_channel ON ai_conversations(channel);
-CREATE INDEX IF NOT EXISTS idx_conversations_started ON ai_conversations(started_at);
-
-CREATE INDEX IF NOT EXISTS idx_messages_conversation ON ai_messages(conversation_id);
-CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON ai_messages(timestamp);
-
-CREATE INDEX IF NOT EXISTS idx_handovers_conversation ON ai_handovers(conversation_id);
-CREATE INDEX IF NOT EXISTS idx_handovers_status ON ai_handovers(status);
-
-CREATE INDEX IF NOT EXISTS idx_feedback_conversation ON ai_feedback(conversation_id);
-
-CREATE INDEX IF NOT EXISTS idx_knowledge_status ON ai_knowledge(status);
-CREATE INDEX IF NOT EXISTS idx_knowledge_category ON ai_knowledge(category);
 
 CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name);
 
@@ -258,7 +148,7 @@ CREATE INDEX IF NOT EXISTS idx_requests_status ON service_requests(status);
 CREATE TABLE IF NOT EXISTS lead_activities (
     activity_id VARCHAR(64) NOT NULL PRIMARY KEY,
     lead_id VARCHAR(50) NOT NULL,
-    activity_type VARCHAR(30) NOT NULL,  -- call / email / visit / proposal_sent / test_drive / ai_message
+    activity_type VARCHAR(30) NOT NULL,  -- call / email / visit / proposal_sent / test_drive
     notes TEXT,
     outcome VARCHAR(20),                 -- positive / neutral / negative / no_answer
     next_action TEXT,

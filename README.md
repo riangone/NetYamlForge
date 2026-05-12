@@ -43,8 +43,6 @@ NetYamlForge/
 │   └── wwwroot/                # Static assets
 ├── NetYamlForge.Tests/        # xUnit test project
 ├── NetYamlForge.Analyzers/    # Roslyn code analyzers
-├── NetYamlForge.AI/           # AI integration core library
-├── NetYamlForge.AI.Web/       # AI Web interface
 └── docs/                       # Documentation (Japanese, English, Chinese)
 ```
 
@@ -54,7 +52,7 @@ NetYamlForge/
 - [Quick Start Guide](docs/quickstart-ja.md)
 - [Framework Overview](docs/framework-overview-tutorial-ja.md)
 - [Developer Tutorial](docs/developer-tutorial-ja.md)
-- [AI System Prompt Config](docs/AI-SYSTEM-PROMPT-CONFIG.md)
+
 
 ## Testing
 

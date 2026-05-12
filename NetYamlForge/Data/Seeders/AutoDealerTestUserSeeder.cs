@@ -58,8 +58,6 @@ public class AutoDealerTestUserSeeder
                 ("EMP-OPS-002", "operator2", "郑军客服", "administration", "staff", "operator", "郑军", "zhengjun@autodealer.com", "13800138041"),
                 ("EMP-OPS-003", "operator3", "钱丽客服", "administration", "senior_staff", "operator", "钱丽", "qianli@autodealer.com", "13800138042"),
                 
-                // AI 管理员
-                ("EMP-AI-ADMIN-001", "ai_admin1", "冯雪AI管理", "management", "manager", "ai_admin", "冯雪", "fengxue@autodealer.com", "13800138050"),
                 
                 // 高管
                 ("EMP-EXEC-001", "executive1", "蒋总", "management", "general_manager", "executive", "蒋总", "jiangzong@autodealer.com", "13800138060"),

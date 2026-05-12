@@ -1,7 +1,7 @@
 name: auto-dealer-demo
-displayName: "自動車ディーラー AI 窓口システム"
+displayName: "自動車ディーラー管理システム"
 version: "1.1.0"
-description: "AI 技術を活用した 24 時間 365 日対応可能な智能客服システム"
+description: "自動車ディーラーの顧客管理・車両在庫・サービス予約を統合した管理システム"
 
 database:
   type: sqlite
@@ -25,7 +25,6 @@ layout:
     sales_rep:     /auto-dealer-demo/Page/SalesRepDashboard
     sales_manager: /auto-dealer-demo/Page/LeadKanban
     service_staff: /auto-dealer-demo/Page/Appointments
-    ai_admin:      /auto-dealer-demo/Page/AIDashboard
     executive:     /auto-dealer-demo/Page/ExecDashboard
 
   navigation:
@@ -54,29 +53,14 @@ layout:
         url: /auto-dealer-demo/Page/Welcome
         icon: 🏠
         section: ""
-        roles: [operator, sales_rep, sales_manager, service_staff, ai_admin, executive]
+        roles: [operator, sales_rep, sales_manager, service_staff, executive]
 
-      # ─── AI 窓口（operator / ai_admin 向け） ───
-      - label: AI 窓口ダッシュボード
-        url: /auto-dealer-demo/Page/AIDashboard
-        icon: 💬
-        section: AI 窓口
-        roles: [operator, ai_admin, sales_manager, executive]
+      # ─── オペレーション ───
       - label: オペレーター・コンソール
         url: /auto-dealer-demo/Page/OperatorConsole
         icon: 🎧
-        section: AI 窓口
-        roles: [operator, ai_admin]
-      - label: AI 分析レポート
-        url: /auto-dealer-demo/Page/AIAnalytics
-        icon: 📈
-        section: AI 窓口
-        roles: [ai_admin]
-      - label: ナレッジベース管理
-        url: /auto-dealer-demo/Page/KnowledgeBase
-        icon: 📚
-        section: AI 窓口
-        roles: [ai_admin]
+        section: オペレーション
+        roles: [operator, sales_manager, executive]
 
       # ─── 販売管理（sales_rep / sales_manager 向け） ───
       - label: リードパイプライン
@@ -107,12 +91,12 @@ layout:
         section: 顧客管理
         roles: [sales_rep, sales_manager, service_staff]
 
-      # ─── 従業員管理（ai_admin / executive 向け） ───
+      # ─── 従業員管理（管理者向け） ───
       - label: 従業員マスタ
         url: /auto-dealer-demo/Page/Employees
         icon: 👨‍💼
         section: 従業員管理
-        roles: [ai_admin, executive]
+        roles: [admin, executive]
 
       # ─── 予約管理（service_staff 向け） ───
       - label: サービス予約
@@ -133,22 +117,17 @@ layout:
         section: 経営レポート
         roles: [executive, sales_manager]
 
-      # ─── データ管理（ai_admin / 管理職向け） ───
-      - label: 会話データ
-        url: /auto-dealer-demo/DynamicEntity/Index?entity=ai_conversations
-        icon: 🗂️
-        section: システム管理
-        roles: [ai_admin, operator]
+      # ─── データ管理 ───
       - label: 車両マスタ
         url: /auto-dealer-demo/DynamicEntity/Index?entity=vehicles
         icon: 🏎️
         section: システム管理
-        roles: [ai_admin, sales_manager]
+        roles: [admin, sales_manager]
       - label: サービス履歴データ
         url: /auto-dealer-demo/DynamicEntity/Index?entity=service_appointments
         icon: 🛠️
         section: システム管理
-        roles: [ai_admin, service_staff]
+        roles: [admin, service_staff]
 
 settings:
   locale: ja-JP

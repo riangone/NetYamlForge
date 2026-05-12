@@ -1,4 +1,0 @@
-﻿lead_id,customer_name,contact,preferred_contact,vehicle_interest,lead_score,status,assigned_to_user_id,stale_duration,lead_created_at
-LEAD-002,佐藤花子,090-2345-6789,phone,price_inquiry,62,new,,未接触,2026-03-27 06:51:59
-LEAD-009,小林大輔,090-9012-3456,sms,price_inquiry,48,new,,未接触,2026-03-20 06:51:59
-LEAD-004,鈴木一郎,090-4567-8901,line,quote_request,45,new,,未接触,2026-03-21 06:51:59

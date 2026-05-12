@@ -1,6 +1,5 @@
 // ファイル概要：システムデータベース (system.db) の初期化クラス
 // マルチテナント認証に必要な app_user, app_user_project_role, projects テーブルを作成
-// AI チャット履歴 (AIChatHistory, AICommandLog) も同時に初期化
 
 using System.Data;
 using Dapper;
@@ -12,8 +11,7 @@ namespace NetYamlForge.Data.Schemas;
 
 /// <summary>
 /// システムデータベースのスキーマ初期化。
-// マルチテナント認証と AI チャット履歴に必要なテーブルを作成します。
-/// </summary>
+/// 
 public static class SystemDatabaseInitializer
 {
     // プロジェクトルートにある system.db を使用（bin/ ではなく）
@@ -119,45 +117,12 @@ public static class SystemDatabaseInitializer
             }
             catch { /* カラムが既に存在する場合の例外は無視 */ }
 
-            // AI チャット履歴テーブル（存在しない場合のみ作成）
-            await conn.ExecuteAsync(@"
-                CREATE TABLE IF NOT EXISTS AIChatHistory (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    UserId TEXT NOT NULL,
-                    Content TEXT NOT NULL,
-                    Type TEXT NOT NULL,
-                    Provider TEXT,
-                    ChatContext TEXT NOT NULL DEFAULT 'framework',
-                    CreatedAt TEXT NOT NULL
-                )
-            ");
-
-            await conn.ExecuteAsync(@"
-                CREATE INDEX IF NOT EXISTS idx_aichat_user ON AIChatHistory(UserId, Id);
-                CREATE INDEX IF NOT EXISTS idx_aichat_context ON AIChatHistory(UserId, ChatContext, Id);
-            ");
-
-            // AI コマンドログテーブル（存在しない場合のみ作成）
-            await conn.ExecuteAsync(@"
-                CREATE TABLE IF NOT EXISTS AICommandLog (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    UserId TEXT NOT NULL,
-                    TaskId TEXT NOT NULL,
-                    CliTool TEXT NOT NULL,
-                    InputText TEXT NOT NULL,
-                    Status TEXT NOT NULL DEFAULT 'pending',
-                    OutputText TEXT,
-                    ErrorMessage TEXT,
-                    StartedAt TEXT NOT NULL,
-                    CompletedAt TEXT,
-                    ChatContext TEXT NOT NULL DEFAULT 'framework'
-                )
-            ");
-
-            await conn.ExecuteAsync(@"
-                CREATE INDEX IF NOT EXISTS idx_aicommand_user ON AICommandLog(UserId, Id);
-                CREATE INDEX IF NOT EXISTS idx_aicommand_task ON AICommandLog(TaskId);
-            ");
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE app_user ADD COLUMN last_login_at TEXT;");
+                logger.LogInformation("app_user テーブルに last_login_at カラムを追加しました");
+            }
+            catch { /* カラムが既に存在する場合の例外は無視 */ }
 
             // デフォルト管理者ユーザーを作成（存在しない場合）
             await EnsureDefaultAdminAsync(conn, logger);

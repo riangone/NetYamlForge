@@ -66,10 +66,9 @@ public class ProjectSpecificInitializer
         // 汎用フォールバック: database/init_seed.sql が存在すれば実行
         await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
 
-        // auto-dealer-demo: AI 窓口システムテーブル初期化 + デモユーザー作成 + テストユーザー作成
+        // auto-dealer-demo: デモユーザー作成 + テストユーザー作成
         if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
         {
-            await InitializeAutoDealerDemoAsync(conn as SqliteConnection, logger);
             await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
             // 创建汽车销售项目的全面测试用户
             await _autoDealerTestUserSeeder.EnsureAutoDealerTestUsersAsync(conn, logger);
@@ -297,15 +296,15 @@ CREATE TABLE ""TaskComment"" (
     }
 
     /// <summary>
-    /// auto-dealer-demo プロジェクトの初期化（AI 窓口システムテーブル）
+    /// auto-dealer-demo プロジェクトの初期化
     /// </summary>
     private static async Task InitializeAutoDealerDemoAsync(SqliteConnection? conn, ILogger logger)
     {
         if (conn == null) return;
 
-        // ai_conversations テーブルの存在確認
+        // customers テーブルの存在確認
         var tables = await conn.QueryAsync<string>(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='ai_conversations'");
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='customers'");
         if (tables.Any())
         {
             logger.LogInformation("auto-dealer-demo のテーブルは既に存在します。初期化をスキップします。");

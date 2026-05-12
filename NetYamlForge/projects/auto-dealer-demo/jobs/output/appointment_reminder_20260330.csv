@@ -1,2 +1,0 @@
-﻿appointment_id,customer_id,customer_name,phone,email,preferred_contact,appointment_type,preferred_date,service_menu,status
-APPT-002,CUST-002,佐藤花子,03-2345-6789,hanako@example.com,phone,inspection,2026-03-31 20:51:59,車検整備,pending

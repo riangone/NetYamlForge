@@ -4,7 +4,6 @@
 
 using System.Data;
 using NetYamlForge.Services;
-using NetYamlForge.Services.AI;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.Connection;
@@ -38,7 +37,6 @@ public static class ServiceCollectionExtensions
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
-        services.AddYamlSkillRegistry();
         return services;
     }
 
@@ -182,8 +180,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPagePermissionService, PagePermissionService>();
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();
-        // AI チャット履歴サービス (system.db に永続化)
-        services.AddSingleton<ChatHistoryService>();
         // PDF エクスポートサービス (PDFsharp - MIT ライセンス)
         services.AddSingleton<IPdfExportService, PdfExportService>();
         // IDocumentPdfService の既定実装は PDFsharp (MIT ライセンス)
@@ -269,27 +265,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEntityHook, SoftDeleteHook>();
 
         services.AddSingleton<IEntityHookRegistry, EntityHookRegistry>();
-
-        return services;
-    }
-
-    /// <summary>
-    /// YAML スキルレジストリを登録します。
-    /// スキル定義の読み込み・依存関係管理・メタデータ提供を行います。
-    /// </summary>
-    public static IServiceCollection AddYamlSkillRegistry(this IServiceCollection services)
-    {
-        // スキルレジストリ（Singleton: 起動時に読み込んでキャッシュ）
-        services.AddSingleton<IYamlSkillRegistry>(sp =>
-            new YamlSkillRegistry(
-                sp.GetRequiredService<ILogger<YamlSkillRegistry>>(),
-                "NetYamlForge/skills"));
-
-        // スキルローダー（Singleton: 初期化制御）
-        services.AddSingleton<IYamlSkillLoader, YamlSkillLoader>();
-
-        // ホストされサービス（起動時に自動実行）
-        services.AddHostedService<YamlSkillInitializationHostedService>();
 
         return services;
     }

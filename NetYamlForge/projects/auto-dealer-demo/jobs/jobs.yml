@@ -1,26 +1,4 @@
 jobs:
-  # 日次 AI 対話統計
-  daily_conversation_stats:
-    displayName: AI 対話日次統計
-    description: "毎日の AI 対話セッションの統計を収集します"
-    enabled: true
-
-    schedule:
-      cron: "0 23 * * *"           # 毎日 23:00
-      timezone: "Asia/Tokyo"
-
-    type: sql_to_csv
-    settings:
-      sqlFile: jobs/sql/daily_conversation_stats.sql
-      outputFile: "jobs/output/conversation_stats_{date:yyyyMMdd}.csv"
-      includeHeader: true
-      delimiter: ","
-
-    onFailure:
-      retryCount: 2
-      retryInterval: 300
-      logError: true
-
   # 翌日予約リマインド
   appointment_reminder:
     displayName: 予約リマインド送信

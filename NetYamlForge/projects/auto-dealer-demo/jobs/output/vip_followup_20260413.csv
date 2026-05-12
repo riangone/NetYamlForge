@@ -1,5 +1,0 @@
-﻿customer_id,name,phone,email,tier_level,last_appointment_date,total_appointments
-CUST-CORP-002,XYZ集团,13900139051,info@xyz-group.com,platinum,,0
-CUST-PLAT-001,冯总,13900139040,fengzong@email.com,platinum,,0
-CUST-VIP-001,吴九,13900139030,wujiu@email.com,vip,,0
-CUST-VIP-002,郑十,13900139031,zhengshi@email.com,vip,,0

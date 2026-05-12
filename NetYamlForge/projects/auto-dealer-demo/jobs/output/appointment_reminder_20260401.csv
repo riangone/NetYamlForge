@@ -1,2 +1,0 @@
-﻿appointment_id,customer_id,customer_name,phone,email,preferred_contact,appointment_type,preferred_date,service_menu,status
-APPT-004,CUST-004,鈴木一郎,04-4567-8901,suzuki@example.com,line,test_drive,2026-04-02 21:51:59,新型車試乗,pending

@@ -1,35 +1,6 @@
 ---
-# AI 窓口システム Dashboard 設定
+# 自動車ディーラー管理システム Dashboard 設定
 stats:
-  - label: アクティブセッション
-    entity: ai_conversations
-    aggregate: count
-    filter: "status='active'"
-    icon: 💬
-    color: badge-primary
-
-  - label: 待機中のエスカレーション
-    entity: ai_handovers
-    aggregate: count
-    filter: "status='pending'"
-    icon: ⚠️
-    color: badge-warning
-
-  - label: 今日の対話数
-    entity: ai_conversations
-    aggregate: count
-    filter: "date(started_at)=date('now')"
-    icon: 📊
-    color: badge-info
-
-  - label: 顧客満足度（平均）
-    entity: ai_feedback
-    aggregate: avg
-    column: rating
-    filter: "date(created_at)=date('now')"
-    icon: ⭐
-    color: badge-success
-
   - label: 本日の予約
     entity: service_appointments
     aggregate: count
@@ -58,45 +29,21 @@ stats:
     icon: 🔥
     color: badge-danger
 
+  - label: 在庫車両
+    entity: vehicles
+    aggregate: count
+    filter: "status='available'"
+    icon: 🚗
+    color: badge-success
+
+  - label: アクティブリード
+    entity: sales_leads
+    aggregate: count
+    filter: "status NOT IN ('won','lost')"
+    icon: 🔥
+    color: badge-primary
+
 charts:
-  - title: 対話数推移（7 日間）
-    type: line
-    entity: ai_conversations
-    valueAggregate: count
-    groupExpression: date(started_at)
-    orderBy: label
-    orderDir: asc
-    limit: 7
-    colorBg: rgba(59, 130, 246, 0.7)
-    colorBorder: rgba(59, 130, 246, 1)
-
-  - title: チャネル別対話数
-    type: doughnut
-    entity: ai_conversations
-    valueAggregate: count
-    groupExpression: channel
-    orderBy: value
-    orderDir: desc
-    limit: 10
-    colors:
-      - rgba(59, 130, 246, 0.85)
-      - rgba(16, 185, 129, 0.85)
-      - rgba(245, 158, 11, 0.85)
-      - rgba(139, 92, 246, 0.85)
-      - rgba(239, 68, 68, 0.85)
-      - rgba(236, 72, 153, 0.85)
-
-  - title: エスカレーション理由
-    type: bar
-    entity: ai_handovers
-    valueAggregate: count
-    groupExpression: reason
-    orderBy: value
-    orderDir: desc
-    limit: 10
-    colorBg: rgba(239, 68, 68, 0.7)
-    colorBorder: rgba(239, 68, 68, 1)
-
   - title: 予約ステータス内訳
     type: pie
     entity: service_appointments
@@ -122,3 +69,41 @@ charts:
     limit: 10
     colorBg: rgba(16, 185, 129, 0.7)
     colorBorder: rgba(16, 185, 129, 1)
+
+  - title: リードスコア分布
+    type: bar
+    entity: sales_leads
+    valueAggregate: count
+    groupExpression: "CASE WHEN lead_score >= 80 THEN '高' WHEN lead_score >= 50 THEN '中' ELSE '低' END"
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: 週間予約推移
+    type: line
+    entity: service_appointments
+    valueAggregate: count
+    groupExpression: date(preferred_date)
+    orderBy: label
+    orderDir: asc
+    limit: 7
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: リードステータス内訳
+    type: doughnut
+    entity: sales_leads
+    valueAggregate: count
+    groupExpression: status
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+      - rgba(236, 72, 153, 0.85)
