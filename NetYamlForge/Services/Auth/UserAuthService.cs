@@ -115,44 +115,10 @@ public class UserAuthService : IUserAuthService
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
-            var password = string.IsNullOrWhiteSpace(input.Password) ? "ChangeMe123!" : input.Password;
+            var password = string.IsNullOrWhiteSpace(input.Password) ? GenerateRandomPassword() : input.Password;
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
-            long id;
-            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
-            if (dbType == "sqlserver")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "postgresql" || dbType == "postgres")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)
-RETURNING Id;";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "mysql" || dbType == "mariadb")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT LAST_INSERT_ID();";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT last_insert_rowid();";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-
+            var id = await InsertUserAsync(user, conn, transaction);
             _logger.LogInformation("Created user '{UserName}' with id {UserId}", user.UserName, id);
             return (int)id;
         }
@@ -210,7 +176,64 @@ WHERE Id = @Id", new
             input.IsActive
             }, transaction);
 
+            // Sync AppUserRole with IsAdmin flag
+            var existingRoles = (await conn.QueryAsync<string>(
+                "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
+                new { UserName = current.UserName }, transaction)).ToList();
+            var hasAdminRole = existingRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase));
+
+            if (!string.Equals(current.UserName, input.UserName, StringComparison.OrdinalIgnoreCase))
+            {
+                await conn.ExecuteAsync(
+                    "UPDATE AppUserRole SET UserName = @NewUserName WHERE UserName = @OldUserName",
+                    new { NewUserName = input.UserName, OldUserName = current.UserName }, transaction);
+            }
+
+            if (input.IsAdmin && !hasAdminRole)
+            {
+                await conn.ExecuteAsync(
+                    "INSERT INTO AppUserRole (UserName, RoleName) VALUES (@UserName, @RoleName)",
+                    new { UserName = input.UserName, RoleName = "Admin" }, transaction);
+            }
+            else if (!input.IsAdmin && hasAdminRole)
+            {
+                await conn.ExecuteAsync(
+                    "DELETE FROM AppUserRole WHERE UserName = @UserName AND RoleName = @RoleName",
+                    new { UserName = input.UserName, RoleName = "Admin" }, transaction);
+            }
+
             _logger.LogInformation("Updated user {UserId} ('{UserName}')", input.Id.Value, input.UserName);
+        }
+        finally
+        {
+            if (ownConnection && conn != null)
+            {
+                _connectionManager.ReleaseConnection(conn);
+            }
+        }
+    }
+
+    public async Task DeleteAsync(int id, IDbConnection? connection = null, IDbTransaction? transaction = null)
+    {
+        var ownConnection = connection == null;
+        var conn = connection ?? await GetConnectionAsync();
+        try
+        {
+            var user = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = id }, transaction);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found.");
+            }
+
+            await conn.ExecuteAsync(
+                "DELETE FROM AppUserRole WHERE UserName = @UserName",
+                new { user.UserName }, transaction);
+
+            await conn.ExecuteAsync(
+                "DELETE FROM AppUser WHERE Id = @Id",
+                new { Id = id }, transaction);
+
+            _logger.LogInformation("Deleted user {UserId} ('{UserName}')", id, user.UserName);
         }
         finally
         {
@@ -255,43 +278,10 @@ WHERE Id = @Id", new
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
-            var password = string.IsNullOrWhiteSpace(input.Password) ? "ChangeMe123!" : input.Password;
+            var password = string.IsNullOrWhiteSpace(input.Password) ? GenerateRandomPassword() : input.Password;
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
-            long id;
-            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
-            if (dbType == "sqlserver")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "postgresql" || dbType == "postgres")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)
-RETURNING Id;";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "mysql" || dbType == "mariadb")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT LAST_INSERT_ID();";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT last_insert_rowid();";
-                id = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
+            var id = await InsertUserAsync(user, conn, transaction);
 
             // カスタムロール割り当て（customer ロール）
             await conn.ExecuteAsync(
@@ -336,43 +326,10 @@ SELECT last_insert_rowid();";
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
-            var password = string.IsNullOrWhiteSpace(input.Password) ? "ChangeMe123!" : input.Password;
+            var password = string.IsNullOrWhiteSpace(input.Password) ? GenerateRandomPassword() : input.Password;
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
-            long userId;
-            var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
-            if (dbType == "sqlserver")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);";
-                userId = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "postgresql" || dbType == "postgres")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)
-RETURNING Id;";
-                userId = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else if (dbType == "mysql" || dbType == "mariadb")
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT LAST_INSERT_ID();";
-                userId = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
-            else
-            {
-                var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
-SELECT last_insert_rowid();";
-                userId = await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-            }
+            var userId = await InsertUserAsync(user, conn, transaction);
 
             // customer ロールを付与
             await conn.ExecuteAsync(
@@ -425,10 +382,10 @@ SELECT last_insert_rowid();";
             selectSql,
             new { UserName = input.UserName }, transaction);
 
-        var now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         var customerId = tableInfo.PrimaryKeyIsIdentity
-            ? existingCustomerId ?? $"CUST-{DateTime.Now:yyyyMMddHHmmss}-{userId:D6}"
-            : $"CUST-{DateTime.Now:yyyyMMddHHmmss}-{userId:D6}";
+            ? existingCustomerId ?? $"CUST-{DateTime.UtcNow:yyyyMMddHHmmss}-{userId:D6}"
+            : $"CUST-{DateTime.UtcNow:yyyyMMddHHmmss}-{userId:D6}";
 
         if (string.IsNullOrEmpty(existingCustomerId))
         {
@@ -734,6 +691,55 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
 
         var result = await conn.ExecuteScalarAsync<int>(sql, new { tableName }, transaction);
         return result > 0;
+    }
+
+    private async Task<long> InsertUserAsync(AppUser user, IDbConnection conn, IDbTransaction? transaction)
+    {
+        var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
+        if (dbType == "sqlserver")
+        {
+            var sql = @"
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+OUTPUT INSERTED.Id
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);";
+            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
+        }
+        else if (dbType == "postgresql" || dbType == "postgres")
+        {
+            var sql = @"
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)
+RETURNING Id;";
+            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
+        }
+        else if (dbType == "mysql" || dbType == "mariadb")
+        {
+            var sql = @"
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
+SELECT LAST_INSERT_ID();";
+            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
+        }
+        else
+        {
+            var sql = @"
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
+SELECT last_insert_rowid();";
+            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
+        }
+    }
+
+    private static string GenerateRandomPassword()
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+        var random = new Random();
+        var password = new char[16];
+        for (int i = 0; i < 16; i++)
+        {
+            password[i] = chars[random.Next(chars.Length)];
+        }
+        return new string(password);
     }
 
     /// <summary>

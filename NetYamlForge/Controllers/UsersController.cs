@@ -5,6 +5,7 @@
 using System.Data;
 using NetYamlForge.Models.Auth;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,14 +15,14 @@ namespace NetYamlForge.Controllers;
 [Route("{project}/Users/{action=Index}/{id?}")]
 public class UsersController : Controller
 {
-    private readonly IDbConnection _db;
+    private readonly IConnectionManager _connectionManager;
     private readonly IUserAuthService _users;
     private readonly IAuditLogService _audit;
     private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IDbConnection db, IUserAuthService users, IAuditLogService audit, ILogger<UsersController> logger)
+    public UsersController(IConnectionManager connectionManager, IUserAuthService users, IAuditLogService audit, ILogger<UsersController> logger)
     {
-        _db = db;
+        _connectionManager = connectionManager;
         _users = users;
         _audit = audit;
         _logger = logger;
@@ -51,8 +52,8 @@ public class UsersController : Controller
         {
             await ExecuteUserTransactionAsync(async tx =>
             {
-                await _users.CreateAsync(model, _db, tx);
-                await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName}", User.Identity?.Name, _db, tx);
+                await _users.CreateAsync(model, null, tx);
+                await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName}", User.Identity?.Name, null, tx);
             });
             return RedirectToAction(nameof(Index));
         }
@@ -95,8 +96,8 @@ public class UsersController : Controller
         {
             await ExecuteUserTransactionAsync(async tx =>
             {
-                await _users.UpdateAsync(model, _db, tx);
-                await _audit.WriteAsync("user_update", "AppUser", $"Updated user {model.UserName}", User.Identity?.Name, _db, tx);
+                await _users.UpdateAsync(model, null, tx);
+                await _audit.WriteAsync("user_update", "AppUser", $"Updated user {model.UserName}", User.Identity?.Name, null, tx);
             });
             return RedirectToAction(nameof(Index));
         }
@@ -107,24 +108,46 @@ public class UsersController : Controller
         }
     }
 
-    private async Task ExecuteUserTransactionAsync(Func<IDbTransaction, Task> action)
+    [HttpPost]
+    public async Task<IActionResult> Delete(int id)
     {
-        if (_db.State != ConnectionState.Open)
-        {
-            _db.Open();
-        }
-
-        using var tx = _db.BeginTransaction();
         try
         {
-            await action(tx);
-            tx.Commit();
+            await ExecuteUserTransactionAsync(async tx =>
+            {
+                await _users.DeleteAsync(id, null, tx);
+                await _audit.WriteAsync("user_delete", "AppUser", $"Deleted user id={id}", User.Identity?.Name, null, tx);
+            });
+            return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "User transaction failed");
-            tx.Rollback();
-            throw;
+            _logger.LogError(ex, "Failed to delete user {UserId}", id);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    private async Task ExecuteUserTransactionAsync(Func<IDbTransaction, Task> action)
+    {
+        var conn = await _connectionManager.GetConnectionAsync();
+        try
+        {
+            using var tx = conn.BeginTransaction();
+            try
+            {
+                await action(tx);
+                tx.Commit();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "User transaction failed");
+                tx.Rollback();
+                throw;
+            }
+        }
+        finally
+        {
+            _connectionManager.ReleaseConnection(conn);
         }
     }
 }

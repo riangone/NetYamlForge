@@ -148,11 +148,9 @@ public class BatchJobController : BaseProjectController
     // ─── TriggerJob (POST, HTMX) ─────────────────────────────────────────────
 
     [HttpPost]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> TriggerJob(string jobId)
     {
-        if (!UserIsAdmin())
-            return Forbid();
-
         if (!_projectScope.IsSet)
             return NotFound();
 

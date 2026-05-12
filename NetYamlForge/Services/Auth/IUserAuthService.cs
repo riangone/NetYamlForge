@@ -16,6 +16,7 @@ public interface IUserAuthService
     Task<AppUser?> GetByIdAsync(int id);
     Task<int> CreateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
     Task UpdateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
+    Task DeleteAsync(int id, IDbConnection? connection = null, IDbTransaction? transaction = null);
     
     /// <summary>
     /// ユーザー登録（一般向け）
