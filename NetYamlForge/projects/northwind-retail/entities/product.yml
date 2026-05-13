@@ -96,11 +96,9 @@ entities:
         type: dropdown
         label: 販売中止
         expression: Products.Discontinued
-        options:
-          - label: 販売中
-            value: 0
-          - label: 販売中止
-            value: 1
+        optionLabels:
+          "0": 販売中
+          "1": 販売中止
       UnitPrice:
         type: range
         label: 単価範囲
