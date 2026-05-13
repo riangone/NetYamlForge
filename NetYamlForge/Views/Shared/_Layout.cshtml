@@ -262,6 +262,32 @@
                             }
                         }
                         
+                        @{
+                            var allPages = ProjectScope?.Current?.PageMetadata?.GetAll();
+                        }
+                        @if (allPages != null && allPages.Count > 0)
+                        {
+                            <li class="menu-title mt-1"><span>Pages</span></li>
+                            @foreach (var page in allPages)
+                            {
+                                if (!page.Value.ShowInSidebar) continue;
+                                var pageUrl = string.IsNullOrEmpty(pathBase)
+                                    ? $"/{currentProject}/Page/{page.Key}"
+                                    : $"{pathBase}/{currentProject}/Page/{page.Key}";
+                                var isPageActive = string.Equals(
+                                    Context.Request.RouteValues["controller"]?.ToString(),
+                                    "Page",
+                                    StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(
+                                        Context.Request.RouteValues["pageName"]?.ToString(),
+                                        page.Key,
+                                        StringComparison.OrdinalIgnoreCase);
+                                <li>
+                                    <a href="@pageUrl" class="@(isPageActive ? "active" : "")">@page.Value.Title</a>
+                                </li>
+                            }
+                        }
+
                         @if (entityDefinitions.Count > 0)
                         {
                             <li class="menu-title mt-1"><span>Entities</span></li>

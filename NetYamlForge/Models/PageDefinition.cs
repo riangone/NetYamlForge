@@ -12,6 +12,8 @@ public class PageDefinition
     public string? MainTable { get; set; }
     /// <summary>カスタム Razor テンプレート名（拡張子なし）。未設定時は汎用 PageView.cshtml を使用。</summary>
     public string? Template { get; set; }
+    /// <summary>サイドバーに自動表示するかどうか。デフォルト: true</summary>
+    public bool ShowInSidebar { get; set; } = true;
     /// <summary>カレンダーUI向けの追加設定（pages/*.yaml の calendar_ui）。</summary>
     public CalendarUiDefinition? CalendarUi { get; set; }
     /// <summary>ページ末尾に挿入する JS ファイル URL リスト（pages/*.yaml の scripts）。</summary>
