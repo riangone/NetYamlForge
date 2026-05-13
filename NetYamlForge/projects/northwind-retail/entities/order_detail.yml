@@ -1,6 +1,6 @@
 entities:
   order_detail:
-    table: "[Order Details]"
+    table: '"Order Details"'
     key: OrderID
     keys:
       - OrderID
@@ -22,11 +22,11 @@ entities:
       - type: left
         table: Products
         alias: p
-        on: "[Order Details].ProductID = p.ProductID"
+        on: '"Order Details".ProductID = p.ProductID'
       - type: left
         table: Orders
         alias: o
-        on: "[Order Details].OrderID = o.OrderID"
+        on: '"Order Details".OrderID = o.OrderID'
     columns:
       OrderID: { type: int, identity: true, label: 注文番号, sortable: true }
       ProductID: { type: int, identity: true, label: 商品ID, sortable: true }
@@ -44,7 +44,7 @@ entities:
         type: decimal
         identity: true
         label: 小計
-        expression: "ROUND([Order Details].UnitPrice * [Order Details].Quantity * (1 - [Order Details].Discount), 2)"
+        expression: 'ROUND("Order Details".UnitPrice * "Order Details".Quantity * (1 - "Order Details".Discount), 2)'
         sortable: true
       OrderDate:
         type: datetime
@@ -76,19 +76,19 @@ entities:
       OrderID:
         type: entity-picker
         label: 注文番号
-        expression: "[Order Details].OrderID"
+        expression: '"Order Details".OrderID'
         foreignKey:
           entity: order
           displayColumn: OrderID
       ProductID:
         type: entity-picker
         label: 商品
-        expression: "[Order Details].ProductID"
+        expression: '"Order Details".ProductID'
         foreignKey:
           entity: product
           displayColumn: ProductName
       UnitPrice:
         type: range
         label: 単価範囲
-        expression: "[Order Details].UnitPrice"
+        expression: '"Order Details".UnitPrice'
     links: {}

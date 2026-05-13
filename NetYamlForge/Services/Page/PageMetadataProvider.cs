@@ -35,7 +35,9 @@ public class PageMetadataProvider : IPageMetadataProvider
             .IgnoreUnmatchedProperties()
             .Build();
 
-        foreach (var file in Directory.GetFiles(pagesDir, "*.yaml"))
+        foreach (var file in Directory.GetFiles(pagesDir).Where(f =>
+            f.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) ||
+            f.EndsWith(".yml", StringComparison.OrdinalIgnoreCase)))
         {
             try
             {

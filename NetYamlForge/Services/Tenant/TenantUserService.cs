@@ -347,7 +347,8 @@ public class TenantUserService : ITenantUserService
     {
         var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
         var result = passwordHasher.VerifyHashedPassword(null!, storedHash, password);
-        return result == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success;
+        return result == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Success ||
+               result == Microsoft.AspNetCore.Identity.PasswordVerificationResult.SuccessRehashNeeded;
     }
 
     #endregion
