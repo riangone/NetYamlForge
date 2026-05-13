@@ -283,7 +283,7 @@
                                         page.Key,
                                         StringComparison.OrdinalIgnoreCase);
                                 <li>
-                                    <a href="@pageUrl" class="@(isPageActive ? "active" : "")">@page.Value.Title</a>
+                                    <a href="@(pageUrl)" class="@(isPageActive ? "active" : "")">@(page.Value.Title)</a>
                                 </li>
                             }
                         }
