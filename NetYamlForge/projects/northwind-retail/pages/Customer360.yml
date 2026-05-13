@@ -1,0 +1,98 @@
+title: 顧客360
+sections:
+  - id: customer_selector
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全顧客数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '👥' AS metric_icon, NULL
+      FROM Customers
+      UNION ALL
+      SELECT 'アクティブ顧客',
+             CAST(COUNT(DISTINCT CustomerID) AS TEXT),
+             '🏢',
+             NULL
+      FROM Orders
+      UNION ALL
+      SELECT '平均顧客単価',
+             '$' || CAST(ROUND(AVG(customer_value.total), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM (
+        SELECT o.CustomerID, SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS total
+        FROM Orders o
+        INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+        GROUP BY o.CustomerID
+      ) customer_value
+      UNION ALL
+      SELECT '平均注文頻度',
+             CAST(ROUND(AVG(order_freq.freq), 1) AS TEXT) || ' 回',
+             '📊',
+             NULL
+      FROM (
+        SELECT CustomerID, COUNT(*) AS freq FROM Orders GROUP BY CustomerID
+      ) order_freq
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: top_customers_by_value
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT c.CompanyName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Customers c
+      INNER JOIN Orders o ON c.CustomerID = o.CustomerID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY c.CustomerID
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: customers_by_country
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT Country AS label,
+             COUNT(*) AS value
+      FROM Customers
+      GROUP BY Country
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: customer_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.CustomerID AS 顧客ID,
+             c.CompanyName AS 会社名,
+             c.ContactName AS 担当者,
+             c.Country AS 国,
+             c.City AS 市区町村,
+             c.Phone AS 電話番号,
+             COALESCE(ord_stats.注文件数, 0) AS 注文件数,
+             COALESCE(ord_stats.総売上, 0) AS 総売上,
+             COALESCE(ord_stats.平均注文額, 0) AS 平均注文額,
+             COALESCE(ord_stats.最終注文日, '-') AS 最終注文日,
+             CASE WHEN ord_stats.総売上 >= 100000 THEN '🏆 VIP'
+                  WHEN ord_stats.総売上 >= 50000 THEN '⭐ 重要'
+                  WHEN ord_stats.総売上 >= 10000 THEN '🔵 一般'
+                  ELSE '⚪ 低頻度'
+             END AS 顧客ランク
+      FROM Customers c
+      LEFT JOIN (
+        SELECT o.CustomerID,
+               COUNT(o.OrderID) AS 注文件数,
+               ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 総売上,
+               ROUND(AVG(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 平均注文額,
+               MAX(o.OrderDate) AS 最終注文日
+        FROM Orders o
+        INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+        GROUP BY o.CustomerID
+      ) ord_stats ON c.CustomerID = ord_stats.CustomerID
+      ORDER BY 総売上 DESC
+    columns: [顧客ID, 会社名, 担当者, 国, 市区町村, 電話番号, 注文件数, 総売上, 平均注文額, 最終注文日, 顧客ランク]

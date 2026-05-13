@@ -1,0 +1,120 @@
+title: 受注処理パイプライン
+sections:
+  - id: pipeline_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全注文' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📋' AS metric_icon, NULL
+      FROM Orders
+      UNION ALL
+      SELECT '未処理',
+             CAST(COUNT(*) AS TEXT),
+             '🟡',
+             NULL
+      FROM Orders WHERE ShippedDate IS NULL AND RequiredDate >= DATE('now')
+      UNION ALL
+      SELECT '遅延',
+             CAST(COUNT(*) AS TEXT),
+             '🔴',
+             NULL
+      FROM Orders WHERE ShippedDate IS NULL AND RequiredDate < DATE('now')
+      UNION ALL
+      SELECT '本日出荷',
+             CAST(COUNT(*) AS TEXT),
+             '🚚',
+             NULL
+      FROM Orders WHERE DATE(RequiredDate) = DATE('now') AND ShippedDate IS NULL
+      UNION ALL
+      SELECT '出荷済',
+             CAST(COUNT(*) AS TEXT),
+             '✅',
+             NULL
+      FROM Orders WHERE ShippedDate IS NOT NULL
+      UNION ALL
+      SELECT '今月売上',
+             '$' || CAST(ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE strftime('%Y-%m', o.OrderDate) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: pipeline_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', OrderDate) AS label,
+             COUNT(*) AS value
+      FROM Orders
+      WHERE OrderDate >= DATE('now', '-12 months')
+      GROUP BY strftime('%Y-%m', OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: delayed_orders
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.RequiredDate AS 必要日,
+             CAST(julianday('now') - julianday(o.RequiredDate) AS INTEGER) AS 遅延日数,
+             e.LastName || ' ' || e.FirstName AS 担当者,
+             o.ShipName AS 配送先,
+             ROUND(o.Freight, 2) AS 運送料,
+             (SELECT ROUND(SUM(od2.UnitPrice * od2.Quantity * (1 - od2.Discount)), 2)
+              FROM "Order Details" od2 WHERE od2.OrderID = o.OrderID) AS 注文金額
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      INNER JOIN Employees e ON o.EmployeeID = e.EmployeeID
+      WHERE o.ShippedDate IS NULL AND o.RequiredDate < DATE('now')
+      ORDER BY 遅延日数 DESC
+    columns: [注文番号, 顧客名, 注文日, 必要日, 遅延日数, 担当者, 配送先, 運送料, 注文金額]
+
+  - id: today_shipments
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.RequiredDate AS 必要日,
+             o.ShipName AS 配送先,
+             o.ShipCity AS 配送先市,
+             o.ShipCountry AS 配送先国,
+             s.CompanyName AS 配送業者,
+             ROUND(o.Freight, 2) AS 運送料
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      INNER JOIN Shippers s ON o.ShipVia = s.ShipperID
+      WHERE DATE(o.RequiredDate) = DATE('now') AND o.ShippedDate IS NULL
+      ORDER BY o.Freight DESC
+    columns: [注文番号, 顧客名, 注文日, 必要日, 配送先, 配送先市, 配送先国, 配送業者, 運送料]
+
+  - id: recent_shipped
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.ShippedDate AS 出荷日,
+             CAST(julianday(o.ShippedDate) - julianday(o.OrderDate) AS INTEGER) AS 処理日数,
+             s.CompanyName AS 配送業者,
+             ROUND(o.Freight, 2) AS 運送料,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 注文金額
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      INNER JOIN Shippers s ON o.ShipVia = s.ShipperID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.ShippedDate IS NOT NULL
+      GROUP BY o.OrderID
+      ORDER BY o.ShippedDate DESC
+      LIMIT 20
+    columns: [注文番号, 顧客名, 注文日, 出荷日, 処理日数, 配送業者, 運送料, 注文金額]

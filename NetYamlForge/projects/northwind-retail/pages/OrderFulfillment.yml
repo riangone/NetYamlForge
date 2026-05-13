@@ -1,0 +1,79 @@
+title: 受注処理ダッシュボード
+sections:
+  - id: fulfillment_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '未処理注文' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📋' AS metric_icon, NULL
+      FROM Orders WHERE ShippedDate IS NULL
+      UNION ALL
+      SELECT '遅延注文',
+             CAST(COUNT(*) AS TEXT),
+             '🔴',
+             NULL
+      FROM Orders WHERE ShippedDate IS NULL AND RequiredDate < DATE('now')
+      UNION ALL
+      SELECT '本日出荷予定',
+             CAST(COUNT(*) AS TEXT),
+             '🚚',
+             NULL
+      FROM Orders WHERE DATE(RequiredDate) = DATE('now') AND ShippedDate IS NULL
+      UNION ALL
+      SELECT '今月処理済',
+             CAST(COUNT(*) AS TEXT),
+             '✅',
+             NULL
+      FROM Orders WHERE ShippedDate IS NOT NULL AND strftime('%Y-%m', ShippedDate) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: pending_orders
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.RequiredDate AS 必要日,
+             o.ShipName AS 配送先,
+             ROUND(o.Freight, 2) AS 運送料,
+             CASE WHEN o.RequiredDate < DATE('now') THEN '🔴 遅延' ELSE '🟡 未処理' END AS ステータス
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      WHERE o.ShippedDate IS NULL
+      ORDER BY o.RequiredDate ASC
+    columns: [注文番号, 顧客名, 注文日, 必要日, 配送先, 運送料, ステータス]
+
+  - id: shipper_workload
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS label,
+             COUNT(o.OrderID) AS value
+      FROM Orders o
+      INNER JOIN Shippers s ON o.ShipVia = s.ShipperID
+      WHERE o.ShippedDate IS NULL
+      GROUP BY s.CompanyName
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: recent_shipped
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.ShippedDate AS 出荷日,
+             s.CompanyName AS 配送業者,
+             ROUND(o.Freight, 2) AS 運送料
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      INNER JOIN Shippers s ON o.ShipVia = s.ShipperID
+      WHERE o.ShippedDate IS NOT NULL
+      ORDER BY o.ShippedDate DESC
+      LIMIT 10
+    columns: [注文番号, 顧客名, 注文日, 出荷日, 配送業者, 運送料]

@@ -1,0 +1,88 @@
+title: 配送管理ダッシュボード
+sections:
+  - id: shipping_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '配送業者数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🚚' AS metric_icon, NULL
+      FROM Shippers
+      UNION ALL
+      SELECT '総出荷件数',
+             CAST(COUNT(*) AS TEXT),
+             '✅',
+             NULL
+      FROM Orders WHERE ShippedDate IS NOT NULL
+      UNION ALL
+      SELECT '未出荷件数',
+             CAST(COUNT(*) AS TEXT),
+             '⏳',
+             NULL
+      FROM Orders WHERE ShippedDate IS NULL
+      UNION ALL
+      SELECT '平均運送料',
+             '$' || CAST(ROUND(AVG(Freight), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Orders WHERE ShippedDate IS NOT NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: orders_by_shipper
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS label,
+             COUNT(o.OrderID) AS value
+      FROM Shippers s
+      INNER JOIN Orders o ON s.ShipperID = o.ShipVia
+      GROUP BY s.ShipperID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: freight_by_country
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT o.ShipCountry AS label,
+             ROUND(SUM(o.Freight), 2) AS value
+      FROM Orders o
+      WHERE o.ShippedDate IS NOT NULL
+      GROUP BY o.ShipCountry
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: monthly_shipping_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', o.ShippedDate) AS label,
+             COUNT(o.OrderID) AS value
+      FROM Orders o
+      WHERE o.ShippedDate IS NOT NULL AND o.ShippedDate >= DATE('now', '-12 months')
+      GROUP BY strftime('%Y-%m', o.ShippedDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: shipper_performance
+    component: table
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS 配送業者名,
+             s.Phone AS 電話番号,
+             COUNT(o.OrderID) AS 取扱件数,
+             ROUND(SUM(o.Freight), 2) AS 運送料合計,
+             ROUND(AVG(o.Freight), 2) AS 平均運送料,
+             ROUND(AVG(ROUND(julianday(o.ShippedDate) - julianday(o.OrderDate), 1)), 1) AS 平均配送日数
+      FROM Shippers s
+      LEFT JOIN Orders o ON s.ShipperID = o.ShipVia AND o.ShippedDate IS NOT NULL
+      GROUP BY s.ShipperID
+      ORDER BY 取扱件数 DESC
+    columns: [配送業者名, 電話番号, 取扱件数, 運送料合計, 平均運送料, 平均配送日数]

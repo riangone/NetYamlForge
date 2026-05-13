@@ -17,13 +17,41 @@ entities:
         order: [OrderID, ProductID, UnitPrice, Quantity, Discount]
       filters:
         columns: 4
-        order: [OrderID, ProductID]
+        order: [OrderID, ProductID, UnitPrice]
+    joins:
+      - type: left
+        table: Products
+        alias: p
+        on: "[Order Details].ProductID = p.ProductID"
+      - type: left
+        table: Orders
+        alias: o
+        on: "[Order Details].OrderID = o.OrderID"
     columns:
       OrderID: { type: int, identity: true, label: 注文番号, sortable: true }
-      ProductID: { type: int, identity: true, label: 商品, sortable: true }
+      ProductID: { type: int, identity: true, label: 商品ID, sortable: true }
+      ProductName:
+        type: string
+        identity: true
+        label: 商品名
+        expression: p.ProductName
+        searchable: true
+        sortable: true
       UnitPrice: { type: decimal, label: 単価, sortable: true }
       Quantity: { type: int, label: 数量, sortable: true }
       Discount: { type: decimal, label: 割引率, sortable: true }
+      LineTotal:
+        type: decimal
+        identity: true
+        label: 小計
+        expression: "ROUND([Order Details].UnitPrice * [Order Details].Quantity * (1 - [Order Details].Discount), 2)"
+        sortable: true
+      OrderDate:
+        type: datetime
+        identity: true
+        label: 注文日
+        expression: o.OrderDate
+        sortable: true
     forms:
       OrderID:
         type: int
@@ -44,5 +72,23 @@ entities:
       UnitPrice: { type: decimal, label: 単価, required: true, editable: true }
       Quantity: { type: int, label: 数量, required: true, editable: true }
       Discount: { type: decimal, label: 割引率, editable: true }
-    filters: {}
+    filters:
+      OrderID:
+        type: entity-picker
+        label: 注文番号
+        expression: "[Order Details].OrderID"
+        foreignKey:
+          entity: order
+          displayColumn: OrderID
+      ProductID:
+        type: entity-picker
+        label: 商品
+        expression: "[Order Details].ProductID"
+        foreignKey:
+          entity: product
+          displayColumn: ProductName
+      UnitPrice:
+        type: range
+        label: 単価範囲
+        expression: "[Order Details].UnitPrice"
     links: {}

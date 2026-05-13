@@ -14,14 +14,40 @@ entities:
         order: [LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Notes, ReportsTo]
       filters:
         columns: 4
-        order: [LastName, FirstName, Title, Country]
+        order: [LastName, FirstName, Title, Country, HireDate]
+    joins:
+      - type: left
+        table: Employees
+        alias: mgr
+        on: Employees.ReportsTo = mgr.EmployeeID
     columns:
       EmployeeID: { type: int, identity: true, label: ID }
       LastName: { type: string, required: true, label: 姓, sortable: true }
       FirstName: { type: string, required: true, label: 名, sortable: true }
+      FullName:
+        type: string
+        identity: true
+        label: 氏名
+        expression: Employees.LastName || ' ' || Employees.FirstName
+        searchable: true
+        sortable: true
       Title: { type: string, label: 役職, sortable: true }
       HireDate: { type: datetime, label: 入社日, sortable: true }
       Country: { type: string, label: 国 }
+      ReportsTo: { type: int, label: 上司ID }
+      ManagerName:
+        type: string
+        identity: true
+        label: 上司名
+        expression: mgr.LastName || ' ' || mgr.FirstName
+        searchable: true
+        sortable: true
+      OrderCount:
+        type: int
+        identity: true
+        label: 担当注文件数
+        expression: (SELECT COUNT(*) FROM Orders ord WHERE ord.EmployeeID = Employees.EmployeeID)
+        sortable: true
     forms:
       LastName: { type: string, required: true, label: 姓, editable: true }
       FirstName: { type: string, required: true, label: 名, editable: true }
@@ -44,6 +70,22 @@ entities:
         foreignKey:
           entity: employee
           displayColumn: LastName
-    filters: {}
+    filters:
+      Title:
+        type: dropdown
+        label: 役職
+        expression: Employees.Title
+      Country:
+        type: multi-select
+        label: 国
+        expression: Employees.Country
+        options:
+          - USA
+          - UK
+      HireDate:
+        type: date-range
+        label: 入社日
+        expression: Employees.HireDate
     links:
       orders: { label: 担当注文, targetEntity: order, filter: { EmployeeID: EmployeeID } }
+      territories: { label: 担当テリトリー, targetEntity: employeeterritory, filter: { EmployeeID: EmployeeID } }

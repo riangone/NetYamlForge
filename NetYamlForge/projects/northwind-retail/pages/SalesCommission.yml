@@ -1,0 +1,98 @@
+title: 営業歩合管理
+sections:
+  - id: commission_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '営業社員数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '👨‍💼' AS metric_icon, NULL
+      FROM Employees WHERE Title LIKE '%Sales%' OR Title LIKE '%Representative%'
+      UNION ALL
+      SELECT '総売上',
+             '$' || CAST(ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      UNION ALL
+      SELECT '総歩合（5%）',
+             '$' || CAST(ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) * 0.05, 2) AS TEXT),
+             '🏆',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      UNION ALL
+      SELECT '平均社員売上',
+             '$' || CAST(ROUND(AVG(emp_sales.total), 2) AS TEXT),
+             '📊',
+             NULL
+      FROM (
+        SELECT o.EmployeeID, SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) AS total
+        FROM Orders o
+        INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+        GROUP BY o.EmployeeID
+      ) emp_sales
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: commission_by_employee
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Employees e
+      INNER JOIN Orders o ON e.EmployeeID = o.EmployeeID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY e.EmployeeID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: monthly_commission_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', o.OrderDate) AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) * 0.05, 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.OrderDate >= DATE('now', '-12 months')
+      GROUP BY strftime('%Y-%m', o.OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: employee_commission_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS 社員名,
+             e.Title AS 役職,
+             COALESCE(emp_stats.担当注文件数, 0) AS 担当注文件数,
+             COALESCE(emp_stats.総売上, 0) AS 総売上,
+             ROUND(COALESCE(emp_stats.総売上, 0) * 0.05, 2) AS 歩合額_5%,
+             ROUND(COALESCE(emp_stats.総売上, 0) * 0.03, 2) AS 歩合額_3%,
+             COALESCE(emp_stats.平均注文額, 0) AS 平均注文額,
+             COALESCE(emp_stats.月平均売上, 0) AS 月平均売上,
+             CASE WHEN COALESCE(emp_stats.総売上, 0) >= 500000 THEN '🏆 Sランク'
+                  WHEN COALESCE(emp_stats.総売上, 0) >= 200000 THEN '⭐ Aランク'
+                  WHEN COALESCE(emp_stats.総売上, 0) >= 50000 THEN '👍 Bランク'
+                  ELSE '📈 Cランク'
+             END AS 評価
+      FROM Employees e
+      LEFT JOIN (
+        SELECT o.EmployeeID,
+               COUNT(o.OrderID) AS 担当注文件数,
+               ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 総売上,
+               ROUND(AVG(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 平均注文額,
+               ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) /
+                     COUNT(DISTINCT strftime('%Y-%m', o.OrderDate)), 2) AS 月平均売上
+        FROM Orders o
+        INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+        GROUP BY o.EmployeeID
+      ) emp_stats ON e.EmployeeID = emp_stats.EmployeeID
+      ORDER BY 総売上 DESC
+    columns: [社員名, 役職, 担当注文件数, 総売上, 歩合額_5%, 歩合額_3%, 平均注文額, 月平均売上, 評価]

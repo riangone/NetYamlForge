@@ -14,18 +14,47 @@ entities:
         order: [ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued]
       filters:
         columns: 4
-        order: [ProductName, SupplierID, CategoryID, Discontinued]
+        order: [CategoryID, SupplierID, Discontinued, UnitPrice, UnitsInStock]
+    joins:
+      - type: left
+        table: Categories
+        alias: cat
+        on: Products.CategoryID = cat.CategoryID
+      - type: left
+        table: Suppliers
+        alias: sup
+        on: Products.SupplierID = sup.SupplierID
     columns:
       ProductID: { type: int, identity: true, label: 商品ID }
       ProductName: { type: string, required: true, label: 商品名, searchable: true, sortable: true }
-      SupplierID: { type: int, label: 仕入先 }
-      CategoryID: { type: int, label: カテゴリ }
+      SupplierID: { type: int, label: 仕入先ID }
+      SupplierName:
+        type: string
+        identity: true
+        label: 仕入先
+        expression: sup.CompanyName
+        searchable: true
+        sortable: true
+      CategoryID: { type: int, label: カテゴリID }
+      CategoryName:
+        type: string
+        identity: true
+        label: カテゴリ
+        expression: cat.CategoryName
+        searchable: true
+        sortable: true
       QuantityPerUnit: { type: string, label: 単位当数量 }
       UnitPrice: { type: decimal, label: 単価, sortable: true }
       UnitsInStock: { type: int, label: 在庫数, sortable: true }
       UnitsOnOrder: { type: int, label: 注文数 }
       ReorderLevel: { type: int, label: 発注点 }
       Discontinued: { type: string, label: 販売中止 }
+      StockStatus:
+        type: string
+        identity: true
+        label: 在庫状況
+        expression: "CASE WHEN Products.Discontinued = '1' THEN '❌ 販売中止' WHEN Products.UnitsInStock = 0 THEN '🔴 在庫切れ' WHEN Products.UnitsInStock <= Products.ReorderLevel THEN '🟡 発注点以下' ELSE '✅ 在庫あり' END"
+        sortable: false
     forms:
       ProductName: { type: string, required: true, label: 商品名, editable: true }
       SupplierID:
@@ -48,7 +77,39 @@ entities:
       UnitsOnOrder: { type: int, label: 注文数, editable: true }
       ReorderLevel: { type: int, label: 発注点, editable: true }
       Discontinued: { type: string, label: 販売中止, editable: true, options: [0, 1] }
-    filters: {}
-    links: {}
+    filters:
+      CategoryID:
+        type: dropdown
+        label: カテゴリ
+        expression: Products.CategoryID
+        foreignKey:
+          entity: category
+          displayColumn: CategoryName
+      SupplierID:
+        type: dropdown
+        label: 仕入先
+        expression: Products.SupplierID
+        foreignKey:
+          entity: supplier
+          displayColumn: CompanyName
+      Discontinued:
+        type: dropdown
+        label: 販売中止
+        expression: Products.Discontinued
+        options:
+          - label: 販売中
+            value: 0
+          - label: 販売中止
+            value: 1
+      UnitPrice:
+        type: range
+        label: 単価範囲
+        expression: Products.UnitPrice
+      UnitsInStock:
+        type: range
+        label: 在庫数範囲
+        expression: Products.UnitsInStock
+    links:
+      order_details: { label: 販売実績, targetEntity: order_detail, filter: { ProductID: ProductID } }
     actions:
       reorder: { label: 発注, scope: row, url: "DynamicEntity/Create?entity=product&SupplierID={SupplierID}" }

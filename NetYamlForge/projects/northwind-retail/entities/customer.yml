@@ -23,6 +23,12 @@ entities:
       Country: { type: string, label: 国, sortable: true }
       City: { type: string, label: 市区町村, sortable: true }
       Phone: { type: string, label: 電話番号 }
+      OrderCount:
+        type: int
+        identity: true
+        label: 注文件数
+        expression: (SELECT COUNT(*) FROM Orders o WHERE o.CustomerID = Customers.CustomerID)
+        sortable: true
     forms:
       CustomerID: { type: string, label: 顧客ID, editable: false }
       CompanyName: { type: string, label: 会社名, required: true, editable: true }
@@ -35,7 +41,36 @@ entities:
       Country: { type: string, label: 国, editable: true }
       Phone: { type: string, label: 電話番号, editable: true }
       Fax: { type: string, label: FAX, editable: true }
-    filters: {}
+    filters:
+      Country:
+        type: multi-select
+        label: 国
+        expression: Customers.Country
+        options:
+          - USA
+          - France
+          - Germany
+          - Brazil
+          - UK
+          - Canada
+          - Spain
+          - Sweden
+          - Austria
+          - Finland
+          - Italy
+          - Portugal
+          - Ireland
+          - Switzerland
+          - Venezuela
+          - Mexico
+          - Denmark
+          - Belgium
+          - Norway
+          - Poland
+      City:
+        type: dropdown
+        label: 市区町村
+        expression: Customers.City
     links:
       orders: { label: 注文履歴, targetEntity: order, filter: { CustomerID: CustomerID } }
     actions:

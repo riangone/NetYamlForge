@@ -1,0 +1,89 @@
+title: 商品カタログ
+sections:
+  - id: catalog_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全商品数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📦' AS metric_icon, NULL
+      FROM Products WHERE Discontinued = 0
+      UNION ALL
+      SELECT 'カテゴリ数', CAST(COUNT(*) AS TEXT), '🏷️', NULL
+      FROM Categories
+      UNION ALL
+      SELECT '仕入先数', CAST(COUNT(*) AS TEXT), '🏭', NULL
+      FROM Suppliers
+      UNION ALL
+      SELECT '平均単価',
+             '$' || CAST(ROUND(AVG(UnitPrice), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Products WHERE Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: category_distribution
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT c.CategoryName AS label,
+             COUNT(p.ProductID) AS value
+      FROM Categories c
+      LEFT JOIN Products p ON c.CategoryID = p.CategoryID AND p.Discontinued = 0
+      GROUP BY c.CategoryID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: price_distribution
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE
+               WHEN UnitPrice < 10 THEN '~$10'
+               WHEN UnitPrice < 20 THEN '$10~$20'
+               WHEN UnitPrice < 50 THEN '$20~$50'
+               WHEN UnitPrice < 100 THEN '$50~$100'
+               ELSE '$100~'
+             END AS label,
+             COUNT(*) AS value
+      FROM Products WHERE Discontinued = 0
+      GROUP BY CASE
+               WHEN UnitPrice < 10 THEN '~$10'
+               WHEN UnitPrice < 20 THEN '$10~$20'
+               WHEN UnitPrice < 50 THEN '$20~$50'
+               WHEN UnitPrice < 100 THEN '$50~$100'
+               ELSE '$100~'
+             END
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: product_catalog_table
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS 商品名,
+             cat.CategoryName AS カテゴリ,
+             s.CompanyName AS 仕入先,
+             p.QuantityPerUnit AS 単位,
+             p.UnitPrice AS 単価,
+             p.UnitsInStock AS 在庫数,
+             p.UnitsOnOrder AS 発注中,
+             p.ReorderLevel AS 発注点,
+             CASE WHEN p.Discontinued = '1' THEN '❌ 販売中止'
+                  WHEN p.UnitsInStock = 0 THEN '🔴 在庫切れ'
+                  WHEN p.UnitsInStock <= p.ReorderLevel THEN '🟡 発注点以下'
+                  ELSE '✅ 在庫あり'
+             END AS 在庫状況,
+             COALESCE(SUM(od.Quantity), 0) AS 総販売数
+      FROM Products p
+      INNER JOIN Categories cat ON p.CategoryID = cat.CategoryID
+      INNER JOIN Suppliers s ON p.SupplierID = s.SupplierID
+      LEFT JOIN "Order Details" od ON p.ProductID = od.ProductID
+      WHERE p.Discontinued = 0
+      GROUP BY p.ProductID
+      ORDER BY 在庫数 ASC, 総販売数 DESC
+    columns: [商品名, カテゴリ, 仕入先, 単位, 単価, 在庫数, 発注中, 発注点, 在庫状況, 総販売数]

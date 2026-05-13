@@ -1,0 +1,93 @@
+title: 商品別売上分析
+sections:
+  - id: product_sales_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '取扱商品数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📦' AS metric_icon, NULL
+      FROM Products WHERE Discontinued = 0
+      UNION ALL
+      SELECT '平均単価',
+             '$' || CAST(ROUND(AVG(UnitPrice), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Products WHERE Discontinued = 0
+      UNION ALL
+      SELECT '総在庫数',
+             CAST(SUM(UnitsInStock) AS TEXT),
+             '📊',
+             NULL
+      FROM Products WHERE Discontinued = 0
+      UNION ALL
+      SELECT '発注点以下商品',
+             CAST(COUNT(*) AS TEXT),
+             '⚠️',
+             NULL
+      FROM Products WHERE UnitsInStock <= ReorderLevel AND Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: top_selling_products
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Products p
+      INNER JOIN "Order Details" od ON p.ProductID = od.ProductID
+      WHERE p.Discontinued = 0
+      GROUP BY p.ProductID
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: sales_by_category
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT cat.CategoryName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Categories cat
+      INNER JOIN Products p ON cat.CategoryID = p.CategoryID
+      INNER JOIN "Order Details" od ON p.ProductID = od.ProductID
+      GROUP BY cat.CategoryName
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: product_profitability
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS 商品名,
+             cat.CategoryName AS カテゴリ,
+             p.UnitPrice AS 単価,
+             p.UnitsInStock AS 在庫数,
+             COALESCE(SUM(od.Quantity), 0) AS 総販売数,
+             ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS 総売上
+      FROM Products p
+      INNER JOIN Categories cat ON p.CategoryID = cat.CategoryID
+      LEFT JOIN "Order Details" od ON p.ProductID = od.ProductID
+      WHERE p.Discontinued = 0
+      GROUP BY p.ProductID
+      ORDER BY 総売上 DESC
+    columns: [商品名, カテゴリ, 単価, 在庫数, 総販売数, 総売上]
+
+  - id: monthly_sales_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', o.OrderDate) AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.OrderDate >= DATE('now', '-12 months')
+      GROUP BY strftime('%Y-%m', o.OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value

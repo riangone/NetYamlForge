@@ -1,0 +1,91 @@
+title: 社員業績管理
+sections:
+  - id: employee_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総社員数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '👨‍💼' AS metric_icon, NULL
+      FROM Employees
+      UNION ALL
+      SELECT '営業職社員',
+             CAST(COUNT(*) AS TEXT),
+             '📞',
+             NULL
+      FROM Employees WHERE Title LIKE '%Sales%'
+      UNION ALL
+      SELECT '平均担当注文件数',
+             CAST(ROUND(AVG(ord.cnt), 1) AS TEXT),
+             '📋',
+             NULL
+      FROM (
+        SELECT EmployeeID, COUNT(*) AS cnt FROM Orders GROUP BY EmployeeID
+      ) ord
+      UNION ALL
+      SELECT '月間売上トップ',
+             COALESCE((SELECT e.LastName || ' ' || e.FirstName FROM Employees e
+              INNER JOIN Orders o ON e.EmployeeID = o.EmployeeID
+              INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+              WHERE strftime('%Y-%m', o.OrderDate) = strftime('%Y-%m', 'now')
+              GROUP BY e.EmployeeID
+              ORDER BY SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)) DESC LIMIT 1), '-'),
+             '🏆',
+             NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: employee_sales_bar
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Employees e
+      INNER JOIN Orders o ON e.EmployeeID = o.EmployeeID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY e.EmployeeID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: employee_monthly_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS label,
+             strftime('%Y-%m', o.OrderDate) AS month,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Employees e
+      INNER JOIN Orders o ON e.EmployeeID = o.EmployeeID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.OrderDate >= DATE('now', '-6 months')
+      GROUP BY e.EmployeeID, strftime('%Y-%m', o.OrderDate)
+    columns: [label, month, value]
+    xField: month
+    yField: value
+    groupField: label
+
+  - id: employee_detail_table
+    component: table
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS 社員名,
+             e.Title AS 役職,
+             e.HireDate AS 入社日,
+             e.Country AS 国,
+             COALESCE(ord_stats.注文件数, 0) AS 担当注文件数,
+             COALESCE(ord_stats.総売上, 0) AS 総売上,
+             COALESCE(ord_stats.平均注文額, 0) AS 平均注文額
+      FROM Employees e
+      LEFT JOIN (
+        SELECT o.EmployeeID,
+               COUNT(o.OrderID) AS 注文件数,
+               ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 総売上,
+               ROUND(AVG(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 平均注文額
+        FROM Orders o
+        INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+        GROUP BY o.EmployeeID
+      ) ord_stats ON e.EmployeeID = ord_stats.EmployeeID
+      ORDER BY 総売上 DESC
+    columns: [社員名, 役職, 入社日, 国, 担当注文件数, 総売上, 平均注文額]

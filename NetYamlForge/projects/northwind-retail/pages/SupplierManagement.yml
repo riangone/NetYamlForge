@@ -1,0 +1,78 @@
+title: 購買管理ダッシュボード
+sections:
+  - id: supplier_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '仕入先数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🏭' AS metric_icon, NULL
+      FROM Suppliers
+      UNION ALL
+      SELECT '取扱商品数',
+             CAST(COUNT(*) AS TEXT),
+             '📦',
+             NULL
+      FROM Products WHERE Discontinued = 0
+      UNION ALL
+      SELECT '発注点以下商品',
+             CAST(COUNT(*) AS TEXT),
+             '⚠️',
+             NULL
+      FROM Products WHERE UnitsInStock <= ReorderLevel AND Discontinued = 0
+      UNION ALL
+      SELECT '在庫切れ商品',
+             CAST(COUNT(*) AS TEXT),
+             '🔴',
+             NULL
+      FROM Products WHERE (UnitsInStock = 0 OR UnitsInStock IS NULL) AND Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: products_by_supplier
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS label,
+             COUNT(p.ProductID) AS value
+      FROM Suppliers s
+      INNER JOIN Products p ON s.SupplierID = p.SupplierID
+      WHERE p.Discontinued = 0
+      GROUP BY s.SupplierID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: reorder_recommendations
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS 商品名,
+             s.CompanyName AS 仕入先,
+             p.UnitsInStock AS 在庫数,
+             p.UnitsOnOrder AS 発注中,
+             p.ReorderLevel AS 発注点,
+             (p.ReorderLevel - p.UnitsInStock) AS 推奨発注数,
+             p.UnitPrice AS 単価,
+             ROUND((p.ReorderLevel - p.UnitsInStock) * p.UnitPrice, 2) AS 推定金額
+      FROM Products p
+      INNER JOIN Suppliers s ON p.SupplierID = s.SupplierID
+      WHERE p.UnitsInStock <= p.ReorderLevel AND p.Discontinued = 0
+      ORDER BY (p.ReorderLevel - p.UnitsInStock) DESC
+    columns: [商品名, 仕入先, 在庫数, 発注中, 発注点, 推奨発注数, 単価, 推定金額]
+
+  - id: supplier_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS 仕入先名,
+             s.ContactName AS 担当者,
+             s.Country AS 国,
+             s.Phone AS 電話番号,
+             COUNT(p.ProductID) AS 取扱商品数,
+             ROUND(AVG(p.UnitPrice), 2) AS 平均単価
+      FROM Suppliers s
+      LEFT JOIN Products p ON s.SupplierID = p.SupplierID AND p.Discontinued = 0
+      GROUP BY s.SupplierID
+      ORDER BY 取扱商品数 DESC
+    columns: [仕入先名, 担当者, 国, 電話番号, 取扱商品数, 平均単価]

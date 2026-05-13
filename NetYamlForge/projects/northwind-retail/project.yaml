@@ -52,6 +52,26 @@ layout:
         url: /northwind-retail/DynamicEntity/Index?entity=customer
         icon: 👥
         section: 営業管理
+      - label: 受注処理状況
+        url: /northwind-retail/Page/OrderFulfillment
+        icon: ⏳
+        section: 営業管理
+      - label: 顧客分析
+        url: /northwind-retail/Page/CustomerAnalytics
+        icon: 📊
+        section: 営業管理
+      - label: 商品別売上分析
+        url: /northwind-retail/Page/SalesByProduct
+        icon: 📈
+        section: 営業管理
+      - label: 受注処理パイプライン
+        url: /northwind-retail/Page/OrderKanban
+        icon: 🔄
+        section: 営業管理
+      - label: 顧客360
+        url: /northwind-retail/Page/Customer360
+        icon: 🎯
+        section: 営業管理
 
       - label: 商品管理
         url: /northwind-retail/DynamicEntity/Index?entity=product
@@ -65,20 +85,44 @@ layout:
         url: /northwind-retail/Page/InventoryOverview
         icon: 📊
         section: 在庫管理
+      - label: 商品カタログ
+        url: /northwind-retail/Page/ProductCatalog
+        icon: 📋
+        section: 在庫管理
 
       - label: 仕入先管理
         url: /northwind-retail/DynamicEntity/Index?entity=supplier
         icon: 🏭
+        section: 購買管理
+      - label: 購買管理ダッシュボード
+        url: /northwind-retail/Page/SupplierManagement
+        icon: 📋
+        section: 購買管理
+      - label: 発注管理
+        url: /northwind-retail/Page/PurchaseRequisition
+        icon: 📝
         section: 購買管理
 
       - label: 配送業者
         url: /northwind-retail/DynamicEntity/Index?entity=shipper
         icon: 🚚
         section: 配送管理
+      - label: 配送管理ダッシュボード
+        url: /northwind-retail/Page/ShippingDashboard
+        icon: 📦
+        section: 配送管理
 
       - label: 社員管理
         url: /northwind-retail/DynamicEntity/Index?entity=employee
         icon: 👨‍💼
+        section: 組織管理
+      - label: 社員業績管理
+        url: /northwind-retail/Page/EmployeePerformance
+        icon: 🏆
+        section: 組織管理
+      - label: 営業歩合管理
+        url: /northwind-retail/Page/SalesCommission
+        icon: 💵
         section: 組織管理
       - label: 地域管理
         url: /northwind-retail/DynamicEntity/Index?entity=region
@@ -92,6 +136,10 @@ layout:
       - label: 経営レポート
         url: /northwind-retail/Page/ExecutiveReport
         icon: 📊
+        section: レポート
+      - label: 資金収支ダッシュボード
+        url: /northwind-retail/Page/CashFlowDashboard
+        icon: 💰
         section: レポート
 
 settings:

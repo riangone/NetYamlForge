@@ -1,0 +1,113 @@
+title: 発注管理
+sections:
+  - id: purchasing_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '全仕入先' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🏭' AS metric_icon, NULL
+      FROM Suppliers
+      UNION ALL
+      SELECT '在庫切れ商品',
+             CAST(COUNT(*) AS TEXT),
+             '🔴',
+             NULL
+      FROM Products WHERE (UnitsInStock = 0 OR UnitsInStock IS NULL) AND Discontinued = 0
+      UNION ALL
+      SELECT '発注点以下',
+             CAST(COUNT(*) AS TEXT),
+             '⚠️',
+             NULL
+      FROM Products WHERE UnitsInStock <= ReorderLevel AND Discontinued = 0
+      UNION ALL
+      SELECT '発注中数量合計',
+             CAST(COALESCE(SUM(UnitsOnOrder), 0) AS TEXT) || ' 個',
+             '📦',
+             NULL
+      FROM Products WHERE Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: urgent_reorder
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductID AS 商品ID,
+             p.ProductName AS 商品名,
+             s.CompanyName AS 仕入先,
+             s.ContactName AS 仕入先担当者,
+             s.Phone AS 仕入先電話,
+             p.UnitsInStock AS 在庫数,
+             p.UnitsOnOrder AS 発注中,
+             p.ReorderLevel AS 発注点,
+             (p.ReorderLevel - p.UnitsInStock) AS 推奨発注数,
+             p.UnitPrice AS 単価,
+             ROUND((p.ReorderLevel - p.UnitsInStock) * p.UnitPrice, 2) AS 推定金額,
+             CASE WHEN p.UnitsInStock = 0 THEN '🔴 緊急'
+                  WHEN p.UnitsInStock <= p.ReorderLevel / 2 THEN '🟡 要注意'
+                  ELSE '🟢 通常'
+             END AS 優先度
+      FROM Products p
+      INNER JOIN Suppliers s ON p.SupplierID = s.SupplierID
+      WHERE p.UnitsInStock <= p.ReorderLevel AND p.Discontinued = 0
+      ORDER BY 優先度 ASC, p.UnitsInStock ASC
+    columns: [商品ID, 商品名, 仕入先, 仕入先担当者, 仕入先電話, 在庫数, 発注中, 発注点, 推奨発注数, 単価, 推定金額, 優先度]
+
+  - id: products_by_supplier
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS label,
+             COUNT(p.ProductID) AS value
+      FROM Suppliers s
+      INNER JOIN Products p ON s.SupplierID = p.SupplierID
+      WHERE p.Discontinued = 0
+      GROUP BY s.SupplierID
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: stock_turnover
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS 商品名,
+             cat.CategoryName AS カテゴリ,
+             s.CompanyName AS 仕入先,
+             p.UnitsInStock AS 現在庫,
+             COALESCE(SUM(od.Quantity), 0) AS 年間販売数,
+             CASE WHEN COALESCE(SUM(od.Quantity), 0) = 0 THEN 'N/A'
+                  ELSE CAST(ROUND(1.0 * p.UnitsInStock / (SUM(od.Quantity) * 1.0 / 365) * 30, 0) AS TEXT) || ' 日'
+             END AS 在庫保有日数
+      FROM Products p
+      INNER JOIN Categories cat ON p.CategoryID = cat.CategoryID
+      INNER JOIN Suppliers s ON p.SupplierID = s.SupplierID
+      LEFT JOIN "Order Details" od ON p.ProductID = od.ProductID
+      LEFT JOIN Orders o ON od.OrderID = o.OrderID
+        AND o.OrderDate >= DATE('now', '-12 months')
+      WHERE p.Discontinued = 0
+      GROUP BY p.ProductID
+      HAVING 年間販売数 > 0
+      ORDER BY CAST(ROUND(1.0 * p.UnitsInStock / (SUM(od.Quantity) * 1.0 / 365) * 30, 0) AS REAL) DESC
+      LIMIT 20
+    columns: [商品名, カテゴリ, 仕入先, 現在庫, 年間販売数, 在庫保有日数]
+
+  - id: supplier_performance
+    component: table
+    sourceType: custom
+    source: |
+      SELECT s.CompanyName AS 仕入先名,
+             s.ContactName AS 担当者,
+             s.Phone AS 電話番号,
+             s.Country AS 国,
+             COUNT(p.ProductID) AS 取扱商品数,
+             ROUND(SUM(od.Quantity), 0) AS 総販売数,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 総売上,
+             ROUND(AVG(p.UnitPrice), 2) AS 平均単価
+      FROM Suppliers s
+      INNER JOIN Products p ON s.SupplierID = p.SupplierID AND p.Discontinued = 0
+      LEFT JOIN "Order Details" od ON p.ProductID = od.ProductID
+      GROUP BY s.SupplierID
+      ORDER BY 総売上 DESC
+    columns: [仕入先名, 担当者, 電話番号, 国, 取扱商品数, 総販売数, 総売上, 平均単価]

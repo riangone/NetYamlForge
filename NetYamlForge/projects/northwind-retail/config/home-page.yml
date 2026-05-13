@@ -28,6 +28,30 @@ quickActions:
     url: /northwind-retail/DynamicEntity/Index?entity=order
     style: btn-outline
     icon: 📋
+  - label: 顧客360
+    url: /northwind-retail/Page/Customer360
+    style: btn-outline
+    icon: 🎯
+  - label: 受注処理パイプライン
+    url: /northwind-retail/Page/OrderKanban
+    style: btn-outline
+    icon: 🔄
+  - label: 商品カタログ
+    url: /northwind-retail/Page/ProductCatalog
+    style: btn-outline
+    icon: 📦
+  - label: 発注管理
+    url: /northwind-retail/Page/PurchaseRequisition
+    style: btn-outline
+    icon: 📝
+  - label: 営業歩合管理
+    url: /northwind-retail/Page/SalesCommission
+    style: btn-outline
+    icon: 💵
+  - label: 資金収支
+    url: /northwind-retail/Page/CashFlowDashboard
+    style: btn-outline
+    icon: 💰
   - label: 経営レポート
     url: /northwind-retail/Page/ExecutiveReport
     style: btn-ghost

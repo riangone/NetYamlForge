@@ -1,0 +1,112 @@
+title: 資金収支ダッシュボード
+sections:
+  - id: cashflow_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総売上' AS metric_name,
+             '$' || CAST(ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS TEXT) AS metric_value,
+             '💰' AS metric_icon, NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      UNION ALL
+      SELECT '未出荷注文の合計額',
+             '$' || CAST(ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS TEXT),
+             '⏳',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.ShippedDate IS NULL
+      UNION ALL
+      SELECT '出荷済（売上確定）',
+             '$' || CAST(ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS TEXT),
+             '✅',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.ShippedDate IS NOT NULL
+      UNION ALL
+      SELECT '今月入金予定',
+             '$' || CAST(ROUND(COALESCE(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 0), 2) AS TEXT),
+             '📅',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE strftime('%Y-%m', o.OrderDate) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: revenue_by_country
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT o.ShipCountry AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.ShippedDate IS NOT NULL
+      GROUP BY o.ShipCountry
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: revenue_timeline
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', o.OrderDate) AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.OrderDate >= DATE('now', '-12 months')
+      GROUP BY strftime('%Y-%m', o.OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: invoice_aging
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.OrderID AS 注文番号,
+             c.CompanyName AS 顧客名,
+             o.OrderDate AS 注文日,
+             o.ShippedDate AS 出荷日,
+             CAST(julianday('now') - julianday(COALESCE(o.ShippedDate, o.OrderDate)) AS INTEGER) AS 経過日数,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 請求金額,
+             CASE WHEN o.ShippedDate IS NULL THEN '⏳ 未出荷'
+                  WHEN julianday('now') - julianday(o.ShippedDate) <= 30 THEN '🟢 正常'
+                  WHEN julianday('now') - julianday(o.ShippedDate) <= 60 THEN '🟡 30日超'
+                  WHEN julianday('now') - julianday(o.ShippedDate) <= 90 THEN '🟠 60日超'
+                  ELSE '🔴 90日超'
+             END AS 滞留状況,
+             o.ShipCountry AS 国,
+             e.LastName || ' ' || e.FirstName AS 担当者
+      FROM Orders o
+      INNER JOIN Customers c ON o.CustomerID = c.CustomerID
+      INNER JOIN Employees e ON o.EmployeeID = e.EmployeeID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY o.OrderID
+      ORDER BY 経過日数 DESC
+      LIMIT 30
+    columns: [注文番号, 顧客名, 注文日, 出荷日, 経過日数, 請求金額, 滞留状況, 国, 担当者]
+
+  - id: top_revenue_customers
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.CompanyName AS 顧客名,
+             c.Country AS 国,
+             COUNT(o.OrderID) AS 注文件数,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 総売上,
+             ROUND(AVG(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 平均注文額,
+             MAX(o.OrderDate) AS 最終注文日
+      FROM Customers c
+      INNER JOIN Orders o ON c.CustomerID = o.CustomerID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY c.CustomerID
+      ORDER BY 総売上 DESC
+      LIMIT 10
+    columns: [顧客名, 国, 注文件数, 総売上, 平均注文額, 最終注文日]

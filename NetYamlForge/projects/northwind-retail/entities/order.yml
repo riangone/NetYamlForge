@@ -14,16 +14,57 @@ entities:
         order: [CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry]
       filters:
         columns: 4
-        order: [CustomerID, EmployeeID, OrderDate, ShipCountry]
+        order: [CustomerID, EmployeeID, OrderDate, ShipCountry, Freight]
+    joins:
+      - type: left
+        table: Customers
+        alias: c
+        on: Orders.CustomerID = c.CustomerID
+      - type: left
+        table: Employees
+        alias: e
+        on: Orders.EmployeeID = e.EmployeeID
+      - type: left
+        table: Shippers
+        alias: s
+        on: Orders.ShipVia = s.ShipperID
     columns:
       OrderID: { type: int, identity: true, label: 注文番号, sortable: true }
-      CustomerID: { type: string, label: 顧客, sortable: true }
-      EmployeeID: { type: int, label: 担当者, sortable: true }
+      CustomerID: { type: string, label: 顧客ID, sortable: true }
+      CustomerName:
+        type: string
+        identity: true
+        label: 顧客名
+        expression: c.CompanyName
+        searchable: true
+        sortable: true
+      EmployeeID: { type: int, label: 担当者ID, sortable: true }
+      EmployeeName:
+        type: string
+        identity: true
+        label: 担当者
+        expression: e.LastName || ' ' || e.FirstName
+        searchable: true
+        sortable: true
       OrderDate: { type: datetime, label: 注文日, sortable: true }
       RequiredDate: { type: datetime, label: 必要日, sortable: true }
       ShippedDate: { type: datetime, label: 出荷日, sortable: true }
       ShipName: { type: string, label: 配送先, searchable: true }
+      ShipCountry: { type: string, label: 配送先国, sortable: true }
+      ShipVia: { type: int, label: 配送業者ID }
+      ShipperName:
+        type: string
+        identity: true
+        label: 配送業者
+        expression: s.CompanyName
+        sortable: true
       Freight: { type: decimal, label: 運送料, sortable: true }
+      OrderStatus:
+        type: string
+        identity: true
+        label: ステータス
+        expression: "CASE WHEN Orders.ShippedDate IS NOT NULL THEN '✅ 出荷済' WHEN Orders.RequiredDate < DATE('now') THEN '🔴 遅延' ELSE '🟡 処理中' END"
+        sortable: false
     forms:
       CustomerID:
         type: string
@@ -57,9 +98,57 @@ entities:
       ShipRegion: { type: string, label: 配送先地域, editable: true }
       ShipPostalCode: { type: string, label: 配送先郵便番号, editable: true }
       ShipCountry: { type: string, label: 配送先国, editable: true }
-    filters: {}
+    filters:
+      CustomerID:
+        type: entity-picker
+        label: 顧客
+        expression: Orders.CustomerID
+        foreignKey:
+          entity: customer
+          displayColumn: CompanyName
+      EmployeeID:
+        type: dropdown
+        label: 担当者
+        expression: Orders.EmployeeID
+        foreignKey:
+          entity: employee
+          displayColumn: LastName
+      OrderDate:
+        type: date-range
+        label: 注文日
+        expression: Orders.OrderDate
+      ShipCountry:
+        type: multi-select
+        label: 配送先国
+        expression: Orders.ShipCountry
+        options:
+          - USA
+          - France
+          - Germany
+          - Brazil
+          - UK
+          - Canada
+          - Spain
+          - Sweden
+          - Austria
+          - Finland
+          - Italy
+          - Portugal
+          - Ireland
+          - Switzerland
+          - Venezuela
+          - Mexico
+          - Denmark
+          - Belgium
+          - Norway
+          - Poland
+      Freight:
+        type: range
+        label: 運送料
+        expression: Orders.Freight
     links:
       details: { label: 注文明細, targetEntity: order_detail, filter: { OrderID: OrderID } }
       customer: { label: 顧客情報, targetEntity: customer, filter: { CustomerID: CustomerID } }
+      employee_link: { label: 担当者情報, targetEntity: employee, filter: { EmployeeID: EmployeeID } }
     exports:
-      order_csv: { label: CSV出力, format: csv, columns: [OrderID, CustomerID, OrderDate, ShipName, Freight] }
+      order_csv: { label: CSV出力, format: csv, columns: [OrderID, CustomerName, EmployeeName, OrderDate, ShippedDate, ShipName, ShipCountry, Freight] }
