@@ -10,9 +10,9 @@ namespace NetYamlForge.Services;
 /// </summary>
 public static class SqlSafetyGuard
 {
-    /// <summary>識別子（テーブル名、列名など）の正規表現</summary>
+    /// <summary>識別子（テーブル名、列名など）の正規表現。単純識別子またはSQLite括弧引用形式 [Name With Spaces] をサポート</summary>
     public static readonly Regex IdentifierRegex =
-        new(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
+        new(@"^([A-Za-z_][A-Za-z0-9_]*|\[[A-Za-z_][A-Za-z0-9_ ]+\])$", RegexOptions.Compiled);
 
     /// <summary>SQL 式（WHERE 句など）の正規表現</summary>
     public static readonly Regex ExpressionRegex =
@@ -37,7 +37,7 @@ public static class SqlSafetyGuard
             throw new InvalidOperationException($"Invalid identifier in '{context}': value is empty.");
         if (!IsValidIdentifier(value))
             throw new InvalidOperationException(
-                $"Unsafe identifier in '{context}': '{value}'. Must match [A-Za-z_][A-Za-z0-9_]*");
+                $"Unsafe identifier in '{context}': '{value}'. Must match [A-Za-z_][A-Za-z0-9_]* or [Name With Spaces]");
         
         // 危険なSQLキーワードをチェック（識別子としてSQLコマンドを拒否）
         // 注意: "CREATE" は許可される（一般的な識別子として使用されるため）

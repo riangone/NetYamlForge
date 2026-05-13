@@ -1,6 +1,6 @@
 entities:
   order_detail:
-    table: Order Details
+    table: "[Order Details]"
     key: OrderID
     keys:
       - OrderID

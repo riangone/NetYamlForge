@@ -31,12 +31,9 @@ public class ProjectViewLocationExpander : IViewLocationExpander
             // 1) コントローラ単位のビュー（例: views/Dashboard/Index.cshtml）
             yield return $"/projects/{project}/views/{{1}}/{{0}}.cshtml";
 
-            // 2) 直下ビューは Home / Page だけ許可（Dashboard などの Index 衝突を回避）
-            if (string.Equals(controller, "Home", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(controller, "Page", StringComparison.OrdinalIgnoreCase))
-            {
-                yield return $"/projects/{project}/views/{{0}}.cshtml";
-            }
+            // 2) 直下ビュー（レイアウト、パーシャル、ルートビュー）
+            //    コントローラ固有ビュー(1)より優先度が低いので Index 衝突は実質発生しない
+            yield return $"/projects/{project}/views/{{0}}.cshtml";
 
             // Layout ビュー用のプロジェクト固有ディレクトリ
             yield return $"/projects/{project}/views/Shared/{{0}}.cshtml";

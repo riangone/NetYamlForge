@@ -116,7 +116,9 @@ public static class EntityDbSchemaConsistencyValidator
 
     private static List<DbColumnInfo> LoadRequiredInputColumnsSqlite(IDbConnection conn, string table)
     {
-        var safeTable = table.Replace("]", "]]", StringComparison.Ordinal);
+        // Strip bracket-quoting if already present (e.g. "[Order Details]" → "Order Details")
+        var rawTable = table.StartsWith('[') && table.EndsWith(']') ? table[1..^1] : table;
+        var safeTable = rawTable.Replace("]", "]]", StringComparison.Ordinal);
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"PRAGMA table_info([{safeTable}]);";
         using var reader = cmd.ExecuteReader();

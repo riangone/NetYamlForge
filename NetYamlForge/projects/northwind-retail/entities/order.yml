@@ -39,7 +39,7 @@ entities:
         editable: true
         foreignKey:
           entity: employee
-          displayColumn: "LastName || ' ' || FirstName"
+          displayColumn: LastName
       OrderDate: { type: datetime, label: 注文日, editable: true }
       RequiredDate: { type: datetime, label: 必要日, editable: true }
       ShippedDate: { type: datetime, label: 出荷日, editable: true }

@@ -28,7 +28,7 @@ entities:
         editable: true
         foreignKey:
           entity: employee
-          displayColumn: "LastName || ' ' || FirstName"
+          displayColumn: LastName
       TerritoryID:
         type: string
         required: true

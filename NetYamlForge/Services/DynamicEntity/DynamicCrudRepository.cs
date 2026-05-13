@@ -11,6 +11,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -166,27 +167,54 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // 主キー単件取得。soft-delete設定時は削除済みレコードを除外します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var sql = new StringBuilder();
-        
+
         var pkColumns = meta.GetPrimaryKeyColumns();
-        if (pkColumns.Count == 1)
+        if (pkColumns.Count > 1)
         {
-            // 単一主鍵
-            sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {pkColumns[0]} = @Id");
+            // 複合主鍵：id を JSON またはカンマ区切りとして解析し、辞書オーバーロードに委譲
+            var keyValues = ParseCompositeId(id?.ToString() ?? "", pkColumns);
+            return await GetByIdAsync(entity, keyValues);
         }
-        else
-        {
-            // 複合主鍵：id は JSON 文字列または区切り文字付き文字列と仮定
-            var whereParts = pkColumns.Select((col, i) => $"{col} = @Id{i}");
-            sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {string.Join(" AND ", whereParts)}");
-        }
-        
+
+        var sql = new StringBuilder();
+        sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {pkColumns[0]} = @Id");
         if (meta.SoftDelete)
             sql.Append($" AND {SoftDeleteClause(meta.Table)}");
 
         _logger.LogInformation("GetByIdAsync entity={Entity} id={Id}", entity, id);
         var statement = sql.ToString();
         return (await TimedAsync("GetByIdAsync", entity, statement, () => _db.QueryAsync(statement, new { Id = id }))).FirstOrDefault();
+    }
+
+    private static Dictionary<string, object?> ParseCompositeId(string idStr, IReadOnlyList<string> pkColumns)
+    {
+        var result = new Dictionary<string, object?>();
+        if (!string.IsNullOrWhiteSpace(idStr))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(idStr);
+                var root = doc.RootElement;
+                foreach (var col in pkColumns)
+                {
+                    if (root.TryGetProperty(col, out var el))
+                        result[col] = el.ValueKind == JsonValueKind.Number ? (object?)el.GetInt64() : el.GetString();
+                    else
+                        result[col] = null;
+                }
+                return result;
+            }
+            catch
+            {
+                var parts = idStr.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                for (var i = 0; i < pkColumns.Count; i++)
+                    result[pkColumns[i]] = i < parts.Length ? parts[i] : null;
+                return result;
+            }
+        }
+
+        foreach (var col in pkColumns) result[col] = null;
+        return result;
     }
 
     /// <summary>
