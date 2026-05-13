@@ -1,0 +1,26 @@
+entities:
+  shipper:
+    table: Shippers
+    key: ShipperID
+    displayName: 配送業者
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CompanyName, Phone]
+      filters:
+        columns: 4
+        order: [CompanyName]
+    columns:
+      ShipperID: { type: int, identity: true, label: ID }
+      CompanyName: { type: string, required: true, label: 会社名, sortable: true }
+      Phone: { type: string, label: 電話番号 }
+    forms:
+      CompanyName: { type: string, required: true, label: 会社名, editable: true }
+      Phone: { type: string, label: 電話番号, editable: true }
+    filters: {}
+    links: {}

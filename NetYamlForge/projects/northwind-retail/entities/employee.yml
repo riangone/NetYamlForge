@@ -1,0 +1,49 @@
+entities:
+  employee:
+    table: Employees
+    key: EmployeeID
+    displayName: 社員
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country, HomePhone, Extension, Notes, ReportsTo]
+      filters:
+        columns: 4
+        order: [LastName, FirstName, Title, Country]
+    columns:
+      EmployeeID: { type: int, identity: true, label: ID }
+      LastName: { type: string, required: true, label: 姓, sortable: true }
+      FirstName: { type: string, required: true, label: 名, sortable: true }
+      Title: { type: string, label: 役職, sortable: true }
+      HireDate: { type: datetime, label: 入社日, sortable: true }
+      Country: { type: string, label: 国 }
+    forms:
+      LastName: { type: string, required: true, label: 姓, editable: true }
+      FirstName: { type: string, required: true, label: 名, editable: true }
+      Title: { type: string, label: 役職, editable: true }
+      TitleOfCourtesy: { type: string, label: 敬称, editable: true }
+      BirthDate: { type: datetime, label: 生年月日, editable: true }
+      HireDate: { type: datetime, label: 入社日, editable: true }
+      Address: { type: text, label: 住所, editable: true }
+      City: { type: string, label: 市区町村, editable: true }
+      Region: { type: string, label: 地域, editable: true }
+      PostalCode: { type: string, label: 郵便番号, editable: true }
+      Country: { type: string, label: 国, editable: true }
+      HomePhone: { type: string, label: 電話番号, editable: true }
+      Extension: { type: string, label: 内線番号, editable: true }
+      Notes: { type: text, label: 備考, editable: true }
+      ReportsTo:
+        type: int
+        label: 上司
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: "LastName || ' ' || FirstName"
+    filters: {}
+    links:
+      orders: { label: 担当注文, targetEntity: order, filter: { EmployeeID: EmployeeID } }

@@ -1,0 +1,54 @@
+entities:
+  product:
+    table: Products
+    key: ProductID
+    displayName: 商品
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [ProductName, SupplierID, CategoryID, QuantityPerUnit, UnitPrice, UnitsInStock, UnitsOnOrder, ReorderLevel, Discontinued]
+      filters:
+        columns: 4
+        order: [ProductName, SupplierID, CategoryID, Discontinued]
+    columns:
+      ProductID: { type: int, identity: true, label: 商品ID }
+      ProductName: { type: string, required: true, label: 商品名, searchable: true, sortable: true }
+      SupplierID: { type: int, label: 仕入先 }
+      CategoryID: { type: int, label: カテゴリ }
+      QuantityPerUnit: { type: string, label: 単位当数量 }
+      UnitPrice: { type: decimal, label: 単価, sortable: true }
+      UnitsInStock: { type: int, label: 在庫数, sortable: true }
+      UnitsOnOrder: { type: int, label: 注文数 }
+      ReorderLevel: { type: int, label: 発注点 }
+      Discontinued: { type: string, label: 販売中止 }
+    forms:
+      ProductName: { type: string, required: true, label: 商品名, editable: true }
+      SupplierID:
+        type: int
+        label: 仕入先
+        editable: true
+        foreignKey:
+          entity: supplier
+          displayColumn: CompanyName
+      CategoryID:
+        type: int
+        label: カテゴリ
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: CategoryName
+      QuantityPerUnit: { type: string, label: 単位当数量, editable: true }
+      UnitPrice: { type: decimal, label: 単価, editable: true }
+      UnitsInStock: { type: int, label: 在庫数, editable: true }
+      UnitsOnOrder: { type: int, label: 注文数, editable: true }
+      ReorderLevel: { type: int, label: 発注点, editable: true }
+      Discontinued: { type: string, label: 販売中止, editable: true, options: [0, 1] }
+    filters: {}
+    links: {}
+    actions:
+      reorder: { label: 発注, scope: row, url: "DynamicEntity/Create?entity=product&SupplierID={SupplierID}" }

@@ -1,0 +1,42 @@
+entities:
+  customer:
+    table: Customers
+    key: CustomerID
+    displayName: 顧客
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CustomerID, CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax]
+      filters:
+        columns: 4
+        order: [CompanyName, Country, City]
+    columns:
+      CustomerID: { type: string, label: 顧客ID, sortable: true, searchable: true }
+      CompanyName: { type: string, label: 会社名, sortable: true, searchable: true }
+      ContactName: { type: string, label: 担当者, searchable: true }
+      ContactTitle: { type: string, label: 役職 }
+      Country: { type: string, label: 国, sortable: true }
+      City: { type: string, label: 市区町村, sortable: true }
+      Phone: { type: string, label: 電話番号 }
+    forms:
+      CustomerID: { type: string, label: 顧客ID, editable: false }
+      CompanyName: { type: string, label: 会社名, required: true, editable: true }
+      ContactName: { type: string, label: 担当者名, editable: true }
+      ContactTitle: { type: string, label: 役職, editable: true }
+      Address: { type: text, label: 住所, editable: true }
+      City: { type: string, label: 市区町村, editable: true }
+      Region: { type: string, label: 地域, editable: true }
+      PostalCode: { type: string, label: 郵便番号, editable: true }
+      Country: { type: string, label: 国, editable: true }
+      Phone: { type: string, label: 電話番号, editable: true }
+      Fax: { type: string, label: FAX, editable: true }
+    filters: {}
+    links:
+      orders: { label: 注文履歴, targetEntity: order, filter: { CustomerID: CustomerID } }
+    actions:
+      view_orders: { label: 注文一覧, scope: row, url: "DynamicEntity/Index?entity=order&CustomerID={CustomerID}" }

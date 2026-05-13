@@ -1,0 +1,65 @@
+title: 営業ダッシュボード
+sections:
+  - id: kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '今月受注' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📋' AS metric_icon,
+             NULL AS metric_delta
+      FROM Orders
+      WHERE strftime('%Y-%m', OrderDate) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '今月売上合計',
+             '$' || CAST(ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS TEXT),
+             '💰',
+             NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE strftime('%Y-%m', o.OrderDate) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '未出荷件数',
+             CAST(COUNT(*) AS TEXT),
+             '⏳',
+             NULL
+      FROM Orders
+      WHERE ShippedDate IS NULL
+      UNION ALL
+      SELECT '取引先数',
+             CAST(COUNT(*) AS TEXT),
+             '🏢',
+             NULL
+      FROM Customers
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: monthly_sales_chart
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', o.OrderDate) AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      WHERE o.OrderDate >= date('now', '-12 months')
+      GROUP BY strftime('%Y-%m', o.OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: top_customers
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.CompanyName AS 顧客名,
+             c.Country AS 国,
+             COUNT(o.OrderID) AS 注文件数,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 購入金額合計
+      FROM Customers c
+      INNER JOIN Orders o ON c.CustomerID = o.CustomerID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY c.CustomerID
+      ORDER BY 購入金額合計 DESC
+      LIMIT 10
+    columns: [顧客名, 国, 注文件数, 購入金額合計]

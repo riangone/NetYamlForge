@@ -1,0 +1,38 @@
+entities:
+  supplier:
+    table: Suppliers
+    key: SupplierID
+    displayName: 仕入先
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CompanyName, ContactName, ContactTitle, Address, City, Region, PostalCode, Country, Phone, Fax, HomePage]
+      filters:
+        columns: 4
+        order: [CompanyName, Country]
+    columns:
+      SupplierID: { type: int, identity: true, label: ID }
+      CompanyName: { type: string, required: true, label: 会社名, searchable: true, sortable: true }
+      ContactName: { type: string, label: 担当者 }
+      Country: { type: string, label: 国 }
+      Phone: { type: string, label: 電話番号 }
+    forms:
+      CompanyName: { type: string, required: true, label: 会社名, editable: true }
+      ContactName: { type: string, label: 担当者名, editable: true }
+      ContactTitle: { type: string, label: 役職, editable: true }
+      Address: { type: text, label: 住所, editable: true }
+      City: { type: string, label: 市区町村, editable: true }
+      Region: { type: string, label: 地域, editable: true }
+      PostalCode: { type: string, label: 郵便番号, editable: true }
+      Country: { type: string, label: 国, editable: true }
+      Phone: { type: string, label: 電話番号, editable: true }
+      Fax: { type: string, label: FAX, editable: true }
+      HomePage: { type: string, label: Webサイト, editable: true }
+    filters: {}
+    links:
+      products: { label: 取扱商品, targetEntity: product, filter: { SupplierID: SupplierID } }

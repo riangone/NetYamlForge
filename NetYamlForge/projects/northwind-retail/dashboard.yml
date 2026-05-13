@@ -1,0 +1,61 @@
+stats:
+  - label: 総受注数
+    entity: order
+    aggregate: count
+    icon: 📋
+    color: primary
+  - label: 未出荷注文
+    entity: order
+    aggregate: count
+    filter: "ShippedDate IS NULL"
+    icon: ⏳
+    color: warning
+  - label: 在庫商品数
+    entity: product
+    aggregate: count
+    filter: "UnitsInStock > 0 AND Discontinued = 0"
+    icon: 📦
+    color: success
+  - label: 発注点以下
+    entity: product
+    aggregate: count
+    filter: "UnitsInStock <= ReorderLevel AND Discontinued = 0"
+    icon: ⚠️
+    color: danger
+  - label: 取引先数
+    entity: customer
+    aggregate: count
+    icon: 🏢
+    color: info
+  - label: 今月の売上
+    entity: order
+    aggregate: count
+    filter: "strftime('%Y-%m', OrderDate) = strftime('%Y-%m', 'now')"
+    icon: 💰
+    color: success
+
+charts:
+  - title: 月別売上推移
+    type: line
+    entity: order
+    valueAggregate: count
+    groupExpression: "strftime('%Y-%m', OrderDate)"
+    orderBy: label
+    orderDir: asc
+    limit: 12
+  - title: カテゴリ別商品数
+    type: doughnut
+    entity: product
+    valueAggregate: count
+    groupExpression: CategoryID
+    orderBy: value
+    orderDir: desc
+    limit: 8
+  - title: 国別顧客分布
+    type: bar
+    entity: customer
+    valueAggregate: count
+    groupExpression: Country
+    orderBy: value
+    orderDir: desc
+    limit: 10

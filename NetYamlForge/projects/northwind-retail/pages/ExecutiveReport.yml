@@ -1,0 +1,65 @@
+title: 経営レポート
+sections:
+  - id: executive_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総売上' AS metric_name,
+             '$' || CAST(ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS TEXT) AS metric_value,
+             '💰' AS metric_icon, NULL
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      UNION ALL
+      SELECT '総受注数', CAST(COUNT(*) AS TEXT), '📋', NULL
+      FROM Orders
+      UNION ALL
+      SELECT '取引顧客数', CAST(COUNT(DISTINCT CustomerID) AS TEXT), '🏢', NULL
+      FROM Orders
+      UNION ALL
+      SELECT '取扱商品数', CAST(COUNT(*) AS TEXT), '📦', NULL
+      FROM Products WHERE Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: yearly_sales
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y', o.OrderDate) AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM Orders o
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY strftime('%Y', o.OrderDate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: sales_by_category
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT c.CategoryName AS label,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS value
+      FROM "Order Details" od
+      INNER JOIN Products p ON od.ProductID = p.ProductID
+      INNER JOIN Categories c ON p.CategoryID = c.CategoryID
+      GROUP BY c.CategoryName
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: employee_performance
+    component: table
+    sourceType: custom
+    source: |
+      SELECT e.LastName || ' ' || e.FirstName AS 社員名,
+             e.Title AS 役職,
+             COUNT(o.OrderID) AS 担当受注数,
+             ROUND(SUM(od.UnitPrice * od.Quantity * (1 - od.Discount)), 2) AS 売上合計
+      FROM Employees e
+      INNER JOIN Orders o ON e.EmployeeID = o.EmployeeID
+      INNER JOIN "Order Details" od ON o.OrderID = od.OrderID
+      GROUP BY e.EmployeeID
+      ORDER BY 売上合計 DESC
+    columns: [社員名, 役職, 担当受注数, 売上合計]

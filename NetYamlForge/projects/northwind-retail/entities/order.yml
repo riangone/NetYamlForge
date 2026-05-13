@@ -1,0 +1,65 @@
+entities:
+  order:
+    table: Orders
+    key: OrderID
+    displayName: 注文
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CustomerID, EmployeeID, OrderDate, RequiredDate, ShippedDate, ShipVia, Freight, ShipName, ShipAddress, ShipCity, ShipRegion, ShipPostalCode, ShipCountry]
+      filters:
+        columns: 4
+        order: [CustomerID, EmployeeID, OrderDate, ShipCountry]
+    columns:
+      OrderID: { type: int, identity: true, label: 注文番号, sortable: true }
+      CustomerID: { type: string, label: 顧客, sortable: true }
+      EmployeeID: { type: int, label: 担当者, sortable: true }
+      OrderDate: { type: datetime, label: 注文日, sortable: true }
+      RequiredDate: { type: datetime, label: 必要日, sortable: true }
+      ShippedDate: { type: datetime, label: 出荷日, sortable: true }
+      ShipName: { type: string, label: 配送先, searchable: true }
+      Freight: { type: decimal, label: 運送料, sortable: true }
+    forms:
+      CustomerID:
+        type: string
+        label: 顧客
+        required: true
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: CompanyName
+      EmployeeID:
+        type: int
+        label: 担当者
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: "LastName || ' ' || FirstName"
+      OrderDate: { type: datetime, label: 注文日, editable: true }
+      RequiredDate: { type: datetime, label: 必要日, editable: true }
+      ShippedDate: { type: datetime, label: 出荷日, editable: true }
+      ShipVia:
+        type: int
+        label: 配送業者
+        editable: true
+        foreignKey:
+          entity: shipper
+          displayColumn: CompanyName
+      Freight: { type: decimal, label: 運送料, editable: true }
+      ShipName: { type: string, label: 配送先名, editable: true }
+      ShipAddress: { type: text, label: 配送先住所, editable: true }
+      ShipCity: { type: string, label: 配送先市区町村, editable: true }
+      ShipRegion: { type: string, label: 配送先地域, editable: true }
+      ShipPostalCode: { type: string, label: 配送先郵便番号, editable: true }
+      ShipCountry: { type: string, label: 配送先国, editable: true }
+    filters: {}
+    links:
+      details: { label: 注文明細, targetEntity: order_detail, filter: { OrderID: OrderID } }
+      customer: { label: 顧客情報, targetEntity: customer, filter: { CustomerID: CustomerID } }
+    exports:
+      order_csv: { label: CSV出力, format: csv, columns: [OrderID, CustomerID, OrderDate, ShipName, Freight] }

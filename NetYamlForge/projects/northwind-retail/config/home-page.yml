@@ -1,0 +1,34 @@
+hero:
+  eyebrow: Northwind 小売管理システム
+  title: Northwind 小売管理システムへようこそ
+  description: 受注管理・在庫管理・顧客管理を統合した小売ERPシステム。Northwind データベースをベースにした本格的な業務管理システムです。
+  primaryActionLabel: ダッシュボードを開く
+  primaryActionUrl: /northwind-retail/Dashboard
+  secondaryActionLabel: スキーマを表示
+  secondaryActionUrl: /northwind-retail/DynamicEntity/AllDefinitions
+  highlights:
+    - YAML駆動CRUD
+    - 自動UI生成
+    - 多言語対応
+
+quickActions:
+  - label: ダッシュボード
+    url: /northwind-retail/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 営業ダッシュボード
+    url: /northwind-retail/Page/SalesDashboard
+    style: btn-outline
+    icon: 📈
+  - label: 在庫概要
+    url: /northwind-retail/Page/InventoryOverview
+    style: btn-outline
+    icon: 📦
+  - label: 受注管理
+    url: /northwind-retail/DynamicEntity/Index?entity=order
+    style: btn-outline
+    icon: 📋
+  - label: 経営レポート
+    url: /northwind-retail/Page/ExecutiveReport
+    style: btn-ghost
+    icon: 📊

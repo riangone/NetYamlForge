@@ -1,0 +1,50 @@
+title: 在庫概要
+sections:
+  - id: inventory_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '在庫あり商品' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📦' AS metric_icon, NULL
+      FROM Products WHERE UnitsInStock > 0 AND Discontinued = 0
+      UNION ALL
+      SELECT '在庫切れ商品', CAST(COUNT(*) AS TEXT), '❌', NULL
+      FROM Products WHERE (UnitsInStock = 0 OR UnitsInStock IS NULL) AND Discontinued = 0
+      UNION ALL
+      SELECT '発注点以下', CAST(COUNT(*) AS TEXT), '⚠️', NULL
+      FROM Products WHERE UnitsInStock <= ReorderLevel AND Discontinued = 0
+      UNION ALL
+      SELECT '全商品数', CAST(COUNT(*) AS TEXT), '📋', NULL
+      FROM Products WHERE Discontinued = 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: low_stock
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.ProductName AS 商品名,
+             s.CompanyName AS 仕入先,
+             p.UnitsInStock AS 在庫数,
+             p.UnitsOnOrder AS 発注中,
+             p.ReorderLevel AS 発注点,
+             CASE WHEN p.UnitsInStock <= p.ReorderLevel THEN '⚠️ 要発注' ELSE '✅ 正常' END AS ステータス
+      FROM Products p
+      INNER JOIN Suppliers s ON p.SupplierID = s.SupplierID
+      WHERE p.Discontinued = 0
+      ORDER BY p.UnitsInStock ASC
+      LIMIT 20
+    columns: [商品名, 仕入先, 在庫数, 発注中, 発注点, ステータス]
+
+  - id: category_distribution
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT c.CategoryName AS label, COUNT(p.ProductID) AS value
+      FROM Products p
+      INNER JOIN Categories c ON p.CategoryID = c.CategoryID
+      WHERE p.Discontinued = 0
+      GROUP BY c.CategoryName
+    columns: [label, value]
+    xField: label
+    yField: value

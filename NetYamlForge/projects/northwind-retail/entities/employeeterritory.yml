@@ -1,0 +1,41 @@
+entities:
+  employeeterritory:
+    table: EmployeeTerritories
+    key: EmployeeID
+    keys:
+      - EmployeeID
+      - TerritoryID
+    displayName: 社員テリトリー
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [EmployeeID, TerritoryID]
+      filters:
+        columns: 4
+        order: [EmployeeID, TerritoryID]
+    columns:
+      EmployeeID: { type: int, identity: true, label: 社員, sortable: true }
+      TerritoryID: { type: string, required: true, label: テリトリー, searchable: true, sortable: true }
+    forms:
+      EmployeeID:
+        type: int
+        label: 社員
+        editable: true
+        foreignKey:
+          entity: employee
+          displayColumn: "LastName || ' ' || FirstName"
+      TerritoryID:
+        type: string
+        required: true
+        label: テリトリー
+        editable: true
+        foreignKey:
+          entity: territory
+          displayColumn: TerritoryDescription
+    filters: {}
+    links: {}

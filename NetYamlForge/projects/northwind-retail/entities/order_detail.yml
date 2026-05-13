@@ -1,0 +1,48 @@
+entities:
+  order_detail:
+    table: Order Details
+    key: OrderID
+    keys:
+      - OrderID
+      - ProductID
+    displayName: 注文明細
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [OrderID, ProductID, UnitPrice, Quantity, Discount]
+      filters:
+        columns: 4
+        order: [OrderID, ProductID]
+    columns:
+      OrderID: { type: int, identity: true, label: 注文番号, sortable: true }
+      ProductID: { type: int, identity: true, label: 商品, sortable: true }
+      UnitPrice: { type: decimal, label: 単価, sortable: true }
+      Quantity: { type: int, label: 数量, sortable: true }
+      Discount: { type: decimal, label: 割引率, sortable: true }
+    forms:
+      OrderID:
+        type: int
+        label: 注文番号
+        required: true
+        editable: true
+        foreignKey:
+          entity: order
+          displayColumn: OrderID
+      ProductID:
+        type: int
+        label: 商品
+        required: true
+        editable: true
+        foreignKey:
+          entity: product
+          displayColumn: ProductName
+      UnitPrice: { type: decimal, label: 単価, required: true, editable: true }
+      Quantity: { type: int, label: 数量, required: true, editable: true }
+      Discount: { type: decimal, label: 割引率, editable: true }
+    filters: {}
+    links: {}

@@ -1,0 +1,26 @@
+entities:
+  category:
+    table: Categories
+    key: CategoryID
+    displayName: カテゴリ
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CategoryName, Description]
+      filters:
+        columns: 4
+        order: [CategoryName]
+    columns:
+      CategoryID: { type: int, identity: true, label: ID }
+      CategoryName: { type: string, required: true, label: カテゴリ名, searchable: true, sortable: true }
+      Description: { type: text, label: 説明 }
+    forms:
+      CategoryName: { type: string, required: true, label: カテゴリ名, editable: true }
+      Description: { type: text, label: 説明, editable: true }
+    filters: {}
+    links: {}

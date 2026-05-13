@@ -1,0 +1,24 @@
+entities:
+  region:
+    table: Regions
+    key: RegionID
+    displayName: 地域
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 1
+        order: [RegionDescription]
+      filters:
+        columns: 4
+        order: [RegionDescription]
+    columns:
+      RegionID: { type: int, identity: true, label: ID }
+      RegionDescription: { type: string, required: true, label: 地域名, searchable: true, sortable: true }
+    forms:
+      RegionDescription: { type: string, required: true, label: 地域名, editable: true }
+    filters: {}
+    links: {}

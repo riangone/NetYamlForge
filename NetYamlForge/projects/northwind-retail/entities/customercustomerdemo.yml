@@ -1,0 +1,42 @@
+entities:
+  customercustomerdemo:
+    table: CustomerCustomerDemo
+    key: CustomerID
+    keys:
+      - CustomerID
+      - CustomerTypeID
+    displayName: 顧客区分紐付
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [CustomerID, CustomerTypeID]
+      filters:
+        columns: 4
+        order: [CustomerID, CustomerTypeID]
+    columns:
+      CustomerID: { type: string, required: true, label: 顧客, searchable: true, sortable: true }
+      CustomerTypeID: { type: string, required: true, label: 顧客区分, searchable: true, sortable: true }
+    forms:
+      CustomerID:
+        type: string
+        required: true
+        label: 顧客
+        editable: true
+        foreignKey:
+          entity: customer
+          displayColumn: CompanyName
+      CustomerTypeID:
+        type: string
+        required: true
+        label: 顧客区分
+        editable: true
+        foreignKey:
+          entity: customerdemographic
+          displayColumn: CustomerDesc
+    filters: {}
+    links: {}

@@ -1,0 +1,34 @@
+entities:
+  territory:
+    table: Territories
+    key: TerritoryID
+    displayName: テリトリー
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [TerritoryID, TerritoryDescription, RegionID]
+      filters:
+        columns: 4
+        order: [TerritoryDescription, RegionID]
+    columns:
+      TerritoryID: { type: string, required: true, label: ID, searchable: true, sortable: true }
+      TerritoryDescription: { type: string, required: true, label: テリトリー名, searchable: true, sortable: true }
+      RegionID: { type: int, required: true, label: 地域 }
+    forms:
+      TerritoryID: { type: string, required: true, label: テリトリーID, editable: true }
+      TerritoryDescription: { type: string, required: true, label: テリトリー名, editable: true }
+      RegionID:
+        type: int
+        required: true
+        label: 地域
+        editable: true
+        foreignKey:
+          entity: region
+          displayColumn: RegionDescription
+    filters: {}
+    links: {}

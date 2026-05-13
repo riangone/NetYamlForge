@@ -1,0 +1,25 @@
+entities:
+  customerdemographic:
+    table: CustomerDemographics
+    key: CustomerTypeID
+    displayName: 顧客区分
+    isPublic: false
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 1
+        order: [CustomerTypeID, CustomerDesc]
+      filters:
+        columns: 4
+        order: [CustomerTypeID]
+    columns:
+      CustomerTypeID: { type: string, required: true, label: 区分ID, searchable: true, sortable: true }
+      CustomerDesc: { type: text, label: 区分説明 }
+    forms:
+      CustomerTypeID: { type: string, required: true, label: 区分ID, editable: true }
+      CustomerDesc: { type: text, label: 区分説明, editable: true }
+    filters: {}
+    links: {}

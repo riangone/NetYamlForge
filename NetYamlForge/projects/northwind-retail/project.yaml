@@ -1,0 +1,99 @@
+name: northwind-retail
+displayName: Northwind 小売管理システム
+version: "1.0.0"
+description: "Northwind データベースをベースにした小売管理システム（受注管理・在庫管理・顧客管理）"
+
+database:
+  type: sqlite
+  path: database/northwind.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+  navigation:
+    showDashboard: true
+    entities:
+      - order
+      - order_detail
+      - customer
+      - product
+      - category
+      - supplier
+      - shipper
+      - employee
+      - region
+      - territory
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+
+      - label: 営業ダッシュボード
+        url: /northwind-retail/Page/SalesDashboard
+        icon: 📈
+        section: 営業管理
+      - label: 受注管理
+        url: /northwind-retail/DynamicEntity/Index?entity=order
+        icon: 📋
+        section: 営業管理
+      - label: 注文明細
+        url: /northwind-retail/DynamicEntity/Index?entity=order_detail
+        icon: 📝
+        section: 営業管理
+      - label: 顧客管理
+        url: /northwind-retail/DynamicEntity/Index?entity=customer
+        icon: 👥
+        section: 営業管理
+
+      - label: 商品管理
+        url: /northwind-retail/DynamicEntity/Index?entity=product
+        icon: 📦
+        section: 在庫管理
+      - label: カテゴリ
+        url: /northwind-retail/DynamicEntity/Index?entity=category
+        icon: 🏷️
+        section: 在庫管理
+      - label: 在庫概要
+        url: /northwind-retail/Page/InventoryOverview
+        icon: 📊
+        section: 在庫管理
+
+      - label: 仕入先管理
+        url: /northwind-retail/DynamicEntity/Index?entity=supplier
+        icon: 🏭
+        section: 購買管理
+
+      - label: 配送業者
+        url: /northwind-retail/DynamicEntity/Index?entity=shipper
+        icon: 🚚
+        section: 配送管理
+
+      - label: 社員管理
+        url: /northwind-retail/DynamicEntity/Index?entity=employee
+        icon: 👨‍💼
+        section: 組織管理
+      - label: 地域管理
+        url: /northwind-retail/DynamicEntity/Index?entity=region
+        icon: 🌍
+        section: 組織管理
+      - label: テリトリー
+        url: /northwind-retail/DynamicEntity/Index?entity=territory
+        icon: 🗺️
+        section: 組織管理
+
+      - label: 経営レポート
+        url: /northwind-retail/Page/ExecutiveReport
+        icon: 📊
+        section: レポート
+
+settings:
+  locale: ja-JP
+  timezone: Asia/Tokyo

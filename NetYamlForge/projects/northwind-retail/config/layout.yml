@@ -1,0 +1,32 @@
+header:
+  title: Northwind 小売管理システム
+
+navigation:
+  showDashboard: true
+  entities:
+    - order
+    - order_detail
+    - customer
+    - product
+    - category
+    - supplier
+    - shipper
+    - employee
+    - region
+    - territory
+  items:
+    - label: ダッシュボード
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: 営業ダッシュボード
+      url: /northwind-retail/Page/SalesDashboard
+      icon: 📈
+      section: 営業管理
+    - label: 経営レポート
+      url: /northwind-retail/Page/ExecutiveReport
+      icon: 📊
+      section: レポート
+
+footer:
+  text: "Northwind 小売管理システム — powered by NetYamlForge"
