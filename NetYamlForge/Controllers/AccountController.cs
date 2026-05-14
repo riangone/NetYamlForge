@@ -45,6 +45,7 @@ public class AccountController : Controller
 
     [AllowAnonymous]
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
@@ -153,6 +154,7 @@ public class AccountController : Controller
 
     [Authorize]
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         var userName = User.Identity?.Name ?? "anonymous";
@@ -180,6 +182,7 @@ public class AccountController : Controller
 
     [AllowAnonymous]
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
@@ -253,6 +256,7 @@ public class AccountController : Controller
 
     [AllowAnonymous]
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> CustomerRegister(CustomerRegisterViewModel model)
     {
         if (!ModelState.IsValid)

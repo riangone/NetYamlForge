@@ -10,6 +10,7 @@ namespace NetYamlForge.Controllers;
 public class LocalizationController : Controller
 {
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult SetLanguage(string culture, string? returnUrl = null)
     {
         var value = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));

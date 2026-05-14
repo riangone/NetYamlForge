@@ -237,6 +237,7 @@ public class DynamicEntityController : BaseProjectController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(string entity, [FromForm] Dictionary<string, string?> form, [FromForm] IFormFileCollection? files = null, string mode = "modal", [FromForm] string? returnUrl = null)
     {
         entity = NormalizeSingleValue(entity) ?? "customer";
@@ -405,6 +406,7 @@ public class DynamicEntityController : BaseProjectController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string entity, string? id = null, [FromForm] Dictionary<string, string?>? form = null, [FromForm] IFormFileCollection? files = null, string mode = "modal", [FromForm] string? returnUrl = null)
     {
         entity = NormalizeSingleValue(entity) ?? "customer";
@@ -449,6 +451,7 @@ public class DynamicEntityController : BaseProjectController
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string entity, string? id = null, [FromForm] string? returnUrl = null)
     {
         entity = NormalizeSingleValue(entity) ?? "customer";
@@ -849,6 +852,7 @@ public class DynamicEntityController : BaseProjectController
     /// ヘッダーアクション（行に依存しない操作）を実行し、一覧パーシャルを返します。
     /// </summary>
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> InvokeHeaderAction(
         string entity,
         string actionKey,
@@ -921,6 +925,7 @@ public class DynamicEntityController : BaseProjectController
     /// 各 ID ごとにハンドラーを呼び出し、すべて成功した場合のみコミットします。
     /// </summary>
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> InvokeBulkAction(
         string entity,
         string actionKey,
@@ -1004,6 +1009,7 @@ public class DynamicEntityController : BaseProjectController
     /// カスタムアクションを実行し、一覧パーシャルを返します。
     /// </summary>
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> InvokeAction(
         string entity,
         string actionKey,

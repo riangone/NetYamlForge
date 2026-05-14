@@ -148,6 +148,7 @@ public class BatchJobController : BaseProjectController
     // ─── TriggerJob (POST, HTMX) ─────────────────────────────────────────────
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> TriggerJob(string jobId)
     {

@@ -8,12 +8,18 @@
 @inject IStringLocalizer<SharedResource> L
 @inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
 @inject NetYamlForge.Services.ProjectScope ProjectScope
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var afTokens = Antiforgery.GetAndStoreTokens(Context);
+}
 <!DOCTYPE html>
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="corporate">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - NetYamlForge</title>
+    <meta name="csrf-token-header" content="@afTokens.HeaderName" />
+    <meta name="csrf-token" content="@afTokens.RequestToken" />
     <script>
         window.NetYamlForgeConfig = {
             pathBase: '@Url.Content("~/").TrimEnd('/')',

@@ -41,6 +41,7 @@ public class UsersController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(UserEditViewModel model)
     {
         if (!ModelState.IsValid)
@@ -85,6 +86,7 @@ public class UsersController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(UserEditViewModel model)
     {
         if (!ModelState.IsValid)
@@ -109,6 +111,7 @@ public class UsersController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         try

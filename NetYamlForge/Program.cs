@@ -153,6 +153,10 @@ builder.Host.UseSerilog((context, cfg) =>
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddControllersWithViews()
     .AddViewLocalization();
+builder.Services.AddAntiforgery(options =>
+{
+    options.Cookie.Path = "/";
+});
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.Razor.RazorViewEngineOptions>(options =>
 {
     options.ViewLocationExpanders.Add(new NetYamlForge.Services.ProjectViewLocationExpander());

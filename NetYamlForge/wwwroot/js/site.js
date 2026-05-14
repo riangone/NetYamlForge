@@ -58,6 +58,15 @@ document.addEventListener('change', function (e) {
     document.addEventListener('htmx:afterSettle', scanAndAttach);
 }());
 
+// ── HTMX CSRF Configuration ──────────────────────────────────────────────────
+document.addEventListener('htmx:configRequest', function (evt) {
+    var header = document.querySelector('meta[name="csrf-token-header"]');
+    var token = document.querySelector('meta[name="csrf-token"]');
+    if (header && token && header.content && token.content) {
+        evt.detail.headers[header.content] = token.content;
+    }
+});
+
 // ── ファイル・画像アップロード処理 ────────────────────────────────────────────────
 // file 型・image 型のフィールドでファイル選択時に hidden フィールドにパスを設定する
 
