@@ -19,6 +19,7 @@ public class AppUser
     public bool IsActive { get; set; } = true;
     public string? ExternalId { get; set; }
     public string? ExternalSource { get; set; }
+    public string? OwningProject { get; set; }
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string? UpdatedAt { get; set; }
     public string? LastLoginAt { get; set; }

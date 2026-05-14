@@ -78,12 +78,13 @@ public class JpcsUserSyncService : IJpcsUserSyncService
         var userName = emp.Name.Replace(" ", "").ToLowerInvariant();
         if (string.IsNullOrEmpty(userName)) return;
 
-        // Check if user already exists (by external_id or user_name)
-        // We need a way to find by ExternalId. Let's use GetAll and filter for now, 
-        // or add a method to IUserAuthService.
-        // For efficiency, I'll just check by user_name first or use a direct query.
-        
-        using var systemConn = await _connectionManager.GetConnectionAsync("system");
+        // Use direct connection to system.db (central auth db)
+        var systemDbPath = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+#pragma warning disable DCS003
+        using var systemConn = new SqliteConnection($"Data Source={systemDbPath}");
+#pragma warning restore DCS003
+        await systemConn.OpenAsync();
+
         var existing = await systemConn.QueryFirstOrDefaultAsync<AppUser>(
             "SELECT * FROM app_user WHERE (external_id = @ExternalId AND external_source = 'jpcs') OR user_name = @UserName",
             new { ExternalId = emp.Ad_User_Id.ToString(), UserName = userName });
@@ -99,18 +100,11 @@ public class JpcsUserSyncService : IJpcsUserSyncService
                 IsActive = true,
                 IsAdmin = false,
                 PreferredLanguage = "ja-JP",
-                Password = "ChangeMe123!" // Default password
+                Password = "ChangeMe123!", // Default password
+                ExternalId = emp.Ad_User_Id.ToString(),
+                ExternalSource = "jpcs",
+                OwningProject = "jpcs" // 隔离标记：该用户归属于 jpcs 项目
             };
-
-            // We need to pass the ExternalId somehow. 
-            // Since CreateAsync takes UserEditViewModel which doesn't have ExternalId,
-            // we have two choices: 
-            // 1. Update UserEditViewModel (cleanest)
-            // 2. Create then update (two steps)
-            
-            // I'll update UserEditViewModel as well.
-            userViewModel.ExternalId = emp.Ad_User_Id.ToString();
-            userViewModel.ExternalSource = "jpcs";
 
             var userId = await _userAuthService.CreateAsync(userViewModel);
             
@@ -120,12 +114,20 @@ public class JpcsUserSyncService : IJpcsUserSyncService
                 new { UserId = userId, Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") });
 
             result.CreatedCount++;
-            _logger.LogInformation("Created system user {UserName} for JPCS employee {Name}", userName, emp.Name);
+            _logger.LogInformation("Created system user {UserName} for JPCS employee {Name} (OwningProject: jpcs)", userName, emp.Name);
         }
         else
         {
             // Update existing user if needed
-            // For now, just ensure project role exists
+            // Ensure OwningProject is set to jpcs for isolation
+            if (existing.OwningProject != "jpcs")
+            {
+                await systemConn.ExecuteAsync(
+                    "UPDATE app_user SET owning_project = 'jpcs' WHERE id = @Id",
+                    new { Id = existing.Id });
+            }
+
+            // Ensure project role exists
             await systemConn.ExecuteAsync(
                 "INSERT OR IGNORE INTO app_user_project_role (user_id, project_name, role_name, created_at) VALUES (@UserId, 'jpcs', 'user', @Now)",
                 new { UserId = existing.Id, Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") });
@@ -139,10 +141,8 @@ public class JpcsUserSyncService : IJpcsUserSyncService
             }
 
             result.UpdatedCount++;
-            _logger.LogInformation("User {UserName} already exists, ensured JPCS project role", userName);
+            _logger.LogInformation("User {UserName} already exists, ensured JPCS project role and OwningProject=jpcs", userName);
         }
-        
-        _connectionManager.ReleaseConnection(systemConn);
     }
 
     private class JpcsEmployee

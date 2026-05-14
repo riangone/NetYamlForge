@@ -85,6 +85,7 @@ public class AccountController : Controller
             new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.GivenName, user.DisplayName),
             new("lang", user.PreferredLanguage),
+            new("owning_project", user.OwningProject ?? ""),
             new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
 

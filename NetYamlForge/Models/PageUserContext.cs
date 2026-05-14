@@ -22,7 +22,9 @@ public record PageUserContext(
     /// <summary>管理者フラグ</summary>
     bool IsAdmin,
     /// <summary>認証済みフラグ</summary>
-    bool IsAuthenticated
+    bool IsAuthenticated,
+    /// <summary>归属项目</summary>
+    string? OwningProject = null
 )
 {
     /// <summary>未認証ユーザー向けの空コンテキスト</summary>
@@ -32,7 +34,8 @@ public record PageUserContext(
         UserId: "",
         Roles: Array.Empty<string>(),
         IsAdmin: false,
-        IsAuthenticated: false
+        IsAuthenticated: false,
+        OwningProject: null
     );
 
     /// <summary>指定ロールを所持しているか（大文字小文字を無視）</summary>

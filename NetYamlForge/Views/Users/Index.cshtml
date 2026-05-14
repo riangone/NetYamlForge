@@ -47,6 +47,7 @@
                             <th>UserName</th>
                             <th>DisplayName</th>
                             <th>Language</th>
+                            <th>Project</th>
                             <th>Admin</th>
                             <th>Active</th>
                             <th></th>
@@ -60,6 +61,7 @@
                                 <td>@u.UserName</td>
                                 <td>@u.DisplayName</td>
                                 <td>@u.PreferredLanguage</td>
+                                <td>@(u.OwningProject ?? "global")</td>
                                 <td>@u.IsAdmin</td>
                                 <td>@u.IsActive</td>
                                 <td><a class="btn btn-xs btn-outline" asp-action="Edit" asp-route-id="@u.Id">Edit</a></td>

@@ -75,8 +75,8 @@ public class SystemDbTestUserSeeder
                 var isAdmin = Convert.ToInt32(user.IsAdmin) != 0;
 
                 var userId = await systemConn.ExecuteScalarAsync<int>(
-                    @"INSERT INTO app_user (user_name, password_hash, display_name, user_type, default_project_name, is_admin, preferred_language, is_active, created_at, updated_at)
-                      VALUES (@UserName, @PasswordHash, @DisplayName, @UserType, @DefaultProjectName, @IsAdmin, @PreferredLanguage, @IsActive, @CreatedAt, @UpdatedAt)
+                    @"INSERT INTO app_user (user_name, password_hash, display_name, user_type, default_project_name, owning_project, is_admin, preferred_language, is_active, created_at, updated_at)
+                      VALUES (@UserName, @PasswordHash, @DisplayName, @UserType, @DefaultProjectName, @OwningProject, @IsAdmin, @PreferredLanguage, @IsActive, @CreatedAt, @UpdatedAt)
                       RETURNING id",
                     new
                     {
@@ -85,6 +85,7 @@ public class SystemDbTestUserSeeder
                         DisplayName = (string)user.DisplayName,
                         UserType = isAdmin ? "admin" : "user",
                         DefaultProjectName = project.Name,
+                        OwningProject = project.Name, // 设置归属项目
                         IsAdmin = isAdmin ? 1 : 0,
                         PreferredLanguage = (string)(user.PreferredLanguage ?? "ja-JP"),
                         IsActive = isActive ? 1 : 0,

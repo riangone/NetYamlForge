@@ -542,7 +542,8 @@ public class PageController : BaseProjectController
             .Select(c => c.Value)
             .ToList(),
         IsAdmin: UserIsAdmin(),
-        IsAuthenticated: User.Identity?.IsAuthenticated == true
+        IsAuthenticated: User.Identity?.IsAuthenticated == true,
+        OwningProject: User.FindFirst("owning_project")?.Value
     );
 
     private static bool CanViewSection(SectionDefinition section, PageUserContext userContext)

@@ -79,11 +79,21 @@ public class UserAuthService : IUserAuthService
             new { Now = now, Id = userId });
     }
 
-    public async Task<IReadOnlyList<AppUser>> GetAllAsync()
+    public async Task<IReadOnlyList<AppUser>> GetAllAsync(string? owningProject = null)
     {
         await using var conn = await GetConnectionAsync();
-        var items = await conn.QueryAsync<AppUser>("SELECT * FROM AppUser ORDER BY Id ASC");
-        return items.ToList();
+        if (string.IsNullOrEmpty(owningProject))
+        {
+            var items = await conn.QueryAsync<AppUser>("SELECT * FROM AppUser ORDER BY Id ASC");
+            return items.ToList();
+        }
+        else
+        {
+            var items = await conn.QueryAsync<AppUser>(
+                "SELECT * FROM AppUser WHERE OwningProject = @OwningProject ORDER BY Id ASC",
+                new { OwningProject = owningProject });
+            return items.ToList();
+        }
     }
 
     public async Task<AppUser?> GetByIdAsync(int id)
@@ -114,6 +124,7 @@ public class UserAuthService : IUserAuthService
                 IsActive = input.IsActive,
                 ExternalId = input.ExternalId,
                 ExternalSource = input.ExternalSource,
+                OwningProject = input.OwningProject,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
@@ -166,7 +177,8 @@ SET UserName = @UserName,
     DisplayName = @DisplayName,
     PreferredLanguage = @PreferredLanguage,
     IsAdmin = @IsAdmin,
-    IsActive = @IsActive
+    IsActive = @IsActive,
+    OwningProject = @OwningProject
 WHERE Id = @Id", new
         {
             Id = input.Id.Value,
@@ -175,7 +187,8 @@ WHERE Id = @Id", new
             input.DisplayName,
             input.PreferredLanguage,
             input.IsAdmin,
-            input.IsActive
+            input.IsActive,
+            input.OwningProject
             }, transaction);
 
             // Sync AppUserRole with IsAdmin flag
@@ -701,32 +714,32 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
         if (dbType == "sqlserver")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
 OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);";
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else if (dbType == "postgresql" || dbType == "postgres")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt)
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt)
 RETURNING Id;";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else if (dbType == "mysql" || dbType == "mariadb")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);
 SELECT LAST_INSERT_ID();";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);
 SELECT last_insert_rowid();";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }

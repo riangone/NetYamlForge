@@ -12,7 +12,7 @@ public interface IUserAuthService
     Task<AppUser?> ValidateCredentialsAsync(string userName, string password);
     Task<IReadOnlyList<string>> GetUserRolesAsync(string userName);
     Task UpdateLastLoginAsync(int userId);
-    Task<IReadOnlyList<AppUser>> GetAllAsync();
+    Task<IReadOnlyList<AppUser>> GetAllAsync(string? owningProject = null);
     Task<AppUser?> GetByIdAsync(int id);
     Task<int> CreateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);
     Task UpdateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null);

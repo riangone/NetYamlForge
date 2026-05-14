@@ -95,6 +95,7 @@ public class UserDetail
     public string Phone { get; set; } = "";
     public string UserType { get; set; } = "";
     public string? DefaultProjectName { get; set; }
+    public string? OwningProject { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public IReadOnlyList<ProjectRoleInfo> ProjectRoles { get; set; } = new List<ProjectRoleInfo>();

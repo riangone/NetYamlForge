@@ -81,6 +81,7 @@ public class TenantUserService : ITenantUserService
                 is_admin as IsAdmin,
                 preferred_language as PreferredLanguage,
                 is_active as IsActive,
+                owning_project as OwningProject,
                 created_at as CreatedAt,
                 updated_at as UpdatedAt,
                 last_login_at as LastLoginAt
@@ -249,9 +250,9 @@ public class TenantUserService : ITenantUserService
             // 1. 创建全局用户
             const string insertUserSql = @"
                 INSERT INTO app_user (user_name, password_hash, display_name, email, phone,
-                                      user_type, default_project_name, is_active, created_at, updated_at)
+                                      user_type, default_project_name, owning_project, is_active, created_at, updated_at)
                 VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @Phone,
-                        @UserType, @DefaultProjectName, 1, @CreatedAt, @UpdatedAt)
+                        @UserType, @DefaultProjectName, @OwningProject, 1, @CreatedAt, @UpdatedAt)
                 RETURNING id
             ";
 
@@ -266,6 +267,7 @@ public class TenantUserService : ITenantUserService
                 Phone = request.Phone,
                 UserType = request.UserType,
                 DefaultProjectName = request.DefaultProjectName,
+                OwningProject = request.DefaultProjectName, // Set owning project same as default project
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             }, transaction);
@@ -297,7 +299,7 @@ public class TenantUserService : ITenantUserService
     {
         const string userSql = @"
             SELECT id, user_name, display_name, email, phone, user_type,
-                   default_project_name, is_active, created_at
+                   default_project_name, owning_project as OwningProject, is_active, created_at
             FROM app_user
             WHERE id = @UserId
         ";

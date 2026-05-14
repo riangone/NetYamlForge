@@ -30,4 +30,5 @@ public class UserEditViewModel
 
     public string? ExternalId { get; set; }
     public string? ExternalSource { get; set; }
+    public string? OwningProject { get; set; }
 }

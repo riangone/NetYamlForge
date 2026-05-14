@@ -32,7 +32,10 @@ public class UsersController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var users = await _users.GetAllAsync();
+        var projectName = RouteData.Values["project"]?.ToString();
+        // 如果是 framework 项目，显示所有用户；否则只显示当前项目的用户
+        var filterProject = projectName == "framework" ? null : projectName;
+        var users = await _users.GetAllAsync(filterProject);
         return View(users);
     }
 
@@ -55,7 +58,11 @@ public class UsersController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        return View("Edit", new UserEditViewModel());
+        var projectName = RouteData.Values["project"]?.ToString();
+        return View("Edit", new UserEditViewModel 
+        { 
+            OwningProject = projectName == "framework" ? null : projectName 
+        });
     }
 
     [HttpPost]
@@ -69,10 +76,16 @@ public class UsersController : Controller
 
         try
         {
+            var projectName = RouteData.Values["project"]?.ToString();
+            if (string.IsNullOrEmpty(model.OwningProject))
+            {
+                model.OwningProject = projectName == "framework" ? null : projectName;
+            }
+
             await ExecuteUserTransactionAsync(async tx =>
             {
                 await _users.CreateAsync(model, null, tx);
-                await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName}", User.Identity?.Name, null, tx);
+                await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName} for project {model.OwningProject ?? "global"}", User.Identity?.Name, null, tx);
             });
             return RedirectToAction(nameof(Index));
         }
@@ -99,7 +112,8 @@ public class UsersController : Controller
             DisplayName = user.DisplayName,
             PreferredLanguage = user.PreferredLanguage,
             IsAdmin = user.IsAdmin,
-            IsActive = user.IsActive
+            IsActive = user.IsActive,
+            OwningProject = user.OwningProject
         });
     }
 

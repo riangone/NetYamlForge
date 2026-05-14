@@ -41,6 +41,12 @@
                 </select>
             </div>
 
+            <div>
+                <label class="label"><span class="label-text">Owning Project</span></label>
+                <input asp-for="OwningProject" class="input input-bordered w-full" readonly="@(ViewContext.RouteData.Values["project"]?.ToString() != "framework")" />
+                <div class="text-xs text-gray-500 mt-1">Leave empty for global users. Only "framework" project can edit this.</div>
+            </div>
+
             <label class="label cursor-pointer justify-start gap-2">
                 <input asp-for="IsAdmin" type="checkbox" class="checkbox" />
                 <span class="label-text">IsAdmin</span>
