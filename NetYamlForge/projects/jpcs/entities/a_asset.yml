@@ -1,211 +1,75 @@
-name: A_ASSET
-tableName: a_asset
-primaryKey: a_asset_id
-fields:
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: a_asset_group_id
-  type: numeric
-  label: A Asset Group Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: serno
-  type: text
-  label: Serno
-- name: lot
-  type: text
-  label: Lot
-- name: versionno
-  type: text
-  label: Versionno
-- name: guaranteedate
-  type: text
-  label: Guaranteedate
-- name: assetservicedate
-  type: text
-  label: Assetservicedate
-- name: isowned
-  type: text
-  label: Isowned
-- name: assetdepreciationdate
-  type: text
-  label: Assetdepreciationdate
-- name: uselifeyears
-  type: numeric
-  label: Uselifeyears
-- name: uselifemonths
-  type: numeric
-  label: Uselifemonths
-- name: lifeuseunits
-  type: numeric
-  label: Lifeuseunits
-- name: useunits
-  type: numeric
-  label: Useunits
-- name: isdisposed
-  type: text
-  label: Isdisposed
-- name: assetdisposaldate
-  type: text
-  label: Assetdisposaldate
-- name: isinposession
-  type: text
-  label: Isinposession
-- name: locationcomment
-  type: text
-  label: Locationcomment
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: processing
-  type: text
-  label: Processing
-- name: isdepreciated
-  type: text
-  label: Isdepreciated
-- name: isfullydepreciated
-  type: text
-  label: Isfullydepreciated
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_bpartnersr_id
-  type: numeric
-  label: C Bpartnersr Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: lastmaintenencedate
-  type: text
-  label: Lastmaintenencedate
-- name: nextmaintenencedate
-  type: text
-  label: Nextmaintenencedate
-- name: lastmaintenanceuseunit
-  type: numeric
-  label: Lastmaintenanceuseunit
-- name: nextmaintenanceuseunit
-  type: numeric
-  label: Nextmaintenanceuseunit
-- name: leaseterminationdate
-  type: text
-  label: Leaseterminationdate
-- name: lease_bpartner_id
-  type: numeric
-  label: Lease Bpartner Id
-- name: lastmaintenancenote
-  type: text
-  label: Lastmaintenancenote
-- name: lastmaintenancedate
-  type: text
-  label: Lastmaintenancedate
-- name: lastmaintenanceunit
-  type: numeric
-  label: Lastmaintenanceunit
-- name: nextmaintenenceunit
-  type: numeric
-  label: Nextmaintenenceunit
-- name: a_asset_createdate
-  type: text
-  label: A Asset Createdate
-- name: a_asset_revaldate
-  type: text
-  label: A Asset Revaldate
-- name: a_parent_asset_id
-  type: numeric
-  label: A Parent Asset Id
-- name: a_qty_current
-  type: numeric
-  label: A Qty Current
-- name: a_qty_original
-  type: numeric
-  label: A Qty Original
-- name: a_asset_uu
-  type: text
-  label: A Asset Uu
-- name: a_asset_class_id
-  type: numeric
-  label: A Asset Class Id
-- name: a_asset_status
-  type: text
-  label: A Asset Status
-- name: a_asset_action
-  type: text
-  label: A Asset Action
-- name: processed
-  type: text
-  label: Processed
-- name: assetactivationdate
-  type: text
-  label: Assetactivationdate
-- name: inventoryno
-  type: text
-  label: Inventoryno
-- name: a_asset_type_id
-  type: numeric
-  label: A Asset Type Id
-- name: a_assettype
-  type: text
-  label: A Assettype
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: manufacturer
-  type: text
-  label: Manufacturer
-- name: manufacturedyear
-  type: numeric
-  label: Manufacturedyear
+entities:
+  a_asset:
+    table: a_asset
+    key: a_asset_id
+    displayName: A_ASSET
+    columns:
+      a_asset_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      a_asset_group_id: {type: decimal}
+      m_product_id: {type: decimal}
+      serno: {type: string}
+      lot: {type: string}
+      versionno: {type: string}
+      guaranteedate: {type: string}
+      assetservicedate: {type: string}
+      isowned: {type: string}
+      assetdepreciationdate: {type: string}
+      uselifeyears: {type: decimal}
+      uselifemonths: {type: decimal}
+      lifeuseunits: {type: decimal}
+      useunits: {type: decimal}
+      isdisposed: {type: string}
+      assetdisposaldate: {type: string}
+      isinposession: {type: string}
+      locationcomment: {type: string}
+      m_locator_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      c_location_id: {type: decimal}
+      processing: {type: string}
+      isdepreciated: {type: string}
+      isfullydepreciated: {type: string}
+      ad_user_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      qty: {type: decimal}
+      c_project_id: {type: decimal}
+      c_bpartnersr_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      lastmaintenencedate: {type: string}
+      nextmaintenencedate: {type: string}
+      lastmaintenanceuseunit: {type: decimal}
+      nextmaintenanceuseunit: {type: decimal}
+      leaseterminationdate: {type: string}
+      lease_bpartner_id: {type: decimal}
+      lastmaintenancenote: {type: string}
+      lastmaintenancedate: {type: string}
+      lastmaintenanceunit: {type: decimal}
+      nextmaintenenceunit: {type: decimal}
+      a_asset_createdate: {type: string}
+      a_asset_revaldate: {type: string}
+      a_parent_asset_id: {type: decimal}
+      a_qty_current: {type: decimal}
+      a_qty_original: {type: decimal}
+      a_asset_uu: {type: string}
+      a_asset_class_id: {type: decimal}
+      a_asset_status: {type: string}
+      a_asset_action: {type: string}
+      processed: {type: string}
+      assetactivationdate: {type: string}
+      inventoryno: {type: string}
+      a_asset_type_id: {type: decimal}
+      a_assettype: {type: string}
+      c_activity_id: {type: decimal}
+      manufacturer: {type: string}
+      manufacturedyear: {type: decimal}

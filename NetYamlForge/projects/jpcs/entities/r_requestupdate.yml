@@ -1,55 +1,23 @@
-name: R_REQUESTUPDATE
-tableName: r_requestupdate
-primaryKey: r_requestupdate_id
-fields:
-- name: r_requestupdate_id
-  type: numeric
-  label: R Requestupdate Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: r_request_id
-  type: numeric
-  label: R Request Id
-- name: confidentialtypeentry
-  type: text
-  label: Confidentialtypeentry
-- name: starttime
-  type: text
-  label: Starttime
-- name: endtime
-  type: text
-  label: Endtime
-- name: qtyspent
-  type: numeric
-  label: Qtyspent
-- name: qtyinvoiced
-  type: numeric
-  label: Qtyinvoiced
-- name: m_productspent_id
-  type: numeric
-  label: M Productspent Id
-- name: result
-  type: text
-  label: Result
-- name: r_requestupdate_uu
-  type: text
-  label: R Requestupdate Uu
+entities:
+  r_requestupdate:
+    table: r_requestupdate
+    key: r_requestupdate_id
+    displayName: R_REQUESTUPDATE
+    columns:
+      r_requestupdate_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      r_request_id: {type: decimal}
+      confidentialtypeentry: {type: string}
+      starttime: {type: string}
+      endtime: {type: string}
+      qtyspent: {type: decimal}
+      qtyinvoiced: {type: decimal}
+      m_productspent_id: {type: decimal}
+      result: {type: string}
+      r_requestupdate_uu: {type: string}

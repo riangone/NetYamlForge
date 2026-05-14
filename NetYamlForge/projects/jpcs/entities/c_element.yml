@@ -1,52 +1,22 @@
-name: C_ELEMENT
-tableName: c_element
-primaryKey: c_element_id
-fields:
-- name: c_element_id
-  type: numeric
-  label: C Element Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: vformat
-  type: text
-  label: Vformat
-- name: elementtype
-  type: text
-  label: Elementtype
-- name: isbalancing
-  type: text
-  label: Isbalancing
-- name: isnaturalaccount
-  type: text
-  label: Isnaturalaccount
-- name: ad_tree_id
-  type: numeric
-  label: Ad Tree Id
-- name: c_element_uu
-  type: text
-  label: C Element Uu
+entities:
+  c_element:
+    table: c_element
+    key: c_element_id
+    displayName: C_ELEMENT
+    columns:
+      c_element_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      vformat: {type: string}
+      elementtype: {type: string}
+      isbalancing: {type: string}
+      isnaturalaccount: {type: string}
+      ad_tree_id: {type: decimal}
+      c_element_uu: {type: string}

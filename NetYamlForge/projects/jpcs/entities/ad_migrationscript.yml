@@ -1,67 +1,27 @@
-name: AD_MIGRATIONSCRIPT
-tableName: ad_migrationscript
-primaryKey: ad_migrationscript_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_migrationscript_id
-  type: numeric
-  label: Ad Migrationscript Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: developername
-  type: text
-  label: Developername
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: projectname
-  type: text
-  label: Projectname
-- name: reference
-  type: text
-  label: Reference
-- name: releaseno
-  type: text
-  label: Releaseno
-- name: scriptroll
-  type: text
-  label: Scriptroll
-- name: status
-  type: text
-  label: Status
-- name: url
-  type: text
-  label: Url
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isapply
-  type: text
-  label: Isapply
-- name: filename
-  type: text
-  label: Filename
-- name: script
-  type: text
-  label: Script
-- name: ad_migrationscript_uu
-  type: text
-  label: Ad Migrationscript Uu
+entities:
+  ad_migrationscript:
+    table: ad_migrationscript
+    key: ad_migrationscript_id
+    displayName: AD_MIGRATIONSCRIPT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_migrationscript_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      developername: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      projectname: {type: string}
+      reference: {type: string}
+      releaseno: {type: string}
+      scriptroll: {type: string}
+      status: {type: string}
+      url: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isapply: {type: string}
+      filename: {type: string}
+      script: {type: string}
+      ad_migrationscript_uu: {type: string}

@@ -1,55 +1,23 @@
-name: JP_BANKSTATEMENTTAX
-tableName: jp_bankstatementtax
-primaryKey: c_tax_id
-fields:
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: processed
-  type: text
-  label: Processed
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: jp_bankstatementtax_uu
-  type: text
-  label: Jp Bankstatementtax Uu
-- name: c_taxprovider_id
-  type: numeric
-  label: C Taxprovider Id
-- name: c_bankstatementline_id
-  type: numeric
-  label: C Bankstatementline Id
-- name: c_bankstatement_id
-  type: numeric
-  label: C Bankstatement Id
-- name: issotrx
-  type: text
-  label: Issotrx
+entities:
+  jp_bankstatementtax:
+    table: jp_bankstatementtax
+    key: c_tax_id
+    displayName: JP_BANKSTATEMENTTAX
+    columns:
+      c_tax_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      taxbaseamt: {type: decimal}
+      taxamt: {type: decimal}
+      processed: {type: string}
+      istaxincluded: {type: string}
+      jp_bankstatementtax_uu: {type: string}
+      c_taxprovider_id: {type: decimal}
+      c_bankstatementline_id: {type: decimal}
+      c_bankstatement_id: {type: decimal}
+      issotrx: {type: string}

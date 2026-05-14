@@ -1,55 +1,23 @@
-name: C_DOCTYPECOUNTER
-tableName: c_doctypecounter
-primaryKey: c_doctypecounter_id
-fields:
-- name: c_doctypecounter_id
-  type: numeric
-  label: C Doctypecounter Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: counter_c_doctype_id
-  type: numeric
-  label: Counter C Doctype Id
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: processing
-  type: text
-  label: Processing
-- name: docaction
-  type: text
-  label: Docaction
-- name: iscreatecounter
-  type: text
-  label: Iscreatecounter
-- name: c_doctypecounter_uu
-  type: text
-  label: C Doctypecounter Uu
+entities:
+  c_doctypecounter:
+    table: c_doctypecounter
+    key: c_doctypecounter_id
+    displayName: C_DOCTYPECOUNTER
+    columns:
+      c_doctypecounter_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_doctype_id: {type: decimal}
+      counter_c_doctype_id: {type: decimal}
+      isvalid: {type: string}
+      processing: {type: string}
+      docaction: {type: string}
+      iscreatecounter: {type: string}
+      c_doctypecounter_uu: {type: string}

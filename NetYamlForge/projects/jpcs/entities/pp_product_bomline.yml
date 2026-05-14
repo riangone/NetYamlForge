@@ -1,100 +1,38 @@
-name: PP_PRODUCT_BOMLINE
-tableName: pp_product_bomline
-primaryKey: pp_product_bomline_id
-fields:
-- name: feature
-  type: text
-  label: Feature
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: assay
-  type: numeric
-  label: Assay
-- name: backflushgroup
-  type: text
-  label: Backflushgroup
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: componenttype
-  type: text
-  label: Componenttype
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: forecast
-  type: numeric
-  label: Forecast
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscritical
-  type: text
-  label: Iscritical
-- name: isqtypercentage
-  type: text
-  label: Isqtypercentage
-- name: issuemethod
-  type: text
-  label: Issuemethod
-- name: leadtimeoffset
-  type: numeric
-  label: Leadtimeoffset
-- name: line
-  type: numeric
-  label: Line
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_changenotice_id
-  type: numeric
-  label: M Changenotice Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pp_product_bomline_id
-  type: numeric
-  label: Pp Product Bomline Id
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: qtybom
-  type: numeric
-  label: Qtybom
-- name: qtybatch
-  type: numeric
-  label: Qtybatch
-- name: scrap
-  type: numeric
-  label: Scrap
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: validto
-  type: text
-  label: Validto
-- name: costallocationperc
-  type: numeric
-  label: Costallocationperc
-- name: pp_product_bomline_uu
-  type: text
-  label: Pp Product Bomline Uu
+entities:
+  pp_product_bomline:
+    table: pp_product_bomline
+    key: pp_product_bomline_id
+    displayName: PP_PRODUCT_BOMLINE
+    columns:
+      feature: {type: string}
+      ad_org_id: {type: decimal}
+      assay: {type: decimal}
+      backflushgroup: {type: string}
+      c_uom_id: {type: decimal}
+      componenttype: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      forecast: {type: decimal}
+      help: {type: string}
+      isactive: {type: string}
+      iscritical: {type: string}
+      isqtypercentage: {type: string}
+      issuemethod: {type: string}
+      leadtimeoffset: {type: decimal}
+      line: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_changenotice_id: {type: decimal}
+      m_product_id: {type: decimal}
+      pp_product_bomline_id: {type: decimal, identity: true}
+      pp_product_bom_id: {type: decimal}
+      qtybom: {type: decimal}
+      qtybatch: {type: decimal}
+      scrap: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      ad_client_id: {type: decimal}
+      validto: {type: string}
+      costallocationperc: {type: decimal}
+      pp_product_bomline_uu: {type: string}

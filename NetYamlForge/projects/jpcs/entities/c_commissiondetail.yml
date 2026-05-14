@@ -1,58 +1,24 @@
-name: C_COMMISSIONDETAIL
-tableName: c_commissiondetail
-primaryKey: c_commissiondetail_id
-fields:
-- name: c_commissiondetail_id
-  type: numeric
-  label: C Commissiondetail Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_commissionamt_id
-  type: numeric
-  label: C Commissionamt Id
-- name: reference
-  type: text
-  label: Reference
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: info
-  type: text
-  label: Info
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: actualamt
-  type: numeric
-  label: Actualamt
-- name: convertedamt
-  type: numeric
-  label: Convertedamt
-- name: actualqty
-  type: numeric
-  label: Actualqty
-- name: c_commissiondetail_uu
-  type: text
-  label: C Commissiondetail Uu
+entities:
+  c_commissiondetail:
+    table: c_commissiondetail
+    key: c_commissiondetail_id
+    displayName: C_COMMISSIONDETAIL
+    columns:
+      c_commissiondetail_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_commissionamt_id: {type: decimal}
+      reference: {type: string}
+      c_orderline_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      info: {type: string}
+      c_currency_id: {type: decimal}
+      actualamt: {type: decimal}
+      convertedamt: {type: decimal}
+      actualqty: {type: decimal}
+      c_commissiondetail_uu: {type: string}

@@ -1,64 +1,26 @@
-name: JP_INFOGADGET
-tableName: jp_infogadget
-primaryKey: jp_infogadget_id
-fields:
-- name: jp_infogadget_id
-  type: numeric
-  label: Jp Infogadget Id
-- name: jp_infogadget_uu
-  type: text
-  label: Jp Infogadget Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: jp_infogadgetcategory_id
-  type: numeric
-  label: Jp Infogadgetcategory Id
-- name: html
-  type: text
-  label: Html
-- name: date1
-  type: text
-  label: Date1
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: iscollapsedbydefault
-  type: text
-  label: Iscollapsedbydefault
-- name: publishstatus
-  type: text
-  label: Publishstatus
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
+entities:
+  jp_infogadget:
+    table: jp_infogadget
+    key: jp_infogadget_id
+    displayName: JP_INFOGADGET
+    columns:
+      jp_infogadget_id: {type: decimal, identity: true}
+      jp_infogadget_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      jp_infogadgetcategory_id: {type: decimal}
+      html: {type: string}
+      date1: {type: string}
+      datefrom: {type: string}
+      dateto: {type: string}
+      iscollapsedbydefault: {type: string}
+      publishstatus: {type: string}
+      ad_user_id: {type: decimal}

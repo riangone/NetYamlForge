@@ -1,100 +1,38 @@
-name: I_CORPORATIONJP
-tableName: i_corporationjp
-primaryKey: i_corporationjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: i_corporationjp_id
-  type: numeric
-  label: I Corporationjp Id
-- name: i_corporationjp_uu
-  type: text
-  label: I Corporationjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: bpvalue
-  type: text
-  label: Bpvalue
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: description
-  type: text
-  label: Description
-- name: duns
-  type: text
-  label: Duns
-- name: jp_cm_corptype_id
-  type: numeric
-  label: Jp Cm Corptype Id
-- name: jp_cm_corptype_value
-  type: text
-  label: Jp Cm Corptype Value
-- name: jp_corptype_id
-  type: numeric
-  label: Jp Corptype Id
-- name: jp_corptype_value
-  type: text
-  label: Jp Corptype Value
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: jp_greeting_name
-  type: text
-  label: Jp Greeting Name
-- name: jp_capital
-  type: numeric
-  label: Jp Capital
-- name: url
-  type: text
-  label: Url
-- name: jp_industrytype_id
-  type: numeric
-  label: Jp Industrytype Id
-- name: jp_industrytype_value
-  type: text
-  label: Jp Industrytype Value
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
+entities:
+  i_corporationjp:
+    table: i_corporationjp
+    key: i_corporationjp_id
+    displayName: I_CORPORATIONJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      jp_corporation_id: {type: decimal}
+      i_corporationjp_id: {type: decimal, identity: true}
+      i_corporationjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      bpvalue: {type: string}
+      value: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      description: {type: string}
+      duns: {type: string}
+      jp_cm_corptype_id: {type: decimal}
+      jp_cm_corptype_value: {type: string}
+      jp_corptype_id: {type: decimal}
+      jp_corptype_value: {type: string}
+      c_greeting_id: {type: decimal}
+      jp_greeting_name: {type: string}
+      jp_capital: {type: decimal}
+      url: {type: string}
+      jp_industrytype_id: {type: decimal}
+      jp_industrytype_value: {type: string}
+      jp_org_value: {type: string}

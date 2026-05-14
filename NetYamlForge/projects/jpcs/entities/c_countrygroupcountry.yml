@@ -1,43 +1,19 @@
-name: C_COUNTRYGROUPCOUNTRY
-tableName: c_countrygroupcountry
-primaryKey: c_countrygroupcountry_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_countrygroupcountry_id
-  type: numeric
-  label: C Countrygroupcountry Id
-- name: c_countrygroupcountry_uu
-  type: text
-  label: C Countrygroupcountry Uu
-- name: c_countrygroup_id
-  type: numeric
-  label: C Countrygroup Id
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  c_countrygroupcountry:
+    table: c_countrygroupcountry
+    key: c_countrygroupcountry_id
+    displayName: C_COUNTRYGROUPCOUNTRY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_countrygroupcountry_id: {type: decimal, identity: true}
+      c_countrygroupcountry_uu: {type: string}
+      c_countrygroup_id: {type: decimal}
+      c_country_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datefrom: {type: string}
+      dateto: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

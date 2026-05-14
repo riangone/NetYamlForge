@@ -1,43 +1,19 @@
-name: C_REGION
-tableName: c_region
-primaryKey: c_region_id
-fields:
-- name: c_region_id
-  type: numeric
-  label: C Region Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: c_region_uu
-  type: text
-  label: C Region Uu
+entities:
+  c_region:
+    table: c_region
+    key: c_region_id
+    displayName: C_REGION
+    columns:
+      c_region_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_country_id: {type: decimal}
+      isdefault: {type: string}
+      c_region_uu: {type: string}

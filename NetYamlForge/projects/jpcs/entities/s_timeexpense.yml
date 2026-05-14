@@ -1,67 +1,27 @@
-name: S_TIMEEXPENSE
-tableName: s_timeexpense
-primaryKey: s_timeexpense_id
-fields:
-- name: s_timeexpense_id
-  type: numeric
-  label: S Timeexpense Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: datereport
-  type: text
-  label: Datereport
-- name: description
-  type: text
-  label: Description
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: approvalamt
-  type: numeric
-  label: Approvalamt
-- name: s_timeexpense_uu
-  type: text
-  label: S Timeexpense Uu
+entities:
+  s_timeexpense:
+    table: s_timeexpense
+    key: s_timeexpense_id
+    displayName: S_TIMEEXPENSE
+    columns:
+      s_timeexpense_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      c_bpartner_id: {type: decimal}
+      datereport: {type: string}
+      description: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      m_pricelist_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      isapproved: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      approvalamt: {type: decimal}
+      s_timeexpense_uu: {type: string}

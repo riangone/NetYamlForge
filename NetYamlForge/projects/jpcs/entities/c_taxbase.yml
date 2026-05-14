@@ -1,49 +1,21 @@
-name: C_TAXBASE
-tableName: c_taxbase
-primaryKey: c_taxbase_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: base
-  type: text
-  label: Base
-- name: c_taxbase_id
-  type: numeric
-  label: C Taxbase Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: percentage
-  type: numeric
-  label: Percentage
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: value
-  type: text
-  label: Value
-- name: c_taxbase_uu
-  type: text
-  label: C Taxbase Uu
+entities:
+  c_taxbase:
+    table: c_taxbase
+    key: c_taxbase_id
+    displayName: C_TAXBASE
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      base: {type: string}
+      c_taxbase_id: {type: decimal, identity: true}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      percentage: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_client_id: {type: decimal}
+      value: {type: string}
+      c_taxbase_uu: {type: string}

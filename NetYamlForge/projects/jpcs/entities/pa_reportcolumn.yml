@@ -1,181 +1,65 @@
-name: PA_REPORTCOLUMN
-tableName: pa_reportcolumn
-primaryKey: pa_reportcolumn_id
-fields:
-- name: pa_reportcolumn_id
-  type: numeric
-  label: Pa Reportcolumn Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pa_reportcolumnset_id
-  type: numeric
-  label: Pa Reportcolumnset Id
-- name: name
-  type: text
-  label: Name
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: description
-  type: text
-  label: Description
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_budget_id
-  type: numeric
-  label: Gl Budget Id
-- name: columntype
-  type: text
-  label: Columntype
-- name: relativeperiod
-  type: numeric
-  label: Relativeperiod
-- name: currencytype
-  type: text
-  label: Currencytype
-- name: calculationtype
-  type: text
-  label: Calculationtype
-- name: amounttype
-  type: text
-  label: Amounttype
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: isadhocconversion
-  type: text
-  label: Isadhocconversion
-- name: oper_1_id
-  type: numeric
-  label: Oper 1 Id
-- name: oper_2_id
-  type: numeric
-  label: Oper 2 Id
-- name: elementtype
-  type: text
-  label: Elementtype
-- name: org_id
-  type: numeric
-  label: Org Id
-- name: c_elementvalue_id
-  type: numeric
-  label: C Elementvalue Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: userelement1_id
-  type: numeric
-  label: Userelement1 Id
-- name: userelement2_id
-  type: numeric
-  label: Userelement2 Id
-- name: isincludenullsorg
-  type: text
-  label: Isincludenullsorg
-- name: isincludenullselementvalue
-  type: text
-  label: Isincludenullselementvalue
-- name: isincludenullsbpartner
-  type: text
-  label: Isincludenullsbpartner
-- name: isincludenullsproduct
-  type: text
-  label: Isincludenullsproduct
-- name: isincludenullslocation
-  type: text
-  label: Isincludenullslocation
-- name: isincludenullsproject
-  type: text
-  label: Isincludenullsproject
-- name: isincludenullssalesregion
-  type: text
-  label: Isincludenullssalesregion
-- name: isincludenullsactivity
-  type: text
-  label: Isincludenullsactivity
-- name: isincludenullscampaign
-  type: text
-  label: Isincludenullscampaign
-- name: isincludenullsuserelement1
-  type: text
-  label: Isincludenullsuserelement1
-- name: isincludenullsuserelement2
-  type: text
-  label: Isincludenullsuserelement2
-- name: factor
-  type: text
-  label: Factor
-- name: formatpattern
-  type: text
-  label: Formatpattern
-- name: isincludenullsorgtrx
-  type: text
-  label: Isincludenullsorgtrx
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: paperiodtype
-  type: text
-  label: Paperiodtype
-- name: paamounttype
-  type: text
-  label: Paamounttype
-- name: pa_reportcolumn_uu
-  type: text
-  label: Pa Reportcolumn Uu
-- name: oper_2_linename
-  type: text
-  label: Oper 2 Linename
-- name: isallowoppositesign
-  type: text
-  label: Isallowoppositesign
-- name: relativeperiodto
-  type: numeric
-  label: Relativeperiodto
-- name: roundfactor
-  type: numeric
-  label: Roundfactor
-- name: multiplier
-  type: numeric
-  label: Multiplier
+entities:
+  pa_reportcolumn:
+    table: pa_reportcolumn
+    key: pa_reportcolumn_id
+    displayName: PA_REPORTCOLUMN
+    columns:
+      pa_reportcolumn_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pa_reportcolumnset_id: {type: decimal}
+      name: {type: string}
+      seqno: {type: decimal}
+      description: {type: string}
+      isprinted: {type: string}
+      postingtype: {type: string}
+      gl_budget_id: {type: decimal}
+      columntype: {type: string}
+      relativeperiod: {type: decimal}
+      currencytype: {type: string}
+      calculationtype: {type: string}
+      amounttype: {type: string}
+      c_currency_id: {type: decimal}
+      isadhocconversion: {type: string}
+      oper_1_id: {type: decimal}
+      oper_2_id: {type: decimal}
+      elementtype: {type: string}
+      org_id: {type: decimal}
+      c_elementvalue_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      m_product_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_location_id: {type: decimal}
+      c_salesregion_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      userelement1_id: {type: decimal}
+      userelement2_id: {type: decimal}
+      isincludenullsorg: {type: string}
+      isincludenullselementvalue: {type: string}
+      isincludenullsbpartner: {type: string}
+      isincludenullsproduct: {type: string}
+      isincludenullslocation: {type: string}
+      isincludenullsproject: {type: string}
+      isincludenullssalesregion: {type: string}
+      isincludenullsactivity: {type: string}
+      isincludenullscampaign: {type: string}
+      isincludenullsuserelement1: {type: string}
+      isincludenullsuserelement2: {type: string}
+      factor: {type: string}
+      formatpattern: {type: string}
+      isincludenullsorgtrx: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      paperiodtype: {type: string}
+      paamounttype: {type: string}
+      pa_reportcolumn_uu: {type: string}
+      oper_2_linename: {type: string}
+      isallowoppositesign: {type: string}
+      relativeperiodto: {type: decimal}
+      roundfactor: {type: decimal}
+      multiplier: {type: decimal}

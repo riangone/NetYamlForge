@@ -1,82 +1,32 @@
-name: C_CASHPLAN
-tableName: c_cashplan
-primaryKey: c_cashplan_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: cashflowtype
-  type: text
-  label: Cashflowtype
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_cashplan_id
-  type: numeric
-  label: C Cashplan Id
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: description
-  type: text
-  label: Description
-- name: documentno
-  type: text
-  label: Documentno
-- name: generateperiodic
-  type: text
-  label: Generateperiodic
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: isactive
-  type: text
-  label: Isactive
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: processed
-  type: text
-  label: Processed
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: c_cashplan_uu
-  type: text
-  label: C Cashplan Uu
+entities:
+  c_cashplan:
+    table: c_cashplan
+    key: c_cashplan_id
+    displayName: C_CASHPLAN
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      cashflowtype: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_cashplan_id: {type: decimal, identity: true}
+      copyfrom: {type: string}
+      c_project_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datedoc: {type: string}
+      description: {type: string}
+      documentno: {type: string}
+      generateperiodic: {type: string}
+      grandtotal: {type: decimal}
+      isactive: {type: string}
+      isapproved: {type: string}
+      issotrx: {type: string}
+      processed: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      c_cashplan_uu: {type: string}

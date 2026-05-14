@@ -1,67 +1,27 @@
-name: M_WAREHOUSE
-tableName: m_warehouse
-primaryKey: m_warehouse_id
-fields:
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: separator
-  type: text
-  label: Separator
-- name: m_warehousesource_id
-  type: numeric
-  label: M Warehousesource Id
-- name: replenishmentclass
-  type: text
-  label: Replenishmentclass
-- name: isintransit
-  type: text
-  label: Isintransit
-- name: isdisallownegativeinv
-  type: text
-  label: Isdisallownegativeinv
-- name: m_warehouse_uu
-  type: text
-  label: M Warehouse Uu
-- name: m_reservelocator_id
-  type: numeric
-  label: M Reservelocator Id
-- name: jp_physicalwarehouse_id
-  type: numeric
-  label: Jp Physicalwarehouse Id
-- name: isdisableinventorypopup
-  type: text
-  label: Isdisableinventorypopup
+entities:
+  m_warehouse:
+    table: m_warehouse
+    key: m_warehouse_id
+    displayName: M_WAREHOUSE
+    columns:
+      m_warehouse_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      c_location_id: {type: decimal}
+      separator: {type: string}
+      m_warehousesource_id: {type: decimal}
+      replenishmentclass: {type: string}
+      isintransit: {type: string}
+      isdisallownegativeinv: {type: string}
+      m_warehouse_uu: {type: string}
+      m_reservelocator_id: {type: decimal}
+      jp_physicalwarehouse_id: {type: decimal}
+      isdisableinventorypopup: {type: string}

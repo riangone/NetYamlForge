@@ -1,49 +1,21 @@
-name: JP_CONTRACTPROCPERIODG
-tableName: jp_contractprocperiodg
-primaryKey: jp_contractprocperiodg_id
-fields:
-- name: jp_contractprocperiodg_id
-  type: numeric
-  label: Jp Contractprocperiodg Id
-- name: jp_contractprocperiodg_uu
-  type: text
-  label: Jp Contractprocperiodg Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractcalender_id
-  type: numeric
-  label: Jp Contractcalender Id
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: processing
-  type: text
-  label: Processing
-- name: jp_contractprocessvalue
-  type: text
-  label: Jp Contractprocessvalue
+entities:
+  jp_contractprocperiodg:
+    table: jp_contractprocperiodg
+    key: jp_contractprocperiodg_id
+    displayName: JP_CONTRACTPROCPERIODG
+    columns:
+      jp_contractprocperiodg_id: {type: decimal, identity: true}
+      jp_contractprocperiodg_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractcalender_id: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      processing: {type: string}
+      jp_contractprocessvalue: {type: string}

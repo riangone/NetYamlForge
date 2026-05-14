@@ -1,67 +1,27 @@
-name: C_COMMISSION
-tableName: c_commission
-primaryKey: c_commission_id
-fields:
-- name: c_commission_id
-  type: numeric
-  label: C Commission Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: docbasistype
-  type: text
-  label: Docbasistype
-- name: listdetails
-  type: text
-  label: Listdetails
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: processing
-  type: text
-  label: Processing
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_commission_uu
-  type: text
-  label: C Commission Uu
-- name: m_product_id
-  type: numeric
-  label: M Product Id
+entities:
+  c_commission:
+    table: c_commission
+    key: c_commission_id
+    displayName: C_COMMISSION
+    columns:
+      c_commission_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      frequencytype: {type: string}
+      docbasistype: {type: string}
+      listdetails: {type: string}
+      datelastrun: {type: string}
+      createfrom: {type: string}
+      processing: {type: string}
+      c_charge_id: {type: decimal}
+      c_commission_uu: {type: string}
+      m_product_id: {type: decimal}

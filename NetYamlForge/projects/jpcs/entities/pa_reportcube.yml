@@ -1,97 +1,37 @@
-name: PA_REPORTCUBE
-tableName: pa_reportcube
-primaryKey: pa_reportcube_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: isactivitydim
-  type: text
-  label: Isactivitydim
-- name: isbpartnerdim
-  type: text
-  label: Isbpartnerdim
-- name: iscampaigndim
-  type: text
-  label: Iscampaigndim
-- name: isglbudgetdim
-  type: text
-  label: Isglbudgetdim
-- name: islocfromdim
-  type: text
-  label: Islocfromdim
-- name: isloctodim
-  type: text
-  label: Isloctodim
-- name: isorgtrxdim
-  type: text
-  label: Isorgtrxdim
-- name: isproductdim
-  type: text
-  label: Isproductdim
-- name: isprojectdim
-  type: text
-  label: Isprojectdim
-- name: isprojectphasedim
-  type: text
-  label: Isprojectphasedim
-- name: isprojecttaskdim
-  type: text
-  label: Isprojecttaskdim
-- name: issalesregiondim
-  type: text
-  label: Issalesregiondim
-- name: issubacctdim
-  type: text
-  label: Issubacctdim
-- name: isuser1dim
-  type: text
-  label: Isuser1Dim
-- name: isuser2dim
-  type: text
-  label: Isuser2Dim
-- name: name
-  type: text
-  label: Name
-- name: pa_reportcube_id
-  type: numeric
-  label: Pa Reportcube Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: processing
-  type: text
-  label: Processing
-- name: lastrecalculated
-  type: text
-  label: Lastrecalculated
-- name: isuserelement2dim
-  type: text
-  label: Isuserelement2Dim
-- name: isuserelement1dim
-  type: text
-  label: Isuserelement1Dim
-- name: pa_reportcube_uu
-  type: text
-  label: Pa Reportcube Uu
+entities:
+  pa_reportcube:
+    table: pa_reportcube
+    key: pa_reportcube_id
+    displayName: PA_REPORTCUBE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_calendar_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      isactivitydim: {type: string}
+      isbpartnerdim: {type: string}
+      iscampaigndim: {type: string}
+      isglbudgetdim: {type: string}
+      islocfromdim: {type: string}
+      isloctodim: {type: string}
+      isorgtrxdim: {type: string}
+      isproductdim: {type: string}
+      isprojectdim: {type: string}
+      isprojectphasedim: {type: string}
+      isprojecttaskdim: {type: string}
+      issalesregiondim: {type: string}
+      issubacctdim: {type: string}
+      isuser1dim: {type: string}
+      isuser2dim: {type: string}
+      name: {type: string}
+      pa_reportcube_id: {type: decimal, identity: true}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      processing: {type: string}
+      lastrecalculated: {type: string}
+      isuserelement2dim: {type: string}
+      isuserelement1dim: {type: string}
+      pa_reportcube_uu: {type: string}

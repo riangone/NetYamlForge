@@ -1,61 +1,25 @@
-name: C_CHARGE
-tableName: c_charge
-primaryKey: c_charge_id
-fields:
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: chargeamt
-  type: numeric
-  label: Chargeamt
-- name: issametax
-  type: text
-  label: Issametax
-- name: issamecurrency
-  type: text
-  label: Issamecurrency
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_chargetype_id
-  type: numeric
-  label: C Chargetype Id
-- name: c_charge_uu
-  type: text
-  label: C Charge Uu
-- name: isexcludedfromdiscount
-  type: text
-  label: Isexcludedfromdiscount
+entities:
+  c_charge:
+    table: c_charge
+    key: c_charge_id
+    displayName: C_CHARGE
+    columns:
+      c_charge_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      chargeamt: {type: decimal}
+      issametax: {type: string}
+      issamecurrency: {type: string}
+      c_taxcategory_id: {type: decimal}
+      istaxincluded: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_chargetype_id: {type: decimal}
+      c_charge_uu: {type: string}
+      isexcludedfromdiscount: {type: string}

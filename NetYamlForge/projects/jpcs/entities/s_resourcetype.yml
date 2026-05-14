@@ -1,91 +1,35 @@
-name: S_RESOURCETYPE
-tableName: s_resourcetype
-primaryKey: s_resourcetype_id
-fields:
-- name: s_resourcetype_id
-  type: numeric
-  label: S Resourcetype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: issingleassignment
-  type: text
-  label: Issingleassignment
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: allowuomfractions
-  type: text
-  label: Allowuomfractions
-- name: timeslotstart
-  type: text
-  label: Timeslotstart
-- name: timeslotend
-  type: text
-  label: Timeslotend
-- name: istimeslot
-  type: text
-  label: Istimeslot
-- name: isdateslot
-  type: text
-  label: Isdateslot
-- name: onsunday
-  type: text
-  label: Onsunday
-- name: onmonday
-  type: text
-  label: Onmonday
-- name: ontuesday
-  type: text
-  label: Ontuesday
-- name: onwednesday
-  type: text
-  label: Onwednesday
-- name: onthursday
-  type: text
-  label: Onthursday
-- name: onfriday
-  type: text
-  label: Onfriday
-- name: onsaturday
-  type: text
-  label: Onsaturday
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: chargeableqty
-  type: numeric
-  label: Chargeableqty
-- name: s_resourcetype_uu
-  type: text
-  label: S Resourcetype Uu
+entities:
+  s_resourcetype:
+    table: s_resourcetype
+    key: s_resourcetype_id
+    displayName: S_RESOURCETYPE
+    columns:
+      s_resourcetype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      issingleassignment: {type: string}
+      c_uom_id: {type: decimal}
+      allowuomfractions: {type: string}
+      timeslotstart: {type: string}
+      timeslotend: {type: string}
+      istimeslot: {type: string}
+      isdateslot: {type: string}
+      onsunday: {type: string}
+      onmonday: {type: string}
+      ontuesday: {type: string}
+      onwednesday: {type: string}
+      onthursday: {type: string}
+      onfriday: {type: string}
+      onsaturday: {type: string}
+      m_product_category_id: {type: decimal}
+      c_taxcategory_id: {type: decimal}
+      chargeableqty: {type: decimal}
+      s_resourcetype_uu: {type: string}

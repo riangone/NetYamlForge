@@ -1,58 +1,24 @@
-name: HR_CONTRACT
-tableName: hr_contract
-primaryKey: hr_contract_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hr_contract_id
-  type: numeric
-  label: Hr Contract Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: netdays
-  type: numeric
-  label: Netdays
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: value
-  type: text
-  label: Value
-- name: hr_contract_uu
-  type: text
-  label: Hr Contract Uu
+entities:
+  hr_contract:
+    table: hr_contract
+    key: hr_contract_id
+    displayName: HR_CONTRACT
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_project_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hr_contract_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      netdays: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      ad_client_id: {type: decimal}
+      value: {type: string}
+      hr_contract_uu: {type: string}

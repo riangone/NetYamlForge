@@ -1,55 +1,23 @@
-name: AD_WORKBENCHWINDOW
-tableName: ad_workbenchwindow
-primaryKey: ad_workbenchwindow_id
-fields:
-- name: ad_workbenchwindow_id
-  type: numeric
-  label: Ad Workbenchwindow Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_workbench_id
-  type: numeric
-  label: Ad Workbench Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: isprimary
-  type: text
-  label: Isprimary
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_task_id
-  type: numeric
-  label: Ad Task Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_workbenchwindow_uu
-  type: text
-  label: Ad Workbenchwindow Uu
+entities:
+  ad_workbenchwindow:
+    table: ad_workbenchwindow
+    key: ad_workbenchwindow_id
+    displayName: AD_WORKBENCHWINDOW
+    columns:
+      ad_workbenchwindow_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_workbench_id: {type: decimal}
+      seqno: {type: decimal}
+      isprimary: {type: string}
+      ad_window_id: {type: decimal}
+      ad_form_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_task_id: {type: decimal}
+      entitytype: {type: string}
+      ad_workbenchwindow_uu: {type: string}

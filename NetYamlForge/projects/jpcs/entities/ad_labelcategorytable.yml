@@ -1,40 +1,18 @@
-name: AD_LABELCATEGORYTABLE
-tableName: ad_labelcategorytable
-primaryKey: ad_labelcategorytable_id
-fields:
-- name: ad_labelcategorytable_id
-  type: numeric
-  label: Ad Labelcategorytable Id
-- name: ad_labelcategorytable_uu
-  type: text
-  label: Ad Labelcategorytable Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: description
-  type: text
-  label: Description
-- name: ad_labelcategory_id
-  type: numeric
-  label: Ad Labelcategory Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
+entities:
+  ad_labelcategorytable:
+    table: ad_labelcategorytable
+    key: ad_labelcategorytable_id
+    displayName: AD_LABELCATEGORYTABLE
+    columns:
+      ad_labelcategorytable_id: {type: decimal, identity: true}
+      ad_labelcategorytable_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      description: {type: string}
+      ad_labelcategory_id: {type: decimal}
+      ad_table_id: {type: decimal}

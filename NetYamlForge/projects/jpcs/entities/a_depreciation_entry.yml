@@ -1,85 +1,33 @@
-name: A_DEPRECIATION_ENTRY
-tableName: a_depreciation_entry
-primaryKey: a_depreciation_entry_id
-fields:
-- name: a_depreciation_entry_id
-  type: numeric
-  label: A Depreciation Entry Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: a_entry_type
-  type: text
-  label: A Entry Type
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: documentno
-  type: text
-  label: Documentno
-- name: isactive
-  type: text
-  label: Isactive
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: description
-  type: text
-  label: Description
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: created
-  type: text
-  label: Created
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_depreciation_entry_uu
-  type: text
-  label: A Depreciation Entry Uu
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: posted
-  type: text
-  label: Posted
-- name: processedon
-  type: numeric
-  label: Processedon
+entities:
+  a_depreciation_entry:
+    table: a_depreciation_entry
+    key: a_depreciation_entry_id
+    displayName: A_DEPRECIATION_ENTRY
+    columns:
+      a_depreciation_entry_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      a_entry_type: {type: string}
+      c_currency_id: {type: decimal}
+      c_period_id: {type: decimal}
+      createdby: {type: decimal}
+      datedoc: {type: string}
+      documentno: {type: string}
+      isactive: {type: string}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      postingtype: {type: string}
+      gl_category_id: {type: decimal}
+      description: {type: string}
+      dateacct: {type: string}
+      created: {type: string}
+      c_doctype_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_depreciation_entry_uu: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      isapproved: {type: string}
+      posted: {type: string}
+      processedon: {type: decimal}

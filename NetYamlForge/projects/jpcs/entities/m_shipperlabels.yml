@@ -1,46 +1,20 @@
-name: M_SHIPPERLABELS
-tableName: m_shipperlabels
-primaryKey: m_shipperlabels_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: labelprintmethod
-  type: text
-  label: Labelprintmethod
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: m_shipperlabels_id
-  type: numeric
-  label: M Shipperlabels Id
-- name: m_shipperlabels_uu
-  type: text
-  label: M Shipperlabels Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_shipperlabelscfg_id
-  type: numeric
-  label: M Shipperlabelscfg Id
-- name: name
-  type: text
-  label: Name
+entities:
+  m_shipperlabels:
+    table: m_shipperlabels
+    key: m_shipperlabels_id
+    displayName: M_SHIPPERLABELS
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isdefault: {type: string}
+      labelprintmethod: {type: string}
+      m_shipper_id: {type: decimal}
+      m_shipperlabels_id: {type: decimal, identity: true}
+      m_shipperlabels_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_shipperlabelscfg_id: {type: decimal}
+      name: {type: string}

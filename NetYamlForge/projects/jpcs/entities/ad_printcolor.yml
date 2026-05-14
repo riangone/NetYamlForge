@@ -1,40 +1,18 @@
-name: AD_PRINTCOLOR
-tableName: ad_printcolor
-primaryKey: ad_printcolor_id
-fields:
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: code
-  type: text
-  label: Code
-- name: ad_printcolor_uu
-  type: text
-  label: Ad Printcolor Uu
+entities:
+  ad_printcolor:
+    table: ad_printcolor
+    key: ad_printcolor_id
+    displayName: AD_PRINTCOLOR
+    columns:
+      ad_printcolor_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      isdefault: {type: string}
+      code: {type: string}
+      ad_printcolor_uu: {type: string}

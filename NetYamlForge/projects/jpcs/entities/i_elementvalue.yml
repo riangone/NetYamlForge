@@ -1,97 +1,37 @@
-name: I_ELEMENTVALUE
-tableName: i_elementvalue
-primaryKey: i_elementvalue_id
-fields:
-- name: i_elementvalue_id
-  type: numeric
-  label: I Elementvalue Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: created
-  type: text
-  label: Created
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: c_element_id
-  type: numeric
-  label: C Element Id
-- name: elementname
-  type: text
-  label: Elementname
-- name: c_elementvalue_id
-  type: numeric
-  label: C Elementvalue Id
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: accounttype
-  type: text
-  label: Accounttype
-- name: accountsign
-  type: text
-  label: Accountsign
-- name: isdoccontrolled
-  type: text
-  label: Isdoccontrolled
-- name: issummary
-  type: text
-  label: Issummary
-- name: parentvalue
-  type: text
-  label: Parentvalue
-- name: parentelementvalue_id
-  type: numeric
-  label: Parentelementvalue Id
-- name: postactual
-  type: text
-  label: Postactual
-- name: postbudget
-  type: text
-  label: Postbudget
-- name: poststatistical
-  type: text
-  label: Poststatistical
-- name: postencumbrance
-  type: text
-  label: Postencumbrance
-- name: default_account
-  type: text
-  label: Default Account
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_elementvalue_uu
-  type: text
-  label: I Elementvalue Uu
+entities:
+  i_elementvalue:
+    table: i_elementvalue
+    key: i_elementvalue_id
+    displayName: I_ELEMENTVALUE
+    columns:
+      i_elementvalue_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      createdby: {type: decimal}
+      created: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      c_element_id: {type: decimal}
+      elementname: {type: string}
+      c_elementvalue_id: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      accounttype: {type: string}
+      accountsign: {type: string}
+      isdoccontrolled: {type: string}
+      issummary: {type: string}
+      parentvalue: {type: string}
+      parentelementvalue_id: {type: decimal}
+      postactual: {type: string}
+      postbudget: {type: string}
+      poststatistical: {type: string}
+      postencumbrance: {type: string}
+      default_account: {type: string}
+      ad_column_id: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      i_elementvalue_uu: {type: string}

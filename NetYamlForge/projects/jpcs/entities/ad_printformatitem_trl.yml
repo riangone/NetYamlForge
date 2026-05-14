@@ -1,46 +1,20 @@
-name: AD_PRINTFORMATITEM_TRL
-tableName: ad_printformatitem_trl
-primaryKey: ad_printformatitem_id
-fields:
-- name: ad_printformatitem_id
-  type: numeric
-  label: Ad Printformatitem Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: printname
-  type: text
-  label: Printname
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: printnamesuffix
-  type: text
-  label: Printnamesuffix
-- name: ad_printformatitem_trl_uu
-  type: text
-  label: Ad Printformatitem Trl Uu
-- name: name
-  type: text
-  label: Name
+entities:
+  ad_printformatitem_trl:
+    table: ad_printformatitem_trl
+    key: ad_printformatitem_id
+    displayName: AD_PRINTFORMATITEM_TRL
+    columns:
+      ad_printformatitem_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      printname: {type: string}
+      istranslated: {type: string}
+      printnamesuffix: {type: string}
+      ad_printformatitem_trl_uu: {type: string}
+      name: {type: string}

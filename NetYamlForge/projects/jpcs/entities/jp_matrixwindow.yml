@@ -1,70 +1,28 @@
-name: JP_MATRIXWINDOW
-tableName: jp_matrixwindow
-primaryKey: jp_matrixwindow_id
-fields:
-- name: jp_matrixwindow_id
-  type: numeric
-  label: Jp Matrixwindow Id
-- name: jp_matrixwindow_uu
-  type: text
-  label: Jp Matrixwindow Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: jp_matrixcolumnkey_id
-  type: numeric
-  label: Jp Matrixcolumnkey Id
-- name: jp_matrixrowkey_id
-  type: numeric
-  label: Jp Matrixrowkey Id
-- name: fieldlength
-  type: numeric
-  label: Fieldlength
-- name: jp_quickentrywindow_id
-  type: numeric
-  label: Jp Quickentrywindow Id
-- name: jp_pagesize
-  type: numeric
-  label: Jp Pagesize
-- name: jp_quickentryconf
-  type: text
-  label: Jp Quickentryconf
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: jp_joinclause
-  type: text
-  label: Jp Joinclause
+entities:
+  jp_matrixwindow:
+    table: jp_matrixwindow
+    key: jp_matrixwindow_id
+    displayName: JP_MATRIXWINDOW
+    columns:
+      jp_matrixwindow_id: {type: decimal, identity: true}
+      jp_matrixwindow_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      ad_window_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      jp_matrixcolumnkey_id: {type: decimal}
+      jp_matrixrowkey_id: {type: decimal}
+      fieldlength: {type: decimal}
+      jp_quickentrywindow_id: {type: decimal}
+      jp_pagesize: {type: decimal}
+      jp_quickentryconf: {type: string}
+      whereclause: {type: string}
+      jp_joinclause: {type: string}

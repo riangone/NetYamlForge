@@ -1,70 +1,28 @@
-name: C_POSKEY
-tableName: c_poskey
-primaryKey: c_poskey_id
-fields:
-- name: c_poskey_id
-  type: numeric
-  label: C Poskey Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_poskeylayout_id
-  type: numeric
-  label: C Poskeylayout Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: c_poskey_uu
-  type: text
-  label: C Poskey Uu
-- name: subkeylayout_id
-  type: numeric
-  label: Subkeylayout Id
-- name: text
-  type: text
-  label: Text
-- name: spanx
-  type: numeric
-  label: Spanx
-- name: spany
-  type: numeric
-  label: Spany
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: ad_printfont_id
-  type: numeric
-  label: Ad Printfont Id
+entities:
+  c_poskey:
+    table: c_poskey
+    key: c_poskey_id
+    displayName: C_POSKEY
+    columns:
+      c_poskey_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_poskeylayout_id: {type: decimal}
+      seqno: {type: decimal}
+      m_product_id: {type: decimal}
+      qty: {type: decimal}
+      ad_printcolor_id: {type: decimal}
+      c_poskey_uu: {type: string}
+      subkeylayout_id: {type: decimal}
+      text: {type: string}
+      spanx: {type: decimal}
+      spany: {type: decimal}
+      ad_image_id: {type: decimal}
+      ad_printfont_id: {type: decimal}

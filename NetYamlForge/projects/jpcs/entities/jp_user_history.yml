@@ -1,64 +1,26 @@
-name: JP_USER_HISTORY
-tableName: jp_user_history
-primaryKey: jp_user_history_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_firstname
-  type: text
-  label: Jp Firstname
-- name: jp_firstname_kana
-  type: text
-  label: Jp Firstname Kana
-- name: jp_lastname
-  type: text
-  label: Jp Lastname
-- name: jp_lastname_kana
-  type: text
-  label: Jp Lastname Kana
-- name: jp_middlename
-  type: text
-  label: Jp Middlename
-- name: jp_middlename_kana
-  type: text
-  label: Jp Middlename Kana
-- name: jp_user_history_id
-  type: numeric
-  label: Jp User History Id
-- name: jp_user_history_uu
-  type: text
-  label: Jp User History Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_user_history:
+    table: jp_user_history
+    key: jp_user_history_id
+    displayName: JP_USER_HISTORY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datefrom: {type: string}
+      dateto: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      jp_firstname: {type: string}
+      jp_firstname_kana: {type: string}
+      jp_lastname: {type: string}
+      jp_lastname_kana: {type: string}
+      jp_middlename: {type: string}
+      jp_middlename_kana: {type: string}
+      jp_user_history_id: {type: decimal, identity: true}
+      jp_user_history_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

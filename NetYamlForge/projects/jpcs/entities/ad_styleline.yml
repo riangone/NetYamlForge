@@ -1,49 +1,21 @@
-name: AD_STYLELINE
-tableName: ad_styleline
-primaryKey: ad_styleline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_style_id
-  type: numeric
-  label: Ad Style Id
-- name: ad_styleline_id
-  type: numeric
-  label: Ad Styleline Id
-- name: ad_styleline_uu
-  type: text
-  label: Ad Styleline Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: inlinestyle
-  type: text
-  label: Inlinestyle
-- name: isactive
-  type: text
-  label: Isactive
-- name: line
-  type: numeric
-  label: Line
-- name: theme
-  type: text
-  label: Theme
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: entitytype
-  type: text
-  label: Entitytype
+entities:
+  ad_styleline:
+    table: ad_styleline
+    key: ad_styleline_id
+    displayName: AD_STYLELINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_style_id: {type: decimal}
+      ad_styleline_id: {type: decimal, identity: true}
+      ad_styleline_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      displaylogic: {type: string}
+      inlinestyle: {type: string}
+      isactive: {type: string}
+      line: {type: decimal}
+      theme: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      entitytype: {type: string}

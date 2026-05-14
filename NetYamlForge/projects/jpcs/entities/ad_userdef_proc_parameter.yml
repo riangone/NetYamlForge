@@ -1,100 +1,38 @@
-name: AD_USERDEF_PROC_PARAMETER
-tableName: ad_userdef_proc_parameter
-primaryKey: ad_userdef_proc_parameter_id
-fields:
-- name: ad_userdef_proc_parameter_id
-  type: numeric
-  label: Ad Userdef Proc Parameter Id
-- name: ad_userdef_proc_parameter_uu
-  type: text
-  label: Ad Userdef Proc Parameter Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_userdef_proc_id
-  type: numeric
-  label: Ad Userdef Proc Id
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isdisplayed
-  type: text
-  label: Isdisplayed
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: name
-  type: text
-  label: Name
-- name: readonlylogic
-  type: text
-  label: Readonlylogic
-- name: mandatorylogic
-  type: text
-  label: Mandatorylogic
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: defaultvalue2
-  type: text
-  label: Defaultvalue2
-- name: placeholder
-  type: text
-  label: Placeholder
-- name: placeholder2
-  type: text
-  label: Placeholder2
-- name: isrange
-  type: text
-  label: Isrange
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: valuemin
-  type: text
-  label: Valuemin
-- name: valuemax
-  type: text
-  label: Valuemax
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: vformat
-  type: text
-  label: Vformat
-- name: ad_fieldgroup_id
-  type: numeric
-  label: Ad Fieldgroup Id
+entities:
+  ad_userdef_proc_parameter:
+    table: ad_userdef_proc_parameter
+    key: ad_userdef_proc_parameter_id
+    displayName: AD_USERDEF_PROC_PARAMETER
+    columns:
+      ad_userdef_proc_parameter_id: {type: decimal, identity: true}
+      ad_userdef_proc_parameter_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_userdef_proc_id: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isdisplayed: {type: string}
+      displaylogic: {type: string}
+      defaultvalue: {type: string}
+      ad_process_para_id: {type: decimal}
+      name: {type: string}
+      readonlylogic: {type: string}
+      mandatorylogic: {type: string}
+      ad_reference_id: {type: decimal}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      defaultvalue2: {type: string}
+      placeholder: {type: string}
+      placeholder2: {type: string}
+      isrange: {type: string}
+      ismandatory: {type: string}
+      valuemin: {type: string}
+      valuemax: {type: string}
+      seqno: {type: decimal}
+      vformat: {type: string}
+      ad_fieldgroup_id: {type: decimal}

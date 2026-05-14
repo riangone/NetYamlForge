@@ -1,79 +1,31 @@
-name: A_ASSET_SPREAD
-tableName: a_asset_spread
-primaryKey: a_asset_spread_id
-fields:
-- name: a_asset_spread_id
-  type: numeric
-  label: A Asset Spread Id
-- name: description
-  type: text
-  label: Description
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: a_asset_spread_type
-  type: text
-  label: A Asset Spread Type
-- name: a_period_10
-  type: numeric
-  label: A Period 10
-- name: a_period_12
-  type: numeric
-  label: A Period 12
-- name: a_period_14
-  type: numeric
-  label: A Period 14
-- name: a_period_3
-  type: numeric
-  label: A Period 3
-- name: a_period_5
-  type: numeric
-  label: A Period 5
-- name: a_period_7
-  type: numeric
-  label: A Period 7
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: isactive
-  type: text
-  label: Isactive
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: created
-  type: text
-  label: Created
-- name: a_period_9
-  type: numeric
-  label: A Period 9
-- name: a_period_8
-  type: numeric
-  label: A Period 8
-- name: a_period_6
-  type: numeric
-  label: A Period 6
-- name: a_period_4
-  type: numeric
-  label: A Period 4
-- name: a_period_2
-  type: numeric
-  label: A Period 2
-- name: a_period_13
-  type: numeric
-  label: A Period 13
-- name: a_period_11
-  type: numeric
-  label: A Period 11
-- name: a_period_1
-  type: numeric
-  label: A Period 1
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_asset_spread_uu
-  type: text
-  label: A Asset Spread Uu
+entities:
+  a_asset_spread:
+    table: a_asset_spread
+    key: a_asset_spread_id
+    displayName: A_ASSET_SPREAD
+    columns:
+      a_asset_spread_id: {type: decimal, identity: true}
+      description: {type: string}
+      ad_client_id: {type: decimal}
+      a_asset_spread_type: {type: string}
+      a_period_10: {type: decimal}
+      a_period_12: {type: decimal}
+      a_period_14: {type: decimal}
+      a_period_3: {type: decimal}
+      a_period_5: {type: decimal}
+      a_period_7: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      isactive: {type: string}
+      createdby: {type: decimal}
+      created: {type: string}
+      a_period_9: {type: decimal}
+      a_period_8: {type: decimal}
+      a_period_6: {type: decimal}
+      a_period_4: {type: decimal}
+      a_period_2: {type: decimal}
+      a_period_13: {type: decimal}
+      a_period_11: {type: decimal}
+      a_period_1: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_asset_spread_uu: {type: string}

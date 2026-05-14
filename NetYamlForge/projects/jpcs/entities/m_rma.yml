@@ -1,112 +1,42 @@
-name: M_RMA
-tableName: m_rma
-primaryKey: m_rma_id
-fields:
-- name: m_rma_id
-  type: numeric
-  label: M Rma Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: inout_id
-  type: numeric
-  label: Inout Id
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: amt
-  type: numeric
-  label: Amt
-- name: m_rmatype_id
-  type: numeric
-  label: M Rmatype Id
-- name: help
-  type: text
-  label: Help
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: generateto
-  type: text
-  label: Generateto
-- name: ref_rma_id
-  type: numeric
-  label: Ref Rma Id
-- name: m_rma_uu
-  type: text
-  label: M Rma Uu
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_order_id
-  type: numeric
-  label: Jp Order Id
-- name: jp_rma_acceptance_date
-  type: text
-  label: Jp Rma Acceptance Date
-- name: createlinesfrom
-  type: text
-  label: Createlinesfrom
+entities:
+  m_rma:
+    table: m_rma
+    key: m_rma_id
+    displayName: M_RMA
+    columns:
+      m_rma_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      name: {type: string}
+      description: {type: string}
+      inout_id: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      c_order_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      docaction: {type: string}
+      docstatus: {type: string}
+      isapproved: {type: string}
+      amt: {type: decimal}
+      m_rmatype_id: {type: decimal}
+      help: {type: string}
+      c_currency_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      issotrx: {type: string}
+      generateto: {type: string}
+      ref_rma_id: {type: decimal}
+      m_rma_uu: {type: string}
+      createfrom: {type: string}
+      jp_contract_id: {type: decimal}
+      jp_contractcontent_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_order_id: {type: decimal}
+      jp_rma_acceptance_date: {type: string}
+      createlinesfrom: {type: string}

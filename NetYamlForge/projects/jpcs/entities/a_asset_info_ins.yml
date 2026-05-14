@@ -1,55 +1,23 @@
-name: A_ASSET_INFO_INS
-tableName: a_asset_info_ins
-primaryKey: a_asset_info_ins_id
-fields:
-- name: a_asset_info_ins_id
-  type: numeric
-  label: A Asset Info Ins Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_ins_value
-  type: numeric
-  label: A Ins Value
-- name: a_policy_no
-  type: text
-  label: A Policy No
-- name: a_replace_cost
-  type: numeric
-  label: A Replace Cost
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: text
-  type: text
-  label: Text
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: a_renewal_date
-  type: text
-  label: A Renewal Date
-- name: a_insurance_co
-  type: text
-  label: A Insurance Co
-- name: a_ins_premium
-  type: numeric
-  label: A Ins Premium
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: a_asset_info_ins_uu
-  type: text
-  label: A Asset Info Ins Uu
+entities:
+  a_asset_info_ins:
+    table: a_asset_info_ins
+    key: a_asset_info_ins_id
+    displayName: A_ASSET_INFO_INS
+    columns:
+      a_asset_info_ins_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_ins_value: {type: decimal}
+      a_policy_no: {type: string}
+      a_replace_cost: {type: decimal}
+      createdby: {type: decimal}
+      text: {type: string}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      isactive: {type: string}
+      created: {type: string}
+      a_renewal_date: {type: string}
+      a_insurance_co: {type: string}
+      a_ins_premium: {type: decimal}
+      a_asset_id: {type: decimal}
+      a_asset_info_ins_uu: {type: string}

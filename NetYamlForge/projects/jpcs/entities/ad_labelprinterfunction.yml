@@ -1,52 +1,22 @@
-name: AD_LABELPRINTERFUNCTION
-tableName: ad_labelprinterfunction
-primaryKey: ad_labelprinterfunction_id
-fields:
-- name: ad_labelprinterfunction_id
-  type: numeric
-  label: Ad Labelprinterfunction Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_labelprinter_id
-  type: numeric
-  label: Ad Labelprinter Id
-- name: functionprefix
-  type: text
-  label: Functionprefix
-- name: functionsuffix
-  type: text
-  label: Functionsuffix
-- name: isxyposition
-  type: text
-  label: Isxyposition
-- name: xyseparator
-  type: text
-  label: Xyseparator
-- name: ad_labelprinterfunction_uu
-  type: text
-  label: Ad Labelprinterfunction Uu
+entities:
+  ad_labelprinterfunction:
+    table: ad_labelprinterfunction
+    key: ad_labelprinterfunction_id
+    displayName: AD_LABELPRINTERFUNCTION
+    columns:
+      ad_labelprinterfunction_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_labelprinter_id: {type: decimal}
+      functionprefix: {type: string}
+      functionsuffix: {type: string}
+      isxyposition: {type: string}
+      xyseparator: {type: string}
+      ad_labelprinterfunction_uu: {type: string}

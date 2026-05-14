@@ -1,214 +1,76 @@
-name: AD_PRINTFORMATITEM
-tableName: ad_printformatitem
-primaryKey: ad_printformatitem_id
-fields:
-- name: ad_printformatitem_id
-  type: numeric
-  label: Ad Printformatitem Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: name
-  type: text
-  label: Name
-- name: printname
-  type: text
-  label: Printname
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: printareatype
-  type: text
-  label: Printareatype
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: printformattype
-  type: text
-  label: Printformattype
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_printformatchild_id
-  type: numeric
-  label: Ad Printformatchild Id
-- name: isrelativeposition
-  type: text
-  label: Isrelativeposition
-- name: isnextline
-  type: text
-  label: Isnextline
-- name: xspace
-  type: numeric
-  label: Xspace
-- name: yspace
-  type: numeric
-  label: Yspace
-- name: xposition
-  type: numeric
-  label: Xposition
-- name: yposition
-  type: numeric
-  label: Yposition
-- name: maxwidth
-  type: numeric
-  label: Maxwidth
-- name: isheightoneline
-  type: text
-  label: Isheightoneline
-- name: maxheight
-  type: numeric
-  label: Maxheight
-- name: fieldalignmenttype
-  type: text
-  label: Fieldalignmenttype
-- name: linealignmenttype
-  type: text
-  label: Linealignmenttype
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: ad_printfont_id
-  type: numeric
-  label: Ad Printfont Id
-- name: isorderby
-  type: text
-  label: Isorderby
-- name: sortno
-  type: numeric
-  label: Sortno
-- name: isgroupby
-  type: text
-  label: Isgroupby
-- name: ispagebreak
-  type: text
-  label: Ispagebreak
-- name: issummarized
-  type: text
-  label: Issummarized
-- name: imageisattached
-  type: text
-  label: Imageisattached
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: isaveraged
-  type: text
-  label: Isaveraged
-- name: iscounted
-  type: text
-  label: Iscounted
-- name: issetnlposition
-  type: text
-  label: Issetnlposition
-- name: issuppressnull
-  type: text
-  label: Issuppressnull
-- name: belowcolumn
-  type: numeric
-  label: Belowcolumn
-- name: ad_printgraph_id
-  type: numeric
-  label: Ad Printgraph Id
-- name: isfixedwidth
-  type: text
-  label: Isfixedwidth
-- name: isnextpage
-  type: text
-  label: Isnextpage
-- name: printnamesuffix
-  type: text
-  label: Printnamesuffix
-- name: ismincalc
-  type: text
-  label: Ismincalc
-- name: ismaxcalc
-  type: text
-  label: Ismaxcalc
-- name: isrunningtotal
-  type: text
-  label: Isrunningtotal
-- name: runningtotallines
-  type: numeric
-  label: Runningtotallines
-- name: isvariancecalc
-  type: text
-  label: Isvariancecalc
-- name: isdeviationcalc
-  type: text
-  label: Isdeviationcalc
-- name: isfilledrectangle
-  type: text
-  label: Isfilledrectangle
-- name: linewidth
-  type: numeric
-  label: Linewidth
-- name: arcdiameter
-  type: numeric
-  label: Arcdiameter
-- name: shapetype
-  type: text
-  label: Shapetype
-- name: iscentrallymaintained
-  type: text
-  label: Iscentrallymaintained
-- name: isimagefield
-  type: text
-  label: Isimagefield
-- name: barcodetype
-  type: text
-  label: Barcodetype
-- name: formatpattern
-  type: text
-  label: Formatpattern
-- name: issuppressrepeats
-  type: text
-  label: Issuppressrepeats
-- name: ad_printformatitem_uu
-  type: text
-  label: Ad Printformatitem Uu
-- name: isdesc
-  type: text
-  label: Isdesc
-- name: isprintbarcodetext
-  type: text
-  label: Isprintbarcodetext
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: jp_html_width
-  type: numeric
-  label: Jp Html Width
-- name: jp_html_lengthuom
-  type: text
-  label: Jp Html Lengthuom
-- name: script
-  type: text
-  label: Script
-- name: isprintinstanceattributes
-  type: text
-  label: Isprintinstanceattributes
-- name: ad_fieldstyle_id
-  type: numeric
-  label: Ad Fieldstyle Id
+entities:
+  ad_printformatitem:
+    table: ad_printformatitem
+    key: ad_printformatitem_id
+    displayName: AD_PRINTFORMATITEM
+    columns:
+      ad_printformatitem_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_printformat_id: {type: decimal}
+      name: {type: string}
+      printname: {type: string}
+      isprinted: {type: string}
+      printareatype: {type: string}
+      seqno: {type: decimal}
+      printformattype: {type: string}
+      ad_column_id: {type: decimal}
+      ad_printformatchild_id: {type: decimal}
+      isrelativeposition: {type: string}
+      isnextline: {type: string}
+      xspace: {type: decimal}
+      yspace: {type: decimal}
+      xposition: {type: decimal}
+      yposition: {type: decimal}
+      maxwidth: {type: decimal}
+      isheightoneline: {type: string}
+      maxheight: {type: decimal}
+      fieldalignmenttype: {type: string}
+      linealignmenttype: {type: string}
+      ad_printcolor_id: {type: decimal}
+      ad_printfont_id: {type: decimal}
+      isorderby: {type: string}
+      sortno: {type: decimal}
+      isgroupby: {type: string}
+      ispagebreak: {type: string}
+      issummarized: {type: string}
+      imageisattached: {type: string}
+      imageurl: {type: string}
+      isaveraged: {type: string}
+      iscounted: {type: string}
+      issetnlposition: {type: string}
+      issuppressnull: {type: string}
+      belowcolumn: {type: decimal}
+      ad_printgraph_id: {type: decimal}
+      isfixedwidth: {type: string}
+      isnextpage: {type: string}
+      printnamesuffix: {type: string}
+      ismincalc: {type: string}
+      ismaxcalc: {type: string}
+      isrunningtotal: {type: string}
+      runningtotallines: {type: decimal}
+      isvariancecalc: {type: string}
+      isdeviationcalc: {type: string}
+      isfilledrectangle: {type: string}
+      linewidth: {type: decimal}
+      arcdiameter: {type: decimal}
+      shapetype: {type: string}
+      iscentrallymaintained: {type: string}
+      isimagefield: {type: string}
+      barcodetype: {type: string}
+      formatpattern: {type: string}
+      issuppressrepeats: {type: string}
+      ad_printformatitem_uu: {type: string}
+      isdesc: {type: string}
+      isprintbarcodetext: {type: string}
+      displaylogic: {type: string}
+      jp_html_width: {type: decimal}
+      jp_html_lengthuom: {type: string}
+      script: {type: string}
+      isprintinstanceattributes: {type: string}
+      ad_fieldstyle_id: {type: decimal}

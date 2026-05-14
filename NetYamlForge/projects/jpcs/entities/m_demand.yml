@@ -1,52 +1,22 @@
-name: M_DEMAND
-tableName: m_demand
-primaryKey: m_demand_id
-fields:
-- name: m_demand_id
-  type: numeric
-  label: M Demand Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: c_year_id
-  type: numeric
-  label: C Year Id
-- name: processing
-  type: text
-  label: Processing
-- name: m_demand_uu
-  type: text
-  label: M Demand Uu
+entities:
+  m_demand:
+    table: m_demand
+    key: m_demand_id
+    displayName: M_DEMAND
+    columns:
+      m_demand_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isdefault: {type: string}
+      c_calendar_id: {type: decimal}
+      c_year_id: {type: decimal}
+      processing: {type: string}
+      m_demand_uu: {type: string}

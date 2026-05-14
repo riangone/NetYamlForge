@@ -1,103 +1,39 @@
-name: C_BANKSTATEMENT
-tableName: c_bankstatement
-primaryKey: c_bankstatement_id
-fields:
-- name: c_bankstatement_id
-  type: numeric
-  label: C Bankstatement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ismanual
-  type: text
-  label: Ismanual
-- name: statementdate
-  type: text
-  label: Statementdate
-- name: beginningbalance
-  type: numeric
-  label: Beginningbalance
-- name: endingbalance
-  type: numeric
-  label: Endingbalance
-- name: statementdifference
-  type: numeric
-  label: Statementdifference
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: posted
-  type: text
-  label: Posted
-- name: eftstatementreference
-  type: text
-  label: Eftstatementreference
-- name: eftstatementdate
-  type: text
-  label: Eftstatementdate
-- name: matchstatement
-  type: text
-  label: Matchstatement
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: c_bankstatement_uu
-  type: text
-  label: C Bankstatement Uu
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: createfrombatch
-  type: text
-  label: Createfrombatch
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: documentno
-  type: text
-  label: Documentno
+entities:
+  c_bankstatement:
+    table: c_bankstatement
+    key: c_bankstatement_id
+    displayName: C_BANKSTATEMENT
+    columns:
+      c_bankstatement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bankaccount_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ismanual: {type: string}
+      statementdate: {type: string}
+      beginningbalance: {type: decimal}
+      endingbalance: {type: decimal}
+      statementdifference: {type: decimal}
+      createfrom: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      posted: {type: string}
+      eftstatementreference: {type: string}
+      eftstatementdate: {type: string}
+      matchstatement: {type: string}
+      isapproved: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      processedon: {type: decimal}
+      c_bankstatement_uu: {type: string}
+      copyfrom: {type: string}
+      dateacct: {type: string}
+      createfrombatch: {type: string}
+      c_doctype_id: {type: decimal}
+      documentno: {type: string}

@@ -1,67 +1,27 @@
-name: A_ASSET_GROUP
-tableName: a_asset_group
-primaryKey: a_asset_group_id
-fields:
-- name: a_asset_group_id
-  type: numeric
-  label: A Asset Group Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isowned
-  type: text
-  label: Isowned
-- name: isdepreciated
-  type: text
-  label: Isdepreciated
-- name: isoneassetperuom
-  type: text
-  label: Isoneassetperuom
-- name: iscreateasactive
-  type: text
-  label: Iscreateasactive
-- name: istrackissues
-  type: text
-  label: Istrackissues
-- name: a_asset_group_uu
-  type: text
-  label: A Asset Group Uu
-- name: a_asset_class_id
-  type: numeric
-  label: A Asset Class Id
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: a_asset_type_id
-  type: numeric
-  label: A Asset Type Id
-- name: isfixedasset
-  type: text
-  label: Isfixedasset
+entities:
+  a_asset_group:
+    table: a_asset_group
+    key: a_asset_group_id
+    displayName: A_ASSET_GROUP
+    columns:
+      a_asset_group_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isowned: {type: string}
+      isdepreciated: {type: string}
+      isoneassetperuom: {type: string}
+      iscreateasactive: {type: string}
+      istrackissues: {type: string}
+      a_asset_group_uu: {type: string}
+      a_asset_class_id: {type: decimal}
+      isdefault: {type: string}
+      a_asset_type_id: {type: decimal}
+      isfixedasset: {type: string}

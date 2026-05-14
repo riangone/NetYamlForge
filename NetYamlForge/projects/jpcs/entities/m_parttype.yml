@@ -1,37 +1,17 @@
-name: M_PARTTYPE
-tableName: m_parttype
-primaryKey: m_parttype_id
-fields:
-- name: m_parttype_id
-  type: numeric
-  label: M Parttype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: m_parttype_uu
-  type: text
-  label: M Parttype Uu
+entities:
+  m_parttype:
+    table: m_parttype
+    key: m_parttype_id
+    displayName: M_PARTTYPE
+    columns:
+      m_parttype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      m_parttype_uu: {type: string}

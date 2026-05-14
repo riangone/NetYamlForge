@@ -1,46 +1,20 @@
-name: A_ASSET_GROUP_TRL
-tableName: a_asset_group_trl
-primaryKey: a_asset_group_id
-fields:
-- name: a_asset_group_id
-  type: numeric
-  label: A Asset Group Id
-- name: a_asset_group_trl_uu
-  type: text
-  label: A Asset Group Trl Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  a_asset_group_trl:
+    table: a_asset_group_trl
+    key: a_asset_group_id
+    displayName: A_ASSET_GROUP_TRL
+    columns:
+      a_asset_group_id: {type: decimal, identity: true}
+      a_asset_group_trl_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      istranslated: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

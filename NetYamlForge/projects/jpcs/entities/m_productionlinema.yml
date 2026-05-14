@@ -1,40 +1,18 @@
-name: M_PRODUCTIONLINEMA
-tableName: m_productionlinema
-primaryKey: m_productionline_id
-fields:
-- name: m_productionline_id
-  type: numeric
-  label: M Productionline Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: m_productionlinema_uu
-  type: text
-  label: M Productionlinema Uu
-- name: datematerialpolicy
-  type: text
-  label: Datematerialpolicy
+entities:
+  m_productionlinema:
+    table: m_productionlinema
+    key: m_productionline_id
+    displayName: M_PRODUCTIONLINEMA
+    columns:
+      m_productionline_id: {type: decimal, identity: true}
+      m_attributesetinstance_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      movementqty: {type: decimal}
+      m_productionlinema_uu: {type: string}
+      datematerialpolicy: {type: string}

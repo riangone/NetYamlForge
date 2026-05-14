@@ -1,124 +1,46 @@
-name: T_REPORT
-tableName: t_report
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: pa_reportline_id
-  type: numeric
-  label: Pa Reportline Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: levelno
-  type: numeric
-  label: Levelno
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: col_0
-  type: numeric
-  label: Col 0
-- name: col_2
-  type: numeric
-  label: Col 2
-- name: col_1
-  type: numeric
-  label: Col 1
-- name: col_3
-  type: numeric
-  label: Col 3
-- name: col_4
-  type: numeric
-  label: Col 4
-- name: col_5
-  type: numeric
-  label: Col 5
-- name: col_6
-  type: numeric
-  label: Col 6
-- name: col_7
-  type: numeric
-  label: Col 7
-- name: col_8
-  type: numeric
-  label: Col 8
-- name: col_9
-  type: numeric
-  label: Col 9
-- name: col_10
-  type: numeric
-  label: Col 10
-- name: col_11
-  type: numeric
-  label: Col 11
-- name: col_12
-  type: numeric
-  label: Col 12
-- name: col_13
-  type: numeric
-  label: Col 13
-- name: col_14
-  type: numeric
-  label: Col 14
-- name: col_15
-  type: numeric
-  label: Col 15
-- name: col_16
-  type: numeric
-  label: Col 16
-- name: col_17
-  type: numeric
-  label: Col 17
-- name: col_18
-  type: numeric
-  label: Col 18
-- name: col_19
-  type: numeric
-  label: Col 19
-- name: col_20
-  type: numeric
-  label: Col 20
-- name: t_report_uu
-  type: text
-  label: T Report Uu
-- name: col_21
-  type: numeric
-  label: Col 21
-- name: col_22
-  type: numeric
-  label: Col 22
-- name: col_23
-  type: numeric
-  label: Col 23
-- name: col_24
-  type: numeric
-  label: Col 24
-- name: col_25
-  type: numeric
-  label: Col 25
-- name: col_26
-  type: numeric
-  label: Col 26
-- name: col_27
-  type: numeric
-  label: Col 27
-- name: col_28
-  type: numeric
-  label: Col 28
-- name: col_29
-  type: numeric
-  label: Col 29
-- name: col_30
-  type: numeric
-  label: Col 30
+entities:
+  t_report:
+    table: t_report
+    key: ad_pinstance_id
+    displayName: T_REPORT
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      pa_reportline_id: {type: decimal}
+      record_id: {type: decimal}
+      fact_acct_id: {type: decimal}
+      seqno: {type: decimal}
+      levelno: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      col_0: {type: decimal}
+      col_2: {type: decimal}
+      col_1: {type: decimal}
+      col_3: {type: decimal}
+      col_4: {type: decimal}
+      col_5: {type: decimal}
+      col_6: {type: decimal}
+      col_7: {type: decimal}
+      col_8: {type: decimal}
+      col_9: {type: decimal}
+      col_10: {type: decimal}
+      col_11: {type: decimal}
+      col_12: {type: decimal}
+      col_13: {type: decimal}
+      col_14: {type: decimal}
+      col_15: {type: decimal}
+      col_16: {type: decimal}
+      col_17: {type: decimal}
+      col_18: {type: decimal}
+      col_19: {type: decimal}
+      col_20: {type: decimal}
+      t_report_uu: {type: string}
+      col_21: {type: decimal}
+      col_22: {type: decimal}
+      col_23: {type: decimal}
+      col_24: {type: decimal}
+      col_25: {type: decimal}
+      col_26: {type: decimal}
+      col_27: {type: decimal}
+      col_28: {type: decimal}
+      col_29: {type: decimal}
+      col_30: {type: decimal}

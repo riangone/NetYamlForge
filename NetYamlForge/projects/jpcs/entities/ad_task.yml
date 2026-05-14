@@ -1,55 +1,23 @@
-name: AD_TASK
-tableName: ad_task
-primaryKey: ad_task_id
-fields:
-- name: ad_task_id
-  type: numeric
-  label: Ad Task Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: accesslevel
-  type: text
-  label: Accesslevel
-- name: os_command
-  type: text
-  label: Os Command
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: isserverprocess
-  type: text
-  label: Isserverprocess
-- name: ad_task_uu
-  type: text
-  label: Ad Task Uu
-- name: ad_ctxhelp_id
-  type: numeric
-  label: Ad Ctxhelp Id
+entities:
+  ad_task:
+    table: ad_task
+    key: ad_task_id
+    displayName: AD_TASK
+    columns:
+      ad_task_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      accesslevel: {type: string}
+      os_command: {type: string}
+      entitytype: {type: string}
+      isserverprocess: {type: string}
+      ad_task_uu: {type: string}
+      ad_ctxhelp_id: {type: decimal}

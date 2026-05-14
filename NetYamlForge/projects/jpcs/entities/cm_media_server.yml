@@ -1,61 +1,25 @@
-name: CM_MEDIA_SERVER
-tableName: cm_media_server
-primaryKey: cm_media_server_id
-fields:
-- name: cm_media_server_id
-  type: numeric
-  label: Cm Media Server Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: ispassive
-  type: text
-  label: Ispassive
-- name: url
-  type: text
-  label: Url
-- name: ip_address
-  type: text
-  label: Ip Address
-- name: username
-  type: text
-  label: Username
-- name: password
-  type: text
-  label: Password
-- name: folder
-  type: text
-  label: Folder
-- name: cm_media_server_uu
-  type: text
-  label: Cm Media Server Uu
+entities:
+  cm_media_server:
+    table: cm_media_server
+    key: cm_media_server_id
+    displayName: CM_MEDIA_SERVER
+    columns:
+      cm_media_server_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      cm_webproject_id: {type: decimal}
+      ispassive: {type: string}
+      url: {type: string}
+      ip_address: {type: string}
+      username: {type: string}
+      password: {type: string}
+      folder: {type: string}
+      cm_media_server_uu: {type: string}

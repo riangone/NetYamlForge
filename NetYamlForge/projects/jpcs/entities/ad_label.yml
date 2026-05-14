@@ -1,43 +1,19 @@
-name: AD_LABEL
-tableName: ad_label
-primaryKey: ad_label_id
-fields:
-- name: ad_label_id
-  type: numeric
-  label: Ad Label Id
-- name: ad_label_uu
-  type: text
-  label: Ad Label Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: description
-  type: text
-  label: Description
-- name: name
-  type: text
-  label: Name
-- name: ad_labelcategory_id
-  type: numeric
-  label: Ad Labelcategory Id
-- name: ad_labelstyle_id
-  type: numeric
-  label: Ad Labelstyle Id
+entities:
+  ad_label:
+    table: ad_label
+    key: ad_label_id
+    displayName: AD_LABEL
+    columns:
+      ad_label_id: {type: decimal, identity: true}
+      ad_label_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      description: {type: string}
+      name: {type: string}
+      ad_labelcategory_id: {type: decimal}
+      ad_labelstyle_id: {type: decimal}

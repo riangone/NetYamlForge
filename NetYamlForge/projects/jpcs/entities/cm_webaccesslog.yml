@@ -1,85 +1,33 @@
-name: CM_WEBACCESSLOG
-tableName: cm_webaccesslog
-primaryKey: cm_webaccesslog_id
-fields:
-- name: cm_webaccesslog_id
-  type: numeric
-  label: Cm Webaccesslog Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: logtype
-  type: text
-  label: Logtype
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: ip_address
-  type: text
-  label: Ip Address
-- name: cm_broadcastserver_id
-  type: numeric
-  label: Cm Broadcastserver Id
-- name: requesttype
-  type: text
-  label: Requesttype
-- name: pageurl
-  type: text
-  label: Pageurl
-- name: referrer
-  type: text
-  label: Referrer
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: useragent
-  type: text
-  label: Useragent
-- name: acceptlanguage
-  type: text
-  label: Acceptlanguage
-- name: websession
-  type: text
-  label: Websession
-- name: hyphen
-  type: text
-  label: Hyphen
-- name: protocol
-  type: text
-  label: Protocol
-- name: statuscode
-  type: numeric
-  label: Statuscode
-- name: filesize
-  type: numeric
-  label: Filesize
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: cm_media_id
-  type: numeric
-  label: Cm Media Id
-- name: cm_webaccesslog_uu
-  type: text
-  label: Cm Webaccesslog Uu
+entities:
+  cm_webaccesslog:
+    table: cm_webaccesslog
+    key: cm_webaccesslog_id
+    displayName: CM_WEBACCESSLOG
+    columns:
+      cm_webaccesslog_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      logtype: {type: string}
+      cm_webproject_id: {type: decimal}
+      ip_address: {type: string}
+      cm_broadcastserver_id: {type: decimal}
+      requesttype: {type: string}
+      pageurl: {type: string}
+      referrer: {type: string}
+      remote_host: {type: string}
+      remote_addr: {type: string}
+      useragent: {type: string}
+      acceptlanguage: {type: string}
+      websession: {type: string}
+      hyphen: {type: string}
+      protocol: {type: string}
+      statuscode: {type: decimal}
+      filesize: {type: decimal}
+      ad_user_id: {type: decimal}
+      cm_media_id: {type: decimal}
+      cm_webaccesslog_uu: {type: string}

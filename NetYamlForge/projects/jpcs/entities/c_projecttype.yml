@@ -1,43 +1,19 @@
-name: C_PROJECTTYPE
-tableName: c_projecttype
-primaryKey: c_projecttype_id
-fields:
-- name: c_projecttype_id
-  type: numeric
-  label: C Projecttype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: projectcategory
-  type: text
-  label: Projectcategory
-- name: c_projecttype_uu
-  type: text
-  label: C Projecttype Uu
+entities:
+  c_projecttype:
+    table: c_projecttype
+    key: c_projecttype_id
+    displayName: C_PROJECTTYPE
+    columns:
+      c_projecttype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      projectcategory: {type: string}
+      c_projecttype_uu: {type: string}

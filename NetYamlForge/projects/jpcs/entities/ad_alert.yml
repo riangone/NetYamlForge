@@ -1,58 +1,24 @@
-name: AD_ALERT
-tableName: ad_alert
-primaryKey: ad_alert_id
-fields:
-- name: ad_alert_id
-  type: numeric
-  label: Ad Alert Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: alertsubject
-  type: text
-  label: Alertsubject
-- name: alertmessage
-  type: text
-  label: Alertmessage
-- name: enforceclientsecurity
-  type: text
-  label: Enforceclientsecurity
-- name: enforcerolesecurity
-  type: text
-  label: Enforcerolesecurity
-- name: ad_alertprocessor_id
-  type: numeric
-  label: Ad Alertprocessor Id
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: ad_alert_uu
-  type: text
-  label: Ad Alert Uu
+entities:
+  ad_alert:
+    table: ad_alert
+    key: ad_alert_id
+    displayName: AD_ALERT
+    columns:
+      ad_alert_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      alertsubject: {type: string}
+      alertmessage: {type: string}
+      enforceclientsecurity: {type: string}
+      enforcerolesecurity: {type: string}
+      ad_alertprocessor_id: {type: decimal}
+      isvalid: {type: string}
+      ad_alert_uu: {type: string}

@@ -1,43 +1,19 @@
-name: A_ASSET_RETIREMENT
-tableName: a_asset_retirement
-primaryKey: a_asset_retirement_id
-fields:
-- name: a_asset_retirement_id
-  type: numeric
-  label: A Asset Retirement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: assetvalueamt
-  type: numeric
-  label: Assetvalueamt
-- name: assetmarketvalueamt
-  type: numeric
-  label: Assetmarketvalueamt
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: a_asset_retirement_uu
-  type: text
-  label: A Asset Retirement Uu
+entities:
+  a_asset_retirement:
+    table: a_asset_retirement
+    key: a_asset_retirement_id
+    displayName: A_ASSET_RETIREMENT
+    columns:
+      a_asset_retirement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      a_asset_id: {type: decimal}
+      assetvalueamt: {type: decimal}
+      assetmarketvalueamt: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      a_asset_retirement_uu: {type: string}

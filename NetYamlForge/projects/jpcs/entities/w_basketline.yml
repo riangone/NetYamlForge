@@ -1,52 +1,22 @@
-name: W_BASKETLINE
-tableName: w_basketline
-primaryKey: w_basketline_id
-fields:
-- name: w_basketline_id
-  type: numeric
-  label: W Basketline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: w_basket_id
-  type: numeric
-  label: W Basket Id
-- name: line
-  type: numeric
-  label: Line
-- name: qty
-  type: numeric
-  label: Qty
-- name: price
-  type: numeric
-  label: Price
-- name: product
-  type: text
-  label: Product
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: w_basketline_uu
-  type: text
-  label: W Basketline Uu
+entities:
+  w_basketline:
+    table: w_basketline
+    key: w_basketline_id
+    displayName: W_BASKETLINE
+    columns:
+      w_basketline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      w_basket_id: {type: decimal}
+      line: {type: decimal}
+      qty: {type: decimal}
+      price: {type: decimal}
+      product: {type: string}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      w_basketline_uu: {type: string}

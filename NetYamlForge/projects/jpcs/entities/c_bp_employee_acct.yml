@@ -1,40 +1,18 @@
-name: C_BP_EMPLOYEE_ACCT
-tableName: c_bp_employee_acct
-primaryKey: c_bpartner_id
-fields:
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: e_expense_acct
-  type: numeric
-  label: E Expense Acct
-- name: e_prepayment_acct
-  type: numeric
-  label: E Prepayment Acct
-- name: c_bp_employee_acct_uu
-  type: text
-  label: C Bp Employee Acct Uu
+entities:
+  c_bp_employee_acct:
+    table: c_bp_employee_acct
+    key: c_bpartner_id
+    displayName: C_BP_EMPLOYEE_ACCT
+    columns:
+      c_bpartner_id: {type: decimal, identity: true}
+      c_acctschema_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      e_expense_acct: {type: decimal}
+      e_prepayment_acct: {type: decimal}
+      c_bp_employee_acct_uu: {type: string}

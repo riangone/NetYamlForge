@@ -1,55 +1,23 @@
-name: M_DISCOUNTSCHEMABREAK
-tableName: m_discountschemabreak
-primaryKey: m_discountschemabreak_id
-fields:
-- name: m_discountschemabreak_id
-  type: numeric
-  label: M Discountschemabreak Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_discountschema_id
-  type: numeric
-  label: M Discountschema Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: breakvalue
-  type: numeric
-  label: Breakvalue
-- name: breakdiscount
-  type: numeric
-  label: Breakdiscount
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: isbpartnerflatdiscount
-  type: text
-  label: Isbpartnerflatdiscount
-- name: m_discountschemabreak_uu
-  type: text
-  label: M Discountschemabreak Uu
-- name: fixedprice
-  type: numeric
-  label: Fixedprice
+entities:
+  m_discountschemabreak:
+    table: m_discountschemabreak
+    key: m_discountschemabreak_id
+    displayName: M_DISCOUNTSCHEMABREAK
+    columns:
+      m_discountschemabreak_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_discountschema_id: {type: decimal}
+      seqno: {type: decimal}
+      breakvalue: {type: decimal}
+      breakdiscount: {type: decimal}
+      m_product_category_id: {type: decimal}
+      m_product_id: {type: decimal}
+      isbpartnerflatdiscount: {type: string}
+      m_discountschemabreak_uu: {type: string}
+      fixedprice: {type: decimal}

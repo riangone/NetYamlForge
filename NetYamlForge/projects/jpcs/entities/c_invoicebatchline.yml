@@ -1,109 +1,41 @@
-name: C_INVOICEBATCHLINE
-tableName: c_invoicebatchline
-primaryKey: c_invoicebatchline_id
-fields:
-- name: c_invoicebatchline_id
-  type: numeric
-  label: C Invoicebatchline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_invoicebatch_id
-  type: numeric
-  label: C Invoicebatch Id
-- name: line
-  type: numeric
-  label: Line
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: linetotalamt
-  type: numeric
-  label: Linetotalamt
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: processed
-  type: text
-  label: Processed
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: description
-  type: text
-  label: Description
-- name: c_invoicebatchline_uu
-  type: text
-  label: C Invoicebatchline Uu
+entities:
+  c_invoicebatchline:
+    table: c_invoicebatchline
+    key: c_invoicebatchline_id
+    displayName: C_INVOICEBATCHLINE
+    columns:
+      c_invoicebatchline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_invoicebatch_id: {type: decimal}
+      line: {type: decimal}
+      c_doctype_id: {type: decimal}
+      documentno: {type: string}
+      dateinvoiced: {type: string}
+      dateacct: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      qtyentered: {type: decimal}
+      priceentered: {type: decimal}
+      istaxincluded: {type: string}
+      linenetamt: {type: decimal}
+      c_tax_id: {type: decimal}
+      taxamt: {type: decimal}
+      linetotalamt: {type: decimal}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      processed: {type: string}
+      c_invoice_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      description: {type: string}
+      c_invoicebatchline_uu: {type: string}

@@ -1,49 +1,21 @@
-name: C_CASHBOOK_ACCT
-tableName: c_cashbook_acct
-primaryKey: c_cashbook_id
-fields:
-- name: c_cashbook_id
-  type: numeric
-  label: C Cashbook Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cb_asset_acct
-  type: numeric
-  label: Cb Asset Acct
-- name: cb_cashtransfer_acct
-  type: numeric
-  label: Cb Cashtransfer Acct
-- name: cb_differences_acct
-  type: numeric
-  label: Cb Differences Acct
-- name: cb_expense_acct
-  type: numeric
-  label: Cb Expense Acct
-- name: cb_receipt_acct
-  type: numeric
-  label: Cb Receipt Acct
-- name: c_cashbook_acct_uu
-  type: text
-  label: C Cashbook Acct Uu
+entities:
+  c_cashbook_acct:
+    table: c_cashbook_acct
+    key: c_cashbook_id
+    displayName: C_CASHBOOK_ACCT
+    columns:
+      c_cashbook_id: {type: decimal, identity: true}
+      c_acctschema_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cb_asset_acct: {type: decimal}
+      cb_cashtransfer_acct: {type: decimal}
+      cb_differences_acct: {type: decimal}
+      cb_expense_acct: {type: decimal}
+      cb_receipt_acct: {type: decimal}
+      c_cashbook_acct_uu: {type: string}

@@ -1,49 +1,21 @@
-name: CM_TEMPLATETABLE
-tableName: cm_templatetable
-primaryKey: cm_templatetable_id
-fields:
-- name: cm_templatetable_id
-  type: numeric
-  label: Cm Templatetable Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: cm_template_id
-  type: numeric
-  label: Cm Template Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: otherclause
-  type: text
-  label: Otherclause
-- name: cm_templatetable_uu
-  type: text
-  label: Cm Templatetable Uu
+entities:
+  cm_templatetable:
+    table: cm_templatetable
+    key: cm_templatetable_id
+    displayName: CM_TEMPLATETABLE
+    columns:
+      cm_templatetable_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      cm_template_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      whereclause: {type: string}
+      otherclause: {type: string}
+      cm_templatetable_uu: {type: string}

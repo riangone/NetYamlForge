@@ -1,139 +1,51 @@
-name: C_COUNTRY
-tableName: c_country
-primaryKey: c_country_id
-fields:
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: countrycode
-  type: text
-  label: Countrycode
-- name: hasregion
-  type: text
-  label: Hasregion
-- name: regionname
-  type: text
-  label: Regionname
-- name: expressionphone
-  type: text
-  label: Expressionphone
-- name: displaysequence
-  type: text
-  label: Displaysequence
-- name: expressionpostal
-  type: text
-  label: Expressionpostal
-- name: haspostal_add
-  type: text
-  label: Haspostal Add
-- name: expressionpostal_add
-  type: text
-  label: Expressionpostal Add
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: displaysequencelocal
-  type: text
-  label: Displaysequencelocal
-- name: isaddresslinesreverse
-  type: text
-  label: Isaddresslinesreverse
-- name: isaddresslineslocalreverse
-  type: text
-  label: Isaddresslineslocalreverse
-- name: expressionbankroutingno
-  type: text
-  label: Expressionbankroutingno
-- name: expressionbankaccountno
-  type: text
-  label: Expressionbankaccountno
-- name: mediasize
-  type: text
-  label: Mediasize
-- name: ispostcodelookup
-  type: text
-  label: Ispostcodelookup
-- name: lookupclassname
-  type: text
-  label: Lookupclassname
-- name: lookupclientid
-  type: text
-  label: Lookupclientid
-- name: lookuppassword
-  type: text
-  label: Lookuppassword
-- name: lookupurl
-  type: text
-  label: Lookupurl
-- name: allowcitiesoutoflist
-  type: text
-  label: Allowcitiesoutoflist
-- name: capturesequence
-  type: text
-  label: Capturesequence
-- name: c_country_uu
-  type: text
-  label: C Country Uu
-- name: placeholderaddress1
-  type: text
-  label: Placeholderaddress1
-- name: placeholderaddress2
-  type: text
-  label: Placeholderaddress2
-- name: placeholderaddress3
-  type: text
-  label: Placeholderaddress3
-- name: placeholderaddress4
-  type: text
-  label: Placeholderaddress4
-- name: placeholderaddress5
-  type: text
-  label: Placeholderaddress5
-- name: placeholdercity
-  type: text
-  label: Placeholdercity
-- name: placeholdercomments
-  type: text
-  label: Placeholdercomments
-- name: placeholderpostal
-  type: text
-  label: Placeholderpostal
-- name: placeholderpostal_add
-  type: text
-  label: Placeholderpostal Add
-- name: m49code
-  type: text
-  label: M49Code
-- name: isocountrycodealpha3
-  type: text
-  label: Isocountrycodealpha3
+entities:
+  c_country:
+    table: c_country
+    key: c_country_id
+    displayName: C_COUNTRY
+    columns:
+      c_country_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      countrycode: {type: string}
+      hasregion: {type: string}
+      regionname: {type: string}
+      expressionphone: {type: string}
+      displaysequence: {type: string}
+      expressionpostal: {type: string}
+      haspostal_add: {type: string}
+      expressionpostal_add: {type: string}
+      ad_language: {type: string}
+      c_currency_id: {type: decimal}
+      displaysequencelocal: {type: string}
+      isaddresslinesreverse: {type: string}
+      isaddresslineslocalreverse: {type: string}
+      expressionbankroutingno: {type: string}
+      expressionbankaccountno: {type: string}
+      mediasize: {type: string}
+      ispostcodelookup: {type: string}
+      lookupclassname: {type: string}
+      lookupclientid: {type: string}
+      lookuppassword: {type: string}
+      lookupurl: {type: string}
+      allowcitiesoutoflist: {type: string}
+      capturesequence: {type: string}
+      c_country_uu: {type: string}
+      placeholderaddress1: {type: string}
+      placeholderaddress2: {type: string}
+      placeholderaddress3: {type: string}
+      placeholderaddress4: {type: string}
+      placeholderaddress5: {type: string}
+      placeholdercity: {type: string}
+      placeholdercomments: {type: string}
+      placeholderpostal: {type: string}
+      placeholderpostal_add: {type: string}
+      m49code: {type: string}
+      isocountrycodealpha3: {type: string}

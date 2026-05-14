@@ -1,55 +1,23 @@
-name: C_SUBSCRIPTION
-tableName: c_subscription
-primaryKey: c_subscription_id
-fields:
-- name: c_subscription_id
-  type: numeric
-  label: C Subscription Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_subscriptiontype_id
-  type: numeric
-  label: C Subscriptiontype Id
-- name: startdate
-  type: text
-  label: Startdate
-- name: paiduntildate
-  type: text
-  label: Paiduntildate
-- name: isdue
-  type: text
-  label: Isdue
-- name: renewaldate
-  type: text
-  label: Renewaldate
-- name: c_subscription_uu
-  type: text
-  label: C Subscription Uu
+entities:
+  c_subscription:
+    table: c_subscription
+    key: c_subscription_id
+    displayName: C_SUBSCRIPTION
+    columns:
+      c_subscription_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      c_bpartner_id: {type: decimal}
+      m_product_id: {type: decimal}
+      c_subscriptiontype_id: {type: decimal}
+      startdate: {type: string}
+      paiduntildate: {type: string}
+      isdue: {type: string}
+      renewaldate: {type: string}
+      c_subscription_uu: {type: string}

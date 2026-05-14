@@ -1,49 +1,21 @@
-name: AD_CHART_TRL
-tableName: ad_chart_trl
-primaryKey: ad_chart_id
-fields:
-- name: ad_chart_id
-  type: numeric
-  label: Ad Chart Id
-- name: ad_chart_trl_uu
-  type: text
-  label: Ad Chart Trl Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: domainlabel
-  type: text
-  label: Domainlabel
-- name: rangelabel
-  type: text
-  label: Rangelabel
+entities:
+  ad_chart_trl:
+    table: ad_chart_trl
+    key: ad_chart_id
+    displayName: AD_CHART_TRL
+    columns:
+      ad_chart_id: {type: decimal, identity: true}
+      ad_chart_trl_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      istranslated: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      domainlabel: {type: string}
+      rangelabel: {type: string}

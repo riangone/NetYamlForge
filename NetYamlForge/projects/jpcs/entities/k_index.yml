@@ -1,55 +1,23 @@
-name: K_INDEX
-tableName: k_index
-primaryKey: k_index_id
-fields:
-- name: k_index_id
-  type: numeric
-  label: K Index Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: keyword
-  type: text
-  label: Keyword
-- name: excerpt
-  type: text
-  label: Excerpt
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: sourceupdated
-  type: text
-  label: Sourceupdated
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: r_requesttype_id
-  type: numeric
-  label: R Requesttype Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: k_index_uu
-  type: text
-  label: K Index Uu
+entities:
+  k_index:
+    table: k_index
+    key: k_index_id
+    displayName: K_INDEX
+    columns:
+      k_index_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      keyword: {type: string}
+      excerpt: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      sourceupdated: {type: string}
+      cm_webproject_id: {type: decimal}
+      r_requesttype_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      k_index_uu: {type: string}

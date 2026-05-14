@@ -1,88 +1,34 @@
-name: GL_JOURNALBATCH
-tableName: gl_journalbatch
-primaryKey: gl_journalbatch_id
-fields:
-- name: gl_journalbatch_id
-  type: numeric
-  label: Gl Journalbatch Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: description
-  type: text
-  label: Description
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: totaldr
-  type: numeric
-  label: Totaldr
-- name: totalcr
-  type: numeric
-  label: Totalcr
-- name: controlamt
-  type: numeric
-  label: Controlamt
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: reversal_id
-  type: numeric
-  label: Reversal Id
-- name: gl_journalbatch_uu
-  type: text
-  label: Gl Journalbatch Uu
+entities:
+  gl_journalbatch:
+    table: gl_journalbatch
+    key: gl_journalbatch_id
+    displayName: GL_JOURNALBATCH
+    columns:
+      gl_journalbatch_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      description: {type: string}
+      postingtype: {type: string}
+      gl_category_id: {type: decimal}
+      datedoc: {type: string}
+      dateacct: {type: string}
+      c_period_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      totaldr: {type: decimal}
+      totalcr: {type: decimal}
+      controlamt: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      copyfrom: {type: string}
+      c_doctype_id: {type: decimal}
+      docstatus: {type: string}
+      docaction: {type: string}
+      isapproved: {type: string}
+      reversal_id: {type: decimal}
+      gl_journalbatch_uu: {type: string}

@@ -1,124 +1,46 @@
-name: AD_PROCESS_PARA
-tableName: ad_process_para
-primaryKey: ad_process_para_id
-fields:
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: columnname
-  type: text
-  label: Columnname
-- name: iscentrallymaintained
-  type: text
-  label: Iscentrallymaintained
-- name: fieldlength
-  type: numeric
-  label: Fieldlength
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: isrange
-  type: text
-  label: Isrange
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: defaultvalue2
-  type: text
-  label: Defaultvalue2
-- name: vformat
-  type: text
-  label: Vformat
-- name: valuemin
-  type: text
-  label: Valuemin
-- name: valuemax
-  type: text
-  label: Valuemax
-- name: ad_element_id
-  type: numeric
-  label: Ad Element Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: readonlylogic
-  type: text
-  label: Readonlylogic
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: ad_process_para_uu
-  type: text
-  label: Ad Process Para Uu
-- name: isencrypted
-  type: text
-  label: Isencrypted
-- name: mandatorylogic
-  type: text
-  label: Mandatorylogic
-- name: placeholder
-  type: text
-  label: Placeholder
-- name: placeholder2
-  type: text
-  label: Placeholder2
-- name: isautocomplete
-  type: text
-  label: Isautocomplete
-- name: ad_fieldgroup_id
-  type: numeric
-  label: Ad Fieldgroup Id
-- name: query
-  type: text
-  label: Query
-- name: daterangeoption
-  type: text
-  label: Daterangeoption
-- name: isshownegatebutton
-  type: text
-  label: Isshownegatebutton
+entities:
+  ad_process_para:
+    table: ad_process_para
+    key: ad_process_para_id
+    displayName: AD_PROCESS_PARA
+    columns:
+      ad_process_para_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_process_id: {type: decimal}
+      seqno: {type: decimal}
+      ad_reference_id: {type: decimal}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      columnname: {type: string}
+      iscentrallymaintained: {type: string}
+      fieldlength: {type: decimal}
+      ismandatory: {type: string}
+      isrange: {type: string}
+      defaultvalue: {type: string}
+      defaultvalue2: {type: string}
+      vformat: {type: string}
+      valuemin: {type: string}
+      valuemax: {type: string}
+      ad_element_id: {type: decimal}
+      entitytype: {type: string}
+      readonlylogic: {type: string}
+      displaylogic: {type: string}
+      ad_process_para_uu: {type: string}
+      isencrypted: {type: string}
+      mandatorylogic: {type: string}
+      placeholder: {type: string}
+      placeholder2: {type: string}
+      isautocomplete: {type: string}
+      ad_fieldgroup_id: {type: decimal}
+      query: {type: string}
+      daterangeoption: {type: string}
+      isshownegatebutton: {type: string}

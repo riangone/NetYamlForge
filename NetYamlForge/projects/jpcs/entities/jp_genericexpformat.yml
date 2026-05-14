@@ -1,91 +1,35 @@
-name: JP_GENERICEXPFORMAT
-tableName: jp_genericexpformat
-primaryKey: jp_genericexpformat_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: characterset
-  type: text
-  label: Characterset
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: filenamepattern
-  type: text
-  label: Filenamepattern
-- name: formattype
-  type: text
-  label: Formattype
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isheaderrequiredjp
-  type: text
-  label: Isheaderrequiredjp
-- name: jp_enclosingchar
-  type: text
-  label: Jp Enclosingchar
-- name: jp_fileextension
-  type: text
-  label: Jp Fileextension
-- name: jp_genericexpformat_id
-  type: numeric
-  label: Jp Genericexpformat Id
-- name: jp_genericexpformat_uu
-  type: text
-  label: Jp Genericexpformat Uu
-- name: jp_linebreakchar
-  type: text
-  label: Jp Linebreakchar
-- name: name
-  type: text
-  label: Name
-- name: orderbyclause
-  type: text
-  label: Orderbyclause
-- name: separatorchar
-  type: text
-  label: Separatorchar
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_storageprovider_id
-  type: numeric
-  label: Ad Storageprovider Id
-- name: isattachmentfilejp
-  type: text
-  label: Isattachmentfilejp
-- name: iszipjp
-  type: text
-  label: Iszipjp
+entities:
+  jp_genericexpformat:
+    table: jp_genericexpformat
+    key: jp_genericexpformat_id
+    displayName: JP_GENERICEXPFORMAT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      characterset: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      documentnote: {type: string}
+      filenamepattern: {type: string}
+      formattype: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isheaderrequiredjp: {type: string}
+      jp_enclosingchar: {type: string}
+      jp_fileextension: {type: string}
+      jp_genericexpformat_id: {type: decimal, identity: true}
+      jp_genericexpformat_uu: {type: string}
+      jp_linebreakchar: {type: string}
+      name: {type: string}
+      orderbyclause: {type: string}
+      separatorchar: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      whereclause: {type: string}
+      ad_process_id: {type: decimal}
+      ad_storageprovider_id: {type: decimal}
+      isattachmentfilejp: {type: string}
+      iszipjp: {type: string}

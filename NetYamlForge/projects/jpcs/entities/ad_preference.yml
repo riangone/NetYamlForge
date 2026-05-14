@@ -1,55 +1,23 @@
-name: AD_PREFERENCE
-tableName: ad_preference
-primaryKey: ad_preference_id
-fields:
-- name: ad_preference_id
-  type: numeric
-  label: Ad Preference Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: attribute
-  type: text
-  label: Attribute
-- name: value
-  type: text
-  label: Value
-- name: ad_preference_uu
-  type: text
-  label: Ad Preference Uu
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: preferencefor
-  type: text
-  label: Preferencefor
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
+entities:
+  ad_preference:
+    table: ad_preference
+    key: ad_preference_id
+    displayName: AD_PREFERENCE
+    columns:
+      ad_preference_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_window_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      attribute: {type: string}
+      value: {type: string}
+      ad_preference_uu: {type: string}
+      ad_process_id: {type: decimal}
+      preferencefor: {type: string}
+      ad_infowindow_id: {type: decimal}
+      ad_form_id: {type: decimal}

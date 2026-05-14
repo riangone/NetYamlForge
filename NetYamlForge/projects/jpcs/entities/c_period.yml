@@ -1,52 +1,22 @@
-name: C_PERIOD
-tableName: c_period
-primaryKey: c_period_id
-fields:
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: periodno
-  type: numeric
-  label: Periodno
-- name: c_year_id
-  type: numeric
-  label: C Year Id
-- name: startdate
-  type: text
-  label: Startdate
-- name: enddate
-  type: text
-  label: Enddate
-- name: periodtype
-  type: text
-  label: Periodtype
-- name: processing
-  type: text
-  label: Processing
-- name: c_period_uu
-  type: text
-  label: C Period Uu
+entities:
+  c_period:
+    table: c_period
+    key: c_period_id
+    displayName: C_PERIOD
+    columns:
+      c_period_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      periodno: {type: decimal}
+      c_year_id: {type: decimal}
+      startdate: {type: string}
+      enddate: {type: string}
+      periodtype: {type: string}
+      processing: {type: string}
+      c_period_uu: {type: string}

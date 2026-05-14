@@ -1,46 +1,20 @@
-name: IMP_PROCESSOR_TYPE
-tableName: imp_processor_type
-primaryKey: imp_processor_type_id
-fields:
-- name: imp_processor_type_id
-  type: numeric
-  label: Imp Processor Type Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: javaclass
-  type: text
-  label: Javaclass
-- name: imp_processor_type_uu
-  type: text
-  label: Imp Processor Type Uu
+entities:
+  imp_processor_type:
+    table: imp_processor_type
+    key: imp_processor_type_id
+    displayName: IMP_PROCESSOR_TYPE
+    columns:
+      imp_processor_type_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      javaclass: {type: string}
+      imp_processor_type_uu: {type: string}

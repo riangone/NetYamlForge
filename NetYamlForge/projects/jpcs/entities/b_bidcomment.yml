@@ -1,40 +1,18 @@
-name: B_BIDCOMMENT
-tableName: b_bidcomment
-primaryKey: b_bidcomment_id
-fields:
-- name: b_topic_id
-  type: numeric
-  label: B Topic Id
-- name: b_bidcomment_id
-  type: numeric
-  label: B Bidcomment Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: b_bidcomment_uu
-  type: text
-  label: B Bidcomment Uu
+entities:
+  b_bidcomment:
+    table: b_bidcomment
+    key: b_bidcomment_id
+    displayName: B_BIDCOMMENT
+    columns:
+      b_topic_id: {type: decimal}
+      b_bidcomment_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_user_id: {type: decimal}
+      textmsg: {type: string}
+      b_bidcomment_uu: {type: string}

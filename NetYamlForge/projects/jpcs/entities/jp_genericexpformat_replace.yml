@@ -1,55 +1,23 @@
-name: JP_GENERICEXPFORMAT_REPLACE
-tableName: jp_genericexpformat_replace
-primaryKey: jp_genericexpformat_replace_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_genericexpformat_replace_id
-  type: numeric
-  label: Jp Genericexpformat Replace Id
-- name: jp_genericexpformat_replace_uu
-  type: text
-  label: Jp Genericexpformat Replace Uu
-- name: jp_replacemethod
-  type: text
-  label: Jp Replacemethod
-- name: jp_replacementstring
-  type: text
-  label: Jp Replacementstring
-- name: jp_targetstring
-  type: text
-  label: Jp Targetstring
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_genericexpformat_row_id
-  type: numeric
-  label: Jp Genericexpformat Row Id
+entities:
+  jp_genericexpformat_replace:
+    table: jp_genericexpformat_replace
+    key: jp_genericexpformat_replace_id
+    displayName: JP_GENERICEXPFORMAT_REPLACE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      documentnote: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      jp_genericexpformat_replace_id: {type: decimal, identity: true}
+      jp_genericexpformat_replace_uu: {type: string}
+      jp_replacemethod: {type: string}
+      jp_replacementstring: {type: string}
+      jp_targetstring: {type: string}
+      seqno: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_genericexpformat_row_id: {type: decimal}

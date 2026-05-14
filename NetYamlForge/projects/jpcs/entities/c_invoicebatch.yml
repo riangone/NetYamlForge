@@ -1,64 +1,26 @@
-name: C_INVOICEBATCH
-tableName: c_invoicebatch
-primaryKey: c_invoicebatch_id
-fields:
-- name: c_invoicebatch_id
-  type: numeric
-  label: C Invoicebatch Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: description
-  type: text
-  label: Description
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: controlamt
-  type: numeric
-  label: Controlamt
-- name: documentamt
-  type: numeric
-  label: Documentamt
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: c_invoicebatch_uu
-  type: text
-  label: C Invoicebatch Uu
+entities:
+  c_invoicebatch:
+    table: c_invoicebatch
+    key: c_invoicebatch_id
+    displayName: C_INVOICEBATCH
+    columns:
+      c_invoicebatch_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      description: {type: string}
+      datedoc: {type: string}
+      issotrx: {type: string}
+      salesrep_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      controlamt: {type: decimal}
+      documentamt: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      c_invoicebatch_uu: {type: string}

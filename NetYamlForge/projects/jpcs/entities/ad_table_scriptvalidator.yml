@@ -1,43 +1,19 @@
-name: AD_TABLE_SCRIPTVALIDATOR
-tableName: ad_table_scriptvalidator
-primaryKey: ad_table_scriptvalidator_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_rule_id
-  type: numeric
-  label: Ad Rule Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_table_scriptvalidator_id
-  type: numeric
-  label: Ad Table Scriptvalidator Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: eventmodelvalidator
-  type: text
-  label: Eventmodelvalidator
-- name: isactive
-  type: text
-  label: Isactive
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_table_scriptvalidator_uu
-  type: text
-  label: Ad Table Scriptvalidator Uu
+entities:
+  ad_table_scriptvalidator:
+    table: ad_table_scriptvalidator
+    key: ad_table_scriptvalidator_id
+    displayName: AD_TABLE_SCRIPTVALIDATOR
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_rule_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_table_scriptvalidator_id: {type: decimal, identity: true}
+      created: {type: string}
+      createdby: {type: decimal}
+      eventmodelvalidator: {type: string}
+      isactive: {type: string}
+      seqno: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_table_scriptvalidator_uu: {type: string}

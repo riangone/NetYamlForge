@@ -1,37 +1,17 @@
-name: C_PROJECTISSUEMA
-tableName: c_projectissuema
-primaryKey: c_projectissue_id
-fields:
-- name: c_projectissue_id
-  type: numeric
-  label: C Projectissue Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: c_projectissuema_uu
-  type: text
-  label: C Projectissuema Uu
+entities:
+  c_projectissuema:
+    table: c_projectissuema
+    key: c_projectissue_id
+    displayName: C_PROJECTISSUEMA
+    columns:
+      c_projectissue_id: {type: decimal, identity: true}
+      m_attributesetinstance_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      movementqty: {type: decimal}
+      c_projectissuema_uu: {type: string}

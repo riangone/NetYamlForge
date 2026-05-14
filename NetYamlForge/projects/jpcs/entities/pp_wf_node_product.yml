@@ -1,55 +1,23 @@
-name: PP_WF_NODE_PRODUCT
-tableName: pp_wf_node_product
-primaryKey: pp_wf_node_product_id
-fields:
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: configurationlevel
-  type: text
-  label: Configurationlevel
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pp_wf_node_product_id
-  type: numeric
-  label: Pp Wf Node Product Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: issubcontracting
-  type: text
-  label: Issubcontracting
-- name: yield
-  type: numeric
-  label: Yield
-- name: pp_wf_node_product_uu
-  type: text
-  label: Pp Wf Node Product Uu
+entities:
+  pp_wf_node_product:
+    table: pp_wf_node_product
+    key: pp_wf_node_product_id
+    displayName: PP_WF_NODE_PRODUCT
+    columns:
+      entitytype: {type: string}
+      configurationlevel: {type: string}
+      ad_wf_node_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      m_product_id: {type: decimal}
+      pp_wf_node_product_id: {type: decimal, identity: true}
+      qty: {type: decimal}
+      seqno: {type: decimal}
+      updated: {type: string}
+      ad_client_id: {type: decimal}
+      updatedby: {type: decimal}
+      ad_org_id: {type: decimal}
+      issubcontracting: {type: string}
+      yield: {type: decimal}
+      pp_wf_node_product_uu: {type: string}

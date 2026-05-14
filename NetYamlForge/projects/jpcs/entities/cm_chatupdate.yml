@@ -1,37 +1,17 @@
-name: CM_CHATUPDATE
-tableName: cm_chatupdate
-primaryKey: cm_chat_id
-fields:
-- name: cm_chat_id
-  type: numeric
-  label: Cm Chat Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: cm_chatupdate_uu
-  type: text
-  label: Cm Chatupdate Uu
+entities:
+  cm_chatupdate:
+    table: cm_chatupdate
+    key: cm_chat_id
+    displayName: CM_CHATUPDATE
+    columns:
+      cm_chat_id: {type: decimal, identity: true}
+      ad_user_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isselfservice: {type: string}
+      cm_chatupdate_uu: {type: string}

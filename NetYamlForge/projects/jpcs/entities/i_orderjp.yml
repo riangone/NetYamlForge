@@ -1,412 +1,142 @@
-name: I_ORDERJP
-tableName: i_orderjp
-primaryKey: i_orderjp_id
-fields:
-- name: i_orderjp_id
-  type: numeric
-  label: I Orderjp Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: bpartnervalue
-  type: text
-  label: Bpartnervalue
-- name: name
-  type: text
-  label: Name
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: billto_id
-  type: numeric
-  label: Billto Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: address1
-  type: text
-  label: Address1
-- name: address2
-  type: text
-  label: Address2
-- name: postal
-  type: text
-  label: Postal
-- name: city
-  type: text
-  label: City
-- name: c_region_id
-  type: numeric
-  label: C Region Id
-- name: regionname
-  type: text
-  label: Regionname
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: countrycode
-  type: text
-  label: Countrycode
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: contactname
-  type: text
-  label: Contactname
-- name: email
-  type: text
-  label: Email
-- name: phone
-  type: text
-  label: Phone
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: doctypename
-  type: text
-  label: Doctypename
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: paymenttermvalue
-  type: text
-  label: Paymenttermvalue
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: productvalue
-  type: text
-  label: Productvalue
-- name: upc
-  type: text
-  label: Upc
-- name: sku
-  type: text
-  label: Sku
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: taxindicator
-  type: text
-  label: Taxindicator
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: linedescription
-  type: text
-  label: Linedescription
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qtyordered
-  type: numeric
-  label: Qtyordered
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: chargename
-  type: text
-  label: Chargename
-- name: c_ordersource_id
-  type: numeric
-  label: C Ordersource Id
-- name: c_ordersourcevalue
-  type: text
-  label: C Ordersourcevalue
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: i_orderjp_uu
-  type: text
-  label: I Orderjp Uu
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: jp_orgtrx_value
-  type: text
-  label: Jp Orgtrx Value
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: jp_salesrep_value
-  type: text
-  label: Jp Salesrep Value
-- name: jp_salesrep_name
-  type: text
-  label: Jp Salesrep Name
-- name: jp_salesrep_email
-  type: text
-  label: Jp Salesrep Email
-- name: jp_warehouse_value
-  type: text
-  label: Jp Warehouse Value
-- name: poreference
-  type: text
-  label: Poreference
-- name: bill_bpvalue
-  type: text
-  label: Bill Bpvalue
-- name: bill_bpartner_id
-  type: numeric
-  label: Bill Bpartner Id
-- name: jp_pricelist_name
-  type: text
-  label: Jp Pricelist Name
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: bill_user_id
-  type: numeric
-  label: Bill User Id
-- name: jp_bill_user_email
-  type: text
-  label: Jp Bill User Email
-- name: jp_bill_user_name
-  type: text
-  label: Jp Bill User Name
-- name: jp_bill_user_value
-  type: text
-  label: Jp Bill User Value
-- name: jp_project_value
-  type: text
-  label: Jp Project Value
-- name: jp_campaign_value
-  type: text
-  label: Jp Campaign Value
-- name: jp_activity_value
-  type: text
-  label: Jp Activity Value
-- name: jp_userelement2_value
-  type: text
-  label: Jp Userelement2 Value
-- name: jp_userelement1_value
-  type: text
-  label: Jp Userelement1 Value
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: jp_locator_value
-  type: text
-  label: Jp Locator Value
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: jp_shipper_name
-  type: text
-  label: Jp Shipper Name
-- name: dropship_bpartner_id
-  type: numeric
-  label: Dropship Bpartner Id
-- name: dropship_location_id
-  type: numeric
-  label: Dropship Location Id
-- name: dropship_user_id
-  type: numeric
-  label: Dropship User Id
-- name: jp_dropship_bp_value
-  type: text
-  label: Jp Dropship Bp Value
-- name: jp_dropship_bp_location_name
-  type: text
-  label: Jp Dropship Bp Location Name
-- name: jp_dropship_user_email
-  type: text
-  label: Jp Dropship User Email
-- name: jp_dropship_user_value
-  type: text
-  label: Jp Dropship User Value
-- name: jp_dropship_user_name
-  type: text
-  label: Jp Dropship User Name
-- name: isselectbilltojp
-  type: text
-  label: Isselectbilltojp
-- name: jp_bp_org_value
-  type: text
-  label: Jp Bp Org Value
-- name: name2
-  type: text
-  label: Name2
-- name: groupvalue
-  type: text
-  label: Groupvalue
-- name: jp_bpartner_location_name
-  type: text
-  label: Jp Bpartner Location Name
-- name: postal_add
-  type: text
-  label: Postal Add
-- name: jp_location_label
-  type: text
-  label: Jp Location Label
-- name: jp_user_value
-  type: text
-  label: Jp User Value
-- name: address3
-  type: text
-  label: Address3
-- name: x12de355
-  type: text
-  label: X12De355
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: line
-  type: numeric
-  label: Line
-- name: jp_bill_bp_location_name
-  type: text
-  label: Jp Bill Bp Location Name
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: jp_line_orgtrx_value
-  type: text
-  label: Jp Line Orgtrx Value
-- name: jp_line_orgtrx_id
-  type: numeric
-  label: Jp Line Orgtrx Id
-- name: jp_line_project_value
-  type: text
-  label: Jp Line Project Value
-- name: jp_line_project_id
-  type: numeric
-  label: Jp Line Project Id
-- name: jp_line_activity_value
-  type: text
-  label: Jp Line Activity Value
-- name: jp_line_activity_id
-  type: numeric
-  label: Jp Line Activity Id
-- name: jp_line_campaign_value
-  type: text
-  label: Jp Line Campaign Value
-- name: jp_line_campaign_id
-  type: numeric
-  label: Jp Line Campaign Id
-- name: jp_line_user1_id
-  type: numeric
-  label: Jp Line User1 Id
-- name: jp_line_user2_id
-  type: numeric
-  label: Jp Line User2 Id
-- name: jp_line_userelement1_value
-  type: text
-  label: Jp Line Userelement1 Value
-- name: jp_line_userelement2_value
-  type: text
-  label: Jp Line Userelement2 Value
+entities:
+  i_orderjp:
+    table: i_orderjp
+    key: i_orderjp_id
+    displayName: I_ORDERJP
+    columns:
+      i_orderjp_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      salesrep_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      m_shipper_id: {type: decimal}
+      issotrx: {type: string}
+      c_bpartner_id: {type: decimal}
+      bpartnervalue: {type: string}
+      name: {type: string}
+      c_bpartner_location_id: {type: decimal}
+      billto_id: {type: decimal}
+      c_location_id: {type: decimal}
+      address1: {type: string}
+      address2: {type: string}
+      postal: {type: string}
+      city: {type: string}
+      c_region_id: {type: decimal}
+      regionname: {type: string}
+      c_country_id: {type: decimal}
+      countrycode: {type: string}
+      ad_user_id: {type: decimal}
+      contactname: {type: string}
+      email: {type: string}
+      phone: {type: string}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      doctypename: {type: string}
+      c_paymentterm_id: {type: decimal}
+      paymenttermvalue: {type: string}
+      c_order_id: {type: decimal}
+      documentno: {type: string}
+      dateordered: {type: string}
+      dateacct: {type: string}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      productvalue: {type: string}
+      upc: {type: string}
+      sku: {type: string}
+      c_tax_id: {type: decimal}
+      taxindicator: {type: string}
+      taxamt: {type: decimal}
+      c_orderline_id: {type: decimal}
+      linedescription: {type: string}
+      c_uom_id: {type: decimal}
+      qtyordered: {type: decimal}
+      priceactual: {type: decimal}
+      freightamt: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      chargename: {type: string}
+      c_ordersource_id: {type: decimal}
+      c_ordersourcevalue: {type: string}
+      deliveryrule: {type: string}
+      i_orderjp_uu: {type: string}
+      jp_org_value: {type: string}
+      jp_orgtrx_value: {type: string}
+      datepromised: {type: string}
+      jp_salesrep_value: {type: string}
+      jp_salesrep_name: {type: string}
+      jp_salesrep_email: {type: string}
+      jp_warehouse_value: {type: string}
+      poreference: {type: string}
+      bill_bpvalue: {type: string}
+      bill_bpartner_id: {type: decimal}
+      jp_pricelist_name: {type: string}
+      paymentrule: {type: string}
+      invoicerule: {type: string}
+      isdiscountprinted: {type: string}
+      bill_user_id: {type: decimal}
+      jp_bill_user_email: {type: string}
+      jp_bill_user_name: {type: string}
+      jp_bill_user_value: {type: string}
+      jp_project_value: {type: string}
+      jp_campaign_value: {type: string}
+      jp_activity_value: {type: string}
+      jp_userelement2_value: {type: string}
+      jp_userelement1_value: {type: string}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      jp_locator_value: {type: string}
+      isdropship: {type: string}
+      priorityrule: {type: string}
+      deliveryviarule: {type: string}
+      freightcostrule: {type: string}
+      jp_locator_id: {type: decimal}
+      jp_shipper_name: {type: string}
+      dropship_bpartner_id: {type: decimal}
+      dropship_location_id: {type: decimal}
+      dropship_user_id: {type: decimal}
+      jp_dropship_bp_value: {type: string}
+      jp_dropship_bp_location_name: {type: string}
+      jp_dropship_user_email: {type: string}
+      jp_dropship_user_value: {type: string}
+      jp_dropship_user_name: {type: string}
+      isselectbilltojp: {type: string}
+      jp_bp_org_value: {type: string}
+      name2: {type: string}
+      groupvalue: {type: string}
+      jp_bpartner_location_name: {type: string}
+      postal_add: {type: string}
+      jp_location_label: {type: string}
+      jp_user_value: {type: string}
+      address3: {type: string}
+      x12de355: {type: string}
+      qtyentered: {type: decimal}
+      priceentered: {type: decimal}
+      line: {type: decimal}
+      jp_bill_bp_location_name: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      jp_line_orgtrx_value: {type: string}
+      jp_line_orgtrx_id: {type: decimal}
+      jp_line_project_value: {type: string}
+      jp_line_project_id: {type: decimal}
+      jp_line_activity_value: {type: string}
+      jp_line_activity_id: {type: decimal}
+      jp_line_campaign_value: {type: string}
+      jp_line_campaign_id: {type: decimal}
+      jp_line_user1_id: {type: decimal}
+      jp_line_user2_id: {type: decimal}
+      jp_line_userelement1_value: {type: string}
+      jp_line_userelement2_value: {type: string}

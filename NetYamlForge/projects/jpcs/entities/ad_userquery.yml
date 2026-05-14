@@ -1,58 +1,24 @@
-name: AD_USERQUERY
-tableName: ad_userquery
-primaryKey: ad_userquery_id
-fields:
-- name: ad_userquery_id
-  type: numeric
-  label: Ad Userquery Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: code
-  type: text
-  label: Code
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ad_userquery_uu
-  type: text
-  label: Ad Userquery Uu
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: isdefault
-  type: text
-  label: Isdefault
+entities:
+  ad_userquery:
+    table: ad_userquery
+    key: ad_userquery_id
+    displayName: AD_USERQUERY
+    columns:
+      ad_userquery_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_user_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      code: {type: string}
+      ad_tab_id: {type: decimal}
+      ad_userquery_uu: {type: string}
+      ad_window_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      isdefault: {type: string}

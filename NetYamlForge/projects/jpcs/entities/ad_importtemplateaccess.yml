@@ -1,46 +1,20 @@
-name: AD_IMPORTTEMPLATEACCESS
-tableName: ad_importtemplateaccess
-primaryKey: ad_importtemplateaccess_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_importtemplateaccess_id
-  type: numeric
-  label: Ad Importtemplateaccess Id
-- name: ad_importtemplateaccess_uu
-  type: text
-  label: Ad Importtemplateaccess Uu
-- name: ad_importtemplate_id
-  type: numeric
-  label: Ad Importtemplate Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isallowinsert
-  type: text
-  label: Isallowinsert
-- name: isallowmerge
-  type: text
-  label: Isallowmerge
-- name: isallowupdate
-  type: text
-  label: Isallowupdate
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  ad_importtemplateaccess:
+    table: ad_importtemplateaccess
+    key: ad_importtemplateaccess_id
+    displayName: AD_IMPORTTEMPLATEACCESS
+    columns:
+      ad_client_id: {type: decimal}
+      ad_importtemplateaccess_id: {type: decimal, identity: true}
+      ad_importtemplateaccess_uu: {type: string}
+      ad_importtemplate_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isallowinsert: {type: string}
+      isallowmerge: {type: string}
+      isallowupdate: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

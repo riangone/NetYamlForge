@@ -1,82 +1,32 @@
-name: AD_COLOR
-tableName: ad_color
-primaryKey: ad_color_id
-fields:
-- name: ad_color_id
-  type: numeric
-  label: Ad Color Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: colortype
-  type: text
-  label: Colortype
-- name: red
-  type: numeric
-  label: Red
-- name: green
-  type: numeric
-  label: Green
-- name: blue
-  type: numeric
-  label: Blue
-- name: alpha
-  type: numeric
-  label: Alpha
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: imagealpha
-  type: numeric
-  label: Imagealpha
-- name: red_1
-  type: numeric
-  label: Red 1
-- name: green_1
-  type: numeric
-  label: Green 1
-- name: blue_1
-  type: numeric
-  label: Blue 1
-- name: alpha_1
-  type: numeric
-  label: Alpha 1
-- name: linewidth
-  type: numeric
-  label: Linewidth
-- name: linedistance
-  type: numeric
-  label: Linedistance
-- name: startpoint
-  type: numeric
-  label: Startpoint
-- name: repeatdistance
-  type: numeric
-  label: Repeatdistance
-- name: ad_color_uu
-  type: text
-  label: Ad Color Uu
+entities:
+  ad_color:
+    table: ad_color
+    key: ad_color_id
+    displayName: AD_COLOR
+    columns:
+      ad_color_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      isdefault: {type: string}
+      colortype: {type: string}
+      red: {type: decimal}
+      green: {type: decimal}
+      blue: {type: decimal}
+      alpha: {type: decimal}
+      ad_image_id: {type: decimal}
+      imagealpha: {type: decimal}
+      red_1: {type: decimal}
+      green_1: {type: decimal}
+      blue_1: {type: decimal}
+      alpha_1: {type: decimal}
+      linewidth: {type: decimal}
+      linedistance: {type: decimal}
+      startpoint: {type: decimal}
+      repeatdistance: {type: decimal}
+      ad_color_uu: {type: string}

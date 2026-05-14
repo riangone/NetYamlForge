@@ -1,37 +1,17 @@
-name: C_DOCBASEGROUPLINE
-tableName: c_docbasegroupline
-primaryKey: c_docbasegroupline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_docbasegroupline_id
-  type: numeric
-  label: C Docbasegroupline Id
-- name: c_docbasegroupline_uu
-  type: text
-  label: C Docbasegroupline Uu
-- name: c_docbasegroup_id
-  type: numeric
-  label: C Docbasegroup Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  c_docbasegroupline:
+    table: c_docbasegroupline
+    key: c_docbasegroupline_id
+    displayName: C_DOCBASEGROUPLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_docbasegroupline_id: {type: decimal, identity: true}
+      c_docbasegroupline_uu: {type: string}
+      c_docbasegroup_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      docbasetype: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

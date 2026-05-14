@@ -1,40 +1,18 @@
-name: M_PRODUCT_QUALITYTEST
-tableName: m_product_qualitytest
-primaryKey: m_product_qualitytest_id
-fields:
-- name: m_product_qualitytest_id
-  type: numeric
-  label: M Product Qualitytest Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_qualitytest_id
-  type: numeric
-  label: M Qualitytest Id
-- name: expectedresult
-  type: text
-  label: Expectedresult
-- name: m_product_qualitytest_uu
-  type: text
-  label: M Product Qualitytest Uu
+entities:
+  m_product_qualitytest:
+    table: m_product_qualitytest
+    key: m_product_qualitytest_id
+    displayName: M_PRODUCT_QUALITYTEST
+    columns:
+      m_product_qualitytest_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_product_id: {type: decimal}
+      m_qualitytest_id: {type: decimal}
+      expectedresult: {type: string}
+      m_product_qualitytest_uu: {type: string}

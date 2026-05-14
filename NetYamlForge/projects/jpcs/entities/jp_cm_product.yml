@@ -1,256 +1,90 @@
-name: JP_CM_PRODUCT
-tableName: jp_cm_product
-primaryKey: jp_cm_product_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: classification
-  type: text
-  label: Classification
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: customstariffnumber
-  type: text
-  label: Customstariffnumber
-- name: description
-  type: text
-  label: Description
-- name: descriptionurl
-  type: text
-  label: Descriptionurl
-- name: discontinued
-  type: text
-  label: Discontinued
-- name: discontinuedat
-  type: text
-  label: Discontinuedat
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: group1
-  type: text
-  label: Group1
-- name: group2
-  type: text
-  label: Group2
-- name: guaranteedays
-  type: numeric
-  label: Guaranteedays
-- name: guaranteedaysmin
-  type: numeric
-  label: Guaranteedaysmin
-- name: help
-  type: text
-  label: Help
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: isactive
-  type: text
-  label: Isactive
-- name: isautoproduce
-  type: text
-  label: Isautoproduce
-- name: isbom
-  type: text
-  label: Isbom
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: isexcludeautodelivery
-  type: text
-  label: Isexcludeautodelivery
-- name: isinvoiceprintdetails
-  type: text
-  label: Isinvoiceprintdetails
-- name: iskanban
-  type: text
-  label: Iskanban
-- name: ismanufactured
-  type: text
-  label: Ismanufactured
-- name: isownbox
-  type: text
-  label: Isownbox
-- name: isphantom
-  type: text
-  label: Isphantom
-- name: ispicklistprintdetails
-  type: text
-  label: Ispicklistprintdetails
-- name: ispurchased
-  type: text
-  label: Ispurchased
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: issold
-  type: text
-  label: Issold
-- name: isstocked
-  type: text
-  label: Isstocked
-- name: issummary
-  type: text
-  label: Issummary
-- name: isverified
-  type: text
-  label: Isverified
-- name: iswebstorefeatured
-  type: text
-  label: Iswebstorefeatured
-- name: jp_attributeset_name
-  type: text
-  label: Jp Attributeset Name
-- name: jp_cm_productcategory_id
-  type: numeric
-  label: Jp Cm Productcategory Id
-- name: jp_cm_product_id
-  type: numeric
-  label: Jp Cm Product Id
-- name: jp_cm_product_uu
-  type: text
-  label: Jp Cm Product Uu
-- name: jp_locator_value
-  type: text
-  label: Jp Locator Value
-- name: jp_mailtext_name
-  type: text
-  label: Jp Mailtext Name
-- name: jp_parttype_name
-  type: text
-  label: Jp Parttype Name
-- name: jp_product_category_value
-  type: text
-  label: Jp Product Category Value
-- name: jp_revenuerecognition_name
-  type: text
-  label: Jp Revenuerecognition Name
-- name: jp_taxcategory_name
-  type: text
-  label: Jp Taxcategory Name
-- name: lowlevel
-  type: numeric
-  label: Lowlevel
-- name: name
-  type: text
-  label: Name
-- name: processing
-  type: text
-  label: Processing
-- name: producttype
-  type: text
-  label: Producttype
-- name: sku
-  type: text
-  label: Sku
-- name: shelfdepth
-  type: numeric
-  label: Shelfdepth
-- name: shelfheight
-  type: numeric
-  label: Shelfheight
-- name: shelfwidth
-  type: numeric
-  label: Shelfwidth
-- name: upc
-  type: text
-  label: Upc
-- name: unitsperpack
-  type: numeric
-  label: Unitsperpack
-- name: unitsperpallet
-  type: numeric
-  label: Unitsperpallet
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: versionno
-  type: text
-  label: Versionno
-- name: volume
-  type: numeric
-  label: Volume
-- name: weight
-  type: numeric
-  label: Weight
-- name: jp_freightcategory_value
-  type: text
-  label: Jp Freightcategory Value
-- name: jp_resourcetype_value
-  type: text
-  label: Jp Resourcetype Value
-- name: jp_warehouse_value
-  type: text
-  label: Jp Warehouse Value
-- name: bpartnervalue
-  type: text
-  label: Bpartnervalue
-- name: qualityrating
-  type: numeric
-  label: Qualityrating
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: jp_vendorupc
-  type: text
-  label: Jp Vendorupc
-- name: priceeffective
-  type: text
-  label: Priceeffective
-- name: pricepo
-  type: numeric
-  label: Pricepo
-- name: order_min
-  type: numeric
-  label: Order Min
-- name: order_pack
-  type: numeric
-  label: Order Pack
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: costperorder
-  type: numeric
-  label: Costperorder
-- name: vendorproductno
-  type: text
-  label: Vendorproductno
-- name: vendorcategory
-  type: text
-  label: Vendorcategory
-- name: manufacturer
-  type: text
-  label: Manufacturer
-- name: jp_vendoruom_id
-  type: numeric
-  label: Jp Vendoruom Id
-- name: iscurrentvendor
-  type: text
-  label: Iscurrentvendor
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: royaltyamt
-  type: numeric
-  label: Royaltyamt
-- name: isignore_nmmaster_notfoundjp
-  type: text
-  label: Isignore Nmmaster Notfoundjp
+entities:
+  jp_cm_product:
+    table: jp_cm_product
+    key: jp_cm_product_id
+    displayName: JP_CM_PRODUCT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      classification: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      customstariffnumber: {type: string}
+      description: {type: string}
+      descriptionurl: {type: string}
+      discontinued: {type: string}
+      discontinuedat: {type: string}
+      documentnote: {type: string}
+      group1: {type: string}
+      group2: {type: string}
+      guaranteedays: {type: decimal}
+      guaranteedaysmin: {type: decimal}
+      help: {type: string}
+      imageurl: {type: string}
+      isactive: {type: string}
+      isautoproduce: {type: string}
+      isbom: {type: string}
+      isdropship: {type: string}
+      isexcludeautodelivery: {type: string}
+      isinvoiceprintdetails: {type: string}
+      iskanban: {type: string}
+      ismanufactured: {type: string}
+      isownbox: {type: string}
+      isphantom: {type: string}
+      ispicklistprintdetails: {type: string}
+      ispurchased: {type: string}
+      isselfservice: {type: string}
+      issold: {type: string}
+      isstocked: {type: string}
+      issummary: {type: string}
+      isverified: {type: string}
+      iswebstorefeatured: {type: string}
+      jp_attributeset_name: {type: string}
+      jp_cm_productcategory_id: {type: decimal}
+      jp_cm_product_id: {type: decimal, identity: true}
+      jp_cm_product_uu: {type: string}
+      jp_locator_value: {type: string}
+      jp_mailtext_name: {type: string}
+      jp_parttype_name: {type: string}
+      jp_product_category_value: {type: string}
+      jp_revenuerecognition_name: {type: string}
+      jp_taxcategory_name: {type: string}
+      lowlevel: {type: decimal}
+      name: {type: string}
+      processing: {type: string}
+      producttype: {type: string}
+      sku: {type: string}
+      shelfdepth: {type: decimal}
+      shelfheight: {type: decimal}
+      shelfwidth: {type: decimal}
+      upc: {type: string}
+      unitsperpack: {type: decimal}
+      unitsperpallet: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      versionno: {type: string}
+      volume: {type: decimal}
+      weight: {type: decimal}
+      jp_freightcategory_value: {type: string}
+      jp_resourcetype_value: {type: string}
+      jp_warehouse_value: {type: string}
+      bpartnervalue: {type: string}
+      qualityrating: {type: decimal}
+      c_currency_id: {type: decimal}
+      jp_vendorupc: {type: string}
+      priceeffective: {type: string}
+      pricepo: {type: decimal}
+      order_min: {type: decimal}
+      order_pack: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      costperorder: {type: decimal}
+      vendorproductno: {type: string}
+      vendorcategory: {type: string}
+      manufacturer: {type: string}
+      jp_vendoruom_id: {type: decimal}
+      iscurrentvendor: {type: string}
+      pricelist: {type: decimal}
+      royaltyamt: {type: decimal}
+      isignore_nmmaster_notfoundjp: {type: string}

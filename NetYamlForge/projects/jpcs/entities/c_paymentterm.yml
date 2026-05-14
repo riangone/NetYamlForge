@@ -1,115 +1,43 @@
-name: C_PAYMENTTERM
-tableName: c_paymentterm
-primaryKey: c_paymentterm_id
-fields:
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: afterdelivery
-  type: text
-  label: Afterdelivery
-- name: isduefixed
-  type: text
-  label: Isduefixed
-- name: netdays
-  type: numeric
-  label: Netdays
-- name: gracedays
-  type: numeric
-  label: Gracedays
-- name: fixmonthcutoff
-  type: numeric
-  label: Fixmonthcutoff
-- name: fixmonthday
-  type: numeric
-  label: Fixmonthday
-- name: fixmonthoffset
-  type: numeric
-  label: Fixmonthoffset
-- name: discountdays
-  type: numeric
-  label: Discountdays
-- name: discount
-  type: numeric
-  label: Discount
-- name: discountdays2
-  type: numeric
-  label: Discountdays2
-- name: discount2
-  type: numeric
-  label: Discount2
-- name: isnextbusinessday
-  type: text
-  label: Isnextbusinessday
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: value
-  type: text
-  label: Value
-- name: netday
-  type: text
-  label: Netday
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: processing
-  type: text
-  label: Processing
-- name: paymenttermusage
-  type: text
-  label: Paymenttermusage
-- name: c_paymentterm_uu
-  type: text
-  label: C Paymentterm Uu
-- name: ispaymenttermsjp
-  type: text
-  label: Ispaymenttermsjp
-- name: jp_paymentterms_id
-  type: numeric
-  label: Jp Paymentterms Id
-- name: isduedatebizdayonlyjp
-  type: text
-  label: Isduedatebizdayonlyjp
-- name: isduedateholidaynextbizdayjp
-  type: text
-  label: Isduedateholidaynextbizdayjp
-- name: jp_calendar_id
-  type: numeric
-  label: Jp Calendar Id
-- name: jp_ar_closingdate
-  type: text
-  label: Jp Ar Closingdate
-- name: jp_ap_closingdate
-  type: text
-  label: Jp Ap Closingdate
+entities:
+  c_paymentterm:
+    table: c_paymentterm
+    key: c_paymentterm_id
+    displayName: C_PAYMENTTERM
+    columns:
+      c_paymentterm_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      documentnote: {type: string}
+      afterdelivery: {type: string}
+      isduefixed: {type: string}
+      netdays: {type: decimal}
+      gracedays: {type: decimal}
+      fixmonthcutoff: {type: decimal}
+      fixmonthday: {type: decimal}
+      fixmonthoffset: {type: decimal}
+      discountdays: {type: decimal}
+      discount: {type: decimal}
+      discountdays2: {type: decimal}
+      discount2: {type: decimal}
+      isnextbusinessday: {type: string}
+      isdefault: {type: string}
+      value: {type: string}
+      netday: {type: string}
+      isvalid: {type: string}
+      processing: {type: string}
+      paymenttermusage: {type: string}
+      c_paymentterm_uu: {type: string}
+      ispaymenttermsjp: {type: string}
+      jp_paymentterms_id: {type: decimal}
+      isduedatebizdayonlyjp: {type: string}
+      isduedateholidaynextbizdayjp: {type: string}
+      jp_calendar_id: {type: decimal}
+      jp_ar_closingdate: {type: string}
+      jp_ap_closingdate: {type: string}

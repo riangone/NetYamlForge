@@ -1,13 +1,9 @@
-name: AD_ATTACHMENT_ENTRY
-tableName: ad_attachment_entry
-primaryKey: ad_attachment_id
-fields:
-- name: ad_attachment_id
-  type: numeric
-  label: Ad Attachment Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: binarydata
-  type: text
-  label: Binarydata
+entities:
+  ad_attachment_entry:
+    table: ad_attachment_entry
+    key: ad_attachment_id
+    displayName: AD_ATTACHMENT_ENTRY
+    columns:
+      ad_attachment_id: {type: decimal, identity: true}
+      seqno: {type: decimal}
+      binarydata: {type: string}

@@ -1,19 +1,11 @@
-name: T_ALTER_COLUMN
-tableName: t_alter_column
-primaryKey: tablename
-fields:
-- name: tablename
-  type: text
-  label: Tablename
-- name: columnname
-  type: text
-  label: Columnname
-- name: datatype
-  type: text
-  label: Datatype
-- name: nullclause
-  type: text
-  label: Nullclause
-- name: defaultclause
-  type: text
-  label: Defaultclause
+entities:
+  t_alter_column:
+    table: t_alter_column
+    key: tablename
+    displayName: T_ALTER_COLUMN
+    columns:
+      tablename: {type: string, identity: true}
+      columnname: {type: string}
+      datatype: {type: string}
+      nullclause: {type: string}
+      defaultclause: {type: string}

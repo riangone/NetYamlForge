@@ -1,100 +1,38 @@
-name: T_OPENINVPOINTOFTIMEJP
-tableName: t_openinvpointoftimejp
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: jp_currencyto_id
-  type: numeric
-  label: Jp Currencyto Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: documentno
-  type: text
-  label: Documentno
-- name: poreference
-  type: text
-  label: Poreference
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: jp_pointoftime
-  type: text
-  label: Jp Pointoftime
-- name: ispaid
-  type: text
-  label: Ispaid
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: openamt
-  type: numeric
-  label: Openamt
-- name: jp_openamtpointoftime
-  type: numeric
-  label: Jp Openamtpointoftime
-- name: jp_exchangedgrandtotal
-  type: numeric
-  label: Jp Exchangedgrandtotal
-- name: jp_exchangedopenamt
-  type: numeric
-  label: Jp Exchangedopenamt
-- name: jp_exchangedopenamtpot
-  type: numeric
-  label: Jp Exchangedopenamtpot
-- name: rate
-  type: numeric
-  label: Rate
+entities:
+  t_openinvpointoftimejp:
+    table: t_openinvpointoftimejp
+    key: ad_pinstance_id
+    displayName: T_OPENINVPOINTOFTIMEJP
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      c_invoice_id: {type: decimal}
+      c_order_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      jp_corporation_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      jp_currencyto_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      c_paymentterm_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      account_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      docbasetype: {type: string}
+      documentno: {type: string}
+      poreference: {type: string}
+      paymentrule: {type: string}
+      docstatus: {type: string}
+      dateinvoiced: {type: string}
+      dateacct: {type: string}
+      jp_pointoftime: {type: string}
+      ispaid: {type: string}
+      issotrx: {type: string}
+      grandtotal: {type: decimal}
+      openamt: {type: decimal}
+      jp_openamtpointoftime: {type: decimal}
+      jp_exchangedgrandtotal: {type: decimal}
+      jp_exchangedopenamt: {type: decimal}
+      jp_exchangedopenamtpot: {type: decimal}
+      rate: {type: decimal}

@@ -1,79 +1,31 @@
-name: R_REQUESTTYPE
-tableName: r_requesttype
-primaryKey: r_requesttype_id
-fields:
-- name: r_requesttype_id
-  type: numeric
-  label: R Requesttype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: duedatetolerance
-  type: numeric
-  label: Duedatetolerance
-- name: isemailwhenoverdue
-  type: text
-  label: Isemailwhenoverdue
-- name: isemailwhendue
-  type: text
-  label: Isemailwhendue
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: autoduedatedays
-  type: numeric
-  label: Autoduedatedays
-- name: confidentialtype
-  type: text
-  label: Confidentialtype
-- name: isautochangerequest
-  type: text
-  label: Isautochangerequest
-- name: isconfidentialinfo
-  type: text
-  label: Isconfidentialinfo
-- name: r_statuscategory_id
-  type: numeric
-  label: R Statuscategory Id
-- name: isindexed
-  type: text
-  label: Isindexed
-- name: r_requesttype_uu
-  type: text
-  label: R Requesttype Uu
-- name: headercolor
-  type: text
-  label: Headercolor
-- name: contentcolor
-  type: text
-  label: Contentcolor
+entities:
+  r_requesttype:
+    table: r_requesttype
+    key: r_requesttype_id
+    displayName: R_REQUESTTYPE
+    columns:
+      r_requesttype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isdefault: {type: string}
+      isselfservice: {type: string}
+      duedatetolerance: {type: decimal}
+      isemailwhenoverdue: {type: string}
+      isemailwhendue: {type: string}
+      isinvoiced: {type: string}
+      autoduedatedays: {type: decimal}
+      confidentialtype: {type: string}
+      isautochangerequest: {type: string}
+      isconfidentialinfo: {type: string}
+      r_statuscategory_id: {type: decimal}
+      isindexed: {type: string}
+      r_requesttype_uu: {type: string}
+      headercolor: {type: string}
+      contentcolor: {type: string}

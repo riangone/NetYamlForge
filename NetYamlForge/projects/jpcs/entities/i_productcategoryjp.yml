@@ -1,181 +1,65 @@
-name: I_PRODUCTCATEGORYJP
-tableName: i_productcategoryjp
-primaryKey: i_productcategoryjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_productcategoryjp_id
-  type: numeric
-  label: I Productcategoryjp Id
-- name: i_productcategoryjp_uu
-  type: text
-  label: I Productcategoryjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: value
-  type: text
-  label: Value
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: plannedmargin
-  type: numeric
-  label: Plannedmargin
-- name: jp_asset_group_name
-  type: text
-  label: Jp Asset Group Name
-- name: a_asset_group_id
-  type: numeric
-  label: A Asset Group Id
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: jp_printcolor_name
-  type: text
-  label: Jp Printcolor Name
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: mmpolicy
-  type: text
-  label: Mmpolicy
-- name: jp_productcategoryl1_value
-  type: text
-  label: Jp Productcategoryl1 Value
-- name: jp_productcategoryl1_id
-  type: numeric
-  label: Jp Productcategoryl1 Id
-- name: jp_acctschema_name
-  type: text
-  label: Jp Acctschema Name
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: costingmethod
-  type: text
-  label: Costingmethod
-- name: costinglevel
-  type: text
-  label: Costinglevel
-- name: jp_p_asset_acct_value
-  type: text
-  label: Jp P Asset Acct Value
-- name: p_asset_acct
-  type: numeric
-  label: P Asset Acct
-- name: jp_p_expense_acct_value
-  type: text
-  label: Jp P Expense Acct Value
-- name: p_expense_acct
-  type: numeric
-  label: P Expense Acct
-- name: jp_costadjustment_value
-  type: text
-  label: Jp Costadjustment Value
-- name: p_costadjustment_acct
-  type: numeric
-  label: P Costadjustment Acct
-- name: jp_inventoryclearing_value
-  type: text
-  label: Jp Inventoryclearing Value
-- name: p_inventoryclearing_acct
-  type: numeric
-  label: P Inventoryclearing Acct
-- name: jp_cogs_acct_value
-  type: text
-  label: Jp Cogs Acct Value
-- name: p_cogs_acct
-  type: numeric
-  label: P Cogs Acct
-- name: jp_p_revenue_acct_value
-  type: text
-  label: Jp P Revenue Acct Value
-- name: p_revenue_acct
-  type: numeric
-  label: P Revenue Acct
-- name: jp_po_pricevariance_value
-  type: text
-  label: Jp Po Pricevariance Value
-- name: p_purchasepricevariance_acct
-  type: numeric
-  label: P Purchasepricevariance Acct
-- name: jp_invoicepricevariance_value
-  type: text
-  label: Jp Invoicepricevariance Value
-- name: p_invoicepricevariance_acct
-  type: numeric
-  label: P Invoicepricevariance Acct
-- name: jp_p_tradediscountrec_value
-  type: text
-  label: Jp P Tradediscountrec Value
-- name: p_tradediscountrec_acct
-  type: numeric
-  label: P Tradediscountrec Acct
-- name: jp_p_tradediscountgrant_value
-  type: text
-  label: Jp P Tradediscountgrant Value
-- name: p_tradediscountgrant_acct
-  type: numeric
-  label: P Tradediscountgrant Acct
-- name: jp_ratevariance_acct_value
-  type: text
-  label: Jp Ratevariance Acct Value
-- name: p_ratevariance_acct
-  type: numeric
-  label: P Ratevariance Acct
-- name: jp_averagecostvariance_value
-  type: text
-  label: Jp Averagecostvariance Value
-- name: p_averagecostvariance_acct
-  type: numeric
-  label: P Averagecostvariance Acct
-- name: jp_landedcostclearing_value
-  type: text
-  label: Jp Landedcostclearing Value
-- name: p_landedcostclearing_acct
-  type: numeric
-  label: P Landedcostclearing Acct
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
+entities:
+  i_productcategoryjp:
+    table: i_productcategoryjp
+    key: i_productcategoryjp_id
+    displayName: I_PRODUCTCATEGORYJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_productcategoryjp_id: {type: decimal, identity: true}
+      i_productcategoryjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_org_value: {type: string}
+      value: {type: string}
+      m_product_category_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isdefault: {type: string}
+      plannedmargin: {type: decimal}
+      jp_asset_group_name: {type: string}
+      a_asset_group_id: {type: decimal}
+      isselfservice: {type: string}
+      jp_printcolor_name: {type: string}
+      ad_printcolor_id: {type: decimal}
+      mmpolicy: {type: string}
+      jp_productcategoryl1_value: {type: string}
+      jp_productcategoryl1_id: {type: decimal}
+      jp_acctschema_name: {type: string}
+      c_acctschema_id: {type: decimal}
+      costingmethod: {type: string}
+      costinglevel: {type: string}
+      jp_p_asset_acct_value: {type: string}
+      p_asset_acct: {type: decimal}
+      jp_p_expense_acct_value: {type: string}
+      p_expense_acct: {type: decimal}
+      jp_costadjustment_value: {type: string}
+      p_costadjustment_acct: {type: decimal}
+      jp_inventoryclearing_value: {type: string}
+      p_inventoryclearing_acct: {type: decimal}
+      jp_cogs_acct_value: {type: string}
+      p_cogs_acct: {type: decimal}
+      jp_p_revenue_acct_value: {type: string}
+      p_revenue_acct: {type: decimal}
+      jp_po_pricevariance_value: {type: string}
+      p_purchasepricevariance_acct: {type: decimal}
+      jp_invoicepricevariance_value: {type: string}
+      p_invoicepricevariance_acct: {type: decimal}
+      jp_p_tradediscountrec_value: {type: string}
+      p_tradediscountrec_acct: {type: decimal}
+      jp_p_tradediscountgrant_value: {type: string}
+      p_tradediscountgrant_acct: {type: decimal}
+      jp_ratevariance_acct_value: {type: string}
+      p_ratevariance_acct: {type: decimal}
+      jp_averagecostvariance_value: {type: string}
+      p_averagecostvariance_acct: {type: decimal}
+      jp_landedcostclearing_value: {type: string}
+      p_landedcostclearing_acct: {type: decimal}
+      i_isactivejp: {type: string}

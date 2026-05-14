@@ -1,61 +1,25 @@
-name: JP_BULKRUNPROCESS
-tableName: jp_bulkrunprocess
-primaryKey: jp_bulkrunprocess_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_bulkrunprocess_id
-  type: numeric
-  label: Jp Bulkrunprocess Id
-- name: jp_bulkrunprocess_uu
-  type: text
-  label: Jp Bulkrunprocess Uu
-- name: jp_cresetrecords
-  type: numeric
-  label: Jp Cresetrecords
-- name: jp_commitrecords
-  type: numeric
-  label: Jp Commitrecords
-- name: jp_registrationqty
-  type: numeric
-  label: Jp Registrationqty
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: orderbyclause
-  type: text
-  label: Orderbyclause
-- name: isprocesslogjp
-  type: text
-  label: Isprocesslogjp
+entities:
+  jp_bulkrunprocess:
+    table: jp_bulkrunprocess
+    key: jp_bulkrunprocess_id
+    displayName: JP_BULKRUNPROCESS
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_bulkrunprocess_id: {type: decimal, identity: true}
+      jp_bulkrunprocess_uu: {type: string}
+      jp_cresetrecords: {type: decimal}
+      jp_commitrecords: {type: decimal}
+      jp_registrationqty: {type: decimal}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      whereclause: {type: string}
+      orderbyclause: {type: string}
+      isprocesslogjp: {type: string}

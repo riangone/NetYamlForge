@@ -1,70 +1,28 @@
-name: AD_HOUSEKEEPING
-tableName: ad_housekeeping
-primaryKey: ad_housekeeping_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_housekeeping_id
-  type: numeric
-  label: Ad Housekeeping Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: backupfolder
-  type: text
-  label: Backupfolder
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isexportxmlbackup
-  type: text
-  label: Isexportxmlbackup
-- name: issaveinhistoric
-  type: text
-  label: Issaveinhistoric
-- name: lastdeleted
-  type: numeric
-  label: Lastdeleted
-- name: lastrun
-  type: text
-  label: Lastrun
-- name: name
-  type: text
-  label: Name
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: ad_housekeeping_uu
-  type: text
-  label: Ad Housekeeping Uu
-- name: tablename
-  type: text
-  label: Tablename
+entities:
+  ad_housekeeping:
+    table: ad_housekeeping
+    key: ad_housekeeping_id
+    displayName: AD_HOUSEKEEPING
+    columns:
+      ad_client_id: {type: decimal}
+      ad_housekeeping_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      backupfolder: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isexportxmlbackup: {type: string}
+      issaveinhistoric: {type: string}
+      lastdeleted: {type: decimal}
+      lastrun: {type: string}
+      name: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      whereclause: {type: string}
+      ad_housekeeping_uu: {type: string}
+      tablename: {type: string}

@@ -1,34 +1,16 @@
-name: CM_ACCESSCONTAINER
-tableName: cm_accesscontainer
-primaryKey: cm_accessprofile_id
-fields:
-- name: cm_accessprofile_id
-  type: numeric
-  label: Cm Accessprofile Id
-- name: cm_container_id
-  type: numeric
-  label: Cm Container Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_accesscontainer_uu
-  type: text
-  label: Cm Accesscontainer Uu
+entities:
+  cm_accesscontainer:
+    table: cm_accesscontainer
+    key: cm_accessprofile_id
+    displayName: CM_ACCESSCONTAINER
+    columns:
+      cm_accessprofile_id: {type: decimal, identity: true}
+      cm_container_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_accesscontainer_uu: {type: string}

@@ -1,106 +1,40 @@
-name: AD_PRINTFORMAT
-tableName: ad_printformat
-primaryKey: ad_printformat_id
-fields:
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: istablebased
-  type: text
-  label: Istablebased
-- name: isform
-  type: text
-  label: Isform
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_printpaper_id
-  type: numeric
-  label: Ad Printpaper Id
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: ad_printfont_id
-  type: numeric
-  label: Ad Printfont Id
-- name: isstandardheaderfooter
-  type: text
-  label: Isstandardheaderfooter
-- name: headermargin
-  type: numeric
-  label: Headermargin
-- name: footermargin
-  type: numeric
-  label: Footermargin
-- name: createcopy
-  type: text
-  label: Createcopy
-- name: ad_reportview_id
-  type: numeric
-  label: Ad Reportview Id
-- name: ad_printtableformat_id
-  type: numeric
-  label: Ad Printtableformat Id
-- name: printername
-  type: text
-  label: Printername
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: jasperprocess_id
-  type: numeric
-  label: Jasperprocess Id
-- name: classname
-  type: text
-  label: Classname
-- name: args
-  type: text
-  label: Args
-- name: ad_printformat_uu
-  type: text
-  label: Ad Printformat Uu
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: isbreakpageperrecord
-  type: text
-  label: Isbreakpageperrecord
-- name: jp_html_width
-  type: numeric
-  label: Jp Html Width
-- name: jp_html_lengthuom
-  type: text
-  label: Jp Html Lengthuom
-- name: ad_printheaderfooter_id
-  type: numeric
-  label: Ad Printheaderfooter Id
-- name: filenamepattern
-  type: text
-  label: Filenamepattern
+entities:
+  ad_printformat:
+    table: ad_printformat
+    key: ad_printformat_id
+    displayName: AD_PRINTFORMAT
+    columns:
+      ad_printformat_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      istablebased: {type: string}
+      isform: {type: string}
+      ad_table_id: {type: decimal}
+      ad_printpaper_id: {type: decimal}
+      ad_printcolor_id: {type: decimal}
+      ad_printfont_id: {type: decimal}
+      isstandardheaderfooter: {type: string}
+      headermargin: {type: decimal}
+      footermargin: {type: decimal}
+      createcopy: {type: string}
+      ad_reportview_id: {type: decimal}
+      ad_printtableformat_id: {type: decimal}
+      printername: {type: string}
+      isdefault: {type: string}
+      jasperprocess_id: {type: decimal}
+      classname: {type: string}
+      args: {type: string}
+      ad_printformat_uu: {type: string}
+      ad_window_id: {type: decimal}
+      isbreakpageperrecord: {type: string}
+      jp_html_width: {type: decimal}
+      jp_html_lengthuom: {type: string}
+      ad_printheaderfooter_id: {type: decimal}
+      filenamepattern: {type: string}

@@ -1,40 +1,18 @@
-name: JP_CORPTYPE
-tableName: jp_corptype
-primaryKey: jp_corptype_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: jp_corptype_id
-  type: numeric
-  label: Jp Corptype Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: created
-  type: text
-  label: Created
-- name: updated
-  type: text
-  label: Updated
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_corptype_uu
-  type: text
-  label: Jp Corptype Uu
-- name: description
-  type: text
-  label: Description
-- name: name
-  type: text
-  label: Name
-- name: value
-  type: text
-  label: Value
+entities:
+  jp_corptype:
+    table: jp_corptype
+    key: jp_corptype_id
+    displayName: JP_CORPTYPE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      jp_corptype_id: {type: decimal, identity: true}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      created: {type: string}
+      updated: {type: string}
+      isactive: {type: string}
+      jp_corptype_uu: {type: string}
+      description: {type: string}
+      name: {type: string}
+      value: {type: string}

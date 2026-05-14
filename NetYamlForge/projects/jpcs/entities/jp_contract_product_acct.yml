@@ -1,85 +1,33 @@
-name: JP_CONTRACT_PRODUCT_ACCT
-tableName: jp_contract_product_acct
-primaryKey: jp_contract_product_acct_id
-fields:
-- name: jp_contract_product_acct_id
-  type: numeric
-  label: Jp Contract Product Acct Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contract_product_acct_uu
-  type: text
-  label: Jp Contract Product Acct Uu
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: jp_contract_acct_id
-  type: numeric
-  label: Jp Contract Acct Id
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: p_cogs_acct
-  type: numeric
-  label: P Cogs Acct
-- name: p_expense_acct
-  type: numeric
-  label: P Expense Acct
-- name: p_revenue_acct
-  type: numeric
-  label: P Revenue Acct
-- name: jp_expense_acct
-  type: numeric
-  label: Jp Expense Acct
-- name: jp_revenue_acct
-  type: numeric
-  label: Jp Revenue Acct
-- name: p_tradediscountrec_acct
-  type: numeric
-  label: P Tradediscountrec Acct
-- name: jp_tradediscountrec_acct
-  type: numeric
-  label: Jp Tradediscountrec Acct
-- name: p_tradediscountgrant_acct
-  type: numeric
-  label: P Tradediscountgrant Acct
-- name: jp_tradediscountgrant_acct
-  type: numeric
-  label: Jp Tradediscountgrant Acct
-- name: jp_purchase_acct
-  type: numeric
-  label: Jp Purchase Acct
-- name: jp_purchaseoffset_acct
-  type: numeric
-  label: Jp Purchaseoffset Acct
-- name: jp_gl_revenue_acct
-  type: numeric
-  label: Jp Gl Revenue Acct
-- name: jp_gl_tradediscountgrant_acct
-  type: numeric
-  label: Jp Gl Tradediscountgrant Acct
-- name: jp_gl_expense_acct
-  type: numeric
-  label: Jp Gl Expense Acct
-- name: jp_gl_tradediscountrec_acct
-  type: numeric
-  label: Jp Gl Tradediscountrec Acct
+entities:
+  jp_contract_product_acct:
+    table: jp_contract_product_acct
+    key: jp_contract_product_acct_id
+    displayName: JP_CONTRACT_PRODUCT_ACCT
+    columns:
+      jp_contract_product_acct_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contract_product_acct_uu: {type: string}
+      c_acctschema_id: {type: decimal}
+      jp_contract_acct_id: {type: decimal}
+      m_product_category_id: {type: decimal}
+      p_cogs_acct: {type: decimal}
+      p_expense_acct: {type: decimal}
+      p_revenue_acct: {type: decimal}
+      jp_expense_acct: {type: decimal}
+      jp_revenue_acct: {type: decimal}
+      p_tradediscountrec_acct: {type: decimal}
+      jp_tradediscountrec_acct: {type: decimal}
+      p_tradediscountgrant_acct: {type: decimal}
+      jp_tradediscountgrant_acct: {type: decimal}
+      jp_purchase_acct: {type: decimal}
+      jp_purchaseoffset_acct: {type: decimal}
+      jp_gl_revenue_acct: {type: decimal}
+      jp_gl_tradediscountgrant_acct: {type: decimal}
+      jp_gl_expense_acct: {type: decimal}
+      jp_gl_tradediscountrec_acct: {type: decimal}

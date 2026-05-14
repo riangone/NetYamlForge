@@ -1,43 +1,19 @@
-name: M_ATTRIBUTEVALUE
-tableName: m_attributevalue
-primaryKey: m_attributevalue_id
-fields:
-- name: m_attributevalue_id
-  type: numeric
-  label: M Attributevalue Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_attribute_id
-  type: numeric
-  label: M Attribute Id
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: m_attributevalue_uu
-  type: text
-  label: M Attributevalue Uu
+entities:
+  m_attributevalue:
+    table: m_attributevalue
+    key: m_attributevalue_id
+    displayName: M_ATTRIBUTEVALUE
+    columns:
+      m_attributevalue_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_attribute_id: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      m_attributevalue_uu: {type: string}

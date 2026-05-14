@@ -1,52 +1,22 @@
-name: JP_INVORGBALANCE
-tableName: jp_invorgbalance
-primaryKey: jp_invorgbalance_uu
-fields:
-- name: jp_invorgbalance_uu
-  type: text
-  label: Jp Invorgbalance Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: datevalue
-  type: text
-  label: Datevalue
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: amtacctbalance
-  type: numeric
-  label: Amtacctbalance
+entities:
+  jp_invorgbalance:
+    table: jp_invorgbalance
+    key: jp_invorgbalance_uu
+    displayName: JP_INVORGBALANCE
+    columns:
+      jp_invorgbalance_uu: {type: string, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      m_product_id: {type: decimal}
+      datevalue: {type: string}
+      account_id: {type: decimal}
+      qtybook: {type: decimal}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      amtacctbalance: {type: decimal}

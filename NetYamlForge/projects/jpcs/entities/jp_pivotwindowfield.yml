@@ -1,106 +1,40 @@
-name: JP_PIVOTWINDOWFIELD
-tableName: jp_pivotwindowfield
-primaryKey: jp_pivotwindowfield_id
-fields:
-- name: jp_pivotwindowfield_id
-  type: numeric
-  label: Jp Pivotwindowfield Id
-- name: jp_pivotwindow_id
-  type: numeric
-  label: Jp Pivotwindow Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: created
-  type: text
-  label: Created
-- name: updated
-  type: text
-  label: Updated
-- name: jp_pivotwindowfield_uu
-  type: text
-  label: Jp Pivotwindowfield Uu
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: selectclause
-  type: text
-  label: Selectclause
-- name: isdisplayed
-  type: text
-  label: Isdisplayed
-- name: isquerycriteria
-  type: text
-  label: Isquerycriteria
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: seqnoselection
-  type: numeric
-  label: Seqnoselection
-- name: ad_element_id
-  type: numeric
-  label: Ad Element Id
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: iscentrallymaintained
-  type: text
-  label: Iscentrallymaintained
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: columnname
-  type: text
-  label: Columnname
-- name: queryoperator
-  type: text
-  label: Queryoperator
-- name: queryfunction
-  type: text
-  label: Queryfunction
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: mandatorylogic
-  type: text
-  label: Mandatorylogic
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: isrange
-  type: text
-  label: Isrange
-- name: defaultvalue2
-  type: text
-  label: Defaultvalue2
-- name: placeholder2
-  type: text
-  label: Placeholder2
-- name: placeholder
-  type: text
-  label: Placeholder
+entities:
+  jp_pivotwindowfield:
+    table: jp_pivotwindowfield
+    key: jp_pivotwindowfield_id
+    displayName: JP_PIVOTWINDOWFIELD
+    columns:
+      jp_pivotwindowfield_id: {type: decimal, identity: true}
+      jp_pivotwindow_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      created: {type: string}
+      updated: {type: string}
+      jp_pivotwindowfield_uu: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      selectclause: {type: string}
+      isdisplayed: {type: string}
+      isquerycriteria: {type: string}
+      seqno: {type: decimal}
+      seqnoselection: {type: decimal}
+      ad_element_id: {type: decimal}
+      ad_reference_id: {type: decimal}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      iscentrallymaintained: {type: string}
+      displaylogic: {type: string}
+      columnname: {type: string}
+      queryoperator: {type: string}
+      queryfunction: {type: string}
+      defaultvalue: {type: string}
+      mandatorylogic: {type: string}
+      ismandatory: {type: string}
+      isrange: {type: string}
+      defaultvalue2: {type: string}
+      placeholder2: {type: string}
+      placeholder: {type: string}

@@ -1,76 +1,30 @@
-name: R_REQUESTPROCESSOR
-tableName: r_requestprocessor
-primaryKey: r_requestprocessor_id
-fields:
-- name: r_requestprocessor_id
-  type: numeric
-  label: R Requestprocessor Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: frequency
-  type: numeric
-  label: Frequency
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: processing
-  type: text
-  label: Processing
-- name: overduealertdays
-  type: numeric
-  label: Overduealertdays
-- name: overdueassigndays
-  type: numeric
-  label: Overdueassigndays
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: keeplogdays
-  type: numeric
-  label: Keeplogdays
-- name: reminddays
-  type: numeric
-  label: Reminddays
-- name: inactivityalertdays
-  type: numeric
-  label: Inactivityalertdays
-- name: r_requesttype_id
-  type: numeric
-  label: R Requesttype Id
-- name: r_requestprocessor_uu
-  type: text
-  label: R Requestprocessor Uu
-- name: ad_schedule_id
-  type: numeric
-  label: Ad Schedule Id
+entities:
+  r_requestprocessor:
+    table: r_requestprocessor
+    key: r_requestprocessor_id
+    displayName: R_REQUESTPROCESSOR
+    columns:
+      r_requestprocessor_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      frequency: {type: decimal}
+      frequencytype: {type: string}
+      datelastrun: {type: string}
+      datenextrun: {type: string}
+      processing: {type: string}
+      overduealertdays: {type: decimal}
+      overdueassigndays: {type: decimal}
+      supervisor_id: {type: decimal}
+      keeplogdays: {type: decimal}
+      reminddays: {type: decimal}
+      inactivityalertdays: {type: decimal}
+      r_requesttype_id: {type: decimal}
+      r_requestprocessor_uu: {type: string}
+      ad_schedule_id: {type: decimal}

@@ -1,94 +1,36 @@
-name: AD_SCHEDULER
-tableName: ad_scheduler
-primaryKey: ad_scheduler_id
-fields:
-- name: ad_scheduler_id
-  type: numeric
-  label: Ad Scheduler Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: frequency
-  type: numeric
-  label: Frequency
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: keeplogdays
-  type: numeric
-  label: Keeplogdays
-- name: processing
-  type: text
-  label: Processing
-- name: weekday
-  type: text
-  label: Weekday
-- name: scheduletype
-  type: text
-  label: Scheduletype
-- name: monthday
-  type: numeric
-  label: Monthday
-- name: isignoreprocessingtime
-  type: text
-  label: Isignoreprocessingtime
-- name: cronpattern
-  type: text
-  label: Cronpattern
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: ad_scheduler_uu
-  type: text
-  label: Ad Scheduler Uu
-- name: ad_schedule_id
-  type: numeric
-  label: Ad Schedule Id
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: reportoutputtype
-  type: text
-  label: Reportoutputtype
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
+entities:
+  ad_scheduler:
+    table: ad_scheduler
+    key: ad_scheduler_id
+    displayName: AD_SCHEDULER
+    columns:
+      ad_scheduler_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_process_id: {type: decimal}
+      frequencytype: {type: string}
+      frequency: {type: decimal}
+      datelastrun: {type: string}
+      datenextrun: {type: string}
+      supervisor_id: {type: decimal}
+      keeplogdays: {type: decimal}
+      processing: {type: string}
+      weekday: {type: string}
+      scheduletype: {type: string}
+      monthday: {type: decimal}
+      isignoreprocessingtime: {type: string}
+      cronpattern: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      ad_scheduler_uu: {type: string}
+      ad_schedule_id: {type: decimal}
+      r_mailtext_id: {type: decimal}
+      reportoutputtype: {type: string}
+      ad_printformat_id: {type: decimal}

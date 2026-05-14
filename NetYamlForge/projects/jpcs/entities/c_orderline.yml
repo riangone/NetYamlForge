@@ -1,232 +1,82 @@
-name: C_ORDERLINE
-tableName: c_orderline
-primaryKey: c_orderline_id
-fields:
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: line
-  type: numeric
-  label: Line
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: datedelivered
-  type: text
-  label: Datedelivered
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qtyordered
-  type: numeric
-  label: Qtyordered
-- name: qtyreserved
-  type: numeric
-  label: Qtyreserved
-- name: qtydelivered
-  type: numeric
-  label: Qtydelivered
-- name: qtyinvoiced
-  type: numeric
-  label: Qtyinvoiced
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: discount
-  type: numeric
-  label: Discount
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: s_resourceassignment_id
-  type: numeric
-  label: S Resourceassignment Id
-- name: ref_orderline_id
-  type: numeric
-  label: Ref Orderline Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: processed
-  type: text
-  label: Processed
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: pricecost
-  type: numeric
-  label: Pricecost
-- name: qtylostsales
-  type: numeric
-  label: Qtylostsales
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: rrstartdate
-  type: text
-  label: Rrstartdate
-- name: rramt
-  type: numeric
-  label: Rramt
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: link_orderline_id
-  type: numeric
-  label: Link Orderline Id
-- name: pp_cost_collector_id
-  type: numeric
-  label: Pp Cost Collector Id
-- name: m_promotion_id
-  type: numeric
-  label: M Promotion Id
-- name: c_orderline_uu
-  type: text
-  label: C Orderline Uu
-- name: createshipment
-  type: text
-  label: Createshipment
-- name: createproduction
-  type: text
-  label: Createproduction
-- name: jp_taxamt
-  type: numeric
-  label: Jp Taxamt
-- name: jp_taxbaseamt
-  type: numeric
-  label: Jp Taxbaseamt
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: jp_locatorfrom_id
-  type: numeric
-  label: Jp Locatorfrom Id
-- name: jp_asi_from_id
-  type: numeric
-  label: Jp Asi From Id
-- name: jp_asi_to_id
-  type: numeric
-  label: Jp Asi To Id
-- name: jp_movementline_id
-  type: numeric
-  label: Jp Movementline Id
-- name: jp_locatorto_id
-  type: numeric
-  label: Jp Locatorto Id
-- name: jp_productexplodebom_id
-  type: numeric
-  label: Jp Productexplodebom Id
-- name: jp_scheduledcost
-  type: numeric
-  label: Jp Scheduledcost
-- name: jp_scheduledcostlineamt
-  type: numeric
-  label: Jp Scheduledcostlineamt
-- name: jp_datereserved
-  type: text
-  label: Jp Datereserved
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_qtyrecognized
-  type: numeric
-  label: Jp Qtyrecognized
-- name: isprocessingorderjp
-  type: text
-  label: Isprocessingorderjp
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  c_orderline:
+    table: c_orderline
+    key: c_orderline_id
+    displayName: C_ORDERLINE
+    columns:
+      c_orderline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_order_id: {type: decimal}
+      line: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      datedelivered: {type: string}
+      dateinvoiced: {type: string}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      qtyordered: {type: decimal}
+      qtyreserved: {type: decimal}
+      qtydelivered: {type: decimal}
+      qtyinvoiced: {type: decimal}
+      m_shipper_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      pricelist: {type: decimal}
+      priceactual: {type: decimal}
+      pricelimit: {type: decimal}
+      linenetamt: {type: decimal}
+      discount: {type: decimal}
+      freightamt: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      s_resourceassignment_id: {type: decimal}
+      ref_orderline_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      isdescription: {type: string}
+      processed: {type: string}
+      qtyentered: {type: decimal}
+      priceentered: {type: decimal}
+      c_project_id: {type: decimal}
+      pricecost: {type: decimal}
+      qtylostsales: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      rrstartdate: {type: string}
+      rramt: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      link_orderline_id: {type: decimal}
+      pp_cost_collector_id: {type: decimal}
+      m_promotion_id: {type: decimal}
+      c_orderline_uu: {type: string}
+      createshipment: {type: string}
+      createproduction: {type: string}
+      jp_taxamt: {type: decimal}
+      jp_taxbaseamt: {type: decimal}
+      jp_locator_id: {type: decimal}
+      jp_locatorfrom_id: {type: decimal}
+      jp_asi_from_id: {type: decimal}
+      jp_asi_to_id: {type: decimal}
+      jp_movementline_id: {type: decimal}
+      jp_locatorto_id: {type: decimal}
+      jp_productexplodebom_id: {type: decimal}
+      jp_scheduledcost: {type: decimal}
+      jp_scheduledcostlineamt: {type: decimal}
+      jp_datereserved: {type: string}
+      jp_contractline_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_qtyrecognized: {type: decimal}
+      isprocessingorderjp: {type: string}
+      jp_communicationcolumn: {type: string}

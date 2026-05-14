@@ -1,55 +1,23 @@
-name: GL_BUDGETCONTROL
-tableName: gl_budgetcontrol
-primaryKey: gl_budgetcontrol_id
-fields:
-- name: gl_budgetcontrol_id
-  type: numeric
-  label: Gl Budgetcontrol Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: gl_budget_id
-  type: numeric
-  label: Gl Budget Id
-- name: commitmenttype
-  type: text
-  label: Commitmenttype
-- name: isbeforeapproval
-  type: text
-  label: Isbeforeapproval
-- name: budgetcontrolscope
-  type: text
-  label: Budgetcontrolscope
-- name: gl_budgetcontrol_uu
-  type: text
-  label: Gl Budgetcontrol Uu
+entities:
+  gl_budgetcontrol:
+    table: gl_budgetcontrol
+    key: gl_budgetcontrol_id
+    displayName: GL_BUDGETCONTROL
+    columns:
+      gl_budgetcontrol_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      c_acctschema_id: {type: decimal}
+      gl_budget_id: {type: decimal}
+      commitmenttype: {type: string}
+      isbeforeapproval: {type: string}
+      budgetcontrolscope: {type: string}
+      gl_budgetcontrol_uu: {type: string}

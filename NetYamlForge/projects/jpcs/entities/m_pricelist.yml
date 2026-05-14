@@ -1,64 +1,26 @@
-name: M_PRICELIST
-tableName: m_pricelist
-primaryKey: m_pricelist_id
-fields:
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: basepricelist_id
-  type: numeric
-  label: Basepricelist Id
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: issopricelist
-  type: text
-  label: Issopricelist
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: enforcepricelimit
-  type: text
-  label: Enforcepricelimit
-- name: priceprecision
-  type: numeric
-  label: Priceprecision
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: ispresentforproduct
-  type: text
-  label: Ispresentforproduct
-- name: m_pricelist_uu
-  type: text
-  label: M Pricelist Uu
+entities:
+  m_pricelist:
+    table: m_pricelist
+    key: m_pricelist_id
+    displayName: M_PRICELIST
+    columns:
+      m_pricelist_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      basepricelist_id: {type: decimal}
+      istaxincluded: {type: string}
+      issopricelist: {type: string}
+      isdefault: {type: string}
+      c_currency_id: {type: decimal}
+      enforcepricelimit: {type: string}
+      priceprecision: {type: decimal}
+      ismandatory: {type: string}
+      ispresentforproduct: {type: string}
+      m_pricelist_uu: {type: string}

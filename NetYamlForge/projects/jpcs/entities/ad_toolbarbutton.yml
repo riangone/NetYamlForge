@@ -1,88 +1,34 @@
-name: AD_TOOLBARBUTTON
-tableName: ad_toolbarbutton
-primaryKey: ad_toolbarbutton_id
-fields:
-- name: actionclassname
-  type: text
-  label: Actionclassname
-- name: actionname
-  type: text
-  label: Actionname
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_toolbarbutton_id
-  type: numeric
-  label: Ad Toolbarbutton Id
-- name: classname
-  type: text
-  label: Classname
-- name: componentname
-  type: text
-  label: Componentname
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscustomization
-  type: text
-  label: Iscustomization
-- name: keystroke_keycode
-  type: numeric
-  label: Keystroke Keycode
-- name: keystroke_modifiers
-  type: numeric
-  label: Keystroke Modifiers
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_toolbarbutton_uu
-  type: text
-  label: Ad Toolbarbutton Uu
-- name: action
-  type: text
-  label: Action
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: isadvancedbutton
-  type: text
-  label: Isadvancedbutton
-- name: isaddseparator
-  type: text
-  label: Isaddseparator
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: isshowmore
-  type: text
-  label: Isshowmore
-- name: readonlylogic
-  type: text
-  label: Readonlylogic
-- name: pressedlogic
-  type: text
-  label: Pressedlogic
+entities:
+  ad_toolbarbutton:
+    table: ad_toolbarbutton
+    key: ad_toolbarbutton_id
+    displayName: AD_TOOLBARBUTTON
+    columns:
+      actionclassname: {type: string}
+      actionname: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_toolbarbutton_id: {type: decimal, identity: true}
+      classname: {type: string}
+      componentname: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      iscustomization: {type: string}
+      keystroke_keycode: {type: decimal}
+      keystroke_modifiers: {type: decimal}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_toolbarbutton_uu: {type: string}
+      action: {type: string}
+      ad_tab_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      displaylogic: {type: string}
+      seqno: {type: decimal}
+      isadvancedbutton: {type: string}
+      isaddseparator: {type: string}
+      entitytype: {type: string}
+      isshowmore: {type: string}
+      readonlylogic: {type: string}
+      pressedlogic: {type: string}

@@ -1,40 +1,18 @@
-name: ASP_PROCESS_PARA
-tableName: asp_process_para
-primaryKey: asp_process_para_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_process_para_id
-  type: numeric
-  label: Asp Process Para Id
-- name: asp_process_id
-  type: numeric
-  label: Asp Process Id
-- name: asp_process_para_uu
-  type: text
-  label: Asp Process Para Uu
+entities:
+  asp_process_para:
+    table: asp_process_para
+    key: asp_process_para_id
+    displayName: ASP_PROCESS_PARA
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_process_para_id: {type: decimal}
+      asp_status: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_process_para_id: {type: decimal, identity: true}
+      asp_process_id: {type: decimal}
+      asp_process_para_uu: {type: string}

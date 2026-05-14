@@ -1,208 +1,74 @@
-name: JP_REFERENCETEST
-tableName: jp_referencetest
-primaryKey: jp_referencetest_id
-fields:
-- name: jp_referencetest_id
-  type: numeric
-  label: Jp Referencetest Id
-- name: jp_referencetest_uu
-  type: text
-  label: Jp Referencetest Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: p_revenue_acct
-  type: numeric
-  label: P Revenue Acct
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: s_resourceassignment_id
-  type: numeric
-  label: S Resourceassignment Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: date1
-  type: text
-  label: Date1
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: latestpickuptime
-  type: text
-  label: Latestpickuptime
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: line
-  type: numeric
-  label: Line
-- name: rate
-  type: numeric
-  label: Rate
-- name: backupfolder
-  type: text
-  label: Backupfolder
-- name: filename
-  type: text
-  label: Filename
-- name: referenceno
-  type: text
-  label: Referenceno
-- name: help
-  type: text
-  label: Help
-- name: html
-  type: text
-  label: Html
-- name: url
-  type: text
-  label: Url
-- name: broadcastmessage
-  type: text
-  label: Broadcastmessage
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_locatorto_id
-  type: numeric
-  label: M Locatorto Id
-- name: bp_location_id
-  type: numeric
-  label: Bp Location Id
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: processing
-  type: text
-  label: Processing
-- name: password
-  type: text
-  label: Password
-- name: creditcardnumber
-  type: text
-  label: Creditcardnumber
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: jp_org_history_name
-  type: text
-  label: Jp Org History Name
-- name: jp_bpartner_multi
-  type: text
-  label: Jp Bpartner Multi
-- name: jp_product_multi
-  type: text
-  label: Jp Product Multi
-- name: jp_multi_list
-  type: text
-  label: Jp Multi List
-- name: jp_multi_grid
-  type: text
-  label: Jp Multi Grid
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: iscustomer
-  type: text
-  label: Iscustomer
-- name: tendertype
-  type: text
-  label: Tendertype
-- name: processed
-  type: text
-  label: Processed
-- name: promotioncode
-  type: text
-  label: Promotioncode
-- name: note
-  type: text
-  label: Note
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: classification
-  type: text
-  label: Classification
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: c_year_id
-  type: numeric
-  label: C Year Id
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: color
-  type: text
-  label: Color
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: jp_single_grid
-  type: text
-  label: Jp Single Grid
-- name: timezone
-  type: text
-  label: Timezone
-- name: schedulerstate
-  type: text
-  label: Schedulerstate
+entities:
+  jp_referencetest:
+    table: jp_referencetest
+    key: jp_referencetest_id
+    displayName: JP_REFERENCETEST
+    columns:
+      jp_referencetest_id: {type: decimal, identity: true}
+      jp_referencetest_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      p_revenue_acct: {type: decimal}
+      m_product_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      grandtotal: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      s_resourceassignment_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      currentcostprice: {type: decimal}
+      c_currency_id: {type: decimal}
+      date1: {type: string}
+      datetrx: {type: string}
+      latestpickuptime: {type: string}
+      qtyentered: {type: decimal}
+      line: {type: decimal}
+      rate: {type: decimal}
+      backupfolder: {type: string}
+      filename: {type: string}
+      referenceno: {type: string}
+      help: {type: string}
+      html: {type: string}
+      url: {type: string}
+      broadcastmessage: {type: string}
+      docstatus: {type: string}
+      ad_image_id: {type: decimal}
+      c_location_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_locatorto_id: {type: decimal}
+      bp_location_id: {type: decimal}
+      paymentrule: {type: string}
+      processing: {type: string}
+      password: {type: string}
+      creditcardnumber: {type: string}
+      m_pricelist_id: {type: decimal}
+      jp_org_history_name: {type: string}
+      jp_bpartner_multi: {type: string}
+      jp_product_multi: {type: string}
+      jp_multi_list: {type: string}
+      jp_multi_grid: {type: string}
+      deliveryrule: {type: string}
+      invoicerule: {type: string}
+      iscustomer: {type: string}
+      tendertype: {type: string}
+      processed: {type: string}
+      promotioncode: {type: string}
+      note: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      classification: {type: string}
+      c_calendar_id: {type: decimal}
+      c_year_id: {type: decimal}
+      c_period_id: {type: decimal}
+      color: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      datenextrun: {type: string}
+      jp_single_grid: {type: string}
+      timezone: {type: string}
+      schedulerstate: {type: string}

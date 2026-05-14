@@ -1,67 +1,27 @@
-name: JP_CORPORATION
-tableName: jp_corporation
-primaryKey: jp_corporation_id
-fields:
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: jp_corporation_uu
-  type: text
-  label: Jp Corporation Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: description
-  type: text
-  label: Description
-- name: duns
-  type: text
-  label: Duns
-- name: jp_industrytype_id
-  type: numeric
-  label: Jp Industrytype Id
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: url
-  type: text
-  label: Url
-- name: jp_capital
-  type: numeric
-  label: Jp Capital
-- name: jp_corptype_id
-  type: numeric
-  label: Jp Corptype Id
-- name: jp_cm_corptype_id
-  type: numeric
-  label: Jp Cm Corptype Id
+entities:
+  jp_corporation:
+    table: jp_corporation
+    key: jp_corporation_id
+    displayName: JP_CORPORATION
+    columns:
+      jp_corporation_id: {type: decimal, identity: true}
+      jp_corporation_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      description: {type: string}
+      duns: {type: string}
+      jp_industrytype_id: {type: decimal}
+      c_greeting_id: {type: decimal}
+      url: {type: string}
+      jp_capital: {type: decimal}
+      jp_corptype_id: {type: decimal}
+      jp_cm_corptype_id: {type: decimal}

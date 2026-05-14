@@ -1,49 +1,21 @@
-name: C_BANKACCOUNTDOC
-tableName: c_bankaccountdoc
-primaryKey: c_bankaccountdoc_id
-fields:
-- name: c_bankaccountdoc_id
-  type: numeric
-  label: C Bankaccountdoc Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: currentnext
-  type: numeric
-  label: Currentnext
-- name: check_printformat_id
-  type: numeric
-  label: Check Printformat Id
-- name: c_bankaccountdoc_uu
-  type: text
-  label: C Bankaccountdoc Uu
+entities:
+  c_bankaccountdoc:
+    table: c_bankaccountdoc
+    key: c_bankaccountdoc_id
+    displayName: C_BANKACCOUNTDOC
+    columns:
+      c_bankaccountdoc_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bankaccount_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      paymentrule: {type: string}
+      currentnext: {type: decimal}
+      check_printformat_id: {type: decimal}
+      c_bankaccountdoc_uu: {type: string}

@@ -1,43 +1,19 @@
-name: A_ASSET_REVAL_INDEX
-tableName: a_asset_reval_index
-primaryKey: a_asset_reval_index_id
-fields:
-- name: a_asset_reval_index_id
-  type: numeric
-  label: A Asset Reval Index Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: a_effective_date
-  type: text
-  label: A Effective Date
-- name: a_reval_multiplier
-  type: text
-  label: A Reval Multiplier
-- name: created
-  type: text
-  label: Created
-- name: isactive
-  type: text
-  label: Isactive
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: a_reval_rate
-  type: numeric
-  label: A Reval Rate
-- name: a_reval_code
-  type: text
-  label: A Reval Code
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_asset_reval_index_uu
-  type: text
-  label: A Asset Reval Index Uu
+entities:
+  a_asset_reval_index:
+    table: a_asset_reval_index
+    key: a_asset_reval_index_id
+    displayName: A_ASSET_REVAL_INDEX
+    columns:
+      a_asset_reval_index_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      a_effective_date: {type: string}
+      a_reval_multiplier: {type: string}
+      created: {type: string}
+      isactive: {type: string}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      createdby: {type: decimal}
+      a_reval_rate: {type: decimal}
+      a_reval_code: {type: string}
+      ad_org_id: {type: decimal}
+      a_asset_reval_index_uu: {type: string}

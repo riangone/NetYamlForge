@@ -1,91 +1,35 @@
-name: M_ATTRIBUTESET
-tableName: m_attributeset
-primaryKey: m_attributeset_id
-fields:
-- name: m_attributeset_id
-  type: numeric
-  label: M Attributeset Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isserno
-  type: text
-  label: Isserno
-- name: m_sernoctl_id
-  type: numeric
-  label: M Sernoctl Id
-- name: islot
-  type: text
-  label: Islot
-- name: m_lotctl_id
-  type: numeric
-  label: M Lotctl Id
-- name: isguaranteedate
-  type: text
-  label: Isguaranteedate
-- name: guaranteedays
-  type: numeric
-  label: Guaranteedays
-- name: isinstanceattribute
-  type: text
-  label: Isinstanceattribute
-- name: mandatorytype
-  type: text
-  label: Mandatorytype
-- name: isguaranteedatemandatory
-  type: text
-  label: Isguaranteedatemandatory
-- name: islotmandatory
-  type: text
-  label: Islotmandatory
-- name: issernomandatory
-  type: text
-  label: Issernomandatory
-- name: sernocharsoverwrite
-  type: text
-  label: Sernocharsoverwrite
-- name: lotcharsoverwrite
-  type: text
-  label: Lotcharsoverwrite
-- name: lotchareoverwrite
-  type: text
-  label: Lotchareoverwrite
-- name: sernochareoverwrite
-  type: text
-  label: Sernochareoverwrite
-- name: m_attributeset_uu
-  type: text
-  label: M Attributeset Uu
-- name: useguaranteedateformpolicy
-  type: text
-  label: Useguaranteedateformpolicy
-- name: isautogeneratelot
-  type: text
-  label: Isautogeneratelot
-- name: m_attributeset_type
-  type: text
-  label: M Attributeset Type
+entities:
+  m_attributeset:
+    table: m_attributeset
+    key: m_attributeset_id
+    displayName: M_ATTRIBUTESET
+    columns:
+      m_attributeset_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isserno: {type: string}
+      m_sernoctl_id: {type: decimal}
+      islot: {type: string}
+      m_lotctl_id: {type: decimal}
+      isguaranteedate: {type: string}
+      guaranteedays: {type: decimal}
+      isinstanceattribute: {type: string}
+      mandatorytype: {type: string}
+      isguaranteedatemandatory: {type: string}
+      islotmandatory: {type: string}
+      issernomandatory: {type: string}
+      sernocharsoverwrite: {type: string}
+      lotcharsoverwrite: {type: string}
+      lotchareoverwrite: {type: string}
+      sernochareoverwrite: {type: string}
+      m_attributeset_uu: {type: string}
+      useguaranteedateformpolicy: {type: string}
+      isautogeneratelot: {type: string}
+      m_attributeset_type: {type: string}

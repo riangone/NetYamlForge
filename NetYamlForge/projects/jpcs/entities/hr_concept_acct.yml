@@ -1,55 +1,23 @@
-name: HR_CONCEPT_ACCT
-tableName: hr_concept_acct
-primaryKey: hr_concept_acct_id
-fields:
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: isbalancing
-  type: text
-  label: Isbalancing
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: hr_concept_acct_id
-  type: numeric
-  label: Hr Concept Acct Id
-- name: hr_concept_id
-  type: numeric
-  label: Hr Concept Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: hr_revenue_acct
-  type: numeric
-  label: Hr Revenue Acct
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: hr_expense_acct
-  type: numeric
-  label: Hr Expense Acct
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: created
-  type: text
-  label: Created
-- name: hr_concept_acct_uu
-  type: text
-  label: Hr Concept Acct Uu
+entities:
+  hr_concept_acct:
+    table: hr_concept_acct
+    key: hr_concept_acct_id
+    displayName: HR_CONCEPT_ACCT
+    columns:
+      c_bp_group_id: {type: decimal}
+      isbalancing: {type: string}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      createdby: {type: decimal}
+      hr_concept_acct_id: {type: decimal, identity: true}
+      hr_concept_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      hr_revenue_acct: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      hr_expense_acct: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      created: {type: string}
+      hr_concept_acct_uu: {type: string}

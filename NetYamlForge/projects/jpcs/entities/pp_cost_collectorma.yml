@@ -1,40 +1,18 @@
-name: PP_COST_COLLECTORMA
-tableName: pp_cost_collectorma
-primaryKey: pp_cost_collectorma_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: pp_cost_collectorma_id
-  type: numeric
-  label: Pp Cost Collectorma Id
-- name: pp_cost_collector_id
-  type: numeric
-  label: Pp Cost Collector Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pp_cost_collectorma_uu
-  type: text
-  label: Pp Cost Collectorma Uu
+entities:
+  pp_cost_collectorma:
+    table: pp_cost_collectorma
+    key: pp_cost_collectorma_id
+    displayName: PP_COST_COLLECTORMA
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      m_attributesetinstance_id: {type: decimal}
+      movementqty: {type: decimal}
+      pp_cost_collectorma_id: {type: decimal, identity: true}
+      pp_cost_collector_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pp_cost_collectorma_uu: {type: string}

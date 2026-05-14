@@ -1,187 +1,67 @@
-name: T_FACT_ACCT_HISTORY
-tableName: t_fact_acct_history
-primaryKey: fact_acct_id
-fields:
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: line_id
-  type: numeric
-  label: Line Id
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: gl_budget_id
-  type: numeric
-  label: Gl Budget Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: amtsourcedr
-  type: numeric
-  label: Amtsourcedr
-- name: amtsourcecr
-  type: numeric
-  label: Amtsourcecr
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_locfrom_id
-  type: numeric
-  label: C Locfrom Id
-- name: c_locto_id
-  type: numeric
-  label: C Locto Id
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: description
-  type: text
-  label: Description
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: c_subacct_id
-  type: numeric
-  label: C Subacct Id
-- name: userelement1_id
-  type: numeric
-  label: Userelement1 Id
-- name: userelement2_id
-  type: numeric
-  label: Userelement2 Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: fact_acct_uu
-  type: text
-  label: Fact Acct Uu
-- name: jp_order_id
-  type: numeric
-  label: Jp Order Id
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_sopotype
-  type: text
-  label: Jp Sopotype
-- name: jp_taxamt
-  type: numeric
-  label: Jp Taxamt
-- name: jp_taxbaseamt
-  type: numeric
-  label: Jp Taxbaseamt
-- name: isqualifiedinvoiceissuerjp
-  type: text
-  label: Isqualifiedinvoiceissuerjp
-- name: jp_registerednumberofqii
-  type: text
-  label: Jp Registerednumberofqii
-- name: jp_priceactual
-  type: numeric
-  label: Jp Priceactual
-- name: jp_charge_id
-  type: numeric
-  label: Jp Charge Id
-- name: jp_bankaccount_id
-  type: numeric
-  label: Jp Bankaccount Id
-- name: jp_invoice_id
-  type: numeric
-  label: Jp Invoice Id
-- name: jp_payment_id
-  type: numeric
-  label: Jp Payment Id
+entities:
+  t_fact_acct_history:
+    table: t_fact_acct_history
+    key: fact_acct_id
+    displayName: T_FACT_ACCT_HISTORY
+    columns:
+      fact_acct_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      account_id: {type: decimal}
+      datetrx: {type: string}
+      dateacct: {type: string}
+      c_period_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      line_id: {type: decimal}
+      gl_category_id: {type: decimal}
+      gl_budget_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      postingtype: {type: string}
+      c_currency_id: {type: decimal}
+      amtsourcedr: {type: decimal}
+      amtsourcecr: {type: decimal}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      c_uom_id: {type: decimal}
+      qty: {type: decimal}
+      m_product_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_locfrom_id: {type: decimal}
+      c_locto_id: {type: decimal}
+      c_salesregion_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      description: {type: string}
+      a_asset_id: {type: decimal}
+      c_subacct_id: {type: decimal}
+      userelement1_id: {type: decimal}
+      userelement2_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      fact_acct_uu: {type: string}
+      jp_order_id: {type: decimal}
+      jp_contractcontent_id: {type: decimal}
+      jp_contract_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_sopotype: {type: string}
+      jp_taxamt: {type: decimal}
+      jp_taxbaseamt: {type: decimal}
+      isqualifiedinvoiceissuerjp: {type: string}
+      jp_registerednumberofqii: {type: string}
+      jp_priceactual: {type: decimal}
+      jp_charge_id: {type: decimal}
+      jp_bankaccount_id: {type: decimal}
+      jp_invoice_id: {type: decimal}
+      jp_payment_id: {type: decimal}

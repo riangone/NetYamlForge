@@ -1,40 +1,18 @@
-name: M_LOTCTLEXCLUDE
-tableName: m_lotctlexclude
-primaryKey: m_lotctlexclude_id
-fields:
-- name: m_lotctlexclude_id
-  type: numeric
-  label: M Lotctlexclude Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_lotctl_id
-  type: numeric
-  label: M Lotctl Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: m_lotctlexclude_uu
-  type: text
-  label: M Lotctlexclude Uu
+entities:
+  m_lotctlexclude:
+    table: m_lotctlexclude
+    key: m_lotctlexclude_id
+    displayName: M_LOTCTLEXCLUDE
+    columns:
+      m_lotctlexclude_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_lotctl_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      issotrx: {type: string}
+      m_lotctlexclude_uu: {type: string}

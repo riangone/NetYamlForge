@@ -1,52 +1,22 @@
-name: C_RECURRING_RUN
-tableName: c_recurring_run
-primaryKey: c_recurring_run_id
-fields:
-- name: c_recurring_run_id
-  type: numeric
-  label: C Recurring Run Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: gl_journalbatch_id
-  type: numeric
-  label: Gl Journalbatch Id
-- name: c_recurring_id
-  type: numeric
-  label: C Recurring Id
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: c_recurring_run_uu
-  type: text
-  label: C Recurring Run Uu
+entities:
+  c_recurring_run:
+    table: c_recurring_run
+    key: c_recurring_run_id
+    displayName: C_RECURRING_RUN
+    columns:
+      c_recurring_run_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_payment_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_invoice_id: {type: decimal}
+      c_project_id: {type: decimal}
+      gl_journalbatch_id: {type: decimal}
+      c_recurring_id: {type: decimal}
+      datedoc: {type: string}
+      c_recurring_run_uu: {type: string}

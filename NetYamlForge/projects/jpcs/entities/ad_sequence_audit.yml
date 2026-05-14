@@ -1,40 +1,18 @@
-name: AD_SEQUENCE_AUDIT
-tableName: ad_sequence_audit
-primaryKey: ad_sequence_id
-fields:
-- name: ad_sequence_id
-  type: numeric
-  label: Ad Sequence Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: ad_sequence_audit_uu
-  type: text
-  label: Ad Sequence Audit Uu
+entities:
+  ad_sequence_audit:
+    table: ad_sequence_audit
+    key: ad_sequence_id
+    displayName: AD_SEQUENCE_AUDIT
+    columns:
+      ad_sequence_id: {type: decimal, identity: true}
+      documentno: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      ad_sequence_audit_uu: {type: string}

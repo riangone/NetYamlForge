@@ -1,211 +1,75 @@
-name: JP_CONTRACTLINET
-tableName: jp_contractlinet
-primaryKey: jp_contractlinet_id
-fields:
-- name: jp_contractlinet_id
-  type: numeric
-  label: Jp Contractlinet Id
-- name: jp_contractlinet_uu
-  type: text
-  label: Jp Contractlinet Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractcontentt_id
-  type: numeric
-  label: Jp Contractcontentt Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: line
-  type: numeric
-  label: Line
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: description
-  type: text
-  label: Description
-- name: iscreatedoclinejp
-  type: text
-  label: Iscreatedoclinejp
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qtyordered
-  type: numeric
-  label: Qtyordered
-- name: jp_derivativedocpolicy_inout
-  type: text
-  label: Jp Derivativedocpolicy Inout
-- name: jp_contractcalref_inout_id
-  type: numeric
-  label: Jp Contractcalref Inout Id
-- name: jp_contractprocref_inout_id
-  type: numeric
-  label: Jp Contractprocref Inout Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: jp_derivativedocpolicy_inv
-  type: text
-  label: Jp Derivativedocpolicy Inv
-- name: jp_contractcalref_inv_id
-  type: numeric
-  label: Jp Contractcalref Inv Id
-- name: jp_contractprocref_inv_id
-  type: numeric
-  label: Jp Contractprocref Inv Id
-- name: qtyinvoiced
-  type: numeric
-  label: Qtyinvoiced
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: discount
-  type: numeric
-  label: Discount
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: jp_locatorfrom_id
-  type: numeric
-  label: Jp Locatorfrom Id
-- name: jp_locatorto_id
-  type: numeric
-  label: Jp Locatorto Id
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: jp_procperiodoffs_lump_inv
-  type: numeric
-  label: Jp Procperiodoffs Lump Inv
-- name: jp_procperiodoffs_lump_inout
-  type: numeric
-  label: Jp Procperiodoffs Lump Inout
-- name: jp_procperiodoffs_end_inout
-  type: numeric
-  label: Jp Procperiodoffs End Inout
-- name: jp_procperiodoffs_start_inout
-  type: numeric
-  label: Jp Procperiodoffs Start Inout
-- name: jp_procperiodoffs_start_inv
-  type: numeric
-  label: Jp Procperiodoffs Start Inv
-- name: jp_procperiodoffs_end_inv
-  type: numeric
-  label: Jp Procperiodoffs End Inv
-- name: jp_basedoclinepolicy
-  type: text
-  label: Jp Basedoclinepolicy
-- name: jp_procperiodoffs_lump
-  type: numeric
-  label: Jp Procperiodoffs Lump
-- name: jp_procperiodoffs_end
-  type: numeric
-  label: Jp Procperiodoffs End
-- name: jp_procperiodoffs_start
-  type: numeric
-  label: Jp Procperiodoffs Start
-- name: name
-  type: text
-  label: Name
-- name: jp_contracttype
-  type: text
-  label: Jp Contracttype
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: jp_createderivativedocpolicy
-  type: text
-  label: Jp Createderivativedocpolicy
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: jp_contractl_autoupdatepolicy
-  type: text
-  label: Jp Contractl Autoupdatepolicy
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_contractlinet:
+    table: jp_contractlinet
+    key: jp_contractlinet_id
+    displayName: JP_CONTRACTLINET
+    columns:
+      jp_contractlinet_id: {type: decimal, identity: true}
+      jp_contractlinet_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractcontentt_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      line: {type: decimal}
+      jp_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      description: {type: string}
+      iscreatedoclinejp: {type: string}
+      qtyentered: {type: decimal}
+      c_uom_id: {type: decimal}
+      qtyordered: {type: decimal}
+      jp_derivativedocpolicy_inout: {type: string}
+      jp_contractcalref_inout_id: {type: decimal}
+      jp_contractprocref_inout_id: {type: decimal}
+      movementqty: {type: decimal}
+      jp_derivativedocpolicy_inv: {type: string}
+      jp_contractcalref_inv_id: {type: decimal}
+      jp_contractprocref_inv_id: {type: decimal}
+      qtyinvoiced: {type: decimal}
+      priceentered: {type: decimal}
+      priceactual: {type: decimal}
+      pricelist: {type: decimal}
+      pricelimit: {type: decimal}
+      discount: {type: decimal}
+      c_tax_id: {type: decimal}
+      jp_locatorfrom_id: {type: decimal}
+      jp_locatorto_id: {type: decimal}
+      linenetamt: {type: decimal}
+      c_charge_id: {type: decimal}
+      isdescription: {type: string}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      jp_procperiodoffs_lump_inv: {type: decimal}
+      jp_procperiodoffs_lump_inout: {type: decimal}
+      jp_procperiodoffs_end_inout: {type: decimal}
+      jp_procperiodoffs_start_inout: {type: decimal}
+      jp_procperiodoffs_start_inv: {type: decimal}
+      jp_procperiodoffs_end_inv: {type: decimal}
+      jp_basedoclinepolicy: {type: string}
+      jp_procperiodoffs_lump: {type: decimal}
+      jp_procperiodoffs_end: {type: decimal}
+      jp_procperiodoffs_start: {type: decimal}
+      name: {type: string}
+      jp_contracttype: {type: string}
+      docbasetype: {type: string}
+      jp_createderivativedocpolicy: {type: string}
+      ordertype: {type: string}
+      m_pricelist_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      issotrx: {type: string}
+      istaxincluded: {type: string}
+      jp_contractl_autoupdatepolicy: {type: string}
+      jp_communicationcolumn: {type: string}

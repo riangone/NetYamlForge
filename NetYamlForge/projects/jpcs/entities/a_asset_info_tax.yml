@@ -1,52 +1,22 @@
-name: A_ASSET_INFO_TAX
-tableName: a_asset_info_tax
-primaryKey: a_asset_info_tax_id
-fields:
-- name: a_asset_info_tax_id
-  type: numeric
-  label: A Asset Info Tax Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_investment_cr
-  type: numeric
-  label: A Investment Cr
-- name: a_state
-  type: text
-  label: A State
-- name: created
-  type: text
-  label: Created
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: a_tax_entity
-  type: text
-  label: A Tax Entity
-- name: a_new_used
-  type: text
-  label: A New Used
-- name: a_finance_meth
-  type: text
-  label: A Finance Meth
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: a_asset_info_tax_uu
-  type: text
-  label: A Asset Info Tax Uu
+entities:
+  a_asset_info_tax:
+    table: a_asset_info_tax
+    key: a_asset_info_tax_id
+    displayName: A_ASSET_INFO_TAX
+    columns:
+      a_asset_info_tax_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_investment_cr: {type: decimal}
+      a_state: {type: string}
+      created: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      textmsg: {type: string}
+      createdby: {type: decimal}
+      a_tax_entity: {type: string}
+      a_new_used: {type: string}
+      a_finance_meth: {type: string}
+      a_asset_id: {type: decimal}
+      a_asset_info_tax_uu: {type: string}

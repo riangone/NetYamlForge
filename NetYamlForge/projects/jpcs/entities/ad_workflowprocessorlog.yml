@@ -1,52 +1,22 @@
-name: AD_WORKFLOWPROCESSORLOG
-tableName: ad_workflowprocessorlog
-primaryKey: ad_workflowprocessorlog_id
-fields:
-- name: ad_workflowprocessor_id
-  type: numeric
-  label: Ad Workflowprocessor Id
-- name: ad_workflowprocessorlog_id
-  type: numeric
-  label: Ad Workflowprocessorlog Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: iserror
-  type: text
-  label: Iserror
-- name: summary
-  type: text
-  label: Summary
-- name: reference
-  type: text
-  label: Reference
-- name: description
-  type: text
-  label: Description
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: binarydata
-  type: text
-  label: Binarydata
-- name: ad_workflowprocessorlog_uu
-  type: text
-  label: Ad Workflowprocessorlog Uu
+entities:
+  ad_workflowprocessorlog:
+    table: ad_workflowprocessorlog
+    key: ad_workflowprocessorlog_id
+    displayName: AD_WORKFLOWPROCESSORLOG
+    columns:
+      ad_workflowprocessor_id: {type: decimal}
+      ad_workflowprocessorlog_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      iserror: {type: string}
+      summary: {type: string}
+      reference: {type: string}
+      description: {type: string}
+      textmsg: {type: string}
+      binarydata: {type: string}
+      ad_workflowprocessorlog_uu: {type: string}

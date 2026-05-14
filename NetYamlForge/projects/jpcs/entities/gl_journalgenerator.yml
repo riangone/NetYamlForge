@@ -1,61 +1,25 @@
-name: GL_JOURNALGENERATOR
-tableName: gl_journalgenerator
-primaryKey: gl_journalgenerator_id
-fields:
-- name: gl_journalgenerator_id
-  type: numeric
-  label: Gl Journalgenerator Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_elementvalueadjustdr_id
-  type: numeric
-  label: C Elementvalueadjustdr Id
-- name: c_elementvalueadjustcr_id
-  type: numeric
-  label: C Elementvalueadjustcr Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: generategljournal
-  type: text
-  label: Generategljournal
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_journalgenerator_uu
-  type: text
-  label: Gl Journalgenerator Uu
+entities:
+  gl_journalgenerator:
+    table: gl_journalgenerator
+    key: gl_journalgenerator_id
+    displayName: GL_JOURNALGENERATOR
+    columns:
+      gl_journalgenerator_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_elementvalueadjustdr_id: {type: decimal}
+      c_elementvalueadjustcr_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      gl_category_id: {type: decimal}
+      generategljournal: {type: string}
+      c_acctschema_id: {type: decimal}
+      postingtype: {type: string}
+      gl_journalgenerator_uu: {type: string}

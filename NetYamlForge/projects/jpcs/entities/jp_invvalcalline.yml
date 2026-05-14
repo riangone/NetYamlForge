@@ -1,73 +1,29 @@
-name: JP_INVVALCALLINE
-tableName: jp_invvalcalline
-primaryKey: jp_invvalcalline_id
-fields:
-- name: jp_invvalcalline_id
-  type: numeric
-  label: Jp Invvalcalline Id
-- name: jp_invvalcalline_uu
-  type: text
-  label: Jp Invvalcalline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_invvalcal_id
-  type: numeric
-  label: Jp Invvalcal Id
-- name: line
-  type: numeric
-  label: Line
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: costingmethod
-  type: text
-  label: Costingmethod
-- name: costinglevel
-  type: text
-  label: Costinglevel
-- name: jp_invvaltotalamt
-  type: numeric
-  label: Jp Invvaltotalamt
-- name: jp_invvalamt
-  type: numeric
-  label: Jp Invvalamt
-- name: description
-  type: text
-  label: Description
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: futurecostprice
-  type: numeric
-  label: Futurecostprice
-- name: jp_begininvvalcalline_id
-  type: numeric
-  label: Jp Begininvvalcalline Id
+entities:
+  jp_invvalcalline:
+    table: jp_invvalcalline
+    key: jp_invvalcalline_id
+    displayName: JP_INVVALCALLINE
+    columns:
+      jp_invvalcalline_id: {type: decimal, identity: true}
+      jp_invvalcalline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_invvalcal_id: {type: decimal}
+      line: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      qtybook: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      costingmethod: {type: string}
+      costinglevel: {type: string}
+      jp_invvaltotalamt: {type: decimal}
+      jp_invvalamt: {type: decimal}
+      description: {type: string}
+      currentcostprice: {type: decimal}
+      futurecostprice: {type: decimal}
+      jp_begininvvalcalline_id: {type: decimal}

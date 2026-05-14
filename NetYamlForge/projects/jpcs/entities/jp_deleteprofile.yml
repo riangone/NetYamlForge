@@ -1,61 +1,25 @@
-name: JP_DELETEPROFILE
-tableName: jp_deleteprofile
-primaryKey: jp_deleteprofile_id
-fields:
-- name: jp_deleteprofile_id
-  type: numeric
-  label: Jp Deleteprofile Id
-- name: jp_deleteprofile_uu
-  type: text
-  label: Jp Deleteprofile Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: jp_ad_org_id_where
-  type: text
-  label: Jp Ad Org Id Where
-- name: jp_ad_role_id_where
-  type: text
-  label: Jp Ad Role Id Where
-- name: jp_ad_user_id_where
-  type: text
-  label: Jp Ad User Id Where
-- name: jp_delete_client
-  type: text
-  label: Jp Delete Client
-- name: jp_c_bpartner_id_where
-  type: text
-  label: Jp C Bpartner Id Where
-- name: jp_m_product_id_where
-  type: text
-  label: Jp M Product Id Where
-- name: name2
-  type: text
-  label: Name2
+entities:
+  jp_deleteprofile:
+    table: jp_deleteprofile
+    key: jp_deleteprofile_id
+    displayName: JP_DELETEPROFILE
+    columns:
+      jp_deleteprofile_id: {type: decimal, identity: true}
+      jp_deleteprofile_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      jp_ad_org_id_where: {type: string}
+      jp_ad_role_id_where: {type: string}
+      jp_ad_user_id_where: {type: string}
+      jp_delete_client: {type: string}
+      jp_c_bpartner_id_where: {type: string}
+      jp_m_product_id_where: {type: string}
+      name2: {type: string}

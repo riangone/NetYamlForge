@@ -1,46 +1,20 @@
-name: M_SHIPPINGPROCESSOR
-tableName: m_shippingprocessor
-primaryKey: m_shippingprocessor_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: connectionkey
-  type: text
-  label: Connectionkey
-- name: connectionpassword
-  type: text
-  label: Connectionpassword
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_shippingprocessor_id
-  type: numeric
-  label: M Shippingprocessor Id
-- name: m_shippingprocessor_uu
-  type: text
-  label: M Shippingprocessor Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: userid
-  type: text
-  label: Userid
-- name: m_shippingprocessorcfg_id
-  type: numeric
-  label: M Shippingprocessorcfg Id
-- name: name
-  type: text
-  label: Name
+entities:
+  m_shippingprocessor:
+    table: m_shippingprocessor
+    key: m_shippingprocessor_id
+    displayName: M_SHIPPINGPROCESSOR
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      connectionkey: {type: string}
+      connectionpassword: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      m_shippingprocessor_id: {type: decimal, identity: true}
+      m_shippingprocessor_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      userid: {type: string}
+      m_shippingprocessorcfg_id: {type: decimal}
+      name: {type: string}

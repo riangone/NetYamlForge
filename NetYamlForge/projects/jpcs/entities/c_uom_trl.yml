@@ -1,46 +1,20 @@
-name: C_UOM_TRL
-tableName: c_uom_trl
-primaryKey: c_uom_id
-fields:
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: uomsymbol
-  type: text
-  label: Uomsymbol
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: c_uom_trl_uu
-  type: text
-  label: C Uom Trl Uu
+entities:
+  c_uom_trl:
+    table: c_uom_trl
+    key: c_uom_id
+    displayName: C_UOM_TRL
+    columns:
+      c_uom_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      uomsymbol: {type: string}
+      name: {type: string}
+      description: {type: string}
+      istranslated: {type: string}
+      c_uom_trl_uu: {type: string}

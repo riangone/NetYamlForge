@@ -1,79 +1,31 @@
-name: I_CONVERSION_RATE
-tableName: i_conversion_rate
-primaryKey: i_conversion_rate_id
-fields:
-- name: i_conversion_rate_id
-  type: numeric
-  label: I Conversion Rate Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_conversion_rate_id
-  type: numeric
-  label: C Conversion Rate Id
-- name: iso_code
-  type: text
-  label: Iso Code
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: iso_code_to
-  type: text
-  label: Iso Code To
-- name: c_currency_id_to
-  type: numeric
-  label: C Currency Id To
-- name: conversiontypevalue
-  type: text
-  label: Conversiontypevalue
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: multiplyrate
-  type: numeric
-  label: Multiplyrate
-- name: dividerate
-  type: numeric
-  label: Dividerate
-- name: createreciprocalrate
-  type: text
-  label: Createreciprocalrate
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_conversion_rate_uu
-  type: text
-  label: I Conversion Rate Uu
+entities:
+  i_conversion_rate:
+    table: i_conversion_rate
+    key: i_conversion_rate_id
+    displayName: I_CONVERSION_RATE
+    columns:
+      i_conversion_rate_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_conversion_rate_id: {type: decimal}
+      iso_code: {type: string}
+      c_currency_id: {type: decimal}
+      iso_code_to: {type: string}
+      c_currency_id_to: {type: decimal}
+      conversiontypevalue: {type: string}
+      c_conversiontype_id: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      multiplyrate: {type: decimal}
+      dividerate: {type: decimal}
+      createreciprocalrate: {type: string}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_conversion_rate_uu: {type: string}

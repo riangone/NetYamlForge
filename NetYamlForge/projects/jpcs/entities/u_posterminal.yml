@@ -1,115 +1,43 @@
-name: U_POSTERMINAL
-tableName: u_posterminal
-primaryKey: u_posterminal_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: autolock
-  type: text
-  label: Autolock
-- name: card_bankaccount_id
-  type: numeric
-  label: Card Bankaccount Id
-- name: cardtransferbankaccount_id
-  type: numeric
-  label: Cardtransferbankaccount Id
-- name: cardtransfercashbook_id
-  type: numeric
-  label: Cardtransfercashbook Id
-- name: cardtransfertype
-  type: text
-  label: Cardtransfertype
-- name: cashbooktransfertype
-  type: text
-  label: Cashbooktransfertype
-- name: cashtransferbankaccount_id
-  type: numeric
-  label: Cashtransferbankaccount Id
-- name: cashtransfercashbook_id
-  type: numeric
-  label: Cashtransfercashbook Id
-- name: c_cashbook_id
-  type: numeric
-  label: C Cashbook Id
-- name: c_cashbpartner_id
-  type: numeric
-  label: C Cashbpartner Id
-- name: check_bankaccount_id
-  type: numeric
-  label: Check Bankaccount Id
-- name: checktransferbankaccount_id
-  type: numeric
-  label: Checktransferbankaccount Id
-- name: checktransfercashbook_id
-  type: numeric
-  label: Checktransfercashbook Id
-- name: checktransfertype
-  type: text
-  label: Checktransfertype
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: c_templatebpartner_id
-  type: numeric
-  label: C Templatebpartner Id
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: lastlocktime
-  type: text
-  label: Lastlocktime
-- name: locked
-  type: text
-  label: Locked
-- name: locktime
-  type: numeric
-  label: Locktime
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: name
-  type: text
-  label: Name
-- name: po_pricelist_id
-  type: numeric
-  label: Po Pricelist Id
-- name: printername
-  type: text
-  label: Printername
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: so_pricelist_id
-  type: numeric
-  label: So Pricelist Id
-- name: unlockingtime
-  type: text
-  label: Unlockingtime
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: u_posterminal_id
-  type: numeric
-  label: U Posterminal Id
-- name: value
-  type: text
-  label: Value
-- name: u_posterminal_uu
-  type: text
-  label: U Posterminal Uu
+entities:
+  u_posterminal:
+    table: u_posterminal
+    key: u_posterminal_id
+    displayName: U_POSTERMINAL
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      autolock: {type: string}
+      card_bankaccount_id: {type: decimal}
+      cardtransferbankaccount_id: {type: decimal}
+      cardtransfercashbook_id: {type: decimal}
+      cardtransfertype: {type: string}
+      cashbooktransfertype: {type: string}
+      cashtransferbankaccount_id: {type: decimal}
+      cashtransfercashbook_id: {type: decimal}
+      c_cashbook_id: {type: decimal}
+      c_cashbpartner_id: {type: decimal}
+      check_bankaccount_id: {type: decimal}
+      checktransferbankaccount_id: {type: decimal}
+      checktransfercashbook_id: {type: decimal}
+      checktransfertype: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      c_templatebpartner_id: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      lastlocktime: {type: string}
+      locked: {type: string}
+      locktime: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      name: {type: string}
+      po_pricelist_id: {type: decimal}
+      printername: {type: string}
+      salesrep_id: {type: decimal}
+      so_pricelist_id: {type: decimal}
+      unlockingtime: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      u_posterminal_id: {type: decimal, identity: true}
+      value: {type: string}
+      u_posterminal_uu: {type: string}

@@ -1,61 +1,25 @@
-name: ASP_CLIENTEXCEPTION
-tableName: asp_clientexception
-primaryKey: asp_clientexception_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_field_id
-  type: numeric
-  label: Ad Field Id
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ad_task_id
-  type: numeric
-  label: Ad Task Id
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: asp_clientexception_id
-  type: numeric
-  label: Asp Clientexception Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_clientexception_uu
-  type: text
-  label: Asp Clientexception Uu
+entities:
+  asp_clientexception:
+    table: asp_clientexception
+    key: asp_clientexception_id
+    displayName: ASP_CLIENTEXCEPTION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_field_id: {type: decimal}
+      ad_form_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_process_para_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      ad_task_id: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_window_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      asp_clientexception_id: {type: decimal, identity: true}
+      asp_status: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_clientexception_uu: {type: string}

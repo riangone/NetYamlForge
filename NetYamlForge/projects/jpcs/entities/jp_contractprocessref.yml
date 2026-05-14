@@ -1,49 +1,21 @@
-name: JP_CONTRACTPROCESSREF
-tableName: jp_contractprocessref
-primaryKey: jp_contractprocessref_id
-fields:
-- name: jp_contractprocessref_id
-  type: numeric
-  label: Jp Contractprocessref Id
-- name: jp_contractprocessref_uu
-  type: text
-  label: Jp Contractprocessref Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: iscreatebasedocjp
-  type: text
-  label: Iscreatebasedocjp
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: issotrx
-  type: text
-  label: Issotrx
+entities:
+  jp_contractprocessref:
+    table: jp_contractprocessref
+    key: jp_contractprocessref_id
+    displayName: JP_CONTRACTPROCESSREF
+    columns:
+      jp_contractprocessref_id: {type: decimal, identity: true}
+      jp_contractprocessref_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      iscreatebasedocjp: {type: string}
+      docbasetype: {type: string}
+      issotrx: {type: string}

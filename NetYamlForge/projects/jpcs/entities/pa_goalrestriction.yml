@@ -1,55 +1,23 @@
-name: PA_GOALRESTRICTION
-tableName: pa_goalrestriction
-primaryKey: pa_goalrestriction_id
-fields:
-- name: pa_goalrestriction_id
-  type: numeric
-  label: Pa Goalrestriction Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: goalrestrictiontype
-  type: text
-  label: Goalrestrictiontype
-- name: pa_goal_id
-  type: numeric
-  label: Pa Goal Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: org_id
-  type: numeric
-  label: Org Id
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: pa_goalrestriction_uu
-  type: text
-  label: Pa Goalrestriction Uu
+entities:
+  pa_goalrestriction:
+    table: pa_goalrestriction
+    key: pa_goalrestriction_id
+    displayName: PA_GOALRESTRICTION
+    columns:
+      pa_goalrestriction_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      goalrestrictiontype: {type: string}
+      pa_goal_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      m_product_id: {type: decimal}
+      org_id: {type: decimal}
+      c_bp_group_id: {type: decimal}
+      m_product_category_id: {type: decimal}
+      pa_goalrestriction_uu: {type: string}

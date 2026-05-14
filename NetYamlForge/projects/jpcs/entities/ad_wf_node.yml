@@ -1,193 +1,69 @@
-name: AD_WF_NODE
-tableName: ad_wf_node
-primaryKey: ad_wf_node_id
-fields:
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: iscentrallymaintained
-  type: text
-  label: Iscentrallymaintained
-- name: action
-  type: text
-  label: Action
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: workflow_id
-  type: numeric
-  label: Workflow Id
-- name: ad_task_id
-  type: numeric
-  label: Ad Task Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: xposition
-  type: numeric
-  label: Xposition
-- name: yposition
-  type: numeric
-  label: Yposition
-- name: ad_wf_block_id
-  type: numeric
-  label: Ad Wf Block Id
-- name: subflowexecution
-  type: text
-  label: Subflowexecution
-- name: startmode
-  type: text
-  label: Startmode
-- name: finishmode
-  type: text
-  label: Finishmode
-- name: limit
-  type: numeric
-  label: Limit
-- name: priority
-  type: numeric
-  label: Priority
-- name: duration
-  type: numeric
-  label: Duration
-- name: cost
-  type: numeric
-  label: Cost
-- name: workingtime
-  type: numeric
-  label: Workingtime
-- name: waitingtime
-  type: numeric
-  label: Waitingtime
-- name: ad_wf_responsible_id
-  type: numeric
-  label: Ad Wf Responsible Id
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: joinelement
-  type: text
-  label: Joinelement
-- name: splitelement
-  type: text
-  label: Splitelement
-- name: waittime
-  type: numeric
-  label: Waittime
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: attributename
-  type: text
-  label: Attributename
-- name: attributevalue
-  type: text
-  label: Attributevalue
-- name: docaction
-  type: text
-  label: Docaction
-- name: value
-  type: text
-  label: Value
-- name: dynpriorityunit
-  type: text
-  label: Dynpriorityunit
-- name: dynprioritychange
-  type: numeric
-  label: Dynprioritychange
-- name: emailrecipient
-  type: text
-  label: Emailrecipient
-- name: email
-  type: text
-  label: Email
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: validto
-  type: text
-  label: Validto
-- name: ismilestone
-  type: text
-  label: Ismilestone
-- name: issubcontracting
-  type: text
-  label: Issubcontracting
-- name: unitscycles
-  type: numeric
-  label: Unitscycles
-- name: movingtime
-  type: numeric
-  label: Movingtime
-- name: overlapunits
-  type: numeric
-  label: Overlapunits
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: queuingtime
-  type: numeric
-  label: Queuingtime
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: setuptime
-  type: numeric
-  label: Setuptime
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: yield
-  type: numeric
-  label: Yield
-- name: ad_wf_node_uu
-  type: text
-  label: Ad Wf Node Uu
-- name: ad_ctxhelp_id
-  type: numeric
-  label: Ad Ctxhelp Id
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: isattacheddocumenttoemail
-  type: text
-  label: Isattacheddocumenttoemail
+entities:
+  ad_wf_node:
+    table: ad_wf_node
+    key: ad_wf_node_id
+    displayName: AD_WF_NODE
+    columns:
+      ad_wf_node_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_workflow_id: {type: decimal}
+      iscentrallymaintained: {type: string}
+      action: {type: string}
+      ad_window_id: {type: decimal}
+      workflow_id: {type: decimal}
+      ad_task_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_form_id: {type: decimal}
+      entitytype: {type: string}
+      xposition: {type: decimal}
+      yposition: {type: decimal}
+      ad_wf_block_id: {type: decimal}
+      subflowexecution: {type: string}
+      startmode: {type: string}
+      finishmode: {type: string}
+      limit: {type: decimal}
+      priority: {type: decimal}
+      duration: {type: decimal}
+      cost: {type: decimal}
+      workingtime: {type: decimal}
+      waitingtime: {type: decimal}
+      ad_wf_responsible_id: {type: decimal}
+      ad_image_id: {type: decimal}
+      joinelement: {type: string}
+      splitelement: {type: string}
+      waittime: {type: decimal}
+      ad_column_id: {type: decimal}
+      attributename: {type: string}
+      attributevalue: {type: string}
+      docaction: {type: string}
+      value: {type: string}
+      dynpriorityunit: {type: string}
+      dynprioritychange: {type: decimal}
+      emailrecipient: {type: string}
+      email: {type: string}
+      r_mailtext_id: {type: decimal}
+      validto: {type: string}
+      ismilestone: {type: string}
+      issubcontracting: {type: string}
+      unitscycles: {type: decimal}
+      movingtime: {type: decimal}
+      overlapunits: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      queuingtime: {type: decimal}
+      s_resource_id: {type: decimal}
+      setuptime: {type: decimal}
+      validfrom: {type: string}
+      yield: {type: decimal}
+      ad_wf_node_uu: {type: string}
+      ad_ctxhelp_id: {type: decimal}
+      ad_infowindow_id: {type: decimal}
+      isattacheddocumenttoemail: {type: string}

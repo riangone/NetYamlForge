@@ -1,52 +1,22 @@
-name: JP_CONTRACTCALENDER
-tableName: jp_contractcalender
-primaryKey: jp_contractcalender_id
-fields:
-- name: jp_contractcalender_id
-  type: numeric
-  label: Jp Contractcalender Id
-- name: jp_contractcalender_uu
-  type: text
-  label: Jp Contractcalender Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: jp_contractcategory_id
-  type: numeric
-  label: Jp Contractcategory Id
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
+entities:
+  jp_contractcalender:
+    table: jp_contractcalender
+    key: jp_contractcalender_id
+    displayName: JP_CONTRACTCALENDER
+    columns:
+      jp_contractcalender_id: {type: decimal, identity: true}
+      jp_contractcalender_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      jp_contractcategory_id: {type: decimal}
+      jp_contractcontent_id: {type: decimal}
+      jp_contractline_id: {type: decimal}
+      jp_contract_id: {type: decimal}

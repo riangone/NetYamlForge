@@ -1,37 +1,17 @@
-name: AD_WORKFLOW_ACCESS
-tableName: ad_workflow_access
-primaryKey: ad_workflow_id
-fields:
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isreadwrite
-  type: text
-  label: Isreadwrite
-- name: ad_workflow_access_uu
-  type: text
-  label: Ad Workflow Access Uu
+entities:
+  ad_workflow_access:
+    table: ad_workflow_access
+    key: ad_workflow_id
+    displayName: AD_WORKFLOW_ACCESS
+    columns:
+      ad_workflow_id: {type: decimal, identity: true}
+      ad_role_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isreadwrite: {type: string}
+      ad_workflow_access_uu: {type: string}

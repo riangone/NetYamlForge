@@ -1,61 +1,25 @@
-name: M_MOVEMENTCONFIRM
-tableName: m_movementconfirm
-primaryKey: m_movementconfirm_id
-fields:
-- name: m_movementconfirm_id
-  type: numeric
-  label: M Movementconfirm Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_movement_id
-  type: numeric
-  label: M Movement Id
-- name: description
-  type: text
-  label: Description
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: approvalamt
-  type: numeric
-  label: Approvalamt
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: m_inventory_id
-  type: numeric
-  label: M Inventory Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: m_movementconfirm_uu
-  type: text
-  label: M Movementconfirm Uu
+entities:
+  m_movementconfirm:
+    table: m_movementconfirm
+    key: m_movementconfirm_id
+    displayName: M_MOVEMENTCONFIRM
+    columns:
+      m_movementconfirm_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_movement_id: {type: decimal}
+      description: {type: string}
+      isapproved: {type: string}
+      approvalamt: {type: decimal}
+      docaction: {type: string}
+      docstatus: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      m_inventory_id: {type: decimal}
+      documentno: {type: string}
+      m_movementconfirm_uu: {type: string}

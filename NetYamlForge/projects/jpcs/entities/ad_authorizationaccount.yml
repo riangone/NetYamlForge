@@ -1,70 +1,28 @@
-name: AD_AUTHORIZATIONACCOUNT
-tableName: ad_authorizationaccount
-primaryKey: ad_authorizationaccount_id
-fields:
-- name: ad_authorizationaccount_id
-  type: numeric
-  label: Ad Authorizationaccount Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: ad_authorizationaccount_uu
-  type: text
-  label: Ad Authorizationaccount Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: email
-  type: text
-  label: Email
-- name: accesstoken
-  type: text
-  label: Accesstoken
-- name: refreshtoken
-  type: text
-  label: Refreshtoken
-- name: expireinseconds
-  type: numeric
-  label: Expireinseconds
-- name: ad_authorizationscope
-  type: text
-  label: Ad Authorizationscope
-- name: accesstokentimestamp
-  type: text
-  label: Accesstokentimestamp
-- name: isauthorized
-  type: text
-  label: Isauthorized
-- name: ad_authorizationcredential_id
-  type: numeric
-  label: Ad Authorizationcredential Id
-- name: isaccessrevoked
-  type: text
-  label: Isaccessrevoked
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_authorizationscopes
-  type: text
-  label: Ad Authorizationscopes
-- name: preferred_username
-  type: text
-  label: Preferred Username
+entities:
+  ad_authorizationaccount:
+    table: ad_authorizationaccount
+    key: ad_authorizationaccount_id
+    displayName: AD_AUTHORIZATIONACCOUNT
+    columns:
+      ad_authorizationaccount_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      help: {type: string}
+      isactive: {type: string}
+      ad_authorizationaccount_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      email: {type: string}
+      accesstoken: {type: string}
+      refreshtoken: {type: string}
+      expireinseconds: {type: decimal}
+      ad_authorizationscope: {type: string}
+      accesstokentimestamp: {type: string}
+      isauthorized: {type: string}
+      ad_authorizationcredential_id: {type: decimal}
+      isaccessrevoked: {type: string}
+      ad_user_id: {type: decimal}
+      ad_authorizationscopes: {type: string}
+      preferred_username: {type: string}

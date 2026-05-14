@@ -1,55 +1,23 @@
-name: PA_DASHBOARDPREFERENCE
-tableName: pa_dashboardpreference
-primaryKey: pa_dashboardpreference_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: columnno
-  type: numeric
-  label: Columnno
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscollapsedbydefault
-  type: text
-  label: Iscollapsedbydefault
-- name: isshowindashboard
-  type: text
-  label: Isshowindashboard
-- name: line
-  type: numeric
-  label: Line
-- name: pa_dashboardcontent_id
-  type: numeric
-  label: Pa Dashboardcontent Id
-- name: pa_dashboardpreference_id
-  type: numeric
-  label: Pa Dashboardpreference Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pa_dashboardpreference_uu
-  type: text
-  label: Pa Dashboardpreference Uu
-- name: flexgrow
-  type: numeric
-  label: Flexgrow
+entities:
+  pa_dashboardpreference:
+    table: pa_dashboardpreference
+    key: pa_dashboardpreference_id
+    displayName: PA_DASHBOARDPREFERENCE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      columnno: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      iscollapsedbydefault: {type: string}
+      isshowindashboard: {type: string}
+      line: {type: decimal}
+      pa_dashboardcontent_id: {type: decimal}
+      pa_dashboardpreference_id: {type: decimal, identity: true}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pa_dashboardpreference_uu: {type: string}
+      flexgrow: {type: decimal}

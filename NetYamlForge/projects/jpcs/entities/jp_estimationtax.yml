@@ -1,46 +1,20 @@
-name: JP_ESTIMATIONTAX
-tableName: jp_estimationtax
-primaryKey: jp_estimation_id
-fields:
-- name: jp_estimation_id
-  type: numeric
-  label: Jp Estimation Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: jp_estimationtax_uu
-  type: text
-  label: Jp Estimationtax Uu
-- name: c_taxprovider_id
-  type: numeric
-  label: C Taxprovider Id
+entities:
+  jp_estimationtax:
+    table: jp_estimationtax
+    key: jp_estimation_id
+    displayName: JP_ESTIMATIONTAX
+    columns:
+      jp_estimation_id: {type: decimal, identity: true}
+      c_tax_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      taxbaseamt: {type: decimal}
+      taxamt: {type: decimal}
+      istaxincluded: {type: string}
+      jp_estimationtax_uu: {type: string}
+      c_taxprovider_id: {type: decimal}

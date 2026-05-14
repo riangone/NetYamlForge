@@ -1,145 +1,53 @@
-name: PP_ORDER_WORKFLOW
-tableName: pp_order_workflow
-primaryKey: pp_order_workflow_id
-fields:
-- name: workflowtype
-  type: text
-  label: Workflowtype
-- name: name
-  type: text
-  label: Name
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_wf_responsible_id
-  type: numeric
-  label: Ad Wf Responsible Id
-- name: ad_workflowprocessor_id
-  type: numeric
-  label: Ad Workflowprocessor Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: accesslevel
-  type: text
-  label: Accesslevel
-- name: author
-  type: text
-  label: Author
-- name: cost
-  type: numeric
-  label: Cost
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: documentno
-  type: text
-  label: Documentno
-- name: duration
-  type: numeric
-  label: Duration
-- name: durationunit
-  type: text
-  label: Durationunit
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: limit
-  type: numeric
-  label: Limit
-- name: movingtime
-  type: numeric
-  label: Movingtime
-- name: pp_order_id
-  type: numeric
-  label: Pp Order Id
-- name: pp_order_node_id
-  type: numeric
-  label: Pp Order Node Id
-- name: pp_order_workflow_id
-  type: numeric
-  label: Pp Order Workflow Id
-- name: priority
-  type: numeric
-  label: Priority
-- name: processtype
-  type: text
-  label: Processtype
-- name: publishstatus
-  type: text
-  label: Publishstatus
-- name: qtybatchsize
-  type: numeric
-  label: Qtybatchsize
-- name: queuingtime
-  type: numeric
-  label: Queuingtime
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: setuptime
-  type: numeric
-  label: Setuptime
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: validateworkflow
-  type: text
-  label: Validateworkflow
-- name: value
-  type: text
-  label: Value
-- name: version
-  type: numeric
-  label: Version
-- name: waitingtime
-  type: numeric
-  label: Waitingtime
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: workingtime
-  type: numeric
-  label: Workingtime
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: yield
-  type: numeric
-  label: Yield
-- name: unitscycles
-  type: numeric
-  label: Unitscycles
-- name: overlapunits
-  type: numeric
-  label: Overlapunits
-- name: pp_order_workflow_uu
-  type: text
-  label: Pp Order Workflow Uu
+entities:
+  pp_order_workflow:
+    table: pp_order_workflow
+    key: pp_order_workflow_id
+    displayName: PP_ORDER_WORKFLOW
+    columns:
+      workflowtype: {type: string}
+      name: {type: string}
+      ad_table_id: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_wf_responsible_id: {type: decimal}
+      ad_workflowprocessor_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      accesslevel: {type: string}
+      author: {type: string}
+      cost: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      documentno: {type: string}
+      duration: {type: decimal}
+      durationunit: {type: string}
+      entitytype: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isdefault: {type: string}
+      limit: {type: decimal}
+      movingtime: {type: decimal}
+      pp_order_id: {type: decimal}
+      pp_order_node_id: {type: decimal}
+      pp_order_workflow_id: {type: decimal, identity: true}
+      priority: {type: decimal}
+      processtype: {type: string}
+      publishstatus: {type: string}
+      qtybatchsize: {type: decimal}
+      queuingtime: {type: decimal}
+      s_resource_id: {type: decimal}
+      setuptime: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      validateworkflow: {type: string}
+      value: {type: string}
+      version: {type: decimal}
+      waitingtime: {type: decimal}
+      ad_client_id: {type: decimal}
+      workingtime: {type: decimal}
+      ad_org_id: {type: decimal}
+      yield: {type: decimal}
+      unitscycles: {type: decimal}
+      overlapunits: {type: decimal}
+      pp_order_workflow_uu: {type: string}

@@ -1,49 +1,21 @@
-name: GL_JOURNALGENERATORSOURCE
-tableName: gl_journalgeneratorsource
-primaryKey: gl_journalgeneratorsource_id
-fields:
-- name: gl_journalgeneratorsource_id
-  type: numeric
-  label: Gl Journalgeneratorsource Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: gl_journalgeneratorline_id
-  type: numeric
-  label: Gl Journalgeneratorline Id
-- name: c_elementvalue_id
-  type: numeric
-  label: C Elementvalue Id
-- name: amtmultiplier
-  type: numeric
-  label: Amtmultiplier
-- name: roundfactor
-  type: numeric
-  label: Roundfactor
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: gl_journalgeneratorsource_uu
-  type: text
-  label: Gl Journalgeneratorsource Uu
+entities:
+  gl_journalgeneratorsource:
+    table: gl_journalgeneratorsource
+    key: gl_journalgeneratorsource_id
+    displayName: GL_JOURNALGENERATORSOURCE
+    columns:
+      gl_journalgeneratorsource_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      help: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      gl_journalgeneratorline_id: {type: decimal}
+      c_elementvalue_id: {type: decimal}
+      amtmultiplier: {type: decimal}
+      roundfactor: {type: decimal}
+      gl_category_id: {type: decimal}
+      gl_journalgeneratorsource_uu: {type: string}

@@ -1,46 +1,20 @@
-name: M_SHIPPERPACKAGING
-tableName: m_shipperpackaging
-primaryKey: m_shipperpackaging_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: m_shipperpackaging_id
-  type: numeric
-  label: M Shipperpackaging Id
-- name: m_shipperpackaging_uu
-  type: text
-  label: M Shipperpackaging Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: weight
-  type: numeric
-  label: Weight
-- name: m_shipperpackagingcfg_id
-  type: numeric
-  label: M Shipperpackagingcfg Id
-- name: name
-  type: text
-  label: Name
+entities:
+  m_shipperpackaging:
+    table: m_shipperpackaging
+    key: m_shipperpackaging_id
+    displayName: M_SHIPPERPACKAGING
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isdefault: {type: string}
+      m_shipper_id: {type: decimal}
+      m_shipperpackaging_id: {type: decimal, identity: true}
+      m_shipperpackaging_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      weight: {type: decimal}
+      m_shipperpackagingcfg_id: {type: decimal}
+      name: {type: string}

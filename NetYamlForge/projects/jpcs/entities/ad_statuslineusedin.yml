@@ -1,55 +1,23 @@
-name: AD_STATUSLINEUSEDIN
-tableName: ad_statuslineusedin
-primaryKey: ad_statuslineusedin_id
-fields:
-- name: ad_statuslineusedin_id
-  type: numeric
-  label: Ad Statuslineusedin Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_statuslineusedin_uu
-  type: text
-  label: Ad Statuslineusedin Uu
-- name: ad_statusline_id
-  type: numeric
-  label: Ad Statusline Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: isstatusline
-  type: text
-  label: Isstatusline
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
+entities:
+  ad_statuslineusedin:
+    table: ad_statuslineusedin
+    key: ad_statuslineusedin_id
+    displayName: AD_STATUSLINEUSEDIN
+    columns:
+      ad_statuslineusedin_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_statuslineusedin_uu: {type: string}
+      ad_statusline_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_window_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      isstatusline: {type: string}
+      seqno: {type: decimal}
+      ad_table_id: {type: decimal}
+      entitytype: {type: string}
+      ad_infowindow_id: {type: decimal}

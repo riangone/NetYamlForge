@@ -1,52 +1,22 @@
-name: CM_NEWSITEM
-tableName: cm_newsitem
-primaryKey: cm_newsitem_id
-fields:
-- name: cm_newsitem_id
-  type: numeric
-  label: Cm Newsitem Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_newschannel_id
-  type: numeric
-  label: Cm Newschannel Id
-- name: title
-  type: text
-  label: Title
-- name: description
-  type: text
-  label: Description
-- name: author
-  type: text
-  label: Author
-- name: linkurl
-  type: text
-  label: Linkurl
-- name: pubdate
-  type: text
-  label: Pubdate
-- name: contenthtml
-  type: text
-  label: Contenthtml
-- name: cm_newsitem_uu
-  type: text
-  label: Cm Newsitem Uu
+entities:
+  cm_newsitem:
+    table: cm_newsitem
+    key: cm_newsitem_id
+    displayName: CM_NEWSITEM
+    columns:
+      cm_newsitem_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_newschannel_id: {type: decimal}
+      title: {type: string}
+      description: {type: string}
+      author: {type: string}
+      linkurl: {type: string}
+      pubdate: {type: string}
+      contenthtml: {type: string}
+      cm_newsitem_uu: {type: string}

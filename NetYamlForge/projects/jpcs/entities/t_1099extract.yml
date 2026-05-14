@@ -1,100 +1,38 @@
-name: T_1099EXTRACT
-tableName: t_1099extract
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: amtbucket01
-  type: numeric
-  label: Amtbucket01
-- name: amtbucket02
-  type: numeric
-  label: Amtbucket02
-- name: amtbucket03
-  type: numeric
-  label: Amtbucket03
-- name: amtbucket04
-  type: numeric
-  label: Amtbucket04
-- name: amtbucket05
-  type: numeric
-  label: Amtbucket05
-- name: amtbucket06
-  type: numeric
-  label: Amtbucket06
-- name: amtbucket07
-  type: numeric
-  label: Amtbucket07
-- name: amtbucket08
-  type: numeric
-  label: Amtbucket08
-- name: amtbucket09
-  type: numeric
-  label: Amtbucket09
-- name: amtbucket10
-  type: numeric
-  label: Amtbucket10
-- name: amtbucket11
-  type: numeric
-  label: Amtbucket11
-- name: amtbucket12
-  type: numeric
-  label: Amtbucket12
-- name: amtbucket13
-  type: numeric
-  label: Amtbucket13
-- name: amtbucket14
-  type: numeric
-  label: Amtbucket14
-- name: amtbucket15
-  type: numeric
-  label: Amtbucket15
-- name: amtbucket16
-  type: numeric
-  label: Amtbucket16
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: cut_date
-  type: text
-  label: Cut Date
-- name: cut_year
-  type: numeric
-  label: Cut Year
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: t_1099extract_uu
-  type: text
-  label: T 1099Extract Uu
-- name: taxid
-  type: text
-  label: Taxid
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
+entities:
+  t_1099extract:
+    table: t_1099extract
+    key: ad_client_id
+    displayName: T_1099EXTRACT
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      amtbucket01: {type: decimal}
+      amtbucket02: {type: decimal}
+      amtbucket03: {type: decimal}
+      amtbucket04: {type: decimal}
+      amtbucket05: {type: decimal}
+      amtbucket06: {type: decimal}
+      amtbucket07: {type: decimal}
+      amtbucket08: {type: decimal}
+      amtbucket09: {type: decimal}
+      amtbucket10: {type: decimal}
+      amtbucket11: {type: decimal}
+      amtbucket12: {type: decimal}
+      amtbucket13: {type: decimal}
+      amtbucket14: {type: decimal}
+      amtbucket15: {type: decimal}
+      amtbucket16: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_location_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      cut_date: {type: string}
+      cut_year: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      t_1099extract_uu: {type: string}
+      taxid: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}

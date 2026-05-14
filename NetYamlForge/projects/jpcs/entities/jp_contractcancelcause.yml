@@ -1,40 +1,18 @@
-name: JP_CONTRACTCANCELCAUSE
-tableName: jp_contractcancelcause
-primaryKey: jp_contractcancelcause_id
-fields:
-- name: jp_contractcancelcause_id
-  type: numeric
-  label: Jp Contractcancelcause Id
-- name: jp_contractcancelcause_uu
-  type: text
-  label: Jp Contractcancelcause Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
+entities:
+  jp_contractcancelcause:
+    table: jp_contractcancelcause
+    key: jp_contractcancelcause_id
+    displayName: JP_CONTRACTCANCELCAUSE
+    columns:
+      jp_contractcancelcause_id: {type: decimal, identity: true}
+      jp_contractcancelcause_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}

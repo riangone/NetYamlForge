@@ -1,46 +1,20 @@
-name: C_DUNNING
-tableName: c_dunning
-primaryKey: c_dunning_id
-fields:
-- name: c_dunning_id
-  type: numeric
-  label: C Dunning Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: senddunningletter
-  type: text
-  label: Senddunningletter
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: createlevelssequentially
-  type: text
-  label: Createlevelssequentially
-- name: c_dunning_uu
-  type: text
-  label: C Dunning Uu
+entities:
+  c_dunning:
+    table: c_dunning
+    key: c_dunning_id
+    displayName: C_DUNNING
+    columns:
+      c_dunning_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      senddunningletter: {type: string}
+      isdefault: {type: string}
+      createlevelssequentially: {type: string}
+      c_dunning_uu: {type: string}

@@ -1,100 +1,38 @@
-name: T_INOUTTRANSACTIONJP
-tableName: t_inouttransactionjp
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: m_inout_id
-  type: numeric
-  label: M Inout Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: jp_posted
-  type: text
-  label: Jp Posted
-- name: description
-  type: text
-  label: Description
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: line
-  type: numeric
-  label: Line
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: pickedqty
-  type: numeric
-  label: Pickedqty
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: m_inoutline_description
-  type: text
-  label: M Inoutline Description
-- name: m_transaction_id
-  type: numeric
-  label: M Transaction Id
-- name: movementtype
-  type: text
-  label: Movementtype
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: jp_adjusttoacctqty
-  type: numeric
-  label: Jp Adjusttoacctqty
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: datevalue
-  type: text
-  label: Datevalue
+entities:
+  t_inouttransactionjp:
+    table: t_inouttransactionjp
+    key: ad_pinstance_id
+    displayName: T_INOUTTRANSACTIONJP
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      m_inout_id: {type: decimal}
+      documentno: {type: string}
+      c_doctype_id: {type: decimal}
+      dateacct: {type: string}
+      salesrep_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      docstatus: {type: string}
+      jp_posted: {type: string}
+      description: {type: string}
+      m_inoutline_id: {type: decimal}
+      line: {type: decimal}
+      qtyentered: {type: decimal}
+      c_uom_id: {type: decimal}
+      confirmedqty: {type: decimal}
+      pickedqty: {type: decimal}
+      scrappedqty: {type: decimal}
+      targetqty: {type: decimal}
+      m_inoutline_description: {type: string}
+      m_transaction_id: {type: decimal}
+      movementtype: {type: string}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      movementdate: {type: string}
+      movementqty: {type: decimal}
+      jp_adjusttoacctqty: {type: decimal}
+      docbasetype: {type: string}
+      datevalue: {type: string}

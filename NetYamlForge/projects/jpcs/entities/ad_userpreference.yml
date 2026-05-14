@@ -1,67 +1,27 @@
-name: AD_USERPREFERENCE
-tableName: ad_userpreference
-primaryKey: ad_userpreference_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_userpreference_id
-  type: numeric
-  label: Ad Userpreference Id
-- name: ad_userpreference_uu
-  type: text
-  label: Ad Userpreference Uu
-- name: autocommit
-  type: text
-  label: Autocommit
-- name: autonew
-  type: text
-  label: Autonew
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: automaticdecimalplacesforamoun
-  type: numeric
-  label: Automaticdecimalplacesforamoun
-- name: toggleondoubleclick
-  type: text
-  label: Toggleondoubleclick
-- name: isdetailedzoomacross
-  type: text
-  label: Isdetailedzoomacross
-- name: isusesimilarto
-  type: text
-  label: Isusesimilarto
-- name: viewfindresult
-  type: text
-  label: Viewfindresult
-- name: gridafterfindthreshold
-  type: numeric
-  label: Gridafterfindthreshold
-- name: migrationscriptcomment
-  type: text
-  label: Migrationscriptcomment
-- name: isreadonlysession
-  type: text
-  label: Isreadonlysession
-- name: isshowtechnicalinfonhelp
-  type: text
-  label: Isshowtechnicalinfonhelp
+entities:
+  ad_userpreference:
+    table: ad_userpreference
+    key: ad_userpreference_id
+    displayName: AD_USERPREFERENCE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      ad_userpreference_id: {type: decimal, identity: true}
+      ad_userpreference_uu: {type: string}
+      autocommit: {type: string}
+      autonew: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      automaticdecimalplacesforamoun: {type: decimal}
+      toggleondoubleclick: {type: string}
+      isdetailedzoomacross: {type: string}
+      isusesimilarto: {type: string}
+      viewfindresult: {type: string}
+      gridafterfindthreshold: {type: decimal}
+      migrationscriptcomment: {type: string}
+      isreadonlysession: {type: string}
+      isshowtechnicalinfonhelp: {type: string}

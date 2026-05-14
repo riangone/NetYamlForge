@@ -1,43 +1,19 @@
-name: JP_PRODUCTGROUP_TRL
-tableName: jp_productgroup_trl
-primaryKey: jp_productgroup_id
-fields:
-- name: jp_productgroup_id
-  type: numeric
-  label: Jp Productgroup Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: jp_productgroup_trl_uu
-  type: text
-  label: Jp Productgroup Trl Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
+entities:
+  jp_productgroup_trl:
+    table: jp_productgroup_trl
+    key: jp_productgroup_id
+    displayName: JP_PRODUCTGROUP_TRL
+    columns:
+      jp_productgroup_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      jp_productgroup_trl_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      istranslated: {type: string}
+      name: {type: string}
+      description: {type: string}

@@ -1,160 +1,58 @@
-name: JP_RECOGNITIONLINE
-tableName: jp_recognitionline
-primaryKey: jp_recognitionline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_productexplodebom_id
-  type: numeric
-  label: Jp Productexplodebom Id
-- name: jp_qtyrecognized
-  type: numeric
-  label: Jp Qtyrecognized
-- name: jp_recognitionline_id
-  type: numeric
-  label: Jp Recognitionline Id
-- name: jp_recognitionline_uu
-  type: text
-  label: Jp Recognitionline Uu
-- name: jp_recognition_id
-  type: numeric
-  label: Jp Recognition Id
-- name: jp_taxamt
-  type: numeric
-  label: Jp Taxamt
-- name: jp_taxbaseamt
-  type: numeric
-  label: Jp Taxbaseamt
-- name: line
-  type: numeric
-  label: Line
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: linetotalamt
-  type: numeric
-  label: Linetotalamt
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_rmaline_id
-  type: numeric
-  label: M Rmaline Id
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: processed
-  type: text
-  label: Processed
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: qtyinvoiced
-  type: numeric
-  label: Qtyinvoiced
-- name: s_resourceassignment_id
-  type: numeric
-  label: S Resourceassignment Id
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: jp_targetqtyrecognized
-  type: numeric
-  label: Jp Targetqtyrecognized
-- name: jp_recogline_splitfrom_id
-  type: numeric
-  label: Jp Recogline Splitfrom Id
-- name: reversalline_id
-  type: numeric
-  label: Reversalline Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_recognitionline:
+    table: jp_recognitionline
+    key: jp_recognitionline_id
+    displayName: JP_RECOGNITIONLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      isdescription: {type: string}
+      isprinted: {type: string}
+      jp_contractline_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_productexplodebom_id: {type: decimal}
+      jp_qtyrecognized: {type: decimal}
+      jp_recognitionline_id: {type: decimal, identity: true}
+      jp_recognitionline_uu: {type: string}
+      jp_recognition_id: {type: decimal}
+      jp_taxamt: {type: decimal}
+      jp_taxbaseamt: {type: decimal}
+      line: {type: decimal}
+      linenetamt: {type: decimal}
+      linetotalamt: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_rmaline_id: {type: decimal}
+      priceactual: {type: decimal}
+      priceentered: {type: decimal}
+      pricelimit: {type: decimal}
+      pricelist: {type: decimal}
+      processed: {type: string}
+      qtyentered: {type: decimal}
+      qtyinvoiced: {type: decimal}
+      s_resourceassignment_id: {type: decimal}
+      taxamt: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      jp_targetqtyrecognized: {type: decimal}
+      jp_recogline_splitfrom_id: {type: decimal}
+      reversalline_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      jp_communicationcolumn: {type: string}

@@ -1,64 +1,26 @@
-name: M_PROMOTIONREWARD
-tableName: m_promotionreward
-primaryKey: m_promotionreward_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: distributionsorting
-  type: text
-  label: Distributionsorting
-- name: isactive
-  type: text
-  label: Isactive
-- name: isforalldistribution
-  type: text
-  label: Isforalldistribution
-- name: issamedistribution
-  type: text
-  label: Issamedistribution
-- name: m_promotiondistribution_id
-  type: numeric
-  label: M Promotiondistribution Id
-- name: m_promotionreward_id
-  type: numeric
-  label: M Promotionreward Id
-- name: m_promotion_id
-  type: numeric
-  label: M Promotion Id
-- name: m_targetdistribution_id
-  type: numeric
-  label: M Targetdistribution Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: rewardtype
-  type: text
-  label: Rewardtype
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_promotionreward_uu
-  type: text
-  label: M Promotionreward Uu
+entities:
+  m_promotionreward:
+    table: m_promotionreward
+    key: m_promotionreward_id
+    displayName: M_PROMOTIONREWARD
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      amount: {type: decimal}
+      c_charge_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      distributionsorting: {type: string}
+      isactive: {type: string}
+      isforalldistribution: {type: string}
+      issamedistribution: {type: string}
+      m_promotiondistribution_id: {type: decimal}
+      m_promotionreward_id: {type: decimal, identity: true}
+      m_promotion_id: {type: decimal}
+      m_targetdistribution_id: {type: decimal}
+      qty: {type: decimal}
+      rewardtype: {type: string}
+      seqno: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_promotionreward_uu: {type: string}

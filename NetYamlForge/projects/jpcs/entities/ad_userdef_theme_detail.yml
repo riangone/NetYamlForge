@@ -1,40 +1,18 @@
-name: AD_USERDEF_THEME_DETAIL
-tableName: ad_userdef_theme_detail
-primaryKey: ad_userdef_theme_detail_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_userdef_theme_detail_id
-  type: numeric
-  label: Ad Userdef Theme Detail Id
-- name: ad_userdef_theme_detail_uu
-  type: text
-  label: Ad Userdef Theme Detail Uu
-- name: ad_userdef_theme_id
-  type: numeric
-  label: Ad Userdef Theme Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: currentvalue
-  type: text
-  label: Currentvalue
-- name: isactive
-  type: text
-  label: Isactive
-- name: newvalue
-  type: text
-  label: Newvalue
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  ad_userdef_theme_detail:
+    table: ad_userdef_theme_detail
+    key: ad_userdef_theme_detail_id
+    displayName: AD_USERDEF_THEME_DETAIL
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_userdef_theme_detail_id: {type: decimal, identity: true}
+      ad_userdef_theme_detail_uu: {type: string}
+      ad_userdef_theme_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      currentvalue: {type: string}
+      isactive: {type: string}
+      newvalue: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

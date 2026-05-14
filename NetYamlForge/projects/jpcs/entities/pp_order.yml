@@ -1,202 +1,72 @@
-name: PP_ORDER
-tableName: pp_order
-primaryKey: pp_order_id
-fields:
-- name: documentno
-  type: text
-  label: Documentno
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: assay
-  type: numeric
-  label: Assay
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_doctypetarget_id
-  type: numeric
-  label: C Doctypetarget Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateconfirm
-  type: text
-  label: Dateconfirm
-- name: datedelivered
-  type: text
-  label: Datedelivered
-- name: datefinish
-  type: text
-  label: Datefinish
-- name: datefinishschedule
-  type: text
-  label: Datefinishschedule
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: datestart
-  type: text
-  label: Datestart
-- name: datestartschedule
-  type: text
-  label: Datestartschedule
-- name: description
-  type: text
-  label: Description
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: floatafter
-  type: numeric
-  label: Floatafter
-- name: floatbefored
-  type: numeric
-  label: Floatbefored
-- name: isactive
-  type: text
-  label: Isactive
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: isqtypercentage
-  type: text
-  label: Isqtypercentage
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: isselected
-  type: text
-  label: Isselected
-- name: line
-  type: numeric
-  label: Line
-- name: lot
-  type: text
-  label: Lot
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: pp_order_id
-  type: numeric
-  label: Pp Order Id
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: planner_id
-  type: numeric
-  label: Planner Id
-- name: posted
-  type: text
-  label: Posted
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: qtybatchsize
-  type: numeric
-  label: Qtybatchsize
-- name: qtybatchs
-  type: numeric
-  label: Qtybatchs
-- name: qtydelivered
-  type: numeric
-  label: Qtydelivered
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: qtyordered
-  type: numeric
-  label: Qtyordered
-- name: qtyreject
-  type: numeric
-  label: Qtyreject
-- name: qtyreserved
-  type: numeric
-  label: Qtyreserved
-- name: qtyscrap
-  type: numeric
-  label: Qtyscrap
-- name: scheduletype
-  type: text
-  label: Scheduletype
-- name: serno
-  type: text
-  label: Serno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: yield
-  type: numeric
-  label: Yield
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: pp_order_uu
-  type: text
-  label: Pp Order Uu
+entities:
+  pp_order:
+    table: pp_order
+    key: pp_order_id
+    displayName: PP_ORDER
+    columns:
+      documentno: {type: string}
+      s_resource_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      assay: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_doctypetarget_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      copyfrom: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateconfirm: {type: string}
+      datedelivered: {type: string}
+      datefinish: {type: string}
+      datefinishschedule: {type: string}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      datestart: {type: string}
+      datestartschedule: {type: string}
+      description: {type: string}
+      docaction: {type: string}
+      docstatus: {type: string}
+      floatafter: {type: decimal}
+      floatbefored: {type: decimal}
+      isactive: {type: string}
+      isapproved: {type: string}
+      isprinted: {type: string}
+      isqtypercentage: {type: string}
+      issotrx: {type: string}
+      isselected: {type: string}
+      line: {type: decimal}
+      lot: {type: string}
+      m_attributesetinstance_id: {type: decimal}
+      ordertype: {type: string}
+      pp_order_id: {type: decimal, identity: true}
+      pp_product_bom_id: {type: decimal}
+      planner_id: {type: decimal}
+      posted: {type: string}
+      priorityrule: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      qtybatchsize: {type: decimal}
+      qtybatchs: {type: decimal}
+      qtydelivered: {type: decimal}
+      qtyentered: {type: decimal}
+      qtyordered: {type: decimal}
+      qtyreject: {type: decimal}
+      qtyreserved: {type: decimal}
+      qtyscrap: {type: decimal}
+      scheduletype: {type: string}
+      serno: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      yield: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      processedon: {type: decimal}
+      pp_order_uu: {type: string}

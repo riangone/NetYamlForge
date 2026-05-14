@@ -1,58 +1,24 @@
-name: HR_PAYROLL
-tableName: hr_payroll
-primaryKey: hr_payroll_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: value
-  type: text
-  label: Value
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hr_contract_id
-  type: numeric
-  label: Hr Contract Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: hr_payroll_id
-  type: numeric
-  label: Hr Payroll Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: hr_payroll_uu
-  type: text
-  label: Hr Payroll Uu
+entities:
+  hr_payroll:
+    table: hr_payroll
+    key: hr_payroll_id
+    displayName: HR_PAYROLL
+    columns:
+      name: {type: string}
+      value: {type: string}
+      ad_printformat_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hr_contract_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      isactive: {type: string}
+      paymentrule: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      hr_payroll_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      hr_payroll_uu: {type: string}

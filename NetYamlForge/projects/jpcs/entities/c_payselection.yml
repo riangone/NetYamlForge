@@ -1,76 +1,30 @@
-name: C_PAYSELECTION
-tableName: c_payselection
-primaryKey: c_payselection_id
-fields:
-- name: c_payselection_id
-  type: numeric
-  label: C Payselection Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: paydate
-  type: text
-  label: Paydate
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: totalamt
-  type: numeric
-  label: Totalamt
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: c_payselection_uu
-  type: text
-  label: C Payselection Uu
-- name: jp_downloadnum
-  type: numeric
-  label: Jp Downloadnum
-- name: jp_paymentbatch_id
-  type: numeric
-  label: Jp Paymentbatch Id
-- name: isreceiptjp
-  type: text
-  label: Isreceiptjp
-- name: isonepaymentperinvoice
-  type: text
-  label: Isonepaymentperinvoice
-- name: reversepreparepayment
-  type: text
-  label: Reversepreparepayment
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
+entities:
+  c_payselection:
+    table: c_payselection
+    key: c_payselection_id
+    displayName: C_PAYSELECTION
+    columns:
+      c_payselection_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_bankaccount_id: {type: decimal}
+      paydate: {type: string}
+      isapproved: {type: string}
+      totalamt: {type: decimal}
+      createfrom: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      c_payselection_uu: {type: string}
+      jp_downloadnum: {type: decimal}
+      jp_paymentbatch_id: {type: decimal}
+      isreceiptjp: {type: string}
+      isonepaymentperinvoice: {type: string}
+      reversepreparepayment: {type: string}
+      jp_processing1: {type: string}

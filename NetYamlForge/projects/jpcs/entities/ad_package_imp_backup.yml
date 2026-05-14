@@ -1,58 +1,24 @@
-name: AD_PACKAGE_IMP_BACKUP
-tableName: ad_package_imp_backup
-primaryKey: ad_package_imp_backup_id
-fields:
-- name: ad_package_imp_backup_id
-  type: numeric
-  label: Ad Package Imp Backup Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_package_imp_id
-  type: numeric
-  label: Ad Package Imp Id
-- name: ad_package_imp_detail_id
-  type: numeric
-  label: Ad Package Imp Detail Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_package_imp_bck_dir
-  type: text
-  label: Ad Package Imp Bck Dir
-- name: ad_package_imp_org_dir
-  type: text
-  label: Ad Package Imp Org Dir
-- name: colvalue
-  type: text
-  label: Colvalue
-- name: uninstall
-  type: text
-  label: Uninstall
-- name: ad_package_imp_backup_uu
-  type: text
-  label: Ad Package Imp Backup Uu
+entities:
+  ad_package_imp_backup:
+    table: ad_package_imp_backup
+    key: ad_package_imp_backup_id
+    displayName: AD_PACKAGE_IMP_BACKUP
+    columns:
+      ad_package_imp_backup_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_package_imp_id: {type: decimal}
+      ad_package_imp_detail_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_column_id: {type: decimal}
+      ad_reference_id: {type: decimal}
+      ad_package_imp_bck_dir: {type: string}
+      ad_package_imp_org_dir: {type: string}
+      colvalue: {type: string}
+      uninstall: {type: string}
+      ad_package_imp_backup_uu: {type: string}

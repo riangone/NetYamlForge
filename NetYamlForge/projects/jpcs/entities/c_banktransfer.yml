@@ -1,106 +1,40 @@
-name: C_BANKTRANSFER
-tableName: c_banktransfer
-primaryKey: c_banktransfer_id
-fields:
-- name: c_banktransfer_id
-  type: numeric
-  label: C Banktransfer Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: documentno
-  type: text
-  label: Documentno
-- name: isactive
-  type: text
-  label: Isactive
-- name: c_banktransfer_uu
-  type: text
-  label: C Banktransfer Uu
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: paydate
-  type: text
-  label: Paydate
-- name: from_c_bankaccount_id
-  type: numeric
-  label: From C Bankaccount Id
-- name: from_ad_org_id
-  type: numeric
-  label: From Ad Org Id
-- name: from_c_charge_id
-  type: numeric
-  label: From C Charge Id
-- name: from_c_currency_id
-  type: numeric
-  label: From C Currency Id
-- name: from_amt
-  type: numeric
-  label: From Amt
-- name: to_c_bankaccount_id
-  type: numeric
-  label: To C Bankaccount Id
-- name: to_ad_org_id
-  type: numeric
-  label: To Ad Org Id
-- name: to_c_charge_id
-  type: numeric
-  label: To C Charge Id
-- name: to_c_currency_id
-  type: numeric
-  label: To C Currency Id
-- name: to_amt
-  type: numeric
-  label: To Amt
-- name: rate
-  type: numeric
-  label: Rate
-- name: from_tendertype
-  type: text
-  label: From Tendertype
-- name: to_tendertype
-  type: text
-  label: To Tendertype
-- name: to_c_bpartner_id
-  type: numeric
-  label: To C Bpartner Id
-- name: from_c_bpartner_id
-  type: numeric
-  label: From C Bpartner Id
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: isoverridecurrencyrate
-  type: text
-  label: Isoverridecurrencyrate
+entities:
+  c_banktransfer:
+    table: c_banktransfer
+    key: c_banktransfer_id
+    displayName: C_BANKTRANSFER
+    columns:
+      c_banktransfer_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      docaction: {type: string}
+      docstatus: {type: string}
+      documentno: {type: string}
+      isactive: {type: string}
+      c_banktransfer_uu: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      paydate: {type: string}
+      from_c_bankaccount_id: {type: decimal}
+      from_ad_org_id: {type: decimal}
+      from_c_charge_id: {type: decimal}
+      from_c_currency_id: {type: decimal}
+      from_amt: {type: decimal}
+      to_c_bankaccount_id: {type: decimal}
+      to_ad_org_id: {type: decimal}
+      to_c_charge_id: {type: decimal}
+      to_c_currency_id: {type: decimal}
+      to_amt: {type: decimal}
+      rate: {type: decimal}
+      from_tendertype: {type: string}
+      to_tendertype: {type: string}
+      to_c_bpartner_id: {type: decimal}
+      from_c_bpartner_id: {type: decimal}
+      dateacct: {type: string}
+      c_conversiontype_id: {type: decimal}
+      isoverridecurrencyrate: {type: string}

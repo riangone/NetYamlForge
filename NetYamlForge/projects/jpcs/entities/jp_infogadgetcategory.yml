@@ -1,52 +1,22 @@
-name: JP_INFOGADGETCATEGORY
-tableName: jp_infogadgetcategory
-primaryKey: jp_infogadgetcategory_id
-fields:
-- name: jp_infogadgetcategory_id
-  type: numeric
-  label: Jp Infogadgetcategory Id
-- name: jp_infogadgetcategory_uu
-  type: text
-  label: Jp Infogadgetcategory Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: maxqueryrecords
-  type: numeric
-  label: Maxqueryrecords
-- name: jp_pagesize
-  type: numeric
-  label: Jp Pagesize
-- name: jp_userdisplayposition
-  type: text
-  label: Jp Userdisplayposition
+entities:
+  jp_infogadgetcategory:
+    table: jp_infogadgetcategory
+    key: jp_infogadgetcategory_id
+    displayName: JP_INFOGADGETCATEGORY
+    columns:
+      jp_infogadgetcategory_id: {type: decimal, identity: true}
+      jp_infogadgetcategory_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      maxqueryrecords: {type: decimal}
+      jp_pagesize: {type: decimal}
+      jp_userdisplayposition: {type: string}

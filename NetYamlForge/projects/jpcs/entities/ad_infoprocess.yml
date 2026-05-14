@@ -1,55 +1,23 @@
-name: AD_INFOPROCESS
-tableName: ad_infoprocess
-primaryKey: ad_infoprocess_id
-fields:
-- name: ad_infoprocess_id
-  type: numeric
-  label: Ad Infoprocess Id
-- name: ad_infoprocess_uu
-  type: text
-  label: Ad Infoprocess Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: layouttype
-  type: text
-  label: Layouttype
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: ad_infocolumn_id
-  type: numeric
-  label: Ad Infocolumn Id
-- name: entitytype
-  type: text
-  label: Entitytype
+entities:
+  ad_infoprocess:
+    table: ad_infoprocess
+    key: ad_infoprocess_id
+    displayName: AD_INFOPROCESS
+    columns:
+      ad_infoprocess_id: {type: decimal, identity: true}
+      ad_infoprocess_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      imageurl: {type: string}
+      seqno: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_infowindow_id: {type: decimal}
+      layouttype: {type: string}
+      displaylogic: {type: string}
+      ad_infocolumn_id: {type: decimal}
+      entitytype: {type: string}

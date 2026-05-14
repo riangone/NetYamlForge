@@ -1,76 +1,30 @@
-name: IMP_PROCESSOR
-tableName: imp_processor
-primaryKey: imp_processor_id
-fields:
-- name: imp_processor_id
-  type: numeric
-  label: Imp Processor Id
-- name: imp_processor_type_id
-  type: numeric
-  label: Imp Processor Type Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: frequency
-  type: numeric
-  label: Frequency
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: keeplogdays
-  type: numeric
-  label: Keeplogdays
-- name: processing
-  type: text
-  label: Processing
-- name: host
-  type: text
-  label: Host
-- name: port
-  type: numeric
-  label: Port
-- name: account
-  type: text
-  label: Account
-- name: passwordinfo
-  type: text
-  label: Passwordinfo
-- name: imp_processor_uu
-  type: text
-  label: Imp Processor Uu
+entities:
+  imp_processor:
+    table: imp_processor
+    key: imp_processor_id
+    displayName: IMP_PROCESSOR
+    columns:
+      imp_processor_id: {type: decimal, identity: true}
+      imp_processor_type_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      frequencytype: {type: string}
+      frequency: {type: decimal}
+      datelastrun: {type: string}
+      datenextrun: {type: string}
+      keeplogdays: {type: decimal}
+      processing: {type: string}
+      host: {type: string}
+      port: {type: decimal}
+      account: {type: string}
+      passwordinfo: {type: string}
+      imp_processor_uu: {type: string}

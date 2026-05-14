@@ -1,43 +1,19 @@
-name: JP_PIVOTWINDOWDEFAULTFIELD
-tableName: jp_pivotwindowdefaultfield
-primaryKey: jp_pivotwindowdefaultfield_id
-fields:
-- name: jp_pivotwindowdefaultfield_id
-  type: numeric
-  label: Jp Pivotwindowdefaultfield Id
-- name: jp_pivotwindowdefault_id
-  type: numeric
-  label: Jp Pivotwindowdefault Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: created
-  type: text
-  label: Created
-- name: updated
-  type: text
-  label: Updated
-- name: jp_pivotwindowdefaultfield_uu
-  type: text
-  label: Jp Pivotwindowdefaultfield Uu
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_pivotfieldposition
-  type: text
-  label: Jp Pivotfieldposition
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: jp_pivotwindowfield_id
-  type: numeric
-  label: Jp Pivotwindowfield Id
+entities:
+  jp_pivotwindowdefaultfield:
+    table: jp_pivotwindowdefaultfield
+    key: jp_pivotwindowdefaultfield_id
+    displayName: JP_PIVOTWINDOWDEFAULTFIELD
+    columns:
+      jp_pivotwindowdefaultfield_id: {type: decimal, identity: true}
+      jp_pivotwindowdefault_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      created: {type: string}
+      updated: {type: string}
+      jp_pivotwindowdefaultfield_uu: {type: string}
+      isactive: {type: string}
+      jp_pivotfieldposition: {type: string}
+      seqno: {type: decimal}
+      jp_pivotwindowfield_id: {type: decimal}

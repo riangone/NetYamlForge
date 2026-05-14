@@ -1,70 +1,28 @@
-name: JP_BULKCREATECONTRACT
-tableName: jp_bulkcreatecontract
-primaryKey: jp_bulkcreatecontract_id
-fields:
-- name: jp_bulkcreatecontract_id
-  type: numeric
-  label: Jp Bulkcreatecontract Id
-- name: jp_bulkcreatecontract_uu
-  type: text
-  label: Jp Bulkcreatecontract Uu
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: startno
-  type: numeric
-  label: Startno
-- name: prefix
-  type: text
-  label: Prefix
-- name: suffix
-  type: text
-  label: Suffix
-- name: jp_registrationqty
-  type: numeric
-  label: Jp Registrationqty
-- name: jp_commitrecords
-  type: numeric
-  label: Jp Commitrecords
-- name: jp_cresetrecords
-  type: numeric
-  label: Jp Cresetrecords
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: docaction
-  type: text
-  label: Docaction
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: jp_contract_docaction
-  type: text
-  label: Jp Contract Docaction
-- name: jp_contractcontent_docaction
-  type: text
-  label: Jp Contractcontent Docaction
+entities:
+  jp_bulkcreatecontract:
+    table: jp_bulkcreatecontract
+    key: jp_bulkcreatecontract_id
+    displayName: JP_BULKCREATECONTRACT
+    columns:
+      jp_bulkcreatecontract_id: {type: decimal, identity: true}
+      jp_bulkcreatecontract_uu: {type: string}
+      name: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      startno: {type: decimal}
+      prefix: {type: string}
+      suffix: {type: string}
+      jp_registrationqty: {type: decimal}
+      jp_commitrecords: {type: decimal}
+      jp_cresetrecords: {type: decimal}
+      jp_contract_id: {type: decimal}
+      docaction: {type: string}
+      c_bp_group_id: {type: decimal}
+      jp_contract_docaction: {type: string}
+      jp_contractcontent_docaction: {type: string}

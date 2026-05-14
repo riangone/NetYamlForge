@@ -1,52 +1,22 @@
-name: A_REGISTRATIONATTRIBUTE
-tableName: a_registrationattribute
-primaryKey: a_registrationattribute_id
-fields:
-- name: a_registrationattribute_id
-  type: numeric
-  label: A Registrationattribute Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: columnname
-  type: text
-  label: Columnname
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: a_registrationattribute_uu
-  type: text
-  label: A Registrationattribute Uu
+entities:
+  a_registrationattribute:
+    table: a_registrationattribute
+    key: a_registrationattribute_id
+    displayName: A_REGISTRATIONATTRIBUTE
+    columns:
+      a_registrationattribute_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      seqno: {type: decimal}
+      ad_reference_id: {type: decimal}
+      columnname: {type: string}
+      ad_reference_value_id: {type: decimal}
+      isselfservice: {type: string}
+      a_registrationattribute_uu: {type: string}

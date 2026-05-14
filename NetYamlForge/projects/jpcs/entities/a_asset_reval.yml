@@ -1,76 +1,30 @@
-name: A_ASSET_REVAL
-tableName: a_asset_reval
-primaryKey: a_asset_reval_id
-fields:
-- name: a_asset_reval_id
-  type: numeric
-  label: A Asset Reval Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: documentno
-  type: text
-  label: Documentno
-- name: isactive
-  type: text
-  label: Isactive
-- name: posted
-  type: text
-  label: Posted
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: a_asset_cost
-  type: numeric
-  label: A Asset Cost
-- name: a_accumulated_depr
-  type: numeric
-  label: A Accumulated Depr
-- name: a_asset_cost_change
-  type: numeric
-  label: A Asset Cost Change
-- name: a_change_acumulated_depr
-  type: numeric
-  label: A Change Acumulated Depr
-- name: docaction
-  type: text
-  label: Docaction
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: a_asset_reval_uu
-  type: text
-  label: A Asset Reval Uu
+entities:
+  a_asset_reval:
+    table: a_asset_reval
+    key: a_asset_reval_id
+    displayName: A_ASSET_REVAL
+    columns:
+      a_asset_reval_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_asset_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateacct: {type: string}
+      datedoc: {type: string}
+      docstatus: {type: string}
+      documentno: {type: string}
+      isactive: {type: string}
+      posted: {type: string}
+      postingtype: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      a_asset_cost: {type: decimal}
+      a_accumulated_depr: {type: decimal}
+      a_asset_cost_change: {type: decimal}
+      a_change_acumulated_depr: {type: decimal}
+      docaction: {type: string}
+      processedon: {type: decimal}
+      a_asset_reval_uu: {type: string}

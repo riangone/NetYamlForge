@@ -1,52 +1,22 @@
-name: CM_CSTAGETTABLE
-tableName: cm_cstagettable
-primaryKey: cm_cstagettable_id
-fields:
-- name: cm_cstagettable_id
-  type: numeric
-  label: Cm Cstagettable Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: cm_cstage_id
-  type: numeric
-  label: Cm Cstage Id
-- name: cm_templatetable_id
-  type: numeric
-  label: Cm Templatetable Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: otherclause
-  type: text
-  label: Otherclause
-- name: cm_cstagettable_uu
-  type: text
-  label: Cm Cstagettable Uu
+entities:
+  cm_cstagettable:
+    table: cm_cstagettable
+    key: cm_cstagettable_id
+    displayName: CM_CSTAGETTABLE
+    columns:
+      cm_cstagettable_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      cm_cstage_id: {type: decimal}
+      cm_templatetable_id: {type: decimal}
+      record_id: {type: decimal}
+      whereclause: {type: string}
+      otherclause: {type: string}
+      cm_cstagettable_uu: {type: string}

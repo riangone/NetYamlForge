@@ -1,70 +1,28 @@
-name: C_DEPOSITBATCH
-tableName: c_depositbatch
-primaryKey: c_depositbatch_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: datedeposit
-  type: text
-  label: Datedeposit
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: depositamt
-  type: numeric
-  label: Depositamt
-- name: description
-  type: text
-  label: Description
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: documentno
-  type: text
-  label: Documentno
-- name: isactive
-  type: text
-  label: Isactive
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_depositbatch_id
-  type: numeric
-  label: C Depositbatch Id
-- name: c_depositbatch_uu
-  type: text
-  label: C Depositbatch Uu
-- name: docaction
-  type: text
-  label: Docaction
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
+entities:
+  c_depositbatch:
+    table: c_depositbatch
+    key: c_depositbatch_id
+    displayName: C_DEPOSITBATCH
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_bankaccount_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      createfrom: {type: string}
+      datedeposit: {type: string}
+      datedoc: {type: string}
+      depositamt: {type: decimal}
+      description: {type: string}
+      docstatus: {type: string}
+      documentno: {type: string}
+      isactive: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_depositbatch_id: {type: decimal, identity: true}
+      c_depositbatch_uu: {type: string}
+      docaction: {type: string}
+      c_currency_id: {type: decimal}

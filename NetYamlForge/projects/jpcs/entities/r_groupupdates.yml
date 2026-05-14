@@ -1,37 +1,17 @@
-name: R_GROUPUPDATES
-tableName: r_groupupdates
-primaryKey: ad_user_id
-fields:
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: r_group_id
-  type: numeric
-  label: R Group Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: r_groupupdates_uu
-  type: text
-  label: R Groupupdates Uu
+entities:
+  r_groupupdates:
+    table: r_groupupdates
+    key: ad_user_id
+    displayName: R_GROUPUPDATES
+    columns:
+      ad_user_id: {type: decimal, identity: true}
+      r_group_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isselfservice: {type: string}
+      r_groupupdates_uu: {type: string}

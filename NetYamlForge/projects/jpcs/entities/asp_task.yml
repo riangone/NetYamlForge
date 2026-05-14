@@ -1,40 +1,18 @@
-name: ASP_TASK
-tableName: asp_task
-primaryKey: asp_task_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_task_id
-  type: numeric
-  label: Ad Task Id
-- name: asp_level_id
-  type: numeric
-  label: Asp Level Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_task_id
-  type: numeric
-  label: Asp Task Id
-- name: asp_task_uu
-  type: text
-  label: Asp Task Uu
+entities:
+  asp_task:
+    table: asp_task
+    key: asp_task_id
+    displayName: ASP_TASK
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_task_id: {type: decimal}
+      asp_level_id: {type: decimal}
+      asp_status: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_task_id: {type: decimal, identity: true}
+      asp_task_uu: {type: string}

@@ -1,70 +1,28 @@
-name: JP_CM_BPARTNER_LOCATION
-tableName: jp_cm_bpartner_location
-primaryKey: jp_cm_bpartner_location_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: customeraddressid
-  type: text
-  label: Customeraddressid
-- name: fax
-  type: text
-  label: Fax
-- name: isactive
-  type: text
-  label: Isactive
-- name: isbillto
-  type: text
-  label: Isbillto
-- name: ispayfrom
-  type: text
-  label: Ispayfrom
-- name: ispreservecustomname
-  type: text
-  label: Ispreservecustomname
-- name: isremitto
-  type: text
-  label: Isremitto
-- name: isshipto
-  type: text
-  label: Isshipto
-- name: jp_cm_bpartner_id
-  type: numeric
-  label: Jp Cm Bpartner Id
-- name: jp_cm_bpartner_location_id
-  type: numeric
-  label: Jp Cm Bpartner Location Id
-- name: jp_cm_bpartner_location_uu
-  type: text
-  label: Jp Cm Bpartner Location Uu
-- name: name
-  type: text
-  label: Name
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_salesregion_value
-  type: text
-  label: Jp Salesregion Value
+entities:
+  jp_cm_bpartner_location:
+    table: jp_cm_bpartner_location
+    key: jp_cm_bpartner_location_id
+    displayName: JP_CM_BPARTNER_LOCATION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_location_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      customeraddressid: {type: string}
+      fax: {type: string}
+      isactive: {type: string}
+      isbillto: {type: string}
+      ispayfrom: {type: string}
+      ispreservecustomname: {type: string}
+      isremitto: {type: string}
+      isshipto: {type: string}
+      jp_cm_bpartner_id: {type: decimal}
+      jp_cm_bpartner_location_id: {type: decimal, identity: true}
+      jp_cm_bpartner_location_uu: {type: string}
+      name: {type: string}
+      phone: {type: string}
+      phone2: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_salesregion_value: {type: string}

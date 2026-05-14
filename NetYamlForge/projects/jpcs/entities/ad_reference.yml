@@ -1,58 +1,24 @@
-name: AD_REFERENCE
-tableName: ad_reference
-primaryKey: ad_reference_id
-fields:
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: validationtype
-  type: text
-  label: Validationtype
-- name: vformat
-  type: text
-  label: Vformat
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: isorderbyvalue
-  type: text
-  label: Isorderbyvalue
-- name: ad_reference_uu
-  type: text
-  label: Ad Reference Uu
-- name: ad_element_id
-  type: numeric
-  label: Ad Element Id
-- name: showinactive
-  type: text
-  label: Showinactive
+entities:
+  ad_reference:
+    table: ad_reference
+    key: ad_reference_id
+    displayName: AD_REFERENCE
+    columns:
+      ad_reference_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      validationtype: {type: string}
+      vformat: {type: string}
+      entitytype: {type: string}
+      isorderbyvalue: {type: string}
+      ad_reference_uu: {type: string}
+      ad_element_id: {type: decimal}
+      showinactive: {type: string}

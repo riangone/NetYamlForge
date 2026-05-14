@@ -1,46 +1,20 @@
-name: AD_MESSAGE
-tableName: ad_message
-primaryKey: ad_message_id
-fields:
-- name: ad_message_id
-  type: numeric
-  label: Ad Message Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: msgtext
-  type: text
-  label: Msgtext
-- name: msgtip
-  type: text
-  label: Msgtip
-- name: msgtype
-  type: text
-  label: Msgtype
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_message_uu
-  type: text
-  label: Ad Message Uu
+entities:
+  ad_message:
+    table: ad_message
+    key: ad_message_id
+    displayName: AD_MESSAGE
+    columns:
+      ad_message_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      msgtext: {type: string}
+      msgtip: {type: string}
+      msgtype: {type: string}
+      entitytype: {type: string}
+      ad_message_uu: {type: string}

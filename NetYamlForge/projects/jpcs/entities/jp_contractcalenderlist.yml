@@ -1,46 +1,20 @@
-name: JP_CONTRACTCALENDERLIST
-tableName: jp_contractcalenderlist
-primaryKey: jp_contractcalenderlist_id
-fields:
-- name: jp_contractcalenderlist_id
-  type: numeric
-  label: Jp Contractcalenderlist Id
-- name: jp_contractcalenderlist_uu
-  type: text
-  label: Jp Contractcalenderlist Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractcalenderref_id
-  type: numeric
-  label: Jp Contractcalenderref Id
-- name: jp_contractcalender_id
-  type: numeric
-  label: Jp Contractcalender Id
-- name: description
-  type: text
-  label: Description
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
+entities:
+  jp_contractcalenderlist:
+    table: jp_contractcalenderlist
+    key: jp_contractcalenderlist_id
+    displayName: JP_CONTRACTCALENDERLIST
+    columns:
+      jp_contractcalenderlist_id: {type: decimal, identity: true}
+      jp_contractcalenderlist_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractcalenderref_id: {type: decimal}
+      jp_contractcalender_id: {type: decimal}
+      description: {type: string}
+      validfrom: {type: string}
+      validto: {type: string}

@@ -1,46 +1,20 @@
-name: JP_BULKUPDATEPROFILE_TRL
-tableName: jp_bulkupdateprofile_trl
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: jp_bulkupdateprofile_id
-  type: numeric
-  label: Jp Bulkupdateprofile Id
-- name: jp_bulkupdateprofile_trl_uu
-  type: text
-  label: Jp Bulkupdateprofile Trl Uu
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_bulkupdateprofile_trl:
+    table: jp_bulkupdateprofile_trl
+    key: ad_client_id
+    displayName: JP_BULKUPDATEPROFILE_TRL
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      istranslated: {type: string}
+      jp_bulkupdateprofile_id: {type: decimal}
+      jp_bulkupdateprofile_trl_uu: {type: string}
+      description: {type: string}
+      help: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

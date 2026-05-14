@@ -1,49 +1,21 @@
-name: ASP_LEVEL
-tableName: asp_level
-primaryKey: asp_level_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: asp_level_id
-  type: numeric
-  label: Asp Level Id
-- name: asp_module_id
-  type: numeric
-  label: Asp Module Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: asp_level_uu
-  type: text
-  label: Asp Level Uu
+entities:
+  asp_level:
+    table: asp_level
+    key: asp_level_id
+    displayName: ASP_LEVEL
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      asp_level_id: {type: decimal, identity: true}
+      asp_module_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      asp_level_uu: {type: string}

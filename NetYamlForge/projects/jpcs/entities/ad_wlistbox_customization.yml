@@ -1,40 +1,18 @@
-name: AD_WLISTBOX_CUSTOMIZATION
-tableName: ad_wlistbox_customization
-primaryKey: ad_wlistbox_customization_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_wlistbox_customization_id
-  type: numeric
-  label: Ad Wlistbox Customization Id
-- name: ad_wlistbox_customization_uu
-  type: text
-  label: Ad Wlistbox Customization Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: custom
-  type: text
-  label: Custom
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: wlistboxname
-  type: text
-  label: Wlistboxname
+entities:
+  ad_wlistbox_customization:
+    table: ad_wlistbox_customization
+    key: ad_wlistbox_customization_id
+    displayName: AD_WLISTBOX_CUSTOMIZATION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      ad_wlistbox_customization_id: {type: decimal, identity: true}
+      ad_wlistbox_customization_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      custom: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      wlistboxname: {type: string}

@@ -1,43 +1,19 @@
-name: R_INTERESTAREA
-tableName: r_interestarea
-primaryKey: r_interestarea_id
-fields:
-- name: r_interestarea_id
-  type: numeric
-  label: R Interestarea Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: value
-  type: text
-  label: Value
-- name: r_interestarea_uu
-  type: text
-  label: R Interestarea Uu
+entities:
+  r_interestarea:
+    table: r_interestarea
+    key: r_interestarea_id
+    displayName: R_INTERESTAREA
+    columns:
+      r_interestarea_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isselfservice: {type: string}
+      value: {type: string}
+      r_interestarea_uu: {type: string}

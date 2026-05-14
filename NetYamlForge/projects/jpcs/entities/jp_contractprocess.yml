@@ -1,64 +1,26 @@
-name: JP_CONTRACTPROCESS
-tableName: jp_contractprocess
-primaryKey: jp_contractprocess_id
-fields:
-- name: jp_contractprocess_id
-  type: numeric
-  label: Jp Contractprocess Id
-- name: jp_contractprocess_uu
-  type: text
-  label: Jp Contractprocess Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: iscreatebasedocjp
-  type: text
-  label: Iscreatebasedocjp
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: classname
-  type: text
-  label: Classname
-- name: docaction
-  type: text
-  label: Docaction
-- name: jp_createcontractpsclass
-  type: text
-  label: Jp Createcontractpsclass
-- name: jp_indirectcontractprocclass
-  type: text
-  label: Jp Indirectcontractprocclass
-- name: jp_contractautorenewclass
-  type: text
-  label: Jp Contractautorenewclass
-- name: jp_contractstatusupdateclass
-  type: text
-  label: Jp Contractstatusupdateclass
+entities:
+  jp_contractprocess:
+    table: jp_contractprocess
+    key: jp_contractprocess_id
+    displayName: JP_CONTRACTPROCESS
+    columns:
+      jp_contractprocess_id: {type: decimal, identity: true}
+      jp_contractprocess_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      iscreatebasedocjp: {type: string}
+      docbasetype: {type: string}
+      classname: {type: string}
+      docaction: {type: string}
+      jp_createcontractpsclass: {type: string}
+      jp_indirectcontractprocclass: {type: string}
+      jp_contractautorenewclass: {type: string}
+      jp_contractstatusupdateclass: {type: string}

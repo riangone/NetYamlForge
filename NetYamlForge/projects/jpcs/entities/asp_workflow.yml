@@ -1,40 +1,18 @@
-name: ASP_WORKFLOW
-tableName: asp_workflow
-primaryKey: asp_workflow_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: asp_level_id
-  type: numeric
-  label: Asp Level Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_workflow_id
-  type: numeric
-  label: Asp Workflow Id
-- name: asp_workflow_uu
-  type: text
-  label: Asp Workflow Uu
+entities:
+  asp_workflow:
+    table: asp_workflow
+    key: asp_workflow_id
+    displayName: ASP_WORKFLOW
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      asp_level_id: {type: decimal}
+      asp_status: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_workflow_id: {type: decimal, identity: true}
+      asp_workflow_uu: {type: string}

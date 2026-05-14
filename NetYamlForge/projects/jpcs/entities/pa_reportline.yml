@@ -1,100 +1,38 @@
-name: PA_REPORTLINE
-tableName: pa_reportline
-primaryKey: pa_reportline_id
-fields:
-- name: pa_reportline_id
-  type: numeric
-  label: Pa Reportline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pa_reportlineset_id
-  type: numeric
-  label: Pa Reportlineset Id
-- name: name
-  type: text
-  label: Name
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: description
-  type: text
-  label: Description
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: parent_id
-  type: numeric
-  label: Parent Id
-- name: issummary
-  type: text
-  label: Issummary
-- name: linetype
-  type: text
-  label: Linetype
-- name: calculationtype
-  type: text
-  label: Calculationtype
-- name: oper_1_id
-  type: numeric
-  label: Oper 1 Id
-- name: oper_2_id
-  type: numeric
-  label: Oper 2 Id
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_budget_id
-  type: numeric
-  label: Gl Budget Id
-- name: amounttype
-  type: text
-  label: Amounttype
-- name: paamounttype
-  type: text
-  label: Paamounttype
-- name: paperiodtype
-  type: text
-  label: Paperiodtype
-- name: pa_reportline_uu
-  type: text
-  label: Pa Reportline Uu
-- name: isinversedebitcreditonly
-  type: text
-  label: Isinversedebitcreditonly
-- name: jp_parameter
-  type: text
-  label: Jp Parameter
-- name: isshowoppositesign
-  type: text
-  label: Isshowoppositesign
-- name: overlinestroketype
-  type: text
-  label: Overlinestroketype
-- name: underlinestroketype
-  type: text
-  label: Underlinestroketype
-- name: roundfactor
-  type: numeric
-  label: Roundfactor
-- name: multiplier
-  type: numeric
-  label: Multiplier
+entities:
+  pa_reportline:
+    table: pa_reportline
+    key: pa_reportline_id
+    displayName: PA_REPORTLINE
+    columns:
+      pa_reportline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pa_reportlineset_id: {type: decimal}
+      name: {type: string}
+      seqno: {type: decimal}
+      description: {type: string}
+      isprinted: {type: string}
+      parent_id: {type: decimal}
+      issummary: {type: string}
+      linetype: {type: string}
+      calculationtype: {type: string}
+      oper_1_id: {type: decimal}
+      oper_2_id: {type: decimal}
+      postingtype: {type: string}
+      gl_budget_id: {type: decimal}
+      amounttype: {type: string}
+      paamounttype: {type: string}
+      paperiodtype: {type: string}
+      pa_reportline_uu: {type: string}
+      isinversedebitcreditonly: {type: string}
+      jp_parameter: {type: string}
+      isshowoppositesign: {type: string}
+      overlinestroketype: {type: string}
+      underlinestroketype: {type: string}
+      roundfactor: {type: decimal}
+      multiplier: {type: decimal}

@@ -1,64 +1,26 @@
-name: M_INOUTLINECONFIRM
-tableName: m_inoutlineconfirm
-primaryKey: m_inoutlineconfirm_id
-fields:
-- name: m_inoutlineconfirm_id
-  type: numeric
-  label: M Inoutlineconfirm Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_inoutconfirm_id
-  type: numeric
-  label: M Inoutconfirm Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: description
-  type: text
-  label: Description
-- name: processed
-  type: text
-  label: Processed
-- name: differenceqty
-  type: numeric
-  label: Differenceqty
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: confirmationno
-  type: text
-  label: Confirmationno
-- name: m_inoutlineconfirm_uu
-  type: text
-  label: M Inoutlineconfirm Uu
+entities:
+  m_inoutlineconfirm:
+    table: m_inoutlineconfirm
+    key: m_inoutlineconfirm_id
+    displayName: M_INOUTLINECONFIRM
+    columns:
+      m_inoutlineconfirm_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_inoutconfirm_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      targetqty: {type: decimal}
+      confirmedqty: {type: decimal}
+      description: {type: string}
+      processed: {type: string}
+      differenceqty: {type: decimal}
+      scrappedqty: {type: decimal}
+      m_inventoryline_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      confirmationno: {type: string}
+      m_inoutlineconfirm_uu: {type: string}

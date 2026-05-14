@@ -1,46 +1,20 @@
-name: ASP_TAB
-tableName: asp_tab
-primaryKey: asp_tab_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: allfields
-  type: text
-  label: Allfields
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_tab_id
-  type: numeric
-  label: Asp Tab Id
-- name: asp_window_id
-  type: numeric
-  label: Asp Window Id
-- name: asp_tab_uu
-  type: text
-  label: Asp Tab Uu
+entities:
+  asp_tab:
+    table: asp_tab
+    key: asp_tab_id
+    displayName: ASP_TAB
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      asp_status: {type: string}
+      allfields: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_tab_id: {type: decimal, identity: true}
+      asp_window_id: {type: decimal}
+      asp_tab_uu: {type: string}

@@ -1,61 +1,25 @@
-name: AD_USERDEF_WIN
-tableName: ad_userdef_win
-primaryKey: ad_userdef_win_id
-fields:
-- name: ad_userdef_win_id
-  type: numeric
-  label: Ad Userdef Win Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: isuserupdateable
-  type: text
-  label: Isuserupdateable
-- name: ad_userdef_win_uu
-  type: text
-  label: Ad Userdef Win Uu
+entities:
+  ad_userdef_win:
+    table: ad_userdef_win
+    key: ad_userdef_win_id
+    displayName: AD_USERDEF_WIN
+    columns:
+      ad_userdef_win_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      ad_window_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_language: {type: string}
+      isdefault: {type: string}
+      isreadonly: {type: string}
+      isuserupdateable: {type: string}
+      ad_userdef_win_uu: {type: string}

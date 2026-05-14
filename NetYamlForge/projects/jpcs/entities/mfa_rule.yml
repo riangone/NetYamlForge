@@ -1,37 +1,17 @@
-name: MFA_RULE
-tableName: mfa_rule
-primaryKey: mfa_rule_id
-fields:
-- name: mfa_rule_id
-  type: numeric
-  label: Mfa Rule Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: mfa_rule_uu
-  type: text
-  label: Mfa Rule Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: mfa_method_id
-  type: numeric
-  label: Mfa Method Id
+entities:
+  mfa_rule:
+    table: mfa_rule
+    key: mfa_rule_id
+    displayName: MFA_RULE
+    columns:
+      mfa_rule_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      help: {type: string}
+      isactive: {type: string}
+      mfa_rule_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      mfa_method_id: {type: decimal}

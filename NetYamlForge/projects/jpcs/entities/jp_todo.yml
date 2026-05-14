@@ -1,121 +1,45 @@
-name: JP_TODO
-tableName: jp_todo
-primaryKey: jp_todo_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: comments
-  type: text
-  label: Comments
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_statistics_choice
-  type: text
-  label: Jp Statistics Choice
-- name: jp_statistics_dateandtime
-  type: text
-  label: Jp Statistics Dateandtime
-- name: jp_statistics_number
-  type: numeric
-  label: Jp Statistics Number
-- name: jp_statistics_yesno
-  type: text
-  label: Jp Statistics Yesno
-- name: jp_todo_category_id
-  type: numeric
-  label: Jp Todo Category Id
-- name: jp_todo_endtime
-  type: text
-  label: Jp Todo Endtime
-- name: jp_todo_id
-  type: numeric
-  label: Jp Todo Id
-- name: jp_todo_related_id
-  type: numeric
-  label: Jp Todo Related Id
-- name: jp_todo_scheduledendtime
-  type: text
-  label: Jp Todo Scheduledendtime
-- name: jp_todo_scheduledstarttime
-  type: text
-  label: Jp Todo Scheduledstarttime
-- name: jp_todo_starttime
-  type: text
-  label: Jp Todo Starttime
-- name: jp_todo_status
-  type: text
-  label: Jp Todo Status
-- name: jp_todo_team_id
-  type: numeric
-  label: Jp Todo Team Id
-- name: jp_todo_type
-  type: text
-  label: Jp Todo Type
-- name: jp_todo_uu
-  type: text
-  label: Jp Todo Uu
-- name: name
-  type: text
-  label: Name
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: processed
-  type: text
-  label: Processed
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: isopentodojp
-  type: text
-  label: Isopentodojp
-- name: jp_todo_scheduledstartdate
-  type: text
-  label: Jp Todo Scheduledstartdate
-- name: jp_todo_scheduledenddate
-  type: text
-  label: Jp Todo Scheduledenddate
-- name: isstartdatealldayjp
-  type: text
-  label: Isstartdatealldayjp
-- name: isenddatealldayjp
-  type: text
-  label: Isenddatealldayjp
-- name: url
-  type: text
-  label: Url
+entities:
+  jp_todo:
+    table: jp_todo
+    key: jp_todo_id
+    displayName: JP_TODO
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      comments: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_processing1: {type: string}
+      jp_statistics_choice: {type: string}
+      jp_statistics_dateandtime: {type: string}
+      jp_statistics_number: {type: decimal}
+      jp_statistics_yesno: {type: string}
+      jp_todo_category_id: {type: decimal}
+      jp_todo_endtime: {type: string}
+      jp_todo_id: {type: decimal, identity: true}
+      jp_todo_related_id: {type: decimal}
+      jp_todo_scheduledendtime: {type: string}
+      jp_todo_scheduledstarttime: {type: string}
+      jp_todo_starttime: {type: string}
+      jp_todo_status: {type: string}
+      jp_todo_team_id: {type: decimal}
+      jp_todo_type: {type: string}
+      jp_todo_uu: {type: string}
+      name: {type: string}
+      record_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      processed: {type: string}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      isopentodojp: {type: string}
+      jp_todo_scheduledstartdate: {type: string}
+      jp_todo_scheduledenddate: {type: string}
+      isstartdatealldayjp: {type: string}
+      isenddatealldayjp: {type: string}
+      url: {type: string}

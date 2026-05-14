@@ -1,67 +1,27 @@
-name: EXP_FORMATLINE
-tableName: exp_formatline
-primaryKey: exp_formatline_id
-fields:
-- name: exp_formatline_id
-  type: numeric
-  label: Exp Formatline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: exp_format_id
-  type: numeric
-  label: Exp Format Id
-- name: position
-  type: numeric
-  label: Position
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: type
-  type: text
-  label: Type
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: exp_embeddedformat_id
-  type: numeric
-  label: Exp Embeddedformat Id
-- name: ispartuniqueindex
-  type: text
-  label: Ispartuniqueindex
-- name: dateformat
-  type: text
-  label: Dateformat
-- name: exp_formatline_uu
-  type: text
-  label: Exp Formatline Uu
+entities:
+  exp_formatline:
+    table: exp_formatline
+    key: exp_formatline_id
+    displayName: EXP_FORMATLINE
+    columns:
+      exp_formatline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      exp_format_id: {type: decimal}
+      position: {type: decimal}
+      ismandatory: {type: string}
+      type: {type: string}
+      ad_column_id: {type: decimal}
+      exp_embeddedformat_id: {type: decimal}
+      ispartuniqueindex: {type: string}
+      dateformat: {type: string}
+      exp_formatline_uu: {type: string}

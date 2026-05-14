@@ -1,52 +1,22 @@
-name: M_DISTRIBUTIONRUNLINE
-tableName: m_distributionrunline
-primaryKey: m_distributionrunline_id
-fields:
-- name: m_distributionrunline_id
-  type: numeric
-  label: M Distributionrunline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_distributionrun_id
-  type: numeric
-  label: M Distributionrun Id
-- name: line
-  type: numeric
-  label: Line
-- name: description
-  type: text
-  label: Description
-- name: m_distributionlist_id
-  type: numeric
-  label: M Distributionlist Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: totalqty
-  type: numeric
-  label: Totalqty
-- name: minqty
-  type: numeric
-  label: Minqty
-- name: m_distributionrunline_uu
-  type: text
-  label: M Distributionrunline Uu
+entities:
+  m_distributionrunline:
+    table: m_distributionrunline
+    key: m_distributionrunline_id
+    displayName: M_DISTRIBUTIONRUNLINE
+    columns:
+      m_distributionrunline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_distributionrun_id: {type: decimal}
+      line: {type: decimal}
+      description: {type: string}
+      m_distributionlist_id: {type: decimal}
+      m_product_id: {type: decimal}
+      totalqty: {type: decimal}
+      minqty: {type: decimal}
+      m_distributionrunline_uu: {type: string}

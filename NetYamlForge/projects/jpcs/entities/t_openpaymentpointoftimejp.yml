@@ -1,91 +1,35 @@
-name: T_OPENPAYMENTPOINTOFTIMEJP
-tableName: t_openpaymentpointoftimejp
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: jp_currencyto_id
-  type: numeric
-  label: Jp Currencyto Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: documentno
-  type: text
-  label: Documentno
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: jp_pointoftime
-  type: text
-  label: Jp Pointoftime
-- name: isallocated
-  type: text
-  label: Isallocated
-- name: isreceipt
-  type: text
-  label: Isreceipt
-- name: payamt
-  type: numeric
-  label: Payamt
-- name: openamt
-  type: numeric
-  label: Openamt
-- name: jp_openamtpointoftime
-  type: numeric
-  label: Jp Openamtpointoftime
-- name: jp_exchangedpayamt
-  type: numeric
-  label: Jp Exchangedpayamt
-- name: jp_exchangedopenamt
-  type: numeric
-  label: Jp Exchangedopenamt
-- name: jp_exchangedopenamtpot
-  type: numeric
-  label: Jp Exchangedopenamtpot
-- name: rate
-  type: numeric
-  label: Rate
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
+entities:
+  t_openpaymentpointoftimejp:
+    table: t_openpaymentpointoftimejp
+    key: ad_pinstance_id
+    displayName: T_OPENPAYMENTPOINTOFTIMEJP
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      c_payment_id: {type: decimal}
+      c_order_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      jp_corporation_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      jp_currencyto_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      account_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      docbasetype: {type: string}
+      documentno: {type: string}
+      docstatus: {type: string}
+      datetrx: {type: string}
+      dateacct: {type: string}
+      jp_pointoftime: {type: string}
+      isallocated: {type: string}
+      isreceipt: {type: string}
+      payamt: {type: decimal}
+      openamt: {type: decimal}
+      jp_openamtpointoftime: {type: decimal}
+      jp_exchangedpayamt: {type: decimal}
+      jp_exchangedopenamt: {type: decimal}
+      jp_exchangedopenamtpot: {type: decimal}
+      rate: {type: decimal}
+      c_bankaccount_id: {type: decimal}

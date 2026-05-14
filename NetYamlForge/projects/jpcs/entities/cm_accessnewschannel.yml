@@ -1,34 +1,16 @@
-name: CM_ACCESSNEWSCHANNEL
-tableName: cm_accessnewschannel
-primaryKey: cm_accessprofile_id
-fields:
-- name: cm_accessprofile_id
-  type: numeric
-  label: Cm Accessprofile Id
-- name: cm_newschannel_id
-  type: numeric
-  label: Cm Newschannel Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_accessnewschannel_uu
-  type: text
-  label: Cm Accessnewschannel Uu
+entities:
+  cm_accessnewschannel:
+    table: cm_accessnewschannel
+    key: cm_accessprofile_id
+    displayName: CM_ACCESSNEWSCHANNEL
+    columns:
+      cm_accessprofile_id: {type: decimal, identity: true}
+      cm_newschannel_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_accessnewschannel_uu: {type: string}

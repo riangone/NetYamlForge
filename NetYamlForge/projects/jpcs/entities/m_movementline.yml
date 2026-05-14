@@ -1,88 +1,34 @@
-name: M_MOVEMENTLINE
-tableName: m_movementline
-primaryKey: m_movementline_id
-fields:
-- name: m_movementline_id
-  type: numeric
-  label: M Movementline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_movement_id
-  type: numeric
-  label: M Movement Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_locatorto_id
-  type: numeric
-  label: M Locatorto Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: line
-  type: numeric
-  label: Line
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: description
-  type: text
-  label: Description
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: processed
-  type: text
-  label: Processed
-- name: m_attributesetinstanceto_id
-  type: numeric
-  label: M Attributesetinstanceto Id
-- name: dd_orderline_id
-  type: numeric
-  label: Dd Orderline Id
-- name: reversalline_id
-  type: numeric
-  label: Reversalline Id
-- name: m_movementline_uu
-  type: text
-  label: M Movementline Uu
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
-- name: jp_pp_mm_factline_id
-  type: numeric
-  label: Jp Pp Mm Factline Id
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
+entities:
+  m_movementline:
+    table: m_movementline
+    key: m_movementline_id
+    displayName: M_MOVEMENTLINE
+    columns:
+      m_movementline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_movement_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_locatorto_id: {type: decimal}
+      m_product_id: {type: decimal}
+      line: {type: decimal}
+      movementqty: {type: decimal}
+      description: {type: string}
+      m_attributesetinstance_id: {type: decimal}
+      confirmedqty: {type: decimal}
+      scrappedqty: {type: decimal}
+      targetqty: {type: decimal}
+      processed: {type: string}
+      m_attributesetinstanceto_id: {type: decimal}
+      dd_orderline_id: {type: decimal}
+      reversalline_id: {type: decimal}
+      m_movementline_uu: {type: string}
+      jp_communicationcolumn: {type: string}
+      jp_pp_mm_factline_id: {type: decimal}
+      qtyentered: {type: decimal}
+      c_uom_id: {type: decimal}

@@ -1,19 +1,11 @@
-name: T_MOVECLIENT
-tableName: t_moveclient
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: tablename
-  type: text
-  label: Tablename
-- name: source_key
-  type: text
-  label: Source Key
-- name: target_key
-  type: text
-  label: Target Key
-- name: identifier
-  type: text
-  label: Identifier
+entities:
+  t_moveclient:
+    table: t_moveclient
+    key: ad_pinstance_id
+    displayName: T_MOVECLIENT
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      tablename: {type: string}
+      source_key: {type: string}
+      target_key: {type: string}
+      identifier: {type: string}

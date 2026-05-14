@@ -1,49 +1,21 @@
-name: R_MAILTEXT
-tableName: r_mailtext
-primaryKey: r_mailtext_id
-fields:
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: ishtml
-  type: text
-  label: Ishtml
-- name: mailheader
-  type: text
-  label: Mailheader
-- name: mailtext
-  type: text
-  label: Mailtext
-- name: mailtext2
-  type: text
-  label: Mailtext2
-- name: mailtext3
-  type: text
-  label: Mailtext3
-- name: r_mailtext_uu
-  type: text
-  label: R Mailtext Uu
+entities:
+  r_mailtext:
+    table: r_mailtext
+    key: r_mailtext_id
+    displayName: R_MAILTEXT
+    columns:
+      r_mailtext_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      ishtml: {type: string}
+      mailheader: {type: string}
+      mailtext: {type: string}
+      mailtext2: {type: string}
+      mailtext3: {type: string}
+      r_mailtext_uu: {type: string}

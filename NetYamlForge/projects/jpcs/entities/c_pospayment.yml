@@ -1,94 +1,36 @@
-name: C_POSPAYMENT
-tableName: c_pospayment
-primaryKey: c_pospayment_id
-fields:
-- name: accountno
-  type: text
-  label: Accountno
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_name
-  type: text
-  label: A Name
-- name: checkno
-  type: text
-  label: Checkno
-- name: checkstatus
-  type: text
-  label: Checkstatus
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_pospayment_id
-  type: numeric
-  label: C Pospayment Id
-- name: c_pospayment_uu
-  type: text
-  label: C Pospayment Uu
-- name: c_postendertype_id
-  type: numeric
-  label: C Postendertype Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: creditcardnumber
-  type: text
-  label: Creditcardnumber
-- name: creditcardtype
-  type: text
-  label: Creditcardtype
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: depositgroup
-  type: text
-  label: Depositgroup
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: ispostdated
-  type: text
-  label: Ispostdated
-- name: micr
-  type: text
-  label: Micr
-- name: payamt
-  type: numeric
-  label: Payamt
-- name: processed
-  type: text
-  label: Processed
-- name: routingno
-  type: text
-  label: Routingno
-- name: tendertype
-  type: text
-  label: Tendertype
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: voiceauthcode
-  type: text
-  label: Voiceauthcode
-- name: iban
-  type: text
-  label: Iban
-- name: swiftcode
-  type: text
-  label: Swiftcode
+entities:
+  c_pospayment:
+    table: c_pospayment
+    key: c_pospayment_id
+    displayName: C_POSPAYMENT
+    columns:
+      accountno: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_name: {type: string}
+      checkno: {type: string}
+      checkstatus: {type: string}
+      c_order_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      c_pospayment_id: {type: decimal, identity: true}
+      c_pospayment_uu: {type: string}
+      c_postendertype_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      creditcardnumber: {type: string}
+      creditcardtype: {type: string}
+      datepromised: {type: string}
+      depositgroup: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      ispostdated: {type: string}
+      micr: {type: string}
+      payamt: {type: decimal}
+      processed: {type: string}
+      routingno: {type: string}
+      tendertype: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      voiceauthcode: {type: string}
+      iban: {type: string}
+      swiftcode: {type: string}

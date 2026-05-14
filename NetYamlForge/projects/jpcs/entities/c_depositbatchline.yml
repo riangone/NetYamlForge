@@ -1,49 +1,21 @@
-name: C_DEPOSITBATCHLINE
-tableName: c_depositbatchline
-primaryKey: c_depositbatchline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: line
-  type: numeric
-  label: Line
-- name: payamt
-  type: numeric
-  label: Payamt
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_depositbatch_id
-  type: numeric
-  label: C Depositbatch Id
-- name: c_depositbatchline_id
-  type: numeric
-  label: C Depositbatchline Id
-- name: c_depositbatchline_uu
-  type: text
-  label: C Depositbatchline Uu
+entities:
+  c_depositbatchline:
+    table: c_depositbatchline
+    key: c_depositbatchline_id
+    displayName: C_DEPOSITBATCHLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      line: {type: decimal}
+      payamt: {type: decimal}
+      processed: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_depositbatch_id: {type: decimal}
+      c_depositbatchline_id: {type: decimal, identity: true}
+      c_depositbatchline_uu: {type: string}

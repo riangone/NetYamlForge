@@ -1,127 +1,47 @@
-name: PP_MRP
-tableName: pp_mrp
-primaryKey: pp_mrp_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateconfirm
-  type: text
-  label: Dateconfirm
-- name: datefinishschedule
-  type: text
-  label: Datefinishschedule
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: datesimulation
-  type: text
-  label: Datesimulation
-- name: datestart
-  type: text
-  label: Datestart
-- name: datestartschedule
-  type: text
-  label: Datestartschedule
-- name: description
-  type: text
-  label: Description
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: isactive
-  type: text
-  label: Isactive
-- name: isavailable
-  type: text
-  label: Isavailable
-- name: m_forecastline_id
-  type: numeric
-  label: M Forecastline Id
-- name: m_forecast_id
-  type: numeric
-  label: M Forecast Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_requisitionline_id
-  type: numeric
-  label: M Requisitionline Id
-- name: m_requisition_id
-  type: numeric
-  label: M Requisition Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: pp_mrp_id
-  type: numeric
-  label: Pp Mrp Id
-- name: pp_order_bomline_id
-  type: numeric
-  label: Pp Order Bomline Id
-- name: pp_order_id
-  type: numeric
-  label: Pp Order Id
-- name: planner_id
-  type: numeric
-  label: Planner Id
-- name: priority
-  type: text
-  label: Priority
-- name: qty
-  type: numeric
-  label: Qty
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: typemrp
-  type: text
-  label: Typemrp
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: version
-  type: numeric
-  label: Version
-- name: dd_order_id
-  type: numeric
-  label: Dd Order Id
-- name: dd_orderline_id
-  type: numeric
-  label: Dd Orderline Id
-- name: pp_mrp_uu
-  type: text
-  label: Pp Mrp Uu
+entities:
+  pp_mrp:
+    table: pp_mrp
+    key: pp_mrp_id
+    displayName: PP_MRP
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      c_order_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateconfirm: {type: string}
+      datefinishschedule: {type: string}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      datesimulation: {type: string}
+      datestart: {type: string}
+      datestartschedule: {type: string}
+      description: {type: string}
+      docstatus: {type: string}
+      isactive: {type: string}
+      isavailable: {type: string}
+      m_forecastline_id: {type: decimal}
+      m_forecast_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_requisitionline_id: {type: decimal}
+      m_requisition_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      pp_mrp_id: {type: decimal, identity: true}
+      pp_order_bomline_id: {type: decimal}
+      pp_order_id: {type: decimal}
+      planner_id: {type: decimal}
+      priority: {type: string}
+      qty: {type: decimal}
+      s_resource_id: {type: decimal}
+      ordertype: {type: string}
+      typemrp: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      ad_client_id: {type: decimal}
+      version: {type: decimal}
+      dd_order_id: {type: decimal}
+      dd_orderline_id: {type: decimal}
+      pp_mrp_uu: {type: string}

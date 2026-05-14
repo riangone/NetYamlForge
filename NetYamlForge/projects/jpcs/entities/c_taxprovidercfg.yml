@@ -1,43 +1,19 @@
-name: C_TAXPROVIDERCFG
-tableName: c_taxprovidercfg
-primaryKey: c_taxprovidercfg_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_taxprovidercfg_id
-  type: numeric
-  label: C Taxprovidercfg Id
-- name: c_taxprovidercfg_uu
-  type: text
-  label: C Taxprovidercfg Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: taxproviderclass
-  type: text
-  label: Taxproviderclass
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: url
-  type: text
-  label: Url
+entities:
+  c_taxprovidercfg:
+    table: c_taxprovidercfg
+    key: c_taxprovidercfg_id
+    displayName: C_TAXPROVIDERCFG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_taxprovidercfg_id: {type: decimal, identity: true}
+      c_taxprovidercfg_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      taxproviderclass: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      url: {type: string}

@@ -1,55 +1,23 @@
-name: AD_USERDEF_PROC
-tableName: ad_userdef_proc
-primaryKey: ad_userdef_proc_id
-fields:
-- name: ad_userdef_proc_id
-  type: numeric
-  label: Ad Userdef Proc Id
-- name: ad_userdef_proc_uu
-  type: text
-  label: Ad Userdef Proc Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: isuserupdateable
-  type: text
-  label: Isuserupdateable
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
+entities:
+  ad_userdef_proc:
+    table: ad_userdef_proc
+    key: ad_userdef_proc_id
+    displayName: AD_USERDEF_PROC
+    columns:
+      ad_userdef_proc_id: {type: decimal, identity: true}
+      ad_userdef_proc_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_language: {type: string}
+      isuserupdateable: {type: string}
+      ad_process_id: {type: decimal}

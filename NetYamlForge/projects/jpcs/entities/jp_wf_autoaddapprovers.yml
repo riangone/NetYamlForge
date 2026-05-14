@@ -1,52 +1,22 @@
-name: JP_WF_AUTOADDAPPROVERS
-tableName: jp_wf_autoaddapprovers
-primaryKey: jp_wf_autoaddapprovers_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_wf_autoaddapprovers_id
-  type: numeric
-  label: Jp Wf Autoaddapprovers Id
-- name: jp_wf_autoaddapprovers_uu
-  type: text
-  label: Jp Wf Autoaddapprovers Uu
-- name: jp_wf_org_id
-  type: numeric
-  label: Jp Wf Org Id
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: value
-  type: text
-  label: Value
+entities:
+  jp_wf_autoaddapprovers:
+    table: jp_wf_autoaddapprovers
+    key: jp_wf_autoaddapprovers_id
+    displayName: JP_WF_AUTOADDAPPROVERS
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_wf_autoaddapprovers_id: {type: decimal, identity: true}
+      jp_wf_autoaddapprovers_uu: {type: string}
+      jp_wf_org_id: {type: decimal}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      value: {type: string}

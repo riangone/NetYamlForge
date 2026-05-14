@@ -1,70 +1,28 @@
-name: A_ASSET_INFO_FIN
-tableName: a_asset_info_fin
-primaryKey: a_asset_info_fin_id
-fields:
-- name: a_asset_info_fin_id
-  type: numeric
-  label: A Asset Info Fin Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_due_on
-  type: text
-  label: A Due On
-- name: a_finance_meth
-  type: text
-  label: A Finance Meth
-- name: a_purchase_option
-  type: text
-  label: A Purchase Option
-- name: a_purchase_option_credit_per
-  type: numeric
-  label: A Purchase Option Credit Per
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: a_purchase_price
-  type: numeric
-  label: A Purchase Price
-- name: a_purchase_option_credit
-  type: numeric
-  label: A Purchase Option Credit
-- name: a_monthly_payment
-  type: numeric
-  label: A Monthly Payment
-- name: a_expired_date
-  type: text
-  label: A Expired Date
-- name: a_contract_date
-  type: text
-  label: A Contract Date
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: a_asset_info_fin_uu
-  type: text
-  label: A Asset Info Fin Uu
-- name: processed
-  type: text
-  label: Processed
+entities:
+  a_asset_info_fin:
+    table: a_asset_info_fin
+    key: a_asset_info_fin_id
+    displayName: A_ASSET_INFO_FIN
+    columns:
+      a_asset_info_fin_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_due_on: {type: string}
+      a_finance_meth: {type: string}
+      a_purchase_option: {type: string}
+      a_purchase_option_credit_per: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      textmsg: {type: string}
+      isactive: {type: string}
+      created: {type: string}
+      a_purchase_price: {type: decimal}
+      a_purchase_option_credit: {type: decimal}
+      a_monthly_payment: {type: decimal}
+      a_expired_date: {type: string}
+      a_contract_date: {type: string}
+      a_asset_id: {type: decimal}
+      a_asset_info_fin_uu: {type: string}
+      processed: {type: string}

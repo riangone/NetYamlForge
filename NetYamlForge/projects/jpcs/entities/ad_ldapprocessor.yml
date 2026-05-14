@@ -1,55 +1,23 @@
-name: AD_LDAPPROCESSOR
-tableName: ad_ldapprocessor
-primaryKey: ad_ldapprocessor_id
-fields:
-- name: ad_ldapprocessor_id
-  type: numeric
-  label: Ad Ldapprocessor Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ldapport
-  type: numeric
-  label: Ldapport
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: keeplogdays
-  type: numeric
-  label: Keeplogdays
-- name: processing
-  type: text
-  label: Processing
-- name: ad_ldapprocessor_uu
-  type: text
-  label: Ad Ldapprocessor Uu
+entities:
+  ad_ldapprocessor:
+    table: ad_ldapprocessor
+    key: ad_ldapprocessor_id
+    displayName: AD_LDAPPROCESSOR
+    columns:
+      ad_ldapprocessor_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      description: {type: string}
+      ldapport: {type: decimal}
+      datelastrun: {type: string}
+      datenextrun: {type: string}
+      supervisor_id: {type: decimal}
+      keeplogdays: {type: decimal}
+      processing: {type: string}
+      ad_ldapprocessor_uu: {type: string}

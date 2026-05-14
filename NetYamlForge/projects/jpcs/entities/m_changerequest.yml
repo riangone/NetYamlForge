@@ -1,61 +1,25 @@
-name: M_CHANGEREQUEST
-tableName: m_changerequest
-primaryKey: m_changerequest_id
-fields:
-- name: m_changerequest_id
-  type: numeric
-  label: M Changerequest Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_changenotice_id
-  type: numeric
-  label: M Changenotice Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: detailinfo
-  type: text
-  label: Detailinfo
-- name: m_fixchangenotice_id
-  type: numeric
-  label: M Fixchangenotice Id
-- name: processed
-  type: text
-  label: Processed
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: m_changerequest_uu
-  type: text
-  label: M Changerequest Uu
+entities:
+  m_changerequest:
+    table: m_changerequest
+    key: m_changerequest_id
+    displayName: M_CHANGEREQUEST
+    columns:
+      m_changerequest_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_changenotice_id: {type: decimal}
+      documentno: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      detailinfo: {type: string}
+      m_fixchangenotice_id: {type: decimal}
+      processed: {type: string}
+      isapproved: {type: string}
+      pp_product_bom_id: {type: decimal}
+      m_changerequest_uu: {type: string}

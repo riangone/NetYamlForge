@@ -1,184 +1,66 @@
-name: JP_PP_DOC
-tableName: jp_pp_doc
-primaryKey: jp_pp_doc_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: description
-  type: text
-  label: Description
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: documentno
-  type: text
-  label: Documentno
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: iscompleteautobyendprocessjp
-  type: text
-  label: Iscompleteautobyendprocessjp
-- name: jp_pp_doct_id
-  type: numeric
-  label: Jp Pp Doct Id
-- name: jp_pp_doc_id
-  type: numeric
-  label: Jp Pp Doc Id
-- name: jp_pp_doc_uu
-  type: text
-  label: Jp Pp Doc Uu
-- name: jp_pp_end
-  type: text
-  label: Jp Pp End
-- name: jp_pp_endprocess
-  type: text
-  label: Jp Pp Endprocess
-- name: jp_pp_start
-  type: text
-  label: Jp Pp Start
-- name: jp_pp_startprocess
-  type: text
-  label: Jp Pp Startprocess
-- name: jp_pp_status
-  type: text
-  label: Jp Pp Status
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: name
-  type: text
-  label: Name
-- name: posted
-  type: text
-  label: Posted
-- name: processed
-  type: text
-  label: Processed
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: processing
-  type: text
-  label: Processing
-- name: productionqty
-  type: numeric
-  label: Productionqty
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: jp_pp_scheduledend
-  type: text
-  label: Jp Pp Scheduledend
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: jp_pp_scheduledstart
-  type: text
-  label: Jp Pp Scheduledstart
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: poreference
-  type: text
-  label: Poreference
-- name: iscompleteautojp
-  type: text
-  label: Iscompleteautojp
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_processing2
-  type: text
-  label: Jp Processing2
-- name: jp_processing3
-  type: text
-  label: Jp Processing3
-- name: jp_processing4
-  type: text
-  label: Jp Processing4
-- name: jp_processing5
-  type: text
-  label: Jp Processing5
-- name: jp_processing6
-  type: text
-  label: Jp Processing6
-- name: upc
-  type: text
-  label: Upc
+entities:
+  jp_pp_doc:
+    table: jp_pp_doc
+    key: jp_pp_doc_id
+    displayName: JP_PP_DOC
+    columns:
+      ad_client_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateacct: {type: string}
+      datepromised: {type: string}
+      description: {type: string}
+      docaction: {type: string}
+      docstatus: {type: string}
+      documentno: {type: string}
+      documentnote: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isapproved: {type: string}
+      iscompleteautobyendprocessjp: {type: string}
+      jp_pp_doct_id: {type: decimal}
+      jp_pp_doc_id: {type: decimal, identity: true}
+      jp_pp_doc_uu: {type: string}
+      jp_pp_end: {type: string}
+      jp_pp_endprocess: {type: string}
+      jp_pp_start: {type: string}
+      jp_pp_startprocess: {type: string}
+      jp_pp_status: {type: string}
+      jp_remarks: {type: string}
+      jp_subject: {type: string}
+      m_product_id: {type: decimal}
+      name: {type: string}
+      posted: {type: string}
+      processed: {type: string}
+      processedon: {type: decimal}
+      processing: {type: string}
+      productionqty: {type: decimal}
+      qtyentered: {type: decimal}
+      salesrep_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      jp_pp_scheduledend: {type: string}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      jp_pp_scheduledstart: {type: string}
+      c_order_id: {type: decimal}
+      poreference: {type: string}
+      iscompleteautojp: {type: string}
+      jp_processing1: {type: string}
+      jp_processing2: {type: string}
+      jp_processing3: {type: string}
+      jp_processing4: {type: string}
+      jp_processing5: {type: string}
+      jp_processing6: {type: string}
+      upc: {type: string}

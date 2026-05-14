@@ -1,52 +1,22 @@
-name: B_TOPICTYPE
-tableName: b_topictype
-primaryKey: b_topictype_id
-fields:
-- name: b_topictype_id
-  type: numeric
-  label: B Topictype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: auctiontype
-  type: text
-  label: Auctiontype
-- name: m_productmember_id
-  type: numeric
-  label: M Productmember Id
-- name: b_topictype_uu
-  type: text
-  label: B Topictype Uu
+entities:
+  b_topictype:
+    table: b_topictype
+    key: b_topictype_id
+    displayName: B_TOPICTYPE
+    columns:
+      b_topictype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      m_pricelist_id: {type: decimal}
+      m_product_id: {type: decimal}
+      auctiontype: {type: string}
+      m_productmember_id: {type: decimal}
+      b_topictype_uu: {type: string}

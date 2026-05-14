@@ -1,34 +1,16 @@
-name: M_EDI_INFO
-tableName: m_edi_info
-primaryKey: m_edi_info_id
-fields:
-- name: m_edi_info_id
-  type: numeric
-  label: M Edi Info Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_edi_id
-  type: numeric
-  label: M Edi Id
-- name: info
-  type: text
-  label: Info
+entities:
+  m_edi_info:
+    table: m_edi_info
+    key: m_edi_info_id
+    displayName: M_EDI_INFO
+    columns:
+      m_edi_info_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_edi_id: {type: decimal}
+      info: {type: string}

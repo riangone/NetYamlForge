@@ -1,37 +1,17 @@
-name: U_WEB_PROPERTIES
-tableName: u_web_properties
-primaryKey: u_web_properties_id
-fields:
-- name: u_web_properties_id
-  type: numeric
-  label: U Web Properties Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: u_key
-  type: text
-  label: U Key
-- name: u_value
-  type: text
-  label: U Value
-- name: u_web_properties_uu
-  type: text
-  label: U Web Properties Uu
+entities:
+  u_web_properties:
+    table: u_web_properties
+    key: u_web_properties_id
+    displayName: U_WEB_PROPERTIES
+    columns:
+      u_web_properties_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      u_key: {type: string}
+      u_value: {type: string}
+      u_web_properties_uu: {type: string}

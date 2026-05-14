@@ -1,40 +1,18 @@
-name: PA_DOCUMENTSTATUSACCESS
-tableName: pa_documentstatusaccess
-primaryKey: pa_documentstatusaccess_id
-fields:
-- name: pa_documentstatusaccess_id
-  type: numeric
-  label: Pa Documentstatusaccess Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pa_documentstatusaccess_uu
-  type: text
-  label: Pa Documentstatusaccess Uu
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: pa_documentstatus_id
-  type: numeric
-  label: Pa Documentstatus Id
+entities:
+  pa_documentstatusaccess:
+    table: pa_documentstatusaccess
+    key: pa_documentstatusaccess_id
+    displayName: PA_DOCUMENTSTATUSACCESS
+    columns:
+      pa_documentstatusaccess_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pa_documentstatusaccess_uu: {type: string}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      pa_documentstatus_id: {type: decimal}

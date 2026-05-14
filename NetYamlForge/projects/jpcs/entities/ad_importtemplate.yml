@@ -1,64 +1,26 @@
-name: AD_IMPORTTEMPLATE
-tableName: ad_importtemplate
-primaryKey: ad_importtemplate_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_importtemplate_id
-  type: numeric
-  label: Ad Importtemplate Id
-- name: ad_importtemplate_uu
-  type: text
-  label: Ad Importtemplate Uu
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: characterset
-  type: text
-  label: Characterset
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: csvaliasheader
-  type: text
-  label: Csvaliasheader
-- name: csvheader
-  type: text
-  label: Csvheader
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_memo
-  type: text
-  label: Jp Memo
-- name: separatorchar
-  type: text
-  label: Separatorchar
-- name: quotechar
-  type: text
-  label: Quotechar
-- name: importtemplatetype
-  type: text
-  label: Importtemplatetype
+entities:
+  ad_importtemplate:
+    table: ad_importtemplate
+    key: ad_importtemplate_id
+    displayName: AD_IMPORTTEMPLATE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_importtemplate_id: {type: decimal, identity: true}
+      ad_importtemplate_uu: {type: string}
+      ad_org_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      ad_window_id: {type: decimal}
+      characterset: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      csvaliasheader: {type: string}
+      csvheader: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_memo: {type: string}
+      separatorchar: {type: string}
+      quotechar: {type: string}
+      importtemplatetype: {type: string}

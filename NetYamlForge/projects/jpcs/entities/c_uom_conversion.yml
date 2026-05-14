@@ -1,46 +1,20 @@
-name: C_UOM_CONVERSION
-tableName: c_uom_conversion
-primaryKey: c_uom_conversion_id
-fields:
-- name: c_uom_conversion_id
-  type: numeric
-  label: C Uom Conversion Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: c_uom_to_id
-  type: numeric
-  label: C Uom To Id
-- name: multiplyrate
-  type: numeric
-  label: Multiplyrate
-- name: dividerate
-  type: numeric
-  label: Dividerate
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_uom_conversion_uu
-  type: text
-  label: C Uom Conversion Uu
+entities:
+  c_uom_conversion:
+    table: c_uom_conversion
+    key: c_uom_conversion_id
+    displayName: C_UOM_CONVERSION
+    columns:
+      c_uom_conversion_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_uom_id: {type: decimal}
+      c_uom_to_id: {type: decimal}
+      multiplyrate: {type: decimal}
+      dividerate: {type: decimal}
+      m_product_id: {type: decimal}
+      c_uom_conversion_uu: {type: string}

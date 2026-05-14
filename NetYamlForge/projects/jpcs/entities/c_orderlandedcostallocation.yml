@@ -1,49 +1,21 @@
-name: C_ORDERLANDEDCOSTALLOCATION
-tableName: c_orderlandedcostallocation
-primaryKey: c_orderlandedcostallocation_id
-fields:
-- name: c_orderlandedcostallocation_id
-  type: numeric
-  label: C Orderlandedcostallocation Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: amt
-  type: numeric
-  label: Amt
-- name: base
-  type: numeric
-  label: Base
-- name: c_orderlandedcostallocation_uu
-  type: text
-  label: C Orderlandedcostallocation Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: qty
-  type: numeric
-  label: Qty
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_orderlandedcost_id
-  type: numeric
-  label: C Orderlandedcost Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: processed
-  type: text
-  label: Processed
+entities:
+  c_orderlandedcostallocation:
+    table: c_orderlandedcostallocation
+    key: c_orderlandedcostallocation_id
+    displayName: C_ORDERLANDEDCOSTALLOCATION
+    columns:
+      c_orderlandedcostallocation_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      amt: {type: decimal}
+      base: {type: decimal}
+      c_orderlandedcostallocation_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      qty: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_orderlandedcost_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      isactive: {type: string}
+      processed: {type: string}

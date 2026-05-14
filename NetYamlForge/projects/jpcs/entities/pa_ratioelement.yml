@@ -1,64 +1,26 @@
-name: PA_RATIOELEMENT
-tableName: pa_ratioelement
-primaryKey: pa_ratioelement_id
-fields:
-- name: pa_ratioelement_id
-  type: numeric
-  label: Pa Ratioelement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: pa_ratio_id
-  type: numeric
-  label: Pa Ratio Id
-- name: ratiooperand
-  type: text
-  label: Ratiooperand
-- name: ratioelementtype
-  type: text
-  label: Ratioelementtype
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: pa_ratioused_id
-  type: numeric
-  label: Pa Ratioused Id
-- name: pa_measurecalc_id
-  type: numeric
-  label: Pa Measurecalc Id
-- name: constantvalue
-  type: numeric
-  label: Constantvalue
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: pa_ratioelement_uu
-  type: text
-  label: Pa Ratioelement Uu
+entities:
+  pa_ratioelement:
+    table: pa_ratioelement
+    key: pa_ratioelement_id
+    displayName: PA_RATIOELEMENT
+    columns:
+      pa_ratioelement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      pa_ratio_id: {type: decimal}
+      ratiooperand: {type: string}
+      ratioelementtype: {type: string}
+      account_id: {type: decimal}
+      pa_ratioused_id: {type: decimal}
+      pa_measurecalc_id: {type: decimal}
+      constantvalue: {type: decimal}
+      seqno: {type: decimal}
+      postingtype: {type: string}
+      pa_ratioelement_uu: {type: string}

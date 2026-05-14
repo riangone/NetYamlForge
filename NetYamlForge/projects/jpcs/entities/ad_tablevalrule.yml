@@ -1,43 +1,19 @@
-name: AD_TABLEVALRULE
-tableName: ad_tablevalrule
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: ad_tablevalrule_uu
-  type: text
-  label: Ad Tablevalrule Uu
-- name: description
-  type: text
-  label: Description
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: code
-  type: text
-  label: Code
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
+entities:
+  ad_tablevalrule:
+    table: ad_tablevalrule
+    key: ad_client_id
+    displayName: AD_TABLEVALRULE
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      ad_tablevalrule_uu: {type: string}
+      description: {type: string}
+      ad_table_id: {type: decimal}
+      code: {type: string}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}

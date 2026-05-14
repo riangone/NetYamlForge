@@ -1,49 +1,21 @@
-name: CM_WEBPROJECT_DOMAIN
-tableName: cm_webproject_domain
-primaryKey: cm_webproject_domain_id
-fields:
-- name: cm_webproject_domain_id
-  type: numeric
-  label: Cm Webproject Domain Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: cm_container_id
-  type: numeric
-  label: Cm Container Id
-- name: fqdn
-  type: text
-  label: Fqdn
-- name: cm_webproject_domain_uu
-  type: text
-  label: Cm Webproject Domain Uu
+entities:
+  cm_webproject_domain:
+    table: cm_webproject_domain
+    key: cm_webproject_domain_id
+    displayName: CM_WEBPROJECT_DOMAIN
+    columns:
+      cm_webproject_domain_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      cm_webproject_id: {type: decimal}
+      cm_container_id: {type: decimal}
+      fqdn: {type: string}
+      cm_webproject_domain_uu: {type: string}

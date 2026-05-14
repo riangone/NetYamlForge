@@ -1,43 +1,19 @@
-name: C_RFQ_TOPIC
-tableName: c_rfq_topic
-primaryKey: c_rfq_topic_id
-fields:
-- name: c_rfq_topic_id
-  type: numeric
-  label: C Rfq Topic Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: c_rfq_topic_uu
-  type: text
-  label: C Rfq Topic Uu
+entities:
+  c_rfq_topic:
+    table: c_rfq_topic
+    key: c_rfq_topic_id
+    displayName: C_RFQ_TOPIC
+    columns:
+      c_rfq_topic_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isselfservice: {type: string}
+      ad_printformat_id: {type: decimal}
+      c_rfq_topic_uu: {type: string}

@@ -1,70 +1,28 @@
-name: B_TOPIC
-tableName: b_topic
-primaryKey: b_topic_id
-fields:
-- name: b_topic_id
-  type: numeric
-  label: B Topic Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: topicstatus
-  type: text
-  label: Topicstatus
-- name: topicaction
-  type: text
-  label: Topicaction
-- name: ispublished
-  type: text
-  label: Ispublished
-- name: textdetails
-  type: text
-  label: Textdetails
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: b_topictype_id
-  type: numeric
-  label: B Topictype Id
-- name: b_topiccategory_id
-  type: numeric
-  label: B Topiccategory Id
-- name: decisiondate
-  type: text
-  label: Decisiondate
-- name: b_topic_uu
-  type: text
-  label: B Topic Uu
+entities:
+  b_topic:
+    table: b_topic
+    key: b_topic_id
+    displayName: B_TOPIC
+    columns:
+      b_topic_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      name: {type: string}
+      description: {type: string}
+      textmsg: {type: string}
+      topicstatus: {type: string}
+      topicaction: {type: string}
+      ispublished: {type: string}
+      textdetails: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      b_topictype_id: {type: decimal}
+      b_topiccategory_id: {type: decimal}
+      decisiondate: {type: string}
+      b_topic_uu: {type: string}

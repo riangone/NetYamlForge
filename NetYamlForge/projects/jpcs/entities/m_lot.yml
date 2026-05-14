@@ -1,52 +1,22 @@
-name: M_LOT
-tableName: m_lot
-primaryKey: m_lot_id
-fields:
-- name: m_lot_id
-  type: numeric
-  label: M Lot Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: help
-  type: text
-  label: Help
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: m_lotctl_id
-  type: numeric
-  label: M Lotctl Id
-- name: m_lot_uu
-  type: text
-  label: M Lot Uu
+entities:
+  m_lot:
+    table: m_lot
+    key: m_lot_id
+    displayName: M_LOT
+    columns:
+      m_lot_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      help: {type: string}
+      datefrom: {type: string}
+      dateto: {type: string}
+      m_lotctl_id: {type: decimal}
+      m_lot_uu: {type: string}

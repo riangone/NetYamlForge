@@ -1,58 +1,24 @@
-name: CM_MEDIA
-tableName: cm_media
-primaryKey: cm_media_id
-fields:
-- name: cm_media_id
-  type: numeric
-  label: Cm Media Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: mediatype
-  type: text
-  label: Mediatype
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: issummary
-  type: text
-  label: Issummary
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: contenttext
-  type: text
-  label: Contenttext
-- name: directdeploy
-  type: text
-  label: Directdeploy
-- name: cm_media_uu
-  type: text
-  label: Cm Media Uu
+entities:
+  cm_media:
+    table: cm_media
+    key: cm_media_id
+    displayName: CM_MEDIA
+    columns:
+      cm_media_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      mediatype: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      issummary: {type: string}
+      cm_webproject_id: {type: decimal}
+      ad_image_id: {type: decimal}
+      contenttext: {type: string}
+      directdeploy: {type: string}
+      cm_media_uu: {type: string}

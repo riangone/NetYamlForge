@@ -1,85 +1,33 @@
-name: M_MATCHPO
-tableName: m_matchpo
-primaryKey: m_matchpo_id
-fields:
-- name: m_matchpo_id
-  type: numeric
-  label: M Matchpo Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: qty
-  type: numeric
-  label: Qty
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: posted
-  type: text
-  label: Posted
-- name: documentno
-  type: text
-  label: Documentno
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: pricematchdifference
-  type: numeric
-  label: Pricematchdifference
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: description
-  type: text
-  label: Description
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: m_matchpo_uu
-  type: text
-  label: M Matchpo Uu
-- name: reversal_id
-  type: numeric
-  label: Reversal Id
-- name: ref_matchpo_id
-  type: numeric
-  label: Ref Matchpo Id
+entities:
+  m_matchpo:
+    table: m_matchpo
+    key: m_matchpo_id
+    displayName: M_MATCHPO
+    columns:
+      m_matchpo_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_orderline_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      datetrx: {type: string}
+      qty: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      posted: {type: string}
+      documentno: {type: string}
+      dateacct: {type: string}
+      m_attributesetinstance_id: {type: decimal}
+      pricematchdifference: {type: decimal}
+      isapproved: {type: string}
+      description: {type: string}
+      processedon: {type: decimal}
+      m_matchpo_uu: {type: string}
+      reversal_id: {type: decimal}
+      ref_matchpo_id: {type: decimal}

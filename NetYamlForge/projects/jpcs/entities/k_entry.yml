@@ -1,61 +1,25 @@
-name: K_ENTRY
-tableName: k_entry
-primaryKey: k_entry_id
-fields:
-- name: k_entry_id
-  type: numeric
-  label: K Entry Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: k_topic_id
-  type: numeric
-  label: K Topic Id
-- name: rating
-  type: numeric
-  label: Rating
-- name: ispublic
-  type: text
-  label: Ispublic
-- name: keywords
-  type: text
-  label: Keywords
-- name: k_source_id
-  type: numeric
-  label: K Source Id
-- name: descriptionurl
-  type: text
-  label: Descriptionurl
-- name: validto
-  type: text
-  label: Validto
-- name: ad_session_id
-  type: numeric
-  label: Ad Session Id
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: k_entry_uu
-  type: text
-  label: K Entry Uu
+entities:
+  k_entry:
+    table: k_entry
+    key: k_entry_id
+    displayName: K_ENTRY
+    columns:
+      k_entry_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      k_topic_id: {type: decimal}
+      rating: {type: decimal}
+      ispublic: {type: string}
+      keywords: {type: string}
+      k_source_id: {type: decimal}
+      descriptionurl: {type: string}
+      validto: {type: string}
+      ad_session_id: {type: decimal}
+      textmsg: {type: string}
+      k_entry_uu: {type: string}

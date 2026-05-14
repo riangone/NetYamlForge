@@ -1,40 +1,18 @@
-name: AD_CTXHELPMSG_TRL
-tableName: ad_ctxhelpmsg_trl
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_ctxhelpmsg_id
-  type: numeric
-  label: Ad Ctxhelpmsg Id
-- name: ad_ctxhelpmsg_trl_uu
-  type: text
-  label: Ad Ctxhelpmsg Trl Uu
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: msgtext
-  type: text
-  label: Msgtext
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  ad_ctxhelpmsg_trl:
+    table: ad_ctxhelpmsg_trl
+    key: ad_client_id
+    displayName: AD_CTXHELPMSG_TRL
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_ctxhelpmsg_id: {type: decimal}
+      ad_ctxhelpmsg_trl_uu: {type: string}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      istranslated: {type: string}
+      msgtext: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

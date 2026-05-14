@@ -1,55 +1,23 @@
-name: AD_ENTITYTYPE
-tableName: ad_entitytype
-primaryKey: ad_entitytype_id
-fields:
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_entitytype_id
-  type: numeric
-  label: Ad Entitytype Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: version
-  type: text
-  label: Version
-- name: modelpackage
-  type: text
-  label: Modelpackage
-- name: classpath
-  type: text
-  label: Classpath
-- name: processing
-  type: text
-  label: Processing
-- name: ad_entitytype_uu
-  type: text
-  label: Ad Entitytype Uu
+entities:
+  ad_entitytype:
+    table: ad_entitytype
+    key: ad_entitytype_id
+    displayName: AD_ENTITYTYPE
+    columns:
+      entitytype: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_entitytype_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      version: {type: string}
+      modelpackage: {type: string}
+      classpath: {type: string}
+      processing: {type: string}
+      ad_entitytype_uu: {type: string}

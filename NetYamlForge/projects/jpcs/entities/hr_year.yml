@@ -1,52 +1,22 @@
-name: HR_YEAR
-tableName: hr_year
-primaryKey: hr_year_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_year_id
-  type: numeric
-  label: C Year Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: hr_payroll_id
-  type: numeric
-  label: Hr Payroll Id
-- name: hr_year_id
-  type: numeric
-  label: Hr Year Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: netdays
-  type: numeric
-  label: Netdays
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: qty
-  type: numeric
-  label: Qty
-- name: startdate
-  type: text
-  label: Startdate
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: hr_year_uu
-  type: text
-  label: Hr Year Uu
+entities:
+  hr_year:
+    table: hr_year
+    key: hr_year_id
+    displayName: HR_YEAR
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_year_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      hr_payroll_id: {type: decimal}
+      hr_year_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      netdays: {type: decimal}
+      processed: {type: string}
+      processing: {type: string}
+      qty: {type: decimal}
+      startdate: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      hr_year_uu: {type: string}

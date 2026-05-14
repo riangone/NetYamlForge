@@ -1,49 +1,21 @@
-name: M_DISTRIBUTIONRUN
-tableName: m_distributionrun
-primaryKey: m_distributionrun_id
-fields:
-- name: m_distributionrun_id
-  type: numeric
-  label: M Distributionrun Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: iscreatesingleorder
-  type: text
-  label: Iscreatesingleorder
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: processing
-  type: text
-  label: Processing
-- name: m_distributionrun_uu
-  type: text
-  label: M Distributionrun Uu
+entities:
+  m_distributionrun:
+    table: m_distributionrun
+    key: m_distributionrun_id
+    displayName: M_DISTRIBUTIONRUN
+    columns:
+      m_distributionrun_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      iscreatesingleorder: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      processing: {type: string}
+      m_distributionrun_uu: {type: string}

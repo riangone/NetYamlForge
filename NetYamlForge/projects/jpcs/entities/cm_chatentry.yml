@@ -1,58 +1,24 @@
-name: CM_CHATENTRY
-tableName: cm_chatentry
-primaryKey: cm_chatentry_id
-fields:
-- name: cm_chatentry_id
-  type: numeric
-  label: Cm Chatentry Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_chat_id
-  type: numeric
-  label: Cm Chat Id
-- name: confidentialtype
-  type: text
-  label: Confidentialtype
-- name: characterdata
-  type: text
-  label: Characterdata
-- name: cm_chatentryparent_id
-  type: numeric
-  label: Cm Chatentryparent Id
-- name: cm_chatentrygrandparent_id
-  type: numeric
-  label: Cm Chatentrygrandparent Id
-- name: chatentrytype
-  type: text
-  label: Chatentrytype
-- name: moderatorstatus
-  type: text
-  label: Moderatorstatus
-- name: subject
-  type: text
-  label: Subject
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: cm_chatentry_uu
-  type: text
-  label: Cm Chatentry Uu
+entities:
+  cm_chatentry:
+    table: cm_chatentry
+    key: cm_chatentry_id
+    displayName: CM_CHATENTRY
+    columns:
+      cm_chatentry_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_chat_id: {type: decimal}
+      confidentialtype: {type: string}
+      characterdata: {type: string}
+      cm_chatentryparent_id: {type: decimal}
+      cm_chatentrygrandparent_id: {type: decimal}
+      chatentrytype: {type: string}
+      moderatorstatus: {type: string}
+      subject: {type: string}
+      ad_user_id: {type: decimal}
+      cm_chatentry_uu: {type: string}

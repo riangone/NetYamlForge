@@ -1,55 +1,23 @@
-name: AD_PACKAGE_IMP_PROC
-tableName: ad_package_imp_proc
-primaryKey: ad_package_imp_proc_id
-fields:
-- name: ad_package_imp_proc_id
-  type: numeric
-  label: Ad Package Imp Proc Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_override_dict
-  type: text
-  label: Ad Override Dict
-- name: ad_package_dir
-  type: text
-  label: Ad Package Dir
-- name: ad_package_source
-  type: text
-  label: Ad Package Source
-- name: ad_package_source_type
-  type: text
-  label: Ad Package Source Type
-- name: processing
-  type: text
-  label: Processing
-- name: ad_package_imp_proc_uu
-  type: text
-  label: Ad Package Imp Proc Uu
-- name: dateprocessed
-  type: text
-  label: Dateprocessed
-- name: p_msg
-  type: text
-  label: P Msg
-- name: name
-  type: text
-  label: Name
+entities:
+  ad_package_imp_proc:
+    table: ad_package_imp_proc
+    key: ad_package_imp_proc_id
+    displayName: AD_PACKAGE_IMP_PROC
+    columns:
+      ad_package_imp_proc_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_override_dict: {type: string}
+      ad_package_dir: {type: string}
+      ad_package_source: {type: string}
+      ad_package_source_type: {type: string}
+      processing: {type: string}
+      ad_package_imp_proc_uu: {type: string}
+      dateprocessed: {type: string}
+      p_msg: {type: string}
+      name: {type: string}

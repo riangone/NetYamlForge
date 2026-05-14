@@ -1,52 +1,22 @@
-name: AD_IMPFORMAT
-tableName: ad_impformat
-primaryKey: ad_impformat_id
-fields:
-- name: ad_impformat_id
-  type: numeric
-  label: Ad Impformat Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: formattype
-  type: text
-  label: Formattype
-- name: processing
-  type: text
-  label: Processing
-- name: separatorchar
-  type: text
-  label: Separatorchar
-- name: ad_impformat_uu
-  type: text
-  label: Ad Impformat Uu
-- name: jp_memo
-  type: text
-  label: Jp Memo
+entities:
+  ad_impformat:
+    table: ad_impformat
+    key: ad_impformat_id
+    displayName: AD_IMPFORMAT
+    columns:
+      ad_impformat_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_table_id: {type: decimal}
+      formattype: {type: string}
+      processing: {type: string}
+      separatorchar: {type: string}
+      ad_impformat_uu: {type: string}
+      jp_memo: {type: string}

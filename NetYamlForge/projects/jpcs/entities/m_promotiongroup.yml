@@ -1,37 +1,17 @@
-name: M_PROMOTIONGROUP
-tableName: m_promotiongroup
-primaryKey: m_promotiongroup_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_promotiongroup_id
-  type: numeric
-  label: M Promotiongroup Id
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_promotiongroup_uu
-  type: text
-  label: M Promotiongroup Uu
+entities:
+  m_promotiongroup:
+    table: m_promotiongroup
+    key: m_promotiongroup_id
+    displayName: M_PROMOTIONGROUP
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      m_promotiongroup_id: {type: decimal, identity: true}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_promotiongroup_uu: {type: string}

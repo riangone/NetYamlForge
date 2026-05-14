@@ -1,40 +1,18 @@
-name: HR_LISTTYPE
-tableName: hr_listtype
-primaryKey: hr_listtype_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hr_listtype_id
-  type: numeric
-  label: Hr Listtype Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: value
-  type: text
-  label: Value
-- name: hr_listtype_uu
-  type: text
-  label: Hr Listtype Uu
+entities:
+  hr_listtype:
+    table: hr_listtype
+    key: hr_listtype_id
+    displayName: HR_LISTTYPE
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hr_listtype_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_client_id: {type: decimal}
+      value: {type: string}
+      hr_listtype_uu: {type: string}

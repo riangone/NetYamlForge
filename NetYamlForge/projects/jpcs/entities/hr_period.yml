@@ -1,73 +1,29 @@
-name: HR_PERIOD
-tableName: hr_period
-primaryKey: hr_period_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: c_year_id
-  type: numeric
-  label: C Year Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: description
-  type: text
-  label: Description
-- name: enddate
-  type: text
-  label: Enddate
-- name: hr_payroll_id
-  type: numeric
-  label: Hr Payroll Id
-- name: hr_period_id
-  type: numeric
-  label: Hr Period Id
-- name: hr_year_id
-  type: numeric
-  label: Hr Year Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: periodaction
-  type: text
-  label: Periodaction
-- name: periodno
-  type: numeric
-  label: Periodno
-- name: periodstatus
-  type: text
-  label: Periodstatus
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: startdate
-  type: text
-  label: Startdate
-- name: updated
-  type: text
-  label: Updated
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: hr_period_uu
-  type: text
-  label: Hr Period Uu
+entities:
+  hr_period:
+    table: hr_period
+    key: hr_period_id
+    displayName: HR_PERIOD
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      c_period_id: {type: decimal}
+      c_year_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateacct: {type: string}
+      description: {type: string}
+      enddate: {type: string}
+      hr_payroll_id: {type: decimal}
+      hr_period_id: {type: decimal, identity: true}
+      hr_year_id: {type: decimal}
+      isactive: {type: string}
+      periodaction: {type: string}
+      periodno: {type: decimal}
+      periodstatus: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      startdate: {type: string}
+      updated: {type: string}
+      ad_client_id: {type: decimal}
+      updatedby: {type: decimal}
+      hr_period_uu: {type: string}

@@ -1,40 +1,18 @@
-name: C_CHARGETYPE_DOCTYPE
-tableName: c_chargetype_doctype
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_chargetype_id
-  type: numeric
-  label: C Chargetype Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isallownegative
-  type: text
-  label: Isallownegative
-- name: isallowpositive
-  type: text
-  label: Isallowpositive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_chargetype_doctype_uu
-  type: text
-  label: C Chargetype Doctype Uu
+entities:
+  c_chargetype_doctype:
+    table: c_chargetype_doctype
+    key: ad_client_id
+    displayName: C_CHARGETYPE_DOCTYPE
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      c_chargetype_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isallownegative: {type: string}
+      isallowpositive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_chargetype_doctype_uu: {type: string}

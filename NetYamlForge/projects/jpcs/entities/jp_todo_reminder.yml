@@ -1,91 +1,35 @@
-name: JP_TODO_REMINDER
-tableName: jp_todo_reminder
-primaryKey: jp_todo_reminder_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: issentreminderjp
-  type: text
-  label: Issentreminderjp
-- name: jp_statistics_choice
-  type: text
-  label: Jp Statistics Choice
-- name: jp_statistics_dateandtime
-  type: text
-  label: Jp Statistics Dateandtime
-- name: jp_statistics_number
-  type: numeric
-  label: Jp Statistics Number
-- name: jp_statistics_yesno
-  type: text
-  label: Jp Statistics Yesno
-- name: jp_todo_id
-  type: numeric
-  label: Jp Todo Id
-- name: jp_todo_remindtime
-  type: text
-  label: Jp Todo Remindtime
-- name: jp_todo_remindertype
-  type: text
-  label: Jp Todo Remindertype
-- name: jp_todo_reminder_id
-  type: numeric
-  label: Jp Todo Reminder Id
-- name: jp_todo_reminder_uu
-  type: text
-  label: Jp Todo Reminder Uu
-- name: jp_todo_team_reminder_id
-  type: numeric
-  label: Jp Todo Team Reminder Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: comments
-  type: text
-  label: Comments
-- name: isconfirmed
-  type: text
-  label: Isconfirmed
-- name: jp_confirmed
-  type: text
-  label: Jp Confirmed
-- name: processed
-  type: text
-  label: Processed
-- name: broadcastfrequency
-  type: text
-  label: Broadcastfrequency
-- name: ad_usermail_id
-  type: numeric
-  label: Ad Usermail Id
-- name: ad_broadcastmessage_id
-  type: numeric
-  label: Ad Broadcastmessage Id
-- name: url
-  type: text
-  label: Url
-- name: jp_mailfrequency
-  type: text
-  label: Jp Mailfrequency
-- name: jp_sendmailnexttime
-  type: text
-  label: Jp Sendmailnexttime
+entities:
+  jp_todo_reminder:
+    table: jp_todo_reminder
+    key: jp_todo_reminder_id
+    displayName: JP_TODO_REMINDER
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      issentreminderjp: {type: string}
+      jp_statistics_choice: {type: string}
+      jp_statistics_dateandtime: {type: string}
+      jp_statistics_number: {type: decimal}
+      jp_statistics_yesno: {type: string}
+      jp_todo_id: {type: decimal}
+      jp_todo_remindtime: {type: string}
+      jp_todo_remindertype: {type: string}
+      jp_todo_reminder_id: {type: decimal, identity: true}
+      jp_todo_reminder_uu: {type: string}
+      jp_todo_team_reminder_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      comments: {type: string}
+      isconfirmed: {type: string}
+      jp_confirmed: {type: string}
+      processed: {type: string}
+      broadcastfrequency: {type: string}
+      ad_usermail_id: {type: decimal}
+      ad_broadcastmessage_id: {type: decimal}
+      url: {type: string}
+      jp_mailfrequency: {type: string}
+      jp_sendmailnexttime: {type: string}

@@ -1,49 +1,21 @@
-name: AD_WF_NODE_PARA
-tableName: ad_wf_node_para
-primaryKey: ad_wf_node_para_id
-fields:
-- name: ad_wf_node_para_id
-  type: numeric
-  label: Ad Wf Node Para Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: attributename
-  type: text
-  label: Attributename
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: description
-  type: text
-  label: Description
-- name: attributevalue
-  type: text
-  label: Attributevalue
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_wf_node_para_uu
-  type: text
-  label: Ad Wf Node Para Uu
+entities:
+  ad_wf_node_para:
+    table: ad_wf_node_para
+    key: ad_wf_node_para_id
+    displayName: AD_WF_NODE_PARA
+    columns:
+      ad_wf_node_para_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      attributename: {type: string}
+      ad_process_para_id: {type: decimal}
+      description: {type: string}
+      attributevalue: {type: string}
+      entitytype: {type: string}
+      ad_wf_node_para_uu: {type: string}

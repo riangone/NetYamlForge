@@ -1,85 +1,33 @@
-name: AD_USERDEF_TAB
-tableName: ad_userdef_tab
-primaryKey: ad_userdef_tab_id
-fields:
-- name: ad_userdef_tab_id
-  type: numeric
-  label: Ad Userdef Tab Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_userdef_win_id
-  type: numeric
-  label: Ad Userdef Win Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ismultirowonly
-  type: text
-  label: Ismultirowonly
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: issinglerow
-  type: text
-  label: Issinglerow
-- name: ad_userdef_tab_uu
-  type: text
-  label: Ad Userdef Tab Uu
-- name: readonlylogic
-  type: text
-  label: Readonlylogic
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: orderbyclause
-  type: text
-  label: Orderbyclause
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: islookuponlyselection
-  type: text
-  label: Islookuponlyselection
-- name: isallowadvancedlookup
-  type: text
-  label: Isallowadvancedlookup
-- name: ishighvolume
-  type: text
-  label: Ishighvolume
-- name: deleteconfirmationlogic
-  type: text
-  label: Deleteconfirmationlogic
+entities:
+  ad_userdef_tab:
+    table: ad_userdef_tab
+    key: ad_userdef_tab_id
+    displayName: AD_USERDEF_TAB
+    columns:
+      ad_userdef_tab_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_userdef_win_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      ismultirowonly: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isreadonly: {type: string}
+      issinglerow: {type: string}
+      ad_userdef_tab_uu: {type: string}
+      readonlylogic: {type: string}
+      whereclause: {type: string}
+      orderbyclause: {type: string}
+      seqno: {type: decimal}
+      ad_process_id: {type: decimal}
+      displaylogic: {type: string}
+      islookuponlyselection: {type: string}
+      isallowadvancedlookup: {type: string}
+      ishighvolume: {type: string}
+      deleteconfirmationlogic: {type: string}

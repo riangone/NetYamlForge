@@ -1,64 +1,26 @@
-name: C_DUNNINGRUNENTRY
-tableName: c_dunningrunentry
-primaryKey: c_dunningrunentry_id
-fields:
-- name: c_dunningrunentry_id
-  type: numeric
-  label: C Dunningrunentry Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_dunningrun_id
-  type: numeric
-  label: C Dunningrun Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: amt
-  type: numeric
-  label: Amt
-- name: qty
-  type: numeric
-  label: Qty
-- name: note
-  type: text
-  label: Note
-- name: processed
-  type: text
-  label: Processed
-- name: c_dunninglevel_id
-  type: numeric
-  label: C Dunninglevel Id
-- name: c_dunningrunentry_uu
-  type: text
-  label: C Dunningrunentry Uu
+entities:
+  c_dunningrunentry:
+    table: c_dunningrunentry
+    key: c_dunningrunentry_id
+    displayName: C_DUNNINGRUNENTRY
+    columns:
+      c_dunningrunentry_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_dunningrun_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      amt: {type: decimal}
+      qty: {type: decimal}
+      note: {type: string}
+      processed: {type: string}
+      c_dunninglevel_id: {type: decimal}
+      c_dunningrunentry_uu: {type: string}

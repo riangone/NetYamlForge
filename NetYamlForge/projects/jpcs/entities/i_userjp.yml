@@ -1,277 +1,97 @@
-name: I_USERJP
-tableName: i_userjp
-primaryKey: i_userjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_userjp_id
-  type: numeric
-  label: I Userjp Id
-- name: i_userjp_uu
-  type: text
-  label: I Userjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: isactive
-  type: text
-  label: Isactive
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: password
-  type: text
-  label: Password
-- name: email
-  type: text
-  label: Email
-- name: jp_supervisor_email
-  type: text
-  label: Jp Supervisor Email
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: jp_bpartner_value
-  type: text
-  label: Jp Bpartner Value
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: emailuser
-  type: text
-  label: Emailuser
-- name: emailuserpw
-  type: text
-  label: Emailuserpw
-- name: jp_bpartner_location_name
-  type: text
-  label: Jp Bpartner Location Name
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: jp_greeting_name
-  type: text
-  label: Jp Greeting Name
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: title
-  type: text
-  label: Title
-- name: comments
-  type: text
-  label: Comments
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: fax
-  type: text
-  label: Fax
-- name: lastcontact
-  type: text
-  label: Lastcontact
-- name: lastresult
-  type: text
-  label: Lastresult
-- name: birthday
-  type: text
-  label: Birthday
-- name: jp_orgtrx_value
-  type: text
-  label: Jp Orgtrx Value
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: emailverify
-  type: text
-  label: Emailverify
-- name: emailverifydate
-  type: text
-  label: Emailverifydate
-- name: notificationtype
-  type: text
-  label: Notificationtype
-- name: isfullbpaccess
-  type: text
-  label: Isfullbpaccess
-- name: jp_job_name
-  type: text
-  label: Jp Job Name
-- name: c_job_id
-  type: numeric
-  label: C Job Id
-- name: ldapuser
-  type: text
-  label: Ldapuser
-- name: connectionprofile
-  type: text
-  label: Connectionprofile
-- name: value
-  type: text
-  label: Value
-- name: userpin
-  type: text
-  label: Userpin
-- name: isinpayroll
-  type: text
-  label: Isinpayroll
-- name: ismenuautoexpand
-  type: text
-  label: Ismenuautoexpand
-- name: salt
-  type: text
-  label: Salt
-- name: islocked
-  type: text
-  label: Islocked
-- name: dateaccountlocked
-  type: text
-  label: Dateaccountlocked
-- name: failedlogincount
-  type: numeric
-  label: Failedlogincount
-- name: datepasswordchanged
-  type: text
-  label: Datepasswordchanged
-- name: datelastlogin
-  type: text
-  label: Datelastlogin
-- name: isnopasswordreset
-  type: text
-  label: Isnopasswordreset
-- name: isexpired
-  type: text
-  label: Isexpired
-- name: securityquestion
-  type: text
-  label: Securityquestion
-- name: answer
-  type: text
-  label: Answer
-- name: issaleslead
-  type: text
-  label: Issaleslead
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: jp_location_label
-  type: text
-  label: Jp Location Label
-- name: leadsource
-  type: text
-  label: Leadsource
-- name: leadstatus
-  type: text
-  label: Leadstatus
-- name: leadsourcedescription
-  type: text
-  label: Leadsourcedescription
-- name: leadstatusdescription
-  type: text
-  label: Leadstatusdescription
-- name: jp_campaign_value
-  type: text
-  label: Jp Campaign Value
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: jp_salesrep_email
-  type: text
-  label: Jp Salesrep Email
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: bpname
-  type: text
-  label: Bpname
-- name: jp_bp_location_label
-  type: text
-  label: Jp Bp Location Label
-- name: bp_location_id
-  type: numeric
-  label: Bp Location Id
-- name: isaddmailtextautomatically
-  type: text
-  label: Isaddmailtextautomatically
-- name: jp_mailtext_name
-  type: text
-  label: Jp Mailtext Name
-- name: r_defaultmailtext_id
-  type: numeric
-  label: R Defaultmailtext Id
-- name: jp_corporation_value
-  type: text
-  label: Jp Corporation Value
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: jp_salesrep_value
-  type: text
-  label: Jp Salesrep Value
-- name: jp_salesrep_name
-  type: text
-  label: Jp Salesrep Name
-- name: jp_supervisor_value
-  type: text
-  label: Jp Supervisor Value
-- name: jp_supervisor_name
-  type: text
-  label: Jp Supervisor Name
-- name: jp_firstname
-  type: text
-  label: Jp Firstname
-- name: jp_firstname_kana
-  type: text
-  label: Jp Firstname Kana
-- name: jp_middlename
-  type: text
-  label: Jp Middlename
-- name: jp_middlename_kana
-  type: text
-  label: Jp Middlename Kana
-- name: jp_lastname
-  type: text
-  label: Jp Lastname
-- name: jp_lastname_kana
-  type: text
-  label: Jp Lastname Kana
+entities:
+  i_userjp:
+    table: i_userjp
+    key: i_userjp_id
+    displayName: I_USERJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_userjp_id: {type: decimal, identity: true}
+      i_userjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      jp_org_value: {type: string}
+      isactive: {type: string}
+      i_isactivejp: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      password: {type: string}
+      email: {type: string}
+      jp_supervisor_email: {type: string}
+      supervisor_id: {type: decimal}
+      jp_bpartner_value: {type: string}
+      c_bpartner_id: {type: decimal}
+      emailuser: {type: string}
+      emailuserpw: {type: string}
+      jp_bpartner_location_name: {type: string}
+      c_bpartner_location_id: {type: decimal}
+      jp_greeting_name: {type: string}
+      c_greeting_id: {type: decimal}
+      title: {type: string}
+      comments: {type: string}
+      phone: {type: string}
+      phone2: {type: string}
+      fax: {type: string}
+      lastcontact: {type: string}
+      lastresult: {type: string}
+      birthday: {type: string}
+      jp_orgtrx_value: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      emailverify: {type: string}
+      emailverifydate: {type: string}
+      notificationtype: {type: string}
+      isfullbpaccess: {type: string}
+      jp_job_name: {type: string}
+      c_job_id: {type: decimal}
+      ldapuser: {type: string}
+      connectionprofile: {type: string}
+      value: {type: string}
+      userpin: {type: string}
+      isinpayroll: {type: string}
+      ismenuautoexpand: {type: string}
+      salt: {type: string}
+      islocked: {type: string}
+      dateaccountlocked: {type: string}
+      failedlogincount: {type: decimal}
+      datepasswordchanged: {type: string}
+      datelastlogin: {type: string}
+      isnopasswordreset: {type: string}
+      isexpired: {type: string}
+      securityquestion: {type: string}
+      answer: {type: string}
+      issaleslead: {type: string}
+      c_location_id: {type: decimal}
+      jp_location_label: {type: string}
+      leadsource: {type: string}
+      leadstatus: {type: string}
+      leadsourcedescription: {type: string}
+      leadstatusdescription: {type: string}
+      jp_campaign_value: {type: string}
+      c_campaign_id: {type: decimal}
+      jp_salesrep_email: {type: string}
+      salesrep_id: {type: decimal}
+      bpname: {type: string}
+      jp_bp_location_label: {type: string}
+      bp_location_id: {type: decimal}
+      isaddmailtextautomatically: {type: string}
+      jp_mailtext_name: {type: string}
+      r_defaultmailtext_id: {type: decimal}
+      jp_corporation_value: {type: string}
+      jp_corporation_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      jp_salesrep_value: {type: string}
+      jp_salesrep_name: {type: string}
+      jp_supervisor_value: {type: string}
+      jp_supervisor_name: {type: string}
+      jp_firstname: {type: string}
+      jp_firstname_kana: {type: string}
+      jp_middlename: {type: string}
+      jp_middlename_kana: {type: string}
+      jp_lastname: {type: string}
+      jp_lastname_kana: {type: string}

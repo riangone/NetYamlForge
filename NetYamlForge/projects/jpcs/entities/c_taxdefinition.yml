@@ -1,91 +1,35 @@
-name: C_TAXDEFINITION
-tableName: c_taxdefinition
-primaryKey: c_taxdefinition_id
-fields:
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: name
-  type: text
-  label: Name
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_taxbase_id
-  type: numeric
-  label: C Taxbase Id
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: c_taxdefinition_id
-  type: numeric
-  label: C Taxdefinition Id
-- name: c_taxgroup_id
-  type: numeric
-  label: C Taxgroup Id
-- name: c_taxtype_id
-  type: numeric
-  label: C Taxtype Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: maxtaxable
-  type: numeric
-  label: Maxtaxable
-- name: mintaxable
-  type: numeric
-  label: Mintaxable
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: value
-  type: text
-  label: Value
-- name: ad_orgtype_id
-  type: numeric
-  label: Ad Orgtype Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_taxdefinition_uu
-  type: text
-  label: C Taxdefinition Uu
+entities:
+  c_taxdefinition:
+    table: c_taxdefinition
+    key: c_taxdefinition_id
+    displayName: C_TAXDEFINITION
+    columns:
+      validfrom: {type: string}
+      validto: {type: string}
+      name: {type: string}
+      c_bp_group_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_taxbase_id: {type: decimal}
+      c_taxcategory_id: {type: decimal}
+      c_taxdefinition_id: {type: decimal, identity: true}
+      c_taxgroup_id: {type: decimal}
+      c_taxtype_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isinvoiced: {type: string}
+      m_product_category_id: {type: decimal}
+      m_product_id: {type: decimal}
+      maxtaxable: {type: decimal}
+      mintaxable: {type: decimal}
+      seqno: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_client_id: {type: decimal}
+      value: {type: string}
+      ad_orgtype_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_taxdefinition_uu: {type: string}

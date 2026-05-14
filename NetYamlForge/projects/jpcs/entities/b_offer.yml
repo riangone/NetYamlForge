@@ -1,52 +1,22 @@
-name: B_OFFER
-tableName: b_offer
-primaryKey: b_offer_id
-fields:
-- name: b_offer_id
-  type: numeric
-  label: B Offer Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: b_topic_id
-  type: numeric
-  label: B Topic Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: iswillingtocommit
-  type: text
-  label: Iswillingtocommit
-- name: b_sellerfunds_id
-  type: numeric
-  label: B Sellerfunds Id
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: privatenote
-  type: text
-  label: Privatenote
-- name: b_offer_uu
-  type: text
-  label: B Offer Uu
+entities:
+  b_offer:
+    table: b_offer
+    key: b_offer_id
+    displayName: B_OFFER
+    columns:
+      b_offer_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      b_topic_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      iswillingtocommit: {type: string}
+      b_sellerfunds_id: {type: decimal}
+      textmsg: {type: string}
+      privatenote: {type: string}
+      b_offer_uu: {type: string}

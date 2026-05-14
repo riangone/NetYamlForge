@@ -1,283 +1,99 @@
-name: I_GLJOURNALJP
-tableName: i_gljournaljp
-primaryKey: i_gljournaljp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_gljournaljp_id
-  type: numeric
-  label: I Gljournaljp Id
-- name: i_gljournaljp_uu
-  type: text
-  label: I Gljournaljp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: gl_journal_id
-  type: numeric
-  label: Gl Journal Id
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: jp_orgtrx_value
-  type: text
-  label: Jp Orgtrx Value
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: jp_acctschema_name
-  type: text
-  label: Jp Acctschema Name
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: jp_doctype_name
-  type: text
-  label: Jp Doctype Name
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: jp_gl_category_name
-  type: text
-  label: Jp Gl Category Name
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: gl_budget_id
-  type: numeric
-  label: Gl Budget Id
-- name: jp_gl_budget_name
-  type: text
-  label: Jp Gl Budget Name
-- name: documentno
-  type: text
-  label: Documentno
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: iso_code
-  type: text
-  label: Iso Code
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: jp_conversiontype_value
-  type: text
-  label: Jp Conversiontype Value
-- name: currencyrate
-  type: numeric
-  label: Currencyrate
-- name: jp_description_header
-  type: text
-  label: Jp Description Header
-- name: jp_order_id
-  type: numeric
-  label: Jp Order Id
-- name: jp_order_documentno
-  type: text
-  label: Jp Order Documentno
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractcontent_docno
-  type: text
-  label: Jp Contractcontent Docno
-- name: jp_datamigration_identifier
-  type: text
-  label: Jp Datamigration Identifier
-- name: gl_journalline_id
-  type: numeric
-  label: Gl Journalline Id
-- name: line
-  type: numeric
-  label: Line
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: jp_elementvalue_value
-  type: text
-  label: Jp Elementvalue Value
-- name: c_subacct_id
-  type: numeric
-  label: C Subacct Id
-- name: jp_subacct_value
-  type: text
-  label: Jp Subacct Value
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: jp_bpartner_value
-  type: text
-  label: Jp Bpartner Value
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: jp_product_value
-  type: text
-  label: Jp Product Value
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: jp_project_value
-  type: text
-  label: Jp Project Value
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: jp_projectphase_name
-  type: text
-  label: Jp Projectphase Name
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: jp_projecttask_name
-  type: text
-  label: Jp Projecttask Name
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: jp_salesregion_value
-  type: text
-  label: Jp Salesregion Value
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: jp_campaign_value
-  type: text
-  label: Jp Campaign Value
-- name: c_locfrom_id
-  type: numeric
-  label: C Locfrom Id
-- name: jp_locfrom_label
-  type: text
-  label: Jp Locfrom Label
-- name: c_locto_id
-  type: numeric
-  label: C Locto Id
-- name: jp_locto_label
-  type: text
-  label: Jp Locto Label
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: userelement1_id
-  type: numeric
-  label: Userelement1 Id
-- name: jp_userelement1_value
-  type: text
-  label: Jp Userelement1 Value
-- name: userelement2_id
-  type: numeric
-  label: Userelement2 Id
-- name: jp_userelement2_value
-  type: text
-  label: Jp Userelement2 Value
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: jp_activity_value
-  type: text
-  label: Jp Activity Value
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: jp_asset_value
-  type: text
-  label: Jp Asset Value
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: jp_tax_name
-  type: text
-  label: Jp Tax Name
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: jp_locator_value
-  type: text
-  label: Jp Locator Value
-- name: amtsourcedr
-  type: numeric
-  label: Amtsourcedr
-- name: amtsourcecr
-  type: numeric
-  label: Amtsourcecr
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: x12de355
-  type: text
-  label: X12De355
-- name: qty
-  type: numeric
-  label: Qty
-- name: jp_description_line
-  type: text
-  label: Jp Description Line
-- name: jp_sopotype
-  type: text
-  label: Jp Sopotype
-- name: jp_contractprocperiod_name
-  type: text
-  label: Jp Contractprocperiod Name
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_priceactual
-  type: numeric
-  label: Jp Priceactual
-- name: jp_bankaccount_value
-  type: text
-  label: Jp Bankaccount Value
-- name: jp_bankaccount_id
-  type: numeric
-  label: Jp Bankaccount Id
+entities:
+  i_gljournaljp:
+    table: i_gljournaljp
+    key: i_gljournaljp_id
+    displayName: I_GLJOURNALJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_gljournaljp_id: {type: decimal, identity: true}
+      i_gljournaljp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      gl_journal_id: {type: decimal}
+      jp_org_value: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      jp_orgtrx_value: {type: string}
+      c_acctschema_id: {type: decimal}
+      jp_acctschema_name: {type: string}
+      c_doctype_id: {type: decimal}
+      jp_doctype_name: {type: string}
+      gl_category_id: {type: decimal}
+      jp_gl_category_name: {type: string}
+      postingtype: {type: string}
+      gl_budget_id: {type: decimal}
+      jp_gl_budget_name: {type: string}
+      documentno: {type: string}
+      datetrx: {type: string}
+      dateacct: {type: string}
+      c_period_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      iso_code: {type: string}
+      c_conversiontype_id: {type: decimal}
+      jp_conversiontype_value: {type: string}
+      currencyrate: {type: decimal}
+      jp_description_header: {type: string}
+      jp_order_id: {type: decimal}
+      jp_order_documentno: {type: string}
+      jp_contractcontent_id: {type: decimal}
+      jp_contractcontent_docno: {type: string}
+      jp_datamigration_identifier: {type: string}
+      gl_journalline_id: {type: decimal}
+      line: {type: decimal}
+      account_id: {type: decimal}
+      jp_elementvalue_value: {type: string}
+      c_subacct_id: {type: decimal}
+      jp_subacct_value: {type: string}
+      c_bpartner_id: {type: decimal}
+      jp_bpartner_value: {type: string}
+      m_product_id: {type: decimal}
+      jp_product_value: {type: string}
+      c_project_id: {type: decimal}
+      jp_project_value: {type: string}
+      c_projectphase_id: {type: decimal}
+      jp_projectphase_name: {type: string}
+      c_projecttask_id: {type: decimal}
+      jp_projecttask_name: {type: string}
+      c_salesregion_id: {type: decimal}
+      jp_salesregion_value: {type: string}
+      c_campaign_id: {type: decimal}
+      jp_campaign_value: {type: string}
+      c_locfrom_id: {type: decimal}
+      jp_locfrom_label: {type: string}
+      c_locto_id: {type: decimal}
+      jp_locto_label: {type: string}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      userelement1_id: {type: decimal}
+      jp_userelement1_value: {type: string}
+      userelement2_id: {type: decimal}
+      jp_userelement2_value: {type: string}
+      c_activity_id: {type: decimal}
+      jp_activity_value: {type: string}
+      a_asset_id: {type: decimal}
+      jp_asset_value: {type: string}
+      c_tax_id: {type: decimal}
+      jp_tax_name: {type: string}
+      m_locator_id: {type: decimal}
+      jp_locator_value: {type: string}
+      amtsourcedr: {type: decimal}
+      amtsourcecr: {type: decimal}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      c_uom_id: {type: decimal}
+      x12de355: {type: string}
+      qty: {type: decimal}
+      jp_description_line: {type: string}
+      jp_sopotype: {type: string}
+      jp_contractprocperiod_name: {type: string}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_priceactual: {type: decimal}
+      jp_bankaccount_value: {type: string}
+      jp_bankaccount_id: {type: decimal}

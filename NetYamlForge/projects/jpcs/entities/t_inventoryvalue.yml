@@ -1,76 +1,30 @@
-name: T_INVENTORYVALUE
-tableName: t_inventoryvalue
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: m_pricelist_version_id
-  type: numeric
-  label: M Pricelist Version Id
-- name: datevalue
-  type: text
-  label: Datevalue
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: qtyonhand
-  type: numeric
-  label: Qtyonhand
-- name: pricepo
-  type: numeric
-  label: Pricepo
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: pricestd
-  type: numeric
-  label: Pricestd
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: coststandard
-  type: numeric
-  label: Coststandard
-- name: cost
-  type: numeric
-  label: Cost
-- name: pricepoamt
-  type: numeric
-  label: Pricepoamt
-- name: pricelistamt
-  type: numeric
-  label: Pricelistamt
-- name: pricestdamt
-  type: numeric
-  label: Pricestdamt
-- name: pricelimitamt
-  type: numeric
-  label: Pricelimitamt
-- name: coststandardamt
-  type: numeric
-  label: Coststandardamt
-- name: costamt
-  type: numeric
-  label: Costamt
-- name: m_costelement_id
-  type: numeric
-  label: M Costelement Id
-- name: t_inventoryvalue_uu
-  type: text
-  label: T Inventoryvalue Uu
+entities:
+  t_inventoryvalue:
+    table: t_inventoryvalue
+    key: ad_pinstance_id
+    displayName: T_INVENTORYVALUE
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      m_warehouse_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      m_pricelist_version_id: {type: decimal}
+      datevalue: {type: string}
+      c_currency_id: {type: decimal}
+      qtyonhand: {type: decimal}
+      pricepo: {type: decimal}
+      pricelist: {type: decimal}
+      pricestd: {type: decimal}
+      pricelimit: {type: decimal}
+      coststandard: {type: decimal}
+      cost: {type: decimal}
+      pricepoamt: {type: decimal}
+      pricelistamt: {type: decimal}
+      pricestdamt: {type: decimal}
+      pricelimitamt: {type: decimal}
+      coststandardamt: {type: decimal}
+      costamt: {type: decimal}
+      m_costelement_id: {type: decimal}
+      t_inventoryvalue_uu: {type: string}

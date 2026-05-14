@@ -1,106 +1,40 @@
-name: JP_BULKCREATEORDER
-tableName: jp_bulkcreateorder
-primaryKey: jp_bulkcreateorder_id
-fields:
-- name: jp_bulkcreateorder_id
-  type: numeric
-  label: Jp Bulkcreateorder Id
-- name: jp_bulkcreateorder_uu
-  type: text
-  label: Jp Bulkcreateorder Uu
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_registrationqty
-  type: numeric
-  label: Jp Registrationqty
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: docaction
-  type: text
-  label: Docaction
-- name: jp_doclinenum
-  type: numeric
-  label: Jp Doclinenum
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: jp_commitrecords
-  type: numeric
-  label: Jp Commitrecords
-- name: jp_cresetrecords
-  type: numeric
-  label: Jp Cresetrecords
-- name: prefix
-  type: text
-  label: Prefix
-- name: suffix
-  type: text
-  label: Suffix
-- name: startno
-  type: numeric
-  label: Startno
-- name: docsubtypeso
-  type: text
-  label: Docsubtypeso
-- name: issqlcreatelinejp
-  type: text
-  label: Issqlcreatelinejp
-- name: isfkinvalidjp
-  type: text
-  label: Isfkinvalidjp
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: jp_client_accounting
-  type: text
-  label: Jp Client Accounting
-- name: isdropindexjp
-  type: text
-  label: Isdropindexjp
+entities:
+  jp_bulkcreateorder:
+    table: jp_bulkcreateorder
+    key: jp_bulkcreateorder_id
+    displayName: JP_BULKCREATEORDER
+    columns:
+      jp_bulkcreateorder_id: {type: decimal, identity: true}
+      jp_bulkcreateorder_uu: {type: string}
+      name: {type: string}
+      description: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_registrationqty: {type: decimal}
+      c_period_id: {type: decimal}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      salesrep_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      c_bp_group_id: {type: decimal}
+      docaction: {type: string}
+      jp_doclinenum: {type: decimal}
+      qtyentered: {type: decimal}
+      jp_commitrecords: {type: decimal}
+      jp_cresetrecords: {type: decimal}
+      prefix: {type: string}
+      suffix: {type: string}
+      startno: {type: decimal}
+      docsubtypeso: {type: string}
+      issqlcreatelinejp: {type: string}
+      isfkinvalidjp: {type: string}
+      c_tax_id: {type: decimal}
+      jp_client_accounting: {type: string}
+      isdropindexjp: {type: string}

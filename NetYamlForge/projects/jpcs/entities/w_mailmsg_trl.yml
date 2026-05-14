@@ -1,49 +1,21 @@
-name: W_MAILMSG_TRL
-tableName: w_mailmsg_trl
-primaryKey: w_mailmsg_id
-fields:
-- name: w_mailmsg_id
-  type: numeric
-  label: W Mailmsg Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: subject
-  type: text
-  label: Subject
-- name: message
-  type: text
-  label: Message
-- name: message2
-  type: text
-  label: Message2
-- name: message3
-  type: text
-  label: Message3
-- name: w_mailmsg_trl_uu
-  type: text
-  label: W Mailmsg Trl Uu
+entities:
+  w_mailmsg_trl:
+    table: w_mailmsg_trl
+    key: w_mailmsg_id
+    displayName: W_MAILMSG_TRL
+    columns:
+      w_mailmsg_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      istranslated: {type: string}
+      subject: {type: string}
+      message: {type: string}
+      message2: {type: string}
+      message3: {type: string}
+      w_mailmsg_trl_uu: {type: string}

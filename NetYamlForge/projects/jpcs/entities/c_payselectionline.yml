@@ -1,79 +1,31 @@
-name: C_PAYSELECTIONLINE
-tableName: c_payselectionline
-primaryKey: c_payselectionline_id
-fields:
-- name: c_payselectionline_id
-  type: numeric
-  label: C Payselectionline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_payselection_id
-  type: numeric
-  label: C Payselection Id
-- name: line
-  type: numeric
-  label: Line
-- name: description
-  type: text
-  label: Description
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: ismanual
-  type: text
-  label: Ismanual
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: payamt
-  type: numeric
-  label: Payamt
-- name: differenceamt
-  type: numeric
-  label: Differenceamt
-- name: c_payselectioncheck_id
-  type: numeric
-  label: C Payselectioncheck Id
-- name: processed
-  type: text
-  label: Processed
-- name: discountamt
-  type: numeric
-  label: Discountamt
-- name: openamt
-  type: numeric
-  label: Openamt
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: c_payselectionline_uu
-  type: text
-  label: C Payselectionline Uu
-- name: writeoffamt
-  type: numeric
-  label: Writeoffamt
-- name: jp_bp_bankaccount_id
-  type: numeric
-  label: Jp Bp Bankaccount Id
-- name: isautocalbanktransferfeejp
-  type: text
-  label: Isautocalbanktransferfeejp
+entities:
+  c_payselectionline:
+    table: c_payselectionline
+    key: c_payselectionline_id
+    displayName: C_PAYSELECTIONLINE
+    columns:
+      c_payselectionline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_payselection_id: {type: decimal}
+      line: {type: decimal}
+      description: {type: string}
+      paymentrule: {type: string}
+      ismanual: {type: string}
+      c_invoice_id: {type: decimal}
+      payamt: {type: decimal}
+      differenceamt: {type: decimal}
+      c_payselectioncheck_id: {type: decimal}
+      processed: {type: string}
+      discountamt: {type: decimal}
+      openamt: {type: decimal}
+      issotrx: {type: string}
+      c_payselectionline_uu: {type: string}
+      writeoffamt: {type: decimal}
+      jp_bp_bankaccount_id: {type: decimal}
+      isautocalbanktransferfeejp: {type: string}

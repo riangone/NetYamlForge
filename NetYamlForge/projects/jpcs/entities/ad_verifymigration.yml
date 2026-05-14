@@ -1,67 +1,27 @@
-name: AD_VERIFYMIGRATION
-tableName: ad_verifymigration
-primaryKey: ad_verifymigration_id
-fields:
-- name: ad_verifymigration_id
-  type: numeric
-  label: Ad Verifymigration Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: ad_verifymigration_uu
-  type: text
-  label: Ad Verifymigration Uu
-- name: help
-  type: text
-  label: Help
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: manualnote
-  type: text
-  label: Manualnote
-- name: expectedvalue
-  type: text
-  label: Expectedvalue
-- name: currentvalue
-  type: text
-  label: Currentvalue
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: isignore
-  type: text
-  label: Isignore
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_changelog_id
-  type: numeric
-  label: Ad Changelog Id
+entities:
+  ad_verifymigration:
+    table: ad_verifymigration
+    key: ad_verifymigration_id
+    displayName: AD_VERIFYMIGRATION
+    columns:
+      ad_verifymigration_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      ad_verifymigration_uu: {type: string}
+      help: {type: string}
+      ad_pinstance_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      seqno: {type: decimal}
+      manualnote: {type: string}
+      expectedvalue: {type: string}
+      currentvalue: {type: string}
+      priorityrule: {type: string}
+      isignore: {type: string}
+      ad_column_id: {type: decimal}
+      ad_changelog_id: {type: decimal}

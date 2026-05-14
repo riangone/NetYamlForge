@@ -1,133 +1,49 @@
-name: JP_CONTRACTPSINOUTLINE
-tableName: jp_contractpsinoutline
-primaryKey: jp_contractpsinoutline_id
-fields:
-- name: jp_contractpsinoutline_id
-  type: numeric
-  label: Jp Contractpsinoutline Id
-- name: jp_contractpsinoutline_uu
-  type: text
-  label: Jp Contractpsinoutline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractpsline_id
-  type: numeric
-  label: Jp Contractpsline Id
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_contractcalender_inout_id
-  type: numeric
-  label: Jp Contractcalender Inout Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_contractprocess_inout_id
-  type: numeric
-  label: Jp Contractprocess Inout Id
-- name: line
-  type: numeric
-  label: Line
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: description
-  type: text
-  label: Description
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: priceentered
-  type: numeric
-  label: Priceentered
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: processed
-  type: text
-  label: Processed
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: isfactcreatedjp
-  type: text
-  label: Isfactcreatedjp
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: jp_contractprocschedule_id
-  type: numeric
-  label: Jp Contractprocschedule Id
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_contractpsinoutline:
+    table: jp_contractpsinoutline
+    key: jp_contractpsinoutline_id
+    displayName: JP_CONTRACTPSINOUTLINE
+    columns:
+      jp_contractpsinoutline_id: {type: decimal, identity: true}
+      jp_contractpsinoutline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractpsline_id: {type: decimal}
+      jp_contractline_id: {type: decimal}
+      jp_contractcalender_inout_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_contractprocess_inout_id: {type: decimal}
+      line: {type: decimal}
+      m_locator_id: {type: decimal}
+      description: {type: string}
+      qtyentered: {type: decimal}
+      c_uom_id: {type: decimal}
+      movementqty: {type: decimal}
+      priceentered: {type: decimal}
+      priceactual: {type: decimal}
+      pricelist: {type: decimal}
+      pricelimit: {type: decimal}
+      c_tax_id: {type: decimal}
+      isdescription: {type: string}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      processed: {type: string}
+      linenetamt: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      isfactcreatedjp: {type: string}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      jp_contractprocschedule_id: {type: decimal}
+      jp_communicationcolumn: {type: string}

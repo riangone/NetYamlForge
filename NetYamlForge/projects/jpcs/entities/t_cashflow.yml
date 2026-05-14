@@ -1,94 +1,36 @@
-name: T_CASHFLOW
-tableName: t_cashflow
-primaryKey: t_cashflow_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: cashflowsource
-  type: text
-  label: Cashflowsource
-- name: cashflowtype
-  type: text
-  label: Cashflowtype
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_cashplanline_id
-  type: numeric
-  label: C Cashplanline Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_elementvalue_id
-  type: numeric
-  label: C Elementvalue Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dateto
-  type: text
-  label: Dateto
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: linetotalamt
-  type: numeric
-  label: Linetotalamt
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: name
-  type: text
-  label: Name
-- name: probability
-  type: numeric
-  label: Probability
-- name: t_cashflow_id
-  type: numeric
-  label: T Cashflow Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: t_cashflow_uu
-  type: text
-  label: T Cashflow Uu
+entities:
+  t_cashflow:
+    table: t_cashflow
+    key: t_cashflow_id
+    displayName: T_CASHFLOW
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      cashflowsource: {type: string}
+      cashflowtype: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_cashplanline_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_elementvalue_id: {type: decimal}
+      c_invoice_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_project_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dateto: {type: string}
+      datetrx: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      issotrx: {type: string}
+      linetotalamt: {type: decimal}
+      m_product_id: {type: decimal}
+      name: {type: string}
+      probability: {type: decimal}
+      t_cashflow_id: {type: decimal, identity: true}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      t_cashflow_uu: {type: string}

@@ -1,46 +1,20 @@
-name: C_TAXDECLARATIONACCT
-tableName: c_taxdeclarationacct
-primaryKey: c_taxdeclarationacct_id
-fields:
-- name: c_taxdeclarationacct_id
-  type: numeric
-  label: C Taxdeclarationacct Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: description
-  type: text
-  label: Description
-- name: c_taxdeclaration_id
-  type: numeric
-  label: C Taxdeclaration Id
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: line
-  type: numeric
-  label: Line
-- name: c_taxdeclarationacct_uu
-  type: text
-  label: C Taxdeclarationacct Uu
+entities:
+  c_taxdeclarationacct:
+    table: c_taxdeclarationacct
+    key: c_taxdeclarationacct_id
+    displayName: C_TAXDECLARATIONACCT
+    columns:
+      c_taxdeclarationacct_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      description: {type: string}
+      c_taxdeclaration_id: {type: decimal}
+      fact_acct_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      line: {type: decimal}
+      c_taxdeclarationacct_uu: {type: string}

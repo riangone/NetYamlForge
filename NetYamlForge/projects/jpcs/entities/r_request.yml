@@ -1,202 +1,72 @@
-name: R_REQUEST
-tableName: r_request
-primaryKey: r_request_id
-fields:
-- name: r_request_id
-  type: numeric
-  label: R Request Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: r_requesttype_id
-  type: numeric
-  label: R Requesttype Id
-- name: r_group_id
-  type: numeric
-  label: R Group Id
-- name: r_category_id
-  type: numeric
-  label: R Category Id
-- name: r_status_id
-  type: numeric
-  label: R Status Id
-- name: r_resolution_id
-  type: numeric
-  label: R Resolution Id
-- name: r_requestrelated_id
-  type: numeric
-  label: R Requestrelated Id
-- name: priority
-  type: text
-  label: Priority
-- name: priorityuser
-  type: text
-  label: Priorityuser
-- name: duetype
-  type: text
-  label: Duetype
-- name: summary
-  type: text
-  label: Summary
-- name: confidentialtype
-  type: text
-  label: Confidentialtype
-- name: isescalated
-  type: text
-  label: Isescalated
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: datelastaction
-  type: text
-  label: Datelastaction
-- name: datelastalert
-  type: text
-  label: Datelastalert
-- name: lastresult
-  type: text
-  label: Lastresult
-- name: processed
-  type: text
-  label: Processed
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: m_inout_id
-  type: numeric
-  label: M Inout Id
-- name: m_rma_id
-  type: numeric
-  label: M Rma Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: requestamt
-  type: numeric
-  label: Requestamt
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: result
-  type: text
-  label: Result
-- name: confidentialtypeentry
-  type: text
-  label: Confidentialtypeentry
-- name: r_standardresponse_id
-  type: numeric
-  label: R Standardresponse Id
-- name: nextaction
-  type: text
-  label: Nextaction
-- name: datenextaction
-  type: text
-  label: Datenextaction
-- name: starttime
-  type: text
-  label: Starttime
-- name: endtime
-  type: text
-  label: Endtime
-- name: qtyspent
-  type: numeric
-  label: Qtyspent
-- name: qtyinvoiced
-  type: numeric
-  label: Qtyinvoiced
-- name: m_productspent_id
-  type: numeric
-  label: M Productspent Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: startdate
-  type: text
-  label: Startdate
-- name: closedate
-  type: text
-  label: Closedate
-- name: c_invoicerequest_id
-  type: numeric
-  label: C Invoicerequest Id
-- name: m_changerequest_id
-  type: numeric
-  label: M Changerequest Id
-- name: taskstatus
-  type: text
-  label: Taskstatus
-- name: qtyplan
-  type: numeric
-  label: Qtyplan
-- name: datecompleteplan
-  type: text
-  label: Datecompleteplan
-- name: datestartplan
-  type: text
-  label: Datestartplan
-- name: m_fixchangenotice_id
-  type: numeric
-  label: M Fixchangenotice Id
-- name: r_request_uu
-  type: text
-  label: R Request Uu
-- name: record_uu
-  type: text
-  label: Record Uu
+entities:
+  r_request:
+    table: r_request
+    key: r_request_id
+    displayName: R_REQUEST
+    columns:
+      r_request_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      r_requesttype_id: {type: decimal}
+      r_group_id: {type: decimal}
+      r_category_id: {type: decimal}
+      r_status_id: {type: decimal}
+      r_resolution_id: {type: decimal}
+      r_requestrelated_id: {type: decimal}
+      priority: {type: string}
+      priorityuser: {type: string}
+      duetype: {type: string}
+      summary: {type: string}
+      confidentialtype: {type: string}
+      isescalated: {type: string}
+      isselfservice: {type: string}
+      salesrep_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      datelastaction: {type: string}
+      datelastalert: {type: string}
+      lastresult: {type: string}
+      processed: {type: string}
+      isinvoiced: {type: string}
+      c_bpartner_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_invoice_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      m_product_id: {type: decimal}
+      c_project_id: {type: decimal}
+      a_asset_id: {type: decimal}
+      m_inout_id: {type: decimal}
+      m_rma_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      requestamt: {type: decimal}
+      r_mailtext_id: {type: decimal}
+      result: {type: string}
+      confidentialtypeentry: {type: string}
+      r_standardresponse_id: {type: decimal}
+      nextaction: {type: string}
+      datenextaction: {type: string}
+      starttime: {type: string}
+      endtime: {type: string}
+      qtyspent: {type: decimal}
+      qtyinvoiced: {type: decimal}
+      m_productspent_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      startdate: {type: string}
+      closedate: {type: string}
+      c_invoicerequest_id: {type: decimal}
+      m_changerequest_id: {type: decimal}
+      taskstatus: {type: string}
+      qtyplan: {type: decimal}
+      datecompleteplan: {type: string}
+      datestartplan: {type: string}
+      m_fixchangenotice_id: {type: decimal}
+      r_request_uu: {type: string}
+      record_uu: {type: string}

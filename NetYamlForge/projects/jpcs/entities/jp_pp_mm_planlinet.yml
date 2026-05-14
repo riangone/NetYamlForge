@@ -1,61 +1,25 @@
-name: JP_PP_MM_PLANLINET
-tableName: jp_pp_mm_planlinet
-primaryKey: jp_pp_mm_planlinet_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
-- name: jp_pp_mm_planlinet_id
-  type: numeric
-  label: Jp Pp Mm Planlinet Id
-- name: jp_pp_mm_planlinet_uu
-  type: text
-  label: Jp Pp Mm Planlinet Uu
-- name: jp_pp_plant_id
-  type: numeric
-  label: Jp Pp Plant Id
-- name: line
-  type: numeric
-  label: Line
-- name: m_attributesetinstanceto_id
-  type: numeric
-  label: M Attributesetinstanceto Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_locatorto_id
-  type: numeric
-  label: M Locatorto Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_pp_mm_planlinet:
+    table: jp_pp_mm_planlinet
+    key: jp_pp_mm_planlinet_id
+    displayName: JP_PP_MM_PLANLINET
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_communicationcolumn: {type: string}
+      jp_pp_mm_planlinet_id: {type: decimal, identity: true}
+      jp_pp_mm_planlinet_uu: {type: string}
+      jp_pp_plant_id: {type: decimal}
+      line: {type: decimal}
+      m_attributesetinstanceto_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_locatorto_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      movementqty: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}

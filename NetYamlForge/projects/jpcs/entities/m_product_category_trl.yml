@@ -1,43 +1,19 @@
-name: M_PRODUCT_CATEGORY_TRL
-tableName: m_product_category_trl
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: m_product_category_trl_uu
-  type: text
-  label: M Product Category Trl Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  m_product_category_trl:
+    table: m_product_category_trl
+    key: ad_client_id
+    displayName: M_PRODUCT_CATEGORY_TRL
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      istranslated: {type: string}
+      m_product_category_id: {type: decimal}
+      m_product_category_trl_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

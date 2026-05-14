@@ -1,40 +1,18 @@
-name: M_COSTTYPE
-tableName: m_costtype
-primaryKey: m_costtype_id
-fields:
-- name: m_costtype_id
-  type: numeric
-  label: M Costtype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: m_costtype_uu
-  type: text
-  label: M Costtype Uu
+entities:
+  m_costtype:
+    table: m_costtype
+    key: m_costtype_id
+    displayName: M_COSTTYPE
+    columns:
+      m_costtype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      m_costtype_uu: {type: string}

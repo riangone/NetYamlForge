@@ -1,55 +1,23 @@
-name: JP_CUSTOMDELETEPROFILE
-tableName: jp_customdeleteprofile
-primaryKey: jp_customdeleteprofile_id
-fields:
-- name: jp_customdeleteprofile_id
-  type: numeric
-  label: Jp Customdeleteprofile Id
-- name: jp_customdeleteprofile_uu
-  type: text
-  label: Jp Customdeleteprofile Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_deleteprofile_id
-  type: numeric
-  label: Jp Deleteprofile Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: description
-  type: text
-  label: Description
-- name: isdeletedatanotusejp
-  type: text
-  label: Isdeletedatanotusejp
-- name: jp_treatforeignkey
-  type: text
-  label: Jp Treatforeignkey
-- name: jp_foreignkey_value
-  type: numeric
-  label: Jp Foreignkey Value
+entities:
+  jp_customdeleteprofile:
+    table: jp_customdeleteprofile
+    key: jp_customdeleteprofile_id
+    displayName: JP_CUSTOMDELETEPROFILE
+    columns:
+      jp_customdeleteprofile_id: {type: decimal, identity: true}
+      jp_customdeleteprofile_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_deleteprofile_id: {type: decimal}
+      seqno: {type: decimal}
+      ad_table_id: {type: decimal}
+      whereclause: {type: string}
+      description: {type: string}
+      isdeletedatanotusejp: {type: string}
+      jp_treatforeignkey: {type: string}
+      jp_foreignkey_value: {type: decimal}

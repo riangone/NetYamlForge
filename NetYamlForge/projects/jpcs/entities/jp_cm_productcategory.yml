@@ -1,46 +1,20 @@
-name: JP_CM_PRODUCTCATEGORY
-tableName: jp_cm_productcategory
-primaryKey: jp_cm_productcategory_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_cm_productcategoryl1_id
-  type: numeric
-  label: Jp Cm Productcategoryl1 Id
-- name: jp_cm_productcategory_id
-  type: numeric
-  label: Jp Cm Productcategory Id
-- name: jp_cm_productcategory_uu
-  type: text
-  label: Jp Cm Productcategory Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
+entities:
+  jp_cm_productcategory:
+    table: jp_cm_productcategory
+    key: jp_cm_productcategory_id
+    displayName: JP_CM_PRODUCTCATEGORY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      jp_cm_productcategoryl1_id: {type: decimal}
+      jp_cm_productcategory_id: {type: decimal, identity: true}
+      jp_cm_productcategory_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}

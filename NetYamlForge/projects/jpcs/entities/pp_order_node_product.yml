@@ -1,55 +1,23 @@
-name: PP_ORDER_NODE_PRODUCT
-tableName: pp_order_node_product
-primaryKey: pp_order_node_product_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pp_order_id
-  type: numeric
-  label: Pp Order Id
-- name: pp_order_node_id
-  type: numeric
-  label: Pp Order Node Id
-- name: pp_order_node_product_id
-  type: numeric
-  label: Pp Order Node Product Id
-- name: pp_order_workflow_id
-  type: numeric
-  label: Pp Order Workflow Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: yield
-  type: numeric
-  label: Yield
-- name: issubcontracting
-  type: text
-  label: Issubcontracting
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: qty
-  type: numeric
-  label: Qty
-- name: pp_order_node_product_uu
-  type: text
-  label: Pp Order Node Product Uu
+entities:
+  pp_order_node_product:
+    table: pp_order_node_product
+    key: pp_order_node_product_id
+    displayName: PP_ORDER_NODE_PRODUCT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      m_product_id: {type: decimal}
+      pp_order_id: {type: decimal}
+      pp_order_node_id: {type: decimal}
+      pp_order_node_product_id: {type: decimal, identity: true}
+      pp_order_workflow_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      yield: {type: decimal}
+      issubcontracting: {type: string}
+      seqno: {type: decimal}
+      qty: {type: decimal}
+      pp_order_node_product_uu: {type: string}

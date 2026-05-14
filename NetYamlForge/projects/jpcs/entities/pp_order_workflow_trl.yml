@@ -1,46 +1,20 @@
-name: PP_ORDER_WORKFLOW_TRL
-tableName: pp_order_workflow_trl
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: pp_order_workflow_id
-  type: numeric
-  label: Pp Order Workflow Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pp_order_workflow_trl_uu
-  type: text
-  label: Pp Order Workflow Trl Uu
+entities:
+  pp_order_workflow_trl:
+    table: pp_order_workflow_trl
+    key: ad_client_id
+    displayName: PP_ORDER_WORKFLOW_TRL
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      istranslated: {type: string}
+      name: {type: string}
+      pp_order_workflow_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pp_order_workflow_trl_uu: {type: string}

@@ -1,58 +1,24 @@
-name: T_DISTRIBUTIONRUNDETAIL
-tableName: t_distributionrundetail
-primaryKey: m_distributionrun_id
-fields:
-- name: m_distributionrun_id
-  type: numeric
-  label: M Distributionrun Id
-- name: m_distributionrunline_id
-  type: numeric
-  label: M Distributionrunline Id
-- name: m_distributionlist_id
-  type: numeric
-  label: M Distributionlist Id
-- name: m_distributionlistline_id
-  type: numeric
-  label: M Distributionlistline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ratio
-  type: numeric
-  label: Ratio
-- name: minqty
-  type: numeric
-  label: Minqty
-- name: qty
-  type: numeric
-  label: Qty
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: t_distributionrundetail_uu
-  type: text
-  label: T Distributionrundetail Uu
+entities:
+  t_distributionrundetail:
+    table: t_distributionrundetail
+    key: m_distributionrun_id
+    displayName: T_DISTRIBUTIONRUNDETAIL
+    columns:
+      m_distributionrun_id: {type: decimal, identity: true}
+      m_distributionrunline_id: {type: decimal}
+      m_distributionlist_id: {type: decimal}
+      m_distributionlistline_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ratio: {type: decimal}
+      minqty: {type: decimal}
+      qty: {type: decimal}
+      m_product_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      t_distributionrundetail_uu: {type: string}

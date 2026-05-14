@@ -1,148 +1,54 @@
-name: GL_DISTRIBUTION
-tableName: gl_distribution
-primaryKey: gl_distribution_id
-fields:
-- name: gl_distribution_id
-  type: numeric
-  label: Gl Distribution Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: anyorg
-  type: text
-  label: Anyorg
-- name: org_id
-  type: numeric
-  label: Org Id
-- name: anyacct
-  type: text
-  label: Anyacct
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: anyproduct
-  type: text
-  label: Anyproduct
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: anybpartner
-  type: text
-  label: Anybpartner
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: anyproject
-  type: text
-  label: Anyproject
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: anycampaign
-  type: text
-  label: Anycampaign
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: anyactivity
-  type: text
-  label: Anyactivity
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: anysalesregion
-  type: text
-  label: Anysalesregion
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: anyorgtrx
-  type: text
-  label: Anyorgtrx
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: anylocto
-  type: text
-  label: Anylocto
-- name: c_locto_id
-  type: numeric
-  label: C Locto Id
-- name: anylocfrom
-  type: text
-  label: Anylocfrom
-- name: c_locfrom_id
-  type: numeric
-  label: C Locfrom Id
-- name: anyuser1
-  type: text
-  label: Anyuser1
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: anyuser2
-  type: text
-  label: Anyuser2
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: percenttotal
-  type: numeric
-  label: Percenttotal
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: processing
-  type: text
-  label: Processing
-- name: iscreatereversal
-  type: text
-  label: Iscreatereversal
-- name: gl_distribution_uu
-  type: text
-  label: Gl Distribution Uu
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
+entities:
+  gl_distribution:
+    table: gl_distribution
+    key: gl_distribution_id
+    displayName: GL_DISTRIBUTION
+    columns:
+      gl_distribution_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      postingtype: {type: string}
+      c_doctype_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      anyorg: {type: string}
+      org_id: {type: decimal}
+      anyacct: {type: string}
+      account_id: {type: decimal}
+      anyproduct: {type: string}
+      m_product_id: {type: decimal}
+      anybpartner: {type: string}
+      c_bpartner_id: {type: decimal}
+      anyproject: {type: string}
+      c_project_id: {type: decimal}
+      anycampaign: {type: string}
+      c_campaign_id: {type: decimal}
+      anyactivity: {type: string}
+      c_activity_id: {type: decimal}
+      anysalesregion: {type: string}
+      c_salesregion_id: {type: decimal}
+      anyorgtrx: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      anylocto: {type: string}
+      c_locto_id: {type: decimal}
+      anylocfrom: {type: string}
+      c_locfrom_id: {type: decimal}
+      anyuser1: {type: string}
+      user1_id: {type: decimal}
+      anyuser2: {type: string}
+      user2_id: {type: decimal}
+      percenttotal: {type: decimal}
+      isvalid: {type: string}
+      processing: {type: string}
+      iscreatereversal: {type: string}
+      gl_distribution_uu: {type: string}
+      seqno: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}

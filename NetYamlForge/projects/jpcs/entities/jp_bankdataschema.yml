@@ -1,91 +1,35 @@
-name: JP_BANKDATASCHEMA
-tableName: jp_bankdataschema
-primaryKey: jp_bankdataschema_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: jp_bankdataschema_id
-  type: numeric
-  label: Jp Bankdataschema Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: jp_paymentdoctype_id
-  type: numeric
-  label: Jp Paymentdoctype Id
-- name: jp_acceptablediffamt
-  type: numeric
-  label: Jp Acceptablediffamt
-- name: created
-  type: text
-  label: Created
-- name: updated
-  type: text
-  label: Updated
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: isreceipt
-  type: text
-  label: Isreceipt
-- name: jp_bankdataschema_uu
-  type: text
-  label: Jp Bankdataschema Uu
-- name: description
-  type: text
-  label: Description
-- name: name
-  type: text
-  label: Name
-- name: value
-  type: text
-  label: Value
-- name: jp_bankdataimportclass
-  type: text
-  label: Jp Bankdataimportclass
-- name: jp_bankdatamatchbpclass
-  type: text
-  label: Jp Bankdatamatchbpclass
-- name: jp_bankdatamatchinvclass
-  type: text
-  label: Jp Bankdatamatchinvclass
-- name: jp_bankdatamatchbillclass
-  type: text
-  label: Jp Bankdatamatchbillclass
-- name: jp_bankdatamatchpaymentclass
-  type: text
-  label: Jp Bankdatamatchpaymentclass
-- name: jp_bankdatacreatedocclass
-  type: text
-  label: Jp Bankdatacreatedocclass
-- name: jp_payment_docaction
-  type: text
-  label: Jp Payment Docaction
-- name: jp_bankstmt_docaction
-  type: text
-  label: Jp Bankstmt Docaction
-- name: jp_bankdatamatchorderclass
-  type: text
-  label: Jp Bankdatamatchorderclass
-- name: bpartnercolumn
-  type: text
-  label: Bpartnercolumn
-- name: jp_bankstatementdoctype_id
-  type: numeric
-  label: Jp Bankstatementdoctype Id
+entities:
+  jp_bankdataschema:
+    table: jp_bankdataschema
+    key: jp_bankdataschema_id
+    displayName: JP_BANKDATASCHEMA
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      jp_bankdataschema_id: {type: decimal, identity: true}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      jp_paymentdoctype_id: {type: decimal}
+      jp_acceptablediffamt: {type: decimal}
+      created: {type: string}
+      updated: {type: string}
+      isactive: {type: string}
+      isdefault: {type: string}
+      isreceipt: {type: string}
+      jp_bankdataschema_uu: {type: string}
+      description: {type: string}
+      name: {type: string}
+      value: {type: string}
+      jp_bankdataimportclass: {type: string}
+      jp_bankdatamatchbpclass: {type: string}
+      jp_bankdatamatchinvclass: {type: string}
+      jp_bankdatamatchbillclass: {type: string}
+      jp_bankdatamatchpaymentclass: {type: string}
+      jp_bankdatacreatedocclass: {type: string}
+      jp_payment_docaction: {type: string}
+      jp_bankstmt_docaction: {type: string}
+      jp_bankdatamatchorderclass: {type: string}
+      bpartnercolumn: {type: string}
+      jp_bankstatementdoctype_id: {type: decimal}

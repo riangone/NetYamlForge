@@ -1,121 +1,45 @@
-name: T_DELETECLIENTLOGJP
-tableName: t_deleteclientlogjp
-primaryKey: t_deleteclientlogjp_id
-fields:
-- name: t_deleteclientlogjp_id
-  type: numeric
-  label: T Deleteclientlogjp Id
-- name: t_deleteclientlogjp_uu
-  type: text
-  label: T Deleteclientlogjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: description
-  type: text
-  label: Description
-- name: jp_delete_client
-  type: text
-  label: Jp Delete Client
-- name: jp_customdeleteprofile_id
-  type: numeric
-  label: Jp Customdeleteprofile Id
-- name: sqlstatement
-  type: text
-  label: Sqlstatement
-- name: help
-  type: text
-  label: Help
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: tablename
-  type: text
-  label: Tablename
-- name: accesslevel
-  type: text
-  label: Accesslevel
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: columnname
-  type: text
-  label: Columnname
-- name: columnsql
-  type: text
-  label: Columnsql
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: fkconstraintname
-  type: text
-  label: Fkconstraintname
-- name: fkconstrainttype
-  type: text
-  label: Fkconstrainttype
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: iskey
-  type: text
-  label: Iskey
-- name: isparent
-  type: text
-  label: Isparent
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: mandatorylogic
-  type: text
-  label: Mandatorylogic
-- name: jp_deleteprofile_id
-  type: numeric
-  label: Jp Deleteprofile Id
-- name: jp_treatforeignkey
-  type: text
-  label: Jp Treatforeignkey
-- name: jp_customdeleteprofileline_id
-  type: numeric
-  label: Jp Customdeleteprofileline Id
-- name: referenced_table_id
-  type: numeric
-  label: Referenced Table Id
-- name: isallowlogging
-  type: text
-  label: Isallowlogging
-- name: lookupclientid
-  type: numeric
-  label: Lookupclientid
-- name: istruncatejp
-  type: text
-  label: Istruncatejp
+entities:
+  t_deleteclientlogjp:
+    table: t_deleteclientlogjp
+    key: t_deleteclientlogjp_id
+    displayName: T_DELETECLIENTLOGJP
+    columns:
+      t_deleteclientlogjp_id: {type: decimal, identity: true}
+      t_deleteclientlogjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      description: {type: string}
+      jp_delete_client: {type: string}
+      jp_customdeleteprofile_id: {type: decimal}
+      sqlstatement: {type: string}
+      help: {type: string}
+      ad_table_id: {type: decimal}
+      tablename: {type: string}
+      accesslevel: {type: string}
+      ad_window_id: {type: decimal}
+      ad_column_id: {type: decimal}
+      columnname: {type: string}
+      columnsql: {type: string}
+      ad_reference_id: {type: decimal}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      fkconstraintname: {type: string}
+      fkconstrainttype: {type: string}
+      defaultvalue: {type: string}
+      iskey: {type: string}
+      isparent: {type: string}
+      ismandatory: {type: string}
+      mandatorylogic: {type: string}
+      jp_deleteprofile_id: {type: decimal}
+      jp_treatforeignkey: {type: string}
+      jp_customdeleteprofileline_id: {type: decimal}
+      referenced_table_id: {type: decimal}
+      isallowlogging: {type: string}
+      lookupclientid: {type: decimal}
+      istruncatejp: {type: string}

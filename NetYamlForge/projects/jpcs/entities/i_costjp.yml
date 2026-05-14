@@ -1,100 +1,38 @@
-name: I_COSTJP
-tableName: i_costjp
-primaryKey: i_costjp_id
-fields:
-- name: i_costjp_id
-  type: numeric
-  label: I Costjp Id
-- name: i_costjp_uu
-  type: text
-  label: I Costjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: jp_acctschema_name
-  type: text
-  label: Jp Acctschema Name
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: jp_costtype_name
-  type: text
-  label: Jp Costtype Name
-- name: m_costtype_id
-  type: numeric
-  label: M Costtype Id
-- name: jp_costelement_name
-  type: text
-  label: Jp Costelement Name
-- name: m_costelement_id
-  type: numeric
-  label: M Costelement Id
-- name: jp_product_value
-  type: text
-  label: Jp Product Value
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: description
-  type: text
-  label: Description
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: futurecostprice
-  type: numeric
-  label: Futurecostprice
-- name: currentcostpricell
-  type: numeric
-  label: Currentcostpricell
-- name: futurecostpricell
-  type: numeric
-  label: Futurecostpricell
-- name: currentqty
-  type: numeric
-  label: Currentqty
-- name: cumulatedamt
-  type: numeric
-  label: Cumulatedamt
-- name: cumulatedqty
-  type: numeric
-  label: Cumulatedqty
-- name: iscostfrozen
-  type: text
-  label: Iscostfrozen
+entities:
+  i_costjp:
+    table: i_costjp
+    key: i_costjp_id
+    displayName: I_COSTJP
+    columns:
+      i_costjp_id: {type: decimal, identity: true}
+      i_costjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      jp_org_value: {type: string}
+      jp_acctschema_name: {type: string}
+      c_acctschema_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      jp_costtype_name: {type: string}
+      m_costtype_id: {type: decimal}
+      jp_costelement_name: {type: string}
+      m_costelement_id: {type: decimal}
+      jp_product_value: {type: string}
+      m_product_id: {type: decimal}
+      description: {type: string}
+      currentcostprice: {type: decimal}
+      futurecostprice: {type: decimal}
+      currentcostpricell: {type: decimal}
+      futurecostpricell: {type: decimal}
+      currentqty: {type: decimal}
+      cumulatedamt: {type: decimal}
+      cumulatedqty: {type: decimal}
+      iscostfrozen: {type: string}

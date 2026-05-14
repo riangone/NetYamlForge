@@ -1,25 +1,13 @@
-name: T_FONTLISTJP
-tableName: t_fontlistjp
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
+entities:
+  t_fontlistjp:
+    table: t_fontlistjp
+    key: ad_client_id
+    displayName: T_FONTLISTJP
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      name2: {type: string}

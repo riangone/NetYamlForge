@@ -1,118 +1,44 @@
-name: AD_CLIENTINFO
-tableName: ad_clientinfo
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isdiscountlineamt
-  type: text
-  label: Isdiscountlineamt
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: c_acctschema1_id
-  type: numeric
-  label: C Acctschema1 Id
-- name: c_uom_volume_id
-  type: numeric
-  label: C Uom Volume Id
-- name: c_uom_weight_id
-  type: numeric
-  label: C Uom Weight Id
-- name: c_uom_length_id
-  type: numeric
-  label: C Uom Length Id
-- name: c_uom_time_id
-  type: numeric
-  label: C Uom Time Id
-- name: ad_tree_menu_id
-  type: numeric
-  label: Ad Tree Menu Id
-- name: ad_tree_org_id
-  type: numeric
-  label: Ad Tree Org Id
-- name: ad_tree_bpartner_id
-  type: numeric
-  label: Ad Tree Bpartner Id
-- name: ad_tree_project_id
-  type: numeric
-  label: Ad Tree Project Id
-- name: ad_tree_salesregion_id
-  type: numeric
-  label: Ad Tree Salesregion Id
-- name: ad_tree_product_id
-  type: numeric
-  label: Ad Tree Product Id
-- name: m_productfreight_id
-  type: numeric
-  label: M Productfreight Id
-- name: c_bpartnercashtrx_id
-  type: numeric
-  label: C Bpartnercashtrx Id
-- name: keeplogdays
-  type: numeric
-  label: Keeplogdays
-- name: ad_tree_activity_id
-  type: numeric
-  label: Ad Tree Activity Id
-- name: ad_tree_campaign_id
-  type: numeric
-  label: Ad Tree Campaign Id
-- name: logo_id
-  type: numeric
-  label: Logo Id
-- name: logoreport_id
-  type: numeric
-  label: Logoreport Id
-- name: logoweb_id
-  type: numeric
-  label: Logoweb Id
-- name: ad_clientinfo_uu
-  type: text
-  label: Ad Clientinfo Uu
-- name: ad_storageprovider_id
-  type: numeric
-  label: Ad Storageprovider Id
-- name: storagearchive_id
-  type: numeric
-  label: Storagearchive Id
-- name: c_chargefreight_id
-  type: numeric
-  label: C Chargefreight Id
-- name: fy_startdate
-  type: text
-  label: Fy Startdate
-- name: isconfirmondocclose
-  type: text
-  label: Isconfirmondocclose
-- name: isconfirmondocvoid
-  type: text
-  label: Isconfirmondocvoid
-- name: storageimage_id
-  type: numeric
-  label: Storageimage Id
-- name: jp_storageattachment_id
-  type: numeric
-  label: Jp Storageattachment Id
-- name: timezone
-  type: text
-  label: Timezone
+entities:
+  ad_clientinfo:
+    table: ad_clientinfo
+    key: ad_client_id
+    displayName: AD_CLIENTINFO
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isdiscountlineamt: {type: string}
+      c_calendar_id: {type: decimal}
+      c_acctschema1_id: {type: decimal}
+      c_uom_volume_id: {type: decimal}
+      c_uom_weight_id: {type: decimal}
+      c_uom_length_id: {type: decimal}
+      c_uom_time_id: {type: decimal}
+      ad_tree_menu_id: {type: decimal}
+      ad_tree_org_id: {type: decimal}
+      ad_tree_bpartner_id: {type: decimal}
+      ad_tree_project_id: {type: decimal}
+      ad_tree_salesregion_id: {type: decimal}
+      ad_tree_product_id: {type: decimal}
+      m_productfreight_id: {type: decimal}
+      c_bpartnercashtrx_id: {type: decimal}
+      keeplogdays: {type: decimal}
+      ad_tree_activity_id: {type: decimal}
+      ad_tree_campaign_id: {type: decimal}
+      logo_id: {type: decimal}
+      logoreport_id: {type: decimal}
+      logoweb_id: {type: decimal}
+      ad_clientinfo_uu: {type: string}
+      ad_storageprovider_id: {type: decimal}
+      storagearchive_id: {type: decimal}
+      c_chargefreight_id: {type: decimal}
+      fy_startdate: {type: string}
+      isconfirmondocclose: {type: string}
+      isconfirmondocvoid: {type: string}
+      storageimage_id: {type: decimal}
+      jp_storageattachment_id: {type: decimal}
+      timezone: {type: string}

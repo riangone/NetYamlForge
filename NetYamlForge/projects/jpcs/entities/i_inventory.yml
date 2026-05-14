@@ -1,118 +1,44 @@
-name: I_INVENTORY
-tableName: i_inventory
-primaryKey: i_inventory_id
-fields:
-- name: i_inventory_id
-  type: numeric
-  label: I Inventory Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: upc
-  type: text
-  label: Upc
-- name: value
-  type: text
-  label: Value
-- name: lot
-  type: text
-  label: Lot
-- name: serno
-  type: text
-  label: Serno
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: warehousevalue
-  type: text
-  label: Warehousevalue
-- name: locatorvalue
-  type: text
-  label: Locatorvalue
-- name: x
-  type: text
-  label: X
-- name: y
-  type: text
-  label: Y
-- name: z
-  type: text
-  label: Z
-- name: m_inventory_id
-  type: numeric
-  label: M Inventory Id
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
-- name: qtycount
-  type: numeric
-  label: Qtycount
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: description
-  type: text
-  label: Description
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: i_inventory_uu
-  type: text
-  label: I Inventory Uu
-- name: doctypename
-  type: text
-  label: Doctypename
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: qtyinternaluse
-  type: numeric
-  label: Qtyinternaluse
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: chargename
-  type: text
-  label: Chargename
-- name: m_costingline_id
-  type: numeric
-  label: M Costingline Id
+entities:
+  i_inventory:
+    table: i_inventory
+    key: i_inventory_id
+    displayName: I_INVENTORY
+    columns:
+      i_inventory_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      m_product_id: {type: decimal}
+      upc: {type: string}
+      value: {type: string}
+      lot: {type: string}
+      serno: {type: string}
+      m_locator_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      warehousevalue: {type: string}
+      locatorvalue: {type: string}
+      x: {type: string}
+      y: {type: string}
+      z: {type: string}
+      m_inventory_id: {type: decimal}
+      m_inventoryline_id: {type: decimal}
+      qtybook: {type: decimal}
+      qtycount: {type: decimal}
+      movementdate: {type: string}
+      description: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      currentcostprice: {type: decimal}
+      i_inventory_uu: {type: string}
+      doctypename: {type: string}
+      c_doctype_id: {type: decimal}
+      qtyinternaluse: {type: decimal}
+      c_charge_id: {type: decimal}
+      chargename: {type: string}
+      m_costingline_id: {type: decimal}

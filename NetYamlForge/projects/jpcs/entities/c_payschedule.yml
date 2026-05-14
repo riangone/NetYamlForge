@@ -1,55 +1,23 @@
-name: C_PAYSCHEDULE
-tableName: c_payschedule
-primaryKey: c_payschedule_id
-fields:
-- name: c_payschedule_id
-  type: numeric
-  label: C Payschedule Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: percentage
-  type: numeric
-  label: Percentage
-- name: netdays
-  type: numeric
-  label: Netdays
-- name: netday
-  type: text
-  label: Netday
-- name: discountdays
-  type: numeric
-  label: Discountdays
-- name: discount
-  type: numeric
-  label: Discount
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: gracedays
-  type: numeric
-  label: Gracedays
-- name: c_payschedule_uu
-  type: text
-  label: C Payschedule Uu
+entities:
+  c_payschedule:
+    table: c_payschedule
+    key: c_payschedule_id
+    displayName: C_PAYSCHEDULE
+    columns:
+      c_payschedule_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_paymentterm_id: {type: decimal}
+      percentage: {type: decimal}
+      netdays: {type: decimal}
+      netday: {type: string}
+      discountdays: {type: decimal}
+      discount: {type: decimal}
+      isvalid: {type: string}
+      gracedays: {type: decimal}
+      c_payschedule_uu: {type: string}

@@ -1,106 +1,40 @@
-name: PP_PRODUCT_PLANNING
-tableName: pp_product_planning
-primaryKey: pp_product_planning_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscreateplan
-  type: text
-  label: Iscreateplan
-- name: isissue
-  type: text
-  label: Isissue
-- name: ismps
-  type: text
-  label: Ismps
-- name: isphantom
-  type: text
-  label: Isphantom
-- name: isrequiredmrp
-  type: text
-  label: Isrequiredmrp
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: order_max
-  type: numeric
-  label: Order Max
-- name: order_min
-  type: numeric
-  label: Order Min
-- name: order_pack
-  type: numeric
-  label: Order Pack
-- name: order_period
-  type: numeric
-  label: Order Period
-- name: order_policy
-  type: text
-  label: Order Policy
-- name: order_qty
-  type: numeric
-  label: Order Qty
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: pp_product_planning_id
-  type: numeric
-  label: Pp Product Planning Id
-- name: planner_id
-  type: numeric
-  label: Planner Id
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: timefence
-  type: numeric
-  label: Timefence
-- name: transferttime
-  type: numeric
-  label: Transferttime
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: workingtime
-  type: numeric
-  label: Workingtime
-- name: yield
-  type: numeric
-  label: Yield
-- name: dd_networkdistribution_id
-  type: numeric
-  label: Dd Networkdistribution Id
-- name: safetystock
-  type: numeric
-  label: Safetystock
-- name: isrequireddrp
-  type: text
-  label: Isrequireddrp
-- name: pp_product_planning_uu
-  type: text
-  label: Pp Product Planning Uu
+entities:
+  pp_product_planning:
+    table: pp_product_planning
+    key: pp_product_planning_id
+    displayName: PP_PRODUCT_PLANNING
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      isactive: {type: string}
+      iscreateplan: {type: string}
+      isissue: {type: string}
+      ismps: {type: string}
+      isphantom: {type: string}
+      isrequiredmrp: {type: string}
+      m_product_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      order_max: {type: decimal}
+      order_min: {type: decimal}
+      order_pack: {type: decimal}
+      order_period: {type: decimal}
+      order_policy: {type: string}
+      order_qty: {type: decimal}
+      pp_product_bom_id: {type: decimal}
+      pp_product_planning_id: {type: decimal, identity: true}
+      planner_id: {type: decimal}
+      s_resource_id: {type: decimal}
+      timefence: {type: decimal}
+      transferttime: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      workingtime: {type: decimal}
+      yield: {type: decimal}
+      dd_networkdistribution_id: {type: decimal}
+      safetystock: {type: decimal}
+      isrequireddrp: {type: string}
+      pp_product_planning_uu: {type: string}

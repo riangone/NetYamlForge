@@ -1,61 +1,25 @@
-name: W_CLICK
-tableName: w_click
-primaryKey: w_click_id
-fields:
-- name: w_click_id
-  type: numeric
-  label: W Click Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: targeturl
-  type: text
-  label: Targeturl
-- name: referrer
-  type: text
-  label: Referrer
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: useragent
-  type: text
-  label: Useragent
-- name: acceptlanguage
-  type: text
-  label: Acceptlanguage
-- name: processed
-  type: text
-  label: Processed
-- name: w_clickcount_id
-  type: numeric
-  label: W Clickcount Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: email
-  type: text
-  label: Email
-- name: w_click_uu
-  type: text
-  label: W Click Uu
+entities:
+  w_click:
+    table: w_click
+    key: w_click_id
+    displayName: W_CLICK
+    columns:
+      w_click_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      targeturl: {type: string}
+      referrer: {type: string}
+      remote_host: {type: string}
+      remote_addr: {type: string}
+      useragent: {type: string}
+      acceptlanguage: {type: string}
+      processed: {type: string}
+      w_clickcount_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      email: {type: string}
+      w_click_uu: {type: string}

@@ -1,76 +1,30 @@
-name: C_ACCTSCHEMA_GL
-tableName: c_acctschema_gl
-primaryKey: c_acctschema_id
-fields:
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: usesuspensebalancing
-  type: text
-  label: Usesuspensebalancing
-- name: suspensebalancing_acct
-  type: numeric
-  label: Suspensebalancing Acct
-- name: usesuspenseerror
-  type: text
-  label: Usesuspenseerror
-- name: suspenseerror_acct
-  type: numeric
-  label: Suspenseerror Acct
-- name: usecurrencybalancing
-  type: text
-  label: Usecurrencybalancing
-- name: currencybalancing_acct
-  type: numeric
-  label: Currencybalancing Acct
-- name: retainedearning_acct
-  type: numeric
-  label: Retainedearning Acct
-- name: incomesummary_acct
-  type: numeric
-  label: Incomesummary Acct
-- name: intercompanydueto_acct
-  type: numeric
-  label: Intercompanydueto Acct
-- name: intercompanyduefrom_acct
-  type: numeric
-  label: Intercompanyduefrom Acct
-- name: ppvoffset_acct
-  type: numeric
-  label: Ppvoffset Acct
-- name: commitmentoffset_acct
-  type: numeric
-  label: Commitmentoffset Acct
-- name: commitmentoffsetsales_acct
-  type: numeric
-  label: Commitmentoffsetsales Acct
-- name: c_acctschema_gl_uu
-  type: text
-  label: C Acctschema Gl Uu
-- name: jp_corporationdueto_acct
-  type: numeric
-  label: Jp Corporationdueto Acct
-- name: jp_corporationduefrom_acct
-  type: numeric
-  label: Jp Corporationduefrom Acct
+entities:
+  c_acctschema_gl:
+    table: c_acctschema_gl
+    key: c_acctschema_id
+    displayName: C_ACCTSCHEMA_GL
+    columns:
+      c_acctschema_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      usesuspensebalancing: {type: string}
+      suspensebalancing_acct: {type: decimal}
+      usesuspenseerror: {type: string}
+      suspenseerror_acct: {type: decimal}
+      usecurrencybalancing: {type: string}
+      currencybalancing_acct: {type: decimal}
+      retainedearning_acct: {type: decimal}
+      incomesummary_acct: {type: decimal}
+      intercompanydueto_acct: {type: decimal}
+      intercompanyduefrom_acct: {type: decimal}
+      ppvoffset_acct: {type: decimal}
+      commitmentoffset_acct: {type: decimal}
+      commitmentoffsetsales_acct: {type: decimal}
+      c_acctschema_gl_uu: {type: string}
+      jp_corporationdueto_acct: {type: decimal}
+      jp_corporationduefrom_acct: {type: decimal}

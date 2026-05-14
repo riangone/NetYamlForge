@@ -1,136 +1,50 @@
-name: PP_ORDER_BOMLINE
-tableName: pp_order_bomline
-primaryKey: pp_order_bomline_id
-fields:
-- name: description
-  type: text
-  label: Description
-- name: feature
-  type: text
-  label: Feature
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: backflushgroup
-  type: text
-  label: Backflushgroup
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: componenttype
-  type: text
-  label: Componenttype
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datedelivered
-  type: text
-  label: Datedelivered
-- name: forecast
-  type: numeric
-  label: Forecast
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscritical
-  type: text
-  label: Iscritical
-- name: isqtypercentage
-  type: text
-  label: Isqtypercentage
-- name: issuemethod
-  type: text
-  label: Issuemethod
-- name: leadtimeoffset
-  type: numeric
-  label: Leadtimeoffset
-- name: line
-  type: numeric
-  label: Line
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_changenotice_id
-  type: numeric
-  label: M Changenotice Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: pp_order_bomline_id
-  type: numeric
-  label: Pp Order Bomline Id
-- name: pp_order_bom_id
-  type: numeric
-  label: Pp Order Bom Id
-- name: pp_order_id
-  type: numeric
-  label: Pp Order Id
-- name: qtybom
-  type: numeric
-  label: Qtybom
-- name: qtybatch
-  type: numeric
-  label: Qtybatch
-- name: qtydelivered
-  type: numeric
-  label: Qtydelivered
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: qtypost
-  type: numeric
-  label: Qtypost
-- name: qtyreject
-  type: numeric
-  label: Qtyreject
-- name: qtyrequiered
-  type: numeric
-  label: Qtyrequiered
-- name: qtyreserved
-  type: numeric
-  label: Qtyreserved
-- name: qtyscrap
-  type: numeric
-  label: Qtyscrap
-- name: scrap
-  type: numeric
-  label: Scrap
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: validto
-  type: text
-  label: Validto
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: assay
-  type: numeric
-  label: Assay
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: costallocationperc
-  type: numeric
-  label: Costallocationperc
-- name: pp_order_bomline_uu
-  type: text
-  label: Pp Order Bomline Uu
+entities:
+  pp_order_bomline:
+    table: pp_order_bomline
+    key: pp_order_bomline_id
+    displayName: PP_ORDER_BOMLINE
+    columns:
+      description: {type: string}
+      feature: {type: string}
+      m_product_id: {type: decimal}
+      backflushgroup: {type: string}
+      c_uom_id: {type: decimal}
+      componenttype: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      datedelivered: {type: string}
+      forecast: {type: decimal}
+      help: {type: string}
+      isactive: {type: string}
+      iscritical: {type: string}
+      isqtypercentage: {type: string}
+      issuemethod: {type: string}
+      leadtimeoffset: {type: decimal}
+      line: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_changenotice_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      pp_order_bomline_id: {type: decimal, identity: true}
+      pp_order_bom_id: {type: decimal}
+      pp_order_id: {type: decimal}
+      qtybom: {type: decimal}
+      qtybatch: {type: decimal}
+      qtydelivered: {type: decimal}
+      qtyentered: {type: decimal}
+      qtypost: {type: decimal}
+      qtyreject: {type: decimal}
+      qtyrequiered: {type: decimal}
+      qtyreserved: {type: decimal}
+      qtyscrap: {type: decimal}
+      scrap: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      ad_client_id: {type: decimal}
+      validto: {type: string}
+      ad_org_id: {type: decimal}
+      assay: {type: decimal}
+      ad_user_id: {type: decimal}
+      costallocationperc: {type: decimal}
+      pp_order_bomline_uu: {type: string}

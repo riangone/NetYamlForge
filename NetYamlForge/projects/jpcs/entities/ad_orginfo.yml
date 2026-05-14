@@ -1,91 +1,35 @@
-name: AD_ORGINFO
-tableName: ad_orginfo
-primaryKey: ad_org_id
-fields:
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: duns
-  type: text
-  label: Duns
-- name: taxid
-  type: text
-  label: Taxid
-- name: pa_goal_id
-  type: numeric
-  label: Pa Goal Id
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: parent_org_id
-  type: numeric
-  label: Parent Org Id
-- name: ad_orgtype_id
-  type: numeric
-  label: Ad Orgtype Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: transferbank_id
-  type: numeric
-  label: Transferbank Id
-- name: transfercashbook_id
-  type: numeric
-  label: Transfercashbook Id
-- name: receiptfootermsg
-  type: text
-  label: Receiptfootermsg
-- name: dropship_warehouse_id
-  type: numeric
-  label: Dropship Warehouse Id
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: logo_id
-  type: numeric
-  label: Logo Id
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: fax
-  type: text
-  label: Fax
-- name: email
-  type: text
-  label: Email
-- name: ad_orginfo_uu
-  type: text
-  label: Ad Orginfo Uu
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: jp_businessunit_id
-  type: numeric
-  label: Jp Businessunit Id
-- name: timezone
-  type: text
-  label: Timezone
+entities:
+  ad_orginfo:
+    table: ad_orginfo
+    key: ad_org_id
+    displayName: AD_ORGINFO
+    columns:
+      ad_org_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_location_id: {type: decimal}
+      duns: {type: string}
+      taxid: {type: string}
+      pa_goal_id: {type: decimal}
+      supervisor_id: {type: decimal}
+      parent_org_id: {type: decimal}
+      ad_orgtype_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      transferbank_id: {type: decimal}
+      transfercashbook_id: {type: decimal}
+      receiptfootermsg: {type: string}
+      dropship_warehouse_id: {type: decimal}
+      c_calendar_id: {type: decimal}
+      logo_id: {type: decimal}
+      phone: {type: string}
+      phone2: {type: string}
+      fax: {type: string}
+      email: {type: string}
+      ad_orginfo_uu: {type: string}
+      jp_corporation_id: {type: decimal}
+      jp_businessunit_id: {type: decimal}
+      timezone: {type: string}

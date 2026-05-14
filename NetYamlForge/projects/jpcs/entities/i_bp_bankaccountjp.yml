@@ -1,157 +1,57 @@
-name: I_BP_BANKACCOUNTJP
-tableName: i_bp_bankaccountjp
-primaryKey: i_bp_bankaccountjp_id
-fields:
-- name: i_bp_bankaccountjp_id
-  type: numeric
-  label: I Bp Bankaccountjp Id
-- name: i_bp_bankaccountjp_uu
-  type: text
-  label: I Bp Bankaccountjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: c_bp_bankaccount_id
-  type: numeric
-  label: C Bp Bankaccount Id
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: jp_bpartner_value
-  type: text
-  label: Jp Bpartner Value
-- name: c_bank_id
-  type: numeric
-  label: C Bank Id
-- name: jp_bank_name
-  type: text
-  label: Jp Bank Name
-- name: isach
-  type: text
-  label: Isach
-- name: bankaccounttype
-  type: text
-  label: Bankaccounttype
-- name: routingno
-  type: text
-  label: Routingno
-- name: accountno
-  type: text
-  label: Accountno
-- name: creditcardtype
-  type: text
-  label: Creditcardtype
-- name: creditcardnumber
-  type: text
-  label: Creditcardnumber
-- name: creditcardvv
-  type: text
-  label: Creditcardvv
-- name: creditcardexpmm
-  type: numeric
-  label: Creditcardexpmm
-- name: creditcardexpyy
-  type: numeric
-  label: Creditcardexpyy
-- name: a_name
-  type: text
-  label: A Name
-- name: a_street
-  type: text
-  label: A Street
-- name: a_city
-  type: text
-  label: A City
-- name: a_state
-  type: text
-  label: A State
-- name: a_zip
-  type: text
-  label: A Zip
-- name: a_ident_dl
-  type: text
-  label: A Ident Dl
-- name: a_email
-  type: text
-  label: A Email
-- name: a_ident_ssn
-  type: text
-  label: A Ident Ssn
-- name: r_avsaddr
-  type: text
-  label: R Avsaddr
-- name: r_avszip
-  type: text
-  label: R Avszip
-- name: a_country
-  type: text
-  label: A Country
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: jp_user_value
-  type: text
-  label: Jp User Value
-- name: jp_user_name
-  type: text
-  label: Jp User Name
-- name: jp_user_email
-  type: text
-  label: Jp User Email
-- name: bpbankacctuse
-  type: text
-  label: Bpbankacctuse
-- name: customerpaymentprofileid
-  type: text
-  label: Customerpaymentprofileid
-- name: c_paymentprocessor_id
-  type: numeric
-  label: C Paymentprocessor Id
-- name: jp_branchcode
-  type: text
-  label: Jp Branchcode
-- name: jp_branchname_kana
-  type: text
-  label: Jp Branchname Kana
-- name: jp_a_name_kana
-  type: text
-  label: Jp A Name Kana
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: iban
-  type: text
-  label: Iban
+entities:
+  i_bp_bankaccountjp:
+    table: i_bp_bankaccountjp
+    key: i_bp_bankaccountjp_id
+    displayName: I_BP_BANKACCOUNTJP
+    columns:
+      i_bp_bankaccountjp_id: {type: decimal, identity: true}
+      i_bp_bankaccountjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      c_bp_bankaccount_id: {type: decimal}
+      jp_org_value: {type: string}
+      c_bpartner_id: {type: decimal}
+      jp_bpartner_value: {type: string}
+      c_bank_id: {type: decimal}
+      jp_bank_name: {type: string}
+      isach: {type: string}
+      bankaccounttype: {type: string}
+      routingno: {type: string}
+      accountno: {type: string}
+      creditcardtype: {type: string}
+      creditcardnumber: {type: string}
+      creditcardvv: {type: string}
+      creditcardexpmm: {type: decimal}
+      creditcardexpyy: {type: decimal}
+      a_name: {type: string}
+      a_street: {type: string}
+      a_city: {type: string}
+      a_state: {type: string}
+      a_zip: {type: string}
+      a_ident_dl: {type: string}
+      a_email: {type: string}
+      a_ident_ssn: {type: string}
+      r_avsaddr: {type: string}
+      r_avszip: {type: string}
+      a_country: {type: string}
+      ad_user_id: {type: decimal}
+      jp_user_value: {type: string}
+      jp_user_name: {type: string}
+      jp_user_email: {type: string}
+      bpbankacctuse: {type: string}
+      customerpaymentprofileid: {type: string}
+      c_paymentprocessor_id: {type: decimal}
+      jp_branchcode: {type: string}
+      jp_branchname_kana: {type: string}
+      jp_a_name_kana: {type: string}
+      isdefault: {type: string}
+      iban: {type: string}

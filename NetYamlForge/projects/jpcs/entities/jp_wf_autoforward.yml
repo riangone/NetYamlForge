@@ -1,52 +1,22 @@
-name: JP_WF_AUTOFORWARD
-tableName: jp_wf_autoforward
-primaryKey: jp_wf_autoforward_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_wf_autoforward_id
-  type: numeric
-  label: Jp Wf Autoforward Id
-- name: jp_wf_autoforward_uu
-  type: text
-  label: Jp Wf Autoforward Uu
-- name: jp_wf_org_id
-  type: numeric
-  label: Jp Wf Org Id
-- name: jp_wf_user_from_id
-  type: numeric
-  label: Jp Wf User From Id
-- name: jp_wf_user_to_id
-  type: numeric
-  label: Jp Wf User To Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
+entities:
+  jp_wf_autoforward:
+    table: jp_wf_autoforward
+    key: jp_wf_autoforward_id
+    displayName: JP_WF_AUTOFORWARD
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_wf_autoforward_id: {type: decimal, identity: true}
+      jp_wf_autoforward_uu: {type: string}
+      jp_wf_org_id: {type: decimal}
+      jp_wf_user_from_id: {type: decimal}
+      jp_wf_user_to_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}

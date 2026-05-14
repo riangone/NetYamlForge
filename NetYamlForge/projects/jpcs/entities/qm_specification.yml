@@ -1,58 +1,24 @@
-name: QM_SPECIFICATION
-tableName: qm_specification
-primaryKey: qm_specification_id
-fields:
-- name: qm_specification_id
-  type: numeric
-  label: Qm Specification Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: m_attributeset_id
-  type: numeric
-  label: M Attributeset Id
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: qm_specification_uu
-  type: text
-  label: Qm Specification Uu
+entities:
+  qm_specification:
+    table: qm_specification
+    key: qm_specification_id
+    displayName: QM_SPECIFICATION
+    columns:
+      qm_specification_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      pp_product_bom_id: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      m_attributeset_id: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      ad_client_id: {type: decimal}
+      qm_specification_uu: {type: string}

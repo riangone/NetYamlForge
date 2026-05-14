@@ -1,46 +1,20 @@
-name: M_WAREHOUSE_ACCT
-tableName: m_warehouse_acct
-primaryKey: m_warehouse_id
-fields:
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: w_inventory_acct
-  type: numeric
-  label: W Inventory Acct
-- name: w_invactualadjust_acct
-  type: numeric
-  label: W Invactualadjust Acct
-- name: w_differences_acct
-  type: numeric
-  label: W Differences Acct
-- name: w_revaluation_acct
-  type: numeric
-  label: W Revaluation Acct
-- name: m_warehouse_acct_uu
-  type: text
-  label: M Warehouse Acct Uu
+entities:
+  m_warehouse_acct:
+    table: m_warehouse_acct
+    key: m_warehouse_id
+    displayName: M_WAREHOUSE_ACCT
+    columns:
+      m_warehouse_id: {type: decimal, identity: true}
+      c_acctschema_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      w_inventory_acct: {type: decimal}
+      w_invactualadjust_acct: {type: decimal}
+      w_differences_acct: {type: decimal}
+      w_revaluation_acct: {type: decimal}
+      m_warehouse_acct_uu: {type: string}

@@ -1,433 +1,149 @@
-name: I_BPARTNERJP
-tableName: i_bpartnerjp
-primaryKey: i_bpartnerjp_id
-fields:
-- name: i_bpartnerjp_id
-  type: numeric
-  label: I Bpartnerjp Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: description
-  type: text
-  label: Description
-- name: duns
-  type: text
-  label: Duns
-- name: taxid
-  type: text
-  label: Taxid
-- name: naics
-  type: text
-  label: Naics
-- name: groupvalue
-  type: text
-  label: Groupvalue
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: address1
-  type: text
-  label: Address1
-- name: address2
-  type: text
-  label: Address2
-- name: postal
-  type: text
-  label: Postal
-- name: postal_add
-  type: text
-  label: Postal Add
-- name: city
-  type: text
-  label: City
-- name: c_region_id
-  type: numeric
-  label: C Region Id
-- name: regionname
-  type: text
-  label: Regionname
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: countrycode
-  type: text
-  label: Countrycode
-- name: title
-  type: text
-  label: Title
-- name: contactname
-  type: text
-  label: Contactname
-- name: contactdescription
-  type: text
-  label: Contactdescription
-- name: comments
-  type: text
-  label: Comments
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: fax
-  type: text
-  label: Fax
-- name: email
-  type: text
-  label: Email
-- name: password
-  type: text
-  label: Password
-- name: birthday
-  type: text
-  label: Birthday
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: bpcontactgreeting
-  type: text
-  label: Bpcontactgreeting
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: r_interestarea_id
-  type: numeric
-  label: R Interestarea Id
-- name: interestareaname
-  type: text
-  label: Interestareaname
-- name: iscustomer
-  type: text
-  label: Iscustomer
-- name: isemployee
-  type: text
-  label: Isemployee
-- name: isvendor
-  type: text
-  label: Isvendor
-- name: i_bpartnerjp_uu
-  type: text
-  label: I Bpartnerjp Uu
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: jp_corporationvalue
-  type: text
-  label: Jp Corporationvalue
-- name: jp_sotaxrounding
-  type: text
-  label: Jp Sotaxrounding
-- name: jp_potaxrounding
-  type: text
-  label: Jp Potaxrounding
-- name: address3
-  type: text
-  label: Address3
-- name: address4
-  type: text
-  label: Address4
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: isprospect
-  type: text
-  label: Isprospect
-- name: issalesrep
-  type: text
-  label: Issalesrep
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
-- name: referenceno
-  type: text
-  label: Referenceno
-- name: rating
-  type: text
-  label: Rating
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: jp_salesrep_email
-  type: text
-  label: Jp Salesrep Email
-- name: socreditstatus
-  type: text
-  label: Socreditstatus
-- name: so_creditlimit
-  type: numeric
-  label: So Creditlimit
-- name: istaxexempt
-  type: text
-  label: Istaxexempt
-- name: ispotaxexempt
-  type: text
-  label: Ispotaxexempt
-- name: url
-  type: text
-  label: Url
-- name: issummary
-  type: text
-  label: Issummary
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: c_invoiceschedule_id
-  type: numeric
-  label: C Invoiceschedule Id
-- name: jp_invoiceschedule_name
-  type: text
-  label: Jp Invoiceschedule Name
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: jp_paymentterm_value
-  type: text
-  label: Jp Paymentterm Value
-- name: jp_billschema_id
-  type: numeric
-  label: Jp Billschema Id
-- name: jp_billschema_value
-  type: text
-  label: Jp Billschema Value
-- name: shareofcustomer
-  type: numeric
-  label: Shareofcustomer
-- name: jp_location_label
-  type: text
-  label: Jp Location Label
-- name: jp_bpartner_location_name
-  type: text
-  label: Jp Bpartner Location Name
-- name: acqusitioncost
-  type: numeric
-  label: Acqusitioncost
-- name: numberemployees
-  type: numeric
-  label: Numberemployees
-- name: salesvolume
-  type: numeric
-  label: Salesvolume
-- name: potentiallifetimevalue
-  type: numeric
-  label: Potentiallifetimevalue
-- name: firstsale
-  type: text
-  label: Firstsale
-- name: actuallifetimevalue
-  type: numeric
-  label: Actuallifetimevalue
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: jp_pricelist_name
-  type: text
-  label: Jp Pricelist Name
-- name: m_discountschema_id
-  type: numeric
-  label: M Discountschema Id
-- name: jp_discountschema_name
-  type: text
-  label: Jp Discountschema Name
-- name: flatdiscount
-  type: numeric
-  label: Flatdiscount
-- name: c_dunning_id
-  type: numeric
-  label: C Dunning Id
-- name: jp_dunning_name
-  type: text
-  label: Jp Dunning Name
-- name: dunninggrace
-  type: text
-  label: Dunninggrace
-- name: shelflifeminpct
-  type: numeric
-  label: Shelflifeminpct
-- name: poreference
-  type: text
-  label: Poreference
-- name: paymentrulepo
-  type: text
-  label: Paymentrulepo
-- name: po_paymentterm_id
-  type: numeric
-  label: Po Paymentterm Id
-- name: jp_po_paymentterm_value
-  type: text
-  label: Jp Po Paymentterm Value
-- name: jp_billschemapo_id
-  type: numeric
-  label: Jp Billschemapo Id
-- name: jp_billschemapo_value
-  type: text
-  label: Jp Billschemapo Value
-- name: po_pricelist_id
-  type: numeric
-  label: Po Pricelist Id
-- name: jp_po_pricelist_name
-  type: text
-  label: Jp Po Pricelist Name
-- name: po_discountschema_id
-  type: numeric
-  label: Po Discountschema Id
-- name: jp_po_discountschema_name
-  type: text
-  label: Jp Po Discountschema Name
-- name: is1099vendor
-  type: text
-  label: Is1099Vendor
-- name: ismanufacturer
-  type: text
-  label: Ismanufacturer
-- name: default1099box_id
-  type: numeric
-  label: Default1099Box Id
-- name: jp_default1099box_value
-  type: text
-  label: Jp Default1099Box Value
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: jp_greeting_name
-  type: text
-  label: Jp Greeting Name
-- name: so_description
-  type: text
-  label: So Description
-- name: invoice_printformat_id
-  type: numeric
-  label: Invoice Printformat Id
-- name: jp_invoice_printformat_name
-  type: text
-  label: Jp Invoice Printformat Name
-- name: documentcopies
-  type: numeric
-  label: Documentcopies
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: isdn
-  type: text
-  label: Isdn
-- name: isshipto
-  type: text
-  label: Isshipto
-- name: isbillto
-  type: text
-  label: Isbillto
-- name: ispayfrom
-  type: text
-  label: Ispayfrom
-- name: isremitto
-  type: text
-  label: Isremitto
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: jp_salesregion_value
-  type: text
-  label: Jp Salesregion Value
-- name: customeraddressid
-  type: text
-  label: Customeraddressid
-- name: address5
-  type: text
-  label: Address5
-- name: c_city_id
-  type: numeric
-  label: C City Id
-- name: jp_user_value
-  type: text
-  label: Jp User Value
-- name: jp_user_phone
-  type: text
-  label: Jp User Phone
-- name: jp_user_phone2
-  type: text
-  label: Jp User Phone2
-- name: jp_user_greeting_id
-  type: numeric
-  label: Jp User Greeting Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: jp_salesrep_value
-  type: text
-  label: Jp Salesrep Value
-- name: jp_salesrep_name
-  type: text
-  label: Jp Salesrep Name
-- name: jp_region_name
-  type: text
-  label: Jp Region Name
-- name: jp_city_name
-  type: text
-  label: Jp City Name
-- name: jp_cm_bpartner_id
-  type: numeric
-  label: Jp Cm Bpartner Id
-- name: jp_cm_bpartner_location_id
-  type: numeric
-  label: Jp Cm Bpartner Location Id
-- name: jp_bill_printformat_name
-  type: text
-  label: Jp Bill Printformat Name
-- name: jp_bill_printformat_id
-  type: numeric
-  label: Jp Bill Printformat Id
+entities:
+  i_bpartnerjp:
+    table: i_bpartnerjp
+    key: i_bpartnerjp_id
+    displayName: I_BPARTNERJP
+    columns:
+      i_bpartnerjp_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      c_bpartner_id: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      description: {type: string}
+      duns: {type: string}
+      taxid: {type: string}
+      naics: {type: string}
+      groupvalue: {type: string}
+      c_bp_group_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      address1: {type: string}
+      address2: {type: string}
+      postal: {type: string}
+      postal_add: {type: string}
+      city: {type: string}
+      c_region_id: {type: decimal}
+      regionname: {type: string}
+      c_country_id: {type: decimal}
+      countrycode: {type: string}
+      title: {type: string}
+      contactname: {type: string}
+      contactdescription: {type: string}
+      comments: {type: string}
+      phone: {type: string}
+      phone2: {type: string}
+      fax: {type: string}
+      email: {type: string}
+      password: {type: string}
+      birthday: {type: string}
+      c_greeting_id: {type: decimal}
+      bpcontactgreeting: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      ad_user_id: {type: decimal}
+      r_interestarea_id: {type: decimal}
+      interestareaname: {type: string}
+      iscustomer: {type: string}
+      isemployee: {type: string}
+      isvendor: {type: string}
+      i_bpartnerjp_uu: {type: string}
+      jp_corporation_id: {type: decimal}
+      jp_corporationvalue: {type: string}
+      jp_sotaxrounding: {type: string}
+      jp_potaxrounding: {type: string}
+      address3: {type: string}
+      address4: {type: string}
+      jp_org_value: {type: string}
+      isprospect: {type: string}
+      issalesrep: {type: string}
+      i_isactivejp: {type: string}
+      referenceno: {type: string}
+      rating: {type: string}
+      salesrep_id: {type: decimal}
+      jp_salesrep_email: {type: string}
+      socreditstatus: {type: string}
+      so_creditlimit: {type: decimal}
+      istaxexempt: {type: string}
+      ispotaxexempt: {type: string}
+      url: {type: string}
+      issummary: {type: string}
+      invoicerule: {type: string}
+      c_invoiceschedule_id: {type: decimal}
+      jp_invoiceschedule_name: {type: string}
+      paymentrule: {type: string}
+      c_paymentterm_id: {type: decimal}
+      jp_paymentterm_value: {type: string}
+      jp_billschema_id: {type: decimal}
+      jp_billschema_value: {type: string}
+      shareofcustomer: {type: decimal}
+      jp_location_label: {type: string}
+      jp_bpartner_location_name: {type: string}
+      acqusitioncost: {type: decimal}
+      numberemployees: {type: decimal}
+      salesvolume: {type: decimal}
+      potentiallifetimevalue: {type: decimal}
+      firstsale: {type: string}
+      actuallifetimevalue: {type: decimal}
+      deliveryrule: {type: string}
+      deliveryviarule: {type: string}
+      m_pricelist_id: {type: decimal}
+      jp_pricelist_name: {type: string}
+      m_discountschema_id: {type: decimal}
+      jp_discountschema_name: {type: string}
+      flatdiscount: {type: decimal}
+      c_dunning_id: {type: decimal}
+      jp_dunning_name: {type: string}
+      dunninggrace: {type: string}
+      shelflifeminpct: {type: decimal}
+      poreference: {type: string}
+      paymentrulepo: {type: string}
+      po_paymentterm_id: {type: decimal}
+      jp_po_paymentterm_value: {type: string}
+      jp_billschemapo_id: {type: decimal}
+      jp_billschemapo_value: {type: string}
+      po_pricelist_id: {type: decimal}
+      jp_po_pricelist_name: {type: string}
+      po_discountschema_id: {type: decimal}
+      jp_po_discountschema_name: {type: string}
+      is1099vendor: {type: string}
+      ismanufacturer: {type: string}
+      default1099box_id: {type: decimal}
+      jp_default1099box_value: {type: string}
+      ad_language: {type: string}
+      jp_greeting_name: {type: string}
+      so_description: {type: string}
+      invoice_printformat_id: {type: decimal}
+      jp_invoice_printformat_name: {type: string}
+      documentcopies: {type: decimal}
+      isdiscountprinted: {type: string}
+      isdn: {type: string}
+      isshipto: {type: string}
+      isbillto: {type: string}
+      ispayfrom: {type: string}
+      isremitto: {type: string}
+      c_salesregion_id: {type: decimal}
+      jp_salesregion_value: {type: string}
+      customeraddressid: {type: string}
+      address5: {type: string}
+      c_city_id: {type: decimal}
+      jp_user_value: {type: string}
+      jp_user_phone: {type: string}
+      jp_user_phone2: {type: string}
+      jp_user_greeting_id: {type: decimal}
+      c_location_id: {type: decimal}
+      jp_salesrep_value: {type: string}
+      jp_salesrep_name: {type: string}
+      jp_region_name: {type: string}
+      jp_city_name: {type: string}
+      jp_cm_bpartner_id: {type: decimal}
+      jp_cm_bpartner_location_id: {type: decimal}
+      jp_bill_printformat_name: {type: string}
+      jp_bill_printformat_id: {type: decimal}

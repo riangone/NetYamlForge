@@ -1,67 +1,27 @@
-name: JP_CONTRACT_TAX_ACCT
-tableName: jp_contract_tax_acct
-primaryKey: jp_contract_tax_acct_id
-fields:
-- name: jp_contract_tax_acct_id
-  type: numeric
-  label: Jp Contract Tax Acct Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contract_tax_acct_uu
-  type: text
-  label: Jp Contract Tax Acct Uu
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: jp_contract_acct_id
-  type: numeric
-  label: Jp Contract Acct Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: t_due_acct
-  type: numeric
-  label: T Due Acct
-- name: t_credit_acct
-  type: numeric
-  label: T Credit Acct
-- name: t_expense_acct
-  type: numeric
-  label: T Expense Acct
-- name: jp_taxdue_acct
-  type: numeric
-  label: Jp Taxdue Acct
-- name: jp_taxcredit_acct
-  type: numeric
-  label: Jp Taxcredit Acct
-- name: jp_taxexpense_acct
-  type: numeric
-  label: Jp Taxexpense Acct
-- name: jp_gl_taxdue_acct
-  type: numeric
-  label: Jp Gl Taxdue Acct
-- name: jp_gl_taxcredit_acct
-  type: numeric
-  label: Jp Gl Taxcredit Acct
-- name: jp_gl_taxexpense_acct
-  type: numeric
-  label: Jp Gl Taxexpense Acct
+entities:
+  jp_contract_tax_acct:
+    table: jp_contract_tax_acct
+    key: jp_contract_tax_acct_id
+    displayName: JP_CONTRACT_TAX_ACCT
+    columns:
+      jp_contract_tax_acct_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contract_tax_acct_uu: {type: string}
+      c_acctschema_id: {type: decimal}
+      jp_contract_acct_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      t_due_acct: {type: decimal}
+      t_credit_acct: {type: decimal}
+      t_expense_acct: {type: decimal}
+      jp_taxdue_acct: {type: decimal}
+      jp_taxcredit_acct: {type: decimal}
+      jp_taxexpense_acct: {type: decimal}
+      jp_gl_taxdue_acct: {type: decimal}
+      jp_gl_taxcredit_acct: {type: decimal}
+      jp_gl_taxexpense_acct: {type: decimal}

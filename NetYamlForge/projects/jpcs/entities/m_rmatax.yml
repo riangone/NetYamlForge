@@ -1,49 +1,21 @@
-name: M_RMATAX
-tableName: m_rmatax
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: m_rma_id
-  type: numeric
-  label: M Rma Id
-- name: m_rmatax_uu
-  type: text
-  label: M Rmatax Uu
-- name: processed
-  type: text
-  label: Processed
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_taxprovider_id
-  type: numeric
-  label: C Taxprovider Id
+entities:
+  m_rmatax:
+    table: m_rmatax
+    key: ad_client_id
+    displayName: M_RMATAX
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      istaxincluded: {type: string}
+      m_rma_id: {type: decimal}
+      m_rmatax_uu: {type: string}
+      processed: {type: string}
+      taxamt: {type: decimal}
+      taxbaseamt: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_taxprovider_id: {type: decimal}

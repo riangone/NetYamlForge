@@ -1,271 +1,95 @@
-name: M_SHIPPINGTRANSACTION
-tableName: m_shippingtransaction
-primaryKey: m_shippingtransaction_id
-fields:
-- name: action
-  type: text
-  label: Action
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: boxcount
-  type: numeric
-  label: Boxcount
-- name: c_bp_shippingacct_id
-  type: numeric
-  label: C Bp Shippingacct Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_uom_length_id
-  type: numeric
-  label: C Uom Length Id
-- name: c_uom_weight_id
-  type: numeric
-  label: C Uom Weight Id
-- name: cashondelivery
-  type: text
-  label: Cashondelivery
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datereceived
-  type: text
-  label: Datereceived
-- name: deliveryconfirmation
-  type: text
-  label: Deliveryconfirmation
-- name: deliveryconfirmationtype
-  type: text
-  label: Deliveryconfirmationtype
-- name: description
-  type: text
-  label: Description
-- name: dothazardclassordivision
-  type: text
-  label: Dothazardclassordivision
-- name: dryiceweight
-  type: numeric
-  label: Dryiceweight
-- name: dutiesshipperaccount
-  type: text
-  label: Dutiesshipperaccount
-- name: fob
-  type: text
-  label: Fob
-- name: freightcharges
-  type: text
-  label: Freightcharges
-- name: handlingcharge
-  type: numeric
-  label: Handlingcharge
-- name: height
-  type: numeric
-  label: Height
-- name: homedeliverypremiumdate
-  type: text
-  label: Homedeliverypremiumdate
-- name: homedeliverypremiumphone
-  type: text
-  label: Homedeliverypremiumphone
-- name: homedeliverypremiumtype
-  type: text
-  label: Homedeliverypremiumtype
-- name: insurance
-  type: text
-  label: Insurance
-- name: insuredamount
-  type: numeric
-  label: Insuredamount
-- name: isaccessible
-  type: text
-  label: Isaccessible
-- name: isactive
-  type: text
-  label: Isactive
-- name: isaddedhandling
-  type: text
-  label: Isaddedhandling
-- name: iscargoaircraftonly
-  type: text
-  label: Iscargoaircraftonly
-- name: isdryice
-  type: text
-  label: Isdryice
-- name: isdutiable
-  type: text
-  label: Isdutiable
-- name: isfuturedayshipment
-  type: text
-  label: Isfuturedayshipment
-- name: ishazmat
-  type: text
-  label: Ishazmat
-- name: isholdatlocation
-  type: text
-  label: Isholdatlocation
-- name: isignorezipnotfound
-  type: text
-  label: Isignorezipnotfound
-- name: isignorezipstatenotmatch
-  type: text
-  label: Isignorezipstatenotmatch
-- name: isresidential
-  type: text
-  label: Isresidential
-- name: issaturdaydelivery
-  type: text
-  label: Issaturdaydelivery
-- name: issaturdaypickup
-  type: text
-  label: Issaturdaypickup
-- name: isverbalconfirmation
-  type: text
-  label: Isverbalconfirmation
-- name: latestpickuptime
-  type: text
-  label: Latestpickuptime
-- name: length
-  type: numeric
-  label: Length
-- name: m_inout_id
-  type: numeric
-  label: M Inout Id
-- name: m_package_id
-  type: numeric
-  label: M Package Id
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: m_shipperlabels_id
-  type: numeric
-  label: M Shipperlabels Id
-- name: m_shipperpackaging_id
-  type: numeric
-  label: M Shipperpackaging Id
-- name: m_shipperpickuptypes_id
-  type: numeric
-  label: M Shipperpickuptypes Id
-- name: m_shippingprocessor_id
-  type: numeric
-  label: M Shippingprocessor Id
-- name: m_shippingtransaction_id
-  type: numeric
-  label: M Shippingtransaction Id
-- name: m_shippingtransaction_uu
-  type: text
-  label: M Shippingtransaction Uu
-- name: notificationmessage
-  type: text
-  label: Notificationmessage
-- name: notificationtype
-  type: text
-  label: Notificationtype
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: price
-  type: numeric
-  label: Price
-- name: priceactual
-  type: numeric
-  label: Priceactual
-- name: processed
-  type: text
-  label: Processed
-- name: rateinquirymessage
-  type: text
-  label: Rateinquirymessage
-- name: receivedinfo
-  type: text
-  label: Receivedinfo
-- name: shipdate
-  type: text
-  label: Shipdate
-- name: shipperaccount
-  type: text
-  label: Shipperaccount
-- name: shippingrespmessage
-  type: text
-  label: Shippingrespmessage
-- name: surcharges
-  type: numeric
-  label: Surcharges
-- name: trackinginfo
-  type: text
-  label: Trackinginfo
-- name: trackingno
-  type: text
-  label: Trackingno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: weight
-  type: numeric
-  label: Weight
-- name: width
-  type: numeric
-  label: Width
-- name: isalternatereturnaddress
-  type: text
-  label: Isalternatereturnaddress
-- name: returnbpartner_id
-  type: numeric
-  label: Returnbpartner Id
-- name: returnlocation_id
-  type: numeric
-  label: Returnlocation Id
-- name: returnuser_id
-  type: numeric
-  label: Returnuser Id
-- name: codamount
-  type: numeric
-  label: Codamount
-- name: customsvalue
-  type: numeric
-  label: Customsvalue
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: poreference
-  type: text
-  label: Poreference
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: bill_location_id
-  type: numeric
-  label: Bill Location Id
-- name: ispriviledgedrate
-  type: text
-  label: Ispriviledgedrate
-- name: holdaddress_id
-  type: numeric
-  label: Holdaddress Id
+entities:
+  m_shippingtransaction:
+    table: m_shippingtransaction
+    key: m_shippingtransaction_id
+    displayName: M_SHIPPINGTRANSACTION
+    columns:
+      action: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      boxcount: {type: decimal}
+      c_bp_shippingacct_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_uom_length_id: {type: decimal}
+      c_uom_weight_id: {type: decimal}
+      cashondelivery: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      datereceived: {type: string}
+      deliveryconfirmation: {type: string}
+      deliveryconfirmationtype: {type: string}
+      description: {type: string}
+      dothazardclassordivision: {type: string}
+      dryiceweight: {type: decimal}
+      dutiesshipperaccount: {type: string}
+      fob: {type: string}
+      freightcharges: {type: string}
+      handlingcharge: {type: decimal}
+      height: {type: decimal}
+      homedeliverypremiumdate: {type: string}
+      homedeliverypremiumphone: {type: string}
+      homedeliverypremiumtype: {type: string}
+      insurance: {type: string}
+      insuredamount: {type: decimal}
+      isaccessible: {type: string}
+      isactive: {type: string}
+      isaddedhandling: {type: string}
+      iscargoaircraftonly: {type: string}
+      isdryice: {type: string}
+      isdutiable: {type: string}
+      isfuturedayshipment: {type: string}
+      ishazmat: {type: string}
+      isholdatlocation: {type: string}
+      isignorezipnotfound: {type: string}
+      isignorezipstatenotmatch: {type: string}
+      isresidential: {type: string}
+      issaturdaydelivery: {type: string}
+      issaturdaypickup: {type: string}
+      isverbalconfirmation: {type: string}
+      latestpickuptime: {type: string}
+      length: {type: decimal}
+      m_inout_id: {type: decimal}
+      m_package_id: {type: decimal}
+      m_shipper_id: {type: decimal}
+      m_shipperlabels_id: {type: decimal}
+      m_shipperpackaging_id: {type: decimal}
+      m_shipperpickuptypes_id: {type: decimal}
+      m_shippingprocessor_id: {type: decimal}
+      m_shippingtransaction_id: {type: decimal, identity: true}
+      m_shippingtransaction_uu: {type: string}
+      notificationmessage: {type: string}
+      notificationtype: {type: string}
+      paymentrule: {type: string}
+      price: {type: decimal}
+      priceactual: {type: decimal}
+      processed: {type: string}
+      rateinquirymessage: {type: string}
+      receivedinfo: {type: string}
+      shipdate: {type: string}
+      shipperaccount: {type: string}
+      shippingrespmessage: {type: string}
+      surcharges: {type: decimal}
+      trackinginfo: {type: string}
+      trackingno: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      weight: {type: decimal}
+      width: {type: decimal}
+      isalternatereturnaddress: {type: string}
+      returnbpartner_id: {type: decimal}
+      returnlocation_id: {type: decimal}
+      returnuser_id: {type: decimal}
+      codamount: {type: decimal}
+      customsvalue: {type: decimal}
+      freightamt: {type: decimal}
+      salesrep_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      poreference: {type: string}
+      c_invoice_id: {type: decimal}
+      bill_location_id: {type: decimal}
+      ispriviledgedrate: {type: string}
+      holdaddress_id: {type: decimal}

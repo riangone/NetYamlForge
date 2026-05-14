@@ -1,52 +1,22 @@
-name: C_DUNNINGRUN
-tableName: c_dunningrun
-primaryKey: c_dunningrun_id
-fields:
-- name: c_dunningrun_id
-  type: numeric
-  label: C Dunningrun Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: dunningdate
-  type: text
-  label: Dunningdate
-- name: c_dunninglevel_id
-  type: numeric
-  label: C Dunninglevel Id
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: sendit
-  type: text
-  label: Sendit
-- name: description
-  type: text
-  label: Description
-- name: c_dunning_id
-  type: numeric
-  label: C Dunning Id
-- name: c_dunningrun_uu
-  type: text
-  label: C Dunningrun Uu
+entities:
+  c_dunningrun:
+    table: c_dunningrun
+    key: c_dunningrun_id
+    displayName: C_DUNNINGRUN
+    columns:
+      c_dunningrun_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      dunningdate: {type: string}
+      c_dunninglevel_id: {type: decimal}
+      processed: {type: string}
+      processing: {type: string}
+      sendit: {type: string}
+      description: {type: string}
+      c_dunning_id: {type: decimal}
+      c_dunningrun_uu: {type: string}

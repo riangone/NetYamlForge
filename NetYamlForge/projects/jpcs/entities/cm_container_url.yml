@@ -1,43 +1,19 @@
-name: CM_CONTAINER_URL
-tableName: cm_container_url
-primaryKey: cm_container_url_id
-fields:
-- name: cm_container_url_id
-  type: numeric
-  label: Cm Container Url Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_container_id
-  type: numeric
-  label: Cm Container Id
-- name: checked
-  type: text
-  label: Checked
-- name: status
-  type: text
-  label: Status
-- name: last_result
-  type: text
-  label: Last Result
-- name: cm_container_url_uu
-  type: text
-  label: Cm Container Url Uu
+entities:
+  cm_container_url:
+    table: cm_container_url
+    key: cm_container_url_id
+    displayName: CM_CONTAINER_URL
+    columns:
+      cm_container_url_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_container_id: {type: decimal}
+      checked: {type: string}
+      status: {type: string}
+      last_result: {type: string}
+      cm_container_url_uu: {type: string}

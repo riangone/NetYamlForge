@@ -1,46 +1,20 @@
-name: B_SELLERFUNDS
-tableName: b_sellerfunds
-primaryKey: b_sellerfunds_id
-fields:
-- name: b_sellerfunds_id
-  type: numeric
-  label: B Sellerfunds Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: committedamt
-  type: numeric
-  label: Committedamt
-- name: noncommittedamt
-  type: numeric
-  label: Noncommittedamt
-- name: b_sellerfunds_uu
-  type: text
-  label: B Sellerfunds Uu
+entities:
+  b_sellerfunds:
+    table: b_sellerfunds
+    key: b_sellerfunds_id
+    displayName: B_SELLERFUNDS
+    columns:
+      b_sellerfunds_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      committedamt: {type: decimal}
+      noncommittedamt: {type: decimal}
+      b_sellerfunds_uu: {type: string}

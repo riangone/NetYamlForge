@@ -1,82 +1,32 @@
-name: JP_PP_PLANLINET
-tableName: jp_pp_planlinet
-primaryKey: jp_pp_planlinet_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: isendproduct
-  type: text
-  label: Isendproduct
-- name: jp_pp_planlinet_id
-  type: numeric
-  label: Jp Pp Planlinet Id
-- name: jp_pp_planlinet_uu
-  type: text
-  label: Jp Pp Planlinet Uu
-- name: line
-  type: numeric
-  label: Line
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: plannedqty
-  type: numeric
-  label: Plannedqty
-- name: qtyused
-  type: numeric
-  label: Qtyused
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_pp_plant_id
-  type: numeric
-  label: Jp Pp Plant Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_processing2
-  type: text
-  label: Jp Processing2
-- name: jp_processing3
-  type: text
-  label: Jp Processing3
-- name: iscreated
-  type: text
-  label: Iscreated
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
+entities:
+  jp_pp_planlinet:
+    table: jp_pp_planlinet
+    key: jp_pp_planlinet_id
+    displayName: JP_PP_PLANLINET
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      documentnote: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      isendproduct: {type: string}
+      jp_pp_planlinet_id: {type: decimal, identity: true}
+      jp_pp_planlinet_uu: {type: string}
+      line: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      movementqty: {type: decimal}
+      plannedqty: {type: decimal}
+      qtyused: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_pp_plant_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      jp_processing1: {type: string}
+      jp_processing2: {type: string}
+      jp_processing3: {type: string}
+      iscreated: {type: string}
+      m_attributesetinstance_id: {type: decimal}

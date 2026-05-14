@@ -1,40 +1,18 @@
-name: R_CONTACTINTEREST
-tableName: r_contactinterest
-primaryKey: r_interestarea_id
-fields:
-- name: r_interestarea_id
-  type: numeric
-  label: R Interestarea Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: subscribedate
-  type: text
-  label: Subscribedate
-- name: optoutdate
-  type: text
-  label: Optoutdate
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: r_contactinterest_uu
-  type: text
-  label: R Contactinterest Uu
+entities:
+  r_contactinterest:
+    table: r_contactinterest
+    key: r_interestarea_id
+    displayName: R_CONTACTINTEREST
+    columns:
+      r_interestarea_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      subscribedate: {type: string}
+      optoutdate: {type: string}
+      ad_user_id: {type: decimal}
+      r_contactinterest_uu: {type: string}

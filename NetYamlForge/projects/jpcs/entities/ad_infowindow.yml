@@ -1,100 +1,38 @@
-name: AD_INFOWINDOW
-tableName: ad_infowindow
-primaryKey: ad_infowindow_id
-fields:
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: fromclause
-  type: text
-  label: Fromclause
-- name: otherclause
-  type: text
-  label: Otherclause
-- name: processing
-  type: text
-  label: Processing
-- name: ad_infowindow_uu
-  type: text
-  label: Ad Infowindow Uu
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: isdistinct
-  type: text
-  label: Isdistinct
-- name: orderbyclause
-  type: text
-  label: Orderbyclause
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: ad_ctxhelp_id
-  type: numeric
-  label: Ad Ctxhelp Id
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: isshowindashboard
-  type: text
-  label: Isshowindashboard
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: maxqueryrecords
-  type: numeric
-  label: Maxqueryrecords
-- name: isloadpagenum
-  type: text
-  label: Isloadpagenum
-- name: pagingsize
-  type: numeric
-  label: Pagingsize
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: po_window_id
-  type: numeric
-  label: Po Window Id
+entities:
+  ad_infowindow:
+    table: ad_infowindow
+    key: ad_infowindow_id
+    displayName: AD_INFOWINDOW
+    columns:
+      ad_infowindow_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_table_id: {type: decimal}
+      entitytype: {type: string}
+      fromclause: {type: string}
+      otherclause: {type: string}
+      processing: {type: string}
+      ad_infowindow_uu: {type: string}
+      whereclause: {type: string}
+      isdefault: {type: string}
+      isdistinct: {type: string}
+      orderbyclause: {type: string}
+      isvalid: {type: string}
+      ad_ctxhelp_id: {type: decimal}
+      imageurl: {type: string}
+      seqno: {type: decimal}
+      isshowindashboard: {type: string}
+      ad_process_id: {type: decimal}
+      maxqueryrecords: {type: decimal}
+      isloadpagenum: {type: string}
+      pagingsize: {type: decimal}
+      ad_window_id: {type: decimal}
+      po_window_id: {type: decimal}

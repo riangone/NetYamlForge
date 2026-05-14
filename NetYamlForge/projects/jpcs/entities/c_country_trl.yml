@@ -1,73 +1,29 @@
-name: C_COUNTRY_TRL
-tableName: c_country_trl
-primaryKey: c_country_id
-fields:
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: regionname
-  type: text
-  label: Regionname
-- name: c_country_trl_uu
-  type: text
-  label: C Country Trl Uu
-- name: placeholderaddress1
-  type: text
-  label: Placeholderaddress1
-- name: placeholderaddress2
-  type: text
-  label: Placeholderaddress2
-- name: placeholderaddress3
-  type: text
-  label: Placeholderaddress3
-- name: placeholderaddress4
-  type: text
-  label: Placeholderaddress4
-- name: placeholderaddress5
-  type: text
-  label: Placeholderaddress5
-- name: placeholdercity
-  type: text
-  label: Placeholdercity
-- name: placeholdercomments
-  type: text
-  label: Placeholdercomments
-- name: placeholderpostal
-  type: text
-  label: Placeholderpostal
-- name: placeholderpostal_add
-  type: text
-  label: Placeholderpostal Add
+entities:
+  c_country_trl:
+    table: c_country_trl
+    key: c_country_id
+    displayName: C_COUNTRY_TRL
+    columns:
+      c_country_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      istranslated: {type: string}
+      name: {type: string}
+      description: {type: string}
+      regionname: {type: string}
+      c_country_trl_uu: {type: string}
+      placeholderaddress1: {type: string}
+      placeholderaddress2: {type: string}
+      placeholderaddress3: {type: string}
+      placeholderaddress4: {type: string}
+      placeholderaddress5: {type: string}
+      placeholdercity: {type: string}
+      placeholdercomments: {type: string}
+      placeholderpostal: {type: string}
+      placeholderpostal_add: {type: string}

@@ -1,70 +1,28 @@
-name: M_BP_PRICE
-tableName: m_bp_price
-primaryKey: m_bp_price_id
-fields:
-- name: m_bp_price_id
-  type: numeric
-  label: M Bp Price Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: breakvalue
-  type: numeric
-  label: Breakvalue
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: comments
-  type: text
-  label: Comments
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: discount
-  type: numeric
-  label: Discount
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: pricestd
-  type: numeric
-  label: Pricestd
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: priceoverridetype
-  type: text
-  label: Priceoverridetype
-- name: isnetprice
-  type: text
-  label: Isnetprice
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: m_bp_price_uu
-  type: text
-  label: M Bp Price Uu
+entities:
+  m_bp_price:
+    table: m_bp_price
+    key: m_bp_price_id
+    displayName: M_BP_PRICE
+    columns:
+      m_bp_price_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      breakvalue: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      comments: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      discount: {type: decimal}
+      isactive: {type: string}
+      m_product_id: {type: decimal}
+      pricelimit: {type: decimal}
+      pricelist: {type: decimal}
+      pricestd: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      priceoverridetype: {type: string}
+      isnetprice: {type: string}
+      c_currency_id: {type: decimal}
+      m_bp_price_uu: {type: string}

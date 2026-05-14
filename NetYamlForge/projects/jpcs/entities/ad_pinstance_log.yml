@@ -1,37 +1,17 @@
-name: AD_PINSTANCE_LOG
-tableName: ad_pinstance_log
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: log_id
-  type: numeric
-  label: Log Id
-- name: p_date
-  type: text
-  label: P Date
-- name: p_id
-  type: numeric
-  label: P Id
-- name: p_number
-  type: numeric
-  label: P Number
-- name: p_msg
-  type: text
-  label: P Msg
-- name: ad_pinstance_log_uu
-  type: text
-  label: Ad Pinstance Log Uu
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: pinstancelogtype
-  type: text
-  label: Pinstancelogtype
-- name: jsondata
-  type: text
-  label: Jsondata
+entities:
+  ad_pinstance_log:
+    table: ad_pinstance_log
+    key: ad_pinstance_id
+    displayName: AD_PINSTANCE_LOG
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      log_id: {type: decimal}
+      p_date: {type: string}
+      p_id: {type: decimal}
+      p_number: {type: decimal}
+      p_msg: {type: string}
+      ad_pinstance_log_uu: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      pinstancelogtype: {type: string}
+      jsondata: {type: string}

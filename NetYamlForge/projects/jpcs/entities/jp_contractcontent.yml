@@ -1,286 +1,100 @@
-name: JP_CONTRACTCONTENT
-tableName: jp_contractcontent
-primaryKey: jp_contractcontent_id
-fields:
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractcontent_uu
-  type: text
-  label: Jp Contractcontent Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: posted
-  type: text
-  label: Posted
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: jp_contractcontentt_id
-  type: numeric
-  label: Jp Contractcontentt Id
-- name: jp_contract_acct_id
-  type: numeric
-  label: Jp Contract Acct Id
-- name: jp_precontractcontent_id
-  type: numeric
-  label: Jp Precontractcontent Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: jp_basedocdoctype_id
-  type: numeric
-  label: Jp Basedocdoctype Id
-- name: jp_createderivativedocpolicy
-  type: text
-  label: Jp Createderivativedocpolicy
-- name: jp_contractcalender_id
-  type: numeric
-  label: Jp Contractcalender Id
-- name: jp_contractprocdate_from
-  type: text
-  label: Jp Contractprocdate From
-- name: jp_contractprocdate_to
-  type: text
-  label: Jp Contractprocdate To
-- name: jp_contractprocess_id
-  type: numeric
-  label: Jp Contractprocess Id
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_opportunity_id
-  type: numeric
-  label: C Opportunity Id
-- name: poreference
-  type: text
-  label: Poreference
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: totallines
-  type: numeric
-  label: Totallines
-- name: jp_contractprocstatus
-  type: text
-  label: Jp Contractprocstatus
-- name: isautomaticupdatejp
-  type: text
-  label: Isautomaticupdatejp
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: dropship_bpartner_id
-  type: numeric
-  label: Dropship Bpartner Id
-- name: dropship_location_id
-  type: numeric
-  label: Dropship Location Id
-- name: dropship_user_id
-  type: numeric
-  label: Dropship User Id
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: m_freightcategory_id
-  type: numeric
-  label: M Freightcategory Id
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: bill_bpartner_id
-  type: numeric
-  label: Bill Bpartner Id
-- name: bill_location_id
-  type: numeric
-  label: Bill Location Id
-- name: bill_user_id
-  type: numeric
-  label: Bill User Id
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: sendemail
-  type: text
-  label: Sendemail
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: jp_estimation_id
-  type: numeric
-  label: Jp Estimation Id
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: jp_countercontractcontent_id
-  type: numeric
-  label: Jp Countercontractcontent Id
-- name: jp_contractprocessmethod
-  type: text
-  label: Jp Contractprocessmethod
-- name: isschedulecreatedjp
-  type: text
-  label: Isschedulecreatedjp
-- name: jp_processing2
-  type: text
-  label: Jp Processing2
-- name: jp_processing3
-  type: text
-  label: Jp Processing3
-- name: jp_contractc_autoupdatepolicy
-  type: text
-  label: Jp Contractc Autoupdatepolicy
-- name: isrenewedcontractcontentjp
-  type: text
-  label: Isrenewedcontractcontentjp
-- name: jp_processing4
-  type: text
-  label: Jp Processing4
-- name: jp_processing5
-  type: text
-  label: Jp Processing5
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_contractcontent:
+    table: jp_contractcontent
+    key: jp_contractcontent_id
+    displayName: JP_CONTRACTCONTENT
+    columns:
+      jp_contractcontent_id: {type: decimal, identity: true}
+      jp_contractcontent_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      posted: {type: string}
+      isapproved: {type: string}
+      processedon: {type: decimal}
+      jp_contract_id: {type: decimal}
+      jp_contractcontentt_id: {type: decimal}
+      jp_contract_acct_id: {type: decimal}
+      jp_precontractcontent_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      datedoc: {type: string}
+      dateacct: {type: string}
+      salesrep_id: {type: decimal}
+      docbasetype: {type: string}
+      jp_basedocdoctype_id: {type: decimal}
+      jp_createderivativedocpolicy: {type: string}
+      jp_contractcalender_id: {type: decimal}
+      jp_contractprocdate_from: {type: string}
+      jp_contractprocdate_to: {type: string}
+      jp_contractprocess_id: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      issotrx: {type: string}
+      name: {type: string}
+      description: {type: string}
+      c_opportunity_id: {type: decimal}
+      poreference: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      totallines: {type: decimal}
+      jp_contractprocstatus: {type: string}
+      isautomaticupdatejp: {type: string}
+      m_warehouse_id: {type: decimal}
+      jp_locator_id: {type: decimal}
+      isdropship: {type: string}
+      dropship_bpartner_id: {type: decimal}
+      dropship_location_id: {type: decimal}
+      dropship_user_id: {type: decimal}
+      deliveryrule: {type: string}
+      priorityrule: {type: string}
+      deliveryviarule: {type: string}
+      m_shipper_id: {type: decimal}
+      m_freightcategory_id: {type: decimal}
+      freightcostrule: {type: string}
+      freightamt: {type: decimal}
+      bill_bpartner_id: {type: decimal}
+      bill_location_id: {type: decimal}
+      bill_user_id: {type: decimal}
+      invoicerule: {type: string}
+      isdiscountprinted: {type: string}
+      m_pricelist_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      paymentrule: {type: string}
+      c_paymentterm_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      istaxincluded: {type: string}
+      sendemail: {type: string}
+      ordertype: {type: string}
+      jp_estimation_id: {type: decimal}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      jp_processing1: {type: string}
+      dateinvoiced: {type: string}
+      jp_countercontractcontent_id: {type: decimal}
+      jp_contractprocessmethod: {type: string}
+      isschedulecreatedjp: {type: string}
+      jp_processing2: {type: string}
+      jp_processing3: {type: string}
+      jp_contractc_autoupdatepolicy: {type: string}
+      isrenewedcontractcontentjp: {type: string}
+      jp_processing4: {type: string}
+      jp_processing5: {type: string}
+      grandtotal: {type: decimal}
+      jp_subject: {type: string}
+      jp_remarks: {type: string}
+      jp_communicationcolumn: {type: string}

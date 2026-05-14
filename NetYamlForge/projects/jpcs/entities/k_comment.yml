@@ -1,46 +1,20 @@
-name: K_COMMENT
-tableName: k_comment
-primaryKey: k_comment_id
-fields:
-- name: k_comment_id
-  type: numeric
-  label: K Comment Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: k_entry_id
-  type: numeric
-  label: K Entry Id
-- name: rating
-  type: numeric
-  label: Rating
-- name: ispublic
-  type: text
-  label: Ispublic
-- name: ad_session_id
-  type: numeric
-  label: Ad Session Id
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: k_comment_uu
-  type: text
-  label: K Comment Uu
+entities:
+  k_comment:
+    table: k_comment
+    key: k_comment_id
+    displayName: K_COMMENT
+    columns:
+      k_comment_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      k_entry_id: {type: decimal}
+      rating: {type: decimal}
+      ispublic: {type: string}
+      ad_session_id: {type: decimal}
+      textmsg: {type: string}
+      k_comment_uu: {type: string}

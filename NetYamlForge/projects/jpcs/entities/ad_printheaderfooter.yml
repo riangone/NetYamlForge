@@ -1,37 +1,17 @@
-name: AD_PRINTHEADERFOOTER
-tableName: ad_printheaderfooter
-primaryKey: ad_printheaderfooter_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_printheaderfooter_id
-  type: numeric
-  label: Ad Printheaderfooter Id
-- name: ad_printheaderfooter_uu
-  type: text
-  label: Ad Printheaderfooter Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: sourceclassname
-  type: text
-  label: Sourceclassname
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  ad_printheaderfooter:
+    table: ad_printheaderfooter
+    key: ad_printheaderfooter_id
+    displayName: AD_PRINTHEADERFOOTER
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_printheaderfooter_id: {type: decimal, identity: true}
+      ad_printheaderfooter_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      sourceclassname: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

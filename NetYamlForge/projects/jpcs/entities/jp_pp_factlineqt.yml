@@ -1,58 +1,24 @@
-name: JP_PP_FACTLINEQT
-tableName: jp_pp_factlineqt
-primaryKey: jp_pp_factlineqt_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: expectedresult
-  type: text
-  label: Expectedresult
-- name: isactive
-  type: text
-  label: Isactive
-- name: isqcpass
-  type: text
-  label: Isqcpass
-- name: jp_pp_factlineqt_id
-  type: numeric
-  label: Jp Pp Factlineqt Id
-- name: jp_pp_factlineqt_uu
-  type: text
-  label: Jp Pp Factlineqt Uu
-- name: jp_pp_factline_id
-  type: numeric
-  label: Jp Pp Factline Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_qualitytest_id
-  type: numeric
-  label: M Qualitytest Id
-- name: processed
-  type: text
-  label: Processed
-- name: result
-  type: text
-  label: Result
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_pp_planlineqt_id
-  type: numeric
-  label: Jp Pp Planlineqt Id
-- name: seqno
-  type: numeric
-  label: Seqno
+entities:
+  jp_pp_factlineqt:
+    table: jp_pp_factlineqt
+    key: jp_pp_factlineqt_id
+    displayName: JP_PP_FACTLINEQT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      expectedresult: {type: string}
+      isactive: {type: string}
+      isqcpass: {type: string}
+      jp_pp_factlineqt_id: {type: decimal, identity: true}
+      jp_pp_factlineqt_uu: {type: string}
+      jp_pp_factline_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_qualitytest_id: {type: decimal}
+      processed: {type: string}
+      result: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_pp_planlineqt_id: {type: decimal}
+      seqno: {type: decimal}

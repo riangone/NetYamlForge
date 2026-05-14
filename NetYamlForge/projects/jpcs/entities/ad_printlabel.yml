@@ -1,55 +1,23 @@
-name: AD_PRINTLABEL
-tableName: ad_printlabel
-primaryKey: ad_printlabel_id
-fields:
-- name: ad_printlabel_id
-  type: numeric
-  label: Ad Printlabel Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: printername
-  type: text
-  label: Printername
-- name: islandscape
-  type: text
-  label: Islandscape
-- name: labelheight
-  type: numeric
-  label: Labelheight
-- name: labelwidth
-  type: numeric
-  label: Labelwidth
-- name: ad_labelprinter_id
-  type: numeric
-  label: Ad Labelprinter Id
-- name: ad_printlabel_uu
-  type: text
-  label: Ad Printlabel Uu
+entities:
+  ad_printlabel:
+    table: ad_printlabel
+    key: ad_printlabel_id
+    displayName: AD_PRINTLABEL
+    columns:
+      ad_printlabel_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_table_id: {type: decimal}
+      printername: {type: string}
+      islandscape: {type: string}
+      labelheight: {type: decimal}
+      labelwidth: {type: decimal}
+      ad_labelprinter_id: {type: decimal}
+      ad_printlabel_uu: {type: string}

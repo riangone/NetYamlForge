@@ -1,55 +1,23 @@
-name: AD_SESSION
-tableName: ad_session
-primaryKey: ad_session_id
-fields:
-- name: ad_session_id
-  type: numeric
-  label: Ad Session Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: websession
-  type: text
-  label: Websession
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: processed
-  type: text
-  label: Processed
-- name: description
-  type: text
-  label: Description
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: logindate
-  type: text
-  label: Logindate
-- name: ad_session_uu
-  type: text
-  label: Ad Session Uu
-- name: servername
-  type: text
-  label: Servername
+entities:
+  ad_session:
+    table: ad_session
+    key: ad_session_id
+    displayName: AD_SESSION
+    columns:
+      ad_session_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      websession: {type: string}
+      remote_addr: {type: string}
+      remote_host: {type: string}
+      processed: {type: string}
+      description: {type: string}
+      ad_role_id: {type: decimal}
+      logindate: {type: string}
+      ad_session_uu: {type: string}
+      servername: {type: string}

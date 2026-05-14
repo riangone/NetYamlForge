@@ -1,43 +1,19 @@
-name: C_SUBSCRIPTIONTYPE
-tableName: c_subscriptiontype
-primaryKey: c_subscriptiontype_id
-fields:
-- name: c_subscriptiontype_id
-  type: numeric
-  label: C Subscriptiontype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: frequency
-  type: numeric
-  label: Frequency
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_subscriptiontype_uu
-  type: text
-  label: C Subscriptiontype Uu
+entities:
+  c_subscriptiontype:
+    table: c_subscriptiontype
+    key: c_subscriptiontype_id
+    displayName: C_SUBSCRIPTIONTYPE
+    columns:
+      c_subscriptiontype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      frequencytype: {type: string}
+      frequency: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_subscriptiontype_uu: {type: string}

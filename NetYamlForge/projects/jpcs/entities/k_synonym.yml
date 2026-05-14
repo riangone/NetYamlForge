@@ -1,40 +1,18 @@
-name: K_SYNONYM
-tableName: k_synonym
-primaryKey: k_synonym_id
-fields:
-- name: k_synonym_id
-  type: numeric
-  label: K Synonym Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: synonymname
-  type: text
-  label: Synonymname
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: k_synonym_uu
-  type: text
-  label: K Synonym Uu
+entities:
+  k_synonym:
+    table: k_synonym
+    key: k_synonym_id
+    displayName: K_SYNONYM
+    columns:
+      k_synonym_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      synonymname: {type: string}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      k_synonym_uu: {type: string}

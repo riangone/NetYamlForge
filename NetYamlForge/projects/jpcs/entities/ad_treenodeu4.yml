@@ -1,40 +1,18 @@
-name: AD_TREENODEU4
-tableName: ad_treenodeu4
-primaryKey: ad_tree_id
-fields:
-- name: ad_tree_id
-  type: numeric
-  label: Ad Tree Id
-- name: node_id
-  type: numeric
-  label: Node Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: parent_id
-  type: numeric
-  label: Parent Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_treenodeu4_uu
-  type: text
-  label: Ad Treenodeu4 Uu
+entities:
+  ad_treenodeu4:
+    table: ad_treenodeu4
+    key: ad_tree_id
+    displayName: AD_TREENODEU4
+    columns:
+      ad_tree_id: {type: decimal, identity: true}
+      node_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      parent_id: {type: decimal}
+      seqno: {type: decimal}
+      ad_treenodeu4_uu: {type: string}

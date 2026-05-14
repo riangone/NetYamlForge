@@ -1,79 +1,31 @@
-name: T_INVOICEGL
-tableName: t_invoicegl
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: openamt
-  type: numeric
-  label: Openamt
-- name: percent
-  type: numeric
-  label: Percent
-- name: apar
-  type: text
-  label: Apar
-- name: amtsourcebalance
-  type: numeric
-  label: Amtsourcebalance
-- name: amtacctbalance
-  type: numeric
-  label: Amtacctbalance
-- name: c_conversiontypereval_id
-  type: numeric
-  label: C Conversiontypereval Id
-- name: amtrevaldr
-  type: numeric
-  label: Amtrevaldr
-- name: amtrevalcr
-  type: numeric
-  label: Amtrevalcr
-- name: datereval
-  type: text
-  label: Datereval
-- name: amtrevaldrdiff
-  type: numeric
-  label: Amtrevaldrdiff
-- name: amtrevalcrdiff
-  type: numeric
-  label: Amtrevalcrdiff
-- name: c_doctypereval_id
-  type: numeric
-  label: C Doctypereval Id
-- name: isallcurrencies
-  type: text
-  label: Isallcurrencies
-- name: t_invoicegl_uu
-  type: text
-  label: T Invoicegl Uu
+entities:
+  t_invoicegl:
+    table: t_invoicegl
+    key: ad_pinstance_id
+    displayName: T_INVOICEGL
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      c_invoice_id: {type: decimal}
+      fact_acct_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      grandtotal: {type: decimal}
+      openamt: {type: decimal}
+      percent: {type: decimal}
+      apar: {type: string}
+      amtsourcebalance: {type: decimal}
+      amtacctbalance: {type: decimal}
+      c_conversiontypereval_id: {type: decimal}
+      amtrevaldr: {type: decimal}
+      amtrevalcr: {type: decimal}
+      datereval: {type: string}
+      amtrevaldrdiff: {type: decimal}
+      amtrevalcrdiff: {type: decimal}
+      c_doctypereval_id: {type: decimal}
+      isallcurrencies: {type: string}
+      t_invoicegl_uu: {type: string}

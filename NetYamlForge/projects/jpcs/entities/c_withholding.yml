@@ -1,73 +1,29 @@
-name: C_WITHHOLDING
-tableName: c_withholding
-primaryKey: c_withholding_id
-fields:
-- name: c_withholding_id
-  type: numeric
-  label: C Withholding Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: istaxwithholding
-  type: text
-  label: Istaxwithholding
-- name: istaxprorated
-  type: text
-  label: Istaxprorated
-- name: ispaidto3party
-  type: text
-  label: Ispaidto3Party
-- name: beneficiary
-  type: numeric
-  label: Beneficiary
-- name: ispercentwithholding
-  type: text
-  label: Ispercentwithholding
-- name: percent
-  type: numeric
-  label: Percent
-- name: fixamt
-  type: numeric
-  label: Fixamt
-- name: thresholdmin
-  type: numeric
-  label: Thresholdmin
-- name: thresholdmax
-  type: numeric
-  label: Thresholdmax
-- name: minamt
-  type: numeric
-  label: Minamt
-- name: maxamt
-  type: numeric
-  label: Maxamt
-- name: c_withholding_uu
-  type: text
-  label: C Withholding Uu
+entities:
+  c_withholding:
+    table: c_withholding
+    key: c_withholding_id
+    displayName: C_WITHHOLDING
+    columns:
+      c_withholding_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_paymentterm_id: {type: decimal}
+      istaxwithholding: {type: string}
+      istaxprorated: {type: string}
+      ispaidto3party: {type: string}
+      beneficiary: {type: decimal}
+      ispercentwithholding: {type: string}
+      percent: {type: decimal}
+      fixamt: {type: decimal}
+      thresholdmin: {type: decimal}
+      thresholdmax: {type: decimal}
+      minamt: {type: decimal}
+      maxamt: {type: decimal}
+      c_withholding_uu: {type: string}

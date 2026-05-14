@@ -1,43 +1,19 @@
-name: AD_REPLICATION_RUN
-tableName: ad_replication_run
-primaryKey: ad_replication_run_id
-fields:
-- name: ad_replication_run_id
-  type: numeric
-  label: Ad Replication Run Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: ad_replication_id
-  type: numeric
-  label: Ad Replication Id
-- name: isreplicated
-  type: text
-  label: Isreplicated
-- name: description
-  type: text
-  label: Description
-- name: ad_replication_run_uu
-  type: text
-  label: Ad Replication Run Uu
+entities:
+  ad_replication_run:
+    table: ad_replication_run
+    key: ad_replication_run_id
+    displayName: AD_REPLICATION_RUN
+    columns:
+      ad_replication_run_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      ad_replication_id: {type: decimal}
+      isreplicated: {type: string}
+      description: {type: string}
+      ad_replication_run_uu: {type: string}

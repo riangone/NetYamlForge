@@ -1,214 +1,76 @@
-name: JP_CONTRACTCONTENTT
-tableName: jp_contractcontentt
-primaryKey: jp_contractcontentt_id
-fields:
-- name: jp_contractcontentt_id
-  type: numeric
-  label: Jp Contractcontentt Id
-- name: jp_contractcontentt_uu
-  type: text
-  label: Jp Contractcontentt Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractt_id
-  type: numeric
-  label: Jp Contractt Id
-- name: jp_contract_acct_id
-  type: numeric
-  label: Jp Contract Acct Id
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: jp_basedocdoctype_id
-  type: numeric
-  label: Jp Basedocdoctype Id
-- name: jp_createderivativedocpolicy
-  type: text
-  label: Jp Createderivativedocpolicy
-- name: jp_contractcalenderref_id
-  type: numeric
-  label: Jp Contractcalenderref Id
-- name: jp_contractprocpoffset
-  type: numeric
-  label: Jp Contractprocpoffset
-- name: jp_contractprocperiodnum
-  type: numeric
-  label: Jp Contractprocperiodnum
-- name: jp_contractprocessref_id
-  type: numeric
-  label: Jp Contractprocessref Id
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: value
-  type: text
-  label: Value
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: totallines
-  type: numeric
-  label: Totallines
-- name: isautomaticupdatejp
-  type: text
-  label: Isautomaticupdatejp
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: dropship_bpartner_id
-  type: numeric
-  label: Dropship Bpartner Id
-- name: dropship_location_id
-  type: numeric
-  label: Dropship Location Id
-- name: dropship_user_id
-  type: numeric
-  label: Dropship User Id
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: m_freightcategory_id
-  type: numeric
-  label: M Freightcategory Id
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: bill_bpartner_id
-  type: numeric
-  label: Bill Bpartner Id
-- name: bill_location_id
-  type: numeric
-  label: Bill Location Id
-- name: bill_user_id
-  type: numeric
-  label: Bill User Id
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: sendemail
-  type: text
-  label: Sendemail
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: isorverlapcontractprocdatejp
-  type: text
-  label: Isorverlapcontractprocdatejp
-- name: jp_contracttype
-  type: text
-  label: Jp Contracttype
-- name: jp_contractprocessmethod
-  type: text
-  label: Jp Contractprocessmethod
-- name: jp_contractc_autoupdatepolicy
-  type: text
-  label: Jp Contractc Autoupdatepolicy
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_contractcontentt:
+    table: jp_contractcontentt
+    key: jp_contractcontentt_id
+    displayName: JP_CONTRACTCONTENTT
+    columns:
+      jp_contractcontentt_id: {type: decimal, identity: true}
+      jp_contractcontentt_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractt_id: {type: decimal}
+      jp_contract_acct_id: {type: decimal}
+      c_doctype_id: {type: decimal}
+      docbasetype: {type: string}
+      jp_basedocdoctype_id: {type: decimal}
+      jp_createderivativedocpolicy: {type: string}
+      jp_contractcalenderref_id: {type: decimal}
+      jp_contractprocpoffset: {type: decimal}
+      jp_contractprocperiodnum: {type: decimal}
+      jp_contractprocessref_id: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      value: {type: string}
+      issotrx: {type: string}
+      name: {type: string}
+      description: {type: string}
+      salesrep_id: {type: decimal}
+      totallines: {type: decimal}
+      isautomaticupdatejp: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      jp_locator_id: {type: decimal}
+      isdropship: {type: string}
+      dropship_bpartner_id: {type: decimal}
+      dropship_location_id: {type: decimal}
+      dropship_user_id: {type: decimal}
+      deliveryrule: {type: string}
+      priorityrule: {type: string}
+      deliveryviarule: {type: string}
+      m_shipper_id: {type: decimal}
+      m_freightcategory_id: {type: decimal}
+      freightcostrule: {type: string}
+      freightamt: {type: decimal}
+      bill_bpartner_id: {type: decimal}
+      bill_location_id: {type: decimal}
+      bill_user_id: {type: decimal}
+      invoicerule: {type: string}
+      isdiscountprinted: {type: string}
+      m_pricelist_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      paymentrule: {type: string}
+      c_paymentterm_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      istaxincluded: {type: string}
+      sendemail: {type: string}
+      ordertype: {type: string}
+      dateinvoiced: {type: string}
+      isorverlapcontractprocdatejp: {type: string}
+      jp_contracttype: {type: string}
+      jp_contractprocessmethod: {type: string}
+      jp_contractc_autoupdatepolicy: {type: string}
+      jp_subject: {type: string}
+      jp_remarks: {type: string}
+      jp_communicationcolumn: {type: string}

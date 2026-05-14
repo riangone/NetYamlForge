@@ -1,91 +1,35 @@
-name: T_TRANSACTION
-tableName: t_transaction
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: m_transaction_id
-  type: numeric
-  label: M Transaction Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: movementtype
-  type: text
-  label: Movementtype
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: m_inout_id
-  type: numeric
-  label: M Inout Id
-- name: m_movementline_id
-  type: numeric
-  label: M Movementline Id
-- name: m_movement_id
-  type: numeric
-  label: M Movement Id
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: m_inventory_id
-  type: numeric
-  label: M Inventory Id
-- name: m_productionline_id
-  type: numeric
-  label: M Productionline Id
-- name: m_production_id
-  type: numeric
-  label: M Production Id
-- name: c_projectissue_id
-  type: numeric
-  label: C Projectissue Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: search_order_id
-  type: numeric
-  label: Search Order Id
-- name: search_invoice_id
-  type: numeric
-  label: Search Invoice Id
-- name: search_inout_id
-  type: numeric
-  label: Search Inout Id
-- name: t_transaction_uu
-  type: text
-  label: T Transaction Uu
+entities:
+  t_transaction:
+    table: t_transaction
+    key: ad_pinstance_id
+    displayName: T_TRANSACTION
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      m_transaction_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      movementtype: {type: string}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      movementdate: {type: string}
+      movementqty: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      m_inout_id: {type: decimal}
+      m_movementline_id: {type: decimal}
+      m_movement_id: {type: decimal}
+      m_inventoryline_id: {type: decimal}
+      m_inventory_id: {type: decimal}
+      m_productionline_id: {type: decimal}
+      m_production_id: {type: decimal}
+      c_projectissue_id: {type: decimal}
+      c_project_id: {type: decimal}
+      search_order_id: {type: decimal}
+      search_invoice_id: {type: decimal}
+      search_inout_id: {type: decimal}
+      t_transaction_uu: {type: string}

@@ -1,55 +1,23 @@
-name: CM_CONTAINER_TRL
-tableName: cm_container_trl
-primaryKey: cm_container_id
-fields:
-- name: cm_container_id
-  type: numeric
-  label: Cm Container Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: title
-  type: text
-  label: Title
-- name: meta_description
-  type: text
-  label: Meta Description
-- name: meta_keywords
-  type: text
-  label: Meta Keywords
-- name: structurexml
-  type: text
-  label: Structurexml
-- name: containerxml
-  type: text
-  label: Containerxml
-- name: cm_container_trl_uu
-  type: text
-  label: Cm Container Trl Uu
+entities:
+  cm_container_trl:
+    table: cm_container_trl
+    key: cm_container_id
+    displayName: CM_CONTAINER_TRL
+    columns:
+      cm_container_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      istranslated: {type: string}
+      name: {type: string}
+      title: {type: string}
+      meta_description: {type: string}
+      meta_keywords: {type: string}
+      structurexml: {type: string}
+      containerxml: {type: string}
+      cm_container_trl_uu: {type: string}

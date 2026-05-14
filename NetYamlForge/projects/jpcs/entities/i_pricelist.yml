@@ -1,106 +1,40 @@
-name: I_PRICELIST
-tableName: i_pricelist
-primaryKey: i_pricelist_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: bpartner_value
-  type: text
-  label: Bpartner Value
-- name: breakvalue
-  type: numeric
-  label: Breakvalue
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: description
-  type: text
-  label: Description
-- name: enforcepricelimit
-  type: text
-  label: Enforcepricelimit
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_pricelist_id
-  type: numeric
-  label: I Pricelist Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: iso_code
-  type: text
-  label: Iso Code
-- name: issopricelist
-  type: text
-  label: Issopricelist
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: name
-  type: text
-  label: Name
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: priceprecision
-  type: numeric
-  label: Priceprecision
-- name: pricestd
-  type: numeric
-  label: Pricestd
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: productvalue
-  type: text
-  label: Productvalue
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: x12de355
-  type: text
-  label: X12De355
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: m_pricelist_version_id
-  type: numeric
-  label: M Pricelist Version Id
-- name: i_pricelist_uu
-  type: text
-  label: I Pricelist Uu
+entities:
+  i_pricelist:
+    table: i_pricelist
+    key: i_pricelist_id
+    displayName: I_PRICELIST
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      bpartner_value: {type: string}
+      breakvalue: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      c_uom_id: {type: decimal}
+      description: {type: string}
+      enforcepricelimit: {type: string}
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      i_pricelist_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      iso_code: {type: string}
+      issopricelist: {type: string}
+      istaxincluded: {type: string}
+      m_product_id: {type: decimal}
+      name: {type: string}
+      pricelimit: {type: decimal}
+      pricelist: {type: decimal}
+      priceprecision: {type: decimal}
+      pricestd: {type: decimal}
+      processed: {type: string}
+      processing: {type: string}
+      productvalue: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      x12de355: {type: string}
+      m_pricelist_id: {type: decimal}
+      m_pricelist_version_id: {type: decimal}
+      i_pricelist_uu: {type: string}

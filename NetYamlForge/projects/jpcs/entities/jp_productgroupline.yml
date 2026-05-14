@@ -1,40 +1,18 @@
-name: JP_PRODUCTGROUPLINE
-tableName: jp_productgroupline
-primaryKey: jp_productgroupline_id
-fields:
-- name: jp_productgroupline_id
-  type: numeric
-  label: Jp Productgroupline Id
-- name: jp_productgroupline_uu
-  type: text
-  label: Jp Productgroupline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_productgroup_id
-  type: numeric
-  label: Jp Productgroup Id
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
+entities:
+  jp_productgroupline:
+    table: jp_productgroupline
+    key: jp_productgroupline_id
+    displayName: JP_PRODUCTGROUPLINE
+    columns:
+      jp_productgroupline_id: {type: decimal, identity: true}
+      jp_productgroupline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_productgroup_id: {type: decimal}
+      description: {type: string}
+      m_product_id: {type: decimal}

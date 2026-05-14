@@ -1,52 +1,22 @@
-name: JP_GLJOURNALTAX
-tableName: jp_gljournaltax
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_taxprovider_id
-  type: numeric
-  label: C Taxprovider Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: gl_journal_id
-  type: numeric
-  label: Gl Journal Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: jp_gljournaltax_uu
-  type: text
-  label: Jp Gljournaltax Uu
-- name: jp_sopotype
-  type: text
-  label: Jp Sopotype
-- name: processed
-  type: text
-  label: Processed
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_gljournaltax:
+    table: jp_gljournaltax
+    key: ad_client_id
+    displayName: JP_GLJOURNALTAX
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      c_taxprovider_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      gl_journal_id: {type: decimal}
+      isactive: {type: string}
+      istaxincluded: {type: string}
+      jp_gljournaltax_uu: {type: string}
+      jp_sopotype: {type: string}
+      processed: {type: string}
+      taxamt: {type: decimal}
+      taxbaseamt: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}

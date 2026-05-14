@@ -1,49 +1,21 @@
-name: CM_CONTAINER_ELEMENT
-tableName: cm_container_element
-primaryKey: cm_container_element_id
-fields:
-- name: cm_container_element_id
-  type: numeric
-  label: Cm Container Element Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: cm_container_id
-  type: numeric
-  label: Cm Container Id
-- name: contenthtml
-  type: text
-  label: Contenthtml
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: cm_container_element_uu
-  type: text
-  label: Cm Container Element Uu
+entities:
+  cm_container_element:
+    table: cm_container_element
+    key: cm_container_element_id
+    displayName: CM_CONTAINER_ELEMENT
+    columns:
+      cm_container_element_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      cm_container_id: {type: decimal}
+      contenthtml: {type: string}
+      isvalid: {type: string}
+      cm_container_element_uu: {type: string}

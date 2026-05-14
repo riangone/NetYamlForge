@@ -1,46 +1,20 @@
-name: A_DEPRECIATION_TABLE_DETAIL
-tableName: a_depreciation_table_detail
-primaryKey: a_depreciation_table_detail_id
-fields:
-- name: a_depreciation_table_detail_id
-  type: numeric
-  label: A Depreciation Table Detail Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_period
-  type: numeric
-  label: A Period
-- name: created
-  type: text
-  label: Created
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: processed
-  type: text
-  label: Processed
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: a_table_rate_type
-  type: text
-  label: A Table Rate Type
-- name: a_depreciation_rate
-  type: numeric
-  label: A Depreciation Rate
-- name: a_depreciation_table_code
-  type: text
-  label: A Depreciation Table Code
-- name: a_depreciation_table_detail_uu
-  type: text
-  label: A Depreciation Table Detail Uu
+entities:
+  a_depreciation_table_detail:
+    table: a_depreciation_table_detail
+    key: a_depreciation_table_detail_id
+    displayName: A_DEPRECIATION_TABLE_DETAIL
+    columns:
+      a_depreciation_table_detail_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_period: {type: decimal}
+      created: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      processed: {type: string}
+      createdby: {type: decimal}
+      a_table_rate_type: {type: string}
+      a_depreciation_rate: {type: decimal}
+      a_depreciation_table_code: {type: string}
+      a_depreciation_table_detail_uu: {type: string}

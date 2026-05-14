@@ -1,172 +1,62 @@
-name: AD_ROLE
-tableName: ad_role
-primaryKey: ad_role_id
-fields:
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: name
-  type: text
-  label: Name
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: description
-  type: text
-  label: Description
-- name: userlevel
-  type: text
-  label: Userlevel
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: amtapproval
-  type: numeric
-  label: Amtapproval
-- name: ad_tree_menu_id
-  type: numeric
-  label: Ad Tree Menu Id
-- name: ismanual
-  type: text
-  label: Ismanual
-- name: isshowacct
-  type: text
-  label: Isshowacct
-- name: ispersonallock
-  type: text
-  label: Ispersonallock
-- name: ispersonalaccess
-  type: text
-  label: Ispersonalaccess
-- name: iscanexport
-  type: text
-  label: Iscanexport
-- name: iscanreport
-  type: text
-  label: Iscanreport
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: iscanapproveowndoc
-  type: text
-  label: Iscanapproveowndoc
-- name: isaccessallorgs
-  type: text
-  label: Isaccessallorgs
-- name: ischangelog
-  type: text
-  label: Ischangelog
-- name: preferencetype
-  type: text
-  label: Preferencetype
-- name: overwritepricelimit
-  type: text
-  label: Overwritepricelimit
-- name: isuseuserorgaccess
-  type: text
-  label: Isuseuserorgaccess
-- name: ad_tree_org_id
-  type: numeric
-  label: Ad Tree Org Id
-- name: confirmqueryrecords
-  type: numeric
-  label: Confirmqueryrecords
-- name: maxqueryrecords
-  type: numeric
-  label: Maxqueryrecords
-- name: connectionprofile
-  type: text
-  label: Connectionprofile
-- name: allow_info_account
-  type: text
-  label: Allow Info Account
-- name: allow_info_asset
-  type: text
-  label: Allow Info Asset
-- name: allow_info_bpartner
-  type: text
-  label: Allow Info Bpartner
-- name: allow_info_cashjournal
-  type: text
-  label: Allow Info Cashjournal
-- name: allow_info_inout
-  type: text
-  label: Allow Info Inout
-- name: allow_info_invoice
-  type: text
-  label: Allow Info Invoice
-- name: allow_info_order
-  type: text
-  label: Allow Info Order
-- name: allow_info_payment
-  type: text
-  label: Allow Info Payment
-- name: allow_info_product
-  type: text
-  label: Allow Info Product
-- name: allow_info_resource
-  type: text
-  label: Allow Info Resource
-- name: allow_info_schedule
-  type: text
-  label: Allow Info Schedule
-- name: userdiscount
-  type: numeric
-  label: Userdiscount
-- name: allow_info_mrp
-  type: text
-  label: Allow Info Mrp
-- name: allow_info_crp
-  type: text
-  label: Allow Info Crp
-- name: isdiscountuptolimitprice
-  type: text
-  label: Isdiscountuptolimitprice
-- name: isdiscountallowedontotal
-  type: text
-  label: Isdiscountallowedontotal
-- name: amtapprovalaccum
-  type: numeric
-  label: Amtapprovalaccum
-- name: daysapprovalaccum
-  type: numeric
-  label: Daysapprovalaccum
-- name: ad_role_uu
-  type: text
-  label: Ad Role Uu
-- name: ismenuautoexpand
-  type: text
-  label: Ismenuautoexpand
-- name: ismasterrole
-  type: text
-  label: Ismasterrole
-- name: isaccessadvanced
-  type: text
-  label: Isaccessadvanced
-- name: roletype
-  type: text
-  label: Roletype
-- name: isclientadministrator
-  type: text
-  label: Isclientadministrator
-- name: predefinedcontextvariables
-  type: text
-  label: Predefinedcontextvariables
+entities:
+  ad_role:
+    table: ad_role
+    key: ad_role_id
+    displayName: AD_ROLE
+    columns:
+      ad_role_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      name: {type: string}
+      updatedby: {type: decimal}
+      description: {type: string}
+      userlevel: {type: string}
+      c_currency_id: {type: decimal}
+      amtapproval: {type: decimal}
+      ad_tree_menu_id: {type: decimal}
+      ismanual: {type: string}
+      isshowacct: {type: string}
+      ispersonallock: {type: string}
+      ispersonalaccess: {type: string}
+      iscanexport: {type: string}
+      iscanreport: {type: string}
+      supervisor_id: {type: decimal}
+      iscanapproveowndoc: {type: string}
+      isaccessallorgs: {type: string}
+      ischangelog: {type: string}
+      preferencetype: {type: string}
+      overwritepricelimit: {type: string}
+      isuseuserorgaccess: {type: string}
+      ad_tree_org_id: {type: decimal}
+      confirmqueryrecords: {type: decimal}
+      maxqueryrecords: {type: decimal}
+      connectionprofile: {type: string}
+      allow_info_account: {type: string}
+      allow_info_asset: {type: string}
+      allow_info_bpartner: {type: string}
+      allow_info_cashjournal: {type: string}
+      allow_info_inout: {type: string}
+      allow_info_invoice: {type: string}
+      allow_info_order: {type: string}
+      allow_info_payment: {type: string}
+      allow_info_product: {type: string}
+      allow_info_resource: {type: string}
+      allow_info_schedule: {type: string}
+      userdiscount: {type: decimal}
+      allow_info_mrp: {type: string}
+      allow_info_crp: {type: string}
+      isdiscountuptolimitprice: {type: string}
+      isdiscountallowedontotal: {type: string}
+      amtapprovalaccum: {type: decimal}
+      daysapprovalaccum: {type: decimal}
+      ad_role_uu: {type: string}
+      ismenuautoexpand: {type: string}
+      ismasterrole: {type: string}
+      isaccessadvanced: {type: string}
+      roletype: {type: string}
+      isclientadministrator: {type: string}
+      predefinedcontextvariables: {type: string}

@@ -1,121 +1,45 @@
-name: GL_DISTRIBUTIONLINE
-tableName: gl_distributionline
-primaryKey: gl_distributionline_id
-fields:
-- name: gl_distributionline_id
-  type: numeric
-  label: Gl Distributionline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: gl_distribution_id
-  type: numeric
-  label: Gl Distribution Id
-- name: line
-  type: numeric
-  label: Line
-- name: percent
-  type: numeric
-  label: Percent
-- name: description
-  type: text
-  label: Description
-- name: overwriteorg
-  type: text
-  label: Overwriteorg
-- name: org_id
-  type: numeric
-  label: Org Id
-- name: overwriteacct
-  type: text
-  label: Overwriteacct
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: overwriteproduct
-  type: text
-  label: Overwriteproduct
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: overwritebpartner
-  type: text
-  label: Overwritebpartner
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: overwriteproject
-  type: text
-  label: Overwriteproject
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: overwritecampaign
-  type: text
-  label: Overwritecampaign
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: overwriteactivity
-  type: text
-  label: Overwriteactivity
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: overwritesalesregion
-  type: text
-  label: Overwritesalesregion
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: overwriteorgtrx
-  type: text
-  label: Overwriteorgtrx
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: overwritelocto
-  type: text
-  label: Overwritelocto
-- name: c_locto_id
-  type: numeric
-  label: C Locto Id
-- name: overwritelocfrom
-  type: text
-  label: Overwritelocfrom
-- name: c_locfrom_id
-  type: numeric
-  label: C Locfrom Id
-- name: overwriteuser1
-  type: text
-  label: Overwriteuser1
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: overwriteuser2
-  type: text
-  label: Overwriteuser2
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: gl_distributionline_uu
-  type: text
-  label: Gl Distributionline Uu
+entities:
+  gl_distributionline:
+    table: gl_distributionline
+    key: gl_distributionline_id
+    displayName: GL_DISTRIBUTIONLINE
+    columns:
+      gl_distributionline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      gl_distribution_id: {type: decimal}
+      line: {type: decimal}
+      percent: {type: decimal}
+      description: {type: string}
+      overwriteorg: {type: string}
+      org_id: {type: decimal}
+      overwriteacct: {type: string}
+      account_id: {type: decimal}
+      overwriteproduct: {type: string}
+      m_product_id: {type: decimal}
+      overwritebpartner: {type: string}
+      c_bpartner_id: {type: decimal}
+      overwriteproject: {type: string}
+      c_project_id: {type: decimal}
+      overwritecampaign: {type: string}
+      c_campaign_id: {type: decimal}
+      overwriteactivity: {type: string}
+      c_activity_id: {type: decimal}
+      overwritesalesregion: {type: string}
+      c_salesregion_id: {type: decimal}
+      overwriteorgtrx: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      overwritelocto: {type: string}
+      c_locto_id: {type: decimal}
+      overwritelocfrom: {type: string}
+      c_locfrom_id: {type: decimal}
+      overwriteuser1: {type: string}
+      user1_id: {type: decimal}
+      overwriteuser2: {type: string}
+      user2_id: {type: decimal}
+      gl_distributionline_uu: {type: string}

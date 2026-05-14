@@ -1,133 +1,49 @@
-name: DD_ORDERLINE
-tableName: dd_orderline
-primaryKey: dd_orderline_id
-fields:
-- name: line
-  type: numeric
-  label: Line
-- name: qtyintransit
-  type: numeric
-  label: Qtyintransit
-- name: qtyordered
-  type: numeric
-  label: Qtyordered
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: dd_order_id
-  type: numeric
-  label: Dd Order Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: dd_orderline_id
-  type: numeric
-  label: Dd Orderline Id
-- name: datedelivered
-  type: text
-  label: Datedelivered
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: description
-  type: text
-  label: Description
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: m_attributesetinstanceto_id
-  type: numeric
-  label: M Attributesetinstanceto Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: m_locatorto_id
-  type: numeric
-  label: M Locatorto Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: pickedqty
-  type: numeric
-  label: Pickedqty
-- name: processed
-  type: text
-  label: Processed
-- name: qtydelivered
-  type: numeric
-  label: Qtydelivered
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: qtyreserved
-  type: numeric
-  label: Qtyreserved
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: dd_orderline_uu
-  type: text
-  label: Dd Orderline Uu
+entities:
+  dd_orderline:
+    table: dd_orderline
+    key: dd_orderline_id
+    displayName: DD_ORDERLINE
+    columns:
+      line: {type: decimal}
+      qtyintransit: {type: decimal}
+      qtyordered: {type: decimal}
+      m_product_id: {type: decimal}
+      dd_order_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      confirmedqty: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      dd_orderline_id: {type: decimal, identity: true}
+      datedelivered: {type: string}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      description: {type: string}
+      freightamt: {type: decimal}
+      isactive: {type: string}
+      isdescription: {type: string}
+      isinvoiced: {type: string}
+      linenetamt: {type: decimal}
+      m_attributesetinstanceto_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      m_locatorto_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      pickedqty: {type: decimal}
+      processed: {type: string}
+      qtydelivered: {type: decimal}
+      qtyentered: {type: decimal}
+      qtyreserved: {type: decimal}
+      scrappedqty: {type: decimal}
+      targetqty: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      user1_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      m_shipper_id: {type: decimal}
+      dd_orderline_uu: {type: string}

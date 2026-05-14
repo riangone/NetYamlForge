@@ -1,70 +1,28 @@
-name: JP_SIMPLEINPUTWINDOW
-tableName: jp_simpleinputwindow
-primaryKey: jp_simpleinputwindow_id
-fields:
-- name: jp_simpleinputwindow_id
-  type: numeric
-  label: Jp Simpleinputwindow Id
-- name: jp_simpleinputwindow_uu
-  type: text
-  label: Jp Simpleinputwindow Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: jp_pagesize
-  type: numeric
-  label: Jp Pagesize
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: jp_joinclause
-  type: text
-  label: Jp Joinclause
-- name: jp_frozenfield
-  type: numeric
-  label: Jp Frozenfield
-- name: orderbyclause
-  type: text
-  label: Orderbyclause
-- name: isdeleteable
-  type: text
-  label: Isdeleteable
-- name: jp_tabfield_id
-  type: numeric
-  label: Jp Tabfield Id
-- name: issummarized
-  type: text
-  label: Issummarized
+entities:
+  jp_simpleinputwindow:
+    table: jp_simpleinputwindow
+    key: jp_simpleinputwindow_id
+    displayName: JP_SIMPLEINPUTWINDOW
+    columns:
+      jp_simpleinputwindow_id: {type: decimal, identity: true}
+      jp_simpleinputwindow_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      ad_window_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      jp_pagesize: {type: decimal}
+      whereclause: {type: string}
+      jp_joinclause: {type: string}
+      jp_frozenfield: {type: decimal}
+      orderbyclause: {type: string}
+      isdeleteable: {type: string}
+      jp_tabfield_id: {type: decimal}
+      issummarized: {type: string}

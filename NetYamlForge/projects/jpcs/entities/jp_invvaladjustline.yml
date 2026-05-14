@@ -1,100 +1,38 @@
-name: JP_INVVALADJUSTLINE
-tableName: jp_invvaladjustline
-primaryKey: jp_invvaladjustline_id
-fields:
-- name: jp_invvaladjustline_id
-  type: numeric
-  label: Jp Invvaladjustline Id
-- name: jp_invvaladjustline_uu
-  type: text
-  label: Jp Invvaladjustline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_invvaladjust_id
-  type: numeric
-  label: Jp Invvaladjust Id
-- name: line
-  type: numeric
-  label: Line
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: costingmethod
-  type: text
-  label: Costingmethod
-- name: costinglevel
-  type: text
-  label: Costinglevel
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
-- name: jp_invvalamt
-  type: numeric
-  label: Jp Invvalamt
-- name: jp_invvaltotalamt
-  type: numeric
-  label: Jp Invvaltotalamt
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: amtacctbalance
-  type: numeric
-  label: Amtacctbalance
-- name: differenceamt
-  type: numeric
-  label: Differenceamt
-- name: jp_invvalcalline_id
-  type: numeric
-  label: Jp Invvalcalline Id
-- name: qtyonhand
-  type: numeric
-  label: Qtyonhand
-- name: differenceqty
-  type: numeric
-  label: Differenceqty
-- name: jp_journallinedr_id
-  type: numeric
-  label: Jp Journallinedr Id
-- name: jp_journallinecr_id
-  type: numeric
-  label: Jp Journallinecr Id
-- name: isconfirmed
-  type: text
-  label: Isconfirmed
-- name: description
-  type: text
-  label: Description
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
+entities:
+  jp_invvaladjustline:
+    table: jp_invvaladjustline
+    key: jp_invvaladjustline_id
+    displayName: JP_INVVALADJUSTLINE
+    columns:
+      jp_invvaladjustline_id: {type: decimal, identity: true}
+      jp_invvaladjustline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_invvaladjust_id: {type: decimal}
+      line: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      costingmethod: {type: string}
+      costinglevel: {type: string}
+      account_id: {type: decimal}
+      qtybook: {type: decimal}
+      jp_invvalamt: {type: decimal}
+      jp_invvaltotalamt: {type: decimal}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      amtacctbalance: {type: decimal}
+      differenceamt: {type: decimal}
+      jp_invvalcalline_id: {type: decimal}
+      qtyonhand: {type: decimal}
+      differenceqty: {type: decimal}
+      jp_journallinedr_id: {type: decimal}
+      jp_journallinecr_id: {type: decimal}
+      isconfirmed: {type: string}
+      description: {type: string}
+      ad_orgtrx_id: {type: decimal}

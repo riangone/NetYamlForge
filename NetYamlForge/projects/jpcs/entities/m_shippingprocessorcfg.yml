@@ -1,61 +1,25 @@
-name: M_SHIPPINGPROCESSORCFG
-tableName: m_shippingprocessorcfg
-primaryKey: m_shippingprocessorcfg_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hostaddress
-  type: text
-  label: Hostaddress
-- name: hostport
-  type: numeric
-  label: Hostport
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: proxyaddress
-  type: text
-  label: Proxyaddress
-- name: proxylogon
-  type: text
-  label: Proxylogon
-- name: proxypassword
-  type: text
-  label: Proxypassword
-- name: proxyport
-  type: numeric
-  label: Proxyport
-- name: servicepath
-  type: text
-  label: Servicepath
-- name: shippingprocessorclass
-  type: text
-  label: Shippingprocessorclass
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_shippingprocessorcfg_id
-  type: numeric
-  label: M Shippingprocessorcfg Id
-- name: m_shippingprocessorcfg_uu
-  type: text
-  label: M Shippingprocessorcfg Uu
+entities:
+  m_shippingprocessorcfg:
+    table: m_shippingprocessorcfg
+    key: m_shippingprocessorcfg_id
+    displayName: M_SHIPPINGPROCESSORCFG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hostaddress: {type: string}
+      hostport: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      proxyaddress: {type: string}
+      proxylogon: {type: string}
+      proxypassword: {type: string}
+      proxyport: {type: decimal}
+      servicepath: {type: string}
+      shippingprocessorclass: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_shippingprocessorcfg_id: {type: decimal, identity: true}
+      m_shippingprocessorcfg_uu: {type: string}

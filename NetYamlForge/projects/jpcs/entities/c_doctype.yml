@@ -1,175 +1,63 @@
-name: C_DOCTYPE
-tableName: c_doctype
-primaryKey: c_doctype_id
-fields:
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: printname
-  type: text
-  label: Printname
-- name: description
-  type: text
-  label: Description
-- name: docbasetype
-  type: text
-  label: Docbasetype
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: docsubtypeso
-  type: text
-  label: Docsubtypeso
-- name: hasproforma
-  type: text
-  label: Hasproforma
-- name: c_doctypeproforma_id
-  type: numeric
-  label: C Doctypeproforma Id
-- name: c_doctypeshipment_id
-  type: numeric
-  label: C Doctypeshipment Id
-- name: c_doctypeinvoice_id
-  type: numeric
-  label: C Doctypeinvoice Id
-- name: isdocnocontrolled
-  type: text
-  label: Isdocnocontrolled
-- name: docnosequence_id
-  type: numeric
-  label: Docnosequence Id
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: hascharges
-  type: text
-  label: Hascharges
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: documentcopies
-  type: numeric
-  label: Documentcopies
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: isdefaultcounterdoc
-  type: text
-  label: Isdefaultcounterdoc
-- name: isshipconfirm
-  type: text
-  label: Isshipconfirm
-- name: ispickqaconfirm
-  type: text
-  label: Ispickqaconfirm
-- name: isintransit
-  type: text
-  label: Isintransit
-- name: issplitwhendifference
-  type: text
-  label: Issplitwhendifference
-- name: c_doctypedifference_id
-  type: numeric
-  label: C Doctypedifference Id
-- name: iscreatecounter
-  type: text
-  label: Iscreatecounter
-- name: isindexed
-  type: text
-  label: Isindexed
-- name: isoverwriteseqoncomplete
-  type: text
-  label: Isoverwriteseqoncomplete
-- name: definitesequence_id
-  type: numeric
-  label: Definitesequence Id
-- name: isoverwritedateoncomplete
-  type: text
-  label: Isoverwritedateoncomplete
-- name: ispreparesplitdocument
-  type: text
-  label: Ispreparesplitdocument
-- name: c_doctype_uu
-  type: text
-  label: C Doctype Uu
-- name: ischargeorproductmandatory
-  type: text
-  label: Ischargeorproductmandatory
-- name: docsubtypeinv
-  type: text
-  label: Docsubtypeinv
-- name: isdisplaydoctypejp
-  type: text
-  label: Isdisplaydoctypejp
-- name: isinoutcompletejp
-  type: text
-  label: Isinoutcompletejp
-- name: isreconcilecompletejp
-  type: text
-  label: Isreconcilecompletejp
-- name: iscompleteafterreconciledjp
-  type: text
-  label: Iscompleteafterreconciledjp
-- name: iscreateinvoicejp
-  type: text
-  label: Iscreateinvoicejp
-- name: isinspectioninvoicejp
-  type: text
-  label: Isinspectioninvoicejp
-- name: isholidaynotinspectionjp
-  type: text
-  label: Isholidaynotinspectionjp
-- name: jp_doctypemm_id
-  type: numeric
-  label: Jp Doctypemm Id
-- name: jp_doctyperecognition_id
-  type: numeric
-  label: Jp Doctyperecognition Id
-- name: jp_contractpsdoctype_id
-  type: numeric
-  label: Jp Contractpsdoctype Id
-- name: jp_doctypegljournal_id
-  type: numeric
-  label: Jp Doctypegljournal Id
-- name: isnopricelistcheck
-  type: text
-  label: Isnopricelistcheck
-- name: jp_productiondoctype_id
-  type: numeric
-  label: Jp Productiondoctype Id
-- name: isautogenerateinout
-  type: text
-  label: Isautogenerateinout
-- name: isautogenerateinvoice
-  type: text
-  label: Isautogenerateinvoice
-- name: iscanbereactivated
-  type: text
-  label: Iscanbereactivated
+entities:
+  c_doctype:
+    table: c_doctype
+    key: c_doctype_id
+    displayName: C_DOCTYPE
+    columns:
+      c_doctype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      printname: {type: string}
+      description: {type: string}
+      docbasetype: {type: string}
+      issotrx: {type: string}
+      docsubtypeso: {type: string}
+      hasproforma: {type: string}
+      c_doctypeproforma_id: {type: decimal}
+      c_doctypeshipment_id: {type: decimal}
+      c_doctypeinvoice_id: {type: decimal}
+      isdocnocontrolled: {type: string}
+      docnosequence_id: {type: decimal}
+      gl_category_id: {type: decimal}
+      hascharges: {type: string}
+      documentnote: {type: string}
+      isdefault: {type: string}
+      documentcopies: {type: decimal}
+      ad_printformat_id: {type: decimal}
+      isdefaultcounterdoc: {type: string}
+      isshipconfirm: {type: string}
+      ispickqaconfirm: {type: string}
+      isintransit: {type: string}
+      issplitwhendifference: {type: string}
+      c_doctypedifference_id: {type: decimal}
+      iscreatecounter: {type: string}
+      isindexed: {type: string}
+      isoverwriteseqoncomplete: {type: string}
+      definitesequence_id: {type: decimal}
+      isoverwritedateoncomplete: {type: string}
+      ispreparesplitdocument: {type: string}
+      c_doctype_uu: {type: string}
+      ischargeorproductmandatory: {type: string}
+      docsubtypeinv: {type: string}
+      isdisplaydoctypejp: {type: string}
+      isinoutcompletejp: {type: string}
+      isreconcilecompletejp: {type: string}
+      iscompleteafterreconciledjp: {type: string}
+      iscreateinvoicejp: {type: string}
+      isinspectioninvoicejp: {type: string}
+      isholidaynotinspectionjp: {type: string}
+      jp_doctypemm_id: {type: decimal}
+      jp_doctyperecognition_id: {type: decimal}
+      jp_contractpsdoctype_id: {type: decimal}
+      jp_doctypegljournal_id: {type: decimal}
+      isnopricelistcheck: {type: string}
+      jp_productiondoctype_id: {type: decimal}
+      isautogenerateinout: {type: string}
+      isautogenerateinvoice: {type: string}
+      iscanbereactivated: {type: string}

@@ -1,61 +1,25 @@
-name: M_LOCATOR
-tableName: m_locator
-primaryKey: m_locator_id
-fields:
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: priorityno
-  type: numeric
-  label: Priorityno
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: x
-  type: text
-  label: X
-- name: y
-  type: text
-  label: Y
-- name: z
-  type: text
-  label: Z
-- name: m_locator_uu
-  type: text
-  label: M Locator Uu
-- name: m_locatortype_id
-  type: numeric
-  label: M Locatortype Id
-- name: iscommonlocatorjp
-  type: text
-  label: Iscommonlocatorjp
-- name: jp_physicalwarehouse_id
-  type: numeric
-  label: Jp Physicalwarehouse Id
+entities:
+  m_locator:
+    table: m_locator
+    key: m_locator_id
+    displayName: M_LOCATOR
+    columns:
+      m_locator_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      m_warehouse_id: {type: decimal}
+      priorityno: {type: decimal}
+      isdefault: {type: string}
+      x: {type: string}
+      y: {type: string}
+      z: {type: string}
+      m_locator_uu: {type: string}
+      m_locatortype_id: {type: decimal}
+      iscommonlocatorjp: {type: string}
+      jp_physicalwarehouse_id: {type: decimal}

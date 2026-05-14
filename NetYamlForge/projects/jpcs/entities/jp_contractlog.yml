@@ -1,43 +1,19 @@
-name: JP_CONTRACTLOG
-tableName: jp_contractlog
-primaryKey: jp_contractlog_id
-fields:
-- name: jp_contractlog_id
-  type: numeric
-  label: Jp Contractlog Id
-- name: jp_contractlog_uu
-  type: text
-  label: Jp Contractlog Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: description
-  type: text
-  label: Description
-- name: jp_contractprocesstracelevel
-  type: text
-  label: Jp Contractprocesstracelevel
-- name: jp_contractprocessunit
-  type: text
-  label: Jp Contractprocessunit
+entities:
+  jp_contractlog:
+    table: jp_contractlog
+    key: jp_contractlog_id
+    displayName: JP_CONTRACTLOG
+    columns:
+      jp_contractlog_id: {type: decimal, identity: true}
+      jp_contractlog_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      description: {type: string}
+      jp_contractprocesstracelevel: {type: string}
+      jp_contractprocessunit: {type: string}

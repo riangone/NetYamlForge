@@ -1,46 +1,20 @@
-name: W_BASKET
-tableName: w_basket
-primaryKey: w_basket_id
-fields:
-- name: w_basket_id
-  type: numeric
-  label: W Basket Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: session_id
-  type: text
-  label: Session Id
-- name: email
-  type: text
-  label: Email
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: w_basket_uu
-  type: text
-  label: W Basket Uu
+entities:
+  w_basket:
+    table: w_basket
+    key: w_basket_id
+    displayName: W_BASKET
+    columns:
+      w_basket_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      session_id: {type: string}
+      email: {type: string}
+      c_bpartner_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      w_basket_uu: {type: string}

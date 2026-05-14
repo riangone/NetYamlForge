@@ -1,52 +1,22 @@
-name: AD_LDAPPROCESSORLOG
-tableName: ad_ldapprocessorlog
-primaryKey: ad_ldapprocessorlog_id
-fields:
-- name: ad_ldapprocessor_id
-  type: numeric
-  label: Ad Ldapprocessor Id
-- name: ad_ldapprocessorlog_id
-  type: numeric
-  label: Ad Ldapprocessorlog Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: summary
-  type: text
-  label: Summary
-- name: iserror
-  type: text
-  label: Iserror
-- name: reference
-  type: text
-  label: Reference
-- name: description
-  type: text
-  label: Description
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: binarydata
-  type: text
-  label: Binarydata
-- name: ad_ldapprocessorlog_uu
-  type: text
-  label: Ad Ldapprocessorlog Uu
+entities:
+  ad_ldapprocessorlog:
+    table: ad_ldapprocessorlog
+    key: ad_ldapprocessorlog_id
+    displayName: AD_LDAPPROCESSORLOG
+    columns:
+      ad_ldapprocessor_id: {type: decimal}
+      ad_ldapprocessorlog_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      summary: {type: string}
+      iserror: {type: string}
+      reference: {type: string}
+      description: {type: string}
+      textmsg: {type: string}
+      binarydata: {type: string}
+      ad_ldapprocessorlog_uu: {type: string}

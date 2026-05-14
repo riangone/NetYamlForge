@@ -1,37 +1,17 @@
-name: WS_WEBSERVICETYPEACCESS
-tableName: ws_webservicetypeaccess
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isreadwrite
-  type: text
-  label: Isreadwrite
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ws_webservicetype_id
-  type: numeric
-  label: Ws Webservicetype Id
-- name: ws_webservicetypeaccess_uu
-  type: text
-  label: Ws Webservicetypeaccess Uu
+entities:
+  ws_webservicetypeaccess:
+    table: ws_webservicetypeaccess
+    key: ad_client_id
+    displayName: WS_WEBSERVICETYPEACCESS
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isreadwrite: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ws_webservicetype_id: {type: decimal}
+      ws_webservicetypeaccess_uu: {type: string}

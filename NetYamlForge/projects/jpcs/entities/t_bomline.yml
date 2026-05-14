@@ -1,94 +1,36 @@
-name: T_BOMLINE
-tableName: t_bomline
-primaryKey: t_bomline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: levelno
-  type: numeric
-  label: Levelno
-- name: levels
-  type: text
-  label: Levels
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: pp_product_bomline_id
-  type: numeric
-  label: Pp Product Bomline Id
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: t_bomline_id
-  type: numeric
-  label: T Bomline Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: sel_product_id
-  type: numeric
-  label: Sel Product Id
-- name: implosion
-  type: text
-  label: Implosion
-- name: m_costelement_id
-  type: numeric
-  label: M Costelement Id
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: currentcostpricell
-  type: numeric
-  label: Currentcostpricell
-- name: qtybom
-  type: numeric
-  label: Qtybom
-- name: cost
-  type: text
-  label: Cost
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: costingmethod
-  type: text
-  label: Costingmethod
-- name: m_costtype_id
-  type: numeric
-  label: M Costtype Id
-- name: futurecostprice
-  type: numeric
-  label: Futurecostprice
-- name: futurecostpricell
-  type: numeric
-  label: Futurecostpricell
-- name: iscostfrozen
-  type: text
-  label: Iscostfrozen
-- name: coststandard
-  type: numeric
-  label: Coststandard
-- name: t_bomline_uu
-  type: text
-  label: T Bomline Uu
+entities:
+  t_bomline:
+    table: t_bomline
+    key: t_bomline_id
+    displayName: T_BOMLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      levelno: {type: decimal}
+      levels: {type: string}
+      m_product_id: {type: decimal}
+      pp_product_bomline_id: {type: decimal}
+      pp_product_bom_id: {type: decimal}
+      seqno: {type: decimal}
+      t_bomline_id: {type: decimal, identity: true}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      sel_product_id: {type: decimal}
+      implosion: {type: string}
+      m_costelement_id: {type: decimal}
+      currentcostprice: {type: decimal}
+      currentcostpricell: {type: decimal}
+      qtybom: {type: decimal}
+      cost: {type: string}
+      c_acctschema_id: {type: decimal}
+      costingmethod: {type: string}
+      m_costtype_id: {type: decimal}
+      futurecostprice: {type: decimal}
+      futurecostpricell: {type: decimal}
+      iscostfrozen: {type: string}
+      coststandard: {type: decimal}
+      t_bomline_uu: {type: string}

@@ -1,46 +1,20 @@
-name: A_DEPRECIATION_METHOD
-tableName: a_depreciation_method
-primaryKey: a_depreciation_method_id
-fields:
-- name: a_depreciation_method_id
-  type: numeric
-  label: A Depreciation Method Id
-- name: name
-  type: text
-  label: Name
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: created
-  type: text
-  label: Created
-- name: depreciationtype
-  type: text
-  label: Depreciationtype
-- name: isactive
-  type: text
-  label: Isactive
-- name: processed
-  type: text
-  label: Processed
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: text
-  type: text
-  label: Text
-- name: description
-  type: text
-  label: Description
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_depreciation_method_uu
-  type: text
-  label: A Depreciation Method Uu
+entities:
+  a_depreciation_method:
+    table: a_depreciation_method
+    key: a_depreciation_method_id
+    displayName: A_DEPRECIATION_METHOD
+    columns:
+      a_depreciation_method_id: {type: decimal, identity: true}
+      name: {type: string}
+      ad_client_id: {type: decimal}
+      created: {type: string}
+      depreciationtype: {type: string}
+      isactive: {type: string}
+      processed: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      text: {type: string}
+      description: {type: string}
+      createdby: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_depreciation_method_uu: {type: string}

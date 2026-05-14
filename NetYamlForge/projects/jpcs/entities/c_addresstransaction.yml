@@ -1,76 +1,30 @@
-name: C_ADDRESSTRANSACTION
-tableName: c_addresstransaction
-primaryKey: c_addresstransaction_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: address1
-  type: text
-  label: Address1
-- name: address2
-  type: text
-  label: Address2
-- name: address3
-  type: text
-  label: Address3
-- name: address4
-  type: text
-  label: Address4
-- name: c_addresstransaction_id
-  type: numeric
-  label: C Addresstransaction Id
-- name: c_addresstransaction_uu
-  type: text
-  label: C Addresstransaction Uu
-- name: c_addressvalidation_id
-  type: numeric
-  label: C Addressvalidation Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: city
-  type: text
-  label: City
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: postal
-  type: text
-  label: Postal
-- name: processed
-  type: text
-  label: Processed
-- name: region
-  type: text
-  label: Region
-- name: result
-  type: text
-  label: Result
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: country
-  type: text
-  label: Country
-- name: comments
-  type: text
-  label: Comments
-- name: address5
-  type: text
-  label: Address5
+entities:
+  c_addresstransaction:
+    table: c_addresstransaction
+    key: c_addresstransaction_id
+    displayName: C_ADDRESSTRANSACTION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      address1: {type: string}
+      address2: {type: string}
+      address3: {type: string}
+      address4: {type: string}
+      c_addresstransaction_id: {type: decimal, identity: true}
+      c_addresstransaction_uu: {type: string}
+      c_addressvalidation_id: {type: decimal}
+      c_location_id: {type: decimal}
+      city: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isvalid: {type: string}
+      postal: {type: string}
+      processed: {type: string}
+      region: {type: string}
+      result: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      country: {type: string}
+      comments: {type: string}
+      address5: {type: string}

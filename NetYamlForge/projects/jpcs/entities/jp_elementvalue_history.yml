@@ -1,46 +1,20 @@
-name: JP_ELEMENTVALUE_HISTORY
-tableName: jp_elementvalue_history
-primaryKey: jp_elementvalue_history_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_elementvalue_id
-  type: numeric
-  label: C Elementvalue Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_elementvalue_history_id
-  type: numeric
-  label: Jp Elementvalue History Id
-- name: jp_elementvalue_history_uu
-  type: text
-  label: Jp Elementvalue History Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_elementvalue_history:
+    table: jp_elementvalue_history
+    key: jp_elementvalue_history_id
+    displayName: JP_ELEMENTVALUE_HISTORY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_elementvalue_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datefrom: {type: string}
+      dateto: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      jp_elementvalue_history_id: {type: decimal, identity: true}
+      jp_elementvalue_history_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

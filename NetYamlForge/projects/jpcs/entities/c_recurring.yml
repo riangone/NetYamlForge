@@ -1,82 +1,32 @@
-name: C_RECURRING
-tableName: c_recurring
-primaryKey: c_recurring_id
-fields:
-- name: c_recurring_id
-  type: numeric
-  label: C Recurring Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: recurringtype
-  type: text
-  label: Recurringtype
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: gl_journalbatch_id
-  type: numeric
-  label: Gl Journalbatch Id
-- name: frequencytype
-  type: text
-  label: Frequencytype
-- name: runsmax
-  type: numeric
-  label: Runsmax
-- name: runsremaining
-  type: numeric
-  label: Runsremaining
-- name: datelastrun
-  type: text
-  label: Datelastrun
-- name: datenextrun
-  type: text
-  label: Datenextrun
-- name: processing
-  type: text
-  label: Processing
-- name: frequency
-  type: numeric
-  label: Frequency
-- name: c_recurring_uu
-  type: text
-  label: C Recurring Uu
-- name: c_recurringgroup_id
-  type: numeric
-  label: C Recurringgroup Id
+entities:
+  c_recurring:
+    table: c_recurring
+    key: c_recurring_id
+    displayName: C_RECURRING
+    columns:
+      c_recurring_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      recurringtype: {type: string}
+      c_order_id: {type: decimal}
+      c_invoice_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      c_project_id: {type: decimal}
+      gl_journalbatch_id: {type: decimal}
+      frequencytype: {type: string}
+      runsmax: {type: decimal}
+      runsremaining: {type: decimal}
+      datelastrun: {type: string}
+      datenextrun: {type: string}
+      processing: {type: string}
+      frequency: {type: decimal}
+      c_recurring_uu: {type: string}
+      c_recurringgroup_id: {type: decimal}

@@ -1,64 +1,26 @@
-name: I_CORPORATIONGROUPJP
-tableName: i_corporationgroupjp
-primaryKey: i_corporationgroupjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: jp_corporationgroup_id
-  type: numeric
-  label: Jp Corporationgroup Id
-- name: i_corporationgroupjp_id
-  type: numeric
-  label: I Corporationgroupjp Id
-- name: i_corporationgroupjp_uu
-  type: text
-  label: I Corporationgroupjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: description
-  type: text
-  label: Description
-- name: corporationvalue
-  type: text
-  label: Corporationvalue
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
+entities:
+  i_corporationgroupjp:
+    table: i_corporationgroupjp
+    key: i_corporationgroupjp_id
+    displayName: I_CORPORATIONGROUPJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      jp_corporationgroup_id: {type: decimal}
+      i_corporationgroupjp_id: {type: decimal, identity: true}
+      i_corporationgroupjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      description: {type: string}
+      corporationvalue: {type: string}
+      jp_corporation_id: {type: decimal}

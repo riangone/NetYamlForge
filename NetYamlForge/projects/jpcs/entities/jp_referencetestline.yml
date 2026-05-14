@@ -1,43 +1,19 @@
-name: JP_REFERENCETESTLINE
-tableName: jp_referencetestline
-primaryKey: jp_referencetestline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_referencetestline_id
-  type: numeric
-  label: Jp Referencetestline Id
-- name: jp_referencetestline_uu
-  type: text
-  label: Jp Referencetestline Uu
-- name: jp_referencetest_id
-  type: numeric
-  label: Jp Referencetest Id
-- name: line
-  type: numeric
-  label: Line
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_referencetestline:
+    table: jp_referencetestline
+    key: jp_referencetestline_id
+    displayName: JP_REFERENCETESTLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_referencetestline_id: {type: decimal, identity: true}
+      jp_referencetestline_uu: {type: string}
+      jp_referencetest_id: {type: decimal}
+      line: {type: decimal}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

@@ -1,13 +1,9 @@
-name: T_SELECTION2
-tableName: t_selection2
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: query_id
-  type: numeric
-  label: Query Id
-- name: t_selection_id
-  type: numeric
-  label: T Selection Id
+entities:
+  t_selection2:
+    table: t_selection2
+    key: ad_pinstance_id
+    displayName: T_SELECTION2
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      query_id: {type: decimal}
+      t_selection_id: {type: decimal}

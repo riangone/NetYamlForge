@@ -1,43 +1,19 @@
-name: M_PROMOTIONLINE
-tableName: m_promotionline
-primaryKey: m_promotionline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: ismandatorypl
-  type: text
-  label: Ismandatorypl
-- name: m_promotiongroup_id
-  type: numeric
-  label: M Promotiongroup Id
-- name: m_promotionline_id
-  type: numeric
-  label: M Promotionline Id
-- name: m_promotion_id
-  type: numeric
-  label: M Promotion Id
-- name: minimumamt
-  type: numeric
-  label: Minimumamt
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_promotionline_uu
-  type: text
-  label: M Promotionline Uu
+entities:
+  m_promotionline:
+    table: m_promotionline
+    key: m_promotionline_id
+    displayName: M_PROMOTIONLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      ismandatorypl: {type: string}
+      m_promotiongroup_id: {type: decimal}
+      m_promotionline_id: {type: decimal, identity: true}
+      m_promotion_id: {type: decimal}
+      minimumamt: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_promotionline_uu: {type: string}

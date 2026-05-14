@@ -1,43 +1,19 @@
-name: AD_REPORTVIEW_COL
-tableName: ad_reportview_col
-primaryKey: ad_reportview_col_id
-fields:
-- name: ad_reportview_col_id
-  type: numeric
-  label: Ad Reportview Col Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_reportview_id
-  type: numeric
-  label: Ad Reportview Id
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: functioncolumn
-  type: text
-  label: Functioncolumn
-- name: isgroupfunction
-  type: text
-  label: Isgroupfunction
-- name: ad_reportview_col_uu
-  type: text
-  label: Ad Reportview Col Uu
+entities:
+  ad_reportview_col:
+    table: ad_reportview_col
+    key: ad_reportview_col_id
+    displayName: AD_REPORTVIEW_COL
+    columns:
+      ad_reportview_col_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_reportview_id: {type: decimal}
+      ad_column_id: {type: decimal}
+      functioncolumn: {type: string}
+      isgroupfunction: {type: string}
+      ad_reportview_col_uu: {type: string}

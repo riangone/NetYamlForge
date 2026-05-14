@@ -1,52 +1,22 @@
-name: C_POSKEYLAYOUT
-tableName: c_poskeylayout
-primaryKey: c_poskeylayout_id
-fields:
-- name: c_poskeylayout_id
-  type: numeric
-  label: C Poskeylayout Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: c_poskeylayout_uu
-  type: text
-  label: C Poskeylayout Uu
-- name: columns
-  type: numeric
-  label: Columns
-- name: poskeylayouttype
-  type: text
-  label: Poskeylayouttype
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: ad_printfont_id
-  type: numeric
-  label: Ad Printfont Id
+entities:
+  c_poskeylayout:
+    table: c_poskeylayout
+    key: c_poskeylayout_id
+    displayName: C_POSKEYLAYOUT
+    columns:
+      c_poskeylayout_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      c_poskeylayout_uu: {type: string}
+      columns: {type: decimal}
+      poskeylayouttype: {type: string}
+      ad_printcolor_id: {type: decimal}
+      ad_printfont_id: {type: decimal}

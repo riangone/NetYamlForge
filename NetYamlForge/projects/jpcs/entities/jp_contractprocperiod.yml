@@ -1,58 +1,24 @@
-name: JP_CONTRACTPROCPERIOD
-tableName: jp_contractprocperiod
-primaryKey: jp_contractprocperiod_id
-fields:
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_contractprocperiod_uu
-  type: text
-  label: Jp Contractprocperiod Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_contractcalender_id
-  type: numeric
-  label: Jp Contractcalender Id
-- name: jp_contractprocperiodg_id
-  type: numeric
-  label: Jp Contractprocperiodg Id
-- name: startdate
-  type: text
-  label: Startdate
-- name: enddate
-  type: text
-  label: Enddate
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: jp_contractprocessvalue
-  type: text
-  label: Jp Contractprocessvalue
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: dateacct
-  type: text
-  label: Dateacct
+entities:
+  jp_contractprocperiod:
+    table: jp_contractprocperiod
+    key: jp_contractprocperiod_id
+    displayName: JP_CONTRACTPROCPERIOD
+    columns:
+      jp_contractprocperiod_id: {type: decimal, identity: true}
+      jp_contractprocperiod_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_contractcalender_id: {type: decimal}
+      jp_contractprocperiodg_id: {type: decimal}
+      startdate: {type: string}
+      enddate: {type: string}
+      name: {type: string}
+      description: {type: string}
+      jp_contractprocessvalue: {type: string}
+      datedoc: {type: string}
+      dateacct: {type: string}

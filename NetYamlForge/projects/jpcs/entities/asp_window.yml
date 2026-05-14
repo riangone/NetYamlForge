@@ -1,40 +1,18 @@
-name: ASP_WINDOW
-tableName: asp_window
-primaryKey: asp_window_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: asp_level_id
-  type: numeric
-  label: Asp Level Id
-- name: asp_status
-  type: text
-  label: Asp Status
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: asp_window_id
-  type: numeric
-  label: Asp Window Id
-- name: asp_window_uu
-  type: text
-  label: Asp Window Uu
+entities:
+  asp_window:
+    table: asp_window
+    key: asp_window_id
+    displayName: ASP_WINDOW
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_window_id: {type: decimal}
+      asp_level_id: {type: decimal}
+      asp_status: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      asp_window_id: {type: decimal, identity: true}
+      asp_window_uu: {type: string}

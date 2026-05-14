@@ -1,58 +1,24 @@
-name: AD_WF_NEXTCONDITION
-tableName: ad_wf_nextcondition
-primaryKey: ad_wf_nextcondition_id
-fields:
-- name: ad_wf_nextcondition_id
-  type: numeric
-  label: Ad Wf Nextcondition Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_wf_nodenext_id
-  type: numeric
-  label: Ad Wf Nodenext Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: andor
-  type: text
-  label: Andor
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: operation
-  type: text
-  label: Operation
-- name: value
-  type: text
-  label: Value
-- name: value2
-  type: text
-  label: Value2
-- name: ad_wf_nextcondition_uu
-  type: text
-  label: Ad Wf Nextcondition Uu
-- name: sqlstatement
-  type: text
-  label: Sqlstatement
+entities:
+  ad_wf_nextcondition:
+    table: ad_wf_nextcondition
+    key: ad_wf_nextcondition_id
+    displayName: AD_WF_NEXTCONDITION
+    columns:
+      ad_wf_nextcondition_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_wf_nodenext_id: {type: decimal}
+      seqno: {type: decimal}
+      entitytype: {type: string}
+      andor: {type: string}
+      ad_column_id: {type: decimal}
+      operation: {type: string}
+      value: {type: string}
+      value2: {type: string}
+      ad_wf_nextcondition_uu: {type: string}
+      sqlstatement: {type: string}

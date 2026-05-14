@@ -1,43 +1,19 @@
-name: C_TAXGROUP
-tableName: c_taxgroup
-primaryKey: c_taxgroup_id
-fields:
-- name: name
-  type: text
-  label: Name
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_taxgroup_id
-  type: numeric
-  label: C Taxgroup Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: value
-  type: text
-  label: Value
-- name: c_taxgroup_uu
-  type: text
-  label: C Taxgroup Uu
+entities:
+  c_taxgroup:
+    table: c_taxgroup
+    key: c_taxgroup_id
+    displayName: C_TAXGROUP
+    columns:
+      name: {type: string}
+      ad_org_id: {type: decimal}
+      c_taxgroup_id: {type: decimal, identity: true}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_client_id: {type: decimal}
+      value: {type: string}
+      c_taxgroup_uu: {type: string}

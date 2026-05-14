@@ -1,49 +1,21 @@
-name: AD_LDAPACCESS
-tableName: ad_ldapaccess
-primaryKey: ad_ldapaccess_id
-fields:
-- name: ad_ldapaccess_id
-  type: numeric
-  label: Ad Ldapaccess Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_ldapprocessor_id
-  type: numeric
-  label: Ad Ldapprocessor Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: r_interestarea_id
-  type: numeric
-  label: R Interestarea Id
-- name: iserror
-  type: text
-  label: Iserror
-- name: summary
-  type: text
-  label: Summary
-- name: description
-  type: text
-  label: Description
-- name: ad_ldapaccess_uu
-  type: text
-  label: Ad Ldapaccess Uu
+entities:
+  ad_ldapaccess:
+    table: ad_ldapaccess
+    key: ad_ldapaccess_id
+    displayName: AD_LDAPACCESS
+    columns:
+      ad_ldapaccess_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_ldapprocessor_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      r_interestarea_id: {type: decimal}
+      iserror: {type: string}
+      summary: {type: string}
+      description: {type: string}
+      ad_ldapaccess_uu: {type: string}

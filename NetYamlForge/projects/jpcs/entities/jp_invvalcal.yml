@@ -1,106 +1,40 @@
-name: JP_INVVALCAL
-tableName: jp_invvalcal
-primaryKey: jp_invvalcal_id
-fields:
-- name: jp_invvalcal_id
-  type: numeric
-  label: Jp Invvalcal Id
-- name: jp_invvalcal_uu
-  type: text
-  label: Jp Invvalcal Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: posted
-  type: text
-  label: Posted
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: datevalue
-  type: text
-  label: Datevalue
-- name: jp_lastdatevalue
-  type: text
-  label: Jp Lastdatevalue
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: jp_invvalprofile_id
-  type: numeric
-  label: Jp Invvalprofile Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_processedtime1
-  type: text
-  label: Jp Processedtime1
-- name: jp_processing2
-  type: text
-  label: Jp Processing2
-- name: jp_processedtime2
-  type: text
-  label: Jp Processedtime2
-- name: jp_processing3
-  type: text
-  label: Jp Processing3
-- name: jp_processedtime3
-  type: text
-  label: Jp Processedtime3
-- name: jp_processing4
-  type: text
-  label: Jp Processing4
-- name: totallines
-  type: numeric
-  label: Totallines
-- name: description
-  type: text
-  label: Description
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: jp_begininvvalcal_id
-  type: numeric
-  label: Jp Begininvvalcal Id
+entities:
+  jp_invvalcal:
+    table: jp_invvalcal
+    key: jp_invvalcal_id
+    displayName: JP_INVVALCAL
+    columns:
+      jp_invvalcal_id: {type: decimal, identity: true}
+      jp_invvalcal_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      posted: {type: string}
+      isapproved: {type: string}
+      processedon: {type: decimal}
+      c_doctype_id: {type: decimal}
+      datevalue: {type: string}
+      jp_lastdatevalue: {type: string}
+      salesrep_id: {type: decimal}
+      jp_invvalprofile_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      jp_processing1: {type: string}
+      jp_processedtime1: {type: string}
+      jp_processing2: {type: string}
+      jp_processedtime2: {type: string}
+      jp_processing3: {type: string}
+      jp_processedtime3: {type: string}
+      jp_processing4: {type: string}
+      totallines: {type: decimal}
+      description: {type: string}
+      dateacct: {type: string}
+      jp_begininvvalcal_id: {type: decimal}

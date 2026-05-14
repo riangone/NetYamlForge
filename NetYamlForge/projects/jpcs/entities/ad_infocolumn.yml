@@ -1,127 +1,47 @@
-name: AD_INFOCOLUMN
-tableName: ad_infocolumn
-primaryKey: ad_infocolumn_id
-fields:
-- name: ad_infocolumn_id
-  type: numeric
-  label: Ad Infocolumn Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: selectclause
-  type: text
-  label: Selectclause
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: isdisplayed
-  type: text
-  label: Isdisplayed
-- name: isquerycriteria
-  type: text
-  label: Isquerycriteria
-- name: ad_element_id
-  type: numeric
-  label: Ad Element Id
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_infocolumn_uu
-  type: text
-  label: Ad Infocolumn Uu
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: iscentrallymaintained
-  type: text
-  label: Iscentrallymaintained
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: columnname
-  type: text
-  label: Columnname
-- name: queryoperator
-  type: text
-  label: Queryoperator
-- name: queryfunction
-  type: text
-  label: Queryfunction
-- name: isidentifier
-  type: text
-  label: Isidentifier
-- name: seqnoselection
-  type: numeric
-  label: Seqnoselection
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: iskey
-  type: text
-  label: Iskey
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: placeholder
-  type: text
-  label: Placeholder
-- name: inputfieldvalidation
-  type: text
-  label: Inputfieldvalidation
-- name: ad_fieldstyle_id
-  type: numeric
-  label: Ad Fieldstyle Id
-- name: isautocomplete
-  type: text
-  label: Isautocomplete
-- name: isqueryafterchange
-  type: text
-  label: Isqueryafterchange
-- name: isrange
-  type: text
-  label: Isrange
-- name: defaultvalue2
-  type: text
-  label: Defaultvalue2
-- name: placeholder2
-  type: text
-  label: Placeholder2
+entities:
+  ad_infocolumn:
+    table: ad_infocolumn
+    key: ad_infocolumn_id
+    displayName: AD_INFOCOLUMN
+    columns:
+      ad_infocolumn_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_infowindow_id: {type: decimal}
+      entitytype: {type: string}
+      selectclause: {type: string}
+      seqno: {type: decimal}
+      isdisplayed: {type: string}
+      isquerycriteria: {type: string}
+      ad_element_id: {type: decimal}
+      ad_reference_id: {type: decimal}
+      ad_infocolumn_uu: {type: string}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      iscentrallymaintained: {type: string}
+      displaylogic: {type: string}
+      columnname: {type: string}
+      queryoperator: {type: string}
+      queryfunction: {type: string}
+      isidentifier: {type: string}
+      seqnoselection: {type: decimal}
+      defaultvalue: {type: string}
+      ismandatory: {type: string}
+      iskey: {type: string}
+      isreadonly: {type: string}
+      placeholder: {type: string}
+      inputfieldvalidation: {type: string}
+      ad_fieldstyle_id: {type: decimal}
+      isautocomplete: {type: string}
+      isqueryafterchange: {type: string}
+      isrange: {type: string}
+      defaultvalue2: {type: string}
+      placeholder2: {type: string}

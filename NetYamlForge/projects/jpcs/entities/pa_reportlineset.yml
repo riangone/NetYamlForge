@@ -1,40 +1,18 @@
-name: PA_REPORTLINESET
-tableName: pa_reportlineset
-primaryKey: pa_reportlineset_id
-fields:
-- name: pa_reportlineset_id
-  type: numeric
-  label: Pa Reportlineset Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: processing
-  type: text
-  label: Processing
-- name: pa_reportlineset_uu
-  type: text
-  label: Pa Reportlineset Uu
+entities:
+  pa_reportlineset:
+    table: pa_reportlineset
+    key: pa_reportlineset_id
+    displayName: PA_REPORTLINESET
+    columns:
+      pa_reportlineset_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      processing: {type: string}
+      pa_reportlineset_uu: {type: string}

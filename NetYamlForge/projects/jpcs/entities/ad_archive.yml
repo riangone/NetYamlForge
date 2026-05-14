@@ -1,64 +1,26 @@
-name: AD_ARCHIVE
-tableName: ad_archive
-primaryKey: ad_archive_id
-fields:
-- name: ad_archive_id
-  type: numeric
-  label: Ad Archive Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: binarydata
-  type: text
-  label: Binarydata
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: isreport
-  type: text
-  label: Isreport
-- name: ad_archive_uu
-  type: text
-  label: Ad Archive Uu
-- name: ad_storageprovider_id
-  type: numeric
-  label: Ad Storageprovider Id
-- name: record_uu
-  type: text
-  label: Record Uu
+entities:
+  ad_archive:
+    table: ad_archive
+    key: ad_archive_id
+    displayName: AD_ARCHIVE
+    columns:
+      ad_archive_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      binarydata: {type: string}
+      c_bpartner_id: {type: decimal}
+      isreport: {type: string}
+      ad_archive_uu: {type: string}
+      ad_storageprovider_id: {type: decimal}
+      record_uu: {type: string}

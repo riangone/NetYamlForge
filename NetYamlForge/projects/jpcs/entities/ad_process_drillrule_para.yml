@@ -1,43 +1,19 @@
-name: AD_PROCESS_DRILLRULE_PARA
-tableName: ad_process_drillrule_para
-primaryKey: ad_process_drillrule_id
-fields:
-- name: ad_process_drillrule_id
-  type: numeric
-  label: Ad Process Drillrule Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: parameterdefault
-  type: text
-  label: Parameterdefault
-- name: description
-  type: text
-  label: Description
-- name: ad_process_drillrule_para_uu
-  type: text
-  label: Ad Process Drillrule Para Uu
-- name: parametertodefault
-  type: text
-  label: Parametertodefault
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
+entities:
+  ad_process_drillrule_para:
+    table: ad_process_drillrule_para
+    key: ad_process_drillrule_id
+    displayName: AD_PROCESS_DRILLRULE_PARA
+    columns:
+      ad_process_drillrule_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      parameterdefault: {type: string}
+      description: {type: string}
+      ad_process_drillrule_para_uu: {type: string}
+      parametertodefault: {type: string}
+      ad_process_para_id: {type: decimal}

@@ -1,310 +1,108 @@
-name: C_ORDER
-tableName: c_order
-primaryKey: c_order_id
-fields:
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: documentno
-  type: text
-  label: Documentno
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: docaction
-  type: text
-  label: Docaction
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_doctypetarget_id
-  type: numeric
-  label: C Doctypetarget Id
-- name: description
-  type: text
-  label: Description
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: iscreditapproved
-  type: text
-  label: Iscreditapproved
-- name: isdelivered
-  type: text
-  label: Isdelivered
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: istransferred
-  type: text
-  label: Istransferred
-- name: isselected
-  type: text
-  label: Isselected
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: dateordered
-  type: text
-  label: Dateordered
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: dateprinted
-  type: text
-  label: Dateprinted
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: poreference
-  type: text
-  label: Poreference
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: chargeamt
-  type: numeric
-  label: Chargeamt
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: totallines
-  type: numeric
-  label: Totallines
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: posted
-  type: text
-  label: Posted
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_cashline_id
-  type: numeric
-  label: C Cashline Id
-- name: sendemail
-  type: text
-  label: Sendemail
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: bill_bpartner_id
-  type: numeric
-  label: Bill Bpartner Id
-- name: bill_location_id
-  type: numeric
-  label: Bill Location Id
-- name: bill_user_id
-  type: numeric
-  label: Bill User Id
-- name: pay_bpartner_id
-  type: numeric
-  label: Pay Bpartner Id
-- name: pay_location_id
-  type: numeric
-  label: Pay Location Id
-- name: ref_order_id
-  type: numeric
-  label: Ref Order Id
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: volume
-  type: numeric
-  label: Volume
-- name: weight
-  type: numeric
-  label: Weight
-- name: ordertype
-  type: text
-  label: Ordertype
-- name: c_pos_id
-  type: numeric
-  label: C Pos Id
-- name: amounttendered
-  type: numeric
-  label: Amounttendered
-- name: amountrefunded
-  type: numeric
-  label: Amountrefunded
-- name: link_order_id
-  type: numeric
-  label: Link Order Id
-- name: m_freightcategory_id
-  type: numeric
-  label: M Freightcategory Id
-- name: dropship_bpartner_id
-  type: numeric
-  label: Dropship Bpartner Id
-- name: dropship_location_id
-  type: numeric
-  label: Dropship Location Id
-- name: dropship_user_id
-  type: numeric
-  label: Dropship User Id
-- name: promotioncode
-  type: text
-  label: Promotioncode
-- name: c_ordersource_id
-  type: numeric
-  label: C Ordersource Id
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: ispayschedulevalid
-  type: text
-  label: Ispayschedulevalid
-- name: c_cashplanline_id
-  type: numeric
-  label: C Cashplanline Id
-- name: c_order_uu
-  type: text
-  label: C Order Uu
-- name: shippingrateinquiry
-  type: text
-  label: Shippingrateinquiry
-- name: ispriviledgedrate
-  type: text
-  label: Ispriviledgedrate
-- name: c_opportunity_id
-  type: numeric
-  label: C Opportunity Id
-- name: quotationorder_id
-  type: numeric
-  label: Quotationorder Id
-- name: jp_locator_id
-  type: numeric
-  label: Jp Locator Id
-- name: jp_scheduledcosttotallines
-  type: numeric
-  label: Jp Scheduledcosttotallines
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
-- name: jp_cancelwfaction
-  type: text
-  label: Jp Cancelwfaction
-- name: jp_cancelwfstatus
-  type: text
-  label: Jp Cancelwfstatus
+entities:
+  c_order:
+    table: c_order
+    key: c_order_id
+    displayName: C_ORDER
+    columns:
+      c_order_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      issotrx: {type: string}
+      documentno: {type: string}
+      docstatus: {type: string}
+      docaction: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      c_doctype_id: {type: decimal}
+      c_doctypetarget_id: {type: decimal}
+      description: {type: string}
+      isapproved: {type: string}
+      iscreditapproved: {type: string}
+      isdelivered: {type: string}
+      isinvoiced: {type: string}
+      isprinted: {type: string}
+      istransferred: {type: string}
+      isselected: {type: string}
+      salesrep_id: {type: decimal}
+      dateordered: {type: string}
+      datepromised: {type: string}
+      dateprinted: {type: string}
+      dateacct: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      poreference: {type: string}
+      isdiscountprinted: {type: string}
+      c_currency_id: {type: decimal}
+      paymentrule: {type: string}
+      c_paymentterm_id: {type: decimal}
+      invoicerule: {type: string}
+      deliveryrule: {type: string}
+      freightcostrule: {type: string}
+      freightamt: {type: decimal}
+      deliveryviarule: {type: string}
+      m_shipper_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      chargeamt: {type: decimal}
+      priorityrule: {type: string}
+      totallines: {type: decimal}
+      grandtotal: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      istaxincluded: {type: string}
+      c_campaign_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      posted: {type: string}
+      c_payment_id: {type: decimal}
+      c_cashline_id: {type: decimal}
+      sendemail: {type: string}
+      ad_user_id: {type: decimal}
+      copyfrom: {type: string}
+      isselfservice: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      bill_bpartner_id: {type: decimal}
+      bill_location_id: {type: decimal}
+      bill_user_id: {type: decimal}
+      pay_bpartner_id: {type: decimal}
+      pay_location_id: {type: decimal}
+      ref_order_id: {type: decimal}
+      isdropship: {type: string}
+      volume: {type: decimal}
+      weight: {type: decimal}
+      ordertype: {type: string}
+      c_pos_id: {type: decimal}
+      amounttendered: {type: decimal}
+      amountrefunded: {type: decimal}
+      link_order_id: {type: decimal}
+      m_freightcategory_id: {type: decimal}
+      dropship_bpartner_id: {type: decimal}
+      dropship_location_id: {type: decimal}
+      dropship_user_id: {type: decimal}
+      promotioncode: {type: string}
+      c_ordersource_id: {type: decimal}
+      processedon: {type: decimal}
+      ispayschedulevalid: {type: string}
+      c_cashplanline_id: {type: decimal}
+      c_order_uu: {type: string}
+      shippingrateinquiry: {type: string}
+      ispriviledgedrate: {type: string}
+      c_opportunity_id: {type: decimal}
+      quotationorder_id: {type: decimal}
+      jp_locator_id: {type: decimal}
+      jp_scheduledcosttotallines: {type: decimal}
+      jp_contract_id: {type: decimal}
+      jp_contractcontent_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_subject: {type: string}
+      jp_remarks: {type: string}
+      jp_communicationcolumn: {type: string}
+      jp_cancelwfaction: {type: string}
+      jp_cancelwfstatus: {type: string}

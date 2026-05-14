@@ -1,40 +1,18 @@
-name: K_INDEXLOG
-tableName: k_indexlog
-primaryKey: k_indexlog_id
-fields:
-- name: k_indexlog_id
-  type: numeric
-  label: K Indexlog Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: indexquery
-  type: text
-  label: Indexquery
-- name: indexqueryresult
-  type: numeric
-  label: Indexqueryresult
-- name: querysource
-  type: text
-  label: Querysource
-- name: k_indexlog_uu
-  type: text
-  label: K Indexlog Uu
+entities:
+  k_indexlog:
+    table: k_indexlog
+    key: k_indexlog_id
+    displayName: K_INDEXLOG
+    columns:
+      k_indexlog_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      indexquery: {type: string}
+      indexqueryresult: {type: decimal}
+      querysource: {type: string}
+      k_indexlog_uu: {type: string}

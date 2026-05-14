@@ -1,46 +1,20 @@
-name: JP_TODO_REMINDER_LOG
-tableName: jp_todo_reminder_log
-primaryKey: jp_todo_reminder_log_id
-fields:
-- name: ad_broadcastmessage_id
-  type: numeric
-  label: Ad Broadcastmessage Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_usermail_id
-  type: numeric
-  label: Ad Usermail Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: iserror
-  type: text
-  label: Iserror
-- name: jp_todo_reminder_id
-  type: numeric
-  label: Jp Todo Reminder Id
-- name: jp_todo_reminder_log_id
-  type: numeric
-  label: Jp Todo Reminder Log Id
-- name: jp_todo_reminder_log_uu
-  type: text
-  label: Jp Todo Reminder Log Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_todo_reminder_log:
+    table: jp_todo_reminder_log
+    key: jp_todo_reminder_log_id
+    displayName: JP_TODO_REMINDER_LOG
+    columns:
+      ad_broadcastmessage_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_usermail_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      iserror: {type: string}
+      jp_todo_reminder_id: {type: decimal}
+      jp_todo_reminder_log_id: {type: decimal, identity: true}
+      jp_todo_reminder_log_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

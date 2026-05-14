@@ -1,82 +1,32 @@
-name: AD_REGISTRATION
-tableName: ad_registration
-primaryKey: ad_registration_id
-fields:
-- name: ad_registration_id
-  type: numeric
-  label: Ad Registration Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_system_id
-  type: numeric
-  label: Ad System Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isregistered
-  type: text
-  label: Isregistered
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: description
-  type: text
-  label: Description
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: isinproduction
-  type: text
-  label: Isinproduction
-- name: startproductiondate
-  type: text
-  label: Startproductiondate
-- name: isallowpublish
-  type: text
-  label: Isallowpublish
-- name: isallowstatistics
-  type: text
-  label: Isallowstatistics
-- name: platforminfo
-  type: text
-  label: Platforminfo
-- name: industryinfo
-  type: text
-  label: Industryinfo
-- name: salesvolume
-  type: numeric
-  label: Salesvolume
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: numberemployees
-  type: numeric
-  label: Numberemployees
-- name: processing
-  type: text
-  label: Processing
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: ad_registration_uu
-  type: text
-  label: Ad Registration Uu
+entities:
+  ad_registration:
+    table: ad_registration
+    key: ad_registration_id
+    displayName: AD_REGISTRATION
+    columns:
+      ad_registration_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_system_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isregistered: {type: string}
+      record_id: {type: decimal}
+      description: {type: string}
+      c_location_id: {type: decimal}
+      isinproduction: {type: string}
+      startproductiondate: {type: string}
+      isallowpublish: {type: string}
+      isallowstatistics: {type: string}
+      platforminfo: {type: string}
+      industryinfo: {type: string}
+      salesvolume: {type: decimal}
+      c_currency_id: {type: decimal}
+      numberemployees: {type: decimal}
+      processing: {type: string}
+      remote_host: {type: string}
+      remote_addr: {type: string}
+      ad_registration_uu: {type: string}

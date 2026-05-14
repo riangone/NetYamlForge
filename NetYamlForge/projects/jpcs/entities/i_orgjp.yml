@@ -1,139 +1,51 @@
-name: I_ORGJP
-tableName: i_orgjp
-primaryKey: i_orgjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_orgjp_id
-  type: numeric
-  label: I Orgjp Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: issummary
-  type: text
-  label: Issummary
-- name: ad_replicationstrategy_id
-  type: numeric
-  label: Ad Replicationstrategy Id
-- name: i_orgjp_uu
-  type: text
-  label: I Orgjp Uu
-- name: jp_location_label
-  type: text
-  label: Jp Location Label
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: countrycode
-  type: text
-  label: Countrycode
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: postal
-  type: text
-  label: Postal
-- name: postal_add
-  type: text
-  label: Postal Add
-- name: regionname
-  type: text
-  label: Regionname
-- name: c_region_id
-  type: numeric
-  label: C Region Id
-- name: city
-  type: text
-  label: City
-- name: c_city_id
-  type: numeric
-  label: C City Id
-- name: address1
-  type: text
-  label: Address1
-- name: address2
-  type: text
-  label: Address2
-- name: address3
-  type: text
-  label: Address3
-- name: address4
-  type: text
-  label: Address4
-- name: address5
-  type: text
-  label: Address5
-- name: comments
-  type: text
-  label: Comments
-- name: ad_orgtype_id
-  type: numeric
-  label: Ad Orgtype Id
-- name: jp_orgtype_name
-  type: text
-  label: Jp Orgtype Name
-- name: phone
-  type: text
-  label: Phone
-- name: fax
-  type: text
-  label: Fax
-- name: email
-  type: text
-  label: Email
-- name: duns
-  type: text
-  label: Duns
-- name: taxid
-  type: text
-  label: Taxid
-- name: phone2
-  type: text
-  label: Phone2
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
-- name: jp_region_name
-  type: text
-  label: Jp Region Name
-- name: jp_city_name
-  type: text
-  label: Jp City Name
+entities:
+  i_orgjp:
+    table: i_orgjp
+    key: i_orgjp_id
+    displayName: I_ORGJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_orgjp_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      issummary: {type: string}
+      ad_replicationstrategy_id: {type: decimal}
+      i_orgjp_uu: {type: string}
+      jp_location_label: {type: string}
+      c_location_id: {type: decimal}
+      countrycode: {type: string}
+      c_country_id: {type: decimal}
+      postal: {type: string}
+      postal_add: {type: string}
+      regionname: {type: string}
+      c_region_id: {type: decimal}
+      city: {type: string}
+      c_city_id: {type: decimal}
+      address1: {type: string}
+      address2: {type: string}
+      address3: {type: string}
+      address4: {type: string}
+      address5: {type: string}
+      comments: {type: string}
+      ad_orgtype_id: {type: decimal}
+      jp_orgtype_name: {type: string}
+      phone: {type: string}
+      fax: {type: string}
+      email: {type: string}
+      duns: {type: string}
+      taxid: {type: string}
+      phone2: {type: string}
+      i_isactivejp: {type: string}
+      jp_region_name: {type: string}
+      jp_city_name: {type: string}

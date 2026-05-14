@@ -1,70 +1,28 @@
-name: GL_JOURNALGENERATORLINE
-tableName: gl_journalgeneratorline
-primaryKey: gl_journalgeneratorline_id
-fields:
-- name: gl_journalgeneratorline_id
-  type: numeric
-  label: Gl Journalgeneratorline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: gl_journalgenerator_id
-  type: numeric
-  label: Gl Journalgenerator Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: c_elementvaluedr_id
-  type: numeric
-  label: C Elementvaluedr Id
-- name: c_elementvaluecr_id
-  type: numeric
-  label: C Elementvaluecr Id
-- name: bpdimensiontype
-  type: text
-  label: Bpdimensiontype
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: bpcolumn
-  type: text
-  label: Bpcolumn
-- name: iscopyalldimensions
-  type: text
-  label: Iscopyalldimensions
-- name: issameproduct
-  type: text
-  label: Issameproduct
-- name: amtmultiplier
-  type: numeric
-  label: Amtmultiplier
-- name: roundfactor
-  type: numeric
-  label: Roundfactor
-- name: gl_journalgeneratorline_uu
-  type: text
-  label: Gl Journalgeneratorline Uu
+entities:
+  gl_journalgeneratorline:
+    table: gl_journalgeneratorline
+    key: gl_journalgeneratorline_id
+    displayName: GL_JOURNALGENERATORLINE
+    columns:
+      gl_journalgeneratorline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      gl_journalgenerator_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      seqno: {type: decimal}
+      c_elementvaluedr_id: {type: decimal}
+      c_elementvaluecr_id: {type: decimal}
+      bpdimensiontype: {type: string}
+      c_bpartner_id: {type: decimal}
+      bpcolumn: {type: string}
+      iscopyalldimensions: {type: string}
+      issameproduct: {type: string}
+      amtmultiplier: {type: decimal}
+      roundfactor: {type: decimal}
+      gl_journalgeneratorline_uu: {type: string}

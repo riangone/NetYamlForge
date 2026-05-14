@@ -1,10 +1,8 @@
-name: AD_ARCHIVE_BLOB
-tableName: ad_archive_blob
-primaryKey: ad_archive_id
-fields:
-- name: ad_archive_id
-  type: numeric
-  label: Ad Archive Id
-- name: binarydata
-  type: text
-  label: Binarydata
+entities:
+  ad_archive_blob:
+    table: ad_archive_blob
+    key: ad_archive_id
+    displayName: AD_ARCHIVE_BLOB
+    columns:
+      ad_archive_id: {type: decimal, identity: true}
+      binarydata: {type: string}

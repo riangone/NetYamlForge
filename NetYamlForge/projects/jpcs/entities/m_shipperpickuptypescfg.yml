@@ -1,46 +1,20 @@
-name: M_SHIPPERPICKUPTYPESCFG
-tableName: m_shipperpickuptypescfg
-primaryKey: m_shipperpickuptypescfg_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: m_shippercfg_id
-  type: numeric
-  label: M Shippercfg Id
-- name: m_shipperpickuptypescfg_id
-  type: numeric
-  label: M Shipperpickuptypescfg Id
-- name: m_shipperpickuptypescfg_uu
-  type: text
-  label: M Shipperpickuptypescfg Uu
+entities:
+  m_shipperpickuptypescfg:
+    table: m_shipperpickuptypescfg
+    key: m_shipperpickuptypescfg_id
+    displayName: M_SHIPPERPICKUPTYPESCFG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      isdefault: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      m_shippercfg_id: {type: decimal}
+      m_shipperpickuptypescfg_id: {type: decimal, identity: true}
+      m_shipperpickuptypescfg_uu: {type: string}

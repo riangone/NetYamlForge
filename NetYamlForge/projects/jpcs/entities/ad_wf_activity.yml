@@ -1,82 +1,32 @@
-name: AD_WF_ACTIVITY
-tableName: ad_wf_activity
-primaryKey: ad_wf_activity_id
-fields:
-- name: ad_wf_activity_id
-  type: numeric
-  label: Ad Wf Activity Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_wf_process_id
-  type: numeric
-  label: Ad Wf Process Id
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_wf_responsible_id
-  type: numeric
-  label: Ad Wf Responsible Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: wfstate
-  type: text
-  label: Wfstate
-- name: ad_message_id
-  type: numeric
-  label: Ad Message Id
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: priority
-  type: numeric
-  label: Priority
-- name: endwaittime
-  type: text
-  label: Endwaittime
-- name: datelastalert
-  type: text
-  label: Datelastalert
-- name: dynprioritystart
-  type: numeric
-  label: Dynprioritystart
-- name: ad_wf_activity_uu
-  type: text
-  label: Ad Wf Activity Uu
-- name: isprocessedapprovalrequestjp
-  type: text
-  label: Isprocessedapprovalrequestjp
+entities:
+  ad_wf_activity:
+    table: ad_wf_activity
+    key: ad_wf_activity_id
+    displayName: AD_WF_ACTIVITY
+    columns:
+      ad_wf_activity_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_wf_process_id: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_wf_responsible_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      wfstate: {type: string}
+      ad_message_id: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      textmsg: {type: string}
+      ad_workflow_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      priority: {type: decimal}
+      endwaittime: {type: string}
+      datelastalert: {type: string}
+      dynprioritystart: {type: decimal}
+      ad_wf_activity_uu: {type: string}
+      isprocessedapprovalrequestjp: {type: string}

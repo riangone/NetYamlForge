@@ -1,52 +1,22 @@
-name: M_PROMOTIONDISTRIBUTION
-tableName: m_promotiondistribution
-primaryKey: m_promotiondistribution_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: distributionsorting
-  type: text
-  label: Distributionsorting
-- name: distributiontype
-  type: text
-  label: Distributiontype
-- name: isactive
-  type: text
-  label: Isactive
-- name: m_promotiondistribution_id
-  type: numeric
-  label: M Promotiondistribution Id
-- name: m_promotionline_id
-  type: numeric
-  label: M Promotionline Id
-- name: m_promotion_id
-  type: numeric
-  label: M Promotion Id
-- name: operation
-  type: text
-  label: Operation
-- name: qty
-  type: numeric
-  label: Qty
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_promotiondistribution_uu
-  type: text
-  label: M Promotiondistribution Uu
+entities:
+  m_promotiondistribution:
+    table: m_promotiondistribution
+    key: m_promotiondistribution_id
+    displayName: M_PROMOTIONDISTRIBUTION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      distributionsorting: {type: string}
+      distributiontype: {type: string}
+      isactive: {type: string}
+      m_promotiondistribution_id: {type: decimal, identity: true}
+      m_promotionline_id: {type: decimal}
+      m_promotion_id: {type: decimal}
+      operation: {type: string}
+      qty: {type: decimal}
+      seqno: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_promotiondistribution_uu: {type: string}

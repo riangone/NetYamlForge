@@ -1,61 +1,25 @@
-name: M_SHIPPERCFG
-tableName: m_shippercfg
-primaryKey: m_shippercfg_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: isinternational
-  type: text
-  label: Isinternational
-- name: isonline
-  type: text
-  label: Isonline
-- name: isresidential
-  type: text
-  label: Isresidential
-- name: issaturdaydelivery
-  type: text
-  label: Issaturdaydelivery
-- name: name
-  type: text
-  label: Name
-- name: shippingservicecode
-  type: text
-  label: Shippingservicecode
-- name: trackingurl
-  type: text
-  label: Trackingurl
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_shippercfg_id
-  type: numeric
-  label: M Shippercfg Id
-- name: m_shippercfg_uu
-  type: text
-  label: M Shippercfg Uu
-- name: m_shippingprocessorcfg_id
-  type: numeric
-  label: M Shippingprocessorcfg Id
-- name: copyfrom
-  type: text
-  label: Copyfrom
+entities:
+  m_shippercfg:
+    table: m_shippercfg
+    key: m_shippercfg_id
+    displayName: M_SHIPPERCFG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      isinternational: {type: string}
+      isonline: {type: string}
+      isresidential: {type: string}
+      issaturdaydelivery: {type: string}
+      name: {type: string}
+      shippingservicecode: {type: string}
+      trackingurl: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_shippercfg_id: {type: decimal, identity: true}
+      m_shippercfg_uu: {type: string}
+      m_shippingprocessorcfg_id: {type: decimal}
+      copyfrom: {type: string}

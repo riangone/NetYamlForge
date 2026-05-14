@@ -1,52 +1,22 @@
-name: AD_REF_LIST
-tableName: ad_ref_list
-primaryKey: ad_ref_list_id
-fields:
-- name: ad_ref_list_id
-  type: numeric
-  label: Ad Ref List Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: ad_ref_list_uu
-  type: text
-  label: Ad Ref List Uu
+entities:
+  ad_ref_list:
+    table: ad_ref_list
+    key: ad_ref_list_id
+    displayName: AD_REF_LIST
+    columns:
+      ad_ref_list_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      ad_reference_id: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      entitytype: {type: string}
+      ad_ref_list_uu: {type: string}

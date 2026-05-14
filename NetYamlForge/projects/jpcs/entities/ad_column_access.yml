@@ -1,43 +1,19 @@
-name: AD_COLUMN_ACCESS
-tableName: ad_column_access
-primaryKey: ad_role_id
-fields:
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: isexclude
-  type: text
-  label: Isexclude
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_column_access_uu
-  type: text
-  label: Ad Column Access Uu
+entities:
+  ad_column_access:
+    table: ad_column_access
+    key: ad_role_id
+    displayName: AD_COLUMN_ACCESS
+    columns:
+      ad_role_id: {type: decimal, identity: true}
+      ad_column_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isreadonly: {type: string}
+      isexclude: {type: string}
+      ad_table_id: {type: decimal}
+      ad_column_access_uu: {type: string}

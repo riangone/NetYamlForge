@@ -1,82 +1,32 @@
-name: A_ASSET_INFO_OTH
-tableName: a_asset_info_oth
-primaryKey: a_asset_info_oth_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: a_asset_info_oth_id
-  type: numeric
-  label: A Asset Info Oth Id
-- name: a_user1
-  type: text
-  label: A User1
-- name: a_user10
-  type: text
-  label: A User10
-- name: a_user11
-  type: text
-  label: A User11
-- name: a_user12
-  type: text
-  label: A User12
-- name: a_user13
-  type: text
-  label: A User13
-- name: a_user14
-  type: text
-  label: A User14
-- name: a_user15
-  type: text
-  label: A User15
-- name: a_user2
-  type: text
-  label: A User2
-- name: a_user3
-  type: text
-  label: A User3
-- name: a_user4
-  type: text
-  label: A User4
-- name: a_user5
-  type: text
-  label: A User5
-- name: a_user6
-  type: text
-  label: A User6
-- name: a_user7
-  type: text
-  label: A User7
-- name: a_user8
-  type: text
-  label: A User8
-- name: a_user9
-  type: text
-  label: A User9
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: text
-  type: text
-  label: Text
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: a_asset_info_oth_uu
-  type: text
-  label: A Asset Info Oth Uu
+entities:
+  a_asset_info_oth:
+    table: a_asset_info_oth
+    key: a_asset_info_oth_id
+    displayName: A_ASSET_INFO_OTH
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_asset_id: {type: decimal}
+      a_asset_info_oth_id: {type: decimal, identity: true}
+      a_user1: {type: string}
+      a_user10: {type: string}
+      a_user11: {type: string}
+      a_user12: {type: string}
+      a_user13: {type: string}
+      a_user14: {type: string}
+      a_user15: {type: string}
+      a_user2: {type: string}
+      a_user3: {type: string}
+      a_user4: {type: string}
+      a_user5: {type: string}
+      a_user6: {type: string}
+      a_user7: {type: string}
+      a_user8: {type: string}
+      a_user9: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      text: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      a_asset_info_oth_uu: {type: string}

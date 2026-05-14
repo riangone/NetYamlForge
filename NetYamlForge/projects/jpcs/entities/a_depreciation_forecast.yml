@@ -1,49 +1,21 @@
-name: A_DEPRECIATION_FORECAST
-tableName: a_depreciation_forecast
-primaryKey: a_depreciation_forecast_id
-fields:
-- name: a_depreciation_forecast_id
-  type: numeric
-  label: A Depreciation Forecast Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: a_end_asset_id
-  type: numeric
-  label: A End Asset Id
-- name: created
-  type: text
-  label: Created
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: processing
-  type: text
-  label: Processing
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: processed
-  type: text
-  label: Processed
-- name: isactive
-  type: text
-  label: Isactive
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: a_start_asset_id
-  type: numeric
-  label: A Start Asset Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_depreciation_forecast_uu
-  type: text
-  label: A Depreciation Forecast Uu
+entities:
+  a_depreciation_forecast:
+    table: a_depreciation_forecast
+    key: a_depreciation_forecast_id
+    displayName: A_DEPRECIATION_FORECAST
+    columns:
+      a_depreciation_forecast_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      a_end_asset_id: {type: decimal}
+      created: {type: string}
+      datedoc: {type: string}
+      postingtype: {type: string}
+      processing: {type: string}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      processed: {type: string}
+      isactive: {type: string}
+      createdby: {type: decimal}
+      a_start_asset_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      a_depreciation_forecast_uu: {type: string}

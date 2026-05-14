@@ -1,52 +1,22 @@
-name: AD_ATTACHMENT
-tableName: ad_attachment
-primaryKey: ad_attachment_id
-fields:
-- name: ad_attachment_id
-  type: numeric
-  label: Ad Attachment Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: title
-  type: text
-  label: Title
-- name: binarydata
-  type: text
-  label: Binarydata
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: ad_attachment_uu
-  type: text
-  label: Ad Attachment Uu
-- name: ad_storageprovider_id
-  type: numeric
-  label: Ad Storageprovider Id
-- name: record_uu
-  type: text
-  label: Record Uu
+entities:
+  ad_attachment:
+    table: ad_attachment
+    key: ad_attachment_id
+    displayName: AD_ATTACHMENT
+    columns:
+      ad_attachment_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      title: {type: string}
+      binarydata: {type: string}
+      textmsg: {type: string}
+      ad_attachment_uu: {type: string}
+      ad_storageprovider_id: {type: decimal}
+      record_uu: {type: string}

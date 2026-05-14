@@ -1,133 +1,49 @@
-name: W_STORE
-tableName: w_store
-primaryKey: w_store_id
-fields:
-- name: w_store_id
-  type: numeric
-  label: W Store Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: wstoreemail
-  type: text
-  label: Wstoreemail
-- name: wstoreuser
-  type: text
-  label: Wstoreuser
-- name: wstoreuserpw
-  type: text
-  label: Wstoreuserpw
-- name: webinfo
-  type: text
-  label: Webinfo
-- name: webparam1
-  type: text
-  label: Webparam1
-- name: webparam2
-  type: text
-  label: Webparam2
-- name: webparam3
-  type: text
-  label: Webparam3
-- name: webparam4
-  type: text
-  label: Webparam4
-- name: webparam5
-  type: text
-  label: Webparam5
-- name: webparam6
-  type: text
-  label: Webparam6
-- name: ismenuassets
-  type: text
-  label: Ismenuassets
-- name: ismenuorders
-  type: text
-  label: Ismenuorders
-- name: ismenuinvoices
-  type: text
-  label: Ismenuinvoices
-- name: ismenushipments
-  type: text
-  label: Ismenushipments
-- name: ismenupayments
-  type: text
-  label: Ismenupayments
-- name: ismenurfqs
-  type: text
-  label: Ismenurfqs
-- name: ismenurequests
-  type: text
-  label: Ismenurequests
-- name: ismenuinterests
-  type: text
-  label: Ismenuinterests
-- name: ismenuregistrations
-  type: text
-  label: Ismenuregistrations
-- name: ismenucontact
-  type: text
-  label: Ismenucontact
-- name: emailheader
-  type: text
-  label: Emailheader
-- name: emailfooter
-  type: text
-  label: Emailfooter
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: webcontext
-  type: text
-  label: Webcontext
-- name: weborderemail
-  type: text
-  label: Weborderemail
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: url
-  type: text
-  label: Url
-- name: stylesheet
-  type: text
-  label: Stylesheet
-- name: w_store_uu
-  type: text
-  label: W Store Uu
+entities:
+  w_store:
+    table: w_store
+    key: w_store_id
+    displayName: W_STORE
+    columns:
+      w_store_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      wstoreemail: {type: string}
+      wstoreuser: {type: string}
+      wstoreuserpw: {type: string}
+      webinfo: {type: string}
+      webparam1: {type: string}
+      webparam2: {type: string}
+      webparam3: {type: string}
+      webparam4: {type: string}
+      webparam5: {type: string}
+      webparam6: {type: string}
+      ismenuassets: {type: string}
+      ismenuorders: {type: string}
+      ismenuinvoices: {type: string}
+      ismenushipments: {type: string}
+      ismenupayments: {type: string}
+      ismenurfqs: {type: string}
+      ismenurequests: {type: string}
+      ismenuinterests: {type: string}
+      ismenuregistrations: {type: string}
+      ismenucontact: {type: string}
+      emailheader: {type: string}
+      emailfooter: {type: string}
+      salesrep_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      webcontext: {type: string}
+      weborderemail: {type: string}
+      c_paymentterm_id: {type: decimal}
+      isdefault: {type: string}
+      url: {type: string}
+      stylesheet: {type: string}
+      w_store_uu: {type: string}

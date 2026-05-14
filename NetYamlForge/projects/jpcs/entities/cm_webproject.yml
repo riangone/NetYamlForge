@@ -1,67 +1,27 @@
-name: CM_WEBPROJECT
-tableName: cm_webproject
-primaryKey: cm_webproject_id
-fields:
-- name: cm_webproject_id
-  type: numeric
-  label: Cm Webproject Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: meta_copyright
-  type: text
-  label: Meta Copyright
-- name: meta_publisher
-  type: text
-  label: Meta Publisher
-- name: meta_robotstag
-  type: text
-  label: Meta Robotstag
-- name: meta_author
-  type: text
-  label: Meta Author
-- name: meta_content
-  type: text
-  label: Meta Content
-- name: ad_treecmc_id
-  type: numeric
-  label: Ad Treecmc Id
-- name: ad_treecms_id
-  type: numeric
-  label: Ad Treecms Id
-- name: ad_treecmm_id
-  type: numeric
-  label: Ad Treecmm Id
-- name: ad_treecmt_id
-  type: numeric
-  label: Ad Treecmt Id
-- name: cm_webproject_uu
-  type: text
-  label: Cm Webproject Uu
+entities:
+  cm_webproject:
+    table: cm_webproject
+    key: cm_webproject_id
+    displayName: CM_WEBPROJECT
+    columns:
+      cm_webproject_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      meta_copyright: {type: string}
+      meta_publisher: {type: string}
+      meta_robotstag: {type: string}
+      meta_author: {type: string}
+      meta_content: {type: string}
+      ad_treecmc_id: {type: decimal}
+      ad_treecms_id: {type: decimal}
+      ad_treecmm_id: {type: decimal}
+      ad_treecmt_id: {type: decimal}
+      cm_webproject_uu: {type: string}

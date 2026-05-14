@@ -1,37 +1,17 @@
-name: T_REPORTSTATEMENT
-tableName: t_reportstatement
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: levelno
-  type: numeric
-  label: Levelno
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: balance
-  type: numeric
-  label: Balance
-- name: qty
-  type: numeric
-  label: Qty
-- name: t_reportstatement_uu
-  type: text
-  label: T Reportstatement Uu
+entities:
+  t_reportstatement:
+    table: t_reportstatement
+    key: ad_pinstance_id
+    displayName: T_REPORTSTATEMENT
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      fact_acct_id: {type: decimal}
+      levelno: {type: decimal}
+      dateacct: {type: string}
+      name: {type: string}
+      description: {type: string}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      balance: {type: decimal}
+      qty: {type: decimal}
+      t_reportstatement_uu: {type: string}

@@ -1,37 +1,17 @@
-name: AD_DOCUMENT_ACTION_ACCESS
-tableName: ad_document_action_access
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_ref_list_id
-  type: numeric
-  label: Ad Ref List Id
-- name: ad_document_action_access_uu
-  type: text
-  label: Ad Document Action Access Uu
+entities:
+  ad_document_action_access:
+    table: ad_document_action_access
+    key: ad_client_id
+    displayName: AD_DOCUMENT_ACTION_ACCESS
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_doctype_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      ad_ref_list_id: {type: decimal}
+      ad_document_action_access_uu: {type: string}

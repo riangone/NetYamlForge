@@ -1,238 +1,84 @@
-name: AD_USER
-tableName: ad_user
-primaryKey: ad_user_id
-fields:
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: password
-  type: text
-  label: Password
-- name: email
-  type: text
-  label: Email
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: processing
-  type: text
-  label: Processing
-- name: emailuser
-  type: text
-  label: Emailuser
-- name: emailuserpw
-  type: text
-  label: Emailuserpw
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: title
-  type: text
-  label: Title
-- name: comments
-  type: text
-  label: Comments
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: fax
-  type: text
-  label: Fax
-- name: lastcontact
-  type: text
-  label: Lastcontact
-- name: lastresult
-  type: text
-  label: Lastresult
-- name: birthday
-  type: text
-  label: Birthday
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: emailverify
-  type: text
-  label: Emailverify
-- name: emailverifydate
-  type: text
-  label: Emailverifydate
-- name: notificationtype
-  type: text
-  label: Notificationtype
-- name: isfullbpaccess
-  type: text
-  label: Isfullbpaccess
-- name: c_job_id
-  type: numeric
-  label: C Job Id
-- name: ldapuser
-  type: text
-  label: Ldapuser
-- name: connectionprofile
-  type: text
-  label: Connectionprofile
-- name: value
-  type: text
-  label: Value
-- name: userpin
-  type: text
-  label: Userpin
-- name: isinpayroll
-  type: text
-  label: Isinpayroll
-- name: ad_user_uu
-  type: text
-  label: Ad User Uu
-- name: ismenuautoexpand
-  type: text
-  label: Ismenuautoexpand
-- name: salt
-  type: text
-  label: Salt
-- name: islocked
-  type: text
-  label: Islocked
-- name: dateaccountlocked
-  type: text
-  label: Dateaccountlocked
-- name: failedlogincount
-  type: numeric
-  label: Failedlogincount
-- name: datepasswordchanged
-  type: text
-  label: Datepasswordchanged
-- name: datelastlogin
-  type: text
-  label: Datelastlogin
-- name: isnopasswordreset
-  type: text
-  label: Isnopasswordreset
-- name: isexpired
-  type: text
-  label: Isexpired
-- name: securityquestion
-  type: text
-  label: Securityquestion
-- name: answer
-  type: text
-  label: Answer
-- name: issaleslead
-  type: text
-  label: Issaleslead
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: leadsource
-  type: text
-  label: Leadsource
-- name: leadstatus
-  type: text
-  label: Leadstatus
-- name: leadsourcedescription
-  type: text
-  label: Leadsourcedescription
-- name: leadstatusdescription
-  type: text
-  label: Leadstatusdescription
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: bpname
-  type: text
-  label: Bpname
-- name: bp_location_id
-  type: numeric
-  label: Bp Location Id
-- name: isaddmailtextautomatically
-  type: text
-  label: Isaddmailtextautomatically
-- name: r_defaultmailtext_id
-  type: numeric
-  label: R Defaultmailtext Id
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: jp_firstname
-  type: text
-  label: Jp Firstname
-- name: jp_firstname_kana
-  type: text
-  label: Jp Firstname Kana
-- name: jp_middlename
-  type: text
-  label: Jp Middlename
-- name: jp_middlename_kana
-  type: text
-  label: Jp Middlename Kana
-- name: jp_lastname
-  type: text
-  label: Jp Lastname
-- name: jp_lastname_kana
-  type: text
-  label: Jp Lastname Kana
-- name: isnoexpire
-  type: text
-  label: Isnoexpire
-- name: issupportuser
-  type: text
-  label: Issupportuser
-- name: isbillto
-  type: text
-  label: Isbillto
-- name: isshipto
-  type: text
-  label: Isshipto
-- name: isvendorlead
-  type: text
-  label: Isvendorlead
-- name: authenticationtype
-  type: text
-  label: Authenticationtype
-- name: passwordhashalgorithm
-  type: text
-  label: Passwordhashalgorithm
-- name: saltalgorithm
-  type: text
-  label: Saltalgorithm
+entities:
+  ad_user:
+    table: ad_user
+    key: ad_user_id
+    displayName: AD_USER
+    columns:
+      ad_user_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      password: {type: string}
+      email: {type: string}
+      supervisor_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      processing: {type: string}
+      emailuser: {type: string}
+      emailuserpw: {type: string}
+      c_bpartner_location_id: {type: decimal}
+      c_greeting_id: {type: decimal}
+      title: {type: string}
+      comments: {type: string}
+      phone: {type: string}
+      phone2: {type: string}
+      fax: {type: string}
+      lastcontact: {type: string}
+      lastresult: {type: string}
+      birthday: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      emailverify: {type: string}
+      emailverifydate: {type: string}
+      notificationtype: {type: string}
+      isfullbpaccess: {type: string}
+      c_job_id: {type: decimal}
+      ldapuser: {type: string}
+      connectionprofile: {type: string}
+      value: {type: string}
+      userpin: {type: string}
+      isinpayroll: {type: string}
+      ad_user_uu: {type: string}
+      ismenuautoexpand: {type: string}
+      salt: {type: string}
+      islocked: {type: string}
+      dateaccountlocked: {type: string}
+      failedlogincount: {type: decimal}
+      datepasswordchanged: {type: string}
+      datelastlogin: {type: string}
+      isnopasswordreset: {type: string}
+      isexpired: {type: string}
+      securityquestion: {type: string}
+      answer: {type: string}
+      issaleslead: {type: string}
+      c_location_id: {type: decimal}
+      leadsource: {type: string}
+      leadstatus: {type: string}
+      leadsourcedescription: {type: string}
+      leadstatusdescription: {type: string}
+      c_campaign_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      bpname: {type: string}
+      bp_location_id: {type: decimal}
+      isaddmailtextautomatically: {type: string}
+      r_defaultmailtext_id: {type: decimal}
+      ad_image_id: {type: decimal}
+      jp_corporation_id: {type: decimal}
+      jp_firstname: {type: string}
+      jp_firstname_kana: {type: string}
+      jp_middlename: {type: string}
+      jp_middlename_kana: {type: string}
+      jp_lastname: {type: string}
+      jp_lastname_kana: {type: string}
+      isnoexpire: {type: string}
+      issupportuser: {type: string}
+      isbillto: {type: string}
+      isshipto: {type: string}
+      isvendorlead: {type: string}
+      authenticationtype: {type: string}
+      passwordhashalgorithm: {type: string}
+      saltalgorithm: {type: string}

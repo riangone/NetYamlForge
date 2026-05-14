@@ -1,40 +1,18 @@
-name: AD_PRINTFONT
-tableName: ad_printfont
-primaryKey: ad_printfont_id
-fields:
-- name: ad_printfont_id
-  type: numeric
-  label: Ad Printfont Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: code
-  type: text
-  label: Code
-- name: ad_printfont_uu
-  type: text
-  label: Ad Printfont Uu
+entities:
+  ad_printfont:
+    table: ad_printfont
+    key: ad_printfont_id
+    displayName: AD_PRINTFONT
+    columns:
+      ad_printfont_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      isdefault: {type: string}
+      code: {type: string}
+      ad_printfont_uu: {type: string}

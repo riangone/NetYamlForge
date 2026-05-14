@@ -1,40 +1,18 @@
-name: A_FUNDINGMODE
-tableName: a_fundingmode
-primaryKey: a_fundingmode_id
-fields:
-- name: a_fundingmode_id
-  type: numeric
-  label: A Fundingmode Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: a_fundingmode_uu
-  type: text
-  label: A Fundingmode Uu
+entities:
+  a_fundingmode:
+    table: a_fundingmode
+    key: a_fundingmode_id
+    displayName: A_FUNDINGMODE
+    columns:
+      a_fundingmode_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      a_fundingmode_uu: {type: string}

@@ -1,82 +1,32 @@
-name: AD_PINSTANCE
-tableName: ad_pinstance
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: isprocessing
-  type: text
-  label: Isprocessing
-- name: created
-  type: text
-  label: Created
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: updated
-  type: text
-  label: Updated
-- name: result
-  type: numeric
-  label: Result
-- name: errormsg
-  type: text
-  label: Errormsg
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: ad_pinstance_uu
-  type: text
-  label: Ad Pinstance Uu
-- name: isrunasjob
-  type: text
-  label: Isrunasjob
-- name: notificationtype
-  type: text
-  label: Notificationtype
-- name: name
-  type: text
-  label: Name
-- name: reporttype
-  type: text
-  label: Reporttype
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: issummary
-  type: text
-  label: Issummary
-- name: ad_language_id
-  type: numeric
-  label: Ad Language Id
-- name: ad_session_id
-  type: numeric
-  label: Ad Session Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_uu
-  type: text
-  label: Record Uu
-- name: jsondata
-  type: text
-  label: Jsondata
+entities:
+  ad_pinstance:
+    table: ad_pinstance
+    key: ad_pinstance_id
+    displayName: AD_PINSTANCE
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      ad_process_id: {type: decimal}
+      record_id: {type: decimal}
+      isprocessing: {type: string}
+      created: {type: string}
+      ad_user_id: {type: decimal}
+      updated: {type: string}
+      result: {type: decimal}
+      errormsg: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      ad_pinstance_uu: {type: string}
+      isrunasjob: {type: string}
+      notificationtype: {type: string}
+      name: {type: string}
+      reporttype: {type: string}
+      ad_printformat_id: {type: decimal}
+      issummary: {type: string}
+      ad_language_id: {type: decimal}
+      ad_session_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      record_uu: {type: string}
+      jsondata: {type: string}

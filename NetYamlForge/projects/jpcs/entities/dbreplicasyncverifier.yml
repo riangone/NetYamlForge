@@ -1,7 +1,7 @@
-name: DBREPLICASYNCVERIFIER
-tableName: dbreplicasyncverifier
-primaryKey: lastupdate
-fields:
-- name: lastupdate
-  type: text
-  label: Lastupdate
+entities:
+  dbreplicasyncverifier:
+    table: dbreplicasyncverifier
+    key: lastupdate
+    displayName: DBREPLICASYNCVERIFIER
+    columns:
+      lastupdate: {type: string, identity: true}

@@ -1,34 +1,16 @@
-name: CM_ACCESSMEDIA
-tableName: cm_accessmedia
-primaryKey: cm_media_id
-fields:
-- name: cm_media_id
-  type: numeric
-  label: Cm Media Id
-- name: cm_accessprofile_id
-  type: numeric
-  label: Cm Accessprofile Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: cm_accessmedia_uu
-  type: text
-  label: Cm Accessmedia Uu
+entities:
+  cm_accessmedia:
+    table: cm_accessmedia
+    key: cm_media_id
+    displayName: CM_ACCESSMEDIA
+    columns:
+      cm_media_id: {type: decimal, identity: true}
+      cm_accessprofile_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      cm_accessmedia_uu: {type: string}

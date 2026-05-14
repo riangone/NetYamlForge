@@ -1,43 +1,19 @@
-name: C_CHARGETYPE
-tableName: c_chargetype
-primaryKey: c_chargetype_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_chargetype_id
-  type: numeric
-  label: C Chargetype Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: c_chargetype_uu
-  type: text
-  label: C Chargetype Uu
+entities:
+  c_chargetype:
+    table: c_chargetype
+    key: c_chargetype_id
+    displayName: C_CHARGETYPE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_chargetype_id: {type: decimal, identity: true}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      c_chargetype_uu: {type: string}

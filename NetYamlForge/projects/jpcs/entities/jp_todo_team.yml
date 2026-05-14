@@ -1,115 +1,43 @@
-name: JP_TODO_TEAM
-tableName: jp_todo_team
-primaryKey: jp_todo_team_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_todo_team_id
-  type: numeric
-  label: Jp Todo Team Id
-- name: jp_todo_team_uu
-  type: text
-  label: Jp Todo Team Uu
-- name: jp_todo_type
-  type: text
-  label: Jp Todo Type
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_todo_category_id
-  type: numeric
-  label: Jp Todo Category Id
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_todo_scheduledstarttime
-  type: text
-  label: Jp Todo Scheduledstarttime
-- name: jp_todo_scheduledendtime
-  type: text
-  label: Jp Todo Scheduledendtime
-- name: jp_todo_status
-  type: text
-  label: Jp Todo Status
-- name: jp_processing2
-  type: text
-  label: Jp Processing2
-- name: jp_processing3
-  type: text
-  label: Jp Processing3
-- name: jp_mandatory_statistics_info
-  type: text
-  label: Jp Mandatory Statistics Info
-- name: jp_todo_team_related_id
-  type: numeric
-  label: Jp Todo Team Related Id
-- name: jp_todo_starttime
-  type: text
-  label: Jp Todo Starttime
-- name: jp_todo_endtime
-  type: text
-  label: Jp Todo Endtime
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: jp_team_id
-  type: numeric
-  label: Jp Team Id
-- name: processed
-  type: text
-  label: Processed
-- name: isopentodojp
-  type: text
-  label: Isopentodojp
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: jp_todo_scheduledenddate
-  type: text
-  label: Jp Todo Scheduledenddate
-- name: jp_todo_scheduledstartdate
-  type: text
-  label: Jp Todo Scheduledstartdate
-- name: isenddatealldayjp
-  type: text
-  label: Isenddatealldayjp
-- name: isstartdatealldayjp
-  type: text
-  label: Isstartdatealldayjp
-- name: url
-  type: text
-  label: Url
+entities:
+  jp_todo_team:
+    table: jp_todo_team
+    key: jp_todo_team_id
+    displayName: JP_TODO_TEAM
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_todo_team_id: {type: decimal, identity: true}
+      jp_todo_team_uu: {type: string}
+      jp_todo_type: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_todo_category_id: {type: decimal}
+      jp_processing1: {type: string}
+      jp_todo_scheduledstarttime: {type: string}
+      jp_todo_scheduledendtime: {type: string}
+      jp_todo_status: {type: string}
+      jp_processing2: {type: string}
+      jp_processing3: {type: string}
+      jp_mandatory_statistics_info: {type: string}
+      jp_todo_team_related_id: {type: decimal}
+      jp_todo_starttime: {type: string}
+      jp_todo_endtime: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      jp_team_id: {type: decimal}
+      processed: {type: string}
+      isopentodojp: {type: string}
+      ad_user_id: {type: decimal}
+      jp_todo_scheduledenddate: {type: string}
+      jp_todo_scheduledstartdate: {type: string}
+      isenddatealldayjp: {type: string}
+      isstartdatealldayjp: {type: string}
+      url: {type: string}

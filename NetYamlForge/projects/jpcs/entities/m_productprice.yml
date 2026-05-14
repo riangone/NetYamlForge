@@ -1,46 +1,20 @@
-name: M_PRODUCTPRICE
-tableName: m_productprice
-primaryKey: m_productprice_id
-fields:
-- name: m_pricelist_version_id
-  type: numeric
-  label: M Pricelist Version Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: pricelist
-  type: numeric
-  label: Pricelist
-- name: pricestd
-  type: numeric
-  label: Pricestd
-- name: pricelimit
-  type: numeric
-  label: Pricelimit
-- name: m_productprice_uu
-  type: text
-  label: M Productprice Uu
-- name: m_productprice_id
-  type: numeric
-  label: M Productprice Id
+entities:
+  m_productprice:
+    table: m_productprice
+    key: m_productprice_id
+    displayName: M_PRODUCTPRICE
+    columns:
+      m_pricelist_version_id: {type: decimal}
+      m_product_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      pricelist: {type: decimal}
+      pricestd: {type: decimal}
+      pricelimit: {type: decimal}
+      m_productprice_uu: {type: string}
+      m_productprice_id: {type: decimal, identity: true}

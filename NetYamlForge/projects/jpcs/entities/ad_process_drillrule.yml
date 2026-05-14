@@ -1,58 +1,24 @@
-name: AD_PROCESS_DRILLRULE
-tableName: ad_process_drillrule
-primaryKey: ad_process_drillrule_id
-fields:
-- name: ad_process_drillrule_id
-  type: numeric
-  label: Ad Process Drillrule Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: showhelp
-  type: text
-  label: Showhelp
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_reportview_id
-  type: numeric
-  label: Ad Reportview Id
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: ad_process_drillrule_uu
-  type: text
-  label: Ad Process Drillrule Uu
-- name: ad_process_para_id
-  type: numeric
-  label: Ad Process Para Id
-- name: isvalid
-  type: text
-  label: Isvalid
+entities:
+  ad_process_drillrule:
+    table: ad_process_drillrule
+    key: ad_process_drillrule_id
+    displayName: AD_PROCESS_DRILLRULE
+    columns:
+      ad_process_drillrule_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      showhelp: {type: string}
+      ad_process_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_reportview_id: {type: decimal}
+      ad_printformat_id: {type: decimal}
+      ad_process_drillrule_uu: {type: string}
+      ad_process_para_id: {type: decimal}
+      isvalid: {type: string}

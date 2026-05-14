@@ -1,88 +1,34 @@
-name: W_ADVERTISEMENT
-tableName: w_advertisement
-primaryKey: w_advertisement_id
-fields:
-- name: w_advertisement_id
-  type: numeric
-  label: W Advertisement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: w_clickcount_id
-  type: numeric
-  label: W Clickcount Id
-- name: w_countercount_id
-  type: numeric
-  label: W Countercount Id
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: adtext
-  type: text
-  label: Adtext
-- name: webparam1
-  type: text
-  label: Webparam1
-- name: webparam2
-  type: text
-  label: Webparam2
-- name: webparam3
-  type: text
-  label: Webparam3
-- name: webparam4
-  type: text
-  label: Webparam4
-- name: publishstatus
-  type: text
-  label: Publishstatus
-- name: version
-  type: numeric
-  label: Version
-- name: processing
-  type: text
-  label: Processing
-- name: w_advertisement_uu
-  type: text
-  label: W Advertisement Uu
+entities:
+  w_advertisement:
+    table: w_advertisement
+    key: w_advertisement_id
+    displayName: W_ADVERTISEMENT
+    columns:
+      w_advertisement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isselfservice: {type: string}
+      c_bpartner_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      w_clickcount_id: {type: decimal}
+      w_countercount_id: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      imageurl: {type: string}
+      adtext: {type: string}
+      webparam1: {type: string}
+      webparam2: {type: string}
+      webparam3: {type: string}
+      webparam4: {type: string}
+      publishstatus: {type: string}
+      version: {type: decimal}
+      processing: {type: string}
+      w_advertisement_uu: {type: string}

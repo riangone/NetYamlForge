@@ -1,49 +1,21 @@
-name: A_ASSET_TYPE
-tableName: a_asset_type
-primaryKey: a_asset_type_id
-fields:
-- name: a_asset_type_id
-  type: numeric
-  label: A Asset Type Id
-- name: name
-  type: text
-  label: Name
-- name: value
-  type: text
-  label: Value
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: description
-  type: text
-  label: Description
-- name: isowned
-  type: text
-  label: Isowned
-- name: isinposession
-  type: text
-  label: Isinposession
-- name: isdepreciable
-  type: text
-  label: Isdepreciable
-- name: a_asset_type_uu
-  type: text
-  label: A Asset Type Uu
+entities:
+  a_asset_type:
+    table: a_asset_type
+    key: a_asset_type_id
+    displayName: A_ASSET_TYPE
+    columns:
+      a_asset_type_id: {type: decimal, identity: true}
+      name: {type: string}
+      value: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      description: {type: string}
+      isowned: {type: string}
+      isinposession: {type: string}
+      isdepreciable: {type: string}
+      a_asset_type_uu: {type: string}

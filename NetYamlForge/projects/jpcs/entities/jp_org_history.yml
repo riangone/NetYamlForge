@@ -1,52 +1,22 @@
-name: JP_ORG_HISTORY
-tableName: jp_org_history
-primaryKey: jp_org_history_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datefrom
-  type: text
-  label: Datefrom
-- name: dateto
-  type: text
-  label: Dateto
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_businessunit_id
-  type: numeric
-  label: Jp Businessunit Id
-- name: jp_org_history_id
-  type: numeric
-  label: Jp Org History Id
-- name: jp_org_history_uu
-  type: text
-  label: Jp Org History Uu
-- name: name
-  type: text
-  label: Name
-- name: supervisor_id
-  type: numeric
-  label: Supervisor Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_org_history:
+    table: jp_org_history
+    key: jp_org_history_id
+    displayName: JP_ORG_HISTORY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_location_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datefrom: {type: string}
+      dateto: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      jp_businessunit_id: {type: decimal}
+      jp_org_history_id: {type: decimal, identity: true}
+      jp_org_history_uu: {type: string}
+      name: {type: string}
+      supervisor_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}

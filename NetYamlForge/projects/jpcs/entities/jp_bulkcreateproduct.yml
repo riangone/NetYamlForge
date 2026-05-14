@@ -1,58 +1,24 @@
-name: JP_BULKCREATEPRODUCT
-tableName: jp_bulkcreateproduct
-primaryKey: jp_bulkcreateproduct_id
-fields:
-- name: jp_bulkcreateproduct_id
-  type: numeric
-  label: Jp Bulkcreateproduct Id
-- name: jp_bulkcreateproduct_uu
-  type: text
-  label: Jp Bulkcreateproduct Uu
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: prefix
-  type: text
-  label: Prefix
-- name: suffix
-  type: text
-  label: Suffix
-- name: startno
-  type: numeric
-  label: Startno
-- name: jp_registrationqty
-  type: numeric
-  label: Jp Registrationqty
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: jp_cresetrecords
-  type: numeric
-  label: Jp Cresetrecords
-- name: jp_commitrecords
-  type: numeric
-  label: Jp Commitrecords
+entities:
+  jp_bulkcreateproduct:
+    table: jp_bulkcreateproduct
+    key: jp_bulkcreateproduct_id
+    displayName: JP_BULKCREATEPRODUCT
+    columns:
+      jp_bulkcreateproduct_id: {type: decimal, identity: true}
+      jp_bulkcreateproduct_uu: {type: string}
+      name: {type: string}
+      description: {type: string}
+      prefix: {type: string}
+      suffix: {type: string}
+      startno: {type: decimal}
+      jp_registrationqty: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_product_id: {type: decimal}
+      jp_cresetrecords: {type: decimal}
+      jp_commitrecords: {type: decimal}

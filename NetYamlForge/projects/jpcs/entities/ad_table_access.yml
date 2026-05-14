@@ -1,49 +1,21 @@
-name: AD_TABLE_ACCESS
-tableName: ad_table_access
-primaryKey: ad_role_id
-fields:
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: accesstyperule
-  type: text
-  label: Accesstyperule
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: iscanreport
-  type: text
-  label: Iscanreport
-- name: iscanexport
-  type: text
-  label: Iscanexport
-- name: isexclude
-  type: text
-  label: Isexclude
-- name: ad_table_access_uu
-  type: text
-  label: Ad Table Access Uu
+entities:
+  ad_table_access:
+    table: ad_table_access
+    key: ad_role_id
+    displayName: AD_TABLE_ACCESS
+    columns:
+      ad_role_id: {type: decimal, identity: true}
+      ad_table_id: {type: decimal}
+      accesstyperule: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      isreadonly: {type: string}
+      iscanreport: {type: string}
+      iscanexport: {type: string}
+      isexclude: {type: string}
+      ad_table_access_uu: {type: string}

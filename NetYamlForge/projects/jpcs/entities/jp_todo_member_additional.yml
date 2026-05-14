@@ -1,37 +1,17 @@
-name: JP_TODO_MEMBER_ADDITIONAL
-tableName: jp_todo_member_additional
-primaryKey: jp_todo_member_additional_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_todo_member_additional_id
-  type: numeric
-  label: Jp Todo Member Additional Id
-- name: jp_todo_member_additional_uu
-  type: text
-  label: Jp Todo Member Additional Uu
-- name: jp_todo_team_id
-  type: numeric
-  label: Jp Todo Team Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_todo_member_additional:
+    table: jp_todo_member_additional
+    key: jp_todo_member_additional_id
+    displayName: JP_TODO_MEMBER_ADDITIONAL
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      jp_todo_member_additional_id: {type: decimal, identity: true}
+      jp_todo_member_additional_uu: {type: string}
+      jp_todo_team_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}

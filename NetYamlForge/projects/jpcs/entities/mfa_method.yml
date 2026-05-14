@@ -1,67 +1,27 @@
-name: MFA_METHOD
-tableName: mfa_method
-primaryKey: mfa_method_id
-fields:
-- name: mfa_method_id
-  type: numeric
-  label: Mfa Method Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: mfa_method_uu
-  type: text
-  label: Mfa Method Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: method
-  type: text
-  label: Method
-- name: mfatype
-  type: text
-  label: Mfatype
-- name: mfaissuer
-  type: text
-  label: Mfaissuer
-- name: mfaallowedtimediscrepancy
-  type: numeric
-  label: Mfaallowedtimediscrepancy
-- name: mfatimeprovider
-  type: text
-  label: Mfatimeprovider
-- name: mfatimeserver
-  type: text
-  label: Mfatimeserver
-- name: expireinminutes
-  type: numeric
-  label: Expireinminutes
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: mfa_elementprm_id
-  type: numeric
-  label: Mfa Elementprm Id
+entities:
+  mfa_method:
+    table: mfa_method
+    key: mfa_method_id
+    displayName: MFA_METHOD
+    columns:
+      mfa_method_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      mfa_method_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      method: {type: string}
+      mfatype: {type: string}
+      mfaissuer: {type: string}
+      mfaallowedtimediscrepancy: {type: decimal}
+      mfatimeprovider: {type: string}
+      mfatimeserver: {type: string}
+      expireinminutes: {type: decimal}
+      r_mailtext_id: {type: decimal}
+      mfa_elementprm_id: {type: decimal}

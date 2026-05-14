@@ -1,55 +1,23 @@
-name: C_PAYMENTALLOCATE
-tableName: c_paymentallocate
-primaryKey: c_paymentallocate_id
-fields:
-- name: c_paymentallocate_id
-  type: numeric
-  label: C Paymentallocate Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: discountamt
-  type: numeric
-  label: Discountamt
-- name: writeoffamt
-  type: numeric
-  label: Writeoffamt
-- name: overunderamt
-  type: numeric
-  label: Overunderamt
-- name: invoiceamt
-  type: numeric
-  label: Invoiceamt
-- name: c_allocationline_id
-  type: numeric
-  label: C Allocationline Id
-- name: c_paymentallocate_uu
-  type: text
-  label: C Paymentallocate Uu
+entities:
+  c_paymentallocate:
+    table: c_paymentallocate
+    key: c_paymentallocate_id
+    displayName: C_PAYMENTALLOCATE
+    columns:
+      c_paymentallocate_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_payment_id: {type: decimal}
+      c_invoice_id: {type: decimal}
+      amount: {type: decimal}
+      discountamt: {type: decimal}
+      writeoffamt: {type: decimal}
+      overunderamt: {type: decimal}
+      invoiceamt: {type: decimal}
+      c_allocationline_id: {type: decimal}
+      c_paymentallocate_uu: {type: string}

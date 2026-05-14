@@ -1,85 +1,33 @@
-name: M_EDI
-tableName: m_edi
-primaryKey: m_edi_id
-fields:
-- name: m_edi_id
-  type: numeric
-  label: M Edi Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_bp_edi_id
-  type: numeric
-  label: C Bp Edi Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: line
-  type: numeric
-  label: Line
-- name: trxtype
-  type: text
-  label: Trxtype
-- name: edistatus
-  type: text
-  label: Edistatus
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: request_qty
-  type: numeric
-  label: Request Qty
-- name: request_shipdate
-  type: text
-  label: Request Shipdate
-- name: request_price
-  type: numeric
-  label: Request Price
-- name: trxsent
-  type: text
-  label: Trxsent
-- name: trxreceived
-  type: text
-  label: Trxreceived
-- name: reply_received
-  type: text
-  label: Reply Received
-- name: reply_qtyconfirmed
-  type: numeric
-  label: Reply Qtyconfirmed
-- name: reply_qtyavailable
-  type: numeric
-  label: Reply Qtyavailable
-- name: reply_shipdate
-  type: text
-  label: Reply Shipdate
-- name: reply_price
-  type: numeric
-  label: Reply Price
-- name: reply_remarks
-  type: text
-  label: Reply Remarks
-- name: processed
-  type: text
-  label: Processed
+entities:
+  m_edi:
+    table: m_edi
+    key: m_edi_id
+    displayName: M_EDI
+    columns:
+      m_edi_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_bp_edi_id: {type: decimal}
+      documentno: {type: string}
+      line: {type: decimal}
+      trxtype: {type: string}
+      edistatus: {type: string}
+      m_warehouse_id: {type: decimal}
+      m_product_id: {type: decimal}
+      request_qty: {type: decimal}
+      request_shipdate: {type: string}
+      request_price: {type: decimal}
+      trxsent: {type: string}
+      trxreceived: {type: string}
+      reply_received: {type: string}
+      reply_qtyconfirmed: {type: decimal}
+      reply_qtyavailable: {type: decimal}
+      reply_shipdate: {type: string}
+      reply_price: {type: decimal}
+      reply_remarks: {type: string}
+      processed: {type: string}

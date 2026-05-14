@@ -1,49 +1,21 @@
-name: AD_IMAGE
-tableName: ad_image
-primaryKey: ad_image_id
-fields:
-- name: ad_image_id
-  type: numeric
-  label: Ad Image Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: binarydata
-  type: text
-  label: Binarydata
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: description
-  type: text
-  label: Description
-- name: ad_image_uu
-  type: text
-  label: Ad Image Uu
-- name: ad_storageprovider_id
-  type: numeric
-  label: Ad Storageprovider Id
+entities:
+  ad_image:
+    table: ad_image
+    key: ad_image_id
+    displayName: AD_IMAGE
+    columns:
+      ad_image_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      imageurl: {type: string}
+      binarydata: {type: string}
+      entitytype: {type: string}
+      description: {type: string}
+      ad_image_uu: {type: string}
+      ad_storageprovider_id: {type: decimal}

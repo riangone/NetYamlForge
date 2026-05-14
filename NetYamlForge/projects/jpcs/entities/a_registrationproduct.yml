@@ -1,37 +1,17 @@
-name: A_REGISTRATIONPRODUCT
-tableName: a_registrationproduct
-primaryKey: a_registrationattribute_id
-fields:
-- name: a_registrationattribute_id
-  type: numeric
-  label: A Registrationattribute Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: description
-  type: text
-  label: Description
-- name: a_registrationproduct_uu
-  type: text
-  label: A Registrationproduct Uu
+entities:
+  a_registrationproduct:
+    table: a_registrationproduct
+    key: a_registrationattribute_id
+    displayName: A_REGISTRATIONPRODUCT
+    columns:
+      a_registrationattribute_id: {type: decimal, identity: true}
+      m_product_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      description: {type: string}
+      a_registrationproduct_uu: {type: string}

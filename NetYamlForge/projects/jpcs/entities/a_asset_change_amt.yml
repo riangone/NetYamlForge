@@ -1,43 +1,19 @@
-name: A_ASSET_CHANGE_AMT
-tableName: a_asset_change_amt
-primaryKey: a_asset_change_id
-fields:
-- name: a_asset_change_id
-  type: numeric
-  label: A Asset Change Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: assetvalueamt
-  type: numeric
-  label: Assetvalueamt
-- name: assetmarketvalueamt
-  type: numeric
-  label: Assetmarketvalueamt
-- name: assetbookvalueamt
-  type: numeric
-  label: Assetbookvalueamt
-- name: assetaccumdepreciationamt
-  type: numeric
-  label: Assetaccumdepreciationamt
+entities:
+  a_asset_change_amt:
+    table: a_asset_change_amt
+    key: a_asset_change_id
+    displayName: A_ASSET_CHANGE_AMT
+    columns:
+      a_asset_change_id: {type: decimal, identity: true}
+      c_acctschema_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      assetvalueamt: {type: decimal}
+      assetmarketvalueamt: {type: decimal}
+      assetbookvalueamt: {type: decimal}
+      assetaccumdepreciationamt: {type: decimal}

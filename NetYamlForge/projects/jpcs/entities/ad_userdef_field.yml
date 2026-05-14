@@ -1,145 +1,53 @@
-name: AD_USERDEF_FIELD
-tableName: ad_userdef_field
-primaryKey: ad_userdef_field_id
-fields:
-- name: ad_userdef_field_id
-  type: numeric
-  label: Ad Userdef Field Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_userdef_tab_id
-  type: numeric
-  label: Ad Userdef Tab Id
-- name: ad_field_id
-  type: numeric
-  label: Ad Field Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isdisplayed
-  type: text
-  label: Isdisplayed
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: issameline
-  type: text
-  label: Issameline
-- name: isupdateable
-  type: text
-  label: Isupdateable
-- name: displaylength
-  type: numeric
-  label: Displaylength
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: sortno
-  type: numeric
-  label: Sortno
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_userdef_field_uu
-  type: text
-  label: Ad Userdef Field Uu
-- name: isalwaysupdateable
-  type: text
-  label: Isalwaysupdateable
-- name: mandatorylogic
-  type: text
-  label: Mandatorylogic
-- name: readonlylogic
-  type: text
-  label: Readonlylogic
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: xposition
-  type: numeric
-  label: Xposition
-- name: numlines
-  type: numeric
-  label: Numlines
-- name: columnspan
-  type: numeric
-  label: Columnspan
-- name: istoolbarbutton
-  type: text
-  label: Istoolbarbutton
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: vformat
-  type: text
-  label: Vformat
-- name: ad_labelstyle_id
-  type: numeric
-  label: Ad Labelstyle Id
-- name: ad_fieldstyle_id
-  type: numeric
-  label: Ad Fieldstyle Id
-- name: pa_dashboardcontent_id
-  type: numeric
-  label: Pa Dashboardcontent Id
-- name: placeholder
-  type: text
-  label: Placeholder
-- name: isautocomplete
-  type: text
-  label: Isautocomplete
-- name: ad_val_rule_lookup_id
-  type: numeric
-  label: Ad Val Rule Lookup Id
-- name: ad_fieldgroup_id
-  type: numeric
-  label: Ad Fieldgroup Id
-- name: seqnogrid
-  type: numeric
-  label: Seqnogrid
-- name: isdisplayedgrid
-  type: text
-  label: Isdisplayedgrid
-- name: ad_chart_id
-  type: numeric
-  label: Ad Chart Id
-- name: alwaysupdatablelogic
-  type: text
-  label: Alwaysupdatablelogic
-- name: ishtml
-  type: text
-  label: Ishtml
+entities:
+  ad_userdef_field:
+    table: ad_userdef_field
+    key: ad_userdef_field_id
+    displayName: AD_USERDEF_FIELD
+    columns:
+      ad_userdef_field_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_userdef_tab_id: {type: decimal}
+      ad_field_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isdisplayed: {type: string}
+      isreadonly: {type: string}
+      issameline: {type: string}
+      isupdateable: {type: string}
+      displaylength: {type: decimal}
+      displaylogic: {type: string}
+      defaultvalue: {type: string}
+      sortno: {type: decimal}
+      seqno: {type: decimal}
+      ad_userdef_field_uu: {type: string}
+      isalwaysupdateable: {type: string}
+      mandatorylogic: {type: string}
+      readonlylogic: {type: string}
+      ad_reference_value_id: {type: decimal}
+      ismandatory: {type: string}
+      xposition: {type: decimal}
+      numlines: {type: decimal}
+      columnspan: {type: decimal}
+      istoolbarbutton: {type: string}
+      ad_reference_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      vformat: {type: string}
+      ad_labelstyle_id: {type: decimal}
+      ad_fieldstyle_id: {type: decimal}
+      pa_dashboardcontent_id: {type: decimal}
+      placeholder: {type: string}
+      isautocomplete: {type: string}
+      ad_val_rule_lookup_id: {type: decimal}
+      ad_fieldgroup_id: {type: decimal}
+      seqnogrid: {type: decimal}
+      isdisplayedgrid: {type: string}
+      ad_chart_id: {type: decimal}
+      alwaysupdatablelogic: {type: string}
+      ishtml: {type: string}

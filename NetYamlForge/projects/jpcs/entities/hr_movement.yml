@@ -1,121 +1,45 @@
-name: HR_MOVEMENT
-tableName: hr_movement
-primaryKey: hr_movement_id
-fields:
-- name: isregistered
-  type: text
-  label: Isregistered
-- name: hr_concept_category_id
-  type: numeric
-  label: Hr Concept Category Id
-- name: hr_process_id
-  type: numeric
-  label: Hr Process Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: hr_concept_id
-  type: numeric
-  label: Hr Concept Id
-- name: columntype
-  type: text
-  label: Columntype
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hr_department_id
-  type: numeric
-  label: Hr Department Id
-- name: hr_job_id
-  type: numeric
-  label: Hr Job Id
-- name: hr_movement_id
-  type: numeric
-  label: Hr Movement Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: processed
-  type: text
-  label: Processed
-- name: qty
-  type: numeric
-  label: Qty
-- name: servicedate
-  type: text
-  label: Servicedate
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: validto
-  type: text
-  label: Validto
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_rule_id
-  type: numeric
-  label: Ad Rule Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: pp_cost_collector_id
-  type: numeric
-  label: Pp Cost Collector Id
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: c_bp_bankaccount_id
-  type: numeric
-  label: C Bp Bankaccount Id
-- name: accountsign
-  type: text
-  label: Accountsign
-- name: hr_movement_uu
-  type: text
-  label: Hr Movement Uu
+entities:
+  hr_movement:
+    table: hr_movement
+    key: hr_movement_id
+    displayName: HR_MOVEMENT
+    columns:
+      isregistered: {type: string}
+      hr_concept_category_id: {type: decimal}
+      hr_process_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      hr_concept_id: {type: decimal}
+      columntype: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hr_department_id: {type: decimal}
+      hr_job_id: {type: decimal}
+      hr_movement_id: {type: decimal, identity: true}
+      isactive: {type: string}
+      isprinted: {type: string}
+      processed: {type: string}
+      qty: {type: decimal}
+      servicedate: {type: string}
+      textmsg: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      ad_client_id: {type: decimal}
+      validto: {type: string}
+      ad_org_id: {type: decimal}
+      ad_rule_id: {type: decimal}
+      amount: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_project_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      pp_cost_collector_id: {type: decimal}
+      c_bp_group_id: {type: decimal}
+      c_bp_bankaccount_id: {type: decimal}
+      accountsign: {type: string}
+      hr_movement_uu: {type: string}

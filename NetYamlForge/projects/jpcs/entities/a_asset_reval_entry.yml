@@ -1,82 +1,32 @@
-name: A_ASSET_REVAL_ENTRY
-tableName: a_asset_reval_entry
-primaryKey: a_asset_reval_entry_id
-fields:
-- name: a_asset_reval_entry_id
-  type: numeric
-  label: A Asset Reval Entry Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: a_effective_date
-  type: text
-  label: A Effective Date
-- name: a_reval_cal_method
-  type: text
-  label: A Reval Cal Method
-- name: a_reval_multiplier
-  type: text
-  label: A Reval Multiplier
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: c_period_id
-  type: numeric
-  label: C Period Id
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datedoc
-  type: text
-  label: Datedoc
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: postingtype
-  type: text
-  label: Postingtype
-- name: isactive
-  type: text
-  label: Isactive
-- name: gl_category_id
-  type: numeric
-  label: Gl Category Id
-- name: documentno
-  type: text
-  label: Documentno
-- name: description
-  type: text
-  label: Description
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: created
-  type: text
-  label: Created
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: a_reval_effective_date
-  type: text
-  label: A Reval Effective Date
-- name: a_rev_code
-  type: text
-  label: A Rev Code
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: a_asset_reval_entry_uu
-  type: text
-  label: A Asset Reval Entry Uu
+entities:
+  a_asset_reval_entry:
+    table: a_asset_reval_entry
+    key: a_asset_reval_entry_id
+    displayName: A_ASSET_REVAL_ENTRY
+    columns:
+      a_asset_reval_entry_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      a_effective_date: {type: string}
+      a_reval_cal_method: {type: string}
+      a_reval_multiplier: {type: string}
+      c_currency_id: {type: decimal}
+      c_period_id: {type: decimal}
+      createdby: {type: decimal}
+      datedoc: {type: string}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      postingtype: {type: string}
+      isactive: {type: string}
+      gl_category_id: {type: decimal}
+      documentno: {type: string}
+      description: {type: string}
+      dateacct: {type: string}
+      created: {type: string}
+      c_doctype_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      a_reval_effective_date: {type: string}
+      a_rev_code: {type: string}
+      ad_org_id: {type: decimal}
+      a_asset_reval_entry_uu: {type: string}

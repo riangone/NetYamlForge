@@ -1,73 +1,29 @@
-name: C_BPARTNER_LOCATION
-tableName: c_bpartner_location
-primaryKey: c_bpartner_location_id
-fields:
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: isbillto
-  type: text
-  label: Isbillto
-- name: isshipto
-  type: text
-  label: Isshipto
-- name: ispayfrom
-  type: text
-  label: Ispayfrom
-- name: isremitto
-  type: text
-  label: Isremitto
-- name: phone
-  type: text
-  label: Phone
-- name: phone2
-  type: text
-  label: Phone2
-- name: fax
-  type: text
-  label: Fax
-- name: isdn
-  type: text
-  label: Isdn
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_location_id
-  type: numeric
-  label: C Location Id
-- name: c_bpartner_location_uu
-  type: text
-  label: C Bpartner Location Uu
-- name: customeraddressid
-  type: text
-  label: Customeraddressid
-- name: ispreservecustomname
-  type: text
-  label: Ispreservecustomname
+entities:
+  c_bpartner_location:
+    table: c_bpartner_location
+    key: c_bpartner_location_id
+    displayName: C_BPARTNER_LOCATION
+    columns:
+      c_bpartner_location_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      isbillto: {type: string}
+      isshipto: {type: string}
+      ispayfrom: {type: string}
+      isremitto: {type: string}
+      phone: {type: string}
+      phone2: {type: string}
+      fax: {type: string}
+      isdn: {type: string}
+      c_salesregion_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_location_id: {type: decimal}
+      c_bpartner_location_uu: {type: string}
+      customeraddressid: {type: string}
+      ispreservecustomname: {type: string}

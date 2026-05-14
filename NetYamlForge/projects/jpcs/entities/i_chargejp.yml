@@ -1,97 +1,37 @@
-name: I_CHARGEJP
-tableName: i_chargejp
-primaryKey: i_chargejp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_chargejp_id
-  type: numeric
-  label: I Chargejp Id
-- name: i_chargejp_uu
-  type: text
-  label: I Chargejp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: jp_chargetype_value
-  type: text
-  label: Jp Chargetype Value
-- name: c_chargetype_id
-  type: numeric
-  label: C Chargetype Id
-- name: jp_taxcategory_name
-  type: text
-  label: Jp Taxcategory Name
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: issametax
-  type: text
-  label: Issametax
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: jp_bpartner_value
-  type: text
-  label: Jp Bpartner Value
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: chargeamt
-  type: numeric
-  label: Chargeamt
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
-- name: jp_acctschema_name
-  type: text
-  label: Jp Acctschema Name
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: jp_ch_expense_acct_value
-  type: text
-  label: Jp Ch Expense Acct Value
-- name: ch_expense_acct
-  type: numeric
-  label: Ch Expense Acct
+entities:
+  i_chargejp:
+    table: i_chargejp
+    key: i_chargejp_id
+    displayName: I_CHARGEJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_chargejp_id: {type: decimal, identity: true}
+      i_chargejp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_org_value: {type: string}
+      c_charge_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      jp_chargetype_value: {type: string}
+      c_chargetype_id: {type: decimal}
+      jp_taxcategory_name: {type: string}
+      c_taxcategory_id: {type: decimal}
+      issametax: {type: string}
+      istaxincluded: {type: string}
+      jp_bpartner_value: {type: string}
+      c_bpartner_id: {type: decimal}
+      chargeamt: {type: decimal}
+      i_isactivejp: {type: string}
+      jp_acctschema_name: {type: string}
+      c_acctschema_id: {type: decimal}
+      jp_ch_expense_acct_value: {type: string}
+      ch_expense_acct: {type: decimal}

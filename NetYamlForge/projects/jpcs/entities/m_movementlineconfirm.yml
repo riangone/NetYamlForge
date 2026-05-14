@@ -1,58 +1,24 @@
-name: M_MOVEMENTLINECONFIRM
-tableName: m_movementlineconfirm
-primaryKey: m_movementlineconfirm_id
-fields:
-- name: m_movementlineconfirm_id
-  type: numeric
-  label: M Movementlineconfirm Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_movementconfirm_id
-  type: numeric
-  label: M Movementconfirm Id
-- name: m_movementline_id
-  type: numeric
-  label: M Movementline Id
-- name: description
-  type: text
-  label: Description
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: differenceqty
-  type: numeric
-  label: Differenceqty
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: processed
-  type: text
-  label: Processed
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: m_movementlineconfirm_uu
-  type: text
-  label: M Movementlineconfirm Uu
+entities:
+  m_movementlineconfirm:
+    table: m_movementlineconfirm
+    key: m_movementlineconfirm_id
+    displayName: M_MOVEMENTLINECONFIRM
+    columns:
+      m_movementlineconfirm_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_movementconfirm_id: {type: decimal}
+      m_movementline_id: {type: decimal}
+      description: {type: string}
+      targetqty: {type: decimal}
+      confirmedqty: {type: decimal}
+      differenceqty: {type: decimal}
+      scrappedqty: {type: decimal}
+      processed: {type: string}
+      m_inventoryline_id: {type: decimal}
+      m_movementlineconfirm_uu: {type: string}

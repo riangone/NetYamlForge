@@ -1,55 +1,23 @@
-name: M_SHIPPERLABELSCFG
-tableName: m_shipperlabelscfg
-primaryKey: m_shipperlabelscfg_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: height
-  type: numeric
-  label: Height
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: labelprintmethod
-  type: text
-  label: Labelprintmethod
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: width
-  type: numeric
-  label: Width
-- name: m_shippercfg_id
-  type: numeric
-  label: M Shippercfg Id
-- name: m_shipperlabelscfg_id
-  type: numeric
-  label: M Shipperlabelscfg Id
-- name: m_shipperlabelscfg_uu
-  type: text
-  label: M Shipperlabelscfg Uu
+entities:
+  m_shipperlabelscfg:
+    table: m_shipperlabelscfg
+    key: m_shipperlabelscfg_id
+    displayName: M_SHIPPERLABELSCFG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      height: {type: decimal}
+      isactive: {type: string}
+      isdefault: {type: string}
+      labelprintmethod: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      width: {type: decimal}
+      m_shippercfg_id: {type: decimal}
+      m_shipperlabelscfg_id: {type: decimal, identity: true}
+      m_shipperlabelscfg_uu: {type: string}

@@ -1,64 +1,26 @@
-name: PA_COLORSCHEMA
-tableName: pa_colorschema
-primaryKey: pa_colorschema_id
-fields:
-- name: pa_colorschema_id
-  type: numeric
-  label: Pa Colorschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: mark1percent
-  type: numeric
-  label: Mark1Percent
-- name: ad_printcolor1_id
-  type: numeric
-  label: Ad Printcolor1 Id
-- name: mark2percent
-  type: numeric
-  label: Mark2Percent
-- name: ad_printcolor2_id
-  type: numeric
-  label: Ad Printcolor2 Id
-- name: mark3percent
-  type: numeric
-  label: Mark3Percent
-- name: ad_printcolor3_id
-  type: numeric
-  label: Ad Printcolor3 Id
-- name: mark4percent
-  type: numeric
-  label: Mark4Percent
-- name: ad_printcolor4_id
-  type: numeric
-  label: Ad Printcolor4 Id
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: pa_colorschema_uu
-  type: text
-  label: Pa Colorschema Uu
+entities:
+  pa_colorschema:
+    table: pa_colorschema
+    key: pa_colorschema_id
+    displayName: PA_COLORSCHEMA
+    columns:
+      pa_colorschema_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      mark1percent: {type: decimal}
+      ad_printcolor1_id: {type: decimal}
+      mark2percent: {type: decimal}
+      ad_printcolor2_id: {type: decimal}
+      mark3percent: {type: decimal}
+      ad_printcolor3_id: {type: decimal}
+      mark4percent: {type: decimal}
+      ad_printcolor4_id: {type: decimal}
+      entitytype: {type: string}
+      pa_colorschema_uu: {type: string}

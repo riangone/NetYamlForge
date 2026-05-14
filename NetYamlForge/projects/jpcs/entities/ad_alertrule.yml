@@ -1,64 +1,26 @@
-name: AD_ALERTRULE
-tableName: ad_alertrule
-primaryKey: ad_alertrule_id
-fields:
-- name: ad_alertrule_id
-  type: numeric
-  label: Ad Alertrule Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: ad_alert_id
-  type: numeric
-  label: Ad Alert Id
-- name: selectclause
-  type: text
-  label: Selectclause
-- name: fromclause
-  type: text
-  label: Fromclause
-- name: whereclause
-  type: text
-  label: Whereclause
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: preprocessing
-  type: text
-  label: Preprocessing
-- name: postprocessing
-  type: text
-  label: Postprocessing
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: errormsg
-  type: text
-  label: Errormsg
-- name: otherclause
-  type: text
-  label: Otherclause
-- name: ad_alertrule_uu
-  type: text
-  label: Ad Alertrule Uu
+entities:
+  ad_alertrule:
+    table: ad_alertrule
+    key: ad_alertrule_id
+    displayName: AD_ALERTRULE
+    columns:
+      ad_alertrule_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      ad_alert_id: {type: decimal}
+      selectclause: {type: string}
+      fromclause: {type: string}
+      whereclause: {type: string}
+      ad_table_id: {type: decimal}
+      preprocessing: {type: string}
+      postprocessing: {type: string}
+      isvalid: {type: string}
+      errormsg: {type: string}
+      otherclause: {type: string}
+      ad_alertrule_uu: {type: string}

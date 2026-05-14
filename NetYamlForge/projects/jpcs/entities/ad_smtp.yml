@@ -1,58 +1,24 @@
-name: AD_SMTP
-tableName: ad_smtp
-primaryKey: ad_smtp_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_smtp_id
-  type: numeric
-  label: Ad Smtp Id
-- name: ad_smtp_uu
-  type: text
-  label: Ad Smtp Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: emailtest
-  type: text
-  label: Emailtest
-- name: isactive
-  type: text
-  label: Isactive
-- name: issecuresmtp
-  type: text
-  label: Issecuresmtp
-- name: issmtpauthorization
-  type: text
-  label: Issmtpauthorization
-- name: name
-  type: text
-  label: Name
-- name: requestuser
-  type: text
-  label: Requestuser
-- name: requestuserpw
-  type: text
-  label: Requestuserpw
-- name: smtphost
-  type: text
-  label: Smtphost
-- name: smtpport
-  type: numeric
-  label: Smtpport
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: usedbyemailordomain
-  type: text
-  label: Usedbyemailordomain
+entities:
+  ad_smtp:
+    table: ad_smtp
+    key: ad_smtp_id
+    displayName: AD_SMTP
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_smtp_id: {type: decimal, identity: true}
+      ad_smtp_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      emailtest: {type: string}
+      isactive: {type: string}
+      issecuresmtp: {type: string}
+      issmtpauthorization: {type: string}
+      name: {type: string}
+      requestuser: {type: string}
+      requestuserpw: {type: string}
+      smtphost: {type: string}
+      smtpport: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      usedbyemailordomain: {type: string}

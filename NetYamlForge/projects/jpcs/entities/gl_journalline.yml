@@ -1,169 +1,61 @@
-name: GL_JOURNALLINE
-tableName: gl_journalline
-primaryKey: gl_journalline_id
-fields:
-- name: gl_journalline_id
-  type: numeric
-  label: Gl Journalline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: gl_journal_id
-  type: numeric
-  label: Gl Journal Id
-- name: line
-  type: numeric
-  label: Line
-- name: isgenerated
-  type: text
-  label: Isgenerated
-- name: description
-  type: text
-  label: Description
-- name: amtsourcedr
-  type: numeric
-  label: Amtsourcedr
-- name: amtsourcecr
-  type: numeric
-  label: Amtsourcecr
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: currencyrate
-  type: numeric
-  label: Currencyrate
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: amtacctdr
-  type: numeric
-  label: Amtacctdr
-- name: amtacctcr
-  type: numeric
-  label: Amtacctcr
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: c_validcombination_id
-  type: numeric
-  label: C Validcombination Id
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: processed
-  type: text
-  label: Processed
-- name: a_asset_group_id
-  type: numeric
-  label: A Asset Group Id
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: a_createasset
-  type: text
-  label: A Createasset
-- name: a_processed
-  type: text
-  label: A Processed
-- name: gl_journalline_uu
-  type: text
-  label: Gl Journalline Uu
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: account_id
-  type: numeric
-  label: Account Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_locfrom_id
-  type: numeric
-  label: C Locfrom Id
-- name: c_locto_id
-  type: numeric
-  label: C Locto Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_salesregion_id
-  type: numeric
-  label: C Salesregion Id
-- name: c_subacct_id
-  type: numeric
-  label: C Subacct Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: alias_validcombination_id
-  type: numeric
-  label: Alias Validcombination Id
-- name: jp_order_id
-  type: numeric
-  label: Jp Order Id
-- name: jp_contract_id
-  type: numeric
-  label: Jp Contract Id
-- name: jp_contractcontent_id
-  type: numeric
-  label: Jp Contractcontent Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: jp_invoiceline_id
-  type: numeric
-  label: Jp Invoiceline Id
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_taxamt
-  type: numeric
-  label: Jp Taxamt
-- name: jp_taxbaseamt
-  type: numeric
-  label: Jp Taxbaseamt
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: jp_sopotype
-  type: text
-  label: Jp Sopotype
-- name: jp_priceactual
-  type: numeric
-  label: Jp Priceactual
-- name: jp_bankaccount_id
-  type: numeric
-  label: Jp Bankaccount Id
+entities:
+  gl_journalline:
+    table: gl_journalline
+    key: gl_journalline_id
+    displayName: GL_JOURNALLINE
+    columns:
+      gl_journalline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      gl_journal_id: {type: decimal}
+      line: {type: decimal}
+      isgenerated: {type: string}
+      description: {type: string}
+      amtsourcedr: {type: decimal}
+      amtsourcecr: {type: decimal}
+      c_currency_id: {type: decimal}
+      currencyrate: {type: decimal}
+      dateacct: {type: string}
+      amtacctdr: {type: decimal}
+      amtacctcr: {type: decimal}
+      c_uom_id: {type: decimal}
+      qty: {type: decimal}
+      c_validcombination_id: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      processed: {type: string}
+      a_asset_group_id: {type: decimal}
+      a_asset_id: {type: decimal}
+      a_createasset: {type: string}
+      a_processed: {type: string}
+      gl_journalline_uu: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      account_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_locfrom_id: {type: decimal}
+      c_locto_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_salesregion_id: {type: decimal}
+      c_subacct_id: {type: decimal}
+      m_product_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      alias_validcombination_id: {type: decimal}
+      jp_order_id: {type: decimal}
+      jp_contract_id: {type: decimal}
+      jp_contractcontent_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      jp_invoiceline_id: {type: decimal}
+      jp_contractline_id: {type: decimal}
+      jp_taxamt: {type: decimal}
+      jp_taxbaseamt: {type: decimal}
+      c_tax_id: {type: decimal}
+      jp_sopotype: {type: string}
+      jp_priceactual: {type: decimal}
+      jp_bankaccount_id: {type: decimal}

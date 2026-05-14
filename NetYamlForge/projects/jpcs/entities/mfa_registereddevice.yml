@@ -1,43 +1,19 @@
-name: MFA_REGISTEREDDEVICE
-tableName: mfa_registereddevice
-primaryKey: mfa_registereddevice_id
-fields:
-- name: mfa_registereddevice_id
-  type: numeric
-  label: Mfa Registereddevice Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: mfa_registereddevice_uu
-  type: text
-  label: Mfa Registereddevice Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: mfadeviceidentifier
-  type: text
-  label: Mfadeviceidentifier
-- name: expiration
-  type: text
-  label: Expiration
-- name: help
-  type: text
-  label: Help
+entities:
+  mfa_registereddevice:
+    table: mfa_registereddevice
+    key: mfa_registereddevice_id
+    displayName: MFA_REGISTEREDDEVICE
+    columns:
+      mfa_registereddevice_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      mfa_registereddevice_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_user_id: {type: decimal}
+      mfadeviceidentifier: {type: string}
+      expiration: {type: string}
+      help: {type: string}

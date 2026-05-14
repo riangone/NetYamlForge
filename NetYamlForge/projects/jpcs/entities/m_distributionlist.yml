@@ -1,46 +1,20 @@
-name: M_DISTRIBUTIONLIST
-tableName: m_distributionlist
-primaryKey: m_distributionlist_id
-fields:
-- name: m_distributionlist_id
-  type: numeric
-  label: M Distributionlist Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ratiototal
-  type: numeric
-  label: Ratiototal
-- name: processing
-  type: text
-  label: Processing
-- name: m_distributionlist_uu
-  type: text
-  label: M Distributionlist Uu
+entities:
+  m_distributionlist:
+    table: m_distributionlist
+    key: m_distributionlist_id
+    displayName: M_DISTRIBUTIONLIST
+    columns:
+      m_distributionlist_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ratiototal: {type: decimal}
+      processing: {type: string}
+      m_distributionlist_uu: {type: string}

@@ -1,52 +1,22 @@
-name: S_RESOURCEASSIGNMENT
-tableName: s_resourceassignment
-primaryKey: s_resourceassignment_id
-fields:
-- name: s_resourceassignment_id
-  type: numeric
-  label: S Resourceassignment Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: assigndatefrom
-  type: text
-  label: Assigndatefrom
-- name: assigndateto
-  type: text
-  label: Assigndateto
-- name: qty
-  type: numeric
-  label: Qty
-- name: isconfirmed
-  type: text
-  label: Isconfirmed
-- name: s_resourceassignment_uu
-  type: text
-  label: S Resourceassignment Uu
+entities:
+  s_resourceassignment:
+    table: s_resourceassignment
+    key: s_resourceassignment_id
+    displayName: S_RESOURCEASSIGNMENT
+    columns:
+      s_resourceassignment_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      s_resource_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      assigndatefrom: {type: string}
+      assigndateto: {type: string}
+      qty: {type: decimal}
+      isconfirmed: {type: string}
+      s_resourceassignment_uu: {type: string}

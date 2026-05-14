@@ -1,64 +1,26 @@
-name: AD_TABLEINDEX
-tableName: ad_tableindex
-primaryKey: ad_tableindex_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_tableindex_id
-  type: numeric
-  label: Ad Tableindex Id
-- name: ad_tableindex_uu
-  type: text
-  label: Ad Tableindex Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: iscreateconstraint
-  type: text
-  label: Iscreateconstraint
-- name: isunique
-  type: text
-  label: Isunique
-- name: name
-  type: text
-  label: Name
-- name: processing
-  type: text
-  label: Processing
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_message_id
-  type: numeric
-  label: Ad Message Id
-- name: tableindexdrop
-  type: text
-  label: Tableindexdrop
-- name: iskey
-  type: text
-  label: Iskey
+entities:
+  ad_tableindex:
+    table: ad_tableindex
+    key: ad_tableindex_id
+    displayName: AD_TABLEINDEX
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_tableindex_id: {type: decimal, identity: true}
+      ad_tableindex_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      entitytype: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      iscreateconstraint: {type: string}
+      isunique: {type: string}
+      name: {type: string}
+      processing: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_message_id: {type: decimal}
+      tableindexdrop: {type: string}
+      iskey: {type: string}

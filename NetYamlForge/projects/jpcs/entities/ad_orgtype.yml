@@ -1,40 +1,18 @@
-name: AD_ORGTYPE
-tableName: ad_orgtype
-primaryKey: ad_orgtype_id
-fields:
-- name: ad_orgtype_id
-  type: numeric
-  label: Ad Orgtype Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: ad_orgtype_uu
-  type: text
-  label: Ad Orgtype Uu
+entities:
+  ad_orgtype:
+    table: ad_orgtype
+    key: ad_orgtype_id
+    displayName: AD_ORGTYPE
+    columns:
+      ad_orgtype_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      ad_printcolor_id: {type: decimal}
+      ad_orgtype_uu: {type: string}

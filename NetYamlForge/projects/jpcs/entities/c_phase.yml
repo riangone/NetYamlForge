@@ -1,52 +1,22 @@
-name: C_PHASE
-tableName: c_phase
-primaryKey: c_phase_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: c_projecttype_id
-  type: numeric
-  label: C Projecttype Id
-- name: standardqty
-  type: numeric
-  label: Standardqty
-- name: c_phase_id
-  type: numeric
-  label: C Phase Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_phase_uu
-  type: text
-  label: C Phase Uu
+entities:
+  c_phase:
+    table: c_phase
+    key: c_phase_id
+    displayName: C_PHASE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      seqno: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      c_projecttype_id: {type: decimal}
+      standardqty: {type: decimal}
+      c_phase_id: {type: decimal, identity: true}
+      m_product_id: {type: decimal}
+      c_phase_uu: {type: string}

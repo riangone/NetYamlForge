@@ -1,76 +1,30 @@
-name: C_OPPORTUNITY
-tableName: c_opportunity
-primaryKey: c_opportunity_id
-fields:
-- name: c_opportunity_id
-  type: numeric
-  label: C Opportunity Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: documentno
-  type: text
-  label: Documentno
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: closedate
-  type: text
-  label: Closedate
-- name: expectedclosedate
-  type: text
-  label: Expectedclosedate
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: opportunityamt
-  type: numeric
-  label: Opportunityamt
-- name: comments
-  type: text
-  label: Comments
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: cost
-  type: numeric
-  label: Cost
-- name: c_salesstage_id
-  type: numeric
-  label: C Salesstage Id
-- name: probability
-  type: numeric
-  label: Probability
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_opportunity_uu
-  type: text
-  label: C Opportunity Uu
+entities:
+  c_opportunity:
+    table: c_opportunity
+    key: c_opportunity_id
+    displayName: C_OPPORTUNITY
+    columns:
+      c_opportunity_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      documentno: {type: string}
+      c_bpartner_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      closedate: {type: string}
+      expectedclosedate: {type: string}
+      salesrep_id: {type: decimal}
+      opportunityamt: {type: decimal}
+      comments: {type: string}
+      c_currency_id: {type: decimal}
+      cost: {type: decimal}
+      c_salesstage_id: {type: decimal}
+      probability: {type: decimal}
+      c_order_id: {type: decimal}
+      c_opportunity_uu: {type: string}

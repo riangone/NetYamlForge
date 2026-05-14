@@ -1,130 +1,48 @@
-name: AD_CLIENT
-tableName: ad_client
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: smtphost
-  type: text
-  label: Smtphost
-- name: requestemail
-  type: text
-  label: Requestemail
-- name: requestuser
-  type: text
-  label: Requestuser
-- name: requestuserpw
-  type: text
-  label: Requestuserpw
-- name: requestfolder
-  type: text
-  label: Requestfolder
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ismultilingualdocument
-  type: text
-  label: Ismultilingualdocument
-- name: issmtpauthorization
-  type: text
-  label: Issmtpauthorization
-- name: isusebetafunctions
-  type: text
-  label: Isusebetafunctions
-- name: ldapquery
-  type: text
-  label: Ldapquery
-- name: modelvalidationclasses
-  type: text
-  label: Modelvalidationclasses
-- name: autoarchive
-  type: text
-  label: Autoarchive
-- name: mmpolicy
-  type: text
-  label: Mmpolicy
-- name: emailtest
-  type: text
-  label: Emailtest
-- name: isserveremail
-  type: text
-  label: Isserveremail
-- name: documentdir
-  type: text
-  label: Documentdir
-- name: ispostimmediate
-  type: text
-  label: Ispostimmediate
-- name: iscostimmediate
-  type: text
-  label: Iscostimmediate
-- name: storeattachmentsonfilesystem
-  type: text
-  label: Storeattachmentsonfilesystem
-- name: windowsattachmentpath
-  type: text
-  label: Windowsattachmentpath
-- name: unixattachmentpath
-  type: text
-  label: Unixattachmentpath
-- name: storearchiveonfilesystem
-  type: text
-  label: Storearchiveonfilesystem
-- name: windowsarchivepath
-  type: text
-  label: Windowsarchivepath
-- name: unixarchivepath
-  type: text
-  label: Unixarchivepath
-- name: isuseasp
-  type: text
-  label: Isuseasp
-- name: ad_replicationstrategy_id
-  type: numeric
-  label: Ad Replicationstrategy Id
-- name: ad_client_uu
-  type: text
-  label: Ad Client Uu
-- name: ad_passwordrule_id
-  type: numeric
-  label: Ad Passwordrule Id
-- name: issecuresmtp
-  type: text
-  label: Issecuresmtp
-- name: smtpport
-  type: numeric
-  label: Smtpport
-- name: loginprefix
-  type: text
-  label: Loginprefix
-- name: authenticationtype
-  type: text
-  label: Authenticationtype
+entities:
+  ad_client:
+    table: ad_client
+    key: ad_client_id
+    displayName: AD_CLIENT
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      smtphost: {type: string}
+      requestemail: {type: string}
+      requestuser: {type: string}
+      requestuserpw: {type: string}
+      requestfolder: {type: string}
+      ad_language: {type: string}
+      ismultilingualdocument: {type: string}
+      issmtpauthorization: {type: string}
+      isusebetafunctions: {type: string}
+      ldapquery: {type: string}
+      modelvalidationclasses: {type: string}
+      autoarchive: {type: string}
+      mmpolicy: {type: string}
+      emailtest: {type: string}
+      isserveremail: {type: string}
+      documentdir: {type: string}
+      ispostimmediate: {type: string}
+      iscostimmediate: {type: string}
+      storeattachmentsonfilesystem: {type: string}
+      windowsattachmentpath: {type: string}
+      unixattachmentpath: {type: string}
+      storearchiveonfilesystem: {type: string}
+      windowsarchivepath: {type: string}
+      unixarchivepath: {type: string}
+      isuseasp: {type: string}
+      ad_replicationstrategy_id: {type: decimal}
+      ad_client_uu: {type: string}
+      ad_passwordrule_id: {type: decimal}
+      issecuresmtp: {type: string}
+      smtpport: {type: decimal}
+      loginprefix: {type: string}
+      authenticationtype: {type: string}

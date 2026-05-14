@@ -1,76 +1,30 @@
-name: PA_REPORT
-tableName: pa_report
-primaryKey: pa_report_id
-fields:
-- name: pa_report_id
-  type: numeric
-  label: Pa Report Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: pa_reportlineset_id
-  type: numeric
-  label: Pa Reportlineset Id
-- name: pa_reportcolumnset_id
-  type: numeric
-  label: Pa Reportcolumnset Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: processing
-  type: text
-  label: Processing
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: listsources
-  type: text
-  label: Listsources
-- name: listtrx
-  type: text
-  label: Listtrx
-- name: jasperprocess_id
-  type: numeric
-  label: Jasperprocess Id
-- name: jasperprocessing
-  type: text
-  label: Jasperprocessing
-- name: pa_reportcube_id
-  type: numeric
-  label: Pa Reportcube Id
-- name: pa_report_uu
-  type: text
-  label: Pa Report Uu
-- name: listsourcesxtrx
-  type: text
-  label: Listsourcesxtrx
-- name: excludeadjustmentperiods
-  type: text
-  label: Excludeadjustmentperiods
+entities:
+  pa_report:
+    table: pa_report
+    key: pa_report_id
+    displayName: PA_REPORT
+    columns:
+      pa_report_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      pa_reportlineset_id: {type: decimal}
+      pa_reportcolumnset_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      c_calendar_id: {type: decimal}
+      processing: {type: string}
+      ad_printformat_id: {type: decimal}
+      listsources: {type: string}
+      listtrx: {type: string}
+      jasperprocess_id: {type: decimal}
+      jasperprocessing: {type: string}
+      pa_reportcube_id: {type: decimal}
+      pa_report_uu: {type: string}
+      listsourcesxtrx: {type: string}
+      excludeadjustmentperiods: {type: string}

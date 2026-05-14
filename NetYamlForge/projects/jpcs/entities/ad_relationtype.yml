@@ -1,58 +1,24 @@
-name: AD_RELATIONTYPE
-tableName: ad_relationtype
-primaryKey: ad_relationtype_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_reference_source_id
-  type: numeric
-  label: Ad Reference Source Id
-- name: ad_reference_target_id
-  type: numeric
-  label: Ad Reference Target Id
-- name: ad_relationtype_id
-  type: numeric
-  label: Ad Relationtype Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdirected
-  type: text
-  label: Isdirected
-- name: name
-  type: text
-  label: Name
-- name: role_source
-  type: text
-  label: Role Source
-- name: role_target
-  type: text
-  label: Role Target
-- name: type
-  type: text
-  label: Type
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_relationtype_uu
-  type: text
-  label: Ad Relationtype Uu
-- name: entitytype
-  type: text
-  label: Entitytype
+entities:
+  ad_relationtype:
+    table: ad_relationtype
+    key: ad_relationtype_id
+    displayName: AD_RELATIONTYPE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_reference_source_id: {type: decimal}
+      ad_reference_target_id: {type: decimal}
+      ad_relationtype_id: {type: decimal, identity: true}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      isdirected: {type: string}
+      name: {type: string}
+      role_source: {type: string}
+      role_target: {type: string}
+      type: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_relationtype_uu: {type: string}
+      entitytype: {type: string}

@@ -1,76 +1,30 @@
-name: C_BP_GROUP_ACCT
-tableName: c_bp_group_acct
-primaryKey: c_acctschema_id
-fields:
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_receivable_acct
-  type: numeric
-  label: C Receivable Acct
-- name: c_prepayment_acct
-  type: numeric
-  label: C Prepayment Acct
-- name: v_liability_acct
-  type: numeric
-  label: V Liability Acct
-- name: v_liability_services_acct
-  type: numeric
-  label: V Liability Services Acct
-- name: v_prepayment_acct
-  type: numeric
-  label: V Prepayment Acct
-- name: paydiscount_exp_acct
-  type: numeric
-  label: Paydiscount Exp Acct
-- name: paydiscount_rev_acct
-  type: numeric
-  label: Paydiscount Rev Acct
-- name: writeoff_acct
-  type: numeric
-  label: Writeoff Acct
-- name: notinvoicedreceipts_acct
-  type: numeric
-  label: Notinvoicedreceipts Acct
-- name: unearnedrevenue_acct
-  type: numeric
-  label: Unearnedrevenue Acct
-- name: notinvoicedrevenue_acct
-  type: numeric
-  label: Notinvoicedrevenue Acct
-- name: notinvoicedreceivables_acct
-  type: numeric
-  label: Notinvoicedreceivables Acct
-- name: processing
-  type: text
-  label: Processing
-- name: c_receivable_services_acct
-  type: numeric
-  label: C Receivable Services Acct
-- name: c_bp_group_acct_uu
-  type: text
-  label: C Bp Group Acct Uu
+entities:
+  c_bp_group_acct:
+    table: c_bp_group_acct
+    key: c_acctschema_id
+    displayName: C_BP_GROUP_ACCT
+    columns:
+      c_acctschema_id: {type: decimal, identity: true}
+      c_bp_group_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_receivable_acct: {type: decimal}
+      c_prepayment_acct: {type: decimal}
+      v_liability_acct: {type: decimal}
+      v_liability_services_acct: {type: decimal}
+      v_prepayment_acct: {type: decimal}
+      paydiscount_exp_acct: {type: decimal}
+      paydiscount_rev_acct: {type: decimal}
+      writeoff_acct: {type: decimal}
+      notinvoicedreceipts_acct: {type: decimal}
+      unearnedrevenue_acct: {type: decimal}
+      notinvoicedrevenue_acct: {type: decimal}
+      notinvoicedreceivables_acct: {type: decimal}
+      processing: {type: string}
+      c_receivable_services_acct: {type: decimal}
+      c_bp_group_acct_uu: {type: string}

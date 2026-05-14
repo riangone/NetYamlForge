@@ -1,115 +1,43 @@
-name: M_COSTDETAIL
-tableName: m_costdetail
-primaryKey: m_costdetail_id
-fields:
-- name: m_costdetail_id
-  type: numeric
-  label: M Costdetail Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_costelement_id
-  type: numeric
-  label: M Costelement Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: m_movementline_id
-  type: numeric
-  label: M Movementline Id
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: m_productionline_id
-  type: numeric
-  label: M Productionline Id
-- name: c_projectissue_id
-  type: numeric
-  label: C Projectissue Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: amt
-  type: numeric
-  label: Amt
-- name: qty
-  type: numeric
-  label: Qty
-- name: deltaamt
-  type: numeric
-  label: Deltaamt
-- name: deltaqty
-  type: numeric
-  label: Deltaqty
-- name: description
-  type: text
-  label: Description
-- name: processed
-  type: text
-  label: Processed
-- name: pp_cost_collector_id
-  type: numeric
-  label: Pp Cost Collector Id
-- name: currentcostprice
-  type: numeric
-  label: Currentcostprice
-- name: currentqty
-  type: numeric
-  label: Currentqty
-- name: cumulatedamt
-  type: numeric
-  label: Cumulatedamt
-- name: cumulatedqty
-  type: numeric
-  label: Cumulatedqty
-- name: m_costdetail_uu
-  type: text
-  label: M Costdetail Uu
-- name: m_matchinv_id
-  type: numeric
-  label: M Matchinv Id
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: isbackdate
-  type: text
-  label: Isbackdate
-- name: backdateprocessedon
-  type: text
-  label: Backdateprocessedon
-- name: ref_costdetail_id
-  type: numeric
-  label: Ref Costdetail Id
+entities:
+  m_costdetail:
+    table: m_costdetail
+    key: m_costdetail_id
+    displayName: M_COSTDETAIL
+    columns:
+      m_costdetail_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      m_product_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_costelement_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      m_movementline_id: {type: decimal}
+      m_inventoryline_id: {type: decimal}
+      m_productionline_id: {type: decimal}
+      c_projectissue_id: {type: decimal}
+      issotrx: {type: string}
+      amt: {type: decimal}
+      qty: {type: decimal}
+      deltaamt: {type: decimal}
+      deltaqty: {type: decimal}
+      description: {type: string}
+      processed: {type: string}
+      pp_cost_collector_id: {type: decimal}
+      currentcostprice: {type: decimal}
+      currentqty: {type: decimal}
+      cumulatedamt: {type: decimal}
+      cumulatedqty: {type: decimal}
+      m_costdetail_uu: {type: string}
+      m_matchinv_id: {type: decimal}
+      dateacct: {type: string}
+      isbackdate: {type: string}
+      backdateprocessedon: {type: string}
+      ref_costdetail_id: {type: decimal}

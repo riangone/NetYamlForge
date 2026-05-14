@@ -1,211 +1,75 @@
-name: M_MOVEMENT
-tableName: m_movement
-primaryKey: m_movement_id
-fields:
-- name: m_movement_id
-  type: numeric
-  label: M Movement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: documentno
-  type: text
-  label: Documentno
-- name: description
-  type: text
-  label: Description
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: posted
-  type: text
-  label: Posted
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: datereceived
-  type: text
-  label: Datereceived
-- name: docaction
-  type: text
-  label: Docaction
-- name: docstatus
-  type: text
-  label: Docstatus
-- name: isintransit
-  type: text
-  label: Isintransit
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: isapproved
-  type: text
-  label: Isapproved
-- name: approvalamt
-  type: numeric
-  label: Approvalamt
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: m_shipper_id
-  type: numeric
-  label: M Shipper Id
-- name: priorityrule
-  type: text
-  label: Priorityrule
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: chargeamt
-  type: numeric
-  label: Chargeamt
-- name: createfrom
-  type: text
-  label: Createfrom
-- name: dd_order_id
-  type: numeric
-  label: Dd Order Id
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: freightamt
-  type: numeric
-  label: Freightamt
-- name: reversal_id
-  type: numeric
-  label: Reversal Id
-- name: poreference
-  type: text
-  label: Poreference
-- name: processedon
-  type: numeric
-  label: Processedon
-- name: m_movement_uu
-  type: text
-  label: M Movement Uu
-- name: jp_order_id
-  type: numeric
-  label: Jp Order Id
-- name: jp_warehousefrom_id
-  type: numeric
-  label: Jp Warehousefrom Id
-- name: jp_warehouseto_id
-  type: numeric
-  label: Jp Warehouseto Id
-- name: jp_physicalwarehousefrom_id
-  type: numeric
-  label: Jp Physicalwarehousefrom Id
-- name: jp_physicalwarehouseto_id
-  type: numeric
-  label: Jp Physicalwarehouseto Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: m_warehouseto_id
-  type: numeric
-  label: M Warehouseto Id
-- name: jp_warehousenext_id
-  type: numeric
-  label: Jp Warehousenext Id
-- name: jp_physicalwarehousenext_id
-  type: numeric
-  label: Jp Physicalwarehousenext Id
-- name: jp_processing1
-  type: text
-  label: Jp Processing1
-- name: jp_physicalwarehousedep_id
-  type: numeric
-  label: Jp Physicalwarehousedep Id
-- name: jp_warehousedep_id
-  type: numeric
-  label: Jp Warehousedep Id
-- name: jp_warehousedst_id
-  type: numeric
-  label: Jp Warehousedst Id
-- name: jp_physicalwarehousedst_id
-  type: numeric
-  label: Jp Physicalwarehousedst Id
-- name: jp_movementpre_id
-  type: numeric
-  label: Jp Movementpre Id
-- name: jp_movementnext_id
-  type: numeric
-  label: Jp Movementnext Id
-- name: jp_movementdatenext
-  type: text
-  label: Jp Movementdatenext
-- name: jp_movementdatedst
-  type: text
-  label: Jp Movementdatedst
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: isrecordroutejp
-  type: text
-  label: Isrecordroutejp
-- name: jp_movementdatedep
-  type: text
-  label: Jp Movementdatedep
-- name: jp_pp_fact_id
-  type: numeric
-  label: Jp Pp Fact Id
+entities:
+  m_movement:
+    table: m_movement
+    key: m_movement_id
+    displayName: M_MOVEMENT
+    columns:
+      m_movement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      documentno: {type: string}
+      description: {type: string}
+      movementdate: {type: string}
+      posted: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      ad_orgtrx_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      datereceived: {type: string}
+      docaction: {type: string}
+      docstatus: {type: string}
+      isintransit: {type: string}
+      c_doctype_id: {type: decimal}
+      isapproved: {type: string}
+      approvalamt: {type: decimal}
+      freightcostrule: {type: string}
+      m_shipper_id: {type: decimal}
+      priorityrule: {type: string}
+      salesrep_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      chargeamt: {type: decimal}
+      createfrom: {type: string}
+      dd_order_id: {type: decimal}
+      deliveryrule: {type: string}
+      deliveryviarule: {type: string}
+      freightamt: {type: decimal}
+      reversal_id: {type: decimal}
+      poreference: {type: string}
+      processedon: {type: decimal}
+      m_movement_uu: {type: string}
+      jp_order_id: {type: decimal}
+      jp_warehousefrom_id: {type: decimal}
+      jp_warehouseto_id: {type: decimal}
+      jp_physicalwarehousefrom_id: {type: decimal}
+      jp_physicalwarehouseto_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      m_warehouseto_id: {type: decimal}
+      jp_warehousenext_id: {type: decimal}
+      jp_physicalwarehousenext_id: {type: decimal}
+      jp_processing1: {type: string}
+      jp_physicalwarehousedep_id: {type: decimal}
+      jp_warehousedep_id: {type: decimal}
+      jp_warehousedst_id: {type: decimal}
+      jp_physicalwarehousedst_id: {type: decimal}
+      jp_movementpre_id: {type: decimal}
+      jp_movementnext_id: {type: decimal}
+      jp_movementdatenext: {type: string}
+      jp_movementdatedst: {type: string}
+      jp_subject: {type: string}
+      jp_communicationcolumn: {type: string}
+      jp_remarks: {type: string}
+      isrecordroutejp: {type: string}
+      jp_movementdatedep: {type: string}
+      jp_pp_fact_id: {type: decimal}

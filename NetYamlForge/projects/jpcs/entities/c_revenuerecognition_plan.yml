@@ -1,55 +1,23 @@
-name: C_REVENUERECOGNITION_PLAN
-tableName: c_revenuerecognition_plan
-primaryKey: c_revenuerecognition_plan_id
-fields:
-- name: c_revenuerecognition_plan_id
-  type: numeric
-  label: C Revenuerecognition Plan Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: c_revenuerecognition_id
-  type: numeric
-  label: C Revenuerecognition Id
-- name: c_invoiceline_id
-  type: numeric
-  label: C Invoiceline Id
-- name: unearnedrevenue_acct
-  type: numeric
-  label: Unearnedrevenue Acct
-- name: p_revenue_acct
-  type: numeric
-  label: P Revenue Acct
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: totalamt
-  type: numeric
-  label: Totalamt
-- name: recognizedamt
-  type: numeric
-  label: Recognizedamt
-- name: c_revenuerecognition_plan_uu
-  type: text
-  label: C Revenuerecognition Plan Uu
+entities:
+  c_revenuerecognition_plan:
+    table: c_revenuerecognition_plan
+    key: c_revenuerecognition_plan_id
+    displayName: C_REVENUERECOGNITION_PLAN
+    columns:
+      c_revenuerecognition_plan_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_acctschema_id: {type: decimal}
+      c_revenuerecognition_id: {type: decimal}
+      c_invoiceline_id: {type: decimal}
+      unearnedrevenue_acct: {type: decimal}
+      p_revenue_acct: {type: decimal}
+      c_currency_id: {type: decimal}
+      totalamt: {type: decimal}
+      recognizedamt: {type: decimal}
+      c_revenuerecognition_plan_uu: {type: string}

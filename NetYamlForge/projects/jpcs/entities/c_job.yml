@@ -1,46 +1,20 @@
-name: C_JOB
-tableName: c_job
-primaryKey: c_job_id
-fields:
-- name: c_job_id
-  type: numeric
-  label: C Job Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: c_jobcategory_id
-  type: numeric
-  label: C Jobcategory Id
-- name: isemployee
-  type: text
-  label: Isemployee
-- name: c_job_uu
-  type: text
-  label: C Job Uu
+entities:
+  c_job:
+    table: c_job
+    key: c_job_id
+    displayName: C_JOB
+    columns:
+      c_job_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      c_jobcategory_id: {type: decimal}
+      isemployee: {type: string}
+      c_job_uu: {type: string}

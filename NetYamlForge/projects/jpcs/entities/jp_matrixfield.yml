@@ -1,49 +1,21 @@
-name: JP_MATRIXFIELD
-tableName: jp_matrixfield
-primaryKey: jp_matrixfield_id
-fields:
-- name: jp_matrixfield_id
-  type: numeric
-  label: Jp Matrixfield Id
-- name: jp_matrixfield_uu
-  type: text
-  label: Jp Matrixfield Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_matrixwindow_id
-  type: numeric
-  label: Jp Matrixwindow Id
-- name: ad_field_id
-  type: numeric
-  label: Ad Field Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: description
-  type: text
-  label: Description
-- name: fieldlength
-  type: numeric
-  label: Fieldlength
-- name: issummarized
-  type: text
-  label: Issummarized
+entities:
+  jp_matrixfield:
+    table: jp_matrixfield
+    key: jp_matrixfield_id
+    displayName: JP_MATRIXFIELD
+    columns:
+      jp_matrixfield_id: {type: decimal, identity: true}
+      jp_matrixfield_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_matrixwindow_id: {type: decimal}
+      ad_field_id: {type: decimal}
+      seqno: {type: decimal}
+      description: {type: string}
+      fieldlength: {type: decimal}
+      issummarized: {type: string}

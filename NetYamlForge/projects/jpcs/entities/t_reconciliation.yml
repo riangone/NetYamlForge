@@ -1,37 +1,17 @@
-name: T_RECONCILIATION
-tableName: t_reconciliation
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: fact_acct_id
-  type: numeric
-  label: Fact Acct Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: matchcode
-  type: text
-  label: Matchcode
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: t_reconciliation_uu
-  type: text
-  label: T Reconciliation Uu
+entities:
+  t_reconciliation:
+    table: t_reconciliation
+    key: ad_client_id
+    displayName: T_RECONCILIATION
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_pinstance_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      fact_acct_id: {type: decimal}
+      isactive: {type: string}
+      matchcode: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      t_reconciliation_uu: {type: string}

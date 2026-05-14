@@ -1,43 +1,19 @@
-name: C_REVENUERECOG_SERVICE
-tableName: c_revenuerecog_service
-primaryKey: c_revenuerecog_service_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: c_revenuerecognition_id
-  type: numeric
-  label: C Revenuerecognition Id
-- name: c_revenuerecog_service_id
-  type: numeric
-  label: C Revenuerecog Service Id
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: line
-  type: numeric
-  label: Line
-- name: percent
-  type: numeric
-  label: Percent
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_revenuerecog_service_uu
-  type: text
-  label: C Revenuerecog Service Uu
+entities:
+  c_revenuerecog_service:
+    table: c_revenuerecog_service
+    key: c_revenuerecog_service_id
+    displayName: C_REVENUERECOG_SERVICE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      c_revenuerecognition_id: {type: decimal}
+      c_revenuerecog_service_id: {type: decimal, identity: true}
+      description: {type: string}
+      isactive: {type: string}
+      line: {type: decimal}
+      percent: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_revenuerecog_service_uu: {type: string}

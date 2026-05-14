@@ -1,43 +1,19 @@
-name: C_NONBUSINESSDAY
-tableName: c_nonbusinessday
-primaryKey: c_nonbusinessday_id
-fields:
-- name: c_nonbusinessday_id
-  type: numeric
-  label: C Nonbusinessday Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: date1
-  type: text
-  label: Date1
-- name: c_calendar_id
-  type: numeric
-  label: C Calendar Id
-- name: c_nonbusinessday_uu
-  type: text
-  label: C Nonbusinessday Uu
-- name: c_country_id
-  type: numeric
-  label: C Country Id
+entities:
+  c_nonbusinessday:
+    table: c_nonbusinessday
+    key: c_nonbusinessday_id
+    displayName: C_NONBUSINESSDAY
+    columns:
+      c_nonbusinessday_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      date1: {type: string}
+      c_calendar_id: {type: decimal}
+      c_nonbusinessday_uu: {type: string}
+      c_country_id: {type: decimal}

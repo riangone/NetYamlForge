@@ -1,40 +1,18 @@
-name: JP_MTRANS_TIMESTAMP
-tableName: jp_mtrans_timestamp
-primaryKey: jp_mtrans_timestamp_uu
-fields:
-- name: jp_mtrans_timestamp_uu
-  type: text
-  label: Jp Mtrans Timestamp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: datevalue
-  type: text
-  label: Datevalue
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
+entities:
+  jp_mtrans_timestamp:
+    table: jp_mtrans_timestamp
+    key: jp_mtrans_timestamp_uu
+    displayName: JP_MTRANS_TIMESTAMP
+    columns:
+      jp_mtrans_timestamp_uu: {type: string, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      datevalue: {type: string}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      qtybook: {type: decimal}

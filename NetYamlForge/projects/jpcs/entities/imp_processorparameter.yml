@@ -1,49 +1,21 @@
-name: IMP_PROCESSORPARAMETER
-tableName: imp_processorparameter
-primaryKey: imp_processorparameter_id
-fields:
-- name: imp_processorparameter_id
-  type: numeric
-  label: Imp Processorparameter Id
-- name: imp_processor_id
-  type: numeric
-  label: Imp Processor Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: parametervalue
-  type: text
-  label: Parametervalue
-- name: imp_processorparameter_uu
-  type: text
-  label: Imp Processorparameter Uu
+entities:
+  imp_processorparameter:
+    table: imp_processorparameter
+    key: imp_processorparameter_id
+    displayName: IMP_PROCESSORPARAMETER
+    columns:
+      imp_processorparameter_id: {type: decimal, identity: true}
+      imp_processor_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      parametervalue: {type: string}
+      imp_processorparameter_uu: {type: string}

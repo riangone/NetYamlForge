@@ -1,112 +1,42 @@
-name: C_PAYMENTPROCESSOR
-tableName: c_paymentprocessor
-primaryKey: c_paymentprocessor_id
-fields:
-- name: c_paymentprocessor_id
-  type: numeric
-  label: C Paymentprocessor Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: ad_sequence_id
-  type: numeric
-  label: Ad Sequence Id
-- name: payprocessorclass
-  type: text
-  label: Payprocessorclass
-- name: hostaddress
-  type: text
-  label: Hostaddress
-- name: hostport
-  type: numeric
-  label: Hostport
-- name: proxyaddress
-  type: text
-  label: Proxyaddress
-- name: proxyport
-  type: numeric
-  label: Proxyport
-- name: proxylogon
-  type: text
-  label: Proxylogon
-- name: proxypassword
-  type: text
-  label: Proxypassword
-- name: acceptvisa
-  type: text
-  label: Acceptvisa
-- name: acceptmc
-  type: text
-  label: Acceptmc
-- name: acceptamex
-  type: text
-  label: Acceptamex
-- name: acceptdiners
-  type: text
-  label: Acceptdiners
-- name: acceptdiscover
-  type: text
-  label: Acceptdiscover
-- name: acceptcorporate
-  type: text
-  label: Acceptcorporate
-- name: acceptcheck
-  type: text
-  label: Acceptcheck
-- name: acceptatm
-  type: text
-  label: Acceptatm
-- name: requirevv
-  type: text
-  label: Requirevv
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: costpertrx
-  type: numeric
-  label: Costpertrx
-- name: commission
-  type: numeric
-  label: Commission
-- name: minimumamt
-  type: numeric
-  label: Minimumamt
-- name: acceptdirectdebit
-  type: text
-  label: Acceptdirectdebit
-- name: acceptdirectdeposit
-  type: text
-  label: Acceptdirectdeposit
-- name: c_paymentprocessor_uu
-  type: text
-  label: C Paymentprocessor Uu
-- name: trxtype
-  type: text
-  label: Trxtype
+entities:
+  c_paymentprocessor:
+    table: c_paymentprocessor
+    key: c_paymentprocessor_id
+    displayName: C_PAYMENTPROCESSOR
+    columns:
+      c_paymentprocessor_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      c_bankaccount_id: {type: decimal}
+      ad_sequence_id: {type: decimal}
+      payprocessorclass: {type: string}
+      hostaddress: {type: string}
+      hostport: {type: decimal}
+      proxyaddress: {type: string}
+      proxyport: {type: decimal}
+      proxylogon: {type: string}
+      proxypassword: {type: string}
+      acceptvisa: {type: string}
+      acceptmc: {type: string}
+      acceptamex: {type: string}
+      acceptdiners: {type: string}
+      acceptdiscover: {type: string}
+      acceptcorporate: {type: string}
+      acceptcheck: {type: string}
+      acceptatm: {type: string}
+      requirevv: {type: string}
+      c_currency_id: {type: decimal}
+      costpertrx: {type: decimal}
+      commission: {type: decimal}
+      minimumamt: {type: decimal}
+      acceptdirectdebit: {type: string}
+      acceptdirectdeposit: {type: string}
+      c_paymentprocessor_uu: {type: string}
+      trxtype: {type: string}

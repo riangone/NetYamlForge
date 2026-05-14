@@ -1,43 +1,19 @@
-name: C_CAMPAIGN_TRL
-tableName: c_campaign_trl
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_campaign_trl_uu
-  type: text
-  label: C Campaign Trl Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  c_campaign_trl:
+    table: c_campaign_trl
+    key: ad_client_id
+    displayName: C_CAMPAIGN_TRL
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_org_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_campaign_trl_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      istranslated: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

@@ -1,154 +1,56 @@
-name: AD_ISSUE
-tableName: ad_issue
-primaryKey: ad_issue_id
-fields:
-- name: ad_issue_id
-  type: numeric
-  label: Ad Issue Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: releaseno
-  type: text
-  label: Releaseno
-- name: version
-  type: text
-  label: Version
-- name: name
-  type: text
-  label: Name
-- name: username
-  type: text
-  label: Username
-- name: supportemail
-  type: text
-  label: Supportemail
-- name: dbaddress
-  type: text
-  label: Dbaddress
-- name: local_host
-  type: text
-  label: Local Host
-- name: operatingsysteminfo
-  type: text
-  label: Operatingsysteminfo
-- name: releasetag
-  type: text
-  label: Releasetag
-- name: databaseinfo
-  type: text
-  label: Databaseinfo
-- name: javainfo
-  type: text
-  label: Javainfo
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: issuesummary
-  type: text
-  label: Issuesummary
-- name: comments
-  type: text
-  label: Comments
-- name: sourceclassname
-  type: text
-  label: Sourceclassname
-- name: sourcemethodname
-  type: text
-  label: Sourcemethodname
-- name: loggername
-  type: text
-  label: Loggername
-- name: lineno
-  type: numeric
-  label: Lineno
-- name: stacktrace
-  type: text
-  label: Stacktrace
-- name: errortrace
-  type: text
-  label: Errortrace
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: requestdocumentno
-  type: text
-  label: Requestdocumentno
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: r_request_id
-  type: numeric
-  label: R Request Id
-- name: responsetext
-  type: text
-  label: Responsetext
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: isvanillasystem
-  type: text
-  label: Isvanillasystem
-- name: isreproducible
-  type: text
-  label: Isreproducible
-- name: r_issueknown_id
-  type: numeric
-  label: R Issueknown Id
-- name: statisticsinfo
-  type: text
-  label: Statisticsinfo
-- name: profileinfo
-  type: text
-  label: Profileinfo
-- name: systemstatus
-  type: text
-  label: Systemstatus
-- name: r_issueproject_id
-  type: numeric
-  label: R Issueproject Id
-- name: r_issueuser_id
-  type: numeric
-  label: R Issueuser Id
-- name: r_issuesystem_id
-  type: numeric
-  label: R Issuesystem Id
-- name: issuesource
-  type: text
-  label: Issuesource
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
-- name: ad_issue_uu
-  type: text
-  label: Ad Issue Uu
+entities:
+  ad_issue:
+    table: ad_issue
+    key: ad_issue_id
+    displayName: AD_ISSUE
+    columns:
+      ad_issue_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      releaseno: {type: string}
+      version: {type: string}
+      name: {type: string}
+      username: {type: string}
+      supportemail: {type: string}
+      dbaddress: {type: string}
+      local_host: {type: string}
+      operatingsysteminfo: {type: string}
+      releasetag: {type: string}
+      databaseinfo: {type: string}
+      javainfo: {type: string}
+      remote_addr: {type: string}
+      remote_host: {type: string}
+      issuesummary: {type: string}
+      comments: {type: string}
+      sourceclassname: {type: string}
+      sourcemethodname: {type: string}
+      loggername: {type: string}
+      lineno: {type: decimal}
+      stacktrace: {type: string}
+      errortrace: {type: string}
+      record_id: {type: decimal}
+      requestdocumentno: {type: string}
+      a_asset_id: {type: decimal}
+      r_request_id: {type: decimal}
+      responsetext: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      isvanillasystem: {type: string}
+      isreproducible: {type: string}
+      r_issueknown_id: {type: decimal}
+      statisticsinfo: {type: string}
+      profileinfo: {type: string}
+      systemstatus: {type: string}
+      r_issueproject_id: {type: decimal}
+      r_issueuser_id: {type: decimal}
+      r_issuesystem_id: {type: decimal}
+      issuesource: {type: string}
+      ad_window_id: {type: decimal}
+      ad_process_id: {type: decimal}
+      ad_form_id: {type: decimal}
+      ad_issue_uu: {type: string}

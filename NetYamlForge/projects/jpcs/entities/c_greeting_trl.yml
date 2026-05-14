@@ -1,43 +1,19 @@
-name: C_GREETING_TRL
-tableName: c_greeting_trl
-primaryKey: ad_language
-fields:
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: greeting
-  type: text
-  label: Greeting
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: c_greeting_trl_uu
-  type: text
-  label: C Greeting Trl Uu
+entities:
+  c_greeting_trl:
+    table: c_greeting_trl
+    key: ad_language
+    displayName: C_GREETING_TRL
+    columns:
+      ad_language: {type: string, identity: true}
+      c_greeting_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      greeting: {type: string}
+      istranslated: {type: string}
+      c_greeting_trl_uu: {type: string}

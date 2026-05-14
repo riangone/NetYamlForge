@@ -1,76 +1,30 @@
-name: JP_BILLSCHEMA
-tableName: jp_billschema
-primaryKey: jp_billschema_id
-fields:
-- name: jp_billschema_id
-  type: numeric
-  label: Jp Billschema Id
-- name: jp_billschema_uu
-  type: text
-  label: Jp Billschema Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: isbillorgjp
-  type: text
-  label: Isbillorgjp
-- name: jp_billorg_id
-  type: numeric
-  label: Jp Billorg Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: classname
-  type: text
-  label: Classname
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: istaxrecalculatejp
-  type: text
-  label: Istaxrecalculatejp
-- name: jp_taxadjust_doctype_id
-  type: numeric
-  label: Jp Taxadjust Doctype Id
-- name: jp_taxadjust_charge_id
-  type: numeric
-  label: Jp Taxadjust Charge Id
-- name: jp_taxadjust_tax_id
-  type: numeric
-  label: Jp Taxadjust Tax Id
-- name: jp_taxadjust_pricelist_id
-  type: numeric
-  label: Jp Taxadjust Pricelist Id
-- name: jp_taxadjust_description
-  type: text
-  label: Jp Taxadjust Description
+entities:
+  jp_billschema:
+    table: jp_billschema
+    key: jp_billschema_id
+    displayName: JP_BILLSCHEMA
+    columns:
+      jp_billschema_id: {type: decimal, identity: true}
+      jp_billschema_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      c_doctype_id: {type: decimal}
+      isbillorgjp: {type: string}
+      jp_billorg_id: {type: decimal}
+      issotrx: {type: string}
+      classname: {type: string}
+      c_bankaccount_id: {type: decimal}
+      istaxrecalculatejp: {type: string}
+      jp_taxadjust_doctype_id: {type: decimal}
+      jp_taxadjust_charge_id: {type: decimal}
+      jp_taxadjust_tax_id: {type: decimal}
+      jp_taxadjust_pricelist_id: {type: decimal}
+      jp_taxadjust_description: {type: string}

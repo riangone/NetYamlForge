@@ -1,43 +1,19 @@
-name: AD_MENU_TRL
-tableName: ad_menu_trl
-primaryKey: ad_menu_id
-fields:
-- name: ad_menu_id
-  type: numeric
-  label: Ad Menu Id
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: ad_menu_trl_uu
-  type: text
-  label: Ad Menu Trl Uu
+entities:
+  ad_menu_trl:
+    table: ad_menu_trl
+    key: ad_menu_id
+    displayName: AD_MENU_TRL
+    columns:
+      ad_menu_id: {type: decimal, identity: true}
+      ad_language: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      istranslated: {type: string}
+      ad_menu_trl_uu: {type: string}

@@ -1,37 +1,17 @@
-name: JP_STOCKORG
-tableName: jp_stockorg
-primaryKey: jp_stockorg_uu
-fields:
-- name: jp_stockorg_uu
-  type: text
-  label: Jp Stockorg Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: datevalue
-  type: text
-  label: Datevalue
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: qtybook
-  type: numeric
-  label: Qtybook
+entities:
+  jp_stockorg:
+    table: jp_stockorg
+    key: jp_stockorg_uu
+    displayName: JP_STOCKORG
+    columns:
+      jp_stockorg_uu: {type: string, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      datevalue: {type: string}
+      m_product_id: {type: decimal}
+      qtybook: {type: decimal}

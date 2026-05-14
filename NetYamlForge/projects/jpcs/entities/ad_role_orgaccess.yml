@@ -1,40 +1,18 @@
-name: AD_ROLE_ORGACCESS
-tableName: ad_role_orgaccess
-primaryKey: ad_role_id
-fields:
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: ad_role_orgaccess_uu
-  type: text
-  label: Ad Role Orgaccess Uu
-- name: jp_validfrom
-  type: text
-  label: Jp Validfrom
-- name: jp_validto
-  type: text
-  label: Jp Validto
+entities:
+  ad_role_orgaccess:
+    table: ad_role_orgaccess
+    key: ad_role_id
+    displayName: AD_ROLE_ORGACCESS
+    columns:
+      ad_role_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isreadonly: {type: string}
+      ad_role_orgaccess_uu: {type: string}
+      jp_validfrom: {type: string}
+      jp_validto: {type: string}

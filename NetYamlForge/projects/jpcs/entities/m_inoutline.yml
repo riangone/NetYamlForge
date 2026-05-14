@@ -1,136 +1,50 @@
-name: M_INOUTLINE
-tableName: m_inoutline
-primaryKey: m_inoutline_id
-fields:
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: line
-  type: numeric
-  label: Line
-- name: description
-  type: text
-  label: Description
-- name: m_inout_id
-  type: numeric
-  label: M Inout Id
-- name: c_orderline_id
-  type: numeric
-  label: C Orderline Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: isinvoiced
-  type: text
-  label: Isinvoiced
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: isdescription
-  type: text
-  label: Isdescription
-- name: confirmedqty
-  type: numeric
-  label: Confirmedqty
-- name: pickedqty
-  type: numeric
-  label: Pickedqty
-- name: scrappedqty
-  type: numeric
-  label: Scrappedqty
-- name: targetqty
-  type: numeric
-  label: Targetqty
-- name: ref_inoutline_id
-  type: numeric
-  label: Ref Inoutline Id
-- name: processed
-  type: text
-  label: Processed
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: m_rmaline_id
-  type: numeric
-  label: M Rmaline Id
-- name: reversalline_id
-  type: numeric
-  label: Reversalline Id
-- name: m_inoutline_uu
-  type: text
-  label: M Inoutline Uu
-- name: qtyoverreceipt
-  type: numeric
-  label: Qtyoverreceipt
-- name: jp_productexplodebom_id
-  type: numeric
-  label: Jp Productexplodebom Id
-- name: jp_contractline_id
-  type: numeric
-  label: Jp Contractline Id
-- name: jp_contractprocperiod_id
-  type: numeric
-  label: Jp Contractprocperiod Id
-- name: isautoproduce
-  type: text
-  label: Isautoproduce
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  m_inoutline:
+    table: m_inoutline
+    key: m_inoutline_id
+    displayName: M_INOUTLINE
+    columns:
+      m_inoutline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      line: {type: decimal}
+      description: {type: string}
+      m_inout_id: {type: decimal}
+      c_orderline_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      movementqty: {type: decimal}
+      isinvoiced: {type: string}
+      m_attributesetinstance_id: {type: decimal}
+      isdescription: {type: string}
+      confirmedqty: {type: decimal}
+      pickedqty: {type: decimal}
+      scrappedqty: {type: decimal}
+      targetqty: {type: decimal}
+      ref_inoutline_id: {type: decimal}
+      processed: {type: string}
+      qtyentered: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      m_rmaline_id: {type: decimal}
+      reversalline_id: {type: decimal}
+      m_inoutline_uu: {type: string}
+      qtyoverreceipt: {type: decimal}
+      jp_productexplodebom_id: {type: decimal}
+      jp_contractline_id: {type: decimal}
+      jp_contractprocperiod_id: {type: decimal}
+      isautoproduce: {type: string}
+      jp_communicationcolumn: {type: string}

@@ -1,88 +1,34 @@
-name: HR_ATTRIBUTE
-tableName: hr_attribute
-primaryKey: hr_attribute_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_rule_id
-  type: numeric
-  label: Ad Rule Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: columntype
-  type: text
-  label: Columntype
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: hr_attribute_acct
-  type: numeric
-  label: Hr Attribute Acct
-- name: hr_attribute_id
-  type: numeric
-  label: Hr Attribute Id
-- name: hr_concept_id
-  type: numeric
-  label: Hr Concept Id
-- name: hr_department_id
-  type: numeric
-  label: Hr Department Id
-- name: hr_employee_id
-  type: numeric
-  label: Hr Employee Id
-- name: hr_job_id
-  type: numeric
-  label: Hr Job Id
-- name: hr_payroll_id
-  type: numeric
-  label: Hr Payroll Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: isprinted
-  type: text
-  label: Isprinted
-- name: maxvalue
-  type: numeric
-  label: Maxvalue
-- name: minvalue
-  type: numeric
-  label: Minvalue
-- name: qty
-  type: numeric
-  label: Qty
-- name: servicedate
-  type: text
-  label: Servicedate
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: validto
-  type: text
-  label: Validto
-- name: hr_attribute_uu
-  type: text
-  label: Hr Attribute Uu
+entities:
+  hr_attribute:
+    table: hr_attribute
+    key: hr_attribute_id
+    displayName: HR_ATTRIBUTE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_rule_id: {type: decimal}
+      amount: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      columntype: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      hr_attribute_acct: {type: decimal}
+      hr_attribute_id: {type: decimal, identity: true}
+      hr_concept_id: {type: decimal}
+      hr_department_id: {type: decimal}
+      hr_employee_id: {type: decimal}
+      hr_job_id: {type: decimal}
+      hr_payroll_id: {type: decimal}
+      isactive: {type: string}
+      isprinted: {type: string}
+      maxvalue: {type: decimal}
+      minvalue: {type: decimal}
+      qty: {type: decimal}
+      servicedate: {type: string}
+      textmsg: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      validto: {type: string}
+      hr_attribute_uu: {type: string}

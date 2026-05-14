@@ -1,79 +1,31 @@
-name: JP_USER_LOCATION
-tableName: jp_user_location
-primaryKey: jp_user_location_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: address1
-  type: text
-  label: Address1
-- name: address2
-  type: text
-  label: Address2
-- name: address3
-  type: text
-  label: Address3
-- name: address4
-  type: text
-  label: Address4
-- name: address5
-  type: text
-  label: Address5
-- name: c_city_id
-  type: numeric
-  label: C City Id
-- name: c_country_id
-  type: numeric
-  label: C Country Id
-- name: c_region_id
-  type: numeric
-  label: C Region Id
-- name: city
-  type: text
-  label: City
-- name: comments
-  type: text
-  label: Comments
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: jp_location_label
-  type: text
-  label: Jp Location Label
-- name: jp_user_location_id
-  type: numeric
-  label: Jp User Location Id
-- name: jp_user_location_uu
-  type: text
-  label: Jp User Location Uu
-- name: postal
-  type: text
-  label: Postal
-- name: postal_add
-  type: text
-  label: Postal Add
-- name: regionname
-  type: text
-  label: Regionname
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_user_location:
+    table: jp_user_location
+    key: jp_user_location_id
+    displayName: JP_USER_LOCATION
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      address1: {type: string}
+      address2: {type: string}
+      address3: {type: string}
+      address4: {type: string}
+      address5: {type: string}
+      c_city_id: {type: decimal}
+      c_country_id: {type: decimal}
+      c_region_id: {type: decimal}
+      city: {type: string}
+      comments: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      isdefault: {type: string}
+      jp_location_label: {type: string}
+      jp_user_location_id: {type: decimal, identity: true}
+      jp_user_location_uu: {type: string}
+      postal: {type: string}
+      postal_add: {type: string}
+      regionname: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

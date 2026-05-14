@@ -1,61 +1,25 @@
-name: C_RFQLINEQTY
-tableName: c_rfqlineqty
-primaryKey: c_rfqlineqty_id
-fields:
-- name: c_rfqlineqty_id
-  type: numeric
-  label: C Rfqlineqty Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: c_rfqline_id
-  type: numeric
-  label: C Rfqline Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: margin
-  type: numeric
-  label: Margin
-- name: ispurchaseqty
-  type: text
-  label: Ispurchaseqty
-- name: bestresponseamt
-  type: numeric
-  label: Bestresponseamt
-- name: isofferqty
-  type: text
-  label: Isofferqty
-- name: offeramt
-  type: numeric
-  label: Offeramt
-- name: benchmarkprice
-  type: numeric
-  label: Benchmarkprice
-- name: isrfqqty
-  type: text
-  label: Isrfqqty
-- name: c_rfqlineqty_uu
-  type: text
-  label: C Rfqlineqty Uu
+entities:
+  c_rfqlineqty:
+    table: c_rfqlineqty
+    key: c_rfqlineqty_id
+    displayName: C_RFQLINEQTY
+    columns:
+      c_rfqlineqty_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      c_rfqline_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      qty: {type: decimal}
+      margin: {type: decimal}
+      ispurchaseqty: {type: string}
+      bestresponseamt: {type: decimal}
+      isofferqty: {type: string}
+      offeramt: {type: decimal}
+      benchmarkprice: {type: decimal}
+      isrfqqty: {type: string}
+      c_rfqlineqty_uu: {type: string}

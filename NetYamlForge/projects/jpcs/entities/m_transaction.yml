@@ -1,67 +1,27 @@
-name: M_TRANSACTION
-tableName: m_transaction
-primaryKey: m_transaction_id
-fields:
-- name: m_transaction_id
-  type: numeric
-  label: M Transaction Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: movementtype
-  type: text
-  label: Movementtype
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: m_inventoryline_id
-  type: numeric
-  label: M Inventoryline Id
-- name: m_movementline_id
-  type: numeric
-  label: M Movementline Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: m_productionline_id
-  type: numeric
-  label: M Productionline Id
-- name: c_projectissue_id
-  type: numeric
-  label: C Projectissue Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: pp_cost_collector_id
-  type: numeric
-  label: Pp Cost Collector Id
-- name: m_transaction_uu
-  type: text
-  label: M Transaction Uu
+entities:
+  m_transaction:
+    table: m_transaction
+    key: m_transaction_id
+    displayName: M_TRANSACTION
+    columns:
+      m_transaction_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      movementtype: {type: string}
+      m_locator_id: {type: decimal}
+      m_product_id: {type: decimal}
+      movementdate: {type: string}
+      movementqty: {type: decimal}
+      m_inventoryline_id: {type: decimal}
+      m_movementline_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      m_productionline_id: {type: decimal}
+      c_projectissue_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      pp_cost_collector_id: {type: decimal}
+      m_transaction_uu: {type: string}

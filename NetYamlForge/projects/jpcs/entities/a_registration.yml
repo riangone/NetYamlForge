@@ -1,76 +1,30 @@
-name: A_REGISTRATION
-tableName: a_registration
-primaryKey: a_registration_id
-fields:
-- name: a_registration_id
-  type: numeric
-  label: A Registration Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: isregistered
-  type: text
-  label: Isregistered
-- name: isinproduction
-  type: text
-  label: Isinproduction
-- name: isallowpublish
-  type: text
-  label: Isallowpublish
-- name: remote_host
-  type: text
-  label: Remote Host
-- name: remote_addr
-  type: text
-  label: Remote Addr
-- name: processing
-  type: text
-  label: Processing
-- name: assetservicedate
-  type: text
-  label: Assetservicedate
-- name: note
-  type: text
-  label: Note
-- name: a_registration_uu
-  type: text
-  label: A Registration Uu
+entities:
+  a_registration:
+    table: a_registration
+    key: a_registration_id
+    displayName: A_REGISTRATION
+    columns:
+      a_registration_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      a_asset_id: {type: decimal}
+      m_product_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      isregistered: {type: string}
+      isinproduction: {type: string}
+      isallowpublish: {type: string}
+      remote_host: {type: string}
+      remote_addr: {type: string}
+      processing: {type: string}
+      assetservicedate: {type: string}
+      note: {type: string}
+      a_registration_uu: {type: string}

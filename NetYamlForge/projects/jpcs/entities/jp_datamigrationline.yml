@@ -1,136 +1,50 @@
-name: JP_DATAMIGRATIONLINE
-tableName: jp_datamigrationline
-primaryKey: jp_datamigrationline_id
-fields:
-- name: jp_datamigrationline_id
-  type: numeric
-  label: Jp Datamigrationline Id
-- name: jp_datamigrationline_uu
-  type: text
-  label: Jp Datamigrationline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_datamigration_id
-  type: numeric
-  label: Jp Datamigration Id
-- name: line
-  type: numeric
-  label: Line
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: m_locatorto_id
-  type: numeric
-  label: M Locatorto Id
-- name: description
-  type: text
-  label: Description
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: price
-  type: numeric
-  label: Price
-- name: jp_order_documentno
-  type: text
-  label: Jp Order Documentno
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: jp_invoice_documentno
-  type: text
-  label: Jp Invoice Documentno
-- name: jp_datamigration_invoice_id
-  type: numeric
-  label: Jp Datamigration Invoice Id
-- name: jp_payment_documentno
-  type: text
-  label: Jp Payment Documentno
-- name: jp_datamigration_payment_id
-  type: numeric
-  label: Jp Datamigration Payment Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: linenetamt
-  type: numeric
-  label: Linenetamt
-- name: amount
-  type: numeric
-  label: Amount
-- name: discountamt
-  type: numeric
-  label: Discountamt
-- name: writeoffamt
-  type: numeric
-  label: Writeoffamt
-- name: overunderamt
-  type: numeric
-  label: Overunderamt
-- name: stmtamt
-  type: numeric
-  label: Stmtamt
-- name: trxamt
-  type: numeric
-  label: Trxamt
-- name: chargeamt
-  type: numeric
-  label: Chargeamt
-- name: interestamt
-  type: numeric
-  label: Interestamt
-- name: qtycount
-  type: numeric
-  label: Qtycount
-- name: qtybook
-  type: numeric
-  label: Qtybook
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
+entities:
+  jp_datamigrationline:
+    table: jp_datamigrationline
+    key: jp_datamigrationline_id
+    displayName: JP_DATAMIGRATIONLINE
+    columns:
+      jp_datamigrationline_id: {type: decimal, identity: true}
+      jp_datamigrationline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_datamigration_id: {type: decimal}
+      line: {type: decimal}
+      m_locator_id: {type: decimal}
+      m_locatorto_id: {type: decimal}
+      description: {type: string}
+      m_product_id: {type: decimal}
+      c_charge_id: {type: decimal}
+      c_tax_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      qty: {type: decimal}
+      price: {type: decimal}
+      jp_order_documentno: {type: string}
+      c_order_id: {type: decimal}
+      jp_invoice_documentno: {type: string}
+      jp_datamigration_invoice_id: {type: decimal}
+      jp_payment_documentno: {type: string}
+      jp_datamigration_payment_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      linenetamt: {type: decimal}
+      amount: {type: decimal}
+      discountamt: {type: decimal}
+      writeoffamt: {type: decimal}
+      overunderamt: {type: decimal}
+      stmtamt: {type: decimal}
+      trxamt: {type: decimal}
+      chargeamt: {type: decimal}
+      interestamt: {type: decimal}
+      qtycount: {type: decimal}
+      qtybook: {type: decimal}
+      c_bpartner_id: {type: decimal}

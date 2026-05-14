@@ -1,40 +1,18 @@
-name: AD_PACKAGE_UUID_MAP
-tableName: ad_package_uuid_map
-primaryKey: ad_package_uuid_map_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_package_uuid_map_id
-  type: numeric
-  label: Ad Package Uuid Map Id
-- name: ad_package_uuid_map_uu
-  type: text
-  label: Ad Package Uuid Map Uu
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: source_uuid
-  type: text
-  label: Source Uuid
-- name: target_uuid
-  type: text
-  label: Target Uuid
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  ad_package_uuid_map:
+    table: ad_package_uuid_map
+    key: ad_package_uuid_map_id
+    displayName: AD_PACKAGE_UUID_MAP
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_package_uuid_map_id: {type: decimal, identity: true}
+      ad_package_uuid_map_uu: {type: string}
+      ad_table_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      source_uuid: {type: string}
+      target_uuid: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

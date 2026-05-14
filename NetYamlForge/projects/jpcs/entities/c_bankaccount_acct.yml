@@ -1,70 +1,28 @@
-name: C_BANKACCOUNT_ACCT
-tableName: c_bankaccount_acct
-primaryKey: c_bankaccount_id
-fields:
-- name: c_bankaccount_id
-  type: numeric
-  label: C Bankaccount Id
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: b_intransit_acct
-  type: numeric
-  label: B Intransit Acct
-- name: b_asset_acct
-  type: numeric
-  label: B Asset Acct
-- name: b_expense_acct
-  type: numeric
-  label: B Expense Acct
-- name: b_interestrev_acct
-  type: numeric
-  label: B Interestrev Acct
-- name: b_interestexp_acct
-  type: numeric
-  label: B Interestexp Acct
-- name: b_unidentified_acct
-  type: numeric
-  label: B Unidentified Acct
-- name: b_unallocatedcash_acct
-  type: numeric
-  label: B Unallocatedcash Acct
-- name: b_paymentselect_acct
-  type: numeric
-  label: B Paymentselect Acct
-- name: b_settlementgain_acct
-  type: numeric
-  label: B Settlementgain Acct
-- name: b_settlementloss_acct
-  type: numeric
-  label: B Settlementloss Acct
-- name: b_revaluationgain_acct
-  type: numeric
-  label: B Revaluationgain Acct
-- name: b_revaluationloss_acct
-  type: numeric
-  label: B Revaluationloss Acct
-- name: c_bankaccount_acct_uu
-  type: text
-  label: C Bankaccount Acct Uu
+entities:
+  c_bankaccount_acct:
+    table: c_bankaccount_acct
+    key: c_bankaccount_id
+    displayName: C_BANKACCOUNT_ACCT
+    columns:
+      c_bankaccount_id: {type: decimal, identity: true}
+      c_acctschema_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      b_intransit_acct: {type: decimal}
+      b_asset_acct: {type: decimal}
+      b_expense_acct: {type: decimal}
+      b_interestrev_acct: {type: decimal}
+      b_interestexp_acct: {type: decimal}
+      b_unidentified_acct: {type: decimal}
+      b_unallocatedcash_acct: {type: decimal}
+      b_paymentselect_acct: {type: decimal}
+      b_settlementgain_acct: {type: decimal}
+      b_settlementloss_acct: {type: decimal}
+      b_revaluationgain_acct: {type: decimal}
+      b_revaluationloss_acct: {type: decimal}
+      c_bankaccount_acct_uu: {type: string}

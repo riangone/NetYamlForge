@@ -1,49 +1,21 @@
-name: C_REVENUERECOGNITION
-tableName: c_revenuerecognition
-primaryKey: c_revenuerecognition_id
-fields:
-- name: c_revenuerecognition_id
-  type: numeric
-  label: C Revenuerecognition Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: istimebased
-  type: text
-  label: Istimebased
-- name: recognitionfrequency
-  type: text
-  label: Recognitionfrequency
-- name: nomonths
-  type: numeric
-  label: Nomonths
-- name: c_revenuerecognition_uu
-  type: text
-  label: C Revenuerecognition Uu
-- name: fixedrecogday
-  type: numeric
-  label: Fixedrecogday
+entities:
+  c_revenuerecognition:
+    table: c_revenuerecognition
+    key: c_revenuerecognition_id
+    displayName: C_REVENUERECOGNITION
+    columns:
+      c_revenuerecognition_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      istimebased: {type: string}
+      recognitionfrequency: {type: string}
+      nomonths: {type: decimal}
+      c_revenuerecognition_uu: {type: string}
+      fixedrecogday: {type: decimal}

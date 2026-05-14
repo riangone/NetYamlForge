@@ -1,166 +1,60 @@
-name: I_BP_GROUPJP
-tableName: i_bp_groupjp
-primaryKey: i_bp_groupjp_id
-fields:
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: i_bp_groupjp_id
-  type: numeric
-  label: I Bp Groupjp Id
-- name: i_bp_groupjp_uu
-  type: text
-  label: I Bp Groupjp Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_org_value
-  type: text
-  label: Jp Org Value
-- name: value
-  type: text
-  label: Value
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: jp_printcolor_name
-  type: text
-  label: Jp Printcolor Name
-- name: ad_printcolor_id
-  type: numeric
-  label: Ad Printcolor Id
-- name: isconfidentialinfo
-  type: text
-  label: Isconfidentialinfo
-- name: prioritybase
-  type: text
-  label: Prioritybase
-- name: jp_pricelist_name
-  type: text
-  label: Jp Pricelist Name
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: jp_po_pricelist_name
-  type: text
-  label: Jp Po Pricelist Name
-- name: po_pricelist_id
-  type: numeric
-  label: Po Pricelist Id
-- name: jp_discountschema_name
-  type: text
-  label: Jp Discountschema Name
-- name: m_discountschema_id
-  type: numeric
-  label: M Discountschema Id
-- name: jp_po_discountschema_name
-  type: text
-  label: Jp Po Discountschema Name
-- name: po_discountschema_id
-  type: numeric
-  label: Po Discountschema Id
-- name: creditwatchpercent
-  type: numeric
-  label: Creditwatchpercent
-- name: pricematchtolerance
-  type: numeric
-  label: Pricematchtolerance
-- name: jp_dunning_name
-  type: text
-  label: Jp Dunning Name
-- name: c_dunning_id
-  type: numeric
-  label: C Dunning Id
-- name: jp_acctschema_name
-  type: text
-  label: Jp Acctschema Name
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: jp_receivable_acct_value
-  type: text
-  label: Jp Receivable Acct Value
-- name: c_receivable_acct
-  type: numeric
-  label: C Receivable Acct
-- name: jp_c_prepayment_acct_value
-  type: text
-  label: Jp C Prepayment Acct Value
-- name: c_prepayment_acct
-  type: numeric
-  label: C Prepayment Acct
-- name: jp_liability_acct_value
-  type: text
-  label: Jp Liability Acct Value
-- name: v_liability_acct
-  type: numeric
-  label: V Liability Acct
-- name: jp_v_prepayment_acct_value
-  type: text
-  label: Jp V Prepayment Acct Value
-- name: v_prepayment_acct
-  type: numeric
-  label: V Prepayment Acct
-- name: jp_paydiscount_exp_value
-  type: text
-  label: Jp Paydiscount Exp Value
-- name: paydiscount_exp_acct
-  type: numeric
-  label: Paydiscount Exp Acct
-- name: jp_paydiscount_rev_value
-  type: text
-  label: Jp Paydiscount Rev Value
-- name: paydiscount_rev_acct
-  type: numeric
-  label: Paydiscount Rev Acct
-- name: jp_writeoff_acct_value
-  type: text
-  label: Jp Writeoff Acct Value
-- name: writeoff_acct
-  type: numeric
-  label: Writeoff Acct
-- name: jp_notinvoicedreceipts_value
-  type: text
-  label: Jp Notinvoicedreceipts Value
-- name: notinvoicedreceipts_acct
-  type: numeric
-  label: Notinvoicedreceipts Acct
-- name: i_isactivejp
-  type: text
-  label: I Isactivejp
+entities:
+  i_bp_groupjp:
+    table: i_bp_groupjp
+    key: i_bp_groupjp_id
+    displayName: I_BP_GROUPJP
+    columns:
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processing: {type: string}
+      processed: {type: string}
+      i_bp_groupjp_id: {type: decimal, identity: true}
+      i_bp_groupjp_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_org_value: {type: string}
+      value: {type: string}
+      c_bp_group_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      isdefault: {type: string}
+      jp_printcolor_name: {type: string}
+      ad_printcolor_id: {type: decimal}
+      isconfidentialinfo: {type: string}
+      prioritybase: {type: string}
+      jp_pricelist_name: {type: string}
+      m_pricelist_id: {type: decimal}
+      jp_po_pricelist_name: {type: string}
+      po_pricelist_id: {type: decimal}
+      jp_discountschema_name: {type: string}
+      m_discountschema_id: {type: decimal}
+      jp_po_discountschema_name: {type: string}
+      po_discountschema_id: {type: decimal}
+      creditwatchpercent: {type: decimal}
+      pricematchtolerance: {type: decimal}
+      jp_dunning_name: {type: string}
+      c_dunning_id: {type: decimal}
+      jp_acctschema_name: {type: string}
+      c_acctschema_id: {type: decimal}
+      jp_receivable_acct_value: {type: string}
+      c_receivable_acct: {type: decimal}
+      jp_c_prepayment_acct_value: {type: string}
+      c_prepayment_acct: {type: decimal}
+      jp_liability_acct_value: {type: string}
+      v_liability_acct: {type: decimal}
+      jp_v_prepayment_acct_value: {type: string}
+      v_prepayment_acct: {type: decimal}
+      jp_paydiscount_exp_value: {type: string}
+      paydiscount_exp_acct: {type: decimal}
+      jp_paydiscount_rev_value: {type: string}
+      paydiscount_rev_acct: {type: decimal}
+      jp_writeoff_acct_value: {type: string}
+      writeoff_acct: {type: decimal}
+      jp_notinvoicedreceipts_value: {type: string}
+      notinvoicedreceipts_acct: {type: decimal}
+      i_isactivejp: {type: string}

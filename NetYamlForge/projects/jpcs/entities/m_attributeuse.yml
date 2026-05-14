@@ -1,37 +1,17 @@
-name: M_ATTRIBUTEUSE
-tableName: m_attributeuse
-primaryKey: m_attribute_id
-fields:
-- name: m_attribute_id
-  type: numeric
-  label: M Attribute Id
-- name: m_attributeset_id
-  type: numeric
-  label: M Attributeset Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: m_attributeuse_uu
-  type: text
-  label: M Attributeuse Uu
+entities:
+  m_attributeuse:
+    table: m_attributeuse
+    key: m_attribute_id
+    displayName: M_ATTRIBUTEUSE
+    columns:
+      m_attribute_id: {type: decimal, identity: true}
+      m_attributeset_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      seqno: {type: decimal}
+      m_attributeuse_uu: {type: string}

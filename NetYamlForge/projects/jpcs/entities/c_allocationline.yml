@@ -1,76 +1,30 @@
-name: C_ALLOCATIONLINE
-tableName: c_allocationline
-primaryKey: c_allocationline_id
-fields:
-- name: c_allocationline_id
-  type: numeric
-  label: C Allocationline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: allocationno
-  type: numeric
-  label: Allocationno
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: ismanual
-  type: text
-  label: Ismanual
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_payment_id
-  type: numeric
-  label: C Payment Id
-- name: c_cashline_id
-  type: numeric
-  label: C Cashline Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: discountamt
-  type: numeric
-  label: Discountamt
-- name: writeoffamt
-  type: numeric
-  label: Writeoffamt
-- name: overunderamt
-  type: numeric
-  label: Overunderamt
-- name: c_allocationhdr_id
-  type: numeric
-  label: C Allocationhdr Id
-- name: c_allocationline_uu
-  type: text
-  label: C Allocationline Uu
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_banktransfer_id
-  type: numeric
-  label: C Banktransfer Id
+entities:
+  c_allocationline:
+    table: c_allocationline
+    key: c_allocationline_id
+    displayName: C_ALLOCATIONLINE
+    columns:
+      c_allocationline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      allocationno: {type: decimal}
+      datetrx: {type: string}
+      ismanual: {type: string}
+      c_invoice_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_order_id: {type: decimal}
+      c_payment_id: {type: decimal}
+      c_cashline_id: {type: decimal}
+      amount: {type: decimal}
+      discountamt: {type: decimal}
+      writeoffamt: {type: decimal}
+      overunderamt: {type: decimal}
+      c_allocationhdr_id: {type: decimal}
+      c_allocationline_uu: {type: string}
+      c_charge_id: {type: decimal}
+      c_banktransfer_id: {type: decimal}

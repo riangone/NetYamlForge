@@ -1,256 +1,90 @@
-name: C_BPARTNER
-tableName: c_bpartner
-primaryKey: c_bpartner_id
-fields:
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: name2
-  type: text
-  label: Name2
-- name: description
-  type: text
-  label: Description
-- name: issummary
-  type: text
-  label: Issummary
-- name: c_bp_group_id
-  type: numeric
-  label: C Bp Group Id
-- name: isonetime
-  type: text
-  label: Isonetime
-- name: isprospect
-  type: text
-  label: Isprospect
-- name: isvendor
-  type: text
-  label: Isvendor
-- name: iscustomer
-  type: text
-  label: Iscustomer
-- name: isemployee
-  type: text
-  label: Isemployee
-- name: issalesrep
-  type: text
-  label: Issalesrep
-- name: referenceno
-  type: text
-  label: Referenceno
-- name: duns
-  type: text
-  label: Duns
-- name: url
-  type: text
-  label: Url
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: taxid
-  type: text
-  label: Taxid
-- name: istaxexempt
-  type: text
-  label: Istaxexempt
-- name: c_invoiceschedule_id
-  type: numeric
-  label: C Invoiceschedule Id
-- name: rating
-  type: text
-  label: Rating
-- name: salesvolume
-  type: numeric
-  label: Salesvolume
-- name: numberemployees
-  type: numeric
-  label: Numberemployees
-- name: naics
-  type: text
-  label: Naics
-- name: firstsale
-  type: text
-  label: Firstsale
-- name: acqusitioncost
-  type: numeric
-  label: Acqusitioncost
-- name: potentiallifetimevalue
-  type: numeric
-  label: Potentiallifetimevalue
-- name: actuallifetimevalue
-  type: numeric
-  label: Actuallifetimevalue
-- name: shareofcustomer
-  type: numeric
-  label: Shareofcustomer
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: so_creditlimit
-  type: numeric
-  label: So Creditlimit
-- name: so_creditused
-  type: numeric
-  label: So Creditused
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: m_discountschema_id
-  type: numeric
-  label: M Discountschema Id
-- name: c_dunning_id
-  type: numeric
-  label: C Dunning Id
-- name: isdiscountprinted
-  type: text
-  label: Isdiscountprinted
-- name: so_description
-  type: text
-  label: So Description
-- name: poreference
-  type: text
-  label: Poreference
-- name: paymentrulepo
-  type: text
-  label: Paymentrulepo
-- name: po_pricelist_id
-  type: numeric
-  label: Po Pricelist Id
-- name: po_discountschema_id
-  type: numeric
-  label: Po Discountschema Id
-- name: po_paymentterm_id
-  type: numeric
-  label: Po Paymentterm Id
-- name: documentcopies
-  type: numeric
-  label: Documentcopies
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: invoicerule
-  type: text
-  label: Invoicerule
-- name: deliveryrule
-  type: text
-  label: Deliveryrule
-- name: freightcostrule
-  type: text
-  label: Freightcostrule
-- name: deliveryviarule
-  type: text
-  label: Deliveryviarule
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: sendemail
-  type: text
-  label: Sendemail
-- name: bpartner_parent_id
-  type: numeric
-  label: Bpartner Parent Id
-- name: invoice_printformat_id
-  type: numeric
-  label: Invoice Printformat Id
-- name: socreditstatus
-  type: text
-  label: Socreditstatus
-- name: shelflifeminpct
-  type: numeric
-  label: Shelflifeminpct
-- name: ad_orgbp_id
-  type: numeric
-  label: Ad Orgbp Id
-- name: flatdiscount
-  type: numeric
-  label: Flatdiscount
-- name: totalopenbalance
-  type: numeric
-  label: Totalopenbalance
-- name: dunninggrace
-  type: text
-  label: Dunninggrace
-- name: c_taxgroup_id
-  type: numeric
-  label: C Taxgroup Id
-- name: logo_id
-  type: numeric
-  label: Logo Id
-- name: ispotaxexempt
-  type: text
-  label: Ispotaxexempt
-- name: ismanufacturer
-  type: text
-  label: Ismanufacturer
-- name: c_bpartner_uu
-  type: text
-  label: C Bpartner Uu
-- name: customerprofileid
-  type: text
-  label: Customerprofileid
-- name: default1099box_id
-  type: numeric
-  label: Default1099Box Id
-- name: is1099vendor
-  type: text
-  label: Is1099Vendor
-- name: jp_sotaxrounding
-  type: text
-  label: Jp Sotaxrounding
-- name: jp_potaxrounding
-  type: text
-  label: Jp Potaxrounding
-- name: jp_corporation_id
-  type: numeric
-  label: Jp Corporation Id
-- name: jp_billschema_id
-  type: numeric
-  label: Jp Billschema Id
-- name: jp_billschemapo_id
-  type: numeric
-  label: Jp Billschemapo Id
-- name: isqualifiedinvoiceissuerjp
-  type: text
-  label: Isqualifiedinvoiceissuerjp
-- name: jp_registerednumberofqii
-  type: text
-  label: Jp Registerednumberofqii
-- name: jp_registereddateofqii
-  type: text
-  label: Jp Registereddateofqii
-- name: jp_bill_printformat_id
-  type: numeric
-  label: Jp Bill Printformat Id
-- name: jp_cm_bpartner_id
-  type: numeric
-  label: Jp Cm Bpartner Id
+entities:
+  c_bpartner:
+    table: c_bpartner
+    key: c_bpartner_id
+    displayName: C_BPARTNER
+    columns:
+      c_bpartner_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      name2: {type: string}
+      description: {type: string}
+      issummary: {type: string}
+      c_bp_group_id: {type: decimal}
+      isonetime: {type: string}
+      isprospect: {type: string}
+      isvendor: {type: string}
+      iscustomer: {type: string}
+      isemployee: {type: string}
+      issalesrep: {type: string}
+      referenceno: {type: string}
+      duns: {type: string}
+      url: {type: string}
+      ad_language: {type: string}
+      taxid: {type: string}
+      istaxexempt: {type: string}
+      c_invoiceschedule_id: {type: decimal}
+      rating: {type: string}
+      salesvolume: {type: decimal}
+      numberemployees: {type: decimal}
+      naics: {type: string}
+      firstsale: {type: string}
+      acqusitioncost: {type: decimal}
+      potentiallifetimevalue: {type: decimal}
+      actuallifetimevalue: {type: decimal}
+      shareofcustomer: {type: decimal}
+      paymentrule: {type: string}
+      so_creditlimit: {type: decimal}
+      so_creditused: {type: decimal}
+      c_paymentterm_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      m_discountschema_id: {type: decimal}
+      c_dunning_id: {type: decimal}
+      isdiscountprinted: {type: string}
+      so_description: {type: string}
+      poreference: {type: string}
+      paymentrulepo: {type: string}
+      po_pricelist_id: {type: decimal}
+      po_discountschema_id: {type: decimal}
+      po_paymentterm_id: {type: decimal}
+      documentcopies: {type: decimal}
+      c_greeting_id: {type: decimal}
+      invoicerule: {type: string}
+      deliveryrule: {type: string}
+      freightcostrule: {type: string}
+      deliveryviarule: {type: string}
+      salesrep_id: {type: decimal}
+      sendemail: {type: string}
+      bpartner_parent_id: {type: decimal}
+      invoice_printformat_id: {type: decimal}
+      socreditstatus: {type: string}
+      shelflifeminpct: {type: decimal}
+      ad_orgbp_id: {type: decimal}
+      flatdiscount: {type: decimal}
+      totalopenbalance: {type: decimal}
+      dunninggrace: {type: string}
+      c_taxgroup_id: {type: decimal}
+      logo_id: {type: decimal}
+      ispotaxexempt: {type: string}
+      ismanufacturer: {type: string}
+      c_bpartner_uu: {type: string}
+      customerprofileid: {type: string}
+      default1099box_id: {type: decimal}
+      is1099vendor: {type: string}
+      jp_sotaxrounding: {type: string}
+      jp_potaxrounding: {type: string}
+      jp_corporation_id: {type: decimal}
+      jp_billschema_id: {type: decimal}
+      jp_billschemapo_id: {type: decimal}
+      isqualifiedinvoiceissuerjp: {type: string}
+      jp_registerednumberofqii: {type: string}
+      jp_registereddateofqii: {type: string}
+      jp_bill_printformat_id: {type: decimal}
+      jp_cm_bpartner_id: {type: decimal}

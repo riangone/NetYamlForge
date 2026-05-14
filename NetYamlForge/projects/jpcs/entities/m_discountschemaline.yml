@@ -1,133 +1,49 @@
-name: M_DISCOUNTSCHEMALINE
-tableName: m_discountschemaline
-primaryKey: m_discountschemaline_id
-fields:
-- name: m_discountschemaline_id
-  type: numeric
-  label: M Discountschemaline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_discountschema_id
-  type: numeric
-  label: M Discountschema Id
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: conversiondate
-  type: text
-  label: Conversiondate
-- name: list_base
-  type: text
-  label: List Base
-- name: list_addamt
-  type: numeric
-  label: List Addamt
-- name: list_discount
-  type: numeric
-  label: List Discount
-- name: list_rounding
-  type: text
-  label: List Rounding
-- name: list_minamt
-  type: numeric
-  label: List Minamt
-- name: list_maxamt
-  type: numeric
-  label: List Maxamt
-- name: list_fixed
-  type: numeric
-  label: List Fixed
-- name: std_base
-  type: text
-  label: Std Base
-- name: std_addamt
-  type: numeric
-  label: Std Addamt
-- name: std_discount
-  type: numeric
-  label: Std Discount
-- name: std_rounding
-  type: text
-  label: Std Rounding
-- name: std_minamt
-  type: numeric
-  label: Std Minamt
-- name: std_maxamt
-  type: numeric
-  label: Std Maxamt
-- name: std_fixed
-  type: numeric
-  label: Std Fixed
-- name: limit_base
-  type: text
-  label: Limit Base
-- name: limit_addamt
-  type: numeric
-  label: Limit Addamt
-- name: limit_discount
-  type: numeric
-  label: Limit Discount
-- name: limit_rounding
-  type: text
-  label: Limit Rounding
-- name: limit_minamt
-  type: numeric
-  label: Limit Minamt
-- name: limit_maxamt
-  type: numeric
-  label: Limit Maxamt
-- name: limit_fixed
-  type: numeric
-  label: Limit Fixed
-- name: c_conversiontype_id
-  type: numeric
-  label: C Conversiontype Id
-- name: classification
-  type: text
-  label: Classification
-- name: group2
-  type: text
-  label: Group2
-- name: group1
-  type: text
-  label: Group1
-- name: m_discountschemaline_uu
-  type: text
-  label: M Discountschemaline Uu
-- name: description
-  type: text
-  label: Description
-- name: isignoreiscurrentvendor
-  type: text
-  label: Isignoreiscurrentvendor
-- name: vendorcategory
-  type: text
-  label: Vendorcategory
+entities:
+  m_discountschemaline:
+    table: m_discountschemaline
+    key: m_discountschemaline_id
+    displayName: M_DISCOUNTSCHEMALINE
+    columns:
+      m_discountschemaline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_discountschema_id: {type: decimal}
+      seqno: {type: decimal}
+      m_product_category_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      m_product_id: {type: decimal}
+      conversiondate: {type: string}
+      list_base: {type: string}
+      list_addamt: {type: decimal}
+      list_discount: {type: decimal}
+      list_rounding: {type: string}
+      list_minamt: {type: decimal}
+      list_maxamt: {type: decimal}
+      list_fixed: {type: decimal}
+      std_base: {type: string}
+      std_addamt: {type: decimal}
+      std_discount: {type: decimal}
+      std_rounding: {type: string}
+      std_minamt: {type: decimal}
+      std_maxamt: {type: decimal}
+      std_fixed: {type: decimal}
+      limit_base: {type: string}
+      limit_addamt: {type: decimal}
+      limit_discount: {type: decimal}
+      limit_rounding: {type: string}
+      limit_minamt: {type: decimal}
+      limit_maxamt: {type: decimal}
+      limit_fixed: {type: decimal}
+      c_conversiontype_id: {type: decimal}
+      classification: {type: string}
+      group2: {type: string}
+      group1: {type: string}
+      m_discountschemaline_uu: {type: string}
+      description: {type: string}
+      isignoreiscurrentvendor: {type: string}
+      vendorcategory: {type: string}

@@ -1,43 +1,19 @@
-name: C_BP_VENDOR_ACCT
-tableName: c_bp_vendor_acct
-primaryKey: c_acctschema_id
-fields:
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: v_liability_acct
-  type: numeric
-  label: V Liability Acct
-- name: v_liability_services_acct
-  type: numeric
-  label: V Liability Services Acct
-- name: v_prepayment_acct
-  type: numeric
-  label: V Prepayment Acct
-- name: c_bp_vendor_acct_uu
-  type: text
-  label: C Bp Vendor Acct Uu
+entities:
+  c_bp_vendor_acct:
+    table: c_bp_vendor_acct
+    key: c_acctschema_id
+    displayName: C_BP_VENDOR_ACCT
+    columns:
+      c_acctschema_id: {type: decimal, identity: true}
+      c_bpartner_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      v_liability_acct: {type: decimal}
+      v_liability_services_acct: {type: decimal}
+      v_prepayment_acct: {type: decimal}
+      c_bp_vendor_acct_uu: {type: string}

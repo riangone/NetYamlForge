@@ -1,58 +1,24 @@
-name: AD_PRINTLABELLINE
-tableName: ad_printlabelline
-primaryKey: ad_printlabelline_id
-fields:
-- name: ad_printlabelline_id
-  type: numeric
-  label: Ad Printlabelline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_printlabel_id
-  type: numeric
-  label: Ad Printlabel Id
-- name: name
-  type: text
-  label: Name
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: labelformattype
-  type: text
-  label: Labelformattype
-- name: printname
-  type: text
-  label: Printname
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_labelprinterfunction_id
-  type: numeric
-  label: Ad Labelprinterfunction Id
-- name: xposition
-  type: numeric
-  label: Xposition
-- name: yposition
-  type: numeric
-  label: Yposition
-- name: ad_printlabelline_uu
-  type: text
-  label: Ad Printlabelline Uu
+entities:
+  ad_printlabelline:
+    table: ad_printlabelline
+    key: ad_printlabelline_id
+    displayName: AD_PRINTLABELLINE
+    columns:
+      ad_printlabelline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_printlabel_id: {type: decimal}
+      name: {type: string}
+      seqno: {type: decimal}
+      labelformattype: {type: string}
+      printname: {type: string}
+      ad_column_id: {type: decimal}
+      ad_labelprinterfunction_id: {type: decimal}
+      xposition: {type: decimal}
+      yposition: {type: decimal}
+      ad_printlabelline_uu: {type: string}

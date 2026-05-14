@@ -1,91 +1,35 @@
-name: C_CASHPLANLINE
-tableName: c_cashplanline
-primaryKey: c_cashplanline_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: c_activity_id
-  type: numeric
-  label: C Activity Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_campaign_id
-  type: numeric
-  label: C Campaign Id
-- name: c_cashplan_id
-  type: numeric
-  label: C Cashplan Id
-- name: c_cashplanline_id
-  type: numeric
-  label: C Cashplanline Id
-- name: c_charge_id
-  type: numeric
-  label: C Charge Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: c_projectphase_id
-  type: numeric
-  label: C Projectphase Id
-- name: c_projecttask_id
-  type: numeric
-  label: C Projecttask Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: datetrx
-  type: text
-  label: Datetrx
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: line
-  type: numeric
-  label: Line
-- name: linetotalamt
-  type: numeric
-  label: Linetotalamt
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: name
-  type: text
-  label: Name
-- name: probability
-  type: numeric
-  label: Probability
-- name: processed
-  type: text
-  label: Processed
-- name: qtyentered
-  type: numeric
-  label: Qtyentered
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: user1_id
-  type: numeric
-  label: User1 Id
-- name: user2_id
-  type: numeric
-  label: User2 Id
-- name: c_cashplanline_uu
-  type: text
-  label: C Cashplanline Uu
+entities:
+  c_cashplanline:
+    table: c_cashplanline
+    key: c_cashplanline_id
+    displayName: C_CASHPLANLINE
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      c_activity_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_campaign_id: {type: decimal}
+      c_cashplan_id: {type: decimal}
+      c_cashplanline_id: {type: decimal, identity: true}
+      c_charge_id: {type: decimal}
+      c_project_id: {type: decimal}
+      c_projectphase_id: {type: decimal}
+      c_projecttask_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      datetrx: {type: string}
+      description: {type: string}
+      isactive: {type: string}
+      line: {type: decimal}
+      linetotalamt: {type: decimal}
+      m_product_id: {type: decimal}
+      name: {type: string}
+      probability: {type: decimal}
+      processed: {type: string}
+      qtyentered: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      user1_id: {type: decimal}
+      user2_id: {type: decimal}
+      c_cashplanline_uu: {type: string}

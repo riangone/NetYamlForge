@@ -1,49 +1,21 @@
-name: M_DISTRIBUTIONLISTLINE
-tableName: m_distributionlistline
-primaryKey: m_distributionlistline_id
-fields:
-- name: m_distributionlistline_id
-  type: numeric
-  label: M Distributionlistline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_distributionlist_id
-  type: numeric
-  label: M Distributionlist Id
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: minqty
-  type: numeric
-  label: Minqty
-- name: ratio
-  type: numeric
-  label: Ratio
-- name: description
-  type: text
-  label: Description
-- name: m_distributionlistline_uu
-  type: text
-  label: M Distributionlistline Uu
+entities:
+  m_distributionlistline:
+    table: m_distributionlistline
+    key: m_distributionlistline_id
+    displayName: M_DISTRIBUTIONLISTLINE
+    columns:
+      m_distributionlistline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_distributionlist_id: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      minqty: {type: decimal}
+      ratio: {type: decimal}
+      description: {type: string}
+      m_distributionlistline_uu: {type: string}

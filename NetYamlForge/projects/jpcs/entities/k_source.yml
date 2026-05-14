@@ -1,37 +1,17 @@
-name: K_SOURCE
-tableName: k_source
-primaryKey: k_source_id
-fields:
-- name: k_source_id
-  type: numeric
-  label: K Source Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: descriptionurl
-  type: text
-  label: Descriptionurl
-- name: k_source_uu
-  type: text
-  label: K Source Uu
+entities:
+  k_source:
+    table: k_source
+    key: k_source_id
+    displayName: K_SOURCE
+    columns:
+      k_source_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      descriptionurl: {type: string}
+      k_source_uu: {type: string}

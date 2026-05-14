@@ -1,160 +1,58 @@
-name: I_PRODUCTPLANNING
-tableName: i_productplanning
-primaryKey: i_productplanning_id
-fields:
-- name: i_productplanning_id
-  type: numeric
-  label: I Productplanning Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: bpartner_value
-  type: text
-  label: Bpartner Value
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: processed
-  type: text
-  label: Processed
-- name: processing
-  type: text
-  label: Processing
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: dd_networkdistribution_id
-  type: numeric
-  label: Dd Networkdistribution Id
-- name: deliverytime_promised
-  type: numeric
-  label: Deliverytime Promised
-- name: iscreateplan
-  type: text
-  label: Iscreateplan
-- name: ismps
-  type: text
-  label: Ismps
-- name: isphantom
-  type: text
-  label: Isphantom
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_warehouse_id
-  type: numeric
-  label: M Warehouse Id
-- name: order_max
-  type: numeric
-  label: Order Max
-- name: order_min
-  type: numeric
-  label: Order Min
-- name: order_pack
-  type: numeric
-  label: Order Pack
-- name: order_period
-  type: numeric
-  label: Order Period
-- name: order_policy
-  type: text
-  label: Order Policy
-- name: order_qty
-  type: numeric
-  label: Order Qty
-- name: planner_id
-  type: numeric
-  label: Planner Id
-- name: pp_product_bom_id
-  type: numeric
-  label: Pp Product Bom Id
-- name: safetystock
-  type: numeric
-  label: Safetystock
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: timefence
-  type: numeric
-  label: Timefence
-- name: transferttime
-  type: numeric
-  label: Transferttime
-- name: workingtime
-  type: numeric
-  label: Workingtime
-- name: yield
-  type: numeric
-  label: Yield
-- name: datepromised
-  type: text
-  label: Datepromised
-- name: m_forecast_id
-  type: numeric
-  label: M Forecast Id
-- name: qty
-  type: numeric
-  label: Qty
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: productvalue
-  type: text
-  label: Productvalue
-- name: warehousevalue
-  type: text
-  label: Warehousevalue
-- name: orgvalue
-  type: text
-  label: Orgvalue
-- name: networkdistributionvalue
-  type: text
-  label: Networkdistributionvalue
-- name: product_bom_value
-  type: text
-  label: Product Bom Value
-- name: forecastvalue
-  type: text
-  label: Forecastvalue
-- name: resourcevalue
-  type: text
-  label: Resourcevalue
-- name: plannervalue
-  type: text
-  label: Plannervalue
-- name: m_forecastline_id
-  type: numeric
-  label: M Forecastline Id
-- name: pp_product_planning_id
-  type: numeric
-  label: Pp Product Planning Id
-- name: vendorproductno
-  type: text
-  label: Vendorproductno
-- name: i_productplanning_uu
-  type: text
-  label: I Productplanning Uu
+entities:
+  i_productplanning:
+    table: i_productplanning
+    key: i_productplanning_id
+    displayName: I_PRODUCTPLANNING
+    columns:
+      i_productplanning_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      bpartner_value: {type: string}
+      c_bpartner_id: {type: decimal}
+      i_errormsg: {type: string}
+      i_isimported: {type: string}
+      processed: {type: string}
+      processing: {type: string}
+      ad_workflow_id: {type: decimal}
+      dd_networkdistribution_id: {type: decimal}
+      deliverytime_promised: {type: decimal}
+      iscreateplan: {type: string}
+      ismps: {type: string}
+      isphantom: {type: string}
+      m_product_id: {type: decimal}
+      m_warehouse_id: {type: decimal}
+      order_max: {type: decimal}
+      order_min: {type: decimal}
+      order_pack: {type: decimal}
+      order_period: {type: decimal}
+      order_policy: {type: string}
+      order_qty: {type: decimal}
+      planner_id: {type: decimal}
+      pp_product_bom_id: {type: decimal}
+      safetystock: {type: decimal}
+      s_resource_id: {type: decimal}
+      timefence: {type: decimal}
+      transferttime: {type: decimal}
+      workingtime: {type: decimal}
+      yield: {type: decimal}
+      datepromised: {type: string}
+      m_forecast_id: {type: decimal}
+      qty: {type: decimal}
+      salesrep_id: {type: decimal}
+      productvalue: {type: string}
+      warehousevalue: {type: string}
+      orgvalue: {type: string}
+      networkdistributionvalue: {type: string}
+      product_bom_value: {type: string}
+      forecastvalue: {type: string}
+      resourcevalue: {type: string}
+      plannervalue: {type: string}
+      m_forecastline_id: {type: decimal}
+      pp_product_planning_id: {type: decimal}
+      vendorproductno: {type: string}
+      i_productplanning_uu: {type: string}

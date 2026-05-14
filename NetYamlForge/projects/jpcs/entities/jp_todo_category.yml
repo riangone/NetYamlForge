@@ -1,46 +1,20 @@
-name: JP_TODO_CATEGORY
-tableName: jp_todo_category
-primaryKey: jp_todo_category_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_todo_category_id
-  type: numeric
-  label: Jp Todo Category Id
-- name: jp_todo_category_uu
-  type: text
-  label: Jp Todo Category Uu
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_colorpicker
-  type: text
-  label: Jp Colorpicker
-- name: jp_colorpicker2
-  type: text
-  label: Jp Colorpicker2
+entities:
+  jp_todo_category:
+    table: jp_todo_category
+    key: jp_todo_category_id
+    displayName: JP_TODO_CATEGORY
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_todo_category_id: {type: decimal, identity: true}
+      jp_todo_category_uu: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_colorpicker: {type: string}
+      jp_colorpicker2: {type: string}

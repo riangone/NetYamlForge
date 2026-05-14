@@ -1,52 +1,22 @@
-name: R_ISSUEPROJECT
-tableName: r_issueproject
-primaryKey: r_issueproject_id
-fields:
-- name: r_issueproject_id
-  type: numeric
-  label: R Issueproject Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: a_asset_id
-  type: numeric
-  label: A Asset Id
-- name: c_project_id
-  type: numeric
-  label: C Project Id
-- name: statisticsinfo
-  type: text
-  label: Statisticsinfo
-- name: profileinfo
-  type: text
-  label: Profileinfo
-- name: systemstatus
-  type: text
-  label: Systemstatus
-- name: r_issueproject_uu
-  type: text
-  label: R Issueproject Uu
+entities:
+  r_issueproject:
+    table: r_issueproject
+    key: r_issueproject_id
+    displayName: R_ISSUEPROJECT
+    columns:
+      r_issueproject_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      a_asset_id: {type: decimal}
+      c_project_id: {type: decimal}
+      statisticsinfo: {type: string}
+      profileinfo: {type: string}
+      systemstatus: {type: string}
+      r_issueproject_uu: {type: string}

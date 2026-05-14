@@ -1,46 +1,20 @@
-name: AD_STATUSLINE
-tableName: ad_statusline
-primaryKey: ad_statusline_id
-fields:
-- name: ad_statusline_id
-  type: numeric
-  label: Ad Statusline Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_statusline_uu
-  type: text
-  label: Ad Statusline Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_message_id
-  type: numeric
-  label: Ad Message Id
-- name: sqlstatement
-  type: text
-  label: Sqlstatement
-- name: ad_style_id
-  type: numeric
-  label: Ad Style Id
+entities:
+  ad_statusline:
+    table: ad_statusline
+    key: ad_statusline_id
+    displayName: AD_STATUSLINE
+    columns:
+      ad_statusline_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_statusline_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      entitytype: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_message_id: {type: decimal}
+      sqlstatement: {type: string}
+      ad_style_id: {type: decimal}

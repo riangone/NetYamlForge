@@ -1,43 +1,19 @@
-name: C_RECURRINGGROUP
-tableName: c_recurringgroup
-primaryKey: c_recurringgroup_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: c_recurringgroup_id
-  type: numeric
-  label: C Recurringgroup Id
-- name: c_recurringgroup_uu
-  type: text
-  label: C Recurringgroup Uu
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
+entities:
+  c_recurringgroup:
+    table: c_recurringgroup
+    key: c_recurringgroup_id
+    displayName: C_RECURRINGGROUP
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      c_recurringgroup_id: {type: decimal, identity: true}
+      c_recurringgroup_uu: {type: string}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      name: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}

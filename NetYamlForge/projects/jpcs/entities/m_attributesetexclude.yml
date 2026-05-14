@@ -1,40 +1,18 @@
-name: M_ATTRIBUTESETEXCLUDE
-tableName: m_attributesetexclude
-primaryKey: m_attributesetexclude_id
-fields:
-- name: m_attributesetexclude_id
-  type: numeric
-  label: M Attributesetexclude Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_attributeset_id
-  type: numeric
-  label: M Attributeset Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: issotrx
-  type: text
-  label: Issotrx
-- name: m_attributesetexclude_uu
-  type: text
-  label: M Attributesetexclude Uu
+entities:
+  m_attributesetexclude:
+    table: m_attributesetexclude
+    key: m_attributesetexclude_id
+    displayName: M_ATTRIBUTESETEXCLUDE
+    columns:
+      m_attributesetexclude_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_attributeset_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      issotrx: {type: string}
+      m_attributesetexclude_uu: {type: string}

@@ -1,256 +1,90 @@
-name: C_ACCTSCHEMA_DEFAULT
-tableName: c_acctschema_default
-primaryKey: c_acctschema_id
-fields:
-- name: c_acctschema_id
-  type: numeric
-  label: C Acctschema Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: w_inventory_acct
-  type: numeric
-  label: W Inventory Acct
-- name: w_invactualadjust_acct
-  type: numeric
-  label: W Invactualadjust Acct
-- name: w_differences_acct
-  type: numeric
-  label: W Differences Acct
-- name: w_revaluation_acct
-  type: numeric
-  label: W Revaluation Acct
-- name: p_revenue_acct
-  type: numeric
-  label: P Revenue Acct
-- name: p_expense_acct
-  type: numeric
-  label: P Expense Acct
-- name: p_asset_acct
-  type: numeric
-  label: P Asset Acct
-- name: p_purchasepricevariance_acct
-  type: numeric
-  label: P Purchasepricevariance Acct
-- name: p_invoicepricevariance_acct
-  type: numeric
-  label: P Invoicepricevariance Acct
-- name: p_tradediscountrec_acct
-  type: numeric
-  label: P Tradediscountrec Acct
-- name: p_tradediscountgrant_acct
-  type: numeric
-  label: P Tradediscountgrant Acct
-- name: p_cogs_acct
-  type: numeric
-  label: P Cogs Acct
-- name: c_receivable_acct
-  type: numeric
-  label: C Receivable Acct
-- name: c_prepayment_acct
-  type: numeric
-  label: C Prepayment Acct
-- name: v_liability_acct
-  type: numeric
-  label: V Liability Acct
-- name: v_liability_services_acct
-  type: numeric
-  label: V Liability Services Acct
-- name: v_prepayment_acct
-  type: numeric
-  label: V Prepayment Acct
-- name: paydiscount_exp_acct
-  type: numeric
-  label: Paydiscount Exp Acct
-- name: writeoff_acct
-  type: numeric
-  label: Writeoff Acct
-- name: paydiscount_rev_acct
-  type: numeric
-  label: Paydiscount Rev Acct
-- name: unrealizedgain_acct
-  type: numeric
-  label: Unrealizedgain Acct
-- name: unrealizedloss_acct
-  type: numeric
-  label: Unrealizedloss Acct
-- name: realizedgain_acct
-  type: numeric
-  label: Realizedgain Acct
-- name: realizedloss_acct
-  type: numeric
-  label: Realizedloss Acct
-- name: withholding_acct
-  type: numeric
-  label: Withholding Acct
-- name: e_prepayment_acct
-  type: numeric
-  label: E Prepayment Acct
-- name: e_expense_acct
-  type: numeric
-  label: E Expense Acct
-- name: pj_asset_acct
-  type: numeric
-  label: Pj Asset Acct
-- name: pj_wip_acct
-  type: numeric
-  label: Pj Wip Acct
-- name: t_expense_acct
-  type: numeric
-  label: T Expense Acct
-- name: t_liability_acct
-  type: numeric
-  label: T Liability Acct
-- name: t_receivables_acct
-  type: numeric
-  label: T Receivables Acct
-- name: t_due_acct
-  type: numeric
-  label: T Due Acct
-- name: t_credit_acct
-  type: numeric
-  label: T Credit Acct
-- name: b_intransit_acct
-  type: numeric
-  label: B Intransit Acct
-- name: b_asset_acct
-  type: numeric
-  label: B Asset Acct
-- name: b_expense_acct
-  type: numeric
-  label: B Expense Acct
-- name: b_interestrev_acct
-  type: numeric
-  label: B Interestrev Acct
-- name: b_interestexp_acct
-  type: numeric
-  label: B Interestexp Acct
-- name: b_unidentified_acct
-  type: numeric
-  label: B Unidentified Acct
-- name: b_unallocatedcash_acct
-  type: numeric
-  label: B Unallocatedcash Acct
-- name: b_paymentselect_acct
-  type: numeric
-  label: B Paymentselect Acct
-- name: b_settlementgain_acct
-  type: numeric
-  label: B Settlementgain Acct
-- name: b_settlementloss_acct
-  type: numeric
-  label: B Settlementloss Acct
-- name: b_revaluationgain_acct
-  type: numeric
-  label: B Revaluationgain Acct
-- name: b_revaluationloss_acct
-  type: numeric
-  label: B Revaluationloss Acct
-- name: ch_expense_acct
-  type: numeric
-  label: Ch Expense Acct
-- name: ch_revenue_acct
-  type: numeric
-  label: Ch Revenue Acct
-- name: unearnedrevenue_acct
-  type: numeric
-  label: Unearnedrevenue Acct
-- name: notinvoicedreceivables_acct
-  type: numeric
-  label: Notinvoicedreceivables Acct
-- name: notinvoicedrevenue_acct
-  type: numeric
-  label: Notinvoicedrevenue Acct
-- name: notinvoicedreceipts_acct
-  type: numeric
-  label: Notinvoicedreceipts Acct
-- name: cb_asset_acct
-  type: numeric
-  label: Cb Asset Acct
-- name: cb_cashtransfer_acct
-  type: numeric
-  label: Cb Cashtransfer Acct
-- name: cb_differences_acct
-  type: numeric
-  label: Cb Differences Acct
-- name: cb_expense_acct
-  type: numeric
-  label: Cb Expense Acct
-- name: cb_receipt_acct
-  type: numeric
-  label: Cb Receipt Acct
-- name: processing
-  type: text
-  label: Processing
-- name: c_receivable_services_acct
-  type: numeric
-  label: C Receivable Services Acct
-- name: p_inventoryclearing_acct
-  type: numeric
-  label: P Inventoryclearing Acct
-- name: p_costadjustment_acct
-  type: numeric
-  label: P Costadjustment Acct
-- name: p_wip_acct
-  type: numeric
-  label: P Wip Acct
-- name: p_methodchangevariance_acct
-  type: numeric
-  label: P Methodchangevariance Acct
-- name: p_usagevariance_acct
-  type: numeric
-  label: P Usagevariance Acct
-- name: p_ratevariance_acct
-  type: numeric
-  label: P Ratevariance Acct
-- name: p_mixvariance_acct
-  type: numeric
-  label: P Mixvariance Acct
-- name: p_floorstock_acct
-  type: numeric
-  label: P Floorstock Acct
-- name: p_costofproduction_acct
-  type: numeric
-  label: P Costofproduction Acct
-- name: p_labor_acct
-  type: numeric
-  label: P Labor Acct
-- name: p_burden_acct
-  type: numeric
-  label: P Burden Acct
-- name: p_outsideprocessing_acct
-  type: numeric
-  label: P Outsideprocessing Acct
-- name: p_overhead_acct
-  type: numeric
-  label: P Overhead Acct
-- name: p_scrap_acct
-  type: numeric
-  label: P Scrap Acct
-- name: p_averagecostvariance_acct
-  type: numeric
-  label: P Averagecostvariance Acct
-- name: c_acctschema_default_uu
-  type: text
-  label: C Acctschema Default Uu
-- name: p_landedcostclearing_acct
-  type: numeric
-  label: P Landedcostclearing Acct
+entities:
+  c_acctschema_default:
+    table: c_acctschema_default
+    key: c_acctschema_id
+    displayName: C_ACCTSCHEMA_DEFAULT
+    columns:
+      c_acctschema_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      w_inventory_acct: {type: decimal}
+      w_invactualadjust_acct: {type: decimal}
+      w_differences_acct: {type: decimal}
+      w_revaluation_acct: {type: decimal}
+      p_revenue_acct: {type: decimal}
+      p_expense_acct: {type: decimal}
+      p_asset_acct: {type: decimal}
+      p_purchasepricevariance_acct: {type: decimal}
+      p_invoicepricevariance_acct: {type: decimal}
+      p_tradediscountrec_acct: {type: decimal}
+      p_tradediscountgrant_acct: {type: decimal}
+      p_cogs_acct: {type: decimal}
+      c_receivable_acct: {type: decimal}
+      c_prepayment_acct: {type: decimal}
+      v_liability_acct: {type: decimal}
+      v_liability_services_acct: {type: decimal}
+      v_prepayment_acct: {type: decimal}
+      paydiscount_exp_acct: {type: decimal}
+      writeoff_acct: {type: decimal}
+      paydiscount_rev_acct: {type: decimal}
+      unrealizedgain_acct: {type: decimal}
+      unrealizedloss_acct: {type: decimal}
+      realizedgain_acct: {type: decimal}
+      realizedloss_acct: {type: decimal}
+      withholding_acct: {type: decimal}
+      e_prepayment_acct: {type: decimal}
+      e_expense_acct: {type: decimal}
+      pj_asset_acct: {type: decimal}
+      pj_wip_acct: {type: decimal}
+      t_expense_acct: {type: decimal}
+      t_liability_acct: {type: decimal}
+      t_receivables_acct: {type: decimal}
+      t_due_acct: {type: decimal}
+      t_credit_acct: {type: decimal}
+      b_intransit_acct: {type: decimal}
+      b_asset_acct: {type: decimal}
+      b_expense_acct: {type: decimal}
+      b_interestrev_acct: {type: decimal}
+      b_interestexp_acct: {type: decimal}
+      b_unidentified_acct: {type: decimal}
+      b_unallocatedcash_acct: {type: decimal}
+      b_paymentselect_acct: {type: decimal}
+      b_settlementgain_acct: {type: decimal}
+      b_settlementloss_acct: {type: decimal}
+      b_revaluationgain_acct: {type: decimal}
+      b_revaluationloss_acct: {type: decimal}
+      ch_expense_acct: {type: decimal}
+      ch_revenue_acct: {type: decimal}
+      unearnedrevenue_acct: {type: decimal}
+      notinvoicedreceivables_acct: {type: decimal}
+      notinvoicedrevenue_acct: {type: decimal}
+      notinvoicedreceipts_acct: {type: decimal}
+      cb_asset_acct: {type: decimal}
+      cb_cashtransfer_acct: {type: decimal}
+      cb_differences_acct: {type: decimal}
+      cb_expense_acct: {type: decimal}
+      cb_receipt_acct: {type: decimal}
+      processing: {type: string}
+      c_receivable_services_acct: {type: decimal}
+      p_inventoryclearing_acct: {type: decimal}
+      p_costadjustment_acct: {type: decimal}
+      p_wip_acct: {type: decimal}
+      p_methodchangevariance_acct: {type: decimal}
+      p_usagevariance_acct: {type: decimal}
+      p_ratevariance_acct: {type: decimal}
+      p_mixvariance_acct: {type: decimal}
+      p_floorstock_acct: {type: decimal}
+      p_costofproduction_acct: {type: decimal}
+      p_labor_acct: {type: decimal}
+      p_burden_acct: {type: decimal}
+      p_outsideprocessing_acct: {type: decimal}
+      p_overhead_acct: {type: decimal}
+      p_scrap_acct: {type: decimal}
+      p_averagecostvariance_acct: {type: decimal}
+      c_acctschema_default_uu: {type: string}
+      p_landedcostclearing_acct: {type: decimal}

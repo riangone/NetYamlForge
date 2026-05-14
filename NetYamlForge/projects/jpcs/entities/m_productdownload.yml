@@ -1,40 +1,18 @@
-name: M_PRODUCTDOWNLOAD
-tableName: m_productdownload
-primaryKey: m_productdownload_id
-fields:
-- name: m_productdownload_id
-  type: numeric
-  label: M Productdownload Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: name
-  type: text
-  label: Name
-- name: downloadurl
-  type: text
-  label: Downloadurl
-- name: m_productdownload_uu
-  type: text
-  label: M Productdownload Uu
+entities:
+  m_productdownload:
+    table: m_productdownload
+    key: m_productdownload_id
+    displayName: M_PRODUCTDOWNLOAD
+    columns:
+      m_productdownload_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      m_product_id: {type: decimal}
+      name: {type: string}
+      downloadurl: {type: string}
+      m_productdownload_uu: {type: string}

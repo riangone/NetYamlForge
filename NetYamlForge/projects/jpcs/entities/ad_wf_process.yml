@@ -1,64 +1,26 @@
-name: AD_WF_PROCESS
-tableName: ad_wf_process
-primaryKey: ad_wf_process_id
-fields:
-- name: ad_wf_process_id
-  type: numeric
-  label: Ad Wf Process Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: ad_wf_responsible_id
-  type: numeric
-  label: Ad Wf Responsible Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: wfstate
-  type: text
-  label: Wfstate
-- name: ad_message_id
-  type: numeric
-  label: Ad Message Id
-- name: processing
-  type: text
-  label: Processing
-- name: processed
-  type: text
-  label: Processed
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: priority
-  type: numeric
-  label: Priority
-- name: ad_wf_process_uu
-  type: text
-  label: Ad Wf Process Uu
+entities:
+  ad_wf_process:
+    table: ad_wf_process
+    key: ad_wf_process_id
+    displayName: AD_WF_PROCESS
+    columns:
+      ad_wf_process_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_workflow_id: {type: decimal}
+      ad_wf_responsible_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      wfstate: {type: string}
+      ad_message_id: {type: decimal}
+      processing: {type: string}
+      processed: {type: string}
+      textmsg: {type: string}
+      ad_table_id: {type: decimal}
+      record_id: {type: decimal}
+      priority: {type: decimal}
+      ad_wf_process_uu: {type: string}

@@ -1,226 +1,80 @@
-name: M_PRODUCT
-tableName: m_product
-primaryKey: m_product_id
-fields:
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: help
-  type: text
-  label: Help
-- name: upc
-  type: text
-  label: Upc
-- name: sku
-  type: text
-  label: Sku
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: issummary
-  type: text
-  label: Issummary
-- name: isstocked
-  type: text
-  label: Isstocked
-- name: ispurchased
-  type: text
-  label: Ispurchased
-- name: issold
-  type: text
-  label: Issold
-- name: isbom
-  type: text
-  label: Isbom
-- name: isinvoiceprintdetails
-  type: text
-  label: Isinvoiceprintdetails
-- name: ispicklistprintdetails
-  type: text
-  label: Ispicklistprintdetails
-- name: isverified
-  type: text
-  label: Isverified
-- name: c_revenuerecognition_id
-  type: numeric
-  label: C Revenuerecognition Id
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: classification
-  type: text
-  label: Classification
-- name: volume
-  type: numeric
-  label: Volume
-- name: weight
-  type: numeric
-  label: Weight
-- name: shelfwidth
-  type: numeric
-  label: Shelfwidth
-- name: shelfheight
-  type: numeric
-  label: Shelfheight
-- name: shelfdepth
-  type: numeric
-  label: Shelfdepth
-- name: unitsperpallet
-  type: numeric
-  label: Unitsperpallet
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: s_resource_id
-  type: numeric
-  label: S Resource Id
-- name: discontinued
-  type: text
-  label: Discontinued
-- name: discontinuedby
-  type: text
-  label: Discontinuedby
-- name: processing
-  type: text
-  label: Processing
-- name: s_expensetype_id
-  type: numeric
-  label: S Expensetype Id
-- name: producttype
-  type: text
-  label: Producttype
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: descriptionurl
-  type: text
-  label: Descriptionurl
-- name: guaranteedays
-  type: numeric
-  label: Guaranteedays
-- name: r_mailtext_id
-  type: numeric
-  label: R Mailtext Id
-- name: versionno
-  type: text
-  label: Versionno
-- name: m_attributeset_id
-  type: numeric
-  label: M Attributeset Id
-- name: m_attributesetinstance_id
-  type: numeric
-  label: M Attributesetinstance Id
-- name: downloadurl
-  type: text
-  label: Downloadurl
-- name: m_freightcategory_id
-  type: numeric
-  label: M Freightcategory Id
-- name: m_locator_id
-  type: numeric
-  label: M Locator Id
-- name: guaranteedaysmin
-  type: numeric
-  label: Guaranteedaysmin
-- name: iswebstorefeatured
-  type: text
-  label: Iswebstorefeatured
-- name: isselfservice
-  type: text
-  label: Isselfservice
-- name: c_subscriptiontype_id
-  type: numeric
-  label: C Subscriptiontype Id
-- name: isdropship
-  type: text
-  label: Isdropship
-- name: isexcludeautodelivery
-  type: text
-  label: Isexcludeautodelivery
-- name: group1
-  type: text
-  label: Group1
-- name: group2
-  type: text
-  label: Group2
-- name: istoformule
-  type: text
-  label: Istoformule
-- name: lowlevel
-  type: numeric
-  label: Lowlevel
-- name: unitsperpack
-  type: numeric
-  label: Unitsperpack
-- name: discontinuedat
-  type: text
-  label: Discontinuedat
-- name: copyfrom
-  type: text
-  label: Copyfrom
-- name: m_product_uu
-  type: text
-  label: M Product Uu
-- name: m_parttype_id
-  type: numeric
-  label: M Parttype Id
-- name: iskanban
-  type: text
-  label: Iskanban
-- name: ismanufactured
-  type: text
-  label: Ismanufactured
-- name: isphantom
-  type: text
-  label: Isphantom
-- name: isownbox
-  type: text
-  label: Isownbox
-- name: customstariffnumber
-  type: text
-  label: Customstariffnumber
-- name: isautoproduce
-  type: text
-  label: Isautoproduce
-- name: jp_cm_product_id
-  type: numeric
-  label: Jp Cm Product Id
-- name: isbompriceoverride
-  type: text
-  label: Isbompriceoverride
+entities:
+  m_product:
+    table: m_product
+    key: m_product_id
+    displayName: M_PRODUCT
+    columns:
+      m_product_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      documentnote: {type: string}
+      help: {type: string}
+      upc: {type: string}
+      sku: {type: string}
+      c_uom_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      issummary: {type: string}
+      isstocked: {type: string}
+      ispurchased: {type: string}
+      issold: {type: string}
+      isbom: {type: string}
+      isinvoiceprintdetails: {type: string}
+      ispicklistprintdetails: {type: string}
+      isverified: {type: string}
+      c_revenuerecognition_id: {type: decimal}
+      m_product_category_id: {type: decimal}
+      classification: {type: string}
+      volume: {type: decimal}
+      weight: {type: decimal}
+      shelfwidth: {type: decimal}
+      shelfheight: {type: decimal}
+      shelfdepth: {type: decimal}
+      unitsperpallet: {type: decimal}
+      c_taxcategory_id: {type: decimal}
+      s_resource_id: {type: decimal}
+      discontinued: {type: string}
+      discontinuedby: {type: string}
+      processing: {type: string}
+      s_expensetype_id: {type: decimal}
+      producttype: {type: string}
+      imageurl: {type: string}
+      descriptionurl: {type: string}
+      guaranteedays: {type: decimal}
+      r_mailtext_id: {type: decimal}
+      versionno: {type: string}
+      m_attributeset_id: {type: decimal}
+      m_attributesetinstance_id: {type: decimal}
+      downloadurl: {type: string}
+      m_freightcategory_id: {type: decimal}
+      m_locator_id: {type: decimal}
+      guaranteedaysmin: {type: decimal}
+      iswebstorefeatured: {type: string}
+      isselfservice: {type: string}
+      c_subscriptiontype_id: {type: decimal}
+      isdropship: {type: string}
+      isexcludeautodelivery: {type: string}
+      group1: {type: string}
+      group2: {type: string}
+      istoformule: {type: string}
+      lowlevel: {type: decimal}
+      unitsperpack: {type: decimal}
+      discontinuedat: {type: string}
+      copyfrom: {type: string}
+      m_product_uu: {type: string}
+      m_parttype_id: {type: decimal}
+      iskanban: {type: string}
+      ismanufactured: {type: string}
+      isphantom: {type: string}
+      isownbox: {type: string}
+      customstariffnumber: {type: string}
+      isautoproduce: {type: string}
+      jp_cm_product_id: {type: decimal}
+      isbompriceoverride: {type: string}

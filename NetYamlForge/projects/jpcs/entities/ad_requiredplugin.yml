@@ -1,37 +1,17 @@
-name: AD_REQUIREDPLUGIN
-tableName: ad_requiredplugin
-primaryKey: ad_client_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_requiredplugin_uu
-  type: text
-  label: Ad Requiredplugin Uu
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: pluginexpectedstate
-  type: text
-  label: Pluginexpectedstate
-- name: pluginname
-  type: text
-  label: Pluginname
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: entitytype
-  type: text
-  label: Entitytype
+entities:
+  ad_requiredplugin:
+    table: ad_requiredplugin
+    key: ad_client_id
+    displayName: AD_REQUIREDPLUGIN
+    columns:
+      ad_client_id: {type: decimal, identity: true}
+      ad_org_id: {type: decimal}
+      ad_requiredplugin_uu: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      pluginexpectedstate: {type: string}
+      pluginname: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      entitytype: {type: string}

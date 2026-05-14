@@ -1,61 +1,25 @@
-name: S_TRAINING
-tableName: s_training
-primaryKey: s_training_id
-fields:
-- name: s_training_id
-  type: numeric
-  label: S Training Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: updated
-  type: text
-  label: Updated
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: documentnote
-  type: text
-  label: Documentnote
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: descriptionurl
-  type: text
-  label: Descriptionurl
-- name: m_product_category_id
-  type: numeric
-  label: M Product Category Id
-- name: c_taxcategory_id
-  type: numeric
-  label: C Taxcategory Id
-- name: c_uom_id
-  type: numeric
-  label: C Uom Id
-- name: processing
-  type: text
-  label: Processing
-- name: s_training_uu
-  type: text
-  label: S Training Uu
+entities:
+  s_training:
+    table: s_training
+    key: s_training_id
+    displayName: S_TRAINING
+    columns:
+      s_training_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updatedby: {type: decimal}
+      updated: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      documentnote: {type: string}
+      imageurl: {type: string}
+      descriptionurl: {type: string}
+      m_product_category_id: {type: decimal}
+      c_taxcategory_id: {type: decimal}
+      c_uom_id: {type: decimal}
+      processing: {type: string}
+      s_training_uu: {type: string}

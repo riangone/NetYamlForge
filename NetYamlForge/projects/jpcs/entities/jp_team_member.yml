@@ -1,40 +1,18 @@
-name: JP_TEAM_MEMBER
-tableName: jp_team_member
-primaryKey: jp_team_member_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_team_id
-  type: numeric
-  label: Jp Team Id
-- name: jp_team_member_id
-  type: numeric
-  label: Jp Team Member Id
-- name: jp_team_member_uu
-  type: text
-  label: Jp Team Member Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
+entities:
+  jp_team_member:
+    table: jp_team_member
+    key: jp_team_member_id
+    displayName: JP_TEAM_MEMBER
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      isactive: {type: string}
+      jp_team_id: {type: decimal}
+      jp_team_member_id: {type: decimal, identity: true}
+      jp_team_member_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}

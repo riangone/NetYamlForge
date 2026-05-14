@@ -1,67 +1,27 @@
-name: JP_INVENTORYDIFFQTYLOG
-tableName: jp_inventorydiffqtylog
-primaryKey: jp_inventorydiffqtylog_id
-fields:
-- name: jp_inventorydiffqtylog_id
-  type: numeric
-  label: Jp Inventorydiffqtylog Id
-- name: jp_inventorydiffqtylog_uu
-  type: text
-  label: Jp Inventorydiffqtylog Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_invvaladjustline_id
-  type: numeric
-  label: Jp Invvaladjustline Id
-- name: line
-  type: numeric
-  label: Line
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: m_inoutline_id
-  type: numeric
-  label: M Inoutline Id
-- name: m_transaction_id
-  type: numeric
-  label: M Transaction Id
-- name: movementtype
-  type: text
-  label: Movementtype
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: movementdate
-  type: text
-  label: Movementdate
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: movementqty
-  type: numeric
-  label: Movementqty
-- name: jp_adjusttoacctqty
-  type: numeric
-  label: Jp Adjusttoacctqty
-- name: description
-  type: text
-  label: Description
+entities:
+  jp_inventorydiffqtylog:
+    table: jp_inventorydiffqtylog
+    key: jp_inventorydiffqtylog_id
+    displayName: JP_INVENTORYDIFFQTYLOG
+    columns:
+      jp_inventorydiffqtylog_id: {type: decimal, identity: true}
+      jp_inventorydiffqtylog_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_invvaladjustline_id: {type: decimal}
+      line: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      m_inoutline_id: {type: decimal}
+      m_transaction_id: {type: decimal}
+      movementtype: {type: string}
+      m_product_id: {type: decimal}
+      movementdate: {type: string}
+      dateacct: {type: string}
+      movementqty: {type: decimal}
+      jp_adjusttoacctqty: {type: decimal}
+      description: {type: string}

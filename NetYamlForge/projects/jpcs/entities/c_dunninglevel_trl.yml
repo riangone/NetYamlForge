@@ -1,43 +1,19 @@
-name: C_DUNNINGLEVEL_TRL
-tableName: c_dunninglevel_trl
-primaryKey: ad_language
-fields:
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: c_dunninglevel_id
-  type: numeric
-  label: C Dunninglevel Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: printname
-  type: text
-  label: Printname
-- name: note
-  type: text
-  label: Note
-- name: istranslated
-  type: text
-  label: Istranslated
-- name: c_dunninglevel_trl_uu
-  type: text
-  label: C Dunninglevel Trl Uu
+entities:
+  c_dunninglevel_trl:
+    table: c_dunninglevel_trl
+    key: ad_language
+    displayName: C_DUNNINGLEVEL_TRL
+    columns:
+      ad_language: {type: string, identity: true}
+      c_dunninglevel_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      printname: {type: string}
+      note: {type: string}
+      istranslated: {type: string}
+      c_dunninglevel_trl_uu: {type: string}

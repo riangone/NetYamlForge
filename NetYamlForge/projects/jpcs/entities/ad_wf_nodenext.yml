@@ -1,52 +1,22 @@
-name: AD_WF_NODENEXT
-tableName: ad_wf_nodenext
-primaryKey: ad_wf_nodenext_id
-fields:
-- name: ad_wf_nodenext_id
-  type: numeric
-  label: Ad Wf Nodenext Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_wf_node_id
-  type: numeric
-  label: Ad Wf Node Id
-- name: ad_wf_next_id
-  type: numeric
-  label: Ad Wf Next Id
-- name: description
-  type: text
-  label: Description
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: transitioncode
-  type: text
-  label: Transitioncode
-- name: isstduserworkflow
-  type: text
-  label: Isstduserworkflow
-- name: ad_wf_nodenext_uu
-  type: text
-  label: Ad Wf Nodenext Uu
+entities:
+  ad_wf_nodenext:
+    table: ad_wf_nodenext
+    key: ad_wf_nodenext_id
+    displayName: AD_WF_NODENEXT
+    columns:
+      ad_wf_nodenext_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_wf_node_id: {type: decimal}
+      ad_wf_next_id: {type: decimal}
+      description: {type: string}
+      seqno: {type: decimal}
+      entitytype: {type: string}
+      transitioncode: {type: string}
+      isstduserworkflow: {type: string}
+      ad_wf_nodenext_uu: {type: string}

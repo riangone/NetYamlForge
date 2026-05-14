@@ -1,100 +1,38 @@
-name: AD_ATTRIBUTE
-tableName: ad_attribute
-primaryKey: ad_attribute_id
-fields:
-- name: ad_attribute_id
-  type: numeric
-  label: Ad Attribute Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_reference_id
-  type: numeric
-  label: Ad Reference Id
-- name: ad_reference_value_id
-  type: numeric
-  label: Ad Reference Value Id
-- name: ad_val_rule_id
-  type: numeric
-  label: Ad Val Rule Id
-- name: callout
-  type: text
-  label: Callout
-- name: valuemin
-  type: text
-  label: Valuemin
-- name: valuemax
-  type: text
-  label: Valuemax
-- name: defaultvalue
-  type: text
-  label: Defaultvalue
-- name: isreadonly
-  type: text
-  label: Isreadonly
-- name: isupdateable
-  type: text
-  label: Isupdateable
-- name: ismandatory
-  type: text
-  label: Ismandatory
-- name: isencrypted
-  type: text
-  label: Isencrypted
-- name: fieldlength
-  type: numeric
-  label: Fieldlength
-- name: displaylength
-  type: numeric
-  label: Displaylength
-- name: displaylogic
-  type: text
-  label: Displaylogic
-- name: vformat
-  type: text
-  label: Vformat
-- name: issameline
-  type: text
-  label: Issameline
-- name: isheading
-  type: text
-  label: Isheading
-- name: isfieldonly
-  type: text
-  label: Isfieldonly
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: ad_attribute_uu
-  type: text
-  label: Ad Attribute Uu
+entities:
+  ad_attribute:
+    table: ad_attribute
+    key: ad_attribute_id
+    displayName: AD_ATTRIBUTE
+    columns:
+      ad_attribute_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_table_id: {type: decimal}
+      ad_reference_id: {type: decimal}
+      ad_reference_value_id: {type: decimal}
+      ad_val_rule_id: {type: decimal}
+      callout: {type: string}
+      valuemin: {type: string}
+      valuemax: {type: string}
+      defaultvalue: {type: string}
+      isreadonly: {type: string}
+      isupdateable: {type: string}
+      ismandatory: {type: string}
+      isencrypted: {type: string}
+      fieldlength: {type: decimal}
+      displaylength: {type: decimal}
+      displaylogic: {type: string}
+      vformat: {type: string}
+      issameline: {type: string}
+      isheading: {type: string}
+      isfieldonly: {type: string}
+      seqno: {type: decimal}
+      ad_attribute_uu: {type: string}

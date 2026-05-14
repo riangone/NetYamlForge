@@ -1,73 +1,29 @@
-name: JP_SAML_CONFIG
-tableName: jp_saml_config
-primaryKey: jp_saml_config_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: jp_saml_config_id
-  type: numeric
-  label: Jp Saml Config Id
-- name: jp_saml_config_uu
-  type: text
-  label: Jp Saml Config Uu
-- name: jp_saml_parameter
-  type: text
-  label: Jp Saml Parameter
-- name: jp_saml_parameter_value
-  type: text
-  label: Jp Saml Parameter Value
-- name: jp_saml_redirect_url
-  type: text
-  label: Jp Saml Redirect Url
-- name: jp_saml_request_issuer
-  type: text
-  label: Jp Saml Request Issuer
-- name: jp_saml_servletfile
-  type: text
-  label: Jp Saml Servletfile
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_saml_binding
-  type: text
-  label: Jp Saml Binding
-- name: jp_saml_nameidpolicy
-  type: text
-  label: Jp Saml Nameidpolicy
-- name: jp_saml_assertion_publickey
-  type: text
-  label: Jp Saml Assertion Publickey
-- name: jp_saml_response_publickey
-  type: text
-  label: Jp Saml Response Publickey
-- name: jp_saml_assertion_issuer
-  type: text
-  label: Jp Saml Assertion Issuer
-- name: isverbosejp
-  type: text
-  label: Isverbosejp
-- name: jp_saml_availableperiod
-  type: numeric
-  label: Jp Saml Availableperiod
+entities:
+  jp_saml_config:
+    table: jp_saml_config
+    key: jp_saml_config_id
+    displayName: JP_SAML_CONFIG
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      description: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      jp_saml_config_id: {type: decimal, identity: true}
+      jp_saml_config_uu: {type: string}
+      jp_saml_parameter: {type: string}
+      jp_saml_parameter_value: {type: string}
+      jp_saml_redirect_url: {type: string}
+      jp_saml_request_issuer: {type: string}
+      jp_saml_servletfile: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_saml_binding: {type: string}
+      jp_saml_nameidpolicy: {type: string}
+      jp_saml_assertion_publickey: {type: string}
+      jp_saml_response_publickey: {type: string}
+      jp_saml_assertion_issuer: {type: string}
+      isverbosejp: {type: string}
+      jp_saml_availableperiod: {type: decimal}

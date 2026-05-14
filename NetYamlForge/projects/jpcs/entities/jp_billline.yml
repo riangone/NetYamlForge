@@ -1,112 +1,42 @@
-name: JP_BILLLINE
-tableName: jp_billline
-primaryKey: jp_billline_id
-fields:
-- name: jp_billline_id
-  type: numeric
-  label: Jp Billline Id
-- name: jp_billline_uu
-  type: text
-  label: Jp Billline Uu
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: jp_bill_id
-  type: numeric
-  label: Jp Bill Id
-- name: ad_orgtrx_id
-  type: numeric
-  label: Ad Orgtrx Id
-- name: line
-  type: numeric
-  label: Line
-- name: c_invoice_id
-  type: numeric
-  label: C Invoice Id
-- name: description
-  type: text
-  label: Description
-- name: c_doctype_id
-  type: numeric
-  label: C Doctype Id
-- name: dateinvoiced
-  type: text
-  label: Dateinvoiced
-- name: dateacct
-  type: text
-  label: Dateacct
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: c_bpartner_location_id
-  type: numeric
-  label: C Bpartner Location Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: m_pricelist_id
-  type: numeric
-  label: M Pricelist Id
-- name: salesrep_id
-  type: numeric
-  label: Salesrep Id
-- name: paymentrule
-  type: text
-  label: Paymentrule
-- name: c_paymentterm_id
-  type: numeric
-  label: C Paymentterm Id
-- name: c_currency_id
-  type: numeric
-  label: C Currency Id
-- name: totallines
-  type: numeric
-  label: Totallines
-- name: grandtotal
-  type: numeric
-  label: Grandtotal
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: payamt
-  type: numeric
-  label: Payamt
-- name: overunderamt
-  type: numeric
-  label: Overunderamt
-- name: openamt
-  type: numeric
-  label: Openamt
-- name: jp_subject
-  type: text
-  label: Jp Subject
-- name: jp_remarks
-  type: text
-  label: Jp Remarks
-- name: istaxadjustlinejp
-  type: text
-  label: Istaxadjustlinejp
-- name: jp_communicationcolumn
-  type: text
-  label: Jp Communicationcolumn
+entities:
+  jp_billline:
+    table: jp_billline
+    key: jp_billline_id
+    displayName: JP_BILLLINE
+    columns:
+      jp_billline_id: {type: decimal, identity: true}
+      jp_billline_uu: {type: string}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      jp_bill_id: {type: decimal}
+      ad_orgtrx_id: {type: decimal}
+      line: {type: decimal}
+      c_invoice_id: {type: decimal}
+      description: {type: string}
+      c_doctype_id: {type: decimal}
+      dateinvoiced: {type: string}
+      dateacct: {type: string}
+      c_bpartner_id: {type: decimal}
+      c_bpartner_location_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      m_pricelist_id: {type: decimal}
+      salesrep_id: {type: decimal}
+      paymentrule: {type: string}
+      c_paymentterm_id: {type: decimal}
+      c_currency_id: {type: decimal}
+      totallines: {type: decimal}
+      grandtotal: {type: decimal}
+      taxbaseamt: {type: decimal}
+      taxamt: {type: decimal}
+      payamt: {type: decimal}
+      overunderamt: {type: decimal}
+      openamt: {type: decimal}
+      jp_subject: {type: string}
+      jp_remarks: {type: string}
+      istaxadjustlinejp: {type: string}
+      jp_communicationcolumn: {type: string}

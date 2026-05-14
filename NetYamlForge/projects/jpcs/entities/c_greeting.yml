@@ -1,43 +1,19 @@
-name: C_GREETING
-tableName: c_greeting
-primaryKey: c_greeting_id
-fields:
-- name: c_greeting_id
-  type: numeric
-  label: C Greeting Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: greeting
-  type: text
-  label: Greeting
-- name: isfirstnameonly
-  type: text
-  label: Isfirstnameonly
-- name: isdefault
-  type: text
-  label: Isdefault
-- name: c_greeting_uu
-  type: text
-  label: C Greeting Uu
+entities:
+  c_greeting:
+    table: c_greeting
+    key: c_greeting_id
+    displayName: C_GREETING
+    columns:
+      c_greeting_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      greeting: {type: string}
+      isfirstnameonly: {type: string}
+      isdefault: {type: string}
+      c_greeting_uu: {type: string}

@@ -1,37 +1,17 @@
-name: WS_WEBSERVICEFIELDOUTPUT
-tableName: ws_webservicefieldoutput
-primaryKey: ws_webservicefieldoutput_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_column_id
-  type: numeric
-  label: Ad Column Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ws_webservicefieldoutput_id
-  type: numeric
-  label: Ws Webservicefieldoutput Id
-- name: ws_webservicetype_id
-  type: numeric
-  label: Ws Webservicetype Id
-- name: ws_webservicefieldoutput_uu
-  type: text
-  label: Ws Webservicefieldoutput Uu
+entities:
+  ws_webservicefieldoutput:
+    table: ws_webservicefieldoutput
+    key: ws_webservicefieldoutput_id
+    displayName: WS_WEBSERVICEFIELDOUTPUT
+    columns:
+      ad_client_id: {type: decimal}
+      ad_column_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ws_webservicefieldoutput_id: {type: decimal, identity: true}
+      ws_webservicetype_id: {type: decimal}
+      ws_webservicefieldoutput_uu: {type: string}

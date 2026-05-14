@@ -1,82 +1,32 @@
-name: I_HR_MOVEMENT
-tableName: i_hr_movement
-primaryKey: i_hr_movement_id
-fields:
-- name: i_hr_movement_id
-  type: numeric
-  label: I Hr Movement Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: amount
-  type: numeric
-  label: Amount
-- name: c_bpartner_id
-  type: numeric
-  label: C Bpartner Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: hr_concept_id
-  type: numeric
-  label: Hr Concept Id
-- name: hr_process_id
-  type: numeric
-  label: Hr Process Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: processed
-  type: text
-  label: Processed
-- name: qty
-  type: numeric
-  label: Qty
-- name: servicedate
-  type: text
-  label: Servicedate
-- name: textmsg
-  type: text
-  label: Textmsg
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: validfrom
-  type: text
-  label: Validfrom
-- name: i_isimported
-  type: text
-  label: I Isimported
-- name: i_errormsg
-  type: text
-  label: I Errormsg
-- name: processing
-  type: text
-  label: Processing
-- name: bpartner_value
-  type: text
-  label: Bpartner Value
-- name: conceptvalue
-  type: text
-  label: Conceptvalue
-- name: hr_movement_id
-  type: numeric
-  label: Hr Movement Id
-- name: processname
-  type: text
-  label: Processname
-- name: description
-  type: text
-  label: Description
-- name: i_hr_movement_uu
-  type: text
-  label: I Hr Movement Uu
+entities:
+  i_hr_movement:
+    table: i_hr_movement
+    key: i_hr_movement_id
+    displayName: I_HR_MOVEMENT
+    columns:
+      i_hr_movement_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      amount: {type: decimal}
+      c_bpartner_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      hr_concept_id: {type: decimal}
+      hr_process_id: {type: decimal}
+      isactive: {type: string}
+      processed: {type: string}
+      qty: {type: decimal}
+      servicedate: {type: string}
+      textmsg: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      validfrom: {type: string}
+      i_isimported: {type: string}
+      i_errormsg: {type: string}
+      processing: {type: string}
+      bpartner_value: {type: string}
+      conceptvalue: {type: string}
+      hr_movement_id: {type: decimal}
+      processname: {type: string}
+      description: {type: string}
+      i_hr_movement_uu: {type: string}

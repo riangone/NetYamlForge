@@ -1,31 +1,15 @@
-name: T_SELECTION_INFOWINDOW
-tableName: t_selection_infowindow
-primaryKey: ad_pinstance_id
-fields:
-- name: ad_pinstance_id
-  type: numeric
-  label: Ad Pinstance Id
-- name: t_selection_id
-  type: numeric
-  label: T Selection Id
-- name: viewid
-  type: text
-  label: Viewid
-- name: columnname
-  type: text
-  label: Columnname
-- name: value_string
-  type: text
-  label: Value String
-- name: value_date
-  type: text
-  label: Value Date
-- name: value_number
-  type: numeric
-  label: Value Number
-- name: info
-  type: text
-  label: Info
-- name: t_selection_uu
-  type: text
-  label: T Selection Uu
+entities:
+  t_selection_infowindow:
+    table: t_selection_infowindow
+    key: ad_pinstance_id
+    displayName: T_SELECTION_INFOWINDOW
+    columns:
+      ad_pinstance_id: {type: decimal, identity: true}
+      t_selection_id: {type: decimal}
+      viewid: {type: string}
+      columnname: {type: string}
+      value_string: {type: string}
+      value_date: {type: string}
+      value_number: {type: decimal}
+      info: {type: string}
+      t_selection_uu: {type: string}

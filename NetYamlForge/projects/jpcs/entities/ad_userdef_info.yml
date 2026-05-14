@@ -1,67 +1,27 @@
-name: AD_USERDEF_INFO
-tableName: ad_userdef_info
-primaryKey: ad_userdef_info_id
-fields:
-- name: ad_userdef_info_id
-  type: numeric
-  label: Ad Userdef Info Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_infowindow_id
-  type: numeric
-  label: Ad Infowindow Id
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: ad_language
-  type: text
-  label: Ad Language
-- name: ad_userdef_info_uu
-  type: text
-  label: Ad Userdef Info Uu
-- name: isshowindashboard
-  type: text
-  label: Isshowindashboard
-- name: seqno
-  type: numeric
-  label: Seqno
-- name: imageurl
-  type: text
-  label: Imageurl
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: po_window_id
-  type: numeric
-  label: Po Window Id
+entities:
+  ad_userdef_info:
+    table: ad_userdef_info
+    key: ad_userdef_info_id
+    displayName: AD_USERDEF_INFO
+    columns:
+      ad_userdef_info_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_role_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      ad_infowindow_id: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      ad_language: {type: string}
+      ad_userdef_info_uu: {type: string}
+      isshowindashboard: {type: string}
+      seqno: {type: decimal}
+      imageurl: {type: string}
+      ad_window_id: {type: decimal}
+      po_window_id: {type: decimal}

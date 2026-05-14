@@ -1,52 +1,22 @@
-name: AD_RECENTITEM
-tableName: ad_recentitem
-primaryKey: ad_recentitem_id
-fields:
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: ad_recentitem_id
-  type: numeric
-  label: Ad Recentitem Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: ad_tab_id
-  type: numeric
-  label: Ad Tab Id
-- name: ad_table_id
-  type: numeric
-  label: Ad Table Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: isactive
-  type: text
-  label: Isactive
-- name: record_id
-  type: numeric
-  label: Record Id
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: ad_recentitem_uu
-  type: text
-  label: Ad Recentitem Uu
-- name: record_uu
-  type: text
-  label: Record Uu
+entities:
+  ad_recentitem:
+    table: ad_recentitem
+    key: ad_recentitem_id
+    displayName: AD_RECENTITEM
+    columns:
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      ad_recentitem_id: {type: decimal, identity: true}
+      ad_role_id: {type: decimal}
+      ad_tab_id: {type: decimal}
+      ad_table_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      ad_window_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      isactive: {type: string}
+      record_id: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      ad_recentitem_uu: {type: string}
+      record_uu: {type: string}

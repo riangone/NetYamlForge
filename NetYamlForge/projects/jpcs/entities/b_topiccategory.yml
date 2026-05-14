@@ -1,40 +1,18 @@
-name: B_TOPICCATEGORY
-tableName: b_topiccategory
-primaryKey: b_topiccategory_id
-fields:
-- name: b_topiccategory_id
-  type: numeric
-  label: B Topiccategory Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: b_topictype_id
-  type: numeric
-  label: B Topictype Id
-- name: b_topiccategory_uu
-  type: text
-  label: B Topiccategory Uu
+entities:
+  b_topiccategory:
+    table: b_topiccategory
+    key: b_topiccategory_id
+    displayName: B_TOPICCATEGORY
+    columns:
+      b_topiccategory_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      b_topictype_id: {type: decimal}
+      b_topiccategory_uu: {type: string}

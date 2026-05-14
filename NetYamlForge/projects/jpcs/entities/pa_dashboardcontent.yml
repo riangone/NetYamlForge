@@ -1,103 +1,39 @@
-name: PA_DASHBOARDCONTENT
-tableName: pa_dashboardcontent
-primaryKey: pa_dashboardcontent_id
-fields:
-- name: pa_dashboardcontent_id
-  type: numeric
-  label: Pa Dashboardcontent Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: isactive
-  type: text
-  label: Isactive
-- name: name
-  type: text
-  label: Name
-- name: ad_window_id
-  type: numeric
-  label: Ad Window Id
-- name: description
-  type: text
-  label: Description
-- name: html
-  type: text
-  label: Html
-- name: line
-  type: numeric
-  label: Line
-- name: pa_goal_id
-  type: numeric
-  label: Pa Goal Id
-- name: columnno
-  type: numeric
-  label: Columnno
-- name: zulfilepath
-  type: text
-  label: Zulfilepath
-- name: iscollapsible
-  type: text
-  label: Iscollapsible
-- name: goaldisplay
-  type: text
-  label: Goaldisplay
-- name: pa_dashboardcontent_uu
-  type: text
-  label: Pa Dashboardcontent Uu
-- name: isshowindashboard
-  type: text
-  label: Isshowindashboard
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: isembedreportcontent
-  type: text
-  label: Isembedreportcontent
-- name: processparameters
-  type: text
-  label: Processparameters
-- name: iscollapsedbydefault
-  type: text
-  label: Iscollapsedbydefault
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: ad_role_id
-  type: numeric
-  label: Ad Role Id
-- name: isshowinlogin
-  type: text
-  label: Isshowinlogin
-- name: ad_chart_id
-  type: numeric
-  label: Ad Chart Id
-- name: isshowtitle
-  type: text
-  label: Isshowtitle
-- name: ad_statusline_id
-  type: numeric
-  label: Ad Statusline Id
-- name: ismaximizable
-  type: text
-  label: Ismaximizable
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: help
-  type: text
-  label: Help
+entities:
+  pa_dashboardcontent:
+    table: pa_dashboardcontent
+    key: pa_dashboardcontent_id
+    displayName: PA_DASHBOARDCONTENT
+    columns:
+      pa_dashboardcontent_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      isactive: {type: string}
+      name: {type: string}
+      ad_window_id: {type: decimal}
+      description: {type: string}
+      html: {type: string}
+      line: {type: decimal}
+      pa_goal_id: {type: decimal}
+      columnno: {type: decimal}
+      zulfilepath: {type: string}
+      iscollapsible: {type: string}
+      goaldisplay: {type: string}
+      pa_dashboardcontent_uu: {type: string}
+      isshowindashboard: {type: string}
+      ad_process_id: {type: decimal}
+      isembedreportcontent: {type: string}
+      processparameters: {type: string}
+      iscollapsedbydefault: {type: string}
+      ad_user_id: {type: decimal}
+      ad_role_id: {type: decimal}
+      isshowinlogin: {type: string}
+      ad_chart_id: {type: decimal}
+      isshowtitle: {type: string}
+      ad_statusline_id: {type: decimal}
+      ismaximizable: {type: string}
+      ad_printformat_id: {type: decimal}
+      help: {type: string}

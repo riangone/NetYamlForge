@@ -1,112 +1,42 @@
-name: AD_PROCESS
-tableName: ad_process
-primaryKey: ad_process_id
-fields:
-- name: ad_process_id
-  type: numeric
-  label: Ad Process Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: value
-  type: text
-  label: Value
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: accesslevel
-  type: text
-  label: Accesslevel
-- name: entitytype
-  type: text
-  label: Entitytype
-- name: procedurename
-  type: text
-  label: Procedurename
-- name: isreport
-  type: text
-  label: Isreport
-- name: isdirectprint
-  type: text
-  label: Isdirectprint
-- name: ad_reportview_id
-  type: numeric
-  label: Ad Reportview Id
-- name: classname
-  type: text
-  label: Classname
-- name: statistic_count
-  type: numeric
-  label: Statistic Count
-- name: statistic_seconds
-  type: numeric
-  label: Statistic Seconds
-- name: ad_printformat_id
-  type: numeric
-  label: Ad Printformat Id
-- name: workflowvalue
-  type: text
-  label: Workflowvalue
-- name: ad_workflow_id
-  type: numeric
-  label: Ad Workflow Id
-- name: isbetafunctionality
-  type: text
-  label: Isbetafunctionality
-- name: isserverprocess
-  type: text
-  label: Isserverprocess
-- name: showhelp
-  type: text
-  label: Showhelp
-- name: jasperreport
-  type: text
-  label: Jasperreport
-- name: ad_form_id
-  type: numeric
-  label: Ad Form Id
-- name: copyfromprocess
-  type: text
-  label: Copyfromprocess
-- name: ad_process_uu
-  type: text
-  label: Ad Process Uu
-- name: ad_ctxhelp_id
-  type: numeric
-  label: Ad Ctxhelp Id
-- name: executiontype
-  type: text
-  label: Executiontype
-- name: allowmultipleexecution
-  type: text
-  label: Allowmultipleexecution
-- name: filenamepattern
-  type: text
-  label: Filenamepattern
-- name: jp_cancelworkflow_id
-  type: numeric
-  label: Jp Cancelworkflow Id
+entities:
+  ad_process:
+    table: ad_process
+    key: ad_process_id
+    displayName: AD_PROCESS
+    columns:
+      ad_process_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      value: {type: string}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      accesslevel: {type: string}
+      entitytype: {type: string}
+      procedurename: {type: string}
+      isreport: {type: string}
+      isdirectprint: {type: string}
+      ad_reportview_id: {type: decimal}
+      classname: {type: string}
+      statistic_count: {type: decimal}
+      statistic_seconds: {type: decimal}
+      ad_printformat_id: {type: decimal}
+      workflowvalue: {type: string}
+      ad_workflow_id: {type: decimal}
+      isbetafunctionality: {type: string}
+      isserverprocess: {type: string}
+      showhelp: {type: string}
+      jasperreport: {type: string}
+      ad_form_id: {type: decimal}
+      copyfromprocess: {type: string}
+      ad_process_uu: {type: string}
+      ad_ctxhelp_id: {type: decimal}
+      executiontype: {type: string}
+      allowmultipleexecution: {type: string}
+      filenamepattern: {type: string}
+      jp_cancelworkflow_id: {type: decimal}

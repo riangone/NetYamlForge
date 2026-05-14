@@ -1,58 +1,24 @@
-name: C_REMUNERATION
-tableName: c_remuneration
-primaryKey: c_remuneration_id
-fields:
-- name: c_remuneration_id
-  type: numeric
-  label: C Remuneration Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: name
-  type: text
-  label: Name
-- name: description
-  type: text
-  label: Description
-- name: help
-  type: text
-  label: Help
-- name: remunerationtype
-  type: text
-  label: Remunerationtype
-- name: standardhours
-  type: numeric
-  label: Standardhours
-- name: grossramt
-  type: numeric
-  label: Grossramt
-- name: grossrcost
-  type: numeric
-  label: Grossrcost
-- name: overtimeamt
-  type: numeric
-  label: Overtimeamt
-- name: overtimecost
-  type: numeric
-  label: Overtimecost
-- name: c_remuneration_uu
-  type: text
-  label: C Remuneration Uu
+entities:
+  c_remuneration:
+    table: c_remuneration
+    key: c_remuneration_id
+    displayName: C_REMUNERATION
+    columns:
+      c_remuneration_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      name: {type: string}
+      description: {type: string}
+      help: {type: string}
+      remunerationtype: {type: string}
+      standardhours: {type: decimal}
+      grossramt: {type: decimal}
+      grossrcost: {type: decimal}
+      overtimeamt: {type: decimal}
+      overtimecost: {type: decimal}
+      c_remuneration_uu: {type: string}

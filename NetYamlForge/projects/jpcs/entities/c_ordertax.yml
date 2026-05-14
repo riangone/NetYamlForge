@@ -1,49 +1,21 @@
-name: C_ORDERTAX
-tableName: c_ordertax
-primaryKey: c_order_id
-fields:
-- name: c_order_id
-  type: numeric
-  label: C Order Id
-- name: c_tax_id
-  type: numeric
-  label: C Tax Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: taxbaseamt
-  type: numeric
-  label: Taxbaseamt
-- name: taxamt
-  type: numeric
-  label: Taxamt
-- name: processed
-  type: text
-  label: Processed
-- name: istaxincluded
-  type: text
-  label: Istaxincluded
-- name: c_ordertax_uu
-  type: text
-  label: C Ordertax Uu
-- name: c_taxprovider_id
-  type: numeric
-  label: C Taxprovider Id
+entities:
+  c_ordertax:
+    table: c_ordertax
+    key: c_order_id
+    displayName: C_ORDERTAX
+    columns:
+      c_order_id: {type: decimal, identity: true}
+      c_tax_id: {type: decimal}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      taxbaseamt: {type: decimal}
+      taxamt: {type: decimal}
+      processed: {type: string}
+      istaxincluded: {type: string}
+      c_ordertax_uu: {type: string}
+      c_taxprovider_id: {type: decimal}

@@ -1,49 +1,21 @@
-name: M_PRODUCT_BOM_OLD
-tableName: m_product_bom_old
-primaryKey: m_product_bom_id
-fields:
-- name: m_product_bom_id
-  type: numeric
-  label: M Product Bom Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: isactive
-  type: text
-  label: Isactive
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: line
-  type: numeric
-  label: Line
-- name: m_product_id
-  type: numeric
-  label: M Product Id
-- name: m_productbom_id
-  type: numeric
-  label: M Productbom Id
-- name: bomqty
-  type: numeric
-  label: Bomqty
-- name: description
-  type: text
-  label: Description
-- name: bomtype
-  type: text
-  label: Bomtype
-- name: m_product_bom_uu
-  type: text
-  label: M Product Bom Uu
+entities:
+  m_product_bom_old:
+    table: m_product_bom_old
+    key: m_product_bom_id
+    displayName: M_PRODUCT_BOM_OLD
+    columns:
+      m_product_bom_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      isactive: {type: string}
+      created: {type: string}
+      createdby: {type: decimal}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      line: {type: decimal}
+      m_product_id: {type: decimal}
+      m_productbom_id: {type: decimal}
+      bomqty: {type: decimal}
+      description: {type: string}
+      bomtype: {type: string}
+      m_product_bom_uu: {type: string}

@@ -1,76 +1,30 @@
-name: MFA_REGISTRATION
-tableName: mfa_registration
-primaryKey: mfa_registration_id
-fields:
-- name: mfa_registration_id
-  type: numeric
-  label: Mfa Registration Id
-- name: ad_client_id
-  type: numeric
-  label: Ad Client Id
-- name: ad_org_id
-  type: numeric
-  label: Ad Org Id
-- name: created
-  type: text
-  label: Created
-- name: createdby
-  type: numeric
-  label: Createdby
-- name: name
-  type: text
-  label: Name
-- name: help
-  type: text
-  label: Help
-- name: isactive
-  type: text
-  label: Isactive
-- name: mfa_registration_uu
-  type: text
-  label: Mfa Registration Uu
-- name: updated
-  type: text
-  label: Updated
-- name: updatedby
-  type: numeric
-  label: Updatedby
-- name: mfa_method_id
-  type: numeric
-  label: Mfa Method Id
-- name: ad_user_id
-  type: numeric
-  label: Ad User Id
-- name: mfasecret
-  type: text
-  label: Mfasecret
-- name: isvalid
-  type: text
-  label: Isvalid
-- name: mfavalidatedat
-  type: text
-  label: Mfavalidatedat
-- name: mfaunregisteredat
-  type: text
-  label: Mfaunregisteredat
-- name: isusermfapreferred
-  type: text
-  label: Isusermfapreferred
-- name: expiration
-  type: text
-  label: Expiration
-- name: parametervalue
-  type: text
-  label: Parametervalue
-- name: mfalastsecret
-  type: text
-  label: Mfalastsecret
-- name: lastsuccess
-  type: text
-  label: Lastsuccess
-- name: lastfailure
-  type: text
-  label: Lastfailure
-- name: failedlogincount
-  type: numeric
-  label: Failedlogincount
+entities:
+  mfa_registration:
+    table: mfa_registration
+    key: mfa_registration_id
+    displayName: MFA_REGISTRATION
+    columns:
+      mfa_registration_id: {type: decimal, identity: true}
+      ad_client_id: {type: decimal}
+      ad_org_id: {type: decimal}
+      created: {type: string}
+      createdby: {type: decimal}
+      name: {type: string}
+      help: {type: string}
+      isactive: {type: string}
+      mfa_registration_uu: {type: string}
+      updated: {type: string}
+      updatedby: {type: decimal}
+      mfa_method_id: {type: decimal}
+      ad_user_id: {type: decimal}
+      mfasecret: {type: string}
+      isvalid: {type: string}
+      mfavalidatedat: {type: string}
+      mfaunregisteredat: {type: string}
+      isusermfapreferred: {type: string}
+      expiration: {type: string}
+      parametervalue: {type: string}
+      mfalastsecret: {type: string}
+      lastsuccess: {type: string}
+      lastfailure: {type: string}
+      failedlogincount: {type: decimal}
