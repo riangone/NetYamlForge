@@ -75,8 +75,13 @@ charts:
     colorBg: rgba(59, 130, 246, 0.7)
     colorBorder: rgba(59, 130, 246, 1)
 
-  - title: 最近契约
-    type: entity-list
+  - title: 月度契约数量
+    type: bar
     entity: jp_contract
-    limit: 5
-    columns: [documentno, name, dateacct, jp_contractstatus]
+    valueAggregate: count
+    groupExpression: strftime('%Y-%m', dateacct)
+    orderBy: label
+    orderDir: asc
+    limit: 12
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)
