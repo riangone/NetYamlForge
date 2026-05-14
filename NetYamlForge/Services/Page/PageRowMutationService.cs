@@ -19,6 +19,9 @@ public sealed class PageRowMutationService
     private readonly IProjectPageMutationValidatorRegistry _validatorRegistry;
     private readonly HookExecutionService _hookExecution;
     private readonly IRowMutationRepository _mutationRepo;
+    private readonly IEntityMetadataProvider _entityMeta;
+    private readonly DynamicEntityCommandService _commandService;
+    private readonly DynamicEntityFormValidationService _formValidationService;
     private readonly ILogger<PageRowMutationService> _logger;
 
     public PageRowMutationService(
@@ -26,12 +29,18 @@ public sealed class PageRowMutationService
         IProjectPageMutationValidatorRegistry validatorRegistry,
         HookExecutionService hookExecution,
         IRowMutationRepository mutationRepo,
+        IEntityMetadataProvider entityMeta,
+        DynamicEntityCommandService commandService,
+        DynamicEntityFormValidationService formValidationService,
         ILogger<PageRowMutationService> logger)
     {
         _db = db;
         _validatorRegistry = validatorRegistry;
         _hookExecution = hookExecution;
         _mutationRepo = mutationRepo;
+        _entityMeta = entityMeta;
+        _commandService = commandService;
+        _formValidationService = formValidationService;
         _logger = logger;
     }
 
@@ -61,6 +70,29 @@ public sealed class PageRowMutationService
             if (!result.ok) return result;
         }
 
+        // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲して統一的な CRUD 処理（フック、監査ログ等）を実行
+        if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
+        {
+            var form = new Dictionary<string, string?> { [field] = value };
+            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, form);
+            if (errors.Any()) return (false, errors.First().Value);
+
+            var result = await _commandService.UpdateAsync(
+                section.TargetTable,
+                section.TargetPrimaryKey,
+                rowId.ToString(),
+                values,
+                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.BeforeUpdate ?? new())
+                    .Distinct().ToList(),
+                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.AfterUpdate ?? new())
+                    .Distinct().ToList(),
+                actorUserName);
+
+            return (result.Ok, result.Error?.Message);
+        }
+
         await _mutationRepo.UpdateAsync(
             section.TargetTable,
             section.TargetPrimaryKey,
@@ -72,7 +104,8 @@ public sealed class PageRowMutationService
     public async Task<(bool ok, string? message)> InsertRowAsync(
         string projectName,
         SectionDefinition section,
-        Dictionary<string, string> fields)
+        Dictionary<string, string> fields,
+        string? actorUserName = null)
     {
         if (string.IsNullOrWhiteSpace(section.TargetTable))
             return (false, "target_table が設定されていません。");
@@ -84,6 +117,26 @@ public sealed class PageRowMutationService
             .ToList();
         if (safeFields.Count == 0)
             return (false, "有効なフィールドがありません。");
+
+        // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲
+        if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
+        {
+            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+            if (errors.Any()) return (false, string.Join(", ", errors.Values));
+
+            var result = await _commandService.CreateAsync(
+                section.TargetTable,
+                values,
+                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.BeforeCreate ?? new())
+                    .Distinct().ToList(),
+                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.AfterCreate ?? new())
+                    .Distinct().ToList(),
+                actorUserName);
+
+            return (result.Ok, result.Error?.Message);
+        }
 
         var ctx = new EntityHookContext
         {
@@ -113,7 +166,8 @@ public sealed class PageRowMutationService
         string projectName,
         SectionDefinition section,
         int rowId,
-        Dictionary<string, string> fields)
+        Dictionary<string, string> fields,
+        string? actorUserName = null)
     {
         if (string.IsNullOrWhiteSpace(section.TargetTable) || string.IsNullOrWhiteSpace(section.TargetPrimaryKey))
             return (false, "target_table または target_primary_key が設定されていません。");
@@ -126,6 +180,28 @@ public sealed class PageRowMutationService
             .ToList();
         if (safeFields.Count == 0)
             return (false, "更新対象フィールドがありません。");
+
+        // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲
+        if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
+        {
+            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+            if (errors.Any()) return (false, string.Join(", ", errors.Values));
+
+            var result = await _commandService.UpdateAsync(
+                section.TargetTable,
+                section.TargetPrimaryKey,
+                rowId.ToString(),
+                values,
+                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.BeforeUpdate ?? new())
+                    .Distinct().ToList(),
+                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.AfterUpdate ?? new())
+                    .Distinct().ToList(),
+                actorUserName);
+
+            return (result.Ok, result.Error?.Message);
+        }
 
         var ctx = new EntityHookContext
         {
@@ -155,7 +231,8 @@ public sealed class PageRowMutationService
     public async Task<(bool ok, string? message)> DeleteRowAsync(
         string projectName,
         SectionDefinition section,
-        int rowId)
+        int rowId,
+        string? actorUserName = null)
     {
         if (string.IsNullOrWhiteSpace(section.TargetTable) || string.IsNullOrWhiteSpace(section.TargetPrimaryKey))
             return (false, "target_table または target_primary_key が設定されていません。");
@@ -163,6 +240,24 @@ public sealed class PageRowMutationService
         if (!IdentifierRegex.IsMatch(section.TargetTable) ||
             !IdentifierRegex.IsMatch(section.TargetPrimaryKey))
             return (false, "無効な識別子です。");
+
+        // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲
+        if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
+        {
+            var result = await _commandService.DeleteAsync(
+                section.TargetTable,
+                section.TargetPrimaryKey,
+                rowId.ToString(),
+                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.BeforeDelete ?? new())
+                    .Distinct().ToList(),
+                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                    .Concat(section.Hooks?.AfterDelete ?? new())
+                    .Distinct().ToList(),
+                actorUserName);
+
+            return (result.Ok, result.Error?.Message);
+        }
 
         var ctx = new EntityHookContext
         {

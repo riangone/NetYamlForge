@@ -213,7 +213,7 @@ public class PageController : BaseProjectController
         var allowed = new HashSet<string>(section.GetFormFields("create"), StringComparer.OrdinalIgnoreCase);
         var fields = FilterFormFields(allowed);
 
-        var result = await _rowMutationService.InsertRowAsync(proj.Name, section, fields);
+        var result = await _rowMutationService.InsertRowAsync(proj.Name, section, fields, User.Identity?.Name);
         if (!result.ok)
         {
             return PartialView("Components/_SectionRowForm", _formViewModelFactory.BuildWithError(
@@ -249,7 +249,7 @@ public class PageController : BaseProjectController
         var allowed = new HashSet<string>(section.GetFormFields("edit"), StringComparer.OrdinalIgnoreCase);
         var fields = FilterFormFields(allowed);
 
-        var result = await _rowMutationService.UpdateAllFieldsAsync(proj.Name, section, rowIdInt, fields);
+        var result = await _rowMutationService.UpdateAllFieldsAsync(proj.Name, section, rowIdInt, fields, User.Identity?.Name);
         if (!result.ok)
         {
             var pkCol = section.TargetPrimaryKey ?? "id";
@@ -415,7 +415,7 @@ public class PageController : BaseProjectController
         if (!int.TryParse(rowId, out var rowIdInt))
             return BadRequest("無効な行 ID です。");
 
-        var deleteResult = await _rowMutationService.DeleteRowAsync(proj.Name, section, rowIdInt);
+        var deleteResult = await _rowMutationService.DeleteRowAsync(proj.Name, section, rowIdInt, User.Identity?.Name);
         if (!deleteResult.ok)
             return BadRequest(deleteResult.message ?? "削除ルール違反です。");
         await TryWritePageAuditAsync(
