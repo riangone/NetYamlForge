@@ -1,0 +1,4 @@
+﻿lead_id,customer_name,contact,preferred_contact,vehicle_interest,lead_score,status,assigned_to_user_id,stale_duration,lead_created_at
+LEAD-003,王五,13900139003,phone,vehicle_inquiry,91,qualified,admin,43日間未対応,2026-03-27 05:30:59
+LEAD-001,张三,13900139001,phone,test_drive_request,85,contacted,admin,44日間未対応,2026-03-29 05:30:59
+LEAD-002,李四,13900139002,phone,price_inquiry,62,new,,未接触,2026-03-31 05:30:59

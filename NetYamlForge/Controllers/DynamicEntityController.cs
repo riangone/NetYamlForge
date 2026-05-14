@@ -177,6 +177,7 @@ public class DynamicEntityController : BaseProjectController
             Request.Query,
             foreignKeysForForm: true);
         _listHttpResponseService.TrySetPushUrl(
+            Request,
             Response,
             Url.Action(nameof(Index), "DynamicEntity"),
             Request.Query,
