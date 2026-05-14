@@ -1,0 +1,30 @@
+name: userhome
+displayName: My Home
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/userhome.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: false
+  pages: false
+
+layout:
+  dashboardTheme: minimal
+  header:
+    title: "My Home"
+  navigation:
+    showDashboard: false
+    entities: []
+    items:
+      - label: Home
+        url: /userhome
+        icon: 🏠
+
+home_page:
+  icon: "👤"
+  tagline: "User Personal Home"
+  tags: [User, Personal]

@@ -85,6 +85,10 @@ openWorkspaceLabel: 进入工作区
 emptyProjectsMessage: 未找到可用项目，请检查 projects/ 目录配置。
 
 projectProfiles:
+  userhome:
+    icon: 👤
+    tagline: 用户个人主页与项目管理
+    tags: [User, Personal]
   northwind-retail:
     icon: 🛒
     tagline: 经典零售 ERP 系统的元数据实现参考

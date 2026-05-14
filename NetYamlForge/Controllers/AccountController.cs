@@ -147,8 +147,8 @@ public class AccountController : Controller
             return RedirectToAction("Project", "Home", new { project = projectName });
         }
 
-        // デフォルト：ユーザー個人主ページへリダイレクト（MyHome）
-        return RedirectToAction("Index", "UserHome");
+        // デフォルト：ユーザー個人ホームページへリダイレクト
+        return Redirect("/userhome");
     }
 
     [Authorize]

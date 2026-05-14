@@ -1,0 +1,59 @@
+hero:
+  eyebrow: User Home Workspace
+  title: 用户个人主页
+  description: 集中管理您的项目访问权限、快速入口和个人设置。
+  primaryActionLabel: 浏览项目
+  primaryActionUrl: "#projects"
+  highlights:
+    - 个性化项目入口
+    - 快速访问常用工具
+    - 个人偏好设置
+
+metrics:
+  - label: 可访问项目
+    value: "--"
+    trend: "动态加载"
+    tone: text-primary
+  - label: 默认项目
+    value: "--"
+    trend: "可随时切换"
+    tone: text-success
+  - label: 用户类型
+    value: "--"
+    trend: "基于角色"
+    tone: text-info
+  - label: 最后登录
+    value: "--"
+    trend: "最近活动"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🔐
+    title: 项目访问管理
+    description: 查看并快速切换您有权限访问的所有工作区项目。
+    badge: Core
+  - icon: ⚡
+    title: 快捷操作
+    description: 一键访问任务、文档、通知和系统设置。
+    badge: Productivity
+  - icon: 📊
+    title: 使用统计
+    description: 了解您的项目分布、角色权限和活动概览。
+    badge: Insights
+
+quickActions:
+  - label: 我的项目
+    url: "#projects"
+    style: btn-primary
+    icon: 🔐
+  - label: 切换项目
+    url: "#"
+    style: btn-outline
+    icon: 🔄
+
+projectsSectionTitle: 我的项目
+projectsSectionLead: 选择项目进入对应的工作区。
+capabilitiesSectionTitle: 核心功能
+quickActionsSectionTitle: 快捷操作
+openWorkspaceLabel: 进入工作区
+emptyProjectsMessage: 您目前没有可访问的项目。

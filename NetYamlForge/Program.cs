@@ -247,6 +247,12 @@ app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication �
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ユーザー個人ホーム：/userhome（プロジェクトルートより先に評価）
+app.MapControllerRoute(
+    name: "userhome",
+    pattern: "userhome/{action=Index}",
+    defaults: new { controller = "UserHome", project = "userhome" });
+
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(
     name: "project-home",

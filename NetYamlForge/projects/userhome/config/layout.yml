@@ -1,0 +1,13 @@
+header:
+  title: My Home
+
+navigation:
+  showDashboard: false
+  entities: []
+  items:
+    - label: Home
+      url: /userhome
+      icon: 🏠
+
+footer:
+  text: "My Home — powered by NetYamlForge"

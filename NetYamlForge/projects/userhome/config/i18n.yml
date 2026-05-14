@@ -1,0 +1,16 @@
+translations:
+  userhome.home:
+    en-US: Home
+    zh-CN: 主页
+    ja-JP: ホーム
+    ko-KR: 홈
+  userhome.my_projects:
+    en-US: My Projects
+    zh-CN: 我的项目
+    ja-JP: マイプロジェクト
+    ko-KR: 내 프로젝트
+  userhome.quick_actions:
+    en-US: Quick Actions
+    zh-CN: 快速操作
+    ja-JP: クイックアクション
+    ko-KR: 빠른 작업

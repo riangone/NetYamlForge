@@ -26,7 +26,7 @@ public class HomeController : Controller
         // 已登录用户自动跳转到个人主页
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToAction("Index", "UserHome");
+            return Redirect("/userhome");
         }
 
         if (_projectManager.TryGet("home", out var homeProject) && homeProject != null)

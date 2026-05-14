@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Tenant;
+using NetYamlForge.Projects.UserHome.Models;
 
-namespace NetYamlForge.Controllers;
+namespace NetYamlForge.Projects.UserHome.Controllers;
 
 /// <summary>
 /// 用户个人主页控制器
@@ -14,15 +15,21 @@ public class UserHomeController : Controller
 {
     private readonly ITenantUserService _tenantUsers;
     private readonly IHomePageConfigProvider _homePageConfigProvider;
+    private readonly ProjectManager _projectManager;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<UserHomeController> _logger;
 
     public UserHomeController(
         ITenantUserService tenantUsers,
         IHomePageConfigProvider homePageConfigProvider,
+        ProjectManager projectManager,
+        ProjectScope projectScope,
         ILogger<UserHomeController> logger)
     {
         _tenantUsers = tenantUsers;
         _homePageConfigProvider = homePageConfigProvider;
+        _projectManager = projectManager;
+        _projectScope = projectScope;
         _logger = logger;
     }
 
@@ -30,7 +37,6 @@ public class UserHomeController : Controller
     /// 用户个人主页 - 登录后默认进入此页面
     /// </summary>
     [HttpGet]
-    [Route("MyHome")]
     public async Task<IActionResult> Index()
     {
         var userId = GetUserId();
@@ -47,7 +53,13 @@ public class UserHomeController : Controller
 
         // 获取默认项目配置
         var defaultProject = userDetail.DefaultProjectName ?? projects.FirstOrDefault()?.Name;
-        var config = _homePageConfigProvider.GetConfig(defaultProject);
+        var config = _homePageConfigProvider.GetConfig("userhome");
+
+        // 确保 ProjectScope 设置为 userhome 项目（当通过属性路由访问时 middleware 可能未设置）
+        if (!_projectScope.IsSet && _projectManager.TryGet("userhome", out var userhomeProject) && userhomeProject != null)
+        {
+            _projectScope.Set(userhomeProject);
+        }
 
         var model = new UserHomeViewModel
         {
@@ -66,7 +78,6 @@ public class UserHomeController : Controller
     /// 切换到指定项目
     /// </summary>
     [HttpPost]
-    [Route("UserHome/SwitchProject")]
     public async Task<IActionResult> SwitchProject(string projectName, string? returnUrl = null)
     {
         var userId = GetUserId();
@@ -90,7 +101,6 @@ public class UserHomeController : Controller
     /// 设置默认项目
     /// </summary>
     [HttpPost]
-    [Route("UserHome/SetDefaultProject")]
     public IActionResult SetDefaultProject(string projectName)
     {
         // TODO: 持久化用户的默认项目设置
@@ -143,42 +153,3 @@ public class UserHomeController : Controller
 
     #endregion
 }
-
-#region View Models
-
-/// <summary>
-/// 用户主页视图模型
-/// </summary>
-public class UserHomeViewModel
-{
-    public UserDetail User { get; set; } = new();
-    public IReadOnlyList<Services.Tenant.ProjectInfo> Projects { get; set; } = new List<Services.Tenant.ProjectInfo>();
-    public string? DefaultProject { get; set; }
-    public List<string> RecentProjects { get; set; } = new();
-    public List<QuickActionItem> QuickActions { get; set; } = new();
-    public UserStatsViewModel Stats { get; set; } = new();
-}
-
-/// <summary>
-/// 快速操作项
-/// </summary>
-public class QuickActionItem
-{
-    public string Label { get; set; } = "";
-    public string Icon { get; set; } = "";
-    public string Url { get; set; } = "#";
-    public string Description { get; set; } = "";
-}
-
-/// <summary>
-/// 用户统计信息
-/// </summary>
-public class UserStatsViewModel
-{
-    public int TotalProjects { get; set; }
-    public bool IsAdmin { get; set; }
-    public string UserType { get; set; } = "";
-    public DateTime? LastLoginAt { get; set; }
-}
-
-#endregion

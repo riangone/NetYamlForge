@@ -75,7 +75,7 @@
     <section>
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold">我的项目</h2>
-            <a asp-controller="TenantAccount" asp-action="SelectProject" class="btn btn-ghost btn-sm">查看全部</a>
+            <a href="/TenantAccount/SelectProject" class="btn btn-ghost btn-sm">查看全部</a>
         </div>
 
         @if (projects.Count == 0)
@@ -112,13 +112,15 @@
                                 }
                             </div>
                             <div class="card-actions justify-end mt-3 gap-2">
-                                <form asp-controller="UserHome" asp-action="SwitchProject" method="post" class="inline">
+                                <form action="/userhome/SwitchProject" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
                                     <input type="hidden" name="projectName" value="@project.Name" />
                                     <button type="submit" class="btn btn-primary btn-sm">进入项目</button>
                                 </form>
                                 @if (!isDefault)
                                 {
-                                    <form asp-controller="UserHome" asp-action="SetDefaultProject" method="post" class="inline">
+                                    <form action="/userhome/SetDefaultProject" method="post" class="inline">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="projectName" value="@project.Name" />
                                         <button type="submit" class="btn btn-ghost btn-sm" title="设为默认项目">设为默认</button>
                                     </form>
