@@ -17,13 +17,15 @@ public class UsersController : Controller
 {
     private readonly IConnectionManager _connectionManager;
     private readonly IUserAuthService _users;
+    private readonly IJpcsUserSyncService _syncService;
     private readonly IAuditLogService _audit;
     private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IConnectionManager connectionManager, IUserAuthService users, IAuditLogService audit, ILogger<UsersController> logger)
+    public UsersController(IConnectionManager connectionManager, IUserAuthService users, IJpcsUserSyncService syncService, IAuditLogService audit, ILogger<UsersController> logger)
     {
         _connectionManager = connectionManager;
         _users = users;
+        _syncService = syncService;
         _audit = audit;
         _logger = logger;
     }
@@ -32,6 +34,22 @@ public class UsersController : Controller
     {
         var users = await _users.GetAllAsync();
         return View(users);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SyncJpcsUsers()
+    {
+        var result = await _syncService.SyncUsersAsync();
+        if (result.Errors.Any())
+        {
+            TempData["Error"] = string.Join("; ", result.Errors);
+        }
+        else
+        {
+            TempData["Message"] = $"Sync completed. Found: {result.TotalFound}, Created: {result.CreatedCount}, Updated: {result.UpdatedCount}";
+        }
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]

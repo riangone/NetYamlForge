@@ -3,6 +3,7 @@
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
 using NetYamlForge.Services.Tenant;
+using NetYamlForge.Services.Auth;
 using System.Globalization;
 using NetYamlForge.Data;
 using NetYamlForge.Extensions;
@@ -189,6 +190,7 @@ builder.Services.AddNetYamlForge();
 
 // 显式确保 ITenantUserService 已注册（解决 AccountController 的 DI 错误）
 builder.Services.AddScoped<ITenantUserService, TenantUserService>();
+builder.Services.AddScoped<IJpcsUserSyncService, JpcsUserSyncService>();
 
 var app = builder.Build();
 

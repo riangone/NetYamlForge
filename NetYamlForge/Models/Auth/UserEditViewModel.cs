@@ -19,9 +19,15 @@ public class UserEditViewModel
     [Required]
     public string DisplayName { get; set; } = string.Empty;
 
+    [EmailAddress]
+    public string? Email { get; set; }
+
     [Required]
     public string PreferredLanguage { get; set; } = "en-US";
 
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; } = true;
+
+    public string? ExternalId { get; set; }
+    public string? ExternalSource { get; set; }
 }

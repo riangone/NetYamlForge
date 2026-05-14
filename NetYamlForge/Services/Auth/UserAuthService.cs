@@ -112,6 +112,8 @@ public class UserAuthService : IUserAuthService
                 PreferredLanguage = input.PreferredLanguage,
                 IsAdmin = input.IsAdmin,
                 IsActive = input.IsActive,
+                ExternalId = input.ExternalId,
+                ExternalSource = input.ExternalSource,
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
@@ -699,32 +701,32 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
         if (dbType == "sqlserver")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
 OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);";
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else if (dbType == "postgresql" || dbType == "postgres")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt)
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt)
 RETURNING Id;";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else if (dbType == "mysql" || dbType == "mariadb")
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);
 SELECT LAST_INSERT_ID();";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }
         else
         {
             var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @CreatedAt);
+INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, CreatedAt)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @CreatedAt);
 SELECT last_insert_rowid();";
             return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
         }

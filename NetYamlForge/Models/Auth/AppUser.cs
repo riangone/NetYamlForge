@@ -17,6 +17,8 @@ public class AppUser
     public string PreferredLanguage { get; set; } = "ja-JP";
     public bool IsAdmin { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? ExternalId { get; set; }
+    public string? ExternalSource { get; set; }
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string? UpdatedAt { get; set; }
     public string? LastLoginAt { get; set; }
