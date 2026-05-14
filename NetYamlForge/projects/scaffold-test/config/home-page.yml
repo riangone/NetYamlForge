@@ -1,63 +1,55 @@
 hero:
   eyebrow: Scaffold Test Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Scaffold Test. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  title: 项目脚手架与自动化沙箱
+  description: 专为开发者设计的集成测试环境，用于验证自动化代码生成、架构模板以及新功能的原型设计。
+  primaryActionLabel: 进入沙箱
   primaryActionUrl: /scaffold-test/Dashboard
-  secondaryActionLabel: View Schema
+  secondaryActionLabel: 实体定义
   secondaryActionUrl: /scaffold-test/DynamicEntity/AllDefinitions
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 快速原型验证
+    - 架构模板测试
+    - 自动化脚手架
+    - 零压力实验
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 验证状态
+    value: "Passed"
+    trend: "CI/CD 集成"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 覆盖率
+    value: "Full"
+    trend: "全模块测试"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 迭代速度
+    value: "Instant"
+    trend: "即时生效"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
+  - icon: 🏗️
+    title: 快速原型验证
+    description: 几秒钟内生成完整的 CRUD 模块与导航菜单，支持快速迭代验证业务逻辑。
+    badge: 工具
+  - icon: 🧪
+    title: 架构模板测试
+    description: 自动检测新生成的子项目是否符合最新的安全、权限及样式架构规范。
+    badge: 质量
   - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+    title: 安全隔离
+    description: 独立的数据库与配置环境，确保实验性功能不会影响核心业务的稳定性。
+    badge: 环境
 
 quickActions:
-  - label: Dashboard
+  - label: 沙箱控制台
     url: /scaffold-test/Dashboard
     style: btn-primary
-    icon: 📊
-  - label: Entity Schema
+    icon: 🧪
+  - label: 实体定义
     url: /scaffold-test/DynamicEntity/AllDefinitions
     style: btn-outline
     icon: 🧩
-  - label: Starter Page
-    url: /scaffold-test/Page/StarterOverview
-    style: btn-outline
-    icon: 🧭
-  - label: User Guide
+  - label: 脚手架指南
     url: /scaffold-test/docs/README-ja.md
     style: btn-ghost
     icon: 📖

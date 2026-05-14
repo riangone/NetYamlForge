@@ -1,93 +1,63 @@
 hero:
-  eyebrow: Northwind Retail Management
-  title: 北风贸易零售管理系统
-  description: 集成订单管理、库存协同、客户 360 与财务分析的元数据驱动型零售 ERP 参考实现。
-  primaryActionLabel: 打开工作台
+  eyebrow: Northwind Retail
+  title: 北风贸易智慧零售 ERP
+  description: 经典的零售业务演示系统，覆盖客户 360 度画像、智能订单处理与全球供应链协同。
+  primaryActionLabel: 销售工作台
   primaryActionUrl: /northwind-retail/Dashboard
-  secondaryActionLabel: 查看数据模型
-  secondaryActionUrl: /northwind-retail/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 订单管理
+  secondaryActionUrl: /northwind-retail/DynamicEntity/List/order
   highlights:
-    - 零售业务全流程覆盖
-    - 实时库存预警
-    - 客户生命周期管理
-    - 销售佣金自动化
+    - 智能零售大脑
+    - 全渠道订单
+    - 全球供应网络
+    - 精准客户运营
 
 metrics:
-  - label: 运营模块
-    value: "12+"
-    trend: "覆盖全业务链路"
+  - label: 客户活跃度
+    value: "High"
+    trend: "持续增长"
     tone: text-primary
-  - label: 数据实体
-    value: "25+"
-    trend: "高内聚数据模型"
+  - label: 订单处理
+    value: "Automated"
+    trend: "高效闭环"
     tone: text-success
-  - label: 报表看板
-    value: "8"
-    trend: "多维度指标分析"
-    tone: text-info
-  - label: 部署状态
-    value: "Ready"
-    trend: "生产级稳定性"
+  - label: 库存水位
+    value: "Optimized"
+    trend: "零积压风险"
     tone: text-secondary
 
 capabilities:
+  - icon: 🛍️
+    title: 智慧零售终端
+    description: 集成多维度订单处理引擎，实时同步全球库存与物流状态，优化销售周转。
+    badge: 销售
+  - icon: 👤
+    title: 客户 360 画像
+    description: 深度整合交易历史、行为偏好与地域特征，实现精准的客户关系管理与营销。
+    badge: 运营
+  - icon: 🌍
+    title: 全球供应协同
+    description: 连接跨区域供应商与配送网络，实现从采购入库到终端销售的全链路追踪。
+    badge: 供应
   - icon: 📊
-    title: 销售工作台
-    description: 实时监控销售进度，集成漏斗分析与订单管道管理。
-    badge: Sales
-  - icon: 📦
-    title: 智能库存
-    description: 多仓库库存联动，支持自动补货建议与异常预警。
-    badge: Inventory
-  - icon: 🎯
-    title: 客户 360
-    description: 全方位的客户画像与交易历史追踪，提升复购转化。
-    badge: CRM
-  - icon: 💵
-    title: 财务协同
-    description: 自动计算销售佣金，集成收支流水与经营利润报表。
-    badge: Finance
-
-solutions:
-  - name: 门店零售 POS
-    audience: 店面营业员
-    summary: 快速收银与小票打印，实时同步库存数据。
-    status: Beta
-  - name: 供应链协同
-    audience: 采购与供应商
-    summary: 自动化采购建议，维护供应商目录与合同。
-    status: Planning
-  - name: 移动运营 App
-    audience: 区域经理
-    summary: 移动端查看实时销售业绩与库存预警。
-    status: Pilot
+    title: 决策分析中台
+    description: 基于海量业务数据，提供实时的利润分析、产品表现及市场趋势洞察。
+    badge: 智能
 
 quickActions:
-  - label: 总览看板
+  - label: 业务大盘
     url: /northwind-retail/Dashboard
     style: btn-primary
-    icon: 📊
-  - label: 销售看板
-    url: /northwind-retail/Page/SalesDashboard
-    style: btn-outline
     icon: 📈
-  - label: 库存概览
-    url: /northwind-retail/Page/InventoryOverview
+  - label: 订单中心
+    url: /northwind-retail/DynamicEntity/List/order
     style: btn-outline
     icon: 📦
-  - label: 订单管理
-    url: /northwind-retail/DynamicEntity/Index?entity=order
+  - label: 产品目录
+    url: /northwind-retail/DynamicEntity/List/product
     style: btn-outline
-    icon: 📋
-  - label: 客户中心
-    url: /northwind-retail/Page/Customer360
-    style: btn-outline
-    icon: 🎯
-  - label: 商品目录
-    url: /northwind-retail/Page/ProductCatalog
-    style: btn-outline
-    icon: 🛍️
-  - label: 经营报告
-    url: /northwind-retail/Page/ExecutiveReport
+    icon: 🏷️
+  - label: 客户管理
+    url: /northwind-retail/DynamicEntity/List/customer
     style: btn-ghost
-    icon: 📝
+    icon: 👥

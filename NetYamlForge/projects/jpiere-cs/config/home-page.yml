@@ -1,63 +1,63 @@
 hero:
-  eyebrow: Jpiere Cs Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Jpiere Cs. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  eyebrow: JPiere Cloud Services
+  title: JPiere 智能云财务与企业资源计划
+  description: 集成财务核算、采购管理、合同执行与库存移动于一体的企业级开源 ERP 最佳实践方案。
+  primaryActionLabel: 管理中心
   primaryActionUrl: /jpiere-cs/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /jpiere-cs/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 财务凭证
+  secondaryActionUrl: /jpiere-cs/DynamicEntity/List/journal
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 财务自动化
+    - 供应链协同
+    - 合约生命周期
+    - 多维度核算
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 记账状态
+    value: "Standard"
+    trend: "合规核算"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 流程节点
+    value: "Workflow"
+    trend: "严谨审批"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 资源负载
+    value: "Global"
+    trend: "全域视角"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 💰
+    title: 财务自动化
+    description: 涵盖会计凭证自动生成、AP/AR 发票处理及支付结算的闭环财务管理流。
+    badge: 核心
+  - icon: ⛓️
+    title: 供应链深度协同
+    description: 无缝集成采购申请、订单、收货与库存移动，确保业务流与资金流高度统一。
+    badge: 供应链
+  - icon: 📜
+    title: 合约全生命周期
+    description: 从合同模板定义、起草、审批到履约阶段的标准化管理，降低经营合规风险。
+    badge: 合规
+  - icon: 🏗️
+    title: 多维业务实体
+    description: 支持复杂的业务伙伴、产品分类及多层级审批流配置，适配多样化业务模式。
+    badge: 扩展
 
 quickActions:
-  - label: Dashboard
+  - label: 财务大盘
     url: /jpiere-cs/Dashboard
     style: btn-primary
-    icon: 📊
-  - label: Entity Schema
-    url: /jpiere-cs/DynamicEntity/AllDefinitions
+    icon: 🏦
+  - label: 采购订单
+    url: /jpiere-cs/DynamicEntity/List/purchase_order
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /jpiere-cs/Page/StarterOverview
+    icon: 🛒
+  - label: 会计分录
+    url: /jpiere-cs/DynamicEntity/List/journal
     style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /jpiere-cs/docs/README-ja.md
-    style: btn-ghost
     icon: 📖
+  - label: 业务伙伴
+    url: /jpiere-cs/DynamicEntity/List/business_partner
+    style: btn-ghost
+    icon: 🤝

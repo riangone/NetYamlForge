@@ -1,0 +1,63 @@
+hero:
+  eyebrow: Auto Dealer Workspace
+  title: 数字化汽车经销与服务管理系统
+  description: 连接销售线索、车辆库存与售后服务，打造闭环式汽车零售与维保体验，驱动业绩增长。
+  primaryActionLabel: 销售看板
+  primaryActionUrl: /auto-dealer-demo/Dashboard
+  secondaryActionLabel: 车辆库存
+  secondaryActionUrl: /auto-dealer-demo/DynamicEntity/List/vehicles
+  highlights:
+    - 360° 客户画像
+    - 实时车辆管理
+    - 智能线索转化
+    - 服务预约自动化
+
+metrics:
+  - label: 车辆库龄
+    value: "Optimized"
+    trend: "高效周转"
+    tone: text-primary
+  - label: 线索转化
+    value: "Enhanced"
+    trend: "数据驱动"
+    tone: text-success
+  - label: 服务评价
+    value: "Service"
+    trend: "客户至上"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🚗
+    title: 车辆资产管理
+    description: 详尽记录车辆参数、外观、状态及库龄信息，支持多店库存动态实时同步。
+    badge: 资产
+  - icon: 🔍
+    title: 线索转化跟踪
+    description: 深度分析潜在客户行为轨迹，实现从线索捕获、跟进到成交的全生命周期管理。
+    badge: 销售
+  - icon: 📅
+    title: 智能预约服务
+    description: 自动化管理试驾与维修保养预约，平衡资源分配，显著提升客户服务效率。
+    badge: 服务
+  - icon: 👥
+    title: 360° 客户洞察
+    description: 整合销售、服务与活动记录，为每一位车主构建精准的数字化画像。
+    badge: 数据
+
+quickActions:
+  - label: 业务大盘
+    url: /auto-dealer-demo/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 车辆目录
+    url: /auto-dealer-demo/DynamicEntity/List/vehicles
+    style: btn-outline
+    icon: 🚘
+  - label: 线索池
+    url: /auto-dealer-demo/DynamicEntity/List/sales_leads
+    style: btn-outline
+    icon: 🎯
+  - label: 预约记录
+    url: /auto-dealer-demo/DynamicEntity/List/service_appointments
+    style: btn-ghost
+    icon: 🗓️

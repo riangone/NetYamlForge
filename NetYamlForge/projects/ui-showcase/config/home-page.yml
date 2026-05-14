@@ -1,63 +1,55 @@
 hero:
-  eyebrow: Ui Showcase Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Ui Showcase. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  eyebrow: UI Showcase
+  title: 企业级 UI 设计规范与组件库
+  description: 基于 DaisyUI 和 Tailwind CSS 的视觉系统深度展示，为子项目开发提供标准化的设计指南与交互参考。
+  primaryActionLabel: 视觉总览
   primaryActionUrl: /ui-showcase/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /ui-showcase/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 组件列表
+  secondaryActionUrl: /ui-showcase/DynamicEntity/List/component_demo
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 响应式设计
+    - 现代配色体系
+    - 标准交互模式
+    - 无障碍友好
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
-    tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
-    tone: text-success
-  - label: Interface
+  - label: 视觉体系
     value: "DaisyUI"
-    trend: "Tailwind powered"
+    trend: "组件丰富"
+    tone: text-primary
+  - label: 样式底层
+    value: "Tailwind"
+    trend: "原子级控制"
+    tone: text-success
+  - label: 设计标准
+    value: "NYF-v1"
+    trend: "统一体验"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 🎨
+    title: 样式指南
+    description: 预设统一的色彩体系、字体规范及图标库使用指南，确保全平台视觉一致性。
+    badge: 设计
+  - icon: 🖱️
+    title: 交互模式标准
+    description: 展示列表导航、详情编辑、仪表盘分析等典型页面的交互标准与最佳实践。
+    badge: 交互
+  - icon: 📱
+    title: 响应式适配
+    description: 演示核心组件在不同屏幕尺寸下的自适应表现，确保移动端与桌面端的无缝切换。
+    badge: 兼容
 
 quickActions:
-  - label: Dashboard
+  - label: 样式大盘
     url: /ui-showcase/Dashboard
     style: btn-primary
-    icon: 📊
-  - label: Entity Schema
-    url: /ui-showcase/DynamicEntity/AllDefinitions
+    icon: 🌈
+  - label: 组件演示
+    url: /ui-showcase/DynamicEntity/List/component_demo
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /ui-showcase/Page/StarterOverview
-    style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /ui-showcase/docs/README-ja.md
+    icon: 🛠️
+  - label: 用户模拟
+    url: /ui-showcase/DynamicEntity/List/users
     style: btn-ghost
-    icon: 📖
+    icon: 👤

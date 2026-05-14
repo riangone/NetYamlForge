@@ -1,63 +1,63 @@
 hero:
   eyebrow: Inventory Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Inventory. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  title: 智能库存与供应链管理平台
+  description: 实时跟踪库存变动，优化仓储效率，集成供应商管理与产品生命周期监控。
+  primaryActionLabel: 进入看板
   primaryActionUrl: /inventory/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /inventory/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 产品目录
+  secondaryActionUrl: /inventory/DynamicEntity/List/product
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 多仓储协同
+    - 移动流水跟踪
+    - 智能水位预警
+    - 供应商集成
 
 metrics:
-  - label: Entities
+  - label: 在库产品
     value: "Auto"
-    trend: "Metadata driven"
+    trend: "实时同步"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 仓储中心
+    value: "Multiple"
+    trend: "全域覆盖"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 库存周转
+    value: "High"
+    trend: "效率领先"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 📦
+    title: 多仓储管理
+    description: 支持全球多仓库协同，实时更新各库区的库存水位与库龄状态。
+    badge: 核心
+  - icon: 🔄
+    title: 移动流水跟踪
+    description: 精确记录入库、出库、调拨及盘点的每一笔流转，确保账实相符。
+    badge: 流程
+  - icon: ⚠️
+    title: 智能预警机制
+    description: 自动监控低库存与超期库存，及时触发补货通知与风险预警。
+    badge: 智能
+  - icon: 🤝
+    title: 供应商协同
+    description: 集成供应商准入、考核及订单执行，优化上游供应链效率。
+    badge: 扩展
 
 quickActions:
-  - label: Dashboard
+  - label: 库存总览
     url: /inventory/Dashboard
     style: btn-primary
     icon: 📊
-  - label: Entity Schema
-    url: /inventory/DynamicEntity/AllDefinitions
+  - label: 产品列表
+    url: /inventory/DynamicEntity/List/product
     style: btn-outline
     icon: 🧩
-  - label: Starter Page
-    url: /inventory/Page/StarterOverview
+  - label: 仓储详情
+    url: /inventory/DynamicEntity/List/warehouse
     style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /inventory/docs/README-ja.md
+    icon: 🏠
+  - label: 变动记录
+    url: /inventory/DynamicEntity/List/stock_movement
     style: btn-ghost
-    icon: 📖
+    icon: 📝

@@ -1,63 +1,63 @@
 hero:
   eyebrow: Task Management Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Task Management. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  title: 协同项目与任务追踪系统
+  description: 提升团队执行力，从项目规划到任务落实，提供全方位的进度监控、资源分配与沟通协作工具。
+  primaryActionLabel: 项目概览
   primaryActionUrl: /task-management/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /task-management/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 我的任务
+  secondaryActionUrl: /task-management/DynamicEntity/List/task
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 敏捷任务追踪
+    - 团队深度协作
+    - 进度可视化
+    - 跨项目管理
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 活跃项目
+    value: "Multi"
+    trend: "并行管理"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 任务状态
+    value: "Realtime"
+    trend: "动态更新"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 协作频率
+    value: "High"
+    trend: "沟通无阻"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 🎯
+    title: 敏捷看板
+    description: 直观展示项目各阶段的任务分布，支持拖拽式状态更新与优先级管理。
+    badge: 核心
+  - icon: 💬
+    title: 协作评论区
+    description: 基于任务条目的深度讨论，支持附件关联，确保团队沟通信息完整留存。
+    badge: 协作
+  - icon: 📂
+    title: 多维分类
+    description: 支持按标签、类别和项目进行任务切片，优化资源投入与工作负载。
+    badge: 组织
+  - icon: 📈
+    title: 进度监控
+    description: 自动生成项目完成度曲线图，实时预警潜在的延期风险。
+    badge: 分析
 
 quickActions:
-  - label: Dashboard
+  - label: 看板
     url: /task-management/Dashboard
     style: btn-primary
     icon: 📊
-  - label: Entity Schema
-    url: /task-management/DynamicEntity/AllDefinitions
+  - label: 任务列表
+    url: /task-management/DynamicEntity/List/task
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /task-management/Page/StarterOverview
+    icon: ✅
+  - label: 项目列表
+    url: /task-management/DynamicEntity/List/project
     style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /task-management/docs/README-ja.md
+    icon: 🏗️
+  - label: 评论汇总
+    url: /task-management/DynamicEntity/List/comment
     style: btn-ghost
-    icon: 📖
+    icon: 💬

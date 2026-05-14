@@ -1,63 +1,63 @@
 hero:
   eyebrow: Biz Docs Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Biz Docs. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  title: 企业级电子单据与合规文档中心
+  description: 专注于日式及通用商业文档的自动化生成与管理，涵盖报价、发票、合同及配送单，确保业务合规高效。
+  primaryActionLabel: 文档中心
   primaryActionUrl: /biz-docs/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /biz-docs/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 发票管理
+  secondaryActionUrl: /biz-docs/DynamicEntity/List/invoice
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 日式标准支持
+    - 自动化单据流
+    - PDF 模板引擎
+    - 合规审计追踪
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 模板数量
+    value: "Rich"
+    trend: "多行业覆盖"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 生成效率
+    value: "Instant"
+    trend: "秒级输出"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 合规等级
+    value: "Audit"
+    trend: "企业级标准"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 📋
+    title: 标准化模板
+    description: 预设符合行业标准的报价单、发票及收据模板，支持自定义样式扩展。
+    badge: 标准
+  - icon: 🇯🇵
+    title: 深度本地化
+    description: 特别优化对日语商业文档格式的支持，满足特定地区的法务与商业习惯。
+    badge: 特色
+  - icon: ⛓️
+    title: 业务流程链
+    description: 实现从估价到合同、再到发票的完整业务单据关联，一键流转。
+    badge: 效率
+  - icon: 🖨️
+    title: 智能导出
+    description: 集成强大的 PDF 生成引擎，支持批量导出、套打及电子签名集成。
+    badge: 输出
 
 quickActions:
-  - label: Dashboard
+  - label: 控制台
     url: /biz-docs/Dashboard
     style: btn-primary
     icon: 📊
-  - label: Entity Schema
-    url: /biz-docs/DynamicEntity/AllDefinitions
+  - label: 发票查询
+    url: /biz-docs/DynamicEntity/List/invoice
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /biz-docs/Page/StarterOverview
+    icon: 📑
+  - label: 模板库
+    url: /biz-docs/DynamicEntity/List/pdf_template
     style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /biz-docs/docs/README-ja.md
+    icon: 🎨
+  - label: 合同中心
+    url: /biz-docs/DynamicEntity/List/jp_contract
     style: btn-ghost
-    icon: 📖
+    icon: ✍️

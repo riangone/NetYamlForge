@@ -1,63 +1,63 @@
 hero:
-  eyebrow: Framework Showcase Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Framework Showcase. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
+  eyebrow: Framework Showcase
+  title: NetYamlForge 核心框架功能演示
+  description: 深度探索平台的核心扩展能力，涵盖动态布局、业务逻辑钩子、批量作业及复杂数据查询演示。
+  primaryActionLabel: 功能地图
   primaryActionUrl: /framework-showcase/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /framework-showcase/DynamicEntity/AllDefinitions
+  secondaryActionLabel: 组件预览
+  secondaryActionUrl: /framework-showcase/DynamicEntity/List/form_component
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 动态 UI 架构
+    - 声明式钩子
+    - 复杂查询引擎
+    - 自动化作业
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 组件覆盖
+    value: "100%"
+    trend: "全量展示"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 逻辑扩展
+    value: "Hooks"
+    trend: "声明式编程"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 数据吞吐
+    value: "Batch"
+    trend: "高性能"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
   - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+    title: 动态 UI 组件库
+    description: 全面展示所有预设的表单控件、列表布局方案，及如何通过 YAML 零代码构建界面。
+    badge: 前端
+  - icon: ⚓
+    title: 业务逻辑钩子
+    description: 演示如何在数据生命周期的各个阶段（增删改查前后）插入自定义业务代码逻辑。
+    badge: 后端
+  - icon: 🔍
+    title: 高级查询引擎
+    description: 体验强大的多维过滤器、复杂排序、数据导出及批量处理能力在实际场景的应用。
+    badge: 数据
+  - icon: 🚀
+    title: 自动化批量作业
+    description: 展示如何配置异步任务与批量作业，处理高耗时或大规模数据的后台任务。
+    badge: 系统
 
 quickActions:
-  - label: Dashboard
+  - label: 示例面板
     url: /framework-showcase/Dashboard
     style: btn-primary
-    icon: 📊
-  - label: Entity Schema
-    url: /framework-showcase/DynamicEntity/AllDefinitions
+    icon: 🎡
+  - label: 钩子演示
+    url: /framework-showcase/DynamicEntity/List/hook_demo
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /framework-showcase/Page/StarterOverview
+    icon: ⚓
+  - label: 表单组件
+    url: /framework-showcase/DynamicEntity/List/form_component
     style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /framework-showcase/docs/README-ja.md
+    icon: 🧱
+  - label: 批量作业
+    url: /framework-showcase/DynamicEntity/List/batch_job_demo
     style: btn-ghost
-    icon: 📖
+    icon: ⚙️

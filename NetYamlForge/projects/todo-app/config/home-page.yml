@@ -1,63 +1,55 @@
 hero:
   eyebrow: Todo App Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to Todo App. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
-  primaryActionUrl: /todo-app/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /todo-app/DynamicEntity/AllDefinitions
+  title: 个人高效办公待办清单
+  description: 极简主义设计，助您专注于最重要的工作。轻松管理每日任务、灵感备注，量化您的每一天。
+  primaryActionLabel: 待办清单
+  primaryActionUrl: /todo-app/DynamicEntity/List/task
+  secondaryActionLabel: 任务分类
+  secondaryActionUrl: /todo-app/DynamicEntity/List/category
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - 极速创建
+    - 灵活分类
+    - 状态流转
+    - 历史回顾
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 待办项
+    value: "Active"
+    trend: "专注当下"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 完成率
+    value: "Quantified"
+    trend: "成就可见"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 简洁度
+    value: "100%"
+    trend: "零干扰"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: ✍️
+    title: 极速记录
+    description: 随时随地记录灵感与待办事项，支持一键保存与分类标记。
+    badge: 效率
+  - icon: 🔄
+    title: 状态流转
+    description: 清晰的任务完成状态管理，通过可视化的状态切换量化每日成就感。
+    badge: 核心
+  - icon: 🏷️
+    title: 灵活标签
+    description: 自定义任务类别，助您在工作、生活与学习之间快速切换焦点。
+    badge: 组织
 
 quickActions:
-  - label: Dashboard
-    url: /todo-app/Dashboard
+  - label: 我的待办
+    url: /todo-app/DynamicEntity/List/task
     style: btn-primary
-    icon: 📊
-  - label: Entity Schema
-    url: /todo-app/DynamicEntity/AllDefinitions
+    icon: ✅
+  - label: 类别管理
+    url: /todo-app/DynamicEntity/List/category
     style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /todo-app/Page/StarterOverview
-    style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /todo-app/docs/README-ja.md
+    icon: 🏷️
+  - label: 交流备注
+    url: /todo-app/DynamicEntity/List/comment
     style: btn-ghost
-    icon: 📖
+    icon: 💬
