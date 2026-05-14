@@ -1,0 +1,126 @@
+title: 業務フローガイド
+description: "JPiere 契約サービスの全業務フローを一覧表示。現在の進捗状況・担当者・次のアクションを確認できます。"
+showInSidebar: true
+
+sections:
+
+  # ─────────────────────────────────────────────
+  # 業務フロー全体ガイド
+  # ─────────────────────────────────────────────
+  - id: workflow_guide
+    title: JPiere 契約サービス — 業務フロー ガイド
+    component: workflow_guide
+    sourceType: custom
+    source: |
+      SELECT 1
+    columns: [dummy]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # ユーザー役割別の担当業務マップ
+  # ─────────────────────────────────────────────
+  - id: role_responsibility_map
+    title: 役割別 担当業務マップ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT '一般社員' AS 役割,
+             'employee' AS コード,
+             '全般的な業務サポート。契約・見積・TODO の照会と登録。' AS 担当業務,
+             '取引先登録、見積作成、TODO管理、書類照会' AS 主な操作,
+             '契約担当・購買担当の補佐、データ入力' AS 補足
+      UNION ALL
+      SELECT '契約担当', 'contract_manager',
+             '契約・見積・請求の作成・管理・分析。売上フローの中心。',
+             '見積作成→受注確定、契約締結→有効化、請求書発行、売上認識',
+             '売上フロー全体のオーナー。入金確認は会計担当と連携。'
+      UNION ALL
+      SELECT '会計担当', 'accountant',
+             '仕訳・会計・入金・支払・資金管理。会計フローの中心。',
+             '売上認識確定、請求確定、入金消込、支払処理、試算表照会',
+             '月次バッチ処理の監視。仕訳の自動起票を確認。'
+      UNION ALL
+      SELECT '購買担当', 'purchaser',
+             '購買フロー（発注・受入・AP請求・支払）の管理。',
+             '発注書作成、受入処理、AP請求登録、在庫照会',
+             '承認が必要な書類は承認者に申請。支払は会計担当と連携。'
+      UNION ALL
+      SELECT '承認者', 'approver',
+             '承認ワークフローの確認・承認・却下。',
+             '承認申請の確認、ステップ承認/却下、承認照会',
+             '金額基準でルートが自動選択。全ステップ承認で文書確定。'
+      UNION ALL
+      SELECT '管理者', 'admin',
+             'システム管理・マスタメンテナンス・権限管理・監査。',
+             'ユーザー管理、権限設定、マスタメンテ、バッチジョブ管理',
+             '全機能へのアクセス権限あり。監査ログの確認。'
+    columns: [役割, コード, 担当業務, 主な操作, 補足]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 文書ステータス別の作業優先度
+  # ─────────────────────────────────────────────
+  - id: status_priority_guide
+    title: ステータス別 アクションガイド
+    component: table
+    sourceType: custom
+    source: |
+      SELECT '見積' AS 書類, 'DR (下書き)' AS 現在の状態, '契約担当' AS 担当者,
+             '内容を確認して提出。doc_status を IN に変更。' AS 次のアクション,
+             '高' AS 優先度
+      UNION ALL
+      SELECT '見積', 'IN (提出中)', '契約担当',
+             '受注確認後、doc_status を CO に変更。失注の場合は VO に。',
+             '高'
+      UNION ALL
+      SELECT '契約', 'DR/WP (交渉中)', '契約担当',
+             '契約条件を確認して締結。doc_status=CO, contract_status=AC に変更。',
+             '高'
+      UNION ALL
+      SELECT '契約', 'AC (有効)', '契約担当',
+             '月次売上認識・請求の基準。期限切れ前に更新手続き。',
+             '中'
+      UNION ALL
+      SELECT '契約', '期限切れ間近(90日以内)', '契約担当',
+             '更新 or 解約を判断。auto_renewal 設定を確認。',
+             '高'
+      UNION ALL
+      SELECT '売上認識', 'DR (下書き)', '会計担当',
+             '実績確認後、doc_status を CO に確定（自動仕訳起票）。',
+             '中'
+      UNION ALL
+      SELECT '請求', 'DR (下書き)', '契約担当/会計担当',
+             '内容確認後、doc_status を CO に確定（売掛金仕訳起票）。',
+             '高'
+      UNION ALL
+      SELECT '請求', 'CO (確定/未入金)', '会計担当',
+             '入金確認まで outstanding_amt を監視。督促が必要か判断。',
+             '中'
+      UNION ALL
+      SELECT '発注書', 'DR (下書き)', '購買担当',
+             '内容確認後、承認申請または直接確定。',
+             '中'
+      UNION ALL
+      SELECT '発注書', 'IP (発注済/受入待)', '購買担当',
+             '納品状況を確認。到着次第、受入処理を実行。',
+             '中'
+      UNION ALL
+      SELECT 'AP請求', 'DR (下書き)', '購買担当/会計担当',
+             '3方向照合（数量・単価・PO）を確認後、CO に確定。',
+             '高'
+      UNION ALL
+      SELECT '支払', '未処理', '会計担当',
+             '確定AP請求に対して支払処理を実行。支払日に注意。',
+             '高'
+      UNION ALL
+      SELECT '承認申請', 'PENDING', '承認者',
+             '申請内容を確認し、承認または却下を実行。',
+             '高'
+    columns: [書類, 現在の状態, 担当者, 次のアクション, 優先度]
+    pageSize: 20
+    editable: false
+    readOnly: true

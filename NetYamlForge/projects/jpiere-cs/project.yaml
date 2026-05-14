@@ -99,6 +99,9 @@ navigation:
         - label: 個人工作台
           url: /Page/MyPage
           icon: user
+        - label: 業務フローガイド
+          url: /Page/WorkflowGuide
+          icon: route
         - label: AI ダッシュボード
           url: /Page/AIDashboard
           icon: robot

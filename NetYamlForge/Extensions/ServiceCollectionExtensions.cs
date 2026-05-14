@@ -199,6 +199,9 @@ public static class ServiceCollectionExtensions
         // 中国股市行情数据服务
         services.AddHttpClient<IChinaStockService, ChinaStockService>();
 
+        // ワークフローガイドサービス
+        services.AddScoped<WorkflowGuideService>();
+
         return services;
     }
 

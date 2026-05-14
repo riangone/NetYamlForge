@@ -113,6 +113,9 @@
                 case "org_chart":
                     @await Html.PartialAsync("Components/_SectionOrgChart", renderModel)
                     break;
+                case "workflow_guide":
+                    @await Html.PartialAsync("Components/_SectionWorkflowGuide", renderModel)
+                    break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)
                     break;

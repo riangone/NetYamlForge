@@ -85,59 +85,15 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────────
-  # 2. 業務フロー ガイド
+  # 2. 業務フロー ガイド（4つの業務フローを動的表示）
   # ─────────────────────────────────────────────
   - id: workflow_guide
     title: JPiere 契約サービス — 業務フロー ガイド
-    component: stat_cards
+    component: workflow_guide
     sourceType: custom
     source: |
-      SELECT
-        'Step 1　取引先登録' AS metric_name,
-        '顧客・仕入先のマスタを登録します。法人番号・与信限度額・支払条件も設定します。' AS metric_value,
-        '🏢' AS metric_icon,
-        '/jpiere-cs/DynamicEntity/Index?entity=business_partner' AS metric_delta
-      UNION ALL
-      SELECT
-        'Step 2　見積作成 → 提出',
-        '取引先に見積書(EST-)を作成し、doc_status を IN（提出中）に変更して送付します。受注後は CO（受注確定）へ変更します。',
-        '📋',
-        '/jpiere-cs/DynamicEntity/Index?entity=estimation'
-      UNION ALL
-      SELECT
-        'Step 3　契約締結',
-        '受注確定後、契約書(CON-)を作成します。contract_status を WP → AC に変更して有効化します。月次売上・期間・自動更新の設定を忘れずに。',
-        '📄',
-        '/jpiere-cs/DynamicEntity/Index?entity=contract'
-      UNION ALL
-      SELECT
-        'Step 4　月次売上認識',
-        '毎月の作業実績を売上認識(REC-)として記録します。doc_status を CO に確定すると仕訳が自動起票されます（会計基盤実装後）。',
-        '📊',
-        '/jpiere-cs/DynamicEntity/Index?entity=recognition'
-      UNION ALL
-      SELECT
-        'Step 5　請求書発行',
-        '月次バッチ、または手動で請求書(BILL-)を作成します。doc_status を CO に確定すると売掛金仕訳が自動起票されます（会計基盤実装後）。',
-        '💴',
-        '/jpiere-cs/DynamicEntity/Index?entity=bill'
-      UNION ALL
-      SELECT
-        'Step 6　入金確認・消込（今後実装）',
-        '入金確認後、支払処理(PAY-)を記録します。outstanding_amt が 0 になると請求書が CL（入金完了）に自動遷移します。',
-        '🏦',
-        '/jpiere-cs/DynamicEntity/Index?entity=bill'
-      UNION ALL
-      SELECT
-        'Step 7　契約更新・解約管理',
-        '期限切れ前に auto_renewal を確認します。更新の場合は period_date_to を延長、解約の場合は contract_status を CL に変更します。',
-        '🔄',
-        '/jpiere-cs/DynamicEntity/Index?entity=contract'
-    columns: [metric_name, metric_value, metric_icon, metric_delta]
-    labelField: metric_name
-    valueField: metric_value
-    iconField: metric_icon
-    deltaField: metric_delta
+      SELECT 1
+    columns: [dummy]
     pageSize: 10
     editable: false
     readOnly: true
