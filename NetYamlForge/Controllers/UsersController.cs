@@ -4,6 +4,7 @@
 
 using System.Data;
 using NetYamlForge.Models.Auth;
+using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Authorization;
@@ -19,20 +20,22 @@ public class UsersController : Controller
     private readonly IUserAuthService _users;
     private readonly IJpcsUserSyncService _syncService;
     private readonly IAuditLogService _audit;
+    private readonly ProjectScope _projectScope;
     private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IConnectionManager connectionManager, IUserAuthService users, IJpcsUserSyncService syncService, IAuditLogService audit, ILogger<UsersController> logger)
+    public UsersController(IConnectionManager connectionManager, IUserAuthService users, IJpcsUserSyncService syncService, IAuditLogService audit, ProjectScope projectScope, ILogger<UsersController> logger)
     {
         _connectionManager = connectionManager;
         _users = users;
         _syncService = syncService;
         _audit = audit;
+        _projectScope = projectScope;
         _logger = logger;
     }
 
     public async Task<IActionResult> Index()
     {
-        var projectName = RouteData.Values["project"]?.ToString();
+        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : RouteData.Values["project"]?.ToString();
         // 如果是 framework 项目，显示所有用户；否则只显示当前项目的用户
         var filterProject = projectName == "framework" ? null : projectName;
         var users = await _users.GetAllAsync(filterProject);
@@ -58,7 +61,7 @@ public class UsersController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        var projectName = RouteData.Values["project"]?.ToString();
+        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : RouteData.Values["project"]?.ToString();
         return View("Edit", new UserEditViewModel 
         { 
             OwningProject = projectName == "framework" ? null : projectName 
@@ -76,17 +79,14 @@ public class UsersController : Controller
 
         try
         {
-            var projectName = RouteData.Values["project"]?.ToString();
+            var projectName = _projectScope.IsSet ? _projectScope.Current.Name : RouteData.Values["project"]?.ToString();
             if (string.IsNullOrEmpty(model.OwningProject))
             {
                 model.OwningProject = projectName == "framework" ? null : projectName;
             }
 
-            await ExecuteUserTransactionAsync(async tx =>
-            {
-                await _users.CreateAsync(model, null, tx);
-                await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName} for project {model.OwningProject ?? "global"}", User.Identity?.Name, null, tx);
-            });
+            await _users.CreateAsync(model);
+            await _audit.WriteAsync("user_create", "AppUser", $"Created user {model.UserName} for project {model.OwningProject ?? "global"}", User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -128,11 +128,8 @@ public class UsersController : Controller
 
         try
         {
-            await ExecuteUserTransactionAsync(async tx =>
-            {
-                await _users.UpdateAsync(model, null, tx);
-                await _audit.WriteAsync("user_update", "AppUser", $"Updated user {model.UserName}", User.Identity?.Name, null, tx);
-            });
+            await _users.UpdateAsync(model);
+            await _audit.WriteAsync("user_update", "AppUser", $"Updated user {model.UserName}", User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -148,11 +145,8 @@ public class UsersController : Controller
     {
         try
         {
-            await ExecuteUserTransactionAsync(async tx =>
-            {
-                await _users.DeleteAsync(id, null, tx);
-                await _audit.WriteAsync("user_delete", "AppUser", $"Deleted user id={id}", User.Identity?.Name, null, tx);
-            });
+            await _users.DeleteAsync(id);
+            await _audit.WriteAsync("user_delete", "AppUser", $"Deleted user id={id}", User.Identity?.Name);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)

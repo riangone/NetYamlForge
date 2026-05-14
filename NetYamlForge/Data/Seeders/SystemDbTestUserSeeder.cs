@@ -57,13 +57,21 @@ public class SystemDbTestUserSeeder
             {
                 // system.db にユーザーが存在するか確認
                 var existingUser = await systemConn.QueryFirstOrDefaultAsync<dynamic>(
-                    "SELECT id FROM app_user WHERE user_name = @UserName",
+                    "SELECT id, owning_project FROM app_user WHERE user_name = @UserName",
                     new { UserName = (string)user.UserName });
 
                 if (existingUser != null)
                 {
                     // 既存ユーザーのプロジェクトロールのみ更新
                     await EnsureProjectRoleAsync(systemConn, (int)existingUser.id, project.Name, logger);
+                    
+                    // owning_project が NULL の場合は、このプロジェクトをセットして回填
+                    if (existingUser.owning_project == null)
+                    {
+                        await systemConn.ExecuteAsync(
+                            "UPDATE app_user SET owning_project = @OwningProject WHERE id = @Id",
+                            new { OwningProject = project.Name, Id = (int)existingUser.id });
+                    }
                     continue;
                 }
 

@@ -13,6 +13,7 @@ using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using Npgsql;
 
@@ -24,15 +25,19 @@ public class UserAuthService : IUserAuthService
     private readonly ProjectScope _scope;
     private readonly ILogger<UserAuthService> _logger;
     private readonly PasswordHasher<AppUser> _passwordHasher = new();
+    private readonly string _systemDbConnectionString;
 
     public UserAuthService(
         IConnectionManager connectionManager,
         ProjectScope scope,
+        IConfiguration config,
         ILogger<UserAuthService> logger)
     {
         _connectionManager = connectionManager;
         _scope = scope;
         _logger = logger;
+        var dbPath = config["SystemDbPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+        _systemDbConnectionString = dbPath.Contains(';') ? dbPath : new SqliteConnectionStringBuilder { DataSource = dbPath }.ConnectionString;
     }
 
     public async Task<AppUser?> ValidateCredentialsAsync(string userName, string password)
@@ -40,7 +45,7 @@ public class UserAuthService : IUserAuthService
         // アクティブなユーザーのみを対象にパスワードハッシュ検証を行います。
         await using var conn = await GetConnectionAsync();
         var user = await conn.QueryFirstOrDefaultAsync<AppUser>(
-            "SELECT * FROM AppUser WHERE UserName = @UserName AND IsActive = 1",
+            "SELECT * FROM app_user WHERE user_name = @UserName AND is_active = 1",
             new { UserName = userName });
 
         if (user == null)
@@ -64,7 +69,7 @@ public class UserAuthService : IUserAuthService
     {
         await using var conn = await GetConnectionAsync();
         var roles = await conn.QueryAsync<string>(
-            "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
+            "SELECT role_name FROM app_user_role WHERE user_name = @UserName",
             new { UserName = userName });
         return roles.Distinct(StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
     }
@@ -75,7 +80,7 @@ public class UserAuthService : IUserAuthService
         await using var conn = await GetConnectionAsync();
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         await conn.ExecuteAsync(
-            "UPDATE AppUser SET LastLoginAt = @Now WHERE Id = @Id",
+            "UPDATE app_user SET last_login_at = @Now WHERE id = @Id",
             new { Now = now, Id = userId });
     }
 
@@ -84,13 +89,13 @@ public class UserAuthService : IUserAuthService
         await using var conn = await GetConnectionAsync();
         if (string.IsNullOrEmpty(owningProject))
         {
-            var items = await conn.QueryAsync<AppUser>("SELECT * FROM AppUser ORDER BY Id ASC");
+            var items = await conn.QueryAsync<AppUser>("SELECT * FROM app_user ORDER BY id ASC");
             return items.ToList();
         }
         else
         {
             var items = await conn.QueryAsync<AppUser>(
-                "SELECT * FROM AppUser WHERE OwningProject = @OwningProject ORDER BY Id ASC",
+                "SELECT * FROM app_user WHERE owning_project = @OwningProject ORDER BY Id ASC",
                 new { OwningProject = owningProject });
             return items.ToList();
         }
@@ -99,7 +104,7 @@ public class UserAuthService : IUserAuthService
     public async Task<AppUser?> GetByIdAsync(int id)
     {
         await using var conn = await GetConnectionAsync();
-        return await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = id });
+        return await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM app_user WHERE id = @Id", new { Id = id });
     }
 
     public async Task<int> CreateAsync(UserEditViewModel input, IDbConnection? connection = null, IDbTransaction? transaction = null)
@@ -109,7 +114,7 @@ public class UserAuthService : IUserAuthService
         var conn = connection ?? await GetConnectionAsync();
         try
         {
-            var existing = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName", new { input.UserName }, transaction);
+            var existing = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM app_user WHERE user_name = @UserName", new { input.UserName }, transaction);
             if (existing > 0)
             {
                 throw new InvalidOperationException($"User '{input.UserName}' already exists.");
@@ -140,7 +145,8 @@ public class UserAuthService : IUserAuthService
             if (ownConnection && conn != null)
             {
                 // Phase 2: 释放连接回池（而不是关闭）
-                _connectionManager.ReleaseConnection(conn);
+                conn.Close();
+                conn.Dispose();
             }
         }
     }
@@ -157,7 +163,7 @@ public class UserAuthService : IUserAuthService
         var conn = connection ?? await GetConnectionAsync();
         try
         {
-            var current = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = input.Id.Value }, transaction);
+            var current = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM app_user WHERE id = @Id", new { Id = input.Id.Value }, transaction);
             if (current == null)
             {
                 throw new InvalidOperationException("User not found.");
@@ -171,15 +177,15 @@ public class UserAuthService : IUserAuthService
             }
 
             await conn.ExecuteAsync(@"
-UPDATE AppUser
-SET UserName = @UserName,
-    PasswordHash = @PasswordHash,
-    DisplayName = @DisplayName,
-    PreferredLanguage = @PreferredLanguage,
-    IsAdmin = @IsAdmin,
-    IsActive = @IsActive,
-    OwningProject = @OwningProject
-WHERE Id = @Id", new
+UPDATE app_user
+SET user_name = @UserName,
+    password_hash = @PasswordHash,
+    display_name = @DisplayName,
+    preferred_language = @PreferredLanguage,
+    is_admin = @IsAdmin,
+    is_active = @IsActive,
+    owning_project = @OwningProject
+WHERE id = @Id", new
         {
             Id = input.Id.Value,
             input.UserName,
@@ -193,28 +199,28 @@ WHERE Id = @Id", new
 
             // Sync AppUserRole with IsAdmin flag
             var existingRoles = (await conn.QueryAsync<string>(
-                "SELECT RoleName FROM AppUserRole WHERE UserName = @UserName",
+                "SELECT role_name FROM app_user_role WHERE user_name = @UserName",
                 new { UserName = current.UserName }, transaction)).ToList();
             var hasAdminRole = existingRoles.Any(r => r.Equals("Admin", StringComparison.OrdinalIgnoreCase));
 
             if (!string.Equals(current.UserName, input.UserName, StringComparison.OrdinalIgnoreCase))
             {
                 await conn.ExecuteAsync(
-                    "UPDATE AppUserRole SET UserName = @NewUserName WHERE UserName = @OldUserName",
+                    "UPDATE app_user_role SET user_name = @NewUserName WHERE user_name = @OldUserName",
                     new { NewUserName = input.UserName, OldUserName = current.UserName }, transaction);
             }
 
             if (input.IsAdmin && !hasAdminRole)
             {
                 await conn.ExecuteAsync(
-                    "INSERT INTO AppUserRole (UserName, RoleName) VALUES (@UserName, @RoleName)",
-                    new { UserName = input.UserName, RoleName = "Admin" }, transaction);
+                    "INSERT INTO app_user_role (user_name, role_name, created_at) VALUES (@UserName, @RoleName, @Now)",
+                    new { UserName = input.UserName, RoleName = "Admin", Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }, transaction);
             }
             else if (!input.IsAdmin && hasAdminRole)
             {
                 await conn.ExecuteAsync(
-                    "DELETE FROM AppUserRole WHERE UserName = @UserName AND RoleName = @RoleName",
-                    new { UserName = input.UserName, RoleName = "Admin" }, transaction);
+                    "DELETE FROM app_user_role WHERE user_name = @UserName AND role_name = @RoleName",
+                    new { UserName = input.UserName, RoleName = "Admin", Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }, transaction);
             }
 
             _logger.LogInformation("Updated user {UserId} ('{UserName}')", input.Id.Value, input.UserName);
@@ -223,7 +229,8 @@ WHERE Id = @Id", new
         {
             if (ownConnection && conn != null)
             {
-                _connectionManager.ReleaseConnection(conn);
+                conn.Close();
+                conn.Dispose();
             }
         }
     }
@@ -234,18 +241,18 @@ WHERE Id = @Id", new
         var conn = connection ?? await GetConnectionAsync();
         try
         {
-            var user = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM AppUser WHERE Id = @Id", new { Id = id }, transaction);
+            var user = await conn.QueryFirstOrDefaultAsync<AppUser>("SELECT * FROM app_user WHERE id = @Id", new { Id = id }, transaction);
             if (user == null)
             {
                 throw new InvalidOperationException("User not found.");
             }
 
             await conn.ExecuteAsync(
-                "DELETE FROM AppUserRole WHERE UserName = @UserName",
+                "DELETE FROM app_user_role WHERE user_name = @UserName",
                 new { user.UserName }, transaction);
 
             await conn.ExecuteAsync(
-                "DELETE FROM AppUser WHERE Id = @Id",
+                "DELETE FROM app_user WHERE id = @Id",
                 new { Id = id }, transaction);
 
             _logger.LogInformation("Deleted user {UserId} ('{UserName}')", id, user.UserName);
@@ -254,7 +261,8 @@ WHERE Id = @Id", new
         {
             if (ownConnection && conn != null)
             {
-                _connectionManager.ReleaseConnection(conn);
+                conn.Close();
+                conn.Dispose();
             }
         }
     }
@@ -263,7 +271,7 @@ WHERE Id = @Id", new
     {
         await using var conn = await GetConnectionAsync();
         var count = await conn.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName",
+            "SELECT COUNT(*) FROM app_user WHERE user_name = @UserName",
             new { UserName = userName });
         return count > 0;
     }
@@ -276,7 +284,7 @@ WHERE Id = @Id", new
         {
             // ユーザー名チェック
             var existing = await conn.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName",
+                "SELECT COUNT(*) FROM app_user WHERE user_name = @UserName",
                 new { input.UserName }, transaction);
             if (existing > 0)
             {
@@ -300,8 +308,8 @@ WHERE Id = @Id", new
 
             // カスタムロール割り当て（customer ロール）
             await conn.ExecuteAsync(
-                "INSERT INTO AppUserRole (UserName, RoleName) VALUES (@UserName, @RoleName)",
-                new { input.UserName, RoleName = "customer" }, transaction);
+                "INSERT INTO app_user_role (user_name, role_name, created_at) VALUES (@UserName, @RoleName, @Now)",
+                new { input.UserName, RoleName = "customer", Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }, transaction);
 
             _logger.LogInformation("Registered user '{UserName}' with id {UserId}", user.UserName, id);
             return (int)id;
@@ -310,7 +318,8 @@ WHERE Id = @Id", new
         {
             if (ownConnection && conn != null)
             {
-                _connectionManager.ReleaseConnection(conn);
+                conn.Close();
+                conn.Dispose();
             }
         }
     }
@@ -323,7 +332,7 @@ WHERE Id = @Id", new
         {
             // ユーザー名チェック
             var existing = await conn.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM AppUser WHERE UserName = @UserName",
+                "SELECT COUNT(*) FROM app_user WHERE user_name = @UserName",
                 new { input.UserName }, transaction);
             if (existing > 0)
             {
@@ -348,8 +357,8 @@ WHERE Id = @Id", new
 
             // customer ロールを付与
             await conn.ExecuteAsync(
-                "INSERT INTO AppUserRole (UserName, RoleName) VALUES (@UserName, @RoleName)",
-                new { input.UserName, RoleName = "customer" }, transaction);
+                "INSERT INTO app_user_role (user_name, role_name, created_at) VALUES (@UserName, @RoleName, @Now)",
+                new { input.UserName, RoleName = "customer", Now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }, transaction);
 
             // customers テーブルにもレコードを作成（auto-dealer-demo など）
             // 既存の customers レコードがある場合は user_name を更新する
@@ -362,7 +371,8 @@ WHERE Id = @Id", new
         {
             if (ownConnection && conn != null)
             {
-                _connectionManager.ReleaseConnection(conn);
+                conn.Close();
+                conn.Dispose();
             }
         }
     }
@@ -710,39 +720,12 @@ SELECT CASE WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_sch
 
     private async Task<long> InsertUserAsync(AppUser user, IDbConnection conn, IDbTransaction? transaction)
     {
-        var dbType = _scope.Current.DatabaseType.ToLowerInvariant();
-        if (dbType == "sqlserver")
-        {
-            var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
-OUTPUT INSERTED.Id
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);";
-            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-        }
-        else if (dbType == "postgresql" || dbType == "postgres")
-        {
-            var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt)
-RETURNING Id;";
-            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-        }
-        else if (dbType == "mysql" || dbType == "mariadb")
-        {
-            var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);
-SELECT LAST_INSERT_ID();";
-            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-        }
-        else
-        {
-            var sql = @"
-INSERT INTO AppUser (UserName, PasswordHash, DisplayName, PreferredLanguage, IsAdmin, IsActive, ExternalId, ExternalSource, OwningProject, CreatedAt)
-VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt);
+        // system.db は常に SQLite 形式
+        var sql = @"
+INSERT INTO app_user (user_name, password_hash, display_name, preferred_language, is_admin, is_active, external_id, external_source, owning_project, created_at, updated_at)
+VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @IsActive, @ExternalId, @ExternalSource, @OwningProject, @CreatedAt, @CreatedAt);
 SELECT last_insert_rowid();";
-            return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
-        }
+        return await conn.ExecuteScalarAsync<long>(sql, user, transaction);
     }
 
     private static string GenerateRandomPassword()
@@ -762,8 +745,12 @@ SELECT last_insert_rowid();";
     /// </summary>
     private async Task<DbConnection> GetConnectionAsync()
     {
-        var conn = await _connectionManager.GetConnectionAsync(_scope.Current.Name);
-        return (DbConnection)conn;
+        // DCS003 抑制理由: system.db はグローバル認証 DB であり ProjectScope に依存しないため直接接続する
+#pragma warning disable DCS003
+        var conn = new SqliteConnection(_systemDbConnectionString);
+#pragma warning restore DCS003
+        await conn.OpenAsync();
+        return conn;
     }
 
 }

@@ -188,6 +188,9 @@ builder.Services.AddAuthorization(options =>
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge();
 
+// Dapper: enable snake_case column mapping
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
 // 显式确保 ITenantUserService 已注册（解决 AccountController 的 DI 错误）
 builder.Services.AddScoped<ITenantUserService, TenantUserService>();
 builder.Services.AddScoped<IJpcsUserSyncService, JpcsUserSyncService>();
