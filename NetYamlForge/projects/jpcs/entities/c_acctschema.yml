@@ -1,0 +1,115 @@
+name: C_ACCTSCHEMA
+tableName: c_acctschema
+primaryKey: c_acctschema_id
+fields:
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: gaap
+  type: text
+  label: Gaap
+- name: isaccrual
+  type: text
+  label: Isaccrual
+- name: costingmethod
+  type: text
+  label: Costingmethod
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: autoperiodcontrol
+  type: text
+  label: Autoperiodcontrol
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: period_openhistory
+  type: numeric
+  label: Period Openhistory
+- name: period_openfuture
+  type: numeric
+  label: Period Openfuture
+- name: separator
+  type: text
+  label: Separator
+- name: hasalias
+  type: text
+  label: Hasalias
+- name: hascombination
+  type: text
+  label: Hascombination
+- name: istradediscountposted
+  type: text
+  label: Istradediscountposted
+- name: isdiscountcorrectstax
+  type: text
+  label: Isdiscountcorrectstax
+- name: m_costtype_id
+  type: numeric
+  label: M Costtype Id
+- name: costinglevel
+  type: text
+  label: Costinglevel
+- name: isadjustcogs
+  type: text
+  label: Isadjustcogs
+- name: ad_orgonly_id
+  type: numeric
+  label: Ad Orgonly Id
+- name: ispostservices
+  type: text
+  label: Ispostservices
+- name: isexplicitcostadjustment
+  type: text
+  label: Isexplicitcostadjustment
+- name: commitmenttype
+  type: text
+  label: Commitmenttype
+- name: processing
+  type: text
+  label: Processing
+- name: taxcorrectiontype
+  type: text
+  label: Taxcorrectiontype
+- name: isallownegativeposting
+  type: text
+  label: Isallownegativeposting
+- name: ispostifclearingequal
+  type: text
+  label: Ispostifclearingequal
+- name: c_acctschema_uu
+  type: text
+  label: C Acctschema Uu
+- name: iscorpbalancejp
+  type: text
+  label: Iscorpbalancejp
+- name: backdateday
+  type: numeric
+  label: Backdateday

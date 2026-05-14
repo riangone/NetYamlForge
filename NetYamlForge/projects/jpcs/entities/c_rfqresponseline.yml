@@ -1,0 +1,58 @@
+name: C_RFQRESPONSELINE
+tableName: c_rfqresponseline
+primaryKey: c_rfqresponseline_id
+fields:
+- name: c_rfqresponseline_id
+  type: numeric
+  label: C Rfqresponseline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_rfqline_id
+  type: numeric
+  label: C Rfqline Id
+- name: c_rfqresponse_id
+  type: numeric
+  label: C Rfqresponse Id
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: isselectedwinner
+  type: text
+  label: Isselectedwinner
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: dateworkstart
+  type: text
+  label: Dateworkstart
+- name: deliverydays
+  type: numeric
+  label: Deliverydays
+- name: dateworkcomplete
+  type: text
+  label: Dateworkcomplete
+- name: c_rfqresponseline_uu
+  type: text
+  label: C Rfqresponseline Uu

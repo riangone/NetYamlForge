@@ -1,0 +1,40 @@
+name: AD_ALERTRECIPIENT
+tableName: ad_alertrecipient
+primaryKey: ad_alertrecipient_id
+fields:
+- name: ad_alertrecipient_id
+  type: numeric
+  label: Ad Alertrecipient Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_alert_id
+  type: numeric
+  label: Ad Alert Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_alertrecipient_uu
+  type: text
+  label: Ad Alertrecipient Uu

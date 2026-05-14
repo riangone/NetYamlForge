@@ -1,0 +1,73 @@
+name: C_PAYSELECTIONCHECK
+tableName: c_payselectioncheck
+primaryKey: c_payselectioncheck_id
+fields:
+- name: c_payselectioncheck_id
+  type: numeric
+  label: C Payselectioncheck Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_payselection_id
+  type: numeric
+  label: C Payselection Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: qty
+  type: numeric
+  label: Qty
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: processed
+  type: text
+  label: Processed
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: c_bp_bankaccount_id
+  type: numeric
+  label: C Bp Bankaccount Id
+- name: isgenerateddraft
+  type: text
+  label: Isgenerateddraft
+- name: c_payselectioncheck_uu
+  type: text
+  label: C Payselectioncheck Uu
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt

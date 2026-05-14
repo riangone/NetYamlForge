@@ -1,0 +1,49 @@
+name: M_SHIPPERPACKAGINGCFG
+tableName: m_shipperpackagingcfg
+primaryKey: m_shipperpackagingcfg_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: weight
+  type: numeric
+  label: Weight
+- name: m_shippercfg_id
+  type: numeric
+  label: M Shippercfg Id
+- name: m_shipperpackagingcfg_id
+  type: numeric
+  label: M Shipperpackagingcfg Id
+- name: m_shipperpackagingcfg_uu
+  type: text
+  label: M Shipperpackagingcfg Uu

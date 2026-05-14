@@ -1,0 +1,313 @@
+name: C_PAYMENT
+tableName: c_payment
+primaryKey: c_payment_id
+fields:
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: trxtype
+  type: text
+  label: Trxtype
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_bp_bankaccount_id
+  type: numeric
+  label: C Bp Bankaccount Id
+- name: c_paymentbatch_id
+  type: numeric
+  label: C Paymentbatch Id
+- name: tendertype
+  type: text
+  label: Tendertype
+- name: creditcardtype
+  type: text
+  label: Creditcardtype
+- name: creditcardnumber
+  type: text
+  label: Creditcardnumber
+- name: creditcardvv
+  type: text
+  label: Creditcardvv
+- name: creditcardexpmm
+  type: numeric
+  label: Creditcardexpmm
+- name: creditcardexpyy
+  type: numeric
+  label: Creditcardexpyy
+- name: micr
+  type: text
+  label: Micr
+- name: routingno
+  type: text
+  label: Routingno
+- name: accountno
+  type: text
+  label: Accountno
+- name: checkno
+  type: text
+  label: Checkno
+- name: a_name
+  type: text
+  label: A Name
+- name: a_street
+  type: text
+  label: A Street
+- name: a_city
+  type: text
+  label: A City
+- name: a_state
+  type: text
+  label: A State
+- name: a_zip
+  type: text
+  label: A Zip
+- name: a_ident_dl
+  type: text
+  label: A Ident Dl
+- name: a_ident_ssn
+  type: text
+  label: A Ident Ssn
+- name: a_email
+  type: text
+  label: A Email
+- name: voiceauthcode
+  type: text
+  label: Voiceauthcode
+- name: orig_trxid
+  type: text
+  label: Orig Trxid
+- name: ponum
+  type: text
+  label: Ponum
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: r_pnref
+  type: text
+  label: R Pnref
+- name: r_result
+  type: text
+  label: R Result
+- name: r_respmsg
+  type: text
+  label: R Respmsg
+- name: r_authcode
+  type: text
+  label: R Authcode
+- name: r_avsaddr
+  type: text
+  label: R Avsaddr
+- name: r_avszip
+  type: text
+  label: R Avszip
+- name: r_info
+  type: text
+  label: R Info
+- name: processing
+  type: text
+  label: Processing
+- name: oprocessing
+  type: text
+  label: Oprocessing
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: isreconciled
+  type: text
+  label: Isreconciled
+- name: isallocated
+  type: text
+  label: Isallocated
+- name: isonline
+  type: text
+  label: Isonline
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: isoverunderpayment
+  type: text
+  label: Isoverunderpayment
+- name: overunderamt
+  type: numeric
+  label: Overunderamt
+- name: a_country
+  type: text
+  label: A Country
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: isdelayedcapture
+  type: text
+  label: Isdelayedcapture
+- name: r_authcode_dc
+  type: text
+  label: R Authcode Dc
+- name: r_cvv2match
+  type: text
+  label: R Cvv2Match
+- name: r_pnref_dc
+  type: text
+  label: R Pnref Dc
+- name: swipe
+  type: text
+  label: Swipe
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: description
+  type: text
+  label: Description
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: isprepayment
+  type: text
+  label: Isprepayment
+- name: ref_payment_id
+  type: numeric
+  label: Ref Payment Id
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: c_cashbook_id
+  type: numeric
+  label: C Cashbook Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_payment_uu
+  type: text
+  label: C Payment Uu
+- name: c_postendertype_id
+  type: numeric
+  label: C Postendertype Id
+- name: c_paymentprocessor_id
+  type: numeric
+  label: C Paymentprocessor Id
+- name: customerpaymentprofileid
+  type: text
+  label: Customerpaymentprofileid
+- name: customerprofileid
+  type: text
+  label: Customerprofileid
+- name: customeraddressid
+  type: text
+  label: Customeraddressid
+- name: isvoided
+  type: text
+  label: Isvoided
+- name: r_voidmsg
+  type: text
+  label: R Voidmsg
+- name: c_depositbatch_id
+  type: numeric
+  label: C Depositbatch Id
+- name: jp_bill_id
+  type: numeric
+  label: Jp Bill Id
+- name: iban
+  type: text
+  label: Iban
+- name: swiftcode
+  type: text
+  label: Swiftcode
+- name: currencyrate
+  type: numeric
+  label: Currencyrate
+- name: convertedamt
+  type: numeric
+  label: Convertedamt
+- name: isoverridecurrencyrate
+  type: text
+  label: Isoverridecurrencyrate
+- name: c_banktransfer_id
+  type: numeric
+  label: C Banktransfer Id

@@ -1,0 +1,10 @@
+name: AD_IMAGE_BLOB
+tableName: ad_image_blob
+primaryKey: ad_image_id
+fields:
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: binarydata
+  type: text
+  label: Binarydata

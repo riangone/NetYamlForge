@@ -1,0 +1,55 @@
+name: QM_SPECIFICATIONLINE
+tableName: qm_specificationline
+primaryKey: qm_specificationline_id
+fields:
+- name: qm_specificationline_id
+  type: numeric
+  label: Qm Specificationline Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: m_attribute_id
+  type: numeric
+  label: M Attribute Id
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: andor
+  type: text
+  label: Andor
+- name: value
+  type: text
+  label: Value
+- name: operation
+  type: text
+  label: Operation
+- name: qm_specification_id
+  type: numeric
+  label: Qm Specification Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: qm_specificationline_uu
+  type: text
+  label: Qm Specificationline Uu

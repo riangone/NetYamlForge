@@ -1,0 +1,64 @@
+name: I_CORPORATIONGROUPJP
+tableName: i_corporationgroupjp
+primaryKey: i_corporationgroupjp_id
+fields:
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: jp_corporationgroup_id
+  type: numeric
+  label: Jp Corporationgroup Id
+- name: i_corporationgroupjp_id
+  type: numeric
+  label: I Corporationgroupjp Id
+- name: i_corporationgroupjp_uu
+  type: text
+  label: I Corporationgroupjp Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: description
+  type: text
+  label: Description
+- name: corporationvalue
+  type: text
+  label: Corporationvalue
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id

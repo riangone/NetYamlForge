@@ -1,0 +1,46 @@
+name: C_TAX_TRL
+tableName: c_tax_trl
+primaryKey: c_tax_id
+fields:
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: taxindicator
+  type: text
+  label: Taxindicator
+- name: c_tax_trl_uu
+  type: text
+  label: C Tax Trl Uu

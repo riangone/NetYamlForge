@@ -1,0 +1,40 @@
+name: T_MRP_CRP
+tableName: t_mrp_crp
+primaryKey: t_mrp_crp_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: t_mrp_crp_id
+  type: numeric
+  label: T Mrp Crp Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: t_mrp_crp_uu
+  type: text
+  label: T Mrp Crp Uu

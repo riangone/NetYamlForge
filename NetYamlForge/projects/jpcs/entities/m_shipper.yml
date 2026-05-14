@@ -1,0 +1,46 @@
+name: M_SHIPPER
+tableName: m_shipper
+primaryKey: m_shipper_id
+fields:
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: m_shipper_uu
+  type: text
+  label: M Shipper Uu
+- name: m_shippingprocessor_id
+  type: numeric
+  label: M Shippingprocessor Id
+- name: m_shippercfg_id
+  type: numeric
+  label: M Shippercfg Id
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: name
+  type: text
+  label: Name

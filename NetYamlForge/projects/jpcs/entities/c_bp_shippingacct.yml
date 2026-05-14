@@ -1,0 +1,49 @@
+name: C_BP_SHIPPINGACCT
+tableName: c_bp_shippingacct
+primaryKey: c_bp_shippingacct_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_bp_shippingacct_id
+  type: numeric
+  label: C Bp Shippingacct Id
+- name: c_bp_shippingacct_uu
+  type: text
+  label: C Bp Shippingacct Uu
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dutiesshipperaccount
+  type: text
+  label: Dutiesshipperaccount
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_shippingprocessor_id
+  type: numeric
+  label: M Shippingprocessor Id
+- name: shipperaccount
+  type: text
+  label: Shipperaccount
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: shippermeter
+  type: text
+  label: Shippermeter

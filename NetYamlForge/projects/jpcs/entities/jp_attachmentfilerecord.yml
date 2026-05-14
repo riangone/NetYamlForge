@@ -1,0 +1,169 @@
+name: JP_ATTACHMENTFILERECORD
+tableName: jp_attachmentfilerecord
+primaryKey: jp_attachmentfilerecord_id
+fields:
+- name: jp_attachmentfilerecord_id
+  type: numeric
+  label: Jp Attachmentfilerecord Id
+- name: jp_attachmentfilerecord_uu
+  type: text
+  label: Jp Attachmentfilerecord Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: jp_attachmentfilename
+  type: text
+  label: Jp Attachmentfilename
+- name: jp_attachmentfilepath
+  type: text
+  label: Jp Attachmentfilepath
+- name: jp_attachmentfiledescription
+  type: text
+  label: Jp Attachmentfiledescription
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: description
+  type: text
+  label: Description
+- name: documentno
+  type: text
+  label: Documentno
+- name: poreference
+  type: text
+  label: Poreference
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: line
+  type: numeric
+  label: Line
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: m_inout_id
+  type: numeric
+  label: M Inout Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: jp_estimation_id
+  type: numeric
+  label: Jp Estimation Id
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: jp_mediaformat
+  type: text
+  label: Jp Mediaformat
+- name: jp_mediacontenttype
+  type: text
+  label: Jp Mediacontenttype
+- name: isdeleteable
+  type: text
+  label: Isdeleteable
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_processing2
+  type: text
+  label: Jp Processing2
+- name: ad_storageprovider_id
+  type: numeric
+  label: Ad Storageprovider Id
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: totalamt
+  type: numeric
+  label: Totalamt
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: jpbillamt
+  type: numeric
+  label: Jpbillamt
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: jp_hash_file
+  type: text
+  label: Jp Hash File
+- name: jp_hash_algorithm
+  type: text
+  label: Jp Hash Algorithm
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_remarks
+  type: text
+  label: Jp Remarks

@@ -1,0 +1,166 @@
+name: I_FIXEDASSET
+tableName: i_fixedasset
+primaryKey: i_fixedasset_id
+fields:
+- name: i_fixedasset_id
+  type: numeric
+  label: I Fixedasset Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: inventoryno
+  type: text
+  label: Inventoryno
+- name: name
+  type: text
+  label: Name
+- name: a_asset_group_id
+  type: numeric
+  label: A Asset Group Id
+- name: a_asset_group_value
+  type: text
+  label: A Asset Group Value
+- name: a_asset_class_id
+  type: numeric
+  label: A Asset Class Id
+- name: a_asset_class_value
+  type: text
+  label: A Asset Class Value
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: productvalue
+  type: text
+  label: Productvalue
+- name: assetservicedate
+  type: text
+  label: Assetservicedate
+- name: a_asset_cost
+  type: numeric
+  label: A Asset Cost
+- name: a_accumulated_depr
+  type: numeric
+  label: A Accumulated Depr
+- name: a_accumulated_depr_f
+  type: numeric
+  label: A Accumulated Depr F
+- name: uselifemonths
+  type: numeric
+  label: Uselifemonths
+- name: uselifemonths_f
+  type: numeric
+  label: Uselifemonths F
+- name: a_current_period
+  type: numeric
+  label: A Current Period
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: a_remaining_period
+  type: numeric
+  label: A Remaining Period
+- name: docaction
+  type: text
+  label: Docaction
+- name: assetperioddepreciationamt
+  type: numeric
+  label: Assetperioddepreciationamt
+- name: assetdepreciationdate
+  type: text
+  label: Assetdepreciationdate
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: locatorvalue
+  type: text
+  label: Locatorvalue
+- name: qty
+  type: numeric
+  label: Qty
+- name: uomsymbol
+  type: text
+  label: Uomsymbol
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: description
+  type: text
+  label: Description
+- name: c_city_value
+  type: text
+  label: C City Value
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: bpartner_value
+  type: text
+  label: Bpartner Value
+- name: c_bpartnersr_id
+  type: numeric
+  label: C Bpartnersr Id
+- name: c_city_id
+  type: numeric
+  label: C City Id
+- name: a_asset_type_id
+  type: numeric
+  label: A Asset Type Id
+- name: a_asset_type_value
+  type: text
+  label: A Asset Type Value
+- name: a_salvage_value
+  type: numeric
+  label: A Salvage Value
+- name: i_fixedasset_uu
+  type: text
+  label: I Fixedasset Uu
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: assetamtentered
+  type: numeric
+  label: Assetamtentered
+- name: assetsourceamt
+  type: numeric
+  label: Assetsourceamt
+- name: acctschemaname
+  type: text
+  label: Acctschemaname
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id

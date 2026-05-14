@@ -1,0 +1,49 @@
+name: A_DEPRECIATION
+tableName: a_depreciation
+primaryKey: a_depreciation_id
+fields:
+- name: a_depreciation_id
+  type: numeric
+  label: A Depreciation Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: depreciationtype
+  type: text
+  label: Depreciationtype
+- name: script
+  type: text
+  label: Script
+- name: processed
+  type: text
+  label: Processed
+- name: text
+  type: text
+  label: Text
+- name: a_depreciation_uu
+  type: text
+  label: A Depreciation Uu

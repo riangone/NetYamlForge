@@ -1,0 +1,205 @@
+name: JP_CM_BPARTNER
+tableName: jp_cm_bpartner
+primaryKey: jp_cm_bpartner_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: duns
+  type: text
+  label: Duns
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: description
+  type: text
+  label: Description
+- name: documentcopies
+  type: numeric
+  label: Documentcopies
+- name: dunninggrace
+  type: text
+  label: Dunninggrace
+- name: flatdiscount
+  type: numeric
+  label: Flatdiscount
+- name: groupvalue
+  type: text
+  label: Groupvalue
+- name: invoicerule
+  type: text
+  label: Invoicerule
+- name: is1099vendor
+  type: text
+  label: Is1099Vendor
+- name: isactive
+  type: text
+  label: Isactive
+- name: iscustomer
+  type: text
+  label: Iscustomer
+- name: isdiscountprinted
+  type: text
+  label: Isdiscountprinted
+- name: isemployee
+  type: text
+  label: Isemployee
+- name: ismanufacturer
+  type: text
+  label: Ismanufacturer
+- name: ispotaxexempt
+  type: text
+  label: Ispotaxexempt
+- name: isprospect
+  type: text
+  label: Isprospect
+- name: isqualifiedinvoiceissuerjp
+  type: text
+  label: Isqualifiedinvoiceissuerjp
+- name: issalesrep
+  type: text
+  label: Issalesrep
+- name: issummary
+  type: text
+  label: Issummary
+- name: istaxexempt
+  type: text
+  label: Istaxexempt
+- name: isvendor
+  type: text
+  label: Isvendor
+- name: jp_billschemapo_value
+  type: text
+  label: Jp Billschemapo Value
+- name: jp_billschema_value
+  type: text
+  label: Jp Billschema Value
+- name: jp_cm_bpartner_id
+  type: numeric
+  label: Jp Cm Bpartner Id
+- name: jp_cm_bpartner_uu
+  type: text
+  label: Jp Cm Bpartner Uu
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id
+- name: jp_default1099box_value
+  type: text
+  label: Jp Default1099Box Value
+- name: jp_discountschema_name
+  type: text
+  label: Jp Discountschema Name
+- name: jp_dunning_name
+  type: text
+  label: Jp Dunning Name
+- name: jp_greeting_name
+  type: text
+  label: Jp Greeting Name
+- name: jp_invoiceschedule_name
+  type: text
+  label: Jp Invoiceschedule Name
+- name: jp_invoice_printformat_name
+  type: text
+  label: Jp Invoice Printformat Name
+- name: jp_potaxrounding
+  type: text
+  label: Jp Potaxrounding
+- name: jp_po_discountschema_name
+  type: text
+  label: Jp Po Discountschema Name
+- name: jp_po_paymentterm_value
+  type: text
+  label: Jp Po Paymentterm Value
+- name: jp_po_pricelist_name
+  type: text
+  label: Jp Po Pricelist Name
+- name: jp_paymentterm_value
+  type: text
+  label: Jp Paymentterm Value
+- name: jp_pricelist_name
+  type: text
+  label: Jp Pricelist Name
+- name: jp_registereddateofqii
+  type: text
+  label: Jp Registereddateofqii
+- name: jp_registerednumberofqii
+  type: text
+  label: Jp Registerednumberofqii
+- name: jp_sotaxrounding
+  type: text
+  label: Jp Sotaxrounding
+- name: naics
+  type: text
+  label: Naics
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: numberemployees
+  type: numeric
+  label: Numberemployees
+- name: poreference
+  type: text
+  label: Poreference
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: paymentrulepo
+  type: text
+  label: Paymentrulepo
+- name: rating
+  type: text
+  label: Rating
+- name: referenceno
+  type: text
+  label: Referenceno
+- name: socreditstatus
+  type: text
+  label: Socreditstatus
+- name: so_creditlimit
+  type: numeric
+  label: So Creditlimit
+- name: so_description
+  type: text
+  label: So Description
+- name: shelflifeminpct
+  type: numeric
+  label: Shelflifeminpct
+- name: taxid
+  type: text
+  label: Taxid
+- name: url
+  type: text
+  label: Url
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: jp_bill_printformat_name
+  type: text
+  label: Jp Bill Printformat Name
+- name: isignore_nmmaster_notfoundjp
+  type: text
+  label: Isignore Nmmaster Notfoundjp

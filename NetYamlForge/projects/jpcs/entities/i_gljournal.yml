@@ -1,0 +1,214 @@
+name: I_GLJOURNAL
+tableName: i_gljournal
+primaryKey: i_gljournal_id
+fields:
+- name: i_gljournal_id
+  type: numeric
+  label: I Gljournal Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: clientvalue
+  type: text
+  label: Clientvalue
+- name: ad_orgdoc_id
+  type: numeric
+  label: Ad Orgdoc Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: gl_journalbatch_id
+  type: numeric
+  label: Gl Journalbatch Id
+- name: batchdocumentno
+  type: text
+  label: Batchdocumentno
+- name: batchdescription
+  type: text
+  label: Batchdescription
+- name: gl_journal_id
+  type: numeric
+  label: Gl Journal Id
+- name: journaldocumentno
+  type: text
+  label: Journaldocumentno
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: acctschemaname
+  type: text
+  label: Acctschemaname
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: doctypename
+  type: text
+  label: Doctypename
+- name: gl_category_id
+  type: numeric
+  label: Gl Category Id
+- name: categoryname
+  type: text
+  label: Categoryname
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: gl_budget_id
+  type: numeric
+  label: Gl Budget Id
+- name: gl_journalline_id
+  type: numeric
+  label: Gl Journalline Id
+- name: line
+  type: numeric
+  label: Line
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: description
+  type: text
+  label: Description
+- name: amtsourcedr
+  type: numeric
+  label: Amtsourcedr
+- name: amtacctdr
+  type: numeric
+  label: Amtacctdr
+- name: amtsourcecr
+  type: numeric
+  label: Amtsourcecr
+- name: amtacctcr
+  type: numeric
+  label: Amtacctcr
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: conversiontypevalue
+  type: text
+  label: Conversiontypevalue
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: currencyrate
+  type: numeric
+  label: Currencyrate
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: c_validcombination_id
+  type: numeric
+  label: C Validcombination Id
+- name: orgvalue
+  type: text
+  label: Orgvalue
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: accountvalue
+  type: text
+  label: Accountvalue
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: orgtrxvalue
+  type: text
+  label: Orgtrxvalue
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: productvalue
+  type: text
+  label: Productvalue
+- name: upc
+  type: text
+  label: Upc
+- name: sku
+  type: text
+  label: Sku
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: projectvalue
+  type: text
+  label: Projectvalue
+- name: c_locto_id
+  type: numeric
+  label: C Locto Id
+- name: c_locfrom_id
+  type: numeric
+  label: C Locfrom Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: iscreatenewbatch
+  type: text
+  label: Iscreatenewbatch
+- name: iscreatenewjournal
+  type: text
+  label: Iscreatenewjournal
+- name: i_gljournal_uu
+  type: text
+  label: I Gljournal Uu
+- name: activityvalue
+  type: text
+  label: Activityvalue
+- name: campaignvalue
+  type: text
+  label: Campaignvalue
+- name: salesregionvalue
+  type: text
+  label: Salesregionvalue

@@ -1,0 +1,46 @@
+name: JP_CM_PRODUCTCATEGORY
+tableName: jp_cm_productcategory
+primaryKey: jp_cm_productcategory_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_cm_productcategoryl1_id
+  type: numeric
+  label: Jp Cm Productcategoryl1 Id
+- name: jp_cm_productcategory_id
+  type: numeric
+  label: Jp Cm Productcategory Id
+- name: jp_cm_productcategory_uu
+  type: text
+  label: Jp Cm Productcategory Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value

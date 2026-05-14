@@ -1,0 +1,58 @@
+name: JP_MATRIXSEARCH
+tableName: jp_matrixsearch
+primaryKey: jp_matrixsearch_id
+fields:
+- name: jp_matrixsearch_id
+  type: numeric
+  label: Jp Matrixsearch Id
+- name: jp_matrixsearch_uu
+  type: text
+  label: Jp Matrixsearch Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_matrixwindow_id
+  type: numeric
+  label: Jp Matrixwindow Id
+- name: ad_field_id
+  type: numeric
+  label: Ad Field Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: description
+  type: text
+  label: Description
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: xposition
+  type: numeric
+  label: Xposition
+- name: columnspan
+  type: numeric
+  label: Columnspan
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id

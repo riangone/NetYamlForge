@@ -1,0 +1,46 @@
+name: M_SHIPPERPICKUPTYPESCFG
+tableName: m_shipperpickuptypescfg
+primaryKey: m_shipperpickuptypescfg_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: m_shippercfg_id
+  type: numeric
+  label: M Shippercfg Id
+- name: m_shipperpickuptypescfg_id
+  type: numeric
+  label: M Shipperpickuptypescfg Id
+- name: m_shipperpickuptypescfg_uu
+  type: text
+  label: M Shipperpickuptypescfg Uu

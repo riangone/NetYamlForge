@@ -1,0 +1,91 @@
+name: JP_PP_FACTLINE
+tableName: jp_pp_factline
+primaryKey: jp_pp_factline_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: isendproduct
+  type: text
+  label: Isendproduct
+- name: jp_pp_factline_id
+  type: numeric
+  label: Jp Pp Factline Id
+- name: jp_pp_factline_uu
+  type: text
+  label: Jp Pp Factline Uu
+- name: jp_pp_fact_id
+  type: numeric
+  label: Jp Pp Fact Id
+- name: line
+  type: numeric
+  label: Line
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: movementqty
+  type: numeric
+  label: Movementqty
+- name: plannedqty
+  type: numeric
+  label: Plannedqty
+- name: qtyused
+  type: numeric
+  label: Qtyused
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_pp_planline_id
+  type: numeric
+  label: Jp Pp Planline Id
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: processed
+  type: text
+  label: Processed
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_processing2
+  type: text
+  label: Jp Processing2
+- name: jp_processing3
+  type: text
+  label: Jp Processing3
+- name: iscreated
+  type: text
+  label: Iscreated
+- name: m_productionline_id
+  type: numeric
+  label: M Productionline Id

@@ -1,0 +1,46 @@
+name: M_DEMANDLINE
+tableName: m_demandline
+primaryKey: m_demandline_id
+fields:
+- name: m_demandline_id
+  type: numeric
+  label: M Demandline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_demand_id
+  type: numeric
+  label: M Demand Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: qtycalculated
+  type: numeric
+  label: Qtycalculated
+- name: m_demandline_uu
+  type: text
+  label: M Demandline Uu

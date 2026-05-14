@@ -1,0 +1,49 @@
+name: AD_TAB_CUSTOMIZATION
+tableName: ad_tab_customization
+primaryKey: ad_tab_customization_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_tab_customization_id
+  type: numeric
+  label: Ad Tab Customization Id
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: custom
+  type: text
+  label: Custom
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_tab_customization_uu
+  type: text
+  label: Ad Tab Customization Uu
+- name: isdisplayedgrid
+  type: text
+  label: Isdisplayedgrid
+- name: isquickform
+  type: text
+  label: Isquickform
+- name: isautohideemptycolumn
+  type: text
+  label: Isautohideemptycolumn

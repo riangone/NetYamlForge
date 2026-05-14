@@ -1,0 +1,91 @@
+name: C_VALIDCOMBINATION
+tableName: c_validcombination
+primaryKey: c_validcombination_id
+fields:
+- name: c_validcombination_id
+  type: numeric
+  label: C Validcombination Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: alias
+  type: text
+  label: Alias
+- name: combination
+  type: text
+  label: Combination
+- name: description
+  type: text
+  label: Description
+- name: isfullyqualified
+  type: text
+  label: Isfullyqualified
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_locfrom_id
+  type: numeric
+  label: C Locfrom Id
+- name: c_locto_id
+  type: numeric
+  label: C Locto Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: c_subacct_id
+  type: numeric
+  label: C Subacct Id
+- name: userelement1_id
+  type: numeric
+  label: Userelement1 Id
+- name: userelement2_id
+  type: numeric
+  label: Userelement2 Id
+- name: c_validcombination_uu
+  type: text
+  label: C Validcombination Uu

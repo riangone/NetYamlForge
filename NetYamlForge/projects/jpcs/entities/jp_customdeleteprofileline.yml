@@ -1,0 +1,52 @@
+name: JP_CUSTOMDELETEPROFILELINE
+tableName: jp_customdeleteprofileline
+primaryKey: jp_customdeleteprofileline_id
+fields:
+- name: jp_customdeleteprofileline_id
+  type: numeric
+  label: Jp Customdeleteprofileline Id
+- name: jp_customdeleteprofileline_uu
+  type: text
+  label: Jp Customdeleteprofileline Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_customdeleteprofile_id
+  type: numeric
+  label: Jp Customdeleteprofile Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: description
+  type: text
+  label: Description
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: jp_treatforeignkey
+  type: text
+  label: Jp Treatforeignkey
+- name: jp_foreignkey_value
+  type: numeric
+  label: Jp Foreignkey Value

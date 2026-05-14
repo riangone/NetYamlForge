@@ -1,0 +1,184 @@
+name: AD_FIELD
+tableName: ad_field
+primaryKey: ad_field_id
+fields:
+- name: ad_field_id
+  type: numeric
+  label: Ad Field Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: iscentrallymaintained
+  type: text
+  label: Iscentrallymaintained
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_fieldgroup_id
+  type: numeric
+  label: Ad Fieldgroup Id
+- name: isdisplayed
+  type: text
+  label: Isdisplayed
+- name: displaylogic
+  type: text
+  label: Displaylogic
+- name: displaylength
+  type: numeric
+  label: Displaylength
+- name: isreadonly
+  type: text
+  label: Isreadonly
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: sortno
+  type: numeric
+  label: Sortno
+- name: issameline
+  type: text
+  label: Issameline
+- name: isheading
+  type: text
+  label: Isheading
+- name: isfieldonly
+  type: text
+  label: Isfieldonly
+- name: isencrypted
+  type: text
+  label: Isencrypted
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: obscuretype
+  type: text
+  label: Obscuretype
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: included_tab_id
+  type: numeric
+  label: Included Tab Id
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id
+- name: ad_val_rule_id
+  type: numeric
+  label: Ad Val Rule Id
+- name: infofactoryclass
+  type: text
+  label: Infofactoryclass
+- name: ad_field_uu
+  type: text
+  label: Ad Field Uu
+- name: isallowcopy
+  type: text
+  label: Isallowcopy
+- name: seqnogrid
+  type: numeric
+  label: Seqnogrid
+- name: isdisplayedgrid
+  type: text
+  label: Isdisplayedgrid
+- name: xposition
+  type: numeric
+  label: Xposition
+- name: numlines
+  type: numeric
+  label: Numlines
+- name: columnspan
+  type: numeric
+  label: Columnspan
+- name: isquickentry
+  type: text
+  label: Isquickentry
+- name: isupdateable
+  type: text
+  label: Isupdateable
+- name: isalwaysupdateable
+  type: text
+  label: Isalwaysupdateable
+- name: mandatorylogic
+  type: text
+  label: Mandatorylogic
+- name: readonlylogic
+  type: text
+  label: Readonlylogic
+- name: istoolbarbutton
+  type: text
+  label: Istoolbarbutton
+- name: isadvancedfield
+  type: text
+  label: Isadvancedfield
+- name: isdefaultfocus
+  type: text
+  label: Isdefaultfocus
+- name: vformat
+  type: text
+  label: Vformat
+- name: ad_labelstyle_id
+  type: numeric
+  label: Ad Labelstyle Id
+- name: ad_fieldstyle_id
+  type: numeric
+  label: Ad Fieldstyle Id
+- name: placeholder
+  type: text
+  label: Placeholder
+- name: isquickform
+  type: text
+  label: Isquickform
+- name: isselectioncolumn
+  type: text
+  label: Isselectioncolumn
+- name: ad_val_rule_lookup_id
+  type: numeric
+  label: Ad Val Rule Lookup Id
+- name: columnsql
+  type: text
+  label: Columnsql
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: alwaysupdatablelogic
+  type: text
+  label: Alwaysupdatablelogic
+- name: ishtml
+  type: text
+  label: Ishtml

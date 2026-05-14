@@ -1,0 +1,88 @@
+name: C_BP_EDI
+tableName: c_bp_edi
+primaryKey: c_bp_edi_id
+fields:
+- name: c_bp_edi_id
+  type: numeric
+  label: C Bp Edi Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: editype
+  type: text
+  label: Editype
+- name: isaudited
+  type: text
+  label: Isaudited
+- name: customerno
+  type: text
+  label: Customerno
+- name: ad_sequence_id
+  type: numeric
+  label: Ad Sequence Id
+- name: email_to
+  type: text
+  label: Email To
+- name: email_from
+  type: text
+  label: Email From
+- name: email_from_uid
+  type: text
+  label: Email From Uid
+- name: email_from_pwd
+  type: text
+  label: Email From Pwd
+- name: email_error_to
+  type: text
+  label: Email Error To
+- name: isinfosent
+  type: text
+  label: Isinfosent
+- name: email_info_to
+  type: text
+  label: Email Info To
+- name: sendinquiry
+  type: text
+  label: Sendinquiry
+- name: receiveinquiryreply
+  type: text
+  label: Receiveinquiryreply
+- name: sendorder
+  type: text
+  label: Sendorder
+- name: receiveorderreply
+  type: text
+  label: Receiveorderreply
+- name: c_bp_edi_uu
+  type: text
+  label: C Bp Edi Uu

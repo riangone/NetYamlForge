@@ -1,0 +1,40 @@
+name: ASP_PROCESS
+tableName: asp_process
+primaryKey: asp_process_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: asp_level_id
+  type: numeric
+  label: Asp Level Id
+- name: asp_status
+  type: text
+  label: Asp Status
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: asp_process_id
+  type: numeric
+  label: Asp Process Id
+- name: asp_process_uu
+  type: text
+  label: Asp Process Uu

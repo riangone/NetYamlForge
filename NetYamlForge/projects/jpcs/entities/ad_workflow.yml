@@ -1,0 +1,148 @@
+name: AD_WORKFLOW
+tableName: ad_workflow
+primaryKey: ad_workflow_id
+fields:
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: accesslevel
+  type: text
+  label: Accesslevel
+- name: ad_wf_node_id
+  type: numeric
+  label: Ad Wf Node Id
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: durationunit
+  type: text
+  label: Durationunit
+- name: author
+  type: text
+  label: Author
+- name: version
+  type: numeric
+  label: Version
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: priority
+  type: numeric
+  label: Priority
+- name: limit
+  type: numeric
+  label: Limit
+- name: duration
+  type: numeric
+  label: Duration
+- name: cost
+  type: numeric
+  label: Cost
+- name: workingtime
+  type: numeric
+  label: Workingtime
+- name: waitingtime
+  type: numeric
+  label: Waitingtime
+- name: ad_wf_responsible_id
+  type: numeric
+  label: Ad Wf Responsible Id
+- name: publishstatus
+  type: text
+  label: Publishstatus
+- name: ad_workflowprocessor_id
+  type: numeric
+  label: Ad Workflowprocessor Id
+- name: value
+  type: text
+  label: Value
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: validateworkflow
+  type: text
+  label: Validateworkflow
+- name: workflowtype
+  type: text
+  label: Workflowtype
+- name: docvaluelogic
+  type: text
+  label: Docvaluelogic
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: s_resource_id
+  type: numeric
+  label: S Resource Id
+- name: setuptime
+  type: numeric
+  label: Setuptime
+- name: movingtime
+  type: numeric
+  label: Movingtime
+- name: processtype
+  type: text
+  label: Processtype
+- name: documentno
+  type: text
+  label: Documentno
+- name: qtybatchsize
+  type: numeric
+  label: Qtybatchsize
+- name: queuingtime
+  type: numeric
+  label: Queuingtime
+- name: isbetafunctionality
+  type: text
+  label: Isbetafunctionality
+- name: yield
+  type: numeric
+  label: Yield
+- name: unitscycles
+  type: numeric
+  label: Unitscycles
+- name: overlapunits
+  type: numeric
+  label: Overlapunits
+- name: ad_workflow_uu
+  type: text
+  label: Ad Workflow Uu
+- name: ad_ctxhelp_id
+  type: numeric
+  label: Ad Ctxhelp Id

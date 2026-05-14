@@ -1,0 +1,139 @@
+name: A_DEPRECIATION_WORKFILE
+tableName: a_depreciation_workfile
+primaryKey: a_depreciation_workfile_id
+fields:
+- name: a_depreciation_workfile_id
+  type: numeric
+  label: A Depreciation Workfile Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_accumulated_depr
+  type: numeric
+  label: A Accumulated Depr
+- name: a_asset_cost
+  type: numeric
+  label: A Asset Cost
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_asset_life_current_year
+  type: numeric
+  label: A Asset Life Current Year
+- name: a_period_forecast
+  type: numeric
+  label: A Period Forecast
+- name: a_prior_year_accumulated_depr
+  type: numeric
+  label: A Prior Year Accumulated Depr
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isdepreciated
+  type: text
+  label: Isdepreciated
+- name: isactive
+  type: text
+  label: Isactive
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: created
+  type: text
+  label: Created
+- name: assetdepreciationdate
+  type: text
+  label: Assetdepreciationdate
+- name: a_salvage_value
+  type: numeric
+  label: A Salvage Value
+- name: a_qty_current
+  type: numeric
+  label: A Qty Current
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: processing
+  type: text
+  label: Processing
+- name: a_period_posted
+  type: numeric
+  label: A Period Posted
+- name: a_life_period
+  type: numeric
+  label: A Life Period
+- name: a_asset_life_years
+  type: numeric
+  label: A Asset Life Years
+- name: a_base_amount
+  type: numeric
+  label: A Base Amount
+- name: a_calc_accumulated_depr
+  type: numeric
+  label: A Calc Accumulated Depr
+- name: a_curr_dep_exp
+  type: numeric
+  label: A Curr Dep Exp
+- name: a_current_period
+  type: numeric
+  label: A Current Period
+- name: a_depreciation_workfile_uu
+  type: text
+  label: A Depreciation Workfile Uu
+- name: a_accumulated_depr_f
+  type: numeric
+  label: A Accumulated Depr F
+- name: a_asset_life_years_f
+  type: numeric
+  label: A Asset Life Years F
+- name: a_life_period_f
+  type: numeric
+  label: A Life Period F
+- name: uselifeyears
+  type: numeric
+  label: Uselifeyears
+- name: uselifemonths
+  type: numeric
+  label: Uselifemonths
+- name: uselifeyears_f
+  type: numeric
+  label: Uselifeyears F
+- name: uselifemonths_f
+  type: numeric
+  label: Uselifemonths F
+- name: a_asset_remaining
+  type: numeric
+  label: A Asset Remaining
+- name: a_asset_remaining_f
+  type: numeric
+  label: A Asset Remaining F
+- name: a_tip_finantare
+  type: text
+  label: A Tip Finantare
+- name: a_valoare_cofinantare
+  type: numeric
+  label: A Valoare Cofinantare
+- name: a_valoare_tert
+  type: numeric
+  label: A Valoare Tert
+- name: description
+  type: text
+  label: Description
+- name: a_fundingmode_id
+  type: numeric
+  label: A Fundingmode Id
+- name: processed
+  type: text
+  label: Processed
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id

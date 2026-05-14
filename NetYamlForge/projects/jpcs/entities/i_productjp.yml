@@ -1,0 +1,331 @@
+name: I_PRODUCTJP
+tableName: i_productjp
+primaryKey: i_productjp_id
+fields:
+- name: i_productjp_id
+  type: numeric
+  label: I Productjp Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: help
+  type: text
+  label: Help
+- name: upc
+  type: text
+  label: Upc
+- name: sku
+  type: text
+  label: Sku
+- name: x12de355
+  type: text
+  label: X12De355
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: productcategory_value
+  type: text
+  label: Productcategory Value
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: producttype
+  type: text
+  label: Producttype
+- name: classification
+  type: text
+  label: Classification
+- name: volume
+  type: numeric
+  label: Volume
+- name: weight
+  type: numeric
+  label: Weight
+- name: shelfwidth
+  type: numeric
+  label: Shelfwidth
+- name: shelfheight
+  type: numeric
+  label: Shelfheight
+- name: shelfdepth
+  type: numeric
+  label: Shelfdepth
+- name: unitsperpallet
+  type: numeric
+  label: Unitsperpallet
+- name: discontinued
+  type: text
+  label: Discontinued
+- name: discontinuedby
+  type: text
+  label: Discontinuedby
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: descriptionurl
+  type: text
+  label: Descriptionurl
+- name: bpartner_value
+  type: text
+  label: Bpartner Value
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricepo
+  type: numeric
+  label: Pricepo
+- name: royaltyamt
+  type: numeric
+  label: Royaltyamt
+- name: priceeffective
+  type: text
+  label: Priceeffective
+- name: vendorproductno
+  type: text
+  label: Vendorproductno
+- name: vendorcategory
+  type: text
+  label: Vendorcategory
+- name: manufacturer
+  type: text
+  label: Manufacturer
+- name: order_min
+  type: numeric
+  label: Order Min
+- name: order_pack
+  type: numeric
+  label: Order Pack
+- name: costperorder
+  type: numeric
+  label: Costperorder
+- name: deliverytime_promised
+  type: numeric
+  label: Deliverytime Promised
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: pricestd
+  type: numeric
+  label: Pricestd
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: discontinuedat
+  type: text
+  label: Discontinuedat
+- name: i_productjp_uu
+  type: text
+  label: I Productjp Uu
+- name: jp_org_value
+  type: text
+  label: Jp Org Value
+- name: i_isactivejp
+  type: text
+  label: I Isactivejp
+- name: issummary
+  type: text
+  label: Issummary
+- name: c_taxcategory_id
+  type: numeric
+  label: C Taxcategory Id
+- name: jp_taxcategory_name
+  type: text
+  label: Jp Taxcategory Name
+- name: ismanufactured
+  type: text
+  label: Ismanufactured
+- name: isphantom
+  type: text
+  label: Isphantom
+- name: iskanban
+  type: text
+  label: Iskanban
+- name: m_parttype_id
+  type: numeric
+  label: M Parttype Id
+- name: jp_parttype_name
+  type: text
+  label: Jp Parttype Name
+- name: isownbox
+  type: text
+  label: Isownbox
+- name: m_freightcategory_id
+  type: numeric
+  label: M Freightcategory Id
+- name: jp_freightcategory_value
+  type: text
+  label: Jp Freightcategory Value
+- name: isdropship
+  type: text
+  label: Isdropship
+- name: isstocked
+  type: text
+  label: Isstocked
+- name: isbom
+  type: text
+  label: Isbom
+- name: ispurchased
+  type: text
+  label: Ispurchased
+- name: issold
+  type: text
+  label: Issold
+- name: isexcludeautodelivery
+  type: text
+  label: Isexcludeautodelivery
+- name: guaranteedays
+  type: numeric
+  label: Guaranteedays
+- name: guaranteedaysmin
+  type: numeric
+  label: Guaranteedaysmin
+- name: m_attributeset_id
+  type: numeric
+  label: M Attributeset Id
+- name: jp_attributeset_name
+  type: text
+  label: Jp Attributeset Name
+- name: iswebstorefeatured
+  type: text
+  label: Iswebstorefeatured
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: group1
+  type: text
+  label: Group1
+- name: group2
+  type: text
+  label: Group2
+- name: isverified
+  type: text
+  label: Isverified
+- name: isinvoiceprintdetails
+  type: text
+  label: Isinvoiceprintdetails
+- name: ispicklistprintdetails
+  type: text
+  label: Ispicklistprintdetails
+- name: s_expensetype_id
+  type: numeric
+  label: S Expensetype Id
+- name: jp_expensetype_value
+  type: text
+  label: Jp Expensetype Value
+- name: s_resource_id
+  type: numeric
+  label: S Resource Id
+- name: jp_resource_value
+  type: text
+  label: Jp Resource Value
+- name: qualityrating
+  type: numeric
+  label: Qualityrating
+- name: iscurrentvendor
+  type: text
+  label: Iscurrentvendor
+- name: r_mailtext_id
+  type: numeric
+  label: R Mailtext Id
+- name: jp_mailtext_name
+  type: text
+  label: Jp Mailtext Name
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: jp_locator_value
+  type: text
+  label: Jp Locator Value
+- name: jp_vendorupc
+  type: text
+  label: Jp Vendorupc
+- name: jp_vendoruom_id
+  type: numeric
+  label: Jp Vendoruom Id
+- name: jp_vendorx12de355
+  type: text
+  label: Jp Vendorx12De355
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: jp_user_value
+  type: text
+  label: Jp User Value
+- name: jp_user_name
+  type: text
+  label: Jp User Name
+- name: jp_user_email
+  type: text
+  label: Jp User Email
+- name: jp_cm_productcategory_id
+  type: numeric
+  label: Jp Cm Productcategory Id
+- name: jp_cm_productcategory_value
+  type: text
+  label: Jp Cm Productcategory Value
+- name: jp_resourcetype_value
+  type: text
+  label: Jp Resourcetype Value
+- name: jp_warehouse_value
+  type: text
+  label: Jp Warehouse Value
+- name: s_resourcetype_id
+  type: numeric
+  label: S Resourcetype Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: jp_cm_product_id
+  type: numeric
+  label: Jp Cm Product Id

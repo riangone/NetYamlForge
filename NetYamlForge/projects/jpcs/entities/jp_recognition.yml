@@ -1,0 +1,196 @@
+name: JP_RECOGNITION
+tableName: jp_recognition
+primaryKey: jp_recognition_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_doctypetarget_id
+  type: numeric
+  label: C Doctypetarget Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: dateprinted
+  type: text
+  label: Dateprinted
+- name: description
+  type: text
+  label: Description
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: documentno
+  type: text
+  label: Documentno
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: isactive
+  type: text
+  label: Isactive
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: isdiscountprinted
+  type: text
+  label: Isdiscountprinted
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: istaxincluded
+  type: text
+  label: Istaxincluded
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_recognition_id
+  type: numeric
+  label: Jp Recognition Id
+- name: jp_recognition_uu
+  type: text
+  label: Jp Recognition Uu
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: m_rma_id
+  type: numeric
+  label: M Rma Id
+- name: poreference
+  type: text
+  label: Poreference
+- name: posted
+  type: text
+  label: Posted
+- name: processed
+  type: text
+  label: Processed
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: processing
+  type: text
+  label: Processing
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: sendemail
+  type: text
+  label: Sendemail
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: m_inout_id
+  type: numeric
+  label: M Inout Id
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: bill_bpartner_id
+  type: numeric
+  label: Bill Bpartner Id
+- name: bill_location_id
+  type: numeric
+  label: Bill Location Id
+- name: bill_user_id
+  type: numeric
+  label: Bill User Id
+- name: jp_recognition_splitfrom_id
+  type: numeric
+  label: Jp Recognition Splitfrom Id
+- name: jp_recognition_splitto_id
+  type: numeric
+  label: Jp Recognition Splitto Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn

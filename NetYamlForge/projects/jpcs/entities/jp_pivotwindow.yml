@@ -1,0 +1,79 @@
+name: JP_PIVOTWINDOW
+tableName: jp_pivotwindow
+primaryKey: jp_pivotwindow_id
+fields:
+- name: jp_pivotwindow_id
+  type: numeric
+  label: Jp Pivotwindow Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: jp_pivotwindow_uu
+  type: text
+  label: Jp Pivotwindow Uu
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: fromclause
+  type: text
+  label: Fromclause
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: maxqueryrecords
+  type: numeric
+  label: Maxqueryrecords
+- name: confirmqueryrecords
+  type: numeric
+  label: Confirmqueryrecords
+- name: formatpattern
+  type: text
+  label: Formatpattern
+- name: orderbyclause
+  type: text
+  label: Orderbyclause
+- name: isshowindashboard
+  type: text
+  label: Isshowindashboard
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: iscollapsedbydefault
+  type: text
+  label: Iscollapsedbydefault

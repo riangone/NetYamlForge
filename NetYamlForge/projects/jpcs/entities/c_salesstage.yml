@@ -1,0 +1,49 @@
+name: C_SALESSTAGE
+tableName: c_salesstage
+primaryKey: c_salesstage_id
+fields:
+- name: c_salesstage_id
+  type: numeric
+  label: C Salesstage Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: probability
+  type: numeric
+  label: Probability
+- name: value
+  type: text
+  label: Value
+- name: isclosed
+  type: text
+  label: Isclosed
+- name: iswon
+  type: text
+  label: Iswon
+- name: c_salesstage_uu
+  type: text
+  label: C Salesstage Uu

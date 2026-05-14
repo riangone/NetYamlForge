@@ -1,0 +1,151 @@
+name: C_BANKSTATEMENTLINE
+tableName: c_bankstatementline
+primaryKey: c_bankstatementline_id
+fields:
+- name: c_bankstatementline_id
+  type: numeric
+  label: C Bankstatementline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_bankstatement_id
+  type: numeric
+  label: C Bankstatement Id
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: isreversal
+  type: text
+  label: Isreversal
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: valutadate
+  type: text
+  label: Valutadate
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: memo
+  type: text
+  label: Memo
+- name: referenceno
+  type: text
+  label: Referenceno
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: efttrxid
+  type: text
+  label: Efttrxid
+- name: efttrxtype
+  type: text
+  label: Efttrxtype
+- name: eftmemo
+  type: text
+  label: Eftmemo
+- name: eftpayee
+  type: text
+  label: Eftpayee
+- name: eftpayeeaccount
+  type: text
+  label: Eftpayeeaccount
+- name: createpayment
+  type: text
+  label: Createpayment
+- name: statementlinedate
+  type: text
+  label: Statementlinedate
+- name: eftstatementlinedate
+  type: text
+  label: Eftstatementlinedate
+- name: eftvalutadate
+  type: text
+  label: Eftvalutadate
+- name: eftreference
+  type: text
+  label: Eftreference
+- name: eftcurrency
+  type: text
+  label: Eftcurrency
+- name: eftamt
+  type: numeric
+  label: Eftamt
+- name: eftcheckno
+  type: text
+  label: Eftcheckno
+- name: matchstatement
+  type: text
+  label: Matchstatement
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: processed
+  type: text
+  label: Processed
+- name: c_bankstatementline_uu
+  type: text
+  label: C Bankstatementline Uu
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: jp_sopotype
+  type: text
+  label: Jp Sopotype
+- name: jp_priceactual
+  type: numeric
+  label: Jp Priceactual
+- name: jp_product_id
+  type: numeric
+  label: Jp Product Id
+- name: jp_qty
+  type: numeric
+  label: Jp Qty
+- name: jp_uom_id
+  type: numeric
+  label: Jp Uom Id
+- name: c_depositbatch_id
+  type: numeric
+  label: C Depositbatch Id

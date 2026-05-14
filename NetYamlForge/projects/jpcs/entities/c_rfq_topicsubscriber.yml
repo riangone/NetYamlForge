@@ -1,0 +1,49 @@
+name: C_RFQ_TOPICSUBSCRIBER
+tableName: c_rfq_topicsubscriber
+primaryKey: c_rfq_topicsubscriber_id
+fields:
+- name: c_rfq_topicsubscriber_id
+  type: numeric
+  label: C Rfq Topicsubscriber Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_rfq_topic_id
+  type: numeric
+  label: C Rfq Topic Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: subscribedate
+  type: text
+  label: Subscribedate
+- name: optoutdate
+  type: text
+  label: Optoutdate
+- name: c_rfq_topicsubscriber_uu
+  type: text
+  label: C Rfq Topicsubscriber Uu

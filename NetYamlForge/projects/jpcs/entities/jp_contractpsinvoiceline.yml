@@ -1,0 +1,133 @@
+name: JP_CONTRACTPSINVOICELINE
+tableName: jp_contractpsinvoiceline
+primaryKey: jp_contractpsinvoiceline_id
+fields:
+- name: jp_contractpsinvoiceline_id
+  type: numeric
+  label: Jp Contractpsinvoiceline Id
+- name: jp_contractpsinvoiceline_uu
+  type: text
+  label: Jp Contractpsinvoiceline Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_contractpsline_id
+  type: numeric
+  label: Jp Contractpsline Id
+- name: jp_contractline_id
+  type: numeric
+  label: Jp Contractline Id
+- name: jp_contractcalender_inv_id
+  type: numeric
+  label: Jp Contractcalender Inv Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_contractprocess_inv_id
+  type: numeric
+  label: Jp Contractprocess Inv Id
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: qtyentered
+  type: numeric
+  label: Qtyentered
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: priceentered
+  type: numeric
+  label: Priceentered
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: isdescription
+  type: text
+  label: Isdescription
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: processed
+  type: text
+  label: Processed
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: isfactcreatedjp
+  type: text
+  label: Isfactcreatedjp
+- name: s_resourceassignment_id
+  type: numeric
+  label: S Resourceassignment Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: jp_contractprocschedule_id
+  type: numeric
+  label: Jp Contractprocschedule Id
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn

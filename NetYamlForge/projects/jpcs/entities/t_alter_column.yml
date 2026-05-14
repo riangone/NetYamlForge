@@ -1,0 +1,19 @@
+name: T_ALTER_COLUMN
+tableName: t_alter_column
+primaryKey: tablename
+fields:
+- name: tablename
+  type: text
+  label: Tablename
+- name: columnname
+  type: text
+  label: Columnname
+- name: datatype
+  type: text
+  label: Datatype
+- name: nullclause
+  type: text
+  label: Nullclause
+- name: defaultclause
+  type: text
+  label: Defaultclause

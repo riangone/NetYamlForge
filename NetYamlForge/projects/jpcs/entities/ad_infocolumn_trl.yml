@@ -1,0 +1,52 @@
+name: AD_INFOCOLUMN_TRL
+tableName: ad_infocolumn_trl
+primaryKey: ad_infocolumn_id
+fields:
+- name: ad_infocolumn_id
+  type: numeric
+  label: Ad Infocolumn Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_infocolumn_trl_uu
+  type: text
+  label: Ad Infocolumn Trl Uu
+- name: placeholder
+  type: text
+  label: Placeholder
+- name: placeholder2
+  type: text
+  label: Placeholder2

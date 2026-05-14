@@ -1,0 +1,49 @@
+name: C_CASHBOOK_ACCT
+tableName: c_cashbook_acct
+primaryKey: c_cashbook_id
+fields:
+- name: c_cashbook_id
+  type: numeric
+  label: C Cashbook Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: cb_asset_acct
+  type: numeric
+  label: Cb Asset Acct
+- name: cb_cashtransfer_acct
+  type: numeric
+  label: Cb Cashtransfer Acct
+- name: cb_differences_acct
+  type: numeric
+  label: Cb Differences Acct
+- name: cb_expense_acct
+  type: numeric
+  label: Cb Expense Acct
+- name: cb_receipt_acct
+  type: numeric
+  label: Cb Receipt Acct
+- name: c_cashbook_acct_uu
+  type: text
+  label: C Cashbook Acct Uu

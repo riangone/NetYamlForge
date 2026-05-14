@@ -1,0 +1,88 @@
+name: C_BANKSTATEMENTLOADER
+tableName: c_bankstatementloader
+primaryKey: c_bankstatementloader_id
+fields:
+- name: c_bankstatementloader_id
+  type: numeric
+  label: C Bankstatementloader Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: stmtloaderclass
+  type: text
+  label: Stmtloaderclass
+- name: financialinstitutionid
+  type: text
+  label: Financialinstitutionid
+- name: branchid
+  type: text
+  label: Branchid
+- name: userid
+  type: text
+  label: Userid
+- name: password
+  type: text
+  label: Password
+- name: pin
+  type: text
+  label: Pin
+- name: accountno
+  type: text
+  label: Accountno
+- name: hostaddress
+  type: text
+  label: Hostaddress
+- name: hostport
+  type: numeric
+  label: Hostport
+- name: proxyaddress
+  type: text
+  label: Proxyaddress
+- name: proxyport
+  type: numeric
+  label: Proxyport
+- name: proxylogon
+  type: text
+  label: Proxylogon
+- name: proxypassword
+  type: text
+  label: Proxypassword
+- name: filename
+  type: text
+  label: Filename
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: dateformat
+  type: text
+  label: Dateformat
+- name: c_bankstatementloader_uu
+  type: text
+  label: C Bankstatementloader Uu

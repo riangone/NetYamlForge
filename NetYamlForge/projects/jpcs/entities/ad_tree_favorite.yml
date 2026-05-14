@@ -1,0 +1,34 @@
+name: AD_TREE_FAVORITE
+tableName: ad_tree_favorite
+primaryKey: ad_tree_favorite_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_tree_favorite_id
+  type: numeric
+  label: Ad Tree Favorite Id
+- name: ad_tree_favorite_uu
+  type: text
+  label: Ad Tree Favorite Uu
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

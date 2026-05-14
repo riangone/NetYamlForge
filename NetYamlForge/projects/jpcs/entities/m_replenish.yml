@@ -1,0 +1,52 @@
+name: M_REPLENISH
+tableName: m_replenish
+primaryKey: m_product_id
+fields:
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: replenishtype
+  type: text
+  label: Replenishtype
+- name: level_min
+  type: numeric
+  label: Level Min
+- name: level_max
+  type: numeric
+  label: Level Max
+- name: m_warehousesource_id
+  type: numeric
+  label: M Warehousesource Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: m_replenish_uu
+  type: text
+  label: M Replenish Uu
+- name: qtybatchsize
+  type: numeric
+  label: Qtybatchsize

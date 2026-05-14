@@ -1,0 +1,79 @@
+name: AD_BROADCASTMESSAGE
+tableName: ad_broadcastmessage
+primaryKey: ad_broadcastmessage_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: broadcastfrequency
+  type: text
+  label: Broadcastfrequency
+- name: broadcastmessage
+  type: text
+  label: Broadcastmessage
+- name: broadcasttype
+  type: text
+  label: Broadcasttype
+- name: expiration
+  type: text
+  label: Expiration
+- name: logacknowledge
+  type: text
+  label: Logacknowledge
+- name: target
+  type: text
+  label: Target
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: testmessage
+  type: text
+  label: Testmessage
+- name: publish
+  type: text
+  label: Publish
+- name: expirenow
+  type: text
+  label: Expirenow
+- name: ad_broadcastmessage_id
+  type: numeric
+  label: Ad Broadcastmessage Id
+- name: ispublished
+  type: text
+  label: Ispublished
+- name: processed
+  type: text
+  label: Processed
+- name: expired
+  type: text
+  label: Expired
+- name: ad_broadcastmessage_uu
+  type: text
+  label: Ad Broadcastmessage Uu
+- name: notification_client_id
+  type: numeric
+  label: Notification Client Id
+- name: title
+  type: text
+  label: Title

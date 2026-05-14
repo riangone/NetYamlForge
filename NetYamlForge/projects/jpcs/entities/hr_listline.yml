@@ -1,0 +1,67 @@
+name: HR_LISTLINE
+tableName: hr_listline
+primaryKey: hr_listline_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: col_1
+  type: numeric
+  label: Col 1
+- name: col_2
+  type: numeric
+  label: Col 2
+- name: col_3
+  type: numeric
+  label: Col 3
+- name: col_4
+  type: numeric
+  label: Col 4
+- name: col_5
+  type: numeric
+  label: Col 5
+- name: col_6
+  type: numeric
+  label: Col 6
+- name: col_7
+  type: numeric
+  label: Col 7
+- name: col_8
+  type: numeric
+  label: Col 8
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: hr_listline_id
+  type: numeric
+  label: Hr Listline Id
+- name: hr_listversion_id
+  type: numeric
+  label: Hr Listversion Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: maxvalue
+  type: numeric
+  label: Maxvalue
+- name: minvalue
+  type: numeric
+  label: Minvalue
+- name: updated
+  type: text
+  label: Updated
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: hr_listline_uu
+  type: text
+  label: Hr Listline Uu

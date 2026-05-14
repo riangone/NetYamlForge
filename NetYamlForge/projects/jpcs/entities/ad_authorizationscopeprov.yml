@@ -1,0 +1,40 @@
+name: AD_AUTHORIZATIONSCOPEPROV
+tableName: ad_authorizationscopeprov
+primaryKey: ad_authorizationscopeprov_id
+fields:
+- name: ad_authorizationscopeprov_id
+  type: numeric
+  label: Ad Authorizationscopeprov Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_authorizationscopeprov_uu
+  type: text
+  label: Ad Authorizationscopeprov Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_authorizationprovider_id
+  type: numeric
+  label: Ad Authorizationprovider Id
+- name: ad_authorizationscope
+  type: text
+  label: Ad Authorizationscope
+- name: scopeurl
+  type: text
+  label: Scopeurl

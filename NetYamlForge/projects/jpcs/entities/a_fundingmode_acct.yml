@@ -1,0 +1,37 @@
+name: A_FUNDINGMODE_ACCT
+tableName: a_fundingmode_acct
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: a_fundingmode_id
+  type: numeric
+  label: A Fundingmode Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: a_fundingmode_acct
+  type: numeric
+  label: A Fundingmode Acct
+- name: a_fundingmode_acct_uu
+  type: text
+  label: A Fundingmode Acct Uu

@@ -1,0 +1,79 @@
+name: PP_PRODUCT_BOM
+tableName: pp_product_bom
+primaryKey: pp_product_bom_id
+fields:
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: documentno
+  type: text
+  label: Documentno
+- name: revision
+  type: text
+  label: Revision
+- name: description
+  type: text
+  label: Description
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: m_changenotice_id
+  type: numeric
+  label: M Changenotice Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: pp_product_bom_id
+  type: numeric
+  label: Pp Product Bom Id
+- name: processing
+  type: text
+  label: Processing
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: bomtype
+  type: text
+  label: Bomtype
+- name: bomuse
+  type: text
+  label: Bomuse
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: pp_product_bom_uu
+  type: text
+  label: Pp Product Bom Uu

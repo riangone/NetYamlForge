@@ -1,0 +1,55 @@
+name: WS_WEBSERVICETYPE
+tableName: ws_webservicetype
+primaryKey: ws_webservicetype_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: ws_webservice_id
+  type: numeric
+  label: Ws Webservice Id
+- name: ws_webservicemethod_id
+  type: numeric
+  label: Ws Webservicemethod Id
+- name: ws_webservicetype_id
+  type: numeric
+  label: Ws Webservicetype Id
+- name: ws_webservicetype_uu
+  type: text
+  label: Ws Webservicetype Uu
+- name: insertparameters
+  type: text
+  label: Insertparameters

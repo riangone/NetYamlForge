@@ -1,0 +1,73 @@
+name: HR_PERIOD
+tableName: hr_period
+primaryKey: hr_period_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: c_year_id
+  type: numeric
+  label: C Year Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: description
+  type: text
+  label: Description
+- name: enddate
+  type: text
+  label: Enddate
+- name: hr_payroll_id
+  type: numeric
+  label: Hr Payroll Id
+- name: hr_period_id
+  type: numeric
+  label: Hr Period Id
+- name: hr_year_id
+  type: numeric
+  label: Hr Year Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: periodaction
+  type: text
+  label: Periodaction
+- name: periodno
+  type: numeric
+  label: Periodno
+- name: periodstatus
+  type: text
+  label: Periodstatus
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: startdate
+  type: text
+  label: Startdate
+- name: updated
+  type: text
+  label: Updated
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: hr_period_uu
+  type: text
+  label: Hr Period Uu

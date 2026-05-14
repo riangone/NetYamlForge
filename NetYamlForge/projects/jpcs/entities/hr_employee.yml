@@ -1,0 +1,70 @@
+name: HR_EMPLOYEE
+tableName: hr_employee
+primaryKey: hr_employee_id
+fields:
+- name: code
+  type: text
+  label: Code
+- name: name
+  type: text
+  label: Name
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: enddate
+  type: text
+  label: Enddate
+- name: hr_department_id
+  type: numeric
+  label: Hr Department Id
+- name: hr_employee_id
+  type: numeric
+  label: Hr Employee Id
+- name: hr_job_id
+  type: numeric
+  label: Hr Job Id
+- name: hr_payroll_id
+  type: numeric
+  label: Hr Payroll Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: name2
+  type: text
+  label: Name2
+- name: nationalcode
+  type: text
+  label: Nationalcode
+- name: sscode
+  type: text
+  label: Sscode
+- name: startdate
+  type: text
+  label: Startdate
+- name: updated
+  type: text
+  label: Updated
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: hr_employee_uu
+  type: text
+  label: Hr Employee Uu

@@ -1,0 +1,40 @@
+name: B_BIDCOMMENT
+tableName: b_bidcomment
+primaryKey: b_bidcomment_id
+fields:
+- name: b_topic_id
+  type: numeric
+  label: B Topic Id
+- name: b_bidcomment_id
+  type: numeric
+  label: B Bidcomment Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: b_bidcomment_uu
+  type: text
+  label: B Bidcomment Uu

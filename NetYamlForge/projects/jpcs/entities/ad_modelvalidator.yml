@@ -1,0 +1,49 @@
+name: AD_MODELVALIDATOR
+tableName: ad_modelvalidator
+primaryKey: ad_modelvalidator_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_modelvalidator_id
+  type: numeric
+  label: Ad Modelvalidator Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: modelvalidationclass
+  type: text
+  label: Modelvalidationclass
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: ad_modelvalidator_uu
+  type: text
+  label: Ad Modelvalidator Uu

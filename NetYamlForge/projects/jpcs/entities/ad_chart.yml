@@ -1,0 +1,67 @@
+name: AD_CHART
+tableName: ad_chart
+primaryKey: ad_chart_id
+fields:
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: charttype
+  type: text
+  label: Charttype
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: winheight
+  type: numeric
+  label: Winheight
+- name: isdisplaylegend
+  type: text
+  label: Isdisplaylegend
+- name: chartorientation
+  type: text
+  label: Chartorientation
+- name: istimeseries
+  type: text
+  label: Istimeseries
+- name: timeunit
+  type: text
+  label: Timeunit
+- name: timescope
+  type: numeric
+  label: Timescope
+- name: domainlabel
+  type: text
+  label: Domainlabel
+- name: rangelabel
+  type: text
+  label: Rangelabel
+- name: ad_chart_uu
+  type: text
+  label: Ad Chart Uu
+- name: entitytype
+  type: text
+  label: Entitytype

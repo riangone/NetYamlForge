@@ -1,0 +1,73 @@
+name: AD_IMPFORMAT_ROW
+tableName: ad_impformat_row
+primaryKey: ad_impformat_row_id
+fields:
+- name: ad_impformat_row_id
+  type: numeric
+  label: Ad Impformat Row Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_impformat_id
+  type: numeric
+  label: Ad Impformat Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: name
+  type: text
+  label: Name
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: startno
+  type: numeric
+  label: Startno
+- name: endno
+  type: numeric
+  label: Endno
+- name: datatype
+  type: text
+  label: Datatype
+- name: dataformat
+  type: text
+  label: Dataformat
+- name: decimalpoint
+  type: text
+  label: Decimalpoint
+- name: divideby100
+  type: text
+  label: Divideby100
+- name: constantvalue
+  type: text
+  label: Constantvalue
+- name: callout
+  type: text
+  label: Callout
+- name: script
+  type: text
+  label: Script
+- name: ad_impformat_row_uu
+  type: text
+  label: Ad Impformat Row Uu
+- name: importprefix
+  type: text
+  label: Importprefix

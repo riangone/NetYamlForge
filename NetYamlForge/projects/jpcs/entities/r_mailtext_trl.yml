@@ -1,0 +1,52 @@
+name: R_MAILTEXT_TRL
+tableName: r_mailtext_trl
+primaryKey: r_mailtext_id
+fields:
+- name: r_mailtext_id
+  type: numeric
+  label: R Mailtext Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: name
+  type: text
+  label: Name
+- name: mailheader
+  type: text
+  label: Mailheader
+- name: mailtext
+  type: text
+  label: Mailtext
+- name: mailtext2
+  type: text
+  label: Mailtext2
+- name: mailtext3
+  type: text
+  label: Mailtext3
+- name: r_mailtext_trl_uu
+  type: text
+  label: R Mailtext Trl Uu

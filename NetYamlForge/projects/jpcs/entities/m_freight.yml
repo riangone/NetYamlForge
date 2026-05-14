@@ -1,0 +1,64 @@
+name: M_FREIGHT
+tableName: m_freight
+primaryKey: m_freight_id
+fields:
+- name: m_freight_id
+  type: numeric
+  label: M Freight Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: m_freightcategory_id
+  type: numeric
+  label: M Freightcategory Id
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: to_country_id
+  type: numeric
+  label: To Country Id
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: to_region_id
+  type: numeric
+  label: To Region Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: m_freight_uu
+  type: text
+  label: M Freight Uu
+- name: maxweight
+  type: numeric
+  label: Maxweight
+- name: maxdimension
+  type: numeric
+  label: Maxdimension

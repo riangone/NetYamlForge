@@ -1,0 +1,133 @@
+name: W_STORE
+tableName: w_store
+primaryKey: w_store_id
+fields:
+- name: w_store_id
+  type: numeric
+  label: W Store Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: wstoreemail
+  type: text
+  label: Wstoreemail
+- name: wstoreuser
+  type: text
+  label: Wstoreuser
+- name: wstoreuserpw
+  type: text
+  label: Wstoreuserpw
+- name: webinfo
+  type: text
+  label: Webinfo
+- name: webparam1
+  type: text
+  label: Webparam1
+- name: webparam2
+  type: text
+  label: Webparam2
+- name: webparam3
+  type: text
+  label: Webparam3
+- name: webparam4
+  type: text
+  label: Webparam4
+- name: webparam5
+  type: text
+  label: Webparam5
+- name: webparam6
+  type: text
+  label: Webparam6
+- name: ismenuassets
+  type: text
+  label: Ismenuassets
+- name: ismenuorders
+  type: text
+  label: Ismenuorders
+- name: ismenuinvoices
+  type: text
+  label: Ismenuinvoices
+- name: ismenushipments
+  type: text
+  label: Ismenushipments
+- name: ismenupayments
+  type: text
+  label: Ismenupayments
+- name: ismenurfqs
+  type: text
+  label: Ismenurfqs
+- name: ismenurequests
+  type: text
+  label: Ismenurequests
+- name: ismenuinterests
+  type: text
+  label: Ismenuinterests
+- name: ismenuregistrations
+  type: text
+  label: Ismenuregistrations
+- name: ismenucontact
+  type: text
+  label: Ismenucontact
+- name: emailheader
+  type: text
+  label: Emailheader
+- name: emailfooter
+  type: text
+  label: Emailfooter
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: webcontext
+  type: text
+  label: Webcontext
+- name: weborderemail
+  type: text
+  label: Weborderemail
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: url
+  type: text
+  label: Url
+- name: stylesheet
+  type: text
+  label: Stylesheet
+- name: w_store_uu
+  type: text
+  label: W Store Uu

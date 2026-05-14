@@ -1,0 +1,64 @@
+name: DD_NETWORKDISTRIBUTION
+tableName: dd_networkdistribution
+primaryKey: dd_networkdistribution_id
+fields:
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: validto
+  type: text
+  label: Validto
+- name: dd_networkdistribution_id
+  type: numeric
+  label: Dd Networkdistribution Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_changenotice_id
+  type: numeric
+  label: M Changenotice Id
+- name: processing
+  type: text
+  label: Processing
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: documentno
+  type: text
+  label: Documentno
+- name: revision
+  type: text
+  label: Revision
+- name: description
+  type: text
+  label: Description
+- name: dd_networkdistribution_uu
+  type: text
+  label: Dd Networkdistribution Uu

@@ -1,0 +1,61 @@
+name: M_MOVEMENTCONFIRM
+tableName: m_movementconfirm
+primaryKey: m_movementconfirm_id
+fields:
+- name: m_movementconfirm_id
+  type: numeric
+  label: M Movementconfirm Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_movement_id
+  type: numeric
+  label: M Movement Id
+- name: description
+  type: text
+  label: Description
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: approvalamt
+  type: numeric
+  label: Approvalamt
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: m_inventory_id
+  type: numeric
+  label: M Inventory Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: m_movementconfirm_uu
+  type: text
+  label: M Movementconfirm Uu

@@ -1,0 +1,46 @@
+name: C_UOM_CONVERSION
+tableName: c_uom_conversion
+primaryKey: c_uom_conversion_id
+fields:
+- name: c_uom_conversion_id
+  type: numeric
+  label: C Uom Conversion Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: c_uom_to_id
+  type: numeric
+  label: C Uom To Id
+- name: multiplyrate
+  type: numeric
+  label: Multiplyrate
+- name: dividerate
+  type: numeric
+  label: Dividerate
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_uom_conversion_uu
+  type: text
+  label: C Uom Conversion Uu

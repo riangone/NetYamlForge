@@ -1,0 +1,52 @@
+name: B_BID
+tableName: b_bid
+primaryKey: b_bid_id
+fields:
+- name: b_bid_id
+  type: numeric
+  label: B Bid Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: b_topic_id
+  type: numeric
+  label: B Topic Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: iswillingtocommit
+  type: text
+  label: Iswillingtocommit
+- name: b_buyerfunds_id
+  type: numeric
+  label: B Buyerfunds Id
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: privatenote
+  type: text
+  label: Privatenote
+- name: b_bid_uu
+  type: text
+  label: B Bid Uu

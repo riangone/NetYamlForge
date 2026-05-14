@@ -1,0 +1,64 @@
+name: PA_RATIOELEMENT
+tableName: pa_ratioelement
+primaryKey: pa_ratioelement_id
+fields:
+- name: pa_ratioelement_id
+  type: numeric
+  label: Pa Ratioelement Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: pa_ratio_id
+  type: numeric
+  label: Pa Ratio Id
+- name: ratiooperand
+  type: text
+  label: Ratiooperand
+- name: ratioelementtype
+  type: text
+  label: Ratioelementtype
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: pa_ratioused_id
+  type: numeric
+  label: Pa Ratioused Id
+- name: pa_measurecalc_id
+  type: numeric
+  label: Pa Measurecalc Id
+- name: constantvalue
+  type: numeric
+  label: Constantvalue
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: pa_ratioelement_uu
+  type: text
+  label: Pa Ratioelement Uu

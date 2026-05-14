@@ -1,0 +1,94 @@
+name: M_REQUISITION
+tableName: m_requisition
+primaryKey: m_requisition_id
+fields:
+- name: m_requisition_id
+  type: numeric
+  label: M Requisition Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: priorityrule
+  type: text
+  label: Priorityrule
+- name: daterequired
+  type: text
+  label: Daterequired
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: m_requisition_uu
+  type: text
+  label: M Requisition Uu
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn
+- name: jp_remarks
+  type: text
+  label: Jp Remarks

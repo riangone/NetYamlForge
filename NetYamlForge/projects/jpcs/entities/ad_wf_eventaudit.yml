@@ -1,0 +1,73 @@
+name: AD_WF_EVENTAUDIT
+tableName: ad_wf_eventaudit
+primaryKey: ad_wf_eventaudit_id
+fields:
+- name: ad_wf_eventaudit_id
+  type: numeric
+  label: Ad Wf Eventaudit Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: eventtype
+  type: text
+  label: Eventtype
+- name: wfstate
+  type: text
+  label: Wfstate
+- name: ad_wf_process_id
+  type: numeric
+  label: Ad Wf Process Id
+- name: ad_wf_node_id
+  type: numeric
+  label: Ad Wf Node Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: ad_wf_responsible_id
+  type: numeric
+  label: Ad Wf Responsible Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: elapsedtimems
+  type: numeric
+  label: Elapsedtimems
+- name: attributename
+  type: text
+  label: Attributename
+- name: oldvalue
+  type: text
+  label: Oldvalue
+- name: newvalue
+  type: text
+  label: Newvalue
+- name: description
+  type: text
+  label: Description
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: ad_wf_eventaudit_uu
+  type: text
+  label: Ad Wf Eventaudit Uu

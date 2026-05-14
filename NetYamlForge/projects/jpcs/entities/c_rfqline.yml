@@ -1,0 +1,58 @@
+name: C_RFQLINE
+tableName: c_rfqline
+primaryKey: c_rfqline_id
+fields:
+- name: c_rfqline_id
+  type: numeric
+  label: C Rfqline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_rfq_id
+  type: numeric
+  label: C Rfq Id
+- name: line
+  type: numeric
+  label: Line
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: deliverydays
+  type: numeric
+  label: Deliverydays
+- name: dateworkcomplete
+  type: text
+  label: Dateworkcomplete
+- name: dateworkstart
+  type: text
+  label: Dateworkstart
+- name: c_rfqline_uu
+  type: text
+  label: C Rfqline Uu

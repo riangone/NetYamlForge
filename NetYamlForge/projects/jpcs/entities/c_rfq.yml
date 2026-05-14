@@ -1,0 +1,118 @@
+name: C_RFQ
+tableName: c_rfq
+primaryKey: c_rfq_id
+fields:
+- name: c_rfq_id
+  type: numeric
+  label: C Rfq Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: c_rfq_topic_id
+  type: numeric
+  label: C Rfq Topic Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: dateresponse
+  type: text
+  label: Dateresponse
+- name: isrfqresponseaccepted
+  type: text
+  label: Isrfqresponseaccepted
+- name: dateworkstart
+  type: text
+  label: Dateworkstart
+- name: deliverydays
+  type: numeric
+  label: Deliverydays
+- name: dateworkcomplete
+  type: text
+  label: Dateworkcomplete
+- name: quotetype
+  type: text
+  label: Quotetype
+- name: isquotetotalamt
+  type: text
+  label: Isquotetotalamt
+- name: isquoteallqty
+  type: text
+  label: Isquoteallqty
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: isinvitedvendorsonly
+  type: text
+  label: Isinvitedvendorsonly
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: margin
+  type: numeric
+  label: Margin
+- name: createso
+  type: text
+  label: Createso
+- name: createpo
+  type: text
+  label: Createpo
+- name: publishrfq
+  type: text
+  label: Publishrfq
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: copylines
+  type: text
+  label: Copylines
+- name: rankrfq
+  type: text
+  label: Rankrfq
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: documentno
+  type: text
+  label: Documentno
+- name: c_rfq_uu
+  type: text
+  label: C Rfq Uu

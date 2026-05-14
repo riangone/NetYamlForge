@@ -1,0 +1,43 @@
+name: C_REGION
+tableName: c_region
+primaryKey: c_region_id
+fields:
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: c_region_uu
+  type: text
+  label: C Region Uu

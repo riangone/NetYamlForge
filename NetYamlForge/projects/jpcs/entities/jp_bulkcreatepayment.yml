@@ -1,0 +1,79 @@
+name: JP_BULKCREATEPAYMENT
+tableName: jp_bulkcreatepayment
+primaryKey: jp_bulkcreatepayment_id
+fields:
+- name: jp_bulkcreatepayment_id
+  type: numeric
+  label: Jp Bulkcreatepayment Id
+- name: jp_bulkcreatepayment_uu
+  type: text
+  label: Jp Bulkcreatepayment Uu
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: startno
+  type: numeric
+  label: Startno
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: jp_registrationqty
+  type: numeric
+  label: Jp Registrationqty
+- name: jp_commitrecords
+  type: numeric
+  label: Jp Commitrecords
+- name: jp_cresetrecords
+  type: numeric
+  label: Jp Cresetrecords
+- name: jp_client_accounting
+  type: text
+  label: Jp Client Accounting
+- name: isfkinvalidjp
+  type: text
+  label: Isfkinvalidjp
+- name: isdropindexjp
+  type: text
+  label: Isdropindexjp
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: docaction
+  type: text
+  label: Docaction

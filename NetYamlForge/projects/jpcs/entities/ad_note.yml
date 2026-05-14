@@ -1,0 +1,64 @@
+name: AD_NOTE
+tableName: ad_note
+primaryKey: ad_note_id
+fields:
+- name: ad_note_id
+  type: numeric
+  label: Ad Note Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: ad_message_id
+  type: numeric
+  label: Ad Message Id
+- name: reference
+  type: text
+  label: Reference
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: description
+  type: text
+  label: Description
+- name: ad_wf_activity_id
+  type: numeric
+  label: Ad Wf Activity Id
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: ad_note_uu
+  type: text
+  label: Ad Note Uu
+- name: ad_broadcastmessage_id
+  type: numeric
+  label: Ad Broadcastmessage Id

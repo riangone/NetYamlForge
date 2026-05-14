@@ -1,0 +1,100 @@
+name: AD_INFOWINDOW
+tableName: ad_infowindow
+primaryKey: ad_infowindow_id
+fields:
+- name: ad_infowindow_id
+  type: numeric
+  label: Ad Infowindow Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: fromclause
+  type: text
+  label: Fromclause
+- name: otherclause
+  type: text
+  label: Otherclause
+- name: processing
+  type: text
+  label: Processing
+- name: ad_infowindow_uu
+  type: text
+  label: Ad Infowindow Uu
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: isdistinct
+  type: text
+  label: Isdistinct
+- name: orderbyclause
+  type: text
+  label: Orderbyclause
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: ad_ctxhelp_id
+  type: numeric
+  label: Ad Ctxhelp Id
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: isshowindashboard
+  type: text
+  label: Isshowindashboard
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: maxqueryrecords
+  type: numeric
+  label: Maxqueryrecords
+- name: isloadpagenum
+  type: text
+  label: Isloadpagenum
+- name: pagingsize
+  type: numeric
+  label: Pagingsize
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: po_window_id
+  type: numeric
+  label: Po Window Id

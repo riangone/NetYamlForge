@@ -1,0 +1,43 @@
+name: WS_WEBSERVICE
+tableName: ws_webservice
+primaryKey: ws_webservice_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: ws_webservice_id
+  type: numeric
+  label: Ws Webservice Id
+- name: ws_webservice_uu
+  type: text
+  label: Ws Webservice Uu

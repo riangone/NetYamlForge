@@ -1,0 +1,79 @@
+name: T_BOM_INDENTED
+tableName: t_bom_indented
+primaryKey: t_bom_indented_id
+fields:
+- name: t_bom_indented_id
+  type: numeric
+  label: T Bom Indented Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: cost
+  type: numeric
+  label: Cost
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: currentcostprice
+  type: numeric
+  label: Currentcostprice
+- name: currentcostpricell
+  type: numeric
+  label: Currentcostpricell
+- name: futurecostprice
+  type: numeric
+  label: Futurecostprice
+- name: futurecostpricell
+  type: numeric
+  label: Futurecostpricell
+- name: isactive
+  type: text
+  label: Isactive
+- name: levelno
+  type: numeric
+  label: Levelno
+- name: levels
+  type: text
+  label: Levels
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: qtybom
+  type: numeric
+  label: Qtybom
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: qty
+  type: numeric
+  label: Qty
+- name: costfuture
+  type: numeric
+  label: Costfuture
+- name: sel_product_id
+  type: numeric
+  label: Sel Product Id
+- name: t_bom_indented_uu
+  type: text
+  label: T Bom Indented Uu

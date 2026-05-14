@@ -1,0 +1,61 @@
+name: C_BP_RELATION
+tableName: c_bp_relation
+primaryKey: c_bp_relation_id
+fields:
+- name: c_bp_relation_id
+  type: numeric
+  label: C Bp Relation Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: isshipto
+  type: text
+  label: Isshipto
+- name: isbillto
+  type: text
+  label: Isbillto
+- name: ispayfrom
+  type: text
+  label: Ispayfrom
+- name: isremitto
+  type: text
+  label: Isremitto
+- name: c_bpartnerrelation_id
+  type: numeric
+  label: C Bpartnerrelation Id
+- name: c_bpartnerrelation_location_id
+  type: numeric
+  label: C Bpartnerrelation Location Id
+- name: c_bp_relation_uu
+  type: text
+  label: C Bp Relation Uu

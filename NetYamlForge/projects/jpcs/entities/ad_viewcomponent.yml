@@ -1,0 +1,67 @@
+name: AD_VIEWCOMPONENT
+tableName: ad_viewcomponent
+primaryKey: ad_viewcomponent_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_viewcomponent_id
+  type: numeric
+  label: Ad Viewcomponent Id
+- name: ad_viewcomponent_uu
+  type: text
+  label: Ad Viewcomponent Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: fromclause
+  type: text
+  label: Fromclause
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: otherclause
+  type: text
+  label: Otherclause
+- name: referenced_table_id
+  type: numeric
+  label: Referenced Table Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: isunionall
+  type: text
+  label: Isunionall
+- name: isdistinct
+  type: text
+  label: Isdistinct

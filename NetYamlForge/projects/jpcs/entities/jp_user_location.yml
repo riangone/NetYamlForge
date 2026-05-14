@@ -1,0 +1,79 @@
+name: JP_USER_LOCATION
+tableName: jp_user_location
+primaryKey: jp_user_location_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: address3
+  type: text
+  label: Address3
+- name: address4
+  type: text
+  label: Address4
+- name: address5
+  type: text
+  label: Address5
+- name: c_city_id
+  type: numeric
+  label: C City Id
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: city
+  type: text
+  label: City
+- name: comments
+  type: text
+  label: Comments
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: jp_location_label
+  type: text
+  label: Jp Location Label
+- name: jp_user_location_id
+  type: numeric
+  label: Jp User Location Id
+- name: jp_user_location_uu
+  type: text
+  label: Jp User Location Uu
+- name: postal
+  type: text
+  label: Postal
+- name: postal_add
+  type: text
+  label: Postal Add
+- name: regionname
+  type: text
+  label: Regionname
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

@@ -1,0 +1,196 @@
+name: I_INVOICE
+tableName: i_invoice
+primaryKey: i_invoice_id
+fields:
+- name: i_invoice_id
+  type: numeric
+  label: I Invoice Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: name
+  type: text
+  label: Name
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: postal
+  type: text
+  label: Postal
+- name: city
+  type: text
+  label: City
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: regionname
+  type: text
+  label: Regionname
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: email
+  type: text
+  label: Email
+- name: contactname
+  type: text
+  label: Contactname
+- name: phone
+  type: text
+  label: Phone
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: countrycode
+  type: text
+  label: Countrycode
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: doctypename
+  type: text
+  label: Doctypename
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: paymenttermvalue
+  type: text
+  label: Paymenttermvalue
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: description
+  type: text
+  label: Description
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: productvalue
+  type: text
+  label: Productvalue
+- name: upc
+  type: text
+  label: Upc
+- name: sku
+  type: text
+  label: Sku
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: taxindicator
+  type: text
+  label: Taxindicator
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: linedescription
+  type: text
+  label: Linedescription
+- name: qtyordered
+  type: numeric
+  label: Qtyordered
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: projectvalue
+  type: text
+  label: Projectvalue
+- name: activityvalue
+  type: text
+  label: Activityvalue
+- name: chargename
+  type: text
+  label: Chargename
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: i_invoice_uu
+  type: text
+  label: I Invoice Uu
+- name: c_1099box_id
+  type: numeric
+  label: C 1099Box Id
+- name: c_1099box_value
+  type: text
+  label: C 1099Box Value

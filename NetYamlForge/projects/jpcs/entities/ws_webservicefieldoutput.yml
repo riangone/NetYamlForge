@@ -1,0 +1,37 @@
+name: WS_WEBSERVICEFIELDOUTPUT
+tableName: ws_webservicefieldoutput
+primaryKey: ws_webservicefieldoutput_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ws_webservicefieldoutput_id
+  type: numeric
+  label: Ws Webservicefieldoutput Id
+- name: ws_webservicetype_id
+  type: numeric
+  label: Ws Webservicetype Id
+- name: ws_webservicefieldoutput_uu
+  type: text
+  label: Ws Webservicefieldoutput Uu

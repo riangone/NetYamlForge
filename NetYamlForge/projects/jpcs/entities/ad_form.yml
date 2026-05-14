@@ -1,0 +1,61 @@
+name: AD_FORM
+tableName: ad_form
+primaryKey: ad_form_id
+fields:
+- name: ad_form_id
+  type: numeric
+  label: Ad Form Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: accesslevel
+  type: text
+  label: Accesslevel
+- name: classname
+  type: text
+  label: Classname
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: isbetafunctionality
+  type: text
+  label: Isbetafunctionality
+- name: jspurl
+  type: text
+  label: Jspurl
+- name: ad_form_uu
+  type: text
+  label: Ad Form Uu
+- name: ad_ctxhelp_id
+  type: numeric
+  label: Ad Ctxhelp Id
+- name: imageurl
+  type: text
+  label: Imageurl

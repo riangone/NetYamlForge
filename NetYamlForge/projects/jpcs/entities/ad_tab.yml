@@ -1,0 +1,148 @@
+name: AD_TAB
+tableName: ad_tab
+primaryKey: ad_tab_id
+fields:
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: tablevel
+  type: numeric
+  label: Tablevel
+- name: issinglerow
+  type: text
+  label: Issinglerow
+- name: isinfotab
+  type: text
+  label: Isinfotab
+- name: istranslationtab
+  type: text
+  label: Istranslationtab
+- name: isreadonly
+  type: text
+  label: Isreadonly
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: hastree
+  type: text
+  label: Hastree
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: orderbyclause
+  type: text
+  label: Orderbyclause
+- name: commitwarning
+  type: text
+  label: Commitwarning
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: processing
+  type: text
+  label: Processing
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: importfields
+  type: text
+  label: Importfields
+- name: ad_columnsortorder_id
+  type: numeric
+  label: Ad Columnsortorder Id
+- name: ad_columnsortyesno_id
+  type: numeric
+  label: Ad Columnsortyesno Id
+- name: issorttab
+  type: text
+  label: Issorttab
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: included_tab_id
+  type: numeric
+  label: Included Tab Id
+- name: readonlylogic
+  type: text
+  label: Readonlylogic
+- name: displaylogic
+  type: text
+  label: Displaylogic
+- name: isinsertrecord
+  type: text
+  label: Isinsertrecord
+- name: isadvancedtab
+  type: text
+  label: Isadvancedtab
+- name: parent_column_id
+  type: numeric
+  label: Parent Column Id
+- name: ad_tab_uu
+  type: text
+  label: Ad Tab Uu
+- name: ad_ctxhelp_id
+  type: numeric
+  label: Ad Ctxhelp Id
+- name: treedisplayedon
+  type: text
+  label: Treedisplayedon
+- name: jpadditionalheaderline
+  type: numeric
+  label: Jpadditionalheaderline
+- name: maxqueryrecords
+  type: numeric
+  label: Maxqueryrecords
+- name: islookuponlyselection
+  type: text
+  label: Islookuponlyselection
+- name: isallowadvancedlookup
+  type: text
+  label: Isallowadvancedlookup
+- name: ad_tabtype
+  type: text
+  label: Ad Tabtype
+- name: ishighvolume
+  type: text
+  label: Ishighvolume
+- name: deleteconfirmationlogic
+  type: text
+  label: Deleteconfirmationlogic

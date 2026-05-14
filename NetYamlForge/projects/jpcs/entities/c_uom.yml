@@ -1,0 +1,58 @@
+name: C_UOM
+tableName: c_uom
+primaryKey: c_uom_id
+fields:
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: x12de355
+  type: text
+  label: X12De355
+- name: uomsymbol
+  type: text
+  label: Uomsymbol
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: stdprecision
+  type: numeric
+  label: Stdprecision
+- name: costingprecision
+  type: numeric
+  label: Costingprecision
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: uomtype
+  type: text
+  label: Uomtype
+- name: c_uom_uu
+  type: text
+  label: C Uom Uu
+- name: uncefact
+  type: text
+  label: Uncefact

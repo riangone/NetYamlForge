@@ -1,0 +1,100 @@
+name: M_PRODUCT_PO
+tableName: m_product_po
+primaryKey: m_product_id
+fields:
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: iscurrentvendor
+  type: text
+  label: Iscurrentvendor
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricepo
+  type: numeric
+  label: Pricepo
+- name: priceeffective
+  type: text
+  label: Priceeffective
+- name: pricelastpo
+  type: numeric
+  label: Pricelastpo
+- name: pricelastinv
+  type: numeric
+  label: Pricelastinv
+- name: vendorproductno
+  type: text
+  label: Vendorproductno
+- name: upc
+  type: text
+  label: Upc
+- name: vendorcategory
+  type: text
+  label: Vendorcategory
+- name: discontinued
+  type: text
+  label: Discontinued
+- name: discontinuedby
+  type: text
+  label: Discontinuedby
+- name: order_min
+  type: numeric
+  label: Order Min
+- name: order_pack
+  type: numeric
+  label: Order Pack
+- name: costperorder
+  type: numeric
+  label: Costperorder
+- name: deliverytime_promised
+  type: numeric
+  label: Deliverytime Promised
+- name: deliverytime_actual
+  type: numeric
+  label: Deliverytime Actual
+- name: qualityrating
+  type: numeric
+  label: Qualityrating
+- name: royaltyamt
+  type: numeric
+  label: Royaltyamt
+- name: manufacturer
+  type: text
+  label: Manufacturer
+- name: discontinuedat
+  type: text
+  label: Discontinuedat
+- name: m_product_po_uu
+  type: text
+  label: M Product Po Uu

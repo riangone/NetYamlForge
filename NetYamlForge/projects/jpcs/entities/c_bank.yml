@@ -1,0 +1,52 @@
+name: C_BANK
+tableName: c_bank
+primaryKey: c_bank_id
+fields:
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: routingno
+  type: text
+  label: Routingno
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: swiftcode
+  type: text
+  label: Swiftcode
+- name: isownbank
+  type: text
+  label: Isownbank
+- name: description
+  type: text
+  label: Description
+- name: c_bank_uu
+  type: text
+  label: C Bank Uu
+- name: jp_bankname_kana
+  type: text
+  label: Jp Bankname Kana

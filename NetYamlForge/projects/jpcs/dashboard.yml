@@ -1,0 +1,82 @@
+stats:
+  - label: 有效契约
+    entity: jp_contract
+    aggregate: count
+    filter: "docstatus IN ('CO','IP') OR docstatus IS NULL"
+    icon: file-contract
+    color: badge-primary
+
+  - label: 总契约数
+    entity: jp_contract
+    aggregate: count
+    icon: file-invoice
+    color: badge-info
+
+  - label: 业务伙伴
+    entity: c_bpartner
+    aggregate: count
+    icon: users
+    color: badge-success
+
+  - label: 产品管理
+    entity: m_product
+    aggregate: count
+    icon: box
+    color: badge-primary
+
+  - label: 发票总数
+    entity: c_invoice
+    aggregate: count
+    icon: file-invoice-dollar
+    color: badge-warning
+
+  - label: 活跃用户
+    entity: ad_user
+    aggregate: count
+    filter: "isactive='Y'"
+    icon: user
+    color: badge-info
+
+charts:
+  - title: 契约状态分布
+    type: pie
+    entity: jp_contract
+    valueAggregate: count
+    groupExpression: docstatus
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(107, 114, 128, 0.85)
+      - rgba(239, 68, 68, 0.85)
+
+  - title: 订单状态分布
+    type: bar
+    entity: c_order
+    valueAggregate: count
+    groupExpression: docstatus
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: 发票状态分布
+    type: bar
+    entity: c_invoice
+    valueAggregate: count
+    groupExpression: docstatus
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: 最近契约
+    type: entity-list
+    entity: jp_contract
+    limit: 5
+    columns: [documentno, name, dateacct, jp_contractstatus]

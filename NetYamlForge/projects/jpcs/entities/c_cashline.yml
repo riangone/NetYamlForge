@@ -1,0 +1,73 @@
+name: C_CASHLINE
+tableName: c_cashline
+primaryKey: c_cashline_id
+fields:
+- name: c_cashline_id
+  type: numeric
+  label: C Cashline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_cash_id
+  type: numeric
+  label: C Cash Id
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: cashtype
+  type: text
+  label: Cashtype
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: amount
+  type: numeric
+  label: Amount
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt
+- name: isgenerated
+  type: text
+  label: Isgenerated
+- name: processed
+  type: text
+  label: Processed
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: c_cashline_uu
+  type: text
+  label: C Cashline Uu

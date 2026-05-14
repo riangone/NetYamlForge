@@ -1,0 +1,55 @@
+name: PA_DASHBOARDPREFERENCE
+tableName: pa_dashboardpreference
+primaryKey: pa_dashboardpreference_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: columnno
+  type: numeric
+  label: Columnno
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: iscollapsedbydefault
+  type: text
+  label: Iscollapsedbydefault
+- name: isshowindashboard
+  type: text
+  label: Isshowindashboard
+- name: line
+  type: numeric
+  label: Line
+- name: pa_dashboardcontent_id
+  type: numeric
+  label: Pa Dashboardcontent Id
+- name: pa_dashboardpreference_id
+  type: numeric
+  label: Pa Dashboardpreference Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: pa_dashboardpreference_uu
+  type: text
+  label: Pa Dashboardpreference Uu
+- name: flexgrow
+  type: numeric
+  label: Flexgrow

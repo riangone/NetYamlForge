@@ -1,0 +1,43 @@
+name: AD_BROADCASTMESSAGE_TRL
+tableName: ad_broadcastmessage_trl
+primaryKey: ad_broadcastmessage_id
+fields:
+- name: ad_broadcastmessage_id
+  type: numeric
+  label: Ad Broadcastmessage Id
+- name: ad_broadcastmessage_trl_uu
+  type: text
+  label: Ad Broadcastmessage Trl Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: broadcastmessage
+  type: text
+  label: Broadcastmessage
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: title
+  type: text
+  label: Title

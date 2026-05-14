@@ -1,0 +1,79 @@
+name: JP_BULKUPDATEPROFILELINE
+tableName: jp_bulkupdateprofileline
+primaryKey: jp_bulkupdateprofileline_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: ischangelog
+  type: text
+  label: Ischangelog
+- name: jp_bulkupdatecommittype
+  type: text
+  label: Jp Bulkupdatecommittype
+- name: jp_bulkupdateprofileline_id
+  type: numeric
+  label: Jp Bulkupdateprofileline Id
+- name: jp_bulkupdateprofileline_uu
+  type: text
+  label: Jp Bulkupdateprofileline Uu
+- name: jp_bulkupdateprofile_id
+  type: numeric
+  label: Jp Bulkupdateprofile Id
+- name: jp_bulkupdatetype
+  type: text
+  label: Jp Bulkupdatetype
+- name: jp_maskingstring
+  type: text
+  label: Jp Maskingstring
+- name: jp_maskingtype
+  type: text
+  label: Jp Maskingtype
+- name: jp_numofcharexcludemasking
+  type: numeric
+  label: Jp Numofcharexcludemasking
+- name: jp_replacementstring
+  type: text
+  label: Jp Replacementstring
+- name: jp_targetstring
+  type: text
+  label: Jp Targetstring
+- name: jp_updatesetclause
+  type: text
+  label: Jp Updatesetclause
+- name: line
+  type: numeric
+  label: Line
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: whereclause
+  type: text
+  label: Whereclause

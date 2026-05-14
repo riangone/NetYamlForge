@@ -1,0 +1,79 @@
+name: C_COMMISSIONLINE
+tableName: c_commissionline
+primaryKey: c_commissionline_id
+fields:
+- name: c_commissionline_id
+  type: numeric
+  label: C Commissionline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_commission_id
+  type: numeric
+  label: C Commission Id
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: amtsubtract
+  type: numeric
+  label: Amtsubtract
+- name: amtmultiplier
+  type: numeric
+  label: Amtmultiplier
+- name: qtysubtract
+  type: numeric
+  label: Qtysubtract
+- name: qtymultiplier
+  type: numeric
+  label: Qtymultiplier
+- name: ispositiveonly
+  type: text
+  label: Ispositiveonly
+- name: commissionorders
+  type: text
+  label: Commissionorders
+- name: org_id
+  type: numeric
+  label: Org Id
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: c_commissionline_uu
+  type: text
+  label: C Commissionline Uu

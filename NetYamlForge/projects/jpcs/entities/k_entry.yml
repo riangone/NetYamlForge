@@ -1,0 +1,61 @@
+name: K_ENTRY
+tableName: k_entry
+primaryKey: k_entry_id
+fields:
+- name: k_entry_id
+  type: numeric
+  label: K Entry Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: k_topic_id
+  type: numeric
+  label: K Topic Id
+- name: rating
+  type: numeric
+  label: Rating
+- name: ispublic
+  type: text
+  label: Ispublic
+- name: keywords
+  type: text
+  label: Keywords
+- name: k_source_id
+  type: numeric
+  label: K Source Id
+- name: descriptionurl
+  type: text
+  label: Descriptionurl
+- name: validto
+  type: text
+  label: Validto
+- name: ad_session_id
+  type: numeric
+  label: Ad Session Id
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: k_entry_uu
+  type: text
+  label: K Entry Uu

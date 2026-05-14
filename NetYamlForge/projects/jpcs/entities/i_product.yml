@@ -1,0 +1,181 @@
+name: I_PRODUCT
+tableName: i_product
+primaryKey: i_product_id
+fields:
+- name: i_product_id
+  type: numeric
+  label: I Product Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: help
+  type: text
+  label: Help
+- name: upc
+  type: text
+  label: Upc
+- name: sku
+  type: text
+  label: Sku
+- name: x12de355
+  type: text
+  label: X12De355
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: productcategory_value
+  type: text
+  label: Productcategory Value
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: producttype
+  type: text
+  label: Producttype
+- name: classification
+  type: text
+  label: Classification
+- name: volume
+  type: numeric
+  label: Volume
+- name: weight
+  type: numeric
+  label: Weight
+- name: shelfwidth
+  type: numeric
+  label: Shelfwidth
+- name: shelfheight
+  type: numeric
+  label: Shelfheight
+- name: shelfdepth
+  type: numeric
+  label: Shelfdepth
+- name: unitsperpallet
+  type: numeric
+  label: Unitsperpallet
+- name: discontinued
+  type: text
+  label: Discontinued
+- name: discontinuedby
+  type: text
+  label: Discontinuedby
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: descriptionurl
+  type: text
+  label: Descriptionurl
+- name: bpartner_value
+  type: text
+  label: Bpartner Value
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricepo
+  type: numeric
+  label: Pricepo
+- name: royaltyamt
+  type: numeric
+  label: Royaltyamt
+- name: priceeffective
+  type: text
+  label: Priceeffective
+- name: vendorproductno
+  type: text
+  label: Vendorproductno
+- name: vendorcategory
+  type: text
+  label: Vendorcategory
+- name: manufacturer
+  type: text
+  label: Manufacturer
+- name: order_min
+  type: numeric
+  label: Order Min
+- name: order_pack
+  type: numeric
+  label: Order Pack
+- name: costperorder
+  type: numeric
+  label: Costperorder
+- name: deliverytime_promised
+  type: numeric
+  label: Deliverytime Promised
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: pricestd
+  type: numeric
+  label: Pricestd
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: discontinuedat
+  type: text
+  label: Discontinuedat
+- name: i_product_uu
+  type: text
+  label: I Product Uu
+- name: customstariffnumber
+  type: text
+  label: Customstariffnumber
+- name: group1
+  type: text
+  label: Group1
+- name: group2
+  type: text
+  label: Group2
+- name: m_attributeset_id
+  type: numeric
+  label: M Attributeset Id

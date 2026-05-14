@@ -1,0 +1,148 @@
+name: I_BANKACCOUNTJP
+tableName: i_bankaccountjp
+primaryKey: i_bankaccountjp_id
+fields:
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: i_bankaccountjp_id
+  type: numeric
+  label: I Bankaccountjp Id
+- name: i_bankaccountjp_uu
+  type: text
+  label: I Bankaccountjp Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_org_value
+  type: text
+  label: Jp Org Value
+- name: jp_bank_name
+  type: text
+  label: Jp Bank Name
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: value
+  type: text
+  label: Value
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: name
+  type: text
+  label: Name
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: bankaccounttype
+  type: text
+  label: Bankaccounttype
+- name: accountno
+  type: text
+  label: Accountno
+- name: currentbalance
+  type: numeric
+  label: Currentbalance
+- name: creditlimit
+  type: numeric
+  label: Creditlimit
+- name: iban
+  type: text
+  label: Iban
+- name: description
+  type: text
+  label: Description
+- name: bban
+  type: text
+  label: Bban
+- name: jp_requestercode
+  type: text
+  label: Jp Requestercode
+- name: jp_requestername
+  type: text
+  label: Jp Requestername
+- name: jp_branchcode
+  type: text
+  label: Jp Branchcode
+- name: jp_branchname_kana
+  type: text
+  label: Jp Branchname Kana
+- name: jp_acctschema_name
+  type: text
+  label: Jp Acctschema Name
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: b_asset_acct
+  type: numeric
+  label: B Asset Acct
+- name: jp_intransit_acct_value
+  type: text
+  label: Jp Intransit Acct Value
+- name: b_intransit_acct
+  type: numeric
+  label: B Intransit Acct
+- name: jp_interestexp_acct_value
+  type: text
+  label: Jp Interestexp Acct Value
+- name: b_interestexp_acct
+  type: numeric
+  label: B Interestexp Acct
+- name: jp_interestrev_acct_value
+  type: text
+  label: Jp Interestrev Acct Value
+- name: b_interestrev_acct
+  type: numeric
+  label: B Interestrev Acct
+- name: jp_paymentselect_value
+  type: text
+  label: Jp Paymentselect Value
+- name: b_paymentselect_acct
+  type: numeric
+  label: B Paymentselect Acct
+- name: jp_unallocatedcash_value
+  type: text
+  label: Jp Unallocatedcash Value
+- name: b_unallocatedcash_acct
+  type: numeric
+  label: B Unallocatedcash Acct
+- name: jp_b_asset_acct_value
+  type: text
+  label: Jp B Asset Acct Value
+- name: i_isactivejp
+  type: text
+  label: I Isactivejp

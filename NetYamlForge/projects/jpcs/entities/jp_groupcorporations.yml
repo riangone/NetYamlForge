@@ -1,0 +1,37 @@
+name: JP_GROUPCORPORATIONS
+tableName: jp_groupcorporations
+primaryKey: jp_groupcorporations_id
+fields:
+- name: jp_groupcorporations_id
+  type: numeric
+  label: Jp Groupcorporations Id
+- name: jp_groupcorporations_uu
+  type: text
+  label: Jp Groupcorporations Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_corporationgroup_id
+  type: numeric
+  label: Jp Corporationgroup Id
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id

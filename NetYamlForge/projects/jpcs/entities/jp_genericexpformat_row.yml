@@ -1,0 +1,82 @@
+name: JP_GENERICEXPFORMAT_ROW
+tableName: jp_genericexpformat_row
+primaryKey: jp_genericexpformat_row_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: constantvalue
+  type: text
+  label: Constantvalue
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dataformat
+  type: text
+  label: Dataformat
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: fieldlength
+  type: numeric
+  label: Fieldlength
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_exporttype
+  type: text
+  label: Jp Exporttype
+- name: jp_genericexpformat_id
+  type: numeric
+  label: Jp Genericexpformat Id
+- name: jp_genericexpformat_row_id
+  type: numeric
+  label: Jp Genericexpformat Row Id
+- name: jp_genericexpformat_row_uu
+  type: text
+  label: Jp Genericexpformat Row Uu
+- name: jp_header
+  type: text
+  label: Jp Header
+- name: jp_paddingchar
+  type: text
+  label: Jp Paddingchar
+- name: jp_paddingtype
+  type: text
+  label: Jp Paddingtype
+- name: name
+  type: text
+  label: Name
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isenclosewithenclosingcharajp
+  type: text
+  label: Isenclosewithenclosingcharajp
+- name: isescapseparatorcharjp
+  type: text
+  label: Isescapseparatorcharjp
+- name: isescapenclosingcharjp
+  type: text
+  label: Isescapenclosingcharjp

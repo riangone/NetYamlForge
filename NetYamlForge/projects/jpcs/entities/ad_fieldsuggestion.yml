@@ -1,0 +1,73 @@
+name: AD_FIELDSUGGESTION
+tableName: ad_fieldsuggestion
+primaryKey: ad_fieldsuggestion_id
+fields:
+- name: acceptsuggestion
+  type: text
+  label: Acceptsuggestion
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_field_id
+  type: numeric
+  label: Ad Field Id
+- name: ad_fieldsuggestion_id
+  type: numeric
+  label: Ad Fieldsuggestion Id
+- name: ad_fieldsuggestion_uu
+  type: text
+  label: Ad Fieldsuggestion Uu
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_userclient_id
+  type: numeric
+  label: Ad Userclient Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: comparesuggestion
+  type: text
+  label: Comparesuggestion
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: fieldsuggestiontarget
+  type: text
+  label: Fieldsuggestiontarget
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: isupdatebaselanguage
+  type: text
+  label: Isupdatebaselanguage
+- name: name
+  type: text
+  label: Name
+- name: processed
+  type: text
+  label: Processed
+- name: rejectsuggestion
+  type: text
+  label: Rejectsuggestion
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

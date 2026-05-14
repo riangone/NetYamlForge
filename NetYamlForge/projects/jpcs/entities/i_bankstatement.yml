@@ -1,0 +1,184 @@
+name: I_BANKSTATEMENT
+tableName: i_bankstatement
+primaryKey: i_bankstatement_id
+fields:
+- name: i_bankstatement_id
+  type: numeric
+  label: I Bankstatement Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processed
+  type: text
+  label: Processed
+- name: c_bankstatement_id
+  type: numeric
+  label: C Bankstatement Id
+- name: statementdate
+  type: text
+  label: Statementdate
+- name: description
+  type: text
+  label: Description
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: routingno
+  type: text
+  label: Routingno
+- name: bankaccountno
+  type: text
+  label: Bankaccountno
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: paymentdocumentno
+  type: text
+  label: Paymentdocumentno
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: name
+  type: text
+  label: Name
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: invoicedocumentno
+  type: text
+  label: Invoicedocumentno
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargename
+  type: text
+  label: Chargename
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: c_bankstatementline_id
+  type: numeric
+  label: C Bankstatementline Id
+- name: line
+  type: numeric
+  label: Line
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: valutadate
+  type: text
+  label: Valutadate
+- name: statementlinedate
+  type: text
+  label: Statementlinedate
+- name: trxtype
+  type: text
+  label: Trxtype
+- name: referenceno
+  type: text
+  label: Referenceno
+- name: memo
+  type: text
+  label: Memo
+- name: isreversal
+  type: text
+  label: Isreversal
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: linedescription
+  type: text
+  label: Linedescription
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: eftstatementdate
+  type: text
+  label: Eftstatementdate
+- name: eftstatementreference
+  type: text
+  label: Eftstatementreference
+- name: eftstatementlinedate
+  type: text
+  label: Eftstatementlinedate
+- name: eftvalutadate
+  type: text
+  label: Eftvalutadate
+- name: eftreference
+  type: text
+  label: Eftreference
+- name: eftcheckno
+  type: text
+  label: Eftcheckno
+- name: efttrxid
+  type: text
+  label: Efttrxid
+- name: efttrxtype
+  type: text
+  label: Efttrxtype
+- name: eftmemo
+  type: text
+  label: Eftmemo
+- name: eftpayee
+  type: text
+  label: Eftpayee
+- name: eftpayeeaccount
+  type: text
+  label: Eftpayeeaccount
+- name: eftamt
+  type: numeric
+  label: Eftamt
+- name: eftcurrency
+  type: text
+  label: Eftcurrency
+- name: createpayment
+  type: text
+  label: Createpayment
+- name: processing
+  type: text
+  label: Processing
+- name: matchstatement
+  type: text
+  label: Matchstatement
+- name: i_bankstatement_uu
+  type: text
+  label: I Bankstatement Uu
+- name: iban
+  type: text
+  label: Iban

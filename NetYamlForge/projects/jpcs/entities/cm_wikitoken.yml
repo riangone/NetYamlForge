@@ -1,0 +1,52 @@
+name: CM_WIKITOKEN
+tableName: cm_wikitoken
+primaryKey: cm_wikitoken_id
+fields:
+- name: cm_wikitoken_id
+  type: numeric
+  label: Cm Wikitoken Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: tokentype
+  type: text
+  label: Tokentype
+- name: selectclause
+  type: text
+  label: Selectclause
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: macro
+  type: text
+  label: Macro
+- name: cm_wikitoken_uu
+  type: text
+  label: Cm Wikitoken Uu

@@ -1,0 +1,46 @@
+name: M_COSTELEMENT
+tableName: m_costelement
+primaryKey: m_costelement_id
+fields:
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: costelementtype
+  type: text
+  label: Costelementtype
+- name: costingmethod
+  type: text
+  label: Costingmethod
+- name: iscalculated
+  type: text
+  label: Iscalculated
+- name: m_costelement_uu
+  type: text
+  label: M Costelement Uu

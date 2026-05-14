@@ -1,0 +1,70 @@
+name: AD_CHARTDATASOURCE
+tableName: ad_chartdatasource
+primaryKey: ad_chartdatasource_id
+fields:
+- name: ad_chartdatasource_id
+  type: numeric
+  label: Ad Chartdatasource Id
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: categorycolumn
+  type: text
+  label: Categorycolumn
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datecolumn
+  type: text
+  label: Datecolumn
+- name: description
+  type: text
+  label: Description
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: fromclause
+  type: text
+  label: Fromclause
+- name: isactive
+  type: text
+  label: Isactive
+- name: keycolumn
+  type: text
+  label: Keycolumn
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: valuecolumn
+  type: text
+  label: Valuecolumn
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: timeoffset
+  type: numeric
+  label: Timeoffset
+- name: seriescolumn
+  type: text
+  label: Seriescolumn
+- name: ad_chartdatasource_uu
+  type: text
+  label: Ad Chartdatasource Uu

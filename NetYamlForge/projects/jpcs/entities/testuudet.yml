@@ -1,0 +1,40 @@
+name: TESTUUDET
+tableName: testuudet
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: alttestuu_uu
+  type: text
+  label: Alttestuu Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: testuudet_uu
+  type: text
+  label: Testuudet Uu
+- name: testuu_uu
+  type: text
+  label: Testuu Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: testuu_uus
+  type: text
+  label: Testuu Uus

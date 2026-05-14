@@ -1,0 +1,112 @@
+name: TEST
+tableName: test
+primaryKey: test_id
+fields:
+- name: test_id
+  type: numeric
+  label: Test Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: t_integer
+  type: numeric
+  label: T Integer
+- name: t_number
+  type: numeric
+  label: T Number
+- name: t_date
+  type: text
+  label: T Date
+- name: t_datetime
+  type: text
+  label: T Datetime
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: t_qty
+  type: numeric
+  label: T Qty
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: t_amount
+  type: numeric
+  label: T Amount
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: account_acct
+  type: numeric
+  label: Account Acct
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: processing
+  type: text
+  label: Processing
+- name: binarydata
+  type: text
+  label: Binarydata
+- name: processed
+  type: text
+  label: Processed
+- name: characterdata
+  type: text
+  label: Characterdata
+- name: test_uu
+  type: text
+  label: Test Uu
+- name: color
+  type: text
+  label: Color
+- name: t_timestamp
+  type: text
+  label: T Timestamp
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: record_uu
+  type: text
+  label: Record Uu
+- name: jsondata
+  type: text
+  label: Jsondata

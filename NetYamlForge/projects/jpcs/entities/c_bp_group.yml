@@ -1,0 +1,73 @@
+name: C_BP_GROUP
+tableName: c_bp_group
+primaryKey: c_bp_group_id
+fields:
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: ad_printcolor_id
+  type: numeric
+  label: Ad Printcolor Id
+- name: isconfidentialinfo
+  type: text
+  label: Isconfidentialinfo
+- name: prioritybase
+  type: text
+  label: Prioritybase
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: po_pricelist_id
+  type: numeric
+  label: Po Pricelist Id
+- name: m_discountschema_id
+  type: numeric
+  label: M Discountschema Id
+- name: po_discountschema_id
+  type: numeric
+  label: Po Discountschema Id
+- name: creditwatchpercent
+  type: numeric
+  label: Creditwatchpercent
+- name: pricematchtolerance
+  type: numeric
+  label: Pricematchtolerance
+- name: c_dunning_id
+  type: numeric
+  label: C Dunning Id
+- name: c_bp_group_uu
+  type: text
+  label: C Bp Group Uu

@@ -1,0 +1,121 @@
+name: S_TIMEEXPENSELINE
+tableName: s_timeexpenseline
+primaryKey: s_timeexpenseline_id
+fields:
+- name: s_timeexpenseline_id
+  type: numeric
+  label: S Timeexpenseline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: s_timeexpense_id
+  type: numeric
+  label: S Timeexpense Id
+- name: line
+  type: numeric
+  label: Line
+- name: istimereport
+  type: text
+  label: Istimereport
+- name: dateexpense
+  type: text
+  label: Dateexpense
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: expenseamt
+  type: numeric
+  label: Expenseamt
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: convertedamt
+  type: numeric
+  label: Convertedamt
+- name: s_resourceassignment_id
+  type: numeric
+  label: S Resourceassignment Id
+- name: description
+  type: text
+  label: Description
+- name: note
+  type: text
+  label: Note
+- name: isinvoiced
+  type: text
+  label: Isinvoiced
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: invoiceprice
+  type: numeric
+  label: Invoiceprice
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: c_orderline_id
+  type: numeric
+  label: C Orderline Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: s_timetype_id
+  type: numeric
+  label: S Timetype Id
+- name: processed
+  type: text
+  label: Processed
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: qtyreimbursed
+  type: numeric
+  label: Qtyreimbursed
+- name: priceinvoiced
+  type: numeric
+  label: Priceinvoiced
+- name: pricereimbursed
+  type: numeric
+  label: Pricereimbursed
+- name: s_timeexpenseline_uu
+  type: text
+  label: S Timeexpenseline Uu
+- name: linenetamt
+  type: numeric
+  label: Linenetamt

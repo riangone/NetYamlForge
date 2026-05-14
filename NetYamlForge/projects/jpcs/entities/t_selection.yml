@@ -1,0 +1,16 @@
+name: T_SELECTION
+tableName: t_selection
+primaryKey: t_selection_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: t_selection_id
+  type: numeric
+  label: T Selection Id
+- name: viewid
+  type: text
+  label: Viewid
+- name: t_selection_uu
+  type: text
+  label: T Selection Uu

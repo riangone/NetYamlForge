@@ -1,0 +1,49 @@
+name: JP_PP_PLANLINEQT
+tableName: jp_pp_planlineqt
+primaryKey: jp_pp_planlineqt_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: expectedresult
+  type: text
+  label: Expectedresult
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_pp_planlineqt_id
+  type: numeric
+  label: Jp Pp Planlineqt Id
+- name: jp_pp_planlineqt_uu
+  type: text
+  label: Jp Pp Planlineqt Uu
+- name: jp_pp_planline_id
+  type: numeric
+  label: Jp Pp Planline Id
+- name: m_qualitytest_id
+  type: numeric
+  label: M Qualitytest Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_pp_planlinetqt_id
+  type: numeric
+  label: Jp Pp Planlinetqt Id
+- name: seqno
+  type: numeric
+  label: Seqno

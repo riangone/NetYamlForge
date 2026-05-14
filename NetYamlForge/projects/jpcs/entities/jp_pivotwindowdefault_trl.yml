@@ -1,0 +1,46 @@
+name: JP_PIVOTWINDOWDEFAULT_TRL
+tableName: jp_pivotwindowdefault_trl
+primaryKey: jp_pivotwindowdefault_id
+fields:
+- name: jp_pivotwindowdefault_id
+  type: numeric
+  label: Jp Pivotwindowdefault Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: jp_pivotwindowdefault_trl_uu
+  type: text
+  label: Jp Pivotwindowdefault Trl Uu
+- name: isactive
+  type: text
+  label: Isactive
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help

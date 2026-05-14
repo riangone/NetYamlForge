@@ -1,0 +1,94 @@
+name: HR_CONCEPT
+tableName: hr_concept
+primaryKey: hr_concept_id
+fields:
+- name: accountsign
+  type: text
+  label: Accountsign
+- name: isreadwrite
+  type: text
+  label: Isreadwrite
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: ispaid
+  type: text
+  label: Ispaid
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: hr_concept_category_id
+  type: numeric
+  label: Hr Concept Category Id
+- name: hr_concept_id
+  type: numeric
+  label: Hr Concept Id
+- name: hr_department_id
+  type: numeric
+  label: Hr Department Id
+- name: hr_job_id
+  type: numeric
+  label: Hr Job Id
+- name: hr_payroll_id
+  type: numeric
+  label: Hr Payroll Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: isemployee
+  type: text
+  label: Isemployee
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: isregistered
+  type: text
+  label: Isregistered
+- name: type
+  type: text
+  label: Type
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: columntype
+  type: text
+  label: Columntype
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: hr_concept_uu
+  type: text
+  label: Hr Concept Uu

@@ -1,0 +1,142 @@
+name: T_TRIALBALANCE
+tableName: t_trialbalance
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: fact_acct_id
+  type: numeric
+  label: Fact Acct Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: line_id
+  type: numeric
+  label: Line Id
+- name: gl_category_id
+  type: numeric
+  label: Gl Category Id
+- name: gl_budget_id
+  type: numeric
+  label: Gl Budget Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: amtsourcedr
+  type: numeric
+  label: Amtsourcedr
+- name: amtsourcecr
+  type: numeric
+  label: Amtsourcecr
+- name: amtsourcebalance
+  type: numeric
+  label: Amtsourcebalance
+- name: amtacctdr
+  type: numeric
+  label: Amtacctdr
+- name: amtacctcr
+  type: numeric
+  label: Amtacctcr
+- name: amtacctbalance
+  type: numeric
+  label: Amtacctbalance
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_locfrom_id
+  type: numeric
+  label: C Locfrom Id
+- name: c_locto_id
+  type: numeric
+  label: C Locto Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: description
+  type: text
+  label: Description
+- name: accountvalue
+  type: text
+  label: Accountvalue
+- name: levelno
+  type: numeric
+  label: Levelno
+- name: t_trialbalance_uu
+  type: text
+  label: T Trialbalance Uu

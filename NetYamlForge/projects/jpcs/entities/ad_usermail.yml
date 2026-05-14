@@ -1,0 +1,67 @@
+name: AD_USERMAIL
+tableName: ad_usermail
+primaryKey: ad_usermail_id
+fields:
+- name: ad_usermail_id
+  type: numeric
+  label: Ad Usermail Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: r_mailtext_id
+  type: numeric
+  label: R Mailtext Id
+- name: w_mailmsg_id
+  type: numeric
+  label: W Mailmsg Id
+- name: messageid
+  type: text
+  label: Messageid
+- name: deliveryconfirmation
+  type: text
+  label: Deliveryconfirmation
+- name: isdelivered
+  type: text
+  label: Isdelivered
+- name: subject
+  type: text
+  label: Subject
+- name: mailtext
+  type: text
+  label: Mailtext
+- name: ad_usermail_uu
+  type: text
+  label: Ad Usermail Uu
+- name: emailfrom
+  type: text
+  label: Emailfrom
+- name: recipientbcc
+  type: text
+  label: Recipientbcc
+- name: recipientcc
+  type: text
+  label: Recipientcc
+- name: recipientto
+  type: text
+  label: Recipientto

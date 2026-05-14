@@ -1,0 +1,52 @@
+name: M_PRODUCTOPERATION
+tableName: m_productoperation
+primaryKey: m_productoperation_id
+fields:
+- name: m_productoperation_id
+  type: numeric
+  label: M Productoperation Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: setuptime
+  type: numeric
+  label: Setuptime
+- name: unitruntime
+  type: numeric
+  label: Unitruntime
+- name: teardowntime
+  type: numeric
+  label: Teardowntime
+- name: m_productoperation_uu
+  type: text
+  label: M Productoperation Uu

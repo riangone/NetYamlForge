@@ -1,0 +1,88 @@
+name: AD_PRINTFORM
+tableName: ad_printform
+primaryKey: ad_printform_id
+fields:
+- name: ad_printform_id
+  type: numeric
+  label: Ad Printform Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: invoice_printformat_id
+  type: numeric
+  label: Invoice Printformat Id
+- name: order_printformat_id
+  type: numeric
+  label: Order Printformat Id
+- name: remittance_printformat_id
+  type: numeric
+  label: Remittance Printformat Id
+- name: shipment_printformat_id
+  type: numeric
+  label: Shipment Printformat Id
+- name: invoice_mailtext_id
+  type: numeric
+  label: Invoice Mailtext Id
+- name: order_mailtext_id
+  type: numeric
+  label: Order Mailtext Id
+- name: remittance_mailtext_id
+  type: numeric
+  label: Remittance Mailtext Id
+- name: shipment_mailtext_id
+  type: numeric
+  label: Shipment Mailtext Id
+- name: project_mailtext_id
+  type: numeric
+  label: Project Mailtext Id
+- name: project_printformat_id
+  type: numeric
+  label: Project Printformat Id
+- name: manuf_order_mailtext_id
+  type: numeric
+  label: Manuf Order Mailtext Id
+- name: manuf_order_printformat_id
+  type: numeric
+  label: Manuf Order Printformat Id
+- name: distrib_order_mailtext_id
+  type: numeric
+  label: Distrib Order Mailtext Id
+- name: distrib_order_printformat_id
+  type: numeric
+  label: Distrib Order Printformat Id
+- name: ad_printform_uu
+  type: text
+  label: Ad Printform Uu
+- name: jp_bill_printformat_id
+  type: numeric
+  label: Jp Bill Printformat Id
+- name: jp_estimation_printformat_id
+  type: numeric
+  label: Jp Estimation Printformat Id
+- name: jp_deposit_printformat_id
+  type: numeric
+  label: Jp Deposit Printformat Id

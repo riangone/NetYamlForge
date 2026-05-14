@@ -1,0 +1,211 @@
+name: A_ASSET
+tableName: a_asset
+primaryKey: a_asset_id
+fields:
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: a_asset_group_id
+  type: numeric
+  label: A Asset Group Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: serno
+  type: text
+  label: Serno
+- name: lot
+  type: text
+  label: Lot
+- name: versionno
+  type: text
+  label: Versionno
+- name: guaranteedate
+  type: text
+  label: Guaranteedate
+- name: assetservicedate
+  type: text
+  label: Assetservicedate
+- name: isowned
+  type: text
+  label: Isowned
+- name: assetdepreciationdate
+  type: text
+  label: Assetdepreciationdate
+- name: uselifeyears
+  type: numeric
+  label: Uselifeyears
+- name: uselifemonths
+  type: numeric
+  label: Uselifemonths
+- name: lifeuseunits
+  type: numeric
+  label: Lifeuseunits
+- name: useunits
+  type: numeric
+  label: Useunits
+- name: isdisposed
+  type: text
+  label: Isdisposed
+- name: assetdisposaldate
+  type: text
+  label: Assetdisposaldate
+- name: isinposession
+  type: text
+  label: Isinposession
+- name: locationcomment
+  type: text
+  label: Locationcomment
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: processing
+  type: text
+  label: Processing
+- name: isdepreciated
+  type: text
+  label: Isdepreciated
+- name: isfullydepreciated
+  type: text
+  label: Isfullydepreciated
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_bpartnersr_id
+  type: numeric
+  label: C Bpartnersr Id
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: lastmaintenencedate
+  type: text
+  label: Lastmaintenencedate
+- name: nextmaintenencedate
+  type: text
+  label: Nextmaintenencedate
+- name: lastmaintenanceuseunit
+  type: numeric
+  label: Lastmaintenanceuseunit
+- name: nextmaintenanceuseunit
+  type: numeric
+  label: Nextmaintenanceuseunit
+- name: leaseterminationdate
+  type: text
+  label: Leaseterminationdate
+- name: lease_bpartner_id
+  type: numeric
+  label: Lease Bpartner Id
+- name: lastmaintenancenote
+  type: text
+  label: Lastmaintenancenote
+- name: lastmaintenancedate
+  type: text
+  label: Lastmaintenancedate
+- name: lastmaintenanceunit
+  type: numeric
+  label: Lastmaintenanceunit
+- name: nextmaintenenceunit
+  type: numeric
+  label: Nextmaintenenceunit
+- name: a_asset_createdate
+  type: text
+  label: A Asset Createdate
+- name: a_asset_revaldate
+  type: text
+  label: A Asset Revaldate
+- name: a_parent_asset_id
+  type: numeric
+  label: A Parent Asset Id
+- name: a_qty_current
+  type: numeric
+  label: A Qty Current
+- name: a_qty_original
+  type: numeric
+  label: A Qty Original
+- name: a_asset_uu
+  type: text
+  label: A Asset Uu
+- name: a_asset_class_id
+  type: numeric
+  label: A Asset Class Id
+- name: a_asset_status
+  type: text
+  label: A Asset Status
+- name: a_asset_action
+  type: text
+  label: A Asset Action
+- name: processed
+  type: text
+  label: Processed
+- name: assetactivationdate
+  type: text
+  label: Assetactivationdate
+- name: inventoryno
+  type: text
+  label: Inventoryno
+- name: a_asset_type_id
+  type: numeric
+  label: A Asset Type Id
+- name: a_assettype
+  type: text
+  label: A Assettype
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: manufacturer
+  type: text
+  label: Manufacturer
+- name: manufacturedyear
+  type: numeric
+  label: Manufacturedyear

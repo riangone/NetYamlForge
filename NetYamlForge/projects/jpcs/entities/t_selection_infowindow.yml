@@ -1,0 +1,31 @@
+name: T_SELECTION_INFOWINDOW
+tableName: t_selection_infowindow
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: t_selection_id
+  type: numeric
+  label: T Selection Id
+- name: viewid
+  type: text
+  label: Viewid
+- name: columnname
+  type: text
+  label: Columnname
+- name: value_string
+  type: text
+  label: Value String
+- name: value_date
+  type: text
+  label: Value Date
+- name: value_number
+  type: numeric
+  label: Value Number
+- name: info
+  type: text
+  label: Info
+- name: t_selection_uu
+  type: text
+  label: T Selection Uu

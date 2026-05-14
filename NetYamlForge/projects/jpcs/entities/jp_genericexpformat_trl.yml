@@ -1,0 +1,49 @@
+name: JP_GENERICEXPFORMAT_TRL
+tableName: jp_genericexpformat_trl
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: jp_genericexpformat_id
+  type: numeric
+  label: Jp Genericexpformat Id
+- name: jp_genericexpformat_trl_uu
+  type: text
+  label: Jp Genericexpformat Trl Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentnote
+  type: text
+  label: Documentnote

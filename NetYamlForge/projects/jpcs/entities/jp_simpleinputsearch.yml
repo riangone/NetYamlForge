@@ -1,0 +1,61 @@
+name: JP_SIMPLEINPUTSEARCH
+tableName: jp_simpleinputsearch
+primaryKey: jp_simpleinputsearch_id
+fields:
+- name: jp_simpleinputsearch_id
+  type: numeric
+  label: Jp Simpleinputsearch Id
+- name: jp_simpleinputsearch_uu
+  type: text
+  label: Jp Simpleinputsearch Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_simpleinputwindow_id
+  type: numeric
+  label: Jp Simpleinputwindow Id
+- name: ad_field_id
+  type: numeric
+  label: Ad Field Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: description
+  type: text
+  label: Description
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: xposition
+  type: numeric
+  label: Xposition
+- name: columnspan
+  type: numeric
+  label: Columnspan
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id
+- name: jp_quickentrywindow_id
+  type: numeric
+  label: Jp Quickentrywindow Id

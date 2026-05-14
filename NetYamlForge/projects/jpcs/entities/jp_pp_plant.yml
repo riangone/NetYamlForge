@@ -1,0 +1,196 @@
+name: JP_PP_PLANT
+tableName: jp_pp_plant
+primaryKey: jp_pp_plant_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_doctypetarget_id
+  type: numeric
+  label: C Doctypetarget Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: issummary
+  type: text
+  label: Issummary
+- name: jp_dayoffset
+  type: numeric
+  label: Jp Dayoffset
+- name: jp_pp_doct_id
+  type: numeric
+  label: Jp Pp Doct Id
+- name: jp_pp_plant_id
+  type: numeric
+  label: Jp Pp Plant Id
+- name: jp_pp_plant_uu
+  type: text
+  label: Jp Pp Plant Uu
+- name: jp_pp_scheduledendtime
+  type: text
+  label: Jp Pp Scheduledendtime
+- name: jp_pp_scheduledstarttime
+  type: text
+  label: Jp Pp Scheduledstarttime
+- name: jp_productiondays
+  type: numeric
+  label: Jp Productiondays
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: name
+  type: text
+  label: Name
+- name: productionqty
+  type: numeric
+  label: Productionqty
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: value
+  type: text
+  label: Value
+- name: processing
+  type: text
+  label: Processing
+- name: iscreated
+  type: text
+  label: Iscreated
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: iscreateppfactjp
+  type: text
+  label: Iscreateppfactjp
+- name: jp_pp_workload_uom_id
+  type: numeric
+  label: Jp Pp Workload Uom Id
+- name: jp_pp_workload_plan
+  type: numeric
+  label: Jp Pp Workload Plan
+- name: issplitwhendifferencejp
+  type: text
+  label: Issplitwhendifferencejp
+- name: iscompleteautojp
+  type: text
+  label: Iscompleteautojp
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_processing2
+  type: text
+  label: Jp Processing2
+- name: jp_processing3
+  type: text
+  label: Jp Processing3
+- name: jp_processing4
+  type: text
+  label: Jp Processing4
+- name: jp_processing5
+  type: text
+  label: Jp Processing5
+- name: jp_processing6
+  type: text
+  label: Jp Processing6
+- name: upc
+  type: text
+  label: Upc
+- name: jp_name
+  type: text
+  label: Jp Name
+- name: jp_pp_workprocesstype
+  type: text
+  label: Jp Pp Workprocesstype
+- name: jp_warehousefrom_id
+  type: numeric
+  label: Jp Warehousefrom Id
+- name: jp_warehouseto_id
+  type: numeric
+  label: Jp Warehouseto Id
+- name: jp_physicalwarehousefrom_id
+  type: numeric
+  label: Jp Physicalwarehousefrom Id
+- name: jp_physicalwarehouseto_id
+  type: numeric
+  label: Jp Physicalwarehouseto Id
+- name: isrecordroutejp
+  type: text
+  label: Isrecordroutejp
+- name: jp_warehousenext_id
+  type: numeric
+  label: Jp Warehousenext Id
+- name: jp_warehousedst_id
+  type: numeric
+  label: Jp Warehousedst Id
+- name: jp_physicalwarehousenext_id
+  type: numeric
+  label: Jp Physicalwarehousenext Id
+- name: jp_physicalwarehousedst_id
+  type: numeric
+  label: Jp Physicalwarehousedst Id
+- name: jp_pp_workprocess_id
+  type: numeric
+  label: Jp Pp Workprocess Id

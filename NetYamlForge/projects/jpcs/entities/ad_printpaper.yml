@@ -1,0 +1,70 @@
+name: AD_PRINTPAPER
+tableName: ad_printpaper
+primaryKey: ad_printpaper_id
+fields:
+- name: ad_printpaper_id
+  type: numeric
+  label: Ad Printpaper Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: islandscape
+  type: text
+  label: Islandscape
+- name: code
+  type: text
+  label: Code
+- name: margintop
+  type: numeric
+  label: Margintop
+- name: marginleft
+  type: numeric
+  label: Marginleft
+- name: marginright
+  type: numeric
+  label: Marginright
+- name: marginbottom
+  type: numeric
+  label: Marginbottom
+- name: processing
+  type: text
+  label: Processing
+- name: sizex
+  type: numeric
+  label: Sizex
+- name: sizey
+  type: numeric
+  label: Sizey
+- name: dimensionunits
+  type: text
+  label: Dimensionunits
+- name: ad_printpaper_uu
+  type: text
+  label: Ad Printpaper Uu

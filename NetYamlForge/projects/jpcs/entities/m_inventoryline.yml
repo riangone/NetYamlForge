@@ -1,0 +1,79 @@
+name: M_INVENTORYLINE
+tableName: m_inventoryline
+primaryKey: m_inventoryline_id
+fields:
+- name: m_inventoryline_id
+  type: numeric
+  label: M Inventoryline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_inventory_id
+  type: numeric
+  label: M Inventory Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: line
+  type: numeric
+  label: Line
+- name: qtybook
+  type: numeric
+  label: Qtybook
+- name: qtycount
+  type: numeric
+  label: Qtycount
+- name: description
+  type: text
+  label: Description
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: inventorytype
+  type: text
+  label: Inventorytype
+- name: processed
+  type: text
+  label: Processed
+- name: qtyinternaluse
+  type: numeric
+  label: Qtyinternaluse
+- name: reversalline_id
+  type: numeric
+  label: Reversalline Id
+- name: qtycsv
+  type: numeric
+  label: Qtycsv
+- name: m_inventoryline_uu
+  type: text
+  label: M Inventoryline Uu
+- name: currentcostprice
+  type: numeric
+  label: Currentcostprice
+- name: newcostprice
+  type: numeric
+  label: Newcostprice

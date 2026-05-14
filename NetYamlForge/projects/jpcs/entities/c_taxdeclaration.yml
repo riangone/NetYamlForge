@@ -1,0 +1,52 @@
+name: C_TAXDECLARATION
+tableName: c_taxdeclaration
+primaryKey: c_taxdeclaration_id
+fields:
+- name: c_taxdeclaration_id
+  type: numeric
+  label: C Taxdeclaration Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: c_taxdeclaration_uu
+  type: text
+  label: C Taxdeclaration Uu

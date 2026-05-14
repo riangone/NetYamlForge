@@ -1,0 +1,70 @@
+name: AD_PACKAGE_IMP_DETAIL
+tableName: ad_package_imp_detail
+primaryKey: ad_package_imp_detail_id
+fields:
+- name: ad_package_imp_detail_id
+  type: numeric
+  label: Ad Package Imp Detail Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: ad_package_imp_id
+  type: numeric
+  label: Ad Package Imp Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: ad_backup_id
+  type: numeric
+  label: Ad Backup Id
+- name: action
+  type: text
+  label: Action
+- name: success
+  type: text
+  label: Success
+- name: type
+  type: text
+  label: Type
+- name: tablename
+  type: text
+  label: Tablename
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: uninstall
+  type: text
+  label: Uninstall
+- name: ad_package_imp_detail_uu
+  type: text
+  label: Ad Package Imp Detail Uu
+- name: execcode
+  type: text
+  label: Execcode
+- name: result
+  type: text
+  label: Result
+- name: record_uu
+  type: text
+  label: Record Uu

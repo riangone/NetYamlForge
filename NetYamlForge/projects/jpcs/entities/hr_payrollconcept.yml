@@ -1,0 +1,55 @@
+name: HR_PAYROLLCONCEPT
+tableName: hr_payrollconcept
+primaryKey: hr_payrollconcept_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_rule_id
+  type: numeric
+  label: Ad Rule Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: hr_concept_id
+  type: numeric
+  label: Hr Concept Id
+- name: hr_payrollconcept_id
+  type: numeric
+  label: Hr Payrollconcept Id
+- name: hr_payroll_id
+  type: numeric
+  label: Hr Payroll Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: isdisplayed
+  type: text
+  label: Isdisplayed
+- name: isinclude
+  type: text
+  label: Isinclude
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: hr_payrollconcept_uu
+  type: text
+  label: Hr Payrollconcept Uu

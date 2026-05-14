@@ -1,0 +1,49 @@
+name: AD_FIND
+tableName: ad_find
+primaryKey: ad_find_id
+fields:
+- name: ad_find_id
+  type: numeric
+  label: Ad Find Id
+- name: find_id
+  type: numeric
+  label: Find Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: andor
+  type: text
+  label: Andor
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: operation
+  type: text
+  label: Operation
+- name: value
+  type: text
+  label: Value
+- name: value2
+  type: text
+  label: Value2
+- name: ad_find_uu
+  type: text
+  label: Ad Find Uu

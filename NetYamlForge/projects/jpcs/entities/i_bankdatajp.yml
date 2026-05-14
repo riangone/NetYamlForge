@@ -1,0 +1,160 @@
+name: I_BANKDATAJP
+tableName: i_bankdatajp
+primaryKey: i_bankdatajp_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: accountno
+  type: text
+  label: Accountno
+- name: bankaccounttype
+  type: text
+  label: Bankaccounttype
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: i_bankdatajp_id
+  type: numeric
+  label: I Bankdatajp Id
+- name: i_bankdatajp_uu
+  type: text
+  label: I Bankdatajp Uu
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_a_name_kana
+  type: text
+  label: Jp A Name Kana
+- name: jp_acctdate
+  type: text
+  label: Jp Acctdate
+- name: jp_acctmonth
+  type: text
+  label: Jp Acctmonth
+- name: jp_bankaccounttype
+  type: text
+  label: Jp Bankaccounttype
+- name: jp_bankaccount_value
+  type: text
+  label: Jp Bankaccount Value
+- name: jp_bankdatacustomercode1
+  type: text
+  label: Jp Bankdatacustomercode1
+- name: jp_bankdatacustomercode2
+  type: text
+  label: Jp Bankdatacustomercode2
+- name: jp_bankdata_edi_info
+  type: text
+  label: Jp Bankdata Edi Info
+- name: jp_bankdata_referenceno
+  type: text
+  label: Jp Bankdata Referenceno
+- name: jp_bankname_kana
+  type: text
+  label: Jp Bankname Kana
+- name: jp_bank_name
+  type: text
+  label: Jp Bank Name
+- name: jp_branchname
+  type: text
+  label: Jp Branchname
+- name: jp_branchname_kana
+  type: text
+  label: Jp Branchname Kana
+- name: jp_date
+  type: text
+  label: Jp Date
+- name: jp_line_description
+  type: text
+  label: Jp Line Description
+- name: jp_month
+  type: text
+  label: Jp Month
+- name: jp_orgtrx_value
+  type: text
+  label: Jp Orgtrx Value
+- name: jp_org_value
+  type: text
+  label: Jp Org Value
+- name: jp_salesrep_email
+  type: text
+  label: Jp Salesrep Email
+- name: jp_salesrep_name
+  type: text
+  label: Jp Salesrep Name
+- name: jp_salesrep_value
+  type: text
+  label: Jp Salesrep Value
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: routingno
+  type: text
+  label: Routingno
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: statementdate
+  type: text
+  label: Statementdate
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_bankdata_id
+  type: numeric
+  label: Jp Bankdata Id
+- name: jp_bankdataline_id
+  type: numeric
+  label: Jp Bankdataline Id
+- name: jp_a_name
+  type: text
+  label: Jp A Name
+- name: jp_requestername
+  type: text
+  label: Jp Requestername
+- name: jp_branchcode
+  type: text
+  label: Jp Branchcode
+- name: jp_bankname_kana_line
+  type: text
+  label: Jp Bankname Kana Line
+- name: jp_branchname_kana_line
+  type: text
+  label: Jp Branchname Kana Line

@@ -1,0 +1,37 @@
+name: JP_STOCKORG
+tableName: jp_stockorg
+primaryKey: jp_stockorg_uu
+fields:
+- name: jp_stockorg_uu
+  type: text
+  label: Jp Stockorg Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: datevalue
+  type: text
+  label: Datevalue
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: qtybook
+  type: numeric
+  label: Qtybook

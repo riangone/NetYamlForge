@@ -1,0 +1,67 @@
+name: C_ACCTPROCESSOR
+tableName: c_acctprocessor
+primaryKey: c_acctprocessor_id
+fields:
+- name: c_acctprocessor_id
+  type: numeric
+  label: C Acctprocessor Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: frequencytype
+  type: text
+  label: Frequencytype
+- name: frequency
+  type: numeric
+  label: Frequency
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: datenextrun
+  type: text
+  label: Datenextrun
+- name: supervisor_id
+  type: numeric
+  label: Supervisor Id
+- name: keeplogdays
+  type: numeric
+  label: Keeplogdays
+- name: processing
+  type: text
+  label: Processing
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: c_acctprocessor_uu
+  type: text
+  label: C Acctprocessor Uu
+- name: ad_schedule_id
+  type: numeric
+  label: Ad Schedule Id

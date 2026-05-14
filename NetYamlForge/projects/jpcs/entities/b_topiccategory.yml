@@ -1,0 +1,40 @@
+name: B_TOPICCATEGORY
+tableName: b_topiccategory
+primaryKey: b_topiccategory_id
+fields:
+- name: b_topiccategory_id
+  type: numeric
+  label: B Topiccategory Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: b_topictype_id
+  type: numeric
+  label: B Topictype Id
+- name: b_topiccategory_uu
+  type: text
+  label: B Topiccategory Uu

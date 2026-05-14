@@ -1,0 +1,52 @@
+name: M_PRODUCTPRICEVENDORBREAK
+tableName: m_productpricevendorbreak
+primaryKey: m_productpricevendorbreak_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: breakvalue
+  type: numeric
+  label: Breakvalue
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_pricelist_version_id
+  type: numeric
+  label: M Pricelist Version Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricestd
+  type: numeric
+  label: Pricestd
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_productpricevendorbreak_id
+  type: numeric
+  label: M Productpricevendorbreak Id
+- name: m_productpricevendorbreak_uu
+  type: text
+  label: M Productpricevendorbreak Uu

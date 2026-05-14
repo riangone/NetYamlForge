@@ -1,0 +1,73 @@
+name: AD_PACKAGE_IMP_INST
+tableName: ad_package_imp_inst
+primaryKey: ad_package_imp_inst_id
+fields:
+- name: ad_package_imp_inst_id
+  type: numeric
+  label: Ad Package Imp Inst Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: pk_status
+  type: text
+  label: Pk Status
+- name: releaseno
+  type: text
+  label: Releaseno
+- name: pk_version
+  type: text
+  label: Pk Version
+- name: version
+  type: text
+  label: Version
+- name: description
+  type: text
+  label: Description
+- name: email
+  type: text
+  label: Email
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: creator
+  type: text
+  label: Creator
+- name: creatorcontact
+  type: text
+  label: Creatorcontact
+- name: createddate
+  type: text
+  label: Createddate
+- name: updateddate
+  type: text
+  label: Updateddate
+- name: uninstall
+  type: text
+  label: Uninstall
+- name: ad_package_imp_inst_uu
+  type: text
+  label: Ad Package Imp Inst Uu

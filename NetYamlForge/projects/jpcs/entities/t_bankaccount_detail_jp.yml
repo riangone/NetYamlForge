@@ -1,0 +1,79 @@
+name: T_BANKACCOUNT_DETAIL_JP
+tableName: t_bankaccount_detail_jp
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: bankaccounttype
+  type: text
+  label: Bankaccounttype
+- name: description
+  type: text
+  label: Description
+- name: line
+  type: numeric
+  label: Line
+- name: amtacctbalance
+  type: numeric
+  label: Amtacctbalance
+- name: amtsourcebalance
+  type: numeric
+  label: Amtsourcebalance
+- name: c_bankstatement_id
+  type: numeric
+  label: C Bankstatement Id
+- name: c_bankstatementline_id
+  type: numeric
+  label: C Bankstatementline Id
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: fact_acct_c_currency_id
+  type: numeric
+  label: Fact Acct C Currency Id

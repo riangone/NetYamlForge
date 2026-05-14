@@ -1,0 +1,79 @@
+name: T_INVOICEGL
+tableName: t_invoicegl
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: fact_acct_id
+  type: numeric
+  label: Fact Acct Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: openamt
+  type: numeric
+  label: Openamt
+- name: percent
+  type: numeric
+  label: Percent
+- name: apar
+  type: text
+  label: Apar
+- name: amtsourcebalance
+  type: numeric
+  label: Amtsourcebalance
+- name: amtacctbalance
+  type: numeric
+  label: Amtacctbalance
+- name: c_conversiontypereval_id
+  type: numeric
+  label: C Conversiontypereval Id
+- name: amtrevaldr
+  type: numeric
+  label: Amtrevaldr
+- name: amtrevalcr
+  type: numeric
+  label: Amtrevalcr
+- name: datereval
+  type: text
+  label: Datereval
+- name: amtrevaldrdiff
+  type: numeric
+  label: Amtrevaldrdiff
+- name: amtrevalcrdiff
+  type: numeric
+  label: Amtrevalcrdiff
+- name: c_doctypereval_id
+  type: numeric
+  label: C Doctypereval Id
+- name: isallcurrencies
+  type: text
+  label: Isallcurrencies
+- name: t_invoicegl_uu
+  type: text
+  label: T Invoicegl Uu

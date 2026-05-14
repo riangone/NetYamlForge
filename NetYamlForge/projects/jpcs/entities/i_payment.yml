@@ -1,0 +1,217 @@
+name: I_PAYMENT
+tableName: i_payment
+primaryKey: i_payment_id
+fields:
+- name: i_payment_id
+  type: numeric
+  label: I Payment Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processed
+  type: text
+  label: Processed
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: doctypename
+  type: text
+  label: Doctypename
+- name: trxtype
+  type: text
+  label: Trxtype
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: bankaccountno
+  type: text
+  label: Bankaccountno
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: invoicedocumentno
+  type: text
+  label: Invoicedocumentno
+- name: tendertype
+  type: text
+  label: Tendertype
+- name: creditcardtype
+  type: text
+  label: Creditcardtype
+- name: creditcardnumber
+  type: text
+  label: Creditcardnumber
+- name: creditcardvv
+  type: text
+  label: Creditcardvv
+- name: creditcardexpmm
+  type: numeric
+  label: Creditcardexpmm
+- name: creditcardexpyy
+  type: numeric
+  label: Creditcardexpyy
+- name: micr
+  type: text
+  label: Micr
+- name: routingno
+  type: text
+  label: Routingno
+- name: accountno
+  type: text
+  label: Accountno
+- name: checkno
+  type: text
+  label: Checkno
+- name: a_name
+  type: text
+  label: A Name
+- name: a_street
+  type: text
+  label: A Street
+- name: a_city
+  type: text
+  label: A City
+- name: a_state
+  type: text
+  label: A State
+- name: a_zip
+  type: text
+  label: A Zip
+- name: a_country
+  type: text
+  label: A Country
+- name: a_ident_dl
+  type: text
+  label: A Ident Dl
+- name: a_ident_ssn
+  type: text
+  label: A Ident Ssn
+- name: a_email
+  type: text
+  label: A Email
+- name: voiceauthcode
+  type: text
+  label: Voiceauthcode
+- name: swipe
+  type: text
+  label: Swipe
+- name: orig_trxid
+  type: text
+  label: Orig Trxid
+- name: ponum
+  type: text
+  label: Ponum
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt
+- name: isoverunderpayment
+  type: text
+  label: Isoverunderpayment
+- name: overunderamt
+  type: numeric
+  label: Overunderamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargename
+  type: text
+  label: Chargename
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: isdelayedcapture
+  type: text
+  label: Isdelayedcapture
+- name: r_pnref
+  type: text
+  label: R Pnref
+- name: r_result
+  type: text
+  label: R Result
+- name: r_respmsg
+  type: text
+  label: R Respmsg
+- name: r_authcode
+  type: text
+  label: R Authcode
+- name: r_info
+  type: text
+  label: R Info
+- name: processing
+  type: text
+  label: Processing
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: i_payment_uu
+  type: text
+  label: I Payment Uu
+- name: iban
+  type: text
+  label: Iban
+- name: swiftcode
+  type: text
+  label: Swiftcode

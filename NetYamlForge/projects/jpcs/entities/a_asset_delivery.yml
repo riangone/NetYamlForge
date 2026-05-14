@@ -1,0 +1,79 @@
+name: A_ASSET_DELIVERY
+tableName: a_asset_delivery
+primaryKey: a_asset_delivery_id
+fields:
+- name: a_asset_delivery_id
+  type: numeric
+  label: A Asset Delivery Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: serno
+  type: text
+  label: Serno
+- name: lot
+  type: text
+  label: Lot
+- name: versionno
+  type: text
+  label: Versionno
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: email
+  type: text
+  label: Email
+- name: messageid
+  type: text
+  label: Messageid
+- name: deliveryconfirmation
+  type: text
+  label: Deliveryconfirmation
+- name: url
+  type: text
+  label: Url
+- name: remote_addr
+  type: text
+  label: Remote Addr
+- name: remote_host
+  type: text
+  label: Remote Host
+- name: referrer
+  type: text
+  label: Referrer
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: description
+  type: text
+  label: Description
+- name: m_productdownload_id
+  type: numeric
+  label: M Productdownload Id
+- name: a_asset_delivery_uu
+  type: text
+  label: A Asset Delivery Uu

@@ -1,0 +1,43 @@
+name: AD_WIZARDPROCESS
+tableName: ad_wizardprocess
+primaryKey: ad_wizardprocess_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_wf_node_id
+  type: numeric
+  label: Ad Wf Node Id
+- name: ad_wizardprocess_id
+  type: numeric
+  label: Ad Wizardprocess Id
+- name: ad_wizardprocess_uu
+  type: text
+  label: Ad Wizardprocess Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: note
+  type: text
+  label: Note
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: wizardstatus
+  type: text
+  label: Wizardstatus
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id

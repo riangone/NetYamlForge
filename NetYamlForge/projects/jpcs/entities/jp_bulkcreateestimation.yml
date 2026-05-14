@@ -1,0 +1,70 @@
+name: JP_BULKCREATEESTIMATION
+tableName: jp_bulkcreateestimation
+primaryKey: jp_bulkcreateestimation_id
+fields:
+- name: jp_bulkcreateestimation_id
+  type: numeric
+  label: Jp Bulkcreateestimation Id
+- name: jp_bulkcreateestimation_uu
+  type: text
+  label: Jp Bulkcreateestimation Uu
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: startno
+  type: numeric
+  label: Startno
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: jp_registrationqty
+  type: numeric
+  label: Jp Registrationqty
+- name: jp_commitrecords
+  type: numeric
+  label: Jp Commitrecords
+- name: jp_cresetrecords
+  type: numeric
+  label: Jp Cresetrecords
+- name: jp_estimation_id
+  type: numeric
+  label: Jp Estimation Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: docaction
+  type: text
+  label: Docaction
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id

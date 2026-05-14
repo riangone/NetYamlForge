@@ -1,0 +1,43 @@
+name: HR_DEPARTMENT
+tableName: hr_department
+primaryKey: hr_department_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: hr_department_id
+  type: numeric
+  label: Hr Department Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: value
+  type: text
+  label: Value
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: hr_department_uu
+  type: text
+  label: Hr Department Uu

@@ -1,0 +1,22 @@
+name: AD_ATTRIBUTE_VALUE
+tableName: ad_attribute_value
+primaryKey: ad_attribute_id
+fields:
+- name: ad_attribute_id
+  type: numeric
+  label: Ad Attribute Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: v_number
+  type: numeric
+  label: V Number
+- name: v_date
+  type: text
+  label: V Date
+- name: v_string
+  type: text
+  label: V String
+- name: ad_attribute_value_uu
+  type: text
+  label: Ad Attribute Value Uu

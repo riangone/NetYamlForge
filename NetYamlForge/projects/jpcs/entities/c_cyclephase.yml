@@ -1,0 +1,34 @@
+name: C_CYCLEPHASE
+tableName: c_cyclephase
+primaryKey: c_cyclestep_id
+fields:
+- name: c_cyclestep_id
+  type: numeric
+  label: C Cyclestep Id
+- name: c_phase_id
+  type: numeric
+  label: C Phase Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_cyclephase_uu
+  type: text
+  label: C Cyclephase Uu

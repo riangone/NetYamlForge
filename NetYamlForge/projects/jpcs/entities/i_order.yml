@@ -1,0 +1,208 @@
+name: I_ORDER
+tableName: i_order
+primaryKey: i_order_id
+fields:
+- name: i_order_id
+  type: numeric
+  label: I Order Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: name
+  type: text
+  label: Name
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: billto_id
+  type: numeric
+  label: Billto Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: postal
+  type: text
+  label: Postal
+- name: city
+  type: text
+  label: City
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: regionname
+  type: text
+  label: Regionname
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: countrycode
+  type: text
+  label: Countrycode
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: contactname
+  type: text
+  label: Contactname
+- name: email
+  type: text
+  label: Email
+- name: phone
+  type: text
+  label: Phone
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: doctypename
+  type: text
+  label: Doctypename
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: paymenttermvalue
+  type: text
+  label: Paymenttermvalue
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: description
+  type: text
+  label: Description
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: productvalue
+  type: text
+  label: Productvalue
+- name: upc
+  type: text
+  label: Upc
+- name: sku
+  type: text
+  label: Sku
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: taxindicator
+  type: text
+  label: Taxindicator
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: c_orderline_id
+  type: numeric
+  label: C Orderline Id
+- name: linedescription
+  type: text
+  label: Linedescription
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qtyordered
+  type: numeric
+  label: Qtyordered
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargename
+  type: text
+  label: Chargename
+- name: c_ordersource_id
+  type: numeric
+  label: C Ordersource Id
+- name: c_ordersourcevalue
+  type: text
+  label: C Ordersourcevalue
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: i_order_uu
+  type: text
+  label: I Order Uu

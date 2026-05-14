@@ -1,0 +1,40 @@
+name: AD_WLISTBOX_CUSTOMIZATION
+tableName: ad_wlistbox_customization
+primaryKey: ad_wlistbox_customization_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: ad_wlistbox_customization_id
+  type: numeric
+  label: Ad Wlistbox Customization Id
+- name: ad_wlistbox_customization_uu
+  type: text
+  label: Ad Wlistbox Customization Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: custom
+  type: text
+  label: Custom
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: wlistboxname
+  type: text
+  label: Wlistboxname

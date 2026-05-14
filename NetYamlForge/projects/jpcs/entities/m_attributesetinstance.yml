@@ -1,0 +1,49 @@
+name: M_ATTRIBUTESETINSTANCE
+tableName: m_attributesetinstance
+primaryKey: m_attributesetinstance_id
+fields:
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_attributeset_id
+  type: numeric
+  label: M Attributeset Id
+- name: serno
+  type: text
+  label: Serno
+- name: lot
+  type: text
+  label: Lot
+- name: guaranteedate
+  type: text
+  label: Guaranteedate
+- name: description
+  type: text
+  label: Description
+- name: m_lot_id
+  type: numeric
+  label: M Lot Id
+- name: m_attributesetinstance_uu
+  type: text
+  label: M Attributesetinstance Uu

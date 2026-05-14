@@ -1,0 +1,13 @@
+name: T_SELECTION2
+tableName: t_selection2
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: query_id
+  type: numeric
+  label: Query Id
+- name: t_selection_id
+  type: numeric
+  label: T Selection Id

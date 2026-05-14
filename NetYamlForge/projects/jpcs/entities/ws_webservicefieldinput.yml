@@ -1,0 +1,55 @@
+name: WS_WEBSERVICEFIELDINPUT
+tableName: ws_webservicefieldinput
+primaryKey: ws_webservicefieldinput_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ws_webservicefieldinput_id
+  type: numeric
+  label: Ws Webservicefieldinput Id
+- name: ws_webservicetype_id
+  type: numeric
+  label: Ws Webservicetype Id
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: columnname
+  type: text
+  label: Columnname
+- name: identifierlogic
+  type: text
+  label: Identifierlogic
+- name: isidentifier
+  type: text
+  label: Isidentifier
+- name: isnullidentifier
+  type: text
+  label: Isnullidentifier
+- name: ws_webservicefieldinput_uu
+  type: text
+  label: Ws Webservicefieldinput Uu
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id

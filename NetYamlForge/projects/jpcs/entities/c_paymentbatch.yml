@@ -1,0 +1,55 @@
+name: C_PAYMENTBATCH
+tableName: c_paymentbatch
+primaryKey: c_paymentbatch_id
+fields:
+- name: c_paymentbatch_id
+  type: numeric
+  label: C Paymentbatch Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: c_paymentprocessor_id
+  type: numeric
+  label: C Paymentprocessor Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: processingdate
+  type: text
+  label: Processingdate
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: c_paymentbatch_uu
+  type: text
+  label: C Paymentbatch Uu
+- name: jp_bankstatement_id
+  type: numeric
+  label: Jp Bankstatement Id
+- name: isreceiptjp
+  type: text
+  label: Isreceiptjp

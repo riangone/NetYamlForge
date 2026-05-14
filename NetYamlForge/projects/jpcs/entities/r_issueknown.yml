@@ -1,0 +1,67 @@
+name: R_ISSUEKNOWN
+tableName: r_issueknown
+primaryKey: r_issueknown_id
+fields:
+- name: r_issueknown_id
+  type: numeric
+  label: R Issueknown Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: issuesummary
+  type: text
+  label: Issuesummary
+- name: releaseno
+  type: text
+  label: Releaseno
+- name: sourceclassname
+  type: text
+  label: Sourceclassname
+- name: sourcemethodname
+  type: text
+  label: Sourcemethodname
+- name: loggername
+  type: text
+  label: Loggername
+- name: lineno
+  type: numeric
+  label: Lineno
+- name: description
+  type: text
+  label: Description
+- name: issuestatus
+  type: text
+  label: Issuestatus
+- name: r_issuestatus_id
+  type: numeric
+  label: R Issuestatus Id
+- name: r_request_id
+  type: numeric
+  label: R Request Id
+- name: processing
+  type: text
+  label: Processing
+- name: r_issuerecommendation_id
+  type: numeric
+  label: R Issuerecommendation Id
+- name: r_issueknown_uu
+  type: text
+  label: R Issueknown Uu

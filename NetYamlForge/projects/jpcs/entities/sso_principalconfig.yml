@@ -1,0 +1,67 @@
+name: SSO_PRINCIPALCONFIG
+tableName: sso_principalconfig
+primaryKey: sso_principalconfig_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: sso_applicationclientid
+  type: text
+  label: Sso Applicationclientid
+- name: sso_applicationlogouturl
+  type: text
+  label: Sso Applicationlogouturl
+- name: sso_applicationredirecturis
+  type: text
+  label: Sso Applicationredirecturis
+- name: sso_applicationsecretkey
+  type: text
+  label: Sso Applicationsecretkey
+- name: sso_authorizationtenantid
+  type: text
+  label: Sso Authorizationtenantid
+- name: sso_principalconfig_id
+  type: numeric
+  label: Sso Principalconfig Id
+- name: sso_principalconfig_uu
+  type: text
+  label: Sso Principalconfig Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: sso_provider
+  type: text
+  label: Sso Provider
+- name: sso_applicationdiscoveryuri
+  type: text
+  label: Sso Applicationdiscoveryuri
+- name: sso_idempmonitorredirecturis
+  type: text
+  label: Sso Idempmonitorredirecturis
+- name: sso_osgiredirecturis
+  type: text
+  label: Sso Osgiredirecturis
+- name: sso_loginbuttonimage_id
+  type: numeric
+  label: Sso Loginbuttonimage Id

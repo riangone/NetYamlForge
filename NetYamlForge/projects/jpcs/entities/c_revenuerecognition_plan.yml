@@ -1,0 +1,55 @@
+name: C_REVENUERECOGNITION_PLAN
+tableName: c_revenuerecognition_plan
+primaryKey: c_revenuerecognition_plan_id
+fields:
+- name: c_revenuerecognition_plan_id
+  type: numeric
+  label: C Revenuerecognition Plan Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: c_revenuerecognition_id
+  type: numeric
+  label: C Revenuerecognition Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: unearnedrevenue_acct
+  type: numeric
+  label: Unearnedrevenue Acct
+- name: p_revenue_acct
+  type: numeric
+  label: P Revenue Acct
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: totalamt
+  type: numeric
+  label: Totalamt
+- name: recognizedamt
+  type: numeric
+  label: Recognizedamt
+- name: c_revenuerecognition_plan_uu
+  type: text
+  label: C Revenuerecognition Plan Uu

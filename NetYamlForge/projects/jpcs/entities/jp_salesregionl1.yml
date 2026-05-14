@@ -1,0 +1,43 @@
+name: JP_SALESREGIONL1
+tableName: jp_salesregionl1
+primaryKey: jp_salesregionl1_id
+fields:
+- name: jp_salesregionl1_id
+  type: numeric
+  label: Jp Salesregionl1 Id
+- name: jp_salesregionl1_uu
+  type: text
+  label: Jp Salesregionl1 Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_salesregionl2_id
+  type: numeric
+  label: Jp Salesregionl2 Id
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description

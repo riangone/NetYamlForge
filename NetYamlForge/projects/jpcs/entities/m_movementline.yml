@@ -1,0 +1,88 @@
+name: M_MOVEMENTLINE
+tableName: m_movementline
+primaryKey: m_movementline_id
+fields:
+- name: m_movementline_id
+  type: numeric
+  label: M Movementline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_movement_id
+  type: numeric
+  label: M Movement Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: m_locatorto_id
+  type: numeric
+  label: M Locatorto Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: line
+  type: numeric
+  label: Line
+- name: movementqty
+  type: numeric
+  label: Movementqty
+- name: description
+  type: text
+  label: Description
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: confirmedqty
+  type: numeric
+  label: Confirmedqty
+- name: scrappedqty
+  type: numeric
+  label: Scrappedqty
+- name: targetqty
+  type: numeric
+  label: Targetqty
+- name: processed
+  type: text
+  label: Processed
+- name: m_attributesetinstanceto_id
+  type: numeric
+  label: M Attributesetinstanceto Id
+- name: dd_orderline_id
+  type: numeric
+  label: Dd Orderline Id
+- name: reversalline_id
+  type: numeric
+  label: Reversalline Id
+- name: m_movementline_uu
+  type: text
+  label: M Movementline Uu
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn
+- name: jp_pp_mm_factline_id
+  type: numeric
+  label: Jp Pp Mm Factline Id
+- name: qtyentered
+  type: numeric
+  label: Qtyentered
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id

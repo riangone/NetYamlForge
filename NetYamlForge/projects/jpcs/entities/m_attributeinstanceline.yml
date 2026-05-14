@@ -1,0 +1,40 @@
+name: M_ATTRIBUTEINSTANCELINE
+tableName: m_attributeinstanceline
+primaryKey: m_attributeinstanceline_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: line
+  type: numeric
+  label: Line
+- name: m_attributeinstanceline_id
+  type: numeric
+  label: M Attributeinstanceline Id
+- name: m_attributeinstanceline_uu
+  type: text
+  label: M Attributeinstanceline Uu
+- name: m_attributeinstance_uu
+  type: text
+  label: M Attributeinstance Uu
+- name: m_attributevalue_id
+  type: numeric
+  label: M Attributevalue Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

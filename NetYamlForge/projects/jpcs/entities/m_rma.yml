@@ -1,0 +1,112 @@
+name: M_RMA
+tableName: m_rma
+primaryKey: m_rma_id
+fields:
+- name: m_rma_id
+  type: numeric
+  label: M Rma Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: inout_id
+  type: numeric
+  label: Inout Id
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: amt
+  type: numeric
+  label: Amt
+- name: m_rmatype_id
+  type: numeric
+  label: M Rmatype Id
+- name: help
+  type: text
+  label: Help
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: generateto
+  type: text
+  label: Generateto
+- name: ref_rma_id
+  type: numeric
+  label: Ref Rma Id
+- name: m_rma_uu
+  type: text
+  label: M Rma Uu
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_order_id
+  type: numeric
+  label: Jp Order Id
+- name: jp_rma_acceptance_date
+  type: text
+  label: Jp Rma Acceptance Date
+- name: createlinesfrom
+  type: text
+  label: Createlinesfrom

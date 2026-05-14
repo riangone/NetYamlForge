@@ -1,0 +1,55 @@
+name: AD_ENTITYTYPE
+tableName: ad_entitytype
+primaryKey: ad_entitytype_id
+fields:
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_entitytype_id
+  type: numeric
+  label: Ad Entitytype Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: version
+  type: text
+  label: Version
+- name: modelpackage
+  type: text
+  label: Modelpackage
+- name: classpath
+  type: text
+  label: Classpath
+- name: processing
+  type: text
+  label: Processing
+- name: ad_entitytype_uu
+  type: text
+  label: Ad Entitytype Uu

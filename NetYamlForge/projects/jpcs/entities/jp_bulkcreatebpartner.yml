@@ -1,0 +1,202 @@
+name: JP_BULKCREATEBPARTNER
+tableName: jp_bulkcreatebpartner
+primaryKey: jp_bulkcreatebpartner_id
+fields:
+- name: jp_bulkcreatebpartner_id
+  type: numeric
+  label: Jp Bulkcreatebpartner Id
+- name: jp_bulkcreatebpartner_uu
+  type: text
+  label: Jp Bulkcreatebpartner Uu
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: startno
+  type: numeric
+  label: Startno
+- name: jp_registrationqty
+  type: numeric
+  label: Jp Registrationqty
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name2
+  type: text
+  label: Name2
+- name: issummary
+  type: text
+  label: Issummary
+- name: isonetime
+  type: text
+  label: Isonetime
+- name: isprospect
+  type: text
+  label: Isprospect
+- name: isvendor
+  type: text
+  label: Isvendor
+- name: iscustomer
+  type: text
+  label: Iscustomer
+- name: isemployee
+  type: text
+  label: Isemployee
+- name: issalesrep
+  type: text
+  label: Issalesrep
+- name: referenceno
+  type: text
+  label: Referenceno
+- name: duns
+  type: text
+  label: Duns
+- name: url
+  type: text
+  label: Url
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: taxid
+  type: text
+  label: Taxid
+- name: istaxexempt
+  type: text
+  label: Istaxexempt
+- name: c_invoiceschedule_id
+  type: numeric
+  label: C Invoiceschedule Id
+- name: rating
+  type: text
+  label: Rating
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: so_creditlimit
+  type: numeric
+  label: So Creditlimit
+- name: so_creditused
+  type: numeric
+  label: So Creditused
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: m_discountschema_id
+  type: numeric
+  label: M Discountschema Id
+- name: c_dunning_id
+  type: numeric
+  label: C Dunning Id
+- name: isdiscountprinted
+  type: text
+  label: Isdiscountprinted
+- name: so_description
+  type: text
+  label: So Description
+- name: poreference
+  type: text
+  label: Poreference
+- name: paymentrulepo
+  type: text
+  label: Paymentrulepo
+- name: po_pricelist_id
+  type: numeric
+  label: Po Pricelist Id
+- name: po_discountschema_id
+  type: numeric
+  label: Po Discountschema Id
+- name: po_paymentterm_id
+  type: numeric
+  label: Po Paymentterm Id
+- name: c_greeting_id
+  type: numeric
+  label: C Greeting Id
+- name: invoicerule
+  type: text
+  label: Invoicerule
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: freightcostrule
+  type: text
+  label: Freightcostrule
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: socreditstatus
+  type: text
+  label: Socreditstatus
+- name: flatdiscount
+  type: numeric
+  label: Flatdiscount
+- name: c_taxgroup_id
+  type: numeric
+  label: C Taxgroup Id
+- name: ispotaxexempt
+  type: text
+  label: Ispotaxexempt
+- name: ismanufacturer
+  type: text
+  label: Ismanufacturer
+- name: default1099box_id
+  type: numeric
+  label: Default1099Box Id
+- name: is1099vendor
+  type: text
+  label: Is1099Vendor
+- name: jp_sotaxrounding
+  type: text
+  label: Jp Sotaxrounding
+- name: jp_potaxrounding
+  type: text
+  label: Jp Potaxrounding
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id
+- name: jp_billschema_id
+  type: numeric
+  label: Jp Billschema Id
+- name: jp_commitrecords
+  type: numeric
+  label: Jp Commitrecords
+- name: jp_cresetrecords
+  type: numeric
+  label: Jp Cresetrecords

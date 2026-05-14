@@ -1,0 +1,103 @@
+name: PA_DASHBOARDCONTENT
+tableName: pa_dashboardcontent
+primaryKey: pa_dashboardcontent_id
+fields:
+- name: pa_dashboardcontent_id
+  type: numeric
+  label: Pa Dashboardcontent Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: description
+  type: text
+  label: Description
+- name: html
+  type: text
+  label: Html
+- name: line
+  type: numeric
+  label: Line
+- name: pa_goal_id
+  type: numeric
+  label: Pa Goal Id
+- name: columnno
+  type: numeric
+  label: Columnno
+- name: zulfilepath
+  type: text
+  label: Zulfilepath
+- name: iscollapsible
+  type: text
+  label: Iscollapsible
+- name: goaldisplay
+  type: text
+  label: Goaldisplay
+- name: pa_dashboardcontent_uu
+  type: text
+  label: Pa Dashboardcontent Uu
+- name: isshowindashboard
+  type: text
+  label: Isshowindashboard
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: isembedreportcontent
+  type: text
+  label: Isembedreportcontent
+- name: processparameters
+  type: text
+  label: Processparameters
+- name: iscollapsedbydefault
+  type: text
+  label: Iscollapsedbydefault
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: isshowinlogin
+  type: text
+  label: Isshowinlogin
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: isshowtitle
+  type: text
+  label: Isshowtitle
+- name: ad_statusline_id
+  type: numeric
+  label: Ad Statusline Id
+- name: ismaximizable
+  type: text
+  label: Ismaximizable
+- name: ad_printformat_id
+  type: numeric
+  label: Ad Printformat Id
+- name: help
+  type: text
+  label: Help

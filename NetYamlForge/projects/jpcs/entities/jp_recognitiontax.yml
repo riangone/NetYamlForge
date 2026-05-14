@@ -1,0 +1,49 @@
+name: JP_RECOGNITIONTAX
+tableName: jp_recognitiontax
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_taxprovider_id
+  type: numeric
+  label: C Taxprovider Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: istaxincluded
+  type: text
+  label: Istaxincluded
+- name: jp_recognitiontax_uu
+  type: text
+  label: Jp Recognitiontax Uu
+- name: jp_recognition_id
+  type: numeric
+  label: Jp Recognition Id
+- name: processed
+  type: text
+  label: Processed
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: taxbaseamt
+  type: numeric
+  label: Taxbaseamt
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

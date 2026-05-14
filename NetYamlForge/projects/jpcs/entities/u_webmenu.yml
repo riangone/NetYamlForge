@@ -1,0 +1,64 @@
+name: U_WEBMENU
+tableName: u_webmenu
+primaryKey: u_webmenu_id
+fields:
+- name: u_webmenu_id
+  type: numeric
+  label: U Webmenu Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: menulink
+  type: text
+  label: Menulink
+- name: module
+  type: text
+  label: Module
+- name: parentmenu_id
+  type: numeric
+  label: Parentmenu Id
+- name: hassubmenu
+  type: text
+  label: Hassubmenu
+- name: description
+  type: text
+  label: Description
+- name: imagelink
+  type: text
+  label: Imagelink
+- name: position
+  type: text
+  label: Position
+- name: help
+  type: text
+  label: Help
+- name: category
+  type: text
+  label: Category
+- name: sequence
+  type: numeric
+  label: Sequence
+- name: u_webmenu_uu
+  type: text
+  label: U Webmenu Uu

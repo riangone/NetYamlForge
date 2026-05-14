@@ -1,0 +1,10 @@
+name: AD_ARCHIVE_BLOB
+tableName: ad_archive_blob
+primaryKey: ad_archive_id
+fields:
+- name: ad_archive_id
+  type: numeric
+  label: Ad Archive Id
+- name: binarydata
+  type: text
+  label: Binarydata

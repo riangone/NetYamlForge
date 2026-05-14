@@ -1,0 +1,165 @@
+name: jpcs
+displayName: JPiere Contract Service (Native)
+description: 基于 iDempiere/JPiere 原始架构的契约管理系统
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/jpcs.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  crud: true
+  api: true
+  export: true
+  batchJobs: true
+  aiAssistant: true
+
+theme:
+  primaryColor: "#2c3e50"
+  accentColor: "#e67e22"
+  logo: jpiere-logo.png
+
+layout:
+  dashboardTheme: workspace
+
+# AI 配置
+aiConfig:
+  enabled: true
+  defaultProvider: qwen
+  businessHours: "月〜金 9:00-18:00"
+
+# 导航菜单
+navigation:
+  groups:
+    - name: 控制面板
+      items:
+        - label: 仪表盘
+          url: /Page/Dashboard
+          icon: dashboard
+    - name: 契约管理
+      items:
+        - label: 契约
+          url: /Entity/jp_contract
+          icon: file-contract
+        - label: 契约内容
+          url: /Entity/jp_contractcontent
+          icon: file-invoice
+        - label: 契约行
+          url: /Entity/jp_contractline
+          icon: list
+        - label: 契约类别
+          url: /Entity/jp_contractcategory
+          icon: tag
+        - label: 契约日志
+          url: /Entity/jp_contractlog
+          icon: history
+        - label: 契约处理进度
+          url: /Entity/jp_contractprocess
+          icon: tasks
+    - name: 销售与订单
+      items:
+        - label: 订单
+          url: /Entity/c_order
+          icon: shopping-cart
+        - label: 订单行
+          url: /Entity/c_orderline
+          icon: list
+        - label: 报价请求
+          url: /Entity/c_rfq
+          icon: file-text
+        - label: 商机
+          url: /Entity/c_opportunity
+          icon: chart-line
+    - name: 财务
+      items:
+        - label: 发票
+          url: /Entity/c_invoice
+          icon: file-invoice-dollar
+        - label: 发票行
+          url: /Entity/c_invoiceline
+          icon: list
+        - label: 付款
+          url: /Entity/c_payment
+          icon: credit-card
+        - label: 账单 (JP)
+          url: /Entity/jp_bill
+          icon: file-invoice-dollar
+        - label: 账单行
+          url: /Entity/jp_billline
+          icon: list
+        - label: 会计凭证
+          url: /Entity/fact_acct
+          icon: book
+        - label: 日记账
+          url: /Entity/gl_journal
+          icon: journal
+    - name: 基础数据
+      items:
+        - label: 业务伙伴
+          url: /Entity/c_bpartner
+          icon: users
+        - label: 伙伴地点
+          url: /Entity/c_bpartner_location
+          icon: map-marker
+        - label: 产品
+          url: /Entity/m_product
+          icon: box
+        - label: 产品类别
+          url: /Entity/m_product_category
+          icon: folder
+        - label: 价格表
+          url: /Entity/m_pricelist
+          icon: dollar-sign
+        - label: 仓库
+          url: /Entity/m_warehouse
+          icon: warehouse
+        - label: 库存
+          url: /Entity/m_storageonhand
+          icon: layers
+    - name: 项目管理
+      items:
+        - label: 项目
+          url: /Entity/c_project
+          icon: project-diagram
+        - label: 项目行
+          url: /Entity/c_projectline
+          icon: list
+        - label: 项目阶段
+          url: /Entity/c_projectphase
+          icon: stairs
+        - label: 项目任务
+          url: /Entity/c_projecttask
+          icon: check-square
+    - name: 系统管理
+      items:
+        - label: 用户
+          url: /Entity/ad_user
+          icon: user
+        - label: 角色
+          url: /Entity/ad_role
+          icon: shield
+        - label: 客户端
+          url: /Entity/ad_client
+          icon: building
+        - label: 组织
+          url: /Entity/ad_org
+          icon: sitemap
+        - label: 窗口
+          url: /Entity/ad_window
+          icon: window-maximize
+        - label: 表定义
+          url: /Entity/ad_table
+          icon: table
+        - label: 列定义
+          url: /Entity/ad_column
+          icon: columns
+        - label: 工作流
+          url: /Entity/ad_workflow
+          icon: code-branch
+        - label: 报表
+          url: /Entity/pa_report
+          icon: chart-bar

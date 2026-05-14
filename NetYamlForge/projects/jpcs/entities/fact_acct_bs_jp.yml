@@ -1,0 +1,115 @@
+name: FACT_ACCT_BS_JP
+tableName: fact_acct_bs_jp
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: amtacctcr
+  type: numeric
+  label: Amtacctcr
+- name: amtacctdr
+  type: numeric
+  label: Amtacctdr
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_locfrom_id
+  type: numeric
+  label: C Locfrom Id
+- name: c_locto_id
+  type: numeric
+  label: C Locto Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_subacct_id
+  type: numeric
+  label: C Subacct Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: fact_acct_bs_jp_uu
+  type: text
+  label: Fact Acct Bs Jp Uu
+- name: gl_budget_id
+  type: numeric
+  label: Gl Budget Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: pa_reportcubejp_id
+  type: numeric
+  label: Pa Reportcubejp Id
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: qty
+  type: numeric
+  label: Qty
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: userelement1_id
+  type: numeric
+  label: Userelement1 Id
+- name: userelement2_id
+  type: numeric
+  label: Userelement2 Id
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id

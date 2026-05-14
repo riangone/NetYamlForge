@@ -1,0 +1,55 @@
+name: HR_CONCEPT_ACCT
+tableName: hr_concept_acct
+primaryKey: hr_concept_acct_id
+fields:
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: isbalancing
+  type: text
+  label: Isbalancing
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: hr_concept_acct_id
+  type: numeric
+  label: Hr Concept Acct Id
+- name: hr_concept_id
+  type: numeric
+  label: Hr Concept Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: hr_revenue_acct
+  type: numeric
+  label: Hr Revenue Acct
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: hr_expense_acct
+  type: numeric
+  label: Hr Expense Acct
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: created
+  type: text
+  label: Created
+- name: hr_concept_acct_uu
+  type: text
+  label: Hr Concept Acct Uu

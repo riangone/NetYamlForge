@@ -1,0 +1,160 @@
+name: A_ASSET_TRANSFER
+tableName: a_asset_transfer
+primaryKey: a_asset_transfer_id
+fields:
+- name: a_asset_acct_id
+  type: numeric
+  label: A Asset Acct Id
+- name: a_asset_transfer_id
+  type: numeric
+  label: A Asset Transfer Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_accumdepreciation_acct
+  type: numeric
+  label: A Accumdepreciation Acct
+- name: a_asset_acct_new
+  type: text
+  label: A Asset Acct New
+- name: a_depreciation_acct
+  type: numeric
+  label: A Depreciation Acct
+- name: a_depreciation_acct_str
+  type: text
+  label: A Depreciation Acct Str
+- name: a_disposal_loss_new
+  type: text
+  label: A Disposal Loss New
+- name: a_transfer_balance_is
+  type: text
+  label: A Transfer Balance Is
+- name: a_transfer_balance
+  type: text
+  label: A Transfer Balance
+- name: a_split_percent
+  type: numeric
+  label: A Split Percent
+- name: a_period_start
+  type: numeric
+  label: A Period Start
+- name: a_period_end
+  type: numeric
+  label: A Period End
+- name: a_disposal_revenue_str
+  type: text
+  label: A Disposal Revenue Str
+- name: a_disposal_revenue_new
+  type: text
+  label: A Disposal Revenue New
+- name: a_disposal_revenue
+  type: numeric
+  label: A Disposal Revenue
+- name: a_disposal_loss_str
+  type: text
+  label: A Disposal Loss Str
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isactive
+  type: text
+  label: Isactive
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: created
+  type: text
+  label: Created
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: a_disposal_loss
+  type: numeric
+  label: A Disposal Loss
+- name: a_depreciation_acct_new
+  type: text
+  label: A Depreciation Acct New
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_asset_acct_str
+  type: text
+  label: A Asset Acct Str
+- name: a_accumdepreciation_acct_new
+  type: text
+  label: A Accumdepreciation Acct New
+- name: a_accumdepreciation_acct_str
+  type: text
+  label: A Accumdepreciation Acct Str
+- name: a_asset_acct
+  type: numeric
+  label: A Asset Acct
+- name: a_asset_transfer_uu
+  type: text
+  label: A Asset Transfer Uu
+- name: a_accumdepreciation_new_acct
+  type: numeric
+  label: A Accumdepreciation New Acct
+- name: a_depreciation_new_acct
+  type: numeric
+  label: A Depreciation New Acct
+- name: a_disposal_loss_acct
+  type: numeric
+  label: A Disposal Loss Acct
+- name: a_disposal_revenue_new_acct
+  type: numeric
+  label: A Disposal Revenue New Acct
+- name: a_disposal_revenue_acct
+  type: numeric
+  label: A Disposal Revenue Acct
+- name: a_disposal_loss_new_acct
+  type: numeric
+  label: A Disposal Loss New Acct
+- name: a_asset_new_acct
+  type: numeric
+  label: A Asset New Acct
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: posted
+  type: text
+  label: Posted
+- name: a_capvsexp
+  type: text
+  label: A Capvsexp
+- name: a_accumulated_depr_f
+  type: numeric
+  label: A Accumulated Depr F
+- name: documentno
+  type: text
+  label: Documentno
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: processedon
+  type: numeric
+  label: Processedon

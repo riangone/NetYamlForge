@@ -1,0 +1,61 @@
+name: EXP_FORMAT
+tableName: exp_format
+primaryKey: exp_format_id
+fields:
+- name: exp_format_id
+  type: numeric
+  label: Exp Format Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: testimportmodel
+  type: text
+  label: Testimportmodel
+- name: version
+  type: text
+  label: Version
+- name: processing
+  type: text
+  label: Processing
+- name: testexportmodel
+  type: text
+  label: Testexportmodel
+- name: exp_format_uu
+  type: text
+  label: Exp Format Uu

@@ -1,0 +1,49 @@
+name: JP_BPARTNER_HISTORY
+tableName: jp_bpartner_history
+primaryKey: jp_bpartner_history_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_bpartner_history_id
+  type: numeric
+  label: Jp Bpartner History Id
+- name: jp_bpartner_history_uu
+  type: text
+  label: Jp Bpartner History Uu
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

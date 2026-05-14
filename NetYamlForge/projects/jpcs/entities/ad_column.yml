@@ -1,0 +1,193 @@
+name: AD_COLUMN
+tableName: ad_column
+primaryKey: ad_column_id
+fields:
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: version
+  type: numeric
+  label: Version
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: columnname
+  type: text
+  label: Columnname
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id
+- name: ad_val_rule_id
+  type: numeric
+  label: Ad Val Rule Id
+- name: fieldlength
+  type: numeric
+  label: Fieldlength
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: iskey
+  type: text
+  label: Iskey
+- name: isparent
+  type: text
+  label: Isparent
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: isupdateable
+  type: text
+  label: Isupdateable
+- name: readonlylogic
+  type: text
+  label: Readonlylogic
+- name: isidentifier
+  type: text
+  label: Isidentifier
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: isencrypted
+  type: text
+  label: Isencrypted
+- name: callout
+  type: text
+  label: Callout
+- name: vformat
+  type: text
+  label: Vformat
+- name: valuemin
+  type: text
+  label: Valuemin
+- name: valuemax
+  type: text
+  label: Valuemax
+- name: isselectioncolumn
+  type: text
+  label: Isselectioncolumn
+- name: ad_element_id
+  type: numeric
+  label: Ad Element Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: issyncdatabase
+  type: text
+  label: Issyncdatabase
+- name: isalwaysupdateable
+  type: text
+  label: Isalwaysupdateable
+- name: columnsql
+  type: text
+  label: Columnsql
+- name: mandatorylogic
+  type: text
+  label: Mandatorylogic
+- name: infofactoryclass
+  type: text
+  label: Infofactoryclass
+- name: isautocomplete
+  type: text
+  label: Isautocomplete
+- name: isallowlogging
+  type: text
+  label: Isallowlogging
+- name: formatpattern
+  type: text
+  label: Formatpattern
+- name: ad_column_uu
+  type: text
+  label: Ad Column Uu
+- name: isallowcopy
+  type: text
+  label: Isallowcopy
+- name: seqnoselection
+  type: numeric
+  label: Seqnoselection
+- name: istoolbarbutton
+  type: text
+  label: Istoolbarbutton
+- name: issecure
+  type: text
+  label: Issecure
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: fkconstraintname
+  type: text
+  label: Fkconstraintname
+- name: fkconstrainttype
+  type: text
+  label: Fkconstrainttype
+- name: pa_dashboardcontent_id
+  type: numeric
+  label: Pa Dashboardcontent Id
+- name: placeholder
+  type: text
+  label: Placeholder
+- name: ishtml
+  type: text
+  label: Ishtml
+- name: ad_val_rule_lookup_id
+  type: numeric
+  label: Ad Val Rule Lookup Id
+- name: ad_infowindow_id
+  type: numeric
+  label: Ad Infowindow Id
+- name: alwaysupdatablelogic
+  type: text
+  label: Alwaysupdatablelogic
+- name: fkconstraintmsg_id
+  type: numeric
+  label: Fkconstraintmsg Id
+- name: partitioningmethod
+  type: text
+  label: Partitioningmethod
+- name: ispartitionkey
+  type: text
+  label: Ispartitionkey
+- name: seqnopartition
+  type: numeric
+  label: Seqnopartition
+- name: rangepartitioninterval
+  type: text
+  label: Rangepartitioninterval

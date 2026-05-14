@@ -1,0 +1,64 @@
+name: W_STORE_TRL
+tableName: w_store_trl
+primaryKey: w_store_id
+fields:
+- name: w_store_id
+  type: numeric
+  label: W Store Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: webinfo
+  type: text
+  label: Webinfo
+- name: webparam1
+  type: text
+  label: Webparam1
+- name: webparam2
+  type: text
+  label: Webparam2
+- name: webparam3
+  type: text
+  label: Webparam3
+- name: webparam4
+  type: text
+  label: Webparam4
+- name: webparam5
+  type: text
+  label: Webparam5
+- name: webparam6
+  type: text
+  label: Webparam6
+- name: emailheader
+  type: text
+  label: Emailheader
+- name: emailfooter
+  type: text
+  label: Emailfooter
+- name: w_store_trl_uu
+  type: text
+  label: W Store Trl Uu

@@ -1,0 +1,313 @@
+name: I_TABLECOLUMNJP
+tableName: i_tablecolumnjp
+primaryKey: i_tablecolumnjp_id
+fields:
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: i_tablecolumnjp_id
+  type: numeric
+  label: I Tablecolumnjp Id
+- name: i_tablecolumnjp_uu
+  type: text
+  label: I Tablecolumnjp Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_table_uu
+  type: text
+  label: Ad Table Uu
+- name: tablename
+  type: text
+  label: Tablename
+- name: jp_table_name
+  type: text
+  label: Jp Table Name
+- name: jp_table_description
+  type: text
+  label: Jp Table Description
+- name: jp_table_help
+  type: text
+  label: Jp Table Help
+- name: isview
+  type: text
+  label: Isview
+- name: accesslevel
+  type: text
+  label: Accesslevel
+- name: ischangelog
+  type: text
+  label: Ischangelog
+- name: jp_window_name
+  type: text
+  label: Jp Window Name
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: jp_po_window_name
+  type: text
+  label: Jp Po Window Name
+- name: po_window_id
+  type: numeric
+  label: Po Window Id
+- name: isdeleteable
+  type: text
+  label: Isdeleteable
+- name: ishighvolume
+  type: text
+  label: Ishighvolume
+- name: jp_table_entitytype
+  type: text
+  label: Jp Table Entitytype
+- name: iscentrallymaintained
+  type: text
+  label: Iscentrallymaintained
+- name: ad_element_id
+  type: numeric
+  label: Ad Element Id
+- name: ad_element_uu
+  type: text
+  label: Ad Element Uu
+- name: jp_element_entitytype
+  type: text
+  label: Jp Element Entitytype
+- name: columnname
+  type: text
+  label: Columnname
+- name: jp_element_name
+  type: text
+  label: Jp Element Name
+- name: jp_element_printname
+  type: text
+  label: Jp Element Printname
+- name: jp_element_description
+  type: text
+  label: Jp Element Description
+- name: jp_element_help
+  type: text
+  label: Jp Element Help
+- name: jp_element_po_name
+  type: text
+  label: Jp Element Po Name
+- name: jp_element_po_printname
+  type: text
+  label: Jp Element Po Printname
+- name: jp_element_po_description
+  type: text
+  label: Jp Element Po Description
+- name: jp_element_po_help
+  type: text
+  label: Jp Element Po Help
+- name: jp_element_placeholder
+  type: text
+  label: Jp Element Placeholder
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_element_trl_uu
+  type: text
+  label: Ad Element Trl Uu
+- name: jp_element_trl_name
+  type: text
+  label: Jp Element Trl Name
+- name: jp_element_trl_printname
+  type: text
+  label: Jp Element Trl Printname
+- name: jp_element_trl_description
+  type: text
+  label: Jp Element Trl Description
+- name: jp_element_trl_help
+  type: text
+  label: Jp Element Trl Help
+- name: jp_element_trl_po_name
+  type: text
+  label: Jp Element Trl Po Name
+- name: jp_element_trl_po_printname
+  type: text
+  label: Jp Element Trl Po Printname
+- name: jp_element_trl_po_description
+  type: text
+  label: Jp Element Trl Po Description
+- name: jp_element_trl_po_help
+  type: text
+  label: Jp Element Trl Po Help
+- name: jp_element_trl_placeholder
+  type: text
+  label: Jp Element Trl Placeholder
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_column_uu
+  type: text
+  label: Ad Column Uu
+- name: jp_column_entitytype
+  type: text
+  label: Jp Column Entitytype
+- name: jp_column_name
+  type: text
+  label: Jp Column Name
+- name: jp_column_description
+  type: text
+  label: Jp Column Description
+- name: jp_column_help
+  type: text
+  label: Jp Column Help
+- name: version
+  type: numeric
+  label: Version
+- name: jp_reference_name
+  type: text
+  label: Jp Reference Name
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id
+- name: jp_reference_value_name
+  type: text
+  label: Jp Reference Value Name
+- name: jp_val_rule_name
+  type: text
+  label: Jp Val Rule Name
+- name: ad_val_rule_id
+  type: numeric
+  label: Ad Val Rule Id
+- name: fieldlength
+  type: numeric
+  label: Fieldlength
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: iskey
+  type: text
+  label: Iskey
+- name: isparent
+  type: text
+  label: Isparent
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: isupdateable
+  type: text
+  label: Isupdateable
+- name: readonlylogic
+  type: text
+  label: Readonlylogic
+- name: isidentifier
+  type: text
+  label: Isidentifier
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: isencrypted
+  type: text
+  label: Isencrypted
+- name: callout
+  type: text
+  label: Callout
+- name: vformat
+  type: text
+  label: Vformat
+- name: valuemin
+  type: text
+  label: Valuemin
+- name: valuemax
+  type: text
+  label: Valuemax
+- name: isselectioncolumn
+  type: text
+  label: Isselectioncolumn
+- name: jp_process_value
+  type: text
+  label: Jp Process Value
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: isalwaysupdateable
+  type: text
+  label: Isalwaysupdateable
+- name: columnsql
+  type: text
+  label: Columnsql
+- name: mandatorylogic
+  type: text
+  label: Mandatorylogic
+- name: isautocomplete
+  type: text
+  label: Isautocomplete
+- name: isallowlogging
+  type: text
+  label: Isallowlogging
+- name: formatpattern
+  type: text
+  label: Formatpattern
+- name: isallowcopy
+  type: text
+  label: Isallowcopy
+- name: seqnoselection
+  type: numeric
+  label: Seqnoselection
+- name: istoolbarbutton
+  type: text
+  label: Istoolbarbutton
+- name: issecure
+  type: text
+  label: Issecure
+- name: jp_chart_name
+  type: text
+  label: Jp Chart Name
+- name: ad_chart_id
+  type: numeric
+  label: Ad Chart Id
+- name: fkconstraintname
+  type: text
+  label: Fkconstraintname
+- name: fkconstrainttype
+  type: text
+  label: Fkconstrainttype
+- name: jp_dashboardcontent_name
+  type: text
+  label: Jp Dashboardcontent Name
+- name: pa_dashboardcontent_id
+  type: numeric
+  label: Pa Dashboardcontent Id
+- name: jp_column_placeholder
+  type: text
+  label: Jp Column Placeholder
+- name: ishtml
+  type: text
+  label: Ishtml

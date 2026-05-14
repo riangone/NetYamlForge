@@ -1,0 +1,145 @@
+name: I_WAREHOUSEJP
+tableName: i_warehousejp
+primaryKey: i_warehousejp_id
+fields:
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: i_warehousejp_id
+  type: numeric
+  label: I Warehousejp Id
+- name: i_warehousejp_uu
+  type: text
+  label: I Warehousejp Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_org_value
+  type: text
+  label: Jp Org Value
+- name: value
+  type: text
+  label: Value
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: separator
+  type: text
+  label: Separator
+- name: replenishmentclass
+  type: text
+  label: Replenishmentclass
+- name: isintransit
+  type: text
+  label: Isintransit
+- name: isdisallownegativeinv
+  type: text
+  label: Isdisallownegativeinv
+- name: jp_acctschema_name
+  type: text
+  label: Jp Acctschema Name
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: jp_w_differences_value
+  type: text
+  label: Jp W Differences Value
+- name: w_differences_acct
+  type: numeric
+  label: W Differences Acct
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: jp_location_label
+  type: text
+  label: Jp Location Label
+- name: jp_locationorg_value
+  type: text
+  label: Jp Locationorg Value
+- name: countrycode
+  type: text
+  label: Countrycode
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: postal
+  type: text
+  label: Postal
+- name: postal_add
+  type: text
+  label: Postal Add
+- name: regionname
+  type: text
+  label: Regionname
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: city
+  type: text
+  label: City
+- name: c_city_id
+  type: numeric
+  label: C City Id
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: address3
+  type: text
+  label: Address3
+- name: address4
+  type: text
+  label: Address4
+- name: address5
+  type: text
+  label: Address5
+- name: comments
+  type: text
+  label: Comments
+- name: jp_locationorg_id
+  type: numeric
+  label: Jp Locationorg Id
+- name: i_isactivejp
+  type: text
+  label: I Isactivejp
+- name: jp_region_name
+  type: text
+  label: Jp Region Name
+- name: jp_city_name
+  type: text
+  label: Jp City Name

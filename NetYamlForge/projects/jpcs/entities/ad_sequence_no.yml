@@ -1,0 +1,37 @@
+name: AD_SEQUENCE_NO
+tableName: ad_sequence_no
+primaryKey: ad_sequence_id
+fields:
+- name: ad_sequence_id
+  type: numeric
+  label: Ad Sequence Id
+- name: calendaryearmonth
+  type: text
+  label: Calendaryearmonth
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: currentnext
+  type: numeric
+  label: Currentnext
+- name: ad_sequence_no_uu
+  type: text
+  label: Ad Sequence No Uu

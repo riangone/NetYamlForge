@@ -1,0 +1,49 @@
+name: AD_MODIFICATION
+tableName: ad_modification
+primaryKey: ad_modification_id
+fields:
+- name: ad_modification_id
+  type: numeric
+  label: Ad Modification Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: version
+  type: text
+  label: Version
+- name: ad_modification_uu
+  type: text
+  label: Ad Modification Uu

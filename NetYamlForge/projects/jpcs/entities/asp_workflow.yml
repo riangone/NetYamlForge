@@ -1,0 +1,40 @@
+name: ASP_WORKFLOW
+tableName: asp_workflow
+primaryKey: asp_workflow_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: asp_level_id
+  type: numeric
+  label: Asp Level Id
+- name: asp_status
+  type: text
+  label: Asp Status
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: asp_workflow_id
+  type: numeric
+  label: Asp Workflow Id
+- name: asp_workflow_uu
+  type: text
+  label: Asp Workflow Uu

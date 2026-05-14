@@ -1,0 +1,55 @@
+name: AD_VIEWCOLUMN
+tableName: ad_viewcolumn
+primaryKey: ad_viewcolumn_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_viewcolumn_id
+  type: numeric
+  label: Ad Viewcolumn Id
+- name: ad_viewcolumn_uu
+  type: text
+  label: Ad Viewcolumn Uu
+- name: ad_viewcomponent_id
+  type: numeric
+  label: Ad Viewcomponent Id
+- name: columnname
+  type: text
+  label: Columnname
+- name: columnsql
+  type: text
+  label: Columnsql
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dbdatatype
+  type: text
+  label: Dbdatatype
+- name: description
+  type: text
+  label: Description
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: seqno
+  type: numeric
+  label: Seqno

@@ -1,0 +1,46 @@
+name: M_COMMODITYSHIPMENT
+tableName: m_commodityshipment
+primaryKey: m_commodityshipment_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: exportlicensenum
+  type: text
+  label: Exportlicensenum
+- name: harmonizedcode
+  type: text
+  label: Harmonizedcode
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_commodityshipment_id
+  type: numeric
+  label: M Commodityshipment Id
+- name: m_commodityshipment_uu
+  type: text
+  label: M Commodityshipment Uu
+- name: countryofmanufacture_id
+  type: numeric
+  label: Countryofmanufacture Id

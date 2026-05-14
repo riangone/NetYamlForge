@@ -1,0 +1,37 @@
+name: M_ATTRIBUTEUSE
+tableName: m_attributeuse
+primaryKey: m_attribute_id
+fields:
+- name: m_attribute_id
+  type: numeric
+  label: M Attribute Id
+- name: m_attributeset_id
+  type: numeric
+  label: M Attributeset Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: m_attributeuse_uu
+  type: text
+  label: M Attributeuse Uu

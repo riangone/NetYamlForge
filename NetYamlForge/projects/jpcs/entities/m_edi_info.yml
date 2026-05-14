@@ -1,0 +1,34 @@
+name: M_EDI_INFO
+tableName: m_edi_info
+primaryKey: m_edi_info_id
+fields:
+- name: m_edi_info_id
+  type: numeric
+  label: M Edi Info Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_edi_id
+  type: numeric
+  label: M Edi Id
+- name: info
+  type: text
+  label: Info

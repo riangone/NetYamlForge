@@ -1,0 +1,46 @@
+name: C_COMMISSIONAMT
+tableName: c_commissionamt
+primaryKey: c_commissionamt_id
+fields:
+- name: c_commissionamt_id
+  type: numeric
+  label: C Commissionamt Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_commissionrun_id
+  type: numeric
+  label: C Commissionrun Id
+- name: c_commissionline_id
+  type: numeric
+  label: C Commissionline Id
+- name: convertedamt
+  type: numeric
+  label: Convertedamt
+- name: actualqty
+  type: numeric
+  label: Actualqty
+- name: commissionamt
+  type: numeric
+  label: Commissionamt
+- name: c_commissionamt_uu
+  type: text
+  label: C Commissionamt Uu

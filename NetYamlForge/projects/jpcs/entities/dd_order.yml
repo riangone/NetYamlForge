@@ -1,0 +1,196 @@
+name: DD_ORDER
+tableName: dd_order
+primaryKey: dd_order_id
+fields:
+- name: documentno
+  type: text
+  label: Documentno
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: createconfirm
+  type: text
+  label: Createconfirm
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: createpackage
+  type: text
+  label: Createpackage
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dd_order_id
+  type: numeric
+  label: Dd Order Id
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: dateprinted
+  type: text
+  label: Dateprinted
+- name: datepromised
+  type: text
+  label: Datepromised
+- name: datereceived
+  type: text
+  label: Datereceived
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: description
+  type: text
+  label: Description
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: freightcostrule
+  type: text
+  label: Freightcostrule
+- name: generateto
+  type: text
+  label: Generateto
+- name: isactive
+  type: text
+  label: Isactive
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: isdelivered
+  type: text
+  label: Isdelivered
+- name: isdropship
+  type: text
+  label: Isdropship
+- name: isindispute
+  type: text
+  label: Isindispute
+- name: isintransit
+  type: text
+  label: Isintransit
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: isselected
+  type: text
+  label: Isselected
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: nopackages
+  type: numeric
+  label: Nopackages
+- name: poreference
+  type: text
+  label: Poreference
+- name: pickdate
+  type: text
+  label: Pickdate
+- name: posted
+  type: text
+  label: Posted
+- name: priorityrule
+  type: text
+  label: Priorityrule
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: ref_order_id
+  type: numeric
+  label: Ref Order Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: sendemail
+  type: text
+  label: Sendemail
+- name: shipdate
+  type: text
+  label: Shipdate
+- name: trackingno
+  type: text
+  label: Trackingno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: volume
+  type: numeric
+  label: Volume
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: weight
+  type: numeric
+  label: Weight
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: dd_order_uu
+  type: text
+  label: Dd Order Uu

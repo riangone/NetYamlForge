@@ -1,0 +1,106 @@
+name: JP_INVVALPROFILE
+tableName: jp_invvalprofile
+primaryKey: jp_invvalprofile_id
+fields:
+- name: jp_invvalprofile_id
+  type: numeric
+  label: Jp Invvalprofile Id
+- name: jp_invvalprofile_uu
+  type: text
+  label: Jp Invvalprofile Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: costingmethod
+  type: text
+  label: Costingmethod
+- name: costinglevel
+  type: text
+  label: Costinglevel
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: jp_applyamtlist
+  type: text
+  label: Jp Applyamtlist
+- name: jp_invvalcallineclass
+  type: text
+  label: Jp Invvalcallineclass
+- name: jp_invvalcalclass
+  type: text
+  label: Jp Invvalcalclass
+- name: jp_invvalupdatecostclass
+  type: text
+  label: Jp Invvalupdatecostclass
+- name: jp_invvaladjustlineclass
+  type: text
+  label: Jp Invvaladjustlineclass
+- name: jp_invvaladjustcalclass
+  type: text
+  label: Jp Invvaladjustcalclass
+- name: jp_gljournalcreateclass
+  type: text
+  label: Jp Gljournalcreateclass
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: jp_updatecost
+  type: text
+  label: Jp Updatecost
+- name: iszerostockinvvaljp
+  type: text
+  label: Iszerostockinvvaljp
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: docaction
+  type: text
+  label: Docaction
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: m_discountschema_id
+  type: numeric
+  label: M Discountschema Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: jp_typeofaveragecost
+  type: text
+  label: Jp Typeofaveragecost

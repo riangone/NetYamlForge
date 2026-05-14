@@ -1,0 +1,43 @@
+name: C_TAXPROVIDERCFG
+tableName: c_taxprovidercfg
+primaryKey: c_taxprovidercfg_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_taxprovidercfg_id
+  type: numeric
+  label: C Taxprovidercfg Id
+- name: c_taxprovidercfg_uu
+  type: text
+  label: C Taxprovidercfg Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: taxproviderclass
+  type: text
+  label: Taxproviderclass
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: url
+  type: text
+  label: Url

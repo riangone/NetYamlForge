@@ -1,0 +1,52 @@
+name: AD_AUTHORIZATIONPROVIDER
+tableName: ad_authorizationprovider
+primaryKey: ad_authorizationprovider_id
+fields:
+- name: ad_authorizationprovider_id
+  type: numeric
+  label: Ad Authorizationprovider Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_authorizationprovider_uu
+  type: text
+  label: Ad Authorizationprovider Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: authorizationendpoint
+  type: text
+  label: Authorizationendpoint
+- name: tokenendpoint
+  type: text
+  label: Tokenendpoint
+- name: revokeendpoint
+  type: text
+  label: Revokeendpoint
+- name: ad_authorizationtype
+  type: text
+  label: Ad Authorizationtype

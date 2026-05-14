@@ -1,0 +1,61 @@
+name: C_RFQLINEQTY
+tableName: c_rfqlineqty
+primaryKey: c_rfqlineqty_id
+fields:
+- name: c_rfqlineqty_id
+  type: numeric
+  label: C Rfqlineqty Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_rfqline_id
+  type: numeric
+  label: C Rfqline Id
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: margin
+  type: numeric
+  label: Margin
+- name: ispurchaseqty
+  type: text
+  label: Ispurchaseqty
+- name: bestresponseamt
+  type: numeric
+  label: Bestresponseamt
+- name: isofferqty
+  type: text
+  label: Isofferqty
+- name: offeramt
+  type: numeric
+  label: Offeramt
+- name: benchmarkprice
+  type: numeric
+  label: Benchmarkprice
+- name: isrfqqty
+  type: text
+  label: Isrfqqty
+- name: c_rfqlineqty_uu
+  type: text
+  label: C Rfqlineqty Uu

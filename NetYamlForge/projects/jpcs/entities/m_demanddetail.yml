@@ -1,0 +1,43 @@
+name: M_DEMANDDETAIL
+tableName: m_demanddetail
+primaryKey: m_demanddetail_id
+fields:
+- name: m_demanddetail_id
+  type: numeric
+  label: M Demanddetail Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_demandline_id
+  type: numeric
+  label: M Demandline Id
+- name: m_forecastline_id
+  type: numeric
+  label: M Forecastline Id
+- name: m_requisitionline_id
+  type: numeric
+  label: M Requisitionline Id
+- name: c_orderline_id
+  type: numeric
+  label: C Orderline Id
+- name: m_demanddetail_uu
+  type: text
+  label: M Demanddetail Uu

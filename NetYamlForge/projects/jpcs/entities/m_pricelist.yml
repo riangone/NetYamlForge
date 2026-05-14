@@ -1,0 +1,64 @@
+name: M_PRICELIST
+tableName: m_pricelist
+primaryKey: m_pricelist_id
+fields:
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: basepricelist_id
+  type: numeric
+  label: Basepricelist Id
+- name: istaxincluded
+  type: text
+  label: Istaxincluded
+- name: issopricelist
+  type: text
+  label: Issopricelist
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: enforcepricelimit
+  type: text
+  label: Enforcepricelimit
+- name: priceprecision
+  type: numeric
+  label: Priceprecision
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: ispresentforproduct
+  type: text
+  label: Ispresentforproduct
+- name: m_pricelist_uu
+  type: text
+  label: M Pricelist Uu

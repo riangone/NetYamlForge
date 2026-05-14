@@ -1,0 +1,43 @@
+name: C_CASHBOOK
+tableName: c_cashbook
+primaryKey: c_cashbook_id
+fields:
+- name: c_cashbook_id
+  type: numeric
+  label: C Cashbook Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_cashbook_uu
+  type: text
+  label: C Cashbook Uu

@@ -1,0 +1,82 @@
+name: A_ASSET_SPLIT
+tableName: a_asset_split
+primaryKey: a_asset_split_id
+fields:
+- name: a_asset_split_id
+  type: numeric
+  label: A Asset Split Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_amount_split
+  type: numeric
+  label: A Amount Split
+- name: a_asset_acct_id
+  type: numeric
+  label: A Asset Acct Id
+- name: a_percent_original
+  type: numeric
+  label: A Percent Original
+- name: a_qty_current
+  type: numeric
+  label: A Qty Current
+- name: a_split_type
+  type: text
+  label: A Split Type
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isactive
+  type: text
+  label: Isactive
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: created
+  type: text
+  label: Created
+- name: a_transfer_balance_is
+  type: text
+  label: A Transfer Balance Is
+- name: a_qty_split
+  type: numeric
+  label: A Qty Split
+- name: a_percent_split
+  type: numeric
+  label: A Percent Split
+- name: a_depreciation_workfile_id
+  type: numeric
+  label: A Depreciation Workfile Id
+- name: a_asset_cost
+  type: numeric
+  label: A Asset Cost
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_asset_id_to
+  type: numeric
+  label: A Asset Id To
+- name: a_asset_split_uu
+  type: text
+  label: A Asset Split Uu

@@ -1,0 +1,58 @@
+name: DD_NETWORKDISTRIBUTIONLINE
+tableName: dd_networkdistributionline
+primaryKey: dd_networkdistributionline_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dd_networkdistributionline_id
+  type: numeric
+  label: Dd Networkdistributionline Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: m_warehousesource_id
+  type: numeric
+  label: M Warehousesource Id
+- name: percent
+  type: numeric
+  label: Percent
+- name: transferttime
+  type: numeric
+  label: Transferttime
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: validto
+  type: text
+  label: Validto
+- name: priorityno
+  type: numeric
+  label: Priorityno
+- name: dd_networkdistribution_id
+  type: numeric
+  label: Dd Networkdistribution Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: dd_networkdistributionline_uu
+  type: text
+  label: Dd Networkdistributionline Uu

@@ -1,0 +1,46 @@
+name: C_CURRENCY_ACCT
+tableName: c_currency_acct
+primaryKey: c_acctschema_id
+fields:
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: unrealizedgain_acct
+  type: numeric
+  label: Unrealizedgain Acct
+- name: unrealizedloss_acct
+  type: numeric
+  label: Unrealizedloss Acct
+- name: realizedgain_acct
+  type: numeric
+  label: Realizedgain Acct
+- name: realizedloss_acct
+  type: numeric
+  label: Realizedloss Acct
+- name: c_currency_acct_uu
+  type: text
+  label: C Currency Acct Uu

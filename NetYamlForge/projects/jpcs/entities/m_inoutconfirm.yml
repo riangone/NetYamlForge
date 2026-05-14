@@ -1,0 +1,79 @@
+name: M_INOUTCONFIRM
+tableName: m_inoutconfirm
+primaryKey: m_inoutconfirm_id
+fields:
+- name: m_inoutconfirm_id
+  type: numeric
+  label: M Inoutconfirm Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: m_inout_id
+  type: numeric
+  label: M Inout Id
+- name: confirmtype
+  type: text
+  label: Confirmtype
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: description
+  type: text
+  label: Description
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: createpackage
+  type: text
+  label: Createpackage
+- name: iscancelled
+  type: text
+  label: Iscancelled
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: isindispute
+  type: text
+  label: Isindispute
+- name: m_inventory_id
+  type: numeric
+  label: M Inventory Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: approvalamt
+  type: numeric
+  label: Approvalamt
+- name: confirmationno
+  type: text
+  label: Confirmationno
+- name: m_inoutconfirm_uu
+  type: text
+  label: M Inoutconfirm Uu

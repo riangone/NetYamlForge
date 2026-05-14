@@ -1,0 +1,52 @@
+name: JP_ORG_HISTORY
+tableName: jp_org_history
+primaryKey: jp_org_history_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_businessunit_id
+  type: numeric
+  label: Jp Businessunit Id
+- name: jp_org_history_id
+  type: numeric
+  label: Jp Org History Id
+- name: jp_org_history_uu
+  type: text
+  label: Jp Org History Uu
+- name: name
+  type: text
+  label: Name
+- name: supervisor_id
+  type: numeric
+  label: Supervisor Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

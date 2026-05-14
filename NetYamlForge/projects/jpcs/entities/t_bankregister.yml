@@ -1,0 +1,46 @@
+name: T_BANKREGISTER
+tableName: t_bankregister
+primaryKey: account
+fields:
+- name: account
+  type: text
+  label: Account
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: amtacctcr
+  type: numeric
+  label: Amtacctcr
+- name: amtacctdr
+  type: numeric
+  label: Amtacctdr
+- name: balance
+  type: numeric
+  label: Balance
+- name: bankname
+  type: text
+  label: Bankname
+- name: bpartner
+  type: text
+  label: Bpartner
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: documentno
+  type: text
+  label: Documentno
+- name: t_bankregister_uu
+  type: text
+  label: T Bankregister Uu

@@ -1,0 +1,142 @@
+name: T_AGING
+tableName: t_aging
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_invoicepayschedule_id
+  type: numeric
+  label: C Invoicepayschedule Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: statementdate
+  type: text
+  label: Statementdate
+- name: duedate
+  type: text
+  label: Duedate
+- name: daysdue
+  type: numeric
+  label: Daysdue
+- name: islistinvoices
+  type: text
+  label: Islistinvoices
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: invoicedamt
+  type: numeric
+  label: Invoicedamt
+- name: openamt
+  type: numeric
+  label: Openamt
+- name: pastdue91_plus
+  type: numeric
+  label: Pastdue91 Plus
+- name: pastdue61_90
+  type: numeric
+  label: Pastdue61 90
+- name: pastdue61_plus
+  type: numeric
+  label: Pastdue61 Plus
+- name: pastdue31_60
+  type: numeric
+  label: Pastdue31 60
+- name: pastdue31_plus
+  type: numeric
+  label: Pastdue31 Plus
+- name: pastdue1_30
+  type: numeric
+  label: Pastdue1 30
+- name: pastdue8_30
+  type: numeric
+  label: Pastdue8 30
+- name: pastdue1_7
+  type: numeric
+  label: Pastdue1 7
+- name: pastdueamt
+  type: numeric
+  label: Pastdueamt
+- name: dueamt
+  type: numeric
+  label: Dueamt
+- name: due0
+  type: numeric
+  label: Due0
+- name: due0_7
+  type: numeric
+  label: Due0 7
+- name: due1_7
+  type: numeric
+  label: Due1 7
+- name: due8_30
+  type: numeric
+  label: Due8 30
+- name: due0_30
+  type: numeric
+  label: Due0 30
+- name: due31_plus
+  type: numeric
+  label: Due31 Plus
+- name: due31_60
+  type: numeric
+  label: Due31 60
+- name: due61_plus
+  type: numeric
+  label: Due61 Plus
+- name: due61_90
+  type: numeric
+  label: Due61 90
+- name: due91_plus
+  type: numeric
+  label: Due91 Plus
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: t_aging_uu
+  type: text
+  label: T Aging Uu
+- name: convertamountsincurrency_id
+  type: numeric
+  label: Convertamountsincurrency Id

@@ -1,0 +1,67 @@
+name: MFA_METHOD
+tableName: mfa_method
+primaryKey: mfa_method_id
+fields:
+- name: mfa_method_id
+  type: numeric
+  label: Mfa Method Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: mfa_method_uu
+  type: text
+  label: Mfa Method Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: method
+  type: text
+  label: Method
+- name: mfatype
+  type: text
+  label: Mfatype
+- name: mfaissuer
+  type: text
+  label: Mfaissuer
+- name: mfaallowedtimediscrepancy
+  type: numeric
+  label: Mfaallowedtimediscrepancy
+- name: mfatimeprovider
+  type: text
+  label: Mfatimeprovider
+- name: mfatimeserver
+  type: text
+  label: Mfatimeserver
+- name: expireinminutes
+  type: numeric
+  label: Expireinminutes
+- name: r_mailtext_id
+  type: numeric
+  label: R Mailtext Id
+- name: mfa_elementprm_id
+  type: numeric
+  label: Mfa Elementprm Id

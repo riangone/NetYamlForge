@@ -1,0 +1,193 @@
+name: JP_DATAMIGRATION
+tableName: jp_datamigration
+primaryKey: jp_datamigration_id
+fields:
+- name: jp_datamigration_id
+  type: numeric
+  label: Jp Datamigration Id
+- name: jp_datamigration_uu
+  type: text
+  label: Jp Datamigration Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: jp_datamigration_identifier
+  type: text
+  label: Jp Datamigration Identifier
+- name: gl_journal_id
+  type: numeric
+  label: Gl Journal Id
+- name: jp_order_documentno
+  type: text
+  label: Jp Order Documentno
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: jp_doctype_name
+  type: text
+  label: Jp Doctype Name
+- name: docbasetype
+  type: text
+  label: Docbasetype
+- name: documentno
+  type: text
+  label: Documentno
+- name: poreference
+  type: text
+  label: Poreference
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: dropship_bpartner_id
+  type: numeric
+  label: Dropship Bpartner Id
+- name: dropship_location_id
+  type: numeric
+  label: Dropship Location Id
+- name: dropship_user_id
+  type: numeric
+  label: Dropship User Id
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: m_freightcategory_id
+  type: numeric
+  label: M Freightcategory Id
+- name: freightcostrule
+  type: text
+  label: Freightcostrule
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt
+- name: overunderamt
+  type: numeric
+  label: Overunderamt
+- name: jp_datamigration_docstatus
+  type: text
+  label: Jp Datamigration Docstatus
+- name: jp_link_order_documentno
+  type: text
+  label: Jp Link Order Documentno
+- name: link_order_id
+  type: numeric
+  label: Link Order Id
+- name: jp_ref_order_documentno
+  type: text
+  label: Jp Ref Order Documentno
+- name: ref_order_id
+  type: numeric
+  label: Ref Order Id
+- name: jp_physicalwarehouse_id
+  type: numeric
+  label: Jp Physicalwarehouse Id
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: isdropship
+  type: text
+  label: Isdropship
+- name: priorityrule
+  type: text
+  label: Priorityrule

@@ -1,0 +1,40 @@
+name: AD_USER_ROLES
+tableName: ad_user_roles
+primaryKey: ad_user_id
+fields:
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_roles_uu
+  type: text
+  label: Ad User Roles Uu
+- name: jp_validto
+  type: text
+  label: Jp Validto
+- name: jp_validfrom
+  type: text
+  label: Jp Validfrom

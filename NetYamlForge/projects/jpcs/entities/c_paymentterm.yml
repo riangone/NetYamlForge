@@ -1,0 +1,115 @@
+name: C_PAYMENTTERM
+tableName: c_paymentterm
+primaryKey: c_paymentterm_id
+fields:
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: documentnote
+  type: text
+  label: Documentnote
+- name: afterdelivery
+  type: text
+  label: Afterdelivery
+- name: isduefixed
+  type: text
+  label: Isduefixed
+- name: netdays
+  type: numeric
+  label: Netdays
+- name: gracedays
+  type: numeric
+  label: Gracedays
+- name: fixmonthcutoff
+  type: numeric
+  label: Fixmonthcutoff
+- name: fixmonthday
+  type: numeric
+  label: Fixmonthday
+- name: fixmonthoffset
+  type: numeric
+  label: Fixmonthoffset
+- name: discountdays
+  type: numeric
+  label: Discountdays
+- name: discount
+  type: numeric
+  label: Discount
+- name: discountdays2
+  type: numeric
+  label: Discountdays2
+- name: discount2
+  type: numeric
+  label: Discount2
+- name: isnextbusinessday
+  type: text
+  label: Isnextbusinessday
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: value
+  type: text
+  label: Value
+- name: netday
+  type: text
+  label: Netday
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: processing
+  type: text
+  label: Processing
+- name: paymenttermusage
+  type: text
+  label: Paymenttermusage
+- name: c_paymentterm_uu
+  type: text
+  label: C Paymentterm Uu
+- name: ispaymenttermsjp
+  type: text
+  label: Ispaymenttermsjp
+- name: jp_paymentterms_id
+  type: numeric
+  label: Jp Paymentterms Id
+- name: isduedatebizdayonlyjp
+  type: text
+  label: Isduedatebizdayonlyjp
+- name: isduedateholidaynextbizdayjp
+  type: text
+  label: Isduedateholidaynextbizdayjp
+- name: jp_calendar_id
+  type: numeric
+  label: Jp Calendar Id
+- name: jp_ar_closingdate
+  type: text
+  label: Jp Ar Closingdate
+- name: jp_ap_closingdate
+  type: text
+  label: Jp Ap Closingdate

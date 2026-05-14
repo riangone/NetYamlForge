@@ -1,0 +1,121 @@
+name: A_ASSET_DISPOSED
+tableName: a_asset_disposed
+primaryKey: a_asset_disposed_id
+fields:
+- name: a_asset_disposed_id
+  type: numeric
+  label: A Asset Disposed Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_disposed_date
+  type: text
+  label: A Disposed Date
+- name: a_disposed_reason
+  type: text
+  label: A Disposed Reason
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: processed
+  type: text
+  label: Processed
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: processing
+  type: text
+  label: Processing
+- name: isactive
+  type: text
+  label: Isactive
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: created
+  type: text
+  label: Created
+- name: a_proceeds
+  type: numeric
+  label: A Proceeds
+- name: a_disposed_method
+  type: text
+  label: A Disposed Method
+- name: a_asset_trade_id
+  type: numeric
+  label: A Asset Trade Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_asset_disposed_uu
+  type: text
+  label: A Asset Disposed Uu
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: documentno
+  type: text
+  label: Documentno
+- name: a_activation_method
+  type: text
+  label: A Activation Method
+- name: description
+  type: text
+  label: Description
+- name: isdisposed
+  type: text
+  label: Isdisposed
+- name: a_asset_status
+  type: text
+  label: A Asset Status
+- name: a_disposal_amt
+  type: numeric
+  label: A Disposal Amt
+- name: expense
+  type: numeric
+  label: Expense
+- name: a_accumulated_depr
+  type: numeric
+  label: A Accumulated Depr
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: posted
+  type: text
+  label: Posted
+- name: a_accumulated_depr_delta
+  type: numeric
+  label: A Accumulated Depr Delta
+- name: a_asset_cost
+  type: numeric
+  label: A Asset Cost
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id

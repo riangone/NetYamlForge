@@ -1,0 +1,46 @@
+name: C_RFQRESPONSELINEQTY
+tableName: c_rfqresponselineqty
+primaryKey: c_rfqresponselineqty_id
+fields:
+- name: c_rfqresponselineqty_id
+  type: numeric
+  label: C Rfqresponselineqty Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_rfqresponseline_id
+  type: numeric
+  label: C Rfqresponseline Id
+- name: c_rfqlineqty_id
+  type: numeric
+  label: C Rfqlineqty Id
+- name: price
+  type: numeric
+  label: Price
+- name: discount
+  type: numeric
+  label: Discount
+- name: ranking
+  type: numeric
+  label: Ranking
+- name: c_rfqresponselineqty_uu
+  type: text
+  label: C Rfqresponselineqty Uu

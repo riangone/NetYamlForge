@@ -1,0 +1,103 @@
+name: C_TAX
+tableName: c_tax
+primaryKey: c_tax_id
+fields:
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: name
+  type: text
+  label: Name
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: taxindicator
+  type: text
+  label: Taxindicator
+- name: isdocumentlevel
+  type: text
+  label: Isdocumentlevel
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: issummary
+  type: text
+  label: Issummary
+- name: requirestaxcertificate
+  type: text
+  label: Requirestaxcertificate
+- name: rate
+  type: numeric
+  label: Rate
+- name: parent_tax_id
+  type: numeric
+  label: Parent Tax Id
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: to_country_id
+  type: numeric
+  label: To Country Id
+- name: to_region_id
+  type: numeric
+  label: To Region Id
+- name: c_taxcategory_id
+  type: numeric
+  label: C Taxcategory Id
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: istaxexempt
+  type: text
+  label: Istaxexempt
+- name: sopotype
+  type: text
+  label: Sopotype
+- name: issalestax
+  type: text
+  label: Issalestax
+- name: ad_rule_id
+  type: numeric
+  label: Ad Rule Id
+- name: c_tax_uu
+  type: text
+  label: C Tax Uu
+- name: c_taxprovider_id
+  type: numeric
+  label: C Taxprovider Id
+- name: c_countrygroupfrom_id
+  type: numeric
+  label: C Countrygroupfrom Id
+- name: c_countrygroupto_id
+  type: numeric
+  label: C Countrygroupto Id
+- name: jp_if_value
+  type: text
+  label: Jp If Value
+- name: taxpostingindicator
+  type: text
+  label: Taxpostingindicator

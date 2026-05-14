@@ -1,0 +1,67 @@
+name: AD_CTXHELPSUGGESTION
+tableName: ad_ctxhelpsuggestion
+primaryKey: ad_ctxhelpsuggestion_id
+fields:
+- name: ad_ctxhelpsuggestion_id
+  type: numeric
+  label: Ad Ctxhelpsuggestion Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_ctxhelp_id
+  type: numeric
+  label: Ad Ctxhelp Id
+- name: ad_ctxhelpmsg_id
+  type: numeric
+  label: Ad Ctxhelpmsg Id
+- name: ad_ctxhelpsuggestion_uu
+  type: text
+  label: Ad Ctxhelpsuggestion Uu
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_userclient_id
+  type: numeric
+  label: Ad Userclient Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: msgtext
+  type: text
+  label: Msgtext
+- name: isactive
+  type: text
+  label: Isactive
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: processed
+  type: text
+  label: Processed
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: acceptsuggestion
+  type: text
+  label: Acceptsuggestion
+- name: rejectsuggestion
+  type: text
+  label: Rejectsuggestion
+- name: comparesuggestion
+  type: text
+  label: Comparesuggestion
+- name: issaveastenantcustomization
+  type: text
+  label: Issaveastenantcustomization

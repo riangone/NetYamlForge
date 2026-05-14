@@ -1,0 +1,76 @@
+name: AD_WINDOW
+tableName: ad_window
+primaryKey: ad_window_id
+fields:
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: windowtype
+  type: text
+  label: Windowtype
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: processing
+  type: text
+  label: Processing
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: ad_color_id
+  type: numeric
+  label: Ad Color Id
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: winheight
+  type: numeric
+  label: Winheight
+- name: winwidth
+  type: numeric
+  label: Winwidth
+- name: isbetafunctionality
+  type: text
+  label: Isbetafunctionality
+- name: ad_window_uu
+  type: text
+  label: Ad Window Uu
+- name: titlelogic
+  type: text
+  label: Titlelogic
+- name: predefinedcontextvariables
+  type: text
+  label: Predefinedcontextvariables

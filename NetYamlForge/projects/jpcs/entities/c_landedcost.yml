@@ -1,0 +1,55 @@
+name: C_LANDEDCOST
+tableName: c_landedcost
+primaryKey: c_landedcost_id
+fields:
+- name: c_landedcost_id
+  type: numeric
+  label: C Landedcost Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: m_inout_id
+  type: numeric
+  label: M Inout Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: landedcostdistribution
+  type: text
+  label: Landedcostdistribution
+- name: processing
+  type: text
+  label: Processing
+- name: c_landedcost_uu
+  type: text
+  label: C Landedcost Uu
+- name: qty
+  type: numeric
+  label: Qty

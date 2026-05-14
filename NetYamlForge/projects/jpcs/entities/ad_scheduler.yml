@@ -1,0 +1,94 @@
+name: AD_SCHEDULER
+tableName: ad_scheduler
+primaryKey: ad_scheduler_id
+fields:
+- name: ad_scheduler_id
+  type: numeric
+  label: Ad Scheduler Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: frequencytype
+  type: text
+  label: Frequencytype
+- name: frequency
+  type: numeric
+  label: Frequency
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: datenextrun
+  type: text
+  label: Datenextrun
+- name: supervisor_id
+  type: numeric
+  label: Supervisor Id
+- name: keeplogdays
+  type: numeric
+  label: Keeplogdays
+- name: processing
+  type: text
+  label: Processing
+- name: weekday
+  type: text
+  label: Weekday
+- name: scheduletype
+  type: text
+  label: Scheduletype
+- name: monthday
+  type: numeric
+  label: Monthday
+- name: isignoreprocessingtime
+  type: text
+  label: Isignoreprocessingtime
+- name: cronpattern
+  type: text
+  label: Cronpattern
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: ad_scheduler_uu
+  type: text
+  label: Ad Scheduler Uu
+- name: ad_schedule_id
+  type: numeric
+  label: Ad Schedule Id
+- name: r_mailtext_id
+  type: numeric
+  label: R Mailtext Id
+- name: reportoutputtype
+  type: text
+  label: Reportoutputtype
+- name: ad_printformat_id
+  type: numeric
+  label: Ad Printformat Id

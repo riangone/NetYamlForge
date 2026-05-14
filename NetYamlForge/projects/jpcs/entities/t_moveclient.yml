@@ -1,0 +1,19 @@
+name: T_MOVECLIENT
+tableName: t_moveclient
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: tablename
+  type: text
+  label: Tablename
+- name: source_key
+  type: text
+  label: Source Key
+- name: target_key
+  type: text
+  label: Target Key
+- name: identifier
+  type: text
+  label: Identifier

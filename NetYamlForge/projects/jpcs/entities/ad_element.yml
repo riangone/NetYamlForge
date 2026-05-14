@@ -1,0 +1,64 @@
+name: AD_ELEMENT
+tableName: ad_element
+primaryKey: ad_element_id
+fields:
+- name: ad_element_id
+  type: numeric
+  label: Ad Element Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: columnname
+  type: text
+  label: Columnname
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: name
+  type: text
+  label: Name
+- name: printname
+  type: text
+  label: Printname
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: po_name
+  type: text
+  label: Po Name
+- name: po_printname
+  type: text
+  label: Po Printname
+- name: po_description
+  type: text
+  label: Po Description
+- name: po_help
+  type: text
+  label: Po Help
+- name: ad_element_uu
+  type: text
+  label: Ad Element Uu
+- name: placeholder
+  type: text
+  label: Placeholder

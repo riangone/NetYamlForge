@@ -1,0 +1,76 @@
+name: PP_ORDER_COST
+tableName: pp_order_cost
+primaryKey: pp_order_cost_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: costingmethod
+  type: text
+  label: Costingmethod
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: cumulatedamt
+  type: numeric
+  label: Cumulatedamt
+- name: cumulatedamtpost
+  type: numeric
+  label: Cumulatedamtpost
+- name: cumulatedqty
+  type: numeric
+  label: Cumulatedqty
+- name: cumulatedqtypost
+  type: numeric
+  label: Cumulatedqtypost
+- name: currentcostprice
+  type: numeric
+  label: Currentcostprice
+- name: currentcostpricell
+  type: numeric
+  label: Currentcostpricell
+- name: currentqty
+  type: numeric
+  label: Currentqty
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: m_costtype_id
+  type: numeric
+  label: M Costtype Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: pp_order_cost_id
+  type: numeric
+  label: Pp Order Cost Id
+- name: pp_order_id
+  type: numeric
+  label: Pp Order Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: pp_order_cost_uu
+  type: text
+  label: Pp Order Cost Uu

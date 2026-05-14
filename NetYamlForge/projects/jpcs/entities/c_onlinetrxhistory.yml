@@ -1,0 +1,46 @@
+name: C_ONLINETRXHISTORY
+tableName: c_onlinetrxhistory
+primaryKey: c_onlinetrxhistory_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: iserror
+  type: text
+  label: Iserror
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_onlinetrxhistory_id
+  type: numeric
+  label: C Onlinetrxhistory Id
+- name: c_onlinetrxhistory_uu
+  type: text
+  label: C Onlinetrxhistory Uu
+- name: processed
+  type: text
+  label: Processed

@@ -1,0 +1,49 @@
+name: CM_TEMPLATETABLE
+tableName: cm_templatetable
+primaryKey: cm_templatetable_id
+fields:
+- name: cm_templatetable_id
+  type: numeric
+  label: Cm Templatetable Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: cm_template_id
+  type: numeric
+  label: Cm Template Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: otherclause
+  type: text
+  label: Otherclause
+- name: cm_templatetable_uu
+  type: text
+  label: Cm Templatetable Uu

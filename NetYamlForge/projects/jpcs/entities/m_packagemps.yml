@@ -1,0 +1,73 @@
+name: M_PACKAGEMPS
+tableName: m_packagemps
+primaryKey: m_packagemps_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_uom_length_id
+  type: numeric
+  label: C Uom Length Id
+- name: c_uom_weight_id
+  type: numeric
+  label: C Uom Weight Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: description
+  type: text
+  label: Description
+- name: height
+  type: numeric
+  label: Height
+- name: isactive
+  type: text
+  label: Isactive
+- name: length
+  type: numeric
+  label: Length
+- name: m_package_id
+  type: numeric
+  label: M Package Id
+- name: m_packagemps_id
+  type: numeric
+  label: M Packagemps Id
+- name: m_packagemps_uu
+  type: text
+  label: M Packagemps Uu
+- name: mastertrackingno
+  type: text
+  label: Mastertrackingno
+- name: price
+  type: numeric
+  label: Price
+- name: processed
+  type: text
+  label: Processed
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: trackingno
+  type: text
+  label: Trackingno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: weight
+  type: numeric
+  label: Weight
+- name: width
+  type: numeric
+  label: Width

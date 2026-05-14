@@ -1,0 +1,70 @@
+name: M_TRANSACTIONALLOCATION
+tableName: m_transactionallocation
+primaryKey: m_transaction_id
+fields:
+- name: m_transaction_id
+  type: numeric
+  label: M Transaction Id
+- name: allocationstrategytype
+  type: text
+  label: Allocationstrategytype
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: isallocated
+  type: text
+  label: Isallocated
+- name: qty
+  type: numeric
+  label: Qty
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: m_productionline_id
+  type: numeric
+  label: M Productionline Id
+- name: m_inventoryline_id
+  type: numeric
+  label: M Inventoryline Id
+- name: out_m_transaction_id
+  type: numeric
+  label: Out M Transaction Id
+- name: out_m_inoutline_id
+  type: numeric
+  label: Out M Inoutline Id
+- name: out_m_productionline_id
+  type: numeric
+  label: Out M Productionline Id
+- name: out_m_inventoryline_id
+  type: numeric
+  label: Out M Inventoryline Id
+- name: m_transactionallocation_uu
+  type: text
+  label: M Transactionallocation Uu

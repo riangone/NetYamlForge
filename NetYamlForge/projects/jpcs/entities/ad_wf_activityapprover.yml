@@ -1,0 +1,40 @@
+name: AD_WF_ACTIVITYAPPROVER
+tableName: ad_wf_activityapprover
+primaryKey: ad_wf_activityapprover_id
+fields:
+- name: ad_wf_activityapprover_id
+  type: numeric
+  label: Ad Wf Activityapprover Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: ad_wf_activityapprover_uu
+  type: text
+  label: Ad Wf Activityapprover Uu
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_wf_activity_id
+  type: numeric
+  label: Ad Wf Activity Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: isprocessedapprovalrequestjp
+  type: text
+  label: Isprocessedapprovalrequestjp

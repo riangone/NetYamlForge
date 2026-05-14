@@ -1,0 +1,118 @@
+name: A_DEPRECIATION_EXP
+tableName: a_depreciation_exp
+primaryKey: a_depreciation_exp_id
+fields:
+- name: a_depreciation_exp_id
+  type: numeric
+  label: A Depreciation Exp Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_entry_type
+  type: text
+  label: A Entry Type
+- name: created
+  type: text
+  label: Created
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: expense
+  type: numeric
+  label: Expense
+- name: isdepreciated
+  type: text
+  label: Isdepreciated
+- name: processed
+  type: text
+  label: Processed
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isactive
+  type: text
+  label: Isactive
+- name: description
+  type: text
+  label: Description
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: a_period
+  type: numeric
+  label: A Period
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_depreciation_exp_uu
+  type: text
+  label: A Depreciation Exp Uu
+- name: dr_account_id
+  type: numeric
+  label: Dr Account Id
+- name: cr_account_id
+  type: numeric
+  label: Cr Account Id
+- name: expense_f
+  type: numeric
+  label: Expense F
+- name: processing
+  type: text
+  label: Processing
+- name: help
+  type: text
+  label: Help
+- name: a_asset_cost
+  type: numeric
+  label: A Asset Cost
+- name: a_accumulated_depr
+  type: numeric
+  label: A Accumulated Depr
+- name: a_accumulated_depr_f
+  type: numeric
+  label: A Accumulated Depr F
+- name: uselifemonths
+  type: numeric
+  label: Uselifemonths
+- name: uselifemonths_f
+  type: numeric
+  label: Uselifemonths F
+- name: a_asset_remaining
+  type: numeric
+  label: A Asset Remaining
+- name: a_asset_remaining_f
+  type: numeric
+  label: A Asset Remaining F
+- name: a_asset_cost_delta
+  type: numeric
+  label: A Asset Cost Delta
+- name: a_accumulated_depr_delta
+  type: numeric
+  label: A Accumulated Depr Delta
+- name: a_accumulated_depr_f_delta
+  type: numeric
+  label: A Accumulated Depr F Delta
+- name: a_asset_addition_id
+  type: numeric
+  label: A Asset Addition Id
+- name: a_asset_disposed_id
+  type: numeric
+  label: A Asset Disposed Id
+- name: a_depreciation_entry_id
+  type: numeric
+  label: A Depreciation Entry Id
+- name: a_account_number_acct
+  type: numeric
+  label: A Account Number Acct
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id

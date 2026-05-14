@@ -1,0 +1,85 @@
+name: C_LOCATION
+tableName: c_location
+primaryKey: c_location_id
+fields:
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: city
+  type: text
+  label: City
+- name: postal
+  type: text
+  label: Postal
+- name: postal_add
+  type: text
+  label: Postal Add
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: c_city_id
+  type: numeric
+  label: C City Id
+- name: regionname
+  type: text
+  label: Regionname
+- name: address3
+  type: text
+  label: Address3
+- name: address4
+  type: text
+  label: Address4
+- name: c_location_uu
+  type: text
+  label: C Location Uu
+- name: validateaddress
+  type: text
+  label: Validateaddress
+- name: result
+  type: text
+  label: Result
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: c_addressvalidation_id
+  type: numeric
+  label: C Addressvalidation Id
+- name: address5
+  type: text
+  label: Address5
+- name: comments
+  type: text
+  label: Comments
+- name: jp_location_label
+  type: text
+  label: Jp Location Label

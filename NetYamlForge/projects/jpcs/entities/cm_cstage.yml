@@ -1,0 +1,115 @@
+name: CM_CSTAGE
+tableName: cm_cstage
+primaryKey: cm_cstage_id
+fields:
+- name: cm_cstage_id
+  type: numeric
+  label: Cm Cstage Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: cm_webproject_id
+  type: numeric
+  label: Cm Webproject Id
+- name: cm_template_id
+  type: numeric
+  label: Cm Template Id
+- name: title
+  type: text
+  label: Title
+- name: notice
+  type: text
+  label: Notice
+- name: containertype
+  type: text
+  label: Containertype
+- name: containerlinkurl
+  type: text
+  label: Containerlinkurl
+- name: relativeurl
+  type: text
+  label: Relativeurl
+- name: priority
+  type: numeric
+  label: Priority
+- name: isindexed
+  type: text
+  label: Isindexed
+- name: issecure
+  type: text
+  label: Issecure
+- name: meta_robotstag
+  type: text
+  label: Meta Robotstag
+- name: meta_author
+  type: text
+  label: Meta Author
+- name: meta_copyright
+  type: text
+  label: Meta Copyright
+- name: meta_content
+  type: text
+  label: Meta Content
+- name: meta_description
+  type: text
+  label: Meta Description
+- name: meta_keywords
+  type: text
+  label: Meta Keywords
+- name: meta_publisher
+  type: text
+  label: Meta Publisher
+- name: structurexml
+  type: text
+  label: Structurexml
+- name: containerxml
+  type: text
+  label: Containerxml
+- name: cm_cstagelink_id
+  type: numeric
+  label: Cm Cstagelink Id
+- name: ismodified
+  type: text
+  label: Ismodified
+- name: processing
+  type: text
+  label: Processing
+- name: issummary
+  type: text
+  label: Issummary
+- name: meta_language
+  type: text
+  label: Meta Language
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: cm_cstage_uu
+  type: text
+  label: Cm Cstage Uu

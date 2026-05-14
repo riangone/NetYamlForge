@@ -1,0 +1,130 @@
+name: GL_JOURNAL
+tableName: gl_journal
+primaryKey: gl_journal_id
+fields:
+- name: gl_journal_id
+  type: numeric
+  label: Gl Journal Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: description
+  type: text
+  label: Description
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: gl_budget_id
+  type: numeric
+  label: Gl Budget Id
+- name: gl_category_id
+  type: numeric
+  label: Gl Category Id
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: currencyrate
+  type: numeric
+  label: Currencyrate
+- name: gl_journalbatch_id
+  type: numeric
+  label: Gl Journalbatch Id
+- name: totaldr
+  type: numeric
+  label: Totaldr
+- name: totalcr
+  type: numeric
+  label: Totalcr
+- name: controlamt
+  type: numeric
+  label: Controlamt
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: gl_journal_uu
+  type: text
+  label: Gl Journal Uu
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: jp_datamigration_identifier
+  type: text
+  label: Jp Datamigration Identifier
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_order_id
+  type: numeric
+  label: Jp Order Id
+- name: jp_invoice_id
+  type: numeric
+  label: Jp Invoice Id

@@ -1,0 +1,13 @@
+name: T_SPOOL
+tableName: t_spool
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: msgtext
+  type: text
+  label: Msgtext

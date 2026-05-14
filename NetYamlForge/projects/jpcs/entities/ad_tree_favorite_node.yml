@@ -1,0 +1,58 @@
+name: AD_TREE_FAVORITE_NODE
+tableName: ad_tree_favorite_node
+primaryKey: ad_tree_favorite_node_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_menu_id
+  type: numeric
+  label: Ad Menu Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_tree_favorite_id
+  type: numeric
+  label: Ad Tree Favorite Id
+- name: ad_tree_favorite_node_id
+  type: numeric
+  label: Ad Tree Favorite Node Id
+- name: ad_tree_favorite_node_uu
+  type: text
+  label: Ad Tree Favorite Node Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: iscollapsible
+  type: text
+  label: Iscollapsible
+- name: issummary
+  type: text
+  label: Issummary
+- name: name
+  type: text
+  label: Name
+- name: parent_id
+  type: numeric
+  label: Parent Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isfavourite
+  type: text
+  label: Isfavourite
+- name: loginopenseqno
+  type: numeric
+  label: Loginopenseqno

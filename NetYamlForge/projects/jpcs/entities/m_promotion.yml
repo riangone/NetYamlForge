@@ -1,0 +1,43 @@
+name: M_PROMOTION
+tableName: m_promotion
+primaryKey: m_promotion_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_promotion_id
+  type: numeric
+  label: M Promotion Id
+- name: name
+  type: text
+  label: Name
+- name: promotionpriority
+  type: numeric
+  label: Promotionpriority
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: m_promotion_uu
+  type: text
+  label: M Promotion Uu

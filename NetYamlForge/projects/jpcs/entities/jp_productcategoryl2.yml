@@ -1,0 +1,40 @@
+name: JP_PRODUCTCATEGORYL2
+tableName: jp_productcategoryl2
+primaryKey: jp_productcategoryl2_id
+fields:
+- name: jp_productcategoryl2_id
+  type: numeric
+  label: Jp Productcategoryl2 Id
+- name: jp_productcategoryl2_uu
+  type: text
+  label: Jp Productcategoryl2 Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description

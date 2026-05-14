@@ -1,0 +1,58 @@
+name: AD_RULE
+tableName: ad_rule
+primaryKey: ad_rule_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_rule_id
+  type: numeric
+  label: Ad Rule Id
+- name: accesslevel
+  type: text
+  label: Accesslevel
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: eventtype
+  type: text
+  label: Eventtype
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: ruletype
+  type: text
+  label: Ruletype
+- name: script
+  type: text
+  label: Script
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: ad_rule_uu
+  type: text
+  label: Ad Rule Uu

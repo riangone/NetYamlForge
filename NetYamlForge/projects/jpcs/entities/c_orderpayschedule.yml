@@ -1,0 +1,58 @@
+name: C_ORDERPAYSCHEDULE
+tableName: c_orderpayschedule
+primaryKey: c_orderpayschedule_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_orderpayschedule_id
+  type: numeric
+  label: C Orderpayschedule Id
+- name: c_payschedule_id
+  type: numeric
+  label: C Payschedule Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: discountdate
+  type: text
+  label: Discountdate
+- name: dueamt
+  type: numeric
+  label: Dueamt
+- name: duedate
+  type: text
+  label: Duedate
+- name: isactive
+  type: text
+  label: Isactive
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_orderpayschedule_uu
+  type: text
+  label: C Orderpayschedule Uu

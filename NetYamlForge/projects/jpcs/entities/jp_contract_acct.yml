@@ -1,0 +1,85 @@
+name: JP_CONTRACT_ACCT
+tableName: jp_contract_acct
+primaryKey: jp_contract_acct_id
+fields:
+- name: jp_contract_acct_id
+  type: numeric
+  label: Jp Contract Acct Id
+- name: jp_contract_acct_uu
+  type: text
+  label: Jp Contract Acct Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: ispostingcontractacctjp
+  type: text
+  label: Ispostingcontractacctjp
+- name: ispostingrecognitiondocjp
+  type: text
+  label: Ispostingrecognitiondocjp
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: processing
+  type: text
+  label: Processing
+- name: docbasetype
+  type: text
+  label: Docbasetype
+- name: docaction
+  type: text
+  label: Docaction
+- name: issplitwhendifferencejp
+  type: text
+  label: Issplitwhendifferencejp
+- name: jp_recogtoinvoicepolicy
+  type: text
+  label: Jp Recogtoinvoicepolicy
+- name: jp_recognition_journalpolicy
+  type: text
+  label: Jp Recognition Journalpolicy
+- name: jp_gljournal_journalpolicy
+  type: text
+  label: Jp Gljournal Journalpolicy
+- name: ispostinggljournaljp
+  type: text
+  label: Ispostinggljournaljp
+- name: jp_gljournal_dateacctselect
+  type: text
+  label: Jp Gljournal Dateacctselect
+- name: jp_gljournal_dateacct
+  type: text
+  label: Jp Gljournal Dateacct
+- name: jp_gljournal_datedocselect
+  type: text
+  label: Jp Gljournal Datedocselect
+- name: jp_gljournal_datedoc
+  type: text
+  label: Jp Gljournal Datedoc

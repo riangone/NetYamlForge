@@ -1,0 +1,130 @@
+name: M_PRODUCTION
+tableName: m_production
+primaryKey: m_production_id
+fields:
+- name: m_production_id
+  type: numeric
+  label: M Production Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: iscreated
+  type: text
+  label: Iscreated
+- name: posted
+  type: text
+  label: Posted
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: m_production_uu
+  type: text
+  label: M Production Uu
+- name: documentno
+  type: text
+  label: Documentno
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: productionqty
+  type: numeric
+  label: Productionqty
+- name: datepromised
+  type: text
+  label: Datepromised
+- name: iscomplete
+  type: text
+  label: Iscomplete
+- name: c_orderline_id
+  type: numeric
+  label: C Orderline Id
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: isuseproductionplan
+  type: text
+  label: Isuseproductionplan
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: jp_pp_fact_id
+  type: numeric
+  label: Jp Pp Fact Id
+- name: pp_product_bom_id
+  type: numeric
+  label: Pp Product Bom Id
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id

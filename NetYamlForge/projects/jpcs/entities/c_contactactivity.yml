@@ -1,0 +1,58 @@
+name: C_CONTACTACTIVITY
+tableName: c_contactactivity
+primaryKey: c_contactactivity_id
+fields:
+- name: c_contactactivity_id
+  type: numeric
+  label: C Contactactivity Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: startdate
+  type: text
+  label: Startdate
+- name: enddate
+  type: text
+  label: Enddate
+- name: comments
+  type: text
+  label: Comments
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: contactactivitytype
+  type: text
+  label: Contactactivitytype
+- name: iscomplete
+  type: text
+  label: Iscomplete
+- name: c_opportunity_id
+  type: numeric
+  label: C Opportunity Id
+- name: c_contactactivity_uu
+  type: text
+  label: C Contactactivity Uu

@@ -1,0 +1,58 @@
+name: A_DEPRECIATION_BUILD
+tableName: a_depreciation_build
+primaryKey: a_depreciation_build_id
+fields:
+- name: a_depreciation_build_id
+  type: numeric
+  label: A Depreciation Build Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: a_end_asset_id
+  type: numeric
+  label: A End Asset Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: periodno
+  type: numeric
+  label: Periodno
+- name: processed
+  type: text
+  label: Processed
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: processing
+  type: text
+  label: Processing
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isactive
+  type: text
+  label: Isactive
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: created
+  type: text
+  label: Created
+- name: a_start_asset_id
+  type: numeric
+  label: A Start Asset Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_depreciation_build_uu
+  type: text
+  label: A Depreciation Build Uu

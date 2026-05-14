@@ -1,0 +1,43 @@
+name: AD_ATTACHMENTNOTE
+tableName: ad_attachmentnote
+primaryKey: ad_attachmentnote_id
+fields:
+- name: ad_attachmentnote_id
+  type: numeric
+  label: Ad Attachmentnote Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_attachment_id
+  type: numeric
+  label: Ad Attachment Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: title
+  type: text
+  label: Title
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: ad_attachmentnote_uu
+  type: text
+  label: Ad Attachmentnote Uu

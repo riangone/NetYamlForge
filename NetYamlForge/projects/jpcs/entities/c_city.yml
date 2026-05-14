@@ -1,0 +1,52 @@
+name: C_CITY
+tableName: c_city
+primaryKey: c_city_id
+fields:
+- name: c_city_id
+  type: numeric
+  label: C City Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: locode
+  type: text
+  label: Locode
+- name: coordinates
+  type: text
+  label: Coordinates
+- name: postal
+  type: text
+  label: Postal
+- name: areacode
+  type: text
+  label: Areacode
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: c_city_uu
+  type: text
+  label: C City Uu

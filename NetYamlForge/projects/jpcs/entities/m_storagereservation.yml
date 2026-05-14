@@ -1,0 +1,46 @@
+name: M_STORAGERESERVATION
+tableName: m_storagereservation
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datelastinventory
+  type: text
+  label: Datelastinventory
+- name: isactive
+  type: text
+  label: Isactive
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_storagereservation_uu
+  type: text
+  label: M Storagereservation Uu

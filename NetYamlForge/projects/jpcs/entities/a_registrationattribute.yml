@@ -1,0 +1,52 @@
+name: A_REGISTRATIONATTRIBUTE
+tableName: a_registrationattribute
+primaryKey: a_registrationattribute_id
+fields:
+- name: a_registrationattribute_id
+  type: numeric
+  label: A Registrationattribute Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: columnname
+  type: text
+  label: Columnname
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: a_registrationattribute_uu
+  type: text
+  label: A Registrationattribute Uu

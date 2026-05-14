@@ -1,0 +1,55 @@
+name: C_PAYSCHEDULE
+tableName: c_payschedule
+primaryKey: c_payschedule_id
+fields:
+- name: c_payschedule_id
+  type: numeric
+  label: C Payschedule Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: percentage
+  type: numeric
+  label: Percentage
+- name: netdays
+  type: numeric
+  label: Netdays
+- name: netday
+  type: text
+  label: Netday
+- name: discountdays
+  type: numeric
+  label: Discountdays
+- name: discount
+  type: numeric
+  label: Discount
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: gracedays
+  type: numeric
+  label: Gracedays
+- name: c_payschedule_uu
+  type: text
+  label: C Payschedule Uu

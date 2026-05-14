@@ -1,0 +1,61 @@
+name: C_CURRENCY
+tableName: c_currency
+primaryKey: c_currency_id
+fields:
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: iso_code
+  type: text
+  label: Iso Code
+- name: cursymbol
+  type: text
+  label: Cursymbol
+- name: description
+  type: text
+  label: Description
+- name: stdprecision
+  type: numeric
+  label: Stdprecision
+- name: costingprecision
+  type: numeric
+  label: Costingprecision
+- name: iseuro
+  type: text
+  label: Iseuro
+- name: isemumember
+  type: text
+  label: Isemumember
+- name: emuentrydate
+  type: text
+  label: Emuentrydate
+- name: emurate
+  type: numeric
+  label: Emurate
+- name: roundofffactor
+  type: numeric
+  label: Roundofffactor
+- name: c_currency_uu
+  type: text
+  label: C Currency Uu

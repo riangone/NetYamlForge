@@ -1,0 +1,52 @@
+name: AD_WORKBENCH
+tableName: ad_workbench
+primaryKey: ad_workbench_id
+fields:
+- name: ad_workbench_id
+  type: numeric
+  label: Ad Workbench Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: ad_color_id
+  type: numeric
+  label: Ad Color Id
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: ad_workbench_uu
+  type: text
+  label: Ad Workbench Uu

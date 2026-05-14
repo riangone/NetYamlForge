@@ -1,0 +1,94 @@
+name: PA_DOCUMENTSTATUS
+tableName: pa_documentstatus
+primaryKey: pa_documentstatus_id
+fields:
+- name: pa_documentstatus_id
+  type: numeric
+  label: Pa Documentstatus Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: name_printcolor_id
+  type: numeric
+  label: Name Printcolor Id
+- name: name_printfont_id
+  type: numeric
+  label: Name Printfont Id
+- name: number_printcolor_id
+  type: numeric
+  label: Number Printcolor Id
+- name: number_printfont_id
+  type: numeric
+  label: Number Printfont Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_form_id
+  type: numeric
+  label: Ad Form Id
+- name: pa_documentstatus_uu
+  type: text
+  label: Pa Documentstatus Uu
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: ishidewhenzero
+  type: text
+  label: Ishidewhenzero
+- name: help
+  type: text
+  label: Help
+- name: name_printcolorzero_id
+  type: numeric
+  label: Name Printcolorzero Id
+- name: ad_fieldgroup_id
+  type: numeric
+  label: Ad Fieldgroup Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: ad_infowindow_id
+  type: numeric
+  label: Ad Infowindow Id

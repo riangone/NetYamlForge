@@ -1,0 +1,37 @@
+name: AD_WINDOW_ACCESS
+tableName: ad_window_access
+primaryKey: ad_window_id
+fields:
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isreadwrite
+  type: text
+  label: Isreadwrite
+- name: ad_window_access_uu
+  type: text
+  label: Ad Window Access Uu

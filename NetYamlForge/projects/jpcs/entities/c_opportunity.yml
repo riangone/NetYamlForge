@@ -1,0 +1,76 @@
+name: C_OPPORTUNITY
+tableName: c_opportunity
+primaryKey: c_opportunity_id
+fields:
+- name: c_opportunity_id
+  type: numeric
+  label: C Opportunity Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: closedate
+  type: text
+  label: Closedate
+- name: expectedclosedate
+  type: text
+  label: Expectedclosedate
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: opportunityamt
+  type: numeric
+  label: Opportunityamt
+- name: comments
+  type: text
+  label: Comments
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: cost
+  type: numeric
+  label: Cost
+- name: c_salesstage_id
+  type: numeric
+  label: C Salesstage Id
+- name: probability
+  type: numeric
+  label: Probability
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_opportunity_uu
+  type: text
+  label: C Opportunity Uu

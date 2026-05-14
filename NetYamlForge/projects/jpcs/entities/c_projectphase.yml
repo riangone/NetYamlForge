@@ -1,0 +1,85 @@
+name: C_PROJECTPHASE
+tableName: c_projectphase
+primaryKey: c_projectphase_id
+fields:
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: startdate
+  type: text
+  label: Startdate
+- name: enddate
+  type: text
+  label: Enddate
+- name: iscomplete
+  type: text
+  label: Iscomplete
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: generateorder
+  type: text
+  label: Generateorder
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_phase_id
+  type: numeric
+  label: C Phase Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: help
+  type: text
+  label: Help
+- name: name
+  type: text
+  label: Name
+- name: qty
+  type: numeric
+  label: Qty
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: committedamt
+  type: numeric
+  label: Committedamt
+- name: iscommitceiling
+  type: text
+  label: Iscommitceiling
+- name: projinvoicerule
+  type: text
+  label: Projinvoicerule
+- name: plannedamt
+  type: numeric
+  label: Plannedamt
+- name: c_projectphase_uu
+  type: text
+  label: C Projectphase Uu

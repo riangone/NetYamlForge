@@ -1,0 +1,115 @@
+name: C_ELEMENTVALUE
+tableName: c_elementvalue
+primaryKey: c_elementvalue_id
+fields:
+- name: c_elementvalue_id
+  type: numeric
+  label: C Elementvalue Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: accounttype
+  type: text
+  label: Accounttype
+- name: accountsign
+  type: text
+  label: Accountsign
+- name: isdoccontrolled
+  type: text
+  label: Isdoccontrolled
+- name: c_element_id
+  type: numeric
+  label: C Element Id
+- name: issummary
+  type: text
+  label: Issummary
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: postactual
+  type: text
+  label: Postactual
+- name: postbudget
+  type: text
+  label: Postbudget
+- name: postencumbrance
+  type: text
+  label: Postencumbrance
+- name: poststatistical
+  type: text
+  label: Poststatistical
+- name: isbankaccount
+  type: text
+  label: Isbankaccount
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: isforeigncurrency
+  type: text
+  label: Isforeigncurrency
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_elementvalue_uu
+  type: text
+  label: C Elementvalue Uu
+- name: isdetailbpartner
+  type: text
+  label: Isdetailbpartner
+- name: isdetailproduct
+  type: text
+  label: Isdetailproduct
+- name: bpartnertype
+  type: text
+  label: Bpartnertype
+- name: jp_if_value
+  type: text
+  label: Jp If Value
+- name: jp_group1
+  type: text
+  label: Jp Group1
+- name: jp_group2
+  type: text
+  label: Jp Group2
+- name: jp_group3
+  type: text
+  label: Jp Group3
+- name: jp_group4
+  type: text
+  label: Jp Group4
+- name: jp_group5
+  type: text
+  label: Jp Group5
+- name: jp_group6
+  type: text
+  label: Jp Group6

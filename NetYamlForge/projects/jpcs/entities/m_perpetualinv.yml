@@ -1,0 +1,64 @@
+name: M_PERPETUALINV
+tableName: m_perpetualinv
+primaryKey: m_perpetualinv_id
+fields:
+- name: m_perpetualinv_id
+  type: numeric
+  label: M Perpetualinv Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: noinventorycount
+  type: numeric
+  label: Noinventorycount
+- name: noproductcount
+  type: numeric
+  label: Noproductcount
+- name: counthighmovement
+  type: text
+  label: Counthighmovement
+- name: processing
+  type: text
+  label: Processing
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: datenextrun
+  type: text
+  label: Datenextrun
+- name: numberofruns
+  type: numeric
+  label: Numberofruns
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: m_perpetualinv_uu
+  type: text
+  label: M Perpetualinv Uu

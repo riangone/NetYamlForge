@@ -1,0 +1,40 @@
+name: C_TAXPOSTAL
+tableName: c_taxpostal
+primaryKey: c_taxpostal_id
+fields:
+- name: c_taxpostal_id
+  type: numeric
+  label: C Taxpostal Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: postal
+  type: text
+  label: Postal
+- name: postal_to
+  type: text
+  label: Postal To
+- name: c_taxpostal_uu
+  type: text
+  label: C Taxpostal Uu

@@ -1,0 +1,46 @@
+name: HR_CONCEPT_CATEGORY
+tableName: hr_concept_category
+primaryKey: hr_concept_category_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: hr_concept_acct
+  type: numeric
+  label: Hr Concept Acct
+- name: hr_concept_category_id
+  type: numeric
+  label: Hr Concept Category Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: value
+  type: text
+  label: Value
+- name: hr_concept_category_uu
+  type: text
+  label: Hr Concept Category Uu

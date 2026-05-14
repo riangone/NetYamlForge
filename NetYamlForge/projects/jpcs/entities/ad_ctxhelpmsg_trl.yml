@@ -1,0 +1,40 @@
+name: AD_CTXHELPMSG_TRL
+tableName: ad_ctxhelpmsg_trl
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_ctxhelpmsg_id
+  type: numeric
+  label: Ad Ctxhelpmsg Id
+- name: ad_ctxhelpmsg_trl_uu
+  type: text
+  label: Ad Ctxhelpmsg Trl Uu
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: msgtext
+  type: text
+  label: Msgtext
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

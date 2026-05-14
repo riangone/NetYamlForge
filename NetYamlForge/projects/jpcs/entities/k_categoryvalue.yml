@@ -1,0 +1,40 @@
+name: K_CATEGORYVALUE
+tableName: k_categoryvalue
+primaryKey: k_categoryvalue_id
+fields:
+- name: k_categoryvalue_id
+  type: numeric
+  label: K Categoryvalue Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: k_category_id
+  type: numeric
+  label: K Category Id
+- name: k_categoryvalue_uu
+  type: text
+  label: K Categoryvalue Uu

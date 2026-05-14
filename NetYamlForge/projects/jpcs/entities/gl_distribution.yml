@@ -1,0 +1,148 @@
+name: GL_DISTRIBUTION
+tableName: gl_distribution
+primaryKey: gl_distribution_id
+fields:
+- name: gl_distribution_id
+  type: numeric
+  label: Gl Distribution Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: anyorg
+  type: text
+  label: Anyorg
+- name: org_id
+  type: numeric
+  label: Org Id
+- name: anyacct
+  type: text
+  label: Anyacct
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: anyproduct
+  type: text
+  label: Anyproduct
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: anybpartner
+  type: text
+  label: Anybpartner
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: anyproject
+  type: text
+  label: Anyproject
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: anycampaign
+  type: text
+  label: Anycampaign
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: anyactivity
+  type: text
+  label: Anyactivity
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: anysalesregion
+  type: text
+  label: Anysalesregion
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: anyorgtrx
+  type: text
+  label: Anyorgtrx
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: anylocto
+  type: text
+  label: Anylocto
+- name: c_locto_id
+  type: numeric
+  label: C Locto Id
+- name: anylocfrom
+  type: text
+  label: Anylocfrom
+- name: c_locfrom_id
+  type: numeric
+  label: C Locfrom Id
+- name: anyuser1
+  type: text
+  label: Anyuser1
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: anyuser2
+  type: text
+  label: Anyuser2
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: percenttotal
+  type: numeric
+  label: Percenttotal
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: processing
+  type: text
+  label: Processing
+- name: iscreatereversal
+  type: text
+  label: Iscreatereversal
+- name: gl_distribution_uu
+  type: text
+  label: Gl Distribution Uu
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto

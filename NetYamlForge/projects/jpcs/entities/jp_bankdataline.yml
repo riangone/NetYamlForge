@@ -1,0 +1,166 @@
+name: JP_BANKDATALINE
+tableName: jp_bankdataline
+primaryKey: jp_bankdataline_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: jp_bankdata_id
+  type: numeric
+  label: Jp Bankdata Id
+- name: jp_bankdataline_id
+  type: numeric
+  label: Jp Bankdataline Id
+- name: c_bankstatementline_id
+  type: numeric
+  label: C Bankstatementline Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: jp_bill_id
+  type: numeric
+  label: Jp Bill Id
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: line
+  type: numeric
+  label: Line
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: statementlinedate
+  type: text
+  label: Statementlinedate
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: valutadate
+  type: text
+  label: Valutadate
+- name: isactive
+  type: text
+  label: Isactive
+- name: ismatchedjp
+  type: text
+  label: Ismatchedjp
+- name: jp_bankdataline_uu
+  type: text
+  label: Jp Bankdataline Uu
+- name: description
+  type: text
+  label: Description
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: jp_bankdatatype_line
+  type: text
+  label: Jp Bankdatatype Line
+- name: routingno
+  type: text
+  label: Routingno
+- name: jp_bankname_kana
+  type: text
+  label: Jp Bankname Kana
+- name: jp_branchcode
+  type: text
+  label: Jp Branchcode
+- name: jp_branchname_kana
+  type: text
+  label: Jp Branchname Kana
+- name: jp_clearinghouse
+  type: text
+  label: Jp Clearinghouse
+- name: jp_bankaccounttype
+  type: text
+  label: Jp Bankaccounttype
+- name: accountno
+  type: text
+  label: Accountno
+- name: jp_a_name_kana
+  type: text
+  label: Jp A Name Kana
+- name: jp_bankdatanewcode
+  type: text
+  label: Jp Bankdatanewcode
+- name: jp_bankdatacustomercode1
+  type: text
+  label: Jp Bankdatacustomercode1
+- name: jp_bankdatacustomercode2
+  type: text
+  label: Jp Bankdatacustomercode2
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: jp_bankdata_edi_info
+  type: text
+  label: Jp Bankdata Edi Info
+- name: jp_bankdata_referenceno
+  type: text
+  label: Jp Bankdata Referenceno
+- name: jp_bankdata_kanjyoubi
+  type: text
+  label: Jp Bankdata Kanjyoubi
+- name: jp_bankdata_kisanbi
+  type: text
+  label: Jp Bankdata Kisanbi
+- name: jp_bankdata_taten_stmtamt
+  type: numeric
+  label: Jp Bankdata Taten Stmtamt
+- name: jp_requestercode
+  type: text
+  label: Jp Requestercode
+- name: jp_bankdata_torikeshikubun
+  type: text
+  label: Jp Bankdata Torikeshikubun
+- name: jp_sopotype
+  type: text
+  label: Jp Sopotype
+- name: jp_priceactual
+  type: numeric
+  label: Jp Priceactual
+- name: jp_product_id
+  type: numeric
+  label: Jp Product Id
+- name: jp_qty
+  type: numeric
+  label: Jp Qty
+- name: jp_uom_id
+  type: numeric
+  label: Jp Uom Id

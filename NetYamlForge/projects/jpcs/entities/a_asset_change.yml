@@ -1,0 +1,241 @@
+name: A_ASSET_CHANGE
+tableName: a_asset_change
+primaryKey: a_asset_change_id
+fields:
+- name: a_asset_change_id
+  type: numeric
+  label: A Asset Change Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: changetype
+  type: text
+  label: Changetype
+- name: changedate
+  type: text
+  label: Changedate
+- name: changeamt
+  type: numeric
+  label: Changeamt
+- name: uselifeyears
+  type: numeric
+  label: Uselifeyears
+- name: uselifemonths
+  type: numeric
+  label: Uselifemonths
+- name: lifeuseunits
+  type: numeric
+  label: Lifeuseunits
+- name: assetdepreciationdate
+  type: text
+  label: Assetdepreciationdate
+- name: a_asset_retirement_id
+  type: numeric
+  label: A Asset Retirement Id
+- name: a_asset_addition_id
+  type: numeric
+  label: A Asset Addition Id
+- name: serno
+  type: text
+  label: Serno
+- name: lot
+  type: text
+  label: Lot
+- name: versionno
+  type: text
+  label: Versionno
+- name: a_accumdepreciation_acct
+  type: numeric
+  label: A Accumdepreciation Acct
+- name: a_asset_createdate
+  type: text
+  label: A Asset Createdate
+- name: a_asset_spread_type
+  type: text
+  label: A Asset Spread Type
+- name: a_depreciation_calc_type
+  type: text
+  label: A Depreciation Calc Type
+- name: a_depreciation_manual_period
+  type: text
+  label: A Depreciation Manual Period
+- name: a_qty_original
+  type: numeric
+  label: A Qty Original
+- name: a_qty_current
+  type: numeric
+  label: A Qty Current
+- name: a_period_start
+  type: numeric
+  label: A Period Start
+- name: a_period_end
+  type: numeric
+  label: A Period End
+- name: a_parent_asset_id
+  type: numeric
+  label: A Parent Asset Id
+- name: a_disposal_revenue
+  type: text
+  label: A Disposal Revenue
+- name: a_disposal_loss
+  type: text
+  label: A Disposal Loss
+- name: a_depreciation_variable_perc
+  type: numeric
+  label: A Depreciation Variable Perc
+- name: a_depreciation_table_header_id
+  type: numeric
+  label: A Depreciation Table Header Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: assetvalueamt
+  type: numeric
+  label: Assetvalueamt
+- name: assetservicedate
+  type: text
+  label: Assetservicedate
+- name: assetmarketvalueamt
+  type: numeric
+  label: Assetmarketvalueamt
+- name: assetdisposaldate
+  type: text
+  label: Assetdisposaldate
+- name: assetbookvalueamt
+  type: numeric
+  label: Assetbookvalueamt
+- name: assetaccumdepreciationamt
+  type: numeric
+  label: Assetaccumdepreciationamt
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: isinposession
+  type: text
+  label: Isinposession
+- name: isfullydepreciated
+  type: text
+  label: Isfullydepreciated
+- name: isdisposed
+  type: text
+  label: Isdisposed
+- name: isdepreciated
+  type: text
+  label: Isdepreciated
+- name: depreciationtype
+  type: text
+  label: Depreciationtype
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: useunits
+  type: numeric
+  label: Useunits
+- name: textdetails
+  type: text
+  label: Textdetails
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: isowned
+  type: text
+  label: Isowned
+- name: conventiontype
+  type: text
+  label: Conventiontype
+- name: c_validcombination_id
+  type: numeric
+  label: C Validcombination Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: a_split_percent
+  type: numeric
+  label: A Split Percent
+- name: a_salvage_value
+  type: numeric
+  label: A Salvage Value
+- name: a_reval_depexp_offset
+  type: numeric
+  label: A Reval Depexp Offset
+- name: a_reval_cost_offset_prior
+  type: numeric
+  label: A Reval Cost Offset Prior
+- name: a_reval_cost_offset
+  type: numeric
+  label: A Reval Cost Offset
+- name: a_reval_cal_method
+  type: text
+  label: A Reval Cal Method
+- name: a_reval_accumdep_offset_prior
+  type: numeric
+  label: A Reval Accumdep Offset Prior
+- name: a_reval_accumdep_offset_cur
+  type: numeric
+  label: A Reval Accumdep Offset Cur
+- name: a_depreciation_manual_amount
+  type: numeric
+  label: A Depreciation Manual Amount
+- name: a_depreciation_acct
+  type: numeric
+  label: A Depreciation Acct
+- name: a_asset_revaldate
+  type: text
+  label: A Asset Revaldate
+- name: a_asset_acct
+  type: numeric
+  label: A Asset Acct
+- name: a_asset_acct_id
+  type: numeric
+  label: A Asset Acct Id
+- name: a_asset_change_uu
+  type: text
+  label: A Asset Change Uu
+- name: a_disposal_revenue_acct
+  type: numeric
+  label: A Disposal Revenue Acct
+- name: a_disposal_loss_acct
+  type: numeric
+  label: A Disposal Loss Acct
+- name: a_reval_depexp_offset_acct
+  type: numeric
+  label: A Reval Depexp Offset Acct
+- name: a_reval_cost_offset_prior_acct
+  type: numeric
+  label: A Reval Cost Offset Prior Acct
+- name: a_reval_cost_offset_acct
+  type: numeric
+  label: A Reval Cost Offset Acct
+- name: a_reval_adep_offset_prior_acct
+  type: numeric
+  label: A Reval Adep Offset Prior Acct
+- name: a_reval_adep_offset_cur_acct
+  type: numeric
+  label: A Reval Adep Offset Cur Acct

@@ -1,0 +1,157 @@
+name: I_BPARTNER
+tableName: i_bpartner
+primaryKey: i_bpartner_id
+fields:
+- name: i_bpartner_id
+  type: numeric
+  label: I Bpartner Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: description
+  type: text
+  label: Description
+- name: duns
+  type: text
+  label: Duns
+- name: taxid
+  type: text
+  label: Taxid
+- name: naics
+  type: text
+  label: Naics
+- name: groupvalue
+  type: text
+  label: Groupvalue
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: address1
+  type: text
+  label: Address1
+- name: address2
+  type: text
+  label: Address2
+- name: postal
+  type: text
+  label: Postal
+- name: postal_add
+  type: text
+  label: Postal Add
+- name: city
+  type: text
+  label: City
+- name: c_region_id
+  type: numeric
+  label: C Region Id
+- name: regionname
+  type: text
+  label: Regionname
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: countrycode
+  type: text
+  label: Countrycode
+- name: title
+  type: text
+  label: Title
+- name: contactname
+  type: text
+  label: Contactname
+- name: contactdescription
+  type: text
+  label: Contactdescription
+- name: comments
+  type: text
+  label: Comments
+- name: phone
+  type: text
+  label: Phone
+- name: phone2
+  type: text
+  label: Phone2
+- name: fax
+  type: text
+  label: Fax
+- name: email
+  type: text
+  label: Email
+- name: password
+  type: text
+  label: Password
+- name: birthday
+  type: text
+  label: Birthday
+- name: c_greeting_id
+  type: numeric
+  label: C Greeting Id
+- name: bpcontactgreeting
+  type: text
+  label: Bpcontactgreeting
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: r_interestarea_id
+  type: numeric
+  label: R Interestarea Id
+- name: interestareaname
+  type: text
+  label: Interestareaname
+- name: iscustomer
+  type: text
+  label: Iscustomer
+- name: isemployee
+  type: text
+  label: Isemployee
+- name: isvendor
+  type: text
+  label: Isvendor
+- name: i_bpartner_uu
+  type: text
+  label: I Bpartner Uu

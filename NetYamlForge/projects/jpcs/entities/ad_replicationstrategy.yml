@@ -1,0 +1,49 @@
+name: AD_REPLICATIONSTRATEGY
+tableName: ad_replicationstrategy
+primaryKey: ad_replicationstrategy_id
+fields:
+- name: ad_replicationstrategy_id
+  type: numeric
+  label: Ad Replicationstrategy Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: exp_processor_id
+  type: numeric
+  label: Exp Processor Id
+- name: value
+  type: text
+  label: Value
+- name: ad_replicationstrategy_uu
+  type: text
+  label: Ad Replicationstrategy Uu

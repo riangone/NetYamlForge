@@ -1,0 +1,43 @@
+name: GL_CATEGORY_TRL
+tableName: gl_category_trl
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: gl_category_id
+  type: numeric
+  label: Gl Category Id
+- name: gl_category_trl_uu
+  type: text
+  label: Gl Category Trl Uu
+- name: isactive
+  type: text
+  label: Isactive
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: printname
+  type: text
+  label: Printname

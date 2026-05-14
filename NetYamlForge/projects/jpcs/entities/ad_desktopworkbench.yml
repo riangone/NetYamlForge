@@ -1,0 +1,40 @@
+name: AD_DESKTOPWORKBENCH
+tableName: ad_desktopworkbench
+primaryKey: ad_desktopworkbench_id
+fields:
+- name: ad_desktopworkbench_id
+  type: numeric
+  label: Ad Desktopworkbench Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_workbench_id
+  type: numeric
+  label: Ad Workbench Id
+- name: ad_desktop_id
+  type: numeric
+  label: Ad Desktop Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: ad_desktopworkbench_uu
+  type: text
+  label: Ad Desktopworkbench Uu

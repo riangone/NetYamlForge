@@ -1,0 +1,43 @@
+name: C_BP_WITHHOLDING
+tableName: c_bp_withholding
+primaryKey: c_bpartner_id
+fields:
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_withholding_id
+  type: numeric
+  label: C Withholding Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ismandatorywithholding
+  type: text
+  label: Ismandatorywithholding
+- name: istemporaryexempt
+  type: text
+  label: Istemporaryexempt
+- name: exemptreason
+  type: text
+  label: Exemptreason
+- name: c_bp_withholding_uu
+  type: text
+  label: C Bp Withholding Uu

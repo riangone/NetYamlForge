@@ -1,0 +1,46 @@
+name: K_INDEXSTOP
+tableName: k_indexstop
+primaryKey: k_indexstop_id
+fields:
+- name: k_indexstop_id
+  type: numeric
+  label: K Indexstop Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: keyword
+  type: text
+  label: Keyword
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: cm_webproject_id
+  type: numeric
+  label: Cm Webproject Id
+- name: r_requesttype_id
+  type: numeric
+  label: R Requesttype Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: k_indexstop_uu
+  type: text
+  label: K Indexstop Uu

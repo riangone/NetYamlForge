@@ -1,0 +1,58 @@
+name: C_BPARTNER_PRODUCT
+tableName: c_bpartner_product
+primaryKey: c_bpartner_id
+fields:
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: shelflifeminpct
+  type: numeric
+  label: Shelflifeminpct
+- name: shelflifemindays
+  type: numeric
+  label: Shelflifemindays
+- name: qualityrating
+  type: numeric
+  label: Qualityrating
+- name: vendorproductno
+  type: text
+  label: Vendorproductno
+- name: vendorcategory
+  type: text
+  label: Vendorcategory
+- name: manufacturer
+  type: text
+  label: Manufacturer
+- name: ismanufacturer
+  type: text
+  label: Ismanufacturer
+- name: c_bpartner_product_uu
+  type: text
+  label: C Bpartner Product Uu

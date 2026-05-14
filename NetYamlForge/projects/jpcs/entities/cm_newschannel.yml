@@ -1,0 +1,49 @@
+name: CM_NEWSCHANNEL
+tableName: cm_newschannel
+primaryKey: cm_newschannel_id
+fields:
+- name: cm_newschannel_id
+  type: numeric
+  label: Cm Newschannel Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: cm_webproject_id
+  type: numeric
+  label: Cm Webproject Id
+- name: link
+  type: text
+  label: Link
+- name: cm_newschannel_uu
+  type: text
+  label: Cm Newschannel Uu

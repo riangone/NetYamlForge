@@ -1,0 +1,7 @@
+name: DBREPLICASYNCVERIFIER
+tableName: dbreplicasyncverifier
+primaryKey: lastupdate
+fields:
+- name: lastupdate
+  type: text
+  label: Lastupdate

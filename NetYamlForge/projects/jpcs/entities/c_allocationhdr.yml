@@ -1,0 +1,79 @@
+name: C_ALLOCATIONHDR
+tableName: c_allocationhdr
+primaryKey: c_allocationhdr_id
+fields:
+- name: c_allocationhdr_id
+  type: numeric
+  label: C Allocationhdr Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: description
+  type: text
+  label: Description
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: approvalamt
+  type: numeric
+  label: Approvalamt
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_allocationhdr_uu
+  type: text
+  label: C Allocationhdr Uu
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id

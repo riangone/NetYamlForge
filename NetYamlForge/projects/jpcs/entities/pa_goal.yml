@@ -1,0 +1,91 @@
+name: PA_GOAL
+tableName: pa_goal
+primaryKey: pa_goal_id
+fields:
+- name: pa_goal_id
+  type: numeric
+  label: Pa Goal Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: note
+  type: text
+  label: Note
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: pa_colorschema_id
+  type: numeric
+  label: Pa Colorschema Id
+- name: issummary
+  type: text
+  label: Issummary
+- name: pa_goalparent_id
+  type: numeric
+  label: Pa Goalparent Id
+- name: pa_measure_id
+  type: numeric
+  label: Pa Measure Id
+- name: relativeweight
+  type: numeric
+  label: Relativeweight
+- name: measuretarget
+  type: numeric
+  label: Measuretarget
+- name: measurescope
+  type: text
+  label: Measurescope
+- name: measuredisplay
+  type: text
+  label: Measuredisplay
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: measureactual
+  type: numeric
+  label: Measureactual
+- name: goalperformance
+  type: numeric
+  label: Goalperformance
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: charttype
+  type: text
+  label: Charttype
+- name: pa_goal_uu
+  type: text
+  label: Pa Goal Uu

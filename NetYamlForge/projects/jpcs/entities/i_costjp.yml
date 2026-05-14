@@ -1,0 +1,100 @@
+name: I_COSTJP
+tableName: i_costjp
+primaryKey: i_costjp_id
+fields:
+- name: i_costjp_id
+  type: numeric
+  label: I Costjp Id
+- name: i_costjp_uu
+  type: text
+  label: I Costjp Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: jp_org_value
+  type: text
+  label: Jp Org Value
+- name: jp_acctschema_name
+  type: text
+  label: Jp Acctschema Name
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: jp_costtype_name
+  type: text
+  label: Jp Costtype Name
+- name: m_costtype_id
+  type: numeric
+  label: M Costtype Id
+- name: jp_costelement_name
+  type: text
+  label: Jp Costelement Name
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: jp_product_value
+  type: text
+  label: Jp Product Value
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: description
+  type: text
+  label: Description
+- name: currentcostprice
+  type: numeric
+  label: Currentcostprice
+- name: futurecostprice
+  type: numeric
+  label: Futurecostprice
+- name: currentcostpricell
+  type: numeric
+  label: Currentcostpricell
+- name: futurecostpricell
+  type: numeric
+  label: Futurecostpricell
+- name: currentqty
+  type: numeric
+  label: Currentqty
+- name: cumulatedamt
+  type: numeric
+  label: Cumulatedamt
+- name: cumulatedqty
+  type: numeric
+  label: Cumulatedqty
+- name: iscostfrozen
+  type: text
+  label: Iscostfrozen

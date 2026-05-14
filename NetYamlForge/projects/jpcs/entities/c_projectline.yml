@@ -1,0 +1,97 @@
+name: C_PROJECTLINE
+tableName: c_projectline
+primaryKey: c_projectline_id
+fields:
+- name: c_projectline_id
+  type: numeric
+  label: C Projectline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: plannedqty
+  type: numeric
+  label: Plannedqty
+- name: plannedprice
+  type: numeric
+  label: Plannedprice
+- name: plannedamt
+  type: numeric
+  label: Plannedamt
+- name: plannedmarginamt
+  type: numeric
+  label: Plannedmarginamt
+- name: committedamt
+  type: numeric
+  label: Committedamt
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_product_category_id
+  type: numeric
+  label: M Product Category Id
+- name: invoicedamt
+  type: numeric
+  label: Invoicedamt
+- name: invoicedqty
+  type: numeric
+  label: Invoicedqty
+- name: committedqty
+  type: numeric
+  label: Committedqty
+- name: c_projectissue_id
+  type: numeric
+  label: C Projectissue Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_orderpo_id
+  type: numeric
+  label: C Orderpo Id
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: processed
+  type: text
+  label: Processed
+- name: dopricing
+  type: text
+  label: Dopricing
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: c_projectline_uu
+  type: text
+  label: C Projectline Uu
+- name: m_production_id
+  type: numeric
+  label: M Production Id

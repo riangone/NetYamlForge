@@ -1,0 +1,55 @@
+name: M_LOCATORTYPE
+tableName: m_locatortype
+primaryKey: m_locatortype_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: isavailableforreplenishment
+  type: text
+  label: Isavailableforreplenishment
+- name: isavailableforreservation
+  type: text
+  label: Isavailableforreservation
+- name: isavailableforshipping
+  type: text
+  label: Isavailableforshipping
+- name: m_locatortype_id
+  type: numeric
+  label: M Locatortype Id
+- name: m_locatortype_uu
+  type: text
+  label: M Locatortype Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_location_id
+  type: numeric
+  label: Jp Location Id
+- name: jp_physicalwarehouse_id
+  type: numeric
+  label: Jp Physicalwarehouse Id

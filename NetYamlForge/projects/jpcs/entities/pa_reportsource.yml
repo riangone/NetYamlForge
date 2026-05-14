@@ -1,0 +1,112 @@
+name: PA_REPORTSOURCE
+tableName: pa_reportsource
+primaryKey: pa_reportsource_id
+fields:
+- name: pa_reportsource_id
+  type: numeric
+  label: Pa Reportsource Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: pa_reportline_id
+  type: numeric
+  label: Pa Reportline Id
+- name: elementtype
+  type: text
+  label: Elementtype
+- name: org_id
+  type: numeric
+  label: Org Id
+- name: c_elementvalue_id
+  type: numeric
+  label: C Elementvalue Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: userelement1_id
+  type: numeric
+  label: Userelement1 Id
+- name: userelement2_id
+  type: numeric
+  label: Userelement2 Id
+- name: isincludenullsorg
+  type: text
+  label: Isincludenullsorg
+- name: isincludenullselementvalue
+  type: text
+  label: Isincludenullselementvalue
+- name: isincludenullsbpartner
+  type: text
+  label: Isincludenullsbpartner
+- name: isincludenullsproduct
+  type: text
+  label: Isincludenullsproduct
+- name: isincludenullslocation
+  type: text
+  label: Isincludenullslocation
+- name: isincludenullsproject
+  type: text
+  label: Isincludenullsproject
+- name: isincludenullssalesregion
+  type: text
+  label: Isincludenullssalesregion
+- name: isincludenullsactivity
+  type: text
+  label: Isincludenullsactivity
+- name: isincludenullscampaign
+  type: text
+  label: Isincludenullscampaign
+- name: isincludenullsuserelement1
+  type: text
+  label: Isincludenullsuserelement1
+- name: isincludenullsuserelement2
+  type: text
+  label: Isincludenullsuserelement2
+- name: isincludenullsorgtrx
+  type: text
+  label: Isincludenullsorgtrx
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: pa_reportsource_uu
+  type: text
+  label: Pa Reportsource Uu

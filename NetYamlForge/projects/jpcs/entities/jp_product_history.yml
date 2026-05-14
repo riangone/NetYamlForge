@@ -1,0 +1,46 @@
+name: JP_PRODUCT_HISTORY
+tableName: jp_product_history
+primaryKey: jp_product_history_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_product_history_id
+  type: numeric
+  label: Jp Product History Id
+- name: jp_product_history_uu
+  type: text
+  label: Jp Product History Uu
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_product_id
+  type: numeric
+  label: M Product Id

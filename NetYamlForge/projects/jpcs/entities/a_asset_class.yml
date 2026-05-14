@@ -1,0 +1,64 @@
+name: A_ASSET_CLASS
+tableName: a_asset_class
+primaryKey: a_asset_class_id
+fields:
+- name: a_asset_class_id
+  type: numeric
+  label: A Asset Class Id
+- name: description
+  type: text
+  label: Description
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: a_life_period_min
+  type: numeric
+  label: A Life Period Min
+- name: a_life_period_max
+  type: numeric
+  label: A Life Period Max
+- name: a_value_2004
+  type: text
+  label: A Value 2004
+- name: a_life_period_2004
+  type: numeric
+  label: A Life Period 2004
+- name: mfx_grupa
+  type: numeric
+  label: Mfx Grupa
+- name: mfx_subgrupa
+  type: numeric
+  label: Mfx Subgrupa
+- name: mfx_clasa
+  type: numeric
+  label: Mfx Clasa
+- name: mfx_subclasa
+  type: numeric
+  label: Mfx Subclasa
+- name: a_asset_class_uu
+  type: text
+  label: A Asset Class Uu

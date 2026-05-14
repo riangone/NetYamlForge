@@ -1,0 +1,76 @@
+name: AD_REPLICATION
+tableName: ad_replication
+primaryKey: ad_replication_id
+fields:
+- name: ad_replication_id
+  type: numeric
+  label: Ad Replication Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: hostaddress
+  type: text
+  label: Hostaddress
+- name: hostport
+  type: numeric
+  label: Hostport
+- name: ad_replicationstrategy_id
+  type: numeric
+  label: Ad Replicationstrategy Id
+- name: isrmioverhttp
+  type: text
+  label: Isrmioverhttp
+- name: processing
+  type: text
+  label: Processing
+- name: idrangestart
+  type: numeric
+  label: Idrangestart
+- name: idrangeend
+  type: numeric
+  label: Idrangeend
+- name: remote_client_id
+  type: numeric
+  label: Remote Client Id
+- name: remote_org_id
+  type: numeric
+  label: Remote Org Id
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: ad_replication_uu
+  type: text
+  label: Ad Replication Uu

@@ -1,0 +1,55 @@
+name: A_ASSET_INFO_LIC
+tableName: a_asset_info_lic
+primaryKey: a_asset_info_lic_id
+fields:
+- name: a_asset_info_lic_id
+  type: numeric
+  label: A Asset Info Lic Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: a_license_fee
+  type: numeric
+  label: A License Fee
+- name: a_renewal_date
+  type: text
+  label: A Renewal Date
+- name: created
+  type: text
+  label: Created
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: text
+  type: text
+  label: Text
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: a_state
+  type: text
+  label: A State
+- name: a_license_no
+  type: text
+  label: A License No
+- name: a_issuing_agency
+  type: text
+  label: A Issuing Agency
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: a_asset_info_lic_uu
+  type: text
+  label: A Asset Info Lic Uu
+- name: processed
+  type: text
+  label: Processed

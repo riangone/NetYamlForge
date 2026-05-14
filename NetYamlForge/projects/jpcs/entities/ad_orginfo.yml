@@ -1,0 +1,91 @@
+name: AD_ORGINFO
+tableName: ad_orginfo
+primaryKey: ad_org_id
+fields:
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: duns
+  type: text
+  label: Duns
+- name: taxid
+  type: text
+  label: Taxid
+- name: pa_goal_id
+  type: numeric
+  label: Pa Goal Id
+- name: supervisor_id
+  type: numeric
+  label: Supervisor Id
+- name: parent_org_id
+  type: numeric
+  label: Parent Org Id
+- name: ad_orgtype_id
+  type: numeric
+  label: Ad Orgtype Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: transferbank_id
+  type: numeric
+  label: Transferbank Id
+- name: transfercashbook_id
+  type: numeric
+  label: Transfercashbook Id
+- name: receiptfootermsg
+  type: text
+  label: Receiptfootermsg
+- name: dropship_warehouse_id
+  type: numeric
+  label: Dropship Warehouse Id
+- name: c_calendar_id
+  type: numeric
+  label: C Calendar Id
+- name: logo_id
+  type: numeric
+  label: Logo Id
+- name: phone
+  type: text
+  label: Phone
+- name: phone2
+  type: text
+  label: Phone2
+- name: fax
+  type: text
+  label: Fax
+- name: email
+  type: text
+  label: Email
+- name: ad_orginfo_uu
+  type: text
+  label: Ad Orginfo Uu
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id
+- name: jp_businessunit_id
+  type: numeric
+  label: Jp Businessunit Id
+- name: timezone
+  type: text
+  label: Timezone

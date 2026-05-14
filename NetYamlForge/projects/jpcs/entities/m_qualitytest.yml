@@ -1,0 +1,40 @@
+name: M_QUALITYTEST
+tableName: m_qualitytest
+primaryKey: m_qualitytest_id
+fields:
+- name: m_qualitytest_id
+  type: numeric
+  label: M Qualitytest Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: help
+  type: text
+  label: Help
+- name: m_qualitytest_uu
+  type: text
+  label: M Qualitytest Uu

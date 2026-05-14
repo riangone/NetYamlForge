@@ -1,0 +1,256 @@
+name: JP_CONTRACTLINE
+tableName: jp_contractline
+primaryKey: jp_contractline_id
+fields:
+- name: jp_contractline_id
+  type: numeric
+  label: Jp Contractline Id
+- name: jp_contractline_uu
+  type: text
+  label: Jp Contractline Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: line
+  type: numeric
+  label: Line
+- name: jp_contractlinet_id
+  type: numeric
+  label: Jp Contractlinet Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: s_resourceassignment_id
+  type: numeric
+  label: S Resourceassignment Id
+- name: jp_locator_id
+  type: numeric
+  label: Jp Locator Id
+- name: deliverytime_promised
+  type: numeric
+  label: Deliverytime Promised
+- name: description
+  type: text
+  label: Description
+- name: iscreatedoclinejp
+  type: text
+  label: Iscreatedoclinejp
+- name: qtyentered
+  type: numeric
+  label: Qtyentered
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qtyordered
+  type: numeric
+  label: Qtyordered
+- name: jp_derivativedocpolicy_inout
+  type: text
+  label: Jp Derivativedocpolicy Inout
+- name: jp_contractcalender_inout_id
+  type: numeric
+  label: Jp Contractcalender Inout Id
+- name: jp_contractprocess_inout_id
+  type: numeric
+  label: Jp Contractprocess Inout Id
+- name: movementqty
+  type: numeric
+  label: Movementqty
+- name: jp_derivativedocpolicy_inv
+  type: text
+  label: Jp Derivativedocpolicy Inv
+- name: jp_contractcalender_inv_id
+  type: numeric
+  label: Jp Contractcalender Inv Id
+- name: jp_contractprocess_inv_id
+  type: numeric
+  label: Jp Contractprocess Inv Id
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: priceentered
+  type: numeric
+  label: Priceentered
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: discount
+  type: numeric
+  label: Discount
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: jp_locatorfrom_id
+  type: numeric
+  label: Jp Locatorfrom Id
+- name: jp_locatorto_id
+  type: numeric
+  label: Jp Locatorto Id
+- name: jp_asi_from_id
+  type: numeric
+  label: Jp Asi From Id
+- name: jp_asi_to_id
+  type: numeric
+  label: Jp Asi To Id
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: isdescription
+  type: text
+  label: Isdescription
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: datepromised
+  type: text
+  label: Datepromised
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: processed
+  type: text
+  label: Processed
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_processing2
+  type: text
+  label: Jp Processing2
+- name: jp_procperiod_lump_inout_id
+  type: numeric
+  label: Jp Procperiod Lump Inout Id
+- name: jp_procperiod_lump_inv_id
+  type: numeric
+  label: Jp Procperiod Lump Inv Id
+- name: jp_procperiod_start_inout_id
+  type: numeric
+  label: Jp Procperiod Start Inout Id
+- name: jp_procperiod_end_inout_id
+  type: numeric
+  label: Jp Procperiod End Inout Id
+- name: jp_procperiod_start_inv_id
+  type: numeric
+  label: Jp Procperiod Start Inv Id
+- name: jp_procperiod_end_inv_id
+  type: numeric
+  label: Jp Procperiod End Inv Id
+- name: jp_basedoclinepolicy
+  type: text
+  label: Jp Basedoclinepolicy
+- name: jp_procperiod_lump_id
+  type: numeric
+  label: Jp Procperiod Lump Id
+- name: jp_procperiod_start_id
+  type: numeric
+  label: Jp Procperiod Start Id
+- name: jp_procperiod_end_id
+  type: numeric
+  label: Jp Procperiod End Id
+- name: jp_countercontractline_id
+  type: numeric
+  label: Jp Countercontractline Id
+- name: jp_procperiod_lump_date
+  type: text
+  label: Jp Procperiod Lump Date
+- name: jp_procperiod_start_date
+  type: text
+  label: Jp Procperiod Start Date
+- name: jp_procperiod_end_date
+  type: text
+  label: Jp Procperiod End Date
+- name: jp_procperiod_lump_inout_date
+  type: text
+  label: Jp Procperiod Lump Inout Date
+- name: jp_procperiod_start_inout_date
+  type: text
+  label: Jp Procperiod Start Inout Date
+- name: jp_procperiod_end_inout_date
+  type: text
+  label: Jp Procperiod End Inout Date
+- name: jp_procperiod_lump_inv_date
+  type: text
+  label: Jp Procperiod Lump Inv Date
+- name: jp_procperiod_start_inv_date
+  type: text
+  label: Jp Procperiod Start Inv Date
+- name: jp_procperiod_end_inv_date
+  type: text
+  label: Jp Procperiod End Inv Date
+- name: jp_contractl_autoupdatepolicy
+  type: text
+  label: Jp Contractl Autoupdatepolicy
+- name: jp_processing3
+  type: text
+  label: Jp Processing3
+- name: jp_processing4
+  type: text
+  label: Jp Processing4
+- name: jp_taxbaseamt
+  type: numeric
+  label: Jp Taxbaseamt
+- name: jp_taxamt
+  type: numeric
+  label: Jp Taxamt
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn

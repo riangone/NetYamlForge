@@ -1,0 +1,49 @@
+name: T_BANKACCOUNT_BALANCE_JP
+tableName: t_bankaccount_balance_jp
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: account_id
+  type: numeric
+  label: Account Id
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: bankaccounttype
+  type: text
+  label: Bankaccounttype
+- name: accountno
+  type: text
+  label: Accountno
+- name: description
+  type: text
+  label: Description
+- name: amtacctbalance
+  type: numeric
+  label: Amtacctbalance
+- name: amtsourcebalance
+  type: numeric
+  label: Amtsourcebalance
+- name: fact_acct_c_currency_id
+  type: numeric
+  label: Fact Acct C Currency Id

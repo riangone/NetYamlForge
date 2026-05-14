@@ -1,0 +1,58 @@
+name: AD_ALERT
+tableName: ad_alert
+primaryKey: ad_alert_id
+fields:
+- name: ad_alert_id
+  type: numeric
+  label: Ad Alert Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: alertsubject
+  type: text
+  label: Alertsubject
+- name: alertmessage
+  type: text
+  label: Alertmessage
+- name: enforceclientsecurity
+  type: text
+  label: Enforceclientsecurity
+- name: enforcerolesecurity
+  type: text
+  label: Enforcerolesecurity
+- name: ad_alertprocessor_id
+  type: numeric
+  label: Ad Alertprocessor Id
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: ad_alert_uu
+  type: text
+  label: Ad Alert Uu

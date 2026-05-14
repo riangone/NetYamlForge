@@ -1,0 +1,52 @@
+name: CM_CONTAINERTTABLE
+tableName: cm_containerttable
+primaryKey: cm_containerttable_id
+fields:
+- name: cm_containerttable_id
+  type: numeric
+  label: Cm Containerttable Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: cm_container_id
+  type: numeric
+  label: Cm Container Id
+- name: cm_templatetable_id
+  type: numeric
+  label: Cm Templatetable Id
+- name: record_id
+  type: numeric
+  label: Record Id
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: otherclause
+  type: text
+  label: Otherclause
+- name: cm_containerttable_uu
+  type: text
+  label: Cm Containerttable Uu

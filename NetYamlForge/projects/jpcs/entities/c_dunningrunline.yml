@@ -1,0 +1,73 @@
+name: C_DUNNINGRUNLINE
+tableName: c_dunningrunline
+primaryKey: c_dunningrunline_id
+fields:
+- name: c_dunningrunline_id
+  type: numeric
+  label: C Dunningrunline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_dunningrunentry_id
+  type: numeric
+  label: C Dunningrunentry Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: amt
+  type: numeric
+  label: Amt
+- name: convertedamt
+  type: numeric
+  label: Convertedamt
+- name: daysdue
+  type: numeric
+  label: Daysdue
+- name: timesdunned
+  type: numeric
+  label: Timesdunned
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: feeamt
+  type: numeric
+  label: Feeamt
+- name: totalamt
+  type: numeric
+  label: Totalamt
+- name: processed
+  type: text
+  label: Processed
+- name: isindispute
+  type: text
+  label: Isindispute
+- name: openamt
+  type: numeric
+  label: Openamt
+- name: c_invoicepayschedule_id
+  type: numeric
+  label: C Invoicepayschedule Id
+- name: c_dunningrunline_uu
+  type: text
+  label: C Dunningrunline Uu

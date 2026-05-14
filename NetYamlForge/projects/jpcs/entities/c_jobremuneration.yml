@@ -1,0 +1,46 @@
+name: C_JOBREMUNERATION
+tableName: c_jobremuneration
+primaryKey: c_jobremuneration_id
+fields:
+- name: c_jobremuneration_id
+  type: numeric
+  label: C Jobremuneration Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_job_id
+  type: numeric
+  label: C Job Id
+- name: c_remuneration_id
+  type: numeric
+  label: C Remuneration Id
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: description
+  type: text
+  label: Description
+- name: c_jobremuneration_uu
+  type: text
+  label: C Jobremuneration Uu

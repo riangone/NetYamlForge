@@ -1,0 +1,175 @@
+name: JP_BILL
+tableName: jp_bill
+primaryKey: jp_bill_id
+fields:
+- name: jp_bill_id
+  type: numeric
+  label: Jp Bill Id
+- name: jp_bill_uu
+  type: text
+  label: Jp Bill Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: jpdatebilled
+  type: text
+  label: Jpdatebilled
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: description
+  type: text
+  label: Description
+- name: jp_lastbill_id
+  type: numeric
+  label: Jp Lastbill Id
+- name: jplastbillamt
+  type: numeric
+  label: Jplastbillamt
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: jplastpayamt
+  type: numeric
+  label: Jplastpayamt
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: taxbaseamt
+  type: numeric
+  label: Taxbaseamt
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: overunderamt
+  type: numeric
+  label: Overunderamt
+- name: jpbillamt
+  type: numeric
+  label: Jpbillamt
+- name: jpdatesent
+  type: text
+  label: Jpdatesent
+- name: jp_user_id
+  type: numeric
+  label: Jp User Id
+- name: jpcarriedforwardamt
+  type: numeric
+  label: Jpcarriedforwardamt
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: openamt
+  type: numeric
+  label: Openamt
+- name: jpcutoffdate
+  type: text
+  label: Jpcutoffdate
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: jp_promisedpaydate
+  type: text
+  label: Jp Promisedpaydate
+- name: c_payselection_id
+  type: numeric
+  label: C Payselection Id
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: istaxrecalculatejp
+  type: text
+  label: Istaxrecalculatejp
+- name: jp_taxadjust_invoice_id
+  type: numeric
+  label: Jp Taxadjust Invoice Id
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn
+- name: jp_print_user_id
+  type: numeric
+  label: Jp Print User Id
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: dateprinted
+  type: text
+  label: Dateprinted

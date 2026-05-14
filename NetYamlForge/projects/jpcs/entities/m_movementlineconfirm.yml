@@ -1,0 +1,58 @@
+name: M_MOVEMENTLINECONFIRM
+tableName: m_movementlineconfirm
+primaryKey: m_movementlineconfirm_id
+fields:
+- name: m_movementlineconfirm_id
+  type: numeric
+  label: M Movementlineconfirm Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_movementconfirm_id
+  type: numeric
+  label: M Movementconfirm Id
+- name: m_movementline_id
+  type: numeric
+  label: M Movementline Id
+- name: description
+  type: text
+  label: Description
+- name: targetqty
+  type: numeric
+  label: Targetqty
+- name: confirmedqty
+  type: numeric
+  label: Confirmedqty
+- name: differenceqty
+  type: numeric
+  label: Differenceqty
+- name: scrappedqty
+  type: numeric
+  label: Scrappedqty
+- name: processed
+  type: text
+  label: Processed
+- name: m_inventoryline_id
+  type: numeric
+  label: M Inventoryline Id
+- name: m_movementlineconfirm_uu
+  type: text
+  label: M Movementlineconfirm Uu

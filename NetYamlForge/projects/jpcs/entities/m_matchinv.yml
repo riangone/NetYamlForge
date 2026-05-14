@@ -1,0 +1,76 @@
+name: M_MATCHINV
+tableName: m_matchinv
+primaryKey: m_matchinv_id
+fields:
+- name: m_matchinv_id
+  type: numeric
+  label: M Matchinv Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: datetrx
+  type: text
+  label: Datetrx
+- name: qty
+  type: numeric
+  label: Qty
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: documentno
+  type: text
+  label: Documentno
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: description
+  type: text
+  label: Description
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: m_matchinv_uu
+  type: text
+  label: M Matchinv Uu
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: ref_matchinv_id
+  type: numeric
+  label: Ref Matchinv Id

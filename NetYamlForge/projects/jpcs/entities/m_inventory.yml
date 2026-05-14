@@ -1,0 +1,115 @@
+name: M_INVENTORY
+tableName: m_inventory
+primaryKey: m_inventory_id
+fields:
+- name: m_inventory_id
+  type: numeric
+  label: M Inventory Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: documentno
+  type: text
+  label: Documentno
+- name: description
+  type: text
+  label: Description
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: posted
+  type: text
+  label: Posted
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: updateqty
+  type: text
+  label: Updateqty
+- name: generatelist
+  type: text
+  label: Generatelist
+- name: m_perpetualinv_id
+  type: numeric
+  label: M Perpetualinv Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: approvalamt
+  type: numeric
+  label: Approvalamt
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: m_inventory_uu
+  type: text
+  label: M Inventory Uu
+- name: costingmethod
+  type: text
+  label: Costingmethod
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: jp_physicalwarehouse_id
+  type: numeric
+  label: Jp Physicalwarehouse Id
+- name: jp_processing1
+  type: text
+  label: Jp Processing1

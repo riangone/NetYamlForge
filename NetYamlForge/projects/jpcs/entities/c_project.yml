@@ -1,0 +1,148 @@
+name: C_PROJECT
+tableName: c_project
+primaryKey: c_project_id
+fields:
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: note
+  type: text
+  label: Note
+- name: issummary
+  type: text
+  label: Issummary
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: poreference
+  type: text
+  label: Poreference
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: m_pricelist_version_id
+  type: numeric
+  label: M Pricelist Version Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: iscommitment
+  type: text
+  label: Iscommitment
+- name: plannedamt
+  type: numeric
+  label: Plannedamt
+- name: plannedqty
+  type: numeric
+  label: Plannedqty
+- name: plannedmarginamt
+  type: numeric
+  label: Plannedmarginamt
+- name: committedamt
+  type: numeric
+  label: Committedamt
+- name: datecontract
+  type: text
+  label: Datecontract
+- name: datefinish
+  type: text
+  label: Datefinish
+- name: generateto
+  type: text
+  label: Generateto
+- name: processed
+  type: text
+  label: Processed
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: c_projecttype_id
+  type: numeric
+  label: C Projecttype Id
+- name: committedqty
+  type: numeric
+  label: Committedqty
+- name: invoicedamt
+  type: numeric
+  label: Invoicedamt
+- name: invoicedqty
+  type: numeric
+  label: Invoicedqty
+- name: projectbalanceamt
+  type: numeric
+  label: Projectbalanceamt
+- name: c_phase_id
+  type: numeric
+  label: C Phase Id
+- name: iscommitceiling
+  type: text
+  label: Iscommitceiling
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: projectcategory
+  type: text
+  label: Projectcategory
+- name: processing
+  type: text
+  label: Processing
+- name: c_bpartnersr_id
+  type: numeric
+  label: C Bpartnersr Id
+- name: projinvoicerule
+  type: text
+  label: Projinvoicerule
+- name: projectlinelevel
+  type: text
+  label: Projectlinelevel
+- name: c_project_uu
+  type: text
+  label: C Project Uu
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id

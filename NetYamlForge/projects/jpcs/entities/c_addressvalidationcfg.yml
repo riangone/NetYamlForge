@@ -1,0 +1,61 @@
+name: C_ADDRESSVALIDATIONCFG
+tableName: c_addressvalidationcfg
+primaryKey: c_addressvalidationcfg_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: addressvalidationclass
+  type: text
+  label: Addressvalidationclass
+- name: c_addressvalidationcfg_id
+  type: numeric
+  label: C Addressvalidationcfg Id
+- name: c_addressvalidationcfg_uu
+  type: text
+  label: C Addressvalidationcfg Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: hostaddress
+  type: text
+  label: Hostaddress
+- name: hostport
+  type: numeric
+  label: Hostport
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: proxyaddress
+  type: text
+  label: Proxyaddress
+- name: proxylogon
+  type: text
+  label: Proxylogon
+- name: proxypassword
+  type: text
+  label: Proxypassword
+- name: proxyport
+  type: numeric
+  label: Proxyport
+- name: servicepath
+  type: text
+  label: Servicepath
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

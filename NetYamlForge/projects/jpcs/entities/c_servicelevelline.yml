@@ -1,0 +1,46 @@
+name: C_SERVICELEVELLINE
+tableName: c_servicelevelline
+primaryKey: c_servicelevelline_id
+fields:
+- name: c_servicelevelline_id
+  type: numeric
+  label: C Servicelevelline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_servicelevel_id
+  type: numeric
+  label: C Servicelevel Id
+- name: description
+  type: text
+  label: Description
+- name: servicelevelprovided
+  type: numeric
+  label: Servicelevelprovided
+- name: servicedate
+  type: text
+  label: Servicedate
+- name: processed
+  type: text
+  label: Processed
+- name: c_servicelevelline_uu
+  type: text
+  label: C Servicelevelline Uu

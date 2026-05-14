@@ -1,0 +1,46 @@
+name: C_1099BOX
+tableName: c_1099box
+primaryKey: c_1099box_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_1099box_id
+  type: numeric
+  label: C 1099Box Id
+- name: c_1099box_uu
+  type: text
+  label: C 1099Box Uu
+- name: bucket
+  type: numeric
+  label: Bucket
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value

@@ -1,0 +1,43 @@
+name: AD_USERBPACCESS
+tableName: ad_userbpaccess
+primaryKey: ad_userbpaccess_id
+fields:
+- name: ad_userbpaccess_id
+  type: numeric
+  label: Ad Userbpaccess Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: bpaccesstype
+  type: text
+  label: Bpaccesstype
+- name: r_requesttype_id
+  type: numeric
+  label: R Requesttype Id
+- name: docbasetype
+  type: text
+  label: Docbasetype
+- name: ad_userbpaccess_uu
+  type: text
+  label: Ad Userbpaccess Uu

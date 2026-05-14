@@ -1,0 +1,61 @@
+name: AD_PRINTGRAPH
+tableName: ad_printgraph
+primaryKey: ad_printgraph_id
+fields:
+- name: ad_printgraph_id
+  type: numeric
+  label: Ad Printgraph Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: graphtype
+  type: text
+  label: Graphtype
+- name: description_printformatitem_id
+  type: numeric
+  label: Description Printformatitem Id
+- name: data_printformatitem_id
+  type: numeric
+  label: Data Printformatitem Id
+- name: data1_printformatitem_id
+  type: numeric
+  label: Data1 Printformatitem Id
+- name: data2_printformatitem_id
+  type: numeric
+  label: Data2 Printformatitem Id
+- name: data3_printformatitem_id
+  type: numeric
+  label: Data3 Printformatitem Id
+- name: data4_printformatitem_id
+  type: numeric
+  label: Data4 Printformatitem Id
+- name: ad_printformat_id
+  type: numeric
+  label: Ad Printformat Id
+- name: ad_printgraph_uu
+  type: text
+  label: Ad Printgraph Uu

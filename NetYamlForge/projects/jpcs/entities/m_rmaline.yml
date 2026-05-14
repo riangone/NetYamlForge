@@ -1,0 +1,91 @@
+name: M_RMALINE
+tableName: m_rmaline
+primaryKey: m_rmaline_id
+fields:
+- name: m_rmaline_id
+  type: numeric
+  label: M Rmaline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_rma_id
+  type: numeric
+  label: M Rma Id
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: description
+  type: text
+  label: Description
+- name: processed
+  type: text
+  label: Processed
+- name: amt
+  type: numeric
+  label: Amt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: line
+  type: numeric
+  label: Line
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: qtydelivered
+  type: numeric
+  label: Qtydelivered
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: ref_rmaline_id
+  type: numeric
+  label: Ref Rmaline Id
+- name: m_rmaline_uu
+  type: text
+  label: M Rmaline Uu
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: jp_contractline_id
+  type: numeric
+  label: Jp Contractline Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_orderline_id
+  type: numeric
+  label: Jp Orderline Id
+- name: jp_qtyrecognized
+  type: numeric
+  label: Jp Qtyrecognized
+- name: jp_productexplodebom_id
+  type: numeric
+  label: Jp Productexplodebom Id
+- name: isprocessingrmajp
+  type: text
+  label: Isprocessingrmajp

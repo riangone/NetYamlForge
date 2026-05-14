@@ -1,0 +1,46 @@
+name: PA_SLA_CRITERIA
+tableName: pa_sla_criteria
+primaryKey: pa_sla_criteria_id
+fields:
+- name: pa_sla_criteria_id
+  type: numeric
+  label: Pa Sla Criteria Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: classname
+  type: text
+  label: Classname
+- name: pa_sla_criteria_uu
+  type: text
+  label: Pa Sla Criteria Uu

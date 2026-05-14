@@ -1,0 +1,127 @@
+name: T_YAYOI_JOURNALJP
+tableName: t_yayoi_journaljp
+primaryKey: t_yayoi_journaljp_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: jp_yayoi_bango
+  type: text
+  label: Jp Yayoi Bango
+- name: jp_yayoi_chousei
+  type: text
+  label: Jp Yayoi Chousei
+- name: jp_yayoi_cracct
+  type: text
+  label: Jp Yayoi Cracct
+- name: jp_yayoi_cramt
+  type: numeric
+  label: Jp Yayoi Cramt
+- name: jp_yayoi_crorg
+  type: text
+  label: Jp Yayoi Crorg
+- name: jp_yayoi_crsubacct
+  type: text
+  label: Jp Yayoi Crsubacct
+- name: jp_yayoi_crtax
+  type: text
+  label: Jp Yayoi Crtax
+- name: jp_yayoi_crtaxamt
+  type: numeric
+  label: Jp Yayoi Crtaxamt
+- name: jp_yayoi_dateacct
+  type: text
+  label: Jp Yayoi Dateacct
+- name: jp_yayoi_docno
+  type: numeric
+  label: Jp Yayoi Docno
+- name: jp_yayoi_dracct
+  type: text
+  label: Jp Yayoi Dracct
+- name: jp_yayoi_dramt
+  type: numeric
+  label: Jp Yayoi Dramt
+- name: jp_yayoi_drorg
+  type: text
+  label: Jp Yayoi Drorg
+- name: jp_yayoi_drsubacct
+  type: text
+  label: Jp Yayoi Drsubacct
+- name: jp_yayoi_drtax
+  type: text
+  label: Jp Yayoi Drtax
+- name: jp_yayoi_drtaxamt
+  type: numeric
+  label: Jp Yayoi Drtaxamt
+- name: jp_yayoi_fusen1
+  type: numeric
+  label: Jp Yayoi Fusen1
+- name: jp_yayoi_fusen2
+  type: numeric
+  label: Jp Yayoi Fusen2
+- name: jp_yayoi_identifierflag
+  type: text
+  label: Jp Yayoi Identifierflag
+- name: jp_yayoi_kessan
+  type: text
+  label: Jp Yayoi Kessan
+- name: jp_yayoi_kijitu
+  type: text
+  label: Jp Yayoi Kijitu
+- name: jp_yayoi_seiseimoto
+  type: text
+  label: Jp Yayoi Seiseimoto
+- name: jp_yayoi_shiwakememo
+  type: text
+  label: Jp Yayoi Shiwakememo
+- name: jp_yayoi_tekiyou
+  type: text
+  label: Jp Yayoi Tekiyou
+- name: jp_yayoi_type
+  type: numeric
+  label: Jp Yayoi Type
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: t_yayoi_journaljp_id
+  type: numeric
+  label: T Yayoi Journaljp Id
+- name: t_yayoi_journaljp_uu
+  type: text
+  label: T Yayoi Journaljp Uu
+- name: fact_acct_id
+  type: numeric
+  label: Fact Acct Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: record_id
+  type: numeric
+  label: Record Id

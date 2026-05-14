@@ -1,0 +1,76 @@
+name: S_RESOURCE
+tableName: s_resource
+primaryKey: s_resource_id
+fields:
+- name: s_resource_id
+  type: numeric
+  label: S Resource Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: s_resourcetype_id
+  type: numeric
+  label: S Resourcetype Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: isavailable
+  type: text
+  label: Isavailable
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: chargeableqty
+  type: numeric
+  label: Chargeableqty
+- name: percentutilization
+  type: numeric
+  label: Percentutilization
+- name: dailycapacity
+  type: numeric
+  label: Dailycapacity
+- name: ismanufacturingresource
+  type: text
+  label: Ismanufacturingresource
+- name: waitingtime
+  type: numeric
+  label: Waitingtime
+- name: manufacturingresourcetype
+  type: text
+  label: Manufacturingresourcetype
+- name: queuingtime
+  type: numeric
+  label: Queuingtime
+- name: planninghorizon
+  type: numeric
+  label: Planninghorizon
+- name: s_resource_uu
+  type: text
+  label: S Resource Uu

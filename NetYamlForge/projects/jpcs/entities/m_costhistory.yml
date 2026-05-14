@@ -1,0 +1,79 @@
+name: M_COSTHISTORY
+tableName: m_costhistory
+primaryKey: m_costhistory_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_costdetail_id
+  type: numeric
+  label: M Costdetail Id
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: m_costhistory_id
+  type: numeric
+  label: M Costhistory Id
+- name: m_costhistory_uu
+  type: text
+  label: M Costhistory Uu
+- name: m_costtype_id
+  type: numeric
+  label: M Costtype Id
+- name: newcamt
+  type: numeric
+  label: Newcamt
+- name: newcostprice
+  type: numeric
+  label: Newcostprice
+- name: newcqty
+  type: numeric
+  label: Newcqty
+- name: newqty
+  type: numeric
+  label: Newqty
+- name: oldcamt
+  type: numeric
+  label: Oldcamt
+- name: oldcostprice
+  type: numeric
+  label: Oldcostprice
+- name: oldcqty
+  type: numeric
+  label: Oldcqty
+- name: oldqty
+  type: numeric
+  label: Oldqty
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: isbackdate
+  type: text
+  label: Isbackdate
+- name: backdateprocessedon
+  type: text
+  label: Backdateprocessedon

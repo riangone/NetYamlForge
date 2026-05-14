@@ -1,0 +1,85 @@
+name: AD_SEQUENCE
+tableName: ad_sequence
+primaryKey: ad_sequence_id
+fields:
+- name: ad_sequence_id
+  type: numeric
+  label: Ad Sequence Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: vformat
+  type: text
+  label: Vformat
+- name: isautosequence
+  type: text
+  label: Isautosequence
+- name: incrementno
+  type: numeric
+  label: Incrementno
+- name: startno
+  type: numeric
+  label: Startno
+- name: currentnext
+  type: numeric
+  label: Currentnext
+- name: currentnextsys
+  type: numeric
+  label: Currentnextsys
+- name: isaudited
+  type: text
+  label: Isaudited
+- name: istableid
+  type: text
+  label: Istableid
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: startnewyear
+  type: text
+  label: Startnewyear
+- name: datecolumn
+  type: text
+  label: Datecolumn
+- name: decimalpattern
+  type: text
+  label: Decimalpattern
+- name: ad_sequence_uu
+  type: text
+  label: Ad Sequence Uu
+- name: startnewmonth
+  type: text
+  label: Startnewmonth
+- name: isorglevelsequence
+  type: text
+  label: Isorglevelsequence
+- name: orgcolumn
+  type: text
+  label: Orgcolumn

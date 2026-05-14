@@ -1,0 +1,202 @@
+name: JP_ESTIMATIONLINE
+tableName: jp_estimationline
+primaryKey: jp_estimationline_id
+fields:
+- name: jp_estimationline_id
+  type: numeric
+  label: Jp Estimationline Id
+- name: jp_estimationline_uu
+  type: text
+  label: Jp Estimationline Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_estimation_id
+  type: numeric
+  label: Jp Estimation Id
+- name: line
+  type: numeric
+  label: Line
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: datepromised
+  type: text
+  label: Datepromised
+- name: datedelivered
+  type: text
+  label: Datedelivered
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: description
+  type: text
+  label: Description
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qtyordered
+  type: numeric
+  label: Qtyordered
+- name: qtyreserved
+  type: numeric
+  label: Qtyreserved
+- name: qtydelivered
+  type: numeric
+  label: Qtydelivered
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: pricelist
+  type: numeric
+  label: Pricelist
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: pricelimit
+  type: numeric
+  label: Pricelimit
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: discount
+  type: numeric
+  label: Discount
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: s_resourceassignment_id
+  type: numeric
+  label: S Resourceassignment Id
+- name: ref_orderline_id
+  type: numeric
+  label: Ref Orderline Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: isdescription
+  type: text
+  label: Isdescription
+- name: qtyentered
+  type: numeric
+  label: Qtyentered
+- name: priceentered
+  type: numeric
+  label: Priceentered
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: pricecost
+  type: numeric
+  label: Pricecost
+- name: qtylostsales
+  type: numeric
+  label: Qtylostsales
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: rrstartdate
+  type: text
+  label: Rrstartdate
+- name: rramt
+  type: numeric
+  label: Rramt
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: link_orderline_id
+  type: numeric
+  label: Link Orderline Id
+- name: pp_cost_collector_id
+  type: numeric
+  label: Pp Cost Collector Id
+- name: m_promotion_id
+  type: numeric
+  label: M Promotion Id
+- name: jp_taxamt
+  type: numeric
+  label: Jp Taxamt
+- name: jp_taxbaseamt
+  type: numeric
+  label: Jp Taxbaseamt
+- name: jp_locator_id
+  type: numeric
+  label: Jp Locator Id
+- name: jp_locatorfrom_id
+  type: numeric
+  label: Jp Locatorfrom Id
+- name: jp_locatorto_id
+  type: numeric
+  label: Jp Locatorto Id
+- name: jp_asi_from_id
+  type: numeric
+  label: Jp Asi From Id
+- name: jp_asi_to_id
+  type: numeric
+  label: Jp Asi To Id
+- name: jp_scheduledcost
+  type: numeric
+  label: Jp Scheduledcost
+- name: jp_scheduledcostlineamt
+  type: numeric
+  label: Jp Scheduledcostlineamt
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn

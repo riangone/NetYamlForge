@@ -1,0 +1,13 @@
+name: AD_ATTACHMENT_ENTRY
+tableName: ad_attachment_entry
+primaryKey: ad_attachment_id
+fields:
+- name: ad_attachment_id
+  type: numeric
+  label: Ad Attachment Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: binarydata
+  type: text
+  label: Binarydata

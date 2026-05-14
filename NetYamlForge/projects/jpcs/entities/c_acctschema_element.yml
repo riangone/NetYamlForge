@@ -1,0 +1,82 @@
+name: C_ACCTSCHEMA_ELEMENT
+tableName: c_acctschema_element
+primaryKey: c_acctschema_element_id
+fields:
+- name: c_acctschema_element_id
+  type: numeric
+  label: C Acctschema Element Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: elementtype
+  type: text
+  label: Elementtype
+- name: name
+  type: text
+  label: Name
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: c_element_id
+  type: numeric
+  label: C Element Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: isbalanced
+  type: text
+  label: Isbalanced
+- name: org_id
+  type: numeric
+  label: Org Id
+- name: c_elementvalue_id
+  type: numeric
+  label: C Elementvalue Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_location_id
+  type: numeric
+  label: C Location Id
+- name: c_salesregion_id
+  type: numeric
+  label: C Salesregion Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: c_acctschema_element_uu
+  type: text
+  label: C Acctschema Element Uu

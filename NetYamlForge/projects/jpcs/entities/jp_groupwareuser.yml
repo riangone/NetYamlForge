@@ -1,0 +1,112 @@
+name: JP_GROUPWAREUSER
+tableName: jp_groupwareuser
+primaryKey: jp_groupwareuser_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_tree_menu_id
+  type: numeric
+  label: Ad Tree Menu Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_colorpicker
+  type: text
+  label: Jp Colorpicker
+- name: jp_colorpicker2
+  type: text
+  label: Jp Colorpicker2
+- name: jp_groupwareuser_id
+  type: numeric
+  label: Jp Groupwareuser Id
+- name: jp_groupwareuser_uu
+  type: text
+  label: Jp Groupwareuser Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_todo_status
+  type: text
+  label: Jp Todo Status
+- name: jp_team_id
+  type: numeric
+  label: Jp Team Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_projectphase_id
+  type: numeric
+  label: C Projectphase Id
+- name: c_projecttask_id
+  type: numeric
+  label: C Projecttask Id
+- name: jp_todo_type
+  type: text
+  label: Jp Todo Type
+- name: jp_todo_category_id
+  type: numeric
+  label: Jp Todo Category Id
+- name: jp_firstdayofweek
+  type: text
+  label: Jp Firstdayofweek
+- name: isdisplayschedulejp
+  type: text
+  label: Isdisplayschedulejp
+- name: isdisplaytaskjp
+  type: text
+  label: Isdisplaytaskjp
+- name: jp_defaultcalendarview
+  type: text
+  label: Jp Defaultcalendarview
+- name: jp_todo_calendar_begintime
+  type: numeric
+  label: Jp Todo Calendar Begintime
+- name: jp_todo_calendar_endtime
+  type: numeric
+  label: Jp Todo Calendar Endtime
+- name: jp_todo_main_calendar
+  type: text
+  label: Jp Todo Main Calendar
+- name: jp_todo_calendar
+  type: text
+  label: Jp Todo Calendar
+- name: jp_add_hours
+  type: numeric
+  label: Jp Add Hours
+- name: jp_add_mins
+  type: numeric
+  label: Jp Add Mins
+- name: jp_nonbusinessdaycalendar_id
+  type: numeric
+  label: Jp Nonbusinessdaycalendar Id
+- name: jp_nonbusinessdaycolor
+  type: text
+  label: Jp Nonbusinessdaycolor
+- name: c_country_id
+  type: numeric
+  label: C Country Id
+- name: isdisplaynonbusinessdayjp
+  type: text
+  label: Isdisplaynonbusinessdayjp
+- name: istodomouseoverpopupjp
+  type: text
+  label: Istodomouseoverpopupjp

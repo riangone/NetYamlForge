@@ -1,0 +1,67 @@
+name: M_PROMOTIONPRECONDITION
+tableName: m_promotionprecondition
+primaryKey: m_promotionprecondition_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_bp_group_id
+  type: numeric
+  label: C Bp Group Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: enddate
+  type: text
+  label: Enddate
+- name: isactive
+  type: text
+  label: Isactive
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: m_promotionprecondition_id
+  type: numeric
+  label: M Promotionprecondition Id
+- name: m_promotion_id
+  type: numeric
+  label: M Promotion Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: promotioncode
+  type: text
+  label: Promotioncode
+- name: promotioncounter
+  type: numeric
+  label: Promotioncounter
+- name: promotionusagelimit
+  type: numeric
+  label: Promotionusagelimit
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: startdate
+  type: text
+  label: Startdate
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: m_promotionprecondition_uu
+  type: text
+  label: M Promotionprecondition Uu

@@ -1,0 +1,43 @@
+name: C_BANKSTATEMENTMATCHER
+tableName: c_bankstatementmatcher
+primaryKey: c_bankstatementmatcher_id
+fields:
+- name: c_bankstatementmatcher_id
+  type: numeric
+  label: C Bankstatementmatcher Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: classname
+  type: text
+  label: Classname
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: c_bankstatementmatcher_uu
+  type: text
+  label: C Bankstatementmatcher Uu

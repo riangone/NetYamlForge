@@ -1,0 +1,46 @@
+name: C_PERIODCONTROL
+tableName: c_periodcontrol
+primaryKey: c_periodcontrol_id
+fields:
+- name: c_periodcontrol_id
+  type: numeric
+  label: C Periodcontrol Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: docbasetype
+  type: text
+  label: Docbasetype
+- name: periodstatus
+  type: text
+  label: Periodstatus
+- name: periodaction
+  type: text
+  label: Periodaction
+- name: processing
+  type: text
+  label: Processing
+- name: c_periodcontrol_uu
+  type: text
+  label: C Periodcontrol Uu

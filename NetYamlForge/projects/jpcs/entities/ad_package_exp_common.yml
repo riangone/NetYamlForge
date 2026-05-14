@@ -1,0 +1,100 @@
+name: AD_PACKAGE_EXP_COMMON
+tableName: ad_package_exp_common
+primaryKey: ad_package_exp_common_id
+fields:
+- name: ad_package_exp_common_id
+  type: numeric
+  label: Ad Package Exp Common Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_form_id
+  type: numeric
+  label: Ad Form Id
+- name: ad_impformat_id
+  type: numeric
+  label: Ad Impformat Id
+- name: ad_reportview_id
+  type: numeric
+  label: Ad Reportview Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_workbench_id
+  type: numeric
+  label: Ad Workbench Id
+- name: dbtype
+  type: text
+  label: Dbtype
+- name: processed
+  type: text
+  label: Processed
+- name: name
+  type: text
+  label: Name
+- name: name2
+  type: text
+  label: Name2
+- name: line
+  type: numeric
+  label: Line
+- name: file_directory
+  type: text
+  label: File Directory
+- name: filename
+  type: text
+  label: Filename
+- name: destination_directory
+  type: text
+  label: Destination Directory
+- name: description
+  type: text
+  label: Description
+- name: type
+  type: text
+  label: Type
+- name: target_directory
+  type: text
+  label: Target Directory
+- name: sqlstatement
+  type: text
+  label: Sqlstatement
+- name: processing
+  type: text
+  label: Processing
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: ad_menu_id
+  type: numeric
+  label: Ad Menu Id
+- name: ad_package_exp_common_uu
+  type: text
+  label: Ad Package Exp Common Uu

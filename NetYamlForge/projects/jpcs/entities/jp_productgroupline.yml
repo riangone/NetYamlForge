@@ -1,0 +1,40 @@
+name: JP_PRODUCTGROUPLINE
+tableName: jp_productgroupline
+primaryKey: jp_productgroupline_id
+fields:
+- name: jp_productgroupline_id
+  type: numeric
+  label: Jp Productgroupline Id
+- name: jp_productgroupline_uu
+  type: text
+  label: Jp Productgroupline Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_productgroup_id
+  type: numeric
+  label: Jp Productgroup Id
+- name: description
+  type: text
+  label: Description
+- name: m_product_id
+  type: numeric
+  label: M Product Id

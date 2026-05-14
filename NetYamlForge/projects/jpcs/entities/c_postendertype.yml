@@ -1,0 +1,52 @@
+name: C_POSTENDERTYPE
+tableName: c_postendertype
+primaryKey: c_postendertype_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_postendertype_id
+  type: numeric
+  label: C Postendertype Id
+- name: c_postendertype_uu
+  type: text
+  label: C Postendertype Uu
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: isguarantee
+  type: text
+  label: Isguarantee
+- name: ispostdated
+  type: text
+  label: Ispostdated
+- name: name
+  type: text
+  label: Name
+- name: tendertype
+  type: text
+  label: Tendertype
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value

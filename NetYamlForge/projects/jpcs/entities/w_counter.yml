@@ -1,0 +1,61 @@
+name: W_COUNTER
+tableName: w_counter
+primaryKey: w_counter_id
+fields:
+- name: w_counter_id
+  type: numeric
+  label: W Counter Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: pageurl
+  type: text
+  label: Pageurl
+- name: referrer
+  type: text
+  label: Referrer
+- name: remote_host
+  type: text
+  label: Remote Host
+- name: remote_addr
+  type: text
+  label: Remote Addr
+- name: useragent
+  type: text
+  label: Useragent
+- name: acceptlanguage
+  type: text
+  label: Acceptlanguage
+- name: processed
+  type: text
+  label: Processed
+- name: w_countercount_id
+  type: numeric
+  label: W Countercount Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: email
+  type: text
+  label: Email
+- name: w_counter_uu
+  type: text
+  label: W Counter Uu

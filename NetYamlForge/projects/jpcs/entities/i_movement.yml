@@ -1,0 +1,136 @@
+name: I_MOVEMENT
+tableName: i_movement
+primaryKey: i_movement_id
+fields:
+- name: i_movement_id
+  type: numeric
+  label: I Movement Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: processed
+  type: text
+  label: Processed
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: processing
+  type: text
+  label: Processing
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: productvalue
+  type: text
+  label: Productvalue
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: locatorvalue
+  type: text
+  label: Locatorvalue
+- name: m_locatorto_id
+  type: numeric
+  label: M Locatorto Id
+- name: locatortovalue
+  type: text
+  label: Locatortovalue
+- name: orgvalue
+  type: text
+  label: Orgvalue
+- name: movementqty
+  type: numeric
+  label: Movementqty
+- name: documentno
+  type: text
+  label: Documentno
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: doctypename
+  type: text
+  label: Doctypename
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: bpartnervalue
+  type: text
+  label: Bpartnervalue
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: shippername
+  type: text
+  label: Shippername
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: priorityrule
+  type: text
+  label: Priorityrule
+- name: freightcostrule
+  type: text
+  label: Freightcostrule
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: projectvalue
+  type: text
+  label: Projectvalue
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: campaignvalue
+  type: text
+  label: Campaignvalue
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: orgtrxvalue
+  type: text
+  label: Orgtrxvalue
+- name: user1_id
+  type: text
+  label: User1 Id
+- name: user2_id
+  type: text
+  label: User2 Id
+- name: m_movement_id
+  type: numeric
+  label: M Movement Id
+- name: m_movementline_id
+  type: numeric
+  label: M Movementline Id
+- name: i_movement_uu
+  type: text
+  label: I Movement Uu

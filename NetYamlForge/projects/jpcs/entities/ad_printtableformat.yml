@@ -1,0 +1,121 @@
+name: AD_PRINTTABLEFORMAT
+tableName: ad_printtableformat
+primaryKey: ad_printtableformat_id
+fields:
+- name: ad_printtableformat_id
+  type: numeric
+  label: Ad Printtableformat Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: hdr_printfont_id
+  type: numeric
+  label: Hdr Printfont Id
+- name: hdrtextfg_printcolor_id
+  type: numeric
+  label: Hdrtextfg Printcolor Id
+- name: hdrtextbg_printcolor_id
+  type: numeric
+  label: Hdrtextbg Printcolor Id
+- name: hdrline_printcolor_id
+  type: numeric
+  label: Hdrline Printcolor Id
+- name: funct_printfont_id
+  type: numeric
+  label: Funct Printfont Id
+- name: functbg_printcolor_id
+  type: numeric
+  label: Functbg Printcolor Id
+- name: functfg_printcolor_id
+  type: numeric
+  label: Functfg Printcolor Id
+- name: line_printcolor_id
+  type: numeric
+  label: Line Printcolor Id
+- name: description
+  type: text
+  label: Description
+- name: ispaintboundarylines
+  type: text
+  label: Ispaintboundarylines
+- name: ispainthlines
+  type: text
+  label: Ispainthlines
+- name: ispaintvlines
+  type: text
+  label: Ispaintvlines
+- name: isprintfunctionsymbols
+  type: text
+  label: Isprintfunctionsymbols
+- name: name
+  type: text
+  label: Name
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: imageurl
+  type: text
+  label: Imageurl
+- name: headerleft
+  type: text
+  label: Headerleft
+- name: headercenter
+  type: text
+  label: Headercenter
+- name: headerright
+  type: text
+  label: Headerright
+- name: footerleft
+  type: text
+  label: Footerleft
+- name: footercenter
+  type: text
+  label: Footercenter
+- name: footerright
+  type: text
+  label: Footerright
+- name: imageisattached
+  type: text
+  label: Imageisattached
+- name: hdrstroke
+  type: numeric
+  label: Hdrstroke
+- name: linestroke
+  type: numeric
+  label: Linestroke
+- name: hdrstroketype
+  type: text
+  label: Hdrstroketype
+- name: linestroketype
+  type: text
+  label: Linestroketype
+- name: ispaintheaderlines
+  type: text
+  label: Ispaintheaderlines
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: ismultilineheader
+  type: text
+  label: Ismultilineheader
+- name: ad_printtableformat_uu
+  type: text
+  label: Ad Printtableformat Uu

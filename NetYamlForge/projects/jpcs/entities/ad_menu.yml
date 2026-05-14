@@ -1,0 +1,79 @@
+name: AD_MENU
+tableName: ad_menu
+primaryKey: ad_menu_id
+fields:
+- name: ad_menu_id
+  type: numeric
+  label: Ad Menu Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: name
+  type: text
+  label: Name
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: issummary
+  type: text
+  label: Issummary
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: isreadonly
+  type: text
+  label: Isreadonly
+- name: action
+  type: text
+  label: Action
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: ad_task_id
+  type: numeric
+  label: Ad Task Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: ad_form_id
+  type: numeric
+  label: Ad Form Id
+- name: ad_workbench_id
+  type: numeric
+  label: Ad Workbench Id
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: iscentrallymaintained
+  type: text
+  label: Iscentrallymaintained
+- name: ad_menu_uu
+  type: text
+  label: Ad Menu Uu
+- name: ad_infowindow_id
+  type: numeric
+  label: Ad Infowindow Id
+- name: predefinedcontextvariables
+  type: text
+  label: Predefinedcontextvariables

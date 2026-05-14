@@ -1,0 +1,61 @@
+name: M_DISCOUNTSCHEMA
+tableName: m_discountschema
+primaryKey: m_discountschema_id
+fields:
+- name: m_discountschema_id
+  type: numeric
+  label: M Discountschema Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: discounttype
+  type: text
+  label: Discounttype
+- name: script
+  type: text
+  label: Script
+- name: flatdiscount
+  type: numeric
+  label: Flatdiscount
+- name: isquantitybased
+  type: text
+  label: Isquantitybased
+- name: cumulativelevel
+  type: text
+  label: Cumulativelevel
+- name: processing
+  type: text
+  label: Processing
+- name: isbpartnerflatdiscount
+  type: text
+  label: Isbpartnerflatdiscount
+- name: m_discountschema_uu
+  type: text
+  label: M Discountschema Uu

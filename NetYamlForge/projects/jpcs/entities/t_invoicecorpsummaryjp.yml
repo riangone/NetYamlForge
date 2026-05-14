@@ -1,0 +1,37 @@
+name: T_INVOICECORPSUMMARYJP
+tableName: t_invoicecorpsummaryjp
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: jp_corporation_id
+  type: numeric
+  label: Jp Corporation Id
+- name: docbasetype
+  type: text
+  label: Docbasetype
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: jp_corporationgroup_id
+  type: numeric
+  label: Jp Corporationgroup Id

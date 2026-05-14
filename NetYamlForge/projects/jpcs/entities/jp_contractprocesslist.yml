@@ -1,0 +1,46 @@
+name: JP_CONTRACTPROCESSLIST
+tableName: jp_contractprocesslist
+primaryKey: jp_contractprocesslist_id
+fields:
+- name: jp_contractprocesslist_id
+  type: numeric
+  label: Jp Contractprocesslist Id
+- name: jp_contractprocesslist_uu
+  type: text
+  label: Jp Contractprocesslist Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_contractprocessref_id
+  type: numeric
+  label: Jp Contractprocessref Id
+- name: jp_contractprocess_id
+  type: numeric
+  label: Jp Contractprocess Id
+- name: description
+  type: text
+  label: Description
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto

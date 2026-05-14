@@ -1,0 +1,55 @@
+name: M_FORECASTLINE
+tableName: m_forecastline
+primaryKey: m_forecastline_id
+fields:
+- name: m_forecastline_id
+  type: numeric
+  label: M Forecastline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: m_forecast_id
+  type: numeric
+  label: M Forecast Id
+- name: c_period_id
+  type: numeric
+  label: C Period Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: qtycalculated
+  type: numeric
+  label: Qtycalculated
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: datepromised
+  type: text
+  label: Datepromised
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: m_forecastline_uu
+  type: text
+  label: M Forecastline Uu

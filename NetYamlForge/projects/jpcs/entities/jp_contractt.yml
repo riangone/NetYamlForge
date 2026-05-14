@@ -1,0 +1,79 @@
+name: JP_CONTRACTT
+tableName: jp_contractt
+primaryKey: jp_contractt_id
+fields:
+- name: jp_contractt_id
+  type: numeric
+  label: Jp Contractt Id
+- name: jp_contractt_uu
+  type: text
+  label: Jp Contractt Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: value
+  type: text
+  label: Value
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: classname
+  type: text
+  label: Classname
+- name: jp_contracttype
+  type: text
+  label: Jp Contracttype
+- name: jp_contractcategory_id
+  type: numeric
+  label: Jp Contractcategory Id
+- name: jp_contractt_parent_id
+  type: numeric
+  label: Jp Contractt Parent Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: isautomaticupdatejp
+  type: text
+  label: Isautomaticupdatejp
+- name: jp_contractcancelterm_id
+  type: numeric
+  label: Jp Contractcancelterm Id
+- name: jp_contractextendperiod_id
+  type: numeric
+  label: Jp Contractextendperiod Id
+- name: jp_classname1
+  type: text
+  label: Jp Classname1
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn

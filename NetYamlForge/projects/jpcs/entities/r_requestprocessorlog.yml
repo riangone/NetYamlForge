@@ -1,0 +1,52 @@
+name: R_REQUESTPROCESSORLOG
+tableName: r_requestprocessorlog
+primaryKey: r_requestprocessorlog_id
+fields:
+- name: r_requestprocessor_id
+  type: numeric
+  label: R Requestprocessor Id
+- name: r_requestprocessorlog_id
+  type: numeric
+  label: R Requestprocessorlog Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: iserror
+  type: text
+  label: Iserror
+- name: summary
+  type: text
+  label: Summary
+- name: reference
+  type: text
+  label: Reference
+- name: description
+  type: text
+  label: Description
+- name: textmsg
+  type: text
+  label: Textmsg
+- name: binarydata
+  type: text
+  label: Binarydata
+- name: r_requestprocessorlog_uu
+  type: text
+  label: R Requestprocessorlog Uu

@@ -1,0 +1,76 @@
+name: AD_PACKAGE_EXP
+tableName: ad_package_exp
+primaryKey: ad_package_exp_id
+fields:
+- name: ad_package_exp_id
+  type: numeric
+  label: Ad Package Exp Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_package_type
+  type: text
+  label: Ad Package Type
+- name: email
+  type: text
+  label: Email
+- name: instructions
+  type: text
+  label: Instructions
+- name: name
+  type: text
+  label: Name
+- name: processed
+  type: text
+  label: Processed
+- name: releaseno
+  type: text
+  label: Releaseno
+- name: version
+  type: text
+  label: Version
+- name: username
+  type: text
+  label: Username
+- name: processing
+  type: text
+  label: Processing
+- name: pk_version
+  type: text
+  label: Pk Version
+- name: file_directory
+  type: text
+  label: File Directory
+- name: description
+  type: text
+  label: Description
+- name: ad_package_exp_uu
+  type: text
+  label: Ad Package Exp Uu
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: isexportdictionaryentity
+  type: text
+  label: Isexportdictionaryentity
+- name: isincludeorganizationid
+  type: text
+  label: Isincludeorganizationid

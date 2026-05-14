@@ -1,0 +1,52 @@
+name: M_SERNOCTL
+tableName: m_sernoctl
+primaryKey: m_sernoctl_id
+fields:
+- name: m_sernoctl_id
+  type: numeric
+  label: M Sernoctl Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: startno
+  type: numeric
+  label: Startno
+- name: incrementno
+  type: numeric
+  label: Incrementno
+- name: currentnext
+  type: numeric
+  label: Currentnext
+- name: prefix
+  type: text
+  label: Prefix
+- name: suffix
+  type: text
+  label: Suffix
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: m_sernoctl_uu
+  type: text
+  label: M Sernoctl Uu

@@ -1,0 +1,73 @@
+name: AD_SEARCHDEFINITION
+tableName: ad_searchdefinition
+primaryKey: ad_searchdefinition_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_searchdefinition_id
+  type: numeric
+  label: Ad Searchdefinition Id
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datatype
+  type: text
+  label: Datatype
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: name
+  type: text
+  label: Name
+- name: query
+  type: text
+  label: Query
+- name: searchtype
+  type: text
+  label: Searchtype
+- name: transactioncode
+  type: text
+  label: Transactioncode
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: po_window_id
+  type: numeric
+  label: Po Window Id
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: ad_searchdefinition_uu
+  type: text
+  label: Ad Searchdefinition Uu
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: ad_message_id
+  type: numeric
+  label: Ad Message Id
+- name: ad_style_id
+  type: numeric
+  label: Ad Style Id

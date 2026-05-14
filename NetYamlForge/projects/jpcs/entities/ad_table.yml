@@ -1,0 +1,109 @@
+name: AD_TABLE
+tableName: ad_table
+primaryKey: ad_table_id
+fields:
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: tablename
+  type: text
+  label: Tablename
+- name: isview
+  type: text
+  label: Isview
+- name: accesslevel
+  type: text
+  label: Accesslevel
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_val_rule_id
+  type: numeric
+  label: Ad Val Rule Id
+- name: loadseq
+  type: numeric
+  label: Loadseq
+- name: issecurityenabled
+  type: text
+  label: Issecurityenabled
+- name: isdeleteable
+  type: text
+  label: Isdeleteable
+- name: ishighvolume
+  type: text
+  label: Ishighvolume
+- name: importtable
+  type: text
+  label: Importtable
+- name: ischangelog
+  type: text
+  label: Ischangelog
+- name: replicationtype
+  type: text
+  label: Replicationtype
+- name: po_window_id
+  type: numeric
+  label: Po Window Id
+- name: copycolumnsfromtable
+  type: text
+  label: Copycolumnsfromtable
+- name: iscentrallymaintained
+  type: text
+  label: Iscentrallymaintained
+- name: ad_table_uu
+  type: text
+  label: Ad Table Uu
+- name: processing
+  type: text
+  label: Processing
+- name: databaseviewdrop
+  type: text
+  label: Databaseviewdrop
+- name: copycomponentsfromview
+  type: text
+  label: Copycomponentsfromview
+- name: createwindowfromtable
+  type: text
+  label: Createwindowfromtable
+- name: isshowindrilloptions
+  type: text
+  label: Isshowindrilloptions
+- name: ispartition
+  type: text
+  label: Ispartition
+- name: createpartition
+  type: text
+  label: Createpartition

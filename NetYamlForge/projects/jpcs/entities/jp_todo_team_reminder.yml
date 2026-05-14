@@ -1,0 +1,67 @@
+name: JP_TODO_TEAM_REMINDER
+tableName: jp_todo_team_reminder
+primaryKey: jp_todo_team_reminder_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: description
+  type: text
+  label: Description
+- name: isactive
+  type: text
+  label: Isactive
+- name: issentreminderjp
+  type: text
+  label: Issentreminderjp
+- name: jp_mandatory_statistics_info
+  type: text
+  label: Jp Mandatory Statistics Info
+- name: jp_todo_remindtime
+  type: text
+  label: Jp Todo Remindtime
+- name: jp_todo_remindertype
+  type: text
+  label: Jp Todo Remindertype
+- name: jp_todo_team_id
+  type: numeric
+  label: Jp Todo Team Id
+- name: jp_todo_team_reminder_id
+  type: numeric
+  label: Jp Todo Team Reminder Id
+- name: jp_todo_team_reminder_uu
+  type: text
+  label: Jp Todo Team Reminder Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: processed
+  type: text
+  label: Processed
+- name: broadcastfrequency
+  type: text
+  label: Broadcastfrequency
+- name: url
+  type: text
+  label: Url
+- name: jp_todo_remindtarget
+  type: text
+  label: Jp Todo Remindtarget
+- name: jp_mailfrequency
+  type: text
+  label: Jp Mailfrequency
+- name: jp_team_id
+  type: numeric
+  label: Jp Team Id

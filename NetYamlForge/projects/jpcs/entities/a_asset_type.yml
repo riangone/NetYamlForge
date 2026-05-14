@@ -1,0 +1,49 @@
+name: A_ASSET_TYPE
+tableName: a_asset_type
+primaryKey: a_asset_type_id
+fields:
+- name: a_asset_type_id
+  type: numeric
+  label: A Asset Type Id
+- name: name
+  type: text
+  label: Name
+- name: value
+  type: text
+  label: Value
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: description
+  type: text
+  label: Description
+- name: isowned
+  type: text
+  label: Isowned
+- name: isinposession
+  type: text
+  label: Isinposession
+- name: isdepreciable
+  type: text
+  label: Isdepreciable
+- name: a_asset_type_uu
+  type: text
+  label: A Asset Type Uu

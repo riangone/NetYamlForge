@@ -1,0 +1,64 @@
+name: AD_PINSTANCE_PARA
+tableName: ad_pinstance_para
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: parametername
+  type: text
+  label: Parametername
+- name: p_string
+  type: text
+  label: P String
+- name: p_string_to
+  type: text
+  label: P String To
+- name: p_number
+  type: numeric
+  label: P Number
+- name: p_number_to
+  type: numeric
+  label: P Number To
+- name: p_date
+  type: text
+  label: P Date
+- name: p_date_to
+  type: text
+  label: P Date To
+- name: info
+  type: text
+  label: Info
+- name: info_to
+  type: text
+  label: Info To
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: isactive
+  type: text
+  label: Isactive
+- name: ad_pinstance_para_uu
+  type: text
+  label: Ad Pinstance Para Uu
+- name: isnotclause
+  type: text
+  label: Isnotclause

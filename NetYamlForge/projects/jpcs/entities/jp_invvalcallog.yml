@@ -1,0 +1,139 @@
+name: JP_INVVALCALLOG
+tableName: jp_invvalcallog
+primaryKey: jp_invvalcallog_id
+fields:
+- name: jp_invvalcallog_id
+  type: numeric
+  label: Jp Invvalcallog Id
+- name: jp_invvalcallog_uu
+  type: text
+  label: Jp Invvalcallog Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: jp_invvalcalline_id
+  type: numeric
+  label: Jp Invvalcalline Id
+- name: line
+  type: numeric
+  label: Line
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: c_orderline_id
+  type: numeric
+  label: C Orderline Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: istaxincluded
+  type: text
+  label: Istaxincluded
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: qtyentered
+  type: numeric
+  label: Qtyentered
+- name: c_uom_id
+  type: numeric
+  label: C Uom Id
+- name: qty
+  type: numeric
+  label: Qty
+- name: priceentered
+  type: numeric
+  label: Priceentered
+- name: priceactual
+  type: numeric
+  label: Priceactual
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: linenetamt
+  type: numeric
+  label: Linenetamt
+- name: jp_currencyto_id
+  type: numeric
+  label: Jp Currencyto Id
+- name: multiplyrate
+  type: numeric
+  label: Multiplyrate
+- name: dividerate
+  type: numeric
+  label: Dividerate
+- name: jp_exchangedamt
+  type: numeric
+  label: Jp Exchangedamt
+- name: jp_exchangednotaxamt
+  type: numeric
+  label: Jp Exchangednotaxamt
+- name: jp_exchangedpriceactual
+  type: numeric
+  label: Jp Exchangedpriceactual
+- name: jp_applyqty
+  type: numeric
+  label: Jp Applyqty
+- name: jp_applyamt
+  type: numeric
+  label: Jp Applyamt
+- name: description
+  type: text
+  label: Description
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: movementtype
+  type: text
+  label: Movementtype
+- name: qtyordered
+  type: numeric
+  label: Qtyordered
+- name: qtyreserved
+  type: numeric
+  label: Qtyreserved
+- name: qtyinvoiced
+  type: numeric
+  label: Qtyinvoiced
+- name: qtydelivered
+  type: numeric
+  label: Qtydelivered
+- name: m_matchpo_id
+  type: numeric
+  label: M Matchpo Id
+- name: m_matchinv_id
+  type: numeric
+  label: M Matchinv Id
+- name: jp_begininvvalcalline_id
+  type: numeric
+  label: Jp Begininvvalcalline Id

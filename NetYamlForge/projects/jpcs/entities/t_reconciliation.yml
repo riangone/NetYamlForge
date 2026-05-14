@@ -1,0 +1,37 @@
+name: T_RECONCILIATION
+tableName: t_reconciliation
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: fact_acct_id
+  type: numeric
+  label: Fact Acct Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: matchcode
+  type: text
+  label: Matchcode
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: t_reconciliation_uu
+  type: text
+  label: T Reconciliation Uu

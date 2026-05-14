@@ -1,0 +1,214 @@
+name: PP_ORDER_NODE
+tableName: pp_order_node
+primaryKey: pp_order_node_id
+fields:
+- name: name
+  type: text
+  label: Name
+- name: ad_column_id
+  type: numeric
+  label: Ad Column Id
+- name: ad_form_id
+  type: numeric
+  label: Ad Form Id
+- name: ad_image_id
+  type: numeric
+  label: Ad Image Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: ad_task_id
+  type: numeric
+  label: Ad Task Id
+- name: ad_wf_block_id
+  type: numeric
+  label: Ad Wf Block Id
+- name: ad_wf_node_id
+  type: numeric
+  label: Ad Wf Node Id
+- name: ad_wf_responsible_id
+  type: numeric
+  label: Ad Wf Responsible Id
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: action
+  type: text
+  label: Action
+- name: attributename
+  type: text
+  label: Attributename
+- name: attributevalue
+  type: text
+  label: Attributevalue
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: cost
+  type: numeric
+  label: Cost
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: datefinish
+  type: text
+  label: Datefinish
+- name: datefinishschedule
+  type: text
+  label: Datefinishschedule
+- name: datestart
+  type: text
+  label: Datestart
+- name: datestartschedule
+  type: text
+  label: Datestartschedule
+- name: description
+  type: text
+  label: Description
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: duration
+  type: numeric
+  label: Duration
+- name: durationreal
+  type: numeric
+  label: Durationreal
+- name: durationrequiered
+  type: numeric
+  label: Durationrequiered
+- name: entitytype
+  type: text
+  label: Entitytype
+- name: finishmode
+  type: text
+  label: Finishmode
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: iscentrallymaintained
+  type: text
+  label: Iscentrallymaintained
+- name: ismilestone
+  type: text
+  label: Ismilestone
+- name: issubcontracting
+  type: text
+  label: Issubcontracting
+- name: joinelement
+  type: text
+  label: Joinelement
+- name: limit
+  type: numeric
+  label: Limit
+- name: movingtime
+  type: numeric
+  label: Movingtime
+- name: overlapunits
+  type: numeric
+  label: Overlapunits
+- name: pp_order_id
+  type: numeric
+  label: Pp Order Id
+- name: pp_order_node_id
+  type: numeric
+  label: Pp Order Node Id
+- name: pp_order_workflow_id
+  type: numeric
+  label: Pp Order Workflow Id
+- name: priority
+  type: numeric
+  label: Priority
+- name: qtydelivered
+  type: numeric
+  label: Qtydelivered
+- name: qtyreject
+  type: numeric
+  label: Qtyreject
+- name: qtyrequiered
+  type: numeric
+  label: Qtyrequiered
+- name: qtyscrap
+  type: numeric
+  label: Qtyscrap
+- name: queuingtime
+  type: numeric
+  label: Queuingtime
+- name: s_resource_id
+  type: numeric
+  label: S Resource Id
+- name: setuptime
+  type: numeric
+  label: Setuptime
+- name: setuptimereal
+  type: numeric
+  label: Setuptimereal
+- name: setuptimerequiered
+  type: numeric
+  label: Setuptimerequiered
+- name: splitelement
+  type: text
+  label: Splitelement
+- name: startmode
+  type: text
+  label: Startmode
+- name: subflowexecution
+  type: text
+  label: Subflowexecution
+- name: unitscycles
+  type: numeric
+  label: Unitscycles
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: validfrom
+  type: text
+  label: Validfrom
+- name: validto
+  type: text
+  label: Validto
+- name: value
+  type: text
+  label: Value
+- name: waitingtime
+  type: numeric
+  label: Waitingtime
+- name: workflow_id
+  type: numeric
+  label: Workflow Id
+- name: workingtime
+  type: numeric
+  label: Workingtime
+- name: xposition
+  type: numeric
+  label: Xposition
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: yposition
+  type: numeric
+  label: Yposition
+- name: yield
+  type: numeric
+  label: Yield
+- name: pp_order_node_uu
+  type: text
+  label: Pp Order Node Uu

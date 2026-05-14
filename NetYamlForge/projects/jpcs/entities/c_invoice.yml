@@ -1,0 +1,253 @@
+name: C_INVOICE
+tableName: c_invoice
+primaryKey: c_invoice_id
+fields:
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: documentno
+  type: text
+  label: Documentno
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_doctypetarget_id
+  type: numeric
+  label: C Doctypetarget Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: description
+  type: text
+  label: Description
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: istransferred
+  type: text
+  label: Istransferred
+- name: isprinted
+  type: text
+  label: Isprinted
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: dateinvoiced
+  type: text
+  label: Dateinvoiced
+- name: dateprinted
+  type: text
+  label: Dateprinted
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: poreference
+  type: text
+  label: Poreference
+- name: isdiscountprinted
+  type: text
+  label: Isdiscountprinted
+- name: dateordered
+  type: text
+  label: Dateordered
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: paymentrule
+  type: text
+  label: Paymentrule
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: totallines
+  type: numeric
+  label: Totallines
+- name: grandtotal
+  type: numeric
+  label: Grandtotal
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: istaxincluded
+  type: text
+  label: Istaxincluded
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: ispaid
+  type: text
+  label: Ispaid
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: c_cashline_id
+  type: numeric
+  label: C Cashline Id
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: generateto
+  type: text
+  label: Generateto
+- name: sendemail
+  type: text
+  label: Sendemail
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: isselfservice
+  type: text
+  label: Isselfservice
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: ispayschedulevalid
+  type: text
+  label: Ispayschedulevalid
+- name: ref_invoice_id
+  type: numeric
+  label: Ref Invoice Id
+- name: isindispute
+  type: text
+  label: Isindispute
+- name: invoicecollectiontype
+  type: text
+  label: Invoicecollectiontype
+- name: m_rma_id
+  type: numeric
+  label: M Rma Id
+- name: dunninggrace
+  type: text
+  label: Dunninggrace
+- name: c_dunninglevel_id
+  type: numeric
+  label: C Dunninglevel Id
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_cashplanline_id
+  type: numeric
+  label: C Cashplanline Id
+- name: c_invoice_uu
+  type: text
+  label: C Invoice Uu
+- name: isfixedassetinvoice
+  type: text
+  label: Isfixedassetinvoice
+- name: jp_bill_id
+  type: numeric
+  label: Jp Bill Id
+- name: jp_contract_id
+  type: numeric
+  label: Jp Contract Id
+- name: jp_contractcontent_id
+  type: numeric
+  label: Jp Contractcontent Id
+- name: jp_contractprocperiod_id
+  type: numeric
+  label: Jp Contractprocperiod Id
+- name: jp_recognition_id
+  type: numeric
+  label: Jp Recognition Id
+- name: relatedinvoice_id
+  type: numeric
+  label: Relatedinvoice Id
+- name: isoverridecurrencyrate
+  type: text
+  label: Isoverridecurrencyrate
+- name: currencyrate
+  type: numeric
+  label: Currencyrate
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn
+- name: createlinesfrom
+  type: text
+  label: Createlinesfrom
+- name: jp_bp_bankaccount_id
+  type: numeric
+  label: Jp Bp Bankaccount Id
+- name: jp_cancelwfstatus
+  type: text
+  label: Jp Cancelwfstatus
+- name: jp_cancelwfaction
+  type: text
+  label: Jp Cancelwfaction

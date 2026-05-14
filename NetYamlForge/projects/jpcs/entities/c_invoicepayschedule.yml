@@ -1,0 +1,58 @@
+name: C_INVOICEPAYSCHEDULE
+tableName: c_invoicepayschedule
+primaryKey: c_invoicepayschedule_id
+fields:
+- name: c_invoicepayschedule_id
+  type: numeric
+  label: C Invoicepayschedule Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_payschedule_id
+  type: numeric
+  label: C Payschedule Id
+- name: duedate
+  type: text
+  label: Duedate
+- name: dueamt
+  type: numeric
+  label: Dueamt
+- name: discountdate
+  type: text
+  label: Discountdate
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: c_invoicepayschedule_uu
+  type: text
+  label: C Invoicepayschedule Uu

@@ -1,0 +1,46 @@
+name: JP_INFOGADGET_TRL
+tableName: jp_infogadget_trl
+primaryKey: jp_infogadget_id
+fields:
+- name: jp_infogadget_id
+  type: numeric
+  label: Jp Infogadget Id
+- name: ad_language
+  type: text
+  label: Ad Language
+- name: jp_infogadget_trl_uu
+  type: text
+  label: Jp Infogadget Trl Uu
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: istranslated
+  type: text
+  label: Istranslated
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: html
+  type: text
+  label: Html

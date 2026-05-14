@@ -1,0 +1,40 @@
+name: T_TAXLINESUMJP
+tableName: t_taxlinesumjp
+primaryKey: ad_pinstance_id
+fields:
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: issotrx
+  type: text
+  label: Issotrx
+- name: jp_posted
+  type: text
+  label: Jp Posted
+- name: taxbaseamt
+  type: numeric
+  label: Taxbaseamt
+- name: taxamt
+  type: numeric
+  label: Taxamt

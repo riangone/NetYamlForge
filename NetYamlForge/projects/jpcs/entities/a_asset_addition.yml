@@ -1,0 +1,160 @@
+name: A_ASSET_ADDITION
+tableName: a_asset_addition
+primaryKey: a_asset_addition_id
+fields:
+- name: a_asset_addition_id
+  type: numeric
+  label: A Asset Addition Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: a_asset_id
+  type: numeric
+  label: A Asset Id
+- name: assetvalueamt
+  type: numeric
+  label: Assetvalueamt
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: a_qty_current
+  type: numeric
+  label: A Qty Current
+- name: description
+  type: text
+  label: Description
+- name: gl_journalbatch_id
+  type: numeric
+  label: Gl Journalbatch Id
+- name: line
+  type: numeric
+  label: Line
+- name: postingtype
+  type: text
+  label: Postingtype
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: documentno
+  type: text
+  label: Documentno
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: a_sourcetype
+  type: text
+  label: A Sourcetype
+- name: a_capvsexp
+  type: text
+  label: A Capvsexp
+- name: a_asset_addition_uu
+  type: text
+  label: A Asset Addition Uu
+- name: processed
+  type: text
+  label: Processed
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: a_createasset
+  type: text
+  label: A Createasset
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: m_matchinv_id
+  type: numeric
+  label: M Matchinv Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: c_conversiontype_id
+  type: numeric
+  label: C Conversiontype Id
+- name: assetsourceamt
+  type: numeric
+  label: Assetsourceamt
+- name: deltauselifeyears
+  type: numeric
+  label: Deltauselifeyears
+- name: deltauselifeyears_f
+  type: numeric
+  label: Deltauselifeyears F
+- name: datedoc
+  type: text
+  label: Datedoc
+- name: i_fixedasset_id
+  type: numeric
+  label: I Fixedasset Id
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: currencyrate
+  type: numeric
+  label: Currencyrate
+- name: a_accumulated_depr
+  type: numeric
+  label: A Accumulated Depr
+- name: a_accumulated_depr_f
+  type: numeric
+  label: A Accumulated Depr F
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: processing
+  type: text
+  label: Processing
+- name: a_accumulated_depr_adjust
+  type: text
+  label: A Accumulated Depr Adjust
+- name: assetamtentered
+  type: numeric
+  label: Assetamtentered
+- name: posted
+  type: text
+  label: Posted
+- name: a_period_start
+  type: numeric
+  label: A Period Start
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: a_salvage_value
+  type: numeric
+  label: A Salvage Value
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id

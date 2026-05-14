@@ -1,0 +1,82 @@
+name: C_POS
+tableName: c_pos
+primaryKey: c_pos_id
+fields:
+- name: c_pos_id
+  type: numeric
+  label: C Pos Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: m_pricelist_id
+  type: numeric
+  label: M Pricelist Id
+- name: c_cashbook_id
+  type: numeric
+  label: C Cashbook Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: printername
+  type: text
+  label: Printername
+- name: c_poskeylayout_id
+  type: numeric
+  label: C Poskeylayout Id
+- name: ismodifyprice
+  type: text
+  label: Ismodifyprice
+- name: c_bpartnercashtrx_id
+  type: numeric
+  label: C Bpartnercashtrx Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: cashdrawer
+  type: text
+  label: Cashdrawer
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_pos_uu
+  type: text
+  label: C Pos Uu
+- name: osk_keylayout_id
+  type: numeric
+  label: Osk Keylayout Id
+- name: osnp_keylayout_id
+  type: numeric
+  label: Osnp Keylayout Id
+- name: autologoutdelay
+  type: numeric
+  label: Autologoutdelay

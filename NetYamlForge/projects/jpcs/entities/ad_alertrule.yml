@@ -1,0 +1,64 @@
+name: AD_ALERTRULE
+tableName: ad_alertrule
+primaryKey: ad_alertrule_id
+fields:
+- name: ad_alertrule_id
+  type: numeric
+  label: Ad Alertrule Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: ad_alert_id
+  type: numeric
+  label: Ad Alert Id
+- name: selectclause
+  type: text
+  label: Selectclause
+- name: fromclause
+  type: text
+  label: Fromclause
+- name: whereclause
+  type: text
+  label: Whereclause
+- name: ad_table_id
+  type: numeric
+  label: Ad Table Id
+- name: preprocessing
+  type: text
+  label: Preprocessing
+- name: postprocessing
+  type: text
+  label: Postprocessing
+- name: isvalid
+  type: text
+  label: Isvalid
+- name: errormsg
+  type: text
+  label: Errormsg
+- name: otherclause
+  type: text
+  label: Otherclause
+- name: ad_alertrule_uu
+  type: text
+  label: Ad Alertrule Uu

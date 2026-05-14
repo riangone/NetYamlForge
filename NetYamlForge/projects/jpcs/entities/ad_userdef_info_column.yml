@@ -1,0 +1,100 @@
+name: AD_USERDEF_INFO_COLUMN
+tableName: ad_userdef_info_column
+primaryKey: ad_userdef_info_column_id
+fields:
+- name: ad_userdef_info_column_id
+  type: numeric
+  label: Ad Userdef Info Column Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_infocolumn_id
+  type: numeric
+  label: Ad Infocolumn Id
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ad_userdef_info_column_uu
+  type: text
+  label: Ad Userdef Info Column Uu
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: isdisplayed
+  type: text
+  label: Isdisplayed
+- name: isquerycriteria
+  type: text
+  label: Isquerycriteria
+- name: ad_reference_id
+  type: numeric
+  label: Ad Reference Id
+- name: ad_reference_value_id
+  type: numeric
+  label: Ad Reference Value Id
+- name: ad_val_rule_id
+  type: numeric
+  label: Ad Val Rule Id
+- name: displaylogic
+  type: text
+  label: Displaylogic
+- name: queryoperator
+  type: text
+  label: Queryoperator
+- name: queryfunction
+  type: text
+  label: Queryfunction
+- name: seqnoselection
+  type: numeric
+  label: Seqnoselection
+- name: defaultvalue
+  type: text
+  label: Defaultvalue
+- name: ismandatory
+  type: text
+  label: Ismandatory
+- name: isreadonly
+  type: text
+  label: Isreadonly
+- name: placeholder
+  type: text
+  label: Placeholder
+- name: inputfieldvalidation
+  type: text
+  label: Inputfieldvalidation
+- name: ad_fieldstyle_id
+  type: numeric
+  label: Ad Fieldstyle Id
+- name: isautocomplete
+  type: text
+  label: Isautocomplete
+- name: ad_userdef_info_id
+  type: numeric
+  label: Ad Userdef Info Id
+- name: isqueryafterchange
+  type: text
+  label: Isqueryafterchange

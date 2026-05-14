@@ -1,0 +1,40 @@
+name: AD_TREENODECMS
+tableName: ad_treenodecms
+primaryKey: ad_tree_id
+fields:
+- name: ad_tree_id
+  type: numeric
+  label: Ad Tree Id
+- name: node_id
+  type: numeric
+  label: Node Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: parent_id
+  type: numeric
+  label: Parent Id
+- name: seqno
+  type: numeric
+  label: Seqno
+- name: ad_treenodecms_uu
+  type: text
+  label: Ad Treenodecms Uu

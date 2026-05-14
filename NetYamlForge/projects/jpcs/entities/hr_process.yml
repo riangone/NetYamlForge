@@ -1,0 +1,100 @@
+name: HR_PROCESS
+tableName: hr_process
+primaryKey: hr_process_id
+fields:
+- name: hr_job_id
+  type: numeric
+  label: Hr Job Id
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: c_payselection_id
+  type: numeric
+  label: C Payselection Id
+- name: hr_process_id
+  type: numeric
+  label: Hr Process Id
+- name: hr_employee_id
+  type: numeric
+  label: Hr Employee Id
+- name: name
+  type: text
+  label: Name
+- name: c_doctypetarget_id
+  type: numeric
+  label: C Doctypetarget Id
+- name: columnsql
+  type: text
+  label: Columnsql
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: documentno
+  type: text
+  label: Documentno
+- name: hr_department_id
+  type: numeric
+  label: Hr Department Id
+- name: hr_payroll_id
+  type: numeric
+  label: Hr Payroll Id
+- name: hr_period_id
+  type: numeric
+  label: Hr Period Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: posted
+  type: text
+  label: Posted
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: updated
+  type: text
+  label: Updated
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_printformat_id
+  type: numeric
+  label: Ad Printformat Id
+- name: ad_workflow_id
+  type: numeric
+  label: Ad Workflow Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: hr_process_uu
+  type: text
+  label: Hr Process Uu

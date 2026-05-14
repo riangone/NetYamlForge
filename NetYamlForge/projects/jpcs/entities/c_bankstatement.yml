@@ -1,0 +1,103 @@
+name: C_BANKSTATEMENT
+tableName: c_bankstatement
+primaryKey: c_bankstatement_id
+fields:
+- name: c_bankstatement_id
+  type: numeric
+  label: C Bankstatement Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: statementdate
+  type: text
+  label: Statementdate
+- name: beginningbalance
+  type: numeric
+  label: Beginningbalance
+- name: endingbalance
+  type: numeric
+  label: Endingbalance
+- name: statementdifference
+  type: numeric
+  label: Statementdifference
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: eftstatementreference
+  type: text
+  label: Eftstatementreference
+- name: eftstatementdate
+  type: text
+  label: Eftstatementdate
+- name: matchstatement
+  type: text
+  label: Matchstatement
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: docaction
+  type: text
+  label: Docaction
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_bankstatement_uu
+  type: text
+  label: C Bankstatement Uu
+- name: copyfrom
+  type: text
+  label: Copyfrom
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: createfrombatch
+  type: text
+  label: Createfrombatch
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: documentno
+  type: text
+  label: Documentno

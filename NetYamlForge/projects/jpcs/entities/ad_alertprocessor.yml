@@ -1,0 +1,61 @@
+name: AD_ALERTPROCESSOR
+tableName: ad_alertprocessor
+primaryKey: ad_alertprocessor_id
+fields:
+- name: ad_alertprocessor_id
+  type: numeric
+  label: Ad Alertprocessor Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: frequencytype
+  type: text
+  label: Frequencytype
+- name: frequency
+  type: numeric
+  label: Frequency
+- name: datelastrun
+  type: text
+  label: Datelastrun
+- name: datenextrun
+  type: text
+  label: Datenextrun
+- name: supervisor_id
+  type: numeric
+  label: Supervisor Id
+- name: keeplogdays
+  type: numeric
+  label: Keeplogdays
+- name: processing
+  type: text
+  label: Processing
+- name: ad_alertprocessor_uu
+  type: text
+  label: Ad Alertprocessor Uu
+- name: ad_schedule_id
+  type: numeric
+  label: Ad Schedule Id

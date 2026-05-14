@@ -1,0 +1,88 @@
+name: C_DUNNINGLEVEL
+tableName: c_dunninglevel
+primaryKey: c_dunninglevel_id
+fields:
+- name: c_dunninglevel_id
+  type: numeric
+  label: C Dunninglevel Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_dunning_id
+  type: numeric
+  label: C Dunning Id
+- name: printname
+  type: text
+  label: Printname
+- name: daysafterdue
+  type: numeric
+  label: Daysafterdue
+- name: daysbetweendunning
+  type: numeric
+  label: Daysbetweendunning
+- name: note
+  type: text
+  label: Note
+- name: chargeinterest
+  type: text
+  label: Chargeinterest
+- name: interestpercent
+  type: numeric
+  label: Interestpercent
+- name: chargefee
+  type: text
+  label: Chargefee
+- name: feeamt
+  type: numeric
+  label: Feeamt
+- name: dunning_printformat_id
+  type: numeric
+  label: Dunning Printformat Id
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: isshowalldue
+  type: text
+  label: Isshowalldue
+- name: isshownotdue
+  type: text
+  label: Isshownotdue
+- name: issetcreditstop
+  type: text
+  label: Issetcreditstop
+- name: issetpaymentterm
+  type: text
+  label: Issetpaymentterm
+- name: c_paymentterm_id
+  type: numeric
+  label: C Paymentterm Id
+- name: invoicecollectiontype
+  type: text
+  label: Invoicecollectiontype
+- name: isstatement
+  type: text
+  label: Isstatement
+- name: c_dunninglevel_uu
+  type: text
+  label: C Dunninglevel Uu

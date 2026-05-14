@@ -1,0 +1,37 @@
+name: JP_BULKUPDATEPROFILEACCESS
+tableName: jp_bulkupdateprofileaccess
+primaryKey: jp_bulkupdateprofileaccess_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: jp_bulkupdateprofileaccess_id
+  type: numeric
+  label: Jp Bulkupdateprofileaccess Id
+- name: jp_bulkupdateprofileaccess_uu
+  type: text
+  label: Jp Bulkupdateprofileaccess Uu
+- name: jp_bulkupdateprofile_id
+  type: numeric
+  label: Jp Bulkupdateprofile Id
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby

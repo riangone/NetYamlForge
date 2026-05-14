@@ -1,0 +1,70 @@
+name: C_TAXDECLARATIONLINE
+tableName: c_taxdeclarationline
+primaryKey: c_taxdeclarationline_id
+fields:
+- name: c_taxdeclarationline_id
+  type: numeric
+  label: C Taxdeclarationline Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: line
+  type: numeric
+  label: Line
+- name: description
+  type: text
+  label: Description
+- name: ismanual
+  type: text
+  label: Ismanual
+- name: c_taxdeclaration_id
+  type: numeric
+  label: C Taxdeclaration Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_tax_id
+  type: numeric
+  label: C Tax Id
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: c_allocationline_id
+  type: numeric
+  label: C Allocationline Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: taxbaseamt
+  type: numeric
+  label: Taxbaseamt
+- name: taxamt
+  type: numeric
+  label: Taxamt
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: c_taxdeclarationline_uu
+  type: text
+  label: C Taxdeclarationline Uu

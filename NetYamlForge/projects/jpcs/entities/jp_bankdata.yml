@@ -1,0 +1,181 @@
+name: JP_BANKDATA
+tableName: jp_bankdata
+primaryKey: jp_bankdata_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: jp_bankdata_id
+  type: numeric
+  label: Jp Bankdata Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: jp_bankdataschema_id
+  type: numeric
+  label: Jp Bankdataschema Id
+- name: c_bankstatement_id
+  type: numeric
+  label: C Bankstatement Id
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: numlines
+  type: numeric
+  label: Numlines
+- name: stmtamt
+  type: numeric
+  label: Stmtamt
+- name: trxamt
+  type: numeric
+  label: Trxamt
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: interestamt
+  type: numeric
+  label: Interestamt
+- name: totalamt
+  type: numeric
+  label: Totalamt
+- name: created
+  type: text
+  label: Created
+- name: updated
+  type: text
+  label: Updated
+- name: statementdate
+  type: text
+  label: Statementdate
+- name: dateacct
+  type: text
+  label: Dateacct
+- name: jp_processedtime1
+  type: text
+  label: Jp Processedtime1
+- name: jp_processedtime2
+  type: text
+  label: Jp Processedtime2
+- name: jp_processedtime3
+  type: text
+  label: Jp Processedtime3
+- name: jp_processedtime4
+  type: text
+  label: Jp Processedtime4
+- name: jp_processedtime5
+  type: text
+  label: Jp Processedtime5
+- name: jp_processedtime6
+  type: text
+  label: Jp Processedtime6
+- name: paydate
+  type: text
+  label: Paydate
+- name: isactive
+  type: text
+  label: Isactive
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_processing2
+  type: text
+  label: Jp Processing2
+- name: jp_processing3
+  type: text
+  label: Jp Processing3
+- name: jp_processing4
+  type: text
+  label: Jp Processing4
+- name: jp_processing5
+  type: text
+  label: Jp Processing5
+- name: jp_processing6
+  type: text
+  label: Jp Processing6
+- name: processed
+  type: text
+  label: Processed
+- name: jp_bankdata_uu
+  type: text
+  label: Jp Bankdata Uu
+- name: description
+  type: text
+  label: Description
+- name: name
+  type: text
+  label: Name
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: jp_bankdatatype_header
+  type: text
+  label: Jp Bankdatatype Header
+- name: jp_bankdataclassification
+  type: text
+  label: Jp Bankdataclassification
+- name: jp_bankdatacodetype
+  type: text
+  label: Jp Bankdatacodetype
+- name: jp_requestercode
+  type: text
+  label: Jp Requestercode
+- name: jp_requestername
+  type: text
+  label: Jp Requestername
+- name: routingno
+  type: text
+  label: Routingno
+- name: jp_bankname_kana
+  type: text
+  label: Jp Bankname Kana
+- name: jp_branchcode
+  type: text
+  label: Jp Branchcode
+- name: jp_branchname_kana
+  type: text
+  label: Jp Branchname Kana
+- name: jp_bankaccounttype
+  type: text
+  label: Jp Bankaccounttype
+- name: accountno
+  type: text
+  label: Accountno
+- name: jp_bankdatatype_footer
+  type: text
+  label: Jp Bankdatatype Footer
+- name: jp_processedtime7
+  type: text
+  label: Jp Processedtime7
+- name: jp_processing7
+  type: text
+  label: Jp Processing7
+- name: jp_bankdatacreated
+  type: text
+  label: Jp Bankdatacreated
+- name: jp_bankdatafrom
+  type: text
+  label: Jp Bankdatafrom
+- name: jp_bankdatato
+  type: text
+  label: Jp Bankdatato
+- name: jp_bankdata_torikeshinum
+  type: numeric
+  label: Jp Bankdata Torikeshinum
+- name: jp_bankdata_torikeshiamt
+  type: numeric
+  label: Jp Bankdata Torikeshiamt

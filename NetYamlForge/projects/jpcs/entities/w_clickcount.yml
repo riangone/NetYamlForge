@@ -1,0 +1,43 @@
+name: W_CLICKCOUNT
+tableName: w_clickcount
+primaryKey: w_clickcount_id
+fields:
+- name: w_clickcount_id
+  type: numeric
+  label: W Clickcount Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: targeturl
+  type: text
+  label: Targeturl
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: w_clickcount_uu
+  type: text
+  label: W Clickcount Uu

@@ -1,0 +1,211 @@
+name: M_MOVEMENT
+tableName: m_movement
+primaryKey: m_movement_id
+fields:
+- name: m_movement_id
+  type: numeric
+  label: M Movement Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: updated
+  type: text
+  label: Updated
+- name: documentno
+  type: text
+  label: Documentno
+- name: description
+  type: text
+  label: Description
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: posted
+  type: text
+  label: Posted
+- name: processed
+  type: text
+  label: Processed
+- name: processing
+  type: text
+  label: Processing
+- name: ad_orgtrx_id
+  type: numeric
+  label: Ad Orgtrx Id
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: c_campaign_id
+  type: numeric
+  label: C Campaign Id
+- name: c_activity_id
+  type: numeric
+  label: C Activity Id
+- name: user1_id
+  type: numeric
+  label: User1 Id
+- name: user2_id
+  type: numeric
+  label: User2 Id
+- name: datereceived
+  type: text
+  label: Datereceived
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus
+- name: isintransit
+  type: text
+  label: Isintransit
+- name: c_doctype_id
+  type: numeric
+  label: C Doctype Id
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: approvalamt
+  type: numeric
+  label: Approvalamt
+- name: freightcostrule
+  type: text
+  label: Freightcostrule
+- name: m_shipper_id
+  type: numeric
+  label: M Shipper Id
+- name: priorityrule
+  type: text
+  label: Priorityrule
+- name: salesrep_id
+  type: numeric
+  label: Salesrep Id
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_bpartner_location_id
+  type: numeric
+  label: C Bpartner Location Id
+- name: c_charge_id
+  type: numeric
+  label: C Charge Id
+- name: chargeamt
+  type: numeric
+  label: Chargeamt
+- name: createfrom
+  type: text
+  label: Createfrom
+- name: dd_order_id
+  type: numeric
+  label: Dd Order Id
+- name: deliveryrule
+  type: text
+  label: Deliveryrule
+- name: deliveryviarule
+  type: text
+  label: Deliveryviarule
+- name: freightamt
+  type: numeric
+  label: Freightamt
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: poreference
+  type: text
+  label: Poreference
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: m_movement_uu
+  type: text
+  label: M Movement Uu
+- name: jp_order_id
+  type: numeric
+  label: Jp Order Id
+- name: jp_warehousefrom_id
+  type: numeric
+  label: Jp Warehousefrom Id
+- name: jp_warehouseto_id
+  type: numeric
+  label: Jp Warehouseto Id
+- name: jp_physicalwarehousefrom_id
+  type: numeric
+  label: Jp Physicalwarehousefrom Id
+- name: jp_physicalwarehouseto_id
+  type: numeric
+  label: Jp Physicalwarehouseto Id
+- name: m_warehouse_id
+  type: numeric
+  label: M Warehouse Id
+- name: m_warehouseto_id
+  type: numeric
+  label: M Warehouseto Id
+- name: jp_warehousenext_id
+  type: numeric
+  label: Jp Warehousenext Id
+- name: jp_physicalwarehousenext_id
+  type: numeric
+  label: Jp Physicalwarehousenext Id
+- name: jp_processing1
+  type: text
+  label: Jp Processing1
+- name: jp_physicalwarehousedep_id
+  type: numeric
+  label: Jp Physicalwarehousedep Id
+- name: jp_warehousedep_id
+  type: numeric
+  label: Jp Warehousedep Id
+- name: jp_warehousedst_id
+  type: numeric
+  label: Jp Warehousedst Id
+- name: jp_physicalwarehousedst_id
+  type: numeric
+  label: Jp Physicalwarehousedst Id
+- name: jp_movementpre_id
+  type: numeric
+  label: Jp Movementpre Id
+- name: jp_movementnext_id
+  type: numeric
+  label: Jp Movementnext Id
+- name: jp_movementdatenext
+  type: text
+  label: Jp Movementdatenext
+- name: jp_movementdatedst
+  type: text
+  label: Jp Movementdatedst
+- name: jp_subject
+  type: text
+  label: Jp Subject
+- name: jp_communicationcolumn
+  type: text
+  label: Jp Communicationcolumn
+- name: jp_remarks
+  type: text
+  label: Jp Remarks
+- name: isrecordroutejp
+  type: text
+  label: Isrecordroutejp
+- name: jp_movementdatedep
+  type: text
+  label: Jp Movementdatedep
+- name: jp_pp_fact_id
+  type: numeric
+  label: Jp Pp Fact Id

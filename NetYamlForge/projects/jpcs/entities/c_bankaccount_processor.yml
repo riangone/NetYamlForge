@@ -1,0 +1,85 @@
+name: C_BANKACCOUNT_PROCESSOR
+tableName: c_bankaccount_processor
+primaryKey: ad_client_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: c_bankaccount_processor_uu
+  type: text
+  label: C Bankaccount Processor Uu
+- name: c_paymentprocessor_id
+  type: numeric
+  label: C Paymentprocessor Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: acceptamex
+  type: text
+  label: Acceptamex
+- name: acceptatm
+  type: text
+  label: Acceptatm
+- name: acceptcheck
+  type: text
+  label: Acceptcheck
+- name: acceptcorporate
+  type: text
+  label: Acceptcorporate
+- name: acceptdiners
+  type: text
+  label: Acceptdiners
+- name: acceptdirectdebit
+  type: text
+  label: Acceptdirectdebit
+- name: acceptdirectdeposit
+  type: text
+  label: Acceptdirectdeposit
+- name: acceptdiscover
+  type: text
+  label: Acceptdiscover
+- name: acceptmc
+  type: text
+  label: Acceptmc
+- name: acceptvisa
+  type: text
+  label: Acceptvisa
+- name: partnerid
+  type: text
+  label: Partnerid
+- name: vendorid
+  type: text
+  label: Vendorid
+- name: userid
+  type: text
+  label: Userid
+- name: password
+  type: text
+  label: Password
+- name: minimumamt
+  type: numeric
+  label: Minimumamt
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: requirevv
+  type: text
+  label: Requirevv

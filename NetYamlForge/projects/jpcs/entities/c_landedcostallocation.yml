@@ -1,0 +1,52 @@
+name: C_LANDEDCOSTALLOCATION
+tableName: c_landedcostallocation
+primaryKey: c_landedcostallocation_id
+fields:
+- name: c_landedcostallocation_id
+  type: numeric
+  label: C Landedcostallocation Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_invoiceline_id
+  type: numeric
+  label: C Invoiceline Id
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_costelement_id
+  type: numeric
+  label: M Costelement Id
+- name: amt
+  type: numeric
+  label: Amt
+- name: qty
+  type: numeric
+  label: Qty
+- name: base
+  type: numeric
+  label: Base
+- name: c_landedcostallocation_uu
+  type: text
+  label: C Landedcostallocation Uu
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id

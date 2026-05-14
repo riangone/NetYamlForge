@@ -1,0 +1,37 @@
+name: C_WITHHOLDING_ACCT
+tableName: c_withholding_acct
+primaryKey: c_withholding_id
+fields:
+- name: c_withholding_id
+  type: numeric
+  label: C Withholding Id
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: withholding_acct
+  type: numeric
+  label: Withholding Acct
+- name: c_withholding_acct_uu
+  type: text
+  label: C Withholding Acct Uu

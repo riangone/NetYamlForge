@@ -1,0 +1,52 @@
+name: GL_FUND
+tableName: gl_fund
+primaryKey: gl_fund_id
+fields:
+- name: gl_fund_id
+  type: numeric
+  label: Gl Fund Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: c_acctschema_id
+  type: numeric
+  label: C Acctschema Id
+- name: amt
+  type: numeric
+  label: Amt
+- name: datefrom
+  type: text
+  label: Datefrom
+- name: dateto
+  type: text
+  label: Dateto
+- name: gl_fund_uu
+  type: text
+  label: Gl Fund Uu

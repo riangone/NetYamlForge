@@ -1,0 +1,40 @@
+name: A_REGISTRATIONVALUE
+tableName: a_registrationvalue
+primaryKey: a_registration_id
+fields:
+- name: a_registration_id
+  type: numeric
+  label: A Registration Id
+- name: a_registrationattribute_id
+  type: numeric
+  label: A Registrationattribute Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: a_registrationvalue_uu
+  type: text
+  label: A Registrationvalue Uu

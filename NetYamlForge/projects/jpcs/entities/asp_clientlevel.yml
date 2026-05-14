@@ -1,0 +1,40 @@
+name: ASP_CLIENTLEVEL
+tableName: asp_clientlevel
+primaryKey: asp_clientlevel_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: asp_clientlevel_id
+  type: numeric
+  label: Asp Clientlevel Id
+- name: asp_level_id
+  type: numeric
+  label: Asp Level Id
+- name: asp_module_id
+  type: numeric
+  label: Asp Module Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: help
+  type: text
+  label: Help
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: asp_clientlevel_uu
+  type: text
+  label: Asp Clientlevel Uu

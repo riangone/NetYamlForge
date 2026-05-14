@@ -1,0 +1,88 @@
+name: C_BANKACCOUNT
+tableName: c_bankaccount
+primaryKey: c_bankaccount_id
+fields:
+- name: c_bankaccount_id
+  type: numeric
+  label: C Bankaccount Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_bank_id
+  type: numeric
+  label: C Bank Id
+- name: c_currency_id
+  type: numeric
+  label: C Currency Id
+- name: bankaccounttype
+  type: text
+  label: Bankaccounttype
+- name: accountno
+  type: text
+  label: Accountno
+- name: currentbalance
+  type: numeric
+  label: Currentbalance
+- name: creditlimit
+  type: numeric
+  label: Creditlimit
+- name: isdefault
+  type: text
+  label: Isdefault
+- name: iban
+  type: text
+  label: Iban
+- name: description
+  type: text
+  label: Description
+- name: bban
+  type: text
+  label: Bban
+- name: paymentexportclass
+  type: text
+  label: Paymentexportclass
+- name: c_bankaccount_uu
+  type: text
+  label: C Bankaccount Uu
+- name: name
+  type: text
+  label: Name
+- name: value
+  type: text
+  label: Value
+- name: jp_requestercode
+  type: text
+  label: Jp Requestercode
+- name: jp_requestername
+  type: text
+  label: Jp Requestername
+- name: jp_branchcode
+  type: text
+  label: Jp Branchcode
+- name: jp_branchname_kana
+  type: text
+  label: Jp Branchname Kana
+- name: jp_branchname
+  type: text
+  label: Jp Branchname
+- name: jp_a_name
+  type: text
+  label: Jp A Name

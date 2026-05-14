@@ -1,0 +1,46 @@
+name: PA_BENCHMARKDATA
+tableName: pa_benchmarkdata
+primaryKey: pa_benchmarkdata_id
+fields:
+- name: pa_benchmarkdata_id
+  type: numeric
+  label: Pa Benchmarkdata Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: pa_benchmark_id
+  type: numeric
+  label: Pa Benchmark Id
+- name: benchmarkdate
+  type: text
+  label: Benchmarkdate
+- name: benchmarkvalue
+  type: numeric
+  label: Benchmarkvalue
+- name: pa_benchmarkdata_uu
+  type: text
+  label: Pa Benchmarkdata Uu

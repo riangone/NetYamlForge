@@ -1,0 +1,43 @@
+name: WS_WEBSERVICE_PARA
+tableName: ws_webservice_para
+primaryKey: ws_webservice_para_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: constantvalue
+  type: text
+  label: Constantvalue
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: parametername
+  type: text
+  label: Parametername
+- name: parametertype
+  type: text
+  label: Parametertype
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ws_webservice_para_id
+  type: numeric
+  label: Ws Webservice Para Id
+- name: ws_webservicetype_id
+  type: numeric
+  label: Ws Webservicetype Id
+- name: ws_webservice_para_uu
+  type: text
+  label: Ws Webservice Para Uu

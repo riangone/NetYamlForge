@@ -1,0 +1,61 @@
+name: I_INOUTLINECONFIRM
+tableName: i_inoutlineconfirm
+primaryKey: i_inoutlineconfirm_id
+fields:
+- name: i_inoutlineconfirm_id
+  type: numeric
+  label: I Inoutlineconfirm Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: i_isimported
+  type: text
+  label: I Isimported
+- name: i_errormsg
+  type: text
+  label: I Errormsg
+- name: m_inoutlineconfirm_id
+  type: numeric
+  label: M Inoutlineconfirm Id
+- name: confirmationno
+  type: text
+  label: Confirmationno
+- name: description
+  type: text
+  label: Description
+- name: confirmedqty
+  type: numeric
+  label: Confirmedqty
+- name: scrappedqty
+  type: numeric
+  label: Scrappedqty
+- name: differenceqty
+  type: numeric
+  label: Differenceqty
+- name: processing
+  type: text
+  label: Processing
+- name: processed
+  type: text
+  label: Processed
+- name: i_inoutlineconfirm_uu
+  type: text
+  label: I Inoutlineconfirm Uu

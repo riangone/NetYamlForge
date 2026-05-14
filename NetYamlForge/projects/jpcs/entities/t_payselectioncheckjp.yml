@@ -1,0 +1,64 @@
+name: T_PAYSELECTIONCHECKJP
+tableName: t_payselectioncheckjp
+primaryKey: t_payselectioncheckjp_id
+fields:
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_pinstance_id
+  type: numeric
+  label: Ad Pinstance Id
+- name: c_bp_bankaccount_id
+  type: numeric
+  label: C Bp Bankaccount Id
+- name: c_bpartner_id
+  type: numeric
+  label: C Bpartner Id
+- name: c_payselection_id
+  type: numeric
+  label: C Payselection Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: discountamt
+  type: numeric
+  label: Discountamt
+- name: isactive
+  type: text
+  label: Isactive
+- name: isreceipt
+  type: text
+  label: Isreceipt
+- name: payamt
+  type: numeric
+  label: Payamt
+- name: qty
+  type: numeric
+  label: Qty
+- name: t_payselectioncheckjp_id
+  type: numeric
+  label: T Payselectioncheckjp Id
+- name: t_payselectioncheckjp_uu
+  type: text
+  label: T Payselectioncheckjp Uu
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: writeoffamt
+  type: numeric
+  label: Writeoffamt
+- name: c_invoice_id
+  type: numeric
+  label: C Invoice Id
+- name: jp_banktransferfee
+  type: numeric
+  label: Jp Banktransferfee

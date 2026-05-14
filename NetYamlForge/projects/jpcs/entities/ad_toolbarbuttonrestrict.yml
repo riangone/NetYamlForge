@@ -1,0 +1,52 @@
+name: AD_TOOLBARBUTTONRESTRICT
+tableName: ad_toolbarbuttonrestrict
+primaryKey: ad_toolbarbuttonrestrict_id
+fields:
+- name: action
+  type: text
+  label: Action
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: ad_role_id
+  type: numeric
+  label: Ad Role Id
+- name: ad_toolbarbutton_id
+  type: numeric
+  label: Ad Toolbarbutton Id
+- name: ad_toolbarbuttonrestrict_id
+  type: numeric
+  label: Ad Toolbarbuttonrestrict Id
+- name: ad_window_id
+  type: numeric
+  label: Ad Window Id
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: isactive
+  type: text
+  label: Isactive
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_toolbarbuttonrestrict_uu
+  type: text
+  label: Ad Toolbarbuttonrestrict Uu
+- name: ad_process_id
+  type: numeric
+  label: Ad Process Id
+- name: isexclude
+  type: text
+  label: Isexclude
+- name: ad_tab_id
+  type: numeric
+  label: Ad Tab Id

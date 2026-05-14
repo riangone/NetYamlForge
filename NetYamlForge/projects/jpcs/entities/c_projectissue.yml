@@ -1,0 +1,85 @@
+name: C_PROJECTISSUE
+tableName: c_projectissue
+primaryKey: c_projectissue_id
+fields:
+- name: c_projectissue_id
+  type: numeric
+  label: C Projectissue Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: c_project_id
+  type: numeric
+  label: C Project Id
+- name: line
+  type: numeric
+  label: Line
+- name: m_product_id
+  type: numeric
+  label: M Product Id
+- name: m_attributesetinstance_id
+  type: numeric
+  label: M Attributesetinstance Id
+- name: m_locator_id
+  type: numeric
+  label: M Locator Id
+- name: movementqty
+  type: numeric
+  label: Movementqty
+- name: description
+  type: text
+  label: Description
+- name: processed
+  type: text
+  label: Processed
+- name: posted
+  type: text
+  label: Posted
+- name: movementdate
+  type: text
+  label: Movementdate
+- name: s_timeexpenseline_id
+  type: numeric
+  label: S Timeexpenseline Id
+- name: m_inoutline_id
+  type: numeric
+  label: M Inoutline Id
+- name: processing
+  type: text
+  label: Processing
+- name: processedon
+  type: numeric
+  label: Processedon
+- name: c_projectissue_uu
+  type: text
+  label: C Projectissue Uu
+- name: reversal_id
+  type: numeric
+  label: Reversal Id
+- name: isapproved
+  type: text
+  label: Isapproved
+- name: docaction
+  type: text
+  label: Docaction
+- name: docstatus
+  type: text
+  label: Docstatus

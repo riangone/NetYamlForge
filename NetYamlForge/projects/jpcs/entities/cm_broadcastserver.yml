@@ -1,0 +1,49 @@
+name: CM_BROADCASTSERVER
+tableName: cm_broadcastserver
+primaryKey: cm_broadcastserver_id
+fields:
+- name: cm_broadcastserver_id
+  type: numeric
+  label: Cm Broadcastserver Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: name
+  type: text
+  label: Name
+- name: description
+  type: text
+  label: Description
+- name: help
+  type: text
+  label: Help
+- name: ip_address
+  type: text
+  label: Ip Address
+- name: lastsynchronized
+  type: text
+  label: Lastsynchronized
+- name: cm_webproject_id
+  type: numeric
+  label: Cm Webproject Id
+- name: cm_broadcastserver_uu
+  type: text
+  label: Cm Broadcastserver Uu

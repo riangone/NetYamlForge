@@ -1,0 +1,46 @@
+name: B_BUYERFUNDS
+tableName: b_buyerfunds
+primaryKey: b_buyerfunds_id
+fields:
+- name: b_buyerfunds_id
+  type: numeric
+  label: B Buyerfunds Id
+- name: ad_client_id
+  type: numeric
+  label: Ad Client Id
+- name: ad_org_id
+  type: numeric
+  label: Ad Org Id
+- name: isactive
+  type: text
+  label: Isactive
+- name: created
+  type: text
+  label: Created
+- name: createdby
+  type: numeric
+  label: Createdby
+- name: updated
+  type: text
+  label: Updated
+- name: updatedby
+  type: numeric
+  label: Updatedby
+- name: ad_user_id
+  type: numeric
+  label: Ad User Id
+- name: c_order_id
+  type: numeric
+  label: C Order Id
+- name: c_payment_id
+  type: numeric
+  label: C Payment Id
+- name: committedamt
+  type: numeric
+  label: Committedamt
+- name: noncommittedamt
+  type: numeric
+  label: Noncommittedamt
+- name: b_buyerfunds_uu
+  type: text
+  label: B Buyerfunds Uu
