@@ -1,15 +1,48 @@
 hero:
-  eyebrow: Scaffold Test
-  title: Welcome to Scaffold Test
-  description: Edit entities/ YAML files to customize your screens. Run --scaffold-entities to regenerate from DB.
+  eyebrow: Scaffold Test Workspace
+  title: Metadata-Driven Enterprise Platform
+  description: Welcome to Scaffold Test. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
   primaryActionLabel: Open Dashboard
   primaryActionUrl: /scaffold-test/Dashboard
   secondaryActionLabel: View Schema
   secondaryActionUrl: /scaffold-test/DynamicEntity/AllDefinitions
   highlights:
-    - YAML First
-    - Auto CRUD
-    - Multi-language
+    - YAML-First UI
+    - Integrated Auth
+    - SQL Abstraction
+    - Auto-Scaffolding
+
+metrics:
+  - label: Entities
+    value: "Auto"
+    trend: "Metadata driven"
+    tone: text-primary
+  - label: Security
+    value: "RBAC"
+    trend: "Enterprise ready"
+    tone: text-success
+  - label: Interface
+    value: "DaisyUI"
+    trend: "Tailwind powered"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🧭
+    title: Dynamic Navigation
+    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
+    badge: Core
+  - icon: 🛡️
+    title: Enterprise Security
+    description: Built-in role-based access control and audit logging for all data operations.
+    badge: Security
+  - icon: 📊
+    title: Operational Insights
+    description: Real-time dashboards with customizable charts and statistical summaries.
+    badge: Analytics
+  - icon: 🧩
+    title: Logic Extensions
+    description: Extend platform behavior with custom hooks and domain-specific business logic.
+    badge: Extensible
 
 quickActions:
   - label: Dashboard
@@ -24,7 +57,7 @@ quickActions:
     url: /scaffold-test/Page/StarterOverview
     style: btn-outline
     icon: 🧭
-  - label: Docs
+  - label: User Guide
     url: /scaffold-test/docs/README-ja.md
     style: btn-ghost
     icon: 📖

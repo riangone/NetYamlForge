@@ -1,11 +1,11 @@
 hero:
-  eyebrow: Inventory Workspace
+  eyebrow: Jpiere Cs Workspace
   title: Metadata-Driven Enterprise Platform
-  description: Welcome to Inventory. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
+  description: Welcome to Jpiere Cs. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
   primaryActionLabel: Open Dashboard
-  primaryActionUrl: /inventory/Dashboard
+  primaryActionUrl: /jpiere-cs/Dashboard
   secondaryActionLabel: View Schema
-  secondaryActionUrl: /inventory/DynamicEntity/AllDefinitions
+  secondaryActionUrl: /jpiere-cs/DynamicEntity/AllDefinitions
   highlights:
     - YAML-First UI
     - Integrated Auth
@@ -46,18 +46,18 @@ capabilities:
 
 quickActions:
   - label: Dashboard
-    url: /inventory/Dashboard
+    url: /jpiere-cs/Dashboard
     style: btn-primary
     icon: 📊
   - label: Entity Schema
-    url: /inventory/DynamicEntity/AllDefinitions
+    url: /jpiere-cs/DynamicEntity/AllDefinitions
     style: btn-outline
     icon: 🧩
   - label: Starter Page
-    url: /inventory/Page/StarterOverview
+    url: /jpiere-cs/Page/StarterOverview
     style: btn-outline
     icon: 🧭
   - label: User Guide
-    url: /inventory/docs/README-ja.md
+    url: /jpiere-cs/docs/README-ja.md
     style: btn-ghost
     icon: 📖

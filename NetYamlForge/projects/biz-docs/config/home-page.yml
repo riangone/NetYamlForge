@@ -1,57 +1,63 @@
 hero:
-  eyebrow: Biz Docs
-  title: ビジネス文書 PDF エクスポートデモ
-  description: "報価単・請款書・報関単など各種ビジネス文書を YAML 設定だけで PDF 出力。カスタム SQL で明細展開・未収金集計なども対応します。"
-  primaryActionLabel: 報価単一覧
-  primaryActionUrl: /biz-docs/DynamicEntity/Index?entity=quotation
-  secondaryActionLabel: 請款書一覧
-  secondaryActionUrl: /biz-docs/DynamicEntity/Index?entity=invoice
+  eyebrow: Biz Docs Workspace
+  title: Metadata-Driven Enterprise Platform
+  description: Welcome to Biz Docs. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /biz-docs/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /biz-docs/DynamicEntity/AllDefinitions
+  highlights:
+    - YAML-First UI
+    - Integrated Auth
+    - SQL Abstraction
+    - Auto-Scaffolding
 
-projectsSectionTitle: Biz Docs Workspace
-projectsSectionLead: 取引先・見積・請求・報関の各エンティティを管理します。
+metrics:
+  - label: Entities
+    value: "Auto"
+    trend: "Metadata driven"
+    tone: text-primary
+  - label: Security
+    value: "RBAC"
+    trend: "Enterprise ready"
+    tone: text-success
+  - label: Interface
+    value: "DaisyUI"
+    trend: "Tailwind powered"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🧭
+    title: Dynamic Navigation
+    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
+    badge: Core
+  - icon: 🛡️
+    title: Enterprise Security
+    description: Built-in role-based access control and audit logging for all data operations.
+    badge: Security
+  - icon: 📊
+    title: Operational Insights
+    description: Real-time dashboards with customizable charts and statistical summaries.
+    badge: Analytics
+  - icon: 🧩
+    title: Logic Extensions
+    description: Extend platform behavior with custom hooks and domain-specific business logic.
+    badge: Extensible
 
 quickActions:
-  - label: 報価単
-    url: /biz-docs/DynamicEntity/Index?entity=quotation
+  - label: Dashboard
+    url: /biz-docs/Dashboard
     style: btn-primary
-    icon: 📋
-  - label: 請款書
-    url: /biz-docs/DynamicEntity/Index?entity=invoice
+    icon: 📊
+  - label: Entity Schema
+    url: /biz-docs/DynamicEntity/AllDefinitions
     style: btn-outline
-    icon: 🧾
-  - label: 報関単
-    url: /biz-docs/DynamicEntity/Index?entity=customs_declaration
+    icon: 🧩
+  - label: Starter Page
+    url: /biz-docs/Page/StarterOverview
     style: btn-outline
-    icon: 🚢
-  - label: 取引先
-    url: /biz-docs/DynamicEntity/Index?entity=customer
+    icon: 🧭
+  - label: User Guide
+    url: /biz-docs/docs/README-ja.md
     style: btn-ghost
-    icon: 🏢
-  - label: 請求書
-    url: /biz-docs/DynamicEntity/Index?entity=jp_invoice
-    style: btn-primary
-    icon: 📄
-  - label: 見積書
-    url: /biz-docs/DynamicEntity/Index?entity=jp_estimate
-    style: btn-outline
-    icon: 📝
-  - label: 納品書
-    url: /biz-docs/DynamicEntity/Index?entity=jp_delivery_slip
-    style: btn-outline
-    icon: 🚚
-  - label: 領収書
-    url: /biz-docs/DynamicEntity/Index?entity=jp_receipt
-    style: btn-outline
-    icon: 🧾
-  - label: FAX 送付状
-    url: /biz-docs/DynamicEntity/Index?entity=fax_cover
-    style: btn-ghost
-    icon: 📠
-  - label: 議事録
-    url: /biz-docs/DynamicEntity/Index?entity=meeting
-    style: btn-ghost
-    icon: 📋
-  - label: 履歴書
-    url: /biz-docs/DynamicEntity/Index?entity=jp_resume
-    style: btn-ghost
-    icon: 👤
+    icon: 📖

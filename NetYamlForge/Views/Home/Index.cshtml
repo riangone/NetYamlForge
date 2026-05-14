@@ -58,6 +58,63 @@
         </section>
     }
 
+    @* ===== Capabilities ===== *@
+    @if (config.Capabilities.Count > 0)
+    {
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold">@T(config.CapabilitiesSectionTitleKey, config.CapabilitiesSectionTitle)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach (var cap in config.Capabilities)
+                {
+                    <div class="card bg-base-100 border border-base-300 shadow-sm">
+                        <div class="card-body p-5">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-2xl">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="badge badge-primary badge-sm">@T(cap.BadgeKey, cap.Badge)</span>
+                                }
+                            </div>
+                            <h3 class="font-bold">@T(cap.TitleKey, cap.Title)</h3>
+                            <p class="text-sm text-base-content/60 mt-1">@T(cap.DescriptionKey, cap.Description)</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    @* ===== Solutions ===== *@
+    @if (config.Solutions.Count > 0)
+    {
+        <section class="space-y-4">
+            <h2 class="text-2xl font-bold">@T(config.SolutionsSectionTitleKey, config.SolutionsSectionTitle)</h2>
+            <div class="overflow-x-auto rounded-xl border border-base-300 bg-base-100">
+                <table class="table table-zebra w-full">
+                    <thead>
+                        <tr class="bg-base-200/50">
+                            <th>Solution</th>
+                            <th>Target Audience</th>
+                            <th>Summary</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sol in config.Solutions)
+                        {
+                            <tr>
+                                <td class="font-bold">@T(sol.NameKey, sol.Name)</td>
+                                <td class="text-sm">@T(sol.AudienceKey, sol.Audience)</td>
+                                <td class="text-sm opacity-70">@T(sol.SummaryKey, sol.Summary)</td>
+                                <td><span class="badge badge-ghost badge-sm">@T(sol.StatusKey, sol.Status)</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
     @* ===== Projects ===== *@
     <section id="products" class="space-y-4">
         <div>

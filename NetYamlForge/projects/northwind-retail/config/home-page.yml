@@ -1,58 +1,93 @@
 hero:
-  eyebrow: Northwind 小売管理システム
-  title: Northwind 小売管理システムへようこそ
-  description: 受注管理・在庫管理・顧客管理を統合した小売ERPシステム。Northwind データベースをベースにした本格的な業務管理システムです。
-  primaryActionLabel: ダッシュボードを開く
+  eyebrow: Northwind Retail Management
+  title: 北风贸易零售管理系统
+  description: 集成订单管理、库存协同、客户 360 与财务分析的元数据驱动型零售 ERP 参考实现。
+  primaryActionLabel: 打开工作台
   primaryActionUrl: /northwind-retail/Dashboard
-  secondaryActionLabel: スキーマを表示
+  secondaryActionLabel: 查看数据模型
   secondaryActionUrl: /northwind-retail/DynamicEntity/AllDefinitions
   highlights:
-    - YAML駆動CRUD
-    - 自動UI生成
-    - 多言語対応
+    - 零售业务全流程覆盖
+    - 实时库存预警
+    - 客户生命周期管理
+    - 销售佣金自动化
+
+metrics:
+  - label: 运营模块
+    value: "12+"
+    trend: "覆盖全业务链路"
+    tone: text-primary
+  - label: 数据实体
+    value: "25+"
+    trend: "高内聚数据模型"
+    tone: text-success
+  - label: 报表看板
+    value: "8"
+    trend: "多维度指标分析"
+    tone: text-info
+  - label: 部署状态
+    value: "Ready"
+    trend: "生产级稳定性"
+    tone: text-secondary
+
+capabilities:
+  - icon: 📊
+    title: 销售工作台
+    description: 实时监控销售进度，集成漏斗分析与订单管道管理。
+    badge: Sales
+  - icon: 📦
+    title: 智能库存
+    description: 多仓库库存联动，支持自动补货建议与异常预警。
+    badge: Inventory
+  - icon: 🎯
+    title: 客户 360
+    description: 全方位的客户画像与交易历史追踪，提升复购转化。
+    badge: CRM
+  - icon: 💵
+    title: 财务协同
+    description: 自动计算销售佣金，集成收支流水与经营利润报表。
+    badge: Finance
+
+solutions:
+  - name: 门店零售 POS
+    audience: 店面营业员
+    summary: 快速收银与小票打印，实时同步库存数据。
+    status: Beta
+  - name: 供应链协同
+    audience: 采购与供应商
+    summary: 自动化采购建议，维护供应商目录与合同。
+    status: Planning
+  - name: 移动运营 App
+    audience: 区域经理
+    summary: 移动端查看实时销售业绩与库存预警。
+    status: Pilot
 
 quickActions:
-  - label: ダッシュボード
+  - label: 总览看板
     url: /northwind-retail/Dashboard
     style: btn-primary
     icon: 📊
-  - label: 営業ダッシュボード
+  - label: 销售看板
     url: /northwind-retail/Page/SalesDashboard
     style: btn-outline
     icon: 📈
-  - label: 在庫概要
+  - label: 库存概览
     url: /northwind-retail/Page/InventoryOverview
     style: btn-outline
     icon: 📦
-  - label: 受注管理
+  - label: 订单管理
     url: /northwind-retail/DynamicEntity/Index?entity=order
     style: btn-outline
     icon: 📋
-  - label: 顧客360
+  - label: 客户中心
     url: /northwind-retail/Page/Customer360
     style: btn-outline
     icon: 🎯
-  - label: 受注処理パイプライン
-    url: /northwind-retail/Page/OrderKanban
-    style: btn-outline
-    icon: 🔄
-  - label: 商品カタログ
+  - label: 商品目录
     url: /northwind-retail/Page/ProductCatalog
     style: btn-outline
-    icon: 📦
-  - label: 発注管理
-    url: /northwind-retail/Page/PurchaseRequisition
-    style: btn-outline
-    icon: 📝
-  - label: 営業歩合管理
-    url: /northwind-retail/Page/SalesCommission
-    style: btn-outline
-    icon: 💵
-  - label: 資金収支
-    url: /northwind-retail/Page/CashFlowDashboard
-    style: btn-outline
-    icon: 💰
-  - label: 経営レポート
+    icon: 🛍️
+  - label: 经营报告
     url: /northwind-retail/Page/ExecutiveReport
     style: btn-ghost
-    icon: 📊
+    icon: 📝

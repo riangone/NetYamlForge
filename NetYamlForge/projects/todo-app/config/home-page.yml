@@ -1,33 +1,63 @@
 hero:
-  eyebrow: Todo App
-  title: タスク・プロジェクト管理
-  description: "フレームワーク全機能を網羅するTODOサンプルアプリ。カンバン・チャート・フォーム・フィルターなどすべての機能をデモします。"
-  primaryActionLabel: Overview
-  primaryActionUrl: /todo-app/Page/Overview
-  secondaryActionLabel: カンバンボード
-  secondaryActionUrl: /todo-app/Page/KanbanBoard
+  eyebrow: Todo App Workspace
+  title: Metadata-Driven Enterprise Platform
+  description: Welcome to Todo App. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /todo-app/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /todo-app/DynamicEntity/AllDefinitions
   highlights:
-    - Kanban Board
-    - Charts & Analytics
-    - CRUD Forms & Filters
+    - YAML-First UI
+    - Integrated Auth
+    - SQL Abstraction
+    - Auto-Scaffolding
 
-projectsSectionTitle: Todo App Workspace
-projectsSectionLead: タスク管理・プロジェクト管理・分析ページを確認できます。
+metrics:
+  - label: Entities
+    value: "Auto"
+    trend: "Metadata driven"
+    tone: text-primary
+  - label: Security
+    value: "RBAC"
+    trend: "Enterprise ready"
+    tone: text-success
+  - label: Interface
+    value: "DaisyUI"
+    trend: "Tailwind powered"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🧭
+    title: Dynamic Navigation
+    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
+    badge: Core
+  - icon: 🛡️
+    title: Enterprise Security
+    description: Built-in role-based access control and audit logging for all data operations.
+    badge: Security
+  - icon: 📊
+    title: Operational Insights
+    description: Real-time dashboards with customizable charts and statistical summaries.
+    badge: Analytics
+  - icon: 🧩
+    title: Logic Extensions
+    description: Extend platform behavior with custom hooks and domain-specific business logic.
+    badge: Extensible
 
 quickActions:
-  - label: Overview
-    url: /todo-app/Page/Overview
+  - label: Dashboard
+    url: /todo-app/Dashboard
     style: btn-primary
-    icon: 🏠
-  - label: Kanban
-    url: /todo-app/Page/KanbanBoard
+    icon: 📊
+  - label: Entity Schema
+    url: /todo-app/DynamicEntity/AllDefinitions
     style: btn-outline
-    icon: 🗂️
-  - label: Analytics
-    url: /todo-app/Page/TaskAnalytics
+    icon: 🧩
+  - label: Starter Page
+    url: /todo-app/Page/StarterOverview
     style: btn-outline
-    icon: 📈
-  - label: Tasks
-    url: /todo-app/DynamicEntity/Index?entity=task
-    style: btn-outline
-    icon: ✅
+    icon: 🧭
+  - label: User Guide
+    url: /todo-app/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖

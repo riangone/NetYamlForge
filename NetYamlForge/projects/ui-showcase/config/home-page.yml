@@ -1,33 +1,63 @@
 hero:
-  eyebrow: UI Component Showcase
-  title: 全UIコンポーネント デモ
-  description: stat_cards・各種チャート・kanban・timeline・heat_map など全ページコンポーネントと、フォーム・フィルターの全入力タイプを一覧できるショーケースプロジェクト。
-  primaryActionLabel: KPI Overview
-  primaryActionUrl: /ui-showcase/Page/KpiOverview
-  secondaryActionLabel: Form & Filter Demo
-  secondaryActionUrl: /ui-showcase/DynamicEntity/Index?entity=component_demo
+  eyebrow: Ui Showcase Workspace
+  title: Metadata-Driven Enterprise Platform
+  description: Welcome to Ui Showcase. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
+  primaryActionLabel: Open Dashboard
+  primaryActionUrl: /ui-showcase/Dashboard
+  secondaryActionLabel: View Schema
+  secondaryActionUrl: /ui-showcase/DynamicEntity/AllDefinitions
   highlights:
-    - All Page Components
-    - All Form Field Types
-    - All Filter Types
+    - YAML-First UI
+    - Integrated Auth
+    - SQL Abstraction
+    - Auto-Scaffolding
 
-projectsSectionTitle: UI Showcase Workspace
-projectsSectionLead: 各ページでコンポーネントの動作・スタイルを確認できます。
+metrics:
+  - label: Entities
+    value: "Auto"
+    trend: "Metadata driven"
+    tone: text-primary
+  - label: Security
+    value: "RBAC"
+    trend: "Enterprise ready"
+    tone: text-success
+  - label: Interface
+    value: "DaisyUI"
+    trend: "Tailwind powered"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🧭
+    title: Dynamic Navigation
+    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
+    badge: Core
+  - icon: 🛡️
+    title: Enterprise Security
+    description: Built-in role-based access control and audit logging for all data operations.
+    badge: Security
+  - icon: 📊
+    title: Operational Insights
+    description: Real-time dashboards with customizable charts and statistical summaries.
+    badge: Analytics
+  - icon: 🧩
+    title: Logic Extensions
+    description: Extend platform behavior with custom hooks and domain-specific business logic.
+    badge: Extensible
 
 quickActions:
-  - label: KPI / Charts
-    url: /ui-showcase/Page/KpiOverview
+  - label: Dashboard
+    url: /ui-showcase/Dashboard
     style: btn-primary
     icon: 📊
-  - label: Component Gallery
-    url: /ui-showcase/Page/ComponentGallery
-    style: btn-outline
-    icon: 🖼️
-  - label: Form & Filter
-    url: /ui-showcase/DynamicEntity/Index?entity=component_demo
+  - label: Entity Schema
+    url: /ui-showcase/DynamicEntity/AllDefinitions
     style: btn-outline
     icon: 🧩
-  - label: Heat Map
-    url: /ui-showcase/Page/HeatMap
+  - label: Starter Page
+    url: /ui-showcase/Page/StarterOverview
     style: btn-outline
-    icon: 🔥
+    icon: 🧭
+  - label: User Guide
+    url: /ui-showcase/docs/README-ja.md
+    style: btn-ghost
+    icon: 📖
