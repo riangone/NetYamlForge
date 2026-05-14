@@ -1,0 +1,94 @@
+title: 受注处理Dashboard
+sections:
+  - id: fulfillment_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '总受注数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'shopping-cart' AS metric_icon, NULL
+      FROM c_order WHERE issotrx='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '未处理受注',
+             CAST(COUNT(*) AS TEXT),
+             'clock',
+             NULL
+      FROM c_order WHERE issotrx='Y' AND docstatus='DR'
+      UNION ALL
+      SELECT '本月受注',
+             CAST(COUNT(*) AS TEXT),
+             'calendar',
+             NULL
+      FROM c_order WHERE issotrx='Y'
+        AND strftime('%Y-%m', dateordered)=strftime('%Y-%m','now')
+      UNION ALL
+      SELECT '本月销售额',
+             '$' || CAST(ROUND(COALESCE(SUM(grandtotal), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM c_order WHERE issotrx='Y'
+        AND strftime('%Y-%m', dateordered)=strftime('%Y-%m','now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: order_status_chart
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE docstatus
+               WHEN 'DR' THEN '下書き'
+               WHEN 'IP' THEN '処理中'
+               WHEN 'CO' THEN '完了'
+               WHEN 'CL' THEN 'クローズ'
+               WHEN 'VO' THEN '無効'
+               ELSE docstatus
+             END AS label,
+             COUNT(*) AS value
+      FROM c_order WHERE issotrx='Y' AND isactive='Y'
+      GROUP BY docstatus
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: order_monthly_trend
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', dateordered) AS label,
+             COUNT(*) AS value,
+             ROUND(SUM(COALESCE(grandtotal, 0)), 2) AS amount
+      FROM c_order
+      WHERE issotrx='Y' AND dateordered IS NOT NULL
+      GROUP BY strftime('%Y-%m', dateordered)
+      ORDER BY label
+      LIMIT 12
+    columns: [label, value, amount]
+    xField: label
+    yField: value
+
+  - id: pending_orders
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.documentno AS 受注番号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             o.dateordered AS 受注日,
+             o.datepromised AS 納期,
+             o.grandtotal AS 金额,
+             o.totallines AS 商品合计,
+             CASE o.docstatus
+               WHEN 'DR' THEN '📝 下書き'
+               WHEN 'IP' THEN '🔄 処理中'
+               WHEN 'CO' THEN '✅ 完了'
+               ELSE o.docstatus
+             END AS 状态,
+             CASE WHEN o.isdelivered='Y' THEN '✅ 出荷済'
+                  WHEN o.isinvoiced='Y' THEN '📄 请求済'
+                  ELSE '⏳ 未处理'
+             END AS 处理状况
+      FROM c_order o
+      LEFT JOIN c_bpartner bp ON o.c_bpartner_id = bp.c_bpartner_id
+      WHERE o.issotrx='Y' AND o.isactive='Y'
+      ORDER BY o.dateordered DESC
+      LIMIT 30
+    columns: [受注番号, 业务伙伴, 受注日, 納期, 金额, 商品合计, 状态, 处理状况]

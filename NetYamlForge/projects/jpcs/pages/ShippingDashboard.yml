@@ -1,0 +1,64 @@
+title: 出荷管理Dashboard
+sections:
+  - id: shipping_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '总出荷数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'package' AS metric_icon, NULL
+      FROM m_inout WHERE issotrx='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '购入入荷数',
+             CAST(COUNT(*) AS TEXT),
+             'truck',
+             NULL
+      FROM m_inout WHERE issotrx='N' AND isactive='Y'
+      UNION ALL
+      SELECT '未処理出荷',
+             CAST(COUNT(*) AS TEXT),
+             'clock',
+             NULL
+      FROM m_inout WHERE issotrx='Y' AND docstatus='DR'
+      UNION ALL
+      SELECT '本月出荷',
+             CAST(COUNT(*) AS TEXT),
+             'calendar',
+             NULL
+      FROM m_inout WHERE issotrx='Y'
+        AND strftime('%Y-%m', movementdate)=strftime('%Y-%m','now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: monthly_shipment_trend
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', movementdate) AS label,
+             COUNT(*) AS value
+      FROM m_inout
+      WHERE movementdate IS NOT NULL AND isactive='Y'
+        AND movementdate >= date('now', '-12 months')
+      GROUP BY strftime('%Y-%m', movementdate)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: recent_shipments
+    component: table
+    sourceType: custom
+    source: |
+      SELECT io.documentno AS 出荷番号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             io.movementdate AS 出荷日,
+             io.movementtype AS 移动类型,
+             CASE io.issotrx WHEN 'Y' THEN '🚚 出荷' ELSE '📥 入荷' END AS 区分,
+             io.description AS 摘要,
+             io.dateordered AS 受注日,
+             io.poreference AS 参照番号
+      FROM m_inout io
+      LEFT JOIN c_bpartner bp ON io.c_bpartner_id = bp.c_bpartner_id
+      WHERE io.isactive='Y'
+      ORDER BY io.movementdate DESC
+      LIMIT 30
+    columns: [出荷番号, 业务伙伴, 出荷日, 移动类型, 区分, 摘要, 受注日, 参照番号]

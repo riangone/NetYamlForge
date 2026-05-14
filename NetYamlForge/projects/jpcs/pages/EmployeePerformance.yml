@@ -1,0 +1,83 @@
+title: 社員业绩管理
+sections:
+  - id: employee_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総社員数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'users' AS metric_icon, NULL
+      FROM ad_user WHERE isactive='Y'
+      UNION ALL
+      SELECT '担当者(取引先)',
+             CAST(COUNT(*) AS TEXT),
+             'user-check',
+             NULL
+      FROM ad_user WHERE c_bpartner_id IS NOT NULL AND isactive='Y'
+      UNION ALL
+      SELECT '営業担当者',
+             CAST(COUNT(DISTINCT salesrep_id) AS TEXT),
+             'briefcase',
+             NULL
+      FROM c_order WHERE issotrx='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '月间契約トップ',
+             COALESCE(
+               (SELECT u.name FROM ad_user u
+                INNER JOIN jp_contract c ON u.ad_user_id = c.salesrep_id
+                WHERE c.isactive='Y'
+                  AND strftime('%Y-%m', c.dateacct)=strftime('%Y-%m','now')
+                GROUP BY u.ad_user_id
+                ORDER BY COUNT(*) DESC LIMIT 1
+               ), '-'),
+             'award',
+             NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: contracts_by_salesrep
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(u.name, '未割当') AS label,
+             COUNT(*) AS value,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)), 2) AS amount
+      FROM jp_contract c
+      LEFT JOIN ad_user u ON c.salesrep_id = u.ad_user_id
+      WHERE c.isactive='Y'
+      GROUP BY c.salesrep_id
+      ORDER BY value DESC
+      LIMIT 15
+    columns: [label, value, amount]
+    xField: label
+    yField: value
+
+  - id: employee_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT u.name AS 社員名,
+             u.title AS 役職,
+             u.email AS メール,
+             u.phone AS 電話,
+             COALESCE(contract_stats.契约数, 0) AS 担当契約数,
+             COALESCE(contract_stats.契約総額, 0) AS 契約総額,
+             COALESCE(order_stats.受注数, 0) AS 担当受注数,
+             COALESCE(order_stats.受注総額, 0) AS 受注総額,
+             CASE WHEN u.isactive='Y' THEN '✅ 在籍' ELSE '❌ 退職' END AS 状态
+      FROM ad_user u
+      LEFT JOIN (
+        SELECT salesrep_id,
+               COUNT(*) AS 契约数,
+               ROUND(SUM(COALESCE(jp_contractdocamt, 0)), 2) AS 契約総額
+        FROM jp_contract WHERE isactive='Y' GROUP BY salesrep_id
+      ) contract_stats ON u.ad_user_id = contract_stats.salesrep_id
+      LEFT JOIN (
+        SELECT salesrep_id,
+               COUNT(*) AS 受注数,
+               ROUND(SUM(COALESCE(grandtotal, 0)), 2) AS 受注総額
+        FROM c_order WHERE issotrx='Y' AND isactive='Y' GROUP BY salesrep_id
+      ) order_stats ON u.ad_user_id = order_stats.salesrep_id
+      WHERE u.isactive='Y'
+      ORDER BY 契約総額 DESC
+      LIMIT 30
+    columns: [社員名, 役職, メール, 電話, 担当契約数, 契約総額, 担当受注数, 受注総額, 状态]

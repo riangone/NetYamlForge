@@ -1,0 +1,68 @@
+title: 商品分类Catalog
+sections:
+  - id: catalog_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総商品数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'package' AS metric_icon, NULL
+      FROM m_product WHERE isactive='Y'
+      UNION ALL
+      SELECT '分类数',
+             CAST(COUNT(*) AS TEXT),
+             'folder',
+             NULL
+      FROM m_product_category WHERE isactive='Y'
+      UNION ALL
+      SELECT '在庫保有商品',
+             CAST(COUNT(*) AS TEXT),
+             'layers',
+             NULL
+      FROM m_product WHERE isstocked='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '平均価格',
+             '$' || CAST(ROUND(AVG(COALESCE(pricelist, 0)), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM m_product WHERE isactive='Y'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: category_distribution
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(pc.name, '未分类') AS label,
+             COUNT(p.m_product_id) AS value
+      FROM m_product_category pc
+      LEFT JOIN m_product p ON pc.m_product_category_id = p.m_product_category_id
+        AND p.isactive='Y'
+      WHERE pc.isactive='Y'
+      GROUP BY pc.m_product_category_id
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: product_catalog_table
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.value AS 商品编码,
+             p.name AS 商品名,
+             COALESCE(pc.name, '-') AS 分类,
+             p.upc AS UPC,
+             p.sku AS SKU,
+             p.pricelist AS 标准価格,
+             p.priceactual AS 实际価格,
+             p.pricelimit AS 下限価格,
+             CASE WHEN p.isstocked='Y' THEN '✅' ELSE '-' END AS 在庫管理,
+             CASE WHEN p.ispurchased='Y' THEN '✅' ELSE '-' END AS 购买,
+             CASE WHEN p.issold='Y' THEN '✅' ELSE '-' END AS 販売,
+             p.description AS 说明
+      FROM m_product p
+      LEFT JOIN m_product_category pc ON p.m_product_category_id = pc.m_product_category_id
+      WHERE p.isactive='Y'
+      ORDER BY p.name
+      LIMIT 50
+    columns: [商品编码, 商品名, 分类, UPC, SKU, 标准価格, 实际価格, 下限価格, 在庫管理, 购买, 販売, 说明]

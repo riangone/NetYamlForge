@@ -1,0 +1,67 @@
+title: 営業歩合管理
+sections:
+  - id: commission_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '営業担当者数' AS metric_name,
+             CAST(COUNT(DISTINCT salesrep_id) AS TEXT) AS metric_value,
+             'users' AS metric_icon, NULL
+      FROM jp_contract WHERE salesrep_id IS NOT NULL AND isactive='Y'
+      UNION ALL
+      SELECT '契約総金额',
+             '$' || CAST(ROUND(COALESCE(SUM(jp_contractdocamt), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM jp_contract WHERE docstatus='CO' AND isactive='Y'
+      UNION ALL
+      SELECT '歩合(5%)',
+             '$' || CAST(ROUND(COALESCE(SUM(jp_contractdocamt), 0) * 0.05, 2) AS TEXT),
+             'percent',
+             NULL
+      FROM jp_contract WHERE docstatus='CO' AND isactive='Y'
+      UNION ALL
+      SELECT '平均契約额',
+             '$' || CAST(ROUND(COALESCE(AVG(jp_contractdocamt), 0), 2) AS TEXT),
+             'bar-chart',
+             NULL
+      FROM jp_contract WHERE docstatus='CO' AND isactive='Y'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: commission_by_salesrep
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(u.name, '未割当') AS label,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)), 2) AS contract_amount,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)) * 0.05, 2) AS commission
+      FROM jp_contract c
+      LEFT JOIN ad_user u ON c.salesrep_id = u.ad_user_id
+      WHERE c.docstatus='CO' AND c.isactive='Y'
+      GROUP BY c.salesrep_id
+      ORDER BY contract_amount DESC
+    columns: [label, contract_amount, commission]
+    xField: label
+    yField: commission
+
+  - id: commission_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT COALESCE(u.name, '未割当') AS 営業担当者,
+             COUNT(c.jp_contract_id) AS 契約件数,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)), 2) AS 契約総額,
+             ROUND(AVG(COALESCE(c.jp_contractdocamt, 0)), 2) AS 平均契約額,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)) * 0.05, 2) AS 歩合額_5%,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)) * 0.03, 2) AS 歩合額_3%,
+             CASE WHEN SUM(COALESCE(c.jp_contractdocamt, 0)) >= 1000000 THEN '🏆 S'
+                  WHEN SUM(COALESCE(c.jp_contractdocamt, 0)) >= 500000 THEN '⭐ A'
+                  WHEN SUM(COALESCE(c.jp_contractdocamt, 0)) >= 100000 THEN '👍 B'
+                  ELSE '📈 C'
+             END AS 評価
+      FROM jp_contract c
+      LEFT JOIN ad_user u ON c.salesrep_id = u.ad_user_id
+      WHERE c.docstatus='CO' AND c.isactive='Y'
+      GROUP BY c.salesrep_id
+      ORDER BY 契約総額 DESC
+    columns: [営業担当者, 契約件数, 契約総額, 平均契約額, 歩合額_5%, 歩合額_3%, 評価]

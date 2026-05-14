@@ -1,0 +1,101 @@
+title: 资金管理Dashboard
+sections:
+  - id: cashflow_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '入金总额' AS metric_name,
+             '$' || CAST(ROUND(COALESCE(SUM(payamt), 0), 2) AS TEXT) AS metric_value,
+             'arrow-down-circle' AS metric_icon, NULL
+      FROM c_payment WHERE isreceipt='Y' AND isactive='Y' AND docstatus='CO'
+      UNION ALL
+      SELECT '出金总额',
+             '$' || CAST(ROUND(COALESCE(SUM(payamt), 0), 2) AS TEXT),
+             'arrow-up-circle',
+             NULL
+      FROM c_payment WHERE isreceipt='N' AND isactive='Y' AND docstatus='CO'
+      UNION ALL
+      SELECT '未收请求总额',
+             '$' || CAST(ROUND(COALESCE(SUM(grandtotal), 0), 2) AS TEXT),
+             'file-text',
+             NULL
+      FROM c_invoice WHERE ispaid='N' AND issotrx='Y' AND isactive='Y' AND docstatus='CO'
+      UNION ALL
+      SELECT '未払请求总额',
+             '$' || CAST(ROUND(COALESCE(SUM(grandtotal), 0), 2) AS TEXT),
+             'credit-card',
+             NULL
+      FROM c_invoice WHERE ispaid='N' AND issotrx='N' AND isactive='Y' AND docstatus='CO'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: invoice_aging
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 30 THEN '0-30日'
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 60 THEN '31-60日'
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 90 THEN '61-90日'
+               ELSE '90日以上'
+             END AS label,
+             COUNT(*) AS value,
+             ROUND(SUM(grandtotal), 2) AS amount
+      FROM c_invoice
+      WHERE ispaid='N' AND isactive='Y' AND docstatus='CO'
+      GROUP BY CASE
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 30 THEN '0-30日'
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 60 THEN '31-60日'
+               WHEN julianday('now') - julianday(COALESCE(dateinvoiced, dateacct)) <= 90 THEN '61-90日'
+               ELSE '90日以上'
+             END
+      ORDER BY label
+    columns: [label, value, amount]
+    xField: label
+    yField: amount
+
+  - id: recent_payments
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.documentno AS 传票番号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             p.datetrx AS 取引日,
+             p.payamt AS 金额,
+             CASE p.tendertype
+               WHEN 'X' THEN '現金'
+               WHEN 'K' THEN '振込'
+               WHEN 'C' THEN '小切手'
+               WHEN 'D' THEN '手形'
+               ELSE p.tendertype
+             END AS 支払方法,
+             CASE WHEN p.isreceipt='Y' THEN '💰 入金' ELSE '💸 出金' END AS 区分,
+             p.description AS 摘要
+      FROM c_payment p
+      LEFT JOIN c_bpartner bp ON p.c_bpartner_id = bp.c_bpartner_id
+      WHERE p.isactive='Y' AND p.docstatus='CO'
+      ORDER BY p.datetrx DESC
+      LIMIT 30
+    columns: [传票番号, 业务伙伴, 取引日, 金额, 支払方法, 区分, 摘要]
+
+  - id: outstanding_invoices
+    component: table
+    sourceType: custom
+    source: |
+      SELECT i.documentno AS 请求番号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             i.dateinvoiced AS 请求日,
+             i.grandtotal AS 金额,
+             CAST(ROUND(julianday('now') - julianday(COALESCE(i.dateinvoiced, i.dateacct)), 0) AS INTEGER) AS 経過日数,
+             CASE WHEN i.issotrx='Y' THEN '📄 売上' ELSE '📥 仕入' END AS 区分,
+             CASE WHEN i.ispaid='Y' THEN '✅ 支払済'
+                  WHEN julianday('now') - julianday(COALESCE(i.dateinvoiced, i.dateacct)) > 90 THEN '🔴 90日超'
+                  WHEN julianday('now') - julianday(COALESCE(i.dateinvoiced, i.dateacct)) > 60 THEN '🟠 60日超'
+                  WHEN julianday('now') - julianday(COALESCE(i.dateinvoiced, i.dateacct)) > 30 THEN '🟡 30日超'
+                  ELSE '🟢 正常'
+             END AS 滞留状況
+      FROM c_invoice i
+      LEFT JOIN c_bpartner bp ON i.c_bpartner_id = bp.c_bpartner_id
+      WHERE i.ispaid='N' AND i.isactive='Y' AND i.docstatus='CO'
+      ORDER BY 経過日数 DESC
+      LIMIT 30
+    columns: [请求番号, 业务伙伴, 请求日, 金额, 経過日数, 区分, 滞留状況]

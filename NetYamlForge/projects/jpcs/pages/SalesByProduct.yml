@@ -1,0 +1,91 @@
+title: 商品别売上分析
+sections:
+  - id: product_sales_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総商品数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'package' AS metric_icon, NULL
+      FROM m_product WHERE issold='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '受注Line数',
+             CAST(COUNT(*) AS TEXT),
+             'list',
+             NULL
+      FROM c_orderline ol
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='Y' AND o.isactive='Y'
+      UNION ALL
+      SELECT '総売上',
+             '$' || CAST(ROUND(COALESCE(SUM(ol.linenetamt), 0), 2) AS TEXT),
+             'trending-up',
+             NULL
+      FROM c_orderline ol
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='Y' AND o.isactive='Y'
+      UNION ALL
+      SELECT '平均Line金额',
+             '$' || CAST(ROUND(COALESCE(AVG(ol.linenetamt), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM c_orderline ol
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='Y' AND o.isactive='Y' AND ol.linenetamt > 0
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: top_selling_products
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT p.name AS label,
+             ROUND(SUM(COALESCE(ol.linenetamt, 0)), 2) AS value,
+             SUM(COALESCE(ol.qtyordered, 0)) AS qty
+      FROM m_product p
+      INNER JOIN c_orderline ol ON p.m_product_id = ol.m_product_id
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='Y' AND o.isactive='Y' AND p.isactive='Y'
+      GROUP BY p.m_product_id
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value, qty]
+    xField: label
+    yField: value
+
+  - id: sales_by_category
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(pc.name, '未分类') AS label,
+             ROUND(SUM(COALESCE(ol.linenetamt, 0)), 2) AS value
+      FROM m_product_category pc
+      INNER JOIN m_product p ON pc.m_product_category_id = p.m_product_category_id
+      INNER JOIN c_orderline ol ON p.m_product_id = ol.m_product_id
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='Y' AND o.isactive='Y' AND p.isactive='Y'
+      GROUP BY pc.m_product_category_id
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: product_sales_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.name AS 商品名,
+             COALESCE(pc.name, '-') AS 分类,
+             p.value AS 编码,
+             COALESCE(SUM(ol.qtyordered), 0) AS 販売数量,
+             ROUND(COALESCE(SUM(ol.linenetamt), 0), 2) AS 売上金额,
+             ROUND(COALESCE(AVG(ol.priceactual), 0), 2) AS 平均販売価格,
+             p.pricelist AS 标准価格
+      FROM m_product p
+      LEFT JOIN m_product_category pc ON p.m_product_category_id = pc.m_product_category_id
+      LEFT JOIN c_orderline ol ON p.m_product_id = ol.m_product_id
+      LEFT JOIN c_order o ON ol.c_order_id = o.c_order_id AND o.issotrx='Y'
+      WHERE p.issold='Y' AND p.isactive='Y'
+      GROUP BY p.m_product_id
+      ORDER BY 売上金额 DESC
+      LIMIT 30
+    columns: [商品名, 分类, 编码, 販売数量, 売上金额, 平均販売価格, 标准価格]

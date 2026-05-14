@@ -1,0 +1,70 @@
+title: 仕入先管理Dashboard
+sections:
+  - id: supplier_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総仕入先数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'truck' AS metric_icon, NULL
+      FROM c_bpartner WHERE isvendor='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '取扱商品数',
+             CAST(COUNT(*) AS TEXT),
+             'package',
+             NULL
+      FROM m_product WHERE ispurchased='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '発注中数量',
+             CAST(COALESCE(SUM(qtyordered), 0) AS TEXT),
+             'shopping-cart',
+             NULL
+      FROM c_orderline ol
+      INNER JOIN c_order o ON ol.c_order_id = o.c_order_id
+      WHERE o.issotrx='N' AND o.docstatus='CO' AND o.isactive='Y'
+      UNION ALL
+      SELECT '今月発注金额',
+             '$' || CAST(ROUND(COALESCE(SUM(o.grandtotal), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM c_order o
+      WHERE o.issotrx='N' AND o.isactive='Y'
+        AND strftime('%Y-%m', o.dateordered)=strftime('%Y-%m','now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: products_per_supplier
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT bp.name AS label,
+             COUNT(p.m_product_id) AS value
+      FROM c_bpartner bp
+      INNER JOIN m_product p ON bp.c_bpartner_id = COALESCE(p.ad_user_id, 0)
+      WHERE bp.isvendor='Y' AND bp.isactive='Y' AND p.isactive='Y'
+      GROUP BY bp.c_bpartner_id
+      ORDER BY value DESC
+      LIMIT 15
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: supplier_list
+    component: table
+    sourceType: custom
+    source: |
+      SELECT bp.name AS 仕入先名,
+             bp.value AS 编码,
+             bp.taxid AS 纳税号,
+             bp.rating AS 評価,
+             COALESCE(bg.name, '-') AS 分组,
+             bp.contactdescription AS 担当者,
+             bp.salesvolume AS 取引額,
+             bp.firstsale AS 初回取引日,
+             bp.created AS 登録日,
+             CASE WHEN bp.isactive='Y' THEN '✅ 有効' ELSE '❌ 無効' END AS 状态
+      FROM c_bpartner bp
+      LEFT JOIN c_bp_group bg ON bp.c_bp_group_id = bg.c_bp_group_id
+      WHERE bp.isvendor='Y'
+      ORDER BY bp.name
+      LIMIT 50
+    columns: [仕入先名, 编码, 纳税号, 評価, 分组, 担当者, 取引額, 初回取引日, 登録日, 状态]

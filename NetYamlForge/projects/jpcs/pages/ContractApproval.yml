@@ -1,0 +1,69 @@
+title: 契约承认流程
+sections:
+  - id: approval_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '待承认契约' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'clock' AS metric_icon, NULL
+      FROM jp_contract WHERE docstatus='DR' AND isactive='Y'
+      UNION ALL
+      SELECT '处理中',
+             CAST(COUNT(*) AS TEXT),
+             'sync',
+             NULL
+      FROM jp_contract WHERE docstatus='IP'
+      UNION ALL
+      SELECT '已承认',
+             CAST(COUNT(*) AS TEXT),
+             'check-circle',
+             NULL
+      FROM jp_contract WHERE docstatus='CO' AND isapproved='Y'
+      UNION ALL
+      SELECT '保留中',
+             CAST(COUNT(*) AS TEXT),
+             'pause-circle',
+             NULL
+      FROM jp_contract WHERE processing='Y' AND docstatus='IP'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: pending_approval
+    component: table
+    sourceType: custom
+    source: |
+      SELECT c.documentno AS 契约编号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             c.name AS 契约名称,
+             c.jp_subject AS 件名,
+             c.dateacct AS 日期,
+             c.jp_contractdocamt AS 契约金额,
+             c.created AS 作成日,
+             COALESCE(u.name, '-') AS 作成者,
+             CASE WHEN c.isapproved='Y' THEN '✅ 已承认'
+                  WHEN c.docstatus='DR' THEN '⏳ 未处理'
+                  WHEN c.processing='Y' THEN '🔄 处理中'
+                  ELSE '📝 下書き'
+             END AS 承认状态
+      FROM jp_contract c
+      LEFT JOIN c_bpartner bp ON c.c_bpartner_id = bp.c_bpartner_id
+      LEFT JOIN ad_user u ON c.createdby = u.ad_user_id
+      WHERE c.isactive='Y' AND c.docstatus IN ('DR','IP')
+      ORDER BY c.created ASC
+    columns: [契约编号, 业务伙伴, 契约名称, 件名, 日期, 契约金额, 作成日, 作成者, 承认状态]
+
+  - id: contract_process_list
+    component: table
+    sourceType: custom
+    source: |
+      SELECT cp.name AS 处理名称,
+             cp.value AS 处理编码,
+             cp.description AS 说明,
+             cp.docbasetype AS 文档类型,
+             cp.docaction AS 文档动作,
+             cp.classname AS 处理类,
+             CASE WHEN cp.isactive='Y' THEN '✅ 有效' ELSE '❌ 无效' END AS 状态
+      FROM jp_contractprocess cp
+      WHERE cp.isactive='Y'
+      ORDER BY cp.name
+    columns: [处理名称, 处理编码, 说明, 文档类型, 文档动作, 处理类, 状态]

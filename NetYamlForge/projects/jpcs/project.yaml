@@ -32,7 +32,7 @@ aiConfig:
   defaultProvider: qwen
   businessHours: "月〜金 9:00-18:00"
 
-# 导航菜单
+# 导航菜单（基于 iDempiere/JPiere 业务流设计）
 navigation:
   groups:
     - name: 控制面板
@@ -40,8 +40,15 @@ navigation:
         - label: 仪表盘
           url: /Page/Dashboard
           icon: dashboard
+
     - name: 契约管理
       items:
+        - label: 契约生命周期
+          url: /Page/ContractLifecycle
+          icon: file-contract
+        - label: 契约承认流程
+          url: /Page/ContractApproval
+          icon: check-circle
         - label: 契约
           url: /Entity/jp_contract
           icon: file-contract
@@ -60,8 +67,15 @@ navigation:
         - label: 契约处理进度
           url: /Entity/jp_contractprocess
           icon: tasks
+
     - name: 销售与订单
       items:
+        - label: 受注处理
+          url: /Page/OrderFulfillment
+          icon: shopping-cart
+        - label: 商谈Pipeline
+          url: /Page/SalesPipeline
+          icon: chart-line
         - label: 订单
           url: /Entity/c_order
           icon: shopping-cart
@@ -74,8 +88,12 @@ navigation:
         - label: 商机
           url: /Entity/c_opportunity
           icon: chart-line
+
     - name: 财务
       items:
+        - label: 资金管理
+          url: /Page/CashFlowDashboard
+          icon: dollar-sign
         - label: 发票
           url: /Entity/c_invoice
           icon: file-invoice-dollar
@@ -97,6 +115,28 @@ navigation:
         - label: 日记账
           url: /Entity/gl_journal
           icon: journal
+
+    - name: 购买与出货
+      items:
+        - label: 购买管理
+          url: /Page/PurchaseRequisition
+          icon: truck
+        - label: 出荷管理
+          url: /Page/ShippingDashboard
+          icon: package
+        - label: 仕入先管理
+          url: /Page/SupplierManagement
+          icon: building
+        - label: 商品分类
+          url: /Page/ProductCatalog
+          icon: box
+        - label: 购买请求
+          url: /Entity/m_requisition
+          icon: file-text
+        - label: 出荷/入荷
+          url: /Entity/m_inout
+          icon: truck
+
     - name: 基础数据
       items:
         - label: 业务伙伴
@@ -120,6 +160,25 @@ navigation:
         - label: 库存
           url: /Entity/m_storageonhand
           icon: layers
+
+    - name: 分析
+      items:
+        - label: 顾客分析
+          url: /Page/CustomerAnalytics
+          icon: bar-chart
+        - label: 顾客360
+          url: /Page/Customer360
+          icon: users
+        - label: 商品别売上
+          url: /Page/SalesByProduct
+          icon: trending-up
+        - label: 営業步合管理
+          url: /Page/SalesCommission
+          icon: percent
+        - label: 社員业绩管理
+          url: /Page/EmployeePerformance
+          icon: briefcase
+
     - name: 项目管理
       items:
         - label: 项目
@@ -134,6 +193,7 @@ navigation:
         - label: 项目任务
           url: /Entity/c_projecttask
           icon: check-square
+
     - name: 系统管理
       items:
         - label: 用户
@@ -142,24 +202,3 @@ navigation:
         - label: 角色
           url: /Entity/ad_role
           icon: shield
-        - label: 客户端
-          url: /Entity/ad_client
-          icon: building
-        - label: 组织
-          url: /Entity/ad_org
-          icon: sitemap
-        - label: 窗口
-          url: /Entity/ad_window
-          icon: window-maximize
-        - label: 表定义
-          url: /Entity/ad_table
-          icon: table
-        - label: 列定义
-          url: /Entity/ad_column
-          icon: columns
-        - label: 工作流
-          url: /Entity/ad_workflow
-          icon: code-branch
-        - label: 报表
-          url: /Entity/pa_report
-          icon: chart-bar

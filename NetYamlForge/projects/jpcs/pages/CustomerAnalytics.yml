@@ -1,0 +1,90 @@
+title: 顧客分析Dashboard
+sections:
+  - id: customer_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総顧客数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'users' AS metric_icon, NULL
+      FROM c_bpartner WHERE iscustomer='Y' AND isactive='Y'
+      UNION ALL
+      SELECT '契約あり顧客',
+             CAST(COUNT(DISTINCT c_bpartner_id) AS TEXT),
+             'file-contract',
+             NULL
+      FROM jp_contract WHERE isactive='Y'
+      UNION ALL
+      SELECT '平均契約金额',
+             '$' || CAST(ROUND(COALESCE(AVG(jp_contractdocamt), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM jp_contract WHERE docstatus='CO' AND isactive='Y'
+      UNION ALL
+      SELECT '最多契約顧客の契約数',
+             CAST(COALESCE(MAX(cnt), 0) AS TEXT),
+             'award',
+             NULL
+      FROM (
+        SELECT c_bpartner_id, COUNT(*) AS cnt
+        FROM jp_contract WHERE isactive='Y' GROUP BY c_bpartner_id
+      )
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: top_customers_by_revenue
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(bp.name, '-') AS label,
+             ROUND(SUM(COALESCE(c.jp_contractdocamt, 0)), 2) AS value
+      FROM c_bpartner bp
+      INNER JOIN jp_contract c ON bp.c_bpartner_id = c.c_bpartner_id
+      WHERE bp.iscustomer='Y' AND c.docstatus='CO' AND c.isactive='Y'
+      GROUP BY bp.c_bpartner_id
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: customers_by_bp_group
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(bg.name, '未分组') AS label,
+             COUNT(bp.c_bpartner_id) AS value
+      FROM c_bpartner bp
+      LEFT JOIN c_bp_group bg ON bp.c_bp_group_id = bg.c_bp_group_id
+      WHERE bp.iscustomer='Y' AND bp.isactive='Y'
+      GROUP BY bp.c_bp_group_id
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+
+  - id: customer_contract_detail
+    component: table
+    sourceType: custom
+    source: |
+      SELECT bp.name AS 顧客名,
+             bp.value AS 编码,
+             COALESCE(bg.name, '-') AS 分组,
+             bp.rating AS 評価,
+             bp.salesvolume AS 销售额,
+             COALESCE(contract_stats.契約件数, 0) AS 契約件数,
+             COALESCE(contract_stats.契約総額, 0) AS 契約総額,
+             COALESCE(contract_stats.平均契約額, 0) AS 平均契約額,
+             bp.created AS 登録日
+      FROM c_bpartner bp
+      LEFT JOIN c_bp_group bg ON bp.c_bp_group_id = bg.c_bp_group_id
+      LEFT JOIN (
+        SELECT c_bpartner_id,
+               COUNT(*) AS 契約件数,
+               ROUND(SUM(COALESCE(jp_contractdocamt, 0)), 2) AS 契約総額,
+               ROUND(AVG(COALESCE(jp_contractdocamt, 0)), 2) AS 平均契約額
+        FROM jp_contract WHERE isactive='Y' GROUP BY c_bpartner_id
+      ) contract_stats ON bp.c_bpartner_id = contract_stats.c_bpartner_id
+      WHERE bp.iscustomer='Y' AND bp.isactive='Y'
+      ORDER BY 契約総額 DESC
+      LIMIT 30
+    columns: [顧客名, 编码, 分组, 評価, 销售额, 契約件数, 契約総額, 平均契約額, 登録日]

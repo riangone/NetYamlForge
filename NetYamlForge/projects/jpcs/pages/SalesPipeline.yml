@@ -1,0 +1,71 @@
+title: 商谈Pipeline
+sections:
+  - id: pipeline_kpi
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総商談数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             'trending-up' AS metric_icon, NULL
+      FROM c_opportunity WHERE isactive='Y'
+      UNION ALL
+      SELECT '進行中',
+             CAST(COUNT(*) AS TEXT),
+             'sync',
+             NULL
+      FROM c_opportunity WHERE isactive='Y'
+        AND c_salesstage_id IS NOT NULL
+        AND (closedate IS NULL OR closedate >= date('now'))
+      UNION ALL
+      SELECT '今月成約',
+             CAST(COUNT(*) AS TEXT),
+             'check-circle',
+             NULL
+      FROM c_opportunity WHERE isactive='Y'
+        AND strftime('%Y-%m', closedate)=strftime('%Y-%m','now')
+      UNION ALL
+      SELECT 'パイプライン総額',
+             '$' || CAST(ROUND(COALESCE(SUM(opportunityamt), 0), 2) AS TEXT),
+             'dollar-sign',
+             NULL
+      FROM c_opportunity WHERE isactive='Y'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+
+  - id: pipeline_by_stage
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(ss.name, '未設定') AS label,
+             COUNT(*) AS value,
+             ROUND(SUM(COALESCE(o.opportunityamt, 0)), 2) AS amount
+      FROM c_opportunity o
+      LEFT JOIN c_salesstage ss ON o.c_salesstage_id = ss.c_salesstage_id
+      WHERE o.isactive='Y'
+      GROUP BY o.c_salesstage_id
+      ORDER BY value DESC
+    columns: [label, value, amount]
+    xField: label
+    yField: amount
+
+  - id: opportunity_list
+    component: table
+    sourceType: custom
+    source: |
+      SELECT o.documentno AS 商談番号,
+             COALESCE(bp.name, '-') AS 业务伙伴,
+             o.description AS 件名,
+             COALESCE(ss.name, '-') AS ステージ,
+             o.opportunityamt AS 予想金额,
+             o.probability AS 確率,
+             ROUND(o.opportunityamt * o.probability / 100, 2) AS 期待値,
+             o.expectedclosedate AS 成約予定日,
+             o.closedate AS 成約日,
+             o.salesrep_id AS 担当者ID,
+             o.comments AS 備考
+      FROM c_opportunity o
+      LEFT JOIN c_bpartner bp ON o.c_bpartner_id = bp.c_bpartner_id
+      LEFT JOIN c_salesstage ss ON o.c_salesstage_id = ss.c_salesstage_id
+      WHERE o.isactive='Y'
+      ORDER BY o.expectedclosedate ASC NULLS LAST
+      LIMIT 30
+    columns: [商談番号, 业务伙伴, 件名, ステージ, 予想金额, 確率, 期待値, 成約予定日, 成約日, 担当者ID, 備考]
