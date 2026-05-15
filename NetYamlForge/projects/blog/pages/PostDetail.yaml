@@ -15,7 +15,7 @@ sections:
         '<span>📁 ' || (SELECT name FROM categories WHERE id = posts.category_id) || '</span>' ||
         '<span>👁️ ' || COALESCE(view_count, 0) || ' views</span>' ||
         '</div>' ||
-        CHAR(10) ||
+        CHAR(10) || CHAR(10) ||
         content AS markdown_content
       FROM posts
       WHERE id = @id
