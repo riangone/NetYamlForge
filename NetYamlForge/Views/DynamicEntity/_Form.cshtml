@@ -71,6 +71,7 @@
                   data-confirm-msg="@(confirmMsg ?? "")">
                 <input type="hidden" name="mode" value="@Model.Mode" />
                 <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+                @Html.AntiForgeryToken()
                 @foreach (var field in orderedForms)
                 {
                     var name = field.Key;
@@ -118,6 +119,7 @@
                   hx-confirm="@(confirmMsg ?? "")">
                 <input type="hidden" name="mode" value="@Model.Mode" />
                 <input type="hidden" name="returnUrl" value="@Context.Request.Query["returnUrl"]" />
+                @Html.AntiForgeryToken()
                 @foreach (var field in orderedForms)
                 {
                     var name = field.Key;
