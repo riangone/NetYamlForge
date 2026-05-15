@@ -4,6 +4,7 @@
 // このファイルを変更する場面: カスタムページのクエリ検証ルール変更のみ。
 
 using System.Data;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Dapper;
 using NetYamlForge.Models;
@@ -105,6 +106,38 @@ public sealed class PageDataQueryService
     {
         var param = new DynamicParameters();
         InjectUserContext(param, userContext);
+
+        // 1. Build WHERE clause and bind parameters for defined filters.
+        var where = BuildWhereClause(section, filters, param);
+        var whereSql = where.Count > 0 ? "WHERE " + string.Join(" AND ", where) : "";
+
+        // 2. Bind all remaining filters that are not yet in param.
+        // This makes global parameters like @category_id available to custom SQL.
+        var existingNames = new HashSet<string>(param.ParameterNames, StringComparer.OrdinalIgnoreCase);
+        foreach (var filter in filters)
+        {
+            if (!existingNames.Contains(filter.Key))
+            {
+                param.Add(filter.Key, filter.Value);
+                existingNames.Add(filter.Key);
+            }
+        }
+
+        // 3. Scan for missing parameters in custom source and bind to null.
+        if (section.SourceType == "custom" && !string.IsNullOrWhiteSpace(section.Source))
+        {
+            var matches = Regex.Matches(section.Source, @"@([a-zA-Z0-9_]+)");
+            foreach (Match match in matches)
+            {
+                var name = match.Groups[1].Value;
+                if (!existingNames.Contains(name))
+                {
+                    param.Add(name, null);
+                    existingNames.Add(name);
+                }
+            }
+        }
+
         string sql;
         string countSql;
 
@@ -121,8 +154,6 @@ public sealed class PageDataQueryService
                 return (Enumerable.Empty<Dictionary<string, object>>(), 0);
             }
 
-            var where = BuildWhereClause(section, filters, param);
-            var whereSql = where.Count > 0 ? "WHERE " + string.Join(" AND ", where) : "";
             var firstCol = section.Columns.Keys.FirstOrDefault() ?? "1";
             var defaultOrder = IdentifierRegex.IsMatch(firstCol) ? $"\"{firstCol}\"" : "1";
             var orderBy = requestedSort != null ? $"\"{requestedSort}\"" : defaultOrder;
@@ -155,8 +186,6 @@ public sealed class PageDataQueryService
                     .Select(c => $"\"{c}\""))
                 : "*";
 
-            var where = BuildWhereClause(section, filters, param);
-            var whereSql = where.Count > 0 ? "WHERE " + string.Join(" AND ", where) : "";
             var firstCol = visibleCols.FirstOrDefault() ?? "1";
             var defaultOrder = IdentifierRegex.IsMatch(firstCol) ? $"\"{firstCol}\"" : "1";
             var orderBy = requestedSort != null ? $"\"{requestedSort}\"" : defaultOrder;
