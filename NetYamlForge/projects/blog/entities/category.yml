@@ -1,0 +1,29 @@
+entities:
+  category:
+    table: 'categories'
+    key: 'id'
+    displayName: 'Category'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name', 'slug', 'description', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+      slug: { type: string, required: true, label: 'Slug', searchable: true, sortable: true }
+      description: { type: string, label: 'Description', searchable: true, sortable: true }
+      created_at: { type: datetime, label: 'Created At', sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', editable: true }
+      slug: { type: string, required: true, label: 'Slug', editable: true }
+      description: { type: string, label: 'Description', editable: true }
+      created_at: { type: datetime, label: 'Created At', editable: true }
+    filters: {}
+    links: {}

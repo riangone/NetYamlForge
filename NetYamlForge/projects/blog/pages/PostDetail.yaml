@@ -1,0 +1,35 @@
+title: "文章详情"
+description: "正在阅读文章"
+isPublic: true
+
+sections:
+  - id: post_content
+    title: "📖 文章内容"
+    component: markdown
+    sourceType: custom
+    source: |
+      SELECT 
+        '# ' || title || CHAR(10) || 
+        '> 发布于 ' || published_at || ' | 分类: ' || (SELECT name FROM categories WHERE id = posts.category_id) || CHAR(10) ||
+        CHAR(10) ||
+        content AS markdown_content
+      FROM posts
+      WHERE id = @id
+    columns: [markdown_content]
+    contentField: markdown_content
+
+  - id: comments
+    title: "💬 评论"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 
+        u.display_name AS user,
+        c.content,
+        c.created_at AS date
+      FROM comments c
+      LEFT JOIN blog_users u ON c.author_id = u.id
+      WHERE c.post_id = @id AND c.status = 'approved'
+      ORDER BY c.created_at DESC
+    columns: [user, content, date]
+    pageSize: 50

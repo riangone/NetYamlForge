@@ -2,72 +2,29 @@ entities:
   jp_contract:
     table: jp_contract
     key: jp_contract_id
-    displayName: JP_CONTRACT
+    displayName: 契约
     columns:
-      jp_contract_id: {type: decimal, identity: true}
-      jp_contract_uu: {type: string}
-      ad_client_id: {type: decimal}
-      ad_org_id: {type: decimal}
-      isactive: {type: string}
-      created: {type: string}
-      createdby: {type: decimal}
-      updated: {type: string}
-      updatedby: {type: decimal}
-      documentno: {type: string}
-      docstatus: {type: string}
-      docaction: {type: string}
-      processing: {type: string}
-      processed: {type: string}
-      posted: {type: string}
-      isapproved: {type: string}
-      processedon: {type: decimal}
-      name: {type: string}
-      description: {type: string}
-      help: {type: string}
-      ad_orgtrx_id: {type: decimal}
-      jp_contracttype: {type: string}
-      dateacct: {type: string}
-      jp_contractcategory_id: {type: decimal}
-      jp_contractt_id: {type: decimal}
-      jp_contract_parent_id: {type: decimal}
-      c_doctype_id: {type: decimal}
-      c_bpartner_id: {type: decimal}
-      c_bpartner_location_id: {type: decimal}
-      ad_user_id: {type: decimal}
-      salesrep_id: {type: decimal}
-      jp_contractstatus: {type: string}
-      jp_contractperioddate_from: {type: string}
-      jp_contractperioddate_to: {type: string}
-      isautomaticupdatejp: {type: string}
-      jp_contractcancelterm_id: {type: decimal}
-      jp_contractextendperiod_id: {type: decimal}
-      jp_contractcanceldeadline: {type: string}
-      jp_contractcancelofferdate: {type: string}
-      jp_contractcanceldate: {type: string}
-      jp_contractcancel_salesrep_id: {type: decimal}
-      jp_contractcancel_user_id: {type: decimal}
-      jp_contractcancelcause_id: {type: decimal}
-      jp_contractdocdate: {type: string}
-      jp_contractdocdate_from: {type: string}
-      jp_contractdocdate_to: {type: string}
-      jp_contractmonthlyrevenueamt: {type: decimal}
-      jp_contractmonthlyexpenseamt: {type: decimal}
-      c_currency_id: {type: decimal}
-      jp_contractdocamt: {type: decimal}
-      datedoc: {type: string}
-      jp_contractno: {type: string}
-      jp_contractcancelmemo: {type: string}
-      jp_contractbpno: {type: string}
-      jp_contract_link_id: {type: decimal}
-      jp_estimation_id: {type: decimal}
-      c_opportunity_id: {type: decimal}
-      poreference: {type: string}
-      jp_contractstatus_ec_date: {type: string}
-      jp_contractstatus_uc_date: {type: string}
-      jp_contractstatus_in_date: {type: string}
-      jp_contractdoclocator: {type: string}
-      jp_countercontract_id: {type: decimal}
-      jp_processing1: {type: string}
-      jp_subject: {type: string}
-      jp_remarks: {type: string}
-      jp_communicationcolumn: {type: string}
+      jp_contract_id: {type: decimal, identity: true, label: 'ID'}
+      documentno: {type: string, label: '契约编号', searchable: true, sortable: true}
+      name: {type: string, label: '名称', searchable: true, sortable: true}
+      docstatus: {type: string, label: '文档状态', searchable: true, sortable: true}
+      jp_contractstatus: {type: string, label: '契约状态', searchable: true, sortable: true}
+      dateacct: {type: string, label: '记账日期', sortable: true}
+      c_bpartner_id:
+        type: decimal
+        label: '业务伙伴'
+        foreignKey:
+          entity: c_bpartner
+          displayColumn: 'name'
+      jp_contractperioddate_from: {type: string, label: '有效期从', sortable: true}
+      jp_contractperioddate_to: {type: string, label: '有效期至', sortable: true}
+      jp_contractmonthlyrevenueamt: {type: decimal, label: '月营收额'}
+      jp_contractdocamt: {type: decimal, label: '合同总额'}
+      salesrep_id:
+        type: decimal
+        label: '销售代表'
+        foreignKey:
+          entity: ad_user
+          displayColumn: 'name'
+      isactive: {type: string, label: '启用'}
+      description: {type: string, label: '描述'}

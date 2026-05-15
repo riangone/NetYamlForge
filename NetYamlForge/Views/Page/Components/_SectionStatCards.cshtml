@@ -27,6 +27,11 @@
         var isPositiveDelta = delta.StartsWith("+");
         var isNegativeDelta = delta.StartsWith("-");
         var isUrl = delta.StartsWith("/");
+        if (isUrl)
+        {
+            var pathBase = Url.Content("~/").TrimEnd('/');
+            delta = pathBase + delta;
+        }
         var deltaClass = isPositiveDelta ? "text-success" : isNegativeDelta ? "text-error" : "text-gray-400";
 
         // Tooltip for long values

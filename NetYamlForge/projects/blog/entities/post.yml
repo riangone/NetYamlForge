@@ -1,0 +1,51 @@
+entities:
+  post:
+    table: 'posts'
+    key: 'id'
+    displayName: 'Post'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'slug', 'summary', 'content', 'author_id', 'category_id', 'status', 'is_featured', 'view_count', 'published_at', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
+      slug: { type: string, required: true, label: 'Slug', searchable: true, sortable: true }
+      summary: { type: string, label: 'Summary', searchable: true, sortable: true }
+      content: { type: string, required: true, label: 'Content', searchable: true, sortable: true }
+      author_id: { type: int, required: true, label: 'Author Id', sortable: true }
+      category_id: { type: int, label: 'Category Id', sortable: true }
+      status: { type: string, label: 'Status', searchable: true, sortable: true }
+      is_featured: { type: int, label: 'Is Featured', sortable: true }
+      view_count: { type: int, label: 'View Count', sortable: true }
+      published_at: { type: datetime, label: 'Published At', sortable: true }
+      created_at: { type: datetime, label: 'Created At', sortable: true }
+      updated_at: { type: datetime, label: 'Updated At', sortable: true }
+    forms:
+      title: { type: string, required: true, label: 'Title', editable: true }
+      slug: { type: string, required: true, label: 'Slug', editable: true }
+      summary: { type: string, label: 'Summary', editable: true }
+      content: { type: string, required: true, label: 'Content', editable: true }
+      author_id: { type: int, required: true, label: 'Author Id', editable: true }
+      category_id:
+        type: int
+        label: 'Category Id'
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: 'name'
+      status: { type: string, label: 'Status', editable: true }
+      is_featured: { type: int, label: 'Is Featured', editable: true }
+      view_count: { type: int, label: 'View Count', editable: true }
+      published_at: { type: datetime, label: 'Published At', editable: true }
+      created_at: { type: datetime, label: 'Created At', editable: true }
+      updated_at: { type: datetime, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

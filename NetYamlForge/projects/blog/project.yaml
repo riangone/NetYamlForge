@@ -1,0 +1,34 @@
+name: blog
+displayName: 博客系统
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/blog.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "博客系统"
+  navigation:
+    showDashboard: true
+    entities: [post, category, comment, tag, blog_user]
+    items:
+      - label: "博客首页"
+        url: "/blog/Page/Home"
+        icon: "🏠"
+      - label: "仪表盘"
+        controller: Dashboard
+        action: Index
+        icon: "📊"
+
+home_page:
+  icon: "🗂️"
+  tagline: "博客系统"
+  tags: []

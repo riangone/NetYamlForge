@@ -1,0 +1,23 @@
+entities:
+  tag:
+    table: 'tags'
+    key: 'id'
+    displayName: 'Tag'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['name']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      name: { type: string, required: true, label: 'Name', searchable: true, sortable: true }
+    forms:
+      name: { type: string, required: true, label: 'Name', editable: true }
+    filters: {}
+    links: {}

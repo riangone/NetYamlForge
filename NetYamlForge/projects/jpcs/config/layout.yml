@@ -1,0 +1,95 @@
+navigation:
+  showDashboard: true
+  entities:
+    - jp_contract
+    - jp_contractcontent
+    - jp_contractline
+    - jp_estimation
+    - c_order
+    - c_invoice
+    - c_payment
+    - jp_bill
+    - jp_recognition
+    - c_bpartner
+    - m_product
+    - c_elementvalue
+    - jp_todo
+    - ad_user
+    - ad_role
+  items:
+    - label: 仪表盘
+      url: /jpcs/Page/Dashboard
+      icon: dashboard
+      section: 主要功能
+    - label: 个人工作台
+      url: /jpcs/Page/MyPage
+      icon: user
+      section: 主要功能
+    - label: 业务分析
+      url: /jpcs/Page/CustomerAnalytics
+      icon: chart-line
+      section: 主要功能
+
+    - label: 契约
+      url: /jpcs/DynamicEntity/Index?entity=jp_contract
+      icon: file-contract
+      section: 契约管理
+    - label: 契约内容
+      url: /jpcs/DynamicEntity/Index?entity=jp_contractcontent
+      icon: file-invoice
+      section: 契约管理
+    - label: 契约行
+      url: /jpcs/DynamicEntity/Index?entity=jp_contractline
+      icon: list
+      section: 契约管理
+    - label: 估价
+      url: /jpcs/DynamicEntity/Index?entity=jp_estimation
+      icon: calculator
+      section: 契约管理
+
+    - label: 订单
+      url: /jpcs/DynamicEntity/Index?entity=c_order
+      icon: shopping-cart
+      section: 销售与财务
+    - label: 发票
+      url: /jpcs/DynamicEntity/Index?entity=c_invoice
+      icon: file-invoice-dollar
+      section: 销售与财务
+    - label: 付款
+      url: /jpcs/DynamicEntity/Index?entity=c_payment
+      icon: credit-card
+      section: 销售与财务
+    - label: 账单
+      url: /jpcs/DynamicEntity/Index?entity=jp_bill
+      icon: file-invoice-dollar
+      section: 销售与财务
+    - label: 收入确认
+      url: /jpcs/DynamicEntity/Index?entity=jp_recognition
+      icon: check-double
+      section: 销售与财务
+
+    - label: 业务伙伴
+      url: /jpcs/DynamicEntity/Index?entity=c_bpartner
+      icon: users
+      section: 基础数据
+    - label: 产品
+      url: /jpcs/DynamicEntity/Index?entity=m_product
+      icon: box
+      section: 基础数据
+    - label: 会计科目
+      url: /jpcs/DynamicEntity/Index?entity=c_elementvalue
+      icon: book
+      section: 基础数据
+    - label: 任务清单
+      url: /jpcs/DynamicEntity/Index?entity=jp_todo
+      icon: check-square
+      section: 基础数据
+
+    - label: 用户
+      url: /jpcs/DynamicEntity/Index?entity=ad_user
+      icon: user
+      section: 系统管理
+    - label: 角色
+      url: /jpcs/DynamicEntity/Index?entity=ad_role
+      icon: shield
+      section: 系统管理

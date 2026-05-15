@@ -1,0 +1,78 @@
+title: "博客首页"
+description: "欢迎来到我的个人博客"
+isPublic: true
+
+sections:
+  - id: hero
+    title: "✨ 探索技术与生活"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'hero' AS id"
+    content: |
+      # 欢迎来到我的博客
+      分享关于技术、架构和生活的思考。
+
+  - id: categories
+    title: "📚 分类"
+    component: cards
+    sourceType: custom
+    source: |
+      SELECT 
+        id,
+        name AS title,
+        description,
+        '📁' AS icon,
+        '/blog/Page/Home?category_id=' || id AS url
+      FROM categories
+    columns: [id, title, description, icon, url]
+    titleField: title
+    descriptionField: description
+    iconField: icon
+    urlField: url
+
+  - id: featured_posts
+    title: "🔥 精选文章"
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT 
+        p.id,
+        p.title,
+        p.summary AS subtitle,
+        '⭐' AS badge,
+        '发布于 ' || p.published_at AS description,
+        '/blog/Page/PostDetail?id=' || p.id AS url
+      FROM posts p
+      WHERE p.status = 'published' AND p.is_featured = 1
+      ORDER BY p.published_at DESC
+      LIMIT 3
+    columns: [id, title, subtitle, badge, description, url]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    actions:
+      - label: "阅读更多"
+        url: "{url}"
+        class: "btn-primary"
+
+  - id: recent_posts
+    title: "🕒 最近更新"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 
+        p.id,
+        p.title,
+        c.name AS category,
+        p.published_at AS date,
+        '/blog/Page/PostDetail?id=' || p.id AS url
+      FROM posts p
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE p.status = 'published'
+      ORDER BY p.published_at DESC
+      LIMIT 10
+    columns: [title, category, date]
+    actions:
+      - label: "查看"
+        url: "/blog/Page/PostDetail?id={id}"

@@ -1,6 +1,7 @@
 @using NetYamlForge.Models
 @using Microsoft.AspNetCore.WebUtilities
 @using NetYamlForge.Controllers
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NetYamlForge.Localization.SharedResource> L
 @model SectionRenderModel
 @{
     var sec = Model.Sec;
@@ -8,7 +9,7 @@
     var total = Model.Total;
     var project = Model.Project;
     var pageName = Model.PageName;
-    var baseUrl = $"/{project}/Page/{pageName}";
+    var baseUrl = Url.Content($"~/{project}/Page/{pageName}");
     var canEdit = sec.Editable && !sec.ReadOnly && !string.IsNullOrEmpty(sec.TargetTable);
     var pkCol = sec.TargetPrimaryKey ?? "id";
     var visibleCols = sec.GetVisibleColumnNames();
@@ -19,7 +20,7 @@
         : Context.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
 
     // セクション単位の部分更新エンドポイント
-    var sectionUrl = $"/{project}/Page/{pageName}/section/{sec.Id}";
+    var sectionUrl = Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}");
 
     // ページネーション
     var pageKey    = $"{sec.Id}__page";
@@ -136,8 +137,8 @@
         }
 
         <div class="flex gap-2 items-end">
-            <button type="submit" class="btn btn-@size btn-primary">Filter</button>
-            <a href="@baseUrl" class="btn btn-@size btn-ghost">Clear</a>
+            <button type="submit" class="btn btn-@size btn-primary">@L["Filter"]</button>
+            <a href="@baseUrl" class="btn btn-@size btn-ghost">@L["Clear"]</a>
         </div>
     </form>
 }
@@ -148,7 +149,7 @@
         @if (canEdit)
         {
             <button class="btn btn-@size btn-primary"
-                    hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form")"
+                    hx-get="Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/row-form")"
                     hx-target="#section-modal-content-@sec.Id"
                     hx-swap="innerHTML"
                     hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
@@ -156,7 +157,7 @@
             </button>
         }
         <div class="ml-auto flex items-center gap-2">
-            <span class="text-xs text-gray-500">Page Size:</span>
+            <span class="text-xs text-gray-500">@L["Page Size"]:</span>
             @* ページサイズ変更フォーム（セクション単位） *@
             <form hx-get="@sectionUrl"
                   hx-target="#section-@sec.Id"
@@ -205,7 +206,7 @@
                 }
                 @if (canEdit)
                 {
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@L["Actions"]</th>
                 }
             </tr>
         </thead>
@@ -231,16 +232,16 @@
                                     hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
                                 Edit
                             </button>
-                            <form hx-post="/@project/Page/@pageName/section/@sec.Id/delete-row"
+                            <form hx-post="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
                                   hx-target="#section-@sec.Id"
                                   hx-swap="innerHTML"
                                   hx-confirm="@(sec.Confirmation?.Delete ?? "Delete this row?")"
                                   method="post"
-                                  action="/@project/Page/@pageName/section/@sec.Id/delete-row"
+                                  action="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
                                   style="display:inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="rowId" value="@rowId" />
-                                <button type="submit" class="btn btn-@size btn-error">Delete</button>
+                                <button type="submit" class="btn btn-@size btn-error">@L["Delete"]</button>
                             </form>
                         </td>
                     }
@@ -250,7 +251,7 @@
             {
                 <tr>
                     <td colspan="@(visibleCols.Count + (canEdit ? 1 : 0))"
-                        class="px-4 py-8 text-center text-gray-400">No data available</td>
+                        class="px-4 py-8 text-center text-gray-400">@L["No data available"]</td>
                 </tr>
             }
         </tbody>

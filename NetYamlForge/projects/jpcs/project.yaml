@@ -35,20 +35,20 @@ aiConfig:
 # 导航菜单（基于 iDempiere/JPiere 业务流设计）
 navigation:
   groups:
-    - name: 控制面板
+    - name: 主要功能
       items:
         - label: 仪表盘
           url: /Page/Dashboard
           icon: dashboard
+        - label: 个人工作台
+          url: /Page/MyPage
+          icon: user
+        - label: 业务分析
+          url: /Page/CustomerAnalytics
+          icon: chart-line
 
     - name: 契约管理
       items:
-        - label: 契约生命周期
-          url: /Page/ContractLifecycle
-          icon: file-contract
-        - label: 契约承认流程
-          url: /Page/ContractApproval
-          icon: check-circle
         - label: 契约
           url: /Entity/jp_contract
           icon: file-contract
@@ -58,140 +58,41 @@ navigation:
         - label: 契约行
           url: /Entity/jp_contractline
           icon: list
-        - label: 契约类别
-          url: /Entity/jp_contractcategory
-          icon: tag
-        - label: 契约日志
-          url: /Entity/jp_contractlog
-          icon: history
-        - label: 契约处理进度
-          url: /Entity/jp_contractprocess
-          icon: tasks
+        - label: 契约估价
+          url: /Entity/jp_estimation
+          icon: calculator
 
-    - name: 销售与订单
+    - name: 销售与财务
       items:
-        - label: 受注处理
-          url: /Page/OrderFulfillment
-          icon: shopping-cart
-        - label: 商谈Pipeline
-          url: /Page/SalesPipeline
-          icon: chart-line
         - label: 订单
           url: /Entity/c_order
           icon: shopping-cart
-        - label: 订单行
-          url: /Entity/c_orderline
-          icon: list
-        - label: 报价请求
-          url: /Entity/c_rfq
-          icon: file-text
-        - label: 商机
-          url: /Entity/c_opportunity
-          icon: chart-line
-
-    - name: 财务
-      items:
-        - label: 资金管理
-          url: /Page/CashFlowDashboard
-          icon: dollar-sign
         - label: 发票
           url: /Entity/c_invoice
           icon: file-invoice-dollar
-        - label: 发票行
-          url: /Entity/c_invoiceline
-          icon: list
         - label: 付款
           url: /Entity/c_payment
           icon: credit-card
         - label: 账单 (JP)
           url: /Entity/jp_bill
           icon: file-invoice-dollar
-        - label: 账单行
-          url: /Entity/jp_billline
-          icon: list
-        - label: 会计凭证
-          url: /Entity/fact_acct
-          icon: book
-        - label: 日记账
-          url: /Entity/gl_journal
-          icon: journal
-
-    - name: 购买与出货
-      items:
-        - label: 购买管理
-          url: /Page/PurchaseRequisition
-          icon: truck
-        - label: 出荷管理
-          url: /Page/ShippingDashboard
-          icon: package
-        - label: 仕入先管理
-          url: /Page/SupplierManagement
-          icon: building
-        - label: 商品分类
-          url: /Page/ProductCatalog
-          icon: box
-        - label: 购买请求
-          url: /Entity/m_requisition
-          icon: file-text
-        - label: 出荷/入荷
-          url: /Entity/m_inout
-          icon: truck
+        - label: 收入确认
+          url: /Entity/jp_recognition
+          icon: check-double
 
     - name: 基础数据
       items:
         - label: 业务伙伴
           url: /Entity/c_bpartner
           icon: users
-        - label: 伙伴地点
-          url: /Entity/c_bpartner_location
-          icon: map-marker
         - label: 产品
           url: /Entity/m_product
           icon: box
-        - label: 产品类别
-          url: /Entity/m_product_category
-          icon: folder
-        - label: 价格表
-          url: /Entity/m_pricelist
-          icon: dollar-sign
-        - label: 仓库
-          url: /Entity/m_warehouse
-          icon: warehouse
-        - label: 库存
-          url: /Entity/m_storageonhand
-          icon: layers
-
-    - name: 分析
-      items:
-        - label: 顾客分析
-          url: /Page/CustomerAnalytics
-          icon: bar-chart
-        - label: 顾客360
-          url: /Page/Customer360
-          icon: users
-        - label: 商品别売上
-          url: /Page/SalesByProduct
-          icon: trending-up
-        - label: 営業步合管理
-          url: /Page/SalesCommission
-          icon: percent
-        - label: 社員业绩管理
-          url: /Page/EmployeePerformance
-          icon: briefcase
-
-    - name: 项目管理
-      items:
-        - label: 项目
-          url: /Entity/c_project
-          icon: project-diagram
-        - label: 项目行
-          url: /Entity/c_projectline
-          icon: list
-        - label: 项目阶段
-          url: /Entity/c_projectphase
-          icon: stairs
-        - label: 项目任务
-          url: /Entity/c_projecttask
+        - label: 会计科目
+          url: /Entity/c_elementvalue
+          icon: book
+        - label: 任务清单
+          url: /Entity/jp_todo
           icon: check-square
 
     - name: 系统管理

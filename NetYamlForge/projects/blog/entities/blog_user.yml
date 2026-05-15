@@ -1,0 +1,33 @@
+entities:
+  blog_user:
+    table: 'blog_users'
+    key: 'id'
+    displayName: 'Blog User'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['app_user_id', 'display_name', 'bio', 'avatar_url', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', sortable: true }
+      app_user_id: { type: int, required: true, label: 'App User Id', sortable: true }
+      display_name: { type: string, required: true, label: 'Display Name', searchable: true, sortable: true }
+      bio: { type: string, label: 'Bio', searchable: true, sortable: true }
+      avatar_url: { type: string, label: 'Avatar Url', searchable: true, sortable: true }
+      created_at: { type: datetime, label: 'Created At', sortable: true }
+      updated_at: { type: datetime, label: 'Updated At', sortable: true }
+    forms:
+      app_user_id: { type: int, required: true, label: 'App User Id', editable: true }
+      display_name: { type: string, required: true, label: 'Display Name', editable: true }
+      bio: { type: string, label: 'Bio', editable: true }
+      avatar_url: { type: string, label: 'Avatar Url', editable: true }
+      created_at: { type: datetime, label: 'Created At', editable: true }
+      updated_at: { type: datetime, label: 'Updated At', editable: true }
+    filters: {}
+    links: {}

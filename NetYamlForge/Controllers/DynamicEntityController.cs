@@ -99,7 +99,11 @@ public class DynamicEntityController : BaseProjectController
         clear = NormalizeSingleValue(clear);
 
         // 初期画面表示。メタデータから検索条件を解釈し、一覧表示モデルを構築します。
-        var meta = _meta.Get(entity);
+        if (!_meta.TryGet(entity, out var meta))
+        {
+            _logger.LogWarning("Entity '{Entity}' not found in project '{Project}'", entity, _projectScope.Current.Name);
+            return NotFound($"Entity '{entity}' は このプロジェクトに存在しません。");
+        }
         var accessDenied = RejectIfNotVisible(meta);
         if (accessDenied != null)
         {

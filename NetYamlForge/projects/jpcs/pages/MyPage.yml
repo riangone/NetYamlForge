@@ -1,0 +1,451 @@
+title: 个人工作台 — 工作状态与后续行动
+description: "在一屏内确认当前的业务状态、需要处理的事项以及业务流程指南"
+
+sections:
+
+  # ─────────────────────────────────────────────
+  # 0. AI 助手指南
+  # ─────────────────────────────────────────────
+  - id: ai_assistant_guide
+    title: 💬 AI 助手
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        '利用 AI 助手' AS metric_name,
+        '点击右下角的 💬 图标可以打开 AI 业务助手。您可以进行契约查询、数据分析、创建 TODO 等任何操作！' AS metric_value,
+        '🤖' AS metric_icon,
+        NULL AS metric_delta
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 1. 待办事项（紧急程度摘要）
+  # ─────────────────────────────────────────────
+  - id: urgent_actions
+    title: 需要立即处理的事项
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        '逾期未付账单' AS metric_name,
+        CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+        '🚨' AS metric_icon,
+        '/{project}/DynamicEntity/Index?entity=jp_bill' AS metric_delta
+      FROM jp_bill
+      WHERE docstatus = 'CO'
+        AND openamt > 0
+        AND jpdatebilled < date('now')
+        AND isactive = 'Y'
+      UNION ALL
+      SELECT
+        '30天内到期的契约',
+        CAST(COUNT(*) AS TEXT) || ' 件',
+        '⏰',
+        '/{project}/DynamicEntity/Index?entity=jp_contract'
+      FROM jp_contract
+      WHERE docstatus = 'CO'
+        AND jp_contractperioddate_to IS NOT NULL
+        AND julianday(jp_contractperioddate_to) - julianday('now') BETWEEN 0 AND 30
+        AND isactive = 'Y'
+      UNION ALL
+      SELECT
+        '待处理草稿文档',
+        CAST(
+          (SELECT COUNT(*) FROM jp_estimation WHERE docstatus = 'DR' AND isactive = 'Y') +
+          (SELECT COUNT(*) FROM jp_bill WHERE docstatus = 'DR' AND isactive = 'Y') +
+          (SELECT COUNT(*) FROM jp_contract WHERE docstatus = 'DR' AND isactive = 'Y')
+        AS TEXT) || ' 件',
+        '📝',
+        '/{project}/Page/MyPage'
+      UNION ALL
+      SELECT
+        '本周到期任务',
+        CAST(COUNT(*) AS TEXT) || ' 件',
+        '✅',
+        '/{project}/DynamicEntity/Index?entity=jp_todo'
+      FROM jp_todo
+      WHERE jp_todo_status IN ('NY', 'WP')
+        AND jp_todo_scheduledenddate IS NOT NULL
+        AND julianday(jp_todo_scheduledenddate) - julianday('now') BETWEEN 0 AND 7
+        AND isactive = 'Y'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 2. 业务流程指南
+  # ─────────────────────────────────────────────
+  - id: workflow_guide
+    title: JPiere 契约服务 — 业务流程指南
+    component: workflow_guide
+    sourceType: custom
+    source: |
+      SELECT 1
+    columns: [dummy]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 3. 当前业务状况概览 (KPI)
+  # ─────────────────────────────────────────────
+  - id: kpi_overview
+    title: 当前业务状况
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '有效契约' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+             '📄' AS metric_icon,
+             NULL AS metric_delta
+      FROM jp_contract WHERE docstatus = 'CO' AND isactive = 'Y'
+      UNION ALL
+      SELECT '待处理估价',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '📋', NULL
+      FROM jp_estimation WHERE docstatus = 'DR' AND isactive = 'Y'
+      UNION ALL
+      SELECT '未结清账单',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '💴', NULL
+      FROM jp_bill WHERE docstatus = 'CO' AND openamt > 0 AND isactive = 'Y'
+      UNION ALL
+      SELECT '未收账款合计',
+             CASE WHEN SUM(openamt) >= 1000000
+               THEN CAST(ROUND(SUM(openamt) / 10000, 1) AS TEXT) || ' 万元'
+               ELSE CAST(COALESCE(SUM(openamt), 0) AS TEXT) || ' 元'
+             END,
+             '📊', NULL
+      FROM jp_bill WHERE docstatus = 'CO' AND isactive = 'Y'
+      UNION ALL
+      SELECT '本月契约营收',
+             CASE WHEN SUM(jp_contractmonthlyrevenueamt) >= 1000000
+               THEN CAST(ROUND(SUM(jp_contractmonthlyrevenueamt) / 10000, 1) AS TEXT) || ' 万元'
+               ELSE CAST(COALESCE(SUM(jp_contractmonthlyrevenueamt), 0) AS TEXT) || ' 元'
+             END,
+             '💹', NULL
+      FROM jp_contract WHERE docstatus = 'CO' AND isactive = 'Y'
+      UNION ALL
+      SELECT '进行中任务',
+             CAST(COUNT(*) AS TEXT) || ' 件',
+             '✅', NULL
+      FROM jp_todo WHERE jp_todo_status IN ('NY', 'WP') AND isactive = 'Y'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 4. 待处理文档列表（草稿・进行中）
+  # ─────────────────────────────────────────────
+  - id: pending_documents
+    title: 待处理文档列表（草稿・处理中）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        '估价' AS 种类,
+        e.documentno AS 编号,
+        bp.name AS 业务伙伴,
+        CASE e.docstatus
+          WHEN 'DR' THEN '草稿'
+          WHEN 'IN' THEN '处理中'
+          ELSE e.docstatus
+        END AS 状态,
+        e.dateordered AS 日期,
+        CASE WHEN e.grandtotal >= 1000000
+          THEN CAST(ROUND(e.grandtotal / 10000, 1) AS TEXT) || '万元'
+          ELSE CAST(e.grandtotal AS TEXT) || '元'
+        END AS 金额,
+        '后续行动: 确定订单 → 将 docstatus 改为 CO' AS 提示
+      FROM jp_estimation e
+      JOIN c_bpartner bp ON bp.c_bpartner_id = e.c_bpartner_id
+      WHERE e.docstatus IN ('DR', 'IN')
+        AND e.isactive = 'Y'
+
+      UNION ALL
+
+      SELECT
+        '账单',
+        b.documentno,
+        bp.name,
+        '草稿（未发送）',
+        b.jpdatebilled,
+        CASE WHEN b.grandtotal >= 1000000
+          THEN CAST(ROUND(b.grandtotal / 10000, 1) AS TEXT) || '万元'
+          ELSE CAST(b.grandtotal AS TEXT) || '元'
+        END,
+        '后续行动: 确认内容后将 docstatus 改为 CO'
+      FROM jp_bill b
+      JOIN c_bpartner bp ON bp.c_bpartner_id = b.c_bpartner_id
+      WHERE b.docstatus = 'DR' AND b.isactive = 'Y'
+
+      UNION ALL
+
+      SELECT
+        '契约',
+        c.documentno,
+        bp.name,
+        CASE c.docstatus
+          WHEN 'DR' THEN '草稿'
+          WHEN 'IN' THEN '协商中'
+          ELSE c.docstatus
+        END,
+        c.dateacct,
+        CASE WHEN c.jp_contractdocamt >= 1000000
+          THEN CAST(ROUND(c.jp_contractdocamt / 10000, 1) AS TEXT) || '万元'
+          ELSE CAST(c.jp_contractdocamt AS TEXT) || '元'
+        END,
+        '后续行动: 达成协议后将 docstatus 改为 CO'
+      FROM jp_contract c
+      JOIN c_bpartner bp ON bp.c_bpartner_id = c.c_bpartner_id
+      WHERE c.docstatus IN ('DR', 'IN')
+        AND c.isactive = 'Y'
+
+      ORDER BY 日期 ASC
+    columns: [种类, 编号, 业务伙伴, 状态, 日期, 金额, 提示]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 5. 未完成任务（按进度排序）
+  # ─────────────────────────────────────────────
+  - id: my_todos
+    title: 未完成任务（按计划日期排序）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        t.name AS 任务,
+        CASE t.jp_todo_status
+          WHEN 'NY' THEN '未开始'
+          WHEN 'WP' THEN '进行中'
+        END AS 状态,
+        tc.name AS 分类,
+        u.name AS 负责人,
+        t.jp_todo_scheduledstartdate AS 计划开始,
+        t.jp_todo_scheduledenddate AS 计划结束,
+        CASE
+          WHEN t.jp_todo_scheduledenddate IS NOT NULL AND t.jp_todo_scheduledenddate < date('now') THEN '逾期 — 请尽快处理'
+          WHEN t.jp_todo_scheduledenddate IS NOT NULL AND julianday(t.jp_todo_scheduledenddate) - julianday('now') <= 3 THEN '3天内到期'
+          WHEN t.jp_todo_status = 'WP' THEN '进行中'
+          ELSE '未开始'
+        END AS 紧急程度
+      FROM jp_todo t
+      LEFT JOIN jp_todo_category tc ON t.jp_todo_category_id = tc.jp_todo_category_id
+      LEFT JOIN ad_user u ON t.ad_user_id = u.ad_user_id
+      WHERE t.jp_todo_status IN ('NY', 'WP')
+        AND t.isactive = 'Y'
+      ORDER BY
+        CASE
+          WHEN t.jp_todo_scheduledenddate IS NOT NULL AND t.jp_todo_scheduledenddate < date('now') THEN 1
+          WHEN t.jp_todo_scheduledenddate IS NOT NULL AND julianday(t.jp_todo_scheduledenddate) - julianday('now') <= 3 THEN 2
+          WHEN t.jp_todo_status = 'WP' THEN 3
+          ELSE 4
+        END,
+        t.jp_todo_scheduledenddate ASC
+      LIMIT 20
+    columns: [任务, 状态, 紧急程度, 分类, 负责人, 计划开始, 计划结束]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 6. 付款期限预警（账单逾期・近期到期）
+  # ─────────────────────────────────────────────
+  - id: payment_alerts
+    title: 账单 — 付款期限预警
+    visibleToRoles: [finance, manager, admin]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        b.documentno AS 账单编号,
+        bp.name AS 业务伙伴,
+        b.jpdatebilled AS 账单日期,
+        CASE WHEN b.openamt >= 1000000
+          THEN CAST(ROUND(b.openamt / 10000, 1) AS TEXT) || '万元'
+          ELSE CAST(b.openamt AS TEXT) || '元'
+        END AS 未收余额,
+        CASE
+          WHEN b.jpdatebilled < date('now') THEN
+            '逾期 ' || CAST(CAST(julianday('now') - julianday(b.jpdatebilled) AS INT) AS TEXT) || ' 天'
+          ELSE
+            '剩余 ' || CAST(CAST(julianday(b.jpdatebilled) - julianday('now') AS INT) AS TEXT) || ' 天'
+        END AS 天数,
+        CASE
+          WHEN b.jpdatebilled < date('now') THEN '付款逾期 — 请立即催款'
+          WHEN julianday(b.jpdatebilled) - julianday('now') <= 7 THEN '一周内到期 — 请确认收款'
+          ELSE '30天内到期 — 建议确认'
+        END AS 操作提示
+      FROM jp_bill b
+      JOIN c_bpartner bp ON bp.c_bpartner_id = b.c_bpartner_id
+      WHERE b.docstatus = 'CO'
+        AND b.openamt > 0
+        AND (b.jpdatebilled < date('now') OR julianday(b.jpdatebilled) - julianday('now') <= 30)
+        AND b.isactive = 'Y'
+      ORDER BY b.jpdatebilled ASC
+    columns: [账单编号, 业务伙伴, 账单日期, 未收余额, 天数, 操作提示]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 7. 合同到期预警（90天内）
+  # ─────────────────────────────────────────────
+  - id: contract_expiry_alerts
+    title: 合同 — 到期预警（90天内）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.documentno AS 合同编号,
+        bp.name AS 业务伙伴,
+        c.jp_contractperioddate_to AS 合同结束日,
+        CAST(julianday(c.jp_contractperioddate_to) - julianday('now') AS INT) AS 剩余天数,
+        CASE WHEN c.jp_contractmonthlyrevenueamt >= 1000000
+          THEN CAST(ROUND(c.jp_contractmonthlyrevenueamt / 10000, 1) AS TEXT) || '万元/月'
+          ELSE CAST(COALESCE(c.jp_contractmonthlyrevenueamt, 0) AS TEXT) || '元/月'
+        END AS 月均收入,
+        后续行动 AS 操作提示
+      FROM (
+        SELECT
+          c.*,
+          CASE
+            WHEN c.docstatus = 'CO' THEN '自动更新确认'
+            ELSE '需要手动续约或解约决定'
+          END AS 后续行动
+        FROM jp_contract c
+        WHERE c.docstatus = 'CO'
+          AND c.jp_contractperioddate_to IS NOT NULL
+          AND julianday(c.jp_contractperioddate_to) - julianday('now') BETWEEN 0 AND 90
+          AND c.isactive = 'Y'
+      ) c
+      LEFT JOIN c_bpartner bp ON bp.c_bpartner_id = c.c_bpartner_id
+      ORDER BY c.jp_contractperioddate_to ASC
+    columns: [合同编号, 业务伙伴, 合同结束日, 剩余天数, 月均收入, 操作提示]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 8. 会计概况（财务相关人员查看）
+  # ─────────────────────────────────────────────
+  - id: accounting_overview
+    title: 会计概况（财务相关人员查看）
+    visibleToRoles: [finance, admin, manager]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '未过账日记账' AS metric_name,
+             CAST(COUNT(*) AS TEXT) || ' 件' AS metric_value,
+             '📒' AS metric_icon,
+             NULL AS metric_delta
+      FROM gl_journal WHERE docstatus = 'DR' AND isactive = 'Y'
+      UNION ALL
+      SELECT '本月收入确认总额',
+             CASE WHEN COALESCE(SUM(grandtotal), 0) >= 1000000
+               THEN CAST(ROUND(SUM(grandtotal) / 10000, 1) AS TEXT) || '万元'
+               ELSE CAST(COALESCE(SUM(grandtotal), 0) AS TEXT) || '元'
+             END,
+             '💹', NULL
+      FROM jp_recognition
+      WHERE docstatus = 'CO' AND isactive = 'Y'
+        AND strftime('%Y-%m', dateacct) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 9. 文档状态分布图
+  # ─────────────────────────────────────────────
+  - id: document_status_map
+    title: 文档状态分布一览
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        '估价' AS 文档类型,
+        CAST(SUM(CASE WHEN docstatus = 'DR' THEN 1 ELSE 0 END) AS TEXT) AS 草稿,
+        CAST(SUM(CASE WHEN docstatus = 'IN' THEN 1 ELSE 0 END) AS TEXT) AS 处理中,
+        CAST(SUM(CASE WHEN docstatus = 'CO' THEN 1 ELSE 0 END) AS TEXT) AS 已确定,
+        CAST(SUM(CASE WHEN docstatus IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT) AS 完成/无效,
+        CAST(COUNT(*) AS TEXT) AS 合计
+      FROM jp_estimation WHERE isactive = 'Y'
+      UNION ALL
+      SELECT
+        '合同',
+        CAST(SUM(CASE WHEN docstatus = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN docstatus = 'IN' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN docstatus = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN docstatus IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM jp_contract WHERE isactive = 'Y'
+      UNION ALL
+      SELECT
+        '账单',
+        CAST(SUM(CASE WHEN docstatus = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        '—',
+        CAST(SUM(CASE WHEN docstatus = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN docstatus IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM jp_bill WHERE isactive = 'Y'
+      UNION ALL
+      SELECT
+        '收入确认',
+        CAST(SUM(CASE WHEN docstatus = 'DR' THEN 1 ELSE 0 END) AS TEXT),
+        '—',
+        CAST(SUM(CASE WHEN docstatus = 'CO' THEN 1 ELSE 0 END) AS TEXT),
+        CAST(SUM(CASE WHEN docstatus IN ('CL','VO') THEN 1 ELSE 0 END) AS TEXT),
+        CAST(COUNT(*) AS TEXT)
+      FROM jp_recognition WHERE isactive = 'Y'
+    columns: [文档类型, 草稿, 处理中, 已确定, 完成/无效, 合计]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────────
+  # 10. 状态码参考（操作指引）
+  # ─────────────────────────────────────────────
+  - id: status_reference
+    title: 状态码参考指南
+    component: table
+    sourceType: custom
+    source: |
+      SELECT '文档状态 (docstatus)' AS 分类, 'DR' AS 代码, '草稿 (Draft)' AS 含义,
+             '创建初期。可编辑。尚未生效。' AS 说明 , '→ 转为 IN 或 CO 以推进处理' AS 下一步操作
+      UNION ALL SELECT '文档状态', 'IN', '处理中 (In Progress)',
+             '估价提交中/合同谈判中等。', '→ 根据结果转为 CO (确定) 或 VO (无效)'
+      UNION ALL SELECT '文档状态', 'CO', '已确定 (Completed)',
+             '业务处理已完成。账单/收入确认会自动创建分录。', '→ 取消需用 RE (冲销) 或 CL (关闭)'
+      UNION ALL SELECT '文档状态', 'CL', '已完成/解约 (Closed)',
+             '全部处理完成或合同已解约。收款完成的账单也会变为 CL。', '→ 原则上不可进一步操作'
+      UNION ALL SELECT '文档状态', 'VO', '无效 (Voided)',
+             '取消的文档。', '→ 如有需要请重新创建'
+      UNION ALL SELECT '文档状态', 'RE', '已冲销 (Reversed)',
+             '确定后被取消的文档。自动生成冲销分录。', '→ 修改后创建新文档'
+    columns: [分类, 代码, 含义, 说明, 下一步操作]
+    pageSize: 15
+    editable: false
+    readOnly: true
