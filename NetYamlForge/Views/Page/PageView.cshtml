@@ -19,6 +19,9 @@
         new[] { "area_chart", "donut_chart", "card_list", "accordion", "leaderboard", 
                 "activity_feed", "goal_tracker", "file_upload", "calendar", "org_chart" }
         .Contains(s.Component));
+    
+    // markdown コンポーネント判定
+    var hasMarkdown = pageDef.Sections.Any(s => s.Component == "markdown");
 }
 
 <div class="container mx-auto px-4 py-8">
@@ -116,6 +119,9 @@
                 case "workflow_guide":
                     @await Html.PartialAsync("Components/_SectionWorkflowGuide", renderModel)
                     break;
+                case "markdown":
+                    @await Html.PartialAsync("Components/_SectionMarkdown", renderModel)
+                    break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)
                     break;
@@ -124,14 +130,39 @@
     }
 </div>
 
-@if (hasChart)
+@{
+    var hasAnyScript = hasChart || hasMarkdown;
+}
+
+@if (hasAnyScript)
 {
     @section Scripts {
-        <script src="@Url.Content("~/lib/chartjs/chart.umd.min.js")"></script>
-        <script>
-            Chart.defaults.font.family = "'Inter','Helvetica Neue',sans-serif";
-            Chart.defaults.font.size = 12;
-            Chart.defaults.color = 'rgba(100,116,139,0.9)';
-        </script>
+        @if (hasChart)
+        {
+            <script src="@Url.Content("~/lib/chartjs/chart.umd.min.js")"></script>
+            <script>
+                Chart.defaults.font.family = "'Inter','Helvetica Neue',sans-serif";
+                Chart.defaults.font.size = 12;
+                Chart.defaults.color = 'rgba(100,116,139,0.9)';
+            </script>
+        }
+        @if (hasMarkdown)
+        {
+            <script src="@Url.Content("~/lib/marked/marked.min.js")"></script>
+            <script>
+                (function() {
+                    function renderMarkdown() {
+                        document.querySelectorAll('.markdown-section[data-markdown]').forEach(function(el) {
+                            var raw = el.getAttribute('data-markdown');
+                            if (raw && typeof marked !== 'undefined') {
+                                el.innerHTML = marked.parse(raw);
+                            }
+                        });
+                    }
+                    document.addEventListener('DOMContentLoaded', renderMarkdown);
+                    document.addEventListener('htmx:afterSwap', renderMarkdown);
+                })();
+            </script>
+        }
     }
 }

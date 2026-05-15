@@ -72,11 +72,10 @@ sections:
     sourceType: custom
     source: |
       SELECT 
-        u.display_name AS user,
+        c.author_name AS user,
         c.content,
         c.created_at AS date
       FROM comments c
-      LEFT JOIN blog_users u ON c.author_id = u.id
       WHERE c.post_id = @id AND c.status = 'approved'
       ORDER BY c.created_at DESC
     columns: [user, content, date]
