@@ -18,6 +18,43 @@ sections:
     columns: [markdown_content]
     contentField: markdown_content
 
+  - id: post_tags
+    title: "🏷️ 标签"
+    component: markdown
+    sourceType: custom
+    source: |
+      SELECT GROUP_CONCAT('<a href="/blog/Page/Home?tag_id=' || t.id || '" class="badge badge-outline mx-1">' || t.name || '</a>', ' ') AS tags_html
+      FROM tags t
+      JOIN post_tags pt ON t.id = pt.tag_id
+      WHERE pt.post_id = @id
+    columns: [tags_html]
+    contentField: tags_html
+
+  - id: related_posts
+    title: "🔗 相关文章"
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT 
+        p.id,
+        p.title,
+        p.summary AS subtitle,
+        '相关' AS badge,
+        '/blog/Page/PostDetail?id=' || p.id AS url
+      FROM posts p
+      WHERE p.category_id = (SELECT category_id FROM posts WHERE id = @id)
+        AND p.id <> @id
+        AND p.status = 'published'
+      LIMIT 3
+    columns: [id, title, subtitle, badge, url]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    actions:
+      - label: "阅读"
+        url: "{url}"
+        class: "btn-ghost btn-sm"
+
   - id: comments
     title: "💬 评论"
     component: table

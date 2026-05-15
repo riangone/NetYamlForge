@@ -23,6 +23,18 @@ layout:
       - label: "博客首页"
         url: "/blog/Page/Home"
         icon: "🏠"
+      - label: "搜索文章"
+        url: "/blog/Page/Search"
+        icon: "🔍"
+      - label: "文章归档"
+        url: "/blog/Page/Archive"
+        icon: "📅"
+      - label: "标签云"
+        url: "/blog/Page/Tags"
+        icon: "🏷️"
+      - label: "关于我"
+        url: "/blog/Page/About"
+        icon: "ℹ️"
       - label: "仪表盘"
         controller: Dashboard
         action: Index

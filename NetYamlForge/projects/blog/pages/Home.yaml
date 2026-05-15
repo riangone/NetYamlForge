@@ -9,11 +9,22 @@ sections:
     sourceType: custom
     source: "SELECT 'hero' AS id"
     content: |
-      # 欢迎来到我的博客
-      分享关于技术、架构和生活的思考。
+      <div class="hero bg-base-100 rounded-box p-10 mb-6">
+        <div class="hero-content text-center">
+          <div class="max-w-md">
+            <h1 class="text-5xl font-bold">欢迎来到我的博客</h1>
+            <p class="py-6">分享关于技术、架构和生活的思考。在这里，你可以找到深度的技术文章和随笔。</p>
+            <div class="flex gap-2 justify-center">
+              <a href="/blog/Page/Search" class="btn btn-outline">🔍 搜索文章</a>
+              <a href="/blog/Page/Archive" class="btn btn-outline">📅 文章归档</a>
+              <a href="/blog/Page/Tags" class="btn btn-outline">🏷️ 标签云</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
   - id: categories
-    title: "📚 分类"
+    title: "📚 热门分类"
     component: cards
     sourceType: custom
     source: |
@@ -24,14 +35,15 @@ sections:
         '📁' AS icon,
         '/blog/Page/Home?category_id=' || id AS url
       FROM categories
+      LIMIT 6
     columns: [id, title, description, icon, url]
     titleField: title
     descriptionField: description
     iconField: icon
     urlField: url
 
-  - id: featured_posts
-    title: "🔥 精选文章"
+  - id: post_list
+    title: "🕒 发现文章"
     component: card_list
     sourceType: custom
     source: |
@@ -39,13 +51,17 @@ sections:
         p.id,
         p.title,
         p.summary AS subtitle,
-        '⭐' AS badge,
+        c.name AS badge,
         '发布于 ' || p.published_at AS description,
         '/blog/Page/PostDetail?id=' || p.id AS url
       FROM posts p
-      WHERE p.status = 'published' AND p.is_featured = 1
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE p.status = 'published'
+        AND (@category_id IS NULL OR p.category_id = @category_id)
+        AND (@tag_id IS NULL OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_id = p.id AND pt.tag_id = @tag_id))
+        AND (@month IS NULL OR strftime('%Y-%m', p.published_at) = @month)
       ORDER BY p.published_at DESC
-      LIMIT 3
+      LIMIT 20
     columns: [id, title, subtitle, badge, description, url]
     titleField: title
     subtitleField: subtitle
@@ -55,24 +71,3 @@ sections:
       - label: "阅读更多"
         url: "{url}"
         class: "btn-primary"
-
-  - id: recent_posts
-    title: "🕒 最近更新"
-    component: table
-    sourceType: custom
-    source: |
-      SELECT 
-        p.id,
-        p.title,
-        c.name AS category,
-        p.published_at AS date,
-        '/blog/Page/PostDetail?id=' || p.id AS url
-      FROM posts p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.status = 'published'
-      ORDER BY p.published_at DESC
-      LIMIT 10
-    columns: [title, category, date]
-    actions:
-      - label: "查看"
-        url: "/blog/Page/PostDetail?id={id}"

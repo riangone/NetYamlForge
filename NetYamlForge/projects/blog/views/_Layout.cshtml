@@ -72,6 +72,13 @@
                        asp-controller="Home"
                        asp-action="Project"
                        asp-route-project="@currentProject">@headerTitle</a>
+                    
+                    <div class="hidden lg:flex ml-4 gap-1">
+                        <a href="/blog/Page/Home" class="btn btn-ghost btn-sm">首页</a>
+                        <a href="/blog/Page/Archive" class="btn btn-ghost btn-sm">归档</a>
+                        <a href="/blog/Page/Tags" class="btn btn-ghost btn-sm">标签</a>
+                        <a href="/blog/Page/About" class="btn btn-ghost btn-sm">关于</a>
+                    </div>
                 </div>
                 <div class="flex-none gap-2">
                     <div class="dropdown dropdown-end">

@@ -1,0 +1,51 @@
+title: "搜索文章"
+description: "搜索您感兴趣的内容"
+isPublic: true
+
+sections:
+  - id: search_box
+    title: "🔍 搜索"
+    component: markdown
+    sourceType: custom
+    source: "SELECT 'search' AS id"
+    content: |
+      <div class="bg-base-100 p-6 rounded-box shadow-sm mb-6">
+        <form method="get" action="/blog/Page/Search" class="flex gap-2">
+          <input type="text" name="q" placeholder="输入文章标题或内容关键词..." class="input input-bordered w-full" value="@q" />
+          <button class="btn btn-primary">
+            搜索
+          </button>
+        </form>
+      </div>
+
+  - id: search_results
+    title: "🔎 搜索结果"
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT 
+        p.id,
+        p.title,
+        p.summary AS subtitle,
+        c.name AS badge,
+        '发布于 ' || p.published_at AS description,
+        '/blog/Page/PostDetail?id=' || p.id AS url
+      FROM posts p
+      LEFT JOIN categories c ON p.category_id = c.id
+      WHERE p.status = 'published' 
+        AND (
+          @q IS NULL OR @q = '' 
+          OR p.title LIKE '%' || @q || '%' 
+          OR p.content LIKE '%' || @q || '%' 
+          OR p.summary LIKE '%' || @q || '%'
+        )
+      ORDER BY p.published_at DESC
+    columns: [id, title, subtitle, badge, description, url]
+    titleField: title
+    subtitleField: subtitle
+    badgeField: badge
+    descriptionField: description
+    actions:
+      - label: "阅读更多"
+        url: "{url}"
+        class: "btn-primary"
