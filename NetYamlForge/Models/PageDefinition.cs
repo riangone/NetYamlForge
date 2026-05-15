@@ -243,6 +243,8 @@ public class SectionDefinition
     public ConfirmationDefinition? Confirmation { get; set; }
 
     // ── コンポーネントサイズ ─────────────────────────────────────────
+    /// <summary>CSS クラス名。HTML class 属性に適用。</summary>
+    public string? Class { get; set; }
     /// <summary>DaisyUI サイズ修飾子（xs / sm / md / lg）。デフォルト: sm</summary>
     public string Size { get; set; } = "sm";
 
