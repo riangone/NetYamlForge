@@ -30,8 +30,9 @@ public sealed class PageDataQueryService
     public Task<(IEnumerable<Dictionary<string, object>> Rows, int Total)> LoadSectionDataAsync(
         SectionDefinition section,
         IDictionary<string, string> allFilters,
+        IEnumerable<string>? allSectionIds = null,
         PageUserContext? userContext = null)
-        => GetSectionDataAsync(section, ExtractSectionFilters(section, allFilters), userContext);
+        => GetSectionDataAsync(section, ExtractSectionFilters(section, allFilters, allSectionIds), userContext);
 
     public async Task<Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>> LoadPageDataAsync(
         PageDefinition page,
@@ -46,7 +47,7 @@ public sealed class PageDataQueryService
             {
                 var (rows, total) = await GetSectionDataAsync(
                     section,
-                    ExtractSectionFilters(section, filters),
+                    ExtractSectionFilters(section, filters, page.Sections.Select(s => s.Id)),
                     userContext);
                 result[section.Id] = (rows, total);
             }
@@ -63,12 +64,29 @@ public sealed class PageDataQueryService
     /// <summary>全体フィルター辞書から指定セクション用のフィルターを抽出する。</summary>
     private static Dictionary<string, string?> ExtractSectionFilters(
         SectionDefinition section,
-        IDictionary<string, string> allFilters)
+        IDictionary<string, string> allFilters,
+        IEnumerable<string>? allSectionIds = null)
     {
         var prefix = $"{section.Id}_";
         var sectionFilters = allFilters
             .Where(kv => kv.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             .ToDictionary(kv => kv.Key[(section.Id.Length + 1)..], kv => (string?)kv.Value);
+
+        var sectionPrefixes = (allSectionIds ?? Array.Empty<string>())
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Select(id => $"{id}_")
+            .ToList();
+
+        // Include global filters that are not scoped to any section.
+        // This allows common parameters like 'id', 'month', 'category_id', 'tag_id' to be shared across sections.
+        foreach (var kv in allFilters)
+        {
+            var isSectionScoped = sectionPrefixes.Any(p => kv.Key.StartsWith(p, StringComparison.OrdinalIgnoreCase));
+            if (!isSectionScoped && !sectionFilters.ContainsKey(kv.Key))
+            {
+                sectionFilters[kv.Key] = kv.Value;
+            }
+        }
 
         if (!string.IsNullOrEmpty(section.ForeignKey) &&
             !string.IsNullOrEmpty(section.LocalForeignKey) &&

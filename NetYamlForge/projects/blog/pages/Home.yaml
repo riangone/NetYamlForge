@@ -4,27 +4,33 @@ isPublic: true
 
 sections:
   - id: hero
-    title: "✨ 探索技术与生活"
+    title: "✨ 探索"
     component: markdown
     sourceType: custom
     source: "SELECT 'hero' AS id"
     content: |
-      <div class="hero bg-base-100 rounded-box p-10 mb-6">
-        <div class="hero-content text-center">
-          <div class="max-w-md">
-            <h1 class="text-5xl font-bold">欢迎来到我的博客</h1>
-            <p class="py-6">分享关于技术、架构和生活的思考。在这里，你可以找到深度的技术文章和随笔。</p>
-            <div class="flex gap-2 justify-center">
-              <a href="/blog/Page/Search" class="btn btn-outline">🔍 搜索文章</a>
-              <a href="/blog/Page/Archive" class="btn btn-outline">📅 文章归档</a>
-              <a href="/blog/Page/Tags" class="btn btn-outline">🏷️ 标签云</a>
+      <div class="hero min-h-[40vh] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl mb-12 overflow-hidden border border-base-300 shadow-sm">
+        <div class="hero-content text-center py-16">
+          <div class="max-w-2xl">
+            <h1 class="text-6xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+              NetYamlForge Blog
+            </h1>
+            <p class="text-xl opacity-80 mb-8 font-medium">
+              探索技术边界，分享架构心得。
+              <br/>
+              这里是思考的实验室，也是创意的停泊港。
+            </p>
+            <div class="flex flex-wrap gap-4 justify-center">
+              <a href="/blog/Page/Search" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/20">🔍 搜索文章</a>
+              <a href="/blog/Page/Archive" class="btn btn-ghost bg-base-100 rounded-full px-8 border-base-300">📅 归档</a>
+              <a href="/blog/Page/Tags" class="btn btn-ghost bg-base-100 rounded-full px-8 border-base-300">🏷️ 标签</a>
             </div>
           </div>
         </div>
       </div>
 
-  - id: categories
-    title: "📚 热门分类"
+  - id: featured_categories
+    title: "📁 热门分类"
     component: cards
     sourceType: custom
     source: |
@@ -32,18 +38,17 @@ sections:
         id,
         name AS title,
         description,
-        '📁' AS icon,
         '/blog/Page/Home?category_id=' || id AS url
       FROM categories
-      LIMIT 6
-    columns: [id, title, description, icon, url]
+      LIMIT 4
+    columns: [id, title, description, url]
     titleField: title
     descriptionField: description
-    iconField: icon
     urlField: url
+    class: "grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
 
   - id: post_list
-    title: "🕒 发现文章"
+    title: "✍️ 最新文章"
     component: card_list
     sourceType: custom
     source: |
@@ -52,8 +57,9 @@ sections:
         p.title,
         p.summary AS subtitle,
         c.name AS badge,
-        '发布于 ' || p.published_at AS description,
-        '/blog/Page/PostDetail?id=' || p.id AS url
+        strftime('%Y-%m-%d', p.published_at) AS description,
+        '/blog/Page/PostDetail?id=' || p.id AS url,
+        COALESCE(p.view_count, 0) || ' views' AS meta
       FROM posts p
       LEFT JOIN categories c ON p.category_id = c.id
       WHERE p.status = 'published'
@@ -62,12 +68,13 @@ sections:
         AND (@month IS NULL OR strftime('%Y-%m', p.published_at) = @month)
       ORDER BY p.published_at DESC
       LIMIT 20
-    columns: [id, title, subtitle, badge, description, url]
+    columns: [id, title, subtitle, badge, description, url, meta]
     titleField: title
     subtitleField: subtitle
     badgeField: badge
     descriptionField: description
     actions:
-      - label: "阅读更多"
+      - label: "阅读全文"
         url: "{url}"
-        class: "btn-primary"
+        class: "btn-primary btn-sm rounded-full"
+

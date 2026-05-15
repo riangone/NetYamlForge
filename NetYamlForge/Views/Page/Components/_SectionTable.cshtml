@@ -62,9 +62,7 @@
     var sectionPrefix = $"{sec.Id}_";
     string BuildSectionSortUrl(string col)
     {
-        var q = qParams
-            .Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase))
-            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+        var q = new Dictionary<string, string>(qParams, StringComparer.OrdinalIgnoreCase);
         if (curSort == col)
             q[dirKey] = curDir == "asc" ? "desc" : "asc";
         else
@@ -78,9 +76,7 @@
     }
     string BuildSectionPageUrl(int page)
     {
-        var q = qParams
-            .Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase))
-            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.OrdinalIgnoreCase);
+        var q = new Dictionary<string, string>(qParams, StringComparer.OrdinalIgnoreCase);
         if (page <= 1) q.Remove(pageKey);
         else q[pageKey] = page.ToString();
         if (currentPageSize != effectivePageSize) q[psSizeKey] = currentPageSize.ToString();
@@ -163,8 +159,7 @@
                   hx-target="#section-@sec.Id"
                   hx-swap="innerHTML"
                   hx-trigger="change from:select[name='@psSizeKey']">
-                @foreach (var kv in qParams.Where(kv => kv.Key.StartsWith(sectionPrefix, StringComparison.OrdinalIgnoreCase)
-                                                      && kv.Key != pageKey && kv.Key != psSizeKey))
+                @foreach (var kv in qParams.Where(kv => kv.Key != pageKey && kv.Key != psSizeKey))
                 {
                     <input type="hidden" name="@kv.Key" value="@kv.Value" />
                 }

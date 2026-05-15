@@ -81,9 +81,7 @@ public class PageController : BaseProjectController
             return NotFound($"ページ '{pageName}' が見つかりません。");
 
         // 公開ページでない場合は認証チェック
-        // Note: IsPublic may not exist in all PageDefinition implementations
-        var isPublic = pageDef.GetType().GetProperty("IsPublic")?.GetValue(pageDef) as bool? ?? false;
-        if (!isPublic)
+        if (!pageDef.IsPublic)
         {
             if (User.Identity?.IsAuthenticated != true)
             {
@@ -171,7 +169,13 @@ public class PageController : BaseProjectController
         if (!CanViewSection(section, userCtx))
             return Forbid();
         return PartialView("Components/_SectionTable",
-            await BuildSectionRenderModelAsync(proj, section, pageName, filters, userCtx));
+            await BuildSectionRenderModelAsync(
+                proj,
+                section,
+                pageName,
+                filters,
+                pageDef.Sections.Select(s => s.Id),
+                userCtx));
     }
 
     // GET /{project}/Page/{pageName}/section/{sectionId}/row-form
@@ -488,9 +492,10 @@ public class PageController : BaseProjectController
         SectionDefinition section,
         string pageName,
         IDictionary<string, string> allFilters,
+        IEnumerable<string>? allSectionIds = null,
         PageUserContext? userContext = null)
     {
-        var (rows, total) = await _pageDataQueryService.LoadSectionDataAsync(section, allFilters, userContext);
+        var (rows, total) = await _pageDataQueryService.LoadSectionDataAsync(section, allFilters, allSectionIds, userContext);
         return new SectionRenderModel
         {
             Sec = section,
@@ -513,12 +518,16 @@ public class PageController : BaseProjectController
         {
             Response.Headers["HX-Retarget"] = $"#section-{sectionId}";
             Response.Headers["HX-Reswap"] = "innerHTML";
+            var allSectionIds = proj.PageMetadata.TryGet(pageName, out var pageDef)
+                ? pageDef.Sections.Select(s => s.Id)
+                : null;
             return PartialView("Components/_SectionTable",
                 await BuildSectionRenderModelAsync(
                     proj,
                     section,
                     pageName,
                     GetFiltersFromHtmxCurrentUrl(),
+                    allSectionIds,
                     BuildUserContext()));
         }
         return Redirect($"/{proj.Name}/Page/{pageName}");

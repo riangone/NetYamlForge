@@ -10,28 +10,37 @@ sections:
     source: |
       SELECT 
         '# ' || title || CHAR(10) || 
-        '> 发布于 ' || published_at || ' | 分类: ' || (SELECT name FROM categories WHERE id = posts.category_id) || CHAR(10) ||
+        '<div class="flex gap-4 items-center opacity-60 mb-8 text-sm">' ||
+        '<span>📅 ' || strftime('%Y-%m-%d', published_at) || '</span>' ||
+        '<span>📁 ' || (SELECT name FROM categories WHERE id = posts.category_id) || '</span>' ||
+        '<span>👁️ ' || COALESCE(view_count, 0) || ' views</span>' ||
+        '</div>' ||
         CHAR(10) ||
         content AS markdown_content
       FROM posts
       WHERE id = @id
     columns: [markdown_content]
     contentField: markdown_content
+    class: "prose prose-lg max-w-none bg-base-100 p-8 rounded-3xl shadow-sm border border-base-200 mb-8"
 
   - id: post_tags
     title: "🏷️ 标签"
     component: markdown
     sourceType: custom
     source: |
-      SELECT GROUP_CONCAT('<a href="/blog/Page/Home?tag_id=' || t.id || '" class="badge badge-outline mx-1">' || t.name || '</a>', ' ') AS tags_html
+      SELECT 
+        '<div class="flex flex-wrap gap-2">' ||
+        GROUP_CONCAT('<a href="/blog/Page/Home?tag_id=' || t.id || '" class="badge badge-lg badge-outline hover:badge-primary transition-all">' || t.name || '</a>', '') ||
+        '</div>' AS tags_html
       FROM tags t
       JOIN post_tags pt ON t.id = pt.tag_id
       WHERE pt.post_id = @id
     columns: [tags_html]
     contentField: tags_html
+    class: "mb-12"
 
   - id: related_posts
-    title: "🔗 相关文章"
+    title: "🔗 相关推荐"
     component: card_list
     sourceType: custom
     source: |
@@ -53,7 +62,9 @@ sections:
     actions:
       - label: "阅读"
         url: "{url}"
-        class: "btn-ghost btn-sm"
+        class: "btn-ghost btn-sm rounded-full"
+    class: "grid-cols-1 md:grid-cols-3 gap-4"
+
 
   - id: comments
     title: "💬 评论"

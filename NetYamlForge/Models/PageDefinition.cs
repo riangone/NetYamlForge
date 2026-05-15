@@ -18,6 +18,7 @@ public class PageDefinition
     public CalendarUiDefinition? CalendarUi { get; set; }
     /// <summary>ページ末尾に挿入する JS ファイル URL リスト（pages/*.yaml の scripts）。</summary>
     public List<string> Scripts { get; set; } = new();
+    public bool IsPublic { get; set; }
     public List<SectionDefinition> Sections { get; set; } = new();
 }
 
