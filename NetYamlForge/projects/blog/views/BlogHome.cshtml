@@ -237,7 +237,9 @@
             }
         </main>
 
-        <!-- サイドバー -->
+        <!-- サイドバー（ログイン時のみ表示） -->
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
         <aside class="w-full lg:w-64 shrink-0 space-y-6">
 
             <!-- カテゴリ -->
@@ -296,6 +298,7 @@
                 </div>
             }
         </aside>
+        }
     </div>
 
     <!-- ページ下部のタグクラウド -->
