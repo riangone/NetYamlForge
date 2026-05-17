@@ -1,0 +1,22 @@
+﻿task_id,title,status,priority,due_date,overdue_days,assigned_to,project_name,category_name
+39,  HookTest  ,pending,low,2020-01-01 00:00:00,2326,,（未設定）,（未設定）
+23,Staging models – orders,in_progress,medium,2026-03-10,66,Karl,Data Warehouse,Database
+4,Landing page animation,in_progress,medium,2026-03-15,61,Alice,Web Redesign,Frontend
+11,Migrate /auth endpoints,in_progress,urgent,2026-03-20,56,Eve,API v2 Migration,Security
+5,SEO metadata & OG tags,pending,low,2026-03-20,56,Carol,Web Redesign,Frontend
+26,JWT issuance service,in_progress,urgent,2026-03-25,51,Leo,Auth Overhaul,Backend
+7,Accessibility audit (WCAG 2.1),review,high,2026-03-25,51,Carol,Web Redesign,Testing
+12,Migrate /users endpoints,in_progress,high,2026-03-25,51,Frank,API v2 Migration,Backend
+37,Renew wildcard TLS certificate,pending,urgent,2026-03-28,48,Leo,（未設定）,Security
+27,OAuth2 provider integration,in_progress,high,2026-03-28,48,Mia,Auth Overhaul,Backend
+36,Upgrade Node.js to v22 LTS,pending,medium,2026-03-31,45,Frank,（未設定）,DevOps
+24,Redshift cluster sizing,pending,low,2026-04-01,44,Judy,Data Warehouse,DevOps
+15,Integration test suite,review,high,2026-04-01,44,Dave,API v2 Migration,Testing
+28,Session migration script,pending,urgent,2026-04-05,40,Leo,Auth Overhaul,Database
+13,Migrate /orders endpoints,pending,high,2026-04-05,40,Grace,API v2 Migration,Backend
+29,Pen-test (auth scope),pending,urgent,2026-04-10,35,Dave,Auth Overhaul,Security
+6,Cross-browser testing,pending,medium,2026-04-10,35,Dave,Web Redesign,Testing
+14,SDK code-gen from spec,pending,medium,2026-04-15,30,Eve,API v2 Migration,Backend
+8,Performance optimisation,pending,high,2026-04-20,25,Bob,Web Redesign,Frontend
+16,API changelog & migration guide,pending,low,2026-05-01,14,Carol,API v2 Migration,Docs
+18,Auth screens (login/signup),pending,high,2026-05-01,14,Ivan,Mobile App MVP,Frontend

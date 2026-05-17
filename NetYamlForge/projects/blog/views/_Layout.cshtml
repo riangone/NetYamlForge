@@ -12,8 +12,8 @@
     var isAdminUser = User?.IsInRole("Admin") ?? false;
     var pathBase = Url.Content("~/").TrimEnd('/');
 
-    // サイドバー表示判定（未ログインでも表示）
-    var showSidebar = true;
+    // サイドバー表示判定（ログイン時のみ表示）
+    var showSidebar = isAuthenticated;
 
     // ナビゲーション設定
     var projectLayout = ProjectScope?.Current?.Layout;
