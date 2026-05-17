@@ -272,6 +272,11 @@ public class FormDefinition
     /// </summary>
     public ThumbnailSizeDefinition? ThumbnailSize { get; set; }
 
+    /// <summary>
+    /// 表示時のグリッド列スパン（デフォルト 1）。
+    /// </summary>
+    public int ColSpan { get; set; } = 1;
+
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 

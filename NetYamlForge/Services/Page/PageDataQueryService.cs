@@ -144,8 +144,8 @@ public sealed class PageDataQueryService
         // ソートパラメータ（_sort / _dir）を解決する
         // URL パラメータ: {section.Id}__sort=col & {section.Id}__dir=asc|desc
         var requestedSort = filters.TryGetValue("_sort", out var rs) && rs is not null && IdentifierRegex.IsMatch(rs) ? rs : null;
-        var sortDir = filters.TryGetValue("_dir", out var rd) &&
-                      string.Equals(rd, "desc", StringComparison.OrdinalIgnoreCase) ? "DESC" : "ASC";
+        var requestedDir = filters.TryGetValue("_dir", out var rd) ? rd : null;
+        var sortDir = string.Equals(requestedDir ?? section.DefaultSortDir, "desc", StringComparison.OrdinalIgnoreCase) ? "DESC" : "ASC";
 
         if (section.SourceType == "custom")
         {
@@ -156,7 +156,10 @@ public sealed class PageDataQueryService
 
             var firstCol = section.Columns.Keys.FirstOrDefault() ?? "1";
             var defaultOrder = IdentifierRegex.IsMatch(firstCol) ? $"\"{firstCol}\"" : "1";
-            var orderBy = requestedSort != null ? $"\"{requestedSort}\"" : defaultOrder;
+            var configuredSort = !string.IsNullOrWhiteSpace(section.DefaultSort) && IdentifierRegex.IsMatch(section.DefaultSort)
+                ? $"\"{section.DefaultSort}\""
+                : null;
+            var orderBy = requestedSort != null ? $"\"{requestedSort}\"" : (configuredSort ?? defaultOrder);
 
             // Safe: section.Source is a trusted SQL subquery from YAML (admin-managed), orderBy/whereSql use only validated identifiers
 #pragma warning disable DCS001

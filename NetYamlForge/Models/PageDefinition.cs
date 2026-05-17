@@ -139,6 +139,10 @@ public class SectionFormFieldDef
     public string? Placeholder { get; set; }
     /// <summary>entities.FormDefinition.ForeignKey に相当。</summary>
     public ForeignKeyDefinition? ForeignKey { get; set; }
+
+    /// <summary>表示時のグリッド列スパン（デフォルト 1）。</summary>
+    public int ColSpan { get; set; } = 1;
+
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
@@ -247,6 +251,12 @@ public class SectionDefinition
     public string? Class { get; set; }
     /// <summary>DaisyUI サイズ修飾子（xs / sm / md / lg）。デフォルト: sm</summary>
     public string Size { get; set; } = "sm";
+
+    // ── デフォルトソート ─────────────────────────────────────────────
+    /// <summary>URL パラメータ未指定時のデフォルトソート列名。未設定時は最初の列。</summary>
+    public string? DefaultSort { get; set; }
+    /// <summary>デフォルトソート方向 (asc / desc)。未設定時は asc。</summary>
+    public string? DefaultSortDir { get; set; }
 
     // ── 後方互換フラット設定 ─────────────────────────────────────────
     public bool Editable { get; set; } = false;

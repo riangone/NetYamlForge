@@ -116,7 +116,7 @@ public class ProjectNavigationConfig
 public class ProjectNavigationItemConfig
 {
     /// <summary>表示ラベル</summary>
-    public string Label { get; set; } = default!;
+    public string? Label { get; set; }
     public string? LabelKey { get; set; }
     public string? Section { get; set; }
     
@@ -137,6 +137,12 @@ public class ProjectNavigationItemConfig
     
     /// <summary>Admin ロールのみ表示（デフォルト：false）</summary>
     public bool AdminOnly { get; set; }
+
+    /// <summary>区切り線を表示するかどうか</summary>
+    public bool Divider { get; set; }
+
+    /// <summary>子項目（階層メニュー用）</summary>
+    public List<ProjectNavigationItemConfig> Children { get; set; } = new();
 
     /// <summary>
     /// この項目を表示するカスタムロールのリスト（AppUserRole.RoleName と照合）。

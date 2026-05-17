@@ -1,0 +1,136 @@
+title: 編集フロー
+description: "記事の公開状況・下書き進捗・コメントモデレーション管理"
+
+sections:
+  # 編集パイプライン KPI
+  - id: pipeline_kpi
+    title: 編集パイプライン状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '下書き中'        AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '✏️' AS metric_icon, NULL AS metric_delta
+        FROM Post WHERE Status='draft'
+      UNION ALL
+      SELECT '公開済み',        CAST(COUNT(*) AS TEXT), '✅', NULL FROM Post WHERE Status='published'
+      UNION ALL
+      SELECT 'アーカイブ済み',  CAST(COUNT(*) AS TEXT), '📦', NULL FROM Post WHERE Status='archived'
+      UNION ALL
+      SELECT '承認待ちコメント',CAST(COUNT(*) AS TEXT), '⏳', NULL FROM Comment WHERE Status='pending'
+      UNION ALL
+      SELECT 'スパムコメント',  CAST(COUNT(*) AS TEXT), '🚫', NULL FROM Comment WHERE Status='spam'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 下書き記事一覧（古い順）
+  - id: draft_posts
+    title: 下書き記事（更新が古い順）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title      AS タイトル,
+        bc.Name      AS カテゴリ,
+        p.AuthorName AS 著者,
+        p.CreatedAt  AS 作成日時,
+        p.UpdatedAt  AS 最終更新
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'draft'
+      ORDER BY p.UpdatedAt ASC
+    columns: [Id, タイトル, カテゴリ, 著者, 作成日時, 最終更新]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # 承認待ちコメント詳細
+  - id: pending_comments
+    title: 承認待ちコメント（投稿が古い順）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.Id,
+        p.Title        AS 記事タイトル,
+        c.AuthorName   AS 投稿者,
+        c.AuthorEmail  AS メール,
+        c.Content      AS コメント本文,
+        c.CreatedAt    AS 投稿日時
+      FROM Comment c
+      LEFT JOIN Post p ON c.PostId = p.Id
+      WHERE c.Status = 'pending'
+      ORDER BY c.CreatedAt ASC
+    columns: [Id, 記事タイトル, 投稿者, メール, コメント本文, 投稿日時]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # スパムコメント一覧
+  - id: spam_comments
+    title: スパムコメント
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.Id,
+        p.Title       AS 記事タイトル,
+        c.AuthorName  AS 投稿者,
+        c.AuthorEmail AS メール,
+        c.Content     AS コメント本文,
+        c.CreatedAt   AS 投稿日時
+      FROM Comment c
+      LEFT JOIN Post p ON c.PostId = p.Id
+      WHERE c.Status = 'spam'
+      ORDER BY c.CreatedAt DESC
+    columns: [Id, 記事タイトル, 投稿者, メール, コメント本文, 投稿日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 著者別下書き数（目安）
+  - id: author_draft_count
+    title: 著者別 下書き数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT AuthorName AS label, COUNT(*) AS value
+      FROM Post
+      WHERE Status = 'draft'
+      GROUP BY AuthorName
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(245,158,11,0.75)"
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # 最近アーカイブされた記事
+  - id: archived_posts
+    title: 最近アーカイブされた記事
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title      AS タイトル,
+        bc.Name      AS カテゴリ,
+        p.AuthorName AS 著者,
+        p.ViewCount  AS 閲覧数,
+        p.UpdatedAt  AS アーカイブ日時
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'archived'
+      ORDER BY p.UpdatedAt DESC
+      LIMIT 10
+    columns: [Id, タイトル, カテゴリ, 著者, 閲覧数, アーカイブ日時]
+    pageSize: 10
+    editable: false
+    readOnly: true

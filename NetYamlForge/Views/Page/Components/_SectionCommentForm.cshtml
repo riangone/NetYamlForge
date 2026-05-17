@@ -1,0 +1,62 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var postId = Context.Request.Query["id"].ToString();
+    var sectionId = Model.Sec.Id;
+}
+
+<div class="card bg-base-100 shadow-sm border border-base-200 mt-8" id="comment-form-section">
+    <div class="card-body">
+        <h3 class="card-title text-lg mb-4">💬 发表评论</h3>
+        
+        <form hx-post="@Url.Content("~/blog/DynamicEntity/Create?entity=comment")"
+              hx-target="#comment-submit-result"
+              hx-on::after-request="if(event.detail.successful) { this.reset(); htmx.trigger('#section-comments', 'refresh'); }"
+              class="space-y-4">
+            
+            <input type="hidden" name="post_id" value="@postId" />
+            <input type="hidden" name="status" value="approved" />
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">名字 (必填)</span>
+                    </label>
+                    <input type="text" name="author_name" placeholder="您的称呼" class="input input-bordered w-full" required />
+                </div>
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">邮箱 (可选)</span>
+                    </label>
+                    <input type="email" name="author_email" placeholder="email@example.com" class="input input-bordered w-full" />
+                </div>
+            </div>
+            
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">内容 (必填)</span>
+                </label>
+                <textarea name="content" class="textarea textarea-bordered h-32 w-full" placeholder="说点什么吧..." required></textarea>
+            </div>
+            
+            <div id="comment-submit-result"></div>
+            
+            <div class="card-actions justify-end">
+                <button type="submit" class="btn btn-primary">提交评论</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.target.id === 'comment-submit-result') {
+            if (evt.detail.successful) {
+                evt.detail.target.innerHTML = '<div class="alert alert-success mt-2">评论已提交！</div>';
+                setTimeout(() => { evt.detail.target.innerHTML = ''; }, 3000);
+            } else {
+                evt.detail.target.innerHTML = '<div class="alert alert-error mt-2">提交失败，请重试。</div>';
+            }
+        }
+    });
+</script>

@@ -1,6 +1,20 @@
 name: blog
-displayName: 博客系统
-version: "1.0.0"
+displayName: "Blog"
+description: "記事・カテゴリ・タグ・コメントを管理するブログシステム"
+version: "2.0.0"
+
+aiHints:
+  primaryLanguage: zh-CN
+  authRequired: true
+  customHooks:
+    - generate_slug        # タイトルから Slug を自動生成
+    - set_published_at     # Status=published 時に PublishedAt を設定
+    - sanitize_content     # コンテンツの XSS サニタイズ
+    - send_comment_notify  # コメント投稿時に管理者へ通知
+  notes:
+    - "post.status の値: draft / published / archived"
+    - "comment.status の値: pending / approved / spam"
+    - "post.featured_flag: 0=通常, 1=特集記事"
 
 database:
   type: sqlite
@@ -15,32 +29,54 @@ features:
 layout:
   dashboardTheme: workspace
   header:
-    title: "博客系统"
+    title: "Blog"
   navigation:
     showDashboard: true
-    entities: [post, category, comment, tag, blog_user]
+    entities:
+      - post
+      - category
+      - tag
+      - comment
     items:
-      - label: "博客首页"
-        url: "/blog/Page/Home"
-        icon: "🏠"
-      - label: "搜索文章"
-        url: "/blog/Page/Search"
-        icon: "🔍"
-      - label: "文章归档"
-        url: "/blog/Page/Archive"
-        icon: "📅"
-      - label: "标签云"
-        url: "/blog/Page/Tags"
-        icon: "🏷️"
-      - label: "关于我"
-        url: "/blog/Page/About"
-        icon: "ℹ️"
-      - label: "仪表盘"
+      - label: ダッシュボード
         controller: Dashboard
         action: Index
-        icon: "📊"
+        icon: 📊
+        section: 概要
+      - label: 公開ブログ
+        url: /blog
+        icon: 🌐
+        section: 概要
+      - label: ホーム
+        url: /blog/Page/Home
+        icon: 🏠
+        section: 概要
+      - label: 分析
+        url: /blog/Page/Analytics
+        icon: 📈
+        section: 概要
+      - label: 記事一覧
+        url: /blog/DynamicEntity/Index?entity=post
+        icon: 📝
+        section: コンテンツ
+      - label: 編集フロー
+        url: /blog/Page/Editorial
+        icon: 🗂️
+        section: コンテンツ
+      - label: カテゴリ管理
+        url: /blog/DynamicEntity/Index?entity=category
+        icon: 📂
+        section: 設定
+      - label: タグ管理
+        url: /blog/DynamicEntity/Index?entity=tag
+        icon: 🏷️
+        section: 設定
+      - label: コメント管理
+        url: /blog/DynamicEntity/Index?entity=comment
+        icon: 💬
+        section: 設定
 
 home_page:
-  icon: "🗂️"
-  tagline: "博客系统"
-  tags: []
+  icon: "📝"
+  tagline: "記事・カテゴリ・タグ・コメントを一元管理"
+  tags: [Blog, CMS, Articles, Comments]

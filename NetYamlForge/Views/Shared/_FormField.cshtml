@@ -12,6 +12,9 @@
     var fkDisplayColsParam = string.Join(",", fkDisplayCols);
     var fkQuery = formDef.ForeignKey?.Query ?? "";
 
+    // ColSpan 対応
+    var colSpanClass = formDef.ColSpan > 1 ? $"md:col-span-{formDef.ColSpan}" : "";
+
     // ColumnDefinition 拡張プロパティを使用
     // forms の type が定義されている場合はそれを優先、そうでなければ columns の type を使用
     var formType = formDef.Type ?? "string";
@@ -44,7 +47,7 @@
     }
 }
 
-<div class="form-control">
+<div class="form-control @colSpanClass">
     <label class="label">
         <span class="label-text">
             @label
@@ -338,12 +341,26 @@
     else if (finalType.Equals("markdown", StringComparison.OrdinalIgnoreCase))
     {
         var markdownValue = value?.ToString() ?? "";
-        <div class="markdown-editor">
-            <textarea name="@name" class="textarea textarea-bordered w-full" rows="6" placeholder="Markdown で入力してください">@markdownValue</textarea>
-            <div class="mt-2">
-                <button type="button" class="btn btn-sm btn-outline" onclick="toggleMarkdownPreview('@name')">プレビュー表示</button>
-            </div>
-            <div id="markdown-preview-@name" class="mt-2 p-4 bg-base-200 rounded" style="display:none;"></div>
+        var uniqueId = "md_" + name + "_" + Guid.NewGuid().ToString("N").Substring(0, 6);
+        <div class="markdown-editor-container">
+            <textarea name="@name" id="@uniqueId" class="textarea textarea-bordered w-full" rows="10">@markdownValue</textarea>
+            <script>
+                (function() {
+                    const init = () => {
+                        const el = document.getElementById('@uniqueId');
+                        if (el && !el.dataset.easymdeInitialized) {
+                            initEasyMDE('@uniqueId');
+                            el.dataset.easymdeInitialized = 'true';
+                        }
+                    };
+                    init();
+                    document.addEventListener('htmx:afterSwap', init);
+                })();
+            </script>
+            <style>
+                .CodeMirror { min-height: 300px; border-radius: 0.5rem; }
+                .editor-toolbar { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
+            </style>
         </div>
     }
     else if (finalType.Equals("autocomplete", StringComparison.OrdinalIgnoreCase))

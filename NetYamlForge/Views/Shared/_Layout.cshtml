@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
     <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
 </head>
 <body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
 @functions {
@@ -742,6 +743,34 @@
                 if (t.checked) values.push(t.value);
             });
             hidden.value = values.join(',');
+        }
+    </script>
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script>
+        // EasyMDE 初期化
+        function initEasyMDE(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const editor = new EasyMDE({
+                element: el,
+                spellChecker: false,
+                autosave: {
+                    enabled: true,
+                    uniqueId: elementId,
+                    delay: 1000,
+                },
+                placeholder: "Markdown で入力してください...",
+                status: ["lines", "words", "cursor"],
+                renderingConfig: {
+                    singleLineBreaks: false,
+                    codeSyntaxHighlighting: true,
+                },
+            });
+            // フォーム送信前に textarea に同期
+            editor.codemirror.on("change", () => {
+                el.value = editor.value();
+            });
+            return editor;
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)

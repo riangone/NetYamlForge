@@ -1,0 +1,325 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/blog/views/_Layout.cshtml";
+    ViewData["Title"] = "ブログ";
+
+    var project = Context.GetRouteValue("project")?.ToString() ?? "blog";
+
+    var featuredRows  = Model.ContainsKey("featured")   ? Model["featured"].Rows.ToList()   : new();
+    var postRows      = Model.ContainsKey("posts")       ? Model["posts"].Rows.ToList()       : new();
+    var postTotal     = Model.ContainsKey("posts")       ? Model["posts"].Total               : 0;
+    var categoryRows  = Model.ContainsKey("categories")  ? Model["categories"].Rows.ToList()  : new();
+    var tagRows       = Model.ContainsKey("tags")        ? Model["tags"].Rows.ToList()         : new();
+
+    // ページネーション
+    var currentPage = int.TryParse(Context.Request.Query["_page"], out var pg) ? pg : 1;
+    var pageSize    = 6;
+    var totalPages  = (int)Math.Ceiling((double)postTotal / pageSize);
+
+    // フィルタリング状態
+    var currentTagId = Context.Request.Query["tagId"].ToString();
+    var currentCatId = Context.Request.Query["categoryId"].ToString();
+    var filterName = "";
+    if (!string.IsNullOrEmpty(currentTagId)) {
+        filterName = tagRows.FirstOrDefault(t => t.GetValueOrDefault("Id")?.ToString() == currentTagId)?.GetValueOrDefault("Name")?.ToString();
+    } else if (!string.IsNullOrEmpty(currentCatId)) {
+        filterName = categoryRows.FirstOrDefault(c => c.GetValueOrDefault("Id")?.ToString() == currentCatId)?.GetValueOrDefault("Name")?.ToString();
+    }
+
+    string PostUrl(object? id) => $"/blog/Page/PostDetail?id={id}";
+    string CategoryFilter(object? id) => $"/blog?categoryId={id}";
+    string TagFilter(object? id) => $"/blog?tagId={id}";
+
+    string FormatDate(object? val)
+    {
+        if (val is null) return "";
+        if (DateTime.TryParse(val.ToString(), out var dt))
+            return dt.ToString("yyyy年M月d日");
+        return val.ToString() ?? "";
+    }
+}
+
+<!-- ヒーローセクション（特集記事） -->
+@if (featuredRows.Any())
+{
+    <section class="bg-gradient-to-br from-primary/5 to-secondary/5 py-12 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="badge badge-primary badge-lg">⭐ 特集記事</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var post in featuredRows)
+                {
+                    var postId       = post.GetValueOrDefault("Id");
+                    var title        = post.GetValueOrDefault("Title")?.ToString() ?? "";
+                    var summary      = post.GetValueOrDefault("Summary")?.ToString() ?? "";
+                    var category     = post.GetValueOrDefault("CategoryName")?.ToString() ?? "";
+                    var categoryColor= post.GetValueOrDefault("CategoryColor")?.ToString() ?? "#6366f1";
+                    var author       = post.GetValueOrDefault("AuthorName")?.ToString() ?? "";
+                    var pubDate      = FormatDate(post.GetValueOrDefault("PublishedAt"));
+                    var viewCount    = post.GetValueOrDefault("ViewCount");
+
+                    <a href="@PostUrl(postId)" class="card bg-base-100 shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 border border-base-200">
+                        <div class="card-body p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="badge badge-sm text-white text-xs font-medium px-2 py-1"
+                                      style="background-color: @categoryColor">@category</span>
+                                <span class="badge badge-warning badge-sm text-xs">⭐ 特集</span>
+                            </div>
+                            <h2 class="card-title text-lg font-bold leading-snug line-clamp-2 hover:text-primary transition-colors">
+                                @title
+                            </h2>
+                            @if (!string.IsNullOrEmpty(summary))
+                            {
+                                <p class="text-sm text-base-content/60 mt-1 line-clamp-2">@summary</p>
+                            }
+                            <div class="flex items-center justify-between mt-4 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    @author
+                                </span>
+                                <span>@pubDate</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- メインレイアウト：記事一覧 + サイドバー -->
+<div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex flex-col lg:flex-row gap-10">
+
+        <!-- 記事一覧 -->
+        <main class="flex-1 min-w-0">
+            @if (!string.IsNullOrEmpty(filterName))
+            {
+                <div class="mb-6 flex items-center justify-between bg-primary/5 px-4 py-3 rounded-lg border border-primary/10">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-base-content/60">フィルタ中:</span>
+                        <span class="badge badge-primary">@filterName</span>
+                    </div>
+                    <a href="/blog" class="text-xs link link-hover text-base-content/50">フィルタを解除</a>
+                </div>
+            }
+
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-6-4h2"/>
+                </svg>
+                @(string.IsNullOrEmpty(filterName) ? "最新記事" : $"{filterName} の記事")
+                <span class="text-sm font-normal text-base-content/50 ml-1">（@postTotal 件）</span>
+            </h2>
+
+            @if (!postRows.Any())
+            {
+                <div class="text-center py-20 text-base-content/40">
+                    <p class="text-4xl mb-3">📭</p>
+                    <p class="text-lg">記事がまだありません</p>
+                </div>
+            }
+            else
+            {
+                <div class="space-y-6">
+                    @foreach (var post in postRows)
+                    {
+                        var postId        = post.GetValueOrDefault("Id");
+                        var title         = post.GetValueOrDefault("Title")?.ToString() ?? "";
+                        var summary       = post.GetValueOrDefault("Summary")?.ToString() ?? "";
+                        var category      = post.GetValueOrDefault("CategoryName")?.ToString() ?? "";
+                        var categoryColor = post.GetValueOrDefault("CategoryColor")?.ToString() ?? "#6366f1";
+                        var author        = post.GetValueOrDefault("AuthorName")?.ToString() ?? "";
+                        var pubDate       = FormatDate(post.GetValueOrDefault("PublishedAt"));
+                        var viewCount     = post.GetValueOrDefault("ViewCount")?.ToString() ?? "0";
+                        var commentCount  = post.GetValueOrDefault("CommentCount")?.ToString() ?? "0";
+                        var tagsRaw       = post.GetValueOrDefault("Tags")?.ToString() ?? "";
+
+                        <article class="card bg-base-100 border border-base-200 hover:shadow-md transition-all duration-200">
+                            <div class="card-body p-6">
+                                <div class="flex items-center gap-2 flex-wrap mb-2">
+                                    <span class="badge badge-sm text-white font-medium"
+                                          style="background-color: @categoryColor">@category</span>
+                                </div>
+                                <a href="@PostUrl(postId)" class="group">
+                                    <h3 class="text-xl font-bold group-hover:text-primary transition-colors leading-snug mb-2">
+                                        @title
+                                    </h3>
+                                </a>
+                                @if (!string.IsNullOrEmpty(summary))
+                                {
+                                    <p class="text-sm text-base-content/60 line-clamp-3 mb-3">@summary</p>
+                                }
+
+                                @if (!string.IsNullOrEmpty(tagsRaw))
+                                {
+                                    <div class="flex flex-wrap gap-1.5 mb-4">
+                                        @foreach (var tagPart in tagsRaw.Split('|'))
+                                        {
+                                            var parts = tagPart.Split(':');
+                                            if (parts.Length == 2)
+                                            {
+                                                <a href="@TagFilter(parts[0])" class="text-[10px] px-1.5 py-0.5 rounded bg-base-200 text-base-content/70 hover:bg-primary hover:text-primary-content transition-colors">
+                                                    #@parts[1]
+                                                </a>
+                                            }
+                                        }
+                                    </div>
+                                }
+
+                                <div class="flex items-center justify-between text-xs text-base-content/50 pt-3 border-t border-base-200">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
+                                            @author
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            @pubDate
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            @viewCount
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                            </svg>
+                                            @commentCount
+                                        </span>
+                                        <a href="@PostUrl(postId)" class="btn btn-primary btn-xs rounded-full">続きを読む →</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+
+                <!-- ページネーション -->
+                @if (totalPages > 1)
+                {
+                    <div class="flex justify-center mt-10">
+                        <div class="join">
+                            @if (currentPage > 1)
+                            {
+                                <a href="?_page=@(currentPage - 1)" class="join-item btn btn-sm">«</a>
+                            }
+                            @for (int p = Math.Max(1, currentPage - 2); p <= Math.Min(totalPages, currentPage + 2); p++)
+                            {
+                                if (p == currentPage)
+                                {
+                                    <button class="join-item btn btn-sm btn-active">@p</button>
+                                }
+                                else
+                                {
+                                    <a href="?_page=@p" class="join-item btn btn-sm">@p</a>
+                                }
+                            }
+                            @if (currentPage < totalPages)
+                            {
+                                <a href="?_page=@(currentPage + 1)" class="join-item btn btn-sm">»</a>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </main>
+
+        <!-- サイドバー -->
+        <aside class="w-full lg:w-64 shrink-0 space-y-6">
+
+            <!-- カテゴリ -->
+            <div class="card bg-base-100 border border-base-200">
+                <div class="card-body p-5">
+                    <h3 class="card-title text-base mb-3">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
+                        カテゴリ
+                    </h3>
+                    <ul class="space-y-1">
+                        @foreach (var cat in categoryRows)
+                        {
+                            var catId    = cat.GetValueOrDefault("Id");
+                            var catName  = cat.GetValueOrDefault("Name")?.ToString() ?? "";
+                            var catColor = cat.GetValueOrDefault("Color")?.ToString() ?? "#6366f1";
+                            var catCount = cat.GetValueOrDefault("PostCount")?.ToString() ?? "0";
+                            <li>
+                                <a href="@CategoryFilter(catId)" class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-base-200 transition-colors">
+                                    <span class="flex items-center gap-2 text-sm">
+                                        <span class="w-2 h-2 rounded-full" style="background-color: @catColor"></span>
+                                        @catName
+                                    </span>
+                                    <span class="badge badge-sm">@catCount</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <!-- タグ -->
+            @if (tagRows.Any())
+            {
+                <div class="card bg-base-100 border border-base-200">
+                    <div class="card-body p-5">
+                        <h3 class="card-title text-base mb-3">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                            </svg>
+                            タグ
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var tag in tagRows)
+                            {
+                                var tagId    = tag.GetValueOrDefault("Id");
+                                var tagName  = tag.GetValueOrDefault("Name")?.ToString() ?? "";
+                                var tagCount = tag.GetValueOrDefault("PostCount")?.ToString() ?? "0";
+                                <a href="@TagFilter(tagId)" class="badge badge-outline badge-sm hover:badge-primary transition-colors">
+                                    @tagName <span class="opacity-60 ml-1">@tagCount</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </aside>
+    </div>
+
+    <!-- ページ下部のタグクラウド -->
+    @if (tagRows.Any())
+    {
+        <div class="mt-16 pt-10 border-t border-base-200">
+            <h3 class="text-lg font-bold mb-6 flex items-center gap-2 justify-center">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                人気のタグ
+            </h3>
+            <div class="flex flex-wrap gap-3 justify-center max-w-3xl mx-auto">
+                @foreach (var tag in tagRows)
+                {
+                    var tagId    = tag.GetValueOrDefault("Id");
+                    var tagName  = tag.GetValueOrDefault("Name")?.ToString() ?? "";
+                    var tagCount = tag.GetValueOrDefault("PostCount")?.ToString() ?? "0";
+                    var isActiveTag = !string.IsNullOrEmpty(currentTagId) && tagId?.ToString() == currentTagId;
+                    <a href="@TagFilter(tagId)" class="btn @(isActiveTag ? "btn-primary" : "btn-outline") btn-sm hover:btn-primary normal-case font-medium">
+                        #@tagName <span class="opacity-50 ml-1 text-xs">(@tagCount)</span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>

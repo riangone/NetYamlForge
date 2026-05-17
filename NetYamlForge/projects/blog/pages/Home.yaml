@@ -1,80 +1,137 @@
-title: "博客首页"
-description: "欢迎来到我的个人博客"
-isPublic: true
+title: ブログ ホーム
+description: "KPI サマリー・最新記事・コメント状況を一覧で確認"
 
 sections:
-  - id: hero
-    title: "✨ 探索"
-    component: markdown
-    sourceType: custom
-    source: "SELECT 'hero' AS id"
-    content: |
-      <div class="hero min-h-[40vh] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl mb-12 overflow-hidden border border-base-300 shadow-sm">
-        <div class="hero-content text-center py-16">
-          <div class="max-w-2xl">
-            <h1 class="text-6xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-              NetYamlForge Blog
-            </h1>
-            <p class="text-xl opacity-80 mb-8 font-medium">
-              探索技术边界，分享架构心得。
-              <br/>
-              这里是思考的实验室，也是创意的停泊港。
-            </p>
-            <div class="flex flex-wrap gap-4 justify-center">
-              <a href="/blog/Page/Search" class="btn btn-primary rounded-full px-8 shadow-lg shadow-primary/20">🔍 搜索文章</a>
-              <a href="/blog/Page/Archive" class="btn btn-ghost bg-base-100 rounded-full px-8 border-base-300">📅 归档</a>
-              <a href="/blog/Page/Tags" class="btn btn-ghost bg-base-100 rounded-full px-8 border-base-300">🏷️ 标签</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-  - id: featured_categories
-    title: "📁 热门分类"
-    component: cards
+  # KPI サマリーカード
+  - id: kpi_summary
+    title: コンテンツ KPI
+    component: stat_cards
     sourceType: custom
     source: |
-      SELECT 
-        id,
-        name AS title,
-        description,
-        '/blog/Page/Home?category_id=' || id AS url
-      FROM categories
-      LIMIT 4
-    columns: [id, title, description, url]
-    titleField: title
-    descriptionField: description
-    urlField: url
-    class: "grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
+      SELECT '総記事数'      AS metric_name, CAST(COUNT(*) AS TEXT)                                        AS metric_value, '📝' AS metric_icon, NULL AS metric_delta FROM Post
+      UNION ALL
+      SELECT '公開中',        CAST(COUNT(*) AS TEXT), '✅', NULL FROM Post WHERE Status='published'
+      UNION ALL
+      SELECT '下書き',        CAST(COUNT(*) AS TEXT), '✏️', NULL FROM Post WHERE Status='draft'
+      UNION ALL
+      SELECT '総閲覧数',      CAST(SUM(ViewCount) AS TEXT), '👁️', NULL FROM Post WHERE Status='published'
+      UNION ALL
+      SELECT '承認待ちコメント', CAST(COUNT(*) AS TEXT), '⏳', NULL FROM Comment WHERE Status='pending'
+      UNION ALL
+      SELECT '総コメント数',  CAST(COUNT(*) AS TEXT), '💬', NULL FROM Comment WHERE Status='approved'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
 
-  - id: post_list
-    title: "✍️ 最新文章"
-    component: card_list
+  # 最新公開記事
+  - id: recent_published
+    title: 最近公開された記事
+    component: table
     sourceType: custom
     source: |
-      SELECT 
-        p.id,
-        p.title,
-        p.summary AS subtitle,
-        c.name AS badge,
-        strftime('%Y-%m-%d', p.published_at) AS description,
-        '/blog/Page/PostDetail?id=' || p.id AS url,
-        COALESCE(p.view_count, 0) || ' views' AS meta
-      FROM posts p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.status = 'published'
-        AND (@category_id IS NULL OR p.category_id = @category_id)
-        AND (@tag_id IS NULL OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_id = p.id AND pt.tag_id = @tag_id))
-        AND (@month IS NULL OR strftime('%Y-%m', p.published_at) = @month)
-      ORDER BY p.published_at DESC
-      LIMIT 20
-    columns: [id, title, subtitle, badge, description, url, meta]
-    titleField: title
-    subtitleField: subtitle
-    badgeField: badge
-    descriptionField: description
-    actions:
-      - label: "阅读全文"
-        url: "{url}"
-        class: "btn-primary btn-sm rounded-full"
+      SELECT
+        p.Id,
+        p.Title    AS タイトル,
+        bc.Name    AS カテゴリ,
+        p.AuthorName AS 著者,
+        p.ViewCount  AS 閲覧数,
+        p.PublishedAt AS 公開日時
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'published'
+      ORDER BY p.PublishedAt DESC
+      LIMIT 10
+    columns: [Id, タイトル, カテゴリ, 著者, 閲覧数, 公開日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
 
+  # 特集記事
+  - id: featured_posts
+    title: 特集記事
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title     AS タイトル,
+        bc.Name     AS カテゴリ,
+        p.AuthorName AS 著者,
+        p.ViewCount  AS 閲覧数,
+        p.PublishedAt AS 公開日時
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.FeaturedFlag = 1 AND p.Status = 'published'
+      ORDER BY p.ViewCount DESC
+    columns: [Id, タイトル, カテゴリ, 著者, 閲覧数, 公開日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # 人気記事ランキング（閲覧数）
+  - id: top_posts
+    title: 人気記事ランキング（閲覧数）
+    component: leaderboard
+    sourceType: custom
+    source: |
+      SELECT
+        p.Title        AS post_title,
+        bc.Name        AS category_name,
+        p.ViewCount    AS view_count
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'published'
+      ORDER BY p.ViewCount DESC
+      LIMIT 10
+    columns: [post_title, category_name, view_count]
+    nameField: post_title
+    valueField: view_count
+    avatarField: category_name
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # カテゴリ別記事数
+  - id: category_dist
+    title: カテゴリ別記事数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT bc.Name AS label, COUNT(p.Id) AS value
+      FROM BlogCategory bc
+      LEFT JOIN Post p ON p.CategoryId = bc.Id AND p.Status = 'published'
+      GROUP BY bc.Id, bc.Name
+      ORDER BY bc.SortOrder
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(99,102,241,0.75)"
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 承認待ちコメント
+  - id: pending_comments
+    title: 承認待ちコメント
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.Id,
+        p.Title      AS 記事タイトル,
+        c.AuthorName AS 投稿者,
+        c.Content    AS コメント,
+        c.CreatedAt  AS 投稿日時
+      FROM Comment c
+      LEFT JOIN Post p ON c.PostId = p.Id
+      WHERE c.Status = 'pending'
+      ORDER BY c.CreatedAt ASC
+    columns: [Id, 記事タイトル, 投稿者, コメント, 投稿日時]
+    pageSize: 10
+    editable: false
+    readOnly: true

@@ -1,82 +1,97 @@
-title: "文章详情"
-description: "正在阅读文章"
+title: 記事詳細
+description: "個別記事表示 — ログイン不要"
 isPublic: true
 
 sections:
-  - id: post_content
-    title: "📖 文章内容"
-    component: markdown
-    sourceType: custom
-    source: |
-      SELECT 
-        '# ' || title || CHAR(10) || 
-        '<div class="flex gap-4 items-center opacity-60 mb-8 text-sm">' ||
-        '<span>📅 ' || strftime('%Y-%m-%d', published_at) || '</span>' ||
-        '<span>📁 ' || (SELECT name FROM categories WHERE id = posts.category_id) || '</span>' ||
-        '<span>👁️ ' || COALESCE(view_count, 0) || ' views</span>' ||
-        '</div>' ||
-        CHAR(10) || CHAR(10) ||
-        content AS markdown_content
-      FROM posts
-      WHERE id = @id
-    columns: [markdown_content]
-    contentField: markdown_content
-    class: "prose prose-lg max-w-none bg-base-100 p-8 rounded-3xl shadow-sm border border-base-200 mb-8"
-
-  - id: post_tags
-    title: "🏷️ 标签"
-    component: markdown
-    sourceType: custom
-    source: |
-      SELECT 
-        '<div class="flex flex-wrap gap-2">' ||
-        GROUP_CONCAT('<a href="/blog/Page/Home?tag_id=' || t.id || '" class="badge badge-lg badge-outline hover:badge-primary transition-all">' || t.name || '</a>', '') ||
-        '</div>' AS tags_html
-      FROM tags t
-      JOIN post_tags pt ON t.id = pt.tag_id
-      WHERE pt.post_id = @id
-    columns: [tags_html]
-    contentField: tags_html
-    class: "mb-12"
-
-  - id: related_posts
-    title: "🔗 相关推荐"
-    component: card_list
-    sourceType: custom
-    source: |
-      SELECT 
-        p.id,
-        p.title,
-        p.summary AS subtitle,
-        '相关' AS badge,
-        '/blog/Page/PostDetail?id=' || p.id AS url
-      FROM posts p
-      WHERE p.category_id = (SELECT category_id FROM posts WHERE id = @id)
-        AND p.id <> @id
-        AND p.status = 'published'
-      LIMIT 3
-    columns: [id, title, subtitle, badge, url]
-    titleField: title
-    subtitleField: subtitle
-    badgeField: badge
-    actions:
-      - label: "阅读"
-        url: "{url}"
-        class: "btn-ghost btn-sm rounded-full"
-    class: "grid-cols-1 md:grid-cols-3 gap-4"
-
-
-  - id: comments
-    title: "💬 评论"
+  # 記事本文（@id を URL クエリから受け取る）
+  - id: post
+    title: 記事
     component: table
     sourceType: custom
     source: |
-      SELECT 
-        c.author_name AS user,
-        c.content,
-        c.created_at AS date
-      FROM comments c
-      WHERE c.post_id = @id AND c.status = 'approved'
-      ORDER BY c.created_at DESC
-    columns: [user, content, date]
+      SELECT
+        p.Id,
+        p.Title,
+        p.Slug,
+        p.Summary,
+        p.Content,
+        p.CoverImage,
+        bc.Id    AS CategoryId,
+        bc.Name  AS CategoryName,
+        bc.Color AS CategoryColor,
+        p.AuthorName,
+        p.PublishedAt,
+        p.ViewCount
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Id = @id AND p.Status = 'published'
+      LIMIT 1
+    columns: [Id, Title, Slug, Summary, Content, CoverImage, CategoryId, CategoryName, CategoryColor, AuthorName, PublishedAt, ViewCount]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # この記事のタグ
+  - id: post_tags
+    title: タグ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT t.Id, t.Name
+      FROM Tag t
+      INNER JOIN PostTag pt ON t.Id = pt.TagId
+      WHERE pt.PostId = @id
+      ORDER BY t.Name
+    columns: [Id, Name]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 承認済みコメント
+  - id: comments
+    title: コメント
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.Id,
+        c.AuthorName,
+        c.Content,
+        c.CreatedAt
+      FROM Comment c
+      WHERE c.PostId = @id AND c.Status = 'approved'
+      ORDER BY c.CreatedAt ASC
+    columns: [Id, AuthorName, Content, CreatedAt]
     pageSize: 50
+    editable: false
+    readOnly: true
+
+  # コメント投稿フォーム
+  - id: comment_form
+    title: コメントを投稿する
+    component: comment_form
+    sourceType: none
+
+  # 関連記事（同じカテゴリ）
+  - id: related
+    title: 関連記事
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title,
+        p.AuthorName,
+        p.PublishedAt,
+        bc.Name AS CategoryName
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.CategoryId = (SELECT CategoryId FROM Post WHERE Id = @id)
+        AND p.Id != @id
+        AND p.Status = 'published'
+      ORDER BY p.PublishedAt DESC
+      LIMIT 4
+    columns: [Id, Title, AuthorName, PublishedAt, CategoryName]
+    pageSize: 4
+    editable: false
+    readOnly: true

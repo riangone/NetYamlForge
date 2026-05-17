@@ -80,8 +80,8 @@ public class TenantAccountController : Controller
             new("user_type", user.UserType),
         };
 
-        // 添加 Admin 角色 Claim（admin 用户或 employee 类型用户）
-        if (user.UserName == "admin" || user.UserType == "employee")
+        // 添加 Admin 角色 Claim（is_admin フラグで判定）
+        if (user.IsAdmin)
         {
             claims.Add(new Claim(ClaimTypes.Role, "Admin"));
         }

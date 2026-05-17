@@ -127,11 +127,11 @@ public class PageController : BaseProjectController
         if (System.IO.File.Exists(projectViewPath))
         {
             // プロジェクト固有のビューを使用（Layout もプロジェクト固有のものを使用）
-            var layoutPath = $"/projects/{proj.Name}/views/_Layout.cshtml";
+            var layoutPath = $"~/projects/{proj.Name}/views/_Layout.cshtml";
             ViewBag.LayoutPath = System.IO.File.Exists(Path.Combine(proj.ProjectDir, "views", "_Layout.cshtml"))
                 ? layoutPath
                 : "_Layout";
-            return View($"/projects/{proj.Name}/views/{pageName}.cshtml", model);
+            return View($"~/projects/{proj.Name}/views/{pageName}.cshtml", model);
         }
 
         // ProjectViewLocationExpander が projects/{project}/views/{template}.cshtml を解決する
@@ -140,11 +140,11 @@ public class PageController : BaseProjectController
             var templatePath = Path.Combine(proj.ProjectDir, "views", pageDef.Template + ".cshtml");
             if (System.IO.File.Exists(templatePath))
             {
-                var layoutPath = $"/projects/{proj.Name}/views/_Layout.cshtml";
+                var layoutPath = $"~/projects/{proj.Name}/views/_Layout.cshtml";
                 ViewBag.LayoutPath = System.IO.File.Exists(Path.Combine(proj.ProjectDir, "views", "_Layout.cshtml"))
                     ? layoutPath
                     : "_Layout";
-                return View($"/projects/{proj.Name}/views/{pageDef.Template}.cshtml", model);
+                return View($"~/projects/{proj.Name}/views/{pageDef.Template}.cshtml", model);
             }
         }
 

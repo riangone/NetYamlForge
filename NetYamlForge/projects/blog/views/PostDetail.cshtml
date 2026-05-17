@@ -1,0 +1,304 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/blog/views/_Layout.cshtml";
+
+    var project = Context.GetRouteValue("project")?.ToString() ?? "blog";
+
+    var postRows     = Model.ContainsKey("post")       ? Model["post"].Rows.ToList()       : new();
+    var tagRows      = Model.ContainsKey("post_tags")  ? Model["post_tags"].Rows.ToList()  : new();
+    var commentRows  = Model.ContainsKey("comments")   ? Model["comments"].Rows.ToList()   : new();
+    var relatedRows  = Model.ContainsKey("related")    ? Model["related"].Rows.ToList()    : new();
+
+    var post = postRows.FirstOrDefault();
+
+    var title         = post?.GetValueOrDefault("Title")?.ToString() ?? "";
+    var content       = post?.GetValueOrDefault("Content")?.ToString() ?? "";
+    var summary       = post?.GetValueOrDefault("Summary")?.ToString() ?? "";
+    var coverImage    = post?.GetValueOrDefault("CoverImage")?.ToString();
+    var categoryName  = post?.GetValueOrDefault("CategoryName")?.ToString() ?? "";
+    var categoryColor = post?.GetValueOrDefault("CategoryColor")?.ToString() ?? "#6366f1";
+    var authorName    = post?.GetValueOrDefault("AuthorName")?.ToString() ?? "";
+    var postId        = post?.GetValueOrDefault("Id");
+    var viewCount     = post?.GetValueOrDefault("ViewCount")?.ToString() ?? "0";
+
+    string FormatDate(object? val)
+    {
+        if (val is null) return "";
+        if (DateTime.TryParse(val.ToString(), out var dt))
+            return dt.ToString("yyyy年M月d日");
+        return val.ToString() ?? "";
+    }
+    var pubDate = post is not null ? FormatDate(post.GetValueOrDefault("PublishedAt")) : "";
+
+    ViewData["Title"] = title;
+
+    var commentSuccess = TempData["CommentSuccess"]?.ToString();
+    var commentError   = TempData["CommentError"]?.ToString();
+    var blogHomeUrl    = $"/blog";
+    string TagFilter(object? id) => $"/blog?tagId={id}";
+    string CategoryFilter(object? id) => $"/blog?categoryId={id}";
+}
+
+@if (post is null)
+{
+    <div class="max-w-3xl mx-auto px-4 py-24 text-center text-base-content/40">
+        <p class="text-5xl mb-4">📭</p>
+        <h1 class="text-2xl font-bold mb-2">記事が見つかりません</h1>
+        <p class="mb-6 text-sm">指定された記事は存在しないか、非公開です。</p>
+        <a href="@blogHomeUrl" class="btn btn-primary btn-sm rounded-full">← ブログに戻る</a>
+    </div>
+}
+else
+{
+    <!-- パンくずリスト -->
+    <div class="max-w-4xl mx-auto px-4 pt-8">
+        <nav class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="@blogHomeUrl" class="text-primary hover:underline">ブログ</a></li>
+                @if (!string.IsNullOrEmpty(categoryName))
+                {
+                    <li class="text-base-content/50">@categoryName</li>
+                }
+                <li class="text-base-content/70 truncate max-w-xs">@title</li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- 記事本文 -->
+    <article class="max-w-4xl mx-auto px-4 pb-12">
+
+        <!-- 記事ヘッダー -->
+        <header class="mb-8 mt-4">
+            <div class="flex items-center gap-2 mb-4 flex-wrap">
+                @if (!string.IsNullOrEmpty(categoryName))
+                {
+                    <a href="@CategoryFilter(post?.GetValueOrDefault("CategoryId"))" class="badge text-white font-medium hover:opacity-80 transition-opacity"
+                          style="background-color: @categoryColor">@categoryName</a>
+                }
+                @foreach (var tag in tagRows)
+                {
+                    <a href="@TagFilter(tag.GetValueOrDefault("Id"))" class="badge badge-outline badge-sm hover:badge-primary transition-colors">@(tag.GetValueOrDefault("Name")?.ToString() ?? "")</a>
+                }
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4 text-base-content">
+                @title
+            </h1>
+
+            @if (!string.IsNullOrEmpty(summary))
+            {
+                <p class="text-lg text-base-content/60 leading-relaxed mb-4">@summary</p>
+            }
+
+            <div class="flex items-center gap-4 text-sm text-base-content/50 pb-6 border-b border-base-200">
+                <span class="flex items-center gap-1.5">
+                    <span class="avatar avatar-xs placeholder">
+                        <div class="bg-primary/10 text-primary rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold">
+                            @(authorName.Length > 0 ? authorName[0].ToString() : "A")
+                        </div>
+                    </span>
+                    <span class="font-medium text-base-content">@authorName</span>
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    @pubDate
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    @viewCount 閲覧
+                </span>
+                <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                    @commentRows.Count コメント
+                </span>
+            </div>
+        </header>
+
+        <!-- カバー画像 -->
+        @if (!string.IsNullOrEmpty(coverImage))
+        {
+            <div class="mb-8 rounded-xl overflow-hidden shadow">
+                <img src="@coverImage" alt="@title" class="w-full object-cover max-h-96" />
+            </div>
+        }
+
+        <!-- 本文（Markdown レンダリング） -->
+        <div id="post-content" class="prose-blog min-h-32">
+            <div id="post-raw" class="hidden">@content</div>
+        </div>
+
+        <!-- 記事フッター -->
+        <div class="mt-10 pt-6 border-t border-base-200 flex items-center justify-between flex-wrap gap-3">
+            <a href="@blogHomeUrl" class="btn btn-ghost btn-sm gap-1">
+                ← ブログ一覧に戻る
+            </a>
+            <div class="flex gap-2">
+                @foreach (var tag in tagRows)
+                {
+                    <a href="@TagFilter(tag.GetValueOrDefault("Id"))" class="badge badge-outline hover:badge-primary transition-colors">@(tag.GetValueOrDefault("Name")?.ToString() ?? "")</a>
+                }
+            </div>
+        </div>
+    </article>
+
+    <!-- 関連記事 -->
+    @if (relatedRows.Any())
+    {
+        <section class="max-w-4xl mx-auto px-4 mb-12">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                関連記事
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @foreach (var related in relatedRows)
+                {
+                    var rId     = related.GetValueOrDefault("Id");
+                    var rTitle  = related.GetValueOrDefault("Title")?.ToString() ?? "";
+                    var rAuthor = related.GetValueOrDefault("AuthorName")?.ToString() ?? "";
+                    var rDate   = FormatDate(related.GetValueOrDefault("PublishedAt"));
+                    <a href="/@project/Page/PostDetail?id=@rId"
+                       class="card bg-base-100 border border-base-200 hover:shadow-md hover:border-primary/30 transition-all duration-200 p-4">
+                        <p class="font-semibold text-sm hover:text-primary leading-snug line-clamp-2">@rTitle</p>
+                        <p class="text-xs text-base-content/50 mt-2">@rAuthor · @rDate</p>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+
+    <!-- コメントセクション -->
+    <section id="comments" class="max-w-4xl mx-auto px-4 mb-16">
+        <div class="divider"></div>
+        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            コメント (@commentRows.Count)
+        </h2>
+
+        <!-- コメント一覧 -->
+        @if (commentRows.Any())
+        {
+            <div class="space-y-4 mb-8">
+                @foreach (var comment in commentRows)
+                {
+                    var cAuthor  = comment.GetValueOrDefault("AuthorName")?.ToString() ?? "匿名用户";
+                    var cContent = comment.GetValueOrDefault("Content")?.ToString() ?? "";
+                    var cDate    = FormatDate(comment.GetValueOrDefault("CreatedAt"));
+                    <div class="flex gap-3">
+                        <div class="avatar placeholder shrink-0">
+                            <div class="bg-neutral/10 text-neutral rounded-full w-9 h-9 flex items-center justify-center text-sm font-bold">
+                                @(cAuthor.Length > 0 ? cAuthor[0].ToString() : "?")
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-base-200 rounded-2xl rounded-tl-none px-4 py-3">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold text-sm">@cAuthor</span>
+                                <span class="text-xs text-base-content/40">@cDate</span>
+                            </div>
+                            <p class="text-sm text-base-content/80 whitespace-pre-wrap">@cContent</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-sm text-base-content/40 mb-8 text-center py-6">暂无评论。来抢沙发吧！</p>
+        }
+
+        <!-- コメント投稿フォーム -->
+        <div class="card bg-base-100 border border-base-200 shadow-sm">
+            <div class="card-body p-6">
+                <h3 class="font-bold text-base mb-4">💬 发表留言</h3>
+
+                @if (!string.IsNullOrEmpty(commentSuccess))
+                {
+                    <div class="alert alert-success mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>@commentSuccess</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(commentError))
+                {
+                    <div class="alert alert-error mb-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>@commentError</span>
+                    </div>
+                }
+
+                <form method="post" action="/@project/BlogPublic/SubmitComment" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="postId" value="@postId" />
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">昵称 <span class="text-base-content/40 text-xs">（可选，不填则显示匿名）</span></span>
+                            </label>
+                            <input type="text" name="authorName" maxlength="100"
+                                   placeholder="您的称呼"
+                                   class="input input-bordered input-sm w-full" />
+                        </div>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">电子邮箱 <span class="text-base-content/40 text-xs">（可选，不公开）</span></span>
+                            </label>
+                            <input type="email" name="authorEmail" maxlength="200"
+                                   placeholder="mail@example.com"
+                                   class="input input-bordered input-sm w-full" />
+                        </div>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">内容 <span class="text-error">*</span></span>
+                        </label>
+                        <textarea name="content" required maxlength="2000" rows="4"
+                                  placeholder="写下您的评论..."
+                                  class="textarea textarea-bordered w-full text-sm"></textarea>
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/40">评论将在审核后公开显示</span>
+                        </label>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-full gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                            发表评论
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+<script>
+    // Markdown レンダリング
+    (function () {
+        const rawEl = document.getElementById('post-raw');
+        const contentEl = document.getElementById('post-content');
+        if (!rawEl || !contentEl || typeof marked === 'undefined') return;
+
+        marked.setOptions({ breaks: true, gfm: true });
+        contentEl.innerHTML = marked.parse(rawEl.textContent || '');
+    })();
+</script>
+}

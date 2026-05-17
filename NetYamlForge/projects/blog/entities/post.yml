@@ -1,51 +1,288 @@
+imports: []
 entities:
   post:
-    table: 'posts'
-    key: 'id'
-    displayName: 'Post'
+    table: Post
+    key: Id
+    displayName: 記事
     softDelete: false
-    paging:
-      pageSize: 20
-      mode: numbered
-    layout:
-      forms:
-        columns: 2
-        order: ['title', 'slug', 'summary', 'content', 'author_id', 'category_id', 'status', 'is_featured', 'view_count', 'published_at', 'created_at', 'updated_at']
-      filters:
-        columns: 4
-        order: []
-    columns:
-      id: { type: int, identity: true, label: 'Id', sortable: true }
-      title: { type: string, required: true, label: 'Title', searchable: true, sortable: true }
-      slug: { type: string, required: true, label: 'Slug', searchable: true, sortable: true }
-      summary: { type: string, label: 'Summary', searchable: true, sortable: true }
-      content: { type: string, required: true, label: 'Content', searchable: true, sortable: true }
-      author_id: { type: int, required: true, label: 'Author Id', sortable: true }
-      category_id: { type: int, label: 'Category Id', sortable: true }
-      status: { type: string, label: 'Status', searchable: true, sortable: true }
-      is_featured: { type: int, label: 'Is Featured', sortable: true }
-      view_count: { type: int, label: 'View Count', sortable: true }
-      published_at: { type: datetime, label: 'Published At', sortable: true }
-      created_at: { type: datetime, label: 'Created At', sortable: true }
-      updated_at: { type: datetime, label: 'Updated At', sortable: true }
+    isPublic: false
+
+    joins:
+      - type: left
+        table: BlogCategory
+        alias: bc
+        on: Post.CategoryId = bc.Id
+
     forms:
-      title: { type: string, required: true, label: 'Title', editable: true }
-      slug: { type: string, required: true, label: 'Slug', editable: true }
-      summary: { type: string, label: 'Summary', editable: true }
-      content: { type: string, required: true, label: 'Content', editable: true }
-      author_id: { type: int, required: true, label: 'Author Id', editable: true }
-      category_id:
+      Title:
+        type: string
+        required: true
+        label: 标题
+        editable: true
+      Slug:
+        type: string
+        required: true
+        label: 别名 (Slug)
+        editable: true
+      Summary:
+        type: textarea
+        label: 摘要
+        editable: true
+      Content:
+        type: markdown
+        label: 内容 (Markdown)
+        editable: true
+      CoverImage:
+        type: string
+        label: 封面图 URL
+        editable: true
+      CategoryId:
         type: int
-        label: 'Category Id'
+        label: 分类
         editable: true
         foreignKey:
           entity: category
-          displayColumn: 'name'
-      status: { type: string, label: 'Status', editable: true }
-      is_featured: { type: int, label: 'Is Featured', editable: true }
-      view_count: { type: int, label: 'View Count', editable: true }
-      published_at: { type: datetime, label: 'Published At', editable: true }
-      created_at: { type: datetime, label: 'Created At', editable: true }
-      updated_at: { type: datetime, label: 'Updated At', editable: true }
-    filters: {}
-    links: {}
+          displayColumn: Name
+          picker: false
+          multiPicker: false
+      AuthorName:
+        type: string
+        required: true
+        label: 作者
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: 状态
+        editable: true
+        options:
+          - draft
+          - published
+          - archived
+      FeaturedFlag:
+        type: int
+        label: 推荐文章
+        editable: true
+        options:
+          - 0
+          - 1
+      ViewCount:
+        type: int
+        label: 阅读量
+        editable: false
+      PublishedAt:
+        type: datetime
+        label: 发布时间
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: 标题
+        searchable: true
+        sortable: true
+      Slug:
+        type: string
+        label: 别名
+        searchable: true
+        sortable: false
+      CategoryId:
+        type: int
+        label: 分类 ID
+        hidden: true
+      CategoryName:
+        type: string
+        label: 分类
+        expression: bc.Name
+        searchable: true
+        sortable: true
+      AuthorName:
+        type: string
+        label: 作者
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        label: 状态
+        sortable: true
+      FeaturedFlag:
+        type: int
+        label: 推荐
+        sortable: true
+      ViewCount:
+        type: int
+        label: 阅读量
+        sortable: true
+      PublishedAt:
+        type: datetime
+        label: 发布时间
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 创建时间
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新时间
+        sortable: true
+      Summary:
+        type: string
+        label: 摘要
+        searchable: true
+        sortable: false
+
+    hooks:
+      beforeCreate:
+        - generate_slug       # タイトルから Slug を自動生成
+        - sanitize_content    # Content の XSS サニタイズ
+      afterCreate:
+        - audit_log
+      beforeUpdate:
+        - sanitize_content
+        - set_published_at    # Status=published のとき PublishedAt を自動設定
+      afterUpdate:
+        - audit_log
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - Slug
+          - CategoryId
+          - AuthorName
+          - Status
+          - FeaturedFlag
+          - PublishedAt
+          - CoverImage
+          - Summary
+          - Content
+          - ViewCount
+      filters:
+        columns: 3
+        order:
+          - Status
+          - CategoryId
+          - AuthorName
+          - FeaturedFlag
+          - PublishedAt
+
+    filters:
+      Status:
+        type: toggle-group
+        label: 状态
+        optionLabels:
+          draft:     "✏️ 草稿"
+          published: "✅ 已发布"
+          archived:  "📦 已存档"
+      CategoryId:
+        type: dropdown
+        label: 分类
+        expression: Post.CategoryId
+        foreignKey:
+          entity: category
+          displayColumn: Name
+      AuthorName:
+        type: like
+        label: 作者姓名
+      FeaturedFlag:
+        type: toggle-group
+        label: 推荐文章
+        expression: Post.FeaturedFlag
+        optionLabels:
+          "0": "普通"
+          "1": "⭐ 推荐"
+      PublishedAt:
+        type: date-range
+        label: 发布日期
+        expression: Post.PublishedAt
+
+    actions:
+      publish:
+        label: "发布"
+        scope: row
+        confirm: "确定要发布这篇文章吗？"
+        handler: publish_post
+      unpublish:
+        label: "撤回"
+        scope: row
+        confirm: "确定要将这篇文章设为草稿吗？"
+        handler: unpublish_post
+      archive:
+        label: "存档"
+        scope: row
+        confirm: "确定要存档这篇文章吗？"
+        handler: archive_post
+
+    exports:
+      posts_csv:
+        label: "导出 CSV"
+        format: csv
+        filename: "posts_{date:yyyyMMdd}.csv"
+        columns:
+          - Title
+          - CategoryName
+          - AuthorName
+          - Status
+          - ViewCount
+          - PublishedAt
+          - CreatedAt
+      posts_pdf:
+        label: "导出 PDF"
+        format: pdf
+        filename: "posts_{date:yyyyMMdd}.pdf"
+        columns:
+          - Title
+          - CategoryName
+          - AuthorName
+          - Status
+          - ViewCount
+          - PublishedAt
+        pdf:
+          title: "文章列表报表"
+          pageSize: A4
+          orientation: landscape
+          headerColor: "#4338CA"
+          oddRowColor: "#EEF2FF"
+          showPageNumbers: true
+          showGeneratedAt: true
+          columns:
+            - key: Title
+              width: 32
+            - key: CategoryName
+              width: 14
+              align: center
+            - key: AuthorName
+              width: 14
+              align: center
+            - key: Status
+              width: 12
+              align: center
+            - key: ViewCount
+              width: 10
+              align: right
+            - key: PublishedAt
+              width: 18
+              align: center
+
+    links:
+      category:
+        label: 分类详情
+        targetEntity: category
+        filter:
+          Id: CategoryId
+      comments:
+        label: 查看评论
+        targetEntity: comment
+        filter:
+          PostId: Id

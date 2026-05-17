@@ -1,0 +1,103 @@
+title: ブログ
+description: "公開ブログホーム — ログイン不要"
+isPublic: true
+
+sections:
+  # 特集記事（FeaturedFlag=1）
+  - id: featured
+    title: 特集記事
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title,
+        p.Slug,
+        COALESCE(p.Summary, SUBSTR(p.Content, 1, 200)) AS Summary,
+        bc.Name  AS CategoryName,
+        bc.Color AS CategoryColor,
+        p.AuthorName,
+        p.PublishedAt,
+        p.ViewCount
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.FeaturedFlag = 1 AND p.Status = 'published'
+      ORDER BY p.ViewCount DESC
+      LIMIT 3
+    columns: [Id, Title, Slug, Summary, CategoryName, CategoryColor, AuthorName, PublishedAt, ViewCount]
+    pageSize: 3
+    editable: false
+    readOnly: true
+
+  # 最新記事（ページネーション）
+  - id: posts
+    title: 最新記事
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Id,
+        p.Title,
+        p.Slug,
+        COALESCE(p.Summary, SUBSTR(p.Content, 1, 160)) AS Summary,
+        bc.Name  AS CategoryName,
+        bc.Color AS CategoryColor,
+        p.AuthorName,
+        p.PublishedAt,
+        p.ViewCount,
+        (SELECT COUNT(*) FROM Comment c WHERE c.PostId = p.Id AND c.Status = 'approved') AS CommentCount,
+        (SELECT GROUP_CONCAT(t.Id || ':' || t.Name, '|') FROM Tag t JOIN PostTag pt ON t.Id = pt.TagId WHERE pt.PostId = p.Id) AS Tags
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'published'
+        AND (@categoryId IS NULL OR p.CategoryId = @categoryId)
+        AND (@tagId IS NULL OR EXISTS (SELECT 1 FROM PostTag pt WHERE pt.PostId = p.Id AND pt.TagId = @tagId))
+      ORDER BY p.PublishedAt DESC
+    columns: [Id, Title, Slug, Summary, CategoryName, CategoryColor, AuthorName, PublishedAt, ViewCount, CommentCount, Tags]
+    defaultSort: PublishedAt
+    defaultSortDir: desc
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # カテゴリ（サイドバー用）
+  - id: categories
+    title: カテゴリ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        bc.Id,
+        bc.Name,
+        bc.Color,
+        COUNT(p.Id) AS PostCount
+      FROM BlogCategory bc
+      LEFT JOIN Post p ON p.CategoryId = bc.Id AND p.Status = 'published'
+      GROUP BY bc.Id, bc.Name, bc.Color
+      ORDER BY bc.SortOrder
+    columns: [Id, Name, Color, PostCount]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # タグ（サイドバー用）
+  - id: tags
+    title: タグ
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        t.Id,
+        t.Name,
+        COUNT(pt.PostId) AS PostCount
+      FROM Tag t
+      LEFT JOIN PostTag pt ON t.Id = pt.TagId
+      LEFT JOIN Post p ON pt.PostId = p.Id AND p.Status = 'published'
+      GROUP BY t.Id, t.Name
+      HAVING COUNT(pt.PostId) > 0
+      ORDER BY PostCount DESC
+      LIMIT 20
+    columns: [Id, Name, PostCount]
+    pageSize: 20
+    editable: false
+    readOnly: true

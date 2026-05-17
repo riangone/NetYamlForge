@@ -1,0 +1,153 @@
+title: ブログ分析
+description: "記事パフォーマンス・著者別統計・タグ利用状況の詳細分析"
+
+sections:
+  # 月別公開記事数（折れ線グラフ）
+  - id: monthly_posts
+    title: 月別公開記事数
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y-%m', PublishedAt) AS label,
+        COUNT(*) AS value
+      FROM Post
+      WHERE Status = 'published' AND PublishedAt IS NOT NULL
+      GROUP BY strftime('%Y-%m', PublishedAt)
+      ORDER BY label ASC
+      LIMIT 24
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(99,102,241,0.75)"
+    colorBg: "rgba(99,102,241,0.15)"
+    colorBorder: "rgba(99,102,241,1)"
+    pageSize: 30
+    editable: false
+    readOnly: true
+
+  # ステータス別記事数（ドーナツ）
+  - id: status_donut
+    title: ステータス別記事数
+    component: donut_chart
+    sourceType: custom
+    source: |
+      SELECT Status AS label, COUNT(*) AS value
+      FROM Post
+      GROUP BY Status
+      ORDER BY CASE Status WHEN 'published' THEN 1 WHEN 'draft' THEN 2 ELSE 3 END
+    columns: [label, value]
+    labelField: label
+    valueField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # カテゴリ別閲覧数（棒グラフ）
+  - id: category_views
+    title: カテゴリ別総閲覧数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        bc.Name     AS label,
+        SUM(p.ViewCount) AS value
+      FROM BlogCategory bc
+      LEFT JOIN Post p ON p.CategoryId = bc.Id AND p.Status = 'published'
+      GROUP BY bc.Id, bc.Name
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16,185,129,0.75)"
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # 著者別統計（テーブル）
+  - id: author_stats
+    title: 著者別パフォーマンス
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        AuthorName        AS 著者,
+        COUNT(*)          AS 総記事数,
+        SUM(CASE WHEN Status='published' THEN 1 ELSE 0 END) AS 公開数,
+        SUM(CASE WHEN Status='draft'     THEN 1 ELSE 0 END) AS 下書き数,
+        COALESCE(SUM(CASE WHEN Status='published' THEN ViewCount ELSE 0 END), 0) AS 総閲覧数,
+        COALESCE(ROUND(AVG(CASE WHEN Status='published' THEN ViewCount ELSE NULL END)), 0) AS 平均閲覧数
+      FROM Post
+      GROUP BY AuthorName
+      ORDER BY 総閲覧数 DESC
+    columns: [著者, 総記事数, 公開数, 下書き数, 総閲覧数, 平均閲覧数]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # タグ利用ランキング（棒グラフ）
+  - id: tag_ranking
+    title: タグ利用数ランキング
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        t.Name    AS label,
+        COUNT(pt.PostId) AS value
+      FROM Tag t
+      LEFT JOIN PostTag pt ON t.Id = pt.TagId
+      GROUP BY t.Id, t.Name
+      ORDER BY value DESC
+      LIMIT 15
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(236,72,153,0.75)"
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # コメント傾向（月別）
+  - id: monthly_comments
+    title: 月別コメント数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y-%m', CreatedAt) AS label,
+        COUNT(*) AS value
+      FROM Comment
+      WHERE Status = 'approved'
+      GROUP BY strftime('%Y-%m', CreatedAt)
+      ORDER BY label ASC
+      LIMIT 12
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(245,158,11,0.75)"
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # 高閲覧記事 TOP 20（テーブル）
+  - id: top20_posts
+    title: 高閲覧記事 TOP 20
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        p.Title      AS タイトル,
+        bc.Name      AS カテゴリ,
+        p.AuthorName AS 著者,
+        p.ViewCount  AS 閲覧数,
+        (SELECT COUNT(*) FROM Comment c WHERE c.PostId = p.Id AND c.Status='approved') AS コメント数,
+        p.PublishedAt AS 公開日時
+      FROM Post p
+      LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
+      WHERE p.Status = 'published'
+      ORDER BY p.ViewCount DESC
+      LIMIT 20
+    columns: [タイトル, カテゴリ, 著者, 閲覧数, コメント数, 公開日時]
+    pageSize: 20
+    editable: false
+    readOnly: true

@@ -39,7 +39,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "sourceType", "source"],
+        "required": ["id", "sourceType"],
         "properties": {
           "id": {
             "type": "string",
@@ -53,7 +53,7 @@
             "items": { "type": "string" }
           },
           "sourceType": {
-            "enum": ["table", "custom"]
+            "enum": ["none", "table", "custom"]
           },
           "source": {
             "type": "string",

@@ -58,7 +58,8 @@
             {
                 Type = fieldDef.Type,
                 Label = fieldDef.Label,
-                Required = fieldDef.Required
+                Required = fieldDef.Required,
+                ColSpan = fieldDef.ColSpan
             };
 
             @await Html.PartialAsync("_FormField",

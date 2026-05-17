@@ -1,40 +1,176 @@
+imports: []
 entities:
   comment:
-    table: 'comments'
-    key: 'id'
-    displayName: 'Comment'
+    table: Comment
+    key: Id
+    displayName: コメント
     softDelete: false
-    paging:
-      pageSize: 20
-      mode: numbered
-    layout:
-      forms:
-        columns: 2
-        order: ['post_id', 'author_name', 'author_email', 'content', 'status', 'created_at']
-      filters:
-        columns: 4
-        order: []
-    columns:
-      id: { type: int, identity: true, label: 'Id', sortable: true }
-      post_id: { type: int, required: true, label: 'Post Id', sortable: true }
-      author_name: { type: string, required: true, label: 'Author Name', searchable: true, sortable: true }
-      author_email: { type: string, label: 'Author Email', searchable: true, sortable: true }
-      content: { type: string, required: true, label: 'Content', searchable: true, sortable: true }
-      status: { type: string, label: 'Status', searchable: true, sortable: true }
-      created_at: { type: datetime, label: 'Created At', sortable: true }
+    isPublic: false
+
+    joins:
+      - type: left
+        table: Post
+        alias: p
+        on: Comment.PostId = p.Id
+
     forms:
-      post_id:
+      PostId:
         type: int
         required: true
-        label: 'Post Id'
+        label: 記事
         editable: true
         foreignKey:
           entity: post
-          displayColumn: 'title'
-      author_name: { type: string, required: true, label: 'Author Name', editable: true }
-      author_email: { type: string, label: 'Author Email', editable: true }
-      content: { type: string, required: true, label: 'Content', editable: true }
-      status: { type: string, label: 'Status', editable: true }
-      created_at: { type: datetime, label: 'Created At', editable: true }
-    filters: {}
-    links: {}
+          displayColumn: Title
+          picker: false
+          multiPicker: false
+      AuthorName:
+        type: string
+        required: true
+        label: 投稿者名
+        editable: true
+      AuthorEmail:
+        type: string
+        label: メールアドレス
+        editable: true
+      Content:
+        type: textarea
+        required: true
+        label: コメント本文
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: ステータス
+        editable: true
+        options:
+          - pending
+          - approved
+          - spam
+      ParentId:
+        type: int
+        label: 返信先コメント ID
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PostId:
+        type: int
+        label: Post ID
+        hidden: true
+      PostTitle:
+        type: string
+        label: 記事タイトル
+        expression: p.Title
+        searchable: true
+        sortable: true
+      AuthorName:
+        type: string
+        label: 投稿者
+        searchable: true
+        sortable: true
+      AuthorEmail:
+        type: string
+        label: メール
+        searchable: true
+        sortable: false
+      Content:
+        type: string
+        label: コメント
+        searchable: true
+        sortable: false
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      ParentId:
+        type: int
+        label: 返信先
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: 投稿日時
+        sortable: true
+
+    hooks:
+      afterCreate:
+        - send_comment_notify  # 管理者へメール通知
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - PostId
+          - AuthorName
+          - AuthorEmail
+          - Status
+          - Content
+          - ParentId
+      filters:
+        columns: 3
+        order:
+          - Status
+          - PostId
+          - AuthorName
+          - CreatedAt
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          pending:  "⏳ 承認待ち"
+          approved: "✅ 承認済み"
+          spam:     "🚫 スパム"
+      PostId:
+        type: dropdown
+        label: 記事
+        expression: Comment.PostId
+        foreignKey:
+          entity: post
+          displayColumn: Title
+      AuthorName:
+        type: like
+        label: 投稿者名
+      CreatedAt:
+        type: date-range
+        label: 投稿日時
+        expression: Comment.CreatedAt
+
+    actions:
+      approve:
+        label: "承認する"
+        scope: row
+        confirm: "このコメントを承認しますか？"
+        handler: approve_comment
+      mark_spam:
+        label: "スパムにする"
+        scope: row
+        confirm: "このコメントをスパムとしてマークしますか？"
+        handler: mark_comment_spam
+      bulk_approve:
+        label: "一括承認"
+        scope: header
+        confirm: "承認待ちのコメントをすべて承認しますか？"
+        handler: bulk_approve_comments
+      bulk_delete_spam:
+        label: "スパムを一括削除"
+        scope: header
+        confirm: "スパムとしてマークされたコメントをすべて削除しますか？"
+        handler: bulk_delete_spam_comments
+
+    links:
+      post:
+        label: 対象記事
+        targetEntity: post
+        filter:
+          Id: PostId

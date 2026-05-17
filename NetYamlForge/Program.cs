@@ -262,6 +262,12 @@ app.MapControllerRoute(
     pattern: "userhome/{action=Index}",
     defaults: new { controller = "UserHome", project = "userhome" });
 
+// 博客公开首页快捷路由：/blog -> /blog/Page/BlogHome
+app.MapControllerRoute(
+    name: "blog-public",
+    pattern: "blog",
+    defaults: new { controller = "Page", action = "Index", project = "blog", pageName = "BlogHome" });
+
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(
     name: "project-home",

@@ -1,18 +1,101 @@
 stats:
-  # Add stat cards here. Example:
-  # - label: Total Records
-  #   entity: my_entity
-  #   aggregate: count
-  #   icon: 📊
-  #   color: badge-info
-  []
+  - label: 総記事数
+    entity: post
+    aggregate: count
+    icon: 📝
+    color: badge-primary
+  - label: 公開中
+    entity: post
+    aggregate: count
+    filter: Status='published'
+    icon: ✅
+    color: badge-success
+  - label: 下書き
+    entity: post
+    aggregate: count
+    filter: Status='draft'
+    icon: ✏️
+    color: badge-warning
+  - label: アーカイブ
+    entity: post
+    aggregate: count
+    filter: Status='archived'
+    icon: 📦
+    color: badge-secondary
+  - label: 総閲覧数
+    entity: post
+    aggregate: sum
+    filter: ViewCount
+    icon: 👁️
+    color: badge-info
+  - label: 特集記事
+    entity: post
+    aggregate: count
+    filter: FeaturedFlag=1
+    icon: ⭐
+    color: badge-accent
+  - label: 承認待ちコメント
+    entity: comment
+    aggregate: count
+    filter: Status='pending'
+    icon: ⏳
+    color: badge-warning
+  - label: 総コメント数
+    entity: comment
+    aggregate: count
+    icon: 💬
+    color: badge-primary
 
 charts:
-  # Add charts here. Example:
-  # - id: trend
-  #   title: Monthly Trend
-  #   type: bar
-  #   source: "SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM YourTable GROUP BY Month ORDER BY Month DESC LIMIT 12"
-  #   xAxis: Month
-  #   yAxis: Count
-  []
+  - title: ステータス別記事数
+    type: doughnut
+    entity: post
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colors:
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(107, 114, 128, 0.85)
+
+  - title: カテゴリ別記事数
+    type: bar
+    entity: post
+    valueAggregate: count
+    labelJoinEntity: category
+    labelJoinKey: CategoryId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(99, 102, 241, 0.7)
+    colorBorder: rgba(99, 102, 241, 1)
+
+  - title: カテゴリ別総閲覧数
+    type: bar
+    entity: post
+    valueAggregate: sum
+    groupExpression: ViewCount
+    labelJoinEntity: category
+    labelJoinKey: CategoryId
+    labelJoinDisplay: Name
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: コメントステータス分布
+    type: pie
+    entity: comment
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colors:
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(239, 68, 68, 0.85)

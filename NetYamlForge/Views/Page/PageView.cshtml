@@ -122,6 +122,9 @@
                 case "markdown":
                     @await Html.PartialAsync("Components/_SectionMarkdown", renderModel)
                     break;
+                case "comment_form":
+                    @await Html.PartialAsync("Components/_SectionCommentForm", renderModel)
+                    break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)
                     break;
