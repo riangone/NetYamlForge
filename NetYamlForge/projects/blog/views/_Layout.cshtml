@@ -122,21 +122,6 @@
             <main class="flex-1">
                 @RenderBody()
             </main>
-
-            <!-- フッター -->
-            <footer class="footer footer-center p-8 bg-base-200 text-base-content/60 mt-16 border-t border-base-300">
-                <div class="space-y-1">
-                    <p class="font-semibold text-base-content">📝 Blog</p>
-                    <p class="text-sm">NetYamlForge で構築されたブログシステム</p>
-                </div>
-                <div class="flex gap-4 text-sm">
-                    <a href="@blogHomeUrl" class="link link-hover">ホーム</a>
-                    @if (!isAuthenticated)
-                    {
-                        <a href="@loginUrl" class="link link-hover">管理者ログイン</a>
-                    }
-                </div>
-            </footer>
         </div>
 
         @if (showSidebar)
