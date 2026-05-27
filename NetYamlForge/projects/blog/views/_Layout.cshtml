@@ -12,14 +12,14 @@
     var isAdminUser = User?.IsInRole("Admin") ?? false;
     var pathBase = Url.Content("~/").TrimEnd('/');
 
-    // サイドバー表示判定（ログイン時のみ表示）
+    // サイドバー表示判定（ログイン时のみ表示）
     var showSidebar = isAuthenticated;
 
-    // ナビゲーション設定
+    // ナビゲーション设定
     var projectLayout = ProjectScope?.Current?.Layout;
     var navConfig = projectLayout?.Navigation;
     
-    // エンティティ定義（管理者は全表示、一般は公開のみ）
+    // エンティティ定义（管理者は全表示、一般は公开のみ）
     var allEntities = EntityMetadataProvider.GetAll()
         .Where(pair => isAdminUser || pair.Value.IsPublic)
         .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
@@ -32,7 +32,7 @@
         : allEntities;
 }
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -88,15 +88,51 @@
                     }
                     <a href="@blogHomeUrl" class="flex items-center gap-2 text-xl font-bold text-primary hover:opacity-80 transition-opacity">
                         <span class="text-2xl">📝</span>
-                        <span>Blog</span>
+                        <span>@L["Blog"]</span>
                     </a>
                 </div>
                 <div class="navbar-center hidden md:flex">
                     <nav class="flex gap-1">
-                        <a href="@blogHomeUrl" class="btn btn-ghost btn-sm rounded-full">ホーム</a>
+                        <a href="@blogHomeUrl" class="btn btn-ghost btn-sm rounded-full">@L["Home"]</a>
                     </nav>
                 </div>
                 <div class="navbar-end gap-2">
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-sm px-2">
+                            <span class="text-lg">🌐</span>
+                        </div>
+                        <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-40 p-2 shadow border border-base-200">
+                            <li>
+                                <form asp-controller="Localization" asp-action="SetLanguage" method="post" class="w-full">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="en-US" />
+                                    <button type="submit" class="w-full text-left @(System.Globalization.CultureInfo.CurrentUICulture.Name == "en-US" ? "font-bold text-primary" : "")">🇺🇸 English</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form asp-controller="Localization" asp-action="SetLanguage" method="post" class="w-full">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="zh-CN" />
+                                    <button type="submit" class="w-full text-left @(System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-CN" ? "font-bold text-primary" : "")">🇨🇳 中文</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form asp-controller="Localization" asp-action="SetLanguage" method="post" class="w-full">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="ja-JP" />
+                                    <button type="submit" class="w-full text-left @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ja-JP" ? "font-bold text-primary" : "")">🇯🇵 日本語</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form asp-controller="Localization" asp-action="SetLanguage" method="post" class="w-full">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="ko-KR" />
+                                    <button type="submit" class="w-full text-left @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ko-KR" ? "font-bold text-primary" : "")">🇰🇷 한국어</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
                     @if (isAuthenticated)
                     {
                         <a href="@adminUrl" class="btn btn-ghost btn-sm hidden md:inline-flex gap-1">
@@ -104,16 +140,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            管理
+                            @L["Manage"]
                         </a>
                         <form method="post" action="/@currentProject/TenantAccount/Logout" class="inline">
                             <input type="hidden" name="__RequestVerificationToken" value="@afTokens.RequestToken" />
-                            <button type="submit" class="btn btn-ghost btn-sm">ログアウト</button>
+                            <button type="submit" class="btn btn-ghost btn-sm">@L["Logout"]</button>
                         </form>
                     }
                     else
                     {
-                        <a href="@loginUrl" class="btn btn-primary btn-sm rounded-full">ログイン</a>
+                        <a href="@loginUrl" class="btn btn-primary btn-sm rounded-full">@L["Login"]</a>
                     }
                 </div>
             </header>

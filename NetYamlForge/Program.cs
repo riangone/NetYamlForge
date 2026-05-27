@@ -117,6 +117,23 @@ if (args.Any(a => a.Equals("--init-project", StringComparison.OrdinalIgnoreCase)
     return;
 }
 
+if (args.Any(a => a.Equals("--scaffold-missing-hooks", StringComparison.OrdinalIgnoreCase)))
+{
+    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
+    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
+    var withTests = args.Any(a => a.Equals("--with-tests", StringComparison.OrdinalIgnoreCase));
+    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-missing-hooks" };
+    if (jsonMode) Console.SetOut(TextWriter.Null);
+    var exitCode = MissingHookScaffolder.Run(
+        Directory.GetCurrentDirectory(),
+        projectName,
+        withTests,
+        scaffoldResult);
+    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
+    Environment.Exit(exitCode);
+    return;
+}
+
 if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnoreCase)))
 {
     var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
@@ -186,7 +203,7 @@ builder.Services.AddAuthorization(options =>
 
 // ===== サービス登録（Extensions/ServiceCollectionExtensions.cs に委譲）=====
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
-builder.Services.AddNetYamlForge();
+builder.Services.AddNetYamlForge(builder.Configuration);
 
 // Dapper: enable snake_case column mapping
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -254,6 +271,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
+app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
 app.UseAuthorization();
 
 // ユーザー個人ホーム：/userhome（プロジェクトルートより先に評価）

@@ -1,0 +1,60 @@
+entities:
+  gosei_client:
+    table: GoseiClient
+    key: Id
+    displayName: 取引先
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [Name, ContactPerson, PostalCode, Address, Phone, Email, InvoiceTemplate, TemplateVars]
+      filters:
+        columns: 3
+        order: [Name, ContactPerson]
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      Name: { type: string, label: 取引先名, sortable: true, searchable: true }
+      ContactPerson: { type: string, label: 担当者, searchable: true }
+      PostalCode: { type: string, label: 郵便番号 }
+      Address: { type: string, label: 住所, searchable: true }
+      Phone: { type: string, label: 電話番号 }
+      Email: { type: string, label: メールアドレス }
+      InvoiceTemplate: { type: string, label: 請求書テンプレート }
+      InvoiceCount:
+        type: int
+        identity: true
+        label: 請求件数
+        expression: (SELECT COUNT(*) FROM GoseiInvoice i WHERE i.ClientId = GoseiClient.Id)
+        sortable: true
+    forms:
+      Name: { type: string, label: 取引先名, required: true, editable: true }
+      ContactPerson: { type: string, label: 担当者名, editable: true }
+      PostalCode: { type: string, label: 郵便番号, editable: true }
+      Address: { type: text, label: 住所, editable: true }
+      Phone: { type: string, label: 電話番号, editable: true }
+      Email: { type: string, label: メールアドレス, editable: true }
+      InvoiceTemplate:
+        type: string
+        label: 請求書テンプレート名
+        editable: true
+        placeholder: "例: gosei-invoice（空白の場合はデフォルト使用）"
+      TemplateVars:
+        type: text
+        label: テンプレート変数（JSON）
+        editable: true
+        placeholder: '{"BankName":"三菱UFJ銀行","BranchName":"深川支店","AccountType":"普通","AccountNo":"1234567","AccountHolder":"カ）ゴーセー"}'
+    filters:
+      Name:
+        type: text
+        label: 取引先名
+        expression: GoseiClient.Name
+      ContactPerson:
+        type: text
+        label: 担当者
+        expression: GoseiClient.ContactPerson
+    links:
+      invoices: { label: 請求書一覧, targetEntity: gosei_invoice, filter: { ClientId: Id } }

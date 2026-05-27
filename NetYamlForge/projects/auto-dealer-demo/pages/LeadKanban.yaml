@@ -49,7 +49,7 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────
-  # ステージ別リード数（ファネル棒グラフ）
+  # リードファネル（ステージ別件数）
   # ─────────────────────────────────────────
   - id: pipeline_funnel
     title: リードファネル（ステージ別件数）
@@ -84,121 +84,45 @@ sections:
     readOnly: true
 
   # ─────────────────────────────────────────
-  # ホットリード（スコア 80+）
+  # AI 育成タスク（実行待ち）
   # ─────────────────────────────────────────
-  - id: hot_leads
-    title: 🔥 ホットリード（スコア 80 以上）
+  - id: ai_nurturing_queue
+    title: '🤖 AI 育成タスク（実行待ち TOP 5）'
+    visibleToRoles: [sales_rep, sales_manager, executive]
     component: table
     sourceType: custom
     source: |
-      SELECT l.lead_id AS ID,
-             c.name AS 顧客名,
-             CASE c.tier_level
-               WHEN 'platinum' THEN '💎 Platinum'
-               WHEN 'vip'      THEN '⭐ VIP'
-               WHEN 'gold'     THEN '🥇 Gold'
-               ELSE c.tier_level
-             END AS ランク,
-             l.vehicle_interest AS 興味車種,
-             CASE WHEN l.budget IS NOT NULL
-                  THEN '¥' || printf('%,.0f', l.budget)
-                  ELSE '−'
-             END AS 予算,
-             l.lead_score AS スコア,
-             CASE l.status
-               WHEN 'new'       THEN '🆕 新規'
-               WHEN 'contacted' THEN '📞 接触済'
-               WHEN 'qualified' THEN '💼 商談中'
-               WHEN 'proposal'  THEN '📋 提案中'
-               ELSE l.status
-             END AS ステータス,
-             COALESCE(l.assigned_to_user_id, '未担当') AS 担当者,
-             CASE WHEN l.last_contact_at IS NOT NULL
-                  THEN CAST(CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) AS TEXT) || '日前'
-                  ELSE '未接触'
-             END AS 最終接触
-      FROM sales_leads l
-      INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE l.lead_score >= 80 AND l.status NOT IN ('won', 'lost')
-      ORDER BY l.lead_score DESC
-    columns: [ID, 顧客名, ランク, 興味車種, 予算, スコア, ステータス, 担当者, 最終接触]
-    pageSize: 10
-    actions:
-      - label: 詳細
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
-        class: "btn-primary"
+      SELECT
+        c.name AS 顧客名,
+        CASE t.task_type
+          WHEN 'email'       THEN '✉️ メール'
+          WHEN 'call'        THEN '📞 電話'
+          WHEN 'appointment' THEN '📅 アポ'
+          WHEN 'test_drive'  THEN '🚗 試乗'
+          ELSE t.task_type
+        END AS タイプ,
+        COALESCE(SUBSTR(t.ai_recommendation, 1, 50), '-') AS AI提案,
+        t.priority_score AS 優先度
+      FROM lead_nurturing_tasks t
+      LEFT JOIN customers c ON t.customer_id = c.customer_id
+      WHERE t.status IN ('pending', 'in_progress')
+      ORDER BY t.priority_score DESC
+      LIMIT 5
+    columns: [顧客名, タイプ, AI提案, 優先度]
+    pageSize: 5
+    editable: false
+    readOnly: true
 
   # ─────────────────────────────────────────
-  # 停滞リード（7日以上フォローアップなし）
+  # 外部リンク
   # ─────────────────────────────────────────
-  - id: stale_leads
-    title: ⚠️ 停滞リード（7日以上フォローアップなし）
-    component: table
-    sourceType: custom
-    source: |
-      SELECT l.lead_id AS ID,
-             c.name AS 顧客名,
-             l.vehicle_interest AS 興味車種,
-             l.lead_score AS スコア,
-             CASE l.status
-               WHEN 'new'       THEN '🆕 新規'
-               WHEN 'contacted' THEN '📞 接触済'
-               WHEN 'qualified' THEN '💼 商談中'
-               WHEN 'proposal'  THEN '📋 提案中'
-               ELSE l.status
-             END AS ステータス,
-             COALESCE(l.assigned_to_user_id, '未担当') AS 担当者,
-             CASE WHEN l.last_contact_at IS NOT NULL
-                  THEN CAST(CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) AS TEXT) || '日'
-                  ELSE '未接触'
-             END AS 未対応日数
-      FROM sales_leads l
-      INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE l.status NOT IN ('won', 'lost')
-        AND (l.last_contact_at IS NULL
-          OR CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) >= 7)
-      ORDER BY l.lead_score DESC,
-               COALESCE(JULIANDAY(l.last_contact_at), JULIANDAY(l.created_at)) ASC
-    columns: [ID, 顧客名, 興味車種, スコア, ステータス, 担当者, 未対応日数]
-    pageSize: 10
-    actions:
-      - label: フォロー開始
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
-        class: "btn-warning"
-
-  # ─────────────────────────────────────────
-  # 全リード一覧
-  # ─────────────────────────────────────────
-  - id: all_leads
-    title: リード全件一覧
-    component: table
-    sourceType: custom
-    source: |
-      SELECT l.lead_id AS ID,
-             c.name AS 顧客名,
-             l.vehicle_interest AS 興味車種,
-             CASE WHEN l.budget IS NOT NULL
-                  THEN '¥' || printf('%,.0f', l.budget)
-                  ELSE '−'
-             END AS 予算,
-             l.lead_score AS スコア,
-             CASE l.status
-               WHEN 'new'       THEN '🆕 新規'
-               WHEN 'contacted' THEN '📞 接触済'
-               WHEN 'qualified' THEN '💼 商談中'
-               WHEN 'proposal'  THEN '📋 提案中'
-               WHEN 'won'       THEN '🏆 成約'
-               WHEN 'lost'      THEN '❌ 失注'
-               ELSE l.status
-             END AS ステータス,
-             COALESCE(l.assigned_to_user_id, '未担当') AS 担当者,
-             l.created_at AS 登録日
-      FROM sales_leads l
-      INNER JOIN customers c ON l.customer_id = c.customer_id
-      ORDER BY l.lead_score DESC, l.created_at DESC
-    columns: [ID, 顧客名, 興味車種, 予算, スコア, ステータス, 担当者, 登録日]
-    pageSize: 15
-    actions:
-      - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
-        class: "btn-outline-secondary"
+  - id: navigation_links
+    title: 詳細データへのアクセス
+    sourceType: none
+    component: markdown
+    content: |
+      このページではパイプラインの全体像と AI の活動を管理します。個別のリード詳細やリスト表示が必要な場合は、以下の詳細ページをご利用ください。
+      
+      * [📋 セールスリード管理（全件一覧・詳細検索）](/auto-dealer-demo/Page/SalesLeads)
+      * [👥 顧客管理マスター](/auto-dealer-demo/Page/Customers)
+      * [📅 本日の予約一覧](/auto-dealer-demo/Page/Appointments)

@@ -1,7 +1,7 @@
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
     Layout = ViewBag.LayoutPath as string ?? "~/projects/blog/views/_Layout.cshtml";
-    ViewData["Title"] = "ブログ";
+    ViewData["Title"] = L["Blog"];
 
     var project = Context.GetRouteValue("project")?.ToString() ?? "blog";
 
@@ -11,12 +11,12 @@
     var categoryRows  = Model.ContainsKey("categories")  ? Model["categories"].Rows.ToList()  : new();
     var tagRows       = Model.ContainsKey("tags")        ? Model["tags"].Rows.ToList()         : new();
 
-    // ページネーション
+    // 分页
     var currentPage = int.TryParse(Context.Request.Query["_page"], out var pg) ? pg : 1;
     var pageSize    = 6;
     var totalPages  = (int)Math.Ceiling((double)postTotal / pageSize);
 
-    // フィルタリング状態
+    // 过滤状态
     var currentTagId = Context.Request.Query["tagId"].ToString();
     var currentCatId = Context.Request.Query["categoryId"].ToString();
     var filterName = "";
@@ -34,18 +34,18 @@
     {
         if (val is null) return "";
         if (DateTime.TryParse(val.ToString(), out var dt))
-            return dt.ToString("yyyy年M月d日");
+            return dt.ToString("D");
         return val.ToString() ?? "";
     }
 }
 
-<!-- ヒーローセクション（特集記事） -->
+<!-- 英雄区（推荐文章） -->
 @if (featuredRows.Any())
 {
     <section class="bg-gradient-to-br from-primary/5 to-secondary/5 py-12 px-4">
         <div class="max-w-6xl mx-auto">
             <div class="flex items-center gap-2 mb-6">
-                <span class="badge badge-primary badge-lg">⭐ 特集記事</span>
+                <span class="badge badge-primary badge-lg">⭐ @L["FeaturedPosts"]</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach (var post in featuredRows)
@@ -64,7 +64,7 @@
                             <div class="flex items-center gap-2 mb-3">
                                 <span class="badge badge-sm text-white text-xs font-medium px-2 py-1"
                                       style="background-color: @categoryColor">@category</span>
-                                <span class="badge badge-warning badge-sm text-xs">⭐ 特集</span>
+                                <span class="badge badge-warning badge-sm text-xs">⭐ @L["Featured"]</span>
                             </div>
                             <h2 class="card-title text-lg font-bold leading-snug line-clamp-2 hover:text-primary transition-colors">
                                 @title
@@ -90,20 +90,20 @@
     </section>
 }
 
-<!-- メインレイアウト：記事一覧 + サイドバー -->
+<!-- 主布局：文章列表 + 侧边栏 -->
 <div class="max-w-6xl mx-auto px-4 py-10">
     <div class="flex flex-col lg:flex-row gap-10">
 
-        <!-- 記事一覧 -->
+        <!-- 文章列表 -->
         <main class="flex-1 min-w-0">
             @if (!string.IsNullOrEmpty(filterName))
             {
                 <div class="mb-6 flex items-center justify-between bg-primary/5 px-4 py-3 rounded-lg border border-primary/10">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm text-base-content/60">フィルタ中:</span>
+                        <span class="text-sm text-base-content/60">@L["FilteringBy"]</span>
                         <span class="badge badge-primary">@filterName</span>
                     </div>
-                    <a href="/blog" class="text-xs link link-hover text-base-content/50">フィルタを解除</a>
+                    <a href="/blog" class="text-xs link link-hover text-base-content/50">@L["CancelFilter"]</a>
                 </div>
             }
 
@@ -111,15 +111,15 @@
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 12h6m-6-4h2"/>
                 </svg>
-                @(string.IsNullOrEmpty(filterName) ? "最新記事" : $"{filterName} の記事")
-                <span class="text-sm font-normal text-base-content/50 ml-1">（@postTotal 件）</span>
+                @(string.IsNullOrEmpty(filterName) ? L["LatestPosts"] : string.Format(L["PostsBy"], filterName))
+                <span class="text-sm font-normal text-base-content/50 ml-1">@string.Format(L["PostsCount"], postTotal)</span>
             </h2>
 
             @if (!postRows.Any())
             {
                 <div class="text-center py-20 text-base-content/40">
                     <p class="text-4xl mb-3">📭</p>
-                    <p class="text-lg">記事がまだありません</p>
+                    <p class="text-lg">@L["NoPostsFound"]</p>
                 </div>
             }
             else
@@ -199,7 +199,7 @@
                                             </svg>
                                             @commentCount
                                         </span>
-                                        <a href="@PostUrl(postId)" class="btn btn-primary btn-xs rounded-full">続きを読む →</a>
+                                        <a href="@PostUrl(postId)" class="btn btn-primary btn-xs rounded-full">@L["ReadMore"]</a>
                                     </div>
                                 </div>
                             </div>
@@ -207,7 +207,7 @@
                     }
                 </div>
 
-                <!-- ページネーション -->
+                <!-- 分页 -->
                 @if (totalPages > 1)
                 {
                     <div class="flex justify-center mt-10">
@@ -237,19 +237,19 @@
             }
         </main>
 
-        <!-- サイドバー（ログイン時のみ表示） -->
+        <!-- 侧边栏（登录时显示） -->
         @if (User.Identity?.IsAuthenticated ?? false)
         {
         <aside class="w-full lg:w-64 shrink-0 space-y-6">
 
-            <!-- カテゴリ -->
+            <!-- 分类 -->
             <div class="card bg-base-100 border border-base-200">
                 <div class="card-body p-5">
                     <h3 class="card-title text-base mb-3">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                         </svg>
-                        カテゴリ
+                        @L["Categories"]
                     </h3>
                     <ul class="space-y-1">
                         @foreach (var cat in categoryRows)
@@ -272,7 +272,7 @@
                 </div>
             </div>
 
-            <!-- タグ -->
+            <!-- 标签 -->
             @if (tagRows.Any())
             {
                 <div class="card bg-base-100 border border-base-200">
@@ -281,7 +281,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                             </svg>
-                            タグ
+                            @L["Tags"]
                         </h3>
                         <div class="flex flex-wrap gap-2">
                             @foreach (var tag in tagRows)
@@ -301,7 +301,7 @@
         }
     </div>
 
-    <!-- ページ下部のタグクラウド -->
+    <!-- 底部标签云 -->
     @if (tagRows.Any())
     {
         <div class="mt-16 pt-10 border-t border-base-200">
@@ -309,7 +309,7 @@
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
-                人気のタグ
+                @L["PopularTags"]
             </h3>
             <div class="flex flex-wrap gap-3 justify-center max-w-3xl mx-auto">
                 @foreach (var tag in tagRows)

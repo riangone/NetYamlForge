@@ -1,0 +1,7 @@
+jobs:
+  ai_chat_poll:
+    displayName: "Poll Inbox and AI Reply"
+    enabled: false
+    type: "ai_email_chat"
+    schedule:
+      cron: "* * * * *"  # Poll every minute

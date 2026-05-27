@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// 全サービスを一括登録するファサードメソッド。Program.cs から呼び出してください。
     /// </summary>
-    public static IServiceCollection AddNetYamlForge(this IServiceCollection services)
+    public static IServiceCollection AddNetYamlForge(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMultiProjectInfrastructure();
         services.AddDatabaseServices();
@@ -37,6 +37,20 @@ public static class ServiceCollectionExtensions
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
+        services.AddEmailServices(configuration);
+        return services;
+    }
+
+    /// <summary>
+    /// メールサービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddEmailServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<NetYamlForge.Models.Config.EmailSettings>(configuration.GetSection("Email"));
+        // グローバルデフォルト（プロジェクト設定なし時のフォールバック）
+        services.AddSingleton<NetYamlForge.Services.Email.IEmailService, NetYamlForge.Services.Email.MailKitEmailService>();
+        // プロジェクト別メールアカウントを解決するファクトリ
+        services.AddSingleton<NetYamlForge.Services.Email.IEmailServiceFactory, NetYamlForge.Services.Email.MailKitEmailServiceFactory>();
         return services;
     }
 
@@ -178,6 +192,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuditLogService, AuditLogService>();
         services.AddScoped<IHookExecutionTelemetry, HookExecutionTelemetryLogger>();
         services.AddScoped<IPagePermissionService, PagePermissionService>();
+        
+        // AI サービス
+        services.AddScoped<NetYamlForge.Services.Ai.IGeminiCliService, NetYamlForge.Services.Ai.GeminiCliService>();
+
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();
         // PDF エクスポートサービス (PDFsharp - MIT ライセンス)
@@ -259,6 +277,7 @@ public static class ServiceCollectionExtensions
         // 汎用フック（監査・通知）
         services.AddSingleton<IEntityHook, AuditLogHook>();
         services.AddSingleton<IEntityHook, WebhookHook>();
+        services.AddSingleton<IEntityHook, SendEmailHook>();
 
         // 汎用フック（関連データ操作）
         services.AddSingleton<IEntityHook, UpdateCountHook>();

@@ -1,0 +1,211 @@
+title: 🤖 AI 決定承認
+description: "AI が自動生成した決定・提案を人間が確認し、承認または却下します"
+
+sections:
+  - id: quick_approval_urgent
+    title: '🚨 緊急承認が必要な決定（人間確認必須）'
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        d.decision_id AS 決定ID,
+        CASE d.decision_type
+          WHEN 'lead_scoring'      THEN '🎯 スコアリング'
+          WHEN 'nurturing_task'    THEN '🌱 育成タスク'
+          WHEN 'quote_generation'  THEN '💰 見積生成'
+          WHEN 'discount_approval' THEN '🏷️ 値引承認'
+          WHEN 'escalation'        THEN '🚨 エスカレーション'
+          ELSE d.decision_type
+        END AS 決定種別,
+        d.entity_type AS 対象,
+        d.entity_id AS 対象ID,
+        CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+        COALESCE(d.ai_reasoning, '（AI判断理由なし）') AS AI判断理由全文,
+        d.created_at AS 作成日時
+      FROM ai_decisions d
+      WHERE d.status = 'pending' AND d.requires_human = 1
+      ORDER BY d.created_at ASC
+      LIMIT 5
+    columns: [決定ID, 決定種別, 対象, 対象ID, 確信度, AI判断理由全文, 作成日時]
+    pageSize: 5
+    actions:
+      - label: '✅ 承認'
+        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}'
+        class: 'btn-success btn-lg'
+      - label: '❌ 却下'
+        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}'
+        class: 'btn-danger btn-lg'
+
+  # ─────────────────────────────────────────
+  # 承認待ちサマリー KPI
+  # ─────────────────────────────────────────
+  - id: approval_kpi
+    title: 承認待ちサマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '承認待ち件数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '⏳' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_decisions
+      WHERE status = 'pending'
+      UNION ALL
+      SELECT '高確信度（90%+）', CAST(COUNT(*) AS TEXT), '🟢', NULL
+      FROM ai_decisions
+      WHERE status = 'pending' AND confidence_score >= 90
+      UNION ALL
+      SELECT '人間承認必須', CAST(COUNT(*) AS TEXT), '🔴', NULL
+      FROM ai_decisions
+      WHERE status = 'pending' AND requires_human = 1
+      UNION ALL
+      SELECT '本日作成', CAST(COUNT(*) AS TEXT), '📅', NULL
+      FROM ai_decisions
+      WHERE status = 'pending'
+        AND date(created_at) = date('now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 決定種別別の承認待ち件数（棒グラフ）
+  # ─────────────────────────────────────────
+  - id: pending_by_type
+    title: 決定種別別 承認待ち件数
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE decision_type
+               WHEN 'lead_scoring'     THEN '🎯 リードスコアリング'
+               WHEN 'nurturing_task'   THEN '🌱 育成タスク'
+               WHEN 'quote_generation' THEN '💰 見積生成'
+               WHEN 'discount_approval' THEN '🏷️ 値引承認'
+               WHEN 'assignment'       THEN '👤 担当アサイン'
+               WHEN 'escalation'       THEN '🚨 エスカレーション'
+               ELSE decision_type
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_decisions
+      WHERE status = 'pending'
+      GROUP BY decision_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(245, 158, 11, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 承認待ち一覧
+  # ─────────────────────────────────────────
+  - id: pending_approvals
+    title: ⏳ 承認待ち一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT d.decision_id AS 決定ID,
+             CASE d.decision_type
+               WHEN 'lead_scoring'     THEN '🎯 スコアリング'
+               WHEN 'nurturing_task'   THEN '🌱 育成タスク'
+               WHEN 'quote_generation' THEN '💰 見積生成'
+               WHEN 'discount_approval' THEN '🏷️ 値引承認'
+               WHEN 'assignment'       THEN '👤 アサイン'
+               WHEN 'escalation'       THEN '🚨 エスカレーション'
+               ELSE d.decision_type
+             END AS 決定種別,
+             d.entity_type AS 対象種別,
+             d.entity_id AS 対象ID,
+             CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+             CASE WHEN d.requires_human = 1 THEN '🔴 必須' ELSE '🟢 任意' END AS 人間承認,
+             d.created_at AS 作成日時,
+             COALESCE(SUBSTR(d.ai_reasoning, 1, 60), '') AS AI判断理由
+      FROM ai_decisions d
+      WHERE d.status = 'pending'
+        AND d.requires_human = 1
+      ORDER BY d.confidence_score ASC, d.created_at ASC
+    columns: [決定ID, 決定種別, 対象種別, 対象ID, 確信度, 人間承認, 作成日時, AI判断理由]
+    pageSize: 15
+    actions:
+      - label: 承認
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}"
+        class: "btn-success"
+      - label: 却下
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}"
+        class: "btn-danger"
+
+  # ─────────────────────────────────────────
+  # 自動実行可能な決定一覧（低リスク・高確信度）
+  # ─────────────────────────────────────────
+  - id: auto_executable
+    title: 🟢 自動実行可能（確信度 90% 以上）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT d.decision_id AS 決定ID,
+             CASE d.decision_type
+               WHEN 'lead_scoring'     THEN '🎯 スコアリング'
+               WHEN 'nurturing_task'   THEN '🌱 育成タスク'
+               WHEN 'quote_generation' THEN '💰 見積生成'
+               WHEN 'discount_approval' THEN '🏷️ 値引承認'
+               WHEN 'assignment'       THEN '👤 アサイン'
+               WHEN 'escalation'       THEN '🚨 エスカレーション'
+               ELSE d.decision_type
+             END AS 決定種別,
+             d.entity_type AS 対象種別,
+             d.entity_id AS 対象ID,
+             CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+             d.created_at AS 作成日時,
+             COALESCE(SUBSTR(d.ai_reasoning, 1, 60), '') AS AI判断理由
+      FROM ai_decisions d
+      WHERE d.status = 'pending'
+        AND d.requires_human = 0
+        AND d.confidence_score >= 90
+      ORDER BY d.confidence_score DESC, d.created_at ASC
+    columns: [決定ID, 決定種別, 対象種別, 対象ID, 確信度, 作成日時, AI判断理由]
+    pageSize: 10
+    actions:
+      - label: 一括自動実行へ
+        url: "/auto-dealer-demo/Page/AiDashboard"
+        class: "btn-info"
+
+  # ─────────────────────────────────────────
+  # 最近の承認履歴
+  # ─────────────────────────────────────────
+  - id: approval_history
+    title: 📋 最近の承認履歴（直近 20 件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT d.decision_id AS 決定ID,
+             CASE d.decision_type
+               WHEN 'lead_scoring'     THEN '🎯 スコアリング'
+               WHEN 'nurturing_task'   THEN '🌱 育成タスク'
+               WHEN 'quote_generation' THEN '💰 見積生成'
+               WHEN 'discount_approval' THEN '🏷️ 値引承認'
+               WHEN 'assignment'       THEN '👤 アサイン'
+               WHEN 'escalation'       THEN '🚨 エスカレーション'
+               ELSE d.decision_type
+             END AS 決定種別,
+             CASE d.status
+               WHEN 'approved'      THEN '✅ 承認'
+               WHEN 'rejected'      THEN '❌ 却下'
+               WHEN 'auto_executed' THEN '🤖 自動実行'
+               ELSE d.status
+             END AS ステータス,
+             CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+             COALESCE(d.executed_at, d.created_at) AS 処理日時
+      FROM ai_decisions d
+      WHERE d.status IN ('approved', 'rejected', 'auto_executed')
+      ORDER BY COALESCE(d.executed_at, d.created_at) DESC
+      LIMIT 20
+    columns: [決定ID, 決定種別, ステータス, 確信度, 処理日時]
+    pageSize: 20
+    editable: false
+    readOnly: true

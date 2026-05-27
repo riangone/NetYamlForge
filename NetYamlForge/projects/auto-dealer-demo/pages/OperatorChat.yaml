@@ -1,0 +1,134 @@
+title: '💬 オペレーターチャット'
+description: 'AI引継ぎ対話の詳細対応。顧客との会話履歴・AI提案回答・対応メモを管理します。'
+
+sections:
+  - id: chat_kpi
+    title: '💬 チャット対応状況（本日）'
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '待機中エスカレーション' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '⏳' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_handovers WHERE status = 'pending'
+      UNION ALL
+      SELECT '対応中', CAST(COUNT(*) AS TEXT), '💬', NULL
+      FROM ai_handovers WHERE status IN ('assigned', 'in_progress')
+      UNION ALL
+      SELECT '本日解決', CAST(COUNT(*) AS TEXT), '✅', NULL
+      FROM ai_handovers WHERE status = 'resolved' AND date(resolved_at) = date('now')
+      UNION ALL
+      SELECT 'SLA超過（10分超）', CAST(COUNT(*) AS TEXT), '🔴', NULL
+      FROM ai_handovers
+      WHERE status = 'pending'
+        AND CAST((JULIANDAY('now') - JULIANDAY(escalated_at)) * 24 * 60 AS INTEGER) >= 10
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  - id: priority_queue
+    title: '🔴 優先対応キュー（緊急・高優先度）'
+    visibleToRoles: [operator, sales_manager, executive]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        h.handover_id AS ID,
+        c.name AS 顧客名,
+        CASE h.reason
+          WHEN 'ai_unable'          THEN 'AI解決不可'
+          WHEN 'customer_request'   THEN 'お客様希望'
+          WHEN 'high_value_deal'    THEN '💰 高額商談'
+          WHEN 'complaint'          THEN '😡 苦情'
+          WHEN 'negative_sentiment' THEN '😞 感情悪化'
+          WHEN 'vip_customer'       THEN '⭐ VIP対応'
+          ELSE h.reason
+        END AS 理由,
+        CASE h.priority
+          WHEN 'urgent' THEN '🔴 緊急'
+          WHEN 'high'   THEN '🟠 高'
+          WHEN 'medium' THEN '🟡 中'
+          ELSE               '🟢 低'
+        END AS 優先度,
+        CAST(ROUND(CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER), 0) AS TEXT) || '分' AS 待機時間,
+        h.handover_notes AS 引継ぎメモ,
+        h.conversation_id AS 会話ID
+      FROM ai_handovers h
+      INNER JOIN ai_conversations conv ON h.conversation_id = conv.conversation_id
+      INNER JOIN customers c ON conv.customer_id = c.customer_id
+      WHERE h.status = 'pending'
+        AND h.priority IN ('urgent', 'high')
+      ORDER BY
+        CASE h.priority WHEN 'urgent' THEN 1 ELSE 2 END,
+        CAST((JULIANDAY('now') - JULIANDAY(h.escalated_at)) * 24 * 60 AS INTEGER) DESC
+      LIMIT 10
+    columns: [ID, 顧客名, 理由, 優先度, 待機時間, 引継ぎメモ, 会話ID]
+    pageSize: 10
+    actions:
+      - label: 対応開始
+        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_handovers&id={ID}'
+        class: 'btn-danger'
+
+  - id: ai_response_suggestions
+    title: '💡 AI推奨回答パターン'
+    visibleToRoles: [operator, sales_manager]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        CASE category
+          WHEN 'faq'            THEN '❓ よくある質問'
+          WHEN 'vehicle_info'   THEN '🚗 車両情報'
+          WHEN 'service_menu'   THEN '🔧 サービスメニュー'
+          WHEN 'campaign'       THEN '🎁 キャンペーン'
+          WHEN 'business_hours' THEN '🕐 営業時間・案内'
+          ELSE category
+        END AS カテゴリ,
+        title AS タイトル,
+        COALESCE(SUBSTR(content, 1, 80), '') AS 内容プレビュー,
+        usage_count AS 使用回数,
+        updated_at AS 最終更新
+      FROM ai_knowledge
+      WHERE is_active = 1
+      ORDER BY usage_count DESC
+      LIMIT 15
+    columns: [カテゴリ, タイトル, 内容プレビュー, 使用回数, 最終更新]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  - id: conversation_history
+    title: '📋 AI対話履歴（直近20件）'
+    visibleToRoles: [operator, sales_manager, executive]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        conv.conversation_id AS ID,
+        c.name AS 顧客名,
+        CASE conv.channel
+          WHEN 'web'    THEN '🌐 Web'
+          WHEN 'line'   THEN '💚 LINE'
+          WHEN 'email'  THEN '✉️ メール'
+          WHEN 'phone'  THEN '📞 電話'
+          ELSE conv.channel
+        END AS チャネル,
+        conv.status AS ステータス,
+        conv.ai_handled_turns AS AI対応数,
+        conv.human_handled_turns AS 人間対応数,
+        conv.started_at AS 開始日時,
+        COALESCE(conv.ended_at, '対話中') AS 終了日時
+      FROM ai_conversations conv
+      INNER JOIN customers c ON conv.customer_id = c.customer_id
+      ORDER BY conv.started_at DESC
+      LIMIT 20
+    columns: [ID, 顧客名, チャネル, ステータス, AI対応数, 人間対応数, 開始日時, 終了日時]
+    pageSize: 20
+    editable: false
+    readOnly: true

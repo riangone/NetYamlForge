@@ -176,17 +176,26 @@ public class TenantUserService : ITenantUserService
 
     /// <summary>
     /// 检查用户是否有指定项目的访问权限
+    /// 逻辑：管理员全通 → 无项目限制记录全通 → 按记录检查
     /// </summary>
     public async Task<bool> HasProjectAccessAsync(int userId, string projectName)
     {
-        const string sql = @"
-            SELECT COUNT(1)
-            FROM app_user_project_role
-            WHERE user_id = @UserId AND project_name = @ProjectName
-        ";
-
         using var db = CreateSystemDbConnection();
-        var count = await db.ExecuteScalarAsync<int>(sql, new { UserId = userId, ProjectName = projectName });
+
+        // Admin users bypass all project restrictions
+        var isAdmin = await db.ExecuteScalarAsync<int>(
+            "SELECT is_admin FROM app_user WHERE id = @UserId", new { UserId = userId });
+        if (isAdmin == 1) return true;
+
+        // Users with no project role entries are unrestricted (global users)
+        var totalRoles = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM app_user_project_role WHERE user_id = @UserId", new { UserId = userId });
+        if (totalRoles == 0) return true;
+
+        // Restricted users: only allow access to their assigned projects
+        var count = await db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM app_user_project_role WHERE user_id = @UserId AND project_name = @ProjectName",
+            new { UserId = userId, ProjectName = projectName });
         return count > 0;
     }
 

@@ -121,6 +121,26 @@ public class JobSettings
     /// メール通知先（カンマ区切り）
     /// </summary>
     public string? NotifyEmails { get; set; }
+
+    /// <summary>
+    /// 受信メールを保存するテーブル名
+    /// </summary>
+    public string? TargetTable { get; set; }
+
+    /// <summary>
+    /// 受信後に既読にするか
+    /// </summary>
+    public bool AutoMarkRead { get; set; } = true;
+
+    /// <summary>
+    /// バッチサイズ（一度に取得するメール数）
+    /// </summary>
+    public int BatchSize { get; set; } = 10;
+
+    /// <summary>
+    /// カスタムパラメータ
+    /// </summary>
+    public Dictionary<string, string>? Params { get; set; }
 }
 
 /// <summary>

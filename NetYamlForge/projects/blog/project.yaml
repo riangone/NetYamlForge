@@ -75,6 +75,11 @@ layout:
         url: /blog/DynamicEntity/Index?entity=comment
         icon: 💬
         section: 設定
+      - label: 定期処理
+        controller: BatchJob
+        action: Index
+        icon: ⚙️
+        section: 設定
 
 home_page:
   icon: "📝"

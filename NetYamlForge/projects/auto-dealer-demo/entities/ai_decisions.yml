@@ -1,0 +1,176 @@
+imports: []
+entities:
+  ai_decisions:
+    table: ai_decisions
+    key: decision_id
+    displayName: AI 決定管理
+    description: AI が自動生成した決定・提案を管理し、必要に応じて人間が承認/却下します
+    softDelete: false
+    isPublic: true
+
+    columns:
+      decision_id:
+        type: string
+        length: 50
+        required: true
+        label: 決定 ID
+        searchable: true
+        sortable: true
+
+      decision_type:
+        type: string
+        length: 50
+        required: true
+        label: 決定種別
+        options:
+          - lead_scoring     # リードスコアリング
+          - nurturing_task   # 育成タスク生成
+          - quote_generation # 見積生成
+          - discount_approval # 値引承認
+          - assignment       # 担当アサイン
+          - escalation       # エスカレーション
+        searchable: true
+        sortable: true
+
+      entity_type:
+        type: string
+        length: 50
+        required: true
+        label: エンティティ種別
+        options:
+          - sales_leads
+          - lead_nurturing_tasks
+          - ai_quotes
+        searchable: true
+        sortable: true
+
+      entity_id:
+        type: string
+        length: 50
+        required: true
+        label: エンティティ ID
+        searchable: true
+        sortable: true
+
+      ai_reasoning:
+        type: text
+        required: false
+        label: AI 判断理由
+        description: AI がこの決定に至った理由
+
+      confidence_score:
+        type: decimal
+        precision: 5
+        scale: 2
+        required: true
+        label: 確信度
+        default: 0.00
+        sortable: true
+
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        options:
+          - pending     # 承認待ち
+          - approved    # 承認済
+          - rejected    # 却下
+          - auto_executed # 自動実行
+        default: pending
+        searchable: true
+        sortable: true
+
+      requires_human:
+        type: boolean
+        required: true
+        label: 人間承認必須
+        default: false
+
+      executed_at:
+        type: datetime
+        required: false
+        label: 実行日時
+        sortable: true
+
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+
+    forms:
+      decision_id:
+        type: string
+        required: true
+        label: 決定 ID
+        editable: false
+
+      decision_type:
+        type: select
+        required: true
+        label: 決定種別
+        editable: false
+
+      entity_type:
+        type: select
+        required: true
+        label: エンティティ種別
+        editable: false
+
+      entity_id:
+        type: string
+        required: true
+        label: エンティティ ID
+        editable: false
+
+      ai_reasoning:
+        type: textarea
+        required: false
+        label: AI 判断理由
+        editable: true
+        rows: 5
+
+      confidence_score:
+        type: number
+        required: true
+        label: 確信度
+        editable: false
+
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+
+      requires_human:
+        type: checkbox
+        required: true
+        label: 人間承認必須
+        editable: false
+
+    hooks:
+      beforeCreate:
+        - set_decision_timestamps
+      beforeUpdate:
+        - update_decision_timestamps
+
+    list:
+      titleColumns:
+        - decision_id
+        - decision_type
+        - entity_type
+        - status
+        - confidence_score
+      defaultSort:
+        field: created_at
+        dir: desc
+      filters:
+        - field: status
+          default: pending
+        - field: decision_type
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

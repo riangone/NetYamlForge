@@ -1,0 +1,317 @@
+imports: []
+entities:
+  ai_communications:
+    table: ai_communications
+    key: comm_id
+    displayName: "AI コミュニケーション履歴"
+    description: "AI が自動生成・送信したコミュニケーションのログ"
+    softDelete: false
+    isPublic: true
+
+    columns:
+      comm_id:
+        type: string
+        length: 50
+        required: true
+        label: 通信 ID
+        searchable: true
+        sortable: true
+
+      lead_id:
+        type: string
+        length: 50
+        required: true
+        label: リード ID
+        searchable: true
+        sortable: true
+
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+
+      nurturing_task_id:
+        type: string
+        length: 50
+        required: true
+        label: 育成タスク ID
+        searchable: true
+        sortable: true
+
+      comm_channel:
+        type: string
+        length: 20
+        required: true
+        label: 送信チャネル
+        options:
+          - email
+          - sms
+          - line
+          - phone_memo
+        searchable: true
+        sortable: true
+
+      subject:
+        type: string
+        length: 200
+        required: false
+        label: 件名
+        searchable: true
+        sortable: true
+
+      body_text:
+        type: text
+        required: false
+        label: 本文（テキスト）
+
+      ai_confidence:
+        type: decimal
+        precision: 5
+        scale: 2
+        required: false
+        label: AI 確信度
+        sortable: true
+
+      send_status:
+        type: string
+        length: 20
+        required: true
+        label: 送信ステータス
+        options:
+          - pending
+          - sent
+          - failed
+          - cancelled
+        default: pending
+        searchable: true
+        sortable: true
+
+      sent_at:
+        type: datetime
+        required: false
+        label: 送信日時
+        sortable: true
+
+      error_message:
+        type: text
+        required: false
+        label: エラーメッセージ
+
+      response_received:
+        type: boolean
+        required: false
+        label: 返信あり
+        default: false
+        sortable: true
+
+      response_at:
+        type: datetime
+        required: false
+        label: 返信日時
+        sortable: true
+
+      response_sentiment:
+        type: string
+        length: 20
+        required: false
+        label: 返信感情
+        options:
+          - positive
+          - neutral
+          - negative
+        searchable: true
+        sortable: true
+
+      response_summary:
+        type: text
+        required: false
+        label: 返信サマリー
+
+      requires_human:
+        type: boolean
+        required: true
+        label: 人間承認必要
+        default: false
+
+      approved_by:
+        type: string
+        length: 50
+        required: false
+        label: 承認者
+        searchable: true
+        sortable: true
+
+      approved_at:
+        type: datetime
+        required: false
+        label: 承認日時
+        sortable: true
+
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      comm_id:
+        type: string
+        required: true
+        label: 通信 ID
+        editable: false
+
+      lead_id:
+        type: string
+        required: true
+        label: リード ID
+        editable: false
+
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: false
+
+      nurturing_task_id:
+        type: string
+        required: true
+        label: 育成タスク ID
+        editable: false
+
+      comm_channel:
+        type: select
+        required: true
+        label: 送信チャネル
+        editable: false
+
+      subject:
+        type: string
+        required: false
+        label: 件名
+        editable: false
+
+      body_text:
+        type: textarea
+        required: false
+        label: 本文（テキスト）
+        editable: false
+
+      ai_confidence:
+        type: number
+        required: false
+        label: AI 確信度
+        editable: false
+
+      send_status:
+        type: select
+        required: true
+        label: 送信ステータス
+        editable: true
+
+      sent_at:
+        type: datetime
+        required: false
+        label: 送信日時
+        editable: false
+
+      error_message:
+        type: textarea
+        required: false
+        label: エラーメッセージ
+        editable: false
+
+      response_received:
+        type: checkbox
+        required: false
+        label: 返信あり
+        editable: true
+
+      response_at:
+        type: datetime
+        required: false
+        label: 返信日時
+        editable: false
+
+      response_sentiment:
+        type: select
+        required: false
+        label: 返信感情
+        editable: false
+
+      response_summary:
+        type: textarea
+        required: false
+        label: 返信サマリー
+        editable: false
+
+      requires_human:
+        type: checkbox
+        required: true
+        label: 人間承認必要
+        editable: false
+
+      approved_by:
+        type: string
+        required: false
+        label: 承認者
+        editable: true
+
+      approved_at:
+        type: datetime
+        required: false
+        label: 承認日時
+        editable: true
+
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        editable: false
+
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        editable: false
+
+    hooks:
+      beforeCreate:
+        - set_communication_timestamps
+      beforeUpdate:
+        - update_communication_timestamps
+
+    list:
+      titleColumns:
+        - comm_id
+        - comm_channel
+        - subject
+        - send_status
+        - ai_confidence
+        - sent_at
+        - response_received
+        - response_sentiment
+      defaultSort:
+        field: created_at
+        dir: desc
+      searchFields:
+        - subject
+        - body_text
+        - comm_id
+      filters:
+        - field: comm_channel
+        - field: send_status
+        - field: response_received
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

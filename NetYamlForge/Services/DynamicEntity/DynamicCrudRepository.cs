@@ -759,7 +759,15 @@ public class DynamicCrudRepository : IDynamicCrudRepository
                 throw new InvalidOperationException($"Expression is required: {name}");
             }
 
-            if (IsUnsafeToken(value) || !ExpressionRegex.IsMatch(value))
+            if (IsUnsafeToken(value))
+            {
+                throw new InvalidOperationException($"Unsafe expression '{name}': {value}");
+            }
+
+            // Strip single-quoted string literals (e.g. 'label', '発行済', '✅ done')
+            // so that Unicode/emoji content inside quoted strings passes the ASCII-range regex.
+            var stripped = Regex.Replace(value, @"'(?:[^']|'')*'", "''");
+            if (!ExpressionRegex.IsMatch(stripped))
             {
                 throw new InvalidOperationException($"Unsafe expression '{name}': {value}");
             }

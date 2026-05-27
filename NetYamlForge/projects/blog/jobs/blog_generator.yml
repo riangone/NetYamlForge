@@ -1,0 +1,64 @@
+jobs:
+  keio_9008_analysis_job:
+    displayName: "京王電鉄(9008) AI分析ブログ生成"
+    description: "毎日定期的に京王電鉄の株価分析レポートを生成し、ブログ記事として投稿します"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "0 9 * * *" # 毎日午前9時
+      timezone: "Asia/Tokyo"
+    settings:
+      params:
+        target: "京王電鉄(9008)"
+        categoryId: "3" # ビジネス (Business)
+        tags: "金融, 投資"
+        author: "AI分析システム"
+      notifyEmails: "admin@example.com"
+
+  ai_computing_stocks_us:
+    displayName: "美国AI算力股票分析"
+    description: "每天定期生成美国AI算力相关股票的分析报告"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "20 8 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "美国AI算力相关股票"
+        categoryId: "3" # 假设 3 是商务/金融分类
+        tags: "AI, 算力, 美股, 股票分析"
+        author: "AI分析系统"
+        language: "zh-CN"
+
+  ai_computing_stocks_china:
+    displayName: "中国AI算力股票分析"
+    description: "每天定期生成中国AI算力相关股票的分析报告"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "20 8 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "中国AI算力相关股票"
+        categoryId: "3"
+        tags: "AI, 算力, A股, 股票分析"
+        author: "AI分析系统"
+        language: "zh-CN"
+
+  ai_computing_stocks_japan:
+    displayName: "日本AI算力股票分析"
+    description: "每天定期生成日本AI算力相关股票的分析报告"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "20 8 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "日本AI算力相关股票"
+        categoryId: "3"
+        tags: "AI, 算力, 日股, 股票分析"
+        author: "AI分析系统"
+        language: "zh-CN"

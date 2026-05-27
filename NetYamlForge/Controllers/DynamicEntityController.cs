@@ -360,7 +360,7 @@ public class DynamicEntityController : BaseProjectController
         }
 
         var bytes    = _docPdf.Generate(template, header, dataSources, projectDir);
-        var filename = BuildPdfFilename(template.FilenameTemplate, templateName);
+        var filename = BuildPdfFilename(template.FilenameTemplate, templateName, header);
         return File(bytes, "application/pdf", filename);
     }
 
@@ -381,12 +381,33 @@ public class DynamicEntityController : BaseProjectController
         return dynParams;
     }
 
-    private static string BuildPdfFilename(string? template, string fallbackName)
+    private static string BuildPdfFilename(
+        string? template, string fallbackName,
+        IDictionary<string, object?>? header = null)
     {
         if (string.IsNullOrWhiteSpace(template))
             return $"{fallbackName}_{DateTime.Now:yyyyMMdd}.pdf";
-        return template.Replace("{date:yyyyMMdd}", DateTime.Now.ToString("yyyyMMdd"))
-                       .Replace("{date}", DateTime.Now.ToString("yyyyMMdd"));
+
+        var result = template
+            .Replace("{date:yyyyMMdd}", DateTime.Now.ToString("yyyyMMdd"))
+            .Replace("{date}", DateTime.Now.ToString("yyyyMMdd"));
+
+        if (header != null)
+        {
+            result = System.Text.RegularExpressions.Regex.Replace(result, @"\{(\w+)\}", m =>
+            {
+                var key = m.Groups[1].Value;
+                return header.TryGetValue(key, out var val) && val != null
+                    ? val.ToString()!
+                    : m.Value;
+            });
+        }
+
+        // ファイル名に使えない文字を除去
+        foreach (var c in System.IO.Path.GetInvalidFileNameChars())
+            result = result.Replace(c.ToString(), "_");
+
+        return result;
     }
 
     public async Task<IActionResult> EditPage(string entity, string? id = null, string? returnUrl = null)

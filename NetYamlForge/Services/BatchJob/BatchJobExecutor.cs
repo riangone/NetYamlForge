@@ -31,6 +31,9 @@ public class BatchJobExecutor : IBatchJobExecutor
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly HookExecutionService _hookExecutionService;
     private readonly IChinaStockService _chinaStockService;
+    private readonly NetYamlForge.Services.Email.IEmailServiceFactory _emailFactory;
+    private readonly IDocumentPdfService _docPdf;
+    private readonly NetYamlForge.Services.Ai.IGeminiCliService _geminiCli;
     private readonly ILogger<BatchJobExecutor> _logger;
     private readonly ILoggerFactory _loggerFactory;
 
@@ -38,12 +41,18 @@ public class BatchJobExecutor : IBatchJobExecutor
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
         IChinaStockService chinaStockService,
+        NetYamlForge.Services.Email.IEmailServiceFactory emailFactory,
+        IDocumentPdfService docPdf,
+        NetYamlForge.Services.Ai.IGeminiCliService geminiCli,
         ILogger<BatchJobExecutor> logger,
         ILoggerFactory loggerFactory)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _hookExecutionService = hookExecutionService;
         _chinaStockService = chinaStockService;
+        _emailFactory = emailFactory;
+        _docPdf = docPdf;
+        _geminiCli = geminiCli;
         _logger = logger;
         _loggerFactory = loggerFactory;
     }
@@ -107,6 +116,32 @@ public class BatchJobExecutor : IBatchJobExecutor
                     await ExecuteChinaStockBriefingAsync(job, db, tx, result, cancellationToken);
                     break;
 
+                case "email_fetch":
+                    await ExecuteEmailFetchAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+
+                /* Disabling AiEmailChatExecutor as requested by user
+                case "ai_email_chat":
+                    await ExecuteAiEmailChatAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+                */
+
+                case "invoice_email_processor":
+                    await ExecuteInvoiceEmailProcessorAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+
+                case "automated_blog_generator":
+                    await ExecuteAutomatedBlogGeneratorAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+
+                case "ai_dealer_engine":
+                    await ExecuteAiDealerEngineAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+
+                case "ai_communication_sender":
+                    await ExecuteAiCommunicationSenderAsync(job, projectName, db, tx, result, cancellationToken);
+                    break;
+
                 default:
                     throw new NotSupportedException($"Unsupported job type: {job.Type}");
             }
@@ -127,6 +162,12 @@ public class BatchJobExecutor : IBatchJobExecutor
             result.Success = false;
             result.ErrorMessage = ex.Message;
             result.ErrorDetail = ex.ToString();
+
+            // エラー通知
+            if (!string.IsNullOrEmpty(job.Settings.NotifyEmails))
+            {
+                await SendErrorNotificationAsync(job, projectName, ex);
+            }
         }
         finally
         {
@@ -280,6 +321,180 @@ public class BatchJobExecutor : IBatchJobExecutor
         result.RowsAffected = briefResult.RowsAffected;
         result.ErrorMessage = briefResult.ErrorMessage;
         result.ErrorDetail = briefResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// メール受信タスク実行
+    /// </summary>
+    private async Task ExecuteEmailFetchAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        var logger = _loggerFactory.CreateLogger<EmailFetchExecutor>();
+        var executor = new EmailFetchExecutor(_emailFactory.GetForProject(projectName), logger);
+        var emailResult = await executor.ExecuteAsync(job, db, tx, cancellationToken);
+
+        result.Success = emailResult.Success;
+        result.RowsAffected = emailResult.RowsAffected;
+        result.ErrorMessage = emailResult.ErrorMessage;
+        result.ErrorDetail = emailResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// AI Email Chat タスク実行
+    /// </summary>
+    private async Task ExecuteAiEmailChatAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(projectName))
+        {
+            throw new InvalidOperationException("projectName is required for ai_email_chat job.");
+        }
+        var logger = _loggerFactory.CreateLogger<AiEmailChatExecutor>();
+        var executor = new AiEmailChatExecutor(_geminiCli, logger);
+        var chatResult = await executor.ExecuteAsync(job, projectName, cancellationToken);
+
+        result.Success = chatResult.Success;
+        result.RowsAffected = chatResult.RowsAffected;
+        result.ErrorMessage = chatResult.ErrorMessage;
+        result.ErrorDetail = chatResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// Invoice Email Processor タスク実行
+    /// </summary>
+    private async Task ExecuteInvoiceEmailProcessorAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(projectName))
+            throw new InvalidOperationException("projectName is required for invoice_email_processor job.");
+
+        var logger = _loggerFactory.CreateLogger<InvoiceEmailProcessorExecutor>();
+        var executor = new InvoiceEmailProcessorExecutor(_docPdf, _geminiCli, logger);
+        var execResult = await executor.ExecuteAsync(job, projectName, db, cancellationToken);
+
+        result.Success = execResult.Success;
+        result.RowsAffected = execResult.RowsAffected;
+        result.ErrorMessage = execResult.ErrorMessage;
+        result.ErrorDetail = execResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// Automated Blog Generator タスク実行
+    /// </summary>
+    private async Task ExecuteAutomatedBlogGeneratorAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(projectName))
+            throw new InvalidOperationException("projectName is required for automated_blog_generator job.");
+
+        var logger = _loggerFactory.CreateLogger<AutomatedBlogGeneratorExecutor>();
+        var executor = new AutomatedBlogGeneratorExecutor(_geminiCli, logger);
+        var execResult = await executor.ExecuteAsync(job, projectName, db, cancellationToken);
+
+        result.Success = execResult.Success;
+        result.RowsAffected = execResult.RowsAffected;
+        result.ErrorMessage = execResult.ErrorMessage;
+        result.ErrorDetail = execResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// AI ディーラーエンジンタスク実行
+    /// </summary>
+    private async Task ExecuteAiDealerEngineAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(projectName))
+            throw new InvalidOperationException("projectName is required for ai_dealer_engine job.");
+
+        var logger = _loggerFactory.CreateLogger<AiDealerEngineExecutor>();
+        var executor = new AiDealerEngineExecutor(_geminiCli, logger);
+        var execResult = await executor.ExecuteAsync(job, projectName, db, tx, cancellationToken);
+
+        result.Success = execResult.Success;
+        result.RowsAffected = execResult.RowsAffected;
+        result.ErrorMessage = execResult.ErrorMessage;
+        result.ErrorDetail = execResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// AI コミュニケーション送信タスク実行
+    /// </summary>
+    private async Task ExecuteAiCommunicationSenderAsync(
+        BatchJobDefinition job,
+        string? projectName,
+        IDbConnection db,
+        IDbTransaction tx,
+        BatchJobResult result,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(projectName))
+            throw new InvalidOperationException("projectName is required for ai_communication_sender job.");
+
+        var logger = _loggerFactory.CreateLogger<AiCommunicationExecutor>();
+        var executor = new AiCommunicationExecutor(_geminiCli, _emailFactory, logger);
+        var execResult = await executor.ExecuteAsync(job, projectName, db, tx, cancellationToken);
+
+        result.Success = execResult.Success;
+        result.RowsAffected = execResult.RowsAffected;
+        result.ErrorMessage = execResult.ErrorMessage;
+        result.ErrorDetail = execResult.ErrorDetail;
+    }
+
+    /// <summary>
+    /// エラー通知メールを送信
+    /// </summary>
+    private async Task SendErrorNotificationAsync(BatchJobDefinition job, string? projectName, Exception ex)
+    {
+        try
+        {
+            var emailService = _emailFactory.GetForProject(projectName);
+            var emails = job.Settings.NotifyEmails!.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var email in emails)
+            {
+                await emailService.SendEmailAsync(new NetYamlForge.Models.Email.EmailMessage
+                {
+                    To = email.Trim(),
+                    Subject = $"[NetYamlForge] Batch Job Error: {job.DisplayName} ({job.Id})",
+                    Body = $@"
+<h2>Batch Job Execution Error</h2>
+<p><b>Job:</b> {job.DisplayName} ({job.Id})</p>
+<p><b>Time:</b> {DateTime.UtcNow} (UTC)</p>
+<p><b>Error:</b> {ex.Message}</p>
+<pre>{ex.StackTrace}</pre>
+",
+                    IsHtml = true
+                });
+            }
+        }
+        catch (Exception notifyEx)
+        {
+            _logger.LogError(notifyEx, "Failed to send error notification for job {JobId}", job.Id);
+        }
     }
 }
 

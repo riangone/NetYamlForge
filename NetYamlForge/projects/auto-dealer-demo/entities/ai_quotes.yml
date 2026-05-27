@@ -1,0 +1,188 @@
+imports: []
+entities:
+  ai_quotes:
+    table: ai_quotes
+    key: quote_id
+    displayName: AI 見積管理
+    description: AI が自動生成した見積もりを管理します
+    softDelete: false
+    isPublic: true
+
+    columns:
+      quote_id:
+        type: string
+        length: 50
+        required: true
+        label: 見積 ID
+        searchable: true
+        sortable: true
+
+      lead_id:
+        type: string
+        length: 50
+        required: true
+        label: リード ID
+        searchable: true
+        sortable: true
+
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+
+      vehicle_id:
+        type: string
+        length: 50
+        required: true
+        label: 車両 ID
+        searchable: true
+        sortable: true
+
+      base_price:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        label: 基準価格
+        sortable: true
+
+      discount_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 値引額
+        default: 0
+        sortable: true
+
+      final_price:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        label: 最終価格
+        sortable: true
+
+      ai_reasoning:
+        type: text
+        required: false
+        label: AI 価格設定理由
+
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        options:
+          - draft          # 下書き
+          - approved       # 承認済
+          - sent           # 送信済
+          - accepted       # 承諾
+          - rejected       # 却下
+          - expired        # 期限切れ
+        default: draft
+        searchable: true
+        sortable: true
+
+      valid_until:
+        type: datetime
+        required: false
+        label: 有効期限
+        sortable: true
+
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+
+    forms:
+      quote_id:
+        type: string
+        required: true
+        label: 見積 ID
+        editable: false
+
+      lead_id:
+        type: string
+        required: true
+        label: リード ID
+        editable: false
+
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: false
+
+      vehicle_id:
+        type: string
+        required: true
+        label: 車両 ID
+        editable: false
+
+      base_price:
+        type: number
+        required: true
+        label: 基準価格
+        editable: true
+
+      discount_amount:
+        type: number
+        required: false
+        label: 値引額
+        editable: true
+
+      final_price:
+        type: number
+        required: true
+        label: 最終価格
+        editable: true
+
+      ai_reasoning:
+        type: textarea
+        required: false
+        label: AI 価格設定理由
+        editable: true
+        rows: 4
+
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+
+      valid_until:
+        type: datetime
+        required: false
+        label: 有効期限
+        editable: true
+
+    hooks:
+      beforeCreate:
+        - set_quote_timestamps
+      beforeUpdate:
+        - update_quote_timestamps
+
+    list:
+      titleColumns:
+        - quote_id
+        - lead_id
+        - customer_id
+        - final_price
+        - status
+        - valid_until
+      defaultSort:
+        field: created_at
+        dir: desc
+      filters:
+        - field: status
+        - field: lead_id
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

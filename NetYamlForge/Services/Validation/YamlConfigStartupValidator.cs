@@ -8,7 +8,7 @@ namespace NetYamlForge.Services.Validation;
 
 /// <summary>
 /// 起動時 YAML 設定バリデーター。
-/// 全プロジェクトのエンティティ定義を走査し、未知の型・未登録フックを警告します。
+/// 全プロジェクトのエンティティ定義を走査し、未知の型・未登録フック・未実装アクションハンドラーを警告します。
 /// </summary>
 public sealed class YamlConfigStartupValidator : IHostedService
 {
@@ -60,15 +60,21 @@ public sealed class YamlConfigStartupValidator : IHostedService
 
     private readonly ProjectManager _projectManager;
     private readonly IEntityHookRegistry _hookRegistry;
+    private readonly IProjectHookRegistry _projectHookRegistry;
+    private readonly IProjectActionRegistry _projectActionRegistry;
     private readonly ILogger<YamlConfigStartupValidator> _logger;
 
     public YamlConfigStartupValidator(
         ProjectManager projectManager,
         IEntityHookRegistry hookRegistry,
+        IProjectHookRegistry projectHookRegistry,
+        IProjectActionRegistry projectActionRegistry,
         ILogger<YamlConfigStartupValidator> logger)
     {
         _projectManager = projectManager;
         _hookRegistry = hookRegistry;
+        _projectHookRegistry = projectHookRegistry;
+        _projectActionRegistry = projectActionRegistry;
         _logger = logger;
     }
 
@@ -109,7 +115,7 @@ public sealed class YamlConfigStartupValidator : IHostedService
                     }
                 }
 
-                // フック名チェック（フレームワーク登録フックのみ確認）
+                // フック名チェック（フレームワーク + プロジェクト両レジストリで確認）
                 if (def.Hooks != null)
                 {
                     var hookSelectors = new System.Func<Models.EntityHooksDefinition, object?>[]
@@ -126,14 +132,31 @@ public sealed class YamlConfigStartupValidator : IHostedService
                             if (string.IsNullOrWhiteSpace(hookName) || hookName.StartsWith('@'))
                                 continue;
                             var baseName = hookName.Split(':', 2)[0];
-                            if (_hookRegistry.Find(baseName) == null)
+                            var inFramework = _hookRegistry.Find(baseName) != null;
+                            var inProject = _projectHookRegistry.Find(project.Name, baseName) != null;
+                            if (!inFramework && !inProject)
                             {
-                                // プロジェクト固有フックは実行時ロードのため Debug レベルに留める
-                                _logger.LogDebug(
-                                    "yaml_config_info event=hook_not_in_framework_registry project={Project} entity={Entity} hook={Hook} hint=プロジェクト固有フックか未登録",
-                                    project.Name, entityName, hookName);
+                                _logger.LogWarning(
+                                    "yaml_config_warn event=unimplemented_hook project={Project} entity={Entity} hook={Hook} " +
+                                    "hint=Hooks/ ディレクトリに実装クラスが見つかりません。dotnet run -- --scaffold-missing-hooks --project={Project2} で自動生成できます",
+                                    project.Name, entityName, baseName, project.Name);
+                                warnCount++;
                             }
                         }
+                    }
+                }
+
+                // アクションハンドラー名チェック
+                foreach (var (actionKey, action) in def.Actions)
+                {
+                    if (string.IsNullOrWhiteSpace(action.Handler)) continue;
+                    if (_projectActionRegistry.Find(project.Name, action.Handler) == null)
+                    {
+                        _logger.LogWarning(
+                            "yaml_config_warn event=unimplemented_action_handler project={Project} entity={Entity} action={Action} handler={Handler} " +
+                            "hint=Hooks/ ディレクトリに ICustomActionHandler 実装が見つかりません。dotnet run -- --scaffold-missing-hooks --project={Project2} で自動生成できます",
+                            project.Name, entityName, actionKey, action.Handler, project.Name);
+                        warnCount++;
                     }
                 }
             }

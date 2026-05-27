@@ -64,3 +64,146 @@ jobs:
       retryCount: 2
       retryInterval: 300
       logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # AI リード再スコアリング（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_lead_scorer:
+    displayName: 🤖 AI リード再スコアリング
+    description: "7 日以上未更新のリードを Gemini AI でスコアリングし、ai_decisions テーブルに書き込みます"
+    enabled: true
+
+    schedule:
+      cron: "30 */2 * * *"          # 2時間毎の30分
+      timezone: "Asia/Tokyo"
+
+    type: ai_dealer_engine
+    settings:
+      params:
+        mode: lead_scoring
+        maxItems: "5"
+        autoExecuteThreshold: "85"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # AI 育成タスク自動生成（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_nurturing_generator:
+    displayName: 🌱 AI 育成タスク自動生成
+    description: "スコア 30-79 のリードに対して Gemini AI が育成タスクを生成・登録します"
+    enabled: true
+
+    schedule:
+      cron: "0 8 * * 1-5"           # 平日毎朝 8:00
+      timezone: "Asia/Tokyo"
+
+    type: ai_dealer_engine
+    settings:
+      params:
+        mode: nurturing
+        maxItems: "10"
+        autoExecuteThreshold: "80"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # AI 見積自動生成（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_quote_generator:
+    displayName: 💰 AI 見積自動生成
+    description: "スコア 80 以上のリードに対して Gemini AI が最適見積を生成し、ai_quotes に登録します"
+    enabled: true
+
+    schedule:
+      cron: "0 9 * * 1-5"           # 平日毎朝 9:00
+      timezone: "Asia/Tokyo"
+
+    type: ai_dealer_engine
+    settings:
+      params:
+        mode: quote_generation
+        maxItems: "5"
+        autoExecuteThreshold: "90"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # Phase 3: AI 育成メール自動送信（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_nurturing_email_sender:
+    displayName: 📧 AI 育成メール自動送信
+    description: "pending の育成タスク（email/appointment/test_drive）を処理し、AI生成メールを顧客に自動送信します"
+    enabled: true
+
+    schedule:
+      cron: "30 10 * * 1-5"         # 平日毎朝 10:30
+      timezone: "Asia/Tokyo"
+
+    type: ai_communication_sender
+    settings:
+      params:
+        mode: nurturing_email
+        maxItems: "15"
+        autoSendThreshold: "80"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # Phase 3: AI 見積メール自動送信（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_quote_email_sender:
+    displayName: 💌 AI 見積メール自動送信
+    description: "承認済みの AI 見積を顧客にメール送信します。AI が件名・本文をパーソナライズします"
+    enabled: true
+
+    schedule:
+      cron: "0 11 * * 1-5"          # 平日毎朝 11:00
+      timezone: "Asia/Tokyo"
+
+    type: ai_communication_sender
+    settings:
+      params:
+        mode: quote_email
+        maxItems: "5"
+        autoSendThreshold: "85"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true
+
+  # ─────────────────────────────────────────────────────────────
+  # Phase 3: 無返信フォローアップ自動生成（Gemini CLI 実行）
+  # ─────────────────────────────────────────────────────────────
+  ai_response_check:
+    displayName: 🔍 AI 無返信フォローアップ
+    description: "3日間返信がないメールを検出し、AI が最適なフォローアップアクションを育成タスクに追加します"
+    enabled: true
+
+    schedule:
+      cron: "0 14 * * 1-5"          # 平日毎日 14:00
+      timezone: "Asia/Tokyo"
+
+    type: ai_communication_sender
+    settings:
+      params:
+        mode: response_check
+        maxItems: "20"
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 300
+      logError: true

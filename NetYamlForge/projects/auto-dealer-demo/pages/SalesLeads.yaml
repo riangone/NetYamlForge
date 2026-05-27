@@ -160,3 +160,34 @@ sections:
       - label: 編集
         url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
         class: "btn-outline-secondary"
+
+  - id: ai_recommendations
+    title: '🤖 AI推奨アクション（承認待ち・実行待ち）'
+    visibleToRoles: [sales_rep, sales_manager, executive]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        d.decision_id AS 決定ID,
+        CASE d.decision_type
+          WHEN 'lead_scoring'      THEN '🎯 スコアリング'
+          WHEN 'nurturing_task'    THEN '🌱 育成タスク'
+          WHEN 'quote_generation'  THEN '💰 見積生成'
+          WHEN 'discount_approval' THEN '🏷️ 値引承認'
+          ELSE d.decision_type
+        END AS 決定種別,
+        d.entity_id AS 対象ID,
+        CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+        CASE WHEN d.requires_human = 1 THEN '🔴 人間確認必要' ELSE '🟢 自動実行可能' END AS 実行種別,
+        COALESCE(SUBSTR(d.ai_reasoning, 1, 80), '') AS AI判断理由,
+        d.created_at AS 生成日時
+      FROM ai_decisions d
+      WHERE d.status = 'pending'
+      ORDER BY d.requires_human DESC, d.confidence_score DESC
+      LIMIT 15
+    columns: [決定ID, 決定種別, 対象ID, 確信度, 実行種別, AI判断理由, 生成日時]
+    pageSize: 15
+    actions:
+      - label: 承認画面へ
+        url: '/auto-dealer-demo/Page/AiDecisionApproval'
+        class: 'btn-warning'

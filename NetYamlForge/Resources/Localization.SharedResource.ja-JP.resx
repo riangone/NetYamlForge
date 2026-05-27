@@ -1776,4 +1776,109 @@
   <data name="projects.todo.entities.task.entities.task.links.project.label" xml:space="preserve">
     <value>プロジェクト</value>
   </data>
-<data name="Open" xml:space="preserve"><value>開く</value></data><data name="Not Started" xml:space="preserve"><value>未開始</value></data><data name="In Progress" xml:space="preserve"><value>進行中</value></data><data name="Completed" xml:space="preserve"><value>完了</value></data><data name="Current Step" xml:space="preserve"><value>現在のステップ</value></data><data name="Employee" xml:space="preserve"><value>一般社員</value></data><data name="Contract Manager" xml:space="preserve"><value>契約責任者</value></data><data name="Accountant" xml:space="preserve"><value>会計責任者</value></data><data name="Purchaser" xml:space="preserve"><value>購買責任者</value></data><data name="Approver" xml:space="preserve"><value>承認者</value></data><data name="Admin" xml:space="preserve"><value>管理者</value></data><data name="Finance Manager" xml:space="preserve"><value>財務責任者</value></data><data name="Manager" xml:space="preserve"><value>マネージャー</value></data><data name="Filter" xml:space="preserve"><value>検索</value></data><data name="Clear" xml:space="preserve"><value>クリア</value></data><data name="New" xml:space="preserve"><value>新規作成</value></data><data name="Edit" xml:space="preserve"><value>編集</value></data><data name="Delete" xml:space="preserve"><value>削除</value></data><data name="No data available" xml:space="preserve"><value>データがありません</value></data><data name="Page Size" xml:space="preserve"><value>表示件数</value></data><data name="Actions" xml:space="preserve"><value>操作</value></data></root>
+<data name="Open" xml:space="preserve"><value>開く</value></data><data name="Not Started" xml:space="preserve"><value>未開始</value></data><data name="In Progress" xml:space="preserve"><value>進行中</value></data><data name="Completed" xml:space="preserve"><value>完了</value></data><data name="Current Step" xml:space="preserve"><value>現在のステップ</value></data><data name="Employee" xml:space="preserve"><value>一般社員</value></data><data name="Contract Manager" xml:space="preserve"><value>契約責任者</value></data><data name="Accountant" xml:space="preserve"><value>会計責任者</value></data><data name="Purchaser" xml:space="preserve"><value>購買責任者</value></data><data name="Approver" xml:space="preserve"><value>承認者</value></data><data name="Admin" xml:space="preserve"><value>管理者</value></data><data name="Finance Manager" xml:space="preserve"><value>財務責任者</value></data><data name="Manager" xml:space="preserve"><value>マネージャー</value></data><data name="Filter" xml:space="preserve"><value>検索</value></data><data name="Clear" xml:space="preserve"><value>クリア</value></data><data name="New" xml:space="preserve"><value>新規作成</value></data><data name="Edit" xml:space="preserve"><value>編集</value></data><data name="Delete" xml:space="preserve"><value>削除</value></data><data name="No data available" xml:space="preserve"><value>データがありません</value></data><data name="Page Size" xml:space="preserve"><value>表示件数</value></data><data name="Actions" xml:space="preserve"><value>操作</value></data>  <data name="Blog" xml:space="preserve">
+    <value>ブログ</value>
+  </data>
+  <data name="FeaturedPosts" xml:space="preserve">
+    <value>おすすめの記事</value>
+  </data>
+  <data name="Featured" xml:space="preserve">
+    <value>おすすめ</value>
+  </data>
+  <data name="FilteringBy" xml:space="preserve">
+    <value>フィルター中:</value>
+  </data>
+  <data name="CancelFilter" xml:space="preserve">
+    <value>フィルター解除</value>
+  </data>
+  <data name="LatestPosts" xml:space="preserve">
+    <value>最新記事</value>
+  </data>
+  <data name="PostsBy" xml:space="preserve">
+    <value>{0} の記事</value>
+  </data>
+  <data name="PostsCount" xml:space="preserve">
+    <value>（{0} 件）</value>
+  </data>
+  <data name="NoPostsFound" xml:space="preserve">
+    <value>記事がありません</value>
+  </data>
+  <data name="ReadMore" xml:space="preserve">
+    <value>続きを読む →</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>カテゴリ</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>タグ</value>
+  </data>
+  <data name="PopularTags" xml:space="preserve">
+    <value>人気のタグ</value>
+  </data>
+  <data name="PostNotFound" xml:space="preserve">
+    <value>記事が見つかりません</value>
+  </data>
+  <data name="PostNotFoundDetail" xml:space="preserve">
+    <value>指定された記事が存在しないか、公開されていません。</value>
+  </data>
+  <data name="BackToBlog" xml:space="preserve">
+    <value>← ブログに戻る</value>
+  </data>
+  <data name="Views" xml:space="preserve">
+    <value>閲覧</value>
+  </data>
+  <data name="Comments" xml:space="preserve">
+    <value>コメント</value>
+  </data>
+  <data name="RelatedPosts" xml:space="preserve">
+    <value>関連記事</value>
+  </data>
+  <data name="CommentsCount" xml:space="preserve">
+    <value>コメント ({0})</value>
+  </data>
+  <data name="AnonymousUser" xml:space="preserve">
+    <value>匿名ユーザー</value>
+  </data>
+  <data name="NoCommentsYet" xml:space="preserve">
+    <value>まだコメントはありません。最初のコメントを書きませんか？</value>
+  </data>
+  <data name="PostComment" xml:space="preserve">
+    <value>💬 コメントを投稿</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>ニックネーム</value>
+  </data>
+  <data name="OptionalNickname" xml:space="preserve">
+    <value>（任意、未入力の場合は匿名）</value>
+  </data>
+  <data name="YourName" xml:space="preserve">
+    <value>お名前</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>メールアドレス</value>
+  </data>
+  <data name="OptionalNotPublic" xml:space="preserve">
+    <value>（任意、公開されません）</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="WriteYourComment" xml:space="preserve">
+    <value>コメントを入力してください...</value>
+  </data>
+  <data name="CommentReviewNotice" xml:space="preserve">
+    <value>コメントは承認後に公開されます</value>
+  </data>
+  <data name="SubmitComment" xml:space="preserve">
+    <value>コメントを送信</value>
+  </data>
+  <data name="BackToBlogList" xml:space="preserve">
+    <value>← 記事一覧に戻る</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>ホーム</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>管理</value>
+  </data>
+</root>

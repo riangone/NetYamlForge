@@ -1,0 +1,184 @@
+title: "AI コミュニケーション管理"
+description: "AI が自動生成・送信したメッセージの一覧・承認・返信トラッキング"
+
+sections:
+  # ────────────────────────────────────────
+  # KPI サマリー
+  # ────────────────────────────────────────
+  - id: kpi_summary
+    title: "コミュニケーション KPI（今週）"
+    visibleToRoles: [executive, sales_manager, operator]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '自動送信済み' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '✅' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_communications
+      WHERE send_status = 'sent'
+        AND sent_at >= date('now', '-7 days')
+      UNION ALL
+      SELECT '承認待ち', CAST(COUNT(*) AS TEXT), '⏳', NULL
+      FROM ai_communications
+      WHERE send_status = 'pending' AND requires_human = 1
+      UNION ALL
+      SELECT '返信率',
+             CASE WHEN COUNT(*) = 0 THEN '0%'
+             ELSE CAST(ROUND(100.0 * SUM(response_received) / COUNT(*), 1) AS TEXT) || '%'
+             END,
+             '💬', NULL
+      FROM ai_communications
+      WHERE send_status = 'sent'
+        AND sent_at >= date('now', '-30 days')
+      UNION ALL
+      SELECT '今日の送信予定', CAST(COUNT(*) AS TEXT), '📤', NULL
+      FROM lead_nurturing_tasks
+      WHERE status = 'pending'
+        AND task_type IN ('email', 'appointment', 'test_drive')
+        AND (due_date IS NULL OR due_date <= date('now', '+1 day'))
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ────────────────────────────────────────
+  # 承認待ちコミュニケーション
+  # ────────────────────────────────────────
+  - id: pending_approval
+    title: "承認待ちコミュニケーション（人間確認必要）"
+    description: "AI確信度が低いため自動送信を保留中です。内容を確認して承認または却下してください。"
+    visibleToRoles: [executive, sales_manager, operator]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ac.comm_id AS 通信ID,
+        c.name AS 顧客名,
+        ac.comm_channel AS チャネル,
+        ac.subject AS 件名,
+        ROUND(ac.ai_confidence, 0) || '%' AS AI確信度,
+        sl.lead_score AS リードスコア,
+        ac.created_at AS 生成日時
+      FROM ai_communications ac
+      LEFT JOIN customers c ON ac.customer_id = c.customer_id
+      LEFT JOIN sales_leads sl ON ac.lead_id = sl.lead_id
+      WHERE ac.send_status = 'pending' AND ac.requires_human = 1
+      ORDER BY sl.lead_score DESC, ac.created_at ASC
+      LIMIT 20
+    columns: [通信ID, 顧客名, チャネル, 件名, AI確信度, リードスコア, 生成日時]
+    pageSize: 20
+    emptyMessage: "承認待ちのコミュニケーションはありません"
+
+  # ────────────────────────────────────────
+  # 送信済みコミュニケーション履歴
+  # ────────────────────────────────────────
+  - id: sent_history
+    title: "送信済みコミュニケーション（直近30日）"
+    visibleToRoles: [executive, sales_manager, operator]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ac.comm_id AS 通信ID,
+        c.name AS 顧客名,
+        ac.comm_channel AS チャネル,
+        ac.subject AS 件名,
+        ROUND(ac.ai_confidence, 0) || '%' AS AI確信度,
+        CASE WHEN ac.response_received = 1 THEN '返信あり' ELSE '未返信' END AS 返信状況,
+        COALESCE(ac.response_sentiment, '-') AS 感情,
+        ac.sent_at AS 送信日時
+      FROM ai_communications ac
+      LEFT JOIN customers c ON ac.customer_id = c.customer_id
+      WHERE ac.send_status = 'sent'
+        AND ac.sent_at >= date('now', '-30 days')
+      ORDER BY ac.sent_at DESC
+      LIMIT 50
+    columns: [通信ID, 顧客名, チャネル, 件名, AI確信度, 返信状況, 感情, 送信日時]
+    pageSize: 20
+    emptyMessage: "送信済みのコミュニケーションはありません"
+
+  # ────────────────────────────────────────
+  # 無返信アラート
+  # ────────────────────────────────────────
+  - id: no_reply_alert
+    title: "無返信アラート（3日以上未返信）"
+    description: "次回の ai_response_check ジョブ（平日14:00）が自動フォローアップタスクを生成します"
+    visibleToRoles: [executive, sales_manager, operator]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ac.comm_id AS 通信ID,
+        c.name AS 顧客名,
+        ac.subject AS 件名,
+        ac.sent_at AS 送信日時,
+        CAST(julianday('now') - julianday(ac.sent_at) AS INTEGER) || '日経過' AS 経過日数,
+        sl.lead_score AS リードスコア
+      FROM ai_communications ac
+      LEFT JOIN customers c ON ac.customer_id = c.customer_id
+      LEFT JOIN sales_leads sl ON ac.lead_id = sl.lead_id
+      WHERE ac.send_status = 'sent'
+        AND ac.response_received = 0
+        AND ac.sent_at <= datetime('now', '-3 days')
+      ORDER BY ac.sent_at ASC
+      LIMIT 20
+    columns: [通信ID, 顧客名, 件名, 送信日時, 経過日数, リードスコア]
+    pageSize: 20
+    emptyMessage: "無返信のコミュニケーションはありません"
+
+  # ────────────────────────────────────────
+  # チャネル別送信統計
+  # ────────────────────────────────────────
+  - id: channel_stats
+    title: "チャネル別送信統計（直近30日）"
+    visibleToRoles: [executive, sales_manager]
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT
+        comm_channel AS チャネル,
+        COUNT(*) AS 送信数,
+        SUM(response_received) AS 返信数,
+        ROUND(100.0 * SUM(response_received) / MAX(COUNT(*), 1), 1) AS 返信率
+      FROM ai_communications
+      WHERE send_status = 'sent'
+        AND sent_at >= date('now', '-30 days')
+      GROUP BY comm_channel
+      ORDER BY COUNT(*) DESC
+    columns: [チャネル, 送信数, 返信数, 返信率]
+    xField: チャネル
+    yField: 送信数
+    color: "rgba(99, 102, 241, 0.75)"
+
+  # ────────────────────────────────────────
+  # 本日の送信予定タスク
+  # ────────────────────────────────────────
+  - id: today_tasks
+    title: "本日の送信予定タスク"
+    visibleToRoles: [executive, sales_manager, operator]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        lnt.task_id AS タスクID,
+        c.name AS 顧客名,
+        lnt.task_type AS タイプ,
+        lnt.ai_recommendation AS AI推奨,
+        lnt.priority_score AS 優先度,
+        lnt.due_date AS 期限,
+        COALESCE(lnt.comm_sent_at, '未送信') AS 送信状況
+      FROM lead_nurturing_tasks lnt
+      LEFT JOIN customers c ON lnt.customer_id = c.customer_id
+      WHERE lnt.status IN ('pending', 'in_progress')
+        AND lnt.task_type IN ('email', 'appointment', 'test_drive', 'catalog')
+        AND (lnt.due_date IS NULL OR lnt.due_date <= date('now', '+2 days'))
+      ORDER BY lnt.priority_score DESC, lnt.due_date ASC
+      LIMIT 30
+    columns: [タスクID, 顧客名, タイプ, AI推奨, 優先度, 期限, 送信状況]
+    pageSize: 20
+    emptyMessage: "本日の送信予定タスクはありません"

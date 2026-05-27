@@ -2,6 +2,38 @@ title: 担当者パフォーマンス
 description: "セールス担当者の個人 KPI、担当リード、フォローアップアクション、活動履歴を管理"
 
 sections:
+  - id: ai_morning_briefing
+    title: '🌅 今日のAI推奨アクション TOP5'
+    visibleToRoles: [sales_rep, sales_manager]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ROW_NUMBER() OVER (ORDER BY t.priority_score DESC, t.due_date ASC) AS 優先順,
+        c.name AS 顧客名,
+        CASE t.task_type
+          WHEN 'email'       THEN '✉️ メール送信'
+          WHEN 'call'        THEN '📞 電話'
+          WHEN 'appointment' THEN '📅 アポ取得'
+          WHEN 'test_drive'  THEN '🚗 試乗誘致'
+          WHEN 'catalog'     THEN '📄 資料送付'
+          ELSE t.task_type
+        END AS アクション,
+        COALESCE(SUBSTR(t.ai_recommendation, 1, 60), '-') AS AI推奨理由,
+        t.priority_score AS 優先度,
+        COALESCE(t.due_date, '期限なし') AS 期限,
+        COALESCE(l.lead_id, '') AS リードID
+      FROM lead_nurturing_tasks t
+      LEFT JOIN customers c ON t.customer_id = c.customer_id
+      LEFT JOIN sales_leads l ON t.lead_id = l.lead_id
+      WHERE t.status IN ('pending', 'in_progress')
+      ORDER BY t.priority_score DESC, t.due_date ASC
+      LIMIT 5
+    columns: [優先順, 顧客名, アクション, AI推奨理由, 優先度, 期限, リードID]
+    pageSize: 5
+    editable: false
+    readOnly: true
+
   # ─────────────────────────────────────────
   # 個人 KPI カード
   # ─────────────────────────────────────────

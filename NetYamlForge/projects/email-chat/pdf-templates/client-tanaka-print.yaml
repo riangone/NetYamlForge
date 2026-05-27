@@ -1,0 +1,227 @@
+# 有限会社タナカ印刷 専用テンプレート
+# スタイル: バーガンディ/ワインレッド
+name: client-tanaka-print
+filenameTemplate: "請求書_{InvoiceNo}.pdf"
+pageSize: A4
+orientation: portrait
+margins: [36, 42, 36, 42]
+
+theme:
+  primaryColor: "7b1d1d"
+  labelColor: "8b2020"
+  labelTextColor: "fff5f5"
+  subtleBackground: "fdf0f0"
+  oddRowColor: "fdf8f8"
+  borderColor: "c06060"
+
+dataSources:
+  client:
+    query: "SELECT * FROM GoseiClient WHERE Id = @ClientId"
+  items:
+    query: "SELECT * FROM GoseiInvoiceItem WHERE InvoiceId = @Id ORDER BY LineNo"
+
+sections:
+  - type: paragraph
+    text: "請　求　書"
+    fontSize: 22
+    align: center
+    marginBottom: 6
+
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 4
+    cells:
+      - elements: []
+      - vAlign: top
+        elements:
+          - type: paragraph
+            field: IssueDate
+            fontSize: 9
+            align: right
+          - type: labelTable
+            columnWidths: [45, 55]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8
+            rows:
+              - label: "登録番号"
+                field: RegistrationNo
+              - label: "請求書番号"
+                field: InvoiceNo
+
+  - type: row
+    columnWidths: [55, 45]
+    marginBottom: 10
+    cells:
+      - vAlign: bottom
+        elements:
+          - type: paragraph
+            field: "client.Name"
+            suffix: "　御中"
+            fontSize: 14
+            suffixFontSize: 9
+            bold: true
+          - type: line
+            lineWeight: 1.5
+            color: primary
+            marginTop: 3
+            marginBottom: 6
+          - type: paragraph
+            text: "下記のとおりご請求申し上げます。"
+            fontSize: 9
+      - vAlign: top
+        paddingLeft: 10
+        elements:
+          - type: paragraph
+            text: "株式会社　ゴーセー"
+            fontSize: 11
+            bold: true
+          - type: paragraph
+            text: "〒135-0035"
+            fontSize: 8
+          - type: paragraph
+            text: "東京都江東区深川2-6-2　泉屋ビル401"
+            fontSize: 8
+          - type: paragraph
+            text: "TEL：03-6458-8710 / FAX：03-6458-8711"
+            fontSize: 8
+
+  - type: row
+    columnWidths: [5, 55, 40]
+    marginBottom: 6
+    cells:
+      - elements: []
+      - elements:
+          - type: row
+            columnWidths: [50, 50]
+            cells:
+              - background: label
+                padding: 5
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    text: "合計金額（消費税込）"
+                    fontSize: 10
+                    color: labelText
+                    align: center
+              - background: subtle
+                padding: 5
+                vAlign: middle
+                borderWeight: 0.5
+                elements:
+                  - type: paragraph
+                    field: Total
+                    format: currency
+                    fontSize: 13
+                    align: center
+                    bold: true
+      - elements: []
+
+  - type: line
+    lineWeight: 0.5
+    color: primary
+    marginBottom: 1
+
+  - type: line
+    lineWeight: 1
+    color: primary
+    marginBottom: 4
+
+  - type: dataTable
+    dataSource: items
+    minRows: 28
+    borderWeight: 0.5
+    cellPadding: 3
+    fontSize: 8.5
+    labelBackground: label
+    labelTextColor: labelText
+    oddRowBackground: oddRow
+    columns:
+      - field: ItemName
+        label: "品　名"
+        width: 30
+        align: left
+      - field: OrderNo
+        label: "受注番号"
+        width: 12
+        align: center
+      - field: Description
+        label: "内　容"
+        width: 14
+        align: left
+      - field: Quantity
+        label: "点数"
+        width: 8
+        align: right
+        format: quantity
+      - field: UnitPrice
+        label: "単価"
+        width: 14
+        align: right
+        format: currency
+      - field: Amount
+        label: "金　額"
+        width: 14
+        align: right
+        format: currency
+      - field: Notes
+        label: "備　考"
+        width: 8
+        align: left
+
+  - type: row
+    columnWidths: [55, 45]
+    cells:
+      - elements: []
+      - elements:
+          - type: labelTable
+            columnWidths: [55, 45]
+            labelBackground: subtle
+            labelTextColor: null
+            borderWeight: 0.5
+            cellPadding: 3
+            fontSize: 8.5
+            rows:
+              - label: "小計"
+                field: Subtotal
+                format: currency
+              - label: "消費税（10%）"
+                field: TaxAmount10
+                format: currency
+                omitIfZero: true
+              - label: "消費税（8%）"
+                field: TaxAmount8
+                format: currency
+                omitIfZero: true
+              - label: "合　計"
+                field: Total
+                format: currency
+                bold: true
+
+  - type: row
+    columnWidths: [15, 85]
+    marginTop: 8
+    cells:
+      - background: label
+        padding: 6
+        vAlign: middle
+        elements:
+          - type: paragraph
+            text: "備　考"
+            fontSize: 9
+            color: labelText
+            align: center
+            bold: true
+      - borderWeight: 0.5
+        padding: 6
+        minHeight: 40
+        elements:
+          - type: paragraph
+            template: |
+              お支払いは下記金融機関へお振込み願います。
+              {BankName}　{BranchName}　{AccountType}　{AccountNo}　{AccountHolder}
+              {Remarks}
+            fontSize: 8.5

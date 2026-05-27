@@ -1,0 +1,58 @@
+hero:
+  eyebrow: AI Email Chat — 自動請求書処理システム
+  title: メールを受信するだけで、請求書処理が完結する
+  description: IMAP でメールを取得し、Gemini AI が添付ファイルを解析。取引先・請求書データを自動で抽出・保存し、PDF を生成してそのまま返信まで行います。
+  primaryActionLabel: 請求書一覧
+  primaryActionUrl: /email-chat/DynamicEntity/Index?entity=gosei_invoice
+  secondaryActionLabel: ダッシュボード
+  secondaryActionUrl: /email-chat/Dashboard
+
+metrics:
+  - label: 自動処理ステップ
+    value: "6"
+    trend: 受信 → AI解析 → 抽出 → DB保存 → PDF → 返信
+    tone: text-primary
+  - label: AI エンジン
+    value: Gemini
+    trend: 画像・テキスト対応
+    tone: text-secondary
+  - label: バックグラウンド実行
+    value: 5 min
+    trend: 定期ポーリング
+    tone: text-success
+
+capabilities:
+  - icon: 📧
+    title: IMAP メール受信
+    description: 設定された IMAP アカウントから未読メールを自動取得。添付ファイル（画像・PDF・テキスト）を自動分類して処理キューへ追加します。
+    badge: 自動
+  - icon: 🤖
+    title: Gemini AI 解析
+    description: 添付画像は `@/path` 構文でそのまま渡し、テキスト系ファイルはコードブロックとして注入。Gemini CLI が JSON 形式で請求情報を抽出します。
+    badge: AI
+  - icon: 🗄️
+    title: DB 自動保存
+    description: 抽出した取引先・請求書・明細データを SQLite へ自動登録。重複チェック付きで冪等な処理を保証します。
+    badge: 自動
+  - icon: 📄
+    title: PDF 生成 & 返信
+    description: 保存済みデータから請求書 PDF を自動生成し、SMTP 経由で送信者へ自動返信。全フローをゼロタッチで完結させます。
+    badge: 自動
+
+quickActions:
+  - label: 請求書一覧
+    url: /email-chat/DynamicEntity/Index?entity=gosei_invoice
+    style: btn-primary
+    icon: 📄
+  - label: 取引先管理
+    url: /email-chat/DynamicEntity/Index?entity=gosei_client
+    style: btn-outline
+    icon: 🏢
+  - label: 請求明細
+    url: /email-chat/DynamicEntity/Index?entity=gosei_invoice_item
+    style: btn-outline
+    icon: 📝
+  - label: ダッシュボード
+    url: /email-chat/Dashboard
+    style: btn-ghost
+    icon: 📊

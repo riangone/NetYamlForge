@@ -1776,4 +1776,109 @@
   <data name="projects.todo.entities.task.entities.task.links.project.label" xml:space="preserve">
     <value>Project</value>
   </data>
+  <data name="Blog" xml:space="preserve">
+    <value>블로그</value>
+  </data>
+  <data name="FeaturedPosts" xml:space="preserve">
+    <value>추천 게시물</value>
+  </data>
+  <data name="Featured" xml:space="preserve">
+    <value>추천</value>
+  </data>
+  <data name="FilteringBy" xml:space="preserve">
+    <value>필터링 중:</value>
+  </data>
+  <data name="CancelFilter" xml:space="preserve">
+    <value>필터 취소</value>
+  </data>
+  <data name="LatestPosts" xml:space="preserve">
+    <value>최신 게시물</value>
+  </data>
+  <data name="PostsBy" xml:space="preserve">
+    <value>{0}의 게시물</value>
+  </data>
+  <data name="PostsCount" xml:space="preserve">
+    <value>({0}개)</value>
+  </data>
+  <data name="NoPostsFound" xml:space="preserve">
+    <value>게시물이 없습니다</value>
+  </data>
+  <data name="ReadMore" xml:space="preserve">
+    <value>더 읽기 →</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>카테고리</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>태그</value>
+  </data>
+  <data name="PopularTags" xml:space="preserve">
+    <value>인기 태그</value>
+  </data>
+  <data name="PostNotFound" xml:space="preserve">
+    <value>게시물을 찾을 수 없습니다</value>
+  </data>
+  <data name="PostNotFoundDetail" xml:space="preserve">
+    <value>지정된 게시물이 존재하지 않거나 공개되지 않았습니다.</value>
+  </data>
+  <data name="BackToBlog" xml:space="preserve">
+    <value>← 블로그로 돌아가기</value>
+  </data>
+  <data name="Views" xml:space="preserve">
+    <value>조회</value>
+  </data>
+  <data name="Comments" xml:space="preserve">
+    <value>댓글</value>
+  </data>
+  <data name="RelatedPosts" xml:space="preserve">
+    <value>관련 게시물</value>
+  </data>
+  <data name="CommentsCount" xml:space="preserve">
+    <value>댓글 ({0})</value>
+  </data>
+  <data name="AnonymousUser" xml:space="preserve">
+    <value>익명 사용자</value>
+  </data>
+  <data name="NoCommentsYet" xml:space="preserve">
+    <value>아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</value>
+  </data>
+  <data name="PostComment" xml:space="preserve">
+    <value>💬 댓글 남기기</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>닉네임</value>
+  </data>
+  <data name="OptionalNickname" xml:space="preserve">
+    <value>(선택 사항, 입력하지 않으면 익명으로 표시됨)</value>
+  </data>
+  <data name="YourName" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>이메일</value>
+  </data>
+  <data name="OptionalNotPublic" xml:space="preserve">
+    <value>(선택 사항, 공개되지 않음)</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>내용</value>
+  </data>
+  <data name="WriteYourComment" xml:space="preserve">
+    <value>댓글을 입력하세요...</value>
+  </data>
+  <data name="CommentReviewNotice" xml:space="preserve">
+    <value>댓글은 승인 후 공개됩니다</value>
+  </data>
+  <data name="SubmitComment" xml:space="preserve">
+    <value>댓글 제출</value>
+  </data>
+  <data name="BackToBlogList" xml:space="preserve">
+    <value>← 게시물 목록으로 돌아가기</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>홈</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>관리</value>
+  </data>
 </root>

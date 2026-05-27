@@ -1,0 +1,269 @@
+title: 📊 AI ダッシュボード
+description: "AI 活動の全体状況を可視化し、決定数・実行数・精度・統計を一元管理します"
+
+sections:
+  # ─────────────────────────────────────────
+  # AI 活動 KPI カード
+  # ─────────────────────────────────────────
+  - id: ai_kpi
+    title: AI 活動サマリー（全期間）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '総 AI 決定数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🤖' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_decisions
+      UNION ALL
+      SELECT '自動実行数',
+             CAST(SUM(CASE WHEN status = 'auto_executed' THEN 1 ELSE 0 END) AS TEXT),
+             '⚡',
+             CAST(ROUND(SUM(CASE WHEN status = 'auto_executed' THEN 1.0 ELSE 0.0 END) * 100.0 / NULLIF(COUNT(*), 0), 1) AS TEXT) || '%'
+      FROM ai_decisions
+      UNION ALL
+      SELECT '人間承認率',
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'approved' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(SUM(CASE WHEN status IN ('approved', 'rejected') THEN 1.0 ELSE 0.0 END), 0), 1
+             ) AS TEXT) || '%',
+             '✅',
+             NULL
+      FROM ai_decisions
+      WHERE status IN ('approved', 'rejected')
+      UNION ALL
+      SELECT '平均確信度',
+             CAST(ROUND(AVG(confidence_score), 1) AS TEXT) || '%',
+             '🎯',
+             NULL
+      FROM ai_decisions
+      UNION ALL
+      SELECT '育成タスク総数',
+             CAST(COUNT(*) AS TEXT),
+             '🌱',
+             NULL
+      FROM lead_nurturing_tasks
+      UNION ALL
+      SELECT 'AI 見積総数',
+             CAST(COUNT(*) AS TEXT),
+             '💰',
+             CAST(ROUND(AVG(final_price), 0) AS TEXT)
+      FROM ai_quotes
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 決定種別別の内訳（円グラフ）
+  # ─────────────────────────────────────────
+  - id: decision_breakdown
+    title: AI 決定種別内訳
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE decision_type
+               WHEN 'lead_scoring'     THEN '🎯 リードスコアリング'
+               WHEN 'nurturing_task'   THEN '🌱 育成タスク'
+               WHEN 'quote_generation' THEN '💰 見積生成'
+               WHEN 'discount_approval' THEN '🏷️ 値引承認'
+               WHEN 'assignment'       THEN '👤 担当アサイン'
+               WHEN 'escalation'       THEN '🚨 エスカレーション'
+               ELSE decision_type
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_decisions
+      GROUP BY decision_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # AI 決定のステータス分布（棒グラフ）
+  # ─────────────────────────────────────────
+  - id: decision_status_chart
+    title: ステータス分布
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT CASE status
+               WHEN 'pending'       THEN '⏳ 承認待ち'
+               WHEN 'approved'      THEN '✅ 承認済'
+               WHEN 'rejected'      THEN '❌ 却下'
+               WHEN 'auto_executed' THEN '⚡ 自動実行'
+               ELSE status
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_decisions
+      GROUP BY status
+      ORDER BY CASE status
+        WHEN 'pending' THEN 1
+        WHEN 'auto_executed' THEN 2
+        WHEN 'approved' THEN 3
+        WHEN 'rejected' THEN 4
+        ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(59, 130, 246, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 確信度分布
+  # ─────────────────────────────────────────
+  - id: confidence_distribution
+    title: 確信度分布
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT '0-25%' AS label, COUNT(*) AS value
+      FROM ai_decisions WHERE confidence_score < 25
+      UNION ALL
+      SELECT '25-50%', COUNT(*)
+      FROM ai_decisions WHERE confidence_score >= 25 AND confidence_score < 50
+      UNION ALL
+      SELECT '50-75%', COUNT(*)
+      FROM ai_decisions WHERE confidence_score >= 50 AND confidence_score < 75
+      UNION ALL
+      SELECT '75-90%', COUNT(*)
+      FROM ai_decisions WHERE confidence_score >= 75 AND confidence_score < 90
+      UNION ALL
+      SELECT '90-100%', COUNT(*)
+      FROM ai_decisions WHERE confidence_score >= 90
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(16, 185, 129, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 直近の AI アクションログ
+  # ─────────────────────────────────────────
+  - id: recent_action_log
+    title: 📝 直近の AI アクションログ（最新 20 件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT log_id AS ログID,
+             CASE action_type
+               WHEN 'lead_scored'        THEN '🎯 リードスコア'
+               WHEN 'nurturing_created'  THEN '🌱 育成タスク作成'
+               WHEN 'quote_generated'    THEN '💰 見積生成'
+               WHEN 'decision_approved'  THEN '✅ 決定承認'
+               WHEN 'decision_rejected'  THEN '❌ 決定却下'
+               WHEN 'auto_executed'      THEN '⚡ 自動実行'
+               ELSE action_type
+             END AS アクション種別,
+             entity_type AS 対象種別,
+             entity_id AS 対象ID,
+             COALESCE(ai_model, '-') AS 使用モデル,
+             COALESCE(SUBSTR(prompt_summary, 1, 50), '') AS プロンプト概要,
+             COALESCE(SUBSTR(result_summary, 1, 50), '') AS 結果概要,
+             CAST(execution_ms AS TEXT) || 'ms' AS 実行時間,
+             created_at AS 実行日時
+      FROM ai_action_log
+      ORDER BY created_at DESC
+      LIMIT 20
+    columns: [ログID, アクション種別, 対象種別, 対象ID, 使用モデル, プロンプト概要, 結果概要, 実行時間, 実行日時]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 日別 AI 決定数推移（7 日間）
+  # ─────────────────────────────────────────
+  - id: daily_decision_trend
+    title: 日別 AI 決定数推移（直近 7 日）
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT date(created_at) AS label,
+             COUNT(*) AS value
+      FROM ai_decisions
+      WHERE date(created_at) >= date('now', '-7 days')
+      GROUP BY date(created_at)
+      ORDER BY date(created_at)
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 育成タスクサマリー
+  # ─────────────────────────────────────────
+  - id: nurturing_summary
+    title: 🌱 育成タスクステータスサマリー
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE status
+               WHEN 'pending'     THEN '⏳ 未着手'
+               WHEN 'in_progress' THEN '🔄 進行中'
+               WHEN 'completed'   THEN '✅ 完了'
+               WHEN 'cancelled'   THEN '❌ キャンセル'
+               ELSE status
+             END AS label,
+             COUNT(*) AS value
+      FROM lead_nurturing_tasks
+      GROUP BY status
+      ORDER BY CASE status
+        WHEN 'pending' THEN 1
+        WHEN 'in_progress' THEN 2
+        WHEN 'completed' THEN 3
+        WHEN 'cancelled' THEN 4
+        ELSE 5 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 見積ステータスサマリー
+  # ─────────────────────────────────────────
+  - id: quote_summary
+    title: 💰 AI 見積ステータスサマリー
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE status
+               WHEN 'draft'    THEN '📝 下書き'
+               WHEN 'approved' THEN '✅ 承認済'
+               WHEN 'sent'     THEN '📤 送信済'
+               WHEN 'accepted' THEN '🎉 承諾'
+               WHEN 'rejected' THEN '❌ 却下'
+               WHEN 'expired'  THEN '⏰ 期限切れ'
+               ELSE status
+             END AS label,
+             COUNT(*) AS value
+      FROM ai_quotes
+      GROUP BY status
+      ORDER BY CASE status
+        WHEN 'draft' THEN 1
+        WHEN 'approved' THEN 2
+        WHEN 'sent' THEN 3
+        WHEN 'accepted' THEN 4
+        WHEN 'rejected' THEN 5
+        WHEN 'expired' THEN 6
+        ELSE 7 END
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true

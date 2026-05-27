@@ -1,0 +1,86 @@
+entities:
+  gosei_invoice_item:
+    table: GoseiInvoiceItem
+    key: Id
+    displayName: 請求明細
+    isPublic: true
+    softDelete: false
+    paging:
+      pageSize: 50
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [InvoiceId, LineNo, ItemName, OrderNo, Description, Quantity, UnitPrice, Amount, Notes]
+      filters:
+        columns: 3
+        order: [InvoiceId, ItemName, OrderNo]
+    joins:
+      - type: left
+        table: GoseiInvoice
+        alias: inv
+        on: GoseiInvoiceItem.InvoiceId = inv.Id
+      - type: left
+        table: GoseiClient
+        alias: c
+        on: inv.ClientId = c.Id
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      InvoiceId: { type: int, label: 請求書ID }
+      InvoiceNo:
+        type: string
+        identity: true
+        label: 請求書番号
+        expression: inv.InvoiceNo
+        searchable: true
+        sortable: true
+      ClientName:
+        type: string
+        identity: true
+        label: 取引先名
+        expression: c.Name
+        searchable: true
+        sortable: true
+      LineNo: { type: int, label: 行番号, sortable: true }
+      ItemName: { type: string, label: 品名, sortable: true, searchable: true }
+      OrderNo: { type: string, label: 受注番号, searchable: true }
+      Description: { type: string, label: 内容 }
+      Quantity: { type: int, label: 点数, sortable: true }
+      UnitPrice: { type: decimal, label: 単価, sortable: true }
+      Amount: { type: decimal, label: 金額, sortable: true }
+      Notes: { type: string, label: 備考 }
+    forms:
+      InvoiceId:
+        type: int
+        label: 請求書
+        required: true
+        editable: true
+        foreignKey:
+          entity: gosei_invoice
+          displayColumn: InvoiceNo
+      LineNo: { type: int, label: 行番号, required: true, editable: true }
+      ItemName: { type: string, label: 品名, required: true, editable: true }
+      OrderNo: { type: string, label: 受注番号, editable: true }
+      Description: { type: string, label: 内容, editable: true }
+      Quantity: { type: int, label: 点数, required: true, editable: true }
+      UnitPrice: { type: decimal, label: 単価, required: true, editable: true }
+      Amount: { type: decimal, label: 金額, required: true, editable: true }
+      Notes: { type: text, label: 備考, editable: true }
+    filters:
+      InvoiceId:
+        type: entity-picker
+        label: 請求書
+        expression: GoseiInvoiceItem.InvoiceId
+        foreignKey:
+          entity: gosei_invoice
+          displayColumn: InvoiceNo
+      ItemName:
+        type: text
+        label: 品名
+        expression: GoseiInvoiceItem.ItemName
+      OrderNo:
+        type: text
+        label: 受注番号
+        expression: GoseiInvoiceItem.OrderNo
+    links:
+      invoice: { label: 請求書へ, targetEntity: gosei_invoice, filter: { Id: InvoiceId } }

@@ -23,111 +23,97 @@ layout:
     customer:      /auto-dealer-demo/Page/CustomerDashboard
     operator:      /auto-dealer-demo/Page/OperatorConsole
     sales_rep:     /auto-dealer-demo/Page/SalesRepDashboard
-    sales_manager: /auto-dealer-demo/Page/LeadKanban
+    sales_manager: /auto-dealer-demo/Page/ManagerDashboard
     service_staff: /auto-dealer-demo/Page/Appointments
     executive:     /auto-dealer-demo/Page/ExecDashboard
 
   navigation:
     showDashboard: false
+    showPages: false
+    showEntities: false
     entities: []
     items:
-      # ─── 顧客向けメニュー ───
-      - label: マイページ
-        url: /auto-dealer-demo/Page/CustomerDashboard
-        icon: 👤
-        section: ""
-        roles: [customer]
-      - label: 予約・サービス確認
-        url: /auto-dealer-demo/Page/CustomerAppointments
-        icon: 📅
-        section: マイページ
-        roles: [customer]
-      - label: 在庫車両を見る
-        url: /auto-dealer-demo/Page/CustomerVehicles
-        icon: 🚗
-        section: マイページ
-        roles: [customer]
-
-      # ─── スタートガイド（スタッフ共通） ───
-      - label: スタートガイド
-        url: /auto-dealer-demo/Page/Welcome
+      # ─── 核心业务 (Core Business) ───
+      - label: 部長ダッシュボード
+        url: /auto-dealer-demo/Page/ManagerDashboard
         icon: 🏠
-        section: ""
-        roles: [operator, sales_rep, sales_manager, service_staff, executive]
-
-      # ─── オペレーション ───
-      - label: オペレーター・コンソール
-        url: /auto-dealer-demo/Page/OperatorConsole
-        icon: 🎧
-        section: オペレーション
-        roles: [operator, sales_manager, executive]
-
-      # ─── 販売管理（sales_rep / sales_manager 向け） ───
+        section: 核心业务
+        roles: [sales_manager]
       - label: リードパイプライン
         url: /auto-dealer-demo/Page/LeadKanban
         icon: 🔥
-        section: 販売管理
+        section: 核心业务
         roles: [sales_rep, sales_manager, executive]
-      - label: セールスリード管理
-        url: /auto-dealer-demo/Page/SalesLeads
-        icon: 📋
-        section: 販売管理
-        roles: [sales_rep, sales_manager]
+      - label: 顧客管理
+        url: /auto-dealer-demo/Page/Customers
+        icon: 👥
+        section: 核心业务
+        roles: [sales_rep, sales_manager, service_staff]
+
+      # ─── AI 智能中心 (AI Intelligence) ───
+      - label: AI 決定承認
+        url: /auto-dealer-demo/Page/AiDecisionApproval
+        icon: ✅
+        section: AI 智能中心
+        roles: [executive, sales_manager]
+      - label: AI アシスタント
+        url: /auto-dealer-demo/Page/AiAssistant
+        icon: 🤖
+        section: AI 智能中心
+        roles: [sales_rep, sales_manager, operator, executive]
+      - label: AI 統計分析
+        url: /auto-dealer-demo/Page/AiDashboard
+        icon: 📊
+        section: AI 智能中心
+        roles: [executive, sales_manager]
+
+      # ─── 运营与服务 (Operations) ───
       - label: 担当者パフォーマンス
         url: /auto-dealer-demo/Page/SalesRepDashboard
         icon: 🎯
-        section: 販売管理
+        section: 运营与服务
         roles: [sales_rep, sales_manager]
       - label: 車両在庫管理
         url: /auto-dealer-demo/Page/VehicleInventory
         icon: 🚗
-        section: 販売管理
+        section: 运营与服务
         roles: [sales_rep, sales_manager, service_staff]
-
-      # ─── 顧客管理（営業・サービス共通） ───
-      - label: 顧客管理
-        url: /auto-dealer-demo/Page/Customers
-        icon: 👥
-        section: 顧客管理
-        roles: [sales_rep, sales_manager, service_staff]
-
-      # ─── 従業員管理（管理者向け） ───
-      - label: 従業員マスタ
-        url: /auto-dealer-demo/Page/Employees
-        icon: 👨‍💼
-        section: 従業員管理
-        roles: [admin, executive]
-
-      # ─── 予約管理（service_staff 向け） ───
       - label: サービス予約
         url: /auto-dealer-demo/Page/Appointments
         icon: 📅
-        section: 予約管理
+        section: 运营与服务
         roles: [service_staff, sales_manager]
-      - label: サービス依頼管理
-        url: /auto-dealer-demo/Page/ServiceRequests
-        icon: 🔧
-        section: 予約管理
-        roles: [service_staff]
 
-      # ─── 経営レポート（executive / sales_manager 向け） ───
-      - label: 経営ダッシュボード（ROI）
-        url: /auto-dealer-demo/Page/ExecDashboard
-        icon: 📊
-        section: 経営レポート
-        roles: [executive, sales_manager]
+      # ─── 沟通中心 (Communication) ───
+      - label: オペレーターチャット
+        url: /auto-dealer-demo/Page/OperatorChat
+        icon: 💬
+        section: 沟通中心
+        roles: [operator, sales_manager, executive]
+      - label: AI コミュニケーション
+        url: /auto-dealer-demo/Page/AiCommunications
+        icon: 📧
+        section: 沟通中心
+        roles: [executive, sales_manager, operator]
 
-      # ─── データ管理 ───
-      - label: 車両マスタ
-        url: /auto-dealer-demo/DynamicEntity/Index?entity=vehicles
-        icon: 🏎️
-        section: システム管理
-        roles: [admin, sales_manager]
-      - label: サービス履歴データ
-        url: /auto-dealer-demo/DynamicEntity/Index?entity=service_appointments
-        icon: 🛠️
-        section: システム管理
-        roles: [admin, service_staff]
+      # ─── 顾客入口 (Customer Portal) ───
+      - label: マイページ
+        url: /auto-dealer-demo/Page/CustomerDashboard
+        icon: 👤
+        section: 顾客入口
+        roles: [customer]
+      - label: AIチャット・メッセージ
+        url: /auto-dealer-demo/Page/CustomerAiChat
+        icon: 💬
+        section: 顾客入口
+        roles: [customer]
+      - label: 在庫車両を見る
+        url: /auto-dealer-demo/Page/CustomerVehicles
+        icon: 🚗
+        section: 顾客入口
+        roles: [customer]
+
+
 
 settings:
   locale: ja-JP

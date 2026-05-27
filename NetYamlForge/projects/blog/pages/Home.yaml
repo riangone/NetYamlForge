@@ -35,18 +35,24 @@ sections:
     sourceType: custom
     source: |
       SELECT
-        p.Id,
-        p.Title    AS タイトル,
-        bc.Name    AS カテゴリ,
-        p.AuthorName AS 著者,
-        p.ViewCount  AS 閲覧数,
-        p.PublishedAt AS 公開日時
+        p.Id            AS id,
+        p.Title         AS title,
+        bc.Name         AS category_name,
+        p.AuthorName    AS author_name,
+        p.ViewCount     AS view_count,
+        p.PublishedAt   AS published_at
       FROM Post p
       LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
       WHERE p.Status = 'published'
       ORDER BY p.PublishedAt DESC
       LIMIT 10
-    columns: [Id, タイトル, カテゴリ, 著者, 閲覧数, 公開日時]
+    columns:
+      id: { label: ID }
+      title: { label: タイトル }
+      category_name: { label: カテゴリ }
+      author_name: { label: 著者 }
+      view_count: { label: 閲覧数 }
+      published_at: { label: 公開日時 }
     pageSize: 10
     editable: false
     readOnly: true
@@ -58,17 +64,23 @@ sections:
     sourceType: custom
     source: |
       SELECT
-        p.Id,
-        p.Title     AS タイトル,
-        bc.Name     AS カテゴリ,
-        p.AuthorName AS 著者,
-        p.ViewCount  AS 閲覧数,
-        p.PublishedAt AS 公開日時
+        p.Id            AS id,
+        p.Title         AS title,
+        bc.Name         AS category_name,
+        p.AuthorName    AS author_name,
+        p.ViewCount     AS view_count,
+        p.PublishedAt   AS published_at
       FROM Post p
       LEFT JOIN BlogCategory bc ON p.CategoryId = bc.Id
       WHERE p.FeaturedFlag = 1 AND p.Status = 'published'
       ORDER BY p.ViewCount DESC
-    columns: [Id, タイトル, カテゴリ, 著者, 閲覧数, 公開日時]
+    columns:
+      id: { label: ID }
+      title: { label: タイトル }
+      category_name: { label: カテゴリ }
+      author_name: { label: 著者 }
+      view_count: { label: 閲覧数 }
+      published_at: { label: 公開日時 }
     pageSize: 10
     editable: false
     readOnly: true
@@ -122,16 +134,21 @@ sections:
     sourceType: custom
     source: |
       SELECT
-        c.Id,
-        p.Title      AS 記事タイトル,
-        c.AuthorName AS 投稿者,
-        c.Content    AS コメント,
-        c.CreatedAt  AS 投稿日時
+        c.Id            AS id,
+        p.Title         AS post_title,
+        c.AuthorName    AS author_name,
+        c.Content       AS content,
+        c.CreatedAt     AS created_at
       FROM Comment c
       LEFT JOIN Post p ON c.PostId = p.Id
       WHERE c.Status = 'pending'
       ORDER BY c.CreatedAt ASC
-    columns: [Id, 記事タイトル, 投稿者, コメント, 投稿日時]
+    columns:
+      id: { label: ID }
+      post_title: { label: 記事タイトル }
+      author_name: { label: 投稿者 }
+      content: { label: コメント }
+      created_at: { label: 投稿日時 }
     pageSize: 10
     editable: false
     readOnly: true

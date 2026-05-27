@@ -1,0 +1,126 @@
+title: '🤖 AI アシスタント'
+description: 'AIの現在の状況確認・推奨アクションの確認・AIの稼働状況をここで確認します'
+
+sections:
+  - id: ai_status_kpi
+    title: '🤖 AI稼働状況（本日）'
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '承認待ち決定' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '⏳' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_decisions WHERE status = 'pending'
+      UNION ALL
+      SELECT '本日自動実行済み',
+             CAST(SUM(CASE WHEN date(executed_at) = date('now') THEN 1 ELSE 0 END) AS TEXT),
+             '⚡', NULL
+      FROM ai_decisions WHERE status = 'auto_executed'
+      UNION ALL
+      SELECT '実行待ち育成タスク',
+             CAST(COUNT(*) AS TEXT),
+             '🌱', NULL
+      FROM lead_nurturing_tasks WHERE status IN ('pending', 'in_progress')
+      UNION ALL
+      SELECT 'AI見積（承認済み）',
+             CAST(COUNT(*) AS TEXT),
+             '💰', NULL
+      FROM ai_quotes WHERE status = 'approved'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  - id: ai_today_actions
+    title: '🌅 今日のAI推奨アクション TOP10'
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ROW_NUMBER() OVER (ORDER BY t.priority_score DESC) AS 順位,
+        c.name AS 顧客名,
+        CASE t.task_type
+          WHEN 'email'       THEN '✉️ メール'
+          WHEN 'call'        THEN '📞 電話'
+          WHEN 'appointment' THEN '📅 アポ'
+          WHEN 'test_drive'  THEN '🚗 試乗'
+          WHEN 'catalog'     THEN '📄 資料'
+          ELSE t.task_type
+        END AS アクション種別,
+        COALESCE(SUBSTR(t.ai_recommendation, 1, 80), '-') AS AI推奨内容,
+        t.priority_score AS 優先度,
+        COALESCE(t.due_date, '期限なし') AS 期限
+      FROM lead_nurturing_tasks t
+      LEFT JOIN customers c ON t.customer_id = c.customer_id
+      WHERE t.status IN ('pending', 'in_progress')
+      ORDER BY t.priority_score DESC, t.due_date ASC
+      LIMIT 10
+    columns: [順位, 顧客名, アクション種別, AI推奨内容, 優先度, 期限]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: ai_urgent_approvals
+    title: '🚨 緊急承認待ち（人間確認必須）'
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        d.decision_id AS 決定ID,
+        CASE d.decision_type
+          WHEN 'lead_scoring'      THEN '🎯 スコアリング'
+          WHEN 'nurturing_task'    THEN '🌱 育成タスク'
+          WHEN 'quote_generation'  THEN '💰 見積生成'
+          WHEN 'discount_approval' THEN '🏷️ 値引承認'
+          WHEN 'escalation'        THEN '🚨 エスカレーション'
+          ELSE d.decision_type
+        END AS 決定種別,
+        CAST(d.confidence_score AS TEXT) || '%' AS 確信度,
+        COALESCE(SUBSTR(d.ai_reasoning, 1, 100), '') AS AI判断理由,
+        d.created_at AS 作成日時
+      FROM ai_decisions d
+      WHERE d.status = 'pending' AND d.requires_human = 1
+      ORDER BY d.created_at ASC
+      LIMIT 5
+    columns: [決定ID, 決定種別, 確信度, AI判断理由, 作成日時]
+    pageSize: 5
+    actions:
+      - label: 承認画面へ
+        url: '/auto-dealer-demo/Page/AiDecisionApproval'
+        class: 'btn-warning'
+    editable: false
+    readOnly: true
+
+  - id: ai_activity_feed
+    title: '📡 AI活動フィード（直近15件）'
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        CASE action_type
+          WHEN 'lead_scored'        THEN '🎯 リードスコア更新'
+          WHEN 'nurturing_created'  THEN '🌱 育成タスク作成'
+          WHEN 'quote_generated'    THEN '💰 見積生成'
+          WHEN 'decision_approved'  THEN '✅ 決定承認'
+          WHEN 'decision_rejected'  THEN '❌ 決定却下'
+          WHEN 'auto_executed'      THEN '⚡ 自動実行'
+          ELSE action_type
+        END AS アクション,
+        entity_type AS 対象種別,
+        entity_id AS 対象ID,
+        COALESCE(SUBSTR(result_summary, 1, 60), '') AS 結果,
+        COALESCE(ai_model, '-') AS 使用モデル,
+        CAST(execution_ms AS TEXT) || 'ms' AS 実行時間,
+        created_at AS 実行日時
+      FROM ai_action_log
+      ORDER BY created_at DESC
+      LIMIT 15
+    columns: [アクション, 対象種別, 対象ID, 結果, 使用モデル, 実行時間, 実行日時]
+    pageSize: 15
+    editable: false
+    readOnly: true

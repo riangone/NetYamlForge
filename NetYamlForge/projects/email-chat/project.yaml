@@ -1,0 +1,42 @@
+name: email-chat
+displayName: "AI Email Chat"
+version: 1.0.0
+
+database:
+  type: sqlite
+  path: data/email-chat.db
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: minimal
+  navigation:
+    showDashboard: true
+    entities:
+      - gosei_client
+      - gosei_invoice
+      - gosei_invoice_item
+    items:
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+
+      - label: 取引先管理
+        url: /email-chat/DynamicEntity/Index?entity=gosei_client
+        icon: 🏢
+        section: 請求管理
+      - label: 請求書一覧
+        url: /email-chat/DynamicEntity/Index?entity=gosei_invoice
+        icon: 📄
+        section: 請求管理
+      - label: 請求明細
+        url: /email-chat/DynamicEntity/Index?entity=gosei_invoice_item
+        icon: 📝
+        section: 請求管理

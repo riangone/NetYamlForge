@@ -20,4 +20,6 @@ public class ProjectInfo
     /// </summary>
     public ProjectLayoutConfig? Layout { get; init; }
     public ProjectCalendarConfig? Calendar { get; init; }
+    /// <summary>プロジェクト固有のメール設定。null の場合はグローバル設定を使用。</summary>
+    public ProjectEmailConfig? Email { get; init; }
 }

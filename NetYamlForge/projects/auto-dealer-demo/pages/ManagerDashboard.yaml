@@ -1,0 +1,165 @@
+title: 営業部長ダッシュボード
+description: "チーム全体のパフォーマンス、重要承認事項、AI 稼働状況を俯瞰し、迅速な意思決定を支援"
+
+sections:
+  # ─────────────────────────────────────────
+  # クイック KPI カード
+  # ─────────────────────────────────────────
+  - id: manager_kpi
+    title: チーム状況（今月）
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '未承認の AI 提案' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🔴' AS metric_icon,
+             '要対応' AS metric_delta
+      FROM ai_quotes
+      WHERE status = 'pending'
+      UNION ALL
+      SELECT '本日の来客予約', CAST(COUNT(*) AS TEXT), '📅', NULL
+      FROM appointments
+      WHERE date(appointment_date) = date('now')
+      UNION ALL
+      SELECT 'チーム成約率',
+             CAST(ROUND(
+               SUM(CASE WHEN status = 'won' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '🏆', NULL
+      FROM sales_leads
+      WHERE strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'AI 自動対応率',
+             CAST(ROUND(
+               SUM(CASE WHEN assigned_to_user_id IS NULL AND status = 'completed' THEN 1.0 ELSE 0.0 END) * 100.0 /
+               NULLIF(COUNT(*), 0), 1
+             ) AS TEXT) || '%',
+             '📈', NULL
+      FROM ai_conversations
+      WHERE strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 最優先：承認待ち AI 提案（5件限定）
+  # ─────────────────────────────────────────
+  - id: pending_approvals_short
+    title: '🚨 要承認：AI 提案 (TOP 5)'
+    visibleToRoles: [sales_manager, executive]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT q.quote_id AS ID,
+             c.name AS 顧客名,
+             v.model_name AS 提案車両,
+             '¥' || printf('%,.0f', q.total_amount) AS 金額,
+             CAST(ROUND(q.discount_rate * 100, 1) AS TEXT) || '%' AS 値引率,
+             CASE
+               WHEN q.discount_rate > 0.15 THEN '⚠️ 高値引'
+               ELSE '✅ 規定内'
+             END AS 注意
+      FROM ai_quotes q
+      INNER JOIN sales_leads l ON q.lead_id = l.lead_id
+      INNER JOIN customers c ON l.customer_id = c.customer_id
+      INNER JOIN vehicle_inventory v ON q.vehicle_id = v.vehicle_id
+      WHERE q.status = 'pending'
+      ORDER BY q.discount_rate DESC
+      LIMIT 5
+    columns: [ID, 顧客名, 提案車両, 金額, 値引率, 注意]
+    pageSize: 5
+    actions:
+      - label: 承認
+        url: "/auto-dealer-demo/Page/AiDecisionApproval"
+        class: "btn-success btn-sm"
+
+  # ─────────────────────────────────────────
+  # チームの稼働状況
+  # ─────────────────────────────────────────
+  - id: team_activity_status
+    title: 👥 チームの活動状況（直近 24 時間）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT COALESCE(assigned_to_user_id, 'AI 自動対応') AS 担当者,
+             COUNT(*) AS 対応件数,
+             SUM(CASE WHEN outcome = 'positive' THEN 1 ELSE 0 END) AS 良好,
+             SUM(CASE WHEN outcome = 'negative' THEN 1 ELSE 0 END) AS 要フォロー
+      FROM lead_activities
+      WHERE created_at >= datetime('now', '-1 day')
+      GROUP BY assigned_to_user_id
+    columns: [担当者, 対応件数, 良好, 要フォロー]
+    pageSize: 10
+
+  # ─────────────────────────────────────────
+  # チームパフォーマンス（サマリー）
+  # ─────────────────────────────────────────
+  - id: team_summary_chart
+    title: 担当者別の成約状況 (直近30日)
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(assigned_sales, '未割当') AS label,
+             COUNT(*) AS value
+      FROM sales_leads
+      WHERE status = 'won'
+        AND date(updated_at) >= date('now', '-30 days')
+      GROUP BY assigned_sales
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "#4f46e5"
+    pageSize: 10
+
+  # ─────────────────────────────────────────
+  # リードパイプライン分布（ステージ別）
+  # ─────────────────────────────────────────
+  - id: pipeline_distribution
+    title: リードパイプラインの健康状態
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE status
+               WHEN 'new'       THEN '🆕 新規'
+               WHEN 'contacted' THEN '📞 接触済'
+               WHEN 'qualified' THEN '💼 商談中'
+               WHEN 'proposal'  THEN '📋 提案中'
+               ELSE 'その他'
+             END AS label,
+             COUNT(*) AS value
+      FROM sales_leads
+      WHERE status NOT IN ('won', 'lost')
+      GROUP BY status
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+
+  # ─────────────────────────────────────────
+  # 直近の要注意活動（ネガティブな反応など）
+  # ─────────────────────────────────────────
+  - id: high_risk_activities
+    title: '⚠️ 要注意：AI が検知したリスク活動'
+    component: table
+    sourceType: custom
+    source: |
+      SELECT a.activity_id AS ID,
+             c.name AS 顧客名,
+             a.activity_type AS 種別,
+             a.notes AS 内容,
+             a.created_at AS 発生日時
+      FROM lead_activities a
+      INNER JOIN sales_leads l ON a.lead_id = l.lead_id
+      INNER JOIN customers c ON l.customer_id = c.customer_id
+      WHERE (a.outcome = 'negative' OR a.notes LIKE '%キャンセル%' OR a.notes LIKE '%高い%')
+        AND a.created_at >= date('now', '-3 days')
+      ORDER BY a.created_at DESC
+      LIMIT 5
+    columns: [ID, 顧客名, 種別, 内容, 発生日時]
+    pageSize: 5

@@ -1,0 +1,31 @@
+@model NetYamlForge.Controllers.ChatMessageViewModel
+
+<div class="chat @(Model.Role == "assistant" ? "chat-start" : "chat-end") mb-4">
+    <div class="chat-image avatar">
+        <div class="w-10 rounded-full bg-base-300 grid place-items-center font-bold">
+            @if (Model.Role == "assistant")
+            {
+                <span class="text-primary">H</span>
+            }
+            else
+            {
+                <span>U</span>
+            }
+        </div>
+    </div>
+    <div class="chat-header opacity-50 text-xs mb-1">
+        @(Model.Role == "assistant" ? "Hyperion" : "You")
+        <time class="text-xs opacity-50 ml-1">@Model.Timestamp.ToString("HH:mm")</time>
+    </div>
+    <div class="chat-bubble @(Model.Role == "assistant" ? "chat-bubble-primary" : "chat-bubble-neutral") text-sm prose prose-sm max-w-full">
+        @if (Model.Role == "assistant")
+        {
+            @* Markdown 渲染可以使用前端库，这里先简单输出 *@
+            @Html.Raw(Model.Content.Replace("\n", "<br/>"))
+        }
+        else
+        {
+            @Model.Content
+        }
+    </div>
+</div>

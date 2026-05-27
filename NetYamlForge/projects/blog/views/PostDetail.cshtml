@@ -25,7 +25,7 @@
     {
         if (val is null) return "";
         if (DateTime.TryParse(val.ToString(), out var dt))
-            return dt.ToString("yyyy年M月d日");
+            return dt.ToString("D");
         return val.ToString() ?? "";
     }
     var pubDate = post is not null ? FormatDate(post.GetValueOrDefault("PublishedAt")) : "";
@@ -43,18 +43,18 @@
 {
     <div class="max-w-3xl mx-auto px-4 py-24 text-center text-base-content/40">
         <p class="text-5xl mb-4">📭</p>
-        <h1 class="text-2xl font-bold mb-2">記事が見つかりません</h1>
-        <p class="mb-6 text-sm">指定された記事は存在しないか、非公開です。</p>
-        <a href="@blogHomeUrl" class="btn btn-primary btn-sm rounded-full">← ブログに戻る</a>
+        <h1 class="text-2xl font-bold mb-2">@L["PostNotFound"]</h1>
+        <p class="mb-6 text-sm">@L["PostNotFoundDetail"]</p>
+        <a href="@blogHomeUrl" class="btn btn-primary btn-sm rounded-full">@L["BackToBlog"]</a>
     </div>
 }
 else
 {
-    <!-- パンくずリスト -->
+    <!-- 面包屑导航 -->
     <div class="max-w-4xl mx-auto px-4 pt-8">
         <nav class="text-sm breadcrumbs">
             <ul>
-                <li><a href="@blogHomeUrl" class="text-primary hover:underline">ブログ</a></li>
+                <li><a href="@blogHomeUrl" class="text-primary hover:underline">@L["Blog"]</a></li>
                 @if (!string.IsNullOrEmpty(categoryName))
                 {
                     <li class="text-base-content/50">@categoryName</li>
@@ -64,10 +64,10 @@ else
         </nav>
     </div>
 
-    <!-- 記事本文 -->
+    <!-- 文章正文 -->
     <article class="max-w-4xl mx-auto px-4 pb-12">
 
-        <!-- 記事ヘッダー -->
+        <!-- 文章头部 -->
         <header class="mb-8 mt-4">
             <div class="flex items-center gap-2 mb-4 flex-wrap">
                 @if (!string.IsNullOrEmpty(categoryName))
@@ -110,18 +110,18 @@ else
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    @viewCount 閲覧
+                    @viewCount @L["Views"]
                 </span>
                 <span class="flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    @commentRows.Count コメント
+                    @commentRows.Count @L["Comments"]
                 </span>
             </div>
         </header>
 
-        <!-- カバー画像 -->
+        <!-- 封面图片 -->
         @if (!string.IsNullOrEmpty(coverImage))
         {
             <div class="mb-8 rounded-xl overflow-hidden shadow">
@@ -129,15 +129,15 @@ else
             </div>
         }
 
-        <!-- 本文（Markdown レンダリング） -->
+        <!-- 渲染后的 Markdown -->
         <div id="post-content" class="prose-blog min-h-32">
             <div id="post-raw" class="hidden">@content</div>
         </div>
 
-        <!-- 記事フッター -->
+        <!-- 底部 -->
         <div class="mt-10 pt-6 border-t border-base-200 flex items-center justify-between flex-wrap gap-3">
             <a href="@blogHomeUrl" class="btn btn-ghost btn-sm gap-1">
-                ← ブログ一覧に戻る
+                @L["BackToBlogList"]
             </a>
             <div class="flex gap-2">
                 @foreach (var tag in tagRows)
@@ -148,7 +148,7 @@ else
         </div>
     </article>
 
-    <!-- 関連記事 -->
+    <!-- 相关文章 -->
     @if (relatedRows.Any())
     {
         <section class="max-w-4xl mx-auto px-4 mb-12">
@@ -156,7 +156,7 @@ else
                 <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
-                関連記事
+                @L["RelatedPosts"]
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @foreach (var related in relatedRows)
@@ -175,23 +175,23 @@ else
         </section>
     }
 
-    <!-- コメントセクション -->
+    <!-- 评论区 -->
     <section id="comments" class="max-w-4xl mx-auto px-4 mb-16">
         <div class="divider"></div>
         <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
             <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
-            コメント (@commentRows.Count)
+            @string.Format(L["CommentsCount"], commentRows.Count)
         </h2>
 
-        <!-- コメント一覧 -->
+        <!-- 评论列表 -->
         @if (commentRows.Any())
         {
             <div class="space-y-4 mb-8">
                 @foreach (var comment in commentRows)
                 {
-                    var cAuthor  = comment.GetValueOrDefault("AuthorName")?.ToString() ?? "匿名用户";
+                    var cAuthor  = comment.GetValueOrDefault("AuthorName")?.ToString() ?? L["AnonymousUser"].Value;
                     var cContent = comment.GetValueOrDefault("Content")?.ToString() ?? "";
                     var cDate    = FormatDate(comment.GetValueOrDefault("CreatedAt"));
                     <div class="flex gap-3">
@@ -213,13 +213,13 @@ else
         }
         else
         {
-            <p class="text-sm text-base-content/40 mb-8 text-center py-6">暂无评论。来抢沙发吧！</p>
+            <p class="text-sm text-base-content/40 mb-8 text-center py-6">@L["NoCommentsYet"]</p>
         }
 
-        <!-- コメント投稿フォーム -->
+        <!-- 评论表单 -->
         <div class="card bg-base-100 border border-base-200 shadow-sm">
             <div class="card-body p-6">
-                <h3 class="font-bold text-base mb-4">💬 发表留言</h3>
+                <h3 class="font-bold text-base mb-4">@L["PostComment"]</h3>
 
                 @if (!string.IsNullOrEmpty(commentSuccess))
                 {
@@ -247,15 +247,15 @@ else
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-medium">昵称 <span class="text-base-content/40 text-xs">（可选，不填则显示匿名）</span></span>
+                                <span class="label-text font-medium">@L["Nickname"] <span class="text-base-content/40 text-xs">@L["OptionalNickname"]</span></span>
                             </label>
                             <input type="text" name="authorName" maxlength="100"
-                                   placeholder="您的称呼"
+                                   placeholder="@L["YourName"]"
                                    class="input input-bordered input-sm w-full" />
                         </div>
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text font-medium">电子邮箱 <span class="text-base-content/40 text-xs">（可选，不公开）</span></span>
+                                <span class="label-text font-medium">@L["Email"] <span class="text-base-content/40 text-xs">@L["OptionalNotPublic"]</span></span>
                             </label>
                             <input type="email" name="authorEmail" maxlength="200"
                                    placeholder="mail@example.com"
@@ -265,13 +265,13 @@ else
 
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text font-medium">内容 <span class="text-error">*</span></span>
+                            <span class="label-text font-medium">@L["Content"] <span class="text-error">*</span></span>
                         </label>
                         <textarea name="content" required maxlength="2000" rows="4"
-                                  placeholder="写下您的评论..."
+                                  placeholder="@L["WriteYourComment"]"
                                   class="textarea textarea-bordered w-full text-sm"></textarea>
                         <label class="label">
-                            <span class="label-text-alt text-base-content/40">评论将在审核后公开显示</span>
+                            <span class="label-text-alt text-base-content/40">@L["CommentReviewNotice"]</span>
                         </label>
                     </div>
 
@@ -280,7 +280,7 @@ else
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                             </svg>
-                            发表评论
+                            @L["SubmitComment"]
                         </button>
                     </div>
                 </form>
@@ -299,6 +299,20 @@ else
 
         marked.setOptions({ breaks: true, gfm: true });
         contentEl.innerHTML = marked.parse(rawEl.textContent || '');
+    })();
+
+    // 记录阅读量
+    (function () {
+        const postId = '@postId';
+        if (postId) {
+            fetch(`/@project/BlogPublic/IncrementViewCount`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `postId=${postId}`
+            }).catch(e => console.error('Failed to increment view count', e));
+        }
     })();
 </script>
 }

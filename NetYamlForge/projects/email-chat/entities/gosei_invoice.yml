@@ -1,0 +1,109 @@
+entities:
+  gosei_invoice:
+    table: GoseiInvoice
+    key: Id
+    displayName: 請求書
+    isPublic: true
+    softDelete: false
+    pdfTemplate: gosei-invoice
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: [InvoiceNo, ClientId, IssueDate, DueDate, Status, Subtotal, TaxAmount10, TaxAmount8, Total, BankName, BranchName, AccountType, AccountNo, AccountHolder, RegistrationNo, Remarks]
+      filters:
+        columns: 3
+        order: [InvoiceNo, ClientId, IssueDate, Status]
+    joins:
+      - type: left
+        table: GoseiClient
+        alias: c
+        on: GoseiInvoice.ClientId = c.Id
+    columns:
+      Id: { type: int, identity: true, label: ID, sortable: true }
+      InvoiceNo: { type: string, label: 請求書番号, sortable: true, searchable: true }
+      ClientId: { type: int, label: 取引先ID }
+      ClientName:
+        type: string
+        identity: true
+        label: 取引先名
+        expression: c.Name
+        searchable: true
+        sortable: true
+      IssueDate: { type: datetime, label: 発行日, sortable: true }
+      DueDate: { type: datetime, label: 支払期限, sortable: true }
+      Subtotal: { type: decimal, label: 小計, sortable: true }
+      TaxAmount10: { type: decimal, label: 消費税（10%）, sortable: false }
+      TaxAmount8: { type: decimal, label: 消費税（8%）, sortable: false }
+      Total: { type: decimal, label: 合計金額, sortable: true }
+      Status:
+        type: string
+        identity: true
+        label: ステータス
+        expression: "CASE GoseiInvoice.Status WHEN 'issued' THEN '✅ 発行済' WHEN 'draft' THEN '📝 下書き' WHEN 'paid' THEN '💰 入金済' WHEN 'cancelled' THEN '❌ キャンセル' ELSE GoseiInvoice.Status END"
+        sortable: false
+      Remarks: { type: text, label: 備考 }
+    forms:
+      InvoiceNo: { type: string, label: 請求書番号, required: true, editable: true }
+      ClientId:
+        type: int
+        label: 取引先
+        required: true
+        editable: true
+        foreignKey:
+          entity: gosei_client
+          displayColumn: Name
+      IssueDate: { type: datetime, label: 発行日, required: true, editable: true }
+      DueDate: { type: datetime, label: 支払期限, editable: true }
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        optionLabels:
+          draft: 下書き
+          issued: 発行済
+          paid: 入金済
+          cancelled: キャンセル
+      Subtotal: { type: decimal, label: 小計, editable: true }
+      TaxAmount10: { type: decimal, label: 消費税（10%）, editable: true }
+      TaxAmount8: { type: decimal, label: 消費税（8%）, editable: true }
+      Total: { type: decimal, label: 合計金額, editable: true }
+      RegistrationNo: { type: string, label: 登録番号, editable: true }
+      BankName: { type: string, label: 銀行名, editable: true }
+      BranchName: { type: string, label: 支店名, editable: true }
+      AccountType: { type: string, label: 口座種別, editable: true }
+      AccountNo: { type: string, label: 口座番号, editable: true }
+      AccountHolder: { type: string, label: 口座名義, editable: true }
+      Remarks: { type: text, label: 備考, editable: true }
+    filters:
+      InvoiceNo:
+        type: text
+        label: 請求書番号
+        expression: GoseiInvoice.InvoiceNo
+      ClientId:
+        type: entity-picker
+        label: 取引先
+        expression: GoseiInvoice.ClientId
+        foreignKey:
+          entity: gosei_client
+          displayColumn: Name
+      IssueDate:
+        type: date-range
+        label: 発行日
+        expression: GoseiInvoice.IssueDate
+      Status:
+        type: multi-select
+        label: ステータス
+        expression: GoseiInvoice.Status
+        options:
+          - draft
+          - issued
+          - paid
+          - cancelled
+    links:
+      items: { label: 明細一覧, targetEntity: gosei_invoice_item, filter: { InvoiceId: Id } }
+      client: { label: 取引先情報, targetEntity: gosei_client, filter: { Id: ClientId } }
+    exports:
+      invoice_csv: { label: CSV出力, format: csv, columns: [InvoiceNo, ClientName, IssueDate, DueDate, Subtotal, TaxAmount10, TaxAmount8, Total, Status] }

@@ -1,0 +1,94 @@
+title: '💬 AIチャット・メッセージ履歴'
+description: 'AIからのお知らせ・メッセージ・次回ご来店のご提案などをここで確認できます。'
+
+sections:
+  - id: my_ai_messages_kpi
+    title: '📬 AIからのお知らせ'
+    visibleToRoles: [customer]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '未確認メッセージ' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📧' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_communications
+      WHERE customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
+        AND send_status = 'sent'
+        AND response_received = 0
+        AND sent_at >= date('now', '-30 days')
+      UNION ALL
+      SELECT '受信済みメッセージ（30日）',
+             CAST(COUNT(*) AS TEXT), '📨', NULL
+      FROM ai_communications
+      WHERE customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
+        AND send_status = 'sent'
+        AND sent_at >= date('now', '-30 days')
+      UNION ALL
+      SELECT '進行中の商談',
+             CAST(COUNT(*) AS TEXT), '🚗', NULL
+      FROM sales_leads
+      WHERE status NOT IN ('won','lost')
+        AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  - id: my_ai_messages
+    title: '📨 受信メッセージ（直近30日）'
+    visibleToRoles: [customer]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ac.comm_id AS ID,
+        CASE ac.comm_channel
+          WHEN 'email' THEN '✉️ メール'
+          WHEN 'line'  THEN '💚 LINE'
+          WHEN 'sms'   THEN '📱 SMS'
+          ELSE ac.comm_channel
+        END AS 受信チャネル,
+        COALESCE(ac.subject, '（件名なし）') AS 件名,
+        CASE WHEN ac.response_received = 1 THEN '✅ 返信済み' ELSE '⏳ 未返信' END AS 返信状況,
+        ac.sent_at AS 受信日時
+      FROM ai_communications ac
+      WHERE ac.customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
+        AND ac.send_status = 'sent'
+        AND ac.sent_at >= date('now', '-30 days')
+      ORDER BY ac.sent_at DESC
+    columns: [ID, 受信チャネル, 件名, 返信状況, 受信日時]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: ai_next_suggestions
+    title: '🎯 AIからのご提案'
+    visibleToRoles: [customer]
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        CASE t.task_type
+          WHEN 'test_drive'  THEN '🚗 試乗のご案内'
+          WHEN 'appointment' THEN '📅 ご来店のご案内'
+          WHEN 'catalog'     THEN '📄 カタログのご案内'
+          WHEN 'email'       THEN '📧 メールでのご提案'
+          ELSE t.task_type
+        END AS ご提案内容,
+        COALESCE(SUBSTR(t.ai_recommendation, 1, 100), '') AS 詳細,
+        COALESCE(t.due_date, '随時') AS ご連絡予定,
+        t.created_at AS 提案日
+      FROM lead_nurturing_tasks t
+      WHERE t.customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
+        AND t.status IN ('pending', 'in_progress')
+      ORDER BY t.priority_score DESC
+      LIMIT 5
+    columns: [ご提案内容, 詳細, ご連絡予定, 提案日]
+    pageSize: 5
+    editable: false
+    readOnly: true

@@ -46,6 +46,24 @@ public sealed class BlogPublicController : Controller
         return Redirect(Url.Content("~/blog/Page/BlogHome" + queryString));
     }
 
+    [HttpPost("IncrementViewCount")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> IncrementViewCount([FromForm] int postId)
+    {
+        try
+        {
+            await _db.ExecuteAsync(
+                "UPDATE Post SET ViewCount = COALESCE(ViewCount, 0) + 1 WHERE Id = @Id",
+                new { Id = postId });
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to increment view count for post {PostId}", postId);
+            return StatusCode(500);
+        }
+    }
+
     // POST /{project}/BlogPublic/SubmitComment
     [HttpPost("SubmitComment")]
     [ValidateAntiForgeryToken]

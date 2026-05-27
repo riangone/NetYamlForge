@@ -18,6 +18,39 @@ public class ProjectConfig
     /// カレンダー関連のプロジェクト共通設定（省略可能）。
     /// </summary>
     public ProjectCalendarConfig? Calendar { get; set; }
+    /// <summary>
+    /// プロジェクト固有のメール設定（省略時はグローバル設定を使用）。
+    /// </summary>
+    public ProjectEmailConfig? Email { get; set; }
+}
+
+/// <summary>
+/// project.yaml の email: セクション。省略された項目はグローバル設定で補完されます。
+/// </summary>
+public class ProjectEmailConfig
+{
+    public ProjectSmtpConfig? Smtp { get; set; }
+    public ProjectImapConfig? Imap { get; set; }
+}
+
+public class ProjectSmtpConfig
+{
+    public string? Server { get; set; }
+    public int? Port { get; set; }
+    public bool? UseSsl { get; set; }
+    public string? User { get; set; }
+    public string? Password { get; set; }
+    public string? FromName { get; set; }
+    public string? FromAddress { get; set; }
+}
+
+public class ProjectImapConfig
+{
+    public string? Server { get; set; }
+    public int? Port { get; set; }
+    public bool? UseSsl { get; set; }
+    public string? User { get; set; }
+    public string? Password { get; set; }
 }
 
 public class ProjectCalendarConfig
@@ -108,6 +141,16 @@ public class ProjectNavigationConfig
     /// ダッシュボードリンクを表示するかどうか（デフォルト：true）。
     /// </summary>
     public bool ShowDashboard { get; set; } = true;
+
+    /// <summary>
+    /// ページセクション（自動生成）を表示するかどうか（デフォルト：true）。
+    /// </summary>
+    public bool ShowPages { get; set; } = true;
+
+    /// <summary>
+    /// エンティティセクション（自動生成）を表示するかどうか（デフォルト：true）。
+    /// </summary>
+    public bool ShowEntities { get; set; } = true;
 }
 
 /// <summary>

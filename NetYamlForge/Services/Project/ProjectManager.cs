@@ -141,7 +141,8 @@ public class ProjectManager
             DashboardConfig = dashboardConfig,
             PageMetadata = pageMetadata,
             Layout = config.Layout,
-            Calendar = config.Calendar
+            Calendar = config.Calendar,
+            Email = config.Email
         };
 
         _projects[config.Name] = info;
