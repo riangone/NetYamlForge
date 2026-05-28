@@ -26,7 +26,7 @@ sections:
       WHERE status NOT IN ('won','lost')
         AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
       UNION ALL
-      SELECT '未解決のサービス依頼', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🔧', NULL
+      SELECT '未解決の服务依頼', COALESCE(CAST(COUNT(*) AS TEXT), '0'), '🔧', NULL
       FROM service_requests
       WHERE status IN ('open','in_progress')
         AND customer_id = (SELECT customer_id FROM customers WHERE login_username = @currentUser)
@@ -108,7 +108,7 @@ sections:
         url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
         class: "btn-primary btn-sm"
 
-  # ─── おすすめ車両 ───
+  # ─── おすすめ车辆 ───
   - id: recommended_vehicles
     title: 🚗 おすすめ在庫車両
     visibleToRoles: [customer]
@@ -132,4 +132,3 @@ sections:
     pageSize: 4
     editable: false
     readOnly: true
-

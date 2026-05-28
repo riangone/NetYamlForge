@@ -49,7 +49,8 @@ sections:
         END AS アクション,
         COALESCE(SUBSTR(t.ai_recommendation, 1, 60), '-') AS AI推奨理由,
         COALESCE(t.due_date, '期限なし') AS 期限,
-        COALESCE(l.lead_id, '') AS リードID
+        COALESCE(l.lead_id, '') AS リードID,
+        t.task_id AS ID
       FROM lead_nurturing_tasks t
       LEFT JOIN customers c ON t.customer_id = c.customer_id
       LEFT JOIN sales_leads l ON t.lead_id = l.lead_id
@@ -60,6 +61,10 @@ sections:
     pageSize: 5
     editable: false
     readOnly: true
+    actions:
+      - label: 実行・完了
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_nurturing_tasks&id={ID}"
+        class: "btn-primary btn-sm"
 
   # ─────────────────────────────────────────
   # 担当ホットリード
@@ -97,7 +102,7 @@ sections:
     actions:
       - label: 対応
         url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
-        class: "btn-primary"
+        class: "btn-primary btn-sm"
 
   # ─────────────────────────────────────────
   # フォローアップリマインダー（今週期限）
@@ -134,5 +139,3 @@ sections:
       - label: 対応記録
         url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_activities&id={ID}"
         class: "btn-success btn-sm"
-, 期限, 緊急度]
-    pageSize: 5
