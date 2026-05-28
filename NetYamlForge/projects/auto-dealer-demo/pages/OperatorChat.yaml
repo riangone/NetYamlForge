@@ -72,7 +72,7 @@ sections:
     pageSize: 10
     actions:
       - label: 対応開始
-        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_handovers&id={ID}'
+        url: '/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_handovers&id={ID}'
         class: 'btn-danger'
 
   - id: ai_response_suggestions

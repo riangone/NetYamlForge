@@ -121,7 +121,7 @@ sections:
     pageSize: 10
     actions:
       - label: 対応
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={リードID}"
         class: "btn-primary"
 
   # ─────────────────────────────────────────
@@ -158,7 +158,7 @@ sections:
     pageSize: 15
     actions:
       - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={リードID}"
         class: "btn-outline-secondary"
 
   - id: ai_recommendations

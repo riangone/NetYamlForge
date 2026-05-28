@@ -131,7 +131,7 @@ sections:
     pageSize: 10
     actions:
       - label: 対応
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_requests&id={依頼ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=service_requests&id={依頼ID}"
         class: "btn-danger"
 
   # ─────────────────────────────────────────
@@ -178,7 +178,7 @@ sections:
     pageSize: 15
     actions:
       - label: 対応
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_requests&id={依頼ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=service_requests&id={依頼ID}"
         class: "btn-outline-primary"
 
   # ─────────────────────────────────────────

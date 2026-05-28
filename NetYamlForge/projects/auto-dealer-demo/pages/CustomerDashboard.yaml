@@ -75,7 +75,7 @@ sections:
     readOnly: true
     actions:
       - label: 予約確認・変更
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_appointments&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=service_appointments&id={ID}"
         class: "btn-outline btn-sm"
 
   # ─── 進行中の商談サマリー ───
@@ -105,7 +105,7 @@ sections:
     readOnly: true
     actions:
       - label: 詳細・メッセージ
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={ID}"
         class: "btn-primary btn-sm"
 
   # ─── おすすめ车辆 ───

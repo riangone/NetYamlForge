@@ -690,6 +690,8 @@ public class ActionDefinition
     public string Scope { get; set; } = "row";
     /// <summary>実行前に表示する確認メッセージ（null の場合は確認なし）</summary>
     public string? Confirm { get; set; }
+    /// <summary>ボタンに適用する CSS クラス（例: btn-success, btn-danger）</summary>
+    public string? Class { get; set; }
     /// <summary>実行する ICustomActionHandler の Name（省略時はアクションキー名と同じ）</summary>
     public string? Handler { get; set; }
     /// <summary>アクション実行時に入力を求めるフィールド定義</summary>

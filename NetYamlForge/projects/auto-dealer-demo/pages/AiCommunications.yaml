@@ -75,7 +75,7 @@ sections:
     emptyMessage: "承認待ちのコミュニケーションはありません"
     actions:
       - label: "承認・送信"
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_communications&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_communications&id={ID}"
         class: "btn-primary btn-sm"
 
   # ────────────────────────────────────────
@@ -107,7 +107,7 @@ sections:
     emptyMessage: "送信済みのコミュニケーションはありません"
     actions:
       - label: "詳細"
-        url: "/auto-dealer-demo/DynamicEntity/Detail?entity=ai_communications&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_communications&id={ID}"
         class: "btn-outline btn-sm"
 
   # ────────────────────────────────────────
@@ -141,7 +141,7 @@ sections:
     emptyMessage: "無返信のコミュニケーションはありません"
     actions:
       - label: "手動フォロー"
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={リードID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={リードID}"
         class: "btn-warning btn-sm"
 
   # ────────────────────────────────────────
@@ -197,5 +197,5 @@ sections:
     emptyMessage: "本日の送信予定タスクはありません"
     actions:
       - label: "詳細・実行"
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_nurturing_tasks&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=lead_nurturing_tasks&id={ID}"
         class: "btn-primary btn-sm"

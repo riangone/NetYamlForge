@@ -182,7 +182,7 @@ sections:
     readOnly: true
     actions:
       - label: "詳細"
-        url: "/auto-dealer-demo/DynamicEntity/Detail?entity=ai_action_log&id={ログID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_action_log&id={ログID}"
         class: "btn-outline btn-sm"
 
   # ─────────────────────────────────────────

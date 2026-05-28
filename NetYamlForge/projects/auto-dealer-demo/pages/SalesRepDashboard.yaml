@@ -63,7 +63,7 @@ sections:
     readOnly: true
     actions:
       - label: 実行・完了
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_nurturing_tasks&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=lead_nurturing_tasks&id={ID}"
         class: "btn-primary btn-sm"
 
   # ─────────────────────────────────────────
@@ -101,7 +101,7 @@ sections:
     pageSize: 5
     actions:
       - label: 対応
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=sales_leads&id={ID}"
         class: "btn-primary btn-sm"
 
   # ─────────────────────────────────────────
@@ -137,5 +137,5 @@ sections:
     pageSize: 5
     actions:
       - label: 対応記録
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_activities&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=lead_activities&id={ID}"
         class: "btn-success btn-sm"

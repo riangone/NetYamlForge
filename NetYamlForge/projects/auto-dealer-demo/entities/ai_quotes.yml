@@ -182,6 +182,20 @@ entities:
         - field: status
         - field: lead_id
 
+    actions:
+      approve:
+        label: "✅ 承認"
+        scope: row
+        confirm: "この見積を承認し、顧客に送信可能な状態にしますか？"
+        handler: approve_quote
+        class: "btn-success"
+      reject:
+        label: "❌ 却下"
+        scope: row
+        confirm: "この見積を却下しますか？"
+        handler: reject_quote
+        class: "btn-danger"
+
     paging:
       pageSize: 20
       mode: numbered

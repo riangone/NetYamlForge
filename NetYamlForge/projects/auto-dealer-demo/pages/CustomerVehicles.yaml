@@ -65,7 +65,7 @@ sections:
     readOnly: true
     actions:
       - label: 詳細
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=vehicles&id={vehicle_id}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={vehicle_id}"
         class: "btn-outline-primary"
       - label: 試乗予約
         url: "/auto-dealer-demo/Page/Appointments?vehicle_id={vehicle_id}"

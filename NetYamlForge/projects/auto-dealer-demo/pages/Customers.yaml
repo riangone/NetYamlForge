@@ -116,7 +116,7 @@ sections:
     pageSize: 20
     actions:
       - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=customers&id={顧客ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=customers&id={顧客ID}"
         class: "btn-outline-primary"
 
   # ─────────────────────────────────────────
@@ -220,5 +220,5 @@ sections:
     pageSize: 20
     actions:
       - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=customers&id={顧客ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=customers&id={顧客ID}"
         class: "btn-outline-secondary"

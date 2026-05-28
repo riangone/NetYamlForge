@@ -1,0 +1,94 @@
+imports: []
+entities:
+  ai_conversations:
+    table: ai_conversations
+    key: conversation_id
+    displayName: AI 会話履歴
+    description: AI と顧客の対話記録
+    softDelete: false
+    isPublic: true
+
+    columns:
+      conversation_id:
+        type: string
+        length: 50
+        required: true
+        label: 会話 ID
+        searchable: true
+        sortable: true
+
+      customer_id:
+        type: string
+        length: 50
+        required: false
+        label: 顧客 ID
+        searchable: true
+
+      lead_id:
+        type: string
+        length: 50
+        required: false
+        label: リード ID
+
+      channel:
+        type: string
+        length: 20
+        required: true
+        label: チャンネル
+        options:
+          - web
+          - chat
+          - email
+          - phone
+
+      started_at:
+        type: datetime
+        required: true
+        label: 開始日時
+        sortable: true
+
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        options:
+          - active
+          - completed
+          - escalated
+        default: active
+
+      last_message_at:
+        type: datetime
+        required: false
+        label: 最終メッセージ日時
+        sortable: true
+
+      created_at:
+        type: datetime
+        required: true
+        label: 開始日時
+        sortable: true
+
+    forms:
+      conversation_id:
+        type: string
+        required: true
+        label: 会話 ID
+        editable: false
+
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+
+    list:
+      titleColumns:
+        - conversation_id
+        - customer_id
+        - status
+        - last_message_at
+      defaultSort:
+        field: last_message_at
+        dir: desc

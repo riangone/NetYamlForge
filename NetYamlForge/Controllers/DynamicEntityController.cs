@@ -1122,12 +1122,24 @@ public class DynamicEntityController : BaseProjectController
         }
 
         if (!result.Ok)
-            return BadRequest(result.ErrorMessage ?? "アクションが失敗しました。");
+        {
+            if (Request.Headers.ContainsKey("HX-Request"))
+                return BadRequest(result.ErrorMessage ?? "アクションが失敗しました。");
 
-        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
-        _listHttpResponseService.SetEntityFormSavedHeaders(Response);
-        return PartialView("_List",
-            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
+            TempData["ErrorMessage"] = result.ErrorMessage ?? "アクションが失敗しました。";
+            return Redirect(returnUrl ?? Request.Headers["Referer"].ToString() ?? Url.Action("Index", new { entity }) ?? "/");
+        }
+
+        if (Request.Headers.ContainsKey("HX-Request"))
+        {
+            var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+            _listHttpResponseService.SetEntityFormSavedHeaders(Response);
+            return PartialView("_List",
+                CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
+        }
+
+        TempData["SuccessMessage"] = "アクションが完了しました。";
+        return Redirect(returnUrl ?? Request.Headers["Referer"].ToString() ?? Url.Action("DetailPage", new { entity, id = keyValue }) ?? "/");
     }
 
     // エンティティ選択ピッカーモーダル用の一覧を返します

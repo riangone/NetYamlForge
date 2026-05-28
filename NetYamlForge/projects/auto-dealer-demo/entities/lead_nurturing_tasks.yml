@@ -39,12 +39,15 @@ entities:
         required: true
         label: 任务类型
         options:
-          - followup_call        # 跟进电话
-          - send_info           # 发送资料
-          - test_drive_invite   # 试驾邀请
-          - special_offer       # 特别优惠通知
-          - competitor_counter  # 竞品应对
-          - price_alert         # 价格变动提醒
+          - email              # メール送信
+          - call               # 電話
+          - appointment        # アポ取得
+          - test_drive         # 試乗
+          - catalog           # カタログ送付
+          - followup_call      # 跟进电话
+          - send_info          # 发送资料
+          - test_drive_invite  # 试驾邀请
+          - special_offer      # 特别优惠通知
         searchable: true
         sortable: true
 
@@ -227,6 +230,20 @@ entities:
           default: pending
         - field: assigned_to
           type: select
+
+    actions:
+      complete:
+        label: "✅ 完了にする"
+        scope: row
+        confirm: "このタスクを完了としてマークしますか？"
+        handler: complete_nurturing_task
+        class: "btn-success"
+      cancel:
+        label: "❌ キャンセル"
+        scope: row
+        confirm: "このタスクをキャンセルしますか？"
+        handler: cancel_nurturing_task
+        class: "btn-ghost"
 
     paging:
       pageSize: 20

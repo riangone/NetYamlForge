@@ -73,6 +73,25 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <h2 class="card-title">@Model.Meta.GetDisplayName() - Detail</h2>
                 <div class="flex gap-2">
+                    @if (Model.Meta.Actions != null && itemId != null)
+                    {
+                        foreach (var action in Model.Meta.Actions.Where(a => a.Value.Scope == "row"))
+                        {
+                            var actionKey = action.Key;
+                            var actionDef = action.Value;
+                            var btnClass = actionDef.Class ?? "btn-primary";
+                            <form asp-controller="DynamicEntity" asp-action="InvokeAction" method="post" style="display:inline;">
+                                <input type="hidden" name="entity" value="@Model.Entity" />
+                                <input type="hidden" name="id" value="@itemId" />
+                                <input type="hidden" name="actionKey" value="@actionKey" />
+                                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                                <button type="submit" class="btn btn-sm @btnClass"
+                                        onclick="return @(string.IsNullOrEmpty(actionDef.Confirm) ? "true" : $"confirm('{actionDef.Confirm}')")">
+                                    @actionDef.Label
+                                </button>
+                            </form>
+                        }
+                    }
                     @if (itemId != null)
                     {
                         <a class="btn btn-sm btn-outline"

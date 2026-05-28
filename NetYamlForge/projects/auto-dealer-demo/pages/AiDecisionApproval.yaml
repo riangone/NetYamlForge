@@ -29,12 +29,9 @@ sections:
     columns: [決定ID, 決定種別, 対象, 対象ID, 確信度, AI判断理由全文, 作成日時]
     pageSize: 5
     actions:
-      - label: '✅ 承認'
-        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}'
-        class: 'btn-success btn-lg'
-      - label: '❌ 却下'
-        url: '/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}'
-        class: 'btn-danger btn-lg'
+      - label: '🔍 詳細確認'
+        url: '/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_decisions&id={決定ID}'
+        class: 'btn-info btn-lg'
 
   # ─────────────────────────────────────────
   # 承認待ちサマリー KPI
@@ -133,12 +130,9 @@ sections:
     columns: [決定ID, 決定種別, 対象種別, 対象ID, 確信度, 人間承認, 作成日時, AI判断理由]
     pageSize: 15
     actions:
-      - label: 承認
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}"
-        class: "btn-success"
-      - label: 却下
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_decisions&id={決定ID}"
-        class: "btn-danger"
+      - label: 詳細
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=ai_decisions&id={決定ID}"
+        class: "btn-info"
 
   # ─────────────────────────────────────────
   # 自動実行可能な決定一覧（低リスク・高確信度）

@@ -1,0 +1,176 @@
+imports: []
+entities:
+  ai_handovers:
+    table: ai_handovers
+    key: handover_id
+    displayName: AI 移交管理
+    description: AI が対応不可能な対話を人間のオペレーターに引き継ぐための管理
+    softDelete: false
+    isPublic: true
+
+    columns:
+      handover_id:
+        type: string
+        length: 50
+        required: true
+        label: 移交 ID
+        searchable: true
+        sortable: true
+
+      conversation_id:
+        type: string
+        length: 50
+        required: true
+        label: 会話 ID
+        searchable: true
+        sortable: true
+
+      customer_id:
+        type: string
+        length: 50
+        required: false
+        label: 顧客 ID
+
+      reason:
+        type: string
+        length: 100
+        required: true
+        label: 移交理由
+        options:
+          - ai_unable
+          - customer_request
+          - high_value_deal
+          - complaint
+          - negative_sentiment
+          - complex_inquiry
+          - vip_customer
+          - price_negotiation
+        searchable: true
+
+      priority:
+        type: string
+        length: 20
+        required: true
+        label: 優先度
+        options:
+          - low
+          - medium
+          - high
+          - urgent
+        default: medium
+        sortable: true
+
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        options:
+          - pending
+          - assigned
+          - in_progress
+          - resolved
+          - cancelled
+        default: pending
+        searchable: true
+        sortable: true
+
+      assigned_to_user_id:
+        type: string
+        length: 50
+        required: false
+        label: 担当者 ID
+        searchable: true
+
+      escalated_at:
+        type: datetime
+        required: true
+        label: 移交日時
+        sortable: true
+
+      assigned_at:
+        type: datetime
+        required: false
+        label: 担当割当日時
+
+      resolved_at:
+        type: datetime
+        required: false
+        label: 解決日時
+
+      notes:
+        type: text
+        required: false
+        label: 対応メモ
+
+    forms:
+      handover_id:
+        type: string
+        required: true
+        label: 移交 ID
+        editable: false
+
+      conversation_id:
+        type: string
+        required: true
+        label: 会話 ID
+        editable: false
+
+      reason:
+        type: select
+        required: true
+        label: 移交理由
+        editable: false
+
+      priority:
+        type: select
+        required: true
+        label: 優先度
+        editable: true
+
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+
+      assigned_to_user_id:
+        type: string
+        required: false
+        label: 担当者 ID
+        editable: true
+
+      notes:
+        type: textarea
+        required: false
+        label: 対応メモ
+        editable: true
+        rows: 5
+
+    list:
+      titleColumns:
+        - handover_id
+        - conversation_id
+        - reason
+        - priority
+        - status
+      defaultSort:
+        field: escalated_at
+        dir: desc
+
+    actions:
+      assign_to_me:
+        label: "🙋 自分に割り当て"
+        scope: row
+        handler: assign_handover_to_me
+        class: "btn-primary"
+      resolve:
+        label: "✅ 解決済み"
+        scope: row
+        confirm: "この件を解決済みとしてクローズしますか？"
+        handler: resolve_handover
+        class: "btn-success"
+
+    paging:
+      pageSize: 20
+      mode: numbered

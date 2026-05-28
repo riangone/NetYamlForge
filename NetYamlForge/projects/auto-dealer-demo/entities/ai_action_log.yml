@@ -1,34 +1,44 @@
-name: ai_action_log
-title: AI アクションログ
-tableName: ai_action_log
-primaryKey: log_id
+imports: []
+entities:
+  ai_action_log:
+    table: ai_action_log
+    key: log_id
+    displayName: "AI アクションログ"
+    description: "AI が実行したアクションのログ"
+    softDelete: false
+    isPublic: true
 
-fields:
-  log_id:
-    label: ログID
-    type: text
-    readOnly: true
-  action_type:
-    label: アクション種別
-    type: text
-  entity_type:
-    label: 対象種別
-    type: text
-  entity_id:
-    label: 対象ID
-    type: text
-  ai_model:
-    label: 使用モデル
-    type: text
-  prompt_summary:
-    label: プロンプト概要
-    type: textarea
-  result_summary:
-    label: 結果概要
-    type: textarea
-  execution_ms:
-    label: 実行時間(ms)
-    type: number
-  created_at:
-    label: 実行日時
-    type: datetime
+    columns:
+      log_id:
+        type: string
+        length: 50
+        required: true
+        label: ログID
+      action_type:
+        type: string
+        length: 50
+        label: アクション種別
+      entity_type:
+        type: string
+        length: 50
+        label: 対象種別
+      entity_id:
+        type: string
+        length: 50
+        label: 対象ID
+      ai_model:
+        type: string
+        length: 100
+        label: 使用モデル
+      prompt_summary:
+        type: text
+        label: プロンプト概要
+      result_summary:
+        type: text
+        label: 結果概要
+      execution_ms:
+        type: int
+        label: 実行時間(ms)
+      created_at:
+        type: datetime
+        label: 実行日時

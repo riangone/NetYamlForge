@@ -166,5 +166,5 @@ sections:
     pageSize: 5
     actions:
       - label: 詳細確認
-        url: "/auto-dealer-demo/DynamicEntity/Detail?entity=lead_activities&id={ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=lead_activities&id={ID}"
         class: "btn-outline btn-sm"

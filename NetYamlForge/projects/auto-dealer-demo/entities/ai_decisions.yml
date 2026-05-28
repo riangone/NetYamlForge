@@ -170,6 +170,20 @@ entities:
           default: pending
         - field: decision_type
 
+    actions:
+      approve:
+        label: "✅ 承認"
+        scope: row
+        confirm: "この AI 決定を承認し、実行しますか？"
+        handler: approve_ai_decision
+        class: "btn-success"
+      reject:
+        label: "❌ 却下"
+        scope: row
+        confirm: "この AI 決定を却下しますか？"
+        handler: reject_ai_decision
+        class: "btn-danger"
+
     paging:
       pageSize: 20
       mode: numbered

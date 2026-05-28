@@ -150,7 +150,7 @@ sections:
     pageSize: 15
     actions:
       - label: 詳細
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=vehicles&id={車両ID}"
+        url: "/auto-dealer-demo/DynamicEntity/DetailPage?entity=vehicles&id={車両ID}"
         class: "btn-outline-primary"
 
   # ─────────────────────────────────────────

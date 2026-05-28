@@ -260,6 +260,11 @@
                                             actionUrl = actionUrl.Replace("{ID}", rowId, StringComparison.OrdinalIgnoreCase);
                                         }
                                     }
+                                    if (!string.IsNullOrEmpty(actionUrl) && actionUrl.StartsWith("/"))
+                                    {
+                                        var pathBase = Url.Content("~/").TrimEnd('/');
+                                        actionUrl = pathBase + actionUrl;
+                                    }
                                     <a href="@actionUrl" class="btn @(action.Class ?? "btn-outline btn-sm") mr-1">@action.Label</a>
                                 }
                             }
