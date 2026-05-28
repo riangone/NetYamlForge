@@ -35,7 +35,7 @@ sections:
     valueField: metric_value
     iconField: metric_icon
     deltaField: metric_delta
-    pageSize: 5
+    pageSize: 3
     editable: false
     readOnly: true
 
@@ -61,49 +61,19 @@ sections:
           WHEN 'confirmed' THEN '✅ 確認済'
           WHEN 'pending'   THEN '⏳ 確認待ち'
           ELSE a.status
-        END AS ステータス,
-        COALESCE(a.notes, '') AS 備考
+        END AS ステータス
       FROM service_appointments a
       JOIN customers cu ON a.customer_id = cu.customer_id
       WHERE a.status IN ('pending','confirmed')
         AND cu.login_username = @currentUser
       ORDER BY a.preferred_date ASC
-      LIMIT 5
-    columns: [日時, サービス, ステータス, 備考]
-    pageSize: 5
+      LIMIT 2
+    columns: [日時, サービス, ステータス]
+    pageSize: 2
     editable: false
     readOnly: true
 
-  # ─── 最近のサービス履歴 ───
-  - id: service_history
-    title: 🔧 最近のサービス履歴
-    visibleToRoles: [customer]
-    component: table
-    sourceType: custom
-    source: |
-      SELECT
-        strftime('%Y/%m/%d', a.preferred_date) AS 日付,
-        CASE a.appointment_type
-          WHEN 'inspection'   THEN '🔍 点検・車検'
-          WHEN 'repair'       THEN '🔧 修理'
-          WHEN 'test_drive'   THEN '🚗 試乗'
-          WHEN 'oil_change'   THEN '🛢️ オイル交換'
-          ELSE a.appointment_type
-        END AS サービス,
-        '✔️ 完了' AS ステータス,
-        COALESCE(a.estimated_cost, 0) || ' 円' AS 費用
-      FROM service_appointments a
-      JOIN customers cu ON a.customer_id = cu.customer_id
-      WHERE a.status = 'completed'
-        AND cu.login_username = @currentUser
-      ORDER BY a.preferred_date DESC
-      LIMIT 5
-    columns: [日付, サービス, ステータス, 費用]
-    pageSize: 5
-    editable: false
-    readOnly: true
-
-  # ─── 進行中の商談 ───
+  # ─── 進行中の商談サマリー ───
   - id: my_leads
     title: 🚗 進行中の商談
     visibleToRoles: [customer]
@@ -112,10 +82,6 @@ sections:
     source: |
       SELECT
         sl.vehicle_interest AS 車種,
-        CASE
-          WHEN sl.budget IS NOT NULL THEN CAST(sl.budget / 10000 AS TEXT) || '万円'
-          ELSE '—'
-        END AS 価格目安,
         CASE sl.status
           WHEN 'new'         THEN '新規問合せ'
           WHEN 'contacted'   THEN '連絡済み'
@@ -126,8 +92,9 @@ sections:
       JOIN customers cu ON sl.customer_id = cu.customer_id
       WHERE cu.login_username = @currentUser
         AND sl.status NOT IN ('won', 'lost')
-    columns: [車種, 価格目安, 状況]
-    pageSize: 10
+      LIMIT 3
+    columns: [車種, 状況]
+    pageSize: 3
     editable: false
     readOnly: true
 
@@ -155,3 +122,4 @@ sections:
     pageSize: 4
     editable: false
     readOnly: true
+

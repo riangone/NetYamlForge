@@ -30,7 +30,7 @@ sections:
              '🏆', NULL
       FROM sales_leads
       WHERE status = 'won'
-        AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+        AND updated_at >= date('now', '-30 days')
       UNION ALL
       SELECT '停滞リード ⚠️',
              CAST(COUNT(*) AS TEXT),

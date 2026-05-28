@@ -18,8 +18,8 @@ sections:
       WHERE status = 'pending'
       UNION ALL
       SELECT '本日の来客予約', CAST(COUNT(*) AS TEXT), '📅', NULL
-      FROM appointments
-      WHERE date(appointment_date) = date('now')
+      FROM service_appointments
+      WHERE date(preferred_date) >= date('now', '-7 days')
       UNION ALL
       SELECT 'チーム成約率',
              CAST(ROUND(
@@ -28,7 +28,7 @@ sections:
              ) AS TEXT) || '%',
              '🏆', NULL
       FROM sales_leads
-      WHERE strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      WHERE updated_at >= date('now', '-30 days')
       UNION ALL
       SELECT 'AI 自動対応率',
              CAST(ROUND(
@@ -37,7 +37,7 @@ sections:
              ) AS TEXT) || '%',
              '📈', NULL
       FROM ai_conversations
-      WHERE strftime('%Y-%m', started_at) = strftime('%Y-%m', 'now')
+      WHERE created_at >= date('now', '-30 days')
     columns: [metric_name, metric_value, metric_icon, metric_delta]
     labelField: metric_name
     valueField: metric_value
@@ -58,8 +58,8 @@ sections:
     source: |
       SELECT q.quote_id AS ID,
              c.name AS 顧客名,
-             v.model_name AS 提案車両,
-             '¥' || printf('%,.0f', q.total_amount) AS 金額,
+             v.maker || ' ' || v.model AS 提案車両,
+             '¥' || printf('%,.0f', q.final_price) AS 金額,
              CAST(ROUND(q.discount_rate * 100, 1) AS TEXT) || '%' AS 値引率,
              CASE
                WHEN q.discount_rate > 0.15 THEN '⚠️ 高値引'
@@ -68,7 +68,7 @@ sections:
       FROM ai_quotes q
       INNER JOIN sales_leads l ON q.lead_id = l.lead_id
       INNER JOIN customers c ON l.customer_id = c.customer_id
-      INNER JOIN vehicle_inventory v ON q.vehicle_id = v.vehicle_id
+      INNER JOIN vehicles v ON q.vehicle_id = v.vehicle_id
       WHERE q.status = 'pending'
       ORDER BY q.discount_rate DESC
       LIMIT 5
@@ -83,17 +83,18 @@ sections:
   # チームの稼働状況
   # ─────────────────────────────────────────
   - id: team_activity_status
-    title: 👥 チームの活動状況（直近 24 時間）
+    title: 👥 チームの活動状況（直近 30 日）
     component: table
     sourceType: custom
     source: |
-      SELECT COALESCE(assigned_to_user_id, 'AI 自動対応') AS 担当者,
+      SELECT COALESCE(l.assigned_to_user_id, 'AI 自動対応') AS 担当者,
              COUNT(*) AS 対応件数,
-             SUM(CASE WHEN outcome = 'positive' THEN 1 ELSE 0 END) AS 良好,
-             SUM(CASE WHEN outcome = 'negative' THEN 1 ELSE 0 END) AS 要フォロー
-      FROM lead_activities
-      WHERE created_at >= datetime('now', '-1 day')
-      GROUP BY assigned_to_user_id
+             SUM(CASE WHEN a.outcome = 'positive' THEN 1 ELSE 0 END) AS 良好,
+             SUM(CASE WHEN a.outcome = 'negative' THEN 1 ELSE 0 END) AS 要フォロー
+      FROM lead_activities a
+      LEFT JOIN sales_leads l ON a.lead_id = l.lead_id
+      WHERE a.created_at >= datetime('now', '-30 days')
+      GROUP BY l.assigned_to_user_id
     columns: [担当者, 対応件数, 良好, 要フォロー]
     pageSize: 10
 
@@ -105,12 +106,12 @@ sections:
     component: bar_chart
     sourceType: custom
     source: |
-      SELECT COALESCE(assigned_sales, '未割当') AS label,
+      SELECT COALESCE(assigned_to_user_id, '未割当') AS label,
              COUNT(*) AS value
       FROM sales_leads
       WHERE status = 'won'
         AND date(updated_at) >= date('now', '-30 days')
-      GROUP BY assigned_sales
+      GROUP BY assigned_to_user_id
     columns: [label, value]
     xField: label
     yField: value

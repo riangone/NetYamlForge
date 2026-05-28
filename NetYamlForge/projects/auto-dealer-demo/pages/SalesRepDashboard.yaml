@@ -2,6 +2,35 @@ title: 担当者パフォーマンス
 description: "セールス担当者の個人 KPI、担当リード、フォローアップアクション、活動履歴を管理"
 
 sections:
+  # ─────────────────────────────────────────
+  # 個人 KPI カード
+  # ─────────────────────────────────────────
+  - id: my_kpi
+    title: 自分の KPI（今月）
+    visibleToRoles: [sales_rep, sales_manager]
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '今月新規リード' AS metric_name, CAST(COUNT(*) AS TEXT) AS metric_value, '🆕' AS metric_icon, NULL AS metric_delta
+      FROM sales_leads WHERE assigned_sales = @currentUser AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '今月成約', CAST(COUNT(*) AS TEXT), '🏆', NULL
+      FROM sales_leads WHERE assigned_sales = @currentUser AND status = 'won' AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '停滞リード', CAST(COUNT(*) AS TEXT), '⚠️', NULL
+      FROM sales_leads WHERE assigned_sales = @currentUser AND status NOT IN ('won', 'lost') AND (last_contact_at IS NULL OR CAST((JULIANDAY('now') - JULIANDAY(last_contact_at)) AS INTEGER) >= 7)
+      UNION ALL
+      SELECT 'フォロー予定（今週）', CAST(COUNT(*) AS TEXT), '📅', NULL
+      FROM lead_activities WHERE created_by = @currentUser AND next_action IS NOT NULL AND next_action_date IS NOT NULL AND date(next_action_date) BETWEEN date('now') AND date('now', '+7 days')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 4
+    editable: false
+    readOnly: true
+
   - id: ai_morning_briefing
     title: '🌅 今日のAI推奨アクション TOP5'
     visibleToRoles: [sales_rep, sales_manager]
@@ -9,7 +38,6 @@ sections:
     sourceType: custom
     source: |
       SELECT
-        ROW_NUMBER() OVER (ORDER BY t.priority_score DESC, t.due_date ASC) AS 優先順,
         c.name AS 顧客名,
         CASE t.task_type
           WHEN 'email'       THEN '✉️ メール送信'
@@ -20,7 +48,6 @@ sections:
           ELSE t.task_type
         END AS アクション,
         COALESCE(SUBSTR(t.ai_recommendation, 1, 60), '-') AS AI推奨理由,
-        t.priority_score AS 優先度,
         COALESCE(t.due_date, '期限なし') AS 期限,
         COALESCE(l.lead_id, '') AS リードID
       FROM lead_nurturing_tasks t
@@ -29,66 +56,8 @@ sections:
       WHERE t.status IN ('pending', 'in_progress')
       ORDER BY t.priority_score DESC, t.due_date ASC
       LIMIT 5
-    columns: [優先順, 顧客名, アクション, AI推奨理由, 優先度, 期限, リードID]
+    columns: [顧客名, アクション, AI推奨理由, 期限, リードID]
     pageSize: 5
-    editable: false
-    readOnly: true
-
-  # ─────────────────────────────────────────
-  # 個人 KPI カード
-  # ─────────────────────────────────────────
-  - id: my_kpi
-    title: 自分の KPI（今月）
-    visibleToRoles: [sales_rep, sales_manager]
-    component: stat_cards
-    sourceType: custom
-    source: |
-      SELECT '担当リード総数' AS metric_name,
-             CAST(COUNT(*) AS TEXT) AS metric_value,
-             '📊' AS metric_icon,
-             NULL AS metric_delta
-      FROM sales_leads
-      WHERE assigned_sales = @currentUser
-        AND status NOT IN ('won', 'lost')
-      UNION ALL
-      SELECT '今月成約', CAST(COUNT(*) AS TEXT), '🏆', NULL
-      FROM sales_leads
-      WHERE assigned_sales = @currentUser
-        AND status = 'won'
-        AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')
-      UNION ALL
-      SELECT '今月新規リード', CAST(COUNT(*) AS TEXT), '🆕', NULL
-      FROM sales_leads
-      WHERE assigned_sales = @currentUser
-        AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
-      UNION ALL
-      SELECT '成約率',
-             CAST(ROUND(
-               SUM(CASE WHEN status = 'won' THEN 1.0 ELSE 0.0 END) * 100.0 /
-               NULLIF(COUNT(*), 0), 1
-             ) AS TEXT) || '%',
-             '💰', NULL
-      FROM sales_leads WHERE assigned_sales = @currentUser
-      UNION ALL
-      SELECT '停滞リード', CAST(COUNT(*) AS TEXT), '⚠️', NULL
-      FROM sales_leads
-      WHERE assigned_sales = @currentUser
-        AND status NOT IN ('won', 'lost')
-        AND (last_contact_at IS NULL
-          OR CAST((JULIANDAY('now') - JULIANDAY(last_contact_at)) AS INTEGER) >= 7)
-      UNION ALL
-      SELECT 'フォロー予定（今週）', CAST(COUNT(*) AS TEXT), '📅', NULL
-      FROM lead_activities
-      WHERE created_by = @currentUser
-        AND next_action IS NOT NULL
-        AND next_action_date IS NOT NULL
-        AND date(next_action_date) BETWEEN date('now') AND date('now', '+7 days')
-    columns: [metric_name, metric_value, metric_icon, metric_delta]
-    labelField: metric_name
-    valueField: metric_value
-    iconField: metric_icon
-    deltaField: metric_delta
-    pageSize: 10
     editable: false
     readOnly: true
 
@@ -103,17 +72,7 @@ sections:
     source: |
       SELECT l.lead_id AS ID,
              c.name AS 顧客名,
-             CASE c.tier_level
-               WHEN 'platinum' THEN '💎 Platinum'
-               WHEN 'vip'      THEN '⭐ VIP'
-               WHEN 'gold'     THEN '🥇 Gold'
-               ELSE c.tier_level
-             END AS ランク,
-             l.vehicle_interest AS 興味車種,
-             CASE WHEN l.budget IS NOT NULL
-                  THEN '¥' || printf('%,.0f', l.budget)
-                  ELSE '−'
-             END AS 予算,
+             CASE WHEN l.budget IS NOT NULL THEN '¥' || printf('%,.0f', l.budget) ELSE '−' END AS 予算,
              l.lead_score AS スコア,
              CASE l.status
                WHEN 'new'       THEN '🆕 新規'
@@ -125,16 +84,16 @@ sections:
              CASE WHEN l.last_contact_at IS NOT NULL
                   THEN CAST(CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) AS TEXT) || '日前'
                   ELSE '未接触'
-             END AS 最終接触,
-             COALESCE(c.preferred_contact, '−') AS 希望連絡手段
+             END AS 最終接触
       FROM sales_leads l
       INNER JOIN customers c ON l.customer_id = c.customer_id
       WHERE l.assigned_sales = @currentUser
         AND l.lead_score >= 70
         AND l.status NOT IN ('won', 'lost')
       ORDER BY l.lead_score DESC
-    columns: [ID, 顧客名, ランク, 興味車種, 予算, スコア, ステータス, 最終接触, 希望連絡手段]
-    pageSize: 10
+      LIMIT 5
+    columns: [ID, 顧客名, 予算, スコア, ステータス, 最終接触]
+    pageSize: 5
     actions:
       - label: 対応
         url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
@@ -168,91 +127,6 @@ sections:
         AND date(a.next_action_date) <= date('now', '+7 days')
         AND l.status NOT IN ('won', 'lost')
       ORDER BY a.next_action_date ASC
+      LIMIT 5
     columns: [ID, リードID, 顧客名, 次のアクション, 期限, 緊急度]
-    pageSize: 10
-
-  # ─────────────────────────────────────────
-  # 担当リード一覧（全件）
-  # ─────────────────────────────────────────
-  - id: my_leads_all
-    title: 担当リード一覧
-    visibleToRoles: [sales_rep, sales_manager]
-    component: table
-    sourceType: custom
-    source: |
-      SELECT l.lead_id AS ID,
-             c.name AS 顧客名,
-             l.vehicle_interest AS 興味車種,
-             l.lead_score AS スコア,
-             CASE l.status
-               WHEN 'new'       THEN '🆕 新規'
-               WHEN 'contacted' THEN '📞 接触済'
-               WHEN 'qualified' THEN '💼 商談中'
-               WHEN 'proposal'  THEN '📋 提案中'
-               WHEN 'won'       THEN '🏆 成約'
-               WHEN 'lost'      THEN '❌ 失注'
-               ELSE l.status
-             END AS ステータス,
-             CASE WHEN l.last_contact_at IS NOT NULL
-                  THEN CAST(CAST((JULIANDAY('now') - JULIANDAY(l.last_contact_at)) AS INTEGER) AS TEXT) || '日前'
-                  ELSE '未接触'
-             END AS 最終接触,
-             l.created_at AS 登録日
-      FROM sales_leads l
-      INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE l.assigned_sales = @currentUser
-      ORDER BY
-        CASE l.status WHEN 'new' THEN 1 WHEN 'contacted' THEN 2 WHEN 'qualified' THEN 3 WHEN 'proposal' THEN 4 ELSE 5 END,
-        l.lead_score DESC
-    columns: [ID, 顧客名, 興味車種, スコア, ステータス, 最終接触, 登録日]
-    pageSize: 15
-    actions:
-      - label: 編集
-        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
-        class: "btn-outline-secondary"
-
-  # ─────────────────────────────────────────
-  # 活動履歴（直近）
-  # ─────────────────────────────────────────
-  - id: recent_activities
-    title: 最近の活動履歴（直近 15 件）
-    visibleToRoles: [sales_rep, sales_manager]
-    component: table
-    sourceType: custom
-    source: |
-      SELECT a.activity_id AS ID,
-             c.name AS 顧客名,
-             CASE a.activity_type
-               WHEN 'call'           THEN '📞 電話'
-               WHEN 'email'          THEN '✉️ メール'
-               WHEN 'visit'          THEN '🏢 来店'
-               WHEN 'proposal_sent'  THEN '📋 提案送付'
-               WHEN 'test_drive'     THEN '🚗 試乗'
-               WHEN 'ai_message'     THEN '🤖 AI 対話'
-               ELSE a.activity_type
-             END AS アクション種別,
-             CASE a.outcome
-               WHEN 'positive'   THEN '😊 良好'
-               WHEN 'neutral'    THEN '😐 普通'
-               WHEN 'negative'   THEN '😞 不調'
-               WHEN 'no_answer'  THEN '📵 不在'
-               ELSE COALESCE(a.outcome, '−')
-             END AS 結果,
-             CASE WHEN a.notes IS NOT NULL
-                  THEN CASE WHEN LENGTH(a.notes) > 40
-                            THEN SUBSTR(a.notes, 1, 40) || '...'
-                            ELSE a.notes
-                       END
-                  ELSE '−'
-             END AS メモ,
-             a.created_at AS 日時
-      FROM lead_activities a
-      INNER JOIN sales_leads l ON a.lead_id = l.lead_id
-      INNER JOIN customers c ON l.customer_id = c.customer_id
-      WHERE a.created_by = @currentUser
-      ORDER BY a.created_at DESC
-      LIMIT 15
-    columns: [ID, 顧客名, アクション種別, 結果, メモ, 日時]
-    pageSize: 15
-    editable: false
-    readOnly: true
+    pageSize: 5
