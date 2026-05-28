@@ -210,14 +210,27 @@
         <tbody class="divide-y divide-gray-100">
             @foreach (var row in rows)
             {
-                var rowId = row.TryGetValue(pkCol, out var rid) ? rid?.ToString() : null;
-                if (rowId == null) {
-                    var fallbackKey = row.Keys.FirstOrDefault(k => string.Equals(k, pkCol, StringComparison.OrdinalIgnoreCase)) ?? 
-                                      row.Keys.FirstOrDefault(k => string.Equals(k, "ID", StringComparison.OrdinalIgnoreCase));
-                    if (fallbackKey != null) {
-                        rowId = row[fallbackKey]?.ToString();
-                    }
+                // ID の特定をより柔軟に行う
+                string? rowId = null;
+                // 1. 指定された PK カラム
+                if (row.TryGetValue(pkCol, out var rid) && rid != null) {
+                    rowId = rid.ToString();
                 }
+                // 2. 一般的な ID 名（大文字小文字無視）
+                if (string.IsNullOrEmpty(rowId)) {
+                    var idKey = row.Keys.FirstOrDefault(k => string.Equals(k, "id", StringComparison.OrdinalIgnoreCase));
+                    if (idKey != null) rowId = row[idKey]?.ToString();
+                }
+                // 3. 末尾が ID で終わる最初のカラム（決定ID, UserId 等に対応）
+                if (string.IsNullOrEmpty(rowId)) {
+                    var idKey = row.Keys.FirstOrDefault(k => k.EndsWith("ID", StringComparison.OrdinalIgnoreCase) || k.EndsWith("Id", StringComparison.OrdinalIgnoreCase));
+                    if (idKey != null) rowId = row[idKey]?.ToString();
+                }
+                // 4. フォールバック: 最初の方のカラム
+                if (string.IsNullOrEmpty(rowId) && row.Keys.Any()) {
+                    rowId = row.Values.FirstOrDefault()?.ToString();
+                }
+
                 <tr class="hover:bg-gray-50">
                     @foreach (var col in visibleCols)
                     {
@@ -226,18 +239,31 @@
                         var displayVal = ColumnValueFormatter.FormatValue(colDef.Type, rawVal, colDef.Options);
                         <td class="px-4 py-3 text-gray-700">@displayVal</td>
                     }
-                    @if (showActionsColumn && rowId != null)
+                    @if (showActionsColumn)
                     {
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             @if (hasCustomActions)
                             {
                                 foreach (var action in sec.Actions!)
                                 {
-                                    var actionUrl = action.Url?.Replace("{ID}", rowId);
+                                    var actionUrl = action.Url;
+                                    if (!string.IsNullOrEmpty(actionUrl))
+                                    {
+                                        // 全てのカラム値をプレースホルダーとして置換可能にする
+                                        foreach (var kv in row)
+                                        {
+                                            actionUrl = actionUrl.Replace("{" + kv.Key + "}", kv.Value?.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
+                                        }
+                                        // {ID} も明示的にサポート
+                                        if (rowId != null)
+                                        {
+                                            actionUrl = actionUrl.Replace("{ID}", rowId, StringComparison.OrdinalIgnoreCase);
+                                        }
+                                    }
                                     <a href="@actionUrl" class="btn @(action.Class ?? "btn-outline btn-sm") mr-1">@action.Label</a>
                                 }
                             }
-                            @if (canEdit)
+                            @if (canEdit && rowId != null)
                             {
                                 <button class="btn btn-@size btn-outline mr-1"
                                         hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form?rowId={rowId}")"

@@ -180,6 +180,10 @@ sections:
     pageSize: 20
     editable: false
     readOnly: true
+    actions:
+      - label: "詳細"
+        url: "/auto-dealer-demo/DynamicEntity/Detail?entity=ai_action_log&id={ログID}"
+        class: "btn-outline btn-sm"
 
   # ─────────────────────────────────────────
   # 日別 AI 決定数推移（7 日間）
