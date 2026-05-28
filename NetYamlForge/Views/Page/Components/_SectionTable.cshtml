@@ -11,6 +11,8 @@
     var pageName = Model.PageName;
     var baseUrl = Url.Content($"~/{project}/Page/{pageName}");
     var canEdit = sec.Editable && !sec.ReadOnly && !string.IsNullOrEmpty(sec.TargetTable);
+    var hasCustomActions = sec.Actions != null && sec.Actions.Count > 0;
+    var showActionsColumn = canEdit || hasCustomActions;
     var pkCol = sec.TargetPrimaryKey ?? "id";
     var visibleCols = sec.GetVisibleColumnNames();
 
@@ -199,7 +201,7 @@
                         }
                     </th>
                 }
-                @if (canEdit)
+                @if (showActionsColumn)
                 {
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">@L["Actions"]</th>
                 }
@@ -209,6 +211,13 @@
             @foreach (var row in rows)
             {
                 var rowId = row.TryGetValue(pkCol, out var rid) ? rid?.ToString() : null;
+                if (rowId == null) {
+                    var fallbackKey = row.Keys.FirstOrDefault(k => string.Equals(k, pkCol, StringComparison.OrdinalIgnoreCase)) ?? 
+                                      row.Keys.FirstOrDefault(k => string.Equals(k, "ID", StringComparison.OrdinalIgnoreCase));
+                    if (fallbackKey != null) {
+                        rowId = row[fallbackKey]?.ToString();
+                    }
+                }
                 <tr class="hover:bg-gray-50">
                     @foreach (var col in visibleCols)
                     {
@@ -217,27 +226,38 @@
                         var displayVal = ColumnValueFormatter.FormatValue(colDef.Type, rawVal, colDef.Options);
                         <td class="px-4 py-3 text-gray-700">@displayVal</td>
                     }
-                    @if (canEdit && rowId != null)
+                    @if (showActionsColumn && rowId != null)
                     {
-                        <td class="px-4 py-3 text-right">
-                            <button class="btn btn-@size btn-outline mr-1"
-                                    hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form?rowId={rowId}")"
-                                    hx-target="#section-modal-content-@sec.Id"
-                                    hx-swap="innerHTML"
-                                    hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
-                                Edit
-                            </button>
-                            <form hx-post="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
-                                  hx-target="#section-@sec.Id"
-                                  hx-swap="innerHTML"
-                                  hx-confirm="@(sec.Confirmation?.Delete ?? "Delete this row?")"
-                                  method="post"
-                                  action="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
-                                  style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="rowId" value="@rowId" />
-                                <button type="submit" class="btn btn-@size btn-error">@L["Delete"]</button>
-                            </form>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            @if (hasCustomActions)
+                            {
+                                foreach (var action in sec.Actions!)
+                                {
+                                    var actionUrl = action.Url?.Replace("{ID}", rowId);
+                                    <a href="@actionUrl" class="btn @(action.Class ?? "btn-outline btn-sm") mr-1">@action.Label</a>
+                                }
+                            }
+                            @if (canEdit)
+                            {
+                                <button class="btn btn-@size btn-outline mr-1"
+                                        hx-get="@($"/{project}/Page/{pageName}/section/{sec.Id}/row-form?rowId={rowId}")"
+                                        hx-target="#section-modal-content-@sec.Id"
+                                        hx-swap="innerHTML"
+                                        hx-on::after-request="document.getElementById('section-modal-@sec.Id').showModal()">
+                                    Edit
+                                </button>
+                                <form hx-post="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
+                                      hx-target="#section-@sec.Id"
+                                      hx-swap="innerHTML"
+                                      hx-confirm="@(sec.Confirmation?.Delete ?? "Delete this row?")"
+                                      method="post"
+                                      action="@Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/delete-row")"
+                                      style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="rowId" value="@rowId" />
+                                    <button type="submit" class="btn btn-@size btn-error">@L["Delete"]</button>
+                                </form>
+                            }
                         </td>
                     }
                 </tr>
@@ -245,7 +265,7 @@
             @if (!rows.Any())
             {
                 <tr>
-                    <td colspan="@(visibleCols.Count + (canEdit ? 1 : 0))"
+                    <td colspan="@(visibleCols.Count + (showActionsColumn ? 1 : 0))"
                         class="px-4 py-8 text-center text-gray-400">@L["No data available"]</td>
                 </tr>
             }
