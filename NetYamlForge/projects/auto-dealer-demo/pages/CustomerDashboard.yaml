@@ -47,6 +47,7 @@ sections:
     sourceType: custom
     source: |
       SELECT
+        a.appointment_id AS ID,
         strftime('%Y/%m/%d %H:%M', a.preferred_date) AS 日時,
         CASE a.appointment_type
           WHEN 'inspection'   THEN '🔍 点検・車検'
@@ -68,10 +69,14 @@ sections:
         AND cu.login_username = @currentUser
       ORDER BY a.preferred_date ASC
       LIMIT 2
-    columns: [日時, サービス, ステータス]
+    columns: [ID, 日時, サービス, ステータス]
     pageSize: 2
     editable: false
     readOnly: true
+    actions:
+      - label: 予約確認・変更
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=service_appointments&id={ID}"
+        class: "btn-outline btn-sm"
 
   # ─── 進行中の商談サマリー ───
   - id: my_leads
@@ -81,6 +86,7 @@ sections:
     sourceType: custom
     source: |
       SELECT
+        sl.lead_id AS ID,
         sl.vehicle_interest AS 車種,
         CASE sl.status
           WHEN 'new'         THEN '新規問合せ'
@@ -93,10 +99,14 @@ sections:
       WHERE cu.login_username = @currentUser
         AND sl.status NOT IN ('won', 'lost')
       LIMIT 3
-    columns: [車種, 状況]
+    columns: [ID, 車種, 状況]
     pageSize: 3
     editable: false
     readOnly: true
+    actions:
+      - label: 詳細・メッセージ
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=sales_leads&id={ID}"
+        class: "btn-primary btn-sm"
 
   # ─── おすすめ車両 ───
   - id: recommended_vehicles

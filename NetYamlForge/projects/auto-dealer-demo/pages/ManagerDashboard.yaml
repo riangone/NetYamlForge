@@ -164,3 +164,7 @@ sections:
       LIMIT 5
     columns: [ID, 顧客名, 種別, 内容, 発生日時]
     pageSize: 5
+    actions:
+      - label: 詳細確認
+        url: "/auto-dealer-demo/DynamicEntity/Detail?entity=lead_activities&id={ID}"
+        class: "btn-outline btn-sm"

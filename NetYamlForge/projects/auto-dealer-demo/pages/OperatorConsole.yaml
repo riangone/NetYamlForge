@@ -75,8 +75,8 @@ sections:
     pageSize: 10
     actions:
       - label: 対応開始
-        url: "/auto-dealer-demo/OperatorChat/Detail/{会話ID}"
-        class: "btn-primary"
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_handovers&id={ID}"
+        class: "btn-primary btn-sm"
 
   # ─────────────────────────────────────────
   # 担当中の対話
@@ -101,6 +101,6 @@ sections:
     columns: [ID, 顧客名, ステータス, 経過時間]
     pageSize: 5
     actions:
-      - label: チャットを開く
-        url: "/auto-dealer-demo/OperatorChat/Detail/{会話ID}"
-        class: "btn-secondary"
+      - label: 詳細確認
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=ai_handovers&id={ID}"
+        class: "btn-secondary btn-sm"

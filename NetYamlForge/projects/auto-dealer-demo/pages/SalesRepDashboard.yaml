@@ -130,3 +130,9 @@ sections:
       LIMIT 5
     columns: [ID, リードID, 顧客名, 次のアクション, 期限, 緊急度]
     pageSize: 5
+    actions:
+      - label: 対応記録
+        url: "/auto-dealer-demo/DynamicEntity/Edit?entity=lead_activities&id={ID}"
+        class: "btn-success btn-sm"
+, 期限, 緊急度]
+    pageSize: 5
