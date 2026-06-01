@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BizDocs AI Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      width: 340px;
+      min-height: 200px;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header svg { flex-shrink: 0; }
+    .header h1 { font-size: 15px; font-weight: 600; }
+    .header p { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+    .body { padding: 16px; }
+    .status-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-err { background: #fee2e2; color: #991b1b; }
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 10px 0; }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 9px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-secondary {
+      background: white;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+      margin-top: 8px;
+    }
+    .help-text {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    #not-bizdocs {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+      font-size: 13px;
+    }
+    #not-bizdocs svg { margin: 0 auto 10px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg width="28" height="28" viewBox="0 0 128 128" fill="none">
+      <rect width="128" height="128" rx="20" fill="rgba(255,255,255,0.2)"/>
+      <circle cx="64" cy="45" r="18" fill="white" opacity="0.9"/>
+      <ellipse cx="64" cy="95" rx="30" ry="18" fill="white" opacity="0.9"/>
+      <circle cx="64" cy="45" r="8" fill="#4f46e5"/>
+    </svg>
+    <div>
+      <h1>BizDocs AI 助手</h1>
+      <p>AI 驱动的表单智能填写</p>
+    </div>
+  </div>
+
+  <div class="body">
+    <div id="main-content">
+      <div class="status-card">
+        <div class="status-row">
+          <span>当前页面</span>
+          <span class="badge badge-ok" id="page-status">检测中...</span>
+        </div>
+        <hr class="divider">
+        <div class="status-row">
+          <span>AI 后端 (antigravity)</span>
+          <span class="badge badge-warn" id="native-status">检测中...</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="open-assistant">
+        打开 AI 助手面板
+      </button>
+      <button class="btn btn-secondary" id="install-guide">
+        查看安装说明
+      </button>
+
+      <p class="help-text">
+        在 BizDocs 页面上点击"打开 AI 助手面板"激活侧边栏，通过自然语言指令或上传文件自动填写表单。
+      </p>
+    </div>
+
+    <div id="not-bizdocs" style="display:none">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      请在 BizDocs 页面上使用此扩展
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

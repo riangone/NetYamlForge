@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "BizDocs AI Assistant",
+  "version": "1.0.0",
+  "description": "AI-powered form assistant for BizDocs. Fill forms with natural language or file uploads via antigravity CLI.",
+  "permissions": [
+    "storage",
+    "nativeMessaging",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:*/biz-docs/*",
+    "http://127.0.0.1:*/biz-docs/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:*/biz-docs/*",
+        "http://127.0.0.1:*/biz-docs/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "BizDocs AI Assistant",
+    "default_icon": {
+      "16": "icons/icon.svg",
+      "48": "icons/icon.svg",
+      "128": "icons/icon.svg"
+    }
+  },
+  "icons": {
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  }
+}

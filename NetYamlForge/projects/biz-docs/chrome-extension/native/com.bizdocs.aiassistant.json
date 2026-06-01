@@ -1,0 +1,9 @@
+{
+  "name": "com.bizdocs.aiassistant",
+  "description": "BizDocs AI Assistant native host – bridges Chrome extension to antigravity CLI",
+  "path": "__PLACEHOLDER__",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://__EXTENSION_ID__/"
+  ]
+}

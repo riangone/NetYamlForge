@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>BizDocs AI Assistant — 安装说明</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 700px; margin: 40px auto; padding: 0 20px;
+      color: #1e293b; line-height: 1.6; background: #f8fafc;
+    }
+    h1 { color: #4f46e5; font-size: 24px; }
+    h2 { color: #3730a3; font-size: 17px; margin-top: 28px; }
+    code {
+      background: #e0e7ff; color: #3730a3;
+      padding: 2px 6px; border-radius: 4px; font-size: 13px;
+    }
+    pre {
+      background: #1e1b4b; color: #e0e7ff; padding: 14px 16px;
+      border-radius: 8px; overflow-x: auto; font-size: 13px;
+    }
+    .step {
+      background: white; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 16px 18px; margin: 10px 0;
+    }
+    .step-num {
+      display: inline-block; background: #4f46e5; color: white;
+      border-radius: 50%; width: 24px; height: 24px;
+      text-align: center; line-height: 24px; font-size: 13px;
+      font-weight: 700; margin-right: 8px;
+    }
+    .note {
+      background: #fffbeb; border-left: 4px solid #f59e0b;
+      padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 16px;
+      font-size: 13px; color: #78350f;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 BizDocs AI Assistant — 安装说明</h1>
+  <p>本扩展通过 <strong>antigravity CLI</strong> 调用 AI，需要安装 Native Messaging Host 才能正常工作。</p>
+
+  <h2>前置条件</h2>
+  <div class="step">
+    <span class="step-num">1</span>
+    安装 <strong>antigravity CLI</strong>（参考其官方文档）<br>
+    安装后确认可以在终端运行：
+    <pre>antigravity --version</pre>
+  </div>
+  <div class="step">
+    <span class="step-num">2</span>
+    确认 <strong>Python 3</strong> 已安装：
+    <pre>python3 --version</pre>
+  </div>
+
+  <h2>安装 Native Messaging Host</h2>
+  <div class="step">
+    <span class="step-num">3</span>
+    在 <code>chrome://extensions</code> 页面开启<strong>开发者模式</strong>，记下扩展 ID（类似 <code>abcdefghijklmnopabcdefghijklmnop</code>）
+  </div>
+  <div class="step">
+    <span class="step-num">4</span>
+    在终端进入扩展目录的 <code>native/</code> 文件夹，运行安装脚本：
+    <pre>cd /path/to/chrome-extension/native
+chmod +x install.sh
+./install.sh &lt;你的扩展ID&gt;</pre>
+  </div>
+  <div class="step">
+    <span class="step-num">5</span>
+    回到 <code>chrome://extensions</code> 点击<strong>重新加载</strong>扩展
+  </div>
+  <div class="step">
+    <span class="step-num">6</span>
+    打开任意 BizDocs 页面（如 <code>http://localhost:5000/biz-docs/Dashboard</code>），点击右侧 <strong>🤖</strong> 按钮开始使用
+  </div>
+
+  <h2>自定义 antigravity 命令（可选）</h2>
+  <p>创建配置文件 <code>~/.config/bizdocs-ai/config.json</code>：</p>
+  <pre>{
+  "command": "antigravity",
+  "args": ["run", "--prompt"],
+  "timeout": 90
+}</pre>
+
+  <div class="note">
+    <strong>提示：</strong>如果连接状态仍显示错误，请检查终端日志。
+    在 macOS 上，Native Messaging Host 日志可在 Console.app 中查看。
+  </div>
+</body>
+</html>
