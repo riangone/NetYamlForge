@@ -3,6 +3,9 @@
   'use strict';
   if (document.getElementById('bizdocs-ai-host')) return;
 
+  // Set by initUI — allows the message listener to trigger the panel directly
+  let _toggleSidebar = null;
+
   // ─── Field Detection ────────────────────────────────────────────────────────
 
   function getFormFields() {
@@ -178,13 +181,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 #ai-toggle {
-  position: fixed; bottom: 80px; right: 16px;
+  position: absolute; bottom: 80px; right: 16px;
   width: 52px; height: 52px; border-radius: 50%;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 20px rgba(99,102,241,.5);
-  transition: all .2s; z-index: 2147483645; font-size: 24px;
+  transition: all .2s; z-index: 2; font-size: 24px;
+  pointer-events: auto;
 }
 #ai-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(99,102,241,.7); }
 #ai-toggle.open { right: 396px; background: linear-gradient(135deg,#ef4444,#dc2626); }
@@ -195,12 +199,12 @@
 #ai-toggle.busy .spin { display:block; }
 
 #ai-panel {
-  position: fixed; top: 0; right: -400px; width: 380px; height: 100vh;
+  position: absolute; top: 0; right: -400px; width: 380px; height: 100%;
   background: #13131f; border-left: 1px solid #252540;
   display: flex; flex-direction: column;
   transition: right .3s cubic-bezier(.4,0,.2,1);
   box-shadow: -8px 0 40px rgba(0,0,0,.6); overflow: hidden;
-  z-index: 2147483644;
+  z-index: 1; pointer-events: auto;
 }
 #ai-panel.open { right: 0; }
 
@@ -474,7 +478,9 @@
       toggle.classList.remove('open');
     }
 
-    toggle.addEventListener('click', () => isOpen ? closeSidebar() : openSidebar());
+    _toggleSidebar = () => isOpen ? closeSidebar() : openSidebar();
+
+    toggle.addEventListener('click', _toggleSidebar);
     closeB.addEventListener('click', closeSidebar);
 
     // ── Tabs ────────────────────────────────────────────────────────────────
@@ -667,17 +673,14 @@
     const host = document.createElement('div');
     host.id = 'bizdocs-ai-host';
     Object.assign(host.style, {
-      position: 'fixed', top: '0', right: '0', width: '0', height: '0',
+      position: 'fixed', top: '0', left: '0',
+      width: '100vw', height: '100vh',
       zIndex: '2147483647', pointerEvents: 'none',
     });
     document.body.appendChild(host);
 
     const shadow = host.attachShadow({ mode: 'open' });
     shadow.innerHTML = buildSidebarHTML();
-
-    // Allow pointer events on the toggle button and panel
-    shadow.getElementById('ai-toggle').style.pointerEvents = 'auto';
-    shadow.getElementById('ai-panel').style.pointerEvents = 'auto';
 
     initUI(shadow);
   }
@@ -689,11 +692,15 @@
   }
 
   // Allow popup button to toggle the sidebar
-  chrome.runtime.onMessage.addListener((msg) => {
+  chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg.type === 'TOGGLE_ASSISTANT') {
-      const toggle = document.getElementById('bizdocs-ai-host')
-        ?.shadowRoot?.getElementById('ai-toggle');
-      toggle?.click();
+      if (_toggleSidebar) {
+        _toggleSidebar();
+        sendResponse({ ok: true });
+      } else {
+        sendResponse({ ok: false, error: 'Panel not mounted yet' });
+      }
     }
+    return true;
   });
 })();

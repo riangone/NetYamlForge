@@ -33,9 +33,23 @@ async function init() {
   });
 
   openBtn.addEventListener('click', async () => {
+    openBtn.disabled = true;
+    openBtn.textContent = '正在打开…';
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_ASSISTANT' });
-    window.close();
+    chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_ASSISTANT' }, (resp) => {
+      if (chrome.runtime.lastError || !resp?.ok) {
+        openBtn.disabled = false;
+        openBtn.textContent = '打开 AI 助手面板';
+        const errEl = document.createElement('p');
+        errEl.style.cssText = 'color:#b91c1c;font-size:11px;margin-top:8px;';
+        errEl.textContent = chrome.runtime.lastError?.message?.includes('Receiving end')
+          ? '页面尚未加载扩展，请刷新页面后重试。'
+          : (chrome.runtime.lastError?.message || '面板未响应，请刷新页面重试。');
+        openBtn.insertAdjacentElement('afterend', errEl);
+      } else {
+        window.close();
+      }
+    });
   });
 
   installBtn.addEventListener('click', () => {
