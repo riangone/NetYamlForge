@@ -16,8 +16,9 @@ namespace NetYamlForge.Services.BatchJob;
 /// ・見積(approved)を処理 → 見積メール自動送信
 /// ・応答トラッキング更新
 /// </summary>
-public class AiCommunicationExecutor
+public class AiCommunicationExecutor : IBatchStepHandler
 {
+    public string StepType => "ai_communication_sender";
     private readonly IGeminiCliService _gemini;
     private readonly IEmailServiceFactory _emailFactory;
     private readonly ILogger<AiCommunicationExecutor> _logger;
@@ -30,6 +31,18 @@ public class AiCommunicationExecutor
         _gemini = gemini;
         _emailFactory = emailFactory;
         _logger = logger;
+    }
+
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var r = await ExecuteAsync(job, projectName ?? "", db, tx, ct);
+        result.Success = r.Success;
+        result.RowsAffected = r.RowsAffected;
+        result.ErrorMessage = r.ErrorMessage;
+        result.ErrorDetail = r.ErrorDetail;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(

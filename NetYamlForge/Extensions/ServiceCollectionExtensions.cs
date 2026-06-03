@@ -205,6 +205,7 @@ public static class ServiceCollectionExtensions
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IGeminiCliService, NetYamlForge.Services.AI.GeminiCliService>();
         services.AddSingleton<ToolCallValidator>();
+        services.AddSingleton<IToolRegistry, InMemoryToolRegistry>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
         services.AddSingleton<PromptVersionResolver>();
         services.AddScoped<ISlotFillingManager, SlotFillingManager>();
@@ -221,6 +222,18 @@ public static class ServiceCollectionExtensions
         // バッチジョブサービス
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+
+        // IBatchStepHandler 実装を登録 (BatchJobExecutor がコレクションで受け取る)
+        services.AddScoped<IBatchStepHandler, SqlToCsvHandler>();
+        services.AddScoped<IBatchStepHandler, SqlCommandHandler>();
+        services.AddScoped<IBatchStepHandler, StoredProcedureHandler>();
+        services.AddScoped<IBatchStepHandler, ChinaStockBriefingExecutor>();
+        services.AddScoped<IBatchStepHandler, EmailFetchExecutor>();
+        services.AddScoped<IBatchStepHandler, InvoiceEmailProcessorExecutor>();
+        services.AddScoped<IBatchStepHandler, AutomatedBlogGeneratorExecutor>();
+        services.AddScoped<IBatchStepHandler, AiDealerEngineExecutor>();
+        services.AddScoped<IBatchStepHandler, AiCommunicationExecutor>();
+
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();
         // BatchJobHostedService を Singleton として登録し、IBatchJobScheduler でも解決できるようにする

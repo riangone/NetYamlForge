@@ -17,8 +17,9 @@ namespace NetYamlForge.Services.BatchJob;
 /// <summary>
 /// メールから請求情報を抽出し、DB保存・PDF生成・返信送信を行うジョブ実行器。
 /// </summary>
-public class InvoiceEmailProcessorExecutor
+public class InvoiceEmailProcessorExecutor : IBatchStepHandler
 {
+    public string StepType => "invoice_email_processor";
     private readonly IDocumentPdfService _docPdf;
     private readonly IGeminiCliService _geminiCli;
     private readonly ILogger<InvoiceEmailProcessorExecutor> _logger;
@@ -28,6 +29,18 @@ public class InvoiceEmailProcessorExecutor
         _docPdf = docPdf;
         _geminiCli = geminiCli;
         _logger = logger;
+    }
+
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var r = await ExecuteAsync(job, projectName ?? "", db, ct);
+        result.Success = r.Success;
+        result.RowsAffected = r.RowsAffected;
+        result.ErrorMessage = r.ErrorMessage;
+        result.ErrorDetail = r.ErrorDetail;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(

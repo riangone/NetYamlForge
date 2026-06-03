@@ -7,23 +7,39 @@ namespace NetYamlForge.Services.BatchJob;
 /// <summary>
 /// メール受信タスク実行器
 /// </summary>
-public class EmailFetchExecutor
+public class EmailFetchExecutor : IBatchStepHandler
 {
-    private readonly IEmailService _emailService;
+    public string StepType => "email_fetch";
+    private readonly IEmailServiceFactory _emailFactory;
     private readonly ILogger<EmailFetchExecutor> _logger;
 
-    public EmailFetchExecutor(IEmailService emailService, ILogger<EmailFetchExecutor> logger)
+    public EmailFetchExecutor(IEmailServiceFactory emailFactory, ILogger<EmailFetchExecutor> logger)
     {
-        _emailService = emailService;
+        _emailFactory = emailFactory;
         _logger = logger;
+    }
+
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var svc = _emailFactory.GetForProject(projectName);
+        var r = await ExecuteAsync(job, db, tx, ct, svc);
+        result.Success = r.Success;
+        result.RowsAffected = r.RowsAffected;
+        result.ErrorMessage = r.ErrorMessage;
+        result.ErrorDetail = r.ErrorDetail;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(
         BatchJobDefinition job,
         IDbConnection db,
         IDbTransaction? tx,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IEmailService? emailServiceOverride = null)
     {
+        var emailService = emailServiceOverride ?? _emailFactory.GetForProject(null);
         var result = new BatchJobResult
         {
             JobId = job.Id,
@@ -35,7 +51,7 @@ public class EmailFetchExecutor
             _logger.LogInformation("メール受信タスク開始：{JobId}", job.Id);
 
             var limit = job.Settings.BatchSize > 0 ? job.Settings.BatchSize : 10;
-            var emails = await _emailService.FetchUnreadEmailsAsync(limit);
+            var emails = await emailService.FetchUnreadEmailsAsync(limit);
 
             if (emails.Count == 0)
             {
@@ -79,7 +95,7 @@ public class EmailFetchExecutor
 
                 if (job.Settings.AutoMarkRead)
                 {
-                    await _emailService.MarkAsReadAsync(email.Id);
+                    await emailService.MarkAsReadAsync(email.Id);
                 }
 
                 rowsAffected++;

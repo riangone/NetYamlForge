@@ -7,8 +7,9 @@ namespace NetYamlForge.Services.BatchJob;
 /// <summary>
 /// AI を使用してブログ記事を自動生成し、データベースに保存するジョブ実行器。
 /// </summary>
-public class AutomatedBlogGeneratorExecutor
+public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
 {
+    public string StepType => "automated_blog_generator";
     private readonly IGeminiCliService _gemini;
     private readonly ILogger<AutomatedBlogGeneratorExecutor> _logger;
 
@@ -16,6 +17,18 @@ public class AutomatedBlogGeneratorExecutor
     {
         _gemini = gemini;
         _logger = logger;
+    }
+
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var r = await ExecuteAsync(job, projectName ?? "", db, ct);
+        result.Success = r.Success;
+        result.RowsAffected = r.RowsAffected;
+        result.ErrorMessage = r.ErrorMessage;
+        result.ErrorDetail = r.ErrorDetail;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(

@@ -9,8 +9,9 @@ namespace NetYamlForge.Services.BatchJob;
 /// <summary>
 /// 中国股市简报任务执行器
 /// </summary>
-public class ChinaStockBriefingExecutor
+public class ChinaStockBriefingExecutor : IBatchStepHandler
 {
+    public string StepType => "china_stock_briefing";
     private readonly IChinaStockService _stockService;
     private readonly ILogger<ChinaStockBriefingExecutor> _logger;
 
@@ -20,6 +21,18 @@ public class ChinaStockBriefingExecutor
     {
         _stockService = stockService;
         _logger = logger;
+    }
+
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var r = await ExecuteAsync(job, db, tx, ct);
+        result.Success = r.Success;
+        result.RowsAffected = r.RowsAffected;
+        result.ErrorMessage = r.ErrorMessage;
+        result.ErrorDetail = r.ErrorDetail;
     }
 
     /// <summary>

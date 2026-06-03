@@ -1,5 +1,5 @@
 using Stateless;
-using Stateless.Graph;
+using Stateless.Graph; // UmlDotGraph.Format is in the Stateless package
 
 namespace NetYamlForge.Services.AI;
 
@@ -48,10 +48,10 @@ public class AppointmentStateMachine : IConversationFsm
     private readonly string _conversationId;
     private int _lowConfidenceCount = 0; // 连续低置信度计数
 
-    public AppointmentStateMachine(string conversationId)
+    public AppointmentStateMachine(string conversationId, State initialState = State.Init)
     {
         _conversationId = conversationId;
-        _machine = new StateMachine<State, Trigger>(State.Init);
+        _machine = new StateMachine<State, Trigger>(initialState);
 
         ConfigureTransitions();
     }
@@ -235,9 +235,7 @@ public class AppointmentStateMachine : IConversationFsm
     /// </summary>
     public string GenerateStateDiagram()
     {
-        // TODO: 需要安装 Stateless.Graph 包
-        // return UmlDotGraph.Format(_machine.GetGraph());
-        return $"Current State: {_machine.State}";
+        return UmlDotGraph.Format(_machine.GetInfo());
     }
 
     // ===== 事件处理器 =====

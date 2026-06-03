@@ -11,8 +11,10 @@ namespace NetYamlForge.Services.BatchJob;
 /// リードスコアリング・育成タスク生成・見積生成を Gemini CLI で自動実行し、
 /// ai_decisions テーブルに結果を書き込む。
 /// </summary>
-public class AiDealerEngineExecutor
+public class AiDealerEngineExecutor : IBatchStepHandler
 {
+    public string StepType => "ai_dealer_engine";
+
     private readonly IGeminiCliService _gemini;
     private readonly ILogger<AiDealerEngineExecutor> _logger;
 
@@ -22,7 +24,19 @@ public class AiDealerEngineExecutor
         _logger = logger;
     }
 
-    public async Task<BatchJobResult> ExecuteAsync(
+    public async Task ExecuteAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx,
+        BatchJobResult result, CancellationToken ct)
+    {
+        var execResult = await ExecuteInternalAsync(job, projectName ?? "", db, tx, ct);
+        result.Success = execResult.Success;
+        result.RowsAffected = execResult.RowsAffected;
+        result.ErrorMessage = execResult.ErrorMessage;
+        result.ErrorDetail = execResult.ErrorDetail;
+    }
+
+    public async Task<BatchJobResult> ExecuteInternalAsync(
         BatchJobDefinition job,
         string projectName,
         IDbConnection db,

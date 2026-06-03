@@ -72,15 +72,18 @@ public class AiToolOrchestrator : IAiToolOrchestrator
 {
     private readonly ToolCallValidator _validator;
     private readonly ISlotFillingManager _slotFillingManager;
+    private readonly IToolRegistry _toolRegistry;
     private readonly ILogger<AiToolOrchestrator> _logger;
 
     public AiToolOrchestrator(
         ToolCallValidator validator,
         ISlotFillingManager slotFillingManager,
+        IToolRegistry toolRegistry,
         ILogger<AiToolOrchestrator> logger)
     {
         _validator = validator;
         _slotFillingManager = slotFillingManager;
+        _toolRegistry = toolRegistry;
         _logger = logger;
     }
 
@@ -147,10 +150,22 @@ public class AiToolOrchestrator : IAiToolOrchestrator
                 }
             }
 
-            // [4] 执行 Tool (TODO: 这里需要集成到实际的 Tool 执行逻辑)
-            // 目前返回验证通过的结果,实际执行需要调用现有的 QueryExecutionService 等
-            result.IsSuccess = true;
-            result.Data = null; // TODO: 实际的 Tool 执行结果
+            // [4] 通过 IToolRegistry 查找并执行 Tool
+            var toolDef = !string.IsNullOrEmpty(toolName) ? _toolRegistry.Get(toolName) : null;
+            if (toolDef?.ExecuteAsync != null)
+            {
+                var toolCallResult = await toolDef.ExecuteAsync(toolCall);
+                result.IsSuccess = toolCallResult.IsSuccess;
+                result.Data = toolCallResult.Data;
+                if (!toolCallResult.IsSuccess)
+                    result.ErrorMessage = toolCallResult.ErrorMessage;
+            }
+            else
+            {
+                // Tool 已通过验证但未注册执行器，视为成功（仅验证模式）
+                result.IsSuccess = true;
+                result.Data = null;
+            }
 
             _logger.LogInformation(
                 "[ToolOrchestrator] Tool 执行成功 Conv={ConvId}, Tool={Tool}",

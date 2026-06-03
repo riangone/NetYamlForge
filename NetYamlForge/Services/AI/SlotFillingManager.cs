@@ -596,64 +596,129 @@ WHERE conversation_id = @ConversationId",
     // ===== FSM 統合メソッド =====
 
     /// <inheritdoc />
-    public Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0)
+    public async Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0)
     {
-        var fsm = GetOrCreateFsm(conversationId);
+        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
 
-        // 低信頼度の検出
         if (confidence < 0.6)
         {
             fsm.TriggerLowConfidence(confidence);
             _logger.LogInformation(
                 "[FSM] 低信頼度検出 Conv={ConvId}, Confidence={Confidence}, State={State}",
-                conversationId,
-                confidence,
-                fsm.CurrentState);
+                conversationId, confidence, fsm.CurrentState);
         }
         else
         {
-            // 標準トリガー
             if (fsm.CanFire(trigger))
             {
                 fsm.Fire(trigger);
                 _logger.LogInformation(
                     "[FSM] 状態更新 Conv={ConvId}, Trigger={Trigger}, State={State}",
-                    conversationId,
-                    trigger,
-                    fsm.CurrentState);
+                    conversationId, trigger, fsm.CurrentState);
             }
         }
 
-        return Task.CompletedTask;
+        // 状態をDBに永続化
+        await PersistFsmStateAsync(conversationId, fsm, null);
     }
 
     /// <inheritdoc />
-    public Task<string?> GetCurrentFsmStateAsync(string conversationId)
+    public async Task<string?> GetCurrentFsmStateAsync(string conversationId)
     {
-        var fsm = GetOrCreateFsm(conversationId);
-        return Task.FromResult<string?>(fsm.CurrentState.ToString());
+        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        return fsm.CurrentState.ToString();
     }
 
     /// <inheritdoc />
-    public Task<HashSet<string>> GetAllowedToolsAsync(string conversationId)
+    public async Task<HashSet<string>> GetAllowedToolsAsync(string conversationId)
     {
-        var fsm = GetOrCreateFsm(conversationId);
-        return Task.FromResult(fsm.GetAllowedTools());
+        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        return fsm.GetAllowedTools();
     }
 
-    public Task<bool> IsToolAllowedAsync(string conversationId, string toolName)
+    public async Task<bool> IsToolAllowedAsync(string conversationId, string toolName)
     {
-        var fsm = GetOrCreateFsm(conversationId);
-        return Task.FromResult(fsm.IsToolAllowed(toolName));
+        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        return fsm.IsToolAllowed(toolName);
     }
 
     /// <summary>
-    /// FSM 状態機を取得または作成
+    /// DB から FSM 状態を復元、または新規作成して返す
     /// </summary>
-    private AppointmentStateMachine GetOrCreateFsm(string conversationId)
+    private async Task<AppointmentStateMachine> GetOrRestoreFsmAsync(string conversationId, string? projectId)
     {
-        return _fsmStates.GetOrAdd(conversationId, id => new AppointmentStateMachine(id));
+        if (_fsmStates.TryGetValue(conversationId, out var existing))
+            return existing;
+
+        // DB から状態を読み込んで復元
+        var dbState = await WithDbAsync(projectId, async db =>
+        {
+            return await db.QueryFirstOrDefaultAsync<(string? currentState, int lowConfidenceCount)>(
+                "SELECT current_state, low_confidence_count FROM ai_conversations WHERE conversation_id = @Id",
+                new { Id = conversationId });
+        });
+
+        var initialState = ParseFsmState(dbState.currentState);
+        var newFsm = new AppointmentStateMachine(conversationId, initialState);
+
+        // 低信頼度カウントを復元
+        for (int i = 0; i < dbState.lowConfidenceCount; i++)
+            newFsm.TriggerLowConfidence(0.5);
+
+        _fsmStates.TryAdd(conversationId, newFsm);
+        return newFsm;
     }
+
+    /// <summary>
+    /// FSM 状態を DB に永続化する
+    /// </summary>
+    private async Task PersistFsmStateAsync(string conversationId, AppointmentStateMachine fsm, string? projectId)
+    {
+        var stateStr = FsmStateToDbString(fsm.CurrentState);
+        var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+
+        await WithDbAsync(projectId, async db =>
+        {
+            await db.ExecuteAsync(@"
+UPDATE ai_conversations
+SET current_state = @State,
+    low_confidence_count = @Count,
+    updated_at = @Now
+WHERE conversation_id = @Id",
+                new { State = stateStr, Count = fsm.LowConfidenceCount, Now = now, Id = conversationId });
+            return 0;
+        });
+    }
+
+    private static AppointmentStateMachine.State ParseFsmState(string? stateStr) =>
+        stateStr switch
+        {
+            "collect_vehicle" => AppointmentStateMachine.State.CollectVehicle,
+            "collect_date"    => AppointmentStateMachine.State.CollectDate,
+            "collect_time"    => AppointmentStateMachine.State.CollectTime,
+            "collect_name"    => AppointmentStateMachine.State.CollectName,
+            "collect_phone"   => AppointmentStateMachine.State.CollectPhone,
+            "confirming"      => AppointmentStateMachine.State.Confirming,
+            "booked"          => AppointmentStateMachine.State.Booked,
+            "cancelled"       => AppointmentStateMachine.State.Cancelled,
+            "escalate"        => AppointmentStateMachine.State.Escalate,
+            _                 => AppointmentStateMachine.State.Init
+        };
+
+    private static string FsmStateToDbString(AppointmentStateMachine.State state) =>
+        state switch
+        {
+            AppointmentStateMachine.State.CollectVehicle => "collect_vehicle",
+            AppointmentStateMachine.State.CollectDate    => "collect_date",
+            AppointmentStateMachine.State.CollectTime    => "collect_time",
+            AppointmentStateMachine.State.CollectName    => "collect_name",
+            AppointmentStateMachine.State.CollectPhone   => "collect_phone",
+            AppointmentStateMachine.State.Confirming     => "confirming",
+            AppointmentStateMachine.State.Booked         => "booked",
+            AppointmentStateMachine.State.Cancelled      => "cancelled",
+            AppointmentStateMachine.State.Escalate       => "escalate",
+            _                                            => "init"
+        };
 
     /// <summary>
     /// FSM 状態をリセット
