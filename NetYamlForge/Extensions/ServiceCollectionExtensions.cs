@@ -102,13 +102,13 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddDatabaseServices(this IServiceCollection services)
     {
-        // 连接池配置（Phase 2 优化：提高并发能力）
+        // 连接池配置（Phase 2 优化：已改为信赖底层原生驱动物理池，关闭自定义应用层连接池）
         services.Configure<ConnectionPoolOptions>(options =>
         {
             options.MaxPoolSize = 64;             // 从 32 提升到 64，支持更高并发
             options.IdleTimeoutMs = 120000;       // 从 1 分钟提升到 2 分钟，减少频繁创建
             options.MaxLifetimeMs = 600000;       // 从 5 分钟提升到 10 分钟，延长连接复用窗口
-            options.Enabled = true;
+            options.Enabled = false;
         });
 
         // 注册连接管理器（Singleton，管理所有项目的连接池）
@@ -208,6 +208,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IToolRegistry, InMemoryToolRegistry>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
         services.AddSingleton<PromptVersionResolver>();
+        services.AddSingleton<IAiScenarioYamlLoader, AiScenarioYamlLoader>();
         services.AddScoped<ISlotFillingManager, SlotFillingManager>();
         services.AddScoped<IAppointmentService, AppointmentService>();
 
@@ -223,16 +224,25 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 
-        // IBatchStepHandler 実装を登録 (BatchJobExecutor がコレクションで受け取る)
-        services.AddScoped<IBatchStepHandler, SqlToCsvHandler>();
-        services.AddScoped<IBatchStepHandler, SqlCommandHandler>();
-        services.AddScoped<IBatchStepHandler, StoredProcedureHandler>();
-        services.AddScoped<IBatchStepHandler, ChinaStockBriefingExecutor>();
-        services.AddScoped<IBatchStepHandler, EmailFetchExecutor>();
-        services.AddScoped<IBatchStepHandler, InvoiceEmailProcessorExecutor>();
-        services.AddScoped<IBatchStepHandler, AutomatedBlogGeneratorExecutor>();
-        services.AddScoped<IBatchStepHandler, AiDealerEngineExecutor>();
-        services.AddScoped<IBatchStepHandler, AiCommunicationExecutor>();
+        // IBatchStepHandler 実装を登録 (具体型とインターフェースの両方を登録して遅延解決に対応)
+        services.AddScoped<SqlToCsvHandler>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<SqlToCsvHandler>());
+        services.AddScoped<SqlCommandHandler>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<SqlCommandHandler>());
+        services.AddScoped<StoredProcedureHandler>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<StoredProcedureHandler>());
+        services.AddScoped<ChinaStockBriefingExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<ChinaStockBriefingExecutor>());
+        services.AddScoped<EmailFetchExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<EmailFetchExecutor>());
+        services.AddScoped<InvoiceEmailProcessorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<InvoiceEmailProcessorExecutor>());
+        services.AddScoped<AutomatedBlogGeneratorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AutomatedBlogGeneratorExecutor>());
+        services.AddScoped<AiDealerEngineExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiDealerEngineExecutor>());
+        services.AddScoped<AiCommunicationExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiCommunicationExecutor>());
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();

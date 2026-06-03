@@ -220,8 +220,8 @@ public class AppointmentStateMachineTests
         // Assert
         Assert.NotNull(diagram);
         Assert.NotEmpty(diagram);
-        // 由于 Stateless.Graph 未安装,返回简化版本
-        Assert.Contains("Current State", diagram);
+        // 确认生成的格式是 DOT 语法图
+        Assert.Contains("digraph", diagram);
     }
 
     [Fact]

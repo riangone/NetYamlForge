@@ -8,6 +8,8 @@ using MySql.Data.MySqlClient;
 using Npgsql;
 using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Hooks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -32,21 +34,34 @@ public class BatchJobExecutor : IBatchJobExecutor
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly HookExecutionService _hookExecutionService;
     private readonly ILogger<BatchJobExecutor> _logger;
-    private readonly IReadOnlyDictionary<string, IBatchStepHandler> _handlers;
+    private readonly IServiceProvider _serviceProvider;
     private readonly NetYamlForge.Services.Email.IEmailServiceFactory? _emailFactory;
+
+    private static readonly IReadOnlyDictionary<string, Type> _handlerTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "sql_to_csv", typeof(SqlToCsvHandler) },
+        { "sql_command", typeof(SqlCommandHandler) },
+        { "stored_procedure", typeof(StoredProcedureHandler) },
+        { "china_stock_briefing", typeof(ChinaStockBriefingExecutor) },
+        { "email_fetch", typeof(EmailFetchExecutor) },
+        { "invoice_email_processor", typeof(InvoiceEmailProcessorExecutor) },
+        { "automated_blog_generator", typeof(AutomatedBlogGeneratorExecutor) },
+        { "ai_dealer_engine", typeof(AiDealerEngineExecutor) },
+        { "ai_communication_sender", typeof(AiCommunicationExecutor) }
+    };
 
     public BatchJobExecutor(
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
-        IEnumerable<IBatchStepHandler> handlers,
+        IServiceProvider serviceProvider,
         ILogger<BatchJobExecutor> logger,
         NetYamlForge.Services.Email.IEmailServiceFactory? emailFactory = null)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _hookExecutionService = hookExecutionService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
         _emailFactory = emailFactory;
-        _handlers = handlers.ToDictionary(h => h.StepType, StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
@@ -88,9 +103,11 @@ public class BatchJobExecutor : IBatchJobExecutor
                 }
             }
 
-            // IBatchStepHandler 辞書経由でルーティング
-            if (!_handlers.TryGetValue(job.Type, out var handler))
-                throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _handlers.Keys)}");
+            // IBatchStepHandler 延迟路由解析
+            if (!_handlerTypes.TryGetValue(job.Type, out var handlerType))
+                throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _handlerTypes.Keys)}");
+
+            var handler = (IBatchStepHandler)_serviceProvider.GetRequiredService(handlerType);
 
             await handler.ExecuteAsync(job, projectName, db, tx, result, cancellationToken);
 

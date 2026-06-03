@@ -18,7 +18,7 @@ public interface IConnectionManager : IDisposable
     Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 释放连接回池（而不是关闭）
+    /// 释放连接（物理关闭或退回原生驱动池）
     /// </summary>
     void ReleaseConnection(IDbConnection connection);
 
@@ -28,7 +28,7 @@ public interface IConnectionManager : IDisposable
     Task<IDbConnection> GetConnectionAsync(string projectName, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 释放指定项目的连接回池
+    /// 释放指定项目的连接
     /// </summary>
     void ReleaseConnection(string projectName, IDbConnection connection);
 
@@ -43,18 +43,18 @@ public interface IConnectionManager : IDisposable
     ConnectionPoolStats GetPoolStats(string projectName);
 
     /// <summary>
-    /// Phase 2: 重置指定项目的连接池（关闭所有连接并重建）
+    /// 重置指定项目的连接统计（清理记录）
     /// </summary>
     void ResetPool(string projectName);
 
     /// <summary>
-    /// Phase 2: 重置所有连接池
+    /// 重置所有连接统计
     /// </summary>
     void ResetAllPools();
 }
 
 /// <summary>
-/// 连接管理器实现
+/// 连接管理器实现（完全基于原生连接池，无双重池化）
 /// </summary>
 public class ConnectionManager : IConnectionManager
 {
@@ -62,7 +62,7 @@ public class ConnectionManager : IConnectionManager
     private readonly ILogger<ConnectionManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ConcurrentDictionary<string, ConnectionPool> _pools;
+    private readonly ConcurrentDictionary<string, ConnectionPoolStats> _statsMap;
     private readonly ConnectionPoolOptions _defaultOptions;
     private readonly ILoggerFactory _loggerFactory;
 
@@ -79,39 +79,37 @@ public class ConnectionManager : IConnectionManager
         _scopeFactory = scopeFactory;
         _loggerFactory = loggerFactory;
         _httpContextAccessor = httpContextAccessor;
-        _pools = new ConcurrentDictionary<string, ConnectionPool>();
+        _statsMap = new ConcurrentDictionary<string, ConnectionPoolStats>(StringComparer.OrdinalIgnoreCase);
         _defaultOptions = defaultOptions ?? new ConnectionPoolOptions();
     }
 
     /// <summary>
-    /// 获取或创建项目的连接池
+    /// 辅助统计：增加创建计数
     /// </summary>
-    private ConnectionPool GetOrCreatePool(string projectName)
+    private void RecordConnectionAcquired(string projectName)
     {
-        return _pools.GetOrAdd(projectName, name =>
+        var stats = _statsMap.GetOrAdd(projectName, _ => new ConnectionPoolStats());
+        lock (stats)
         {
-            if (!_projectManager.TryGet(name, out var project) || project == null)
-                throw new InvalidOperationException($"Project not found: {name}");
+            stats.TotalCreated++;
+            stats.CurrentActiveConnections++;
+        }
+    }
 
-            var dbType = project.DatabaseType.ToLowerInvariant();
-            var connectionString = AddPoolParametersIfNeeded(project.DatabaseType, project.ConnectionString);
-
-#pragma warning disable DCS003
-            Func<IDbConnection> factory = dbType switch
+    /// <summary>
+    /// 辅助统计：增加释放计数
+    /// </summary>
+    private void RecordConnectionReleased(string projectName)
+    {
+        if (_statsMap.TryGetValue(projectName, out var stats))
+        {
+            lock (stats)
             {
-                "sqlserver" => () => new Microsoft.Data.SqlClient.SqlConnection(connectionString),
-                "postgresql" or "postgres" => () => new Npgsql.NpgsqlConnection(connectionString),
-                "mysql" or "mariadb" => () => new MySql.Data.MySqlClient.MySqlConnection(connectionString),
-                _ => () => new Microsoft.Data.Sqlite.SqliteConnection(connectionString)
-            };
-#pragma warning restore DCS003
-
-            _logger.LogInformation("Created connection pool for project {ProjectName} (DB: {DbType})",
-                name, dbType);
-
-            return new ConnectionPool(name, factory, _defaultOptions,
-                _loggerFactory.CreateLogger<ConnectionPool>());
-        });
+                stats.TotalReused++; // 在没有自定义池时，我们将底层连接复用记作 Reused，体现原生池的效率
+                stats.TotalDisposed++;
+                stats.CurrentActiveConnections = Math.Max(0, stats.CurrentActiveConnections - 1);
+            }
+        }
     }
 
     /// <summary>
@@ -119,12 +117,9 @@ public class ConnectionManager : IConnectionManager
     /// </summary>
     private static string AddPoolParametersIfNeeded(string dbType, string connectionString)
     {
-        // SQLite 不需要额外参数（使用应用层连接池）
-        if (string.IsNullOrEmpty(dbType) || dbType == "sqlite")
+        if (string.IsNullOrEmpty(dbType) || dbType.ToLowerInvariant() == "sqlite")
             return connectionString;
 
-        // 为 PostgreSQL/MySQL/SQL Server 添加原生连接池参数
-        // 注意：如果连接字符串已包含这些参数，则不重复添加
         return dbType.ToLowerInvariant() switch
         {
             "sqlserver" => AddSqlPoolParamsIfNeeded(connectionString),
@@ -134,37 +129,28 @@ public class ConnectionManager : IConnectionManager
         };
     }
 
-    /// <summary>
-    /// 为 SQL Server 连接字符串添加池参数
-    /// </summary>
     private static string AddSqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("Max Pool Size", StringComparison.OrdinalIgnoreCase))
-            return connectionString; // 已配置
+            return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
         return $"{connectionString}{separator}Max Pool Size=100;Min Pool Size=5;Connection Lifetime=300;";
     }
 
-    /// <summary>
-    /// 为 PostgreSQL 连接字符串添加池参数
-    /// </summary>
     private static string AddNpgsqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("MaxPoolSize", StringComparison.OrdinalIgnoreCase))
-            return connectionString; // 已配置
+            return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
         return $"{connectionString}{separator}MaxPoolSize=100;MinPoolSize=5;Connection Idle Lifetime=300;";
     }
 
-    /// <summary>
-    /// 为 MySQL 连接字符串添加池参数
-    /// </summary>
     private static string AddMySqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("MaximumPoolSize", StringComparison.OrdinalIgnoreCase))
-            return connectionString; // 已配置
+            return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
         return $"{connectionString}{separator}MaximumPoolSize=100;MinimumPoolSize=5;ConnectionLifeTime=300;";
@@ -172,7 +158,6 @@ public class ConnectionManager : IConnectionManager
 
     public async Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken = default)
     {
-        // 1. 尝试从 HttpContext 获取当前项目的 ProjectScope（最高优先级，最准确）
         var httpContext = _httpContextAccessor?.HttpContext;
         if (httpContext != null)
         {
@@ -183,7 +168,6 @@ public class ConnectionManager : IConnectionManager
             }
         }
 
-        // 2. 备选方案：尝试从 ScopeFactory 获取（可能在某些后台任务中手动设置了作用域）
         using var scope = _scopeFactory.CreateScope();
         var spProjectScope = scope.ServiceProvider.GetService<ProjectScope>();
         
@@ -197,107 +181,108 @@ public class ConnectionManager : IConnectionManager
 
     public async Task<IDbConnection> GetConnectionAsync(string projectName, CancellationToken cancellationToken = default)
     {
-        var pool = GetOrCreatePool(projectName);
-        var connection = await pool.AcquireAsync(cancellationToken);
+        if (!_projectManager.TryGet(projectName, out var project) || project == null)
+            throw new InvalidOperationException($"Project not found: {projectName}");
 
-        // 确保连接是打开的
+        var dbType = project.DatabaseType.ToLowerInvariant();
+        var connectionString = AddPoolParametersIfNeeded(project.DatabaseType, project.ConnectionString);
+
+#pragma warning disable DCS003
+        IDbConnection connection = dbType switch
+        {
+            "sqlserver" => new Microsoft.Data.SqlClient.SqlConnection(connectionString),
+            "postgresql" or "postgres" => new Npgsql.NpgsqlConnection(connectionString),
+            "mysql" or "mariadb" => new MySql.Data.MySqlClient.MySqlConnection(connectionString),
+            _ => new Microsoft.Data.Sqlite.SqliteConnection(connectionString)
+        };
+#pragma warning restore DCS003
+
         if (connection.State != ConnectionState.Open)
         {
-            connection.Open();
+            if (connection is System.Data.Common.DbConnection dbConn)
+            {
+                await dbConn.OpenAsync(cancellationToken);
+            }
+            else
+            {
+                connection.Open();
+            }
         }
 
+        RecordConnectionAcquired(projectName);
         return connection;
     }
 
     public void ReleaseConnection(IDbConnection connection)
     {
-        // 从当前请求作用域获取 ProjectScope
+        if (connection == null) return;
+
         using var scope = _scopeFactory.CreateScope();
         var projectScope = scope.ServiceProvider.GetService<ProjectScope>();
         
-        if (projectScope == null || !projectScope.IsSet)
+        if (projectScope != null && projectScope.IsSet)
         {
-            // 没有项目上下文，直接关闭连接
-            try
-            {
-                if (connection.State == ConnectionState.Open)
-                    connection.Close();
-                connection.Dispose();
-            }
-            catch { }
+            ReleaseConnection(projectScope.Current.Name, connection);
             return;
         }
 
-        ReleaseConnection(projectScope.Current.Name, connection);
+        // 无项目上下文时直接关闭释放
+        try
+        {
+            if (connection.State == ConnectionState.Open)
+                connection.Close();
+            connection.Dispose();
+        }
+        catch { }
     }
 
     public void ReleaseConnection(string projectName, IDbConnection connection)
     {
-        if (_pools.TryGetValue(projectName, out var pool))
+        if (connection == null) return;
+
+        try
         {
-            pool.Release(connection);
+            if (connection.State == ConnectionState.Open)
+                connection.Close();
+            connection.Dispose();
         }
-        else
+        catch { }
+        finally
         {
-            // 池不存在，直接关闭连接
-            try
-            {
-                if (connection.State == ConnectionState.Open)
-                    connection.Close();
-                connection.Dispose();
-            }
-            catch { }
+            RecordConnectionReleased(projectName);
         }
     }
 
     public Dictionary<string, ConnectionPoolStats> GetAllPoolStats()
     {
-        return _pools.ToDictionary(
-            kv => kv.Key,
-            kv => kv.Value.GetStats()
-        );
+        return _statsMap.ToDictionary(kv => kv.Key, kv => kv.Value);
     }
 
     public ConnectionPoolStats GetPoolStats(string projectName)
     {
-        if (_pools.TryGetValue(projectName, out var pool))
+        if (_statsMap.TryGetValue(projectName, out var stats))
         {
-            return pool.GetStats();
+            return stats;
         }
         return new ConnectionPoolStats();
     }
 
-    /// <summary>
-    /// Phase 2: 重置指定项目的连接池（关闭所有连接并重建池）
-    /// </summary>
     public void ResetPool(string projectName)
     {
-        if (_pools.TryRemove(projectName, out var pool))
+        if (_statsMap.TryRemove(projectName, out _))
         {
-            _logger.LogInformation("Resetting connection pool for project {ProjectName}", projectName);
-            pool.Dispose();
+            _logger.LogInformation("Resetting connection stats for project {ProjectName}", projectName);
         }
     }
 
-    /// <summary>
-    /// Phase 2: 重置所有连接池
-    /// </summary>
     public void ResetAllPools()
     {
-        _logger.LogInformation("Resetting all connection pools");
-        foreach (var kvp in _pools)
-        {
-            kvp.Value.Dispose();
-        }
-        _pools.Clear();
+        _logger.LogInformation("Resetting all connection stats");
+        _statsMap.Clear();
     }
 
     public void Dispose()
     {
-        foreach (var pool in _pools.Values)
-        {
-            pool.Dispose();
-        }
-        _pools.Clear();
+        _statsMap.Clear();
     }
 }

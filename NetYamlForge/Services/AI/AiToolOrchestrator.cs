@@ -151,7 +151,7 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             }
 
             // [4] 通过 IToolRegistry 查找并执行 Tool
-            var toolDef = !string.IsNullOrEmpty(toolName) ? _toolRegistry.Get(toolName) : null;
+            var toolDef = !string.IsNullOrEmpty(toolName) ? _toolRegistry.Get(projectId, toolName) : null;
             if (toolDef?.ExecuteAsync != null)
             {
                 var toolCallResult = await toolDef.ExecuteAsync(toolCall);

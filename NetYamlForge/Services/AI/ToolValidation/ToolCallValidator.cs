@@ -16,11 +16,14 @@ namespace NetYamlForge.Services.AI.ToolValidation;
 public class ToolCallValidator
 {
     private readonly ILogger<ToolCallValidator> _logger;
+    private readonly IAiScenarioYamlLoader _aiScenarioYamlLoader;
 
     public ToolCallValidator(
-        ILogger<ToolCallValidator> logger)
+        ILogger<ToolCallValidator> logger,
+        IAiScenarioYamlLoader aiScenarioYamlLoader)
     {
         _logger = logger;
+        _aiScenarioYamlLoader = aiScenarioYamlLoader;
     }
 
     /// <summary>
@@ -72,7 +75,7 @@ public class ToolCallValidator
         // [4] 状态白名单检查(如果提供了当前状态)
         if (currentState != null)
         {
-            var stateResult = ValidateStateAllowlist(toolCall, currentState);
+            var stateResult = ValidateStateAllowlist(toolCall, currentState, projectId);
             if (!stateResult.IsValid)
             {
                 return stateResult;
@@ -134,15 +137,8 @@ public class ToolCallValidator
             return Task.FromResult(ToolValidationResult.Fail("action 字段不能为空"));
         }
 
-        // 允许的实体列表(默认)
-        var allowedEntities = new[]
-        {
-            "vehicles",
-            "sales_leads",
-            "customers",
-            "service_appointments",
-            "test_drives"
-        };
+        var config = _aiScenarioYamlLoader.GetConfig(projectId);
+        var allowedEntities = config.AllowedEntities;
 
         bool hasEntity = false;
         foreach (var ent in allowedEntities)
@@ -162,7 +158,7 @@ public class ToolCallValidator
         }
 
         // 验证 Action 是否合法
-        var allowedActions = new[] { "list", "count", "get", "create", "update" };
+        var allowedActions = config.AllowedActions;
         bool hasAction = false;
         foreach (var act in allowedActions)
         {
@@ -271,7 +267,8 @@ public class ToolCallValidator
     /// </summary>
     private ToolValidationResult ValidateStateAllowlist(
         JsonNode toolCall,
-        string? currentState)
+        string? currentState,
+        string projectId)
     {
         var toolName = toolCall["tool_call"]?.ToString();
 
@@ -280,16 +277,22 @@ public class ToolCallValidator
             return ToolValidationResult.Fail("tool_call 字段不能为空");
         }
 
-        // 根据状态字符串检查允许的 Tool
-        var allowedTools = currentState switch
+        var config = _aiScenarioYamlLoader.GetConfig(projectId);
+        var allowedTools = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        if (currentState != null)
         {
-            "Init" => new HashSet<string> { "query_data" },
-            "CollectVehicle" => new HashSet<string> { "query_data" },
-            "CollectDate" or "CollectTime" or "CollectName" or "CollectPhone" => new HashSet<string>(),
-            "Confirming" => new HashSet<string> { "create_appointment_request" },
-            "Booked" or "Escalate" or "Cancelled" => new HashSet<string>(),
-            _ => new HashSet<string>()
-        };
+            foreach (var scenario in config.Scenarios.Values)
+            {
+                if (scenario.Tools.TryGetValue(currentState, out var toolsList))
+                {
+                    foreach (var tool in toolsList)
+                    {
+                        allowedTools.Add(tool);
+                    }
+                }
+            }
+        }
 
         if (!allowedTools.Contains(toolName))
         {

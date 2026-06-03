@@ -15,12 +15,40 @@ namespace NetYamlForge.Tests.Services.AI.ToolValidation;
 public class ToolCallValidatorTests
 {
     private readonly Mock<ILogger<ToolCallValidator>> _loggerMock;
+    private readonly Mock<IAiScenarioYamlLoader> _aiScenarioYamlLoaderMock;
     private readonly ToolCallValidator _validator;
 
     public ToolCallValidatorTests()
     {
         _loggerMock = new Mock<ILogger<ToolCallValidator>>();
-        _validator = new ToolCallValidator(_loggerMock.Object);
+        _aiScenarioYamlLoaderMock = new Mock<IAiScenarioYamlLoader>();
+        
+        var testConfig = GetTestScenarioConfig();
+        _aiScenarioYamlLoaderMock.Setup(x => x.GetConfig(It.IsAny<string>())).Returns(testConfig);
+
+        _validator = new ToolCallValidator(_loggerMock.Object, _aiScenarioYamlLoaderMock.Object);
+    }
+
+    private AiScenarioConfig GetTestScenarioConfig()
+    {
+        var config = new AiScenarioConfig
+        {
+            AllowedEntities = new List<string> { "vehicles", "sales_leads", "customers", "service_appointments", "test_drives" },
+            AllowedActions = new List<string> { "list", "count", "get", "create", "update" }
+        };
+
+        config.Scenarios["test_drive"] = new ScenarioConfig
+        {
+            Name = "test_drive",
+            Tools = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Init"] = new() { "query_data" },
+                ["CollectVehicle"] = new() { "query_data" },
+                ["Confirming"] = new() { "create_appointment_request" }
+            }
+        };
+
+        return config;
     }
 
     [Fact]
@@ -167,7 +195,7 @@ public class ToolCallValidatorTests
         var result = await _validator.ValidateAsync(
             toolCall,
             "auto-dealer-demo",
-            AppointmentStateMachine.State.Escalate);
+            AppointmentStateMachine.State.Escalate.ToString());
 
         // Assert
         Assert.False(result.IsValid);
@@ -189,7 +217,7 @@ public class ToolCallValidatorTests
         var result = await _validator.ValidateAsync(
             toolCall,
             "auto-dealer-demo",
-            AppointmentStateMachine.State.Confirming);
+            AppointmentStateMachine.State.Confirming.ToString());
 
         // Assert
         Assert.True(result.IsValid);
@@ -210,7 +238,7 @@ public class ToolCallValidatorTests
         var result = await _validator.ValidateAsync(
             toolCall,
             "auto-dealer-demo",
-            AppointmentStateMachine.State.CollectDate);
+            AppointmentStateMachine.State.CollectDate.ToString());
 
         // Assert
         Assert.False(result.IsValid);

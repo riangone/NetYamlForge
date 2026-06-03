@@ -143,108 +143,16 @@ public class SlotFillingManager : ISlotFillingManager
     private const string DefaultProjectId = "auto-dealer-demo";
 
     // 自動車販売向けシナリオ定義
-    private static readonly Dictionary<string, ScenarioDefinition> Scenarios = new()
-    {
-        ["test_drive"] = new ScenarioDefinition
-        {
-            Name = "test_drive",
-            Description = "試乗予約",
-            RequiredSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_model", Prompt = "どの車種の試乗をご希望ですか？", IsRequired = true },
-                new() { Name = "preferred_date", Prompt = "ご希望の日付を教えてください（例：明日、来週月曜日）", IsRequired = true },
-                new() { Name = "preferred_time", Prompt = "ご希望の時間帯を教えてください（例：午前 10 時、午後 2 時）", IsRequired = true },
-                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true },
-                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true }
-            },
-            OptionalSlots = new List<SlotInfo>
-            {
-                new() { Name = "current_vehicle", Prompt = "現在お乗りの車はありますか？（任意）", IsRequired = false },
-                new() { Name = "license_status", Prompt = "運転免許証はお持ちですか？（任意）", IsRequired = false }
-            }
-        },
+    private readonly IAiScenarioYamlLoader _aiScenarioYamlLoader;
 
-        ["estimate"] = new ScenarioDefinition
-        {
-            Name = "estimate",
-            Description = "見積もり依頼",
-            RequiredSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_model", Prompt = "どの車種の御見積もりをご希望ですか？", IsRequired = true },
-                new() { Name = "grade", Prompt = "グレードは決まっていますか？（例：G、X、Z など）", IsRequired = true },
-                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true },
-                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true }
-            },
-            OptionalSlots = new List<SlotInfo>
-            {
-                new() { Name = "budget_amount", Prompt = "ご予算はありますか？（例：300 万円以内）", IsRequired = false },
-                new() { Name = "payment_method", Prompt = "お支払い方法はいかがなさいますか？（ローン/現金）", IsRequired = false, AllowedValues = ["ローン", "現金", "リース"] },
-                new() { Name = "trade_in", Prompt = "下取り車両はございますか？", IsRequired = false, AllowedValues = ["はい", "いいえ"] },
-                new() { Name = "options", Prompt = "ご希望のオプションはありますか？（例：ナビ、ETC、ドラレコ）", IsRequired = false }
-            }
-        },
-
-        ["appointment_service"] = new ScenarioDefinition
-        {
-            Name = "appointment_service",
-            Description = "サービス予約（車検・整備）",
-            RequiredSlots = new List<SlotInfo>
-            {
-                new() { Name = "service_type", Prompt = "どのようなご用件でしょうか？（例：車検、点検、オイル交換）", IsRequired = true },
-                new() { Name = "vehicle_model", Prompt = "お車の車種を教えてください", IsRequired = true },
-                new() { Name = "preferred_date", Prompt = "ご希望の日付を教えてください", IsRequired = true },
-                new() { Name = "preferred_time", Prompt = "ご希望の時間帯を教えてください", IsRequired = true },
-                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true },
-                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true }
-            },
-            OptionalSlots = new List<SlotInfo>
-            {
-                new() { Name = "mileage", Prompt = "現在の走行距離を教えてください（任意）", IsRequired = false },
-                new() { Name = "concerns", Prompt = "気になる点はありますか？（例：異音、振動）", IsRequired = false }
-            }
-        },
-
-        ["trade_in"] = new ScenarioDefinition
-        {
-            Name = "trade_in",
-            Description = "下取り査定",
-            RequiredSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_brand", Prompt = "お車のメーカーを教えてください（例：トヨタ、ホンダ）", IsRequired = true },
-                new() { Name = "vehicle_model", Prompt = "車種を教えてください", IsRequired = true },
-                new() { Name = "vehicle_year", Prompt = "初度登録年を教えてください（例：2018 年）", IsRequired = true },
-                new() { Name = "mileage", Prompt = "走行距離を教えてください（例：5 万 km）", IsRequired = true },
-                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true },
-                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true }
-            },
-            OptionalSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_condition", Prompt = "お車の状態はいかがですか？（事故歴など）", IsRequired = false },
-                new() { Name = "preferred_date", Prompt = "査定ご希望の日付はありますか？", IsRequired = false }
-            }
-        },
-
-        ["vehicle_inquiry"] = new ScenarioDefinition
-        {
-            Name = "vehicle_inquiry",
-            Description = "車両お問い合わせ",
-            RequiredSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_model", Prompt = "どの車種についてお調べしますか？", IsRequired = true }
-            },
-            OptionalSlots = new List<SlotInfo>
-            {
-                new() { Name = "vehicle_type", Prompt = "ご希望の車体タイプはありますか？（例：SUV、セダン）", IsRequired = false },
-                new() { Name = "budget_amount", Prompt = "ご予算はありますか？", IsRequired = false },
-                new() { Name = "vehicle_color", Prompt = "ご希望の色はありますか？", IsRequired = false }
-            }
-        }
-    };
-
-    public SlotFillingManager(ILogger<SlotFillingManager> logger, IServiceScopeFactory scopeFactory)
+    public SlotFillingManager(
+        ILogger<SlotFillingManager> logger,
+        IServiceScopeFactory scopeFactory,
+        IAiScenarioYamlLoader aiScenarioYamlLoader)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
+        _aiScenarioYamlLoader = aiScenarioYamlLoader;
     }
 
     /// <inheritdoc />
@@ -261,7 +169,7 @@ public class SlotFillingManager : ISlotFillingManager
             return session;
 
         // 新規セッション作成
-        session = CreateNewSession(conversationId, scenario);
+        session = CreateNewSession(conversationId, scenario, projectId);
         _sessions[key] = session;
         await PersistSessionsAsync(conversationId, projectId);
 
@@ -385,7 +293,7 @@ public class SlotFillingManager : ISlotFillingManager
     /// <summary>
     /// 新規セッションを作成
     /// </summary>
-    private static SlotSession CreateNewSession(string conversationId, string scenario)
+    private SlotSession CreateNewSession(string conversationId, string scenario, string? projectId)
     {
         var now = DateTime.UtcNow;
         var session = new SlotSession
@@ -396,8 +304,10 @@ public class SlotFillingManager : ISlotFillingManager
             UpdatedAt = now
         };
 
-        // シナリオ定義からスロットを初期化
-        if (Scenarios.TryGetValue(scenario, out var definition))
+        var resolvedProjectId = projectId ?? DefaultProjectId;
+        var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
+
+        if (config.Scenarios.TryGetValue(scenario, out var definition))
         {
             foreach (var slot in definition.RequiredSlots.Concat(definition.OptionalSlots))
             {
@@ -450,7 +360,7 @@ public class SlotFillingManager : ISlotFillingManager
                 continue;
 
             var scenario = entry.Key;
-            var session = CreateSessionFromPayload(conversationId, scenario, sessionObj);
+            var session = CreateSessionFromPayload(conversationId, scenario, sessionObj, projectId);
             _sessions[$"{conversationId}:{scenario}"] = session;
         }
     }
@@ -545,9 +455,9 @@ WHERE conversation_id = @ConversationId",
         }
     }
 
-    private SlotSession CreateSessionFromPayload(string conversationId, string scenario, JsonObject payload)
+    private SlotSession CreateSessionFromPayload(string conversationId, string scenario, JsonObject payload, string? projectId)
     {
-        var session = CreateNewSession(conversationId, scenario);
+        var session = CreateNewSession(conversationId, scenario, projectId);
 
         if (payload["created_at"]?.GetValue<string>() is string createdStr &&
             DateTime.TryParse(createdStr, out var createdAt))
