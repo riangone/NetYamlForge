@@ -203,7 +203,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPagePermissionService, PagePermissionService>();
         
         // AI サービス
-        services.AddScoped<NetYamlForge.Services.Ai.IGeminiCliService, NetYamlForge.Services.Ai.GeminiCliService>();
+        services.AddScoped<NetYamlForge.Services.AI.IGeminiCliService, NetYamlForge.Services.AI.GeminiCliService>();
         services.AddSingleton<ToolCallValidator>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
         services.AddSingleton<PromptVersionResolver>();

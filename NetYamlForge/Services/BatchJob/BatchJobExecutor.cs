@@ -30,31 +30,28 @@ public class BatchJobExecutor : IBatchJobExecutor
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly HookExecutionService _hookExecutionService;
-    private readonly IChinaStockService _chinaStockService;
-    private readonly NetYamlForge.Services.Email.IEmailServiceFactory _emailFactory;
-    private readonly IDocumentPdfService _docPdf;
-    private readonly NetYamlForge.Services.Ai.IGeminiCliService _geminiCli;
     private readonly ILogger<BatchJobExecutor> _logger;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IServiceProvider _services;
+
+    // 懒加载特定领域依赖，避免所有 Job 类型共同承担所有服务的初始化开销
+    private IChinaStockService ChinaStock => _services.GetRequiredService<IChinaStockService>();
+    private NetYamlForge.Services.Email.IEmailServiceFactory EmailFactory => _services.GetRequiredService<NetYamlForge.Services.Email.IEmailServiceFactory>();
+    private IDocumentPdfService DocPdf => _services.GetRequiredService<IDocumentPdfService>();
+    private NetYamlForge.Services.AI.IGeminiCliService GeminiCli => _services.GetRequiredService<NetYamlForge.Services.AI.IGeminiCliService>();
 
     public BatchJobExecutor(
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
-        IChinaStockService chinaStockService,
-        NetYamlForge.Services.Email.IEmailServiceFactory emailFactory,
-        IDocumentPdfService docPdf,
-        NetYamlForge.Services.Ai.IGeminiCliService geminiCli,
         ILogger<BatchJobExecutor> logger,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IServiceProvider services)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _hookExecutionService = hookExecutionService;
-        _chinaStockService = chinaStockService;
-        _emailFactory = emailFactory;
-        _docPdf = docPdf;
-        _geminiCli = geminiCli;
         _logger = logger;
         _loggerFactory = loggerFactory;
+        _services = services;
     }
 
     public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
@@ -313,7 +310,7 @@ public class BatchJobExecutor : IBatchJobExecutor
         CancellationToken cancellationToken)
     {
         var logger = _loggerFactory.CreateLogger<ChinaStockBriefingExecutor>();
-        var executor = new ChinaStockBriefingExecutor(_chinaStockService, logger);
+        var executor = new ChinaStockBriefingExecutor(ChinaStock, logger);
         var briefResult = await executor.ExecuteAsync(job, db, tx, cancellationToken);
 
         result.Success = briefResult.Success;
@@ -334,7 +331,7 @@ public class BatchJobExecutor : IBatchJobExecutor
         CancellationToken cancellationToken)
     {
         var logger = _loggerFactory.CreateLogger<EmailFetchExecutor>();
-        var executor = new EmailFetchExecutor(_emailFactory.GetForProject(projectName), logger);
+        var executor = new EmailFetchExecutor(EmailFactory.GetForProject(projectName), logger);
         var emailResult = await executor.ExecuteAsync(job, db, tx, cancellationToken);
 
         result.Success = emailResult.Success;
@@ -359,7 +356,7 @@ public class BatchJobExecutor : IBatchJobExecutor
             throw new InvalidOperationException("projectName is required for ai_email_chat job.");
         }
         var logger = _loggerFactory.CreateLogger<AiEmailChatExecutor>();
-        var executor = new AiEmailChatExecutor(_geminiCli, logger);
+        var executor = new AiEmailChatExecutor(GeminiCli, logger);
         var chatResult = await executor.ExecuteAsync(job, projectName, cancellationToken);
 
         result.Success = chatResult.Success;
@@ -383,7 +380,7 @@ public class BatchJobExecutor : IBatchJobExecutor
             throw new InvalidOperationException("projectName is required for invoice_email_processor job.");
 
         var logger = _loggerFactory.CreateLogger<InvoiceEmailProcessorExecutor>();
-        var executor = new InvoiceEmailProcessorExecutor(_docPdf, _geminiCli, logger);
+        var executor = new InvoiceEmailProcessorExecutor(DocPdf, GeminiCli, logger);
         var execResult = await executor.ExecuteAsync(job, projectName, db, cancellationToken);
 
         result.Success = execResult.Success;
@@ -407,7 +404,7 @@ public class BatchJobExecutor : IBatchJobExecutor
             throw new InvalidOperationException("projectName is required for automated_blog_generator job.");
 
         var logger = _loggerFactory.CreateLogger<AutomatedBlogGeneratorExecutor>();
-        var executor = new AutomatedBlogGeneratorExecutor(_geminiCli, logger);
+        var executor = new AutomatedBlogGeneratorExecutor(GeminiCli, logger);
         var execResult = await executor.ExecuteAsync(job, projectName, db, cancellationToken);
 
         result.Success = execResult.Success;
@@ -431,7 +428,7 @@ public class BatchJobExecutor : IBatchJobExecutor
             throw new InvalidOperationException("projectName is required for ai_dealer_engine job.");
 
         var logger = _loggerFactory.CreateLogger<AiDealerEngineExecutor>();
-        var executor = new AiDealerEngineExecutor(_geminiCli, logger);
+        var executor = new AiDealerEngineExecutor(GeminiCli, logger);
         var execResult = await executor.ExecuteAsync(job, projectName, db, tx, cancellationToken);
 
         result.Success = execResult.Success;
@@ -455,7 +452,7 @@ public class BatchJobExecutor : IBatchJobExecutor
             throw new InvalidOperationException("projectName is required for ai_communication_sender job.");
 
         var logger = _loggerFactory.CreateLogger<AiCommunicationExecutor>();
-        var executor = new AiCommunicationExecutor(_geminiCli, _emailFactory, logger);
+        var executor = new AiCommunicationExecutor(GeminiCli, EmailFactory, logger);
         var execResult = await executor.ExecuteAsync(job, projectName, db, tx, cancellationToken);
 
         result.Success = execResult.Success;
@@ -471,7 +468,7 @@ public class BatchJobExecutor : IBatchJobExecutor
     {
         try
         {
-            var emailService = _emailFactory.GetForProject(projectName);
+            var emailService = EmailFactory.GetForProject(projectName);
             var emails = job.Settings.NotifyEmails!.Split(',', StringSplitOptions.RemoveEmptyEntries);
             foreach (var email in emails)
             {

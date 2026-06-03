@@ -2,7 +2,7 @@
 
 using System.Data;
 using Dapper;
-using NetYamlForge.Services.Ai;
+using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Services.BatchJob;
 

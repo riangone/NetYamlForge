@@ -33,7 +33,7 @@ public class ToolCallValidator
     public async Task<ToolValidationResult> ValidateAsync(
         JsonNode toolCall,
         string projectId,
-        AppointmentStateMachine.State? currentState = null)
+        string? currentState = null)
     {
         var entityName = toolCall["entity"]?.ToString();
         var action = toolCall["action"]?.ToString();
@@ -70,9 +70,9 @@ public class ToolCallValidator
         }
 
         // [4] 状态白名单检查(如果提供了当前状态)
-        if (currentState.HasValue)
+        if (currentState != null)
         {
-            var stateResult = ValidateStateAllowlist(toolCall, currentState.Value);
+            var stateResult = ValidateStateAllowlist(toolCall, currentState);
             if (!stateResult.IsValid)
             {
                 return stateResult;
@@ -271,7 +271,7 @@ public class ToolCallValidator
     /// </summary>
     private ToolValidationResult ValidateStateAllowlist(
         JsonNode toolCall,
-        AppointmentStateMachine.State currentState)
+        string? currentState)
     {
         var toolName = toolCall["tool_call"]?.ToString();
 
@@ -280,18 +280,14 @@ public class ToolCallValidator
             return ToolValidationResult.Fail("tool_call 字段不能为空");
         }
 
-        // 根据状态检查允许的 Tool
+        // 根据状态字符串检查允许的 Tool
         var allowedTools = currentState switch
         {
-            AppointmentStateMachine.State.Init => new HashSet<string> { "query_data" },
-            AppointmentStateMachine.State.CollectVehicle => new HashSet<string> { "query_data" },
-            AppointmentStateMachine.State.CollectDate => new HashSet<string>(),
-            AppointmentStateMachine.State.CollectTime => new HashSet<string>(),
-            AppointmentStateMachine.State.CollectName => new HashSet<string>(),
-            AppointmentStateMachine.State.CollectPhone => new HashSet<string>(),
-            AppointmentStateMachine.State.Confirming => new HashSet<string> { "create_appointment_request" },
-            AppointmentStateMachine.State.Booked => new HashSet<string>(),
-            AppointmentStateMachine.State.Escalate => new HashSet<string>(), // 人工接管
+            "Init" => new HashSet<string> { "query_data" },
+            "CollectVehicle" => new HashSet<string> { "query_data" },
+            "CollectDate" or "CollectTime" or "CollectName" or "CollectPhone" => new HashSet<string>(),
+            "Confirming" => new HashSet<string> { "create_appointment_request" },
+            "Booked" or "Escalate" or "Cancelled" => new HashSet<string>(),
             _ => new HashSet<string>()
         };
 

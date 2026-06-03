@@ -57,9 +57,9 @@ public interface ISlotFillingManager
     Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0);
 
     /// <summary>
-    /// 現在の FSM 状態を取得
+    /// 現在の FSM 状態を文字列で取得
     /// </summary>
-    Task<AppointmentStateMachine.State?> GetCurrentFsmStateAsync(string conversationId);
+    Task<string?> GetCurrentFsmStateAsync(string conversationId);
 
     /// <summary>
     /// 状態に基づいて許可された Tool リストを取得
@@ -628,10 +628,10 @@ WHERE conversation_id = @ConversationId",
     }
 
     /// <inheritdoc />
-    public Task<AppointmentStateMachine.State?> GetCurrentFsmStateAsync(string conversationId)
+    public Task<string?> GetCurrentFsmStateAsync(string conversationId)
     {
         var fsm = GetOrCreateFsm(conversationId);
-        return Task.FromResult<AppointmentStateMachine.State?>(fsm.CurrentState);
+        return Task.FromResult<string?>(fsm.CurrentState.ToString());
     }
 
     /// <inheritdoc />

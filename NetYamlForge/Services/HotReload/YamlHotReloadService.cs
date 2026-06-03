@@ -8,7 +8,8 @@ public class HotReloadOptions
 {
     public const string SectionName = "HotReload";
     public bool Enabled { get; set; } = true;
-    public bool OnlyInDevelopment { get; set; } = true;
+    public bool OnlyInDevelopment { get; set; } = false;
+    public bool EnableCsHotReload { get; set; } = false;
     public int DebounceMs { get; set; } = 500;
 }
 
@@ -50,12 +51,12 @@ public class YamlHotReloadService : IHostedService, IDisposable
             return Task.CompletedTask;
         }
 
-        _logger.LogInformation("YAML ホットリロードサービスを開始");
+        _logger.LogInformation("YAML ホットリロードサービスを開始 (CsReload={CsEnabled})", _options.EnableCsHotReload);
         var projectsDir = Path.Combine(Directory.GetCurrentDirectory(), "projects");
         if (Directory.Exists(projectsDir))
         {
             foreach (var projectDir in Directory.GetDirectories(projectsDir))
-                _fileWatcher.StartWatching(projectDir);
+                _fileWatcher.StartWatching(projectDir, _options.EnableCsHotReload);
         }
         return Task.CompletedTask;
     }

@@ -10,7 +10,7 @@ using MailKit.Net.Smtp;
 using MailKit.Search;
 using MimeKit;
 using NetYamlForge.Services;
-using NetYamlForge.Services.Ai;
+using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Services.BatchJob;
 

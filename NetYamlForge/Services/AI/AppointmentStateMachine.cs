@@ -11,7 +11,7 @@ namespace NetYamlForge.Services.AI;
 /// 任意状态 → Escalate(连续 2 次置信度 < 0.6)
 /// Escalate → Init(人工坐席接管后)
 /// </summary>
-public class AppointmentStateMachine
+public class AppointmentStateMachine : IConversationFsm
 {
     // 状态定义
     public enum State
@@ -163,9 +163,25 @@ public class AppointmentStateMachine
     public bool CanFire(Trigger trigger) => _machine.CanFire(trigger);
 
     /// <summary>
-    /// 获取当前状态
+    /// 获取当前状态（枚举类型，供场景内部使用）
     /// </summary>
     public State CurrentState => _machine.State;
+
+    // IConversationFsm 实现
+    string IConversationFsm.CurrentState => _machine.State.ToString();
+    bool IConversationFsm.IsTerminal => _machine.State is State.Booked or State.Cancelled;
+    bool IConversationFsm.IsEscalated => _machine.State == State.Escalate;
+    IReadOnlySet<string> IConversationFsm.AllowedTools => GetAllowedTools();
+    void IConversationFsm.FireTrigger(string trigger, double confidence)
+    {
+        if (confidence < 0.6)
+        {
+            TriggerLowConfidence(confidence);
+            return;
+        }
+        if (Enum.TryParse<Trigger>(trigger, ignoreCase: true, out var t) && _machine.CanFire(t))
+            _machine.Fire(t);
+    }
 
     /// <summary>
     /// 获取当前状态允许的 Tool 列表

@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using NetYamlForge.Services.Ai;
+using NetYamlForge.Services.AI;
 using NetYamlForge.Services;
 
 namespace NetYamlForge.Controllers;

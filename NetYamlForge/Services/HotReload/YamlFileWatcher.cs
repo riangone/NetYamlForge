@@ -14,7 +14,7 @@ public record YamlFileChangedEventArgs
 public interface IYamlFileWatcher : IDisposable
 {
     event EventHandler<YamlFileChangedEventArgs>? FileChanged;
-    void StartWatching(string projectDir);
+    void StartWatching(string projectDir, bool watchCsFiles = false);
     void StopWatching(string projectDir);
     void StopAll();
 }
@@ -31,7 +31,7 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
 
     public YamlFileWatcher(ILogger<YamlFileWatcher> logger) => _logger = logger;
 
-    public void StartWatching(string projectDir)
+    public void StartWatching(string projectDir, bool watchCsFiles = false)
     {
         if (!Directory.Exists(projectDir)) return;
 
@@ -77,23 +77,27 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
         yamlWatcher.Error += OnWatcherError;
         _watchers[$"{projectName}_yaml"] = yamlWatcher;
 
-        var csWatcher = new FileSystemWatcher
+        if (watchCsFiles)
         {
-            Path = projectDir,
-            Filter = "*.cs",
-            IncludeSubdirectories = true,
-            EnableRaisingEvents = true,
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.Size
-        };
+            var csWatcher = new FileSystemWatcher
+            {
+                Path = projectDir,
+                Filter = "*.cs",
+                IncludeSubdirectories = true,
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.Size
+            };
 
-        csWatcher.Changed += OnFileChanged;
-        csWatcher.Created += OnFileChanged;
-        csWatcher.Deleted += OnFileChanged;
-        csWatcher.Renamed += OnFileRenamed;
-        csWatcher.Error += OnWatcherError;
-        _watchers[$"{projectName}_cs"] = csWatcher;
+            csWatcher.Changed += OnFileChanged;
+            csWatcher.Created += OnFileChanged;
+            csWatcher.Deleted += OnFileChanged;
+            csWatcher.Renamed += OnFileRenamed;
+            csWatcher.Error += OnWatcherError;
+            _watchers[$"{projectName}_cs"] = csWatcher;
+        }
 
-        _logger.LogInformation("ファイル監視を開始（YAML/CS）：{Project} ({Dir})", projectName, projectDir);
+        _logger.LogInformation("ファイル監視を開始（YAML{CsNote}）：{Project} ({Dir})",
+            watchCsFiles ? "/CS" : "", projectName, projectDir);
     }
 
     public void StopWatching(string projectDir)

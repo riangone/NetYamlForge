@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace NetYamlForge.Services.Ai;
+namespace NetYamlForge.Services.AI;
 
 public class GeminiCliService : IGeminiCliService
 {

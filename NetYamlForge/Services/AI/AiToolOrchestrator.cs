@@ -48,7 +48,8 @@ public class ToolExecutionResult
     public string? ErrorMessage { get; set; }
     public object? Data { get; set; }
     public string? ValidationFailedReason { get; set; }
-    public AppointmentStateMachine.State? FsmState { get; set; }
+    public string? FsmState { get; set; }
+    public bool IsEscalated { get; set; }
 }
 
 /// <summary>
@@ -57,11 +58,11 @@ public class ToolExecutionResult
 public class SessionStateInfo
 {
     public string ConversationId { get; set; } = string.Empty;
-    public AppointmentStateMachine.State FsmState { get; set; }
+    public string FsmState { get; set; } = string.Empty;
     public HashSet<string> AllowedTools { get; set; } = new();
     public Dictionary<string, string> CollectedSlots { get; set; } = new();
     public int LowConfidenceCount { get; set; }
-    public bool IsEscalated => FsmState == AppointmentStateMachine.State.Escalate;
+    public bool IsEscalated { get; set; }
 }
 
 /// <summary>
@@ -180,13 +181,15 @@ public class AiToolOrchestrator : IAiToolOrchestrator
         var allowedTools = await _slotFillingManager.GetAllowedToolsAsync(conversationId);
         var collectedSlots = await _slotFillingManager.GetCollectedSlotsAsync(conversationId);
 
+        var stateStr = fsmState?.ToString() ?? "Init";
         return new SessionStateInfo
         {
             ConversationId = conversationId,
-            FsmState = fsmState ?? AppointmentStateMachine.State.Init,
+            FsmState = stateStr,
+            IsEscalated = stateStr == "Escalate",
             AllowedTools = allowedTools,
             CollectedSlots = collectedSlots,
-            LowConfidenceCount = 0 // TODO: 从 FSM 获取
+            LowConfidenceCount = 0
         };
     }
 }

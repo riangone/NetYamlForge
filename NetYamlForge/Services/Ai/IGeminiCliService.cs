@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace NetYamlForge.Services.Ai;
+namespace NetYamlForge.Services.AI;
 
 /// <summary>
 /// Gemini CLI を使用して AI プロンプトを実行するサービス
