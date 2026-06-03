@@ -73,11 +73,14 @@ public class FileUploadService : IFileUploadService
 
         // 保存先ディレクトリの確保
         var wwwRoot = _environment.WebRootPath;
-        var uploadDir = Path.Combine(wwwRoot, uploadPath.TrimStart('/'));
+        var uploadDir = PathSafetyGuard.NormalizeAndValidatePath(uploadPath.TrimStart('/'), wwwRoot, "UploadPath");
         Directory.CreateDirectory(uploadDir);
 
         // 重複ファイル名回避
         var fileName = file.FileName;
+        var safeInitialPath = PathSafetyGuard.NormalizeAndValidatePath(fileName, uploadDir, "FileNameInit");
+        fileName = Path.GetFileName(safeInitialPath);
+
         var nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
         var ext = Path.GetExtension(fileName);
         var counter = 0;
@@ -87,8 +90,8 @@ public class FileUploadService : IFileUploadService
             fileName = $"{nameWithoutExt}_{counter}{ext}";
         }
 
-        var filePath = Path.Combine(uploadDir, fileName);
-        var relativePath = $"/{uploadPath.TrimStart('/')}/{fileName}";
+        var filePath = PathSafetyGuard.NormalizeAndValidatePath(fileName, uploadDir, "FilePathFinal");
+        var relativePath = "/" + Path.GetRelativePath(wwwRoot, filePath).Replace('\\', '/');
 
         // ファイル保存
         await using var stream = new FileStream(filePath, FileMode.Create);
@@ -132,7 +135,7 @@ public class FileUploadService : IFileUploadService
         try
         {
             var wwwRoot = _environment.WebRootPath;
-            var fullPath = Path.Combine(wwwRoot, filePath.TrimStart('/'));
+            var fullPath = PathSafetyGuard.NormalizeAndValidatePath(filePath.TrimStart('/'), wwwRoot, "DeleteFilePath");
 
             if (File.Exists(fullPath))
             {
@@ -150,7 +153,7 @@ public class FileUploadService : IFileUploadService
                 File.Delete(thumbPath);
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not UnauthorizedAccessException)
         {
             _logger.LogWarning(ex, "ファイル削除中にエラー：{Path}", filePath);
         }

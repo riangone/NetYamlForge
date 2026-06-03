@@ -52,43 +52,43 @@ public class PdfExportService : IPdfExportService
 
         var pageSize = ResolvePageSize(options);
         var page = document.AddPage();
-        page.Width = pageSize.Width;
-        page.Height = pageSize.Height;
+        page.Width = XUnit.FromPoint(pageSize.Width);
+        page.Height = XUnit.FromPoint(pageSize.Height);
 
         var gfx = XGraphics.FromPdfPage(page);
         var font = LoadFont(options.FontFile, projectDir);
-        var fontNormal = new XFont(font.FontFamily.Name, XUnit.FromPoint(9), XFontStyleEx.Regular);
-        var fontBold = new XFont(font.FontFamily.Name, XUnit.FromPoint(9), XFontStyleEx.Bold);
+        var fontNormal = new XFont(font.FontFamily.Name, 9, XFontStyleEx.Regular);
+        var fontBold = new XFont(font.FontFamily.Name, 9, XFontStyleEx.Bold);
 
         // ヘッダー・フッター用の余白を確保
-        float topMargin = string.IsNullOrWhiteSpace(options.Title) ? (float)XUnit.FromPoint(36f).Point : (float)XUnit.FromPoint(50f).Point;
-        float bottomMargin = options.ShowPageNumbers ? (float)XUnit.FromPoint(40f).Point : (float)XUnit.FromPoint(24f).Point;
-        float leftMargin = (float)XUnit.FromPoint(36f).Point;
-        float rightMargin = (float)XUnit.FromPoint(36f).Point;
+        double topMargin = string.IsNullOrWhiteSpace(options.Title) ? 36.0 : 50.0;
+        double bottomMargin = options.ShowPageNumbers ? 40.0 : 24.0;
+        double leftMargin = 36.0;
+        double rightMargin = 36.0;
 
         var usableWidth = pageSize.Width - leftMargin - rightMargin;
         var usableHeight = pageSize.Height - topMargin - bottomMargin;
 
         // ── タイトルブロック ───────────────────────────────────
-        float y = topMargin;
+        double y = topMargin;
         if (!string.IsNullOrWhiteSpace(options.Title))
         {
-            var titleFont = new XFont(font.FontFamily.Name, XUnit.FromPoint(15), XFontStyleEx.Bold);
+            var titleFont = new XFont(font.FontFamily.Name, 15, XFontStyleEx.Bold);
             gfx.DrawString(options.Title, titleFont, XBrushes.Black,
-                new XRect(XUnit.FromPoint(leftMargin), XUnit.FromPoint(y), XUnit.FromPoint(usableWidth), XUnit.FromPoint(20)), XStringFormats.TopLeft);
+                new XRect(leftMargin, y, usableWidth, 20), XStringFormats.TopLeft);
             y += 20;
         }
 
         if (options.ShowGeneratedAt)
         {
-            var dateFont = new XFont(font.FontFamily.Name, XUnit.FromPoint(8), XFontStyleEx.Regular);
+            var dateFont = new XFont(font.FontFamily.Name, 8, XFontStyleEx.Regular);
             var dateBrush = new XSolidBrush(XColors.Gray);
             gfx.DrawString($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm}", dateFont, dateBrush,
-                new XRect(XUnit.FromPoint(leftMargin), XUnit.FromPoint(y), XUnit.FromPoint(usableWidth), XUnit.FromPoint(15)), XStringFormats.TopLeft);
+                new XRect(leftMargin, y, usableWidth, 15), XStringFormats.TopLeft);
             y += 15;
         }
 
-        y += (float)XUnit.FromPoint(10).Point; // スペース追加
+        y += 10; // スペース追加
 
         // ── テーブル列設定 ────────────────────────────────────
         var colConfigs = BuildColumnConfigs(columns, options);
@@ -96,7 +96,7 @@ public class PdfExportService : IPdfExportService
 
         // ── ヘッダー行 ────────────────────────────────────────
         var hdrBg = ParseColor(options.HeaderColor);
-        float rowHeight = 25f;
+        double rowHeight = 25.0;
 
         for (int i = 0; i < colConfigs.Count; i++)
         {
@@ -163,8 +163,8 @@ public class PdfExportService : IPdfExportService
             if (y + rowHeight > pageSize.Height - bottomMargin)
             {
                 page = document.AddPage();
-                page.Width = pageSize.Width;
-                page.Height = pageSize.Height;
+                page.Width = XUnit.FromPoint(pageSize.Width);
+                page.Height = XUnit.FromPoint(pageSize.Height);
                 gfx.Dispose();
                 gfx = XGraphics.FromPdfPage(page);
                 y = topMargin;
@@ -178,12 +178,12 @@ public class PdfExportService : IPdfExportService
             {
                 var p = document.Pages[i];
                 var pageGfx = XGraphics.FromPdfPage(p);
-                var pageNumFont = new XFont(font.FontFamily.Name, XUnit.FromPoint(8), XFontStyleEx.Regular);
+                var pageNumFont = new XFont(font.FontFamily.Name, 8, XFontStyleEx.Regular);
                 var pageNumBrush = new XSolidBrush(XColors.Gray);
                 var text = $"- {i + 1} -";
                 var size = pageGfx.MeasureString(text, pageNumFont);
-                var x = XUnit.FromPoint(p.Width.Point / 2 - size.Width / 2);
-                var yPos = XUnit.FromPoint(p.Height.Point - XUnit.FromPoint(24).Point);
+                var x = p.Width.Point / 2 - size.Width / 2;
+                var yPos = p.Height.Point - 24;
                 pageGfx.DrawString(text, pageNumFont, pageNumBrush, x, yPos);
                 pageGfx.Dispose();
             }

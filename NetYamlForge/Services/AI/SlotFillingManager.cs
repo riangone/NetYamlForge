@@ -140,7 +140,7 @@ public class SlotFillingManager : ISlotFillingManager
     private readonly ConcurrentDictionary<string, IConversationFsm> _fsmStates = new(); // FSM 状態管理
     private readonly ILogger<SlotFillingManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ProjectScope _projectScope;
+    private readonly ProjectScope? _projectScope;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     // 自動車販売向けシナリオ定義

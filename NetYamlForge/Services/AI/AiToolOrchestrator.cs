@@ -74,7 +74,7 @@ public class AiToolOrchestrator : IAiToolOrchestrator
     private readonly ISlotFillingManager _slotFillingManager;
     private readonly IToolRegistry _toolRegistry;
     private readonly ILogger<AiToolOrchestrator> _logger;
-    private readonly ProjectScope _projectScope;
+    private readonly ProjectScope? _projectScope;
 
     public AiToolOrchestrator(
         ToolCallValidator validator,
