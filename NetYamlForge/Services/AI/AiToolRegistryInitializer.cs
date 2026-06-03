@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
 using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.Services.BatchJob;
 using Dapper;
 
 namespace NetYamlForge.Services.AI;
