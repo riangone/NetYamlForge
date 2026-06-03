@@ -1,6 +1,13 @@
+using System;
 using System.Data;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -10,17 +17,50 @@ namespace NetYamlForge.Services.BatchJob;
 public class SqlToCsvHandler : IBatchStepHandler
 {
     public string StepType => "sql_to_csv";
+    private readonly ProjectManager _projectManager;
+    private readonly IWebHostEnvironment _env;
     private readonly ILogger<SqlToCsvHandler> _logger;
 
-    public SqlToCsvHandler(ILogger<SqlToCsvHandler> logger) => _logger = logger;
+    public SqlToCsvHandler(
+        ProjectManager projectManager,
+        IWebHostEnvironment env,
+        ILogger<SqlToCsvHandler> logger)
+    {
+        _projectManager = projectManager;
+        _env = env;
+        _logger = logger;
+    }
 
     public async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
     {
-        var sql = await GetSqlAsync(job);
-        var outputFile = ResolveOutputPath(job.Settings.OutputFile);
+        // 租户项目根目录解析
+        string baseDir;
+        if (!string.IsNullOrEmpty(projectName) && _projectManager.TryGet(projectName, out var projectInfo) && projectInfo != null)
+        {
+            baseDir = projectInfo.ProjectDir;
+        }
+        else
+        {
+            baseDir = _env.ContentRootPath;
+        }
+
+        var sql = await GetSqlAsync(job, baseDir);
+        var rawOutputFile = job.Settings.OutputFile;
+
+        string outputFile;
+        if (string.IsNullOrEmpty(rawOutputFile))
+        {
+            outputFile = Path.Combine(Path.GetTempPath(), $"batch_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
+        }
+        else
+        {
+            var resolvedRaw = ResolveOutputPath(rawOutputFile);
+            // ⚠️ 路径防穿越校验
+            outputFile = PathSafetyGuard.NormalizeAndValidatePath(resolvedRaw, baseDir, "OutputFile");
+        }
 
         var directory = Path.GetDirectoryName(outputFile);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -51,11 +91,18 @@ public class SqlToCsvHandler : IBatchStepHandler
         _logger.LogInformation("SQL->CSV 完了: {JobId}, Rows={Rows}, File={File}", job.Id, rowCount, outputFile);
     }
 
-    private static async Task<string> GetSqlAsync(BatchJobDefinition job)
+    private async Task<string> GetSqlAsync(BatchJobDefinition job, string baseDir)
     {
         if (!string.IsNullOrEmpty(job.Settings.SqlQuery)) return job.Settings.SqlQuery;
-        if (!string.IsNullOrEmpty(job.Settings.SqlFile) && File.Exists(job.Settings.SqlFile))
-            return await File.ReadAllTextAsync(job.Settings.SqlFile);
+        if (!string.IsNullOrEmpty(job.Settings.SqlFile))
+        {
+            // ⚠️ 路径防穿越校验
+            var safeSqlFile = PathSafetyGuard.NormalizeAndValidatePath(job.Settings.SqlFile, baseDir, "SqlFile");
+            if (File.Exists(safeSqlFile))
+            {
+                return await File.ReadAllTextAsync(safeSqlFile);
+            }
+        }
         throw new InvalidOperationException("SQL ファイルまたはクエリが指定されていません");
     }
 
@@ -85,18 +132,52 @@ public class SqlToCsvHandler : IBatchStepHandler
 public class SqlCommandHandler : IBatchStepHandler
 {
     public string StepType => "sql_command";
+    private readonly ProjectManager _projectManager;
+    private readonly IWebHostEnvironment _env;
     private readonly ILogger<SqlCommandHandler> _logger;
 
-    public SqlCommandHandler(ILogger<SqlCommandHandler> logger) => _logger = logger;
+    public SqlCommandHandler(
+        ProjectManager projectManager,
+        IWebHostEnvironment env,
+        ILogger<SqlCommandHandler> logger)
+    {
+        _projectManager = projectManager;
+        _env = env;
+        _logger = logger;
+    }
 
     public async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
     {
-        var sql = !string.IsNullOrEmpty(job.Settings.SqlQuery)
-            ? job.Settings.SqlQuery
-            : await File.ReadAllTextAsync(job.Settings.SqlFile!);
+        // 租户项目根目录解析
+        string baseDir;
+        if (!string.IsNullOrEmpty(projectName) && _projectManager.TryGet(projectName, out var projectInfo) && projectInfo != null)
+        {
+            baseDir = projectInfo.ProjectDir;
+        }
+        else
+        {
+            baseDir = _env.ContentRootPath;
+        }
+
+        string sql;
+        if (!string.IsNullOrEmpty(job.Settings.SqlQuery))
+        {
+            sql = job.Settings.SqlQuery;
+        }
+        else if (!string.IsNullOrEmpty(job.Settings.SqlFile))
+        {
+            // ⚠️ 路径防穿越校验
+            var safeSqlFile = PathSafetyGuard.NormalizeAndValidatePath(job.Settings.SqlFile, baseDir, "SqlFile");
+            sql = await File.ReadAllTextAsync(safeSqlFile);
+        }
+        else
+        {
+            throw new InvalidOperationException("SQL ファイルまたはクエリが指定されていません");
+        }
+
         result.RowsAffected = await db.ExecuteAsync(sql, transaction: tx);
         _logger.LogInformation("SQL コマンド完了: {JobId}, Rows={Rows}", job.Id, result.RowsAffected);
     }
