@@ -1,0 +1,125 @@
+allowed_entities:
+  - vehicles
+  - sales_leads
+  - customers
+  - service_appointments
+  - test_drives
+allowed_actions:
+  - list
+  - count
+  - get
+  - create
+  - update
+scenarios:
+  test_drive:
+    description: "試乗予約"
+    initial_state: "Init"
+    required_slots:
+      - name: "vehicle_model"
+        prompt: "どの車種の試乗をご希望ですか？"
+        is_required: true
+      - name: "preferred_date"
+        prompt: "ご希望の日付を教えてください（例：明日、来週月曜日）"
+        is_required: true
+      - name: "preferred_time"
+        prompt: "ご希望の時間帯を教えてください（例：午前 10 時、午後 2 時）"
+        is_required: true
+      - name: "customer_name"
+        prompt: "お名前を教えてください"
+        is_required: true
+      - name: "customer_phone"
+        prompt: "ご連絡先電話番号を教えてください"
+        is_required: true
+    optional_slots:
+      - name: "current_vehicle"
+        prompt: "現在お乗りの車はありますか？（任意）"
+        is_required: false
+      - name: "license_status"
+        prompt: "運転免許証はお持ちですか？（任意）"
+        is_required: false
+    tools:
+      Init:
+        - "query_data"
+      CollectVehicle:
+        - "query_data"
+      Confirming:
+        - "create_appointment_request"
+  estimate:
+    description: "見積もり依頼"
+    initial_state: "Init"
+    required_slots:
+      - name: "vehicle_model"
+        prompt: "どの車種の御見積もりをご希望ですか？"
+        is_required: true
+      - name: "grade"
+        prompt: "グレードは決まっていますか？（例：G、X、Z など）"
+        is_required: true
+      - name: "customer_name"
+        prompt: "お名前を教えてください"
+        is_required: true
+      - name: "customer_phone"
+        prompt: "ご連絡先電話番号を教えてください"
+        is_required: true
+    optional_slots:
+      - name: "budget_amount"
+        prompt: "ご予算はありますか？（例：300 万円以内）"
+        is_required: false
+      - name: "payment_method"
+        prompt: "お支払い方法はいかがなさいますか？（ローン/現金）"
+        is_required: false
+        allowed_values:
+          - "ローン"
+          - "現金"
+          - "リース"
+      - name: "trade_in"
+        prompt: "下取り車両はございますか？"
+        is_required: false
+        allowed_values:
+          - "はい"
+          - "いいえ"
+      - name: "options"
+        prompt: "ご希望のオプションはありますか？（例：ナビ、ETC、ドラレコ）"
+        is_required: false
+    tools:
+      Init:
+        - "query_data"
+      CollectVehicle:
+        - "query_data"
+      Confirming:
+        - "create_appointment_request"
+  appointment_service:
+    description: "サービス予約（車検・整備）"
+    initial_state: "Init"
+    required_slots:
+      - name: "service_type"
+        prompt: "どのようなご用件でしょうか？（例：車検、点検、オイル交換）"
+        is_required: true
+      - name: "vehicle_model"
+        prompt: "お車の車種を教えてください"
+        is_required: true
+      - name: "preferred_date"
+        prompt: "ご希望の日付を教えてください"
+        is_required: true
+      - name: "preferred_time"
+        prompt: "ご希望の時間帯を教えてください"
+        is_required: true
+      - name: "customer_name"
+        prompt: "お名前を教えてください"
+        is_required: true
+      - name: "customer_phone"
+        prompt: "ご連絡先電話番号を教えてください"
+        is_required: true
+    optional_slots:
+      - name: "mileage"
+        prompt: "現在の走行距离を教えてください（任意）"
+        is_required: false
+      - name: "concerns"
+        prompt: "気になる点はありますか？（例：異音、振動）"
+        is_required: false
+    tools:
+      Init:
+        - "query_data"
+      CollectVehicle:
+        - "query_data"
+      Confirming:
+        - "create_appointment_request"

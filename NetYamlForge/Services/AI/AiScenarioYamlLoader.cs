@@ -123,11 +123,11 @@ public class AiScenarioYamlLoader : IAiScenarioYamlLoader
             InitialState = "Init",
             RequiredSlots = new List<SlotConfig>
             {
-                new() { Name = "vehicle_model", Prompt = "どの車種の試乗をご希望ですか？", IsRequired = true },
-                new() { Name = "preferred_date", Prompt = "ご希望の日付を教えてください（例：明日、来週月曜日）", IsRequired = true },
-                new() { Name = "preferred_time", Prompt = "ご希望の時間帯を教えてください（例：午前 10 時、午後 2 時）", IsRequired = true },
-                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true },
-                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true }
+                new() { Name = "vehicle_model", Prompt = "どの車種の試乗をご希望ですか？", IsRequired = true, Trigger = "VehicleProvided" },
+                new() { Name = "preferred_date", Prompt = "ご希望の日付を教えてください（例：明日、来週月曜日）", IsRequired = true, Trigger = "DateProvided" },
+                new() { Name = "preferred_time", Prompt = "ご希望の時間帯を教えてください（例：午前 10 時、午後 2 時）", IsRequired = true, Trigger = "TimeProvided" },
+                new() { Name = "customer_name", Prompt = "お名前を教えてください", IsRequired = true, Trigger = "NameProvided" },
+                new() { Name = "customer_phone", Prompt = "ご連絡先電話番号を教えてください", IsRequired = true, Trigger = "PhoneProvided" }
             },
             OptionalSlots = new List<SlotConfig>
             {
@@ -139,6 +139,34 @@ public class AiScenarioYamlLoader : IAiScenarioYamlLoader
                 ["Init"] = new() { "query_data" },
                 ["CollectVehicle"] = new() { "query_data" },
                 ["Confirming"] = new() { "create_appointment_request" }
+            },
+            Transitions = new List<TransitionConfig>
+            {
+                new() { From = "Init", Trigger = "VehicleProvided", To = "CollectVehicle" },
+                new() { From = "Init", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "CollectVehicle", Trigger = "VehicleProvided", To = "CollectDate" },
+                new() { From = "CollectVehicle", Trigger = "DateProvided", To = "CollectDate" },
+                new() { From = "CollectVehicle", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "CollectVehicle", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "CollectDate", Trigger = "DateProvided", To = "CollectTime" },
+                new() { From = "CollectDate", Trigger = "TimeProvided", To = "CollectTime" },
+                new() { From = "CollectDate", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "CollectDate", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "CollectTime", Trigger = "TimeProvided", To = "CollectName" },
+                new() { From = "CollectTime", Trigger = "NameProvided", To = "CollectName" },
+                new() { From = "CollectTime", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "CollectTime", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "CollectName", Trigger = "NameProvided", To = "CollectPhone" },
+                new() { From = "CollectName", Trigger = "PhoneProvided", To = "CollectPhone" },
+                new() { From = "CollectName", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "CollectName", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "CollectPhone", Trigger = "PhoneProvided", To = "Confirming" },
+                new() { From = "CollectPhone", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "CollectPhone", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "Confirming", Trigger = "Confirmed", To = "Booked" },
+                new() { From = "Confirming", Trigger = "LowConfidence", To = "Escalate" },
+                new() { From = "Confirming", Trigger = "Cancelled", To = "Cancelled" },
+                new() { From = "Escalate", Trigger = "HumanResolved", To = "Init" }
             }
         };
 

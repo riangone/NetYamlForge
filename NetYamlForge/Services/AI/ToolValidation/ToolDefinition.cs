@@ -26,7 +26,7 @@ public class ToolDefinition
     /// <summary>
     /// 允许的状态列表
     /// </summary>
-    public HashSet<AppointmentStateMachine.State> AllowedStates { get; } = new();
+    public HashSet<string> AllowedStates { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// 执行函数

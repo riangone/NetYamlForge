@@ -211,6 +211,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAiScenarioYamlLoader, AiScenarioYamlLoader>();
         services.AddScoped<ISlotFillingManager, SlotFillingManager>();
         services.AddScoped<IAppointmentService, AppointmentService>();
+        services.AddHostedService<AiToolRegistryInitializer>();
 
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();

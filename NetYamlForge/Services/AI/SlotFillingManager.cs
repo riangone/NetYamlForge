@@ -54,7 +54,7 @@ public interface ISlotFillingManager
     /// <summary>
     /// FSM 状態を更新
     /// </summary>
-    Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0);
+    Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0);
 
     /// <summary>
     /// 現在の FSM 状態を文字列で取得
@@ -137,7 +137,7 @@ public class ScenarioDefinition
 public class SlotFillingManager : ISlotFillingManager
 {
     private readonly ConcurrentDictionary<string, SlotSession> _sessions = new();
-    private readonly ConcurrentDictionary<string, AppointmentStateMachine> _fsmStates = new(); // FSM 状態管理
+    private readonly ConcurrentDictionary<string, IConversationFsm> _fsmStates = new(); // FSM 状態管理
     private readonly ILogger<SlotFillingManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
     private const string DefaultProjectId = "auto-dealer-demo";
@@ -506,7 +506,7 @@ WHERE conversation_id = @ConversationId",
     // ===== FSM 統合メソッド =====
 
     /// <inheritdoc />
-    public async Task UpdateFsmStateAsync(string conversationId, AppointmentStateMachine.Trigger trigger, double confidence = 1.0)
+    public async Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0)
     {
         var fsm = await GetOrRestoreFsmAsync(conversationId, null);
 
@@ -519,13 +519,10 @@ WHERE conversation_id = @ConversationId",
         }
         else
         {
-            if (fsm.CanFire(trigger))
-            {
-                fsm.Fire(trigger);
-                _logger.LogInformation(
-                    "[FSM] 状態更新 Conv={ConvId}, Trigger={Trigger}, State={State}",
-                    conversationId, trigger, fsm.CurrentState);
-            }
+            fsm.FireTrigger(trigger, confidence);
+            _logger.LogInformation(
+                "[FSM] 状態更新 Conv={ConvId}, Trigger={Trigger}, State={State}",
+                conversationId, trigger, fsm.CurrentState);
         }
 
         // 状態をDBに永続化
@@ -536,26 +533,26 @@ WHERE conversation_id = @ConversationId",
     public async Task<string?> GetCurrentFsmStateAsync(string conversationId)
     {
         var fsm = await GetOrRestoreFsmAsync(conversationId, null);
-        return fsm.CurrentState.ToString();
+        return fsm.CurrentState;
     }
 
     /// <inheritdoc />
     public async Task<HashSet<string>> GetAllowedToolsAsync(string conversationId)
     {
         var fsm = await GetOrRestoreFsmAsync(conversationId, null);
-        return fsm.GetAllowedTools();
+        return new HashSet<string>(fsm.AllowedTools);
     }
 
     public async Task<bool> IsToolAllowedAsync(string conversationId, string toolName)
     {
         var fsm = await GetOrRestoreFsmAsync(conversationId, null);
-        return fsm.IsToolAllowed(toolName);
+        return fsm.AllowedTools.Contains(toolName);
     }
 
     /// <summary>
     /// DB から FSM 状態を復元、または新規作成して返す
     /// </summary>
-    private async Task<AppointmentStateMachine> GetOrRestoreFsmAsync(string conversationId, string? projectId)
+    private async Task<IConversationFsm> GetOrRestoreFsmAsync(string conversationId, string? projectId)
     {
         if (_fsmStates.TryGetValue(conversationId, out var existing))
             return existing;
@@ -568,8 +565,25 @@ WHERE conversation_id = @ConversationId",
                 new { Id = conversationId });
         });
 
-        var initialState = ParseFsmState(dbState.currentState);
-        var newFsm = new AppointmentStateMachine(conversationId, initialState);
+        var scenario = await GetActiveScenarioAsync(conversationId) ?? "test_drive";
+        var resolvedProjectId = projectId ?? DefaultProjectId;
+        var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
+
+        if (!config.Scenarios.TryGetValue(scenario, out var scenarioConfig))
+        {
+            config.Scenarios.TryGetValue("test_drive", out scenarioConfig);
+        }
+
+        IConversationFsm newFsm;
+        if (scenarioConfig != null)
+        {
+            newFsm = new DynamicConversationFsm(conversationId, scenarioConfig, dbState.currentState);
+        }
+        else
+        {
+            var initialState = ParseFsmState(dbState.currentState);
+            newFsm = new AppointmentStateMachine(conversationId, initialState);
+        }
 
         // 低信頼度カウントを復元
         for (int i = 0; i < dbState.lowConfidenceCount; i++)
@@ -582,9 +596,9 @@ WHERE conversation_id = @ConversationId",
     /// <summary>
     /// FSM 状態を DB に永続化する
     /// </summary>
-    private async Task PersistFsmStateAsync(string conversationId, AppointmentStateMachine fsm, string? projectId)
+    private async Task PersistFsmStateAsync(string conversationId, IConversationFsm fsm, string? projectId)
     {
-        var stateStr = FsmStateToDbString(fsm.CurrentState);
+        var stateStr = fsm.CurrentState.ToLowerInvariant();
         var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
         await WithDbAsync(projectId, async db =>
@@ -615,21 +629,6 @@ WHERE conversation_id = @Id",
             _                 => AppointmentStateMachine.State.Init
         };
 
-    private static string FsmStateToDbString(AppointmentStateMachine.State state) =>
-        state switch
-        {
-            AppointmentStateMachine.State.CollectVehicle => "collect_vehicle",
-            AppointmentStateMachine.State.CollectDate    => "collect_date",
-            AppointmentStateMachine.State.CollectTime    => "collect_time",
-            AppointmentStateMachine.State.CollectName    => "collect_name",
-            AppointmentStateMachine.State.CollectPhone   => "collect_phone",
-            AppointmentStateMachine.State.Confirming     => "confirming",
-            AppointmentStateMachine.State.Booked         => "booked",
-            AppointmentStateMachine.State.Cancelled      => "cancelled",
-            AppointmentStateMachine.State.Escalate       => "escalate",
-            _                                            => "init"
-        };
-
     /// <summary>
     /// FSM 状態をリセット
     /// </summary>
@@ -648,22 +647,41 @@ WHERE conversation_id = @Id",
         string value,
         string? projectId = null)
     {
+        var resolvedProjectId = projectId ?? DefaultProjectId;
+        var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
+        var activeScenario = await GetActiveScenarioAsync(conversationId) ?? "test_drive";
+
+        string? trigger = null;
+        if (config.Scenarios.TryGetValue(activeScenario, out var scenarioConfig))
+        {
+            var slotConfig = scenarioConfig.RequiredSlots
+                .Concat(scenarioConfig.OptionalSlots)
+                .FirstOrDefault(s => string.Equals(s.Name, slotName, StringComparison.OrdinalIgnoreCase));
+
+            if (slotConfig != null)
+            {
+                trigger = slotConfig.Trigger;
+            }
+        }
+
+        if (string.IsNullOrEmpty(trigger))
+        {
+            trigger = slotName switch
+            {
+                "vehicle_model" => "VehicleProvided",
+                "preferred_date" => "DateProvided",
+                "preferred_time" => "TimeProvided",
+                "customer_name" => "NameProvided",
+                "customer_phone" => "PhoneProvided",
+                _ => null
+            };
+        }
+
         // スロットを更新
         await UpdateSlotAsync(conversationId, slotName, value, projectId);
 
-        // スロット名に基づいて FSM トリガーを決定
-        var trigger = slotName switch
-        {
-            "vehicle_model" => AppointmentStateMachine.Trigger.VehicleProvided,
-            "preferred_date" => AppointmentStateMachine.Trigger.DateProvided,
-            "preferred_time" => AppointmentStateMachine.Trigger.TimeProvided,
-            "customer_name" => AppointmentStateMachine.Trigger.NameProvided,
-            "customer_phone" => AppointmentStateMachine.Trigger.PhoneProvided,
-            _ => default
-        };
-
         // トリガーが存在する場合、FSM を進行
-        if (trigger != default || Enum.IsDefined(trigger))
+        if (!string.IsNullOrEmpty(trigger))
         {
             await UpdateFsmStateAsync(conversationId, trigger);
         }

@@ -21,6 +21,14 @@ public class ScenarioConfig
     public List<SlotConfig> RequiredSlots { get; set; } = new();
     public List<SlotConfig> OptionalSlots { get; set; } = new();
     public Dictionary<string, List<string>> Tools { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public List<TransitionConfig> Transitions { get; set; } = new();
+}
+
+public class TransitionConfig
+{
+    public string From { get; set; } = string.Empty;
+    public string Trigger { get; set; } = string.Empty;
+    public string To { get; set; } = string.Empty;
 }
 
 public class SlotConfig
@@ -30,4 +38,5 @@ public class SlotConfig
     public bool IsRequired { get; set; }
     public string? ValidationPattern { get; set; }
     public List<string>? AllowedValues { get; set; }
+    public string? Trigger { get; set; }
 }
