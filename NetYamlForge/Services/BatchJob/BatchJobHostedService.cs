@@ -1,6 +1,8 @@
 // ファイル概要：バッチジョブをバックグラウンドでスケジューリング実行する IHostedService 実装です。
 
 using System.Collections.Concurrent;
+using NetYamlForge.Models.Email;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -312,14 +314,36 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
             var jobName = job.DisplayName ?? job.Id;
             var result = lastResult;
 
+            // 获取 EmailService
+            var emailFactory = scope.ServiceProvider.GetService<NetYamlForge.Services.Email.IEmailServiceFactory>();
+            var emailService = emailFactory?.GetForProject(scheduledJob.ProjectName);
+
             // 邮件通知
             foreach (var email in notifyEmails)
             {
                 try
                 {
-                    _logger.LogInformation("应发送失败通知邮件到: {Email}, 作业: {JobName}, 错误: {Error}",
+                    _logger.LogInformation("发送失败通知邮件到: {Email}, 作业: {JobName}, 错误: {Error}",
                         email, jobName, result.ErrorMessage);
-                    // TODO: 集成实际邮件发送服务
+                    
+                    if (emailService != null)
+                    {
+                        await emailService.SendEmailAsync(new EmailMessage
+                        {
+                            To = email,
+                            Subject = $"【通知】批处理作业失败: {jobName}",
+                            Body = $"项目 '{scheduledJob.ProjectName}' 中的批处理作业 '{jobName}' (ID: {job.Id}) 运行失败。\n\n" +
+                                   $"执行时间: {DateTime.Now}\n" +
+                                   $"错误信息: {result.ErrorMessage}\n\n" +
+                                   $"请检查系统日志以获取更多详细信息。",
+                            IsHtml = false,
+                            Date = DateTimeOffset.UtcNow
+                        });
+                    }
+                    else
+                    {
+                        _logger.LogWarning("无法发送通知邮件: 找不到适用于项目 '{Project}' 的邮件服务实例", scheduledJob.ProjectName);
+                    }
                 }
                 catch (Exception ex)
                 {

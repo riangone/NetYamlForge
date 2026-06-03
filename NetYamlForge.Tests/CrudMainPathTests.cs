@@ -316,6 +316,11 @@ public class CrudMainPathTests
                 _hooks[project] = byName = new Dictionary<string, IEntityHook>(StringComparer.OrdinalIgnoreCase);
             byName[hook.Name] = hook;
         }
+
+        public void Clear(string project)
+        {
+            _hooks.Remove(project);
+        }
     }
 
     private sealed class NullEntityMetadataProvider : IEntityMetadataProvider

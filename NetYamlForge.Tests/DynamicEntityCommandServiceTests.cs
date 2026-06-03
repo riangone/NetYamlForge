@@ -233,6 +233,7 @@ public class DynamicEntityCommandServiceTests
         public IEnumerable<string> GetHookNames(string projectName) => Enumerable.Empty<string>();
         public IEnumerable<IEntityHook> GetAllHooks(string projectName) => Enumerable.Empty<IEntityHook>();
         public void Register(string projectName, IEntityHook hook) { }
+        public void Clear(string projectName) { }
     }
 
     private sealed class NoopAuditLogService : IAuditLogService

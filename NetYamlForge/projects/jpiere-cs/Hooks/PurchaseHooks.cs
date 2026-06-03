@@ -28,16 +28,18 @@ public class PurchaseReceiptCompleteHook : IEntityHook
         var receiptId = Convert.ToInt32(idObj);
 
         // 受入データを取得
-        var receipt = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var receiptRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM purchase_receipts WHERE id = @id", new { id = receiptId }, tx);
+        var receipt = (IDictionary<string, object>)receiptRow;
 
         var purchaseOrderId = DictHelper.Get<int>(receipt, "PurchaseOrderId", "purchase_order_id", 0);
         if (purchaseOrderId == 0) return;
 
         // 受入明細を取得
-        var receiptLines = await db.QueryAsync<Dictionary<string, object?>>(
+        var receiptLinesRows = await db.QueryAsync<dynamic>(
             "SELECT * FROM purchase_receipt_lines WHERE ReceiptId = @receiptId",
             new { receiptId }, tx);
+        var receiptLines = receiptLinesRows.Select(r => (IDictionary<string, object>)r);
 
         foreach (var line in receiptLines)
         {
@@ -59,8 +61,9 @@ public class PurchaseReceiptCompleteHook : IEntityHook
             // 在庫品の場合、stock_moves に記録
             if (productId > 0)
             {
-                var product = await db.QueryFirstOrDefaultAsync<Dictionary<string, object?>>(
+                var productRow = await db.QueryFirstOrDefaultAsync<dynamic>(
                     "SELECT ProductType FROM products WHERE id = @id", new { id = productId }, tx);
+                var product = (IDictionary<string, object>?)productRow;
 
                 var productType = DictHelper.GetStr(product, "ProductType", "product_type") ?? string.Empty;
 
@@ -119,8 +122,9 @@ public class APInvoiceCompleteHook : IEntityHook
         var invoiceId = Convert.ToInt32(idObj);
 
         // 仕入請求データを取得
-        var invoice = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var invoiceRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM ap_invoices WHERE id = @id", new { id = invoiceId }, tx);
+        var invoice = (IDictionary<string, object>)invoiceRow;
 
         var existingJournal = await db.ExecuteScalarAsync<int?>(
             "SELECT id FROM journals WHERE source_table = 'ap_invoices' AND source_id = @invoiceId AND doc_status = 'CO'",
@@ -231,8 +235,9 @@ public class PaymentCompleteHook : IEntityHook
         var paymentId = Convert.ToInt32(idObj);
 
         // 支払データを取得
-        var payment = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var paymentRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM payments WHERE id = @id", new { id = paymentId }, tx);
+        var payment = (IDictionary<string, object>)paymentRow;
 
         var paymentType = DictHelper.GetStr(payment, "PaymentType", "payment_type");
         if (string.IsNullOrEmpty(paymentType)) return;

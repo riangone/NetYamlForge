@@ -1,0 +1,154 @@
+---
+name: {skill-name}
+tier: 1
+version: 1.0.0
+description: |
+  {skill-name} スキル
+  {スキールの目的と用途を記載}
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - AskUserQuestion
+---
+
+## Preamble (run first)
+
+```bash
+# 環境チェック
+PROJECT="{project-name}"
+cd /home/ubuntu/ws/NetYamlForge
+
+# 必須ファイルの存在確認
+if [ ! -d "NetYamlForge/projects/$PROJECT" ]; then
+    echo "❌ プロジェクトが見つかりません：$PROJECT"
+    exit 1
+fi
+
+echo "🔧 {skill-name} スキル"
+echo "プロジェクト：$PROJECT"
+```
+
+## Voice
+
+**Tone:** {トーンの説明：専門的、丁寧、など}
+**Writing rules:**
+- 日本語（フレームワーク標準）
+- 具体的な数値と根拠を示す
+- 常に次のアクションを提示
+
+## Completion Status Protocol
+
+完了状態の報告標準：
+
+- **DONE** — 全てのステップが正常に完了
+- **DONE_WITH_CONCERNS** — 完了したが注意点がある
+- **BLOCKED** — 継続不能、理由を説明
+- **NEEDS_CONTEXT** — 追加情報が必要
+
+### Escalation
+
+エスカレーション条件と形式：
+
+```
+STATUS: BLOCKED | NEEDS_CONTEXT
+REASON: [1-2 行で理由]
+ATTEMPTED: [試行した内容]
+RECOMMENDATION: [次のアクション]
+```
+
+## 工作流程
+
+### Step 1: 前置チェック
+
+```bash
+# 環境変数確認
+# 依存関係チェック
+# 必須ファイル存在確認
+```
+
+### Step 2: 主要処理
+
+```bash
+# 実際の処理を実装
+# 複数のサブステップに分割可能
+```
+
+### Step 3: 検証
+
+```bash
+# 結果の検証
+# エラーチェック
+```
+
+### Step 4: 出力生成
+
+```markdown
+# {出力タイトル}
+
+## 概要
+{サマリー}
+
+## 詳細
+{詳細情報}
+
+## 次のアクション
+{推奨される次のステップ}
+```
+
+## 出力形式
+
+### レポート形式
+
+```markdown
+## {レポート名}
+
+### 概要
+- 項目 1: {値}
+- 項目 2: {値}
+
+### 詳細
+| 列 1 | 列 2 | 列 3 |
+|-----|-----|-----|
+| データ | データ | データ |
+
+### 推奨アクション
+1. **優先度の高い行動** — 理由
+2. **次に取るべき行動** — 理由
+```
+
+### 表形式
+
+| 項目 | 説明 | 例 |
+|------|------|-----|
+| CRITICAL | 即時対応必要 | SQL インジェクション |
+| WARNING | 推奨修正 | パフォーマンス問題 |
+| INFO | 参考情報 | コードスタイル |
+
+## 他スキルとの連携
+
+| スキル | 連携方法 |
+|-------|---------|
+| `{skill-name}` | {連携内容} |
+
+## Command Reference
+
+| Command | Description |
+|---------|-------------|
+| `/{skill-name}` | 基本コマンド |
+| `/{skill-name} --option` | オプション付き |
+
+## Tips
+
+1. **ベストプラクティス** — 説明
+2. **使用上の注意** — 注意点
+3. **関連ドキュメント** — リファレンス
+
+## 変更履歴
+
+| バージョン | 日付 | 変更内容 |
+|-----------|------|---------|
+| 1.0.0 | 2026-04-01 | 初版 |

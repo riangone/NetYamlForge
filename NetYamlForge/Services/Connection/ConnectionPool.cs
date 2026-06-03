@@ -109,6 +109,9 @@ public class ConnectionPool : IDisposable
     private readonly Timer _cleanupTimer;
     private bool _disposed;
 
+    // Phase 2 优化：使用 ConcurrentDictionary 跟踪底层原生连接实例
+    private readonly ConcurrentDictionary<IDbConnection, PooledConnection> _activeConnections;
+
     public ConnectionPoolStats Stats => _stats;
 
     public ConnectionPool(
@@ -124,6 +127,7 @@ public class ConnectionPool : IDisposable
         _pool = new ConcurrentQueue<PooledConnection>();
         _poolSemaphore = new SemaphoreSlim(_options.MaxPoolSize, _options.MaxPoolSize);
         _stats = new ConnectionPoolStats();
+        _activeConnections = new ConcurrentDictionary<IDbConnection, PooledConnection>();
 
         // 启动定时清理线程
         _cleanupTimer = new Timer(CleanupExpiredConnections, null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
@@ -151,13 +155,10 @@ public class ConnectionPool : IDisposable
         // 尝试从池中获取可用连接
         while (_pool.TryDequeue(out var pooled))
         {
-            if (pooled.IsInUse)
-                continue;
-
             if (pooled.IsExpired(_options))
             {
-                // 连接已过期，关闭并创建新的
-                _logger.LogDebug("Connection expired for project {ProjectName}, creating new one", _projectName);
+                // 连接已过期，关闭并从 active 列表移除
+                _activeConnections.TryRemove(pooled.Connection, out _);
                 pooled.Dispose();
                 _stats.TotalDisposed++;
                 continue;
@@ -170,7 +171,8 @@ public class ConnectionPool : IDisposable
             _stats.CurrentActiveConnections++;
             _logger.LogDebug("Reusing connection for project {ProjectName} (reuse count: {Reused})",
                 _projectName, _stats.TotalReused);
-            return pooled.Connection;
+            
+            return new PooledDbConnection(pooled.Connection, this);
         }
 
         // 池中没有可用连接，创建新连接
@@ -179,7 +181,14 @@ public class ConnectionPool : IDisposable
         _stats.CurrentActiveConnections++;
         _logger.LogDebug("Created new connection for project {ProjectName} (total created: {Created})",
             _projectName, _stats.TotalCreated);
-        return newConn;
+
+        var pooledNew = new PooledConnection(newConn)
+        {
+            IsInUse = true
+        };
+        _activeConnections[newConn] = pooledNew;
+
+        return new PooledDbConnection(newConn, this);
     }
 
     /// <summary>
@@ -190,40 +199,68 @@ public class ConnectionPool : IDisposable
         if (_disposed || connection == null)
             return;
 
+        // 如果是 PooledDbConnection，解包出底层原生连接
+        var connToRelease = connection;
+        if (connection is PooledDbConnection pooledDbConn)
+        {
+            connToRelease = pooledDbConn.InnerConnection;
+        }
+
         if (!_options.Enabled)
         {
             // 未启用池，直接关闭
             try
             {
-                if (connection.State == ConnectionState.Open)
-                    connection.Close();
-                connection.Dispose();
+                if (connToRelease.State == ConnectionState.Open)
+                    connToRelease.Close();
+                connToRelease.Dispose();
             }
             catch { }
             _stats.CurrentActiveConnections--;
             return;
         }
 
-        // 尝试将连接返回池中
-        var pooled = new PooledConnection(connection);
-        pooled.IsInUse = false;
-        pooled.LastUsedAt = DateTime.UtcNow;
-
-        if (_pool.Count < _options.MaxPoolSize)
+        if (_activeConnections.TryGetValue(connToRelease, out var pooled))
         {
-            _pool.Enqueue(pooled);
-            _stats.CurrentPooledConnections = _pool.Count;
+            // 确保同一个连接不会被重复归还
+            if (!pooled.IsInUse)
+            {
+                return;
+            }
+
+            pooled.IsInUse = false;
+            pooled.LastUsedAt = DateTime.UtcNow;
+
+            if (_pool.Count < _options.MaxPoolSize)
+            {
+                _pool.Enqueue(pooled);
+                _stats.CurrentPooledConnections = _pool.Count;
+            }
+            else
+            {
+                // 池已满，从 active 列表中彻底移除并关闭物理连接
+                if (_activeConnections.TryRemove(connToRelease, out _))
+                {
+                    pooled.Dispose();
+                    _stats.TotalDisposed++;
+                    _logger.LogDebug("Pool full for project {ProjectName}, closing connection", _projectName);
+                }
+            }
+
+            _stats.CurrentActiveConnections--;
+            _poolSemaphore.Release();
         }
         else
         {
-            // 池已满，关闭连接
-            pooled.Dispose();
-            _stats.TotalDisposed++;
-            _logger.LogDebug("Pool full for project {ProjectName}, closing connection", _projectName);
+            // 底层连接不在活跃字典中，说明已经被释放或重置过，直接关闭它即可
+            try
+            {
+                if (connToRelease.State == ConnectionState.Open)
+                    connToRelease.Close();
+                connToRelease.Dispose();
+            }
+            catch { }
         }
-
-        _stats.CurrentActiveConnections--;
-        _poolSemaphore.Release();
     }
 
     /// <summary>
@@ -241,7 +278,6 @@ public class ConnectionPool : IDisposable
         {
             if (pooled.IsInUse)
             {
-                // 正在使用的连接重新入队
                 remaining.Add(pooled);
             }
             else if (pooled.IsExpired(_options))
@@ -254,9 +290,10 @@ public class ConnectionPool : IDisposable
             }
         }
 
-        // 关闭过期连接
+        // 关闭并从 active 中移除过期连接
         foreach (var expired in expiredConnections)
         {
+            _activeConnections.TryRemove(expired.Connection, out _);
             expired.Dispose();
             _stats.TotalDisposed++;
         }
@@ -300,13 +337,61 @@ public class ConnectionPool : IDisposable
         _disposed = true;
         _cleanupTimer.Dispose();
 
-        // 关闭池中所有连接
-        while (_pool.TryDequeue(out var pooled))
+        // 清空队列
+        _pool.Clear();
+
+        // 彻底释放 active 字典里记录的所有原生连接
+        foreach (var kv in _activeConnections)
         {
-            pooled.Dispose();
+            kv.Value.Dispose();
         }
+        _activeConnections.Clear();
 
         _poolSemaphore.Dispose();
         _logger.LogInformation("Connection pool disposed for project {ProjectName}", _projectName);
     }
+}
+
+/// <summary>
+/// 连接包装代理类 - 在 using / Dispose 时自动安全释放回池
+/// </summary>
+internal class PooledDbConnection : IDbConnection
+{
+    private readonly IDbConnection _inner;
+    private readonly ConnectionPool _pool;
+    private bool _disposed;
+
+    public IDbConnection InnerConnection => _inner;
+
+    public PooledDbConnection(IDbConnection inner, ConnectionPool pool)
+    {
+        _inner = inner;
+        _pool = pool;
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _disposed = true;
+            _pool.Release(_inner);
+        }
+    }
+
+    public string ConnectionString 
+    { 
+        get => _inner.ConnectionString ?? string.Empty; 
+        set => _inner.ConnectionString = value; 
+    }
+
+    public int ConnectionTimeout => _inner.ConnectionTimeout;
+    public string Database => _inner.Database;
+    public ConnectionState State => _inner.State;
+
+    public IDbTransaction BeginTransaction() => _inner.BeginTransaction();
+    public IDbTransaction BeginTransaction(IsolationLevel il) => _inner.BeginTransaction(il);
+    public void ChangeDatabase(string databaseName) => _inner.ChangeDatabase(databaseName);
+    public void Close() => Dispose(); // Close 动作同样重构为自动归还
+    public IDbCommand CreateCommand() => _inner.CreateCommand();
+    public void Open() => _inner.Open();
 }

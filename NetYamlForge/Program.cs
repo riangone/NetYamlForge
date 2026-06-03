@@ -11,6 +11,7 @@ using NetYamlForge.Middleware;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Cli;
+using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
@@ -235,6 +236,10 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// プロジェクト定義の非同期初期化
+var projectManager = app.Services.GetRequiredService<ProjectManager>();
+await projectManager.InitializeAsync(app.Environment);
+
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
 
 var supportedCultures = new[] { "en-US", "zh-CN", "ja-JP", "ko-KR" }
@@ -272,6 +277,7 @@ app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
 app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
+app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
 
 // ユーザー個人ホーム：/userhome（プロジェクトルートより先に評価）

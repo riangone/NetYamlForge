@@ -74,7 +74,9 @@ public class ConnectionPoolTests
         var connection2 = await pool.AcquireAsync();
 
         // Assert
-        Assert.Same(connection1, connection2);
+        var raw1 = (connection1 as PooledDbConnection)?.InnerConnection ?? connection1;
+        var raw2 = (connection2 as PooledDbConnection)?.InnerConnection ?? connection2;
+        Assert.Same(raw1, raw2);
         Assert.Equal(1, createdCount);
         Assert.Equal(1, pool.Stats.TotalReused);
 

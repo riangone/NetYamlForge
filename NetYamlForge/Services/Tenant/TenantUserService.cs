@@ -128,7 +128,7 @@ public class TenantUserService : ITenantUserService
     /// <summary>
     /// 分配项目角色给用户
     /// </summary>
-    public async Task AssignProjectRoleAsync(int userId, string projectName, string roleName, int assignedByUserId)
+    public async Task AssignProjectRoleAsync(int userId, string projectName, string roleName, int assignedByUserId, IDbConnection? dbConn = null, IDbTransaction? transaction = null)
     {
         const string sql = @"
             INSERT INTO app_user_project_role (user_id, project_name, role_name, assigned_by, created_at)
@@ -138,15 +138,25 @@ public class TenantUserService : ITenantUserService
                 assigned_by = excluded.assigned_by
         ";
 
-        using var db = CreateSystemDbConnection();
-        await db.ExecuteAsync(sql, new
+        var db = dbConn ?? CreateSystemDbConnection();
+        try
         {
-            UserId = userId,
-            ProjectName = projectName,
-            RoleName = roleName,
-            AssignedBy = assignedByUserId,
-            CreatedAt = DateTime.UtcNow
-        });
+            await db.ExecuteAsync(sql, new
+            {
+                UserId = userId,
+                ProjectName = projectName,
+                RoleName = roleName,
+                AssignedBy = assignedByUserId,
+                CreatedAt = DateTime.UtcNow
+            }, transaction);
+        }
+        finally
+        {
+            if (dbConn == null)
+            {
+                db.Dispose();
+            }
+        }
 
         _logger.LogInformation("用户 {UserId} 被分配角色 {RoleName} 到项目 {ProjectName}", userId, roleName, projectName);
     }
@@ -284,7 +294,7 @@ public class TenantUserService : ITenantUserService
             // 2. 如果指定了项目，分配角色
             if (!string.IsNullOrEmpty(request.DefaultProjectName) && !string.IsNullOrEmpty(request.ProjectRole))
             {
-                await AssignProjectRoleAsync(userId, request.DefaultProjectName, request.ProjectRole, request.CreatedByUserId);
+                await AssignProjectRoleAsync(userId, request.DefaultProjectName, request.ProjectRole, request.CreatedByUserId, db, transaction);
             }
 
             transaction.Commit();

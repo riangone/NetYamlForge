@@ -17,8 +17,17 @@ public class ProjectManager
     private readonly IProjectBusinessLogicRegistry _projectBusinessLogicRegistry;
     private readonly IProjectActionRegistry _projectActionRegistry;
 
+    protected ProjectManager()
+    {
+        _projects = new Dictionary<string, ProjectInfo>(StringComparer.OrdinalIgnoreCase);
+        _logger = null!;
+        _projectHookRegistry = null!;
+        _projectHookLoader = null!;
+        _projectBusinessLogicRegistry = null!;
+        _projectActionRegistry = null!;
+    }
+
     public ProjectManager(
-        IWebHostEnvironment env,
         ILogger<ProjectManager> logger,
         IProjectHookRegistry projectHookRegistry,
         IProjectHookLoader projectHookLoader,
@@ -31,7 +40,10 @@ public class ProjectManager
         _projectBusinessLogicRegistry = projectBusinessLogicRegistry;
         _projectActionRegistry = projectActionRegistry;
         _projects = new Dictionary<string, ProjectInfo>(StringComparer.OrdinalIgnoreCase);
+    }
 
+    public virtual async Task InitializeAsync(IWebHostEnvironment env)
+    {
         var projectsRoot = Path.Combine(env.ContentRootPath, "projects");
         if (!Directory.Exists(projectsRoot))
         {
@@ -51,7 +63,7 @@ public class ProjectManager
 
             try
             {
-                LoadProjectAsync(projectDir, yamlPath).GetAwaiter().GetResult();
+                await LoadProjectAsync(projectDir, yamlPath);
             }
             catch (Exception ex)
             {
@@ -186,8 +198,8 @@ public class ProjectManager
         return $"Data Source={defaultPath}";
     }
 
-    public bool TryGet(string name, out ProjectInfo? info) =>
+    public virtual bool TryGet(string name, out ProjectInfo? info) =>
         _projects.TryGetValue(name, out info);
 
-    public IReadOnlyCollection<ProjectInfo> GetAll() => _projects.Values;
+    public virtual IReadOnlyCollection<ProjectInfo> GetAll() => _projects.Values;
 }

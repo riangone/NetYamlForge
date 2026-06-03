@@ -129,10 +129,11 @@ public class EstimationToContractHook : IEntityHook
 
         // 見積データを取得
         const string selectEst = "SELECT * FROM estimations WHERE id = @id";
-        var est = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var estRow = await db.QuerySingleAsync<dynamic>(
             selectEst,
             new { id = estimationId },
             tx);
+        var est = (IDictionary<string, object>)estRow;
 
         // 契約番号を採番
         var now = DateTime.Now;

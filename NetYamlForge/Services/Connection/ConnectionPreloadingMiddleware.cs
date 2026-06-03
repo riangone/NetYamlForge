@@ -29,6 +29,7 @@ public class ConnectionPreloadingMiddleware
                            path.StartsWith("/dashboard") ||
                            path.StartsWith("/page/");
 
+        bool preloaded = false;
         if (shouldPreload && projectScope.IsSet)
         {
             try
@@ -38,6 +39,7 @@ public class ConnectionPreloadingMiddleware
                 var connection = await connectionManager.GetConnectionAsync(projectScope.Current.Name);
                 context.Items["PreloadedConnection"] = connection;
                 context.Items["PreloadedConnectionProject"] = projectScope.Current.Name;
+                preloaded = true;
                 _logger.LogDebug("Preloaded connection for project {ProjectName}", projectScope.Current.Name);
             }
             catch (Exception ex)
@@ -47,7 +49,29 @@ public class ConnectionPreloadingMiddleware
             }
         }
 
-        await _next(context);
+        try
+        {
+            await _next(context);
+        }
+        finally
+        {
+            if (preloaded && context.Items.TryGetValue("PreloadedConnection", out var connObj) && connObj is IDbConnection conn)
+            {
+                // 若预加载了连接，但在请求生命周期内从未被 IDbConnection 解析使用过（即没有被 Scoped 容器 Dispose 的机会），在此安全释放
+                if (!context.Items.ContainsKey("PreloadedConnectionUsed"))
+                {
+                    try
+                    {
+                        conn.Dispose();
+                        _logger.LogDebug("Disposed unused preloaded connection for project {Project}", projectScope.Current?.Name);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to dispose unused preloaded connection");
+                    }
+                }
+            }
+        }
     }
 }
 

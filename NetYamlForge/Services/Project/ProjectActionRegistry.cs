@@ -12,6 +12,7 @@ public interface IProjectActionRegistry
 {
     ICustomActionHandler? Find(string projectName, string handlerName);
     void Register(string projectName, ICustomActionHandler handler);
+    void Clear(string projectName);
 }
 
 /// <summary>
@@ -45,5 +46,13 @@ public class ProjectActionRegistry : IProjectActionRegistry
         _logger.LogDebug(
             "プロジェクト '{Project}' にカスタムアクションハンドラー '{Name}' ({Type}) を登録しました",
             projectName, handler.Name, handler.GetType().Name);
+    }
+
+    public void Clear(string projectName)
+    {
+        if (string.IsNullOrWhiteSpace(projectName)) return;
+
+        _registry.TryRemove(projectName, out _);
+        _logger.LogDebug("プロジェクト '{Project}' のカスタムアクションハンドラーをクリアしました", projectName);
     }
 }

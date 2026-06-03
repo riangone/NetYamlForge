@@ -21,15 +21,16 @@ public class PurchaseOrderApprovalHook : IEntityHook
         if (!ctx.Values.TryGetValue("Id", out var idObj) || idObj == null) return;
 
         var orderId = Convert.ToInt32(idObj);
-        var order = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var orderRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM purchase_orders WHERE id = @id", new { id = orderId }, tx);
+        var order = (IDictionary<string, object>)orderRow;
 
         var grandTotal = DictHelper.Get<double>(order, "GrandTotal", "grand_total", 0.0);
 
-        var existingApproval = await db.QueryFirstOrDefaultAsync<Dictionary<string, object?>>(
+        var existingApprovalRow = await db.QueryFirstOrDefaultAsync<dynamic>(
             "SELECT id FROM approval_requests WHERE source_table = 'purchase_orders' AND source_id = @orderId",
             new { orderId }, tx);
-        if (existingApproval != null) return;
+        if (existingApprovalRow != null) return;
 
         int totalSteps;
         if (grandTotal < 100000)
@@ -82,8 +83,9 @@ public class ApprovalStepCompleteHook : IEntityHook
         var requestId = Convert.ToInt32(reqIdObj);
         var stepNo = Convert.ToInt32(stepNoObj);
 
-        var approvalRequest = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var approvalRequestRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM approval_requests WHERE id = @id", new { id = requestId }, tx);
+        var approvalRequest = (IDictionary<string, object>)approvalRequestRow;
 
         var totalSteps = DictHelper.Get<int>(approvalRequest, "TotalSteps", "total_steps", 1);
         var sourceTable = DictHelper.GetStr(approvalRequest, "SourceTable", "source_table") ?? string.Empty;
@@ -124,8 +126,9 @@ public class ApprovalRejectHook : IEntityHook
         if (!ctx.Values.TryGetValue("RequestId", out var reqIdObj) || reqIdObj == null) return;
 
         var requestId = Convert.ToInt32(reqIdObj);
-        var approvalRequest = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var approvalRequestRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM approval_requests WHERE id = @id", new { id = requestId }, tx);
+        var approvalRequest = (IDictionary<string, object>)approvalRequestRow;
 
         var sourceTable = DictHelper.GetStr(approvalRequest, "SourceTable", "source_table") ?? string.Empty;
         var sourceId = DictHelper.Get<int>(approvalRequest, "SourceId", "source_id", 0);

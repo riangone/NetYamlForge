@@ -1,0 +1,308 @@
+apiVersion: skills.netyamlforge.io/v1
+kind: Skill
+metadata:
+  name: upgrade-entity-yaml
+  version: "1.0.0"
+  displayName: エンティティ更新
+  description: |
+    DB スキーマの変更をエンティティ YAML に安全にマージします。
+    既存の手動編集を保持しながら、新しい列・フォーム項目のみを追記します。
+  category: development
+  tier: 5
+  icon: "🔄"
+  tags:
+    - entity-management
+    - yaml-sync
+    - database-migrations
+  author: NetYamlForge Team
+  createdAt: "2026-04-16T00:00:00Z"
+  updatedAt: "2026-04-16T00:00:00Z"
+
+spec:
+  # 入力パラメータ定義
+  inputs:
+    required:
+      - project
+    properties:
+      project:
+        type: string
+        description: |
+          プロジェクト名（kebab-case）
+          更新対象プロジェクトを指定
+        pattern: "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+        minLength: 3
+        maxLength: 64
+        example: "my-project"
+
+      dry-run:
+        type: boolean
+        description: |
+          true の場合、変更を実行せず、差分のみを表示
+          false の場合、実際に YAML ファイルを更新
+        default: false
+        example: false
+
+      backup:
+        type: boolean
+        description: |
+          true の場合、更新前に entities/*.yml をバックアップ
+          false の場合、バックアップしない
+        default: true
+        example: true
+
+      merge-strategy:
+        type: string
+        enum:
+          - additive
+          - smart-merge
+          - conservative
+        description: |
+          マージ戦略
+          - additive: 新しい列のみ追加（既存の型変更は無視）
+          - smart-merge: 型変更も反映（ただし既存設定は保持）
+          - conservative: 新しい列のみ、既存設定は完全保持
+        default: "smart-merge"
+        example: "smart-merge"
+
+  # 実行の前提条件
+  requirements:
+    dotnetVersion: ">=10.0.0"
+    tools:
+      - dotnet
+      - git
+    projectExists: true
+    fileExists:
+      - "projects/{project}/project.yaml"
+      - "projects/{project}/entities/"
+
+  # 実行ステップ
+  execution:
+    type: dotnet-cli
+    steps:
+      - name: "プロジェクト検証"
+        type: validation
+        description: |
+          プロジェクトが存在し、project.yaml が有効かチェック
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --validate-project --project={project}
+        onError: abort
+        timeout: 30
+
+      - name: "DB スキーマ再解析"
+        type: execution
+        description: |
+          DB から最新のテーブルスキーマを取得
+          entities.generated/ に新しい定義を生成
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --scaffold-entities \
+               --project={project} \
+               --no-overwrite
+        onError: abort
+        timeout: 300
+
+      - name: "差分分析"
+        type: transformation
+        description: |
+          entities/ と entities.generated/ を比較
+          新しい列・変更点を特定
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --analyze-entity-diff \
+               --project={project}
+        onError: abort
+        timeout: 60
+
+      - name: "YAML マージ（Dry-run）"
+        type: validation
+        description: |
+          --dry-run=true の場合、変更内容を表示のみ
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --upgrade-entity-yaml \
+               --project={project} \
+               --merge-strategy={merge-strategy} \
+               {% if dry_run %}--dry-run{% endif %}
+        onError: abort
+        timeout: 120
+
+      - name: "バックアップ作成（オプション）"
+        type: execution
+        description: |
+          --backup=true の場合、更新前に entities/*.yml をバックアップ
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --backup-entities \
+               --project={project} \
+               --output-dir=entities.backup.{timestamp}
+        onError: continue
+        timeout: 30
+
+      - name: "YAML マージ実行"
+        type: execution
+        description: |
+          entities/ を実際に更新
+          新しい列・フォーム項目を追記
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --upgrade-entity-yaml \
+               --project={project} \
+               --merge-strategy={merge-strategy}
+        onError: abort
+        timeout: 120
+
+      - name: "YAML 検証"
+        type: validation
+        description: |
+          更新された YAML ファイルがスキーマに従っているか検証
+        command: |
+          dotnet run --project NetYamlForge \
+            -- --validate-entities-yaml \
+               --project={project} \
+               --path=projects/{project}/entities/
+        onError: abort
+        timeout: 60
+
+      - name: "ビルド検証"
+        type: validation
+        description: |
+          更新後のビルドが成功するか確認
+        command: |
+          dotnet build --configuration Debug \
+            --no-restore \
+            /p:TreatWarningsAsErrors=false
+        onError: abort
+        timeout: 180
+
+  # 出力仕様
+  outputs:
+    successCriteria:
+      - "dotnet コマンド終了コード: 0"
+      - "YAML マージが成功"
+      - "スキーマ検証合格"
+      - "ビルド成功"
+
+    outputFormat:
+      type: markdown
+      structure:
+        summary: |
+          実行サマリー
+          - 処理対象エンティティ数
+          - 新規列数
+          - 変更列数
+          - マージ戦略
+        changes: |
+          検出された変更
+          - エンティティごとの差分
+          - 新規列
+          - 型変更
+          - 削除された列（手動削除推奨）
+        mergeResult: |
+          マージ結果
+          - 実際に更新されたファイル
+          - マージ済み列一覧
+          - スキップされた変更（あれば）
+        warnings: |
+          警告・注意事項
+          - 手動確認が必要な項目
+          - バックアップ位置
+        nextSteps: "推奨される次のアクション"
+
+    files:
+      - pattern: "projects/{project}/entities/*.yml"
+        description: |
+          更新されたエンティティ定義ファイル
+          - 新規列が追加
+          - 既存カスタム設定は保持
+
+      - pattern: "projects/{project}/entities.backup.*/"
+        description: |
+          バックアップディレクトリ（--backup=true 時）
+          - 更新前のエンティティ定義
+
+  # 許可ツール
+  allowedTools:
+    - bash
+    - dotnet
+    - file-read
+    - file-write
+    - file-edit
+    - file-glob
+    - git
+
+  # 学習・改善フィードバック
+  learning:
+    successMetrics:
+      - name: merge_success_rate
+        type: percentage
+        unit: "%"
+        target: 100
+        description: "マージ成功率"
+
+      - name: custom_config_preservation
+        type: boolean
+        description: "既存カスタム設定が保持されたか"
+
+      - name: execution_time
+        type: time
+        unit: seconds
+        target: 120
+        description: "全体実行時間の目標"
+
+    feedbackTemplate: |
+      エンティティ更新結果のフィードバック（任意）:
+      
+      1. YAML マージは期待通りでしたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 部分的
+      
+      2. 既存カスタム設定は正しく保持されましたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 未確認
+      
+      3. 新しい列の追加は正確でしたか？
+         - [ ] はい
+         - [ ] いいえ
+         - [ ] 不完全
+      
+      4. 改善提案（オプション）:
+         [ここに改善提案を記入]
+
+    improvementLog:
+      - date: "2026-04-16T00:00:00Z"
+        change: "初版リリース"
+        impact: "DB スキーマ変更の安全なマージが可能"
+
+# 依存関係
+dependencies:
+  requires: []
+  recommends:
+    - run-tests
+    - build-check
+
+# 既知の問題・制限事項
+limitations:
+  - description: |
+      複雑なフォーム設定（カスタムバリデーション・条件分岐など）を持つエンティティの場合、
+      マージが不完全になる可能性がある
+    workaround: |
+      --dry-run で確認してから実行し、必要に応じて手動で調整してください
+
+  - description: |
+      削除されたカラムは自動的に YAML から削除されない
+    workaround: |
+      手動で entities/*.yml から削除してください
+
+  - description: |
+      マージ後の YAML に論理矛盾が生じる可能性がある
+      （例: 新規列が required=true だが、フォームから非表示など）
+    workaround: |
+      更新後に entities/*.yml の consistency を手動で確認してください
+
+  - description: |
+      --backup=true で大量のバックアップが蓄積される可能性
+    workaround: |
+      定期的に古いバックアップを削除してください

@@ -75,8 +75,7 @@ public class BatchJobExecutor : IBatchJobExecutor
                 Data = new Dictionary<string, object?> { { "JobId", job.Id } }
             };
 
-            using var db = _dbConnectionFactory.CreateConnection(projectName);
-            db.Open();
+            using var db = await _dbConnectionFactory.CreateConnectionAsync(projectName, cancellationToken);
 
             using var tx = db.BeginTransaction();
 
@@ -504,6 +503,7 @@ public class BatchJobExecutor : IBatchJobExecutor
 public interface IDbConnectionFactory
 {
     IDbConnection CreateConnection(string? projectName);
+    Task<IDbConnection> CreateConnectionAsync(string? projectName, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -536,6 +536,23 @@ public class DbConnectionFactory : IDbConnectionFactory
 
         // 使用连接管理器获取连接（从池中复用）
         var connection = _connectionManager.GetConnectionAsync(projectName).GetAwaiter().GetResult();
+        return connection;
+    }
+
+    public async Task<IDbConnection> CreateConnectionAsync(string? projectName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(projectName))
+        {
+            throw new InvalidOperationException("Project name is required");
+        }
+
+        if (!_projectManager.TryGet(projectName, out var project) || project == null)
+        {
+            throw new InvalidOperationException($"Project not found: {projectName}");
+        }
+
+        // 使用连接管理器异步获取连接（从池中复用）
+        var connection = await _connectionManager.GetConnectionAsync(projectName, cancellationToken);
         return connection;
     }
 }

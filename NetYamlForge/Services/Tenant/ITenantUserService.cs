@@ -23,7 +23,7 @@ public interface ITenantUserService
     /// <summary>
     /// 分配项目角色给用户
     /// </summary>
-    Task AssignProjectRoleAsync(int userId, string projectName, string roleName, int assignedByUserId);
+    Task AssignProjectRoleAsync(int userId, string projectName, string roleName, int assignedByUserId, System.Data.IDbConnection? dbConn = null, System.Data.IDbTransaction? transaction = null);
     
     /// <summary>
     /// 获取用户可访问的所有项目

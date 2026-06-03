@@ -1,5 +1,6 @@
-// ファイル概要：YAML ホットリロードを管理する IHostedService 実装
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using NetYamlForge.Services.Hooks;
 
 namespace NetYamlForge.Services.HotReload;
 
@@ -83,6 +84,37 @@ public class YamlHotReloadService : IHostedService, IDisposable
     {
         var filePath = e.FilePath;
         var projectName = e.ProjectName;
+
+        if (filePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation("C# コードファイルの変更を検知：{File}。リロードを開始します...", filePath);
+            using var scope = _serviceProvider.CreateScope();
+            var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
+            var hookLoader = scope.ServiceProvider.GetRequiredService<IProjectHookLoader>();
+            var hookRegistry = scope.ServiceProvider.GetRequiredService<IProjectHookRegistry>();
+            var bizRegistry = scope.ServiceProvider.GetRequiredService<IProjectBusinessLogicRegistry>();
+            var actionRegistry = scope.ServiceProvider.GetRequiredService<IProjectActionRegistry>();
+
+            if (projectManager.TryGet(projectName, out var projectInfo) && projectInfo != null)
+            {
+                var projectDir = projectInfo.ProjectDir;
+                
+                // 1. 古いアセンブリと登録を解除
+                hookLoader.UnloadProjectAssembly(projectName);
+
+                // 2. 再コンパイルしてロード
+                await hookLoader.LoadProjectHooksAsync(projectName, projectDir, hookRegistry);
+                await hookLoader.LoadProjectBusinessLogicAsync(projectName, projectDir, bizRegistry);
+                await hookLoader.LoadProjectActionHandlersAsync(projectName, projectDir, actionRegistry);
+
+                _logger.LogInformation("プロジェクト '{Project}' の C# コードリロードが完了しました", projectName);
+            }
+            else
+            {
+                _logger.LogWarning("プロジェクト '{Project}' が見つからないため、C# コードリロードをスキップします", projectName);
+            }
+            return;
+        }
 
         if (filePath.Contains("/entities/", StringComparison.OrdinalIgnoreCase) ||
             filePath.Contains("\\entities\\", StringComparison.OrdinalIgnoreCase))

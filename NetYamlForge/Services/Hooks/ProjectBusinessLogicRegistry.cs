@@ -35,9 +35,14 @@ public interface IProjectBusinessLogicRegistry
     void RegisterValidator(string projectName, IProjectValidator validator);
 
     /// <summary>
-    /// プロジェクトにデータ変換を登録します。
+    /// プロジェクトに数据转换を登録します。
     /// </summary>
     void RegisterDataTransformer(string projectName, IProjectDataTransformer transformer);
+
+    /// <summary>
+    /// 指定プロジェクトのビジネスロジック、バリデーション、データ変換をクリアします。
+    /// </summary>
+    void Clear(string projectName);
 }
 
 /// <summary>
@@ -110,5 +115,15 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
         _transformers[projectName] = transformer;
         _logger.LogDebug("プロジェクト '{Project}' にデータ変換 '{Type}' を登録しました",
             projectName, transformer.GetType().Name);
+    }
+
+    public void Clear(string projectName)
+    {
+        if (string.IsNullOrWhiteSpace(projectName)) return;
+
+        _businessLogics.TryRemove(projectName, out _);
+        _validators.TryRemove(projectName, out _);
+        _transformers.TryRemove(projectName, out _);
+        _logger.LogDebug("プロジェクト '{Project}' のビジネスロジック、バリデーション、データ変換をクリアしました", projectName);
     }
 }

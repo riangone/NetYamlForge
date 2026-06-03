@@ -230,6 +230,8 @@
                             {
                                 var showItem = !item.AdminOnly || isAdminUser;
                                 if (!showItem) continue;
+                                // ロールが指定されている場合、非管理者はいずれかのロールを持つ必要がある
+                                if (!isAdminUser && item.Roles.Count > 0 && !item.Roles.Any(r => User.IsInRole(r))) continue;
                                 var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
                                 var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
                                 if (section == null)
@@ -292,6 +294,7 @@
                             @foreach (var page in allPages)
                             {
                                 if (!page.Value.ShowInSidebar) continue;
+                                if (!isAdminUser && !page.Value.IsPublic) continue;
                                 var pageUrl = string.IsNullOrEmpty(pathBase)
                                     ? $"/{currentProject}/Page/{page.Key}"
                                     : $"{pathBase}/{currentProject}/Page/{page.Key}";

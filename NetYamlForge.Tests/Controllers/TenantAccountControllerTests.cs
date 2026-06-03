@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -48,6 +49,10 @@ public class TenantAccountControllerTests
         httpContext.RequestServices = serviceProvider.Object;
         
         _controller.ControllerContext.HttpContext = httpContext;
+
+        // Mock TempData 和 Url 以防框架获取抛出 InvalidOperationException
+        _controller.TempData = new Mock<ITempDataDictionary>().Object;
+        _controller.Url = new Mock<IUrlHelper>().Object;
     }
 
     #region Login GET 测试
@@ -102,7 +107,7 @@ public class TenantAccountControllerTests
 
         // Assert
         var redirectResult = Assert.IsType<RedirectResult>(result);
-        Assert.Equal("/auto-dealer-demo/Dashboard", redirectResult.Url);
+        Assert.Equal("/userhome", redirectResult.Url);
     }
 
     [Fact]

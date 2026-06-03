@@ -78,6 +78,12 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     private static readonly Regex ExpressionRegex = SqlSafetyGuard.ExpressionRegex;
     private static readonly HashSet<string> AllowedJoinTypes = new(StringComparer.OrdinalIgnoreCase) { "left", "inner", "right" };
 
+    // 缓存已通过安全校验的实体元数据，避免每次请求重复进行正则和标识符校验
+    private static readonly ConcurrentDictionary<EntityDefinition, bool> ValidatedMetadataCache = new();
+
+    // SQL 语句模板缓存，避免高并发下的字符串拼接开销
+    private static readonly ConcurrentDictionary<string, string> SqlCache = new();
+
     public DynamicCrudRepository(IDbConnection db, IEntityMetadataProvider meta, ISqlDialect dialect, ILogger<DynamicCrudRepository> logger)
     {
         _db = db;
@@ -101,63 +107,89 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         bool keyset = false,
         bool fetchOneExtra = false)
     {
-        // 1) メタデータを検証して、危険な識別子/式を拒否
-        // 2) WHERE句を共通ビルダで生成
-        // 3) modeに応じて numbered / keyset を切替
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
         pageSize ??= meta.Paging.PageSize;
 
-        var selectList = string.Join(", ",
-            meta.Columns.Select(c =>
-                c.Value.Expression != null
-                    ? $"{c.Value.Expression} AS {c.Key}"
-                    : $"{meta.Table}.{c.Key}"));
+        var activeFilterKeys = filters == null
+            ? Array.Empty<string>()
+            : filters.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)).Select(kv => kv.Key).OrderBy(k => k).ToArray();
+        var filterKeysStr = string.Join(",", activeFilterKeys);
+        var hasSearch = !string.IsNullOrWhiteSpace(search);
+        var cacheKey = $"GetAll_{meta.GetHashCode()}_{sort}_{dir}_{keyset}_{fetchOneExtra}_{hasSearch}_{filterKeysStr}";
 
-        var sql = new List<string> { $"SELECT {selectList} {BuildFromClause(meta)}" };
+        if (!SqlCache.TryGetValue(cacheKey, out var statement))
+        {
+            var selectList = string.Join(", ",
+                meta.Columns.Select(c =>
+                    c.Value.Expression != null
+                        ? $"{c.Value.Expression} AS {c.Key}"
+                        : $"{meta.Table}.{c.Key}"));
+
+            var sql = new List<string> { $"SELECT {selectList} {BuildFromClause(meta)}" };
+            var tempParam = new DynamicParameters();
+            var where = BuildWhere(meta, search, filters, tempParam);
+
+            if (keyset)
+            {
+                var pkColumns = meta.GetPrimaryKeyColumns();
+                var firstPk = pkColumns[0];
+                if (long.TryParse(cursor, out var cursorValue))
+                {
+                    where.Add($"{meta.Table}.{firstPk} > @Cursor");
+                }
+
+                AppendWhere(sql, where);
+                sql.Add($" ORDER BY {meta.Table}.{firstPk} ASC");
+            }
+            else
+            {
+                AppendWhere(sql, where);
+                if (!string.IsNullOrWhiteSpace(sort) && meta.Columns.TryGetValue(sort, out var colDef) && colDef.Sortable)
+                {
+                    var expr = colDef.Expression ?? $"{meta.Table}.{sort}";
+                    var direction = (dir?.ToLowerInvariant() == "desc") ? "DESC" : "ASC";
+                    sql.Add($" ORDER BY {expr} {direction}");
+                }
+            }
+
+            var tempEffectivePageSize = fetchOneExtra ? pageSize.Value + 1 : pageSize.Value;
+            if (keyset)
+            {
+                _dialect.AppendKeysetPagination(sql, tempParam, tempEffectivePageSize);
+            }
+            else
+            {
+                var tempOffset = (page - 1) * pageSize.Value;
+                var pkColumns = meta.GetPrimaryKeyColumns();
+                var firstPk = pkColumns[0];
+                _dialect.AppendNumberedPagination(sql, tempParam, tempEffectivePageSize, tempOffset, $"{meta.Table}.{firstPk}");
+            }
+
+            statement = string.Join(Environment.NewLine, sql);
+            SqlCache.TryAdd(cacheKey, statement);
+        }
+
+        // 重新构建参数，由于是从缓存命中，我们直接运行轻量参数构造
         var param = new DynamicParameters();
-        var where = BuildWhere(meta, search, filters, param);
-
-        if (keyset)
-        {
-            var pkColumns = meta.GetPrimaryKeyColumns();
-            var firstPk = pkColumns[0];
-            if (long.TryParse(cursor, out var cursorValue))
-            {
-                where.Add($"{meta.Table}.{firstPk} > @Cursor");
-                param.Add("Cursor", cursorValue);
-            }
-
-            AppendWhere(sql, where);
-            // 複合主鍵の場合は最初の PK 列でソート
-            sql.Add($" ORDER BY {meta.Table}.{firstPk} ASC");
-        }
-        else
-        {
-            AppendWhere(sql, where);
-            if (!string.IsNullOrWhiteSpace(sort) && meta.Columns.TryGetValue(sort, out var colDef) && colDef.Sortable)
-            {
-                var expr = colDef.Expression ?? $"{meta.Table}.{sort}";
-                var direction = (dir?.ToLowerInvariant() == "desc") ? "DESC" : "ASC";
-                sql.Add($" ORDER BY {expr} {direction}");
-            }
-        }
+        BuildWhere(meta, search, filters, param);
 
         var effectivePageSize = fetchOneExtra ? pageSize.Value + 1 : pageSize.Value;
-
         if (keyset)
         {
-            _dialect.AppendKeysetPagination(sql, param, effectivePageSize);
+            if (long.TryParse(cursor, out var cursorValue))
+            {
+                param.Add("Cursor", cursorValue);
+            }
+            param.Add("PageSize", effectivePageSize);
         }
         else
         {
             var offset = (page - 1) * pageSize.Value;
-            var pkColumns = meta.GetPrimaryKeyColumns();
-            var firstPk = pkColumns[0];
-            _dialect.AppendNumberedPagination(sql, param, effectivePageSize, offset, $"{meta.Table}.{firstPk}");
+            param.Add("PageSize", effectivePageSize);
+            param.Add("Offset", offset);
         }
 
-        var statement = string.Join(Environment.NewLine, sql);
         _logger.LogInformation("GetAllAsync entity={Entity} page={Page} pageSize={PageSize} sql={Sql}", entity, page, pageSize, statement);
         return await TimedAsync("GetAllAsync", entity, statement, () => _db.QueryAsync(statement, param));
     }
@@ -176,13 +208,18 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             return await GetByIdAsync(entity, keyValues);
         }
 
-        var sql = new StringBuilder();
-        sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {pkColumns[0]} = @Id");
-        if (meta.SoftDelete)
-            sql.Append($" AND {SoftDeleteClause(meta.Table)}");
+        var cacheKey = $"GetById_{meta.GetHashCode()}";
+        if (!SqlCache.TryGetValue(cacheKey, out var statement))
+        {
+            var sql = new StringBuilder();
+            sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {pkColumns[0]} = @Id");
+            if (meta.SoftDelete)
+                sql.Append($" AND {SoftDeleteClause(meta.Table)}");
+            statement = sql.ToString();
+            SqlCache.TryAdd(cacheKey, statement);
+        }
 
         _logger.LogInformation("GetByIdAsync entity={Entity} id={Id}", entity, id);
-        var statement = sql.ToString();
         return (await TimedAsync("GetByIdAsync", entity, statement, () => _db.QueryAsync(statement, new { Id = id }))).FirstOrDefault();
     }
 
@@ -224,31 +261,46 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var param = new DynamicParameters();
         var pkColumns = meta.GetPrimaryKeyColumns();
-        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
-        var sql = new StringBuilder($"SELECT * FROM {meta.Table} WHERE {whereClause}");
-        if (meta.SoftDelete)
-            sql.Append($" AND {SoftDeleteClause(meta.Table)}");
+
+        var cacheKey = $"GetByIdComposite_{meta.GetHashCode()}";
+        if (!SqlCache.TryGetValue(cacheKey, out var statement))
+        {
+            var tempParam = new DynamicParameters();
+            var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, tempParam);
+            var sql = new StringBuilder($"SELECT * FROM {meta.Table} WHERE {whereClause}");
+            if (meta.SoftDelete)
+                sql.Append($" AND {SoftDeleteClause(meta.Table)}");
+            statement = sql.ToString();
+            SqlCache.TryAdd(cacheKey, statement);
+        }
+
+        var param = new DynamicParameters();
+        BuildCompositeKeyWhere(pkColumns, keyValues, param);
 
         _logger.LogInformation("GetByIdAsync entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
-        var statement = sql.ToString();
         return (await TimedAsync("GetByIdAsync.Composite", entity, statement, () => _db.QueryAsync(statement, param))).FirstOrDefault();
     }
 
     public async Task<int> InsertAsync(string entity, IDictionary<string, object?> values, IDbTransaction? tx = null)
     {
-        // identity列を除外してINSERT文を動的生成します。
+        // identity列を除外してINSERT文を动的生成します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var cols = meta.Columns
-            .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression))
-            .Select(c => c.Key)
-            .ToArray();
 
-        var colList = string.Join(", ", cols);
-        var paramList = string.Join(", ", cols.Select(c => "@" + c));
-        var sql = $"INSERT INTO {meta.Table} ({colList}) VALUES ({paramList});";
+        var cacheKey = $"Insert_{meta.GetHashCode()}";
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
+        {
+            var cols = meta.Columns
+                .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression))
+                .Select(c => c.Key)
+                .ToArray();
+
+            var colList = string.Join(", ", cols);
+            var paramList = string.Join(", ", cols.Select(c => "@" + c));
+            sql = $"INSERT INTO {meta.Table} ({colList}) VALUES ({paramList});";
+            SqlCache.TryAdd(cacheKey, sql);
+        }
 
         _logger.LogInformation("InsertAsync entity={Entity} sql={Sql}", entity, sql);
         return await TimedAsync("InsertAsync", entity, sql, () => _db.ExecuteAsync(sql, values, tx));
@@ -259,16 +311,22 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // editable=falseのフォーム列は更新対象から除外します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var fields = meta.Forms
-            .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
-            .Select(f => f.Key)
-            .ToArray();
-
-        var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
-        
         var pkColumns = meta.GetPrimaryKeyColumns();
-        var whereParts = pkColumns.Select((col, i) => $"{col} = @Pk{i}");
-        var sql = $"UPDATE {meta.Table} SET {setClause} WHERE {string.Join(" AND ", whereParts)}";
+
+        var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
+        var cacheKey = $"Update_{meta.GetHashCode()}_{valuesKeysStr}";
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
+        {
+            var fields = meta.Forms
+                .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
+                .Select(f => f.Key)
+                .ToArray();
+
+            var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
+            var whereParts = pkColumns.Select((col, i) => $"{col} = @Pk{i}");
+            sql = $"UPDATE {meta.Table} SET {setClause} WHERE {string.Join(" AND ", whereParts)}";
+            SqlCache.TryAdd(cacheKey, sql);
+        }
 
         var param = new DynamicParameters(values);
         // 複合主鍵の場合は values から主鍵値を取得、単一主鍵の場合は id を使用
@@ -297,16 +355,26 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var fields = meta.Forms
-            .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
-            .Select(f => f.Key)
-            .ToArray();
-
-        var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
         var pkColumns = meta.GetPrimaryKeyColumns();
+
+        var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
+        var cacheKey = $"UpdateComposite_{meta.GetHashCode()}_{valuesKeysStr}";
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
+        {
+            var fields = meta.Forms
+                .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
+                .Select(f => f.Key)
+                .ToArray();
+
+            var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
+            var tempParam = new DynamicParameters();
+            var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, tempParam);
+            sql = $"UPDATE {meta.Table} SET {setClause} WHERE {whereClause}";
+            SqlCache.TryAdd(cacheKey, sql);
+        }
+
         var param = new DynamicParameters(values);
-        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
-        var sql = $"UPDATE {meta.Table} SET {setClause} WHERE {whereClause}";
+        BuildCompositeKeyWhere(pkColumns, keyValues, param);
 
         _logger.LogInformation("UpdateAsync entity={Entity} keys={Keys} sql={Sql}", entity, string.Join(",", pkColumns), sql);
         return await TimedAsync("UpdateAsync.Composite", entity, sql, () => _db.ExecuteAsync(sql, param, tx));
@@ -319,20 +387,32 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         ValidateMetadata(meta, entity);
         var pkColumns = meta.GetPrimaryKeyColumns();
 
-        // 単一主鍵: @Id で直接バインド。複合主鍵: @Id0, @Id1... で展開。
-        var whereClause = pkColumns.Count == 1
-            ? $"{pkColumns[0]} = @Id"
-            : string.Join(" AND ", pkColumns.Select((col, i) => $"{col} = @Id{i}"));
-        var args = new { Id = id };
-
-        if (meta.SoftDelete)
+        var cacheKey = $"Delete_{meta.GetHashCode()}";
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
-            var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
-            _logger.LogInformation("SoftDelete entity={Entity} id={Id}", entity, id);
-            return await TimedAsync("SoftDelete", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, args, tx));
+            // 単一主鍵: @Id で直接バインド。複合主鍵: @Id0, @Id1... で展開。
+            var whereClause = pkColumns.Count == 1
+                ? $"{pkColumns[0]} = @Id"
+                : string.Join(" AND ", pkColumns.Select((col, i) => $"{col} = @Id{i}"));
+
+            if (meta.SoftDelete)
+            {
+                sql = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
+            }
+            else
+            {
+                sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
+            }
+            SqlCache.TryAdd(cacheKey, sql);
         }
 
-        var sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
+        var args = new { Id = id };
+        if (meta.SoftDelete)
+        {
+            _logger.LogInformation("SoftDelete entity={Entity} id={Id}", entity, id);
+            return await TimedAsync("SoftDelete", entity, sql, () => _db.ExecuteAsync(sql, args, tx));
+        }
+
         _logger.LogInformation("Delete entity={Entity} id={Id}", entity, id);
         return await TimedAsync("Delete", entity, sql, () => _db.ExecuteAsync(sql, args, tx));
     }
@@ -345,17 +425,32 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
         var pkColumns = meta.GetPrimaryKeyColumns();
+
+        var cacheKey = $"DeleteComposite_{meta.GetHashCode()}";
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
+        {
+            var tempParam = new DynamicParameters();
+            var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, tempParam);
+            if (meta.SoftDelete)
+            {
+                sql = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
+            }
+            else
+            {
+                sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
+            }
+            SqlCache.TryAdd(cacheKey, sql);
+        }
+
         var param = new DynamicParameters();
-        var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, param);
+        BuildCompositeKeyWhere(pkColumns, keyValues, param);
 
         if (meta.SoftDelete)
         {
-            var sqlSoft = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
             _logger.LogInformation("SoftDelete entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
-            return await TimedAsync("SoftDelete.Composite", entity, sqlSoft, () => _db.ExecuteAsync(sqlSoft, param, tx));
+            return await TimedAsync("SoftDelete.Composite", entity, sql, () => _db.ExecuteAsync(sql, param, tx));
         }
 
-        var sql = $"DELETE FROM {meta.Table} WHERE {whereClause}";
         _logger.LogInformation("Delete entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
         return await TimedAsync("Delete.Composite", entity, sql, () => _db.ExecuteAsync(sql, param, tx));
     }
@@ -374,62 +469,103 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var firstPk = pkColumns[0];
         var fk = foreignKey ?? new ForeignKeyDefinition { Entity = entity, DisplayColumn = "Id" };
 
-        var baseSql = string.IsNullOrWhiteSpace(fk.Query)
-            ? $"SELECT {firstPk} AS Id, * FROM {meta.Table}"
-            : fk.Query!.Trim();
+        var fkDisplayCols = fk.GetDisplayColumns();
+        var fkDisplayColsStr = string.Join(",", fkDisplayCols.OrderBy(c => c));
+        var hasSearch = !string.IsNullOrWhiteSpace(search);
+        var hasPageSize = pageSize.HasValue && pageSize.Value > 0;
+        var cacheKey = $"GetAllForEntity_{meta.GetHashCode()}_{fk.GetHashCode()}_{fkDisplayColsStr}_{hasSearch}_{hasPageSize}_{fetchOneExtra}";
 
-        var sql = new List<string> { $"SELECT * FROM ({baseSql}) fkq" };
-        var where = new List<string>();
+        if (!SqlCache.TryGetValue(cacheKey, out var statement))
+        {
+            var baseSql = string.IsNullOrWhiteSpace(fk.Query)
+                ? $"SELECT {firstPk} AS Id, * FROM {meta.Table}"
+                : fk.Query!.Trim();
+
+            var sql = new List<string> { $"SELECT * FROM ({baseSql}) fkq" };
+            var where = new List<string>();
+
+            if (hasSearch)
+            {
+                var cols = fk.GetDisplayColumns();
+                if (cols.Count > 0)
+                {
+                    var terms = new List<string>();
+                    for (var i = 0; i < cols.Count; i++)
+                    {
+                        terms.Add($"fkq.{cols[i]} LIKE @Search{i}");
+                    }
+                    where.Add("(" + string.Join(" OR ", terms) + ")");
+                }
+            }
+
+            if (where.Count > 0)
+            {
+                sql.Add("WHERE " + string.Join(" AND ", where));
+            }
+
+            sql.Add("ORDER BY fkq.Id ASC");
+            if (hasPageSize)
+            {
+                var tempParam = new DynamicParameters();
+                var effectivePageSize = fetchOneExtra ? pageSize!.Value + 1 : pageSize!.Value;
+                var offset = Math.Max(0, page - 1) * pageSize.Value;
+                _dialect.AppendNumberedPagination(sql, tempParam, effectivePageSize, offset, "fkq.Id");
+            }
+
+            statement = string.Join(Environment.NewLine, sql);
+            SqlCache.TryAdd(cacheKey, statement);
+        }
+
+        // 构建参数
         var param = new DynamicParameters();
-
-        if (!string.IsNullOrWhiteSpace(search))
+        if (hasSearch)
         {
             var cols = fk.GetDisplayColumns();
-            if (cols.Count > 0)
+            for (var i = 0; i < cols.Count; i++)
             {
-                var terms = new List<string>();
-                for (var i = 0; i < cols.Count; i++)
-                {
-                    var p = $"Search{i}";
-                    terms.Add($"fkq.{cols[i]} LIKE @{p}");
-                    param.Add(p, $"%{search}%");
-                }
-
-                where.Add("(" + string.Join(" OR ", terms) + ")");
+                param.Add($"Search{i}", $"%{search}%");
             }
         }
-
-        if (where.Count > 0)
+        if (hasPageSize)
         {
-            sql.Add("WHERE " + string.Join(" AND ", where));
-        }
-
-        sql.Add("ORDER BY fkq.Id ASC");
-        if (pageSize.HasValue && pageSize.Value > 0)
-        {
-            var effectivePageSize = fetchOneExtra ? pageSize.Value + 1 : pageSize.Value;
+            var effectivePageSize = fetchOneExtra ? pageSize!.Value + 1 : pageSize!.Value;
             var offset = Math.Max(0, page - 1) * pageSize.Value;
-            _dialect.AppendNumberedPagination(sql, param, effectivePageSize, offset, "fkq.Id");
+            param.Add("PageSize", effectivePageSize);
+            param.Add("Offset", offset);
         }
 
-        var statement = string.Join(Environment.NewLine, sql);
         _logger.LogDebug("GetAllForEntityAsync entity={Entity} sql={Sql}", entity, statement);
         return await TimedAsync("GetAllForEntityAsync", entity, statement, () => _db.QueryAsync(statement, param));
     }
 
     public async Task<int> CountAsync(string entity, string? search, Dictionary<string, string?>? filters = null)
     {
-        // 総件数取得。count=falseモード時はController側で呼び出しを抑止します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
-        var sql = $"SELECT COUNT(*) {BuildFromClause(meta)}";
-        var param = new DynamicParameters();
-        var where = BuildWhere(meta, search, filters, param);
 
-        if (where.Any())
+        var activeFilterKeys = filters == null
+            ? Array.Empty<string>()
+            : filters.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)).Select(kv => kv.Key).OrderBy(k => k).ToArray();
+        var filterKeysStr = string.Join(",", activeFilterKeys);
+        var hasSearch = !string.IsNullOrWhiteSpace(search);
+        var cacheKey = $"Count_{meta.GetHashCode()}_{hasSearch}_{filterKeysStr}";
+
+        if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
-            sql += " WHERE " + string.Join(" AND ", where);
+            var tempSql = $"SELECT COUNT(*) {BuildFromClause(meta)}";
+            var tempParam = new DynamicParameters();
+            var where = BuildWhere(meta, search, filters, tempParam);
+
+            if (where.Any())
+            {
+                tempSql += " WHERE " + string.Join(" AND ", where);
+            }
+            sql = tempSql;
+            SqlCache.TryAdd(cacheKey, sql);
         }
+
+        var param = new DynamicParameters();
+        BuildWhere(meta, search, filters, param);
 
         _logger.LogInformation("CountAsync entity={Entity} sql={Sql}", entity, sql);
         return await TimedAsync("CountAsync", entity, sql, () => _db.ExecuteScalarAsync<int>(sql, param));
@@ -738,41 +874,13 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
     private static void ValidateMetadata(EntityDefinition meta, string entityName)
     {
+        if (ValidatedMetadataCache.ContainsKey(meta))
+        {
+            return;
+        }
+
         // YAML由来メタデータの安全性チェック。
         // SQL注入に繋がる文字や不正なトークンを事前に拒否します。
-        static bool IsUnsafeToken(string? value) =>
-            !string.IsNullOrEmpty(value)
-            && (value.Contains(';') || value.Contains("--") || value.Contains("/*") || value.Contains("*/"));
-
-        static void EnsureIdentifier(string value, string name)
-        {
-            if (!IdentifierRegex.IsMatch(value))
-            {
-                throw new InvalidOperationException($"Unsafe identifier '{name}': {value}");
-            }
-        }
-
-        static void EnsureExpression(string? value, string name)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new InvalidOperationException($"Expression is required: {name}");
-            }
-
-            if (IsUnsafeToken(value))
-            {
-                throw new InvalidOperationException($"Unsafe expression '{name}': {value}");
-            }
-
-            // Strip single-quoted string literals (e.g. 'label', '発行済', '✅ done')
-            // so that Unicode/emoji content inside quoted strings passes the ASCII-range regex.
-            var stripped = Regex.Replace(value, @"'(?:[^']|'')*'", "''");
-            if (!ExpressionRegex.IsMatch(stripped))
-            {
-                throw new InvalidOperationException($"Unsafe expression '{name}': {value}");
-            }
-        }
-
         static void EnsureForeignKey(ForeignKeyDefinition fk, string name)
         {
             var displayColumns = fk.GetDisplayColumns();
@@ -783,13 +891,13 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
             foreach (var displayCol in displayColumns)
             {
-                EnsureIdentifier(displayCol, $"{name}.displayColumn");
+                SqlSafetyGuard.EnsureIdentifier(displayCol, $"{name}.displayColumn");
             }
 
             if (!string.IsNullOrWhiteSpace(fk.Query))
             {
                 var query = fk.Query!.Trim();
-                if (IsUnsafeToken(query))
+                if (SqlSafetyGuard.IsUnsafeToken(query))
                 {
                     throw new InvalidOperationException($"Unsafe fk.query '{name}': {query}");
                 }
@@ -806,27 +914,28 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             }
         }
 
-        EnsureIdentifier(meta.Table, $"{entityName}.table");
+        SqlSafetyGuard.EnsureIdentifier(entityName, "entity");
+        SqlSafetyGuard.EnsureIdentifier(meta.Table, $"{entityName}.table");
         
         // 複合主鍵対応：Keys が設定されていればそれら、そうでなければ Key を検証
         var pkColumns = meta.GetPrimaryKeyColumns();
         foreach (var pkCol in pkColumns)
         {
-            EnsureIdentifier(pkCol, $"{entityName}.key.{pkCol}");
+            SqlSafetyGuard.EnsureIdentifier(pkCol, $"{entityName}.key.{pkCol}");
         }
 
         foreach (var col in meta.Columns)
         {
-            EnsureIdentifier(col.Key, $"{entityName}.column");
+            SqlSafetyGuard.EnsureIdentifier(col.Key, $"{entityName}.column");
             if (col.Value.Expression != null)
             {
-                EnsureExpression(col.Value.Expression, $"{entityName}.columnExpression.{col.Key}");
+                SqlSafetyGuard.EnsureExpression(col.Value.Expression, $"{entityName}.columnExpression.{col.Key}");
             }
         }
 
         foreach (var form in meta.Forms)
         {
-            EnsureIdentifier(form.Key, $"{entityName}.form");
+            SqlSafetyGuard.EnsureIdentifier(form.Key, $"{entityName}.form");
             if (form.Value.ForeignKey != null)
             {
                 EnsureForeignKey(form.Value.ForeignKey, $"{entityName}.form.fk.{form.Key}");
@@ -835,10 +944,10 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
         foreach (var filter in meta.Filters)
         {
-            EnsureIdentifier(filter.Key, $"{entityName}.filter");
+            SqlSafetyGuard.EnsureIdentifier(filter.Key, $"{entityName}.filter");
             if (filter.Value.Expression != null)
             {
-                EnsureExpression(filter.Value.Expression, $"{entityName}.filterExpression.{filter.Key}");
+                SqlSafetyGuard.EnsureExpression(filter.Value.Expression, $"{entityName}.filterExpression.{filter.Key}");
             }
 
             if (filter.Value.ForeignKey != null)
@@ -854,10 +963,13 @@ public class DynamicCrudRepository : IDynamicCrudRepository
                 throw new InvalidOperationException($"Unsafe join type '{entityName}.joinType': {j.Type}");
             }
 
-            EnsureIdentifier(j.Table, $"{entityName}.joinTable");
-            EnsureIdentifier(j.Alias, $"{entityName}.joinAlias");
+            SqlSafetyGuard.EnsureIdentifier(j.Table, $"{entityName}.joinTable");
+            SqlSafetyGuard.EnsureIdentifier(j.Alias, $"{entityName}.joinAlias");
             var joinOn = j.GetJoinCondition();
-            EnsureExpression(joinOn, $"{entityName}.joinOn");
+            SqlSafetyGuard.EnsureExpression(joinOn, $"{entityName}.joinOn");
         }
+
+        // 安全校验完全通过，加入缓存
+        ValidatedMetadataCache.TryAdd(meta, true);
     }
 }

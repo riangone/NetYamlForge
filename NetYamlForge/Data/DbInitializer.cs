@@ -94,6 +94,8 @@ public static class DbInitializer
             await conn.OpenAsync();
             await new SqlServerAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
+            await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
             return;
         }
 
@@ -103,6 +105,8 @@ public static class DbInitializer
             await conn.OpenAsync();
             await new PostgreSqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
+            await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
             return;
         }
 
@@ -112,6 +116,8 @@ public static class DbInitializer
             await conn.OpenAsync();
             await new MySqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
+            await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
             return;
         }
 
@@ -138,6 +144,7 @@ public static class DbInitializer
         await commonTestUserSeeder.EnsureCommonTestUsersAsync(conn, logger);
         
         // 运行项目特定的初始化和测试用户创建
-        await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(conn, project.Name, logger);
+        await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
+            conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
     }
 }

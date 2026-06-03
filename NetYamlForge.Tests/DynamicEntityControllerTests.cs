@@ -568,6 +568,7 @@ public class DynamicEntityControllerTests
         public IEnumerable<string> GetHookNames(string projectName) => Enumerable.Empty<string>();
         public IEnumerable<IEntityHook> GetAllHooks(string projectName) => Enumerable.Empty<IEntityHook>();
         public void Register(string projectName, IEntityHook hook) { }
+        public void Clear(string projectName) { }
     }
 
     private sealed class NoopAuditLogService : IAuditLogService
@@ -590,6 +591,7 @@ public class DynamicEntityControllerTests
     {
         public ICustomActionHandler? Find(string projectName, string handlerName) => null;
         public void Register(string projectName, ICustomActionHandler handler) { }
+        public void Clear(string projectName) { }
     }
 
     private sealed class StubPdfExportService : IPdfExportService

@@ -7,6 +7,8 @@ using System.IO;
 using Dapper;
 using Microsoft.Data.Sqlite;
 using NetYamlForge.Data.Seeders;
+using NetYamlForge.Services;
+using NetYamlForge.Models;
 
 namespace NetYamlForge.Data;
 
@@ -19,12 +21,12 @@ public class ProjectSpecificInitializer
     private readonly CommonTestUserSeeder _commonTestUserSeeder = new();
     private readonly AutoDealerTestUserSeeder _autoDealerTestUserSeeder = new();
     private readonly ProjectSpecificTestUserSeeder _projectSpecificTestUserSeeder = new();
-    /// <summary>
-    /// プロジェクト固有の列追加を実行します。
-    /// </summary>
+
     public async Task EnsureProjectSpecificColumnsAsync(
         IDbConnection conn,
         string projectName,
+        string dbType,
+        IEntityMetadataProvider metadataProvider,
         ILogger logger)
     {
         // 首先运行项目特定的初始化和数据种子
@@ -32,79 +34,70 @@ public class ProjectSpecificInitializer
         if (string.Equals(projectName, "contact-manager", StringComparison.OrdinalIgnoreCase))
         {
             await InitializeContactManagerAsync(conn as SqliteConnection, logger);
-            return;
         }
-
         // todo-app: プロジェクト固有テーブルを init_seed.sql から初期化
-        if (string.Equals(projectName, "todo-app", StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(projectName, "todo-app", StringComparison.OrdinalIgnoreCase))
         {
             await InitializeTodoAppAsync(conn as SqliteConnection, logger);
             // 创建 todo-app 测试用户
             await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
         }
-
         // task-management: init.sql でテーブル作成後、CreatedBy 列追加 & TaskComment テーブル作成
-        if (string.Equals(projectName, "task-management", StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(projectName, "task-management", StringComparison.OrdinalIgnoreCase))
         {
             await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
             await EnsureColumnAsync(conn as SqliteConnection, "Task", "CreatedBy", "TEXT", logger);
             await EnsureTaskCommentTableAsync(conn as SqliteConnection, logger);
             // 创建 task-management 测试用户
             await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
         }
-
         // attendance-ops: 承認カラム追加
-        if (string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(projectName, "attendance-ops", StringComparison.OrdinalIgnoreCase))
         {
             await EnsureColumnAsync(conn as SqliteConnection, "LeaveRequest", "ApprovedAt", "TEXT", logger);
             await EnsureColumnAsync(conn as SqliteConnection, "OvertimeRequest", "ApprovedAt", "TEXT", logger);
-            return;
         }
-
-        // 汎用フォールバック: database/init_seed.sql が存在すれば実行
-        await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
-
-        // auto-dealer-demo: デモユーザー作成 + テストユーザー作成
-        if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
+        else
         {
-            await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
-            // 创建汽车销售项目的全面测试用户
-            await _autoDealerTestUserSeeder.EnsureAutoDealerTestUsersAsync(conn, logger);
-            return;
+            // 汎用フォールバック: database/init_seed.sql が存在すれば実行
+            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
+
+            // auto-dealer-demo: デモユーザー作成 + テストユーザー作成
+            if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
+            {
+                await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
+                // 创建汽车销售项目的全面测试用户
+                await _autoDealerTestUserSeeder.EnsureAutoDealerTestUsersAsync(conn, logger);
+            }
+            // framework: 框架管理测试用户
+            else if (string.Equals(projectName, "framework", StringComparison.OrdinalIgnoreCase))
+            {
+                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            }
+            // biz-docs: 业务文档测试用户
+            else if (string.Equals(projectName, "biz-docs", StringComparison.OrdinalIgnoreCase))
+            {
+                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            }
+            // inventory: 库存管理测试用户
+            else if (string.Equals(projectName, "inventory", StringComparison.OrdinalIgnoreCase))
+            {
+                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            }
+            // ui-showcase: UI 展示测试用户
+            else if (string.Equals(projectName, "ui-showcase", StringComparison.OrdinalIgnoreCase))
+            {
+                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            }
+            // 其他项目使用通用测试用户
+            else
+            {
+                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+            }
         }
 
-        // framework: 框架管理测试用户
-        if (string.Equals(projectName, "framework", StringComparison.OrdinalIgnoreCase))
-        {
-            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
-        }
-
-        // biz-docs: 业务文档测试用户
-        if (string.Equals(projectName, "biz-docs", StringComparison.OrdinalIgnoreCase))
-        {
-            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
-        }
-
-        // inventory: 库存管理测试用户
-        if (string.Equals(projectName, "inventory", StringComparison.OrdinalIgnoreCase))
-        {
-            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
-        }
-
-        // ui-showcase: UI 展示测试用户
-        if (string.Equals(projectName, "ui-showcase", StringComparison.OrdinalIgnoreCase))
-        {
-            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            return;
-        }
-
-        // 其他项目使用通用测试用户
-        await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+        // 调用基于 YAML 实体配置的自动物理列追加迁移机制
+        await AutoMigrateMissingColumnsAsync(conn, projectName, dbType, metadataProvider, logger);
     }
 
     // 認証テーブル名（エンティティテーブル判定から除外）
@@ -211,7 +204,7 @@ CREATE TABLE ""TaskComment"" (
             return;
         }
 
-        // init_seed.sql を検索（複数のパスを試行）
+        // init_seed.sql を検索（複数のパスを试行）
         var candidates = new[]
         {
             Path.Combine(AppContext.BaseDirectory, "projects", "todo-app", "database", "init_seed.sql"),
@@ -331,5 +324,207 @@ CREATE TABLE ""TaskComment"" (
         var sql = await File.ReadAllTextAsync(initSqlPath);
         await conn.ExecuteAsync(sql);
         logger.LogInformation("auto-dealer-demo の初期化が完了しました。");
+    }
+
+    /// <summary>
+    /// 基于 YAML 实体定义的自动物理列追加迁移机制
+    /// </summary>
+    private static async Task AutoMigrateMissingColumnsAsync(
+        IDbConnection conn,
+        string projectName,
+        string dbType,
+        IEntityMetadataProvider metadataProvider,
+        ILogger logger)
+    {
+        if (conn is not System.Data.Common.DbConnection dbConn) return;
+
+        try
+        {
+            var entities = metadataProvider.GetAll();
+            foreach (var entry in entities)
+            {
+                var entityName = entry.Key;
+                var entity = entry.Value;
+                var tableName = entity.Table;
+
+                if (string.IsNullOrWhiteSpace(tableName)) continue;
+
+                // 1. 检查表是否存在
+                bool tableExists;
+                try
+                {
+                    using var cmd = dbConn.CreateCommand();
+                    cmd.CommandText = $"SELECT 1 FROM \"{tableName}\" WHERE 1=0";
+                    await cmd.ExecuteNonQueryAsync();
+                    tableExists = true;
+                }
+                catch
+                {
+                    tableExists = false;
+                }
+
+                if (!tableExists)
+                {
+                    logger.LogInformation("项目 '{Project}' 检测到表 '{Table}' 在数据库中不存在。正在自动创建该表...", 
+                        projectName, tableName);
+                    await AutoCreateTableAsync(dbConn, tableName, entity, dbType, logger);
+                    tableExists = true;
+                }
+
+                // 2. 获取表目前已有的物理列
+                var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                using (var cmd = dbConn.CreateCommand())
+                {
+                    cmd.CommandText = $"SELECT * FROM \"{tableName}\" WHERE 1=0";
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        existingColumns.Add(reader.GetName(i));
+                    }
+                }
+
+                // 3. 对比 YAML 定义 of Columns，找出物理缺失的列
+                if (entity.Columns == null) continue;
+
+                foreach (var colEntry in entity.Columns)
+                {
+                    var colName = colEntry.Key;
+                    var colDef = colEntry.Value;
+
+                    // 如果是虚拟计算列（包含 Expression），不需要在数据库中添加实际物理列
+                    if (!string.IsNullOrWhiteSpace(colDef.Expression)) continue;
+
+                    // 如果已经是主键或者物理列已存在，跳过
+                    if (existingColumns.Contains(colName)) continue;
+
+                    // 4. 执行自动列迁移
+                    var sqlType = MapYamlTypeToSqlType(colDef.Type, dbType);
+                    
+                    logger.LogInformation("项目 '{Project}' 检测到表 '{Table}' 缺失物理列 '{Column}' (YAML 定义类型为 '{YamlType}')。正在自动追加物理列...", 
+                        projectName, tableName, colName, colDef.Type);
+
+                    // DCS001 抑制理由：表名、列名和数据类型均为经过校验或映射的安全值，非外部传入的用户输入
+#pragma warning disable DCS001
+                    var alterSql = $"ALTER TABLE \"{tableName}\" ADD COLUMN \"{colName}\" {sqlType}";
+                    if (string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase))
+                    {
+                        alterSql = $"ALTER TABLE \"{tableName}\" ADD \"{colName}\" {sqlType}";
+                    }
+                    
+                    using var alterCmd = dbConn.CreateCommand();
+                    alterCmd.CommandText = alterSql;
+                    await alterCmd.ExecuteNonQueryAsync();
+#pragma warning restore DCS001
+
+                    logger.LogInformation("项目 '{Project}' 的表 '{Table}' 已成功追加物理列 '{Column}'", projectName, tableName, colName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "项目 '{Project}' 在执行通用列自动迁移时遇到异常", projectName);
+        }
+    }
+
+    private static string MapYamlTypeToSqlType(string yamlType, string dbType)
+    {
+        var isSqlite = string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase);
+        if (isSqlite)
+        {
+            return yamlType.ToLowerInvariant() switch
+            {
+                "int" or "integer" or "long" or "bool" or "boolean" => "INTEGER",
+                "decimal" or "double" or "float" or "number" => "NUMERIC",
+                _ => "TEXT"
+            };
+        }
+        
+        return yamlType.ToLowerInvariant() switch
+        {
+            "int" or "integer" => "INT",
+            "long" => "BIGINT",
+            "bool" or "boolean" => "BIT",
+            "decimal" => "DECIMAL(18,2)",
+            "double" or "float" or "number" => "DOUBLE PRECISION",
+            "datetime" or "date" => "DATETIME",
+            _ => "NVARCHAR(MAX)"
+        };
+    }
+
+    /// <summary>
+    /// 当 YAML 中定义的表不存在时，自动根据其属性列创建对应物理表
+    /// </summary>
+    private static async Task AutoCreateTableAsync(
+        System.Data.Common.DbConnection dbConn,
+        string tableName,
+        EntityDefinition entity,
+        string dbType,
+        ILogger logger)
+    {
+        var pkColumns = entity.GetPrimaryKeyColumns();
+        var isSqlServer = string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase);
+        var isPostgres = string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase) || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+        var isMySql = string.Equals(dbType, "mysql", StringComparison.OrdinalIgnoreCase) || string.Equals(dbType, "mariadb", StringComparison.OrdinalIgnoreCase);
+        var isSqlite = string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase);
+
+        var colSqls = new List<string>();
+        var hasSelfAddedPk = false;
+
+        foreach (var colEntry in entity.Columns)
+        {
+            var colName = colEntry.Key;
+            var colDef = colEntry.Value;
+
+            // 虚拟计算列不建物理字段
+            if (!string.IsNullOrWhiteSpace(colDef.Expression)) continue;
+
+            var sqlType = MapYamlTypeToSqlType(colDef.Type, dbType);
+            var isPk = pkColumns.Contains(colName);
+
+            if (isPk && pkColumns.Count == 1 && colDef.Identity)
+            {
+                hasSelfAddedPk = true;
+                if (isSqlite)
+                {
+                    colSqls.Add($"\"{colName}\" INTEGER PRIMARY KEY AUTOINCREMENT");
+                }
+                else if (isSqlServer)
+                {
+                    colSqls.Add($"\"{colName}\" INT IDENTITY(1,1) PRIMARY KEY");
+                }
+                else if (isPostgres)
+                {
+                    colSqls.Add($"\"{colName}\" SERIAL PRIMARY KEY");
+                }
+                else if (isMySql)
+                {
+                    colSqls.Add($"\"{colName}\" INT AUTO_INCREMENT PRIMARY KEY");
+                }
+                else
+                {
+                    colSqls.Add($"\"{colName}\" INTEGER PRIMARY KEY AUTOINCREMENT");
+                }
+            }
+            else
+            {
+                var nullableStr = colDef.Required ? "NOT NULL" : "NULL";
+                colSqls.Add($"\"{colName}\" {sqlType} {nullableStr}");
+            }
+        }
+
+        // 复合主键或非自增单主键，需要在最后添加 PRIMARY KEY 约束
+        if (!hasSelfAddedPk && pkColumns.Count > 0)
+        {
+            var pkColsStr = string.Join(", ", pkColumns.Select(c => $"\"{c}\""));
+            colSqls.Add($"PRIMARY KEY ({pkColsStr})");
+        }
+
+        // 双引号包裹字段名和表名，以避免与保留关键字冲突
+        var createTableSql = $"CREATE TABLE \"{tableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";
+        logger.LogInformation("自动建表 SQL: {Sql}", createTableSql);
+
+        using var cmd = dbConn.CreateCommand();
+        cmd.CommandText = createTableSql;
+        await cmd.ExecuteNonQueryAsync();
     }
 }

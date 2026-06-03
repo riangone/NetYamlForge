@@ -83,8 +83,9 @@ public class JournalBalanceValidationHook : IEntityHook
 /// </summary>
 internal static class DictHelper
 {
-    public static T? Get<T>(Dictionary<string, object?> dict, string pascalName, string snakeName, T? defaultValue = default)
+    public static T? Get<T>(IDictionary<string, object> dict, string pascalName, string snakeName, T? defaultValue = default)
     {
+        if (dict == null) return defaultValue;
         if (dict.TryGetValue(pascalName, out var val) && val != null && val != DBNull.Value)
             return (T)Convert.ChangeType(val, typeof(T));
         if (dict.TryGetValue(snakeName, out var val2) && val2 != null && val2 != DBNull.Value)
@@ -92,8 +93,9 @@ internal static class DictHelper
         return defaultValue;
     }
     
-    public static string? GetStr(Dictionary<string, object?> dict, string pascalName, string snakeName)
+    public static string? GetStr(IDictionary<string, object> dict, string pascalName, string snakeName)
     {
+        if (dict == null) return null;
         if (dict.TryGetValue(pascalName, out var val) && val != null && val != DBNull.Value)
             return val.ToString();
         if (dict.TryGetValue(snakeName, out var val2) && val2 != null && val2 != DBNull.Value)
@@ -117,8 +119,9 @@ public class BillCompleteHook : IEntityHook
 
         var billId = Convert.ToInt32(idObj);
 
-        var bill = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var billRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM bills WHERE id = @id", new { id = billId }, tx);
+        var bill = (IDictionary<string, object>)billRow;
 
         var existingJournal = await db.ExecuteScalarAsync<int?>(
             "SELECT id FROM journals WHERE source_table = 'bills' AND source_id = @billId AND doc_status = 'CO'",
@@ -188,9 +191,10 @@ public class BillReverseHook : IEntityHook
         if (!ctx.Values.TryGetValue("Id", out var idObj) || idObj == null) return;
 
         var billId = Convert.ToInt32(idObj);
-        var originalJournal = await db.QueryFirstOrDefaultAsync<Dictionary<string, object?>>(
+        var originalJournalRow = await db.QueryFirstOrDefaultAsync<dynamic>(
             "SELECT * FROM journals WHERE source_table = 'bills' AND source_id = @billId AND doc_status = 'CO'", new { billId }, tx);
-        if (originalJournal == null) return;
+        if (originalJournalRow == null) return;
+        var originalJournal = (IDictionary<string, object>)originalJournalRow;
 
         var originalJournalId = Convert.ToInt32(originalJournal["id"]);
         var existingReverse = await db.ExecuteScalarAsync<int?>(
@@ -208,8 +212,9 @@ public class BillReverseHook : IEntityHook
             SELECT last_insert_rowid()",
             new { no = journalNo, dateAcct, desc = $"請求取消: {originalDocNo}", billId, grandTotal }, tx);
 
-        var originalLines = await db.QueryAsync<Dictionary<string, object?>>(
+        var originalLinesRows = await db.QueryAsync<dynamic>(
             "SELECT * FROM journal_lines WHERE journal_id = @journalId ORDER BY line_no", new { journalId = originalJournalId }, tx);
+        var originalLines = originalLinesRows.Select(r => (IDictionary<string, object>)r);
 
         var lineNo = 10;
         foreach (var line in originalLines)
@@ -251,8 +256,9 @@ public class RecognitionCompleteHook : IEntityHook
         if (!ctx.Values.TryGetValue("Id", out var idObj) || idObj == null) return;
 
         var recognitionId = Convert.ToInt32(idObj);
-        var recognition = await db.QuerySingleAsync<Dictionary<string, object?>>(
+        var recognitionRow = await db.QuerySingleAsync<dynamic>(
             "SELECT * FROM recognitions WHERE id = @id", new { id = recognitionId }, tx);
+        var recognition = (IDictionary<string, object>)recognitionRow;
 
         var existingJournal = await db.ExecuteScalarAsync<int?>(
             "SELECT id FROM journals WHERE source_table = 'recognitions' AND source_id = @recognitionId AND doc_status = 'CO'", new { recognitionId }, tx);

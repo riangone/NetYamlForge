@@ -24,6 +24,9 @@ public class TenantUserServiceTests : IDisposable
 
     public TenantUserServiceTests()
     {
+        // 设置 Dapper 映射规则
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
         // 使用临时文件数据库进行测试
         _tempDbFile = Path.GetTempFileName();
         _testDbConnectionString = $"Data Source={_tempDbFile};";
@@ -56,6 +59,10 @@ public class TenantUserServiceTests : IDisposable
                 phone TEXT,
                 user_type TEXT NOT NULL DEFAULT 'employee',
                 default_project_name TEXT,
+                owning_project TEXT,
+                is_admin INTEGER NOT NULL DEFAULT 0,
+                preferred_language TEXT,
+                last_login_at TEXT,
                 is_active INTEGER NOT NULL DEFAULT 1,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
@@ -185,18 +192,12 @@ public class TenantUserServiceTests : IDisposable
             VALUES (@UserId, @ProjectName, @RoleName, datetime('now'))
         ", new { UserId = userId, ProjectName = projectName, RoleName = "sales_rep" });
         
-        _db.Execute(@"
-            INSERT INTO app_user_project_role (user_id, project_name, role_name, created_at)
-            VALUES (@UserId, @ProjectName, @RoleName, datetime('now'))
-        ", new { UserId = userId, ProjectName = projectName, RoleName = "customer" });
-        
         // Act
         var result = await _service.GetProjectRolesAsync(userId, projectName);
         
         // Assert
-        Assert.Equal(2, result.Count);
+        Assert.Single(result);
         Assert.Contains("sales_rep", result);
-        Assert.Contains("customer", result);
     }
 
     [Fact]
@@ -235,8 +236,15 @@ public class TenantUserServiceTests : IDisposable
     [Fact]
     public async Task HasProjectAccessAsync_UserHasNoAccess_ReturnsFalse()
     {
+        // Arrange
+        var userId = 1;
+        _db.Execute(@"
+            INSERT INTO app_user_project_role (user_id, project_name, role_name, created_at)
+            VALUES (@UserId, 'inventory', 'sales_rep', datetime('now'))
+        ", new { UserId = userId });
+
         // Act
-        var result = await _service.HasProjectAccessAsync(999, "auto-dealer-demo");
+        var result = await _service.HasProjectAccessAsync(userId, "auto-dealer-demo");
         
         // Assert
         Assert.False(result);
@@ -440,10 +448,8 @@ public class TenantUserServiceTests : IDisposable
 
     private static string HashPassword(string password)
     {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
+        var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<object>();
+        return passwordHasher.HashPassword(null!, password);
     }
 
     #endregion

@@ -237,6 +237,11 @@ public class EntityCrudExecutionServiceTests
 
             byName[hook.Name] = hook;
         }
+
+        public void Clear(string projectName)
+        {
+            _hooks.Remove(projectName);
+        }
     }
 
     private sealed class CaptureAuditLogService : IAuditLogService

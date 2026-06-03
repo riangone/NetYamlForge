@@ -31,6 +31,11 @@ public interface IProjectHookRegistry
     /// プロジェクトにフックを登録します。
     /// </summary>
     void Register(string projectName, IEntityHook hook);
+
+    /// <summary>
+    /// 指定プロジェクトの全フックをクリアします。
+    /// </summary>
+    void Clear(string projectName);
 }
 
 /// <summary>

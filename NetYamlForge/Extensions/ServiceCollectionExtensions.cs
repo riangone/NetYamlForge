@@ -13,6 +13,8 @@ using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
 using NetYamlForge.Services.Tenant;
 using NetYamlForge.Services.Cli;
+using NetYamlForge.Services.AI;
+using NetYamlForge.Services.AI.ToolValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -38,6 +40,9 @@ public static class ServiceCollectionExtensions
         services.AddEntityHooks();
         services.AddYamlHotReload();
         services.AddEmailServices(configuration);
+        
+        // AI Prompt 配置配置化
+        services.Configure<PromptHotReloadOptions>(configuration.GetSection(PromptHotReloadOptions.SectionName));
         return services;
     }
 
@@ -121,6 +126,7 @@ public static class ServiceCollectionExtensions
             // 1. 尝试使用预加载的连接
             if (httpContext?.Items["PreloadedConnection"] is IDbConnection preloadedConn)
             {
+                httpContext.Items["PreloadedConnectionUsed"] = true;
                 return preloadedConn;
             }
 
@@ -134,9 +140,12 @@ public static class ServiceCollectionExtensions
 #pragma warning restore DCS003
             }
 
-            // 3. 最后手段：同步等待异步获取（不推荐，但保持向后兼容）
+            // 3. 惰性获取连接：返回 LazyDbConnection，避免同步阻塞并实现延迟打开
             var connectionManager = sp.GetRequiredService<IConnectionManager>();
-            return connectionManager.GetConnectionAsync(scope.Current.Name).GetAwaiter().GetResult();
+            return new NetYamlForge.Services.Connection.LazyDbConnection(() =>
+            {
+                return connectionManager.GetConnectionAsync(scope.Current.Name).GetAwaiter().GetResult();
+            });
         });
 
         // ISqlDialect: プロジェクトの DatabaseType に応じた方言を提供します。
@@ -195,6 +204,11 @@ public static class ServiceCollectionExtensions
         
         // AI サービス
         services.AddScoped<NetYamlForge.Services.Ai.IGeminiCliService, NetYamlForge.Services.Ai.GeminiCliService>();
+        services.AddSingleton<ToolCallValidator>();
+        services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
+        services.AddSingleton<PromptVersionResolver>();
+        services.AddScoped<ISlotFillingManager, SlotFillingManager>();
+        services.AddScoped<IAppointmentService, AppointmentService>();
 
         // ファイルアップロードサービス
         services.AddScoped<IFileUploadService, FileUploadService>();

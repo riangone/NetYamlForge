@@ -42,7 +42,8 @@ public class DapperDictionaryDiagnosis
             _output.WriteLine($"Dynamic row: id={row.id}, DocumentNo={row.DocumentNo}, GrandTotal={row.GrandTotal}");
         }
         
-        var bill = await db.QuerySingleAsync<Dictionary<string, object?>>("SELECT * FROM bills WHERE id = 1");
+        var billRow = await db.QuerySingleAsync<dynamic>("SELECT * FROM bills WHERE id = 1");
+        var bill = (IDictionary<string, object>)billRow;
         
         _output.WriteLine($"Dictionary Keys count: {bill.Keys.Count}");
         foreach (var kvp in bill)

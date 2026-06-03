@@ -77,7 +77,23 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
         yamlWatcher.Error += OnWatcherError;
         _watchers[$"{projectName}_yaml"] = yamlWatcher;
 
-        _logger.LogInformation("YAML ファイル監視を開始：{Project} ({Dir})", projectName, projectDir);
+        var csWatcher = new FileSystemWatcher
+        {
+            Path = projectDir,
+            Filter = "*.cs",
+            IncludeSubdirectories = true,
+            EnableRaisingEvents = true,
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.Size
+        };
+
+        csWatcher.Changed += OnFileChanged;
+        csWatcher.Created += OnFileChanged;
+        csWatcher.Deleted += OnFileChanged;
+        csWatcher.Renamed += OnFileRenamed;
+        csWatcher.Error += OnWatcherError;
+        _watchers[$"{projectName}_cs"] = csWatcher;
+
+        _logger.LogInformation("ファイル監視を開始（YAML/CS）：{Project} ({Dir})", projectName, projectDir);
     }
 
     public void StopWatching(string projectDir)
@@ -92,6 +108,11 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
         {
             yamlWatcher.EnableRaisingEvents = false;
             yamlWatcher.Dispose();
+        }
+        if (_watchers.TryRemove($"{projectName}_cs", out var csWatcher))
+        {
+            csWatcher.EnableRaisingEvents = false;
+            csWatcher.Dispose();
         }
     }
 
@@ -108,7 +129,8 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
         if (!e.Name.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) &&
-            !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)) return;
+            !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) &&
+            !e.Name.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) return;
 
         var now = DateTime.UtcNow;
         var filePath = e.FullPath;
@@ -130,7 +152,8 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
     private void OnFileRenamed(object sender, RenamedEventArgs e)
     {
         if (!e.Name.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) &&
-            !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)) return;
+            !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) &&
+            !e.Name.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) return;
 
         var projectName = ExtractProjectName(e.FullPath);
         FileChanged?.Invoke(this, new YamlFileChangedEventArgs
