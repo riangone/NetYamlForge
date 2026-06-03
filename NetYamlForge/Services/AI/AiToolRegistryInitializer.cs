@@ -6,6 +6,7 @@ using System.Text.Json.Nodes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NetYamlForge.Services;
 using NetYamlForge.Services.AI.ToolValidation;
 using Dapper;
 
@@ -48,6 +49,7 @@ public class AiToolRegistryInitializer : IHostedService
                 Description = "データベースエンティティデータ取得ツール",
                 ExecuteAsync = async (toolCall) =>
                 {
+#pragma warning disable DCS001
                     try
                     {
                         var entity = toolCall["entity"]?.ToString();
@@ -111,6 +113,7 @@ public class AiToolRegistryInitializer : IHostedService
                     {
                         return ToolCallResult.Fail($"Failed to query data: {ex.Message}");
                     }
+#pragma warning restore DCS001
                 }
             };
             toolRegistry.Register(projectId, queryDataTool);

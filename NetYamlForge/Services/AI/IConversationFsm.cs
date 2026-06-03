@@ -11,5 +11,7 @@ public interface IConversationFsm
     bool IsTerminal { get; }
     bool IsEscalated { get; }
     IReadOnlySet<string> AllowedTools { get; }
+    int LowConfidenceCount { get; }
     void FireTrigger(string trigger, double confidence = 1.0);
+    void TriggerLowConfidence(double confidence);
 }
