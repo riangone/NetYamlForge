@@ -59,6 +59,16 @@ public class AiToolRegistryInitializer : IHostedService
                         if (string.IsNullOrEmpty(entity))
                             return ToolCallResult.Fail("Entity name is required");
 
+                        // ⚠️ 深层防御：确保 entity 是安全标识符，防止 SQL 注入
+                        try
+                        {
+                            SqlSafetyGuard.EnsureIdentifier(entity, "query_data.entity");
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            return ToolCallResult.Fail($"Unsafe entity name: {ex.Message}");
+                        }
+
                         using var db = dbConnectionFactory.CreateConnection(projectId);
                         db.Open();
 
@@ -79,6 +89,23 @@ public class AiToolRegistryInitializer : IHostedService
 
                                     if (!string.IsNullOrEmpty(field) && value != null)
                                     {
+                                        // ⚠️ 深层防御：确保字段名是安全标识符
+                                        try
+                                        {
+                                            SqlSafetyGuard.EnsureIdentifier(field, "query_data.filter.field");
+                                        }
+                                        catch (InvalidOperationException ex)
+                                        {
+                                            return ToolCallResult.Fail($"Unsafe filter field: {ex.Message}");
+                                        }
+
+                                        // ⚠️ 深层防御：限制 operator 的白名单，防止注入 SQL 关键字
+                                        var allowedOps = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "=", "!=", "<", "<=", ">", ">=", "like" };
+                                        if (!allowedOps.Contains(op))
+                                        {
+                                            return ToolCallResult.Fail($"Unsupported or unsafe operator: {op}");
+                                        }
+
                                         var paramName = $"@p{paramIndex++}";
                                         if (string.Equals(op, "like", StringComparison.OrdinalIgnoreCase))
                                         {

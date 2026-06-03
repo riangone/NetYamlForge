@@ -74,17 +74,20 @@ public class AiToolOrchestrator : IAiToolOrchestrator
     private readonly ISlotFillingManager _slotFillingManager;
     private readonly IToolRegistry _toolRegistry;
     private readonly ILogger<AiToolOrchestrator> _logger;
+    private readonly ProjectScope _projectScope;
 
     public AiToolOrchestrator(
         ToolCallValidator validator,
         ISlotFillingManager slotFillingManager,
         IToolRegistry toolRegistry,
-        ILogger<AiToolOrchestrator> logger)
+        ILogger<AiToolOrchestrator> logger,
+        ProjectScope? projectScope = null)
     {
         _validator = validator;
         _slotFillingManager = slotFillingManager;
         _toolRegistry = toolRegistry;
         _logger = logger;
+        _projectScope = projectScope;
     }
 
     /// <summary>
@@ -98,6 +101,33 @@ public class AiToolOrchestrator : IAiToolOrchestrator
     {
         var result = new ToolExecutionResult();
 
+        // ⚠️ 租户防越权校验与解析
+        var resolvedProjectId = projectId;
+        if (_projectScope != null && _projectScope.IsSet)
+        {
+            var activeProject = _projectScope.Current.Name;
+            if (string.IsNullOrEmpty(resolvedProjectId))
+            {
+                resolvedProjectId = activeProject;
+            }
+            else if (!string.Equals(resolvedProjectId, activeProject, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning(
+                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}",
+                    conversationId, activeProject, resolvedProjectId);
+                
+                result.IsSuccess = false;
+                result.ValidationFailedReason = "访问被拒绝：不允许跨租户调用 Tool";
+                result.ErrorMessage = result.ValidationFailedReason;
+                return result;
+            }
+        }
+
+        if (string.IsNullOrEmpty(resolvedProjectId))
+        {
+            resolvedProjectId = "default";
+        }
+
         try
         {
             // [1] 获取当前 FSM 状态
@@ -105,14 +135,15 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             result.FsmState = currentState;
 
             _logger.LogInformation(
-                "[ToolOrchestrator] Tool 调用开始 Conv={ConvId}, State={State}",
+                "[ToolOrchestrator] Tool 调用开始 Conv={ConvId}, State={State}, Project={Project}",
                 conversationId,
-                currentState);
+                currentState,
+                resolvedProjectId);
 
             // [2] Tool 验证 (JSON Schema + Entity 白名单 + SqlSafetyGuard)
             var validationResult = await _validator.ValidateAsync(
                 toolCall,
-                projectId,
+                resolvedProjectId,
                 currentState);
 
             if (!validationResult.IsValid)
@@ -151,7 +182,7 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             }
 
             // [4] 通过 IToolRegistry 查找并执行 Tool
-            var toolDef = !string.IsNullOrEmpty(toolName) ? _toolRegistry.Get(projectId, toolName) : null;
+            var toolDef = !string.IsNullOrEmpty(toolName) ? _toolRegistry.Get(resolvedProjectId, toolName) : null;
             if (toolDef?.ExecuteAsync != null)
             {
                 var toolCallResult = await toolDef.ExecuteAsync(toolCall);

@@ -140,6 +140,7 @@ public class SlotFillingManager : ISlotFillingManager
     private readonly ConcurrentDictionary<string, IConversationFsm> _fsmStates = new(); // FSM 状態管理
     private readonly ILogger<SlotFillingManager> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ProjectScope _projectScope;
     private const string DefaultProjectId = "auto-dealer-demo";
 
     // 自動車販売向けシナリオ定義
@@ -148,17 +149,40 @@ public class SlotFillingManager : ISlotFillingManager
     public SlotFillingManager(
         ILogger<SlotFillingManager> logger,
         IServiceScopeFactory scopeFactory,
-        IAiScenarioYamlLoader aiScenarioYamlLoader)
+        IAiScenarioYamlLoader aiScenarioYamlLoader,
+        ProjectScope? projectScope = null)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
         _aiScenarioYamlLoader = aiScenarioYamlLoader;
+        _projectScope = projectScope;
+    }
+
+    private string GetResolvedProjectId(string? projectId)
+    {
+        if (!string.IsNullOrWhiteSpace(projectId))
+            return projectId;
+        if (_projectScope != null && _projectScope.IsSet)
+            return _projectScope.Current.Name;
+        return DefaultProjectId;
+    }
+
+    private string GetSessionKey(string conversationId, string scenario, string? projectId)
+    {
+        var pid = GetResolvedProjectId(projectId);
+        return $"{pid}:{conversationId}:{scenario}";
+    }
+
+    private string GetFsmKey(string conversationId, string? projectId)
+    {
+        var pid = GetResolvedProjectId(projectId);
+        return $"{pid}:{conversationId}";
     }
 
     /// <inheritdoc />
     public async Task<SlotSession> GetSessionAsync(string conversationId, string scenario, string? projectId = null)
     {
-        var key = $"{conversationId}:{scenario}";
+        var key = GetSessionKey(conversationId, scenario, projectId);
         
         if (_sessions.TryGetValue(key, out var session))
             return session;
@@ -182,18 +206,20 @@ public class SlotFillingManager : ISlotFillingManager
         await EnsureSessionsLoadedAsync(conversationId, projectId);
 
         var updated = false;
+        var pid = GetResolvedProjectId(projectId);
+        var prefix = $"{pid}:{conversationId}:";
 
         // 全てのシナリオを検索して該当スロットを更新
         foreach (var kvp in _sessions)
         {
-            if (kvp.Key.StartsWith($"{conversationId}:") && 
+            if (kvp.Key.StartsWith(prefix) && 
                 kvp.Value.Slots.TryGetValue(slotName, out var slot))
             {
                 slot.Value = value;
                 kvp.Value.UpdatedAt = DateTime.UtcNow;
                 updated = true;
-                _logger.LogInformation("スロット更新：Conv={ConvId}, Slot={Slot}, Value={Value}", 
-                    conversationId, slotName, value);
+                _logger.LogInformation("スロット更新：Conv={ConvId}, Slot={Slot}, Value={Value}, Project={Project}", 
+                    conversationId, slotName, value, pid);
             }
         }
 
@@ -204,7 +230,7 @@ public class SlotFillingManager : ISlotFillingManager
     /// <inheritdoc />
     public async Task<bool> IsCompleteAsync(string conversationId, string scenario, string? projectId = null)
     {
-        var key = $"{conversationId}:{scenario}";
+        var key = GetSessionKey(conversationId, scenario, projectId);
         if (_sessions.TryGetValue(key, out var session))
             return session.IsComplete;
 
@@ -215,7 +241,7 @@ public class SlotFillingManager : ISlotFillingManager
     /// <inheritdoc />
     public async Task<SlotRequest?> GetNextRequiredSlotAsync(string conversationId, string scenario, string? projectId = null)
     {
-        var key = $"{conversationId}:{scenario}";
+        var key = GetSessionKey(conversationId, scenario, projectId);
 
         if (!_sessions.TryGetValue(key, out var session))
         {
@@ -239,20 +265,23 @@ public class SlotFillingManager : ISlotFillingManager
     /// <inheritdoc />
     public async Task ResetAsync(string conversationId, string? projectId = null)
     {
-        var keysToRemove = _sessions.Keys.Where(k => k.StartsWith($"{conversationId}:")).ToList();
+        var pid = GetResolvedProjectId(projectId);
+        var prefix = $"{pid}:{conversationId}:";
+        var keysToRemove = _sessions.Keys.Where(k => k.StartsWith(prefix)).ToList();
         foreach (var key in keysToRemove)
         {
             _sessions.TryRemove(key, out _);
         }
 
-        _logger.LogInformation("スロットセッションリセット：Conv={ConvId}", conversationId);
+        _logger.LogInformation("スロットセッションリセット：Conv={ConvId}, Project={Project}", conversationId, pid);
         await RemoveSessionsFromContextAsync(conversationId, projectId);
     }
 
     /// <inheritdoc />
     public async Task<string?> GetActiveScenarioAsync(string conversationId)
     {
-        var prefix = $"{conversationId}:";
+        var pid = GetResolvedProjectId(null);
+        var prefix = $"{pid}:{conversationId}:";
         var activeSession = _sessions
             .Where(kvp => kvp.Key.StartsWith(prefix) && !kvp.Value.IsComplete)
             .Select(kvp => kvp.Value.Scenario)
@@ -260,7 +289,7 @@ public class SlotFillingManager : ISlotFillingManager
         if (activeSession != null)
             return activeSession;
 
-        await EnsureSessionsLoadedAsync(conversationId, null);
+        await EnsureSessionsLoadedAsync(conversationId, pid);
         activeSession = _sessions
             .Where(kvp => kvp.Key.StartsWith(prefix) && !kvp.Value.IsComplete)
             .Select(kvp => kvp.Value.Scenario)
@@ -274,10 +303,12 @@ public class SlotFillingManager : ISlotFillingManager
         await EnsureSessionsLoadedAsync(conversationId, projectId);
 
         var slots = new Dictionary<string, string>();
+        var pid = GetResolvedProjectId(projectId);
+        var prefix = $"{pid}:{conversationId}:";
         
         foreach (var kvp in _sessions)
         {
-            if (kvp.Key.StartsWith($"{conversationId}:"))
+            if (kvp.Key.StartsWith(prefix))
             {
                 foreach (var slot in kvp.Value.GetCollectedValues())
                 {
@@ -346,7 +377,9 @@ public class SlotFillingManager : ISlotFillingManager
 
     private async Task EnsureSessionsLoadedAsync(string conversationId, string? projectId)
     {
-        if (_sessions.Keys.Any(k => k.StartsWith($"{conversationId}:")))
+        var pid = GetResolvedProjectId(projectId);
+        var prefix = $"{pid}:{conversationId}:";
+        if (_sessions.Keys.Any(k => k.StartsWith(prefix)))
             return;
 
         var context = await LoadContextDataAsync(conversationId, projectId);
@@ -361,7 +394,7 @@ public class SlotFillingManager : ISlotFillingManager
 
             var scenario = entry.Key;
             var session = CreateSessionFromPayload(conversationId, scenario, sessionObj, projectId);
-            _sessions[$"{conversationId}:{scenario}"] = session;
+            _sessions[GetSessionKey(conversationId, scenario, projectId)] = session;
         }
     }
 
@@ -378,8 +411,10 @@ public class SlotFillingManager : ISlotFillingManager
 
     private async Task PersistSessionsAsync(string conversationId, string? projectId)
     {
+        var pid = GetResolvedProjectId(projectId);
+        var prefix = $"{pid}:{conversationId}:";
         var slotSessions = new JsonObject();
-        foreach (var kvp in _sessions.Where(kvp => kvp.Key.StartsWith($"{conversationId}:")))
+        foreach (var kvp in _sessions.Where(kvp => kvp.Key.StartsWith(prefix)))
         {
             var session = kvp.Value;
             var slotsNode = new JsonObject();
@@ -488,19 +523,10 @@ WHERE conversation_id = @ConversationId",
     {
         using var scope = _scopeFactory.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
-        var resolvedProject = ResolveProjectId(projectId, scope.ServiceProvider.GetService<ProjectScope>());
+        var resolvedProject = GetResolvedProjectId(projectId);
         using var db = factory.CreateConnection(resolvedProject);
         db.Open();
         return await action(db);
-    }
-
-    private static string ResolveProjectId(string? projectId, ProjectScope? projectScope)
-    {
-        if (!string.IsNullOrWhiteSpace(projectId))
-            return projectId;
-        if (projectScope != null && projectScope.IsSet)
-            return projectScope.Current.Name;
-        return DefaultProjectId;
     }
 
     // ===== FSM 統合メソッド =====
@@ -554,7 +580,8 @@ WHERE conversation_id = @ConversationId",
     /// </summary>
     private async Task<IConversationFsm> GetOrRestoreFsmAsync(string conversationId, string? projectId)
     {
-        if (_fsmStates.TryGetValue(conversationId, out var existing))
+        var fsmKey = GetFsmKey(conversationId, projectId);
+        if (_fsmStates.TryGetValue(fsmKey, out var existing))
             return existing;
 
         // DB から状態を読み込んで復元
@@ -566,7 +593,7 @@ WHERE conversation_id = @ConversationId",
         });
 
         var scenario = await GetActiveScenarioAsync(conversationId) ?? "test_drive";
-        var resolvedProjectId = projectId ?? DefaultProjectId;
+        var resolvedProjectId = GetResolvedProjectId(projectId);
         var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
 
         if (!config.Scenarios.TryGetValue(scenario, out var scenarioConfig))
@@ -589,7 +616,7 @@ WHERE conversation_id = @ConversationId",
         for (int i = 0; i < dbState.lowConfidenceCount; i++)
             newFsm.TriggerLowConfidence(0.5);
 
-        _fsmStates.TryAdd(conversationId, newFsm);
+        _fsmStates.TryAdd(fsmKey, newFsm);
         return newFsm;
     }
 
@@ -634,7 +661,8 @@ WHERE conversation_id = @Id",
     /// </summary>
     public void ResetFsm(string conversationId)
     {
-        _fsmStates.TryRemove(conversationId, out _);
+        var fsmKey = GetFsmKey(conversationId, null);
+        _fsmStates.TryRemove(fsmKey, out _);
         _logger.LogInformation("[FSM] 状態リセット Conv={ConvId}", conversationId);
     }
 
