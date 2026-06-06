@@ -1,0 +1,250 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
+    var uploadUrl = $"/{currentProject}/Page/UploadPage";
+    var listUrl = $"/{currentProject}/DynamicEntity/Index?entity=document_task";
+    var dashboardUrl = $"/{currentProject}/Dashboard";
+
+    var completedSection = Model.ContainsKey("completed_tasks") ? Model["completed_tasks"] : (Rows: Enumerable.Empty<Dictionary<string, object>>(), Total: 0);
+    var allSection = Model.ContainsKey("all_tasks") ? Model["all_tasks"] : (Rows: Enumerable.Empty<Dictionary<string, object>>(), Total: 0);
+
+    var allRows = allSection.Rows.ToList();
+    int cntCompleted = allRows.Count(r => r.TryGetValue("Status", out var s) && s?.ToString() == "completed");
+    int cntProcessing = allRows.Count(r => r.TryGetValue("Status", out var s) && s?.ToString() == "processing");
+    int cntPending = allRows.Count(r => r.TryGetValue("Status", out var s) && s?.ToString() == "pending");
+    int cntFailed = allRows.Count(r => r.TryGetValue("Status", out var s) && s?.ToString() == "failed");
+    int cntTotal = allSection.Total;
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
+                <a href="/@currentProject" class="hover:underline">首页</a>
+                <span>/</span>
+                <span>查看提取数据</span>
+            </div>
+            <h1 class="text-2xl font-bold">🔍 查看提取数据</h1>
+            <p class="text-sm opacity-60 mt-1">AI 从文档中自动提取的结构化数据</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <a href="@uploadUrl" class="btn btn-sm btn-primary">📤 上传新文档</a>
+            <a href="@dashboardUrl" class="btn btn-sm btn-outline">📊 数据看板</a>
+        </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat bg-base-100 rounded-box border border-base-300 shadow-sm p-4">
+            <div class="stat-title text-xs opacity-60">总任务</div>
+            <div class="stat-value text-2xl">@cntTotal</div>
+            <div class="stat-desc">📄 全部文档</div>
+        </div>
+        <div class="stat bg-base-100 rounded-box border-2 border-success/30 shadow-sm p-4">
+            <div class="stat-title text-xs text-success">已完成</div>
+            <div class="stat-value text-2xl text-success">@cntCompleted</div>
+            <div class="stat-desc">✅ 提取成功</div>
+        </div>
+        <div class="stat bg-base-100 rounded-box border-2 border-warning/30 shadow-sm p-4">
+            <div class="stat-title text-xs text-warning">待处理 / 处理中</div>
+            <div class="stat-value text-2xl text-warning">@(cntPending + cntProcessing)</div>
+            <div class="stat-desc">⏳ 等待 AI 分析</div>
+        </div>
+        <div class="stat bg-base-100 rounded-box border-2 border-error/30 shadow-sm p-4">
+            <div class="stat-title text-xs text-error">失败</div>
+            <div class="stat-value text-2xl text-error">@cntFailed</div>
+            <div class="stat-desc">❌ 处理出错</div>
+        </div>
+    </div>
+
+    <!-- Completed tasks with collapsible JSON links -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="card-title text-base">✅ 已完成任务 — 提取结果</h2>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success">@completedSection.Total 条</span>
+                    @if (completedSection.Total > 50)
+                    {
+                        <span class="text-xs opacity-50">（显示最新 50 条）</span>
+                    }
+                </div>
+            </div>
+
+            @if (!completedSection.Rows.Any())
+            {
+                <div class="hero min-h-40">
+                    <div class="hero-content text-center">
+                        <div>
+                            <p class="text-4xl mb-3">📭</p>
+                            <h3 class="text-lg font-semibold opacity-70">暂无已完成的任务</h3>
+                            <p class="text-sm opacity-50 mt-1">请先上传文件，等待 AI 分析完成后可在此查看结果。</p>
+                            <a href="@uploadUrl" class="btn btn-primary btn-sm mt-4">📤 上传文档</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="space-y-2">
+                    @foreach (var row in completedSection.Rows)
+                    {
+                        var taskId = row.TryGetValue("Id", out var idVal) ? idVal?.ToString() ?? "" : "";
+                        var fileName = row.TryGetValue("FileName", out var fnVal) ? fnVal?.ToString() ?? "未知文件" : "未知文件";
+                        var docType = row.TryGetValue("DocumentType", out var dtVal) ? dtVal?.ToString() ?? "" : "";
+                        var jsonPath = row.TryGetValue("JsonPath", out var jpVal) ? jpVal?.ToString() ?? "" : "";
+                        var createdAt = row.TryGetValue("CreatedAt", out var caVal) ? caVal?.ToString() ?? "" : "";
+
+                        // Determine file type icon
+                        var fileExt = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+                        var fileIcon = fileExt switch
+                        {
+                            ".pdf" => "📕",
+                            ".jpg" or ".jpeg" or ".png" or ".webp" or ".bmp" => "🖼️",
+                            _ => "📄"
+                        };
+
+                        <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-box">
+                            <input type="checkbox" />
+                            <div class="collapse-title min-h-0 py-3 flex items-center gap-3">
+                                <span class="text-xl flex-shrink-0">@fileIcon</span>
+                                <div class="flex-1 min-w-0">
+                                    <span class="font-medium text-sm block truncate">@fileName</span>
+                                    <span class="text-xs opacity-50">@createdAt</span>
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    @if (!string.IsNullOrEmpty(docType))
+                                    {
+                                        <span class="badge badge-outline badge-sm hidden sm:inline-flex">@docType</span>
+                                    }
+                                    <span class="badge badge-success badge-sm">✅ 完成</span>
+                                </div>
+                            </div>
+                            <div class="collapse-content">
+                                <div class="pt-2 space-y-3">
+                                    @if (!string.IsNullOrEmpty(docType))
+                                    {
+                                        <div class="flex items-center gap-2 text-sm">
+                                            <span class="opacity-50 w-20 flex-shrink-0">文档类型</span>
+                                            <span class="badge badge-outline">@docType</span>
+                                        </div>
+                                    }
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <span class="opacity-50 w-20 flex-shrink-0">文件名称</span>
+                                        <span class="font-mono text-xs bg-base-100 px-2 py-0.5 rounded truncate max-w-xs">@fileName</span>
+                                    </div>
+                                    <div class="flex gap-2 flex-wrap pt-1">
+                                        @if (!string.IsNullOrEmpty(jsonPath))
+                                        {
+                                            <a href="@jsonPath" target="_blank" class="btn btn-sm btn-primary">
+                                                📥 查看完整 JSON
+                                            </a>
+                                            <a href="@jsonPath" download class="btn btn-sm btn-outline">
+                                                💾 下载 JSON
+                                            </a>
+                                        }
+                                        <a href="@listUrl" class="btn btn-sm btn-ghost">🗂️ 任务列表</a>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(jsonPath))
+                                    {
+                                        <div class="bg-base-100 border border-base-300 rounded-box p-3 text-xs opacity-60">
+                                            <span>💡 提示：JSON 文件包含此文档的全部提取字段（包括表格明细），点击"查看完整 JSON"可在新标签页中查看。</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- All tasks table -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="card-title text-base">🗂️ 全部任务状态</h2>
+                <a href="@listUrl" class="btn btn-xs btn-ghost">完整列表 →</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table table-sm w-full">
+                    <thead>
+                        <tr class="bg-base-200">
+                            <th class="text-xs font-semibold">文件名</th>
+                            <th class="text-xs font-semibold">文档类型</th>
+                            <th class="text-xs font-semibold">处理状态</th>
+                            <th class="text-xs font-semibold">上传时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!allRows.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center opacity-50 py-8">
+                                    暂无任务记录 —
+                                    <a href="@uploadUrl" class="link link-primary">立即上传文档</a>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var row in allRows)
+                            {
+                                var status = row.TryGetValue("Status", out var sv) ? sv?.ToString() ?? "" : "";
+                                var badgeClass = status switch
+                                {
+                                    "completed" => "badge-success",
+                                    "processing" => "badge-info",
+                                    "pending" => "badge-warning",
+                                    "failed" => "badge-error",
+                                    _ => "badge-ghost"
+                                };
+                                var statusLabel = status switch
+                                {
+                                    "completed" => "✅ 完成",
+                                    "processing" => "🔄 处理中",
+                                    "pending" => "⏳ 等待中",
+                                    "failed" => "❌ 失败",
+                                    _ => status
+                                };
+                                var dt = row.TryGetValue("DocumentType", out var dtv) ? dtv?.ToString() ?? "" : "";
+                                var fn = row.TryGetValue("FileName", out var fnv) ? fnv?.ToString() ?? "—" : "—";
+                                var ca = row.TryGetValue("CreatedAt", out var cav) ? cav?.ToString() ?? "—" : "—";
+
+                                <tr class="hover">
+                                    <td class="text-sm font-medium max-w-xs truncate">@fn</td>
+                                    <td class="text-sm">
+                                        @if (!string.IsNullOrEmpty(dt))
+                                        {
+                                            <span class="badge badge-outline badge-xs">@dt</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="opacity-30">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge @badgeClass badge-sm">@statusLabel</span>
+                                    </td>
+                                    <td class="text-xs opacity-60">@ca</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (allSection.Total > allRows.Count)
+            {
+                <p class="text-xs opacity-40 mt-2 text-right">显示最新 @allRows.Count 条，共 @allSection.Total 条 — <a href="@listUrl" class="link">查看全部</a></p>
+            }
+        </div>
+    </div>
+
+    <!-- Bottom quick action -->
+    <div class="flex justify-center gap-3 pb-2">
+        <a href="@uploadUrl" class="btn btn-primary">📤 上传新文档</a>
+        <a href="@dashboardUrl" class="btn btn-outline">📊 数据看板</a>
+    </div>
+</div>

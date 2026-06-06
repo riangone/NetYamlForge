@@ -1,0 +1,224 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
+    var uploadActionUrl = $"/{currentProject}/DynamicEntity/InvokeHeaderAction?entity=document_task&actionKey=batch_upload";
+    var listUrl = $"/{currentProject}/DynamicEntity/Index?entity=document_task";
+    var viewerUrl = $"/{currentProject}/Page/DataViewer";
+}
+
+<div class="space-y-6 max-w-2xl mx-auto">
+    <!-- Header -->
+    <div>
+        <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
+            <a href="/@currentProject" class="hover:underline">首页</a>
+            <span>/</span>
+            <span>上传文档</span>
+        </div>
+        <h1 class="text-2xl font-bold">📤 上传文档</h1>
+        <p class="text-sm opacity-60 mt-1">上传 PDF、图片或 ZIP 压缩包，AI 将自动分析并提取结构化数据</p>
+    </div>
+
+    <!-- Upload card -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+            <form id="upload-form" enctype="multipart/form-data" novalidate>
+                <!-- ZIP section -->
+                <div class="form-control mb-2">
+                    <label class="label pb-1">
+                        <span class="label-text font-semibold">📦 ZIP 压缩包</span>
+                        <span class="label-text-alt opacity-50">可选，最大 20MB</span>
+                    </label>
+                    <input type="file" name="ZipFile" accept=".zip"
+                           class="file-input file-input-bordered w-full" />
+                    <label class="label pt-1">
+                        <span class="label-text-alt opacity-40">将多个文档压缩成一个 ZIP 包后上传，批量处理更方便</span>
+                    </label>
+                </div>
+
+                <div class="divider text-xs opacity-40 my-2">或者</div>
+
+                <!-- Single/multi doc section -->
+                <div class="form-control mb-6">
+                    <label class="label pb-1">
+                        <span class="label-text font-semibold">📄 单个 / 多个文档文件</span>
+                        <span class="label-text-alt opacity-50">可选，每个最大 20MB</span>
+                    </label>
+                    <input type="file" name="DocFiles"
+                           accept=".pdf,.jpg,.jpeg,.png,.webp,.bmp"
+                           multiple
+                           class="file-input file-input-bordered w-full" />
+                    <label class="label pt-1">
+                        <span class="label-text-alt opacity-40">支持格式：PDF · JPG · PNG · WebP · BMP，可多选</span>
+                    </label>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3">
+                    <button type="submit" id="submit-btn" class="btn btn-primary flex-1">
+                        <span id="btn-icon">🚀</span>
+                        <span id="btn-text">开始上传并分析</span>
+                        <span id="btn-loading" class="loading loading-spinner loading-sm hidden"></span>
+                    </button>
+                    <a href="@listUrl" class="btn btn-ghost">取消</a>
+                </div>
+            </form>
+
+            <!-- Result area -->
+            <div id="upload-result" class="hidden mt-4">
+                <div id="result-success" class="alert alert-success hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold">上传成功！AI 正在后台分析</p>
+                        <p class="text-sm" id="result-message">请稍后在任务列表或数据查看器中查看结果。</p>
+                    </div>
+                </div>
+                <div id="result-error" class="alert alert-error hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="font-semibold">上传失败</p>
+                        <p class="text-sm" id="error-message"></p>
+                    </div>
+                </div>
+                <!-- Quick links after success -->
+                <div id="after-success-links" class="hidden flex gap-2 mt-3">
+                    <a href="@listUrl" class="btn btn-sm btn-outline">🗂️ 查看任务列表</a>
+                    <a href="@viewerUrl" class="btn btn-sm btn-ghost">🔍 查看提取数据</a>
+                    <button onclick="resetForm()" class="btn btn-sm btn-ghost">📤 继续上传</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="font-semibold text-sm mb-3">📖 使用说明</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="flex gap-2 text-sm">
+                    <span class="text-lg">1️⃣</span>
+                    <div>
+                        <p class="font-medium">选择文件</p>
+                        <p class="opacity-60 text-xs">选择 ZIP 包或直接选择 PDF / 图片文件（可多选）</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 text-sm">
+                    <span class="text-lg">2️⃣</span>
+                    <div>
+                        <p class="font-medium">提交上传</p>
+                        <p class="opacity-60 text-xs">点击"开始上传并分析"，文件将安全上传到服务器</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 text-sm">
+                    <span class="text-lg">3️⃣</span>
+                    <div>
+                        <p class="font-medium">AI 自动分析</p>
+                        <p class="opacity-60 text-xs">Gemini AI 在后台自动识别文档类型并提取全部字段</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 text-sm">
+                    <span class="text-lg">4️⃣</span>
+                    <div>
+                        <p class="font-medium">查看结果</p>
+                        <p class="opacity-60 text-xs">在"查看提取数据"页面查看结构化数据和 JSON 文件</p>
+                    </div>
+                </div>
+            </div>
+            <div class="divider my-2"></div>
+            <div class="flex gap-2 flex-wrap">
+                <a href="@listUrl" class="btn btn-xs btn-outline">🗂️ 任务列表</a>
+                <a href="@viewerUrl" class="btn btn-xs btn-ghost">🔍 提取数据</a>
+                <a href="/@currentProject/Dashboard" class="btn btn-xs btn-ghost">📊 数据看板</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('upload-form');
+    var submitBtn = document.getElementById('submit-btn');
+    var btnIcon = document.getElementById('btn-icon');
+    var btnText = document.getElementById('btn-text');
+    var btnLoading = document.getElementById('btn-loading');
+    var resultDiv = document.getElementById('upload-result');
+    var successDiv = document.getElementById('result-success');
+    var errorDiv = document.getElementById('result-error');
+    var afterLinks = document.getElementById('after-success-links');
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        var zipInput = form.querySelector('[name="ZipFile"]');
+        var docInput = form.querySelector('[name="DocFiles"]');
+
+        if ((!zipInput || !zipInput.files || zipInput.files.length === 0) &&
+            (!docInput || !docInput.files || docInput.files.length === 0)) {
+            showError('请至少选择一个文件（ZIP 压缩包或文档文件）。');
+            return;
+        }
+
+        setLoading(true);
+        hideResult();
+
+        var formData = new FormData(form);
+
+        try {
+            var response = await fetch('@uploadActionUrl', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            var data = {};
+            try { data = await response.json(); } catch (_) { }
+
+            if (response.ok && (data.success !== false)) {
+                showSuccess(data.message || 'AI 正在后台分析文档，请稍后在任务列表或数据查看器中查看结果。');
+                form.reset();
+            } else {
+                showError(data.message || data.error || '上传失败，请重试。');
+            }
+        } catch (err) {
+            showError('网络错误：' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    function setLoading(loading) {
+        submitBtn.disabled = loading;
+        btnIcon.classList.toggle('hidden', loading);
+        btnText.textContent = loading ? '上传中...' : '开始上传并分析';
+        btnLoading.classList.toggle('hidden', !loading);
+    }
+
+    function hideResult() {
+        resultDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+        afterLinks.classList.add('hidden');
+    }
+
+    function showSuccess(msg) {
+        document.getElementById('result-message').textContent = msg;
+        resultDiv.classList.remove('hidden');
+        successDiv.classList.remove('hidden');
+        afterLinks.classList.remove('hidden');
+    }
+
+    function showError(msg) {
+        document.getElementById('error-message').textContent = msg;
+        resultDiv.classList.remove('hidden');
+        errorDiv.classList.remove('hidden');
+    }
+
+    window.resetForm = function () {
+        form.reset();
+        hideResult();
+    };
+})();
+</script>

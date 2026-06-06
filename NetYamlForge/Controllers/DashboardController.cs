@@ -119,7 +119,7 @@ public class DashboardController : Controller
 
     // ─── Stats ───────────────────────────────────────────────────────────────
 
-    private async Task<List<DashboardStatViewModel>> BuildStatsAsync(
+    private Task<List<DashboardStatViewModel>> BuildStatsAsync(
         Models.DashboardConfig config)
     {
         var result = new List<DashboardStatViewModel>();
@@ -152,7 +152,7 @@ public class DashboardController : Controller
                 if (!string.IsNullOrEmpty(stat.Filter))
                     sql += $" WHERE {stat.Filter}";
 
-                var raw = await _db.ExecuteScalarAsync<object>(sql);
+                var raw = _db.ExecuteScalar<object>(sql);
                 var formatted = FormatScalar(raw, stat.Aggregate);
 
                 var routeValues = new RouteValueDictionary
@@ -191,12 +191,12 @@ public class DashboardController : Controller
             }
         }
 
-        return result;
+        return Task.FromResult(result);
     }
 
     // ─── Charts ──────────────────────────────────────────────────────────────
 
-    private async Task<List<DashboardChartViewModel>> BuildChartsAsync(
+    private Task<List<DashboardChartViewModel>> BuildChartsAsync(
         Models.DashboardConfig config)
     {
         var result = new List<DashboardChartViewModel>();
@@ -262,7 +262,7 @@ public class DashboardController : Controller
                 var orderDir = (chart.OrderDir?.ToLowerInvariant() == "asc")  ? "ASC"   : "DESC";
                 sql += $" ORDER BY {orderCol} {orderDir} LIMIT {chart.Limit}";
 
-                var rows   = await _db.QueryAsync(sql);
+                var rows   = _db.Query(sql);
                 var labels = new List<string>();
                 var values = new List<double>();
 
@@ -305,7 +305,7 @@ public class DashboardController : Controller
             }
         }
 
-        return result;
+        return Task.FromResult(result);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

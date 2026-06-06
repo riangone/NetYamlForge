@@ -1,0 +1,7 @@
+title: 上传文档
+description: 上传 PDF、图片或 ZIP 文件，AI 自动提取结构化数据
+isPublic: true
+
+sections:
+  - id: upload_placeholder
+    sourceType: none

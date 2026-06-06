@@ -1,0 +1,54 @@
+title: 查看提取数据
+description: 查看 AI 从文档中提取的结构化数据
+isPublic: true
+
+sections:
+  - id: completed_tasks
+    title: 已完成任务
+    sourceType: custom
+    source: >
+      SELECT Id, FileName, DocumentType, Status, JsonPath, CreatedAt
+      FROM DocumentTask
+      WHERE Status = 'completed'
+      ORDER BY CreatedAt DESC
+    columns:
+      Id:
+        label: "ID"
+        hidden: true
+      FileName:
+        label: "文件名"
+      DocumentType:
+        label: "文档类型"
+      Status:
+        label: "状态"
+      JsonPath:
+        label: "JSON路径"
+        hidden: true
+      CreatedAt:
+        label: "处理时间"
+    pageSize: 50
+    editable: false
+    readOnly: true
+
+  - id: all_tasks
+    title: 全部任务
+    sourceType: custom
+    source: >
+      SELECT Id, FileName, DocumentType, Status, CreatedAt
+      FROM DocumentTask
+      ORDER BY CreatedAt DESC
+    columns:
+      Id:
+        label: "ID"
+        hidden: true
+      FileName:
+        label: "文件名"
+      DocumentType:
+        label: "文档类型"
+      Status:
+        label: "状态"
+      CreatedAt:
+        label: "处理时间"
+    pageSize: 100
+    editable: false
+    readOnly: true
