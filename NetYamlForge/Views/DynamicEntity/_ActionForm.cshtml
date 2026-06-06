@@ -28,7 +28,10 @@
           hx-target="#list-container"
           hx-swap="innerHTML"
           hx-encoding="multipart/form-data"
-          hx-on::after-request="if(event.detail.successful){ document.getElementById('entity-form-modal').close(); }">
+          hx-disabled-elt="#action-submit-btn, #action-cancel-btn"
+          hx-on::before-request="document.getElementById('action-submit-spinner').classList.remove('hidden');"
+          hx-on::after-request="if(event.detail.successful){ document.getElementById('entity-form-modal').close(); showToast('操作已成功提交！AI 正在后台分析中。', 'success'); } else { document.getElementById('action-submit-spinner').classList.add('hidden'); var err = (event.detail.xhr && event.detail.xhr.responseText) ? event.detail.xhr.responseText : '请求处理失败。'; showToast(err, 'error'); }">
+        @Html.AntiForgeryToken()
 
         @if (hasInputs)
         {
@@ -50,7 +53,8 @@
                                    name="@input.Name"
                                    class="file-input file-input-bordered file-input-sm w-full"
                                    accept="@accept"
-                                   @(input.Required ? "required" : "") />
+                                   @(input.Required ? "required" : "")
+                                   @(input.Multiple ? "multiple" : "") />
                             <span class="label-text-alt text-base-content/50 mt-1">
                                 @if (!string.IsNullOrWhiteSpace(accept)) { <text>@accept &nbsp;|&nbsp;</text> }
                                 @maxMb
@@ -83,12 +87,13 @@
         }
 
         <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="btn btn-sm btn-ghost"
+            <button type="button" class="btn btn-sm btn-ghost" id="action-cancel-btn"
                     onclick="document.getElementById('entity-form-modal').close()">
                 キャンセル
             </button>
-            <button type="submit" class="btn btn-sm btn-primary">
-                実行
+            <button type="submit" class="btn btn-sm btn-primary flex items-center gap-1" id="action-submit-btn">
+                <span class="loading loading-spinner loading-xs hidden" id="action-submit-spinner"></span>
+                <span id="action-submit-text">実行</span>
             </button>
         </div>
     </form>

@@ -319,7 +319,7 @@ public class ProjectHookLoader : IProjectHookLoader
             try
             {
                 var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-                var stdLibs = new[] { "System.Runtime.dll", "System.Collections.dll", "System.Runtime.Extensions.dll", "System.Linq.dll", "System.Text.RegularExpressions.dll", "Microsoft.CSharp.dll" };
+                var stdLibs = new[] { "System.Runtime.dll", "System.Collections.dll", "System.Runtime.Extensions.dll", "System.Linq.dll", "System.Text.RegularExpressions.dll", "Microsoft.CSharp.dll", "System.IO.Compression.dll", "System.IO.Compression.ZipFile.dll", "System.Text.Json.dll" };
                 foreach (var lib in stdLibs)
                 {
                     var fullPath = Path.Combine(assemblyPath, lib);

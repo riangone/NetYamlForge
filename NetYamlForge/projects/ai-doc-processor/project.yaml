@@ -1,0 +1,38 @@
+name: ai-doc-processor
+displayName: AI Document Processor
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/ai-doc-processor.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "AI Document Processor"
+  navigation:
+    showDashboard: true
+    entities:
+      - document_task
+    items:
+      - label: Home
+        url: /ai-doc-processor
+        icon: 🏠
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📊
+      - label: "文档任务管理"
+        url: /ai-doc-processor/DynamicEntity/Index?entity=document_task
+        icon: 🗂️
+
+home_page:
+  icon: "🗂️"
+  tagline: "AI Document Processor"
+  tags: []

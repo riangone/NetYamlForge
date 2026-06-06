@@ -19,16 +19,16 @@ namespace NetYamlForge.Services.BatchJob;
 public class AiCommunicationExecutor : IBatchStepHandler
 {
     public string StepType => "ai_communication_sender";
-    private readonly IGeminiCliService _gemini;
+    private readonly IAntigravityCliService _antigravity;
     private readonly IEmailServiceFactory _emailFactory;
     private readonly ILogger<AiCommunicationExecutor> _logger;
 
     public AiCommunicationExecutor(
-        IGeminiCliService gemini,
+        IAntigravityCliService antigravity,
         IEmailServiceFactory emailFactory,
         ILogger<AiCommunicationExecutor> logger)
     {
-        _gemini = gemini;
+        _antigravity = antigravity;
         _emailFactory = emailFactory;
         _logger = logger;
     }
@@ -148,15 +148,15 @@ public class AiCommunicationExecutor : IBatchStepHandler
                     continue;
                 }
 
-                // Gemini CLI でパーソナライズメッセージ生成
+                // Antigravity CLI でパーソナライズメッセージ生成
                 var prompt = BuildNurturingEmailPrompt(
                     customerName, vehicleInterest, budget, leadScore, taskType, aiRecommendation, aiReasoning);
-                var aiResult = await _gemini.PromptJsonAsync<EmailMessageResult>(
+                var aiResult = await _antigravity.PromptJsonAsync<EmailMessageResult>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null)
                 {
-                    _logger.LogWarning("[AiCommExecutor] Gemini returned null for task {TaskId}", taskId);
+                    _logger.LogWarning("[AiCommExecutor] Antigravity returned null for task {TaskId}", taskId);
                     continue;
                 }
 
@@ -173,7 +173,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
                     ) VALUES (
                         @CommId, @LeadId, @CustomerId, @TaskId,
                         'email', @Subject, @Body,
-                        1, 'gemini', @Confidence,
+                        1, 'antigravity', @Confidence,
                         @Status, @RequiresHuman, @Now, @Now
                     )", new
                 {
@@ -317,7 +317,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
                     customerName, vehicleInterest, make, model, yearStr, color,
                     basePrice, finalPrice, discountRate, monthlyPayment,
                     accessories, notes, validUntil, leadScore);
-                var aiResult = await _gemini.PromptJsonAsync<EmailMessageResult>(
+                var aiResult = await _antigravity.PromptJsonAsync<EmailMessageResult>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null) continue;
@@ -334,7 +334,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
                     ) VALUES (
                         @CommId, @LeadId, @CustomerId,
                         'email', @Subject, @Body,
-                        1, 'gemini', @Confidence,
+                        1, 'antigravity', @Confidence,
                         @Status, @RequiresHuman, @Now, @Now
                     )", new
                 {
@@ -442,7 +442,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
             {
                 // AI で無返信状態を分析し、次のアクションを提案
                 var prompt = BuildNoResponsePrompt(customerName, subject, sentAt, leadScore);
-                var aiResult = await _gemini.PromptJsonAsync<NoResponseAnalysis>(
+                var aiResult = await _antigravity.PromptJsonAsync<NoResponseAnalysis>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null) continue;
@@ -475,7 +475,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
 
                 await LogActionAsync(db, tx, "no_response_followup",
                     "ai_communications", commId,
-                    "gemini", $"無返信フォロー: {customerName}",
+                    "antigravity", $"無返信フォロー: {customerName}",
                     $"推奨: {aiResult.SuggestedChannel} - {aiResult.FollowUpTitle}",
                     0);
 

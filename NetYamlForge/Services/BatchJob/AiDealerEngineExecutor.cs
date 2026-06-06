@@ -15,12 +15,12 @@ public class AiDealerEngineExecutor : IBatchStepHandler
 {
     public string StepType => "ai_dealer_engine";
 
-    private readonly IGeminiCliService _gemini;
+    private readonly IAntigravityCliService _antigravity;
     private readonly ILogger<AiDealerEngineExecutor> _logger;
 
-    public AiDealerEngineExecutor(IGeminiCliService gemini, ILogger<AiDealerEngineExecutor> logger)
+    public AiDealerEngineExecutor(IAntigravityCliService antigravity, ILogger<AiDealerEngineExecutor> logger)
     {
-        _gemini = gemini;
+        _antigravity = antigravity;
         _logger = logger;
     }
 
@@ -113,7 +113,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             try
             {
                 var prompt = BuildLeadScoringPrompt(lead);
-                var aiResult = await _gemini.PromptJsonAsync<LeadScoringResult>(
+                var aiResult = await _antigravity.PromptJsonAsync<LeadScoringResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;
@@ -159,7 +159,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
 
                 var elapsedMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMs;
                 await LogActionAsync(db, tx, "lead_scored", "sales_leads", (string?)lead.lead_id,
-                    "gemini", $"リードスコア更新: {lead.customer_name}",
+                    "antigravity", $"リードスコア更新: {lead.customer_name}",
                     $"スコア {lead.lead_score ?? 0} → {aiResult.NewScore} / 確信度 {aiResult.ConfidenceScore}%",
                     (int)elapsedMs);
 
@@ -210,7 +210,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             try
             {
                 var prompt = BuildNurturingPrompt(lead);
-                var aiResult = await _gemini.PromptJsonAsync<NurturingResult>(
+                var aiResult = await _antigravity.PromptJsonAsync<NurturingResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;
@@ -280,7 +280,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
 
                 var elapsedMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMs;
                 await LogActionAsync(db, tx, "nurturing_created", "sales_leads", (string?)lead.lead_id,
-                    "gemini", $"育成タスク生成: {lead.customer_name}",
+                    "antigravity", $"育成タスク生成: {lead.customer_name}",
                     $"{aiResult.ActionType}: {aiResult.TaskTitle}",
                     (int)elapsedMs);
 
@@ -338,7 +338,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             try
             {
                 var prompt = BuildQuotePrompt(lead);
-                var aiResult = await _gemini.PromptJsonAsync<QuoteResult>(
+                var aiResult = await _antigravity.PromptJsonAsync<QuoteResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;
@@ -415,7 +415,7 @@ public class AiDealerEngineExecutor : IBatchStepHandler
 
                 var elapsedMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - startMs;
                 await LogActionAsync(db, tx, "quote_generated", "ai_quotes", quoteId,
-                    "gemini", $"AI見積生成: {lead.customer_name}",
+                    "antigravity", $"AI見積生成: {lead.customer_name}",
                     $"¥{aiResult.FinalPrice:N0} (割引率 {aiResult.DiscountRate}%)",
                     (int)elapsedMs);
 

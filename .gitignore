@@ -37,3 +37,7 @@ Thumbs.db
 # Claude memory
 memory/
 NetYamlForge/projects/jpcs/database/jpcs.db
+
+# ai-doc-processor: exclude uploaded files and database
+NetYamlForge/wwwroot/uploads/ai-doc-processor/
+NetYamlForge/projects/ai-doc-processor/database/*.db

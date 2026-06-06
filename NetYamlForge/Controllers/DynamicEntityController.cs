@@ -315,6 +315,39 @@ public class DynamicEntityController : BaseProjectController
         var fkData = await _foreignKeyDataService.LoadForFormAsync(meta);
         var breadcrumbs = _navigationService.BuildBreadcrumbChain(returnUrl);
         var vm = new DynamicDetailViewModel(entity, meta, item, fkData, breadcrumbs, returnUrl);
+
+        if (entity.Equals("document_task", StringComparison.OrdinalIgnoreCase) && item != null)
+        {
+            var itemDict = item as IDictionary<string, object>;
+            if (itemDict != null &&
+                itemDict.TryGetValue("ExtractedTable", out var tbl) && tbl != null &&
+                itemDict.TryGetValue("ExtractedId", out var extId) && extId != null)
+            {
+                var tableStr = tbl.ToString();
+                var idStr = extId.ToString();
+                if (!string.IsNullOrWhiteSpace(tableStr) && !string.IsNullOrWhiteSpace(idStr) && int.TryParse(idStr, out var intId) && intId > 0)
+                {
+                    var cleanTable = new string(tableStr.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
+                    if (!string.IsNullOrEmpty(cleanTable))
+                    {
+                        try
+                        {
+                            var selectStatement = string.Format("SELECT * FROM \"{0}\" WHERE Id = @Id", cleanTable);
+                            var extRow = await _db.QueryFirstOrDefaultAsync<dynamic>(selectStatement, new { Id = intId });
+                            if (extRow != null)
+                            {
+                                ViewBag.ExtractedData = extRow;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to load extracted dynamic data from {Table} with ID {Id}", cleanTable, idStr);
+                        }
+                    }
+                }
+            }
+        }
+
         return View("DetailPage", vm);
     }
 
@@ -794,59 +827,92 @@ public class DynamicEntityController : BaseProjectController
     /// 成功した場合は (inputName → 一時ファイル絶対パス) の辞書を返します。
     /// バリデーションエラーがある場合はエラーメッセージを返します。
     /// </summary>
-    private static async Task<(Dictionary<string, string> Files, string? Error)> SaveActionUploadedFilesAsync(
+    private static async Task<(Dictionary<string, string> Files, Dictionary<string, List<string>> MultipleFiles, string? Error)> SaveActionUploadedFilesAsync(
         NetYamlForge.Models.ActionDefinition actionDef,
         IFormFileCollection formFiles)
     {
         var saved = new Dictionary<string, string>();
-        if (actionDef.Inputs == null) return (saved, null);
+        var savedMultiple = new Dictionary<string, List<string>>();
+        if (actionDef.Inputs == null) return (saved, savedMultiple, null);
 
         foreach (var input in actionDef.Inputs.Where(i => i.Type == "file"))
         {
-            var formFile = formFiles.GetFile(input.Name);
-            if (formFile == null || formFile.Length == 0)
+            var files = formFiles.GetFiles(input.Name);
+            if (files == null || files.Count == 0)
             {
                 if (input.Required)
-                    return (saved, $"'{input.Label ?? input.Name}' は必須です。");
+                    return (saved, savedMultiple, $"'{input.Label ?? input.Name}' は必須です。");
                 continue;
             }
 
-            // サイズ検証
-            var maxBytes = input.MaxSizeBytes ?? 10L * 1024 * 1024;
-            if (formFile.Length > maxBytes)
-                return (saved, $"'{input.Label ?? input.Name}' のファイルサイズが上限（{maxBytes / 1024 / 1024} MB）を超えています。");
-
-            // 拡張子検証
-            if (!string.IsNullOrWhiteSpace(input.AllowedExtensions))
+            var pathList = new List<string>();
+            foreach (var formFile in files)
             {
-                var allowed = input.AllowedExtensions
-                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                    .Select(e => e.TrimStart('.').ToLowerInvariant())
-                    .ToHashSet();
-                var ext = Path.GetExtension(formFile.FileName).TrimStart('.').ToLowerInvariant();
-                if (!allowed.Contains(ext))
-                    return (saved, $"'{input.Label ?? input.Name}' の拡張子 .{ext} は許可されていません（許可: {input.AllowedExtensions}）。");
+                if (formFile.Length == 0) continue;
+
+                // サイズ検証
+                var maxBytes = input.MaxSizeBytes ?? 10L * 1024 * 1024;
+                if (formFile.Length > maxBytes)
+                    return (saved, savedMultiple, $"'{input.Label ?? input.Name}' のファイルサイズが上限（{maxBytes / 1024 / 1024} MB）を超えています。");
+
+                // 拡張子検証
+                if (!string.IsNullOrWhiteSpace(input.AllowedExtensions))
+                {
+                    var allowed = input.AllowedExtensions
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Select(e => e.TrimStart('.').ToLowerInvariant())
+                        .ToHashSet();
+                    var ext = Path.GetExtension(formFile.FileName).TrimStart('.').ToLowerInvariant();
+                    if (!allowed.Contains(ext))
+                        return (saved, savedMultiple, $"'{input.Label ?? input.Name}' の拡張子 .{ext} は許可されていません（許可: {input.AllowedExtensions}）。");
+                }
+
+                // 一時ファイルに保存
+                var tempDir = Path.Combine(Path.GetTempPath(), "netyamlforge_uploads");
+                Directory.CreateDirectory(tempDir);
+                var safeFilename = $"{Guid.NewGuid():N}_{Path.GetFileName(formFile.FileName)}";
+                var tempPath = Path.Combine(tempDir, safeFilename);
+
+                await using var fs = System.IO.File.Create(tempPath);
+                await formFile.CopyToAsync(fs);
+
+                pathList.Add(tempPath);
             }
 
-            // 一時ファイルに保存
-            var tempDir = Path.Combine(Path.GetTempPath(), "netyamlforge_uploads");
-            Directory.CreateDirectory(tempDir);
-            var safeFilename = $"{Guid.NewGuid():N}_{Path.GetFileName(formFile.FileName)}";
-            var tempPath = Path.Combine(tempDir, safeFilename);
+            if (pathList.Count == 0 && input.Required)
+            {
+                return (saved, savedMultiple, $"'{input.Label ?? input.Name}' は必須です。");
+            }
 
-            await using var fs = System.IO.File.Create(tempPath);
-            await formFile.CopyToAsync(fs);
-
-            saved[input.Name] = tempPath;
+            if (pathList.Count > 0)
+            {
+                saved[input.Name] = pathList[0];
+                savedMultiple[input.Name] = pathList;
+            }
         }
 
-        return (saved, null);
+        return (saved, savedMultiple, null);
     }
 
     /// <summary>アクション実行後に一時ファイルを削除します。</summary>
-    private void CleanupTempFiles(Dictionary<string, string> files)
+    private void CleanupTempFiles(Dictionary<string, string> files, Dictionary<string, List<string>>? multipleFiles = null)
     {
+        var allPaths = new HashSet<string>();
         foreach (var path in files.Values)
+        {
+            allPaths.Add(path);
+        }
+        if (multipleFiles != null)
+        {
+            foreach (var paths in multipleFiles.Values)
+            {
+                foreach (var path in paths)
+                {
+                    allPaths.Add(path);
+                }
+            }
+        }
+        foreach (var path in allPaths)
         {
             try { System.IO.File.Delete(path); }
             catch (Exception ex)
@@ -906,9 +972,21 @@ public class DynamicEntityController : BaseProjectController
             .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
         // ファイル入力を一時領域に保存する
-        var (savedFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
-        if (fileError != null)
-            return BadRequest(fileError);
+        Dictionary<string, string> savedFiles;
+        Dictionary<string, List<string>> savedMultipleFiles;
+        try
+        {
+            var (sFiles, sMultipleFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
+            if (fileError != null)
+                return BadRequest(fileError);
+            savedFiles = sFiles;
+            savedMultipleFiles = sMultipleFiles;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "保存上传文件时发生异常");
+            return BadRequest($"上传文件处理失败：{ex.Message}");
+        }
 
         var ctx = new CustomActionContext
         {
@@ -918,6 +996,7 @@ public class DynamicEntityController : BaseProjectController
             RecordId = null,
             Inputs = inputs,
             Files = savedFiles,
+            MultipleFiles = savedMultipleFiles,
             UserName = User.Identity?.Name
         };
 
@@ -933,7 +1012,7 @@ public class DynamicEntityController : BaseProjectController
         }
         finally
         {
-            CleanupTempFiles(savedFiles);
+            CleanupTempFiles(savedFiles, savedMultipleFiles);
         }
 
         if (!result.Ok)
@@ -1073,9 +1152,21 @@ public class DynamicEntityController : BaseProjectController
             .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
         // ファイル入力を一時領域に保存する
-        var (savedFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
-        if (fileError != null)
-            return BadRequest(fileError);
+        Dictionary<string, string> savedFiles;
+        Dictionary<string, List<string>> savedMultipleFiles;
+        try
+        {
+            var (sFiles, sMultipleFiles, fileError) = await SaveActionUploadedFilesAsync(actionDef, Request.Form.Files);
+            if (fileError != null)
+                return BadRequest(fileError);
+            savedFiles = sFiles;
+            savedMultipleFiles = sMultipleFiles;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "保存上传文件时发生异常");
+            return BadRequest($"上传文件处理失败：{ex.Message}");
+        }
 
         var ctx = new NetYamlForge.Services.Hooks.CustomActionContext
         {
@@ -1085,6 +1176,7 @@ public class DynamicEntityController : BaseProjectController
             RecordId = keyValue,
             Inputs = inputs,
             Files = savedFiles,
+            MultipleFiles = savedMultipleFiles,
             UserName = User.Identity?.Name
         };
 
@@ -1118,7 +1210,7 @@ public class DynamicEntityController : BaseProjectController
         }
         finally
         {
-            CleanupTempFiles(ctx.Files);
+            CleanupTempFiles(ctx.Files, ctx.MultipleFiles);
         }
 
         if (!result.Ok)

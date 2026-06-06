@@ -1,0 +1,81 @@
+imports: []
+entities:
+  document_task:
+    table: DocumentTask
+    key: Id
+    displayName: "AI文档处理任务"
+    softDelete: false
+    isPublic: true
+
+    actions:
+      batch_upload:
+        label: "批量上传文档/ZIP"
+        scope: header
+        handler: batch_upload_zip_handler
+        confirm: "您确定要上传文件并由 AI 批量提取内容吗？"
+        inputs:
+          - name: ZipFile
+            type: file
+            label: "选择 ZIP 压缩包 (可选)"
+            required: false
+            allowedExtensions: ".zip"
+            maxSizeBytes: 20971520 # 20MB
+          - name: DocFiles
+            type: file
+            label: "或选择单个/多个文档文件 (PDF/图片)"
+            required: false
+            multiple: true
+            allowedExtensions: ".pdf,.jpg,.jpeg,.png,.webp,.bmp"
+            maxSizeBytes: 20971520 # 20MB
+
+    columns:
+      Id:
+        type: int
+        label: "ID"
+        identity: true
+        hidden: true
+      FileName:
+        type: string
+        label: "文件名"
+        searchable: true
+        sortable: true
+      DocumentType:
+        type: string
+        label: "文档类型"
+        sortable: true
+      Status:
+        type: string
+        label: "状态"
+        sortable: true
+      FilePath:
+        type: string
+        label: "原始文件"
+      JsonPath:
+        type: string
+        label: "JSON输出"
+      CreatedAt:
+        type: datetime
+        label: "处理时间"
+        sortable: true
+
+    forms:
+      FileName:
+        type: string
+        label: "文件名"
+        editable: false
+      FilePath:
+        type: string
+        label: "文件路径"
+        editable: false
+      Status:
+        type: string
+        label: "状态"
+        editable: false
+      DocumentType:
+        type: string
+        label: "文档类型"
+        editable: false
+      JsonPath:
+        type: string
+        label: "JSON输出路径"
+        editable: false

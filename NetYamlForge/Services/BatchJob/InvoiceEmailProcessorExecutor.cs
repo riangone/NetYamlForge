@@ -21,13 +21,13 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
 {
     public string StepType => "invoice_email_processor";
     private readonly IDocumentPdfService _docPdf;
-    private readonly IGeminiCliService _geminiCli;
+    private readonly IAntigravityCliService _antigravityCli;
     private readonly ILogger<InvoiceEmailProcessorExecutor> _logger;
 
-    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, IGeminiCliService geminiCli, ILogger<InvoiceEmailProcessorExecutor> logger)
+    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, IAntigravityCliService antigravityCli, ILogger<InvoiceEmailProcessorExecutor> logger)
     {
         _docPdf = docPdf;
-        _geminiCli = geminiCli;
+        _antigravityCli = antigravityCli;
         _logger = logger;
     }
 
@@ -229,7 +229,7 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
 
         var prompt = $"{systemPrompt}\n\nメール本文:\n{emailBody}";
 
-        var extracted = await _geminiCli.PromptJsonAsync<ExtractedInvoiceContainer>(prompt, aiModel, projectName, cancellationToken);
+        var extracted = await _antigravityCli.PromptJsonAsync<ExtractedInvoiceContainer>(prompt, aiModel, projectName, cancellationToken);
         
         if (extracted?.Invoices != null)
         {

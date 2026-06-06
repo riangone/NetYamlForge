@@ -204,6 +204,12 @@
                                 {
                                     <a class="link link-hover" href="@targetUrl">@formattedValue</a>
                                 }
+                                else if (formattedValue != null && (formattedValue.StartsWith("/") || formattedValue.StartsWith("http://") || formattedValue.StartsWith("https://")))
+                                {
+                                    <a class="link link-primary font-semibold" href="@formattedValue" target="_blank">
+                                        @(System.IO.Path.GetFileName(formattedValue))
+                                    </a>
+                                }
                                 else
                                 {
                                     @formattedValue

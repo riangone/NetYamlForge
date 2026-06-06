@@ -31,6 +31,13 @@ public class CustomActionContext
     /// </summary>
     public Dictionary<string, string> Files { get; set; } = new();
 
+    /// <summary>
+    /// アップロードされた複数のファイルの一時パスマップ。
+    /// キー: ActionInputField.Name（YAML 定義名）、値: 一時ファイルの絶対パスリスト。
+    /// ハンドラー実行後に自動削除されます。
+    /// </summary>
+    public Dictionary<string, List<string>> MultipleFiles { get; set; } = new();
+
     /// <summary>操作を実行したユーザー名</summary>
     public string? UserName { get; set; }
 

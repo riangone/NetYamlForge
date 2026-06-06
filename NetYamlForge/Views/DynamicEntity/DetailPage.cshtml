@@ -141,6 +141,12 @@
                                 {
                                     <span class="text-base-content/30 italic">—</span>
                                 }
+                                else if (displayValue.StartsWith("/") || displayValue.StartsWith("http://") || displayValue.StartsWith("https://"))
+                                {
+                                    <a class="link link-primary font-semibold" href="@displayValue" target="_blank">
+                                        @displayValue
+                                    </a>
+                                }
                                 else if (colDef.Type == "boolean")
                                 {
                                     if (displayValue is "true" or "True" or "1" or "Yes" or "はい")
@@ -164,6 +170,38 @@
                         </div>
                     }
                 </dl>
+            }
+
+            @if (ViewBag.ExtractedData != null)
+            {
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="text-md font-bold text-base-content/80 mb-4 flex items-center gap-2">
+                        🤖 AI 提取的结构化数据结果 (来自关联数据库表)
+                    </h3>
+                    <div class="overflow-x-auto bg-base-200 rounded-lg p-4">
+                        <table class="table table-compact w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th class="bg-base-300">字段键 (Key)</th>
+                                    <th class="bg-base-300">提取值 (Value)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var prop in (IDictionary<string, object>)ViewBag.ExtractedData)
+                                {
+                                    if (prop.Key.Equals("Id", StringComparison.OrdinalIgnoreCase) || prop.Key.Equals("DocumentTaskId", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        continue;
+                                    }
+                                    <tr>
+                                        <td class="font-semibold text-base-content/70">@prop.Key</td>
+                                        <td class="text-base-content font-mono">@prop.Value</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             }
         </div>
     </div>

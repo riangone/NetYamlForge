@@ -14,12 +14,12 @@ namespace NetYamlForge.Services.BatchJob;
 
 public class AiEmailChatExecutor
 {
-    private readonly IGeminiCliService _geminiCli;
+    private readonly IAntigravityCliService _antigravityCli;
     private readonly ILogger<AiEmailChatExecutor> _logger;
 
-    public AiEmailChatExecutor(IGeminiCliService geminiCli, ILogger<AiEmailChatExecutor> logger)
+    public AiEmailChatExecutor(IAntigravityCliService antigravityCli, ILogger<AiEmailChatExecutor> logger)
     {
-        _geminiCli = geminiCli;
+        _antigravityCli = antigravityCli;
         _logger = logger;
     }
 
@@ -68,7 +68,7 @@ public class AiEmailChatExecutor
             var aiModel = env.GetValueOrDefault("AI_MODEL", "gpt-3.5-turbo");
             var aiSystemPrompt = env.GetValueOrDefault("AI_SYSTEM_PROMPT", "You are a helpful AI assistant. Reply to the user's email.");
             var targetSender = env.GetValueOrDefault("TARGET_SENDER_EMAIL");
-            var useGeminiCli = bool.Parse(env.GetValueOrDefault("USE_GEMINI_CLI", "false"));
+            var useGeminiCli = bool.Parse(env.GetValueOrDefault("USE_GEMINI_CLI", "false")) || bool.Parse(env.GetValueOrDefault("USE_ANTIGRAVITY_CLI", "false"));
             var invoiceKeywordsRaw = env.GetValueOrDefault("INVOICE_SUBJECT_KEYWORDS", "");
             var invoiceKeywords = invoiceKeywordsRaw
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -122,7 +122,7 @@ public class AiEmailChatExecutor
                 if (useGeminiCli)
                 {
                     var prompt = $"System: {aiSystemPrompt}\n\nUser Email Content:\n{body}";
-                    replyContent = await _geminiCli.PromptAsync(prompt, aiModel, projectName, cancellationToken);
+                    replyContent = await _antigravityCli.PromptAsync(prompt, aiModel, projectName, cancellationToken);
                 }
                 else if (!string.IsNullOrEmpty(aiKey))
                 {

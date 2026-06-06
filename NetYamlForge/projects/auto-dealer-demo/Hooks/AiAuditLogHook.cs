@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace AutoDealer.Hooks;
 

@@ -1,0 +1,21 @@
+header:
+  title: AI Document Processor
+
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /ai-doc-processor
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "AI Document Processor — powered by NetYamlForge"

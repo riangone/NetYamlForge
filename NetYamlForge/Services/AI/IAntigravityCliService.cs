@@ -3,9 +3,9 @@ using System.Text.Json;
 namespace NetYamlForge.Services.AI;
 
 /// <summary>
-/// Gemini CLI を使用して AI プロンプトを実行するサービス
+/// Antigravity CLI を使用して AI プロンプトを実行する服务
 /// </summary>
-public interface IGeminiCliService
+public interface IAntigravityCliService
 {
     /// <summary>
     /// AI にプロンプトを送信し、テキストの回答を得る

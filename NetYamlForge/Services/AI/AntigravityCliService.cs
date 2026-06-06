@@ -5,12 +5,12 @@ using System.Text.RegularExpressions;
 
 namespace NetYamlForge.Services.AI;
 
-public class GeminiCliService : IGeminiCliService
+public class AntigravityCliService : IAntigravityCliService
 {
-    private readonly ILogger<GeminiCliService> _logger;
+    private readonly ILogger<AntigravityCliService> _logger;
     private readonly IConfiguration _configuration;
 
-    public GeminiCliService(ILogger<GeminiCliService> logger, IConfiguration configuration)
+    public AntigravityCliService(ILogger<AntigravityCliService> logger, IConfiguration configuration)
     {
         _logger = logger;
         _configuration = configuration;
@@ -25,12 +25,10 @@ public class GeminiCliService : IGeminiCliService
             ? "" 
             : $"--model \"{aiModel}\"";
         
-        // Use -o json for structured output if we want reliability, but PromptAsync is for text.
-        // Actually, gemini cli -o json returns { "response": "..." } which is safer.
         var startInfo = new ProcessStartInfo
         {
-            FileName = "gemini",
-            Arguments = $"-p \"{prompt.Replace("\\", "\\\\").Replace("\"", "\\\"")}\" {modelArg} -o json",
+            FileName = "antigravity",
+            Arguments = $"-p \"{prompt.Replace("\\", "\\\\").Replace("\"", "\\\"")}\" {modelArg} --dangerously-skip-permissions",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             RedirectStandardInput = true,
@@ -66,13 +64,13 @@ public class GeminiCliService : IGeminiCliService
         catch (OperationCanceledException)
         {
             if (!process.HasExited) process.Kill(true);
-            _logger.LogError("Gemini CLI timed out after 90 seconds.");
+            _logger.LogError("Antigravity CLI timed out after 90 seconds.");
             return "";
         }
 
         if (process.ExitCode != 0)
         {
-            _logger.LogError("Gemini CLI failed with exit code {ExitCode}. Error: {Error}", process.ExitCode, errorBuilder.ToString());
+            _logger.LogError("Antigravity CLI failed with exit code {ExitCode}. Error: {Error}", process.ExitCode, errorBuilder.ToString());
             return "";
         }
 

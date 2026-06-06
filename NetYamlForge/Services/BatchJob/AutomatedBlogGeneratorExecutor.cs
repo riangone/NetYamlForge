@@ -10,12 +10,12 @@ namespace NetYamlForge.Services.BatchJob;
 public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
 {
     public string StepType => "automated_blog_generator";
-    private readonly IGeminiCliService _gemini;
+    private readonly IAntigravityCliService _antigravity;
     private readonly ILogger<AutomatedBlogGeneratorExecutor> _logger;
 
-    public AutomatedBlogGeneratorExecutor(IGeminiCliService gemini, ILogger<AutomatedBlogGeneratorExecutor> logger)
+    public AutomatedBlogGeneratorExecutor(IAntigravityCliService antigravity, ILogger<AutomatedBlogGeneratorExecutor> logger)
     {
-        _gemini = gemini;
+        _antigravity = antigravity;
         _logger = logger;
     }
 
@@ -82,7 +82,7 @@ public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
                 prompt = prompt.Replace("{target}", target).Replace("{language}", language);
             }
 
-            var blogData = await _gemini.PromptJsonAsync<BlogArticle>(prompt, projectName: projectName, cancellationToken: cancellationToken);
+            var blogData = await _antigravity.PromptJsonAsync<BlogArticle>(prompt, projectName: projectName, cancellationToken: cancellationToken);
 
             if (blogData == null || string.IsNullOrEmpty(blogData.Content))
             {

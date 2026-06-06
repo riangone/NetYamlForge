@@ -7,16 +7,16 @@ namespace NetYamlForge.Controllers;
 [Route("{project}/AiAssistant")]
 public class AiAssistantController : Controller
 {
-    private readonly IGeminiCliService _gemini;
+    private readonly IAntigravityCliService _antigravity;
     private readonly ProjectScope _projectScope;
     private readonly ILogger<AiAssistantController> _logger;
 
     public AiAssistantController(
-        IGeminiCliService gemini,
+        IAntigravityCliService antigravity,
         ProjectScope projectScope,
         ILogger<AiAssistantController> logger)
     {
-        _gemini = gemini;
+        _antigravity = antigravity;
         _projectScope = projectScope;
         _logger = logger;
     }
@@ -40,7 +40,7 @@ public class AiAssistantController : Controller
 
         var fullPrompt = $"{systemPrompt}\n\nUser: {message}\nAssistant:";
 
-        var response = await _gemini.PromptAsync(fullPrompt, projectName: projectName);
+        var response = await _antigravity.PromptAsync(fullPrompt, projectName: projectName);
 
         if (string.IsNullOrEmpty(response))
         {

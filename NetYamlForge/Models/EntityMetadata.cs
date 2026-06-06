@@ -653,7 +653,7 @@ public class ActionInputField
 {
     public string Name { get; set; } = default!;
     /// <summary>
-    /// 入力フィールドの種別。
+    /// 入力フィールドの種别。
     /// string / text / textarea / date / number / dropdown（Options 指定時）/ file
     /// </summary>
     public string Type { get; set; } = "string";
@@ -665,6 +665,8 @@ public class ActionInputField
     public string? AllowedExtensions { get; set; }
     /// <summary>type: file — 最大ファイルサイズ（バイト）。省略時は 10MB。</summary>
     public long? MaxSizeBytes { get; set; }
+    /// <summary>type: file — 複数ファイルの選択を許可するかどうか</summary>
+    public bool Multiple { get; set; }
 }
 
 /// <summary>カスタムアクションのフック定義（実行前後）</summary>
