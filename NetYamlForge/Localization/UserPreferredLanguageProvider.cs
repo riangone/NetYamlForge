@@ -16,6 +16,19 @@ public class UserPreferredLanguageProvider : RequestCultureProvider
             throw new ArgumentNullException(nameof(httpContext));
         }
 
+        // 1. 优先尝试从 Cookie 中获取（如果用户曾经手动切换过语言，以 Cookie 优先）
+        var cookieName = CookieRequestCultureProvider.DefaultCookieName;
+        if (httpContext.Request.Cookies.TryGetValue(cookieName, out var cookieValue) && 
+            !string.IsNullOrWhiteSpace(cookieValue))
+        {
+            var result = CookieRequestCultureProvider.ParseCookieValue(cookieValue);
+            if (result != null)
+            {
+                return Task.FromResult<ProviderCultureResult?>(result);
+            }
+        }
+
+        // 2. 其次，如果用户已登录，从 Claim 中获取
         if (httpContext.User.Identity?.IsAuthenticated == true)
         {
             // 尝试获取 Claim 中记录的 "lang"（首选语言）

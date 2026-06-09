@@ -28,7 +28,7 @@ public class LocalizationController : Controller
         Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             value,
-            new CookieOptions { Path = "/", HttpOnly = true, Secure = true, SameSite = SameSiteMode.Lax });
+            new CookieOptions { Path = "/", HttpOnly = true, Secure = Request.IsHttps, SameSite = SameSiteMode.Lax });
 
         // 如果用户已登录，将语言设置持久化到数据库中
         if (User.Identity?.IsAuthenticated == true)

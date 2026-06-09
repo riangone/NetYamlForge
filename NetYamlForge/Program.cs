@@ -273,11 +273,11 @@ app.UseSerilogRequestLogging(options =>
         }
     };
 });
-app.UseRequestLocalization(localizationOptions);
 app.UseStaticFiles();
 app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();
+app.UseRequestLocalization(localizationOptions);
 app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
