@@ -15,3 +15,571 @@ translations:
     en-US: 'Starter template'
     zh-CN: 'Starter template'
     ja-JP: 'Starter template'
+
+  # HomePage Custom Translations
+  projects.ai-doc-processor.pages.HomePage.title:
+    zh-CN: 首页
+    en-US: Home
+    ja-JP: ホーム
+    ko-KR: 홈
+  projects.ai-doc-processor.pages.HomePage.platformName:
+    zh-CN: AI 文档智能处理平台
+    en-US: AI Document Processing Platform
+    ja-JP: AIドキュメントインテリジェント処理プラットフォーム
+    ko-KR: AI 문서 지능형 처리 플랫폼
+  projects.ai-doc-processor.pages.HomePage.heroTitle:
+    zh-CN: 上传文档，AI 自动提取<br/>结构化数据
+    en-US: Upload Documents, AI Automatically Extracts<br/>Structured Data
+    ja-JP: ドキュメントをアップロード、AIが自動抽出<br/>構造化データ
+    ko-KR: 문서 업로드, AI가 자동으로 추출<br/>구조화된 데이터
+  projects.ai-doc-processor.pages.HomePage.heroDesc:
+    zh-CN: 支持 PDF、图片（JPG/PNG/WebP）和 ZIP 批量包。Gemini AI 自动识别文档类型，提取全部字段含表格明细，动态建表存储。
+    en-US: Supports PDF, images (JPG/PNG/WebP), and ZIP batch packages. Gemini AI automatically recognizes document types, extracts all fields including table details, and dynamically creates tables for storage.
+    ja-JP: PDF、画像（JPG/PNG/WebP）、ZIP一括パッケージに対応。Gemini AIがドキュメントタイプを自動識別し、テーブル明細を含むすべてのフィールドを抽出して、テーブルを動的に作成して保存します。
+    ko-KR: PDF, 이미지(JPG/PNG/WebP) 및 ZIP 배치 패키지를 지원합니다. Gemini AI가 문서 유형을 자동으로 인식하고 테이블 상세 정보를 포함한 모든 필드를 추출하며 저장용 테이블을 동적으로 생성합니다。
+  projects.ai-doc-processor.pages.HomePage.uploadNow:
+    zh-CN: 📤 立即上传 file
+    en-US: 📤 Upload File Now
+    ja-JP: 📤 今すぐファイルをアップロード
+    ko-KR: 📤 지금 파일 업로드
+  projects.ai-doc-processor.pages.HomePage.viewData:
+    zh-CN: 🔍 查看提取数据
+    en-US: 🔍 View Extracted Data
+    ja-JP: 🔍 抽出データの表示
+    ko-KR: 🔍 추출된 데이터 보기
+  projects.ai-doc-processor.pages.HomePage.aiDriven:
+    zh-CN: Gemini AI 驱动
+    en-US: Driven by Gemini AI
+    ja-JP: Gemini AI 駆動
+    ko-KR: Gemini AI 구동
+  projects.ai-doc-processor.pages.HomePage.status.completed:
+    zh-CN: 已完成
+    en-US: Completed
+    ja-JP: 完了
+    ko-KR: 완료됨
+  projects.ai-doc-processor.pages.HomePage.status.processing:
+    zh-CN: 处理中
+    en-US: Processing
+    ja-JP: 処理中
+    ko-KR: 처리 중
+  projects.ai-doc-processor.pages.HomePage.status.pending:
+    zh-CN: 待处理
+    en-US: Pending
+    ja-JP: 保留中
+    ko-KR: 대기 중
+  projects.ai-doc-processor.pages.HomePage.status.failed:
+    zh-CN: 失败
+    en-US: Failed
+    ja-JP: 失敗
+    ko-KR: 실패함
+  projects.ai-doc-processor.pages.HomePage.status.unknown:
+    zh-CN: 未知
+    en-US: Unknown
+    ja-JP: 不明
+    ko-KR: 알 수 없음
+  projects.ai-doc-processor.pages.HomePage.stats.totalTasks:
+    zh-CN: 总任务数
+    en-US: Total Tasks
+    ja-JP: 総タスク数
+    ko-KR: 총 작업 수
+  projects.ai-doc-processor.pages.HomePage.stats.allSubmitted:
+    zh-CN: 全部已提交
+    en-US: All Submitted
+    ja-JP: すべて送信済み
+    ko-KR: 모두 제출됨
+  projects.ai-doc-processor.pages.HomePage.stats.completed:
+    zh-CN: 已完成
+    en-US: Completed
+    ja-JP: 完了
+    ko-KR: 완료됨
+  projects.ai-doc-processor.pages.HomePage.stats.completionRate:
+    zh-CN: 完成率 {0}%
+    en-US: Completion Rate {0}%
+    ja-JP: 完了率 {0}%
+    ko-KR: 완료율 {0}%
+  projects.ai-doc-processor.pages.HomePage.stats.processing:
+    zh-CN: 处理中
+    en-US: Processing
+    ja-JP: 処理中
+    ko-KR: 처리 중
+  projects.ai-doc-processor.pages.HomePage.stats.aiExtracting:
+    zh-CN: AI 正在提取
+    en-US: AI is extracting
+    ja-JP: AIが抽出中
+    ko-KR: AI 추출 중
+  projects.ai-doc-processor.pages.HomePage.stats.pending:
+    zh-CN: 待处理
+    en-US: Pending
+    ja-JP: 保留中
+    ko-KR: 대기 중
+  projects.ai-doc-processor.pages.HomePage.stats.waiting:
+    zh-CN: 排队等待
+    en-US: Queueing
+    ja-JP: 待機中
+    ko-KR: 대기 열에 대기 중
+  projects.ai-doc-processor.pages.HomePage.stats.failed:
+    zh-CN: 失败
+    en-US: Failed
+    ja-JP: 失敗
+    ko-KR: 실패함
+  projects.ai-doc-processor.pages.HomePage.stats.retryNeeded:
+    zh-CN: 需重新处理
+    en-US: Retry needed
+    ja-JP: 再処理が必要
+    ko-KR: 재처리 필요
+  projects.ai-doc-processor.pages.HomePage.actions.upload:
+    zh-CN: 上传文件
+    en-US: Upload File
+    ja-JP: ファイルアップロード
+    ko-KR: 파일 업로드
+  projects.ai-doc-processor.pages.HomePage.actions.viewData:
+    zh-CN: 查看提取数据
+    en-US: View Extracted Data
+    ja-JP: 抽出データの表示
+    ko-KR: 추출된 데이터 보기
+  projects.ai-doc-processor.pages.HomePage.actions.viewDataDesc:
+    zh-CN: 浏览结构化结果
+    en-US: Browse structured results
+    ja-JP: 構造化された結果を閲覧
+    ko-KR: 구조화된 결과 찾기
+  projects.ai-doc-processor.pages.HomePage.actions.dashboard:
+    zh-CN: 数据看板
+    en-US: Data Dashboard
+    ja-JP: データダッシュボード
+    ko-KR: 데이터 대시보드
+  projects.ai-doc-processor.pages.HomePage.actions.dashboardDesc:
+    zh-CN: 统计图表分析
+    en-US: Statistical chart analysis
+    ja-JP: 統計グラフ分析
+    ko-KR: 통계 차트 분석
+  projects.ai-doc-processor.pages.HomePage.recentTasks.title:
+    zh-CN: 🕐 最近任务
+    en-US: 🕐 Recent Tasks
+    ja-JP: 🕐 最近のタスク
+    ko-KR: 🕐 최근 작업
+  projects.ai-doc-processor.pages.HomePage.recentTasks.all:
+    zh-CN: 全部 →
+    en-US: All →
+    ja-JP: すべて →
+    ko-KR: 전체 →
+  projects.ai-doc-processor.pages.HomePage.recentTasks.empty:
+    zh-CN: 暂无任务记录，
+    en-US: No task records yet,
+    ja-JP: タスク履歴はありません。
+    ko-KR: 작업 기록이 없습니다.
+  projects.ai-doc-processor.pages.HomePage.recentTasks.uploadLink:
+    zh-CN: 立即上传文件
+    en-US: upload files now
+    ja-JP: 今すぐアップロード
+    ko-KR: 지금 파일 업로드
+  projects.ai-doc-processor.pages.HomePage.docTypes.title:
+    zh-CN: 📂 文档类型
+    en-US: 📂 Document Types
+    ja-JP: 📂 ドキュメントタイプ
+    ko-KR: 📂 문서 유형
+  projects.ai-doc-processor.pages.HomePage.docTypes.empty:
+    zh-CN: 完成处理后<br/>将在此显示分布
+    en-US: Breakdown will be displayed<br/>here after processing
+    ja-JP: 処理完了後、ここに<br/>内訳が表示されます
+    ko-KR: 처리 완료 후 여기에<br/>분포가 표시됩니다
+  projects.ai-doc-processor.pages.HomePage.docTypes.unknown:
+    zh-CN: 未知
+    en-US: Unknown
+    ja-JP: 不明
+    ko-KR: 알 수 없음
+  projects.ai-doc-processor.pages.HomePage.workflow.title:
+    zh-CN: 🚀 使用流程
+    en-US: 🚀 Process Workflow
+    ja-JP: 🚀 ご利用の流れ
+    ko-KR: 🚀 이용 프로세스
+  projects.ai-doc-processor.pages.HomePage.workflow.step1Title:
+    zh-CN: 上传文档
+    en-US: Upload Documents
+    ja-JP: ドキュメントのアップロード
+    ko-KR: 문서 업로드
+  projects.ai-doc-processor.pages.HomePage.workflow.step1Desc:
+    zh-CN: 选择 PDF、图片或 ZIP 压缩包，单次支持多文件上传，单文件最大 20MB。
+    en-US: Select PDF, image, or ZIP archive. Supports multi-file uploading, max 20MB per file.
+    ja-JP: PDF、画像、またはZIPファイルを選択。複数ファイルの同時アップロードに対応、1ファイル最大20MB。
+    ko-KR: PDF, 이미지 또는 ZIP 압축 파일을 선택하십시오. 한 번에 여러 파일 업로드를 지원하며 파일당 최대 20MB입니다.
+  projects.ai-doc-processor.pages.HomePage.workflow.step2Title:
+    zh-CN: AI 自动提取
+    en-US: AI Automatic Extraction
+    ja-JP: AI自動抽出
+    ko-KR: AI 자동 추출
+  projects.ai-doc-processor.pages.HomePage.workflow.step2Desc:
+    zh-CN: Gemini AI 识别文档类型（发票、收据、合同等），提取全部字段及表格明细行，绝不省略。
+    en-US: Gemini AI identifies document types (invoices, receipts, contracts, etc.), extracts all fields and table details, without omissions.
+    ja-JP: Gemini AIがドキュメントタイプ（請求書、領収書、契約書など）を識別し、すべてのフィールドと表の明细行を漏れなく抽出します。
+    ko-KR: Gemini AI가 문서 유형(송장, 영수증, 계약서 등)을 인식하여 누락 없이 모든 필드와 표 세부 항목을 추출합니다.
+  projects.ai-doc-processor.pages.HomePage.workflow.step3Title:
+    zh-CN: 查看结构化数据
+    en-US: View Structured Data
+    ja-JP: 構造化データの表示
+    ko-KR: 구조화된 데이터 보기
+  projects.ai-doc-processor.pages.HomePage.workflow.step3Desc:
+    zh-CN: 系统自动建表存储，可在"查看提取数据"页面按文档类型浏览和下载 JSON 结果。
+    en-US: Automatically stored in database. Browse and download JSON results by document type on the "View Extracted Data" page.
+    ja-JP: データベースに自動保存。 「抽出データの表示」ページでドキュメントタイプ別にJSON結果を閲覧・ダウンロードできます。
+    ko-KR: 시스템이 자동으로 테이블을 생성하여 저장합니다. "추출된 데이터 보기" 페이지에서 문서 유형별로 JSON 결과를 탐색하고 다운로드할 수 있습니다.
+
+  # HomePage Sections
+  projects.ai-doc-processor.pages.HomePage.sections.task_stats.title:
+    zh-CN: 任务统计
+    en-US: Task Statistics
+    ja-JP: タスク統計
+    ko-KR: 작업 통계
+  projects.ai-doc-processor.pages.HomePage.sections.recent_tasks.title:
+    zh-CN: 最近任务
+    en-US: Recent Tasks
+    ja-JP: 最近のタスク
+    ko-KR: 最近作業
+  projects.ai-doc-processor.pages.HomePage.sections.doc_type_stats.title:
+    zh-CN: 文档类型分布
+    en-US: Document Type Breakdown
+    ja-JP: ドキュメントタイプ分布
+    ko-KR: 문서 유형 분포
+
+  # DataViewer
+  projects.ai-doc-processor.pages.DataViewer.title:
+    zh-CN: 查看提取数据
+    en-US: View Extracted Data
+    ja-JP: 抽出データの表示
+    ko-KR: 추출된 데이터 보기
+  projects.ai-doc-processor.pages.DataViewer.subtitle:
+    zh-CN: AI 从文档中自动提取的结构化数据
+    en-US: Structured data automatically extracted from documents by AI
+    ja-JP: AIがドキュメントから自動抽出した構造化データ
+    ko-KR: AI가 문서에서 자동으로 추출한 구조화된 데이터
+  projects.ai-doc-processor.pages.DataViewer.uploadNew:
+    zh-CN: 📤 上传新文档
+    en-US: 📤 Upload New Document
+    ja-JP: 📤 新しいドキュメントをアップロード
+    ko-KR: 📤 새 문서 업로드
+  projects.ai-doc-processor.pages.DataViewer.dashboard:
+    zh-CN: 📊 数据看板
+    en-US: 📊 Data Dashboard
+    ja-JP: 📊 データダッシュボード
+    ko-KR: 📊 데이터 대시보드
+  projects.ai-doc-processor.pages.DataViewer.stats.total:
+    zh-CN: 总任务
+    en-US: Total Tasks
+    ja-JP: 総タスク
+    ko-KR: 총 작업
+  projects.ai-doc-processor.pages.DataViewer.stats.allDocs:
+    zh-CN: 📄 全部文档
+    en-US: 📄 All Documents
+    ja-JP: 📄 すべてのドキュメント
+    ko-KR: 📄 모든 문서
+  projects.ai-doc-processor.pages.DataViewer.stats.completed:
+    zh-CN: 已完成
+    en-US: Completed
+    ja-JP: 完了
+    ko-KR: 완료됨
+  projects.ai-doc-processor.pages.DataViewer.stats.success:
+    zh-CN: ✅ 提取成功
+    en-US: ✅ Extracted Successfully
+    ja-JP: ✅ 抽出成功
+    ko-KR: ✅ 추출 성공
+  projects.ai-doc-processor.pages.DataViewer.stats.processing:
+    zh-CN: 待处理 / 处理中
+    en-US: Pending / Processing
+    ja-JP: 保留中 / 処理中
+    ko-KR: 대기 중 / 처리 중
+  projects.ai-doc-processor.pages.DataViewer.stats.waiting:
+    zh-CN: ⏳ 等待 AI 分析
+    en-US: ⏳ Waiting for AI analysis
+    ja-JP: ⏳ AIの分析を待機中
+    ko-KR: ⏳ AI 분석 대기 중
+  projects.ai-doc-processor.pages.DataViewer.stats.failed:
+    zh-CN: 失败
+    en-US: Failed
+    ja-JP: 失敗
+    ko-KR: 실패함
+  projects.ai-doc-processor.pages.DataViewer.stats.error:
+    zh-CN: ❌ 处理出错
+    en-US: ❌ Processing error
+    ja-JP: ❌ 処理エラー
+    ko-KR: ❌ 처리 오류
+  projects.ai-doc-processor.pages.DataViewer.completedSection.title:
+    zh-CN: ✅ 已完成任务 — 提取结果
+    en-US: ✅ Completed Tasks — Extraction Results
+    ja-JP: ✅ 完了したタスク — 抽出結果
+    ko-KR: ✅ 완료된 작업 — 추출 결과
+  projects.ai-doc-processor.pages.DataViewer.completedSection.items:
+    zh-CN: 条
+    en-US: items
+    ja-JP: 件
+    ko-KR: 개
+  projects.ai-doc-processor.pages.DataViewer.completedSection.limitNotice:
+    zh-CN: （显示最新 50 条）
+    en-US: (Showing latest 50)
+    ja-JP: （最新50件を表示）
+    ko-KR: (최근 50개 표시)
+  projects.ai-doc-processor.pages.DataViewer.completedSection.emptyTitle:
+    zh-CN: 暂无已完成的任务
+    en-US: No completed tasks yet
+    ja-JP: 完了したタスクはありません
+    ko-KR: 완료된 작업이 없습니다
+  projects.ai-doc-processor.pages.DataViewer.completedSection.emptyDesc:
+    zh-CN: 请先上传文件，等待 AI 分析完成后可在此查看结果。
+    en-US: Please upload files first, and view results here after AI analysis is complete.
+    ja-JP: 最初にファイルをアップロードしてください。AIの分析完了後にここで結果を確認できます。
+    ko-KR: 먼저 파일을 업로드하고 AI 분석이 완료된 후 여기서 결과를 확인하십시오.
+  projects.ai-doc-processor.pages.DataViewer.unknownFile:
+    zh-CN: 未知文件
+    en-US: Unknown File
+    ja-JP: 不明なファイル
+    ko-KR: 알 수 없는 파일
+  projects.ai-doc-processor.pages.DataViewer.completed:
+    zh-CN: ✅ 完成
+    en-US: ✅ Completed
+    ja-JP: ✅ 完了
+    ko-KR: ✅ 완료됨
+  projects.ai-doc-processor.pages.DataViewer.docType:
+    zh-CN: 文档类型
+    en-US: Document Type
+    ja-JP: ドキュメントタイプ
+    ko-KR: 문서 유형
+  projects.ai-doc-processor.pages.DataViewer.fileName:
+    zh-CN: 文件名称
+    en-US: File Name
+    ja-JP: ファイル名
+    ko-KR: 파일 이름
+  projects.ai-doc-processor.pages.DataViewer.viewJson:
+    zh-CN: 📥 查看完整 JSON
+    en-US: 📥 View Full JSON
+    ja-JP: 📥 完全なJSONを表示
+    ko-KR: 📥 전체 JSON 보기
+  projects.ai-doc-processor.pages.DataViewer.downloadJson:
+    zh-CN: 💾 下载 JSON
+    en-US: 💾 Download JSON
+    ja-JP: 💾 JSONをダウンロード
+    ko-KR: 💾 JSON 다운로드
+  projects.ai-doc-processor.pages.DataViewer.taskList:
+    zh-CN: 🗂️ 任务列表
+    en-US: 🗂️ Task List
+    ja-JP: 🗂️ タスク一覧
+    ko-KR: 🗂️ 작업 목록
+  projects.ai-doc-processor.pages.DataViewer.tip:
+    zh-CN: 💡 提示：JSON 文件包含此文档的全部提取字段（包括表格明细），点击"查看完整 JSON"可在新标签页中查看。
+    en-US: '💡 Tip: The JSON file contains all extracted fields (including table details). Click "View Full JSON" to check in a new tab.'
+    ja-JP: '💡 ヒント: JSONファイルには、このドキュメントのすべての抽出フィールド（テーブル明細を含む）が含まれています。「完全なJSONを表示」をクリックして新しいタブで確認できます。'
+    ko-KR: '💡 팁: JSON 파일에는 이 문서의 모든 추출된 필드(테이블 세부 사항 포함)가 포함되어 있습니다. "전체 JSON 보기"를 클릭하여 새 탭에서 확인하십시오.'
+  projects.ai-doc-processor.pages.DataViewer.allTasks.title:
+    zh-CN: 🗂️ 全部任务状态
+    en-US: 🗂️ All Task Statuses
+    ja-JP: 🗂️ すべてのタスクステータス
+    ko-KR: 🗂️ 모든 작업 상태
+  projects.ai-doc-processor.pages.DataViewer.allTasks.fullList:
+    zh-CN: 完整列表 →
+    en-US: Full List →
+    ja-JP: 完全な一覧 →
+    ko-KR: 전체 목록 →
+  projects.ai-doc-processor.pages.DataViewer.allTasks.header.fileName:
+    zh-CN: 文件名
+    en-US: File Name
+    ja-JP: 파일名
+    ko-KR: 파일 이름
+  projects.ai-doc-processor.pages.DataViewer.allTasks.header.status:
+    zh-CN: 处理状态
+    en-US: Status
+    ja-JP: 処理ステータス
+    ko-KR: 처리 상태
+  projects.ai-doc-processor.pages.DataViewer.allTasks.header.time:
+    zh-CN: 上传时间
+    en-US: Upload Time
+    ja-JP: アップロード時間
+    ko-KR: 업로드 시간
+  projects.ai-doc-processor.pages.DataViewer.allTasks.empty:
+    zh-CN: 暂无任务记录 —
+    en-US: No task records yet —
+    ja-JP: タスク履歴はありません —
+    ko-KR: 작업 기록이 없습니다 —
+  projects.ai-doc-processor.pages.DataViewer.allTasks.uploadLink:
+    zh-CN: 立即上传文档
+    en-US: Upload document now
+    ja-JP: 今すぐドキュメントをアップロード
+    ko-KR: 지금 문서 업로드
+  projects.ai-doc-processor.pages.DataViewer.status.completed:
+    zh-CN: ✅ 完成
+    en-US: ✅ Done
+    ja-JP: ✅ 完了
+    ko-KR: ✅ 완료
+  projects.ai-doc-processor.pages.DataViewer.status.processing:
+    zh-CN: 🔄 处理中
+    en-US: 🔄 Processing
+    ja-JP: 🔄 処理中
+    ko-KR: 🔄 처리 중
+  projects.ai-doc-processor.pages.DataViewer.status.pending:
+    zh-CN: ⏳ 等待中
+    en-US: ⏳ Pending
+    ja-JP: ⏳ 保留中
+    ko-KR: ⏳ 대기 중
+  projects.ai-doc-processor.pages.DataViewer.status.failed:
+    zh-CN: ❌ 失败
+    en-US: ❌ Failed
+    ja-JP: ❌ 失敗
+    ko-KR: ❌ 실패
+  projects.ai-doc-processor.pages.DataViewer.allTasks.displayLimit:
+    zh-CN: "显示最新 {0} 条，共 {1} 条 — "
+    en-US: "Showing latest {0} of {1} items — "
+    ja-JP: "最新 {0} 件中 {1} 件を表示中 — "
+    ko-KR: "최신 {0}개 표시 중, 총 {1}개 — "
+  projects.ai-doc-processor.pages.DataViewer.allTasks.viewAll:
+    zh-CN: 查看全部
+    en-US: View All
+    ja-JP: すべて表示
+    ko-KR: 전체 보기
+
+  # UploadPage
+  projects.ai-doc-processor.pages.UploadPage.title:
+    zh-CN: 上传文档
+    en-US: Upload Documents
+    ja-JP: ドキュメントのアップロード
+    ko-KR: 문서 업로드
+  projects.ai-doc-processor.pages.UploadPage.subtitle:
+    zh-CN: 上传 PDF、图片或 ZIP 压缩包，AI 将自动分析并提取结构化数据
+    en-US: Upload PDF, image, or ZIP archive. AI will automatically analyze and extract structured data
+    ja-JP: PDF、画像、またはZIPファイルをアップロードすると、AIが自動的に分析して構造化データを抽出します
+    ko-KR: PDF, 이미지 또는 ZIP 압축 파일을 업로드하면 AI가 자동으로 분석하고 구조화된 데이터를 추출합니다
+  projects.ai-doc-processor.pages.UploadPage.zipTitle:
+    zh-CN: 📦 ZIP 压缩包
+    en-US: 📦 ZIP Archive
+    ja-JP: 📦 ZIPアーカイブ
+    ko-KR: 📦 ZIP 압축 파일
+  projects.ai-doc-processor.pages.UploadPage.maxSizeNotice:
+    zh-CN: 可选，最大 20MB
+    en-US: Optional, max 20MB
+    ja-JP: 任意、最大 20MB
+    ko-KR: 선택 사항, 최대 20MB
+  projects.ai-doc-processor.pages.UploadPage.zipDesc:
+    zh-CN: 将多个文档压缩成一个 ZIP 包后上传，批量处理更方便
+    en-US: Compress multiple documents into a ZIP archive and upload for easier batch processing
+    ja-JP: 複数のドキュメントをZIPアーカイブに圧縮してアップロードすると、一括処理がより便利になります
+    ko-KR: 여러 문서를 하나의 ZIP 파일로 압축하여 업로드하면 일괄 처리가 더 편리해집니다
+  projects.ai-doc-processor.pages.UploadPage.or:
+    zh-CN: 或者
+    en-US: Or
+    ja-JP: または
+    ko-KR: 또는
+  projects.ai-doc-processor.pages.UploadPage.docTitle:
+    zh-CN: 📄 单个 / 多个文档文件
+    en-US: 📄 Single / Multiple Document Files
+    ja-JP: 📄 単一/複数のドキュメントファイル
+    ko-KR: 📄 단일 / 다중 문서 파일
+  projects.ai-doc-processor.pages.UploadPage.docDesc:
+    zh-CN: 支持格式：PDF · JPG · PNG · WebP · BMP，可多选
+    en-US: "Supported formats: PDF · JPG · PNG · WebP · BMP, multi-selection allowed"
+    ja-JP: "対応フォーマット：PDF · JPG · PNG · WebP · BMP、複数選択可"
+    ko-KR: "지원 형식: PDF · JPG · PNG · WebP · BMP, 다중 선택 가능"
+  projects.ai-doc-processor.pages.UploadPage.btnSubmit:
+    zh-CN: 开始上传并分析
+    en-US: Start Upload and Analysis
+    ja-JP: アップロードと分析を開始
+    ko-KR: 업로드 및 분석 시작
+  projects.ai-doc-processor.pages.UploadPage.btnCancel:
+    zh-CN: 取消
+    en-US: Cancel
+    ja-JP: キャンセル
+    ko-KR: 취소
+  projects.ai-doc-processor.pages.UploadPage.result.successTitle:
+    zh-CN: 上传成功！AI 正在后台分析
+    en-US: Upload successful! AI is analyzing in the background
+    ja-JP: アップロード成功！AIがバックグラウンドで分析中
+    ko-KR: 업로드 성공! AI가 백그라운드에서 분석 중입니다
+  projects.ai-doc-processor.pages.UploadPage.result.successDesc:
+    zh-CN: 请稍后在任务列表或数据查看器中查看结果。
+    en-US: Please check the results later in the task list or data viewer.
+    ja-JP: 後ほどタスク一覧またはデータビューアで結果を確認してください。
+    ko-KR: 나중에 작업 목록 또는 데이터 뷰어에서 결과를 확인하십시오.
+  projects.ai-doc-processor.pages.UploadPage.result.errorTitle:
+    zh-CN: 上传失败
+    en-US: Upload failed
+    ja-JP: アップロードに失敗しました
+    ko-KR: 업로드 실패
+  projects.ai-doc-processor.pages.UploadPage.result.taskList:
+    zh-CN: 🗂️ 查看任务列表
+    en-US: 🗂️ View Task List
+    ja-JP: 🗂️ タスク一覧を表示
+    ko-KR: 🗂️ 작업 목록 보기
+  projects.ai-doc-processor.pages.UploadPage.result.viewData:
+    zh-CN: 🔍 查看提取数据
+    en-US: 🔍 View Extracted Data
+    ja-JP: 🔍 抽出データの表示
+    ko-KR: 🔍 추출된 데이터 보기
+  projects.ai-doc-processor.pages.UploadPage.result.continueUpload:
+    zh-CN: 📤 继续上传
+    en-US: 📤 Continue Uploading
+    ja-JP: 📤 アップロードを続ける
+    ko-KR: 📤 계속 업로드
+  projects.ai-doc-processor.pages.UploadPage.instruction.title:
+    zh-CN: 📖 使用说明
+    en-US: 📖 User Instructions
+    ja-JP: 📖 ご利用ガイド
+    ko-KR: 📖 사용 설명
+  projects.ai-doc-processor.pages.UploadPage.instruction.step1Title:
+    zh-CN: 选择文件
+    en-US: Select Files
+    ja-JP: ファイルを選択
+    ko-KR: 파일 선택
+  projects.ai-doc-processor.pages.UploadPage.instruction.step1Desc:
+    zh-CN: 选择 ZIP 包或直接选择 PDF / 图片文件（可多选）
+    en-US: Select a ZIP archive or directly choose PDF / image files (multi-selection supported)
+    ja-JP: ZIPファイルを選択するか、PDF/画像ファイルを直接選択（複数選択可）
+    ko-KR: ZIP 파일을 선택하거나 PDF / 이미지 파일을 직접 선택하십시오 (다중 선택 가능)
+  projects.ai-doc-processor.pages.UploadPage.instruction.step2Title:
+    zh-CN: 提交上传
+    en-US: Submit Upload
+    ja-JP: アップロードを送信
+    ko-KR: 업로드 제출
+  projects.ai-doc-processor.pages.UploadPage.instruction.step2Desc:
+    zh-CN: 点击"开始上传并分析"，文件将安全上传到服务器
+    en-US: 'Click "Start Upload and Analysis" to securely upload files to the server'
+    ja-JP: 「アップロードと分析を開始」をクリックすると、ファイルがサーバーに安全にアップロードされます
+    ko-KR: '"업로드 및 분석 시작"을 클릭하면 파일이 서버로 안전하게 업로드됩니다'
+  projects.ai-doc-processor.pages.UploadPage.instruction.step3Title:
+    zh-CN: AI 自动分析
+    en-US: AI Auto-analysis
+    ja-JP: AI自動分析
+    ko-KR: AI 자동 분석
+  projects.ai-doc-processor.pages.UploadPage.instruction.step3Desc:
+    zh-CN: Gemini AI 在后台自动识别文档类型并提取全部字段
+    en-US: Gemini AI automatically identifies document types and extracts all fields in the background
+    ja-JP: Gemini AIがバックグラウンドで自動的にドキュメントタイプを識別し、すべてのフィールドを抽出します
+    ko-KR: Gemini AI가 백그라운드에서 자동으로 문서 유형을 인식하고 모든 필드를 추출합니다
+  projects.ai-doc-processor.pages.UploadPage.instruction.step4Title:
+    zh-CN: 查看结果
+    en-US: View Results
+    ja-JP: 結果を表示
+    ko-KR: 결과 보기
+  projects.ai-doc-processor.pages.UploadPage.instruction.step4Desc:
+    zh-CN: 在"查看提取数据"页面查看结构化数据和 JSON 文件
+    en-US: 'Check structured data and JSON files on the "View Extracted Data" page'
+    ja-JP: 「抽出データの表示」ページで構造化データとJSONファイルを確認します
+    ko-KR: '"추출된 데이터 보기" 페이지에서 구조화된 데이터와 JSON 파일을 확인하십시오'
+  projects.ai-doc-processor.pages.UploadPage.validation.selectFile:
+    zh-CN: 请至少选择一个文件（ZIP 压缩包或文档文件）。
+    en-US: Please select at least one file (ZIP archive or document file).
+    ja-JP: 파일을 少なくとも1つ選択してください（ZIPアーカイブまたはドキュメントファイル）。
+    ko-KR: 파일을 최소한 하나 이상 선택하십시오(ZIP 압축 파일 또는 문서 파일).
+  projects.ai-doc-processor.pages.UploadPage.btnUploading:
+    zh-CN: 上传中...
+    en-US: Uploading...
+    ja-JP: アップロード中...
+    ko-KR: 업로드 중...
+  projects.ai-doc-processor.pages.UploadPage.result.errorMsg:
+    zh-CN: 上传失败，请重试。
+    en-US: Upload failed, please try again.
+    ja-JP: アップロードに失敗しました。もう一度お試しください。
+    ko-KR: 업로드에 실패했습니다. 다시 시도하십시오.
+  projects.ai-doc-processor.pages.UploadPage.result.serverError:
+    zh-CN: 服务器内部错误（500），请检查后台日志。
+    en-US: Server internal error (500), please check the system logs.
+    ja-JP: サーバー内部エラー（500）、システムログを確認してください。
+    ko-KR: 서버 내부 오류(500), 시스템 로그를 확인하십시오.
+  projects.ai-doc-processor.pages.UploadPage.result.networkError:
+    zh-CN: "网络错误："
+    en-US: "Network Error: "
+    ja-JP: "ネットワークエラー: "
+    ko-KR: "네트워크 오류: "

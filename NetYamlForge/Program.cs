@@ -252,6 +252,8 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedCultures = supportedCultures,
     SupportedUICultures = supportedCultures
 };
+localizationOptions.RequestCultureProviders.Insert(2, new NetYamlForge.Localization.UserPreferredLanguageProvider());
+
 
 if (!app.Environment.IsDevelopment())
 {

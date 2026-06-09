@@ -35,6 +35,10 @@
 
     @foreach (var sec in pageDef.Sections)
     {
+        if (!string.IsNullOrEmpty(sec.Title))
+        {
+            sec.Title = T($"projects.{currentProject}.pages.{pageName}.sections.{sec.Id}.title", sec.Title);
+        }
         var sectionData = Model.TryGetValue(sec.Id, out var sd)
             ? sd : (Enumerable.Empty<Dictionary<string, object>>(), 0);
         var rows = sectionData.Item1.ToList();

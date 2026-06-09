@@ -54,6 +54,11 @@ public interface ITenantUserService
     /// 获取用户的详细信息（包含项目角色）
     /// </summary>
     Task<UserDetail?> GetUserDetailAsync(int userId);
+
+    /// <summary>
+    /// 更新用户的首选语言
+    /// </summary>
+    Task UpdatePreferredLanguageAsync(int userId, string culture);
 }
 
 /// <summary>

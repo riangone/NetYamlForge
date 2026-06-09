@@ -350,6 +350,21 @@ public class TenantUserService : ITenantUserService
         return user;
     }
 
+    /// <summary>
+    /// 更新用户的首选语言
+    /// </summary>
+    public async Task UpdatePreferredLanguageAsync(int userId, string culture)
+    {
+        const string sql = @"
+            UPDATE app_user 
+            SET preferred_language = @Culture 
+            WHERE id = @Id
+        ";
+
+        using var db = CreateSystemDbConnection();
+        await db.ExecuteAsync(sql, new { Id = userId, Culture = culture });
+    }
+
     #region Helper Methods
 
     /// <summary>

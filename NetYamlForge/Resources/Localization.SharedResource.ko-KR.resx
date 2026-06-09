@@ -1881,4 +1881,73 @@
   <data name="Manage" xml:space="preserve">
     <value>관리</value>
   </data>
+  <data name="TenantLoginTitle" xml:space="preserve">
+    <value>사용자 로그인</value>
+  </data>
+  <data name="MultiTenantSystem" xml:space="preserve">
+    <value>멀티 테넌트 관리 시스템</value>
+  </data>
+  <data name="TenantRememberMe" xml:space="preserve">
+    <value>로그인 상태 유지</value>
+  </data>
+  <data name="TenantOr" xml:space="preserve">
+    <value>또는</value>
+  </data>
+  <data name="TenantDoNotHaveAccount" xml:space="preserve">
+    <value>계정이 없으십니까?</value>
+  </data>
+  <data name="TenantRegisterNow" xml:space="preserve">
+    <value>지금 등록</value>
+  </data>
+  <data name="TenantCustomerRegister" xml:space="preserve">
+    <value>고객 등록</value>
+  </data>
+  <data name="TenantClickHere" xml:space="preserve">
+    <value>여기를 클릭</value>
+  </data>
+  <data name="TenantUserRegister" xml:space="preserve">
+    <value>사용자 등록</value>
+  </data>
+  <data name="TenantCreateYourAccount" xml:space="preserve">
+    <value>계정 생성</value>
+  </data>
+  <data name="TenantDisplayName" xml:space="preserve">
+    <value>표시 이름</value>
+  </data>
+  <data name="TenantConfirmPassword" xml:space="preserve">
+    <value>비밀번호 확인</value>
+  </data>
+  <data name="TenantEmail" xml:space="preserve">
+    <value>이메일</value>
+  </data>
+  <data name="TenantPhone" xml:space="preserve">
+    <value>전화번호</value>
+  </data>
+  <data name="TenantRegisterConsent" xml:space="preserve">
+    <value>등록하면 이용 약관 및 개인정보 처리방침에 동의하게 됩니다</value>
+  </data>
+  <data name="TenantPleaseEnterUserName" xml:space="preserve">
+    <value>사용자 이름을 입력하십시오</value>
+  </data>
+  <data name="TenantPleaseEnterUserNameLimit" xml:space="preserve">
+    <value>사용자 이름을 입력하십시오 (3~50자)</value>
+  </data>
+  <data name="TenantPleaseEnterDisplayName" xml:space="preserve">
+    <value>표시 이름을 입력하십시오</value>
+  </data>
+  <data name="TenantPleaseEnterPassword" xml:space="preserve">
+    <value>비밀번호를 입력하십시오</value>
+  </data>
+  <data name="TenantPleaseEnterPasswordLimit" xml:space="preserve">
+    <value>비밀번호를 입력하십시오 (최소 6자)</value>
+  </data>
+  <data name="TenantPleaseEnterPasswordAgain" xml:space="preserve">
+    <value>비밀번호를 다시 입력하십시오</value>
+  </data>
+  <data name="TenantAlreadyHaveAccount" xml:space="preserve">
+    <value>이미 계정이 있으십니까?</value>
+  </data>
+  <data name="TenantLoginNow" xml:space="preserve">
+    <value>지금 로그인</value>
+  </data>
 </root>

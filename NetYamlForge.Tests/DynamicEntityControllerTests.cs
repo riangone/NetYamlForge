@@ -369,6 +369,7 @@ public class DynamicEntityControllerTests
             new SqliteConnection("Data Source=:memory:"),
             new StubPdfExportService(),
             new StubDocumentPdfService(),
+            new TestWebHostEnvironment(),
             NullLogger<DynamicEntityController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }

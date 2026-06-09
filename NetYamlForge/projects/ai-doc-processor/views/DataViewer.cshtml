@@ -1,6 +1,13 @@
+@using NetYamlForge.Localization
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
+
+    string T(string key, string fallback) =>
+        YamlKeyLocalizer.Resolve(key, System.Globalization.CultureInfo.CurrentUICulture, currentProject) ?? fallback;
+
+    ViewData["Title"] = T("projects.ai-doc-processor.pages.DataViewer.title", "查看提取数据");
+
     var uploadUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "UploadPage" });
     var listUrl = Url.Action("Index", "DynamicEntity", new { project = currentProject, entity = "document_task" });
     var dashboardUrl = Url.Action("Index", "Dashboard", new { project = currentProject });
@@ -21,40 +28,40 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
-                <a href="@Url.Content($"~/{currentProject}")" class="hover:underline">首页</a>
+                <a href="@Url.Content($"~/{currentProject}")" class="hover:underline">@T("projects.ai-doc-processor.pages.HomePage.title", "首页")</a>
                 <span>/</span>
-                <span>查看提取数据</span>
+                <span>@T("projects.ai-doc-processor.pages.DataViewer.title", "查看提取数据")</span>
             </div>
-            <h1 class="text-2xl font-bold">🔍 查看提取数据</h1>
-            <p class="text-sm opacity-60 mt-1">AI 从文档中自动提取的结构化数据</p>
+            <h1 class="text-2xl font-bold">@T("projects.ai-doc-processor.pages.DataViewer.title", "🔍 查看提取数据")</h1>
+            <p class="text-sm opacity-60 mt-1">@T("projects.ai-doc-processor.pages.DataViewer.subtitle", "AI 从文档中自动提取的结构化 data")</p>
         </div>
         <div class="flex gap-2 flex-wrap">
-            <a href="@uploadUrl" class="btn btn-sm btn-primary">📤 上传新文档</a>
-            <a href="@dashboardUrl" class="btn btn-sm btn-outline">📊 数据看板</a>
+            <a href="@uploadUrl" class="btn btn-sm btn-primary">@T("projects.ai-doc-processor.pages.DataViewer.uploadNew", "📤 上传新文档")</a>
+            <a href="@dashboardUrl" class="btn btn-sm btn-outline">@T("projects.ai-doc-processor.pages.DataViewer.dashboard", "📊 数据看板")</a>
         </div>
     </div>
 
     <!-- Stats bar -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="stat bg-base-100 rounded-box border border-base-300 shadow-sm p-4">
-            <div class="stat-title text-xs opacity-60">总任务</div>
+            <div class="stat-title text-xs opacity-60">@T("projects.ai-doc-processor.pages.DataViewer.stats.total", "总任务")</div>
             <div class="stat-value text-2xl">@cntTotal</div>
-            <div class="stat-desc">📄 全部文档</div>
+            <div class="stat-desc">@T("projects.ai-doc-processor.pages.DataViewer.stats.allDocs", "📄 全部文档")</div>
         </div>
         <div class="stat bg-base-100 rounded-box border-2 border-success/30 shadow-sm p-4">
-            <div class="stat-title text-xs text-success">已完成</div>
+            <div class="stat-title text-xs text-success">@T("projects.ai-doc-processor.pages.DataViewer.stats.completed", "已完成")</div>
             <div class="stat-value text-2xl text-success">@cntCompleted</div>
-            <div class="stat-desc">✅ 提取成功</div>
+            <div class="stat-desc">@T("projects.ai-doc-processor.pages.DataViewer.stats.success", "✅ 提取成功")</div>
         </div>
         <div class="stat bg-base-100 rounded-box border-2 border-warning/30 shadow-sm p-4">
-            <div class="stat-title text-xs text-warning">待处理 / 处理中</div>
+            <div class="stat-title text-xs text-warning">@T("projects.ai-doc-processor.pages.DataViewer.stats.processing", "待处理 / 处理中")</div>
             <div class="stat-value text-2xl text-warning">@(cntPending + cntProcessing)</div>
-            <div class="stat-desc">⏳ 等待 AI 分析</div>
+            <div class="stat-desc">@T("projects.ai-doc-processor.pages.DataViewer.stats.waiting", "⏳ 等待 AI 分析")</div>
         </div>
         <div class="stat bg-base-100 rounded-box border-2 border-error/30 shadow-sm p-4">
-            <div class="stat-title text-xs text-error">失败</div>
+            <div class="stat-title text-xs text-error">@T("projects.ai-doc-processor.pages.DataViewer.stats.failed", "失败")</div>
             <div class="stat-value text-2xl text-error">@cntFailed</div>
-            <div class="stat-desc">❌ 处理出错</div>
+            <div class="stat-desc">@T("projects.ai-doc-processor.pages.DataViewer.stats.error", "❌ 处理出错")</div>
         </div>
     </div>
 
@@ -62,12 +69,12 @@
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body p-4">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="card-title text-base">✅ 已完成任务 — 提取结果</h2>
+                <h2 class="card-title text-base">@T("projects.ai-doc-processor.pages.DataViewer.completedSection.title", "✅ 已完成任务 — 提取结果")</h2>
                 <div class="flex items-center gap-2">
-                    <span class="badge badge-success">@completedSection.Total 条</span>
+                    <span class="badge badge-success">@completedSection.Total @T("projects.ai-doc-processor.pages.DataViewer.completedSection.items", "条")</span>
                     @if (completedSection.Total > 50)
                     {
-                        <span class="text-xs opacity-50">（显示最新 50 条）</span>
+                        <span class="text-xs opacity-50">@T("projects.ai-doc-processor.pages.DataViewer.completedSection.limitNotice", "（显示最新 50 条）")</span>
                     }
                 </div>
             </div>
@@ -78,9 +85,9 @@
                     <div class="hero-content text-center">
                         <div>
                             <p class="text-4xl mb-3">📭</p>
-                            <h3 class="text-lg font-semibold opacity-70">暂无已完成的任务</h3>
-                            <p class="text-sm opacity-50 mt-1">请先上传文件，等待 AI 分析完成后可在此查看结果。</p>
-                            <a href="@uploadUrl" class="btn btn-primary btn-sm mt-4">📤 上传文档</a>
+                            <h3 class="text-lg font-semibold opacity-70">@T("projects.ai-doc-processor.pages.DataViewer.completedSection.emptyTitle", "暂无已完成的任务")</h3>
+                            <p class="text-sm opacity-50 mt-1">@T("projects.ai-doc-processor.pages.DataViewer.completedSection.emptyDesc", "请先上传文件，等待 AI 分析完成后可在此查看结果。")</p>
+                            <a href="@uploadUrl" class="btn btn-primary btn-sm mt-4">@T("projects.ai-doc-processor.pages.DataViewer.uploadNew", "📤 上传文档")</a>
                         </div>
                     </div>
                 </div>
@@ -91,7 +98,7 @@
                     @foreach (var row in completedSection.Rows)
                     {
                         var taskId = row.TryGetValue("Id", out var idVal) ? idVal?.ToString() ?? "" : "";
-                        var fileName = row.TryGetValue("FileName", out var fnVal) ? fnVal?.ToString() ?? "未知文件" : "未知文件";
+                        var fileName = row.TryGetValue("FileName", out var fnVal) ? fnVal?.ToString() ?? T("projects.ai-doc-processor.pages.DataViewer.unknownFile", "未知文件") : T("projects.ai-doc-processor.pages.DataViewer.unknownFile", "未知文件");
                         var docType = row.TryGetValue("DocumentType", out var dtVal) ? dtVal?.ToString() ?? "" : "";
                         var jsonPath = row.TryGetValue("JsonPath", out var jpVal) ? jpVal?.ToString() ?? "" : "";
                         var createdAt = row.TryGetValue("CreatedAt", out var caVal) ? caVal?.ToString() ?? "" : "";
@@ -118,7 +125,7 @@
                                     {
                                         <span class="badge badge-outline badge-sm hidden sm:inline-flex">@docType</span>
                                     }
-                                    <span class="badge badge-success badge-sm">✅ 完成</span>
+                                    <span class="badge badge-success badge-sm">@T("projects.ai-doc-processor.pages.DataViewer.completed", "✅ 完成")</span>
                                 </div>
                             </div>
                             <div class="collapse-content">
@@ -126,30 +133,30 @@
                                     @if (!string.IsNullOrEmpty(docType))
                                     {
                                         <div class="flex items-center gap-2 text-sm">
-                                            <span class="opacity-50 w-20 flex-shrink-0">文档类型</span>
+                                            <span class="opacity-50 w-20 flex-shrink-0">@T("projects.ai-doc-processor.pages.DataViewer.docType", "文档类型")</span>
                                             <span class="badge badge-outline">@docType</span>
                                         </div>
                                     }
                                     <div class="flex items-center gap-2 text-sm">
-                                        <span class="opacity-50 w-20 flex-shrink-0">文件名称</span>
+                                        <span class="opacity-50 w-20 flex-shrink-0">@T("projects.ai-doc-processor.pages.DataViewer.fileName", "文件名称")</span>
                                         <span class="font-mono text-xs bg-base-100 px-2 py-0.5 rounded truncate max-w-xs">@fileName</span>
                                     </div>
                                     <div class="flex gap-2 flex-wrap pt-1">
                                         @if (!string.IsNullOrEmpty(jsonPath))
                                         {
                                             <a href="@Url.Content("~" + jsonPath)" target="_blank" class="btn btn-sm btn-primary">
-                                                📥 查看完整 JSON
+                                                @T("projects.ai-doc-processor.pages.DataViewer.viewJson", "📥 查看完整 JSON")
                                             </a>
                                             <a href="@Url.Content("~" + jsonPath)" download class="btn btn-sm btn-outline">
-                                                💾 下载 JSON
+                                                @T("projects.ai-doc-processor.pages.DataViewer.downloadJson", "💾 下载 JSON")
                                             </a>
                                         }
-                                        <a href="@listUrl" class="btn btn-sm btn-ghost">🗂️ 任务列表</a>
+                                        <a href="@listUrl" class="btn btn-sm btn-ghost">@T("projects.ai-doc-processor.pages.DataViewer.taskList", "🗂️ 任务列表")</a>
                                     </div>
                                     @if (!string.IsNullOrEmpty(jsonPath))
                                     {
                                         <div class="bg-base-100 border border-base-300 rounded-box p-3 text-xs opacity-60">
-                                            <span>💡 提示：JSON 文件包含此文档的全部提取字段（包括表格明细），点击"查看完整 JSON"可在新标签页中查看。</span>
+                                            <span>@T("projects.ai-doc-processor.pages.DataViewer.tip", "💡 提示：JSON 文件包含此文档的全部提取字段（包括表格明细），点击\"查看完整 JSON\"可在新标签页中查看。")</span>
                                         </div>
                                     }
                                 </div>
@@ -165,17 +172,17 @@
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body p-4">
             <div class="flex items-center justify-between mb-3">
-                <h2 class="card-title text-base">🗂️ 全部任务状态</h2>
-                <a href="@listUrl" class="btn btn-xs btn-ghost">完整列表 →</a>
+                <h2 class="card-title text-base">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.title", "🗂️ 全部任务状态")</h2>
+                <a href="@listUrl" class="btn btn-xs btn-ghost">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.fullList", "完整列表 →")</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="table table-sm w-full">
                     <thead>
                         <tr class="bg-base-200">
-                            <th class="text-xs font-semibold">文件名</th>
-                            <th class="text-xs font-semibold">文档类型</th>
-                            <th class="text-xs font-semibold">处理状态</th>
-                            <th class="text-xs font-semibold">上传时间</th>
+                            <th class="text-xs font-semibold">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.header.fileName", "文件名")</th>
+                            <th class="text-xs font-semibold">@T("projects.ai-doc-processor.pages.DataViewer.docType", "文档类型")</th>
+                            <th class="text-xs font-semibold">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.header.status", "处理状态")</th>
+                            <th class="text-xs font-semibold">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.header.time", "上传时间")</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -183,8 +190,8 @@
                         {
                             <tr>
                                 <td colspan="4" class="text-center opacity-50 py-8">
-                                    暂无任务记录 —
-                                    <a href="@uploadUrl" class="link link-primary">立即上传文档</a>
+                                    @T("projects.ai-doc-processor.pages.DataViewer.allTasks.empty", "暂无任务记录 —")
+                                    <a href="@uploadUrl" class="link link-primary">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.uploadLink", "立即上传文档")</a>
                                 </td>
                             </tr>
                         }
@@ -203,10 +210,10 @@
                                 };
                                 var statusLabel = status switch
                                 {
-                                    "completed" => "✅ 完成",
-                                    "processing" => "🔄 处理中",
-                                    "pending" => "⏳ 等待中",
-                                    "failed" => "❌ 失败",
+                                    "completed" => T("projects.ai-doc-processor.pages.DataViewer.status.completed", "✅ 完成"),
+                                    "processing" => T("projects.ai-doc-processor.pages.DataViewer.status.processing", "🔄 处理中"),
+                                    "pending" => T("projects.ai-doc-processor.pages.DataViewer.status.pending", "⏳ 等待中"),
+                                    "failed" => T("projects.ai-doc-processor.pages.DataViewer.status.failed", "❌ 失败"),
                                     _ => status
                                 };
                                 var dt = row.TryGetValue("DocumentType", out var dtv) ? dtv?.ToString() ?? "" : "";
@@ -237,14 +244,14 @@
             </div>
             @if (allSection.Total > allRows.Count)
             {
-                <p class="text-xs opacity-40 mt-2 text-right">显示最新 @allRows.Count 条，共 @allSection.Total 条 — <a href="@listUrl" class="link">查看全部</a></p>
+                <p class="text-xs opacity-40 mt-2 text-right">@string.Format(T("projects.ai-doc-processor.pages.DataViewer.allTasks.displayLimit", "显示最新 {0} 条，共 {1} 条 — "), allRows.Count, allSection.Total)<a href="@listUrl" class="link">@T("projects.ai-doc-processor.pages.DataViewer.allTasks.viewAll", "查看全部")</a></p>
             }
         </div>
     </div>
 
     <!-- Bottom quick action -->
     <div class="flex justify-center gap-3 pb-2">
-        <a href="@uploadUrl" class="btn btn-primary">📤 上传新文档</a>
-        <a href="@dashboardUrl" class="btn btn-outline">📊 数据看板</a>
+        <a href="@uploadUrl" class="btn btn-primary">@T("projects.ai-doc-processor.pages.DataViewer.uploadNew", "📤 上传新文档")</a>
+        <a href="@dashboardUrl" class="btn btn-outline">@T("projects.ai-doc-processor.pages.DataViewer.dashboard", "📊 数据看板")</a>
     </div>
 </div>

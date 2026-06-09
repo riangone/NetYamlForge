@@ -1,7 +1,10 @@
 @* 多租户登录页面 *@
+@using NetYamlForge.Localization
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> L
 @model NetYamlForge.Models.Auth.LoginViewModel
 @{
-    ViewData["Title"] = "登录";
+    ViewData["Title"] = L["TenantLoginTitle"];
     Layout = "_Layout";
 }
 
@@ -10,13 +13,13 @@
         @* 项目 Logo/名称 *@
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-primary">NetYamlForge</h1>
-            <p class="text-sm text-base-content/60 mt-2">多租户管理系统</p>
+            <p class="text-sm text-base-content/60 mt-2">@L["MultiTenantSystem"]</p>
         </div>
 
         @* 登录卡片 *@
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
-                <h2 class="card-title justify-center text-2xl mb-4">用户登录</h2>
+                <h2 class="card-title justify-center text-2xl mb-4">@L["TenantLoginTitle"]</h2>
                 
                 <form method="post" class="space-y-4">
                     <input type="hidden" asp-for="ReturnUrl" />
@@ -24,11 +27,11 @@
                     @* 用户名 *@
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text font-medium">用户名</span>
+                            <span class="label-text font-medium">@L["UserName"]</span>
                         </label>
                         <input asp-for="UserName" 
                                class="input input-bordered" 
-                               placeholder="请输入用户名"
+                               placeholder="@L["TenantPleaseEnterUserName"]"
                                autofocus />
                         <span asp-validation-for="UserName" class="text-error text-sm mt-1"></span>
                     </div>
@@ -36,12 +39,12 @@
                     @* 密码 *@
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text font-medium">密码</span>
+                            <span class="label-text font-medium">@L["Password"]</span>
                         </label>
                         <input asp-for="Password" 
                                class="input input-bordered" 
                                type="password"
-                               placeholder="请输入密码" />
+                               placeholder="@L["TenantPleaseEnterPassword"]" />
                         <span asp-validation-for="Password" class="text-error text-sm mt-1"></span>
                     </div>
                     
@@ -49,7 +52,7 @@
                     <div class="form-control">
                         <label class="cursor-pointer label justify-start gap-2">
                             <input asp-for="RememberMe" type="checkbox" class="checkbox checkbox-sm" />
-                            <span class="label-text">记住我</span>
+                            <span class="label-text">@L["TenantRememberMe"]</span>
                         </label>
                     </div>
                     
@@ -61,23 +64,23 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                         </svg>
-                        登录
+                        @L["Login"]
                     </button>
                 </form>
                 
-                <div class="divider">或者</div>
+                <div class="divider">@L["TenantOr"]</div>
                 
                 @* 注册链接 *@
                 <div class="text-center space-y-2">
                     <p class="text-sm">
-                        还没有账户？
-                        <a asp-action="Register" class="link link-primary">立即注册</a>
+                        @L["TenantDoNotHaveAccount"]
+                        <a asp-action="Register" class="link link-primary">@L["TenantRegisterNow"]</a>
                     </p>
                     @if (!string.IsNullOrEmpty(ViewData["ProjectName"] as string))
                     {
                         <p class="text-xs text-base-content/60">
-                            客户注册 
-                            <a asp-action="CustomerRegister" asp-route-project="@(ViewData["ProjectName"] as string)" class="link">请点击这里</a>
+                            @L["TenantCustomerRegister"]
+                            <a asp-action="CustomerRegister" asp-route-project="@(ViewData["ProjectName"] as string)" class="link">@L["TenantClickHere"]</a>
                         </p>
                     }
                 </div>

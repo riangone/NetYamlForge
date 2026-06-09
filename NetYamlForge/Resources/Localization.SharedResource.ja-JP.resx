@@ -1881,4 +1881,73 @@
   <data name="Manage" xml:space="preserve">
     <value>管理</value>
   </data>
+  <data name="TenantLoginTitle" xml:space="preserve">
+    <value>ユーザーログイン</value>
+  </data>
+  <data name="MultiTenantSystem" xml:space="preserve">
+    <value>マルチテナント管理システム</value>
+  </data>
+  <data name="TenantRememberMe" xml:space="preserve">
+    <value>ログイン状態を保持する</value>
+  </data>
+  <data name="TenantOr" xml:space="preserve">
+    <value>または</value>
+  </data>
+  <data name="TenantDoNotHaveAccount" xml:space="preserve">
+    <value>アカウントをお持ちでないですか？</value>
+  </data>
+  <data name="TenantRegisterNow" xml:space="preserve">
+    <value>今すぐ登録</value>
+  </data>
+  <data name="TenantCustomerRegister" xml:space="preserve">
+    <value>顧客登録</value>
+  </data>
+  <data name="TenantClickHere" xml:space="preserve">
+    <value>こちらをクリック</value>
+  </data>
+  <data name="TenantUserRegister" xml:space="preserve">
+    <value>ユーザー登録</value>
+  </data>
+  <data name="TenantCreateYourAccount" xml:space="preserve">
+    <value>アカウントの作成</value>
+  </data>
+  <data name="TenantDisplayName" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="TenantConfirmPassword" xml:space="preserve">
+    <value>パスワード確認</value>
+  </data>
+  <data name="TenantEmail" xml:space="preserve">
+    <value>メールアドレス</value>
+  </data>
+  <data name="TenantPhone" xml:space="preserve">
+    <value>電話番号</value>
+  </data>
+  <data name="TenantRegisterConsent" xml:space="preserve">
+    <value>登録することにより、利用規約とプライバシーポリシーに同意したものとみなされます</value>
+  </data>
+  <data name="TenantPleaseEnterUserName" xml:space="preserve">
+    <value>ユーザー名を入力してください</value>
+  </data>
+  <data name="TenantPleaseEnterUserNameLimit" xml:space="preserve">
+    <value>ユーザー名を入力してください（3〜50文字）</value>
+  </data>
+  <data name="TenantPleaseEnterDisplayName" xml:space="preserve">
+    <value>表示名を入力してください</value>
+  </data>
+  <data name="TenantPleaseEnterPassword" xml:space="preserve">
+    <value>パスワードを入力してください</value>
+  </data>
+  <data name="TenantPleaseEnterPasswordLimit" xml:space="preserve">
+    <value>パスワードを入力してください（6文字以上）</value>
+  </data>
+  <data name="TenantPleaseEnterPasswordAgain" xml:space="preserve">
+    <value>パスワードを再入力してください</value>
+  </data>
+  <data name="TenantAlreadyHaveAccount" xml:space="preserve">
+    <value>すでにアカウントをお持ちですか？</value>
+  </data>
+  <data name="TenantLoginNow" xml:space="preserve">
+    <value>今すぐログイン</value>
+  </data>
 </root>
