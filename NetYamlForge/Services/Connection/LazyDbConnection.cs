@@ -20,7 +20,21 @@ public class LazyDbConnection : IDbConnection
     /// <summary>
     /// 获取底层的实际连接（惰性加载）
     /// </summary>
-    public IDbConnection InnerConnection => _innerConnection ??= _connectionFactory();
+    public IDbConnection InnerConnection
+    {
+        get
+        {
+            if (_innerConnection == null)
+            {
+                _innerConnection = _connectionFactory();
+                if (_innerConnection.State != ConnectionState.Open)
+                {
+                    _innerConnection.Open();
+                }
+            }
+            return _innerConnection;
+        }
+    }
 
     public string ConnectionString
     {
@@ -32,7 +46,7 @@ public class LazyDbConnection : IDbConnection
 
     public string Database => InnerConnection.Database;
 
-    public ConnectionState State => _innerConnection == null ? ConnectionState.Closed : _innerConnection.State;
+    public ConnectionState State => _innerConnection == null ? ConnectionState.Open : _innerConnection.State;
 
     public IDbTransaction BeginTransaction() => InnerConnection.BeginTransaction();
 

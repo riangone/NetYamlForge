@@ -1,16 +1,17 @@
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
-    var uploadActionUrl = $"/{currentProject}/DynamicEntity/InvokeHeaderAction?entity=document_task&actionKey=batch_upload";
-    var listUrl = $"/{currentProject}/DynamicEntity/Index?entity=document_task";
-    var viewerUrl = $"/{currentProject}/Page/DataViewer";
+    var uploadActionUrl = Url.Content($"~/{currentProject}/DynamicEntity/InvokeHeaderAction?entity=document_task&actionKey=batch_upload");
+    var listUrl    = Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=document_task");
+    var viewerUrl  = Url.Content($"~/{currentProject}/Page/DataViewer");
+    var dashUrl    = Url.Content($"~/{currentProject}/Dashboard");
 }
 
 <div class="space-y-6 max-w-2xl mx-auto">
     <!-- Header -->
     <div>
         <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
-            <a href="/@currentProject" class="hover:underline">首页</a>
+            <a href="@Url.Content($"~/{currentProject}")" class="hover:underline">首页</a>
             <span>/</span>
             <span>上传文档</span>
         </div>
@@ -22,6 +23,7 @@
     <div class="card bg-base-100 border border-base-300 shadow-sm">
         <div class="card-body p-6">
             <form id="upload-form" enctype="multipart/form-data" novalidate>
+                @Html.AntiForgeryToken()
                 <!-- ZIP section -->
                 <div class="form-control mb-2">
                     <label class="label pb-1">
@@ -131,7 +133,7 @@
             <div class="flex gap-2 flex-wrap">
                 <a href="@listUrl" class="btn btn-xs btn-outline">🗂️ 任务列表</a>
                 <a href="@viewerUrl" class="btn btn-xs btn-ghost">🔍 提取数据</a>
-                <a href="/@currentProject/Dashboard" class="btn btn-xs btn-ghost">📊 数据看板</a>
+                <a href="@dashUrl" class="btn btn-xs btn-ghost">📊 数据看板</a>
             </div>
         </div>
     </div>
@@ -167,20 +169,28 @@
         var formData = new FormData(form);
 
         try {
-            var response = await fetch('@uploadActionUrl', {
+            var response = await fetch('@Html.Raw(uploadActionUrl)', {
                 method: 'POST',
                 body: formData,
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             });
 
             var data = {};
-            try { data = await response.json(); } catch (_) { }
+            var responseText = '';
+            try {
+                responseText = await response.text();
+                data = JSON.parse(responseText);
+            } catch (_) { }
 
             if (response.ok && (data.success !== false)) {
                 showSuccess(data.message || 'AI 正在后台分析文档，请稍后在任务列表或数据查看器中查看结果。');
                 form.reset();
             } else {
-                showError(data.message || data.error || '上传失败，请重试。');
+                var errorMsg = data.message || data.error || responseText || '上传失败，请重试。';
+                if (errorMsg.includes('<!DOCTYPE html>') || errorMsg.includes('<html')) {
+                    errorMsg = '服务器内部错误（500），请检查后台日志。';
+                }
+                showError(errorMsg);
             }
         } catch (err) {
             showError('网络错误：' + err.message);

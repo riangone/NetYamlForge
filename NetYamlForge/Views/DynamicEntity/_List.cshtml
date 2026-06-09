@@ -105,6 +105,25 @@
             }
         </div>
 
+        <!-- Bulk delete bar: shown when rows are selected -->
+        <div id="bulk-action-bar" class="hidden items-center gap-3 p-2 bg-base-200 rounded-box border border-base-300">
+            <span id="selected-count-label" class="text-sm font-medium">已选择 <span id="selected-count">0</span> 条</span>
+            <form id="bulk-delete-form"
+                  hx-post="@Url.Action("BulkDelete", "DynamicEntity")"
+                  hx-target="#list-container"
+                  hx-swap="innerHTML"
+                  class="flex items-center gap-2">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="entity" value="@Model.Entity" />
+                <div id="bulk-ids-container"></div>
+                <button type="submit" class="btn btn-sm btn-error"
+                        onclick="return confirm('确定要删除选中的 ' + document.getElementById('selected-count').textContent + ' 条记录？此操作不可恢复。')">
+                    🗑️ 删除选中
+                </button>
+            </form>
+            <button class="btn btn-sm btn-ghost" onclick="clearAllSelections()">取消</button>
+        </div>
+
         @{
             // filter なし = エンティティレベルリンク（上部に表示）
             var entityLevelLinks = Model.Meta.Links
@@ -272,13 +291,16 @@
                                        href="@Url.Action("EditPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
                                         Edit Page
                                     </a>
-                                    <button class="btn btn-xs btn-error"
-                                            hx-post="@Url.Action("Delete", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
-                                            hx-target="#list-container"
-                                            hx-swap="innerHTML"
-                                            hx-confirm="Delete this item?">
-                                        Delete
-                                    </button>
+                                    <form hx-post="@Url.Action("Delete", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
+                                          hx-target="#list-container"
+                                          hx-swap="innerHTML"
+                                          hx-confirm="Delete this item?"
+                                          style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-xs btn-error">
+                                            Delete
+                                        </button>
+                                    </form>
                                     @foreach (var actionEntry in Model.Meta.Actions)
                                     {
                                         var actionKey = actionEntry.Key;
@@ -298,12 +320,15 @@
                                         else
                                         {
                                             // 入力も確認もない場合は直接実行
-                                            <button class="btn btn-xs btn-accent btn-outline"
-                                                    hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
-                                                    hx-target="#list-container"
-                                                    hx-swap="innerHTML">
-                                                @actionDef.Label
-                                            </button>
+                                            <form hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
+                                                  hx-target="#list-container"
+                                                  hx-swap="innerHTML"
+                                                  style="display:inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-xs btn-accent btn-outline">
+                                                    @actionDef.Label
+                                                </button>
+                                            </form>
                                         }
                                     }
                                 </div>
@@ -353,3 +378,65 @@
         @await Html.PartialAsync("_Pagination", pagination)
     </div>
 </div>
+
+<script>
+(function () {
+    function updateBulkBar() {
+        var checked = document.querySelectorAll('.row-checkbox:checked');
+        var bar = document.getElementById('bulk-action-bar');
+        var countEl = document.getElementById('selected-count');
+        var container = document.getElementById('bulk-ids-container');
+        if (!bar || !countEl || !container) return;
+
+        var count = checked.length;
+        countEl.textContent = count;
+
+        // Rebuild hidden id inputs
+        container.innerHTML = '';
+        checked.forEach(function (cb) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'ids';
+            inp.value = cb.value;
+            container.appendChild(inp);
+        });
+
+        if (count > 0) {
+            bar.classList.remove('hidden');
+            bar.classList.add('flex');
+        } else {
+            bar.classList.add('hidden');
+            bar.classList.remove('flex');
+        }
+    }
+
+    window.clearAllSelections = function () {
+        document.querySelectorAll('.row-checkbox').forEach(function (cb) { cb.checked = false; });
+        var selectAll = document.getElementById('select-all-checkbox');
+        if (selectAll) selectAll.checked = false;
+        updateBulkBar();
+    };
+
+    // Select-all checkbox
+    var selectAll = document.getElementById('select-all-checkbox');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.row-checkbox').forEach(function (cb) {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkBar();
+        });
+    }
+
+    // Individual row checkboxes
+    document.querySelectorAll('.row-checkbox').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            var all = document.querySelectorAll('.row-checkbox');
+            var allChecked = Array.from(all).every(function (c) { return c.checked; });
+            if (selectAll) selectAll.checked = allChecked;
+            updateBulkBar();
+        });
+    });
+
+})();
+</script>

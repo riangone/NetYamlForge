@@ -97,15 +97,15 @@ public sealed class BatchUploadZipHandler : ICustomActionHandler
 
                         var relativeFilePath = string.Concat("/uploads/ai-doc-processor/", safeFileName);
                         
-                        var insertTaskStatement = @"
+                        await db.ExecuteAsync(@"
                             INSERT INTO DocumentTask (FileName, FilePath, Status, CreatedAt)
-                            VALUES (@FileName, @FilePath, 'pending', datetime('now', 'localtime'));
-                            SELECT last_insert_rowid();";
-                            
-                        var taskId = await db.QuerySingleAsync<int>(insertTaskStatement, new {
-                            FileName = entry.Name,
-                            FilePath = relativeFilePath
-                        }, transaction: tx);
+                            VALUES (@FileName, @FilePath, 'pending', datetime('now', 'localtime'));",
+                            new { FileName = entry.Name, FilePath = relativeFilePath },
+                            transaction: tx);
+
+                        var taskId = await db.QuerySingleAsync<int>(@"
+                            SELECT last_insert_rowid();",
+                            transaction: tx);
                         
                         pendingTaskIds.Add(taskId);
                     }
@@ -149,15 +149,15 @@ public sealed class BatchUploadZipHandler : ICustomActionHandler
 
                     var relativeFilePath = string.Concat("/uploads/ai-doc-processor/", safeFileName);
 
-                    var insertTaskStatement = @"
+                    await db.ExecuteAsync(@"
                         INSERT INTO DocumentTask (FileName, FilePath, Status, CreatedAt)
-                        VALUES (@FileName, @FilePath, 'pending', datetime('now', 'localtime'));
-                        SELECT last_insert_rowid();";
+                        VALUES (@FileName, @FilePath, 'pending', datetime('now', 'localtime'));",
+                        new { FileName = displayName, FilePath = relativeFilePath },
+                        transaction: tx);
 
-                    var taskId = await db.QuerySingleAsync<int>(insertTaskStatement, new {
-                        FileName = displayName,
-                        FilePath = relativeFilePath
-                    }, transaction: tx);
+                    var taskId = await db.QuerySingleAsync<int>(@"
+                        SELECT last_insert_rowid();",
+                        transaction: tx);
 
                     pendingTaskIds.Add(taskId);
                 }
@@ -189,6 +189,8 @@ public sealed class BatchUploadZipHandler : ICustomActionHandler
         {
             try
             {
+                // Delay execution to let the outer transaction commit successfully.
+                await Task.Delay(1000);
                 await ProcessPendingTasksAsync(projectName, connString, taskIds);
             }
             catch (Exception ex)

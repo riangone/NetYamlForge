@@ -47,7 +47,8 @@ public class BatchJobExecutor : IBatchJobExecutor
         { "invoice_email_processor", typeof(InvoiceEmailProcessorExecutor) },
         { "automated_blog_generator", typeof(AutomatedBlogGeneratorExecutor) },
         { "ai_dealer_engine", typeof(AiDealerEngineExecutor) },
-        { "ai_communication_sender", typeof(AiCommunicationExecutor) }
+        { "ai_communication_sender", typeof(AiCommunicationExecutor) },
+        { "ai_folder_processor", typeof(AiFolderProcessorExecutor) }
     };
 
     public BatchJobExecutor(

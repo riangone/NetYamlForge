@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dapper;
 using NetYamlForge.Services;
+using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NetYamlForge.Controllers;
@@ -123,7 +124,13 @@ public class DashboardController : Controller
         Models.DashboardConfig config)
     {
         var result = new List<DashboardStatViewModel>();
+        var conn = _db is LazyDbConnection lazyConn ? lazyConn.InnerConnection : _db;
         var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+
+        if (conn.State != ConnectionState.Open)
+        {
+            conn.Open();
+        }
 
         foreach (var stat in config.Stats)
         {
@@ -152,7 +159,7 @@ public class DashboardController : Controller
                 if (!string.IsNullOrEmpty(stat.Filter))
                     sql += $" WHERE {stat.Filter}";
 
-                var raw = _db.ExecuteScalar<object>(sql);
+                var raw = conn.ExecuteScalar<object>(sql);
                 var formatted = FormatScalar(raw, stat.Aggregate);
 
                 var routeValues = new RouteValueDictionary
@@ -199,7 +206,13 @@ public class DashboardController : Controller
     private Task<List<DashboardChartViewModel>> BuildChartsAsync(
         Models.DashboardConfig config)
     {
+        var conn = _db is LazyDbConnection lazyConn ? lazyConn.InnerConnection : _db;
         var result = new List<DashboardChartViewModel>();
+
+        if (conn.State != ConnectionState.Open)
+        {
+            conn.Open();
+        }
 
         foreach (var chart in config.Charts)
         {
@@ -262,7 +275,7 @@ public class DashboardController : Controller
                 var orderDir = (chart.OrderDir?.ToLowerInvariant() == "asc")  ? "ASC"   : "DESC";
                 sql += $" ORDER BY {orderCol} {orderDir} LIMIT {chart.Limit}";
 
-                var rows   = _db.Query(sql);
+                var rows   = conn.Query(sql);
                 var labels = new List<string>();
                 var values = new List<double>();
 

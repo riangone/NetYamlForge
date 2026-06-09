@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -207,6 +208,14 @@ public class ConnectionManager : IConnectionManager
             {
                 connection.Open();
             }
+        }
+
+        // Enable WAL mode for SQLite so concurrent reads and writes don't block each other.
+        // Split into separate calls: multi-statement PRAGMA may silently stop after the first one.
+        if (dbType == "sqlite")
+        {
+            await connection.ExecuteAsync("PRAGMA journal_mode=WAL;");
+            await connection.ExecuteAsync("PRAGMA busy_timeout=10000;");
         }
 
         RecordConnectionAcquired(projectName);

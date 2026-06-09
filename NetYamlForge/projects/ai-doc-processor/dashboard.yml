@@ -1,18 +1,70 @@
 stats:
-  # Add stat cards here. Example:
-  # - label: Total Records
-  #   entity: my_entity
-  #   aggregate: count
-  #   icon: 📊
-  #   color: badge-info
-  []
+  - label: 总任务数
+    labelKey: ai-doc.stats.total
+    entity: document_task
+    aggregate: count
+    icon: 📄
+    color: badge-info
+
+  - label: 已完成
+    labelKey: ai-doc.stats.completed
+    entity: document_task
+    aggregate: count
+    filter: "Status = 'completed'"
+    icon: ✅
+    color: badge-success
+
+  - label: 处理中
+    labelKey: ai-doc.stats.processing
+    entity: document_task
+    aggregate: count
+    filter: "Status = 'processing'"
+    icon: 🔄
+    color: badge-primary
+
+  - label: 等待中
+    labelKey: ai-doc.stats.pending
+    entity: document_task
+    aggregate: count
+    filter: "Status = 'pending'"
+    icon: ⏳
+    color: badge-warning
+
+  - label: 失败
+    labelKey: ai-doc.stats.failed
+    entity: document_task
+    aggregate: count
+    filter: "Status = 'failed'"
+    icon: ❌
+    color: badge-danger
 
 charts:
-  # Add charts here. Example:
-  # - id: trend
-  #   title: Monthly Trend
-  #   type: bar
-  #   source: "SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM YourTable GROUP BY Month ORDER BY Month DESC LIMIT 12"
-  #   xAxis: Month
-  #   yAxis: Count
-  []
+  - title: 任务状态分布
+    titleKey: ai-doc.charts.status
+    type: doughnut
+    entity: document_task
+    valueAggregate: count
+    groupExpression: Status
+    orderBy: value
+    orderDir: desc
+
+  - title: 文档类型分布（已完成）
+    titleKey: ai-doc.charts.doctype
+    type: bar
+    entity: document_task
+    valueAggregate: count
+    groupExpression: DocumentType
+    filter: "Status = 'completed' AND DocumentType IS NOT NULL AND DocumentType != ''"
+    orderBy: value
+    orderDir: desc
+    limit: 10
+
+  - title: 每日处理量（最近14天）
+    titleKey: ai-doc.charts.daily
+    type: bar
+    entity: document_task
+    valueAggregate: count
+    groupExpression: "date(CreatedAt)"
+    orderBy: label
+    orderDir: desc
+    limit: 14

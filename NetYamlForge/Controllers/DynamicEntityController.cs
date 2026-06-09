@@ -37,6 +37,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly IDbConnection _db;
     private readonly IPdfExportService _pdfExport;
     private readonly IDocumentPdfService _docPdf;
+    private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -59,6 +60,7 @@ public class DynamicEntityController : BaseProjectController
         IDbConnection db,
         IPdfExportService pdfExport,
         IDocumentPdfService docPdf,
+        Microsoft.AspNetCore.Hosting.IWebHostEnvironment env,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -80,6 +82,7 @@ public class DynamicEntityController : BaseProjectController
         _db = db;
         _pdfExport = pdfExport;
         _docPdf = docPdf;
+        _env = env;
         _logger = logger;
     }
 
@@ -319,29 +322,60 @@ public class DynamicEntityController : BaseProjectController
         if (entity.Equals("document_task", StringComparison.OrdinalIgnoreCase) && item != null)
         {
             var itemDict = item as IDictionary<string, object>;
-            if (itemDict != null &&
-                itemDict.TryGetValue("ExtractedTable", out var tbl) && tbl != null &&
-                itemDict.TryGetValue("ExtractedId", out var extId) && extId != null)
+            if (itemDict != null)
             {
-                var tableStr = tbl.ToString();
-                var idStr = extId.ToString();
-                if (!string.IsNullOrWhiteSpace(tableStr) && !string.IsNullOrWhiteSpace(idStr) && int.TryParse(idStr, out var intId) && intId > 0)
+                // Case-insensitive key lookups
+                var tblKey = itemDict.Keys.FirstOrDefault(k => k.Equals("ExtractedTable", StringComparison.OrdinalIgnoreCase));
+                var extIdKey = itemDict.Keys.FirstOrDefault(k => k.Equals("ExtractedId", StringComparison.OrdinalIgnoreCase));
+                var jsonPathKey = itemDict.Keys.FirstOrDefault(k => k.Equals("JsonPath", StringComparison.OrdinalIgnoreCase));
+
+                if (tblKey != null && extIdKey != null &&
+                    itemDict.TryGetValue(tblKey, out var tbl) && tbl != null &&
+                    itemDict.TryGetValue(extIdKey, out var extId) && extId != null)
                 {
-                    var cleanTable = new string(tableStr.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
-                    if (!string.IsNullOrEmpty(cleanTable))
+                    var tableStr = tbl.ToString();
+                    var idStr = extId.ToString();
+                    if (!string.IsNullOrWhiteSpace(tableStr) && !string.IsNullOrWhiteSpace(idStr) && int.TryParse(idStr, out var intId) && intId > 0)
+                    {
+                        var cleanTable = new string(tableStr.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
+                        if (!string.IsNullOrEmpty(cleanTable))
+                        {
+                            try
+                            {
+                                var selectStatement = string.Format("SELECT * FROM \"{0}\" WHERE Id = @Id", cleanTable);
+                                var extRow = await _db.QueryFirstOrDefaultAsync<dynamic>(selectStatement, new { Id = intId });
+                                if (extRow != null)
+                                {
+                                    ViewBag.ExtractedData = extRow;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to load extracted dynamic data from {Table} with ID {Id}", cleanTable, idStr);
+                            }
+                        }
+                    }
+                }
+
+                if (jsonPathKey != null && itemDict.TryGetValue(jsonPathKey, out var jsonPathObj) && jsonPathObj != null)
+                {
+                    var jsonRelativePath = jsonPathObj.ToString();
+                    if (!string.IsNullOrWhiteSpace(jsonRelativePath))
                     {
                         try
                         {
-                            var selectStatement = string.Format("SELECT * FROM \"{0}\" WHERE Id = @Id", cleanTable);
-                            var extRow = await _db.QueryFirstOrDefaultAsync<dynamic>(selectStatement, new { Id = intId });
-                            if (extRow != null)
+                            var jsonAbsolutePath = Path.Combine(_env.WebRootPath, jsonRelativePath.TrimStart('/'));
+                            if (System.IO.File.Exists(jsonAbsolutePath))
                             {
-                                ViewBag.ExtractedData = extRow;
+                                var rawJson = await System.IO.File.ReadAllTextAsync(jsonAbsolutePath);
+                                using var jsonDoc = JsonDocument.Parse(rawJson);
+                                var formattedJson = JsonSerializer.Serialize(jsonDoc, new JsonSerializerOptions { WriteIndented = true });
+                                ViewBag.RawJson = formattedJson;
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "Failed to load extracted dynamic data from {Table} with ID {Id}", cleanTable, idStr);
+                            _logger.LogWarning(ex, "Failed to load raw JSON from path: {Path}", jsonRelativePath);
                         }
                     }
                 }
@@ -562,6 +596,33 @@ public class DynamicEntityController : BaseProjectController
                 null,
                 null,
                 returnUrl));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BulkDelete(string entity, [FromForm] List<string>? ids = null, [FromForm] string? returnUrl = null)
+    {
+        entity = NormalizeSingleValue(entity) ?? "customer";
+        var meta = _meta.Get(entity);
+        var accessDenied = RejectIfNotVisible(meta);
+        if (accessDenied != null) return accessDenied;
+
+        var pkColumns = meta.GetPrimaryKeyColumns();
+        var pkCol = pkColumns[0];
+        var beforeDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg));
+        var afterDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg));
+
+        var errors = new List<string>();
+        foreach (var idVal in ids ?? [])
+        {
+            var result = await _commandService.DeleteAsync(entity, pkCol, idVal, beforeDeleteHooks, afterDeleteHooks, User.Identity?.Name);
+            if (!result.Ok)
+                errors.Add(result.Error?.Message ?? idVal);
+        }
+
+        var (items, total) = await _listResponseService.LoadFirstPageAfterMutationAsync(entity);
+        return PartialView("_List",
+            CreateListViewModel(entity, meta, items, null, null, null, new(), 1, total, null, 5, true, false, null, null, returnUrl));
     }
 
     // エンティティ定義（フィールド・フォーム・フィルタ等）をページで表示します（Admin のみ）

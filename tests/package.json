@@ -1,0 +1,12 @@
+{
+  "name": "netyamlforge-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for NetYamlForge auto-dealer-demo",
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

@@ -1,9 +1,9 @@
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
-    var uploadUrl = $"/{currentProject}/Page/UploadPage";
-    var listUrl = $"/{currentProject}/DynamicEntity/Index?entity=document_task";
-    var dashboardUrl = $"/{currentProject}/Dashboard";
+    var uploadUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "UploadPage" });
+    var listUrl = Url.Action("Index", "DynamicEntity", new { project = currentProject, entity = "document_task" });
+    var dashboardUrl = Url.Action("Index", "Dashboard", new { project = currentProject });
 
     var completedSection = Model.ContainsKey("completed_tasks") ? Model["completed_tasks"] : (Rows: Enumerable.Empty<Dictionary<string, object>>(), Total: 0);
     var allSection = Model.ContainsKey("all_tasks") ? Model["all_tasks"] : (Rows: Enumerable.Empty<Dictionary<string, object>>(), Total: 0);
@@ -21,7 +21,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
-                <a href="/@currentProject" class="hover:underline">首页</a>
+                <a href="@Url.Content($"~/{currentProject}")" class="hover:underline">首页</a>
                 <span>/</span>
                 <span>查看提取数据</span>
             </div>
@@ -137,10 +137,10 @@
                                     <div class="flex gap-2 flex-wrap pt-1">
                                         @if (!string.IsNullOrEmpty(jsonPath))
                                         {
-                                            <a href="@jsonPath" target="_blank" class="btn btn-sm btn-primary">
+                                            <a href="@Url.Content("~" + jsonPath)" target="_blank" class="btn btn-sm btn-primary">
                                                 📥 查看完整 JSON
                                             </a>
-                                            <a href="@jsonPath" download class="btn btn-sm btn-outline">
+                                            <a href="@Url.Content("~" + jsonPath)" download class="btn btn-sm btn-outline">
                                                 💾 下载 JSON
                                             </a>
                                         }

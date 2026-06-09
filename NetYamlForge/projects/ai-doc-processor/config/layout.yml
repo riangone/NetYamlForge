@@ -5,17 +5,22 @@ navigation:
   showDashboard: true
   entities: []
   items:
-    - label: Home
+    - label: 首页
       url: /ai-doc-processor
       icon: 🏠
-    - label: Dashboard
+    - label: 数据看板
       controller: Dashboard
       action: Index
       icon: 📊
-    - label: Schema
-      controller: DynamicEntity
-      action: AllDefinitions
-      icon: 🧩
+    - label: 上传文档
+      url: /ai-doc-processor/Page/UploadPage
+      icon: 📤
+    - label: 查看提取数据
+      url: /ai-doc-processor/Page/DataViewer
+      icon: 🔍
+    - label: 任务列表
+      url: /ai-doc-processor/DynamicEntity/Index?entity=document_task
+      icon: 🗂️
 
 footer:
-  text: "AI Document Processor — powered by NetYamlForge"
+  text: "AI Document Processor — Powered by NetYamlForge × Gemini AI"

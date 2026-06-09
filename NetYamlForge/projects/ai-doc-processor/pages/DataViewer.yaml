@@ -29,6 +29,10 @@ sections:
     pageSize: 50
     editable: false
     readOnly: true
+    actions:
+      - label: "🔍 查看详情"
+        url: "/ai-doc-processor/DynamicEntity/DetailPage?entity=document_task&id={Id}"
+        class: "btn-primary btn-xs text-white"
 
   - id: all_tasks
     title: 全部任务
@@ -52,3 +56,7 @@ sections:
     pageSize: 100
     editable: false
     readOnly: true
+    actions:
+      - label: "🔍 查看详情"
+        url: "/ai-doc-processor/DynamicEntity/DetailPage?entity=document_task&id={Id}"
+        class: "btn-primary btn-xs text-white"

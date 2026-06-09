@@ -244,6 +244,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiDealerEngineExecutor>());
         services.AddScoped<AiCommunicationExecutor>();
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiCommunicationExecutor>());
+        services.AddScoped<AiFolderProcessorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiFolderProcessorExecutor>());
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();

@@ -10,7 +10,7 @@ features:
   multiLanguage: true
   userAuthentication: true
   dashboard: true
-  pages: false
+  pages: true
 
 layout:
   dashboardTheme: workspace
@@ -21,18 +21,24 @@ layout:
     entities:
       - document_task
     items:
-      - label: Home
+      - label: 首页
         url: /ai-doc-processor
         icon: 🏠
-      - label: Dashboard
+      - label: 数据看板
         controller: Dashboard
         action: Index
         icon: 📊
-      - label: "文档任务管理"
+      - label: 上传文档
+        url: /ai-doc-processor/Page/UploadPage
+        icon: 📤
+      - label: 查看提取数据
+        url: /ai-doc-processor/Page/DataViewer
+        icon: 🔍
+      - label: 任务列表
         url: /ai-doc-processor/DynamicEntity/Index?entity=document_task
         icon: 🗂️
 
 home_page:
-  icon: "🗂️"
+  icon: "🤖"
   tagline: "AI Document Processor"
   tags: []

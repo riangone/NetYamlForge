@@ -1,0 +1,290 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    ViewData["Title"] = "首页";
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "ai-doc-processor";
+
+    var statsRow = Model.TryGetValue("task_stats", out var statsSection)
+        ? statsSection.Rows.FirstOrDefault()
+        : null;
+
+    long total      = statsRow != null && statsRow.TryGetValue("total",      out var tv) ? Convert.ToInt64(tv ?? 0) : 0;
+    long completed  = statsRow != null && statsRow.TryGetValue("completed",  out var cv) ? Convert.ToInt64(cv ?? 0) : 0;
+    long processing = statsRow != null && statsRow.TryGetValue("processing", out var pv) ? Convert.ToInt64(pv ?? 0) : 0;
+    long pending    = statsRow != null && statsRow.TryGetValue("pending",    out var ndv) ? Convert.ToInt64(ndv ?? 0) : 0;
+    long failed     = statsRow != null && statsRow.TryGetValue("failed",     out var fv) ? Convert.ToInt64(fv ?? 0) : 0;
+
+    var recentTasks = Model.TryGetValue("recent_tasks", out var recentSection)
+        ? recentSection.Rows.ToList()
+        : new List<Dictionary<string, object>>();
+
+    var docTypes = Model.TryGetValue("doc_type_stats", out var docTypeSection)
+        ? docTypeSection.Rows.ToList()
+        : new List<Dictionary<string, object>>();
+
+    var uploadUrl  = Url.Action("Index", "Page", new { project = currentProject, pageName = "UploadPage" });
+    var listUrl    = Url.Action("Index", "DynamicEntity", new { project = currentProject, entity = "document_task" });
+    var viewerUrl  = Url.Action("Index", "Page", new { project = currentProject, pageName = "DataViewer" });
+    var dashUrl    = Url.Action("Index", "Dashboard", new { project = currentProject });
+
+    string StatusClass(string? s) => s?.ToLower() switch {
+        "completed"  => "badge-success",
+        "processing" => "badge-info",
+        "pending"    => "badge-warning",
+        "failed"     => "badge-error",
+        _            => "badge-ghost"
+    };
+    string StatusLabel(string? s) => s?.ToLower() switch {
+        "completed"  => "已完成",
+        "processing" => "处理中",
+        "pending"    => "待处理",
+        "failed"     => "失败",
+        _            => s ?? "未知"
+    };
+    string StatusIcon(string? s) => s?.ToLower() switch {
+        "completed"  => "✅",
+        "processing" => "🔄",
+        "pending"    => "⏳",
+        "failed"     => "❌",
+        _            => "📄"
+    };
+
+    double completionRate = total > 0 ? Math.Round((double)completed / total * 100, 1) : 0;
+}
+
+<div class="space-y-6">
+
+    <!-- ===== Hero =====-->
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-content">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_50%,white_0%,transparent_60%)]"></div>
+        <div class="relative p-8 md:p-10 flex flex-col md:flex-row md:items-center gap-8">
+            <div class="flex-1 space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-sm font-medium">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    AI 文档智能处理平台
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold leading-tight">
+                    上传文档，AI 自动提取<br/>结构化数据
+                </h1>
+                <p class="text-primary-content/80 max-w-lg">
+                    支持 PDF、图片（JPG/PNG/WebP）和 ZIP 批量包。Gemini AI 自动识别文档类型，提取全部字段含表格明细，动态建表存储。
+                </p>
+                <div class="flex flex-wrap gap-3 pt-1">
+                    <a href="@uploadUrl" class="btn btn-white gap-2 text-primary font-semibold shadow">
+                        📤 立即上传文件
+                    </a>
+                    <a href="@viewerUrl" class="btn btn-ghost btn-outline border-white/40 text-white gap-2">
+                        🔍 查看提取数据
+                    </a>
+                </div>
+            </div>
+            <div class="hidden md:flex flex-col items-center gap-3 text-center opacity-80 min-w-[140px]">
+                <div class="text-7xl">🤖</div>
+                <div class="text-sm font-medium">Gemini AI 驱动</div>
+                <div class="flex flex-wrap gap-1 justify-center">
+                    <span class="badge badge-ghost badge-sm bg-white/20 border-0 text-white">PDF</span>
+                    <span class="badge badge-ghost badge-sm bg-white/20 border-0 text-white">JPG</span>
+                    <span class="badge badge-ghost badge-sm bg-white/20 border-0 text-white">PNG</span>
+                    <span class="badge badge-ghost badge-sm bg-white/20 border-0 text-white">ZIP</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Stats =====-->
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        <div class="card bg-base-100 border border-base-300 shadow-sm lg:col-span-1">
+            <div class="card-body p-4">
+                <div class="text-xs font-medium opacity-60 mb-1">总任务数</div>
+                <div class="text-3xl font-bold text-base-content">@total</div>
+                <div class="text-xs opacity-50 mt-1">全部已提交</div>
+            </div>
+        </div>
+        <div class="card bg-base-100 border border-base-300 shadow-sm lg:col-span-1">
+            <div class="card-body p-4">
+                <div class="text-xs font-medium opacity-60 mb-1">已完成</div>
+                <div class="text-3xl font-bold text-success">@completed</div>
+                <div class="text-xs opacity-50 mt-1">完成率 @completionRate%</div>
+            </div>
+        </div>
+        <div class="card bg-base-100 border border-base-300 shadow-sm lg:col-span-1">
+            <div class="card-body p-4">
+                <div class="text-xs font-medium opacity-60 mb-1">处理中</div>
+                <div class="text-3xl font-bold text-info">@processing</div>
+                <div class="text-xs opacity-50 mt-1">AI 正在提取</div>
+            </div>
+        </div>
+        <div class="card bg-base-100 border border-base-300 shadow-sm lg:col-span-1">
+            <div class="card-body p-4">
+                <div class="text-xs font-medium opacity-60 mb-1">待处理</div>
+                <div class="text-3xl font-bold text-warning">@pending</div>
+                <div class="text-xs opacity-50 mt-1">排队等待</div>
+            </div>
+        </div>
+        <div class="card bg-base-100 border border-base-300 shadow-sm lg:col-span-1">
+            <div class="card-body p-4">
+                <div class="text-xs font-medium opacity-60 mb-1">失败</div>
+                <div class="text-3xl font-bold text-error">@failed</div>
+                <div class="text-xs opacity-50 mt-1">需重新处理</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Quick Actions =====-->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <a href="@uploadUrl"
+           class="group card bg-primary text-primary-content border-0 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+            <div class="card-body p-5 flex-row items-center gap-4">
+                <div class="text-4xl">📤</div>
+                <div>
+                    <div class="font-bold text-lg">上传文件</div>
+                    <div class="text-sm opacity-80">PDF / 图片 / ZIP</div>
+                </div>
+            </div>
+        </a>
+        <a href="@viewerUrl"
+           class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-md hover:border-primary/40 transition-all hover:-translate-y-0.5">
+            <div class="card-body p-5 flex-row items-center gap-4">
+                <div class="text-4xl">🔍</div>
+                <div>
+                    <div class="font-bold text-lg">查看提取数据</div>
+                    <div class="text-sm opacity-60">浏览结构化结果</div>
+                </div>
+            </div>
+        </a>
+        <a href="@dashUrl"
+           class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-md hover:border-primary/40 transition-all hover:-translate-y-0.5">
+            <div class="card-body p-5 flex-row items-center gap-4">
+                <div class="text-4xl">📊</div>
+                <div>
+                    <div class="font-bold text-lg">数据看板</div>
+                    <div class="text-sm opacity-60">统计图表分析</div>
+                </div>
+            </div>
+        </a>
+    </section>
+
+    <!-- ===== Recent Tasks + Doc Types =====-->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Recent tasks-->
+        <div class="lg:col-span-2 card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="card-title text-base font-bold">🕐 最近任务</h2>
+                    <a href="@listUrl" class="btn btn-ghost btn-xs gap-1">全部 →</a>
+                </div>
+
+                @if (!recentTasks.Any())
+                {
+                    <div class="flex flex-col items-center justify-center py-10 gap-3 opacity-50">
+                        <span class="text-4xl">📭</span>
+                        <p class="text-sm">暂无任务记录，<a href="@uploadUrl" class="link link-primary">立即上传文件</a></p>
+                    </div>
+                }
+                else
+                {
+                    <div class="space-y-2">
+                        @foreach (var row in recentTasks)
+                        {
+                            var fileName    = row.TryGetValue("FileName",     out var fn) ? fn?.ToString() : "—";
+                            var docType     = row.TryGetValue("DocumentType", out var dt) ? dt?.ToString() : null;
+                            var status      = row.TryGetValue("Status",       out var st) ? st?.ToString() : null;
+                            var createdAt   = row.TryGetValue("CreatedAt",    out var ca) ? ca?.ToString() : null;
+
+                            <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-base-200 transition-colors">
+                                <div class="text-xl w-7 text-center flex-shrink-0">@StatusIcon(status)</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-medium text-sm truncate" title="@fileName">@fileName</div>
+                                    <div class="text-xs opacity-50 flex gap-2 mt-0.5">
+                                        @if (!string.IsNullOrWhiteSpace(docType))
+                                        {
+                                            <span>@docType</span>
+                                            <span>·</span>
+                                        }
+                                        <span>@createdAt</span>
+                                    </div>
+                                </div>
+                                <span class="badge badge-sm @StatusClass(status) flex-shrink-0">@StatusLabel(status)</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Doc type breakdown -->
+        @{
+            long maxCount = docTypes
+                .Select(r => r.TryGetValue("count", out var c2) ? Convert.ToInt64(c2 ?? 0) : 0)
+                .DefaultIfEmpty(1)
+                .Max();
+            if (maxCount == 0) maxCount = 1;
+        }
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-base font-bold mb-3">📂 文档类型</h2>
+
+                @if (!docTypes.Any())
+                {
+                    <div class="flex flex-col items-center justify-center py-8 gap-2 opacity-50">
+                        <span class="text-3xl">📋</span>
+                        <p class="text-xs text-center">完成处理后<br/>将在此显示分布</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="space-y-3">
+                        @foreach (var row in docTypes)
+                        {
+                            var docType  = row.TryGetValue("DocumentType", out var dt) ? dt?.ToString() ?? "未知" : "未知";
+                            var cnt      = row.TryGetValue("count",        out var c)  ? Convert.ToInt64(c ?? 0)  : 0;
+                            var barPct   = (int)Math.Round((double)cnt / maxCount * 100);
+
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="font-medium truncate max-w-[140px]" title="@docType">@docType</span>
+                                    <span class="opacity-60">@cnt</span>
+                                </div>
+                                <div class="h-1.5 bg-base-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full transition-all" style="width:@(barPct)%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ===== How it works =====-->
+    <section class="card bg-base-100 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+            <h2 class="card-title text-base font-bold mb-4">🚀 使用流程</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="flex gap-3">
+                    <div class="flex-shrink-0 w-9 h-9 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold text-sm">1</div>
+                    <div>
+                        <div class="font-semibold text-sm">上传文档</div>
+                        <div class="text-xs opacity-60 mt-1">选择 PDF、图片或 ZIP 压缩包，单次支持多文件上传，单文件最大 20MB。</div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-shrink-0 w-9 h-9 rounded-full bg-secondary text-secondary-content flex items-center justify-center font-bold text-sm">2</div>
+                    <div>
+                        <div class="font-semibold text-sm">AI 自动提取</div>
+                        <div class="text-xs opacity-60 mt-1">Gemini AI 识别文档类型（发票、收据、合同等），提取全部字段及表格明细行，绝不省略。</div>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex-shrink-0 w-9 h-9 rounded-full bg-accent text-accent-content flex items-center justify-center font-bold text-sm">3</div>
+                    <div>
+                        <div class="font-semibold text-sm">查看结构化数据</div>
+                        <div class="text-xs opacity-60 mt-1">系统自动建表存储，可在"查看提取数据"页面按文档类型浏览和下载 JSON 结果。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>

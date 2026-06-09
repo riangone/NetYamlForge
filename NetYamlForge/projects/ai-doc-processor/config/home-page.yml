@@ -1,63 +1,63 @@
 hero:
-  eyebrow: AI Document Processor Workspace
-  title: Metadata-Driven Enterprise Platform
-  description: Welcome to AI Document Processor. Manage your business logic, entities, and operational dashboards through a unified YAML-first interface.
-  primaryActionLabel: Open Dashboard
-  primaryActionUrl: /ai-doc-processor/Dashboard
-  secondaryActionLabel: View Schema
-  secondaryActionUrl: /ai-doc-processor/DynamicEntity/AllDefinitions
+  eyebrow: AI 文档智能处理平台
+  title: 上传文档，AI 自动提取结构化数据
+  description: 支持 PDF、图片（JPG/PNG/WebP）和 ZIP 批量上传。AI 自动识别文档类型、提取所有字段（含表格明细行），并将数据存入动态数据库，无需手动配置。
+  primaryActionLabel: 立即上传文件
+  primaryActionUrl: /ai-doc-processor/Page/UploadPage
+  secondaryActionLabel: 查看数据看板
+  secondaryActionUrl: /ai-doc-processor/Dashboard
   highlights:
-    - YAML-First UI
-    - Integrated Auth
-    - SQL Abstraction
-    - Auto-Scaffolding
+    - PDF / 图片 / ZIP
+    - AI 全字段提取
+    - 动态建表
+    - 批量处理
 
 metrics:
-  - label: Entities
-    value: "Auto"
-    trend: "Metadata driven"
+  - label: 支持格式
+    value: "6+"
+    trend: "PDF · JPG · PNG · WebP · BMP · ZIP"
     tone: text-primary
-  - label: Security
-    value: "RBAC"
-    trend: "Enterprise ready"
+  - label: 单文件上限
+    value: "20MB"
+    trend: "ZIP 包含多文件"
     tone: text-success
-  - label: Interface
-    value: "DaisyUI"
-    trend: "Tailwind powered"
+  - label: 驱动引擎
+    value: "Gemini"
+    trend: "Google AI 多模态"
     tone: text-secondary
 
 capabilities:
-  - icon: 🧭
-    title: Dynamic Navigation
-    description: Hierarchical menus and breadcrumbs auto-generated from your layout configuration.
-    badge: Core
-  - icon: 🛡️
-    title: Enterprise Security
-    description: Built-in role-based access control and audit logging for all data operations.
-    badge: Security
-  - icon: 📊
-    title: Operational Insights
-    description: Real-time dashboards with customizable charts and statistical summaries.
-    badge: Analytics
-  - icon: 🧩
-    title: Logic Extensions
-    description: Extend platform behavior with custom hooks and domain-specific business logic.
-    badge: Extensible
+  - icon: 📤
+    title: 便捷上传
+    description: 支持单文件、多文件或 ZIP 压缩包上传，点击"立即上传文件"按钮直达专属上传页面。
+    badge: 核心
+  - icon: 🤖
+    title: AI 智能提取
+    description: Gemini AI 自动识别文档类型（发票、收据、名片等），提取全部字段，包括表格明细行，绝不省略。
+    badge: AI
+  - icon: 🗄️
+    title: 动态数据管理
+    description: 系统根据文档类型自动创建专属数据表并存储结构化数据，支持动态字段扩展，无需手动建表。
+    badge: 自动化
+  - icon: 📋
+    title: 处理状态追踪
+    description: 实时显示每个文档的处理状态（待处理→处理中→完成/失败），Dashboard 提供总览统计与图表。
+    badge: 监控
 
 quickActions:
-  - label: Dashboard
-    url: /ai-doc-processor/Dashboard
+  - label: 上传文件
+    url: /ai-doc-processor/Page/UploadPage
     style: btn-primary
+    icon: 📤
+  - label: 查看提取数据
+    url: /ai-doc-processor/Page/DataViewer
+    style: btn-outline
+    icon: 🔍
+  - label: 数据看板
+    url: /ai-doc-processor/Dashboard
+    style: btn-outline
     icon: 📊
-  - label: Entity Schema
-    url: /ai-doc-processor/DynamicEntity/AllDefinitions
-    style: btn-outline
-    icon: 🧩
-  - label: Starter Page
-    url: /ai-doc-processor/Page/StarterOverview
-    style: btn-outline
-    icon: 🧭
-  - label: User Guide
-    url: /ai-doc-processor/docs/README-ja.md
+  - label: 任务列表
+    url: /ai-doc-processor/DynamicEntity/Index?entity=document_task
     style: btn-ghost
-    icon: 📖
+    icon: 🗂️

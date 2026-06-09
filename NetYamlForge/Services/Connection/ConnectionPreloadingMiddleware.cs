@@ -24,10 +24,10 @@ public class ConnectionPreloadingMiddleware
     {
         // 仅对需要数据库连接的路径预加载
         var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
-        var shouldPreload = path.StartsWith("/api/") ||
-                           path.StartsWith("/entity/") ||
-                           path.StartsWith("/dashboard") ||
-                           path.StartsWith("/page/");
+        var shouldPreload = path.Contains("/api/") ||
+                           path.Contains("/entity/") ||
+                           path.Contains("/dashboard") ||
+                           path.Contains("/page/");
 
         bool preloaded = false;
         if (shouldPreload && projectScope.IsSet)

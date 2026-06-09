@@ -185,17 +185,20 @@ public class ProjectManager
         }
 
         // SQLite: path が相対パスの場合は projectDir 基準で解決
+        // Pooling=false: prevents stale pooled connections from holding WAL/journal locks
+        // that cause SQLITE_BUSY when the batch scheduler tries to write concurrently.
+        const string sqliteOptions = ";Pooling=False";
         if (!string.IsNullOrWhiteSpace(config.Database.Path))
         {
             var dbPath = Path.IsPathRooted(config.Database.Path)
                 ? config.Database.Path
                 : Path.GetFullPath(Path.Combine(projectDir, config.Database.Path));
-            return $"Data Source={dbPath}";
+            return $"Data Source={dbPath}{sqliteOptions}";
         }
 
         // フォールバック：database/ サブディレクトリ内の {name}.db
         var defaultPath = Path.Combine(projectDir, "database", $"{config.Name}.db");
-        return $"Data Source={defaultPath}";
+        return $"Data Source={defaultPath}{sqliteOptions}";
     }
 
     public virtual bool TryGet(string name, out ProjectInfo? info) =>

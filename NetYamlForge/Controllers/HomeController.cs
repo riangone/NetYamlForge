@@ -50,6 +50,10 @@ public class HomeController : Controller
             return NotFound();
         }
 
+        // Redirect to custom home page if defined
+        if (projectInfo.PageMetadata.TryGet("HomePage", out _))
+            return RedirectToAction("Index", "Page", new { project, pageName = "HomePage" });
+
         var projects = string.Equals(projectInfo.Name, "home", StringComparison.OrdinalIgnoreCase)
             ? _projectManager.GetAll()
             : new[] { projectInfo };

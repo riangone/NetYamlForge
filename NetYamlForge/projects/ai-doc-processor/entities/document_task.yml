@@ -9,24 +9,24 @@ entities:
 
     actions:
       batch_upload:
-        label: "批量上传文档/ZIP"
+        label: "📤 上传文档 / ZIP"
         scope: header
         handler: batch_upload_zip_handler
-        confirm: "您确定要上传文件并由 AI 批量提取内容吗？"
+        confirm: "请选择要上传的文档文件或 ZIP 压缩包，AI 将自动分析并提取全部内容。"
         inputs:
           - name: ZipFile
             type: file
-            label: "选择 ZIP 压缩包 (可选)"
+            label: "📦 选择 ZIP 压缩包（可包含多个文档）"
             required: false
             allowedExtensions: ".zip"
-            maxSizeBytes: 20971520 # 20MB
+            maxSizeBytes: 20971520
           - name: DocFiles
             type: file
-            label: "或选择单个/多个文档文件 (PDF/图片)"
+            label: "📄 或选择单个/多个文档文件（PDF/图片）"
             required: false
             multiple: true
             allowedExtensions: ".pdf,.jpg,.jpeg,.png,.webp,.bmp"
-            maxSizeBytes: 20971520 # 20MB
+            maxSizeBytes: 20971520
 
     columns:
       Id:
@@ -45,17 +45,27 @@ entities:
         sortable: true
       Status:
         type: string
-        label: "状态"
+        label: "处理状态"
         sortable: true
       FilePath:
         type: string
         label: "原始文件"
+        hidden: true
       JsonPath:
         type: string
-        label: "JSON输出"
+        label: "提取结果"
+        hidden: true
+      ExtractedTable:
+        type: string
+        label: "数据表"
+        hidden: true
+      ExtractedId:
+        type: int
+        label: "数据ID"
+        hidden: true
       CreatedAt:
         type: datetime
-        label: "处理时间"
+        label: "上传时间"
         sortable: true
 
     forms:
@@ -63,19 +73,15 @@ entities:
         type: string
         label: "文件名"
         editable: false
-      FilePath:
-        type: string
-        label: "文件路径"
-        editable: false
       Status:
         type: string
-        label: "状态"
+        label: "处理状态"
         editable: false
       DocumentType:
         type: string
         label: "文档类型"
         editable: false
-      JsonPath:
-        type: string
-        label: "JSON输出路径"
+      CreatedAt:
+        type: datetime
+        label: "上传时间"
         editable: false

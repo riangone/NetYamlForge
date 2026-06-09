@@ -1,0 +1,21 @@
+jobs:
+  ai_folder_processor_job:
+    displayName: "AI 文档文件夹定期处理"
+    description: "每5分钟扫描指定文件夹，自动将新文档文件提交给 AI 进行数据提取。处理完成后文件移至 processed 子目录，失败时移至 error 子目录。"
+    type: ai_folder_processor
+    enabled: true
+    schedule:
+      cron: "* * * * *"
+      timezone: "Asia/Tokyo"
+    settings:
+      params:
+        # 监视文件夹（相对于 wwwroot，或使用绝对路径）
+        watch_folder: "watch-docs/ai-doc-processor"
+        # 处理成功后移动到的目录（留空则删除原文件）
+        processed_folder: "watch-docs/ai-doc-processor/processed"
+        # 处理失败后移动到的目录（留空则保留在原位）
+        error_folder: "watch-docs/ai-doc-processor/error"
+    onFailure:
+      retryCount: 1
+      retryInterval: 30
+      logError: true
