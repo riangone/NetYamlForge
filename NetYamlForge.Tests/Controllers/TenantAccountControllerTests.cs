@@ -162,7 +162,10 @@ public class TenantAccountControllerTests
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.False(_controller.ModelState.IsValid);
         _controller.ModelState.AddModelError("", "未分配任何项目");
-        Assert.Contains("未分配任何项目", _controller.ModelState[""].Errors[0].ErrorMessage);
+        var errors = _controller.ModelState[""]?.Errors;
+        Assert.NotNull(errors);
+        Assert.NotEmpty(errors);
+        Assert.Contains("未分配任何项目", errors[0].ErrorMessage);
     }
 
     #endregion

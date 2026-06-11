@@ -49,17 +49,17 @@ public class AiEmailChatExecutor
 
             var env = LoadEnv(envPath);
 
-            var imapServer = env.GetValueOrDefault("IMAP_SERVER");
+            var imapServer = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
             var imapPort = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
             var imapSsl = bool.Parse(env.GetValueOrDefault("IMAP_SSL", "true"));
-            var imapUser = env.GetValueOrDefault("IMAP_USER");
-            var imapPass = env.GetValueOrDefault("IMAP_PASSWORD");
+            var imapUser = env.GetValueOrDefault("IMAP_USER") ?? string.Empty;
+            var imapPass = env.GetValueOrDefault("IMAP_PASSWORD") ?? string.Empty;
 
-            var smtpServer = env.GetValueOrDefault("SMTP_SERVER");
+            var smtpServer = env.GetValueOrDefault("SMTP_SERVER") ?? string.Empty;
             var smtpPort = int.Parse(env.GetValueOrDefault("SMTP_PORT", "587"));
             var smtpSsl = bool.Parse(env.GetValueOrDefault("SMTP_SSL", "false"));
-            var smtpUser = env.GetValueOrDefault("SMTP_USER");
-            var smtpPass = env.GetValueOrDefault("SMTP_PASSWORD");
+            var smtpUser = env.GetValueOrDefault("SMTP_USER") ?? string.Empty;
+            var smtpPass = env.GetValueOrDefault("SMTP_PASSWORD") ?? string.Empty;
             var fromName = env.GetValueOrDefault("SMTP_FROM_NAME", "AI Assistant");
             var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
 
@@ -138,7 +138,7 @@ public class AiEmailChatExecutor
 
                 // 4. Send Reply
                 var replyMessage = new MimeMessage();
-                replyMessage.From.Add(new MailboxAddress(fromName, fromAddress ?? smtpUser ?? "ai@assistant.local"));
+                replyMessage.From.Add(new MailboxAddress(fromName, fromAddress));
                 replyMessage.To.Add(message.From.Mailboxes.First());
                 replyMessage.Subject = subject.StartsWith("Re:", StringComparison.OrdinalIgnoreCase)
                     ? subject
@@ -155,7 +155,7 @@ public class AiEmailChatExecutor
 
                 using var smtpClient = new SmtpClient();
                 await smtpClient.ConnectAsync(smtpServer, smtpPort, smtpSsl, cancellationToken);
-                await smtpClient.AuthenticateAsync(smtpUser, smtpPass, cancellationToken);
+                await smtpClient.AuthenticateAsync(smtpUser!, smtpPass, cancellationToken);
                 await smtpClient.SendAsync(replyMessage, cancellationToken);
                 await smtpClient.DisconnectAsync(true, cancellationToken);
                 

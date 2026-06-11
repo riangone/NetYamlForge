@@ -34,7 +34,7 @@ public class ConnectionManagerTests
     public async Task GetConnectionAsync_ShouldThrow_WhenProjectNotFound()
     {
         // Arrange
-        _projectManagerMock.Setup(pm => pm.TryGet(It.IsAny<string>(), out It.Ref<ProjectInfo>.IsAny))
+        _projectManagerMock.Setup(pm => pm.TryGet(It.IsAny<string>(), out It.Ref<ProjectInfo?>.IsAny))
             .Returns(false);
 
         var scopeFactory = new Mock<IServiceScopeFactory>();
@@ -98,7 +98,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void GetAllPoolStats_ShouldReturnStatsForAllProjects()
+    public async Task GetAllPoolStats_ShouldReturnStatsForAllProjects()
     {
         // Arrange
         var project1 = new ProjectInfo
@@ -136,8 +136,8 @@ public class ConnectionManagerTests
             _testOptions);
 
         // Act - 先创建一些连接
-        var conn1 = manager.GetConnectionAsync("project1").GetAwaiter().GetResult();
-        var conn2 = manager.GetConnectionAsync("project2").GetAwaiter().GetResult();
+        var conn1 = await manager.GetConnectionAsync("project1");
+        var conn2 = await manager.GetConnectionAsync("project2");
 
         var stats = manager.GetAllPoolStats();
 
@@ -150,7 +150,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void ResetPool_ShouldRemoveAndDisposePool()
+    public async Task ResetPool_ShouldRemoveAndDisposePool()
     {
         // Arrange
         var projectInfo = new ProjectInfo
@@ -180,7 +180,7 @@ public class ConnectionManagerTests
             _testOptions);
 
         // Act - 创建连接池
-        var conn = manager.GetConnectionAsync("test-project").GetAwaiter().GetResult();
+        var conn = await manager.GetConnectionAsync("test-project");
         manager.ReleaseConnection("test-project", conn);
 
         // 验证池存在
@@ -196,7 +196,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void ResetAllPools_ShouldClearAllPools()
+    public async Task ResetAllPools_ShouldClearAllPools()
     {
         // Arrange
         var project1 = new ProjectInfo
@@ -234,8 +234,8 @@ public class ConnectionManagerTests
             _testOptions);
 
         // Act - 创建一些连接池
-        var conn1 = manager.GetConnectionAsync("project1").GetAwaiter().GetResult();
-        var conn2 = manager.GetConnectionAsync("project2").GetAwaiter().GetResult();
+        var conn1 = await manager.GetConnectionAsync("project1");
+        var conn2 = await manager.GetConnectionAsync("project2");
         manager.ReleaseConnection("project1", conn1);
         manager.ReleaseConnection("project2", conn2);
 

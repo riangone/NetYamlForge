@@ -58,17 +58,17 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
             var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
             var env = LoadEnv(Path.Combine(projectDir, ".env"));
 
-            var imapServer  = env.GetValueOrDefault("IMAP_SERVER");
+            var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
             var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
             var imapSsl     = bool.Parse(env.GetValueOrDefault("IMAP_SSL", "true"));
-            var imapUser    = env.GetValueOrDefault("IMAP_USER");
-            var imapPass    = env.GetValueOrDefault("IMAP_PASSWORD");
+            var imapUser    = env.GetValueOrDefault("IMAP_USER") ?? string.Empty;
+            var imapPass    = env.GetValueOrDefault("IMAP_PASSWORD") ?? string.Empty;
 
-            var smtpServer  = env.GetValueOrDefault("SMTP_SERVER");
+            var smtpServer  = env.GetValueOrDefault("SMTP_SERVER") ?? string.Empty;
             var smtpPort    = int.Parse(env.GetValueOrDefault("SMTP_PORT", "587"));
             var smtpSsl     = bool.Parse(env.GetValueOrDefault("SMTP_SSL", "false"));
-            var smtpUser    = env.GetValueOrDefault("SMTP_USER");
-            var smtpPass    = env.GetValueOrDefault("SMTP_PASSWORD");
+            var smtpUser    = env.GetValueOrDefault("SMTP_USER") ?? string.Empty;
+            var smtpPass    = env.GetValueOrDefault("SMTP_PASSWORD") ?? string.Empty;
             var fromName    = env.GetValueOrDefault("SMTP_FROM_NAME", "請求処理システム");
             var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
             var aiModel     = env.GetValueOrDefault("AI_MODEL", "");

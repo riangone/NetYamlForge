@@ -36,10 +36,11 @@ public class LazyDbConnection : IDbConnection
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.AllowNull]
     public string ConnectionString
     {
         get => InnerConnection.ConnectionString ?? string.Empty;
-        set => InnerConnection.ConnectionString = value;
+        set => InnerConnection.ConnectionString = value ?? string.Empty;
     }
 
     public int ConnectionTimeout => InnerConnection.ConnectionTimeout;

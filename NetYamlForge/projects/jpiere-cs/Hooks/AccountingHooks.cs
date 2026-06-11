@@ -84,7 +84,7 @@ public class JournalBalanceValidationHook : IEntityHook
 /// </summary>
 internal static class DictHelper
 {
-    public static T? Get<T>(IDictionary<string, object> dict, string pascalName, string snakeName, T? defaultValue = default)
+    public static T? Get<T>(IDictionary<string, object>? dict, string pascalName, string snakeName, T? defaultValue = default)
     {
         if (dict == null) return defaultValue;
         if (dict.TryGetValue(pascalName, out var val) && val != null && val != DBNull.Value)
@@ -94,7 +94,7 @@ internal static class DictHelper
         return defaultValue;
     }
     
-    public static string? GetStr(IDictionary<string, object> dict, string pascalName, string snakeName)
+    public static string? GetStr(IDictionary<string, object>? dict, string pascalName, string snakeName)
     {
         if (dict == null) return null;
         if (dict.TryGetValue(pascalName, out var val) && val != null && val != DBNull.Value)

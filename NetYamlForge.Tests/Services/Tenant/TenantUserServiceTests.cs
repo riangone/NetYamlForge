@@ -301,8 +301,8 @@ public class TenantUserServiceTests : IDisposable
         ", new { UserId = userId, ProjectName = projectName });
         
         Assert.NotNull(result);
-        Assert.Equal(roleName, result.role_name);
-        Assert.Equal(assignedBy, result.assigned_by);
+        Assert.Equal(roleName, result!.role_name);
+        Assert.Equal(assignedBy, result!.assigned_by);
     }
 
     [Fact]
@@ -329,7 +329,7 @@ public class TenantUserServiceTests : IDisposable
         ", new { UserId = userId, ProjectName = projectName });
         
         Assert.NotNull(result);
-        Assert.Equal(newRole, result.role_name);
+        Assert.Equal(newRole, result!.role_name);
     }
 
     #endregion
@@ -365,8 +365,8 @@ public class TenantUserServiceTests : IDisposable
         ", new { Id = userId });
         
         Assert.NotNull(user);
-        Assert.Equal(request.UserName, user.user_name);
-        Assert.Equal(request.DisplayName, user.display_name);
+        Assert.Equal(request.UserName, user!.user_name);
+        Assert.Equal(request.DisplayName, user!.display_name);
         
         // 验证项目角色已分配
         var role = _db.QueryFirstOrDefault(@"
@@ -374,7 +374,7 @@ public class TenantUserServiceTests : IDisposable
         ", new { UserId = userId });
         
         Assert.NotNull(role);
-        Assert.Equal(request.ProjectRole, role.role_name);
+        Assert.Equal(request.ProjectRole, role!.role_name);
     }
 
     #endregion
