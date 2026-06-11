@@ -61,7 +61,7 @@ public class AiEmailChatExecutor
             var smtpUser = env.GetValueOrDefault("SMTP_USER");
             var smtpPass = env.GetValueOrDefault("SMTP_PASSWORD");
             var fromName = env.GetValueOrDefault("SMTP_FROM_NAME", "AI Assistant");
-            var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS", smtpUser);
+            var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
 
             var aiEndpoint = env.GetValueOrDefault("AI_API_ENDPOINT", "https://api.openai.com/v1/chat/completions");
             var aiKey = env.GetValueOrDefault("AI_API_KEY");
@@ -107,8 +107,9 @@ public class AiEmailChatExecutor
                 }
                 
                 // Skip emails that should be handled by invoice_email_processor
+                var subject = message.Subject ?? string.Empty;
                 if (invoiceKeywords.Length > 0 && invoiceKeywords.Any(kw =>
-                    message.Subject.Contains(kw, StringComparison.OrdinalIgnoreCase)))
+                    subject.Contains(kw, StringComparison.OrdinalIgnoreCase)))
                 {
                     _logger.LogInformation("Skipping invoice email (subject matched INVOICE_SUBJECT_KEYWORDS): {Subject}", message.Subject);
                     continue;
@@ -139,9 +140,9 @@ public class AiEmailChatExecutor
                 var replyMessage = new MimeMessage();
                 replyMessage.From.Add(new MailboxAddress(fromName, fromAddress ?? smtpUser ?? "ai@assistant.local"));
                 replyMessage.To.Add(message.From.Mailboxes.First());
-                replyMessage.Subject = message.Subject.StartsWith("Re:", StringComparison.OrdinalIgnoreCase) 
-                    ? message.Subject 
-                    : $"Re: {message.Subject}";
+                replyMessage.Subject = subject.StartsWith("Re:", StringComparison.OrdinalIgnoreCase)
+                    ? subject
+                    : $"Re: {subject}";
                 
                 if (!string.IsNullOrEmpty(message.MessageId))
                 {

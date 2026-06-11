@@ -456,8 +456,9 @@ public class SyncCustomerToAuthUserHook : IEntityHook
         var passwordParam = insertCmd.CreateParameter();
         passwordParam.ParameterName = "@passwordHash";
         // 初期パスワードは顧客 ID を使用（後で変更を促す）
+        // PasswordHasher の既定実装は user 引数を参照しないため、ダミーインスタンスを渡す
         var passwordHasher = new PasswordHasher<AppUser>();
-        passwordParam.Value = passwordHasher.HashPassword(null, customerId);
+        passwordParam.Value = passwordHasher.HashPassword(new AppUser(), customerId);
         insertCmd.Parameters.Add(passwordParam);
 
         var displayNameParam = insertCmd.CreateParameter();
@@ -601,8 +602,9 @@ public class SyncEmployeeToAuthUserHook : IEntityHook
             var passwordParam = insertCmd.CreateParameter();
             passwordParam.ParameterName = "@passwordHash";
             // 初期パスワードは従業員 ID を使用
+            // PasswordHasher の既定実装は user 引数を参照しないため、ダミーインスタンスを渡す
             var passwordHasher = new PasswordHasher<AppUser>();
-            passwordParam.Value = passwordHasher.HashPassword(null, employeeId);
+            passwordParam.Value = passwordHasher.HashPassword(new AppUser(), employeeId);
             insertCmd.Parameters.Add(passwordParam);
 
             var displayNameParam = insertCmd.CreateParameter();

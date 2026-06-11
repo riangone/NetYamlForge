@@ -461,7 +461,7 @@ public class PageController : BaseProjectController
                 var url = QueryHelpers.AddQueryString(
                     $"/{_projectScope.Current.Name}/Page/{pageName}",
                     row.Filters.Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-                        .ToDictionary(kv => kv.Key, kv => kv.Value));
+                        .ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
 
                 result.Add(new Dictionary<string, string>
                 {

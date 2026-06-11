@@ -105,7 +105,7 @@ public class MailKitEmailService : IEmailService
 
                 foreach (var attachment in message.Attachments)
                 {
-                    if (attachment is MimePart part)
+                    if (attachment is MimePart { Content: not null } part)
                     {
                         using var ms = new MemoryStream();
                         await part.Content.DecodeToAsync(ms);

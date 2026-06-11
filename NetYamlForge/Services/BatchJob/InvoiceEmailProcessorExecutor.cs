@@ -70,7 +70,7 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
             var smtpUser    = env.GetValueOrDefault("SMTP_USER");
             var smtpPass    = env.GetValueOrDefault("SMTP_PASSWORD");
             var fromName    = env.GetValueOrDefault("SMTP_FROM_NAME", "請求処理システム");
-            var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS", smtpUser);
+            var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
             var aiModel     = env.GetValueOrDefault("AI_MODEL", "");
             var targetSender = env.GetValueOrDefault("TARGET_SENDER_EMAIL");
             var invoiceKeywordsRaw = env.GetValueOrDefault("INVOICE_SUBJECT_KEYWORDS", "");
@@ -105,7 +105,7 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
 
                 // INVOICE_SUBJECT_KEYWORDS が設定されている場合、件名が一致するメールのみ処理
                 if (invoiceKeywords.Length > 0 && !invoiceKeywords.Any(kw =>
-                    message.Subject.Contains(kw, StringComparison.OrdinalIgnoreCase)))
+                    message.Subject?.Contains(kw, StringComparison.OrdinalIgnoreCase) == true))
                 {
                     _logger.LogInformation("スキップ（請求キーワード不一致）: {Subject}", message.Subject);
                     continue;
@@ -438,8 +438,9 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
         reply.From.Add(new MailboxAddress(fromName, fromAddress));
         foreach (var addr in recipients)
             reply.To.Add(new MailboxAddress(addr, addr));
-        reply.Subject = original.Subject.StartsWith("Re:", StringComparison.OrdinalIgnoreCase)
-            ? original.Subject : $"Re: {original.Subject}";
+        var originalSubject = original.Subject ?? string.Empty;
+        reply.Subject = originalSubject.StartsWith("Re:", StringComparison.OrdinalIgnoreCase)
+            ? originalSubject : $"Re: {originalSubject}";
 
         if (!string.IsNullOrEmpty(original.MessageId))
         {

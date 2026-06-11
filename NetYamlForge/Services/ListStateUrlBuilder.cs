@@ -56,7 +56,7 @@ public static class ListStateUrlBuilder
 
         var nonEmpty = stateParams
             .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .ToDictionary(kv => kv.Key, kv => kv.Value!);
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
         return QueryHelpers.AddQueryString(baseIndexUrl, nonEmpty);
     }
 

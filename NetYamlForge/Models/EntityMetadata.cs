@@ -658,6 +658,8 @@ public class ActionInputField
     /// </summary>
     public string Type { get; set; } = "string";
     public string? Label { get; set; }
+    public string? LabelKey { get; set; }
+    public Dictionary<string, string>? LabelI18n { get; set; }
     public bool Required { get; set; }
     /// <summary>dropdown 用の選択肢</summary>
     public List<string>? Options { get; set; }
@@ -667,6 +669,8 @@ public class ActionInputField
     public long? MaxSizeBytes { get; set; }
     /// <summary>type: file — 複数ファイルの選択を許可するかどうか</summary>
     public bool Multiple { get; set; }
+
+    public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
 /// <summary>カスタムアクションのフック定義（実行前後）</summary>
@@ -690,8 +694,16 @@ public class ActionDefinition
     /// "header": 一覧ヘッダーの右側に表示（行に依存しない操作 = エクスポート等）。
     /// </summary>
     public string Scope { get; set; } = "row";
+    /// <summary>多语言翻译 Key</summary>
+    public string? LabelKey { get; set; }
+    /// <summary>多语言翻译 map</summary>
+    public Dictionary<string, string>? LabelI18n { get; set; }
     /// <summary>実行前に表示する確認メッセージ（null の場合は確認なし）</summary>
     public string? Confirm { get; set; }
+    /// <summary>确认提示多语言 Key</summary>
+    public string? ConfirmKey { get; set; }
+    /// <summary>确认提示多语言 map</summary>
+    public Dictionary<string, string>? ConfirmI18n { get; set; }
     /// <summary>ボタンに適用する CSS クラス（例: btn-success, btn-danger）</summary>
     public string? Class { get; set; }
     /// <summary>実行する ICustomActionHandler の Name（省略時はアクションキー名と同じ）</summary>
@@ -700,6 +712,9 @@ public class ActionDefinition
     public List<ActionInputField>? Inputs { get; set; }
     /// <summary>アクション前後に実行するフック</summary>
     public ActionHooksDefinition? Hooks { get; set; }
+
+    public string GetLabel() => I18nText.Resolve(LabelI18n, Label, LabelKey);
+    public string? GetConfirm() => I18nText.Resolve(ConfirmI18n, Confirm ?? "", ConfirmKey);
 }
 
 /// <summary>

@@ -132,6 +132,7 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
 
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
+        if (e.Name is null) return;
         if (!e.Name.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) &&
             !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) &&
             !e.Name.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) return;
@@ -155,6 +156,7 @@ public class YamlFileWatcher : IYamlFileWatcher, IDisposable
 
     private void OnFileRenamed(object sender, RenamedEventArgs e)
     {
+        if (e.Name is null) return;
         if (!e.Name.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) &&
             !e.Name.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) &&
             !e.Name.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)) return;

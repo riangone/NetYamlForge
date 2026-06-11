@@ -27,7 +27,8 @@ public class ProjectSpecificInitializer
         string projectName,
         string dbType,
         IEntityMetadataProvider metadataProvider,
-        ILogger logger)
+        ILogger logger,
+        string? projectDir = null)
     {
         // 首先运行项目特定的初始化和数据种子
         // contact-manager: 初期データロード
@@ -45,7 +46,7 @@ public class ProjectSpecificInitializer
         // task-management: init.sql でテーブル作成後、CreatedBy 列追加 & TaskComment テーブル作成
         else if (string.Equals(projectName, "task-management", StringComparison.OrdinalIgnoreCase))
         {
-            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
+            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger, projectDir);
             await EnsureColumnAsync(conn as SqliteConnection, "Task", "CreatedBy", "TEXT", logger);
             await EnsureTaskCommentTableAsync(conn as SqliteConnection, logger);
             // 创建 task-management 测试用户
@@ -60,7 +61,7 @@ public class ProjectSpecificInitializer
         else
         {
             // 汎用フォールバック: database/init_seed.sql が存在すれば実行
-            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger);
+            await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger, projectDir);
 
             // auto-dealer-demo: デモユーザー作成 + テストユーザー作成
             if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
@@ -113,7 +114,8 @@ public class ProjectSpecificInitializer
     private static async Task RunInitSeedSqlIfExistsAsync(
         SqliteConnection? conn,
         string projectName,
-        ILogger logger)
+        ILogger logger,
+        string? projectDir = null)
     {
         if (conn == null) return;
 
@@ -130,10 +132,15 @@ public class ProjectSpecificInitializer
         string ResolveDbFile(string fileName) =>
             new[]
             {
+                // プロジェクトの実ディレクトリ（ProjectManager が解決済み）を最優先。
+                // CWD やビルド出力に依存せず、コンテンツルートが変わっても動作する。
+                string.IsNullOrWhiteSpace(projectDir)
+                    ? string.Empty
+                    : Path.Combine(projectDir, "database", fileName),
                 Path.Combine(AppContext.BaseDirectory, "projects", projectName, "database", fileName),
                 Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, "database", fileName),
                 Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName, "database", fileName),
-            }.FirstOrDefault(File.Exists) ?? string.Empty;
+            }.FirstOrDefault(p => !string.IsNullOrEmpty(p) && File.Exists(p)) ?? string.Empty;
 
         // init.sql でテーブルを作成してから init_seed.sql でデータを投入
         var initSqlPath = ResolveDbFile("init.sql");
