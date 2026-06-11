@@ -49,7 +49,7 @@ public static class I18nText
     private static readonly ResourceManager SharedResourceManager =
         new("NetYamlForge.Resources.Localization.SharedResource", typeof(SharedResource).Assembly);
 
-    public static string Resolve(Dictionary<string, string>? map, string fallback, string? key = null)
+    public static string Resolve(Dictionary<string, string>? map, string? fallback, string? key = null)
     {
         var fromKey = ResolveByKey(key);
         if (!string.IsNullOrWhiteSpace(fromKey))
@@ -117,11 +117,11 @@ public static class I18nText
         }
     }
 
-    public static string ResolveFromMap(Dictionary<string, string>? map, string fallback)
+    public static string ResolveFromMap(Dictionary<string, string>? map, string? fallback)
     {
         if (map == null || map.Count == 0)
         {
-            return fallback;
+            return fallback ?? string.Empty;
         }
 
         var culture = System.Globalization.CultureInfo.CurrentUICulture.Name;
@@ -147,7 +147,7 @@ public static class I18nText
             return en;
         }
 
-        return fallback;
+        return fallback ?? string.Empty;
     }
 }
 
