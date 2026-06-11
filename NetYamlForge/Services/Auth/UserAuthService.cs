@@ -750,6 +750,7 @@ SELECT last_insert_rowid();";
         var conn = new SqliteConnection(_systemDbConnectionString);
 #pragma warning restore DCS003
         await conn.OpenAsync();
+        await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
         return conn;
     }
 

@@ -1,11 +1,11 @@
 jobs:
   ai_folder_processor_job:
     displayName: "AI 文档文件夹定期处理"
-    description: "每5分钟扫描指定文件夹，自动将新文档文件提交给 AI 进行数据提取。处理完成后文件移至 processed 子目录，失败时移至 error 子目录。"
+    description: "每6小时扫描指定文件夹，自动将新文档文件提交给 AI 进行数据提取。处理完成后文件移至 processed 子目录，失败时移至 error 子目录。"
     type: ai_folder_processor
     enabled: true
     schedule:
-      cron: "* * * * *"
+      cron: "0 */6 * * *"
       timezone: "Asia/Tokyo"
     settings:
       params:

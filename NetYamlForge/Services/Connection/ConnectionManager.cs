@@ -211,11 +211,10 @@ public class ConnectionManager : IConnectionManager
         }
 
         // Enable WAL mode for SQLite so concurrent reads and writes don't block each other.
-        // Split into separate calls: multi-statement PRAGMA may silently stop after the first one.
+        // Centralized in SqliteConnectionHardening so every connection path uses identical settings.
         if (dbType == "sqlite")
         {
-            await connection.ExecuteAsync("PRAGMA journal_mode=WAL;");
-            await connection.ExecuteAsync("PRAGMA busy_timeout=10000;");
+            await SqliteConnectionHardening.ApplyAsync(connection);
         }
 
         RecordConnectionAcquired(projectName);

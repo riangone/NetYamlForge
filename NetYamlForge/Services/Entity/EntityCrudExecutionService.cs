@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Hooks;
 
 namespace NetYamlForge.Services;
@@ -137,26 +138,31 @@ public sealed class EntityCrudExecutionService
             _db.Open();
         }
 
-        var sw = Stopwatch.StartNew();
-        using var tx = _db.BeginTransaction();
-        try
+        // SQLite は単一ライターのため、同一 DB ファイルへの書き込みトランザクションを直列化する。
+        // 他方言の接続は SqliteWriteGate が素通しするので影響なし。
+        await SqliteWriteGate.RunAsync(_db, async () =>
         {
-            await action(tx);
-            tx.Commit();
-            _logger.LogInformation(
-                "crud_tx result=commit durationMs={DurationMs} project={Project}",
-                sw.ElapsedMilliseconds,
-                _projectScope.Current?.Name);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                "crud_tx result=rollback durationMs={DurationMs} project={Project}",
-                sw.ElapsedMilliseconds,
-                _projectScope.Current?.Name);
-            tx.Rollback();
-            throw;
-        }
+            var sw = Stopwatch.StartNew();
+            using var tx = _db.BeginTransaction();
+            try
+            {
+                await action(tx);
+                tx.Commit();
+                _logger.LogInformation(
+                    "crud_tx result=commit durationMs={DurationMs} project={Project}",
+                    sw.ElapsedMilliseconds,
+                    _projectScope.Current?.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "crud_tx result=rollback durationMs={DurationMs} project={Project}",
+                    sw.ElapsedMilliseconds,
+                    _projectScope.Current?.Name);
+                tx.Rollback();
+                throw;
+            }
+        });
     }
 
     /// <summary>
@@ -168,26 +174,30 @@ public sealed class EntityCrudExecutionService
         if (_db.State != ConnectionState.Open)
             _db.Open();
 
-        var result = ActionHandlerResult.Failure("実行前エラー");
-        using var tx = _db.BeginTransaction();
-        try
+        // CRUD と同様、SQLite への書き込みアクションを DB ファイル単位で直列化する。
+        return await SqliteWriteGate.RunAsync(_db, async () =>
         {
-            result = await handler.ExecuteAsync(ctx, _db, tx);
-            if (result.Ok)
+            var result = ActionHandlerResult.Failure("実行前エラー");
+            using var tx = _db.BeginTransaction();
+            try
             {
-                tx.Commit();
+                result = await handler.ExecuteAsync(ctx, _db, tx);
+                if (result.Ok)
+                {
+                    tx.Commit();
+                }
+                else
+                {
+                    tx.Rollback();
+                }
             }
-            else
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "action_tx result=rollback action={Action}", ctx.Action);
                 tx.Rollback();
+                throw;
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "action_tx result=rollback action={Action}", ctx.Action);
-            tx.Rollback();
-            throw;
-        }
-        return result;
+            return result;
+        });
     }
 }

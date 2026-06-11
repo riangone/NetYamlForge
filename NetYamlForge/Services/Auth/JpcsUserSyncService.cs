@@ -41,6 +41,7 @@ public class JpcsUserSyncService : IJpcsUserSyncService
             using var jpcsConn = new SqliteConnection($"Data Source={jpcsDbPath}");
 #pragma warning restore DCS003
             await jpcsConn.OpenAsync();
+            await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(jpcsConn);
 
             // 1. Get active employees from jpcs.db
             var employees = (await jpcsConn.QueryAsync<JpcsEmployee>(
@@ -84,6 +85,7 @@ public class JpcsUserSyncService : IJpcsUserSyncService
         using var systemConn = new SqliteConnection($"Data Source={systemDbPath}");
 #pragma warning restore DCS003
         await systemConn.OpenAsync();
+        await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(systemConn);
 
         var existing = await systemConn.QueryFirstOrDefaultAsync<AppUser>(
             "SELECT * FROM app_user WHERE (external_id = @ExternalId AND external_source = 'jpcs') OR user_name = @UserName",

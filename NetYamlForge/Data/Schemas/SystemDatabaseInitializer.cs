@@ -31,8 +31,8 @@ public static class SystemDatabaseInitializer
             await using var conn = new SqliteConnection(connectionString);
             await conn.OpenAsync();
 
-            // WAL モードを有効にして並行性を向上
-            await conn.ExecuteAsync("PRAGMA journal_mode=WAL;");
+            // WAL + busy_timeout を有効にして並行性を向上（SqliteConnectionHardening に一元化）
+            await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
 #pragma warning restore DCS003
 
             Console.WriteLine($"[SystemDatabase] Initializing: {DbPath}");
@@ -124,6 +124,15 @@ public static class SystemDatabaseInitializer
             }
             catch { /* カラムが既に存在する場合の例外は無視 */ }
 
+            try
+            {
+                // SystemDbTestUserSeeder が参照する所属プロジェクト列。
+                // 新規作成の system.db には存在しないため、ここで追加します。
+                await conn.ExecuteAsync("ALTER TABLE app_user ADD COLUMN owning_project TEXT;");
+                logger.LogInformation("app_user テーブルに owning_project カラムを追加しました");
+            }
+            catch { /* カラムが既に存在する場合の例外は無視 */ }
+
             // デフォルト管理者ユーザーを作成（存在しない場合）
             await EnsureDefaultAdminAsync(conn, logger);
 
@@ -183,6 +192,7 @@ public static class SystemDatabaseInitializer
             await using var conn = new SqliteConnection(connectionString);
             await conn.OpenAsync();
 #pragma warning restore DCS003
+            await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
 
             foreach (var project in projects)
             {

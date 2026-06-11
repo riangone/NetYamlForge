@@ -25,6 +25,10 @@ public static class EntityDbSchemaConsistencyValidator
         {
             using var conn = CreateConnection(databaseType, connectionString);
             conn.Open();
+            if (conn is SqliteConnection)
+            {
+                NetYamlForge.Services.Connection.SqliteConnectionHardening.Apply(conn);
+            }
             ValidateSchema(projectName, databaseType, conn, metadataProvider);
         }
         catch (System.Data.Common.DbException dbEx)

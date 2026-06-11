@@ -198,6 +198,7 @@ public static class EntityYamlScaffolder
     {
         using var conn = new SqliteConnection(connectionString);
         conn.Open();
+        NetYamlForge.Services.Connection.SqliteConnectionHardening.Apply(conn);
 
         using var tablesCmd = conn.CreateCommand();
         tablesCmd.CommandText = """

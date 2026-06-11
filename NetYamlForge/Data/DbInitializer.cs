@@ -95,7 +95,7 @@ public static class DbInitializer
             await new SqlServerAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
             await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
             return;
         }
 
@@ -106,7 +106,7 @@ public static class DbInitializer
             await new PostgreSqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
             await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
             return;
         }
 
@@ -117,7 +117,7 @@ public static class DbInitializer
             await new MySqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
             await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
             return;
         }
 
@@ -134,6 +134,7 @@ public static class DbInitializer
 
         await using var conn = new SqliteConnection(project.ConnectionString);
         await conn.OpenAsync();
+        await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
 
         await new SqliteAuthSchemaInitializer().InitializeAsync(conn, logger);
         await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
@@ -145,6 +146,6 @@ public static class DbInitializer
         
         // 运行项目特定的初始化和测试用户创建
         await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-            conn, project.Name, project.DatabaseType, project.EntityMetadata, logger);
+            conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
     }
 }

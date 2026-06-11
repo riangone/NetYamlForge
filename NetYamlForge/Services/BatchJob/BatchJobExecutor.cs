@@ -85,41 +85,54 @@ public class BatchJobExecutor : IBatchJobExecutor
 
             using var db = await _dbConnectionFactory.CreateConnectionAsync(projectName, cancellationToken);
 
-            using var tx = db.BeginTransaction();
-
-            // Before フック
-            if (job.BeforeRun != null && job.BeforeRun.Count > 0)
+            // SQLite は単一ライターのため、ジョブの書き込みトランザクション全体を
+            // DB ファイル単位で直列化する（Error 5: database is locked 対策）。
+            // 他方言の接続は SqliteWriteGate が素通しする。
+            var cancelledByHook = await SqliteWriteGate.RunAsync(db, async () =>
             {
-                var hookResult = await _hookExecutionService.RunBeforeAsync(
-                    job.BeforeRun, hookContext, projectName, db, tx);
+                using var tx = db.BeginTransaction();
 
-                if (hookResult.Cancel)
+                // Before フック
+                if (job.BeforeRun != null && job.BeforeRun.Count > 0)
                 {
-                    _logger.LogWarning("ジョブがフックによってキャンセルされました：{JobId}, Reason: {Reason}", 
-                        job.Id, hookResult.CancelMessage);
-                    result.Success = false;
-                    result.ErrorMessage = hookResult.CancelMessage ?? "Hook cancelled";
-                    result.EndedAt = DateTime.UtcNow;
-                    return result;
+                    var hookResult = await _hookExecutionService.RunBeforeAsync(
+                        job.BeforeRun, hookContext, projectName, db, tx);
+
+                    if (hookResult.Cancel)
+                    {
+                        _logger.LogWarning("ジョブがフックによってキャンセルされました：{JobId}, Reason: {Reason}",
+                            job.Id, hookResult.CancelMessage);
+                        result.Success = false;
+                        result.ErrorMessage = hookResult.CancelMessage ?? "Hook cancelled";
+                        return true;
+                    }
                 }
-            }
 
-            // IBatchStepHandler 延迟路由解析
-            if (!_handlerTypes.TryGetValue(job.Type, out var handlerType))
-                throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _handlerTypes.Keys)}");
+                // IBatchStepHandler 延迟路由解析
+                if (!_handlerTypes.TryGetValue(job.Type, out var handlerType))
+                    throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _handlerTypes.Keys)}");
 
-            var handler = (IBatchStepHandler)_serviceProvider.GetRequiredService(handlerType);
+                var handler = (IBatchStepHandler)_serviceProvider.GetRequiredService(handlerType);
 
-            await handler.ExecuteAsync(job, projectName, db, tx, result, cancellationToken);
+                await handler.ExecuteAsync(job, projectName, db, tx, result, cancellationToken);
 
-            // After フック
-            if (job.AfterRun != null && job.AfterRun.Count > 0)
+                // After フック
+                if (job.AfterRun != null && job.AfterRun.Count > 0)
+                {
+                    await _hookExecutionService.RunAfterAsync(
+                        job.AfterRun, hookContext, projectName, db, tx);
+                }
+
+                tx.Commit();
+                return false;
+            }, cancellationToken);
+
+            if (cancelledByHook)
             {
-                await _hookExecutionService.RunAfterAsync(
-                    job.AfterRun, hookContext, projectName, db, tx);
+                result.EndedAt = DateTime.UtcNow;
+                return result;
             }
 
-            tx.Commit();
             result.Success = true;
         }
         catch (Exception ex)

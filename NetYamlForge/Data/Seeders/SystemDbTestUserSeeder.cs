@@ -27,6 +27,7 @@ public class SystemDbTestUserSeeder
 
         await using var systemConn = new SqliteConnection(systemConnStr);
         await systemConn.OpenAsync();
+        await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(systemConn);
 
         // 1. プロジェクト一覧を system.db に登録
         foreach (var project in projects)
@@ -48,6 +49,7 @@ public class SystemDbTestUserSeeder
             var projectConnStr = new SqliteConnectionStringBuilder { DataSource = project.DbPath }.ConnectionString;
             await using var projectConn = new SqliteConnection(projectConnStr);
             await projectConn.OpenAsync();
+            await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(projectConn);
 
             // AppUser テーブルからユーザーを取得
             var users = await projectConn.QueryAsync<dynamic>(

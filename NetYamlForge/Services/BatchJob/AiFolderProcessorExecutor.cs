@@ -6,6 +6,7 @@ using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.Connection;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -175,8 +176,7 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
         var conn = (IDbConnection)Activator.CreateInstance(typeof(SqliteConnection), connString)!;
         conn.Open();
         // Mirror the WAL mode set by ConnectionManager so all connections to the same DB are consistent.
-        conn.Execute("PRAGMA journal_mode=WAL;");
-        conn.Execute("PRAGMA busy_timeout=10000;");
+        NetYamlForge.Services.Connection.SqliteConnectionHardening.Apply(conn);
         return conn;
     }
 
@@ -192,9 +192,10 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
             {
                 using (var conn = CreateConnection(connString))
                 {
-                    await conn.ExecuteAsync(
+                    // 同一テナント DB への並行書き込みを直列化（Error 5 対策）。
+                    await SqliteWriteGate.RunAsync(conn, () => conn.ExecuteAsync(
                         "UPDATE DocumentTask SET Status = 'processing' WHERE Id = @Id",
-                        new { Id = taskId });
+                        new { Id = taskId }));
                 }
 
                 var filePath = relativeFilePath;
@@ -236,38 +237,42 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
 
                 using (var conn = CreateConnection(connString))
                 {
-                    await EnsureTableAndColumnsAsync(conn, tableName, extractionResult.Data);
+                    // テーブル作成・INSERT・UPDATE をひとまとまりの書き込みとして直列化する。
+                    await SqliteWriteGate.RunAsync(conn, async () =>
+                    {
+                        await EnsureTableAndColumnsAsync(conn, tableName, extractionResult.Data);
 
-                    var (paramNames, parameters) = BuildInsertParams(taskId, extractionResult.Data);
+                        var (paramNames, parameters) = BuildInsertParams(taskId, extractionResult.Data);
 
-                    var columnsStr = string.Join(", ", paramNames.Select(p => "\"" + p + "\""));
-                    var valuesStr = string.Join(", ", paramNames.Select(p => "@" + p));
-                    var insertSql = string.Format(@"
-                        INSERT INTO ""{0}"" (DocumentTaskId{1})
-                        VALUES (@DocumentTaskId{2});
-                        SELECT last_insert_rowid();",
-                        tableName,
-                        paramNames.Count > 0 ? ", " + columnsStr : "",
-                        paramNames.Count > 0 ? ", " + valuesStr : "");
+                        var columnsStr = string.Join(", ", paramNames.Select(p => "\"" + p + "\""));
+                        var valuesStr = string.Join(", ", paramNames.Select(p => "@" + p));
+                        var insertSql = string.Format(@"
+                            INSERT INTO ""{0}"" (DocumentTaskId{1})
+                            VALUES (@DocumentTaskId{2});
+                            SELECT last_insert_rowid();",
+                            tableName,
+                            paramNames.Count > 0 ? ", " + columnsStr : "",
+                            paramNames.Count > 0 ? ", " + valuesStr : "");
 
-                    var extractedRowId = await conn.QuerySingleAsync<int>(insertSql, parameters);
+                        var extractedRowId = await conn.QuerySingleAsync<int>(insertSql, parameters);
 
-                    await conn.ExecuteAsync(@"
-                        UPDATE DocumentTask
-                        SET Status = 'completed',
-                            DocumentType = @DocumentType,
-                            JsonPath = @JsonPath,
-                            ExtractedTable = @ExtractedTable,
-                            ExtractedId = @ExtractedId
-                        WHERE Id = @Id",
-                        new
-                        {
-                            DocumentType = extractionResult.DocumentType,
-                            JsonPath = jsonRelativePath,
-                            ExtractedTable = tableName,
-                            ExtractedId = extractedRowId,
-                            Id = taskId
-                        });
+                        await conn.ExecuteAsync(@"
+                            UPDATE DocumentTask
+                            SET Status = 'completed',
+                                DocumentType = @DocumentType,
+                                JsonPath = @JsonPath,
+                                ExtractedTable = @ExtractedTable,
+                                ExtractedId = @ExtractedId
+                            WHERE Id = @Id",
+                            new
+                            {
+                                DocumentType = extractionResult.DocumentType,
+                                JsonPath = jsonRelativePath,
+                                ExtractedTable = tableName,
+                                ExtractedId = extractedRowId,
+                                Id = taskId
+                            });
+                    });
 
                     _logger.LogInformation("Task {TaskId}: extraction complete, type={Type}", taskId, extractionResult.DocumentType);
                 }
@@ -278,9 +283,9 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
                 try
                 {
                     using var conn = CreateConnection(connString);
-                    await conn.ExecuteAsync(
+                    await SqliteWriteGate.RunAsync(conn, () => conn.ExecuteAsync(
                         "UPDATE DocumentTask SET Status = 'failed' WHERE Id = @Id",
-                        new { Id = taskId });
+                        new { Id = taskId }));
                 }
                 catch (Exception dbEx)
                 {

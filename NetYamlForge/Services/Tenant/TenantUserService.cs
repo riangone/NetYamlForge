@@ -59,6 +59,7 @@ public class TenantUserService : ITenantUserService
         {
             conn.Open();
         }
+        NetYamlForge.Services.Connection.SqliteConnectionHardening.Apply(conn);
         return conn;
 #pragma warning restore DCS003
     }
