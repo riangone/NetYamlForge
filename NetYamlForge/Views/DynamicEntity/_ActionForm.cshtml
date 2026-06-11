@@ -16,11 +16,11 @@
 }
 
 <div class="p-4 space-y-4">
-    <h3 class="text-lg font-bold">@Model.ActionDef.Label</h3>
+    <h3 class="text-lg font-bold">@Model.ActionDef.GetLabel()</h3>
 
-    @if (!string.IsNullOrWhiteSpace(Model.ActionDef.Confirm))
+    @if (!string.IsNullOrWhiteSpace(Model.ActionDef.GetConfirm()))
     {
-        <p class="text-sm text-base-content/70">@Model.ActionDef.Confirm</p>
+        <p class="text-sm text-base-content/70">@Model.ActionDef.GetConfirm()</p>
     }
 
     @* ファイル入力に対応するため常に multipart/form-data でエンコードする *@
@@ -40,7 +40,7 @@
                 {
                     <div class="form-control">
                         <label class="label">
-                            <span class="label-text">@(input.Label ?? input.Name)@(input.Required ? " *" : "")</span>
+                            <span class="label-text">@input.GetLabel(input.Name)@(input.Required ? " *" : "")</span>
                         </label>
                         @if (input.Type == "file")
                         {
@@ -89,11 +89,11 @@
         <div class="flex justify-end gap-2 pt-2">
             <button type="button" class="btn btn-sm btn-ghost" id="action-cancel-btn"
                     onclick="document.getElementById('entity-form-modal').close()">
-                キャンセル
+                @(I18nText.ResolveByKey("bulk.cancel") ?? "キャンセル")
             </button>
             <button type="submit" class="btn btn-sm btn-primary flex items-center gap-1" id="action-submit-btn">
                 <span class="loading loading-spinner loading-xs hidden" id="action-submit-spinner"></span>
-                <span id="action-submit-text">実行</span>
+                <span id="action-submit-text">@(I18nText.ResolveByKey("bulk.execute") ?? "実行")</span>
             </button>
         </div>
     </form>

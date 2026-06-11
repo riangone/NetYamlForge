@@ -4,7 +4,7 @@
 
 @model NetYamlForge.Controllers.DashboardViewModel
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = NetYamlForge.Models.I18nText.ResolveByKey("ui.dashboard") ?? "Dashboard";
     var theme = (ViewData["DashboardTheme"] as string ?? "default").ToLowerInvariant();
     var partialName = theme switch {
         "minimal"   => "~/Views/Dashboard/Themes/_Minimal.cshtml",

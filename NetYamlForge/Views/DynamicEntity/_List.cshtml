@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using System.Linq
 @using System.Text.Json
+@using NetYamlForge.Models
 @model NetYamlForge.Controllers.DynamicListViewModel
 @inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
 @{
@@ -38,7 +39,7 @@
         ? baseIndexUrl
         : QueryHelpers.AddQueryString(baseIndexUrl, stateParams
             .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
-            .ToDictionary(kv => kv.Key, kv => kv.Value!));
+            .ToDictionary(kv => kv.Key, kv => kv.Value));
     var currentListUrl = Url.Action("Index", "DynamicEntity", new
     {
         entity = Model.Entity,
@@ -81,7 +82,7 @@
 <div class="card bg-base-100 shadow">
     <div class="card-body space-y-4">
         <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-sm">Page Size:</span>
+            <span class="text-sm">@(I18nText.ResolveByKey("ui.page_size") ?? "Page Size:")</span>
             <select class="select select-bordered select-sm w-24"
                     hx-get="@Url.Action("ListPartial", new { cursor = (string?)null })"
                     hx-include="#filter-form"
@@ -101,13 +102,19 @@
             <input type="hidden" name="cursor" value="@Model.Cursor" />
             @if (Model.Total >= 0)
             {
-                <span class="text-sm ml-auto">Total: @Model.Total</span>
+                <span class="text-sm ml-auto">@(I18nText.ResolveByKey("ui.total") ?? "Total:") @Model.Total</span>
             }
         </div>
 
         <!-- Bulk delete bar: shown when rows are selected -->
         <div id="bulk-action-bar" class="hidden items-center gap-3 p-2 bg-base-200 rounded-box border border-base-300">
-            <span id="selected-count-label" class="text-sm font-medium">已选择 <span id="selected-count">0</span> 条</span>
+            <span id="selected-count-label" class="text-sm font-medium">
+                @{
+                    var selCountFormat = I18nText.ResolveByKey("ui.selected_count_format") ?? "已选择 {0} 条";
+                    var selCountParts = selCountFormat.Split("{0}");
+                }
+                @selCountParts.FirstOrDefault()<span id="selected-count">0</span>@selCountParts.LastOrDefault()
+            </span>
             <form id="bulk-delete-form"
                   hx-post="@Url.Action("BulkDelete", "DynamicEntity")"
                   hx-target="#list-container"
@@ -117,11 +124,11 @@
                 <input type="hidden" name="entity" value="@Model.Entity" />
                 <div id="bulk-ids-container"></div>
                 <button type="submit" class="btn btn-sm btn-error"
-                        onclick="return confirm('确定要删除选中的 ' + document.getElementById('selected-count').textContent + ' 条记录？此操作不可恢复。')">
-                    🗑️ 删除选中
+                        onclick="return confirm('@Html.Raw(I18nText.ResolveByKey("ui.bulk_delete_confirm") ?? "确定要删除选中的记录吗？此操作不可恢复。")')">
+                    @(I18nText.ResolveByKey("ui.bulk_delete") ?? "🗑️ 删除选中")
                 </button>
             </form>
-            <button class="btn btn-sm btn-ghost" onclick="clearAllSelections()">取消</button>
+            <button class="btn btn-sm btn-ghost" onclick="clearAllSelections()">@(I18nText.ResolveByKey("ui.cancel") ?? "取消")</button>
         </div>
 
         @{
@@ -133,18 +140,18 @@
         @if (entityLevelLinks.Count > 0)
         {
             <div class="flex flex-wrap items-center gap-2 mb-4 border-b pb-3 text-sm text-base-content/70">
-                <span class="font-semibold">他のエンティティへ</span>
+                <span class="font-semibold">@(I18nText.ResolveByKey("ui.other_entities") ?? "他のエンティティへ")</span>
                 @foreach (var entry in entityLevelLinks)
                 {
                     var link = entry.Value;
                     var linkParams = link.Query != null
-                        ? new Dictionary<string, string?>(link.Query)
+                        ? link.Query.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
                         : new Dictionary<string, string?>();
                     linkParams["entity"] = link.TargetEntity;
                     linkParams["returnUrl"] = currentStateUrl;
                     var href = QueryHelpers.AddQueryString(baseIndexUrl, linkParams
                         .Where(kv => kv.Value != null)
-                        .ToDictionary(kv => kv.Key, kv => kv.Value!));
+                        .ToDictionary(kv => kv.Key, kv => kv.Value));
                     <a class="btn btn-sm btn-outline" href="@href">
                         @link.GetLabel()
                     </a>
@@ -157,7 +164,7 @@
                 <thead>
                     <tr>
                         <th class="w-8">
-                            <input type="checkbox" id="select-all-checkbox" class="checkbox checkbox-sm" title="全選択" />
+                            <input type="checkbox" id="select-all-checkbox" class="checkbox checkbox-sm" title="@(I18nText.ResolveByKey("ui.select_all") ?? "全選択")" />
                         </th>
                         @foreach (var col in displayColumns)
                         {
@@ -183,7 +190,7 @@
                                 </th>
                             }
                         }
-                        <th class="text-right">Actions</th>
+                        <th class="text-right">@(I18nText.ResolveByKey("ui.actions") ?? "Actions")</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,7 +219,7 @@
                             var targetUrl = hasNavigableLink
                                 ? Url.Action("Index", "DynamicEntity", new
                                 {
-                                    entity = def.ForeignKey.Entity,
+                                    entity = def.ForeignKey?.Entity,
                                     returnUrl = currentReturnUrl,
                                     returnEntity = Model.Entity,
                                     returnDisplayName = Model.Meta.GetDisplayName()
@@ -249,7 +256,7 @@
                                     {
                                         var rowLink = linkEntry.Value;
                                         var rowLinkParams = rowLink.Query != null
-                                            ? new Dictionary<string, string?>(rowLink.Query)
+                                            ? rowLink.Query.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
                                             : new Dictionary<string, string?>();
                                         rowLinkParams["entity"] = rowLink.TargetEntity;
                                         // 現在のページ状態（検索・ソート・フィルタ）を returnUrl に含めて遷移後に復元できるようにする
@@ -263,42 +270,42 @@
                                         }
                                         var rowLinkHref = QueryHelpers.AddQueryString(baseIndexUrl, rowLinkParams
                                             .Where(kv => kv.Value != null)
-                                            .ToDictionary(kv => kv.Key, kv => kv.Value!));
+                                            .ToDictionary(kv => kv.Key, kv => kv.Value));
                                         <a class="btn btn-xs btn-secondary btn-outline" href="@rowLinkHref">
                                             @rowLink.GetLabel() →
                                         </a>
                                     }
                                     <a class="btn btn-xs btn-info btn-outline"
                                        href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
-                                        Detail
+                                        @(I18nText.ResolveByKey("ui.detail") ?? "Detail")
                                     </a>
                                     @if (Model.Meta.PdfTemplate != null)
                                     {
                                         <a class="btn btn-xs btn-accent btn-outline"
                                            href="@Url.Action("DocumentPdf", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
                                            target="_blank"
-                                           title="帳票 PDF">
-                                            📄 帳票
+                                           title="@(I18nText.ResolveByKey("ui.pdf_document") ?? "📄 帳票")">
+                                            @(I18nText.ResolveByKey("ui.pdf_document") ?? "📄 帳票")
                                         </a>
                                     }
                                     <button class="btn btn-xs btn-outline"
                                             hx-get="@Url.Action("EditForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["mode"] = "modal" })"
                                             hx-target="#modal-form-content"
                                             hx-swap="innerHTML">
-                                        Edit
+                                        @(I18nText.ResolveByKey("ui.edit") ?? "Edit")
                                     </button>
                                     <a class="btn btn-xs btn-ghost"
                                        href="@Url.Action("EditPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
-                                        Edit Page
+                                        @(I18nText.ResolveByKey("ui.edit_page") ?? "Edit Page")
                                     </a>
                                     <form hx-post="@Url.Action("Delete", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
                                           hx-target="#list-container"
                                           hx-swap="innerHTML"
-                                          hx-confirm="Delete this item?"
+                                          hx-confirm="@(I18nText.ResolveByKey("bulk.delete_confirm") ?? "Delete this item?")"
                                           style="display:inline">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-xs btn-error">
-                                            Delete
+                                            @(I18nText.ResolveByKey("bulk.delete") ?? "Delete")
                                         </button>
                                     </form>
                                     @foreach (var actionEntry in Model.Meta.Actions)
@@ -306,7 +313,7 @@
                                         var actionKey = actionEntry.Key;
                                         var actionDef = actionEntry.Value;
                                         var hasInputs = actionDef.Inputs != null && actionDef.Inputs.Count > 0;
-                                        var hasConfirm = !string.IsNullOrWhiteSpace(actionDef.Confirm);
+                                        var hasConfirm = !string.IsNullOrWhiteSpace(actionDef.GetConfirm());
                                         if (hasInputs || hasConfirm)
                                         {
                                             // 入力フォームまたは確認ダイアログが必要な場合はモーダルを開く
@@ -314,7 +321,7 @@
                                                     hx-get="@Url.Action("ActionForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
                                                     hx-target="#modal-form-content"
                                                     hx-swap="innerHTML">
-                                                @actionDef.Label
+                                                @actionDef.GetLabel()
                                             </button>
                                         }
                                         else
@@ -326,7 +333,7 @@
                                                   style="display:inline">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" class="btn btn-xs btn-accent btn-outline">
-                                                    @actionDef.Label
+                                                    @actionDef.GetLabel()
                                                 </button>
                                             </form>
                                         }

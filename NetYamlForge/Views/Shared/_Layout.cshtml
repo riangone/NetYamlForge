@@ -100,9 +100,9 @@
                     <div class="dropdown dropdown-end">
                         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                             <div class="w-10 rounded-full bg-base-300 text-base-content grid place-items-center font-semibold">
-                                @if (User.Identity?.IsAuthenticated ?? false)
+                                @if (User?.Identity?.IsAuthenticated ?? false)
                                 {
-                                    @((User.Identity?.Name ?? "U").Substring(0, 1).ToUpperInvariant())
+                                    @((User?.Identity?.Name ?? "U").Substring(0, 1).ToUpperInvariant())
                                 }
                                 else
                                 {
@@ -111,39 +111,39 @@
                             </div>
                         </div>
                         <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-64 p-2 shadow">
-                            @if (User.Identity?.IsAuthenticated ?? false)
+                            @if (User?.Identity?.IsAuthenticated ?? false)
                             {
                                 <li class="menu-title">
                                     <span>@L["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name)</span>
                                 </li>
                             }
-                            <li class="menu-title"><span>Language</span></li>
+                            <li class="menu-title"><span>@L["Language"]</span></li>
                             <li>
                                 <div class="flex gap-2 px-2 py-1">
                                     <form asp-controller="Localization" asp-action="SetLanguage" method="post">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase)@Context.Request.Path@Context.Request.QueryString" />
                                         <input type="hidden" name="culture" value="en-US" />
                                         <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "en-US" ? "btn-active" : "")" title="English">🇺🇸</button>
                                     </form>
                                     <form asp-controller="Localization" asp-action="SetLanguage" method="post">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase)@Context.Request.Path@Context.Request.QueryString" />
                                         <input type="hidden" name="culture" value="zh-CN" />
                                         <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-CN" ? "btn-active" : "")" title="中文">🇨🇳</button>
                                     </form>
                                     <form asp-controller="Localization" asp-action="SetLanguage" method="post">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase)@Context.Request.Path@Context.Request.QueryString" />
                                         <input type="hidden" name="culture" value="ja-JP" />
                                         <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ja-JP" ? "btn-active" : "")" title="日本語">🇯🇵</button>
                                     </form>
                                     <form asp-controller="Localization" asp-action="SetLanguage" method="post">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="returnUrl" value="@(Context.Request.PathBase)@Context.Request.Path@Context.Request.QueryString" />
                                         <input type="hidden" name="culture" value="ko-KR" />
                                         <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ko-KR" ? "btn-active" : "")" title="한국어">🇰🇷</button>
                                     </form>
                                 </div>
                             </li>
 
-                            @if (User.Identity?.IsAuthenticated ?? false)
+                            @if (User?.Identity?.IsAuthenticated ?? false)
                             {
                                 @if (User.IsInRole("Admin"))
                                 {
@@ -231,7 +231,7 @@
                                 var showItem = !item.AdminOnly || isAdminUser;
                                 if (!showItem) continue;
                                 // ロールが指定されている場合、非管理者はいずれかのロールを持つ必要がある
-                                if (!isAdminUser && item.Roles.Count > 0 && !item.Roles.Any(r => User.IsInRole(r))) continue;
+                                if (!isAdminUser && item.Roles.Count > 0 && !item.Roles.Any(r => User?.IsInRole(r) == true)) continue;
                                 var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
                                 var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
                                 if (section == null)
@@ -481,7 +481,7 @@
     </dialog>
 
     @* AI アシスタントサイドバー *@
-    @if (User.Identity?.IsAuthenticated ?? false)
+    @if (User?.Identity?.IsAuthenticated ?? false)
     {
         <button onclick="toggleAiSidebar()" class="fixed bottom-6 right-6 btn btn-circle btn-primary shadow-lg z-[100] hover:scale-110 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

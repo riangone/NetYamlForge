@@ -23,7 +23,7 @@
                 <li>
                     <a class="link link-hover"
                        asp-controller="Dashboard"
-                       asp-action="Index">Dashboard</a>
+                       asp-action="Index">@(I18nText.ResolveByKey("ui.dashboard") ?? "Dashboard")</a>
                 </li>
                 @foreach (var crumb in breadcrumbs)
                 {
@@ -43,7 +43,7 @@
                 hx-get="@Url.Action("CreateForm", "DynamicEntity", new { entity = Model.Entity, mode = "modal", returnUrl = Model.ReturnUrl })"
                 hx-target="#modal-form-content"
                 hx-swap="innerHTML">
-                New
+                @(I18nText.ResolveByKey("ui.new") ?? "New")
             </button>
             <h1 class="text-2xl font-bold">@title</h1>
             @if (User.IsInRole("Admin"))
@@ -65,9 +65,9 @@
         {
             <div class="flex items-center gap-2 text-sm text-base-content/70">
                 <a class="btn btn-ghost btn-sm" href="@Model.ReturnUrl">
-                    ← 前の@(Model.ReturnDisplayName ?? Model.ReturnEntity ?? "一覧")に戻る
+                    ← @(I18nText.ResolveByKey("ui.back_to_previous") ?? "前の一覧に戻る")
                 </a>
-                <span>状態を維持したまま戻る</span>
+                <span>@(I18nText.ResolveByKey("ui.keep_state_back") ?? "状態を維持したまま戻る")</span>
             </div>
         }
     </div>
@@ -77,17 +77,17 @@
 
         @* 一括操作バー（チェックボックスで1件以上選択時に表示） *@
         <div id="bulk-action-bar" class="hidden items-center gap-2 flex-wrap">
-            <span id="bulk-selected-count" class="text-sm font-semibold badge badge-neutral">0 件選択</span>
+            <span id="bulk-selected-count" class="text-sm font-semibold badge badge-neutral">0</span>
             @foreach (var actionEntry in Model.Meta.Actions.Where(a => a.Value.Scope != "header"))
             {
                 var bActionKey = actionEntry.Key;
                 var bActionDef = actionEntry.Value;
                 <button class="btn btn-sm btn-warning btn-outline"
-                        onclick="invokeBulkAction('@bActionKey', '@(bActionDef.Confirm ?? "")')">
-                    @bActionDef.Label (選択)
+                        onclick="invokeBulkAction('@bActionKey', '@(bActionDef.GetConfirm() ?? "")')">
+                    @bActionDef.GetLabel() (@(I18nText.ResolveByKey("bulk.action_selected") ?? "選択"))
                 </button>
             }
-            <button class="btn btn-sm btn-ghost" onclick="clearAllCheckboxes()">選択解除</button>
+            <button class="btn btn-sm btn-ghost" onclick="clearAllCheckboxes()">@(I18nText.ResolveByKey("bulk.clear_selection") ?? "選択解除")</button>
         </div>
 
         @* 右側ボタン群（常時表示） *@
@@ -122,7 +122,7 @@
                             hx-get="@Url.Action("HeaderActionForm", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
                             hx-target="#modal-form-content"
                             hx-swap="innerHTML">
-                        @hActionDef.Label
+                        @hActionDef.GetLabel()
                     </button>
                 }
                 else
@@ -131,8 +131,8 @@
                             hx-post="@Url.Action("InvokeHeaderAction", "DynamicEntity", new { entity = Model.Entity, actionKey = hActionKey })"
                             hx-target="#list-container"
                             hx-swap="innerHTML"
-                            @(!string.IsNullOrWhiteSpace(hActionDef.Confirm) ? $"hx-confirm=\"{hActionDef.Confirm}\"" : "")>
-                        @hActionDef.Label
+                            @(!string.IsNullOrWhiteSpace(hActionDef.GetConfirm()) ? $"hx-confirm=\"{hActionDef.GetConfirm()}\"" : "")>
+                        @hActionDef.GetLabel()
                     </button>
                 }
             }
@@ -153,8 +153,8 @@
                 <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
 
                 <label class="input input-bordered col-span-full">
-                    <span class="label">Search</span>
-                    <input type="text" name="search" value="@Model.Search" placeholder="Search..." id="search-input" />
+                    <span class="label">@(I18nText.ResolveByKey("ui.search") ?? "Search")</span>
+                    <input type="text" name="search" value="@Model.Search" placeholder="@(I18nText.ResolveByKey("ui.search") ?? "Search")..." id="search-input" />
                 </label>
 
                 @foreach (var f in orderedFilters)
@@ -168,8 +168,8 @@
                 }
 
                 <div class="col-span-full flex items-center gap-2">
-                    <button type="submit" class="btn btn-outline btn-sm">Search</button>
-                    <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">Clear</button>
+                    <button type="submit" class="btn btn-outline btn-sm">@(I18nText.ResolveByKey("ui.search") ?? "Search")</button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="clear-filters-btn">@(I18nText.ResolveByKey("ui.clear") ?? "Clear")</button>
                 </div>
             </form>
         </div>
@@ -320,7 +320,10 @@
             if (ids.length > 0) {
                 bar.classList.remove("hidden");
                 bar.classList.add("flex");
-                if (counter) counter.textContent = ids.length + " 件選択";
+                if (counter) {
+                    var format = "@Html.Raw(I18nText.ResolveByKey("ui.selected_count_format") ?? "{0} 件選択")";
+                    counter.textContent = format.replace("{0}", ids.length);
+                }
             } else {
                 bar.classList.add("hidden");
                 bar.classList.remove("flex");
@@ -367,10 +370,11 @@
         function invokeBulkAction(actionKey, confirmMsg) {
             const ids = getCheckedIds();
             if (ids.length === 0) {
-                alert("操作するレコードを選択してください。");
+                alert("@Html.Raw(I18nText.ResolveByKey("ui.select_records_warning") ?? "操作するレコードを選択してください。")");
                 return;
             }
-            if (confirmMsg && !window.confirm(confirmMsg + "\n\n" + ids.length + " 件を処理します。")) {
+            var confirmFormat = "@Html.Raw(I18nText.ResolveByKey("ui.process_count_confirm") ?? "件を処理します。")";
+            if (confirmMsg && !window.confirm(confirmMsg + "\n\n" + ids.length + " " + confirmFormat)) {
                 return;
             }
 
@@ -399,7 +403,7 @@
                 }
             }).catch(function (err) {
                 console.error("Bulk action failed:", err);
-                alert("操作中にエラーが発生しました: " + err.message);
+                alert("@Html.Raw(I18nText.ResolveByKey("ui.operation_error") ?? "操作中にエラーが発生しました"): " + err.message);
             });
         }
 

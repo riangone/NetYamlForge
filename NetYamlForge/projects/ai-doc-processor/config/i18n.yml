@@ -1,4 +1,166 @@
 translations:
+  projects.ai-doc-processor.displayName:
+    zh-CN: AI文档处理系统
+    en-US: AI Document Processor
+    ja-JP: AIドキュメント処理システム
+    ko-KR: AI 문서 처리 시스템
+  # General UI
+  bulk.action_selected:
+    zh-CN: 选择
+    en-US: Select
+    ja-JP: 選択
+    ko-KR: 선택
+  bulk.clear_selection:
+    zh-CN: 取消选择
+    en-US: Clear Selection
+    ja-JP: 選択解除
+    ko-KR: 선택 해제
+  bulk.cancel:
+    zh-CN: 取消
+    en-US: Cancel
+    ja-JP: キャンセル
+    ko-KR: 취소
+  bulk.execute:
+    zh-CN: 执行
+    en-US: Execute
+    ja-JP: 実行
+    ko-KR: 실행
+  bulk.delete:
+    zh-CN: 删除
+    en-US: Delete
+    ja-JP: 削除
+    ko-KR: 삭제
+  bulk.delete_confirm:
+    zh-CN: 确定要删除选中的项目吗？
+    en-US: Are you sure you want to delete the selected item?
+    ja-JP: 選択した項目を削除してもよろしいですか？
+    ko-KR: 선택한 항목을 삭제하시겠습니까?
+  ui.edit:
+    zh-CN: 编辑
+    en-US: Edit
+    ja-JP: 編集
+    ko-KR: 편집
+  ui.edit_page:
+    zh-CN: 编辑页面
+    en-US: Edit Page
+    ja-JP: 編集ページ
+    ko-KR: 페이지 편집
+
+  # Dashboard Keys
+  ai-doc.stats.total:
+    zh-CN: 总任务数
+    en-US: Total Tasks
+    ja-JP: 総タスク数
+    ko-KR: 총 작업 수
+  ai-doc.stats.completed:
+    zh-CN: 已完成
+    en-US: Completed
+    ja-JP: 完了
+    ko-KR: 완료됨
+  ai-doc.stats.processing:
+    zh-CN: 处理中
+    en-US: Processing
+    ja-JP: 処理中
+    ko-KR: 처리 중
+  ai-doc.stats.pending:
+    zh-CN: 等待中
+    en-US: Pending
+    ja-JP: 保留中
+    ko-KR: 대기 중
+  ai-doc.stats.failed:
+    zh-CN: 失败
+    en-US: Failed
+    ja-JP: 失敗
+    ko-KR: 실패함
+  ai-doc.charts.status:
+    zh-CN: 任务状态分布
+    en-US: Task Status Distribution
+    ja-JP: タスクステータス分布
+    ko-KR: 작업 상태 분포
+  ai-doc.charts.doctype:
+    zh-CN: 文档类型分布（已完成）
+    en-US: Document Type Distribution (Completed)
+    ja-JP: ドキュメントタイプ分布（完了）
+    ko-KR: 문서 유형 분포(완료)
+  ai-doc.charts.daily:
+    zh-CN: 每日处理量（最近14天）
+    en-US: Daily Processing Volume (Last 14 Days)
+    ja-JP: 日次処理量（過去14日間）
+    ko-KR: 일일 처리량(최근 14일)
+
+  # Document Task Entity Translations
+  projects.ai-doc-processor.entities.document_task.displayName:
+    zh-CN: AI文档处理任务
+    en-US: AI Document Tasks
+    ja-JP: AIドキュメント処理タスク
+    ko-KR: AI 문서 처리 작업
+  projects.ai-doc-processor.entities.document_task.actions.batch_upload.label:
+    zh-CN: "📤 上传文档 / ZIP"
+    en-US: "📤 Upload Documents / ZIP"
+    ja-JP: "📤 ドキュメント/ZIPをアップロード"
+    ko-KR: "📤 문서 / ZIP 업로드"
+  projects.ai-doc-processor.entities.document_task.actions.batch_upload.confirm:
+    zh-CN: "请选择要上传的文档文件或 ZIP 压缩包，AI 将自动分析并提取全部内容。"
+    en-US: "Please select the document file or ZIP archive to upload. AI will automatically analyze and extract all contents."
+    ja-JP: "アップロードするドキュメントファイルまたはZIPアーカイブを選択してください。AIが自動的に分析し、すべてのコンテンツを抽出します。"
+    ko-KR: "업로드할 문서 파일 또는 ZIP 압축 파일을 선택하십시오. AI가 자동으로 분석하고 모든 내용을 추출합니다."
+  projects.ai-doc-processor.entities.document_task.actions.batch_upload.inputs.ZipFile.label:
+    zh-CN: "📦 选择 ZIP 压缩包（可包含多个文档）"
+    en-US: "📦 Select ZIP archive (can contain multiple documents)"
+    ja-JP: "📦 ZIPアーカイブを選択（複数のドキュメントを含めることができます）"
+    ko-KR: "📦 ZIP 압축 파일 선택 (여러 문서 포함 가능)"
+  projects.ai-doc-processor.entities.document_task.actions.batch_upload.inputs.DocFiles.label:
+    zh-CN: "📄 或选择单个/多个文档文件（PDF/图片）"
+    en-US: "📄 Or select single/multiple document files (PDF/images)"
+    ja-JP: "📄 または単一/複数のドキュメントファイルを選択（PDF/画像）"
+    ko-KR: "📄 또는 단일/다중 문서 파일 선택 (PDF/이미지)"
+
+  projects.ai-doc-processor.entities.document_task.columns.Id.label:
+    zh-CN: 编号
+    en-US: ID
+    ja-JP: ID
+    ko-KR: ID
+  projects.ai-doc-processor.entities.document_task.columns.FileName.label:
+    zh-CN: 文件名
+    en-US: File Name
+    ja-JP: ファイル名
+    ko-KR: 파일 이름
+  projects.ai-doc-processor.entities.document_task.columns.DocumentType.label:
+    zh-CN: 文档类型
+    en-US: Document Type
+    ja-JP: ドキュメントタイプ
+    ko-KR: 문서 유형
+  projects.ai-doc-processor.entities.document_task.columns.Status.label:
+    zh-CN: 处理状态
+    en-US: Status
+    ja-JP: 処理ステータス
+    ko-KR: 처리 상태
+  projects.ai-doc-processor.entities.document_task.columns.FilePath.label:
+    zh-CN: 原始文件
+    en-US: Original File
+    ja-JP: 元ファイル
+    ko-KR: 원본 파일
+  projects.ai-doc-processor.entities.document_task.columns.JsonPath.label:
+    zh-CN: 提取结果
+    en-US: Extraction Result
+    ja-JP: 抽出結果
+    ko-KR: 추출 결과
+  projects.ai-doc-processor.entities.document_task.columns.ExtractedTable.label:
+    zh-CN: 数据表
+    en-US: Data Table
+    ja-JP: データテーブル
+    ko-KR: 데이터 테이블
+  projects.ai-doc-processor.entities.document_task.columns.ExtractedId.label:
+    zh-CN: 数据ID
+    en-US: Data ID
+    ja-JP: データID
+    ko-KR: 데이터 ID
+  projects.ai-doc-processor.entities.document_task.columns.CreatedAt.label:
+    zh-CN: 上传时间
+    en-US: Upload Time
+    ja-JP: アップロード時間
+    ko-KR: 업로드 시간
+
   projects.ai-doc-processor.pages.starterOverview.description:
     en-US: 'Auto-generated starter page'
     zh-CN: 'Auto-generated starter page'

@@ -86,8 +86,8 @@
                                 <input type="hidden" name="actionKey" value="@actionKey" />
                                 <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
                                 <button type="submit" class="btn btn-sm @btnClass"
-                                        onclick="return @(string.IsNullOrEmpty(actionDef.Confirm) ? "true" : $"confirm('{actionDef.Confirm}')")">
-                                    @actionDef.Label
+                                        onclick="return @(string.IsNullOrEmpty(actionDef.GetConfirm()) ? "true" : $"confirm('{actionDef.GetConfirm()}')")">
+                                    @actionDef.GetLabel()
                                 </button>
                             </form>
                         }

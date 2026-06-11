@@ -45,7 +45,7 @@
     else
     {
         <div class="alert alert-info">
-            <span>統計情報が未設定です。<code>config/dashboard.yml</code> の <code>stats</code> セクションに定義を追加してください。</span>
+            <span>@(NetYamlForge.Models.I18nText.ResolveByKey("ui.dashboard.stats_not_configured") ?? "統計情報が未設定です。config/dashboard.yml の stats セクションに定義を追加してください。")</span>
         </div>
     }
 

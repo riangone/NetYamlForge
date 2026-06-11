@@ -110,7 +110,7 @@
     else if (Model.Stats.Count == 0)
     {
         <div class="alert alert-info">
-            <span>統計情報が未設定です。<code>config/dashboard.yml</code> を設定してください。</span>
+            <span>@(NetYamlForge.Models.I18nText.ResolveByKey("ui.dashboard.stats_not_configured") ?? "統計情報が未設定です。config/dashboard.yml を設定してください。")</span>
         </div>
     }
 </div>

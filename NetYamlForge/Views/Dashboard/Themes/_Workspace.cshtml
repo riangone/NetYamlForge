@@ -3,7 +3,7 @@
 @{
     var projectName = ViewData["ProjectDisplayName"] as string ?? "Dashboard";
     var now         = DateTime.Now;
-    var greeting    = now.Hour < 12 ? "Good morning" : now.Hour < 17 ? "Good afternoon" : "Good evening";
+    var greeting = now.Hour < 12 ? (NetYamlForge.Models.I18nText.ResolveByKey("ui.greeting.morning") ?? "Good morning") : now.Hour < 17 ? (NetYamlForge.Models.I18nText.ResolveByKey("ui.greeting.afternoon") ?? "Good afternoon") : (NetYamlForge.Models.I18nText.ResolveByKey("ui.greeting.evening") ?? "Good evening");
     var dayLabel    = now.ToString("dddd, MMMM d", System.Globalization.CultureInfo.InvariantCulture);
     string[] gradients = [
         "from-primary/20 to-primary/5",
@@ -89,7 +89,7 @@
     @if (Model.Stats.Count == 0 && Model.Charts.Count == 0)
     {
         <div class="alert">
-            <span>統計情報が未設定です。<code>config/dashboard.yml</code> を設定してください。</span>
+            <span>@(NetYamlForge.Models.I18nText.ResolveByKey("ui.dashboard.stats_not_configured") ?? "統計情報が未設定です。config/dashboard.yml を設定してください。")</span>
         </div>
     }
 </div>

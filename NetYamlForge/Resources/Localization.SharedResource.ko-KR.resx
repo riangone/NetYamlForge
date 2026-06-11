@@ -1950,4 +1950,7 @@
   <data name="TenantLoginNow" xml:space="preserve">
     <value>지금 로그인</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>언어</value>
+  </data>
 </root>

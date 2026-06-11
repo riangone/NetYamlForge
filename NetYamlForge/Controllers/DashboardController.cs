@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using Dapper;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Connection;
+using NetYamlForge.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NetYamlForge.Controllers;
@@ -102,7 +103,19 @@ public class DashboardController : Controller
             ? (_projectScope.Current.Layout?.DashboardTheme ?? "default")
             : "default";
         ViewData["DashboardTheme"]       = theme;
-        ViewData["ProjectDisplayName"]   = _projectScope.IsSet ? _projectScope.Current.DisplayName : "Dashboard";
+
+        var projectDisplayName = _projectScope.IsSet ? _projectScope.Current.DisplayName : "Dashboard";
+        if (_projectScope.IsSet)
+        {
+            var key = $"projects.{projectName}.displayName";
+            var culture = System.Globalization.CultureInfo.CurrentUICulture;
+            var localizedName = YamlKeyLocalizer.Resolve(key, culture, projectName);
+            if (!string.IsNullOrWhiteSpace(localizedName))
+            {
+                projectDisplayName = localizedName;
+            }
+        }
+        ViewData["ProjectDisplayName"]   = projectDisplayName;
 
         // プロジェクト固有の Dashboard/Index.cshtml があればそちらを優先
         if (!string.IsNullOrEmpty(projectName))

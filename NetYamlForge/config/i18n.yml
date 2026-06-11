@@ -1,4 +1,129 @@
 translations:
+  ui.page_size:
+    zh-CN: 每页显示
+    en-US: Page Size
+    ja-JP: ページサイズ
+    ko-KR: 페이지 크기
+  ui.total:
+    zh-CN: 共
+    en-US: Total
+    ja-JP: 合計
+    ko-KR: 합계
+  ui.selected_count_format:
+    zh-CN: 已选择 {0} 条
+    en-US: "{0} selected"
+    ja-JP: "{0} 件選択"
+    ko-KR: "{0}개 선택됨"
+  ui.bulk_delete_confirm:
+    zh-CN: 确定要删除选中的记录吗？此操作不可恢复。
+    en-US: Are you sure you want to delete the selected records? This action cannot be undone.
+    ja-JP: 選択したレコードを削除してもよろしいですか？この操作は取り消せません。
+    ko-KR: 선택한 레코드를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.
+  ui.bulk_delete:
+    zh-CN: 🗑️ 删除选中
+    en-US: 🗑️ Delete Selected
+    ja-JP: 🗑️ 選択削除
+    ko-KR: 🗑️ 선택 삭제
+  ui.cancel:
+    zh-CN: 取消
+    en-US: Cancel
+    ja-JP: キャンセル
+    ko-KR: 취소
+  ui.other_entities:
+    zh-CN: 跳转到其他实体
+    en-US: Navigate to other entities
+    ja-JP: 他のエンティティへ
+    ko-KR: 다른 엔티티로 이동
+  ui.actions:
+    zh-CN: 操作
+    en-US: Actions
+    ja-JP: アクション
+    ko-KR: 작업
+  ui.detail:
+    zh-CN: 详情
+    en-US: Detail
+    ja-JP: 詳細
+    ko-KR: 상세
+  ui.pdf_document:
+    zh-CN: 📄 报表
+    en-US: 📄 Document
+    ja-JP: 📄 帳票
+    ko-KR: 📄 보고서
+  ui.new:
+    zh-CN: 新建
+    en-US: New
+    ja-JP: 新規作成
+    ko-KR: 새로 만들기
+  ui.back_to_previous:
+    zh-CN: 返回前一列表
+    en-US: Back to previous list
+    ja-JP: 前の一覧に戻る
+    ko-KR: 이전 목록으로 돌아가기
+  ui.keep_state_back:
+    zh-CN: 保持状态返回
+    en-US: Keep state and go back
+    ja-JP: 状態を維持したまま戻る
+    ko-KR: 상태를 유지하며 돌아가기
+  ui.search:
+    zh-CN: 搜索
+    en-US: Search
+    ja-JP: 検索
+    ko-KR: 검색
+  ui.clear:
+    zh-CN: 清空
+    en-US: Clear
+    ja-JP: クリア
+    ko-KR: 初期화
+  ui.dashboard:
+    zh-CN: 数据看板
+    en-US: Dashboard
+    ja-JP: ダッシュボード
+    ko-KR: 대시보드
+  ui.dashboard.stats_not_configured:
+    zh-CN: 统计信息未设置。请在 config/dashboard.yml 的 stats 部分中添加定义。
+    en-US: Statistics are not configured. Please add definitions in the stats section of config/dashboard.yml.
+    ja-JP: 統計情報が未設定です。config/dashboard.yml の stats セクションに定義を追加してください。
+    ko-KR: 통계 정보가 설정되지 않았습니다. config/dashboard.yml의 stats 섹션에 정의를 추가하십시오.
+  ui.dashboard.charts_not_configured:
+    zh-CN: 图表信息未设置。请在 config/dashboard.yml 中进行设置。
+    en-US: Chart is not configured. Please configure config/dashboard.yml.
+    ja-JP: グラフが未設定です。config/dashboard.yml を設定してください。
+    ko-KR: 차트가 설정되지 않았습니다. config/dashboard.yml을 설정하십시오.
+  ui.dashboard.no_metrics:
+    zh-CN: 未配置指标
+    en-US: No metrics configured
+    ja-JP: メトリクスが未設定です
+    ko-KR: 구성된 메트릭이 없습니다
+  ui.greeting.morning:
+    zh-CN: 早上好
+    en-US: Good morning
+    ja-JP: おはようございます
+    ko-KR: 좋은 아침입니다
+  ui.greeting.afternoon:
+    zh-CN: 下午好
+    en-US: Good afternoon
+    ja-JP: こんにちは
+    ko-KR: 좋은 오후입니다
+  ui.greeting.evening:
+    zh-CN: 晚上好
+    en-US: Good evening
+    ja-JP: こんばんは
+    ko-KR: 좋은 저녁입니다
+  ui.select_records_warning:
+    zh-CN: 请选择要操作的记录。
+    en-US: Please select records to operate.
+    ja-JP: 操作するレコードを選択してください。
+    ko-KR: 작업할 레코드를 선택하십시오.
+  ui.process_count_confirm:
+    zh-CN: 件处理确认
+    en-US: records will be processed.
+    ja-JP: 件を処理します。
+    ko-KR: 건을 처리합니다.
+  ui.operation_error:
+    zh-CN: 操作中发生错误
+    en-US: An error occurred during operation
+    ja-JP: 操作中にエラーが発生しました
+    ko-KR: 작업 중 오류가 발생했습니다
   Hello:
     en-US: Hello
     zh-CN: 你好

@@ -4,25 +4,30 @@ entities:
     table: DocumentTask
     key: Id
     displayName: "AI文档处理任务"
+    displayNameKey: "projects.ai-doc-processor.entities.document_task.displayName"
     softDelete: false
     isPublic: true
 
     actions:
       batch_upload:
         label: "📤 上传文档 / ZIP"
+        labelKey: "projects.ai-doc-processor.entities.document_task.actions.batch_upload.label"
         scope: header
         handler: batch_upload_zip_handler
         confirm: "请选择要上传的文档文件或 ZIP 压缩包，AI 将自动分析并提取全部内容。"
+        confirmKey: "projects.ai-doc-processor.entities.document_task.actions.batch_upload.confirm"
         inputs:
           - name: ZipFile
             type: file
             label: "📦 选择 ZIP 压缩包（可包含多个文档）"
+            labelKey: "projects.ai-doc-processor.entities.document_task.actions.batch_upload.inputs.ZipFile.label"
             required: false
             allowedExtensions: ".zip"
             maxSizeBytes: 20971520
           - name: DocFiles
             type: file
             label: "📄 或选择单个/多个文档文件（PDF/图片）"
+            labelKey: "projects.ai-doc-processor.entities.document_task.actions.batch_upload.inputs.DocFiles.label"
             required: false
             multiple: true
             allowedExtensions: ".pdf,.jpg,.jpeg,.png,.webp,.bmp"
@@ -32,56 +37,69 @@ entities:
       Id:
         type: int
         label: "ID"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.Id.label"
         identity: true
         hidden: true
       FileName:
         type: string
         label: "文件名"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.FileName.label"
         searchable: true
         sortable: true
       DocumentType:
         type: string
         label: "文档类型"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.DocumentType.label"
         sortable: true
       Status:
         type: string
         label: "处理状态"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.Status.label"
         sortable: true
       FilePath:
         type: string
         label: "原始文件"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.FilePath.label"
         hidden: true
       JsonPath:
         type: string
         label: "提取结果"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.JsonPath.label"
         hidden: true
       ExtractedTable:
         type: string
         label: "数据表"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.ExtractedTable.label"
         hidden: true
       ExtractedId:
         type: int
         label: "数据ID"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.ExtractedId.label"
         hidden: true
       CreatedAt:
         type: datetime
         label: "上传时间"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.CreatedAt.label"
         sortable: true
 
     forms:
       FileName:
         type: string
         label: "文件名"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.FileName.label"
         editable: false
       Status:
         type: string
         label: "处理状态"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.Status.label"
         editable: false
       DocumentType:
         type: string
         label: "文档类型"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.DocumentType.label"
         editable: false
       CreatedAt:
         type: datetime
         label: "上传时间"
+        labelKey: "projects.ai-doc-processor.entities.document_task.columns.CreatedAt.label"
         editable: false

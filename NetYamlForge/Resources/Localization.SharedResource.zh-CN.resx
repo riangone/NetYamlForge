@@ -1950,4 +1950,7 @@
   <data name="TenantLoginNow" xml:space="preserve">
     <value>立即登录</value>
   </data>
+  <data name="Language" xml:space="preserve">
+    <value>语言</value>
+  </data>
 </root>
