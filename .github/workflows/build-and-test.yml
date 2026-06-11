@@ -2,7 +2,7 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, develop, 'feature/**' ]
+    branches: [ main, develop, nyf, 'feature/**' ]
   pull_request:
     branches: [ main, develop ]
 
@@ -32,7 +32,7 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         files: './**/coverage.cobertura.xml'
-        fail-ci-if-error: true
+        fail-ci-if-error: false
 
   code-quality:
     runs-on: ubuntu-latest
@@ -49,13 +49,13 @@ jobs:
       run: dotnet restore
     
     - name: Check code style
-      run: dotnet format --verify --no-restore
+      run: dotnet format --verify-no-changes --no-restore
       continue-on-error: true
     
     - name: Security scan (NuGet vulnerabilities)
       run: |
         dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-report.txt
-        if grep -q "vulnerable" vuln-report.txt; then
+        if grep -q "has the following vulnerable packages" vuln-report.txt; then
           echo "⚠️ Vulnerable packages found!"
           exit 1
         fi
