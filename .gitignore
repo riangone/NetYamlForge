@@ -21,9 +21,12 @@ logs/
 *.nupkg
 packages/
 
-# Runtime data (SQLite WAL files still ignored)
+# Runtime data (SQLite databases are rebuilt by the framework on startup;
+# schema comes from YAML entity configs + init.sql, demo data from seed scripts)
+*.db
 *.db-shm
 *.db-wal
+*.db.backup
 
 # App runtime files
 *.pid
@@ -36,11 +39,9 @@ Thumbs.db
 
 # Claude memory
 memory/
-NetYamlForge/projects/jpcs/database/jpcs.db
 
-# ai-doc-processor: exclude uploaded files and database
+# ai-doc-processor: exclude uploaded files
 NetYamlForge/wwwroot/uploads/ai-doc-processor/
-NetYamlForge/projects/ai-doc-processor/database/*.db
 NetYamlForge/wwwroot/watch-docs/
 NetYamlForge/projects/*/jobs/output/
 NetYamlForge/cache/

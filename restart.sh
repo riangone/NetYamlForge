@@ -66,6 +66,7 @@ nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge
 
 APP_PID=$!
 echo $APP_PID > "$PID_FILE"
+disown $APP_PID
 
 echo "NetYamlForge started (PID: $APP_PID)"
 echo "Log: $LOG_FILE"
