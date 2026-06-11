@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -17,8 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="../NetYamlForge/NetYamlForge.csproj" />
     <!-- アナライザーをテストプロジェクトにも適用 -->
-    <ProjectReference Include="../NetYamlForge.Analyzers/NetYamlForge.Analyzers.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="../NetYamlForge.Analyzers/NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

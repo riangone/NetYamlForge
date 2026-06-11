@@ -311,3 +311,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+/// <summary>
+/// WebApplicationFactory（統合テスト）から参照できるようにするための partial 宣言。
+/// トップレベルステートメントで生成される Program クラスを public にします。
+/// </summary>
+public partial class Program { }
