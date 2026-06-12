@@ -11,4 +11,7 @@ public interface ISqlDialect
 
     /// <summary>文字列連結演算子（SQLite: ||, SQL Server: +）</summary>
     string ConcatOperator { get; }
+
+    /// <summary>直前の INSERT で生成された自動採番値を取得する SQL 式</summary>
+    string LastInsertIdExpression { get; }
 }

@@ -39,6 +39,7 @@
     <PackageReference Include="Stateless" Version="5.20.1" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="PDFsharp" Version="6.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
   <!-- wwwroot/fonts のフォントファイルをビルド出力にコピー -->
   <ItemGroup>

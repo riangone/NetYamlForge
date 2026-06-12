@@ -1,18 +1,20 @@
 // ファイル概要：動的エンティティ向けの汎用 REST API コントローラー。
 // 全エンティティに対して CRUD 操作を提供します。
-// ルート: /{project}/api/entities/{entity}[/{id}]
+// ルート: /api/{project}/{entity}[/{id}]
 // 保守時は副作用を避けるため、公開シグネチャと呼び出し関係の整合性を維持してください。
 
 using NetYamlForge.Models;
 using NetYamlForge.Services;
+using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NetYamlForge.Controllers;
 
-[Authorize]
+[Authorize(AuthenticationSchemes = $"{Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme},ApiToken")]
 [ApiController]
-[Route("{project}/api/entities")]
+[Route("api/{project}/{entity}")]
 public class ApiEntityController : BaseProjectController
 {
     private readonly IDynamicCrudRepository              _repo;
@@ -20,6 +22,7 @@ public class ApiEntityController : BaseProjectController
     private readonly DynamicEntityCommandService         _commandService;
     private readonly DynamicEntityFormValidationService  _formValidationService;
     private readonly ProjectScope                        _projectScope;
+    private readonly IProjectActionRegistry              _actionRegistry;
     private readonly ILogger<ApiEntityController>        _logger;
 
     public ApiEntityController(
@@ -28,6 +31,7 @@ public class ApiEntityController : BaseProjectController
         DynamicEntityCommandService        commandService,
         DynamicEntityFormValidationService formValidationService,
         ProjectScope                       projectScope,
+        IProjectActionRegistry             actionRegistry,
         ILogger<ApiEntityController>       logger)
     {
         _repo                 = repo;
@@ -35,13 +39,36 @@ public class ApiEntityController : BaseProjectController
         _commandService       = commandService;
         _formValidationService = formValidationService;
         _projectScope         = projectScope;
+        _actionRegistry       = actionRegistry;
         _logger               = logger;
     }
 
-    // ─── GET /{project}/api/entities/{entity} ─────────────────────────────────
+    private IActionResult? ValidateApiAccess(EntityDefinition meta, bool writeRequired)
+    {
+        var apiMode = (meta.Api ?? "disabled").ToLowerInvariant();
+        if (apiMode == "disabled")
+        {
+            return Problem(
+                title: "API Access Disabled",
+                detail: $"API access to entity '{meta.Table}' is disabled by configuration.",
+                statusCode: StatusCodes.Status403Forbidden
+            );
+        }
+        if (writeRequired && apiMode == "readonly")
+        {
+            return Problem(
+                title: "API Read-Only",
+                detail: $"API access to entity '{meta.Table}' is read-only.",
+                statusCode: StatusCodes.Status403Forbidden
+            );
+        }
+        return null;
+    }
+
+    // ─── GET /api/{project}/{entity} ─────────────────────────────────
 
     /// <summary>エンティティ一覧を取得（ページネーション・検索・ソート対応）</summary>
-    [HttpGet("{entity}")]
+    [HttpGet("")]
     public async Task<IActionResult> GetList(
         string entity,
         [FromQuery] string? search   = null,
@@ -52,7 +79,7 @@ public class ApiEntityController : BaseProjectController
         [FromQuery] Dictionary<string, string?>? filters = null)
     {
         var meta = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: false);
         if (denied != null) return denied;
 
         var filterDict = filters ?? new Dictionary<string, string?>();
@@ -80,14 +107,14 @@ public class ApiEntityController : BaseProjectController
         });
     }
 
-    // ─── GET /{project}/api/entities/{entity}/meta ────────────────────────────
+    // ─── GET /api/{project}/{entity}/meta ────────────────────────────
 
     /// <summary>エンティティのメタデータを取得</summary>
-    [HttpGet("{entity}/meta")]
+    [HttpGet("meta")]
     public IActionResult GetMeta(string entity)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: false);
         if (denied != null) return denied;
 
         var columns = meta.Columns.ToDictionary(
@@ -124,14 +151,14 @@ public class ApiEntityController : BaseProjectController
         });
     }
 
-    // ─── GET /{project}/api/entities/{entity}/{id} ────────────────────────────
+    // ─── GET /api/{project}/{entity}/{id} ────────────────────────────
 
     /// <summary>単一エンティティを取得</summary>
-    [HttpGet("{entity}/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string entity, string id)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: false);
         if (denied != null) return denied;
 
         var item = await _repo.GetByIdAsync(entity, id);
@@ -141,16 +168,16 @@ public class ApiEntityController : BaseProjectController
         return Ok(ToApiDto(item, meta));
     }
 
-    // ─── POST /{project}/api/entities/{entity} ────────────────────────────────
+    // ─── POST /api/{project}/{entity} ────────────────────────────────
 
     /// <summary>単一エンティティを作成</summary>
-    [HttpPost("{entity}")]
+    [HttpPost("")]
     public async Task<IActionResult> Create(
         string entity,
         [FromBody] Dictionary<string, object?> body)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: true);
         if (denied != null) return denied;
 
         var stringForm = body.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
@@ -170,21 +197,21 @@ public class ApiEntityController : BaseProjectController
         var created = await _repo.GetByIdAsync(entity, result.Value.ToString()!);
         return CreatedAtAction(
             nameof(GetById),
-            new { entity, id = result.Value.ToString() },
+            new { project = _projectScope.Current.Name, entity, id = result.Value.ToString() },
             ToApiDto(created!, meta));
     }
 
-    // ─── PUT /{project}/api/entities/{entity}/{id} ────────────────────────────
+    // ─── PUT /api/{project}/{entity}/{id} ────────────────────────────
 
     /// <summary>単一エンティティを完全更新</summary>
-    [HttpPut("{entity}/{id}")]
+    [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         string entity,
         string id,
         [FromBody] Dictionary<string, object?> body)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: true);
         if (denied != null) return denied;
 
         if (await _repo.GetByIdAsync(entity, id) == null)
@@ -208,17 +235,17 @@ public class ApiEntityController : BaseProjectController
         return Ok(ToApiDto(updated!, meta));
     }
 
-    // ─── PATCH /{project}/api/entities/{entity}/{id} ──────────────────────────
+    // ─── PATCH /api/{project}/{entity}/{id} ──────────────────────────
 
     /// <summary>単一エンティティを部分更新（送信フィールドのみ更新）</summary>
-    [HttpPatch("{entity}/{id}")]
+    [HttpPatch("{id}")]
     public async Task<IActionResult> PartialUpdate(
         string entity,
         string id,
         [FromBody] Dictionary<string, object?> body)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: true);
         if (denied != null) return denied;
 
         if (await _repo.GetByIdAsync(entity, id) == null)
@@ -242,14 +269,14 @@ public class ApiEntityController : BaseProjectController
         return Ok(ToApiDto(updated!, meta));
     }
 
-    // ─── DELETE /{project}/api/entities/{entity}/{id} ─────────────────────────
+    // ─── DELETE /api/{project}/{entity}/{id} ─────────────────────────
 
     /// <summary>単一エンティティを削除</summary>
-    [HttpDelete("{entity}/{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string entity, string id)
     {
         var meta   = _meta.Get(entity);
-        var denied = RejectIfNotVisible(meta);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: true);
         if (denied != null) return denied;
 
         if (await _repo.GetByIdAsync(entity, id) == null)
@@ -265,6 +292,81 @@ public class ApiEntityController : BaseProjectController
             return BadRequest(new { error = result.Error?.Message ?? "Failed to delete entity" });
 
         return NoContent();
+    }
+
+    // ─── POST /api/{project}/{entity}/{id}/actions/{actionKey} ────────
+
+    /// <summary>カスタムアクションを実行</summary>
+    [HttpPost("{id}/actions/{actionKey}")]
+    public async Task<IActionResult> InvokeAction(
+        string entity,
+        string id,
+        string actionKey,
+        [FromBody] Dictionary<string, object?>? body)
+    {
+        var meta = _meta.Get(entity);
+        var denied = RejectIfNotVisible(meta) ?? ValidateApiAccess(meta, writeRequired: true);
+        if (denied != null) return denied;
+
+        if (!meta.Actions.TryGetValue(actionKey, out var actionDef))
+            return NotFound(new { error = $"Action '{actionKey}' not found." });
+
+        var projectName = _projectScope.Current?.Name ?? "";
+        var handlerName = string.IsNullOrWhiteSpace(actionDef.Handler) ? actionKey : actionDef.Handler;
+        var handler = _actionRegistry.Find(projectName, handlerName);
+        if (handler == null)
+        {
+            _logger.LogWarning("Action handler '{Handler}' not found for project '{Project}'", handlerName, projectName);
+            return BadRequest(new { error = $"Action handler '{handlerName}' not found." });
+        }
+
+        var inputs = body ?? new Dictionary<string, object?>();
+
+        var ctx = new NetYamlForge.Services.Hooks.CustomActionContext
+        {
+            Project = projectName,
+            Entity = entity,
+            Action = actionKey,
+            RecordId = id,
+            Inputs = inputs,
+            Files = new Dictionary<string, string>(),
+            MultipleFiles = new Dictionary<string, List<string>>(),
+            UserName = User.Identity?.Name
+        };
+
+        var beforeHooks = actionDef.Hooks?.Before;
+        if (beforeHooks != null && beforeHooks.Count > 0)
+        {
+            var hookCtx = new NetYamlForge.Services.Hooks.EntityHookContext
+            {
+                Entity = entity,
+                Operation = NetYamlForge.Services.Hooks.CrudOperation.CustomAction,
+                Id = int.TryParse(id, out var intId) ? intId : null,
+                Values = inputs,
+                UserName = User.Identity?.Name
+            };
+            var beforeResult = await _commandService.RunBeforeHooksForActionAsync(beforeHooks, hookCtx);
+            if (beforeResult.Cancel)
+                return BadRequest(new { error = beforeResult.CancelMessage ?? "Cancelled by pre-action hook." });
+        }
+
+        ActionHandlerResult result;
+        try
+        {
+            result = await _commandService.ExecuteActionAsync(handler, ctx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing action '{Action}'", actionKey);
+            return StatusCode(500, new { error = "An error occurred during action execution." });
+        }
+
+        if (!result.Ok)
+        {
+            return BadRequest(new { error = result.ErrorMessage ?? "Action execution failed." });
+        }
+
+        return Ok(new { success = true, message = result.ErrorMessage ?? "Action executed successfully." });
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

@@ -65,6 +65,15 @@ public class UserAuthService : IUserAuthService
         return null;
     }
 
+    public async Task<AppUser?> GetByApiTokenAsync(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return null;
+        await using var conn = await GetConnectionAsync();
+        return await conn.QueryFirstOrDefaultAsync<AppUser>(
+            "SELECT * FROM app_user WHERE api_token = @Token AND is_active = 1",
+            new { Token = token });
+    }
+
     public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName)
     {
         await using var conn = await GetConnectionAsync();

@@ -29,7 +29,8 @@ public static class DbInitializer
         var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
 
         // システムデータベース（system.db）を初期化
-        await SystemDatabaseInitializer.InitializeAsync(logger);
+        var systemDbPath = configuration["SystemDbPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+        await SystemDatabaseInitializer.InitializeAsync(logger, systemDbPath);
         logger.LogInformation("システムデータベース初期化完了");
 
         var projects = projectManager.GetAll();
@@ -62,7 +63,7 @@ public static class DbInitializer
     /// </summary>
     private static async Task SyncTestUsersToSystemDbAsync(IReadOnlyCollection<ProjectInfo> projects, ILogger logger)
     {
-        var systemDbPath = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+        var systemDbPath = SystemDatabaseInitializer.DbPath;
         if (!File.Exists(systemDbPath))
         {
             logger.LogWarning("system.db が見つかりません。テストユーザーの同期をスキップします。");

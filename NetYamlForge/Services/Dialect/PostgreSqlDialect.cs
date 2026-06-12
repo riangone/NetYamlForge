@@ -7,6 +7,8 @@ public class PostgreSqlDialect : ISqlDialect
 {
     public string ConcatOperator => "||";
 
+    public string LastInsertIdExpression => "lastval()";
+
     public void AppendNumberedPagination(List<string> sqlParts, DynamicParameters param, int effectivePageSize, int offset, string defaultOrderByExpr)
     {
         sqlParts.Add(" LIMIT @PageSize");

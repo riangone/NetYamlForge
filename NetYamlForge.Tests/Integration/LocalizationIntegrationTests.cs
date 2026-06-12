@@ -48,7 +48,9 @@ public class LocalizationIntegrationTests : IClassFixture<NetYamlForgeWebApplica
             new FormUrlEncodedContent(formZh));
 
         // 3. Assert: 302 または 200 であることを確認し、適切にCookieと表示内容を検証する
-        Assert.True(responseZh.StatusCode == HttpStatusCode.Redirect || responseZh.StatusCode == HttpStatusCode.OK);
+        var responseBody = await responseZh.Content.ReadAsStringAsync();
+        Assert.True(responseZh.StatusCode == HttpStatusCode.Redirect || responseZh.StatusCode == HttpStatusCode.OK,
+            $"Expected Redirect or OK but got {responseZh.StatusCode}. Response: {responseBody}");
 
         if (responseZh.StatusCode == HttpStatusCode.Redirect)
         {

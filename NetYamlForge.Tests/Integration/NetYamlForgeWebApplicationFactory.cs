@@ -94,6 +94,14 @@ public sealed class NetYamlForgeWebApplicationFactory : WebApplicationFactory<Pr
                 options.DefaultForbidScheme = TestAuthHandler.SchemeName;
             }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                 TestAuthHandler.SchemeName, _ => { });
+
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes(TestAuthHandler.SchemeName)
+                    .Build();
+            });
         });
     }
 

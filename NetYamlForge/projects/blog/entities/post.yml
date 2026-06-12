@@ -6,6 +6,7 @@ entities:
     displayName: 記事
     softDelete: false
     isPublic: false
+    api: enabled
 
     joins:
       - type: left

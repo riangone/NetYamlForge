@@ -288,21 +288,28 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
 
-        var cacheKey = $"Insert_{meta.GetHashCode()}";
+        var hasAutoIncrementIdentity = meta.Columns.Any(c => c.Value.Identity);
+
+        var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
+        var cacheKey = $"Insert_{meta.GetHashCode()}_{valuesKeysStr}";
         if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
             var cols = meta.Columns
-                .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression))
+                .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression) && values.ContainsKey(c.Key))
                 .Select(c => c.Key)
                 .ToArray();
 
             var colList = string.Join(", ", cols);
             var paramList = string.Join(", ", cols.Select(c => "@" + c));
             sql = $"INSERT INTO {meta.Table} ({colList}) VALUES ({paramList});";
+            if (hasAutoIncrementIdentity)
+                sql += $" SELECT {_dialect.LastInsertIdExpression};";
             SqlCache.TryAdd(cacheKey, sql);
         }
 
         _logger.LogInformation("InsertAsync entity={Entity} sql={Sql}", entity, sql);
+        if (hasAutoIncrementIdentity)
+            return await TimedAsync("InsertAsync", entity, sql, () => _db.ExecuteScalarAsync<int>(sql, values, tx));
         return await TimedAsync("InsertAsync", entity, sql, () => _db.ExecuteAsync(sql, values, tx));
     }
 

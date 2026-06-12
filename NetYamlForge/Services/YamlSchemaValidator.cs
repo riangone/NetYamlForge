@@ -79,22 +79,50 @@ public static class YamlSchemaValidator
 
     private static JsonSchema GetProjectSchema()
     {
-        return _projectSchema ??= LoadSchemaFromResource("project-schema.json");
+        if (_projectSchema == null)
+        {
+            lock (_lock)
+            {
+                _projectSchema ??= LoadSchemaFromResource("project-schema.json");
+            }
+        }
+        return _projectSchema;
     }
 
     private static JsonSchema GetUiPageSchema()
     {
-        return _uiPageSchema ??= LoadSchemaFromResource("ui-page-schema.json");
+        if (_uiPageSchema == null)
+        {
+            lock (_lock)
+            {
+                _uiPageSchema ??= LoadSchemaFromResource("ui-page-schema.json");
+            }
+        }
+        return _uiPageSchema;
     }
 
     private static JsonSchema GetEntitySchema()
     {
-        return _entitySchema ??= LoadSchemaFromResource("entity-schema.json");
+        if (_entitySchema == null)
+        {
+            lock (_lock)
+            {
+                _entitySchema ??= LoadSchemaFromResource("entity-schema.json");
+            }
+        }
+        return _entitySchema;
     }
 
     private static JsonSchema GetDashboardSchema()
     {
-        return _dashboardSchema ??= LoadSchemaFromResource("dashboard-schema.json");
+        if (_dashboardSchema == null)
+        {
+            lock (_lock)
+            {
+                _dashboardSchema ??= LoadSchemaFromResource("dashboard-schema.json");
+            }
+        }
+        return _dashboardSchema;
     }
 
     private static JsonSchema LoadSchemaFromResource(string schemaFileName)

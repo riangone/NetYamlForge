@@ -17,36 +17,26 @@
 
 **剩余动作**：在 `nyf` 分支提交以上改动（与本地化改动分开提交更清晰）。提交由用户确认后执行。
 
-## Phase 2 — 质量基线（进行中）
+## Phase 2 — 质量基线 ✅
 
-### 2.1 YAML→运行时 端到端集成测试（骨架已建）
-- **现状**：`NetYamlForge.Tests/Integration/` 已有 `NetYamlForgeWebApplicationFactory`、`TestAuthHandler`、`YamlPipelineEndToEndTests`。
+### 2.1 YAML→运行时 端到端集成测试 ✅
+- **现状**：已实现全面端到端集成测试。
 - **目标**：覆盖框架核心链路——加载示例项目 → 渲染实体列表 → 提交 Create/Update/Delete → 执行自定义 Action → 校验数据库结果。
-- **改动点**：扩展 `YamlPipelineEndToEndTests`；必要时在测试夹具中用临时目录生成最小 YAML 项目（实体 + action + hook），避免依赖 `projects/` 下的演示数据。
 - **验收**：`dotnet test` 全绿；覆盖 List/Detail/Create/Update/Delete/InvokeAction 六条路径；测试不向仓库内的 `.db` 写入。
 
-### 2.2 本地化回归测试（骨架已建）
-- **现状**：`Localization/UserPreferredLanguageProviderTests.cs` 已存在（固化 cookie > claim 优先级，对应 fe1c1d8 修复）。
-- **补充**：为 `LocalizationController` 的语言切换端点加集成测试（切换后响应 Set-Cookie、后续请求生效）。
+### 2.2 本地化回归测试 ✅
+- **现状**：已包含在 `LocalizationIntegrationTests` 中，并验证了多语言切换以及 cookie > claim 优先级。
 
-### 2.3 空引用警告清零
-- **现状**：`NoWarn` 已移除；需确认 Release build 无 warning 回归（CI 的 build 步骤可加 `-warnaserror:nullable` 分阶段收紧）。
+### 2.3 空引用警告清零 ✅
+- **现状**：在 nyf 分支已全面修复编译警告（CS8604/CS8601/CS8767/CS0168/xUnit1031等历史警告全部清零）。
 
-## Phase 3 — 运行时健壮性
+## Phase 3 — 运行时健壮性 ✅
 
-### 3.1 根治 SQLite 写锁（优先级最高）
-- **背景**：`BatchJobExecutor` / `AiFolderProcessorExecutor` 曾因 SQLite Error 5 (database is locked) 失败，目前靠重试缓解。
-- **目标**：连接层统一启用 WAL + busy_timeout，写路径串行化。
-- **改动点**：
-  - `Services/Connection/ConnectionManager.cs`：SQLite 连接打开时执行 `PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;`（仅对 SQLite 方言；WAL 对同一文件只需设置一次但幂等）。
-  - 评估每租户引入单写者队列（`SemaphoreSlim` per database file）包裹写命令；读不受限。
-  - 现有零散重试逻辑收敛到连接层一处。
-- **验收**：新增并发写集成测试（两个执行器同时写同一租户库不再抛 Error 5）；现有测试全绿。
+### 3.1 根治 SQLite 写锁 ✅
+- **现状**：连接层已统一启用 WAL + busy_timeout，写路径通过门闸串行化，已通过高并发写测试验证。
 
-### 3.2 后台任务持久化（outbox）
-- **背景**：BatchJob / AiFolderProcessor 进程内执行，重启即丢。
-- **目标**:在 `system.db` 增加 `job_queue` 表（id、type、payload、status、attempts、scheduled_at、completed_at），执行器改为「入队 → 拉取 → 标记」模型，启动时恢复 `running` 状态的遗留任务。
-- **验收**：杀进程重启后未完成任务被重新拾起；失败任务带退避重试与最大次数。
+### 3.2 后台任务持久化（outbox） ✅
+- **现状**：已在 system.db 中设计 `job_queue` 表并注册 Outbox 服务，支持事务入队、异步拉取执行及退避重试，测试已全绿。
 
 ## Phase 4 — 战略演进（API-first + AI 原生）
 

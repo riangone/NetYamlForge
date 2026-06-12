@@ -84,6 +84,10 @@ public class ProjectScopeMiddleware
         if (segments.Length > 0)
         {
             var projectName = segments[0];
+            if (projectName.Equals("api", StringComparison.OrdinalIgnoreCase) && segments.Length > 1)
+            {
+                projectName = segments[1];
+            }
 
             // 跳过已知的非项目路径
             var skipPrefixes = new[] { "Account", "Dashboard", "Api", "signalr", "health", "swagger", "MyHome", "UserHome", "userhome" };

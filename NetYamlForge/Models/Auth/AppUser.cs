@@ -23,4 +23,5 @@ public class AppUser
     public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
     public string? UpdatedAt { get; set; }
     public string? LastLoginAt { get; set; }
+    public string? ApiToken { get; set; }
 }

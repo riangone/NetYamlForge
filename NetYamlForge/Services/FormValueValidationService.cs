@@ -40,12 +40,13 @@ public sealed class FormValueValidationService
                 continue;
             }
 
-            form.TryGetValue(field.Name, out var raw);
+            var hasField = form.TryGetValue(field.Name, out var raw);
 
             // bool/チェックボックス列: フォームに含まれない = チェックなし = false として扱う
-            if (field.Type.Equals("bool", StringComparison.OrdinalIgnoreCase) && !form.ContainsKey(field.Name))
+            if (field.Type.Equals("bool", StringComparison.OrdinalIgnoreCase) && !hasField)
             {
                 raw = "false";
+                hasField = true;
             }
 
             var colDef = new ColumnDefinition
@@ -58,8 +59,10 @@ public sealed class FormValueValidationService
             {
                 errors[field.Name] = error ?? "Invalid value";
             }
-            else
+            else if (hasField)
             {
+                // フォームに含まれないフィールドは values に含めず、
+                // INSERT/UPDATE 時に DB の DEFAULT や既存値を保持させる
                 values[field.Name] = val;
             }
         }

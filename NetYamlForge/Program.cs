@@ -181,7 +181,10 @@ builder.Services.Configure<Microsoft.AspNetCore.Mvc.Razor.RazorViewEngineOptions
     options.ViewLocationExpanders.Add(new NetYamlForge.Services.ProjectViewLocationExpander());
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
@@ -192,19 +195,54 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Lax;
-    });
+    })
+    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, NetYamlForge.Services.Auth.ApiTokenAuthenticationHandler>("ApiToken", null);
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiToken")
         .Build();
 });
 
 // ===== サービス登録（Extensions/ServiceCollectionExtensions.cs に委譲）=====
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge(builder.Configuration);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "NetYamlForge API",
+        Version = "v1"
+    });
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "Enter API Token here",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+    c.DocumentFilter<NetYamlForge.Services.Auth.DynamicEntitySwaggerFilter>();
+});
 
 // Dapper: enable snake_case column mapping
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -274,6 +312,11 @@ app.UseSerilogRequestLogging(options =>
     };
 });
 app.UseStaticFiles();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("v1/swagger.json", "NetYamlForge API v1");
+});
 app.UseRouting();
 app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication 前に配置
 app.UseAuthentication();

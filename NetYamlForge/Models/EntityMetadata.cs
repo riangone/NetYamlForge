@@ -388,6 +388,7 @@ public class EntityDefinition
     public EntityLayoutDefinition Layout { get; set; } = new();
     public bool SoftDelete { get; set; }
     public bool IsPublic { get; set; } = true;
+    public string Api { get; set; } = "disabled";
     public Dictionary<string, FilterDefinition> Filters { get; set; } = new();
     public Dictionary<string, EntityLinkDefinition> Links { get; set; } = new();
     /// <summary>新規作成・更新時の確認ダイアログ設定</summary>

@@ -7,6 +7,8 @@ public class SqliteDialect : ISqlDialect
 {
     public string ConcatOperator => "||";
 
+    public string LastInsertIdExpression => "last_insert_rowid()";
+
     public void AppendNumberedPagination(List<string> sqlParts, DynamicParameters param, int effectivePageSize, int offset, string defaultOrderByExpr)
     {
         // SQLite は ORDER BY なしでも LIMIT / OFFSET が使えます

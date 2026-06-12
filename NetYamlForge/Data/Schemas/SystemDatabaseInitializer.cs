@@ -15,16 +15,17 @@ namespace NetYamlForge.Data.Schemas;
 public static class SystemDatabaseInitializer
 {
     // プロジェクトルートにある system.db を使用（bin/ ではなく）
-    private static readonly string DbPath = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+    public static string DbPath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
 
     /// <summary>
     /// システムデータベースを初期化します
     /// </summary>
-    public static async Task InitializeAsync(ILogger logger)
+    public static async Task InitializeAsync(ILogger logger, string? dbPath = null)
     {
+        var targetDbPath = dbPath ?? DbPath;
         // DCS003 抑制理由：システム DB 初期化は DI 開始前に実行されるため直接接続します
 #pragma warning disable DCS003
-        var connectionString = new SqliteConnectionStringBuilder { DataSource = DbPath }.ConnectionString;
+        var connectionString = new SqliteConnectionStringBuilder { DataSource = targetDbPath }.ConnectionString;
 
         try
         {
@@ -35,8 +36,8 @@ public static class SystemDatabaseInitializer
             await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
 #pragma warning restore DCS003
 
-            Console.WriteLine($"[SystemDatabase] Initializing: {DbPath}");
-            logger.LogInformation("システムデータベース初期化中：{DbPath}", DbPath);
+            Console.WriteLine($"[SystemDatabase] Initializing: {targetDbPath}");
+            logger.LogInformation("システムデータベース初期化中：{DbPath}", targetDbPath);
 
             // app_user テーブル
             await conn.ExecuteAsync(@"
@@ -53,7 +54,8 @@ public static class SystemDatabaseInitializer
                     preferred_language TEXT NOT NULL DEFAULT 'ja-JP',
                     is_active INTEGER NOT NULL DEFAULT 1,
                     created_at TEXT NOT NULL,
-                    updated_at TEXT NOT NULL
+                    updated_at TEXT NOT NULL,
+                    api_token TEXT UNIQUE
                 )
             ");
 
@@ -133,6 +135,14 @@ public static class SystemDatabaseInitializer
             }
             catch { /* カラムが既に存在する場合の例外は無視 */ }
 
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE app_user ADD COLUMN api_token TEXT;");
+                await conn.ExecuteAsync("UPDATE app_user SET api_token = 'admin-api-token' WHERE user_name = 'admin' AND api_token IS NULL;");
+                logger.LogInformation("app_user テーブルに api_token カラムを追加しました");
+            }
+            catch { /* カラムが既に存在する場合の例外は無視 */ }
+
             // nyf_jobs テーブル (Outbox Job Queue)
             await conn.ExecuteAsync(@"
                 CREATE TABLE IF NOT EXISTS nyf_jobs (
@@ -162,7 +172,7 @@ public static class SystemDatabaseInitializer
         catch (Exception ex)
         {
             Console.WriteLine($"[FATAL ERROR] SystemDatabase initialization failed: {ex.Message}");
-            logger.LogError(ex, "システムデータベースの初期化に失敗しました：{DbPath}", DbPath);
+            logger.LogError(ex, "システムデータベースの初期化に失敗しました：{DbPath}", targetDbPath);
             throw;
         }
 
@@ -182,8 +192,8 @@ public static class SystemDatabaseInitializer
         {
             var passwordHash = HashPassword("Admin@123");
             await conn.ExecuteAsync(@"
-                INSERT INTO app_user (user_name, password_hash, display_name, email, user_type, is_admin, preferred_language, is_active, created_at, updated_at)
-                VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @UserType, 1, 'ja-JP', 1, @CreatedAt, @UpdatedAt)
+                INSERT INTO app_user (user_name, password_hash, display_name, email, user_type, is_admin, preferred_language, is_active, created_at, updated_at, api_token)
+                VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @UserType, 1, 'ja-JP', 1, @CreatedAt, @UpdatedAt, @ApiToken)
             ", new
             {
                 UserName = "admin",
@@ -192,7 +202,8 @@ public static class SystemDatabaseInitializer
                 Email = "admin@example.com",
                 UserType = "employee",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                ApiToken = "admin-api-token"
             });
 
             logger.LogInformation("デフォルト管理者ユーザーを作成しました：admin / Admin@123");
@@ -202,11 +213,12 @@ public static class SystemDatabaseInitializer
     /// <summary>
     /// プロジェクトメタデータを同期します
     /// </summary>
-    public static async Task SyncProjectsAsync(IEnumerable<ProjectInfo> projects, ILogger logger)
+    public static async Task SyncProjectsAsync(IEnumerable<ProjectInfo> projects, ILogger logger, string? dbPath = null)
     {
+        var targetDbPath = dbPath ?? DbPath;
         // DCS003 抑制理由：システム DB 初期化は DI 開始前に実行されるため直接接続します
 #pragma warning disable DCS003
-        var connectionString = new SqliteConnectionStringBuilder { DataSource = DbPath }.ConnectionString;
+        var connectionString = new SqliteConnectionStringBuilder { DataSource = targetDbPath }.ConnectionString;
 
         try
         {

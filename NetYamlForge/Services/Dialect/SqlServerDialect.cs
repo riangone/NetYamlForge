@@ -8,6 +8,8 @@ public class SqlServerDialect : ISqlDialect
 {
     public string ConcatOperator => "+";
 
+    public string LastInsertIdExpression => "SCOPE_IDENTITY()";
+
     public void AppendNumberedPagination(List<string> sqlParts, DynamicParameters param, int effectivePageSize, int offset, string defaultOrderByExpr)
     {
         // SQL Server は OFFSET/FETCH の前に ORDER BY が必須
