@@ -251,6 +251,14 @@ Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 builder.Services.AddScoped<ITenantUserService, TenantUserService>();
 builder.Services.AddScoped<IJpcsUserSyncService, JpcsUserSyncService>();
 
+// MCP（Model Context Protocol）サーバー：/mcp で動的エンティティ CRUD ツールを公開する。
+builder.Services.AddScoped<NetYamlForge.Services.Mcp.EntityToolService>();
+builder.Services.AddScoped<NetYamlForge.Services.Mcp.EntityMcpTools>();
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<NetYamlForge.Services.Mcp.EntityMcpTools>();
+
 var app = builder.Build();
 
 app.UsePathBase("/nyf");
@@ -324,6 +332,13 @@ app.UseRequestLocalization(localizationOptions);
 app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
+
+// MCP サーバーエンドポイント：/mcp（/api/{project}/{entity} と同じ認証スキームを要求）
+app.MapMcp("/mcp")
+    .RequireAuthorization(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiToken")
+        .Build());
 
 // ユーザー個人ホーム：/userhome（プロジェクトルートより先に評価）
 app.MapControllerRoute(

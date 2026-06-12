@@ -40,15 +40,16 @@
 
 ## Phase 4 — 战略演进（API-first + AI 原生）
 
-### 4.1 实体 REST API + OpenAPI
-- **目标**：基于已有 `EntityMetadata`，为每个租户项目的每个实体自动暴露 `/api/{project}/{entity}` 的 CRUD + 查询（复用 `DynamicEntityListQueryService` / `EntityCrudExecutionService`），并自动生成 OpenAPI 文档。
-- **要点**：鉴权复用现有 cookie/claim 体系 + 新增 API token；YAML 中可按实体声明 `api: enabled/readonly/disabled`。
-- **验收**：Swagger UI 能列出全部实体端点；集成测试覆盖一条完整 API CRUD。
+### 4.1 实体 REST API + OpenAPI ✅
+- **现状**：`/api/{project}/{entity}` CRUD + 查询已实现（`ApiEntityController`），Bearer Token 鉴权、`meta.Api` 权限分级、Swagger 文档（`DynamicEntitySwaggerFilter`）均已就绪。2026-06-12 修复了 Swagger 过滤器中 `/api/{project}/{entity}/{id}` 路径（GET/PUT/PATCH/DELETE）未注册到 `swaggerDoc.Paths` 的 bug（误写为重复设置 `listPath`）。
+- **验收**：Swagger UI 能列出全部实体端点（含 by-id 路径）；集成测试覆盖一条完整 API CRUD。
 
-### 4.2 内置 MCP Server
+### 4.2 内置 MCP Server ✅
 - **目标**：把每个租户的实体 CRUD、Action、查询暴露为 MCP 工具，使 AI 客户端（含 AiChatApp/Hyperion）协议级接入而非爬 HTML。
-- **依赖**：4.1（复用同一服务层）；使用官方 C# MCP SDK（`ModelContextProtocol` NuGet 包），以 HTTP/SSE transport 挂在现有主机上。
-- **验收**：MCP 客户端可 list tools 并完成一次实体创建。
+- **依赖**：4.1（复用同一服务层）；使用官方 C# MCP SDK（`ModelContextProtocol` / `ModelContextProtocol.AspNetCore` 1.4.0），以 Streamable HTTP transport 挂在现有主机上的 `/mcp`。
+- **设计文档**：详见 [`docs/PHASE4.2-MCP-DESIGN.md`](./PHASE4.2-MCP-DESIGN.md)（架构、改动文件清单、工具列表、测试与验收标准）。
+- **现状（2026-06-12 完成）**：新增 `EntityToolService` / `EntityMcpTools`（`Services/Mcp/`），通过 `IServiceProvider` 延迟解析项目相关服务以避免 `ProjectScope` 未初始化异常；`Program.cs` 注册 `AddMcpServer().WithHttpTransport().WithTools<EntityMcpTools>()` 并 `MapMcp("/mcp")`，要求 `Cookies,ApiToken` 认证。公开 9 个工具：`list_projects` / `list_entities` / `get_entity_meta` / `list_entity_records` / `get_entity_record` / `create_entity_record` / `update_entity_record` / `delete_entity_record` / `invoke_entity_action`。
+- **验收**：`McpServerIntegrationTests`（5 个用例）验证 MCP 客户端可 `ListToolsAsync` 看到全部工具、`list_entity_records`/`create_entity_record`/`get_entity_record` 完成创建+读取闭环、对 `meta.Api=disabled` 实体（`comment`）的工具调用返回错误而非异常、未带 Bearer token 访问 `/mcp` 被拒绝。`dotnet build` 0 警告 0 错误，`dotnet test` 653/653 全绿。
 
 ### 4.3 YAML Schema 迁移系统
 - **目标**：`DynamicEntityConfigDiffService` 进化为完整迁移管线：diff → 迁移计划（ALTER TABLE / 数据回填）→ 版本记录表 → 可回滚。

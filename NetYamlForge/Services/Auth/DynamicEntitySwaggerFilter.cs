@@ -219,7 +219,7 @@ public class DynamicEntitySwaggerFilter : IDocumentFilter
                     });
                 }
                 
-                swaggerDoc.Paths[listPath] = listPathItem;
+                swaggerDoc.Paths[itemPath] = itemPathItem;
 
                 // 3. Custom Actions
                 if (!isReadonly && meta.Actions != null && meta.Actions.Count > 0)
