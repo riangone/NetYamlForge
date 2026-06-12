@@ -24,16 +24,71 @@ public interface IBatchJobExecutor
     Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default);
 }
 
+public class BatchJobExecutor : IBatchJobExecutor
+{
+    private readonly IOutboxJobService _outboxJobService;
+    private readonly ILogger<BatchJobExecutor> _logger;
+
+    public BatchJobExecutor(IOutboxJobService outboxJobService, ILogger<BatchJobExecutor> logger)
+    {
+        _outboxJobService = outboxJobService;
+        _logger = logger;
+    }
+
+    public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
+    {
+        var result = new BatchJobResult
+        {
+            JobId = job.Id,
+            StartedAt = DateTime.UtcNow
+        };
+
+        try
+        {
+            var payload = System.Text.Json.JsonSerializer.Serialize(job);
+            var maxAttempts = (job.OnFailure?.RetryCount ?? 0) + 1;
+
+            await _outboxJobService.EnqueueAsync(
+                "batch_job",
+                payload,
+                projectName,
+                maxAttempts
+            );
+
+            result.Success = true;
+            result.ErrorMessage = "Job enqueued successfully to the persistent job queue";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to enqueue job: {JobId}", job.Id);
+            result.Success = false;
+            result.ErrorMessage = ex.Message;
+            result.ErrorDetail = ex.ToString();
+        }
+        finally
+        {
+            result.EndedAt = DateTime.UtcNow;
+        }
+
+        return result;
+    }
+}
+
+public interface IRealBatchJobExecutor
+{
+    Task<BatchJobResult> ExecuteRealAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default);
+}
+
 /// <summary>
 /// バッチジョブ実行エンジンの実装
 /// IBatchStepHandler コレクションを DI で受け取り、job.Type でルーティングします。
 /// 新しいジョブタイプを追加する際は IBatchStepHandler を実装して DI 登録するだけで OK です。
 /// </summary>
-public class BatchJobExecutor : IBatchJobExecutor
+public class RealBatchJobExecutor : IRealBatchJobExecutor
 {
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly HookExecutionService _hookExecutionService;
-    private readonly ILogger<BatchJobExecutor> _logger;
+    private readonly ILogger<RealBatchJobExecutor> _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly NetYamlForge.Services.Email.IEmailServiceFactory? _emailFactory;
 
@@ -51,11 +106,11 @@ public class BatchJobExecutor : IBatchJobExecutor
         { "ai_folder_processor", typeof(AiFolderProcessorExecutor) }
     };
 
-    public BatchJobExecutor(
+    public RealBatchJobExecutor(
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
         IServiceProvider serviceProvider,
-        ILogger<BatchJobExecutor> logger,
+        ILogger<RealBatchJobExecutor> logger,
         NetYamlForge.Services.Email.IEmailServiceFactory? emailFactory = null)
     {
         _dbConnectionFactory = dbConnectionFactory;
@@ -65,7 +120,7 @@ public class BatchJobExecutor : IBatchJobExecutor
         _emailFactory = emailFactory;
     }
 
-    public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
+    public async Task<BatchJobResult> ExecuteRealAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
     {
         var result = new BatchJobResult
         {

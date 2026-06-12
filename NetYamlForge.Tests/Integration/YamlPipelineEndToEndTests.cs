@@ -30,10 +30,12 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         RegexOptions.Compiled);
 
     private readonly NetYamlForgeWebApplicationFactory _factory;
+    private readonly Xunit.Abstractions.ITestOutputHelper _output;
 
-    public YamlPipelineEndToEndTests(NetYamlForgeWebApplicationFactory factory)
+    public YamlPipelineEndToEndTests(NetYamlForgeWebApplicationFactory factory, Xunit.Abstractions.ITestOutputHelper output)
     {
         _factory = factory;
+        _output = output;
     }
 
     // ── 1. YAML 定義 → 一覧ページ表示 ─────────────────────────────────────
@@ -171,6 +173,111 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
             Assert.Equal("published", row.Status);
             Assert.False(string.IsNullOrWhiteSpace(row.PublishedAt));
         }
+    }
+
+    [Fact]
+    public async Task DetailPage_BootsFromYamlConfig_ReturnsDetailInfo()
+    {
+        using var client = CreateClient();
+
+        var response = await client.GetAsync("/blog/DynamicEntity/DetailPage?entity=post&id=1");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var htmlRaw = await response.Content.ReadAsStringAsync();
+        var html = System.Net.WebUtility.HtmlDecode(htmlRaw);
+
+        Assert.Contains("NetYamlForge 入門", html);
+        Assert.Contains("netyamlforge-getting-started", html);
+    }
+
+    [Fact]
+    public async Task UpdatePost_ThroughHttpLayer_UpdatesRowInTenantDatabase()
+    {
+        using var client = CreateClient();
+        var token = await GetAntiForgeryTokenAsync(client);
+
+        var slug = $"e2e-update-{Guid.NewGuid():N}";
+        long postId;
+        await using (var db = new SqliteConnection(_factory.TenantDbConnectionString))
+        {
+            postId = await db.ExecuteScalarAsync<long>(
+                """
+                INSERT INTO Post (Title, Slug, AuthorName, Status)
+                VALUES ('E2E Update Target', @slug, 'E2E Tester', 'draft');
+                SELECT last_insert_rowid();
+                """,
+                new { slug });
+        }
+
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token,
+            ["Title"] = "E2E Updated Post Title",
+            ["Slug"] = slug,
+            ["Summary"] = "Updated by the YAML pipeline e2e test",
+            ["Content"] = "## e2e updated content",
+            ["AuthorName"] = "E2E Tester",
+            ["Status"] = "draft",
+            ["FeaturedFlag"] = "1",
+            ["ViewCount"] = "0",
+            ["CreatedAt"] = "2026-06-12 10:00:00",
+            ["UpdatedAt"] = "2026-06-12 10:05:00"
+        };
+
+        var response = await client.PostAsync(
+            $"/blog/DynamicEntity/Edit?entity=post&id={postId}",
+            new FormUrlEncodedContent(form));
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode,
+            $"Edit failed: {(int)response.StatusCode} {response.StatusCode}\n{Truncate(body)}");
+
+        await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
+        var updated = await checkDb.QuerySingleOrDefaultAsync<(string Title, int FeaturedFlag)?>(
+            "SELECT Title, FeaturedFlag FROM Post WHERE Id = @postId", new { postId });
+
+        Assert.NotNull(updated);
+        Assert.Equal("E2E Updated Post Title", updated.Value.Title);
+        Assert.Equal(1, updated.Value.FeaturedFlag);
+    }
+
+    [Fact]
+    public async Task DeletePost_ThroughHttpLayer_DeletesRowInTenantDatabase()
+    {
+        using var client = CreateClient();
+        var token = await GetAntiForgeryTokenAsync(client);
+
+        var slug = $"e2e-delete-{Guid.NewGuid():N}";
+        long postId;
+        await using (var db = new SqliteConnection(_factory.TenantDbConnectionString))
+        {
+            postId = await db.ExecuteScalarAsync<long>(
+                """
+                INSERT INTO Post (Title, Slug, AuthorName, Status)
+                VALUES ('E2E Delete Target', @slug, 'E2E Tester', 'draft');
+                SELECT last_insert_rowid();
+                """,
+                new { slug });
+        }
+
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token
+        };
+
+        var response = await client.PostAsync(
+            $"/blog/DynamicEntity/Delete?entity=post&id={postId}",
+            new FormUrlEncodedContent(form));
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode,
+            $"Delete failed: {(int)response.StatusCode} {response.StatusCode}\n{Truncate(body)}");
+
+        await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
+        var row = await checkDb.QuerySingleOrDefaultAsync<long?>(
+            "SELECT Id FROM Post WHERE Id = @postId", new { postId });
+
+        Assert.Null(row);
     }
 
     // ── ヘルパー ───────────────────────────────────────────────────────────

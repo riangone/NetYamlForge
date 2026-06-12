@@ -253,104 +253,25 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
     {
         using var scope = _serviceProvider.CreateScope();
         var executor = scope.ServiceProvider.GetRequiredService<IBatchJobExecutor>();
-        var jobHistoryStore = scope.ServiceProvider.GetService<IBatchJobHistoryStore>();
 
         var job = scheduledJob.Job;
-
-        // リトライロジック
-        var maxAttempts = (job.OnFailure?.RetryCount ?? 0) + 1;
-        BatchJobResult? lastResult = null;
-
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        _logger.LogInformation("ジョブスケジューリング開始（キュー登録）：{JobId}", job.Id);
+        
+        try
         {
-            try
+            var result = await executor.ExecuteAsync(job, scheduledJob.ProjectName, cancellationToken);
+            if (result.Success)
             {
-                _logger.LogInformation("ジョブ実行開始：{JobId} (試行 {Attempt}/{Max})",
-                    job.Id, attempt, maxAttempts);
-
-                lastResult = await executor.ExecuteAsync(job, scheduledJob.ProjectName, cancellationToken);
-
-                if (lastResult.Success)
-                {
-                    _logger.LogInformation("ジョブ成功：{JobId}, Duration: {Duration}ms, Rows: {Rows}",
-                        job.Id, lastResult.DurationMs, lastResult.RowsAffected);
-                    break;
-                }
-
-                // 失敗時
-                if (attempt < maxAttempts)
-                {
-                    var retryInterval = TimeSpan.FromSeconds(job.OnFailure?.RetryInterval ?? 60);
-                    _logger.LogWarning("ジョブ失敗、リトライ待機：{JobId}, Error: {Error}, Retry in {Seconds}s",
-                        job.Id, lastResult.ErrorMessage, retryInterval.TotalSeconds);
-                    await Task.Delay(retryInterval, cancellationToken);
-                }
+                _logger.LogInformation("ジョブのキュー登録に成功しました：{JobId}", job.Id);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "ジョブ実行中に例外：{JobId}", job.Id);
-                if (attempt < maxAttempts)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(job.OnFailure?.RetryInterval ?? 60), cancellationToken);
-                }
+                _logger.LogError("ジョブのキュー登録に失敗しました：{JobId}, Error: {Error}", job.Id, result.ErrorMessage);
             }
         }
-
-        // 履歴保存
-        if (jobHistoryStore != null && lastResult != null)
+        catch (Exception ex)
         {
-            await jobHistoryStore.SaveHistoryAsync(new BatchJobHistory
-            {
-                JobId = job.Id,
-                ExecutedAt = DateTime.UtcNow,
-                Result = lastResult
-            });
-        }
-
-        // 失敗通知
-        if (lastResult != null && !lastResult.Success && job.OnFailure?.Notify != null && job.OnFailure.Notify.Any())
-        {
-            var notifyEmails = job.OnFailure.Notify;
-            var jobName = job.DisplayName ?? job.Id;
-            var result = lastResult;
-
-            // 获取 EmailService
-            var emailFactory = scope.ServiceProvider.GetService<NetYamlForge.Services.Email.IEmailServiceFactory>();
-            var emailService = emailFactory?.GetForProject(scheduledJob.ProjectName);
-
-            // 邮件通知
-            foreach (var email in notifyEmails)
-            {
-                try
-                {
-                    _logger.LogInformation("发送失败通知邮件到: {Email}, 作业: {JobName}, 错误: {Error}",
-                        email, jobName, result.ErrorMessage);
-                    
-                    if (emailService != null)
-                    {
-                        await emailService.SendEmailAsync(new EmailMessage
-                        {
-                            To = email,
-                            Subject = $"【通知】批处理作业失败: {jobName}",
-                            Body = $"项目 '{scheduledJob.ProjectName}' 中的批处理作业 '{jobName}' (ID: {job.Id}) 运行失败。\n\n" +
-                                   $"执行时间: {DateTime.Now}\n" +
-                                   $"错误信息: {result.ErrorMessage}\n\n" +
-                                   $"请检查系统日志以获取更多详细信息。",
-                            IsHtml = false,
-                            Date = DateTimeOffset.UtcNow
-                        });
-                    }
-                    else
-                    {
-                        _logger.LogWarning("无法发送通知邮件: 找不到适用于项目 '{Project}' 的邮件服务实例", scheduledJob.ProjectName);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "发送通知邮件失败: {Email}", email);
-                }
-            }
-            _logger.LogWarning("ジョブ失敗通知：{JobId}, Error: {Error}", job.Id, lastResult.ErrorMessage);
+            _logger.LogError(ex, "ジョブのキュー登録中に例外が発生しました：{JobId}", job.Id);
         }
     }
 

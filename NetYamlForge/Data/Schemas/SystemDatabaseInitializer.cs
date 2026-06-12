@@ -133,6 +133,27 @@ public static class SystemDatabaseInitializer
             }
             catch { /* カラムが既に存在する場合の例外は無視 */ }
 
+            // nyf_jobs テーブル (Outbox Job Queue)
+            await conn.ExecuteAsync(@"
+                CREATE TABLE IF NOT EXISTS nyf_jobs (
+                    id TEXT PRIMARY KEY,
+                    job_type TEXT NOT NULL,
+                    payload TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    max_attempts INTEGER NOT NULL DEFAULT 3,
+                    scheduled_at TEXT NOT NULL,
+                    started_at TEXT,
+                    completed_at TEXT,
+                    error_message TEXT,
+                    project_name TEXT
+                )
+            ");
+
+            await conn.ExecuteAsync(@"
+                CREATE INDEX IF NOT EXISTS IX_nyf_jobs_status_scheduled_at ON nyf_jobs(status, scheduled_at);
+            ");
+
             // デフォルト管理者ユーザーを作成（存在しない場合）
             await EnsureDefaultAdminAsync(conn, logger);
 

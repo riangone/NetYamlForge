@@ -224,6 +224,9 @@ public static class ServiceCollectionExtensions
         // バッチジョブサービス
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        services.AddScoped<IOutboxJobService, OutboxJobService>();
+        services.AddScoped<IRealBatchJobExecutor, RealBatchJobExecutor>();
+        services.AddHostedService<OutboxJobBackgroundService>();
 
         // IBatchStepHandler 実装を登録 (具体型とインターフェースの両方を登録して遅延解決に対応)
         services.AddScoped<SqlToCsvHandler>();

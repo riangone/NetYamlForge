@@ -23,15 +23,18 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
     private readonly IAntigravityCliService _antigravity;
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<AiFolderProcessorExecutor> _logger;
+    private readonly IOutboxJobService _outboxJobService;
 
     public AiFolderProcessorExecutor(
         IAntigravityCliService antigravity,
         IWebHostEnvironment env,
-        ILogger<AiFolderProcessorExecutor> logger)
+        ILogger<AiFolderProcessorExecutor> logger,
+        IOutboxJobService outboxJobService)
     {
         _antigravity = antigravity;
         _env = env;
         _logger = logger;
+        _outboxJobService = outboxJobService;
     }
 
     public async Task ExecuteAsync(
@@ -121,20 +124,24 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
         if (pendingTasks.Count > 0)
         {
             var pName = projectName ?? "";
-            var snapshot = new Dictionary<int, string>(pendingTasks);
-            _ = Task.Run(async () =>
+            foreach (var kvp in pendingTasks)
             {
-                try
+                var payload = JsonSerializer.Serialize(new AiFolderProcessorTaskPayload
                 {
-                    // Delay execution to let the outer transaction commit successfully.
-                    await Task.Delay(1000);
-                    await ProcessPendingTasksAsync(pName, connString, snapshot);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Background AI extraction failed for folder processor job");
-                }
-            }, CancellationToken.None);
+                    ProjectName = pName,
+                    ConnectionString = connString,
+                    TaskId = kvp.Key,
+                    RelativeFilePath = kvp.Value
+                });
+
+                await _outboxJobService.EnqueueAsync(
+                    "ai_folder_processor_task",
+                    payload,
+                    pName,
+                    maxAttempts: 5,
+                    scheduledAt: DateTime.UtcNow.AddSeconds(1)
+                );
+            }
         }
     }
 
@@ -390,10 +397,128 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
         return start >= 0 && end > start ? cleaned[start..(end + 1)] : cleaned;
     }
 
+    public async Task ProcessSingleTaskAsync(string projectName, string connString, int taskId, string relativeFilePath)
+    {
+        _logger.LogInformation("AI folder processor: starting extraction for task {TaskId}, file {File}", taskId, relativeFilePath);
+        try
+        {
+            using (var conn = CreateConnection(connString))
+            {
+                // 同一テナント DB への並行書き込みを直列化（Error 5 対策）。
+                await SqliteWriteGate.RunAsync(conn, () => conn.ExecuteAsync(
+                    "UPDATE DocumentTask SET Status = 'processing' WHERE Id = @Id",
+                    new { Id = taskId }));
+            }
+
+            var filePath = relativeFilePath;
+            if (string.IsNullOrEmpty(filePath))
+            {
+                _logger.LogWarning("Task {Id}: FilePath is empty, skipping", taskId);
+                return;
+            }
+
+            var absolutePath = Path.Combine(_env.WebRootPath, filePath.TrimStart('/'));
+            if (!File.Exists(absolutePath))
+                throw new FileNotFoundException("Physical file not found: " + absolutePath);
+
+            var prompt = BuildExtractionPrompt(absolutePath);
+            var responseText = await _antigravity.PromptAsync(prompt, projectName: projectName);
+            var jsonText = CleanJson(responseText);
+
+            if (string.IsNullOrWhiteSpace(jsonText))
+                throw new InvalidOperationException("AI returned no valid JSON");
+
+            var extractionResult = JsonSerializer.Deserialize<AiExtractionResultDto>(
+                jsonText,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (extractionResult == null || string.IsNullOrWhiteSpace(extractionResult.DocumentType))
+                throw new InvalidOperationException("AI extraction: document_type is empty");
+
+            // Save JSON sidecar
+            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "ai-doc-processor");
+            var jsonFileName = taskId + ".json";
+            var jsonFullPath = Path.Combine(uploadsFolder, jsonFileName);
+            await File.WriteAllTextAsync(jsonFullPath, jsonText);
+            var jsonRelativePath = "/uploads/ai-doc-processor/" + jsonFileName;
+
+            var cleanType = new string(extractionResult.DocumentType.Where(char.IsLetterOrDigit).ToArray())
+                .ToLowerInvariant();
+            if (string.IsNullOrEmpty(cleanType)) cleanType = "unknown";
+            var tableName = "dynamic_" + cleanType;
+
+            using (var conn = CreateConnection(connString))
+            {
+                // テーブル作成・INSERT・UPDATE をひとまとまりの書き込みとして直列化する。
+                await SqliteWriteGate.RunAsync(conn, async () =>
+                {
+                    await EnsureTableAndColumnsAsync(conn, tableName, extractionResult.Data);
+
+                    var (paramNames, parameters) = BuildInsertParams(taskId, extractionResult.Data);
+
+                    var columnsStr = string.Join(", ", paramNames.Select(p => "\"" + p + "\""));
+                    var valuesStr = string.Join(", ", paramNames.Select(p => "@" + p));
+                    var insertSql = string.Format(@"
+                        INSERT INTO ""{0}"" (DocumentTaskId{1})
+                        VALUES (@DocumentTaskId{2});
+                        SELECT last_insert_rowid();",
+                        tableName,
+                        paramNames.Count > 0 ? ", " + columnsStr : "",
+                        paramNames.Count > 0 ? ", " + valuesStr : "");
+
+                    var extractedRowId = await conn.QuerySingleAsync<int>(insertSql, parameters);
+
+                    await conn.ExecuteAsync(@"
+                        UPDATE DocumentTask
+                        SET Status = 'completed',
+                            DocumentType = @DocumentType,
+                            JsonPath = @JsonPath,
+                            ExtractedTable = @ExtractedTable,
+                            ExtractedId = @ExtractedId
+                        WHERE Id = @Id",
+                        new
+                        {
+                            DocumentType = extractionResult.DocumentType,
+                            JsonPath = jsonRelativePath,
+                            ExtractedTable = tableName,
+                            ExtractedId = extractedRowId,
+                            Id = taskId
+                        });
+                });
+
+                _logger.LogInformation("Task {TaskId}: extraction complete, type={Type}", taskId, extractionResult.DocumentType);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Task {TaskId}: extraction failed", taskId);
+            try
+            {
+                using var conn = CreateConnection(connString);
+                await SqliteWriteGate.RunAsync(conn, () => conn.ExecuteAsync(
+                    "UPDATE DocumentTask SET Status = 'failed' WHERE Id = @Id",
+                    new { Id = taskId }));
+            }
+            catch (Exception dbEx)
+            {
+                _logger.LogError(dbEx, "Task {TaskId}: failed to mark as failed", taskId);
+            }
+            throw; // Re-throw to let outbox queue catch the failure and handle retries
+        }
+    }
+
     private sealed class AiExtractionResultDto
     {
         public string DocumentType { get; set; } = "";
         public string document_type { get => DocumentType; set => DocumentType = value; }
         public Dictionary<string, object> Data { get; set; } = new();
     }
+}
+
+public class AiFolderProcessorTaskPayload
+{
+    public string ProjectName { get; set; } = string.Empty;
+    public string ConnectionString { get; set; } = string.Empty;
+    public int TaskId { get; set; }
+    public string RelativeFilePath { get; set; } = string.Empty;
 }
