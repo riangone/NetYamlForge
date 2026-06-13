@@ -15,6 +15,22 @@ public static class SqlTypeMapper
             };
         }
 
+        var isPostgres = string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+        if (isPostgres)
+        {
+            return yamlType.ToLowerInvariant() switch
+            {
+                "int" or "integer" => "INTEGER",
+                "long" => "BIGINT",
+                "bool" or "boolean" => "BOOLEAN",
+                "decimal" => "NUMERIC(18,2)",
+                "double" or "float" or "number" => "DOUBLE PRECISION",
+                "datetime" or "date" => "TIMESTAMP",
+                _ => "TEXT"
+            };
+        }
+
         return yamlType.ToLowerInvariant() switch
         {
             "int" or "integer" => "INT",

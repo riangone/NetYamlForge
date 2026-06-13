@@ -29,9 +29,50 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
         _logger = logger;
     }
 
-    public async Task<IReadOnlyList<ColumnSchemaInfo>> GetPhysicalColumnsAsync(IDbConnection conn, string tableName)
+    public async Task<IReadOnlyList<ColumnSchemaInfo>> GetPhysicalColumnsAsync(IDbConnection conn, string tableName, string dbType = "sqlite")
     {
         EnsureOpen(conn);
+        if (IsPostgres(dbType))
+        {
+            var pgRows = await conn.QueryAsync<PostgresColumnRow>(
+                """
+SELECT
+    c.ordinal_position AS "Cid",
+    c.column_name AS "Name",
+    c.data_type AS "Type",
+    (c.is_nullable = 'NO') AS "NotNullBool",
+    CASE WHEN pk.column_name IS NOT NULL THEN 1 ELSE 0 END AS "Pk"
+FROM information_schema.columns c
+LEFT JOIN (
+    SELECT kcu.column_name
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu
+      ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+    WHERE tc.constraint_type = 'PRIMARY KEY'
+      AND tc.table_name = @TableName
+      AND tc.table_schema = current_schema()
+) pk ON pk.column_name = c.column_name
+WHERE c.table_name = @TableName
+  AND c.table_schema = current_schema()
+ORDER BY c.ordinal_position
+""",
+                new { TableName = tableName });
+
+            return pgRows
+                .OrderBy(r => r.Cid)
+                .Select(r => new ColumnSchemaInfo(
+                    r.Name,
+                    NormalizeSqlType(r.Type),
+                    r.NotNullBool,
+                    r.Pk != 0))
+                .ToList();
+        }
+
+        if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new NotSupportedException("Schema migration column inspection supports SQLite and PostgreSQL only.");
+        }
+
 #pragma warning disable DCS001
         var rows = await conn.QueryAsync<PragmaColumnRow>(
             $"SELECT cid AS \"Cid\", name AS \"Name\", type AS \"Type\", \"notnull\" AS \"NotNull\", pk AS \"Pk\" FROM pragma_table_info(\"{EscapeIdentifier(tableName)}\")");
@@ -66,7 +107,8 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
                 continue;
             }
 
-            var newSqlType = NormalizeSqlType(SqlTypeMapper.MapYamlTypeToSqlType(yamlColumn.Value.Type, dbType));
+            var newSqlType = SqlTypeMapper.MapYamlTypeToSqlType(yamlColumn.Value.Type, dbType);
+            var normalizedNewSqlType = NormalizeSqlType(newSqlType);
             var newNotNull = yamlColumn.Value.Required;
             if (!physicalByName.TryGetValue(yamlColumn.Key, out var physical))
             {
@@ -81,7 +123,7 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
             }
 
             var oldSqlType = NormalizeSqlType(physical.SqlType);
-            if (!SqlTypesEqual(oldSqlType, newSqlType))
+            if (!SqlTypesEqual(oldSqlType, normalizedNewSqlType))
             {
                 operations.Add(new MigrationOperation(MigrationOpType.AlterColumnType, yamlColumn.Key, oldSqlType, newSqlType, null));
             }
@@ -118,14 +160,19 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
         EntityDefinition entity,
         string dbType)
     {
-        if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new NotSupportedException("Phase 4.3 schema migration supports SQLite only.");
-        }
-
         if (plan.Operations.Count == 0)
         {
             return (Array.Empty<string>(), Array.Empty<string>(), string.Empty);
+        }
+
+        if (IsPostgres(dbType))
+        {
+            return GeneratePostgresSql(plan, entity);
+        }
+
+        if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new NotSupportedException("Schema migration supports SQLite and PostgreSQL only.");
         }
 
         var backupTableName = $"{plan.TableName}__bak_{DateTime.UtcNow:yyyyMMddHHmmssfff}";
@@ -192,6 +239,68 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
         };
 
         return (upSql, downSql, backupTableName);
+    }
+
+    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GeneratePostgresSql(
+        MigrationPlan plan,
+        EntityDefinition entity)
+    {
+        var up = new List<string>();
+        var down = new List<string>();
+        var tableName = EscapeIdentifier(plan.TableName);
+
+        foreach (var operation in plan.Operations)
+        {
+            var columnName = EscapeIdentifier(operation.ColumnName);
+            switch (operation.OpType)
+            {
+                case MigrationOpType.AddColumn:
+                {
+                    var colDef = entity.Columns[operation.ColumnName];
+                    var sqlType = operation.NewSqlType ?? "TEXT";
+                    if (colDef.Required)
+                    {
+                        up.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqlType}");
+                        up.Add($"UPDATE \"{tableName}\" SET \"{columnName}\" = {GetPostgresDefaultLiteral(sqlType)} WHERE \"{columnName}\" IS NULL");
+                        up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" SET NOT NULL");
+                    }
+                    else
+                    {
+                        up.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqlType} NULL");
+                    }
+
+                    down.Add($"ALTER TABLE \"{tableName}\" DROP COLUMN \"{columnName}\"");
+                    break;
+                }
+                case MigrationOpType.DropColumn:
+                {
+                    up.Add($"ALTER TABLE \"{tableName}\" DROP COLUMN \"{columnName}\"");
+                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
+                    {
+                        down.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {operation.OldSqlType}");
+                    }
+                    break;
+                }
+                case MigrationOpType.AlterColumnType:
+                {
+                    var newType = operation.NewSqlType ?? "TEXT";
+                    var oldType = operation.OldSqlType ?? "TEXT";
+                    up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" TYPE {newType} USING \"{columnName}\"::{newType}");
+                    down.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" TYPE {oldType} USING \"{columnName}\"::{oldType}");
+                    break;
+                }
+                case MigrationOpType.AlterNullability:
+                {
+                    var upAction = operation.NewNotNull == true ? "SET NOT NULL" : "DROP NOT NULL";
+                    var downAction = operation.NewNotNull == true ? "DROP NOT NULL" : "SET NOT NULL";
+                    up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" {upAction}");
+                    down.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" {downAction}");
+                    break;
+                }
+            }
+        }
+
+        return (up, down, string.Empty);
     }
 
     public async Task<MigrationApplyResult> ApplyAsync(
@@ -333,7 +442,7 @@ ORDER BY applied_at DESC
 
     private static string EscapeIdentifier(string name) => name.Replace("\"", "\"\"");
 
-    private static string NormalizeSqlType(string? sqlType)
+    public static string NormalizeSqlType(string? sqlType)
     {
         var text = (sqlType ?? string.Empty).Trim();
         var paren = text.IndexOf('(');
@@ -345,16 +454,23 @@ ORDER BY applied_at DESC
         return text.ToUpperInvariant() switch
         {
             "INT" => "INTEGER",
+            "BIGINT" => "BIGINT",
+            "SMALLINT" => "INTEGER",
             "BOOLEAN" => "INTEGER",
             "BOOL" => "INTEGER",
             "REAL" => "NUMERIC",
             "DOUBLE" => "NUMERIC",
+            "DOUBLE PRECISION" => "NUMERIC",
             "FLOAT" => "NUMERIC",
+            "NUMERIC" => "NUMERIC",
             "DECIMAL" => "NUMERIC",
             "VARCHAR" => "TEXT",
+            "CHARACTER VARYING" => "TEXT",
             "NVARCHAR" => "TEXT",
             "CHAR" => "TEXT",
             "NCHAR" => "TEXT",
+            "TIMESTAMP WITHOUT TIME ZONE" => "TIMESTAMP",
+            "TIMESTAMP WITH TIME ZONE" => "TIMESTAMP",
             "" => "TEXT",
             var normalized => normalized
         };
@@ -363,12 +479,41 @@ ORDER BY applied_at DESC
     private static bool SqlTypesEqual(string oldSqlType, string newSqlType) =>
         string.Equals(NormalizeSqlType(oldSqlType), NormalizeSqlType(newSqlType), StringComparison.OrdinalIgnoreCase);
 
+    private static bool IsPostgres(string dbType) =>
+        string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+
+    private static string GetPostgresDefaultLiteral(string sqlType)
+    {
+        var upper = sqlType.Trim().ToUpperInvariant();
+        if (upper is "BOOLEAN" or "BOOL")
+        {
+            return "false";
+        }
+
+        return NormalizeSqlType(sqlType) switch
+        {
+            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
+            "TIMESTAMP" => "now()",
+            _ => "''"
+        };
+    }
+
     private sealed class PragmaColumnRow
     {
         public int Cid { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public int NotNull { get; set; }
+        public int Pk { get; set; }
+    }
+
+    private sealed class PostgresColumnRow
+    {
+        public int Cid { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public bool NotNullBool { get; set; }
         public int Pk { get; set; }
     }
 

@@ -75,6 +75,8 @@ public class ProjectDatabaseConfig
     public string? Path { get; set; }
     /// <summary>SQL Server 用接続文字列</summary>
     public string? ConnectionString { get; set; }
+    /// <summary>PostgreSQL 用 schema 名（省略時はプロジェクト名から自動生成）</summary>
+    public string? Schema { get; set; }
 }
 
 public class ProjectFeaturesConfig

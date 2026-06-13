@@ -58,9 +58,11 @@
 - **现状（2026-06-13 完成）**：新增 `DynamicEntitySchemaMigrationService`，支持 BuildPlan、dry-run SQL、Apply、Rollback 和 `_nyf_migrations` 历史记录；SQLite 破坏性变更统一走表重建并保留备份表用于回滚。Admin UI 已新增 Schema Migration 页面，可预览 Up/Down SQL、应用迁移并回滚历史记录。
 - **验收**：修改实体 YAML（加列/改类型/删列）后旧数据完好且可回滚。
 
-### 4.4 PostgreSQL 生产模式
+### 4.4 PostgreSQL 生产模式 ✅
 - **目标**：SQLite 保留为开发/单机模式；PostgreSQL（Npgsql 已引入）成为多租户生产模式一等公民（schema-per-tenant），顺带根治写锁问题。
 - **依赖**：4.3（迁移系统需先支持两种方言）。
+- **设計**: `docs/PHASE4.4-POSTGRESQL-DESIGN.md`
+- **现状（2026-06-13 完成）**：`SqlTypeMapper` / `TableDdlBuilder` 已生成 PostgreSQL 合法类型；`DynamicEntitySchemaMigrationService` 支持 PostgreSQL physical column inspection、in-place ALTER migration SQL、type normalization；项目配置新增 `database.schema` 并在 Npgsql connection string 中补齐 `Search Path`，启动期自动 `CREATE SCHEMA IF NOT EXISTS`。
 
 ---
 

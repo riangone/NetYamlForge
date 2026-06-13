@@ -25,6 +25,11 @@ public sealed record MigrationPlan(
     public bool RequiresTableRebuild =>
         Operations.Any(o => o.OpType is MigrationOpType.AlterColumnType or MigrationOpType.AlterNullability
                              or MigrationOpType.DropColumn);
+
+    public bool RequiresTableRebuildFor(string dbType) =>
+        !string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
+        && !string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase)
+        && RequiresTableRebuild;
 }
 
 public sealed record MigrationRecord(

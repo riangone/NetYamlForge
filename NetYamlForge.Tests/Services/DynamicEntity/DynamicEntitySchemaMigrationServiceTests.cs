@@ -160,6 +160,140 @@ INSERT INTO "Customer" ("Name", "Legacy") VALUES ('Alice', 'keep-me');
         Assert.DoesNotContain(columns, c => c.Name == "Name");
     }
 
+    [Fact]
+    public void BuildPlan_Postgres_PreservesPostgreSqlTargetTypes()
+    {
+        var sut = CreateService();
+        var entity = CreateEntity(columns =>
+        {
+            columns["Id"] = new ColumnDefinition { Type = "int", Identity = true, Required = true };
+            columns["IsActive"] = new ColumnDefinition { Type = "bool", Required = true };
+            columns["CreatedAt"] = new ColumnDefinition { Type = "datetime" };
+        });
+        var physical = new[]
+        {
+            new ColumnSchemaInfo("Id", "integer", true, true),
+        };
+
+        var plan = sut.BuildPlan("customer", entity, physical, "postgresql");
+
+        Assert.Contains(plan.Operations, o => o.OpType == MigrationOpType.AddColumn
+            && o.ColumnName == "IsActive"
+            && o.NewSqlType == "BOOLEAN"
+            && o.NewNotNull == true);
+        Assert.Contains(plan.Operations, o => o.OpType == MigrationOpType.AddColumn
+            && o.ColumnName == "CreatedAt"
+            && o.NewSqlType == "TIMESTAMP");
+    }
+
+    [Fact]
+    public void GenerateSql_Postgres_AddRequiredColumn_ReturnsBackfillSequence()
+    {
+        var sut = CreateService();
+        var entity = CreateEntity(columns =>
+        {
+            columns["Id"] = new ColumnDefinition { Type = "int", Identity = true, Required = true };
+            columns["IsActive"] = new ColumnDefinition { Type = "bool", Required = true };
+        });
+        var plan = new MigrationPlan(
+            "customer",
+            "Customer",
+            new[] { new MigrationOperation(MigrationOpType.AddColumn, "IsActive", null, "BOOLEAN", true) });
+
+        var (upSql, downSql, backupTableName) = sut.GenerateSql(plan, entity, "postgresql");
+
+        Assert.Equal(string.Empty, backupTableName);
+        Assert.False(plan.RequiresTableRebuildFor("postgresql"));
+        Assert.Equal(new[]
+        {
+            "ALTER TABLE \"Customer\" ADD COLUMN \"IsActive\" BOOLEAN",
+            "UPDATE \"Customer\" SET \"IsActive\" = false WHERE \"IsActive\" IS NULL",
+            "ALTER TABLE \"Customer\" ALTER COLUMN \"IsActive\" SET NOT NULL"
+        }, upSql);
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" DROP COLUMN \"IsActive\"" }, downSql);
+    }
+
+    [Fact]
+    public void GenerateSql_Postgres_DropColumn_ReturnsInPlaceAlter()
+    {
+        var sut = CreateService();
+        var entity = CreateEntity(columns =>
+        {
+            columns["Id"] = new ColumnDefinition { Type = "int", Identity = true, Required = true };
+        });
+        var plan = new MigrationPlan(
+            "customer",
+            "Customer",
+            new[] { new MigrationOperation(MigrationOpType.DropColumn, "Legacy", "TEXT", null, null) });
+
+        var (upSql, downSql, backupTableName) = sut.GenerateSql(plan, entity, "postgresql");
+
+        Assert.Equal(string.Empty, backupTableName);
+        Assert.False(plan.RequiresTableRebuildFor("postgresql"));
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" DROP COLUMN \"Legacy\"" }, upSql);
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" ADD COLUMN \"Legacy\" TEXT" }, downSql);
+    }
+
+    [Fact]
+    public void GenerateSql_Postgres_AlterColumnType_ReturnsUsingCast()
+    {
+        var sut = CreateService();
+        var entity = CreateEntity(columns =>
+        {
+            columns["Id"] = new ColumnDefinition { Type = "int", Identity = true, Required = true };
+            columns["Amount"] = new ColumnDefinition { Type = "decimal" };
+        });
+        var plan = new MigrationPlan(
+            "customer",
+            "Customer",
+            new[] { new MigrationOperation(MigrationOpType.AlterColumnType, "Amount", "TEXT", "NUMERIC(18,2)", null) });
+
+        var (upSql, downSql, backupTableName) = sut.GenerateSql(plan, entity, "postgresql");
+
+        Assert.Equal(string.Empty, backupTableName);
+        Assert.False(plan.RequiresTableRebuildFor("postgresql"));
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" ALTER COLUMN \"Amount\" TYPE NUMERIC(18,2) USING \"Amount\"::NUMERIC(18,2)" }, upSql);
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" ALTER COLUMN \"Amount\" TYPE TEXT USING \"Amount\"::TEXT" }, downSql);
+    }
+
+    [Fact]
+    public void GenerateSql_Postgres_AlterNullability_ReturnsSetAndDropNotNull()
+    {
+        var sut = CreateService();
+        var entity = CreateEntity(columns =>
+        {
+            columns["Id"] = new ColumnDefinition { Type = "int", Identity = true, Required = true };
+            columns["Name"] = new ColumnDefinition { Type = "string", Required = true };
+        });
+        var plan = new MigrationPlan(
+            "customer",
+            "Customer",
+            new[] { new MigrationOperation(MigrationOpType.AlterNullability, "Name", "TEXT", "TEXT", true) });
+
+        var (upSql, downSql, backupTableName) = sut.GenerateSql(plan, entity, "postgresql");
+
+        Assert.Equal(string.Empty, backupTableName);
+        Assert.False(plan.RequiresTableRebuildFor("postgresql"));
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" ALTER COLUMN \"Name\" SET NOT NULL" }, upSql);
+        Assert.Equal(new[] { "ALTER TABLE \"Customer\" ALTER COLUMN \"Name\" DROP NOT NULL" }, downSql);
+    }
+
+    [Theory]
+    [InlineData("character varying", "TEXT")]
+    [InlineData("character varying(255)", "TEXT")]
+    [InlineData("double precision", "NUMERIC")]
+    [InlineData("timestamp without time zone", "TIMESTAMP")]
+    [InlineData("timestamp with time zone", "TIMESTAMP")]
+    [InlineData("boolean", "INTEGER")]
+    [InlineData("numeric", "NUMERIC")]
+    [InlineData("integer", "INTEGER")]
+    public void NormalizeSqlType_PostgresInformationSchemaTypes_ReturnsCanonicalType(string dataType, string expected)
+    {
+        var normalized = DynamicEntitySchemaMigrationService.NormalizeSqlType(dataType);
+
+        Assert.Equal(expected, normalized);
+    }
+
     private static DynamicEntitySchemaMigrationService CreateService() =>
         new(NullLogger<DynamicEntitySchemaMigrationService>.Instance);
 

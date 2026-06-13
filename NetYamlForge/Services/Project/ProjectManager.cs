@@ -5,6 +5,7 @@ using NetYamlForge.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using NetYamlForge.Services.Hooks;
+using Npgsql;
 
 namespace NetYamlForge.Services;
 
@@ -133,9 +134,10 @@ public class ProjectManager
             ? (config.Database.Type ?? "sqlite").ToLowerInvariant()
             : envDbType.Trim().ToLowerInvariant();
 
+        var schemaName = IsPostgres(dbType) ? ResolvePostgresSchemaName(config) : null;
         var connectionString = string.IsNullOrWhiteSpace(envConnStr)
-            ? BuildConnectionString(config, projectDir, dbType)
-            : envConnStr.Trim();
+            ? BuildConnectionString(config, projectDir, dbType, schemaName)
+            : AddPostgresSearchPathIfNeeded(envConnStr.Trim(), dbType, schemaName);
 
         var entityMetadata = new EntityMetadataProvider(projectDir, dbType);
         var dashboardConfig = new DashboardConfigProvider(projectDir);
@@ -149,6 +151,7 @@ public class ProjectManager
             ProjectDir = projectDir,
             DatabaseType = dbType,
             ConnectionString = connectionString,
+            SchemaName = schemaName,
             EntityMetadata = entityMetadata,
             DashboardConfig = dashboardConfig,
             PageMetadata = pageMetadata,
@@ -171,7 +174,7 @@ public class ProjectManager
         await _projectHookLoader.LoadProjectActionHandlersAsync(config.Name, projectDir, _projectActionRegistry);
     }
 
-    private static string BuildConnectionString(ProjectConfig config, string projectDir, string dbType)
+    private static string BuildConnectionString(ProjectConfig config, string projectDir, string dbType, string? schemaName = null)
     {
         if (dbType == "sqlserver"
             || dbType == "postgresql"
@@ -179,9 +182,10 @@ public class ProjectManager
             || dbType == "mysql"
             || dbType == "mariadb")
         {
-            return config.Database.ConnectionString
+            var connectionString = config.Database.ConnectionString
                 ?? throw new InvalidOperationException(
                     $"プロジェクト '{config.Name}' の database.connectionString が未設定です。");
+            return AddPostgresSearchPathIfNeeded(connectionString, dbType, schemaName);
         }
 
         // SQLite: path が相対パスの場合は projectDir 基準で解決
@@ -199,6 +203,32 @@ public class ProjectManager
         // フォールバック：database/ サブディレクトリ内の {name}.db
         var defaultPath = Path.Combine(projectDir, "database", $"{config.Name}.db");
         return $"Data Source={defaultPath}{sqliteOptions}";
+    }
+
+    private static bool IsPostgres(string dbType) =>
+        string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+
+    private static string ResolvePostgresSchemaName(ProjectConfig config) =>
+        string.IsNullOrWhiteSpace(config.Database.Schema)
+            ? config.Name.ToLowerInvariant().Replace("-", "_")
+            : config.Database.Schema.Trim();
+
+    private static string AddPostgresSearchPathIfNeeded(string connectionString, string dbType, string? schemaName)
+    {
+        if (!IsPostgres(dbType) || string.IsNullOrWhiteSpace(schemaName))
+        {
+            return connectionString;
+        }
+
+        var builder = new NpgsqlConnectionStringBuilder(connectionString);
+        if (builder.ContainsKey("Search Path"))
+        {
+            return builder.ConnectionString;
+        }
+
+        builder.SearchPath = schemaName;
+        return builder.ConnectionString;
     }
 
     public virtual bool TryGet(string name, out ProjectInfo? info) =>

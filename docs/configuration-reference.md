@@ -38,6 +38,19 @@
 }
 ```
 
+Project-level `project.yaml` can also select PostgreSQL and optionally assign a tenant schema:
+
+```yaml
+database:
+  type: postgresql
+  connectionString: "Host=localhost;Database=netyamlforge;Username=nyf;Password=secret"
+  schema: tenant_inventory
+```
+
+| 設定 | 説明 | デフォルト |
+|------|------|-----------|
+| `database.schema` | PostgreSQL 専用。プロジェクトのテーブルを作成する schema 名。接続文字列に `Search Path` が未設定の場合、自動的に追加されます。 | プロジェクト名を小文字化し、`-` を `_` に置換 |
+
 ### MySQL
 
 ```json

@@ -29,8 +29,11 @@ public class ProjectSpecificInitializer
         string dbType,
         IEntityMetadataProvider metadataProvider,
         ILogger logger,
-        string? projectDir = null)
+        string? projectDir = null,
+        string? schemaName = null)
     {
+        await EnsurePostgresSchemaAsync(conn, dbType, schemaName, logger);
+
         // 首先运行项目特定的初始化和数据种子
         // contact-manager: 初期データロード
         if (string.Equals(projectName, "contact-manager", StringComparison.OrdinalIgnoreCase))
@@ -433,6 +436,29 @@ CREATE TABLE ""TaskComment"" (
             logger.LogError(ex, "项目 '{Project}' 在执行通用列自动迁移时遇到异常", projectName);
         }
     }
+
+    public async Task EnsurePostgresSchemaAsync(
+        IDbConnection conn,
+        string dbType,
+        string? schemaName,
+        ILogger logger)
+    {
+        if (!IsPostgres(dbType) || string.IsNullOrWhiteSpace(schemaName))
+        {
+            return;
+        }
+
+#pragma warning disable DCS001
+        await conn.ExecuteAsync($"CREATE SCHEMA IF NOT EXISTS \"{EscapeIdentifier(schemaName)}\"");
+#pragma warning restore DCS001
+        logger.LogInformation("PostgreSQL schema '{Schema}' を確認しました。", schemaName);
+    }
+
+    private static bool IsPostgres(string dbType) =>
+        string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+
+    private static string EscapeIdentifier(string value) => value.Replace("\"", "\"\"");
 
     /// <summary>
     /// 当 YAML 中定义的表不存在时，自动根据其属性列创建对应物理表

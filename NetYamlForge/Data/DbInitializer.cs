@@ -70,16 +70,19 @@ public static class DbInitializer
             return;
         }
 
-        var projectUserInfos = projects.Select(p =>
-        {
-            var sqliteBuilder = new SqliteConnectionStringBuilder(p.ConnectionString);
-            return new ProjectUserInfo
+        var projectUserInfos = projects
+            .Where(p => string.Equals(p.DatabaseType, "sqlite", StringComparison.OrdinalIgnoreCase))
+            .Select(p =>
             {
-                Name = p.Name,
-                DisplayName = p.DisplayName ?? p.Name,
-                DbPath = sqliteBuilder.DataSource
-            };
-        }).ToList();
+                var sqliteBuilder = new SqliteConnectionStringBuilder(p.ConnectionString);
+                return new ProjectUserInfo
+                {
+                    Name = p.Name,
+                    DisplayName = p.DisplayName ?? p.Name,
+                    DbPath = sqliteBuilder.DataSource
+                };
+            })
+            .ToList();
 
         var seeder = new SystemDbTestUserSeeder();
         await seeder.SyncTestUsersToSystemDbAsync(systemDbPath, projectUserInfos, logger);
@@ -96,7 +99,7 @@ public static class DbInitializer
             await new SqlServerAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
             await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir, project.SchemaName);
             return;
         }
 
@@ -104,10 +107,12 @@ public static class DbInitializer
         {
             await using var conn = new NpgsqlConnection(project.ConnectionString);
             await conn.OpenAsync();
+            var projectSpecificInitializer = new ProjectSpecificInitializer();
+            await projectSpecificInitializer.EnsurePostgresSchemaAsync(conn, project.DatabaseType, project.SchemaName, logger);
             await new PostgreSqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
-            await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
+            await projectSpecificInitializer.EnsureProjectSpecificColumnsAsync(
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir, project.SchemaName);
             return;
         }
 
@@ -118,7 +123,7 @@ public static class DbInitializer
             await new MySqlAuthSchemaInitializer().InitializeAsync(conn, logger);
             await new DefaultAdminSeeder().EnsureDefaultAdminAsync(conn, logger);
             await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
+                conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir, project.SchemaName);
             return;
         }
 
@@ -147,6 +152,6 @@ public static class DbInitializer
         
         // 运行项目特定的初始化和测试用户创建
         await new ProjectSpecificInitializer().EnsureProjectSpecificColumnsAsync(
-            conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir);
+            conn, project.Name, project.DatabaseType, project.EntityMetadata, logger, project.ProjectDir, project.SchemaName);
     }
 }

@@ -12,6 +12,7 @@ public class ProjectInfo
     public string ProjectDir { get; init; } = default!;
     public string DatabaseType { get; init; } = "sqlite";
     public string ConnectionString { get; init; } = default!;
+    public string? SchemaName { get; init; }
     public IEntityMetadataProvider EntityMetadata { get; init; } = default!;
     public IDashboardConfigProvider DashboardConfig { get; init; } = default!;
     public IPageMetadataProvider PageMetadata { get; init; } = NullPageMetadataProvider.Instance;

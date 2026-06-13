@@ -31,6 +31,10 @@
         "connectionString": {
           "type": "string",
           "description": "SQL Server / PostgreSQL / MySQL 用接続文字列"
+        },
+        "schema": {
+          "type": "string",
+          "description": "PostgreSQL 用 schema 名（省略時はプロジェクト名から自動生成）"
         }
       }
     },
