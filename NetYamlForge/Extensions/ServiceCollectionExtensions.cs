@@ -8,6 +8,7 @@ using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Dialect;
+using NetYamlForge.Services.DynamicEntity;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
@@ -194,6 +195,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DynamicEntityConfigDiffService>();
         services.AddScoped<IBaseEntityMetadataProvider, BaseEntityMetadataProvider>();
         services.AddScoped<DynamicEntityConfigDiagnosticsService>();
+        services.AddScoped<DynamicEntitySchemaMigrationService>();
         services.AddScoped<DynamicEntityFormValidationService>();
         services.AddScoped<CommandErrorHttpMapper>();
         services.AddScoped<IUserAuthService, UserAuthService>();

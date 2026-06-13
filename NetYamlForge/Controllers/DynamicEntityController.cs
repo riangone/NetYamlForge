@@ -4,6 +4,7 @@
 
 using NetYamlForge.Models;
 using NetYamlForge.Services;
+using NetYamlForge.Services.DynamicEntity;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,7 @@ public class DynamicEntityController : BaseProjectController
     private readonly DynamicEntityListHttpResponseService _listHttpResponseService;
     private readonly DynamicEntityNavigationService _navigationService;
     private readonly DynamicEntityConfigDiagnosticsService _configDiagnosticsService;
+    private readonly DynamicEntitySchemaMigrationService _schemaMigrationService;
     private readonly DynamicEntityFormValidationService _formValidationService;
     private readonly CommandErrorHttpMapper _commandErrorHttpMapper;
     private readonly ProjectScope _projectScope;
@@ -52,6 +54,7 @@ public class DynamicEntityController : BaseProjectController
         DynamicEntityListHttpResponseService listHttpResponseService,
         DynamicEntityNavigationService navigationService,
         DynamicEntityConfigDiagnosticsService configDiagnosticsService,
+        DynamicEntitySchemaMigrationService schemaMigrationService,
         DynamicEntityFormValidationService formValidationService,
         CommandErrorHttpMapper commandErrorHttpMapper,
         ProjectScope projectScope,
@@ -74,6 +77,7 @@ public class DynamicEntityController : BaseProjectController
         _listHttpResponseService = listHttpResponseService;
         _navigationService = navigationService;
         _configDiagnosticsService = configDiagnosticsService;
+        _schemaMigrationService = schemaMigrationService;
         _formValidationService = formValidationService;
         _commandErrorHttpMapper = commandErrorHttpMapper;
         _projectScope = projectScope;
@@ -660,6 +664,74 @@ public class DynamicEntityController : BaseProjectController
             diagnostics.DiffLines,
             onlyChanged,
             diagnostics.ChangedCount));
+    }
+
+    // YAML 定義と物理テーブルの差分、および適用/回滚用 SQL を表示します（Admin のみ）
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> SchemaMigration(string entity = "customer")
+    {
+        entity = NormalizeSingleValue(entity) ?? "customer";
+        if (!_meta.TryGet(entity, out var meta))
+        {
+            return NotFound($"Entity '{entity}' は このプロジェクトに存在しません。");
+        }
+
+        var project = _projectScope.Current;
+        var physicalColumns = await _schemaMigrationService.GetPhysicalColumnsAsync(_db, meta.Table);
+        var plan = _schemaMigrationService.BuildPlan(entity, meta, physicalColumns, project.DatabaseType);
+        var (upSql, downSql, backupTableName) = _schemaMigrationService.GenerateSql(plan, meta, project.DatabaseType);
+        var history = await _schemaMigrationService.GetHistoryAsync(_db, project.Name);
+
+        return View("SchemaMigration", new SchemaMigrationViewModel(
+            project.Name,
+            entity,
+            _meta.GetAll().Keys.OrderBy(x => x).ToList(),
+            meta,
+            physicalColumns,
+            plan,
+            upSql,
+            downSql,
+            backupTableName,
+            history));
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("~/{project}/DynamicEntity/SchemaMigration/Apply")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SchemaMigrationApply(string entity = "customer")
+    {
+        entity = NormalizeSingleValue(entity) ?? "customer";
+        if (!_meta.TryGet(entity, out var meta))
+        {
+            return NotFound($"Entity '{entity}' は このプロジェクトに存在しません。");
+        }
+
+        var project = _projectScope.Current;
+        var physicalColumns = await _schemaMigrationService.GetPhysicalColumnsAsync(_db, meta.Table);
+        var plan = _schemaMigrationService.BuildPlan(entity, meta, physicalColumns, project.DatabaseType);
+        var result = await _schemaMigrationService.ApplyAsync(_db, project.Name, plan, meta, project.DatabaseType, dryRun: false);
+        TempData["SchemaMigrationMessage"] = result.Applied
+            ? $"Migration applied: {result.MigrationId}"
+            : "No schema changes to apply.";
+        return RedirectToAction(nameof(SchemaMigration), new { entity });
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("~/{project}/DynamicEntity/SchemaMigration/Rollback")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SchemaMigrationRollback(string migrationId, string entity = "customer")
+    {
+        migrationId = NormalizeSingleValue(migrationId) ?? string.Empty;
+        entity = NormalizeSingleValue(entity) ?? "customer";
+        if (string.IsNullOrWhiteSpace(migrationId))
+        {
+            return BadRequest("migrationId is required.");
+        }
+
+        await _schemaMigrationService.RollbackAsync(_db, migrationId);
+        TempData["SchemaMigrationMessage"] = $"Migration rolled back: {migrationId}";
+        return RedirectToAction(nameof(SchemaMigration), new { entity });
     }
 
     /// <summary>
@@ -1534,3 +1606,15 @@ public record ConfigDiagnosticsViewModel(
     IReadOnlyList<string> DiffLines,
     bool OnlyChanged,
     int ChangedCount);
+
+public record SchemaMigrationViewModel(
+    string ProjectName,
+    string Entity,
+    IReadOnlyList<string> Entities,
+    EntityDefinition Meta,
+    IReadOnlyList<ColumnSchemaInfo> PhysicalColumns,
+    MigrationPlan Plan,
+    IReadOnlyList<string> UpSql,
+    IReadOnlyList<string> DownSql,
+    string BackupTableName,
+    IReadOnlyList<MigrationRecord> History);

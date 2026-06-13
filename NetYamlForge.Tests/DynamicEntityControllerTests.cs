@@ -5,6 +5,7 @@ using NetYamlForge.Controllers;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.DynamicEntity;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -359,6 +360,7 @@ public class DynamicEntityControllerTests
             new DynamicEntityListHttpResponseService(),
             new DynamicEntityNavigationService(metaProvider),
             diagnosticsService,
+            new DynamicEntitySchemaMigrationService(NullLogger<DynamicEntitySchemaMigrationService>.Instance),
             new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter())),
             new CommandErrorHttpMapper(),
             scope,

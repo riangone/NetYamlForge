@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using NetYamlForge.Data.Seeders;
 using NetYamlForge.Services;
 using NetYamlForge.Models;
+using NetYamlForge.Services.DynamicEntity;
 
 namespace NetYamlForge.Data;
 
@@ -405,7 +406,7 @@ CREATE TABLE ""TaskComment"" (
                     if (existingColumns.Contains(colName)) continue;
 
                     // 4. 执行自动列迁移
-                    var sqlType = MapYamlTypeToSqlType(colDef.Type, dbType);
+                    var sqlType = SqlTypeMapper.MapYamlTypeToSqlType(colDef.Type, dbType);
                     
                     logger.LogInformation("项目 '{Project}' 检测到表 '{Table}' 缺失物理列 '{Column}' (YAML 定义类型为 '{YamlType}')。正在自动追加物理列...", 
                         projectName, tableName, colName, colDef.Type);
@@ -433,31 +434,6 @@ CREATE TABLE ""TaskComment"" (
         }
     }
 
-    private static string MapYamlTypeToSqlType(string yamlType, string dbType)
-    {
-        var isSqlite = string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase);
-        if (isSqlite)
-        {
-            return yamlType.ToLowerInvariant() switch
-            {
-                "int" or "integer" or "long" or "bool" or "boolean" => "INTEGER",
-                "decimal" or "double" or "float" or "number" => "NUMERIC",
-                _ => "TEXT"
-            };
-        }
-        
-        return yamlType.ToLowerInvariant() switch
-        {
-            "int" or "integer" => "INT",
-            "long" => "BIGINT",
-            "bool" or "boolean" => "BIT",
-            "decimal" => "DECIMAL(18,2)",
-            "double" or "float" or "number" => "DOUBLE PRECISION",
-            "datetime" or "date" => "DATETIME",
-            _ => "NVARCHAR(MAX)"
-        };
-    }
-
     /// <summary>
     /// 当 YAML 中定义的表不存在时，自动根据其属性列创建对应物理表
     /// </summary>
@@ -468,66 +444,7 @@ CREATE TABLE ""TaskComment"" (
         string dbType,
         ILogger logger)
     {
-        var pkColumns = entity.GetPrimaryKeyColumns();
-        var isSqlServer = string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase);
-        var isPostgres = string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase) || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
-        var isMySql = string.Equals(dbType, "mysql", StringComparison.OrdinalIgnoreCase) || string.Equals(dbType, "mariadb", StringComparison.OrdinalIgnoreCase);
-        var isSqlite = string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase);
-
-        var colSqls = new List<string>();
-        var hasSelfAddedPk = false;
-
-        foreach (var colEntry in entity.Columns)
-        {
-            var colName = colEntry.Key;
-            var colDef = colEntry.Value;
-
-            // 虚拟计算列不建物理字段
-            if (!string.IsNullOrWhiteSpace(colDef.Expression)) continue;
-
-            var sqlType = MapYamlTypeToSqlType(colDef.Type, dbType);
-            var isPk = pkColumns.Contains(colName);
-
-            if (isPk && pkColumns.Count == 1 && colDef.Identity)
-            {
-                hasSelfAddedPk = true;
-                if (isSqlite)
-                {
-                    colSqls.Add($"\"{colName}\" INTEGER PRIMARY KEY AUTOINCREMENT");
-                }
-                else if (isSqlServer)
-                {
-                    colSqls.Add($"\"{colName}\" INT IDENTITY(1,1) PRIMARY KEY");
-                }
-                else if (isPostgres)
-                {
-                    colSqls.Add($"\"{colName}\" SERIAL PRIMARY KEY");
-                }
-                else if (isMySql)
-                {
-                    colSqls.Add($"\"{colName}\" INT AUTO_INCREMENT PRIMARY KEY");
-                }
-                else
-                {
-                    colSqls.Add($"\"{colName}\" INTEGER PRIMARY KEY AUTOINCREMENT");
-                }
-            }
-            else
-            {
-                var nullableStr = colDef.Required ? "NOT NULL" : "NULL";
-                colSqls.Add($"\"{colName}\" {sqlType} {nullableStr}");
-            }
-        }
-
-        // 复合主键或非自增单主键，需要在最后添加 PRIMARY KEY 约束
-        if (!hasSelfAddedPk && pkColumns.Count > 0)
-        {
-            var pkColsStr = string.Join(", ", pkColumns.Select(c => $"\"{c}\""));
-            colSqls.Add($"PRIMARY KEY ({pkColsStr})");
-        }
-
-        // 双引号包裹字段名和表名，以避免与保留关键字冲突
-        var createTableSql = $"CREATE TABLE \"{tableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";
+        var createTableSql = TableDdlBuilder.BuildCreateTableSql(tableName, entity, dbType);
         logger.LogInformation("自动建表 SQL: {Sql}", createTableSql);
 
         using var cmd = dbConn.CreateCommand();

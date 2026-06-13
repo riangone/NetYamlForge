@@ -51,9 +51,11 @@
 - **现状（2026-06-12 完成）**：新增 `EntityToolService` / `EntityMcpTools`（`Services/Mcp/`），通过 `IServiceProvider` 延迟解析项目相关服务以避免 `ProjectScope` 未初始化异常；`Program.cs` 注册 `AddMcpServer().WithHttpTransport().WithTools<EntityMcpTools>()` 并 `MapMcp("/mcp")`，要求 `Cookies,ApiToken` 认证。公开 9 个工具：`list_projects` / `list_entities` / `get_entity_meta` / `list_entity_records` / `get_entity_record` / `create_entity_record` / `update_entity_record` / `delete_entity_record` / `invoke_entity_action`。
 - **验收**：`McpServerIntegrationTests`（5 个用例）验证 MCP 客户端可 `ListToolsAsync` 看到全部工具、`list_entity_records`/`create_entity_record`/`get_entity_record` 完成创建+读取闭环、对 `meta.Api=disabled` 实体（`comment`）的工具调用返回错误而非异常、未带 Bearer token 访问 `/mcp` 被拒绝。`dotnet build` 0 警告 0 错误，`dotnet test` 653/653 全绿。
 
-### 4.3 YAML Schema 迁移系统
+### 4.3 YAML Schema 迁移系统 ✅
 - **目标**：`DynamicEntityConfigDiffService` 进化为完整迁移管线：diff → 迁移计划（ALTER TABLE / 数据回填）→ 版本记录表 → 可回滚。
 - **要点**：迁移计划先以 dry-run 输出 SQL 供确认；版本记录存各租户库内 `_nyf_migrations` 表。
+- **设计文档**：详见 [`docs/PHASE4.3-MIGRATION-DESIGN.md`](./PHASE4.3-MIGRATION-DESIGN.md)（架构、改动文件清单、SQLite 表重建方案、测试与验收标准）。
+- **现状（2026-06-13 完成）**：新增 `DynamicEntitySchemaMigrationService`，支持 BuildPlan、dry-run SQL、Apply、Rollback 和 `_nyf_migrations` 历史记录；SQLite 破坏性变更统一走表重建并保留备份表用于回滚。Admin UI 已新增 Schema Migration 页面，可预览 Up/Down SQL、应用迁移并回滚历史记录。
 - **验收**：修改实体 YAML（加列/改类型/删列）后旧数据完好且可回滚。
 
 ### 4.4 PostgreSQL 生产模式

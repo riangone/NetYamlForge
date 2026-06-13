@@ -1,0 +1,140 @@
+@model NetYamlForge.Controllers.SchemaMigrationViewModel
+@{
+    ViewData["Title"] = "Schema Migration";
+}
+
+<div class="space-y-4">
+    <div>
+        <h1 class="text-2xl font-bold">Schema Migration</h1>
+        <p class="text-sm text-base-content/70">Project: @(string.IsNullOrWhiteSpace(Model.ProjectName) ? "(none)" : Model.ProjectName)</p>
+    </div>
+
+    @if (TempData["SchemaMigrationMessage"] is string message)
+    {
+        <div class="alert alert-info text-sm">@message</div>
+    }
+
+    <form method="get" class="flex flex-wrap items-end gap-3">
+        <label class="form-control w-80 max-w-full">
+            <span class="label-text text-sm">Entity</span>
+            <select name="entity" class="select select-bordered select-sm">
+                @foreach (var e in Model.Entities)
+                {
+                    <option value="@e" selected="@(Model.Entity.Equals(e, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@e</option>
+                }
+            </select>
+        </label>
+        <button type="submit" class="btn btn-sm btn-primary">Reload</button>
+    </form>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="card-title text-base">Diff: @Model.Entity</h2>
+                    <div class="text-sm text-base-content/70">Table: @Model.Meta.Table</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.BackupTableName))
+                    {
+                        <div class="text-xs text-warning">Backup table: @Model.BackupTableName</div>
+                    }
+                </div>
+                <form asp-action="SchemaMigrationApply" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="entity" value="@Model.Entity" />
+                    <button type="submit" class="btn btn-sm btn-primary" disabled="@(Model.Plan.Operations.Count == 0 ? "disabled" : null)">Apply</button>
+                </form>
+            </div>
+
+            @if (Model.Plan.Operations.Count == 0)
+            {
+                <div class="text-sm text-success">No schema changes detected.</div>
+            }
+            else
+            {
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Operation</th>
+                            <th>Old SQL Type</th>
+                            <th>New SQL Type</th>
+                            <th>New NOT NULL</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var op in Model.Plan.Operations)
+                        {
+                            <tr>
+                                <td>@op.ColumnName</td>
+                                <td>@op.OpType</td>
+                                <td>@(op.OldSqlType ?? "-")</td>
+                                <td>@(op.NewSqlType ?? "-")</td>
+                                <td>@(op.NewNotNull?.ToString() ?? "-")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="text-sm font-semibold mb-2">Up SQL</div>
+                <pre class="bg-base-200 rounded p-3 text-xs overflow-auto min-h-60">@string.Join("\n\n", Model.UpSql)</pre>
+            </div>
+        </div>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="text-sm font-semibold mb-2">Down SQL</div>
+                <pre class="bg-base-200 rounded p-3 text-xs overflow-auto min-h-60">@string.Join("\n\n", Model.DownSql)</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h2 class="card-title text-base">Migration History</h2>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>Applied At</th>
+                        <th>Entity</th>
+                        <th>Table</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var row in Model.History)
+                    {
+                        <tr>
+                            <td>@row.AppliedAt.ToString("u")</td>
+                            <td>@row.EntityName</td>
+                            <td>@row.TableName</td>
+                            <td>@row.Description</td>
+                            <td>@(row.RolledBackAt.HasValue ? "Rolled back" : "Applied")</td>
+                            <td>
+                                @if (!row.RolledBackAt.HasValue)
+                                {
+                                    <form asp-action="SchemaMigrationRollback" method="post" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="migrationId" value="@row.Id" />
+                                        <input type="hidden" name="entity" value="@Model.Entity" />
+                                        <button type="submit" class="btn btn-xs btn-outline">Rollback</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
