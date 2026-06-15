@@ -7,6 +7,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using NetYamlForge.Models;
+using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Hooks;
 
 namespace NetYamlForge.Services.Mcp;
@@ -51,6 +52,7 @@ public sealed class EntityToolService
     private readonly ProjectManager             _projectManager;
     private readonly ProjectScope               _projectScope;
     private readonly IProjectActionRegistry     _actionRegistry;
+    private readonly IAuditLogService           _audit;
     private readonly ILogger<EntityToolService> _logger;
 
     public EntityToolService(
@@ -58,12 +60,14 @@ public sealed class EntityToolService
         ProjectManager               projectManager,
         ProjectScope                 projectScope,
         IProjectActionRegistry       actionRegistry,
+        IAuditLogService             audit,
         ILogger<EntityToolService>   logger)
     {
         _serviceProvider = serviceProvider;
         _projectManager  = projectManager;
         _projectScope    = projectScope;
         _actionRegistry  = actionRegistry;
+        _audit           = audit;
         _logger          = logger;
     }
 
@@ -213,9 +217,10 @@ public sealed class EntityToolService
 
     // ─── list_entity_records ────────────────────────────────────────────────
 
-    /// <summary>エンティティのレコード一覧をページネーション・検索・ソート付きで取得します。</summary>
+    /// <summary>エンティティのレコード一覧をページネーション・検索・ソート・フィルタ付きで取得します。</summary>
     public async Task<McpToolResult> ListRecordsAsync(
-        string project, string entity, string? search, string? sort, string? dir, int page, int pageSize)
+        string project, string entity, string? search, string? sort, string? dir, int page, int pageSize,
+        Dictionary<string, string?>? filters = null)
     {
         var bindError = BindProject(project);
         if (bindError != null) return bindError;
@@ -224,18 +229,18 @@ public sealed class EntityToolService
         var (meta, error) = ResolveEntity(svc.Meta, entity, writeRequired: false);
         if (error != null) return error;
 
-        var filters = new Dictionary<string, string?>();
+        var filterDict = filters ?? new Dictionary<string, string?>();
 
         var items = await svc.Repo.GetAllAsync(
             entity:   entity,
             search:   search,
             sort:     sort,
             dir:      dir ?? "asc",
-            filters:  filters,
+            filters:  filterDict,
             page:     page,
             pageSize: pageSize);
 
-        var total = await svc.Repo.CountAsync(entity, search, filters);
+        var total = await svc.Repo.CountAsync(entity, search, filterDict);
 
         var data = items.Select(item => ToApiDto((IDictionary<string, object?>)item, meta!)).ToList();
 
@@ -293,6 +298,7 @@ public sealed class EntityToolService
             return McpToolResult.Failure(result.Error?.Message ?? "Failed to create entity");
 
         var created = await svc.Repo.GetByIdAsync(entity, result.Value.ToString()!);
+        await _audit.WriteAsync("mcp.create", entity, $"id={result.Value}", userName: null);
         return McpToolResult.Success(ToApiDto(created!, meta));
     }
 
@@ -326,6 +332,7 @@ public sealed class EntityToolService
             return McpToolResult.Failure(result.Error?.Message ?? "Failed to update entity");
 
         var updated = await svc.Repo.GetByIdAsync(entity, id);
+        await _audit.WriteAsync("mcp.update", entity, $"id={id}", userName: null);
         return McpToolResult.Success(ToApiDto(updated!, meta));
     }
 
@@ -353,6 +360,7 @@ public sealed class EntityToolService
         if (!result.Ok)
             return McpToolResult.Failure(result.Error?.Message ?? "Failed to delete entity");
 
+        await _audit.WriteAsync("mcp.delete", entity, $"id={id}", userName: null);
         return McpToolResult.Success(new { deleted = true, id });
     }
 
@@ -425,6 +433,7 @@ public sealed class EntityToolService
         if (!result.Ok)
             return McpToolResult.Failure(result.ErrorMessage ?? "Action execution failed.");
 
+        await _audit.WriteAsync("mcp.action", entity, $"id={id} action={actionKey}", userName: null);
         return McpToolResult.Success(new { success = true, message = result.ErrorMessage ?? "Action executed successfully." });
     }
 

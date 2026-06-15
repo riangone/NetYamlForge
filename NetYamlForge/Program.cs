@@ -242,6 +242,10 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
     c.DocumentFilter<NetYamlForge.Services.Auth.DynamicEntitySwaggerFilter>();
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = System.IO.Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (System.IO.File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
 });
 
 // Dapper: enable snake_case column mapping

@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- ローカル開発環境では NuGet 監査ネットワーク依存警告（NU1900）を抑止。CI では監査を維持。 -->
     <NuGetAudit Condition="'$(CI)' != 'true'">false</NuGetAudit>
+    <!-- Swagger XML doc -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591;1570;1587</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Schemas\project-schema.json" />

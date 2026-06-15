@@ -5,6 +5,7 @@
 
 using NetYamlForge.Models;
 using NetYamlForge.Services;
+using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Hooks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -12,8 +13,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace NetYamlForge.Controllers;
 
+/// <summary>動的エンティティ向け汎用 REST API。CRUD + カスタムアクションを提供します。</summary>
 [Authorize(AuthenticationSchemes = $"{Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme},ApiToken")]
 [ApiController]
+[Produces("application/json")]
 [Route("api/{project}/{entity}")]
 public class ApiEntityController : BaseProjectController
 {
@@ -23,6 +26,7 @@ public class ApiEntityController : BaseProjectController
     private readonly DynamicEntityFormValidationService  _formValidationService;
     private readonly ProjectScope                        _projectScope;
     private readonly IProjectActionRegistry              _actionRegistry;
+    private readonly IAuditLogService                    _audit;
     private readonly ILogger<ApiEntityController>        _logger;
 
     public ApiEntityController(
@@ -32,6 +36,7 @@ public class ApiEntityController : BaseProjectController
         DynamicEntityFormValidationService formValidationService,
         ProjectScope                       projectScope,
         IProjectActionRegistry             actionRegistry,
+        IAuditLogService                   audit,
         ILogger<ApiEntityController>       logger)
     {
         _repo                 = repo;
@@ -40,6 +45,7 @@ public class ApiEntityController : BaseProjectController
         _formValidationService = formValidationService;
         _projectScope         = projectScope;
         _actionRegistry       = actionRegistry;
+        _audit                = audit;
         _logger               = logger;
     }
 
@@ -67,8 +73,19 @@ public class ApiEntityController : BaseProjectController
 
     // ─── GET /api/{project}/{entity} ─────────────────────────────────
 
-    /// <summary>エンティティ一覧を取得（ページネーション・検索・ソート対応）</summary>
+    /// <summary>エンティティ一覧を取得（ページネーション・検索・ソート・フィルタ対応）</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="search">全文検索キーワード（任意）</param>
+    /// <param name="sort">ソート対象カラム名（任意）</param>
+    /// <param name="dir">ソート方向 asc / desc（任意、既定値 asc）</param>
+    /// <param name="page">ページ番号（1始まり）</param>
+    /// <param name="pageSize">1ページ件数（既定値 20）</param>
+    /// <param name="filters">カラム別フィルタ（任意）</param>
+    /// <response code="200">レコード一覧を返します</response>
+    /// <response code="403">API アクセスが無効または読み取り専用</response>
     [HttpGet("")]
+    [ProducesResponseType(typeof(ApiListResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetList(
         string entity,
         [FromQuery] string? search   = null,
@@ -109,8 +126,13 @@ public class ApiEntityController : BaseProjectController
 
     // ─── GET /api/{project}/{entity}/meta ────────────────────────────
 
-    /// <summary>エンティティのメタデータを取得</summary>
+    /// <summary>エンティティのカラム定義・フォーム定義・主キー情報を取得</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <response code="200">エンティティメタデータを返します</response>
+    /// <response code="403">API アクセスが無効</response>
     [HttpGet("meta")]
+    [ProducesResponseType(typeof(ApiEntityMeta), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public IActionResult GetMeta(string entity)
     {
         var meta   = _meta.Get(entity);
@@ -153,8 +175,14 @@ public class ApiEntityController : BaseProjectController
 
     // ─── GET /api/{project}/{entity}/{id} ────────────────────────────
 
-    /// <summary>単一エンティティを取得</summary>
+    /// <summary>主キーを指定して単一エンティティを取得</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="id">レコードの主キー値</param>
+    /// <response code="200">レコードを返します</response>
+    /// <response code="404">レコードが存在しない</response>
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ApiDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(string entity, string id)
     {
         var meta   = _meta.Get(entity);
@@ -170,8 +198,16 @@ public class ApiEntityController : BaseProjectController
 
     // ─── POST /api/{project}/{entity} ────────────────────────────────
 
-    /// <summary>単一エンティティを作成</summary>
+    /// <summary>エンティティレコードを新規作成</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="body">作成するレコードのカラム名→値マップ</param>
+    /// <response code="201">作成されたレコードを返します</response>
+    /// <response code="400">バリデーションエラーまたは作成失敗</response>
+    /// <response code="403">API アクセスが無効または読み取り専用</response>
     [HttpPost("")]
+    [ProducesResponseType(typeof(ApiDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Create(
         string entity,
         [FromBody] Dictionary<string, object?> body)
@@ -195,6 +231,7 @@ public class ApiEntityController : BaseProjectController
             return BadRequest(new { error = result.Error?.Message ?? "Failed to create entity" });
 
         var created = await _repo.GetByIdAsync(entity, result.Value.ToString()!);
+        await _audit.WriteAsync("api.create", entity, $"id={result.Value}", User.Identity?.Name);
         return CreatedAtAction(
             nameof(GetById),
             new { project = _projectScope.Current.Name, entity, id = result.Value.ToString() },
@@ -203,7 +240,16 @@ public class ApiEntityController : BaseProjectController
 
     // ─── PUT /api/{project}/{entity}/{id} ────────────────────────────
 
-    /// <summary>単一エンティティを完全更新</summary>
+    /// <summary>エンティティレコードを完全更新（PUT）</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="id">更新対象の主キー値</param>
+    /// <param name="body">更新するカラム名→値マップ</param>
+    /// <response code="200">更新後のレコードを返します</response>
+    /// <response code="400">バリデーションエラーまたは更新失敗</response>
+    /// <response code="404">レコードが存在しない</response>
+    [ProducesResponseType(typeof(ApiDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         string entity,
@@ -232,12 +278,22 @@ public class ApiEntityController : BaseProjectController
             return BadRequest(new { error = result.Error?.Message ?? "Failed to update entity" });
 
         var updated = await _repo.GetByIdAsync(entity, id);
+        await _audit.WriteAsync("api.update", entity, $"id={id}", User.Identity?.Name);
         return Ok(ToApiDto(updated!, meta));
     }
 
     // ─── PATCH /api/{project}/{entity}/{id} ──────────────────────────
 
-    /// <summary>単一エンティティを部分更新（送信フィールドのみ更新）</summary>
+    /// <summary>エンティティレコードを部分更新（送信フィールドのみ更新）</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="id">更新対象の主キー値</param>
+    /// <param name="body">更新するカラム名→値マップ（指定フィールドのみ更新）</param>
+    /// <response code="200">更新後のレコードを返します</response>
+    /// <response code="400">バリデーションエラーまたは更新失敗</response>
+    /// <response code="404">レコードが存在しない</response>
+    [ProducesResponseType(typeof(ApiDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPatch("{id}")]
     public async Task<IActionResult> PartialUpdate(
         string entity,
@@ -266,12 +322,21 @@ public class ApiEntityController : BaseProjectController
             return BadRequest(new { error = result.Error?.Message ?? "Failed to update entity" });
 
         var updated = await _repo.GetByIdAsync(entity, id);
+        await _audit.WriteAsync("api.patch", entity, $"id={id}", User.Identity?.Name);
         return Ok(ToApiDto(updated!, meta));
     }
 
     // ─── DELETE /api/{project}/{entity}/{id} ─────────────────────────
 
-    /// <summary>単一エンティティを削除</summary>
+    /// <summary>主キーを指定してエンティティレコードを削除</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="id">削除対象の主キー値</param>
+    /// <response code="204">削除成功（ボディなし）</response>
+    /// <response code="400">削除失敗</response>
+    /// <response code="404">レコードが存在しない</response>
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string entity, string id)
     {
@@ -291,12 +356,23 @@ public class ApiEntityController : BaseProjectController
         if (!result.Ok)
             return BadRequest(new { error = result.Error?.Message ?? "Failed to delete entity" });
 
+        await _audit.WriteAsync("api.delete", entity, $"id={id}", User.Identity?.Name);
         return NoContent();
     }
 
     // ─── POST /api/{project}/{entity}/{id}/actions/{actionKey} ────────
 
-    /// <summary>カスタムアクションを実行</summary>
+    /// <summary>エンティティに定義されたカスタムアクションを実行</summary>
+    /// <param name="entity">エンティティ名</param>
+    /// <param name="id">対象レコードの主キー値</param>
+    /// <param name="actionKey">実行するアクション名（entities.yml の actions キー）</param>
+    /// <param name="body">アクションに渡す入力パラメータ（任意）</param>
+    /// <response code="200">アクション実行結果を返します</response>
+    /// <response code="400">アクション失敗またはアクションハンドラ未登録</response>
+    /// <response code="404">アクション定義またはレコードが存在しない</response>
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("{id}/actions/{actionKey}")]
     public async Task<IActionResult> InvokeAction(
         string entity,
@@ -366,6 +442,7 @@ public class ApiEntityController : BaseProjectController
             return BadRequest(new { error = result.ErrorMessage ?? "Action execution failed." });
         }
 
+        await _audit.WriteAsync("api.action", entity, $"id={id} action={actionKey}", User.Identity?.Name);
         return Ok(new { success = true, message = result.ErrorMessage ?? "Action executed successfully." });
     }
 

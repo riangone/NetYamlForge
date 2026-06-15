@@ -42,7 +42,7 @@ public sealed class EntityMcpTools
         => _service.GetEntityMeta(project, entity);
 
     [McpServerTool(Name = "list_entity_records", ReadOnly = true)]
-    [Description("エンティティのレコード一覧をページネーション・検索・ソート付きで取得します。API が disabled の場合はエラーを返します。")]
+    [Description("エンティティのレコード一覧をページネーション・検索・ソート・フィルタ付きで取得します。API が disabled の場合はエラーを返します。")]
     public Task<McpToolResult> ListEntityRecords(
         [Description("テナントプロジェクト名")] string project,
         [Description("エンティティ名")] string entity,
@@ -50,8 +50,9 @@ public sealed class EntityMcpTools
         [Description("ソート対象カラム名（任意）")] string? sort = null,
         [Description("ソート方向 'asc' または 'desc'（任意、既定値 'asc'）")] string? dir = null,
         [Description("ページ番号（1始まり、既定値 1）")] int page = 1,
-        [Description("1ページあたりの件数（既定値 20）")] int pageSize = 20)
-        => _service.ListRecordsAsync(project, entity, search, sort, dir, page, pageSize);
+        [Description("1ページあたりの件数（既定値 20）")] int pageSize = 20,
+        [Description("カラム別フィルタ。キーはカラム名、値はフィルタ値（任意）")] Dictionary<string, string?>? filters = null)
+        => _service.ListRecordsAsync(project, entity, search, sort, dir, page, pageSize, filters);
 
     [McpServerTool(Name = "get_entity_record", ReadOnly = true)]
     [Description("主キーを指定して、エンティティの単一レコードを取得します。API が disabled の場合はエラーを返します。")]
