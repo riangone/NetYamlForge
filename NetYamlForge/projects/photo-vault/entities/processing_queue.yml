@@ -1,0 +1,85 @@
+imports: []
+entities:
+  processing_queue:
+    table: processing_queue
+    key: queue_id
+    displayName: 处理队列
+    softDelete: false
+
+    columns:
+      queue_id:
+        type: int
+        required: true
+        label: 队列 ID
+        sortable: true
+      photo_id:
+        type: string
+        length: 64
+        required: true
+        label: 照片 ID
+        searchable: true
+        sortable: true
+      file_path:
+        type: string
+        length: 512
+        required: true
+        label: 文件路径
+      status:
+        type: string
+        length: 20
+        required: false
+        label: 状态
+        options: [queued, processing, done, failed, skipped]
+        default: queued
+        searchable: true
+        sortable: true
+      priority:
+        type: int
+        required: false
+        label: 优先级
+        default: 5
+        sortable: true
+      retry_count:
+        type: int
+        required: false
+        label: 重试次数
+        default: 0
+        sortable: true
+      error_message:
+        type: text
+        required: false
+        label: 错误信息
+      provider:
+        type: string
+        length: 20
+        required: false
+        label: AI 提供商
+        options: [ollama, gemini, antigravity]
+        default: ollama
+        searchable: true
+        sortable: true
+      model_name:
+        type: string
+        length: 80
+        required: false
+        label: 使用模型
+      processing_ms:
+        type: int
+        required: false
+        label: 处理耗时（ms）
+        sortable: true
+      queued_at:
+        type: datetime
+        required: false
+        label: 入队时间
+        sortable: true
+      started_at:
+        type: datetime
+        required: false
+        label: 开始时间
+        sortable: true
+      completed_at:
+        type: datetime
+        required: false
+        label: 完成时间
+        sortable: true

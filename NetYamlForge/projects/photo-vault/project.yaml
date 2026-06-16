@@ -1,0 +1,79 @@
+name: photo-vault
+displayName: "📷 Photo Vault"
+version: "1.0.0"
+description: "智能相册资产管理系统 — 基于本地 LLM 的照片语义标注、检索与管理平台"
+
+database:
+  type: sqlite
+  path: database/photo-vault.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+
+  landingPageByRole:
+    viewer:  /photo-vault/Page/Gallery
+    editor:  /photo-vault/Page/Gallery
+    admin:   /photo-vault/Dashboard
+
+  navigation:
+    showDashboard: true
+    showPages: false
+    showEntities: false
+    entities: []
+    items:
+      # ─── 相册浏览 ───
+      - label: 照片画廊
+        url: /photo-vault/Page/Gallery
+        icon: 🖼️
+        section: 相册浏览
+        roles: [viewer, editor, admin]
+      - label: 相册管理
+        url: /photo-vault/Page/Albums
+        icon: 📂
+        section: 相册浏览
+        roles: [viewer, editor, admin]
+      - label: 标签浏览
+        url: /photo-vault/Page/TagBrowser
+        icon: 🏷️
+        section: 相册浏览
+        roles: [viewer, editor, admin]
+
+      # ─── AI 智能中心 ───
+      - label: 语义搜索
+        url: /photo-vault/Page/AiSearch
+        icon: 🔍
+        section: AI 智能中心
+        roles: [viewer, editor, admin]
+      - label: AI 助手
+        url: /photo-vault/Page/AiAssistant
+        icon: 🤖
+        section: AI 智能中心
+        roles: [editor, admin]
+
+      # ─── 运营管理 ───
+      - label: 处理队列
+        url: /photo-vault/Page/ProcessingQueue
+        icon: ⚙️
+        section: 运营管理
+        roles: [editor, admin]
+      - label: AI 提供商
+        url: /photo-vault/Page/AiProvider
+        icon: 🔌
+        section: 运营管理
+        roles: [admin]
+      - label: 照片管理
+        url: /photo-vault/Page/PhotoManage
+        icon: 📋
+        section: 运营管理
+        roles: [editor, admin]
+
+settings:
+  locale: zh-CN
+  timezone: Asia/Shanghai

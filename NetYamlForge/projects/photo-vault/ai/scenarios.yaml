@@ -1,0 +1,149 @@
+allowed_entities:
+  - photos
+  - albums
+  - tags
+  - photo_tags
+  - processing_queue
+allowed_actions:
+  - list
+  - count
+  - get
+  - create
+  - update
+
+# ─── AI 提供商配置 ───────────────────────────────────────────
+providers:
+
+  # 1. 本地 LLM（Ollama OpenAI-compatible endpoint）
+  ollama:
+    enabled: true
+    display_name: "Ollama 本地 LLM"
+    base_url: "http://localhost:11434/v1"
+    vision_model: "llava:13b"
+    text_model: "qwen2.5:7b"
+    max_tokens: 1024
+    temperature: 0.2
+
+  # 2. Gemini API（Google Cloud）
+  gemini:
+    enabled: true
+    display_name: "Google Gemini API"
+    # api_key 从环境变量读取：GEMINI_API_KEY
+    api_key_env: "GEMINI_API_KEY"
+    vision_model: "gemini-2.5-flash"
+    text_model: "gemini-2.5-flash"
+    base_url: "https://generativelanguage.googleapis.com/v1beta"
+    max_tokens: 1024
+    temperature: 0.2
+    # 速率限制（免费额度）
+    rate_limit:
+      requests_per_minute: 15
+      tokens_per_minute: 32000
+
+  # 3. 本地 antigravity CLI
+  antigravity:
+    enabled: true
+    display_name: "Antigravity CLI"
+    # CLI 可执行文件路径（默认 PATH 中查找）
+    bin_path: "antigravity"
+    # 调用模式：vision_annotate / chat / batch
+    modes:
+      vision_annotate:
+        command: "antigravity vision --image {file_path} --prompt {prompt_file} --format json"
+      chat:
+        command: "antigravity chat --message {message} --format text"
+      batch:
+        command: "antigravity batch --input {input_file} --output {output_file} --format json"
+    timeout_seconds: 120
+    max_retries: 3
+
+# 默认标注提供商（可被 processing_queue.provider 字段覆盖）
+default_annotation_provider: ollama
+
+# 标注 Prompt（三个提供商共用）
+annotation_prompt: |
+  你是一个专业的图片分析 AI。请对以下图片进行结构化分析，输出 JSON 格式：
+  {
+    "caption_short": "25字以内的简洁描述",
+    "caption_long": "100字以内的详细描述",
+    "scene_type": "场景类别(indoor/outdoor/portrait/landscape/cityscape/food/animal/document/product/abstract/event/travel之一)",
+    "tags": ["标签1","标签2",...],
+    "subjects": ["主体1","主体2",...],
+    "activities": ["活动1",...],
+    "style_labels": ["风格1",...],
+    "ocr_text": "图中可见文字，不超过300字，无则为null",
+    "person_count": 0,
+    "confidence_score": 0.95,
+    "safety_flag": "safe"
+  }
+
+# ─── 对话场景 ────────────────────────────────────────────────
+scenarios:
+  search_photos:
+    description: "搜索照片"
+    initial_state: "Init"
+    required_slots:
+      - name: "keyword"
+        prompt: "请描述您想查找的照片内容（场景、标签、描述等）"
+        is_required: true
+    optional_slots:
+      - name: "scene_type"
+        prompt: "是否限定场景类别？（例：portrait, landscape, food）"
+        is_required: false
+      - name: "date_range"
+        prompt: "是否指定拍摄时间范围？（例：2024年, 今年夏天）"
+        is_required: false
+    tools:
+      Init:
+        - "query_data"
+
+  album_summary:
+    description: "相册摘要报告"
+    initial_state: "Init"
+    required_slots:
+      - name: "album_name"
+        prompt: "您想了解哪个相册的统计信息？"
+        is_required: true
+    tools:
+      Init:
+        - "query_data"
+
+  annotation_status:
+    description: "标注进度查询"
+    initial_state: "Init"
+    required_slots: []
+    optional_slots:
+      - name: "album_filter"
+        prompt: "是否限定某个相册的标注进度？"
+        is_required: false
+    tools:
+      Init:
+        - "query_data"
+
+  # Gemini 专属：高精度分析
+  gemini_deep_analysis:
+    description: "用 Gemini API 对指定照片做深度分析"
+    provider: gemini
+    initial_state: "Init"
+    required_slots:
+      - name: "photo_id"
+        prompt: "请提供要深度分析的照片 ID"
+        is_required: true
+    tools:
+      Init:
+        - "query_data"
+        - "ai_annotate"
+
+  # Antigravity CLI 专属：批量本地处理
+  antigravity_batch:
+    description: "用 antigravity CLI 批量处理本地照片目录"
+    provider: antigravity
+    initial_state: "Init"
+    required_slots:
+      - name: "directory"
+        prompt: "请输入要批量处理的本地目录路径"
+        is_required: true
+    tools:
+      Init:
+        - "run_cli"
+        - "query_data"

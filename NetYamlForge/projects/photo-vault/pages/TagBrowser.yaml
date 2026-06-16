@@ -1,0 +1,61 @@
+title: 🏷️ 标签浏览器
+description: "按语义标签分类浏览照片，分析 AI 标注质量"
+
+sections:
+  # ─── 标签分类分布 ───
+  - id: tag_category_chart
+    title: 标签分类分布
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(category, '其他') AS label,
+             COUNT(*) AS value
+      FROM tags
+      GROUP BY category
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─── 全标签列表 ───
+  - id: tag_list
+    title: 所有语义标签
+    component: table
+    sourceType: custom
+    source: |
+      SELECT t.name AS 标签名称,
+             t.category AS 分类,
+             COUNT(pt.photo_id) AS 关联照片数,
+             ROUND(AVG(pt.confidence), 3) AS 平均置信度,
+             MAX(pt.source) AS 来源
+      FROM tags t
+      LEFT JOIN photo_tags pt ON t.tag_id = pt.tag_id
+      GROUP BY t.tag_id, t.name, t.category
+      ORDER BY 关联照片数 DESC
+    columns: [标签名称, 分类, 关联照片数, 平均置信度, 来源]
+    pageSize: 50
+    editable: true
+    readOnly: false
+
+  # ─── Top 15 高频标签（条形图） ───
+  - id: top_tag_bar
+    title: Top 15 高频标签
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT t.name AS label,
+             COUNT(pt.photo_id) AS value
+      FROM tags t
+      LEFT JOIN photo_tags pt ON t.tag_id = pt.tag_id
+      GROUP BY t.tag_id, t.name
+      ORDER BY value DESC
+      LIMIT 15
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 15
+    editable: false
+    readOnly: true

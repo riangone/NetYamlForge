@@ -32,9 +32,10 @@ public class SystemDbTestUserSeeder
         // 1. プロジェクト一覧を system.db に登録
         foreach (var project in projects)
         {
+            var now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
             await systemConn.ExecuteAsync(
-                @"INSERT OR IGNORE INTO projects (name, display_name, created_at) VALUES (@Name, @DisplayName, @CreatedAt)",
-                new { project.Name, project.DisplayName, CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") });
+                @"INSERT OR IGNORE INTO projects (name, display_name, created_at, updated_at) VALUES (@Name, @DisplayName, @CreatedAt, @UpdatedAt)",
+                new { project.Name, project.DisplayName, CreatedAt = now, UpdatedAt = now });
         }
 
         // 2. 各プロジェクト DB からユーザーを同期

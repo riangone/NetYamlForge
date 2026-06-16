@@ -288,13 +288,13 @@ CREATE TABLE ""TaskComment"" (
 
         // DCS001 抑制理由：tableName/columnName/columnType はすべて呼び出し元ハードコード値（ユーザー入力なし）
 #pragma warning disable DCS001
-        var columns = await conn.QueryAsync<string>($"SELECT name FROM pragma_table_info('{tableName}')");
+        var columns = await conn.QueryAsync<string>($"SELECT name FROM pragma_table_info('{BareIdentifier(tableName)}')");
         if (columns.Any(c => string.Equals(c, columnName, StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }
 
-        await conn.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {columnType}");
+        await conn.ExecuteAsync($"ALTER TABLE {QuoteIdentifier(tableName)} ADD COLUMN \"{columnName}\" {columnType}");
 #pragma warning restore DCS001
         logger.LogInformation("列を追加しました：{Table}.{Column}", tableName, columnName);
     }
@@ -365,7 +365,7 @@ CREATE TABLE ""TaskComment"" (
                 try
                 {
                     using var cmd = dbConn.CreateCommand();
-                    cmd.CommandText = $"SELECT 1 FROM \"{tableName}\" WHERE 1=0";
+                    cmd.CommandText = $"SELECT 1 FROM {QuoteIdentifier(tableName)} WHERE 1=0";
                     await cmd.ExecuteNonQueryAsync();
                     tableExists = true;
                 }
@@ -386,7 +386,7 @@ CREATE TABLE ""TaskComment"" (
                 var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 using (var cmd = dbConn.CreateCommand())
                 {
-                    cmd.CommandText = $"SELECT * FROM \"{tableName}\" WHERE 1=0";
+                    cmd.CommandText = $"SELECT * FROM {QuoteIdentifier(tableName)} WHERE 1=0";
                     using var reader = await cmd.ExecuteReaderAsync();
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
@@ -416,10 +416,10 @@ CREATE TABLE ""TaskComment"" (
 
                     // DCS001 抑制理由：表名、列名和数据类型均为经过校验或映射的安全值，非外部传入的用户输入
 #pragma warning disable DCS001
-                    var alterSql = $"ALTER TABLE \"{tableName}\" ADD COLUMN \"{colName}\" {sqlType}";
+                    var alterSql = $"ALTER TABLE {QuoteIdentifier(tableName)} ADD COLUMN \"{colName}\" {sqlType}";
                     if (string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase))
                     {
-                        alterSql = $"ALTER TABLE \"{tableName}\" ADD \"{colName}\" {sqlType}";
+                        alterSql = $"ALTER TABLE {QuoteIdentifier(tableName)} ADD \"{colName}\" {sqlType}";
                     }
                     
                     using var alterCmd = dbConn.CreateCommand();
@@ -459,6 +459,13 @@ CREATE TABLE ""TaskComment"" (
         || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
 
     private static string EscapeIdentifier(string value) => value.Replace("\"", "\"\"");
+
+    // 引用符付き or 裸のテーブル名を正規化して SQL 用に二重引用符でラップする
+    private static string QuoteIdentifier(string name) =>
+        $"\"{name.Trim('"').Replace("\"", "\"\"")}\"";
+
+    // pragma など生の識別子が必要な場所用（引用符を除去するだけ）
+    private static string BareIdentifier(string name) => name.Trim('"');
 
     /// <summary>
     /// 当 YAML 中定义的表不存在时，自动根据其属性列创建对应物理表

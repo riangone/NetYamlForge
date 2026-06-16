@@ -1,0 +1,117 @@
+title: ⚙️ AI 处理队列
+description: "监控本地 LLM 标注进度，查看失败任务与性能指标"
+
+sections:
+  # ─── 队列 KPI ───
+  - id: queue_kpi
+    title: 队列状态总览
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '等待处理' AS metric_name,
+             CAST(SUM(CASE WHEN status = 'queued' THEN 1 ELSE 0 END) AS TEXT) AS metric_value,
+             '⏳' AS metric_icon,
+             NULL AS metric_delta
+      FROM processing_queue
+      UNION ALL
+      SELECT '处理中',
+             CAST(SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) AS TEXT),
+             '⚙️', NULL
+      FROM processing_queue
+      UNION ALL
+      SELECT '已完成',
+             CAST(SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) AS TEXT),
+             '✅', NULL
+      FROM processing_queue
+      UNION ALL
+      SELECT '失败任务',
+             CAST(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS TEXT),
+             '❌', NULL
+      FROM processing_queue
+      UNION ALL
+      SELECT '平均耗时（ms）',
+             CAST(ROUND(AVG(CASE WHEN status = 'done' THEN processing_ms END), 0) AS TEXT),
+             '⏱️', NULL
+      FROM processing_queue
+      UNION ALL
+      SELECT '今日完成',
+             CAST(SUM(CASE WHEN status = 'done' AND date(completed_at) = date('now') THEN 1 ELSE 0 END) AS TEXT),
+             '📅', NULL
+      FROM processing_queue
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── 处理中任务 ───
+  - id: active_jobs
+    title: ⚙️ 处理中 / 等待中（最近 20）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT queue_id AS ID,
+             photo_id AS 照片 ID,
+             SUBSTR(file_path, -50) AS 文件路径,
+             status AS 状态,
+             priority AS 优先级,
+             retry_count AS 重试次数,
+             COALESCE(model_name, '—') AS 模型,
+             queued_at AS 入队时间,
+             started_at AS 开始时间
+      FROM processing_queue
+      WHERE status IN ('queued', 'processing')
+      ORDER BY priority DESC, queued_at ASC
+      LIMIT 20
+    columns: [ID, 照片 ID, 文件路径, 状态, 优先级, 重试次数, 模型, 入队时间, 开始时间]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─── 失败任务 ───
+  - id: failed_jobs
+    title: ❌ 失败任务（最近 10）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT queue_id AS ID,
+             photo_id AS 照片 ID,
+             SUBSTR(file_path, -50) AS 文件,
+             retry_count AS 重试次数,
+             SUBSTR(error_message, 1, 120) AS 错误信息,
+             completed_at AS 失败时间
+      FROM processing_queue
+      WHERE status = 'failed'
+      ORDER BY completed_at DESC
+      LIMIT 10
+    columns: [ID, 照片 ID, 文件, 重试次数, 错误信息, 失败时间]
+    pageSize: 10
+    actions:
+      - label: 重新入队
+        url: /photo-vault/Page/ProcessingQueue
+        class: btn-warning
+    editable: false
+    readOnly: true
+
+  # ─── 处理速率（按小时） ───
+  - id: throughput_chart
+    title: 📈 处理速率（过去 24 小时）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%H:00', completed_at) AS label,
+             COUNT(*) AS value
+      FROM processing_queue
+      WHERE status = 'done'
+        AND completed_at >= datetime('now', '-24 hours')
+      GROUP BY strftime('%H', completed_at)
+      ORDER BY label
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 24
+    editable: false
+    readOnly: true

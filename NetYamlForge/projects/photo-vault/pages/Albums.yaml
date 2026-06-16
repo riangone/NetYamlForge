@@ -1,0 +1,83 @@
+title: 📂 相册管理
+description: "创建与管理照片集合，查看相册标注进度"
+
+sections:
+  # ─── 相册统计 ───
+  - id: album_stats
+    title: 相册总览
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '相册总数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📂' AS metric_icon,
+             NULL AS metric_delta
+      FROM albums
+      UNION ALL
+      SELECT '照片总数',
+             CAST(SUM(photo_count) AS TEXT),
+             '📷', NULL
+      FROM albums
+      UNION ALL
+      SELECT '已标注照片',
+             CAST(SUM(annotated_count) AS TEXT),
+             '✅', NULL
+      FROM albums
+      UNION ALL
+      SELECT '标注完成率',
+             CAST(ROUND(
+               100.0 * SUM(annotated_count) / MAX(SUM(photo_count), 1),
+               1
+             ) AS TEXT) || '%',
+             '📊', NULL
+      FROM albums
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 4
+    editable: false
+    readOnly: true
+
+  # ─── 相册列表 ───
+  - id: album_list
+    title: 相册列表
+    component: table
+    sourceType: custom
+    entity: albums
+    source: |
+      SELECT album_id,
+             name AS 相册名称,
+             description AS 描述,
+             photo_count AS 照片数,
+             annotated_count AS 已标注,
+             CAST(ROUND(100.0 * annotated_count / MAX(photo_count, 1), 1) AS TEXT) || '%' AS 完成率,
+             CASE WHEN is_public = 1 THEN '公开' ELSE '私有' END AS 可见性,
+             tags AS 标签,
+             created_at AS 创建时间
+      FROM albums
+      ORDER BY created_at DESC
+    columns: [相册名称, 描述, 照片数, 已标注, 完成率, 可见性, 标签, 创建时间]
+    pageSize: 20
+    editable: true
+    readOnly: false
+
+  # ─── 每相册标注进度（条形图） ───
+  - id: album_progress_chart
+    title: 各相册标注完成率
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT name AS label,
+             ROUND(100.0 * annotated_count / MAX(photo_count, 1), 1) AS value
+      FROM albums
+      WHERE photo_count > 0
+      ORDER BY value DESC
+      LIMIT 15
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 15
+    editable: false
+    readOnly: true

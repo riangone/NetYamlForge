@@ -62,6 +62,7 @@ public static class TableDdlBuilder
             colSqls.Add($"PRIMARY KEY ({pkColsStr})");
         }
 
-        return $"CREATE TABLE \"{tableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";
+        var escapedTableName = tableName.Trim('"').Replace("\"", "\"\"");
+        return $"CREATE TABLE \"{escapedTableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";
     }
 }

@@ -201,9 +201,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    // FallbackPolicy はブラウザ向けページ用なので Cookie のみ。
+    // API エンドポイントは各コントローラーの [Authorize(AuthenticationSchemes = "...,ApiToken")] で個別指定。
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, "ApiToken")
+        .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme)
         .Build();
 });
 

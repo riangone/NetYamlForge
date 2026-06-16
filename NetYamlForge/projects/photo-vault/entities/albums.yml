@@ -1,0 +1,63 @@
+imports: []
+entities:
+  albums:
+    table: albums
+    key: album_id
+    displayName: 相册
+    softDelete: false
+
+    columns:
+      album_id:
+        type: string
+        length: 64
+        required: true
+        label: 相册 ID
+      name:
+        type: string
+        length: 120
+        required: true
+        label: 相册名称
+        searchable: true
+        sortable: true
+      description:
+        type: text
+        required: false
+        label: 描述
+      cover_photo_id:
+        type: string
+        length: 64
+        required: false
+        label: 封面照片 ID
+      source_path:
+        type: string
+        length: 512
+        required: false
+        label: 来源目录
+      photo_count:
+        type: int
+        required: false
+        label: 照片数量
+        default: 0
+        sortable: true
+      annotated_count:
+        type: int
+        required: false
+        label: 已标注数量
+        default: 0
+        sortable: true
+      tags:
+        type: string
+        length: 500
+        required: false
+        label: 标签（逗号分隔）
+        searchable: true
+      is_public:
+        type: bool
+        required: false
+        label: 公开
+        default: false
+      created_at:
+        type: datetime
+        required: false
+        label: 创建时间
+        sortable: true

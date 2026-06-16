@@ -1,0 +1,230 @@
+imports: []
+entities:
+  photos:
+    table: photos
+    key: photo_id
+    displayName: 照片库
+    softDelete: true
+
+    columns:
+      photo_id:
+        type: string
+        length: 64
+        required: true
+        label: 照片 ID
+        searchable: true
+        sortable: true
+
+      # ─── 文件信息 ───
+      file_name:
+        type: string
+        length: 255
+        required: true
+        label: 文件名
+        searchable: true
+        sortable: true
+      file_path:
+        type: string
+        length: 512
+        required: true
+        label: 文件路径
+      file_size:
+        type: int
+        required: false
+        label: 文件大小（字节）
+        sortable: true
+      file_format:
+        type: string
+        length: 20
+        required: false
+        label: 格式
+        options: [JPG, PNG, HEIC, DNG, CR3, WEBP, GIF]
+        searchable: true
+        sortable: true
+      width:
+        type: int
+        required: false
+        label: 宽度（px）
+        sortable: true
+      height:
+        type: int
+        required: false
+        label: 高度（px）
+        sortable: true
+
+      # ─── EXIF 元数据 ───
+      taken_at:
+        type: datetime
+        required: false
+        label: 拍摄时间
+        sortable: true
+      camera_make:
+        type: string
+        length: 80
+        required: false
+        label: 相机品牌
+        searchable: true
+        sortable: true
+      camera_model:
+        type: string
+        length: 80
+        required: false
+        label: 相机型号
+        searchable: true
+        sortable: true
+      lens_model:
+        type: string
+        length: 100
+        required: false
+        label: 镜头型号
+        searchable: true
+      focal_length:
+        type: string
+        length: 20
+        required: false
+        label: 焦距（mm）
+      aperture:
+        type: string
+        length: 20
+        required: false
+        label: 光圈 (f/)
+      shutter_speed:
+        type: string
+        length: 20
+        required: false
+        label: 快门速度
+      iso:
+        type: int
+        required: false
+        label: ISO
+        sortable: true
+      gps_lat:
+        type: decimal
+        required: false
+        label: 纬度
+      gps_lon:
+        type: decimal
+        required: false
+        label: 经度
+      gps_address:
+        type: string
+        length: 255
+        required: false
+        label: 拍摄地点
+        searchable: true
+
+      # ─── AI 标注结果 ───
+      caption_short:
+        type: string
+        length: 255
+        required: false
+        label: 简短描述
+        searchable: true
+      caption_long:
+        type: text
+        required: false
+        label: 详细描述
+        searchable: true
+      scene_type:
+        type: string
+        length: 80
+        required: false
+        label: 场景分类
+        searchable: true
+        sortable: true
+        options:
+          - indoor
+          - outdoor
+          - portrait
+          - landscape
+          - cityscape
+          - food
+          - animal
+          - document
+          - product
+          - abstract
+          - event
+          - travel
+      subjects:
+        type: text
+        required: false
+        label: 主体（JSON 数组）
+      activities:
+        type: text
+        required: false
+        label: 活动（JSON 数组）
+      style_labels:
+        type: text
+        required: false
+        label: 风格标签（JSON 数组）
+      ocr_text:
+        type: text
+        required: false
+        label: OCR 文字
+        searchable: true
+      person_count:
+        type: int
+        required: false
+        label: 人数
+        sortable: true
+      confidence_score:
+        type: decimal
+        required: false
+        label: AI 置信度
+        sortable: true
+      safety_flag:
+        type: string
+        length: 20
+        required: false
+        label: 安全标记
+        options: [safe, review, nsfw]
+        sortable: true
+
+      # ─── 状态与关联 ───
+      album_id:
+        type: string
+        length: 64
+        required: false
+        label: 所属相册
+        searchable: true
+        sortable: true
+      annotation_status:
+        type: string
+        length: 20
+        required: false
+        label: 标注状态
+        options: [pending, processing, done, failed, skipped]
+        default: pending
+        searchable: true
+        sortable: true
+      annotation_model:
+        type: string
+        length: 80
+        required: false
+        label: 使用模型
+      annotation_at:
+        type: datetime
+        required: false
+        label: 标注时间
+        sortable: true
+      thumb_path:
+        type: string
+        length: 512
+        required: false
+        label: 缩略图路径
+      is_favorite:
+        type: bool
+        required: false
+        label: 收藏
+        default: false
+        sortable: true
+      created_at:
+        type: datetime
+        required: false
+        label: 入库时间
+        sortable: true
+      updated_at:
+        type: datetime
+        required: false
+        label: 更新时间
+        sortable: true

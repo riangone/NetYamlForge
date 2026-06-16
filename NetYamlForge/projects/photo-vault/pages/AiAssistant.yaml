@@ -1,0 +1,72 @@
+title: 🤖 AI 照片助手
+description: "用自然语言与三路 AI 后端对话：Ollama 本地 LLM、Google Gemini API、Antigravity CLI"
+
+sections:
+  # ─── AI 模型状态 ───
+  - id: ai_model_status
+    title: 🖥️ AI 提供商状态
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '已标注照片' AS metric_name,
+             CAST(SUM(CASE WHEN annotation_status = 'done' THEN 1 ELSE 0 END) AS TEXT) AS metric_value,
+             '✅' AS metric_icon,
+             NULL AS metric_delta
+      FROM photos WHERE deleted_at IS NULL
+      UNION ALL
+      SELECT '今日新增标注',
+             CAST(SUM(CASE WHEN annotation_status = 'done'
+                            AND date(annotation_at) = date('now') THEN 1 ELSE 0 END) AS TEXT),
+             '📅', NULL
+      FROM photos WHERE deleted_at IS NULL
+      UNION ALL
+      SELECT 'Gemini 已完成',
+             CAST(COUNT(*) AS TEXT),
+             '✨', NULL
+      FROM processing_queue WHERE provider = 'gemini' AND status = 'done'
+      UNION ALL
+      SELECT 'Antigravity 已完成',
+             CAST(COUNT(*) AS TEXT),
+             '⚡', NULL
+      FROM processing_queue WHERE provider = 'antigravity' AND status = 'done'
+      UNION ALL
+      SELECT '失败任务',
+             CAST(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS TEXT),
+             '❌', NULL
+      FROM processing_queue
+      UNION ALL
+      SELECT '队列等待',
+             CAST(SUM(CASE WHEN status = 'queued' THEN 1 ELSE 0 END) AS TEXT),
+             '⏳', NULL
+      FROM processing_queue
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── 最近 AI 标注活动 ───
+  - id: recent_annotations
+    title: 📡 最近标注活动（直近 15 张）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.file_name AS 文件名,
+             p.scene_type AS 场景,
+             COALESCE(p.caption_short, '—') AS AI 描述,
+             COALESCE(p.annotation_model, '—') AS 模型,
+             ROUND(p.confidence_score, 2) AS 置信度,
+             p.annotation_at AS 标注时间
+      FROM photos p
+      WHERE p.deleted_at IS NULL
+        AND p.annotation_status = 'done'
+        AND p.annotation_at IS NOT NULL
+      ORDER BY p.annotation_at DESC
+      LIMIT 15
+    columns: [文件名, 场景, AI 描述, 模型, 置信度, 标注时间]
+    pageSize: 15
+    editable: false
+    readOnly: true

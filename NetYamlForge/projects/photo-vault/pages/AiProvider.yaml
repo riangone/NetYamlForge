@@ -1,0 +1,133 @@
+title: 🔌 AI 提供商管理
+description: "配置与监控三路 AI 标注后端：Ollama 本地 LLM、Google Gemini API、Antigravity CLI"
+
+sections:
+  # ─── 提供商状态概览 ───
+  - id: provider_stats
+    title: 📊 各提供商标注统计
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'Ollama 本地 LLM' AS provider_label,
+             CAST(COUNT(*) AS TEXT) AS total,
+             '🖥️' AS icon,
+             NULL AS delta
+      FROM processing_queue WHERE provider = 'ollama' AND status = 'done'
+      UNION ALL
+      SELECT 'Gemini API',
+             CAST(COUNT(*) AS TEXT),
+             '✨', NULL
+      FROM processing_queue WHERE provider = 'gemini' AND status = 'done'
+      UNION ALL
+      SELECT 'Antigravity CLI',
+             CAST(COUNT(*) AS TEXT),
+             '⚡', NULL
+      FROM processing_queue WHERE provider = 'antigravity' AND status = 'done'
+      UNION ALL
+      SELECT '队列待处理（全部）',
+             CAST(COUNT(*) AS TEXT),
+             '⏳', NULL
+      FROM processing_queue WHERE status = 'queued'
+    columns: [provider_label, total, icon, delta]
+    labelField: provider_label
+    valueField: total
+    iconField: icon
+    deltaField: delta
+    pageSize: 4
+    editable: false
+    readOnly: true
+
+  # ─── 队列分布（按提供商） ───
+  - id: queue_by_provider
+    title: 📋 处理队列（按提供商分组）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+          COALESCE(provider, 'ollama') AS 提供商,
+          SUM(CASE WHEN status = 'queued'     THEN 1 ELSE 0 END) AS 等待中,
+          SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) AS 处理中,
+          SUM(CASE WHEN status = 'done'       THEN 1 ELSE 0 END) AS 已完成,
+          SUM(CASE WHEN status = 'failed'     THEN 1 ELSE 0 END) AS 失败,
+          ROUND(AVG(CASE WHEN processing_ms IS NOT NULL THEN processing_ms END), 0) AS 平均耗时ms
+      FROM processing_queue
+      GROUP BY COALESCE(provider, 'ollama')
+      ORDER BY 提供商
+    columns: [提供商, 等待中, 处理中, 已完成, 失败, 平均耗时ms]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─── Gemini API 最近任务 ───
+  - id: gemini_recent
+    title: ✨ Gemini API — 最近 10 条记录
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+          q.queue_id AS ID,
+          p.file_name AS 文件名,
+          q.status AS 状态,
+          q.retry_count AS 重试,
+          q.model_name AS 模型,
+          q.processing_ms AS 耗时ms,
+          q.error_message AS 错误信息,
+          q.completed_at AS 完成时间
+      FROM processing_queue q
+      JOIN photos p ON p.photo_id = q.photo_id
+      WHERE q.provider = 'gemini'
+      ORDER BY q.completed_at DESC NULLS LAST, q.queued_at DESC
+      LIMIT 10
+    columns: [ID, 文件名, 状态, 重试, 模型, 耗时ms, 错误信息, 完成时间]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─── Antigravity CLI 最近任务 ───
+  - id: antigravity_recent
+    title: ⚡ Antigravity CLI — 最近 10 条记录
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+          q.queue_id AS ID,
+          p.file_name AS 文件名,
+          q.status AS 状态,
+          q.retry_count AS 重试,
+          q.model_name AS 模型,
+          q.processing_ms AS 耗时ms,
+          q.error_message AS 错误信息,
+          q.completed_at AS 完成时间
+      FROM processing_queue q
+      JOIN photos p ON p.photo_id = q.photo_id
+      WHERE q.provider = 'antigravity'
+      ORDER BY q.completed_at DESC NULLS LAST, q.queued_at DESC
+      LIMIT 10
+    columns: [ID, 文件名, 状态, 重试, 模型, 耗时ms, 错误信息, 完成时间]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─── 失败任务（全部提供商） ───
+  - id: failed_tasks
+    title: ❌ 失败任务（重试 > 3）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+          q.queue_id AS ID,
+          COALESCE(q.provider, 'ollama') AS 提供商,
+          p.file_name AS 文件名,
+          q.retry_count AS 重试次数,
+          q.error_message AS 最后错误,
+          q.queued_at AS 入队时间
+      FROM processing_queue q
+      JOIN photos p ON p.photo_id = q.photo_id
+      WHERE q.status = 'failed'
+        AND q.retry_count > 3
+      ORDER BY q.queued_at DESC
+      LIMIT 20
+    columns: [ID, 提供商, 文件名, 重试次数, 最后错误, 入队时间]
+    pageSize: 20
+    editable: false
+    readOnly: true

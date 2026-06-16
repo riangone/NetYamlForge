@@ -1,0 +1,63 @@
+title: 📋 照片管理
+description: "查看和管理所有照片记录，手动触发重新标注，编辑元数据"
+
+sections:
+  # ─── 照片完整列表 ───
+  - id: photo_list
+    title: 照片列表
+    component: table
+    sourceType: custom
+    entity: photos
+    source: |
+      SELECT p.photo_id,
+             p.file_name AS 文件名,
+             p.file_format AS 格式,
+             p.width || 'x' || p.height AS 分辨率,
+             COALESCE(a.name, '—') AS 相册,
+             COALESCE(p.scene_type, '—') AS 场景,
+             COALESCE(p.caption_short, '—') AS AI 描述,
+             p.person_count AS 人数,
+             CASE p.annotation_status
+               WHEN 'done'       THEN '✅ 完成'
+               WHEN 'pending'    THEN '⏳ 待处理'
+               WHEN 'processing' THEN '⚙️ 处理中'
+               WHEN 'failed'     THEN '❌ 失败'
+               WHEN 'skipped'    THEN '⏭️ 已跳过'
+               ELSE p.annotation_status
+             END AS 标注状态,
+             CASE WHEN p.is_favorite = 1 THEN '⭐' ELSE '—' END AS 收藏,
+             COALESCE(p.taken_at, p.created_at) AS 时间
+      FROM photos p
+      LEFT JOIN albums a ON p.album_id = a.album_id
+      WHERE p.deleted_at IS NULL
+      ORDER BY p.created_at DESC
+    columns: [文件名, 格式, 分辨率, 相册, 场景, AI 描述, 人数, 标注状态, 收藏, 时间]
+    pageSize: 30
+    editable: true
+    readOnly: false
+
+  # ─── 标注状态分布 ───
+  - id: status_chart
+    title: 标注状态分布
+    component: pie_chart
+    sourceType: custom
+    source: |
+      SELECT CASE annotation_status
+               WHEN 'done'       THEN '✅ 完成'
+               WHEN 'pending'    THEN '⏳ 待处理'
+               WHEN 'processing' THEN '⚙️ 处理中'
+               WHEN 'failed'     THEN '❌ 失败'
+               WHEN 'skipped'    THEN '⏭️ 已跳过'
+               ELSE annotation_status
+             END AS label,
+             COUNT(*) AS value
+      FROM photos
+      WHERE deleted_at IS NULL
+      GROUP BY annotation_status
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 6
+    editable: false
+    readOnly: true

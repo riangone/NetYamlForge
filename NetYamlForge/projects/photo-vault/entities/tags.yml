@@ -1,0 +1,85 @@
+imports: []
+entities:
+  tags:
+    table: tags
+    key: tag_id
+    displayName: 语义标签
+    softDelete: false
+
+    columns:
+      tag_id:
+        type: string
+        length: 64
+        required: true
+        label: 标签 ID
+      name:
+        type: string
+        length: 100
+        required: true
+        label: 标签名称
+        searchable: true
+        sortable: true
+        unique: true
+      category:
+        type: string
+        length: 50
+        required: false
+        label: 分类
+        searchable: true
+        sortable: true
+        options: [scene, object, person, activity, style, emotion, color, location, time, other]
+      usage_count:
+        type: int
+        required: false
+        label: 使用次数
+        default: 0
+        sortable: true
+      created_at:
+        type: datetime
+        required: false
+        label: 创建时间
+        sortable: true
+
+  photo_tags:
+    table: photo_tags
+    key: id
+    displayName: 照片标签关联
+    softDelete: false
+
+    columns:
+      id:
+        type: int
+        required: true
+        label: ID
+      photo_id:
+        type: string
+        length: 64
+        required: true
+        label: 照片 ID
+        searchable: true
+        sortable: true
+      tag_id:
+        type: string
+        length: 64
+        required: true
+        label: 标签 ID
+        searchable: true
+        sortable: true
+      tag_name:
+        type: string
+        length: 100
+        required: false
+        label: 标签名称
+        searchable: true
+      confidence:
+        type: decimal
+        required: false
+        label: 置信度
+        sortable: true
+      source:
+        type: string
+        length: 20
+        required: false
+        label: 来源
+        options: [ai, manual]
+        default: ai

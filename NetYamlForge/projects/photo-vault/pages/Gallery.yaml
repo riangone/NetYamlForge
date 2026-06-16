@@ -1,0 +1,137 @@
+title: 📷 照片画廊
+description: "按场景、标签、相册浏览全部照片"
+
+sections:
+  # ─── KPI 统计卡 ───
+  - id: gallery_kpi
+    title: 库存概览
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '总照片数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📷' AS metric_icon,
+             NULL AS metric_delta
+      FROM photos WHERE deleted_at IS NULL
+      UNION ALL
+      SELECT 'AI 已标注',
+             CAST(SUM(CASE WHEN annotation_status = 'done' THEN 1 ELSE 0 END) AS TEXT),
+             '✅', NULL
+      FROM photos WHERE deleted_at IS NULL
+      UNION ALL
+      SELECT '待处理',
+             CAST(SUM(CASE WHEN annotation_status IN ('pending','processing') THEN 1 ELSE 0 END) AS TEXT),
+             '⏳', NULL
+      FROM photos WHERE deleted_at IS NULL
+      UNION ALL
+      SELECT '相册数量',
+             CAST(COUNT(*) AS TEXT),
+             '📂', NULL
+      FROM albums
+      UNION ALL
+      SELECT '语义标签数',
+             CAST(COUNT(*) AS TEXT),
+             '🏷️', NULL
+      FROM tags
+      UNION ALL
+      SELECT '收藏照片',
+             CAST(SUM(CASE WHEN is_favorite = 1 THEN 1 ELSE 0 END) AS TEXT),
+             '⭐', NULL
+      FROM photos WHERE deleted_at IS NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── 场景分类分布 ───
+  - id: scene_chart
+    title: 场景分类分布
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(scene_type, '未分类') AS label,
+             COUNT(*) AS value
+      FROM photos
+      WHERE deleted_at IS NULL AND annotation_status = 'done'
+      GROUP BY scene_type
+      ORDER BY value DESC
+      LIMIT 12
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 12
+    editable: false
+    readOnly: true
+
+  # ─── 热门标签 Top 20 ───
+  - id: top_tags
+    title: 🏷️ 热门标签 Top 20
+    component: table
+    sourceType: custom
+    source: |
+      SELECT t.name AS 标签,
+             t.category AS 分类,
+             COUNT(pt.photo_id) AS 照片数,
+             ROUND(AVG(pt.confidence), 2) AS 平均置信度
+      FROM tags t
+      LEFT JOIN photo_tags pt ON t.tag_id = pt.tag_id
+      GROUP BY t.tag_id, t.name, t.category
+      ORDER BY 照片数 DESC
+      LIMIT 20
+    columns: [标签, 分类, 照片数, 平均置信度]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # ─── 最新入库照片 ───
+  - id: recent_photos
+    title: 📅 最近入库（30 张）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT p.file_name AS 文件名,
+             p.file_format AS 格式,
+             p.scene_type AS 场景,
+             COALESCE(p.caption_short, '—') AS AI 描述,
+             COALESCE(a.name, '未分相册') AS 相册,
+             CASE p.annotation_status
+               WHEN 'done'       THEN '✅ 已标注'
+               WHEN 'processing' THEN '⚙️ 处理中'
+               WHEN 'pending'    THEN '⏳ 待处理'
+               WHEN 'failed'     THEN '❌ 失败'
+               ELSE p.annotation_status
+             END AS 状态,
+             COALESCE(p.taken_at, p.created_at) AS 时间
+      FROM photos p
+      LEFT JOIN albums a ON p.album_id = a.album_id
+      WHERE p.deleted_at IS NULL
+      ORDER BY p.created_at DESC
+      LIMIT 30
+    columns: [文件名, 格式, 场景, AI 描述, 相册, 状态, 时间]
+    pageSize: 30
+    editable: false
+    readOnly: true
+
+  # ─── 拍摄时间线（按月） ───
+  - id: timeline_chart
+    title: 📅 拍摄时间线（按月）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', taken_at) AS label,
+             COUNT(*) AS value
+      FROM photos
+      WHERE deleted_at IS NULL AND taken_at IS NOT NULL
+      GROUP BY strftime('%Y-%m', taken_at)
+      ORDER BY label DESC
+      LIMIT 24
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 24
+    editable: false
+    readOnly: true
