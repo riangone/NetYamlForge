@@ -1,0 +1,207 @@
+imports: []
+entities:
+  payment_plans:
+    table: payment_plans
+    key: plan_id
+    displayName: ローン・支払プラン
+    softDelete: false
+    isPublic: false
+
+    columns:
+      plan_id:
+        type: string
+        length: 50
+        required: true
+        label: プラン ID
+        searchable: true
+        sortable: true
+      lead_id:
+        type: string
+        length: 50
+        required: false
+        label: リード ID
+        searchable: false
+        sortable: true
+        reference:
+          entity: sales_leads
+          key: lead_id
+          display: lead_id
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: customers
+          key: customer_id
+          display: name
+      vehicle_id:
+        type: string
+        length: 50
+        required: true
+        label: 車両 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: vehicles
+          key: vehicle_id
+          display: model
+      plan_type:
+        type: string
+        length: 20
+        required: true
+        label: プラン種別
+        default: loan
+        options:
+          - cash
+          - loan
+          - lease
+        searchable: true
+        sortable: true
+      total_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        label: 車両総額（円）
+        sortable: true
+      down_payment:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 頭金（円）
+        default: 0
+        sortable: true
+      loan_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: ローン金額（円）
+        sortable: true
+      interest_rate:
+        type: decimal
+        precision: 5
+        scale: 3
+        required: false
+        label: 年利（%）
+        sortable: true
+      term_months:
+        type: int
+        required: false
+        label: 回数（月）
+        sortable: true
+      monthly_payment:
+        type: decimal
+        precision: 10
+        scale: 2
+        required: false
+        label: 月次支払額（円）
+        sortable: true
+      balloon_payment:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 残価設定額（円）
+        sortable: true
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        default: simulation
+        options:
+          - simulation
+          - approved
+          - active
+          - completed
+          - cancelled
+        searchable: true
+        sortable: true
+      contract_date:
+        type: date
+        required: false
+        label: 契約日
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_by:
+        type: string
+        length: 50
+        required: false
+        label: 作成者
+        searchable: false
+        sortable: false
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: true
+      vehicle_id:
+        type: string
+        required: true
+        label: 車両 ID
+        editable: true
+      plan_type:
+        type: select
+        required: true
+        label: プラン種別
+        editable: true
+      total_amount:
+        type: number
+        required: true
+        label: 車両総額
+        editable: true
+      down_payment:
+        type: number
+        required: false
+        label: 頭金
+        editable: true
+      interest_rate:
+        type: number
+        required: false
+        label: 年利（%）
+        editable: true
+      term_months:
+        type: number
+        required: false
+        label: 回数（月）
+        editable: true
+      balloon_payment:
+        type: number
+        required: false
+        label: 残価設定額
+        editable: true
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+      notes:
+        type: textarea
+        required: false
+        label: 備考
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

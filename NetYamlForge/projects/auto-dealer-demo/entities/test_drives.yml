@@ -1,0 +1,185 @@
+imports: []
+entities:
+  test_drives:
+    table: test_drives
+    key: test_drive_id
+    displayName: 試乗記録
+    softDelete: false
+    isPublic: false
+
+    columns:
+      test_drive_id:
+        type: string
+        length: 50
+        required: true
+        label: 試乗 ID
+        searchable: true
+        sortable: true
+      lead_id:
+        type: string
+        length: 50
+        required: false
+        label: リード ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: sales_leads
+          key: lead_id
+          display: lead_id
+      customer_id:
+        type: string
+        length: 50
+        required: true
+        label: 顧客 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: customers
+          key: customer_id
+          display: name
+      vehicle_id:
+        type: string
+        length: 50
+        required: true
+        label: 車両 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: vehicles
+          key: vehicle_id
+          display: model
+      assigned_staff_id:
+        type: string
+        length: 50
+        required: false
+        label: 担当スタッフ ID
+        searchable: false
+        sortable: true
+        reference:
+          entity: employees
+          key: employee_id
+          display: name
+      branch_id:
+        type: string
+        length: 50
+        required: false
+        label: 拠点 ID
+        searchable: false
+        sortable: true
+      scheduled_at:
+        type: datetime
+        required: true
+        label: 予定日時
+        sortable: true
+      actual_start_at:
+        type: datetime
+        required: false
+        label: 実施開始日時
+        sortable: true
+      actual_end_at:
+        type: datetime
+        required: false
+        label: 実施終了日時
+        sortable: true
+      status:
+        type: string
+        length: 20
+        required: true
+        label: ステータス
+        default: scheduled
+        options:
+          - scheduled
+          - completed
+          - cancelled
+          - no_show
+        searchable: true
+        sortable: true
+      feedback_score:
+        type: int
+        required: false
+        label: 顧客満足度（1-5）
+        sortable: true
+      feedback_notes:
+        type: text
+        required: false
+        label: 顧客フィードバック
+      staff_notes:
+        type: text
+        required: false
+        label: スタッフメモ
+      next_action:
+        type: string
+        length: 30
+        required: false
+        label: 次アクション
+        default: revisit
+        options:
+          - quote
+          - revisit
+          - lost
+          - contract
+          - other
+        searchable: true
+        sortable: true
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      customer_id:
+        type: string
+        required: true
+        label: 顧客 ID
+        editable: true
+      vehicle_id:
+        type: string
+        required: true
+        label: 車両 ID
+        editable: true
+      assigned_staff_id:
+        type: string
+        required: false
+        label: 担当スタッフ ID
+        editable: true
+      scheduled_at:
+        type: datetime
+        required: true
+        label: 予定日時
+        editable: true
+      status:
+        type: select
+        required: true
+        label: ステータス
+        editable: true
+      feedback_score:
+        type: number
+        required: false
+        label: 顧客満足度（1-5）
+        editable: true
+      feedback_notes:
+        type: textarea
+        required: false
+        label: 顧客フィードバック
+        editable: true
+      staff_notes:
+        type: textarea
+        required: false
+        label: スタッフメモ
+        editable: true
+      next_action:
+        type: select
+        required: false
+        label: 次アクション
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

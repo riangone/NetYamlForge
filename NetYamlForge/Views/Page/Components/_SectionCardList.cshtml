@@ -3,11 +3,15 @@
 @{
     var sec = Model.Sec;
     var rows = Model.Rows;
-    var titleField = sec.TitleField ?? (sec.GetColumnAt(0));
-    var subtitleField = sec.SubtitleField ?? (sec.GetColumnAt(1));
+    var titleField       = sec.TitleField       ?? (sec.GetColumnAt(0));
+    var subtitleField    = sec.SubtitleField    ?? (sec.GetColumnAt(1));
     var descriptionField = sec.DescriptionField ?? (sec.GetColumnAt(2));
-    var imageField = sec.ImageField;
-    var actionUrl = sec.ActionUrl;
+    var imageField       = sec.ImageField;
+    var captionField     = sec.CaptionField;
+    var actionUrl        = sec.ActionUrl;
+
+    // unique id per section to avoid conflicts when multiple card_lists on one page
+    var sectionId = $"cl_{sec.Id ?? Guid.NewGuid().ToString("N")[..8]}";
 }
 
 @if (!string.IsNullOrEmpty(sec.Title))
@@ -15,66 +19,199 @@
     <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
 }
 
-<div class="card-list-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+<div class="card-list-container grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3"
+     id="@sectionId">
+    @{int idx = 0;}
     @foreach (var row in rows)
     {
-        var title = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
-        var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? st?.ToString() ?? "" : "";
-        var description = !string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d) ? d?.ToString() ?? "" : "";
-        var imageUrl = !string.IsNullOrEmpty(imageField) && row.TryGetValue(imageField, out var img) ? img?.ToString() ?? "" : "";
+        var title       = row.TryGetValue(titleField, out var t)   ? t?.ToString() ?? "" : "";
+        var subtitle    = !string.IsNullOrEmpty(subtitleField)    && row.TryGetValue(subtitleField,    out var st) ? st?.ToString() ?? "" : "";
+        var description = !string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d)  ? d?.ToString()  ?? "" : "";
+        var imageUrl    = !string.IsNullOrEmpty(imageField)       && row.TryGetValue(imageField,       out var img) ? img?.ToString() ?? "" : "";
+        var caption     = !string.IsNullOrEmpty(captionField)     && row.TryGetValue(captionField,     out var cap) ? cap?.ToString() ?? "" : description;
 
-        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow">
+        // Use thumbnail API for grid; Lightbox shows full-res original
+        var thumbUrl = string.IsNullOrEmpty(imageUrl) ? "" :
+            imageUrl.StartsWith("/uploads/photo-vault/") || imageUrl.StartsWith("uploads/photo-vault/")
+                ? $"/nyf/photo/thumb/{System.IO.Path.GetFileName(imageUrl)}?w=400"
+                : imageUrl;
+
+        <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow overflow-hidden">
             @if (!string.IsNullOrEmpty(imageUrl))
             {
-                <figure class="px-4 pt-4">
-                    <img src="@imageUrl" alt="@title" class="rounded-xl h-40 w-full object-cover" />
+                <figure class="relative cursor-pointer group"
+                        onclick="nyf_lb_open('@sectionId', @idx)"
+                        title="点击放大">
+                    <img src="@thumbUrl"
+                         alt="@title"
+                         loading="lazy"
+                         class="h-40 w-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                        </svg>
+                    </div>
                 </figure>
             }
-            <div class="card-body p-4">
+            <div class="card-body p-3">
                 @if (!string.IsNullOrEmpty(subtitle))
                 {
-                    <div class="card-actions justify-start mb-1">
-                        <div class="badge badge-outline badge-sm">@subtitle</div>
+                    <div class="mb-1">
+                        <div class="badge badge-outline badge-xs">@subtitle</div>
                     </div>
                 }
-                <h3 class="font-bold text-lg">@title</h3>
+                <h3 class="font-semibold text-sm truncate" title="@title">@title</h3>
                 @if (!string.IsNullOrEmpty(description))
                 {
-                    <p class="text-sm text-gray-500 line-clamp-2">@description</p>
+                    <p class="text-xs text-gray-500 line-clamp-2">@description</p>
                 }
-                
-                @* ── アクションボタン ──────────────────────────────────── *@
+
                 @if (sec.Actions != null && sec.Actions.Count > 0)
                 {
-                    <div class="card-actions justify-end mt-3 pt-3 border-t border-gray-100">
+                    <div class="card-actions justify-end mt-2 pt-2 border-t border-gray-100">
                         @foreach (var action in sec.Actions)
                         {
                             var url = action.Url;
-                            // プレースホルダーを行の値で置換
                             foreach (var kv in row)
                             {
-                                var placeholder = $"{{{kv.Key}}}";
-                                if (url.Contains(placeholder))
-                                {
-                                    url = url.Replace(placeholder, kv.Value?.ToString() ?? "");
-                                }
+                                url = url.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
                             }
-                            
-                            var btnClass = string.IsNullOrEmpty(action.Class) 
-                                ? "btn btn-outline btn-sm" 
-                                : $"btn {action.Class} btn-sm";
-                            
-                            <a href="@url" class="@btnClass">
-                                @action.Label
-                            </a>
+                            var btnClass = string.IsNullOrEmpty(action.Class)
+                                ? "btn btn-outline btn-xs"
+                                : $"btn {action.Class} btn-xs";
+                            <a href="@url" class="@btnClass">@action.Label</a>
                         }
                     </div>
                 }
             </div>
         </div>
+        idx++;
     }
     @if (!rows.Any())
     {
         <div class="col-span-full text-center text-gray-400 py-8">No data available</div>
     }
 </div>
+
+@* ── Lightbox overlay ─────────────────────────────────────────────── *@
+@if (!string.IsNullOrEmpty(imageField) && rows.Any())
+{
+    <!-- build JS data array -->
+    <script>
+    (function(){
+      var _data = [
+        @foreach (var row in rows)
+        {
+            var imageUrl = !string.IsNullOrEmpty(imageField) && row.TryGetValue(imageField, out var img) ? img?.ToString() ?? "" : "";
+            if (string.IsNullOrEmpty(imageUrl)) continue;
+            var title    = row.TryGetValue(titleField, out var t) ? (t?.ToString() ?? "").Replace("'","\'") : "";
+            var caption  = !string.IsNullOrEmpty(captionField) && row.TryGetValue(captionField, out var cap)
+                            ? (cap?.ToString() ?? "").Replace("'","\'")
+                            : (!string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d)
+                                ? (d?.ToString() ?? "").Replace("'","\'") : "");
+            var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? (st?.ToString() ?? "").Replace("'","\'") : "";
+            <text>{'src':'@imageUrl','title':'@title','caption':'@caption','subtitle':'@subtitle'},</text>
+        }
+      ];
+      if(!window._nyf_lb) window._nyf_lb = {};
+      window._nyf_lb['@sectionId'] = _data;
+    })();
+    </script>
+
+    <div id="@(sectionId)_modal"
+         class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center bg-black/90"
+         role="dialog" aria-modal="true" aria-label="图片预览"
+         onclick="if(event.target===this)nyf_lb_close('@sectionId')">
+
+        <!-- close button -->
+        <button class="absolute top-4 right-4 text-white/80 hover:text-white z-10"
+                onclick="nyf_lb_close('@sectionId')" title="关闭 (Esc)">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <!-- prev -->
+        <button class="absolute left-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white z-10 p-2"
+                onclick="nyf_lb_nav('@sectionId',-1)" title="上一张 (←)">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+
+        <!-- image container -->
+        <div class="flex flex-col items-center max-w-5xl w-full px-16 select-none">
+            <img id="@(sectionId)_img"
+                 src="" alt=""
+                 class="max-h-[75vh] max-w-full object-contain rounded shadow-2xl" />
+            <div class="mt-4 text-center">
+                <div id="@(sectionId)_title"   class="text-white font-semibold text-lg"></div>
+                <div id="@(sectionId)_subtitle" class="text-white/60 text-sm mt-1"></div>
+                <div id="@(sectionId)_caption" class="text-white/80 text-sm mt-1 max-w-2xl"></div>
+                <div id="@(sectionId)_counter" class="text-white/40 text-xs mt-2"></div>
+            </div>
+        </div>
+
+        <!-- next -->
+        <button class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white z-10 p-2"
+                onclick="nyf_lb_nav('@sectionId',1)" title="下一张 (→)">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </div>
+}
+
+@* ── Lightbox JS (injected once; idempotent) ────────────────────── *@
+<script>
+if(!window._nyf_lb_init){
+  window._nyf_lb_init = true;
+  var _cur_section = null, _cur_idx = 0;
+
+  window.nyf_lb_open = function(sectionId, idx){
+    var data = (window._nyf_lb||{})[sectionId];
+    if(!data||!data.length) return;
+    _cur_section = sectionId;
+    _cur_idx = idx;
+    _nyf_lb_show();
+    var modal = document.getElementById(sectionId+'_modal');
+    if(modal){ modal.style.display='flex'; document.body.style.overflow='hidden'; }
+  };
+
+  window.nyf_lb_close = function(sectionId){
+    var modal = document.getElementById((sectionId||_cur_section)+'_modal');
+    if(modal){ modal.style.display='none'; document.body.style.overflow=''; }
+    _cur_section = null;
+  };
+
+  window.nyf_lb_nav = function(sectionId, dir){
+    var data = (window._nyf_lb||{})[sectionId];
+    if(!data||!data.length) return;
+    _cur_idx = (_cur_idx + dir + data.length) % data.length;
+    _cur_section = sectionId;
+    _nyf_lb_show();
+  };
+
+  function _nyf_lb_show(){
+    var data = (window._nyf_lb||{})[_cur_section];
+    if(!data) return;
+    var item = data[_cur_idx];
+    var el = function(id){ return document.getElementById(_cur_section+'_'+id); };
+    el('img').src = item.src;
+    el('img').alt = item.title;
+    el('title').textContent   = item.title   || '';
+    el('subtitle').textContent= item.subtitle|| '';
+    el('caption').textContent = item.caption || '';
+    el('counter').textContent = (_cur_idx+1)+' / '+data.length;
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(!_cur_section) return;
+    if(e.key==='Escape')       nyf_lb_close(_cur_section);
+    if(e.key==='ArrowLeft')    nyf_lb_nav(_cur_section,-1);
+    if(e.key==='ArrowRight')   nyf_lb_nav(_cur_section,1);
+  });
+}
+</script>

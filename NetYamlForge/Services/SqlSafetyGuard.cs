@@ -10,13 +10,13 @@ namespace NetYamlForge.Services;
 /// </summary>
 public static class SqlSafetyGuard
 {
-    /// <summary>識別子（テーブル名、列名など）の正規表現。単純識別子またはSQLite括弧引用形式 [Name With Spaces] をサポート</summary>
+    /// <summary>識別子（テーブル名、列名など）の正規表現。単純識別子またはSQLite括弧引用形式 [Name With Spaces] をサポート。Unicode（日本語・中国語等）対応</summary>
     public static readonly Regex IdentifierRegex =
-        new(@"^([A-Za-z_][A-Za-z0-9_]*|\[[A-Za-z_][A-Za-z0-9_ ]+\])$", RegexOptions.Compiled);
+        new(@"^([\p{L}_][\p{L}\p{N}_]*|\[[\p{L}_][\p{L}\p{N}_ ]+\])$", RegexOptions.Compiled);
 
-    /// <summary>SQL 式（WHERE 句など）の正規表現</summary>
+    /// <summary>SQL 式（WHERE 句など）の正規表現。Unicode（日本語・中国語等）対応</summary>
     public static readonly Regex ExpressionRegex =
-        new(@"^[A-Za-z0-9_.\s,()+*/%<>=!'|-]+$", RegexOptions.Compiled);
+        new(@"^[\p{L}\p{N}_.\s,()+*/%<>=!'|-]+$", RegexOptions.Compiled);
 
     /// <summary>識別子として有効かどうかを判定</summary>
     public static bool IsValidIdentifier(string value) =>

@@ -1,0 +1,181 @@
+title: 売上目標管理
+description: 月次売上目標（配額）と実績の対比・達成率モニタリング
+permissions:
+  view:
+    roles:
+    - sales_manager
+    - executive
+    - ai_admin
+  create:
+    roles:
+    - sales_manager
+    - executive
+    - ai_admin
+  edit:
+    roles:
+    - sales_manager
+    - executive
+    - ai_admin
+  delete:
+    roles:
+    - executive
+    - ai_admin
+sections:
+- id: quota_kpi
+  title: 今月の全社達成状況（2026年6月）
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '全社目標金額' AS metric_name,\n       '¥' || printf('%,.0f', SUM(quota_amount)) AS metric_value,\n       '\U0001F3AF' AS metric_icon,\n       NULL AS metric_delta\nFROM sales_quotas WHERE year = 2026 AND month = 6\nUNION ALL\nSELECT '全社実績金額',\n       '¥' || printf('%,.0f', SUM(achieved_amount)),\n       '\U0001F4B0', NULL\nFROM sales_quotas WHERE year = 2026 AND month = 6\nUNION ALL\nSELECT '全社達成率',\n       CAST(ROUND(100.0 * SUM(achieved_amount) / MAX(SUM(quota_amount), 1), 1) AS TEXT) || '%',\n       '\U0001F4CA', NULL\nFROM sales_quotas WHERE year = 2026 AND month = 6\nUNION ALL\nSELECT '目標台数合計',\n       CAST(SUM(quota_units) AS TEXT) || '台',\n       '\U0001F697', NULL\nFROM sales_quotas WHERE year = 2026 AND month = 6\nUNION ALL\nSELECT '実績台数合計',\n       CAST(SUM(achieved_units) AS TEXT) || '台',\n       '✅', NULL\nFROM sales_quotas WHERE year = 2026 AND month = 6\nUNION ALL\nSELECT '目標達成者',\n       CAST(SUM(CASE WHEN achieved_amount >= quota_amount THEN 1 ELSE 0 END) AS\
+    \ TEXT) || '名',\n       '\U0001F3C6', NULL\nFROM sales_quotas WHERE year = 2026 AND month = 6\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: quota_achievement_chart
+  title: 担当者別達成率（今月）
+  component: bar_chart
+  sourceType: custom
+  source: "SELECT COALESCE(e.name, q.employee_id) AS label,\n       ROUND(100.0 * q.achieved_amount / MAX(q.quota_amount, 1), 1) AS value\nFROM sales_quotas q\nLEFT JOIN employees e ON e.employee_id = q.employee_id\nWHERE q.year = 2026 AND q.month = 6\nORDER BY value DESC\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  color: rgba(99, 102, 241, 0.75)
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: quota_detail_current
+  title: 今月の担当者別実績（2026年6月）
+  component: table
+  sourceType: custom
+  source: "SELECT COALESCE(e.name, q.employee_id) AS 担当者,\n       COALESCE(b.branch_name, q.branch_id) AS 拠点,\n       '¥' || printf('%,.0f', q.quota_amount) AS 目標金額,\n       '¥' || printf('%,.0f', q.achieved_amount) AS 実績金額,\n       CAST(ROUND(100.0 * q.achieved_amount / MAX(q.quota_amount, 1), 1) AS TEXT) || '%' AS 達成率,\n       q.quota_units || '台' AS 目標台数,\n       q.achieved_units || '台' AS 実績台数,\n       CASE\n         WHEN q.achieved_amount >= q.quota_amount THEN '\U0001F3C6 達成'\n         WHEN q.achieved_amount >= q.quota_amount * 0.8 THEN '\U0001F4C8 順調'\n         WHEN q.achieved_amount >= q.quota_amount * 0.5 THEN '⚠️ 要注意'\n         ELSE '\U0001F534 未達'\n       END AS 判定\nFROM sales_quotas q\nLEFT JOIN employees e ON e.employee_id = q.employee_id\nLEFT JOIN branches  b ON b.branch_id  = q.branch_id\nWHERE q.year = 2026 AND q.month = 6\nORDER BY q.achieved_amount / MAX(q.quota_amount, 1) DESC\n"
+  columns:
+  - 担当者
+  - 拠点
+  - 目標金額
+  - 実績金額
+  - 達成率
+  - 目標台数
+  - 実績台数
+  - 判定
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: quota_trend
+  title: 月次達成金額トレンド（直近2ヶ月）
+  component: bar_chart
+  sourceType: custom
+  source: "SELECT year || '年' || month || '月' AS label,\n       SUM(achieved_amount) AS value\nFROM sales_quotas\nWHERE (year = 2026 AND month IN (5, 6))\nGROUP BY year, month\nORDER BY year, month\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  color: rgba(16, 185, 129, 0.75)
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: quota_table
+  title: 売上目標一覧（全期間）
+  component: data_table
+  entity: sales_quotas
+  sourceType: table
+  columns:
+    employee_id:
+      label: 従業員 ID
+      sortable: true
+      searchable: true
+    year:
+      label: 年
+      sortable: true
+    month:
+      label: 月
+      sortable: true
+    quota_amount:
+      label: 目標金額
+      sortable: true
+    achieved_amount:
+      label: 実績金額
+      sortable: true
+    quota_units:
+      label: 目標台数
+      sortable: true
+    achieved_units:
+      label: 実績台数
+      sortable: true
+  defaultSort: year
+  pageSize: 20
+  searchable: true
+  editable: true
+  allowCreate: true
+  allowEdit: true
+  allowDelete: true
+  defaultSortDir: desc
+- id: quota_form
+  title: 売上目標設定
+  component: form
+  entity: sales_quotas
+  mode: create_edit
+  fields:
+  - field: employee_id
+    label: 従業員 ID
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: EMP-002'
+  - field: branch_id
+    label: 拠点 ID
+    type: text
+    required: false
+    editable: true
+    default: BR-001
+  - field: year
+    label: 年
+    type: number
+    required: true
+    editable: true
+    default: 2026
+  - field: month
+    label: 月（1-12）
+    type: number
+    required: true
+    editable: true
+  - field: quota_amount
+    label: 目標売上金額（円）
+    type: number
+    required: true
+    editable: true
+    placeholder: '例: 10000000'
+  - field: quota_units
+    label: 目標台数
+    type: number
+    required: true
+    editable: true
+    placeholder: '例: 3'
+  - field: achieved_amount
+    label: 実績売上金額（円）
+    type: number
+    required: false
+    editable: true
+    default: 0
+  - field: achieved_units
+    label: 実績台数
+    type: number
+    required: false
+    editable: true
+    default: 0
+  - field: notes
+    label: 備考
+    type: textarea
+    required: false
+    editable: true
+  sourceType: none

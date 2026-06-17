@@ -1,21 +1,48 @@
 jobs:
-  # ─── 本地 LLM 视觉标注工作器（Ollama）───
-  # 调用 Ollama (llava 模型) 对队列中 provider=ollama 的照片进行批量标注
-  annotation_worker:
-    displayName: 本地 LLM 视觉标注
-    description: "从 processing_queue 取出待处理照片，调用 Ollama llava 模型生成标注，写回 photos 表"
+  # ─── 照片导入工作器 ───
+  # 处理目录扫描类型的 import_jobs，扫描文件系统、提取 EXIF、写入 photos + processing_queue
+  photo_import_worker:
+    displayName: 照片导入工作器
+    description: "从 import_jobs 取出 status=queued 的目录扫描任务，扫描目录写入 photos 表并加入 AI 标注队列"
     enabled: true
 
     schedule:
-      cron: "*/5 * * * *"     # 每 5 分钟运行一次
+      cron: "* * * * *"       # 每分钟检查一次
       timezone: "Asia/Shanghai"
 
-    type: sql_to_csv
+    type: directory_import
     settings:
-      sqlFile: jobs/sql/pending_photos.sql
-      outputFile: "jobs/output/annotation_worker_{date:yyyyMMddHHmm}.csv"
+      sqlFile: jobs/sql/pending_import_jobs.sql
+      outputFile: "jobs/output/import_worker_{date:yyyyMMddHHmm}.csv"
       includeHeader: true
       delimiter: ","
+
+    behavior:
+      updateStatusOnStart: scanning      # 取出任务后立即将 status 置为 scanning
+      updateStatusOnDone: done           # 处理完成后置为 done
+      updateStatusOnError: failed        # 失败后置为 failed
+      writeExif: true                    # 自动提取 JPEG/HEIC EXIF 元数据
+      deduplicateByPath: true            # file_path 已存在则跳过（INSERT OR IGNORE）
+      autoEnqueueAnnotation: true        # 导入后自动写入 processing_queue
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 60
+      logError: true
+
+  # ─── 本地 LLM 视觉标注工作器（Ollama）───
+  annotation_worker:
+    displayName: 本地 LLM 视觉标注（Ollama）
+    description: "从 processing_queue 取出 provider=ollama 的待处理照片，调用 Ollama llava 模型生成标注"
+    enabled: true
+
+    schedule:
+      cron: "*/5 * * * *"
+      timezone: "Asia/Shanghai"
+
+    type: photo_annotator
+    aiProvider: ollama
+    batchSize: 5
 
     onFailure:
       retryCount: 3
@@ -23,57 +50,60 @@ jobs:
       logError: true
 
   # ─── Gemini API 视觉标注工作器 ───
-  # 调用 Google Gemini API 对队列中 provider=gemini 的照片进行标注
   gemini_annotation_worker:
     displayName: Gemini API 视觉标注
-    description: "从 processing_queue 取出 provider=gemini 的待处理照片，调用 Gemini Vision API 生成标注，写回 photos 表"
+    description: "从 processing_queue 取出 provider=gemini 的待处理照片，调用 Gemini Vision API 生成标注"
     enabled: true
 
     schedule:
-      cron: "*/10 * * * *"    # 每 10 分钟运行（尊重 API 速率限制）
+      cron: "*/10 * * * *"
       timezone: "Asia/Shanghai"
 
-    type: sql_to_csv
-    settings:
-      sqlFile: jobs/sql/gemini_pending_photos.sql
-      outputFile: "jobs/output/gemini_worker_{date:yyyyMMddHHmm}.csv"
-      includeHeader: true
-      delimiter: ","
-
-    # Gemini API 调用配置（从 ai/scenarios.yaml providers.gemini 继承）
-    ai_provider: gemini
-    batch_size: 5             # 每批处理 5 张（控制 API 配额消耗）
+    type: photo_annotator
+    aiProvider: gemini
+    batchSize: 5
 
     onFailure:
       retryCount: 2
       retryInterval: 120
       logError: true
 
-  # ─── Antigravity CLI 标注工作器 ───
-  # 调用本地 antigravity CLI 对队列中 provider=antigravity 的照片进行处理
+  # ─── Antigravity (Anthropic Claude) 标注工作器 ───
   antigravity_cli_worker:
-    displayName: Antigravity CLI 标注
-    description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 antigravity CLI 进行本地处理"
+    displayName: Antigravity 视觉标注（Claude API）
+    description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 Anthropic Claude API 进行视觉标注"
     enabled: true
 
     schedule:
-      cron: "*/3 * * * *"     # 每 3 分钟运行（本地 CLI 无速率限制）
+      cron: "*/3 * * * *"
       timezone: "Asia/Shanghai"
 
-    type: sql_to_csv
-    settings:
-      sqlFile: jobs/sql/antigravity_pending_photos.sql
-      outputFile: "jobs/output/antigravity_worker_{date:yyyyMMddHHmm}.csv"
-      includeHeader: true
-      delimiter: ","
-
-    # antigravity CLI 调用配置（从 ai/scenarios.yaml providers.antigravity 继承）
-    ai_provider: antigravity
-    batch_size: 10            # 每批处理 10 张
+    type: photo_annotator
+    aiProvider: antigravity
+    batchSize: 5
 
     onFailure:
       retryCount: 3
       retryInterval: 60
+      logError: true
+
+  # ─── 向量嵌入生成 ───
+  # 对已完成标注但尚未生成向量的照片批量调用 Gemini text-embedding-004
+  embedding_generator:
+    displayName: 向量嵌入生成（Gemini）
+    description: "为 annotation_status=done 且尚无嵌入向量的照片调用 Gemini text-embedding-004，结果存入 photo_embeddings 表"
+    enabled: true
+
+    schedule:
+      cron: "0 * * * *"      # 每 60 分钟扫描一次
+      timezone: "Asia/Shanghai"
+
+    type: photo_embedding_generator
+    batchSize: 10
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 120
       logError: true
 
   # ─── 相册统计刷新 ───

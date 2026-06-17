@@ -58,7 +58,7 @@ providers:
     max_retries: 3
 
 # 默认标注提供商（可被 processing_queue.provider 字段覆盖）
-default_annotation_provider: ollama
+default_annotation_provider: antigravity
 
 # 标注 Prompt（三个提供商共用）
 annotation_prompt: |

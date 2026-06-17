@@ -1,0 +1,204 @@
+title: 車両画像管理
+description: 車両ごとの複数画像（外装・内装・エンジン等）の一元管理・ギャラリー表示
+permissions:
+  view:
+    roles:
+    - sales_rep
+    - sales_manager
+    - service_staff
+    - ai_admin
+    - executive
+    - customer
+  create:
+    roles:
+    - sales_rep
+    - sales_manager
+    - ai_admin
+  edit:
+    roles:
+    - sales_rep
+    - sales_manager
+    - ai_admin
+  delete:
+    roles:
+    - sales_manager
+    - ai_admin
+sections:
+- id: image_stats
+  title: 画像管理サマリー
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '登録画像総数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F4F7' AS metric_icon,\n       NULL AS metric_delta\nFROM vehicle_images\nUNION ALL\nSELECT '画像登録済み車両',\n       CAST(COUNT(DISTINCT vehicle_id) AS TEXT),\n       '\U0001F697', NULL\nFROM vehicle_images\nUNION ALL\nSELECT '画像なし車両',\n       CAST(COUNT(*) AS TEXT),\n       '⚠️', NULL\nFROM vehicles v\nWHERE NOT EXISTS (SELECT 1 FROM vehicle_images vi WHERE vi.vehicle_id = v.vehicle_id)\n  AND v.status IN ('available','display')\nUNION ALL\nSELECT '外装写真',\n       CAST(SUM(CASE WHEN image_type = 'exterior' THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F532', NULL\nFROM vehicle_images\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: image_type_chart
+  title: 画像種別分布
+  component: doughnut_chart
+  sourceType: custom
+  source: "SELECT CASE image_type\n         WHEN 'exterior' THEN '外装'\n         WHEN 'interior' THEN '内装'\n         WHEN 'engine'   THEN 'エンジン'\n         WHEN 'detail'   THEN '詳細'\n         ELSE 'その他'\n       END AS label,\n       COUNT(*) AS value\nFROM vehicle_images\nGROUP BY image_type\nORDER BY value DESC\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: vehicle_image_summary
+  title: 🚗 車両別画像数
+  component: table
+  sourceType: custom
+  source: "SELECT v.vehicle_id AS 車両ID,\n       v.maker || ' ' || v.model AS 車名,\n       v.year || '年' AS 年式,\n       v.status AS 状態,\n       COALESCE(img.image_count, 0) AS 画像数,\n       CASE WHEN img.image_count IS NULL THEN '⚠️ 未登録' ELSE '✅ 登録済' END AS 画像状態\nFROM vehicles v\nLEFT JOIN (\n  SELECT vehicle_id, COUNT(*) AS image_count\n  FROM vehicle_images\n  GROUP BY vehicle_id\n) img ON img.vehicle_id = v.vehicle_id\nWHERE v.status IN ('available','display','reserved')\nORDER BY img.image_count IS NULL DESC, v.vehicle_id\n"
+  columns:
+  - 車両ID
+  - 車名
+  - 年式
+  - 状態
+  - 画像数
+  - 画像状態
+  pageSize: 20
+  editable: false
+  readOnly: true
+- id: image_list
+  title: 画像一覧
+  component: data_table
+  entity: vehicle_images
+  sourceType: table
+  columns:
+    image_id:
+      label: 画像 ID
+      sortable: true
+    vehicle_id:
+      label: 車両 ID
+      sortable: true
+      searchable: true
+    image_type:
+      label: 種別
+      sortable: true
+      renderAs: badge
+      colorMap:
+        exterior: blue
+        interior: green
+        engine: orange
+        detail: purple
+        other: gray
+    caption:
+      label: キャプション
+      sortable: false
+      searchable: true
+    sort_order:
+      label: 表示順
+      sortable: true
+    is_primary:
+      label: メイン
+      sortable: true
+      renderAs: badge
+      colorMap:
+        1: green
+        0: gray
+    image_url:
+      label: URL
+      sortable: false
+  defaultSort: vehicle_id
+  pageSize: 20
+  searchable: true
+  editable: true
+  allowCreate: true
+  allowEdit: true
+  allowDelete: true
+  permissions:
+    create:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    edit:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    delete:
+      roles:
+      - sales_manager
+      - ai_admin
+  defaultSortDir: asc
+- id: image_form
+  title: 画像登録・編集
+  component: form
+  entity: vehicle_images
+  mode: create_edit
+  fields:
+  - field: vehicle_id
+    label: 車両 ID
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: V-001'
+  - field: image_url
+    label: 画像 URL
+    type: text
+    required: true
+    editable: true
+    placeholder: https://...
+  - field: caption
+    label: キャプション
+    type: text
+    required: false
+    editable: true
+    placeholder: '例: 外観（フロント）'
+  - field: image_type
+    label: 画像種別
+    type: select
+    options:
+    - value: exterior
+      label: 外装
+    - value: interior
+      label: 内装
+    - value: engine
+      label: エンジンルーム
+    - value: detail
+      label: 詳細・装備
+    - value: other
+      label: その他
+    required: true
+    editable: true
+    default: exterior
+  - field: sort_order
+    label: 表示順
+    type: number
+    required: false
+    editable: true
+    default: 0
+  - field: is_primary
+    label: メイン画像
+    type: select
+    options:
+    - value: 1
+      label: はい（メイン）
+    - value: 0
+      label: いいえ
+    required: false
+    editable: true
+    default: 0
+  permissions:
+    create:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    edit:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+  sourceType: none

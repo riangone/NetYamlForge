@@ -1,0 +1,145 @@
+@using NetYamlForge.Models
+@model SectionRenderModel
+@{
+    var sec     = Model.Sec;
+    var project = Model.Project;
+    var secId   = sec.Id;
+    var apiBase = $"/{project}/api";
+}
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="vs-@secId">
+
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <span class="text-2xl">🔍</span>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-800">@sec.Title</h2>
+            <p class="text-xs text-gray-400 mt-0.5">由 Gemini text-embedding-004 驱动 · 支持中文、英文、日文等 100+ 语言跨语言检索</p>
+        </div>
+    </div>
+
+    <div class="px-6 py-5 bg-gray-50 border-b border-gray-100">
+        <div class="flex gap-3 max-w-2xl">
+            <input id="vs-input-@secId"
+                   type="text"
+                   placeholder="用任意语言描述你想找的照片，例如：夕阳海边、cat on roof、雪山风景…"
+                   class="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm shadow-sm
+                          focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white" />
+            <button id="vs-btn-@secId"
+                    class="px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-medium
+                           hover:bg-indigo-700 active:scale-95 transition-all whitespace-nowrap">
+                语义搜索
+            </button>
+        </div>
+        <div id="vs-status-@secId" class="mt-2 text-xs text-gray-400 min-h-[1rem]"></div>
+    </div>
+
+    <div id="vs-stats-@secId" class="px-6 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-600 hidden">
+    </div>
+
+    <div id="vs-results-@secId" class="px-6 py-6">
+        <div class="text-center text-gray-400 text-sm py-12">
+            <div class="text-4xl mb-3">🖼️</div>
+            <p>输入搜索词，找到语义相关的照片</p>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var secId  = @Json.Serialize(secId);
+    var apiBase = @Json.Serialize(apiBase);
+
+    var input   = document.getElementById('vs-input-'   + secId);
+    var btn     = document.getElementById('vs-btn-'     + secId);
+    var status  = document.getElementById('vs-status-'  + secId);
+    var results = document.getElementById('vs-results-' + secId);
+    var statsBar= document.getElementById('vs-stats-'   + secId);
+
+    // Load embedding stats on mount
+    fetch(apiBase + '/embedding-stats')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d.embedded > 0) {
+                statsBar.textContent = '向量索引: ' + d.embedded + ' / ' + d.total_photos + ' 张已标注照片已嵌入';
+                statsBar.classList.remove('hidden');
+            } else if (d.total_photos === 0) {
+                statsBar.textContent = '提示: 尚无已完成标注的照片，请先执行 AI 标注任务';
+                statsBar.classList.remove('hidden');
+            } else {
+                statsBar.textContent = '提示: 已标注 ' + d.total_photos + ' 张，但向量索引为空 — 请运行「向量嵌入生成」批处理任务';
+                statsBar.classList.remove('hidden');
+            }
+        })
+        .catch(function(){});
+
+    function search() {
+        var q = input.value.trim();
+        if (!q) return;
+
+        btn.disabled = true;
+        status.textContent = '正在语义检索…';
+        results.innerHTML = '<div class="text-center py-12 text-gray-400">⏳ 正在向量化查询并匹配…</div>';
+
+        fetch(apiBase + '/vector-search?q=' + encodeURIComponent(q) + '&limit=30')
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                btn.disabled = false;
+                if (data.message && (!data.results || data.results.length === 0)) {
+                    status.textContent = data.message;
+                    results.innerHTML = '<div class="text-center py-12 text-gray-400">💡 ' + escHtml(data.message) + '</div>';
+                    return;
+                }
+                status.textContent = '找到 ' + data.results.length + ' 张相关照片';
+                renderResults(data.results);
+            })
+            .catch(function(e){
+                btn.disabled = false;
+                status.textContent = '搜索失败: ' + e.message;
+                results.innerHTML = '<div class="text-center py-12 text-red-400">⚠️ 请求失败</div>';
+            });
+    }
+
+    function renderResults(items) {
+        if (!items || items.length === 0) {
+            results.innerHTML = '<div class="text-center py-12 text-gray-400">😶 没有找到相关照片，请换个描述</div>';
+            return;
+        }
+
+        var html = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">';
+        items.forEach(function(item) {
+            var sim = Math.round(item.similarity * 100);
+            var simColor = sim >= 80 ? 'bg-green-100 text-green-700'
+                         : sim >= 60 ? 'bg-yellow-100 text-yellow-700'
+                         :             'bg-gray-100 text-gray-500';
+            html += '<div class="group relative bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"'
+                  + ' onclick="window.open(\'' + escAttr(item.photo_url) + '\',\'_blank\')">'
+                  + '<div class="relative h-36 bg-gray-100 overflow-hidden">'
+                  + '<img src="' + escAttr(item.thumb_url) + '" loading="lazy"'
+                  + '     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"'
+                  + '     onerror="this.style.display=\'none\'">'
+                  + '<span class="absolute top-1.5 right-1.5 text-xs font-medium px-1.5 py-0.5 rounded ' + simColor + '">'
+                  + sim + '%</span>'
+                  + '</div>'
+                  + '<div class="p-2">'
+                  + '<p class="text-xs font-medium text-gray-700 truncate" title="' + escAttr(item.caption_short || '') + '">'
+                  + escHtml(item.caption_short || item.file_name) + '</p>'
+                  + (item.scene_type ? '<p class="text-xs text-gray-400 truncate">' + escHtml(item.scene_type) + '</p>' : '')
+                  + (item.gps_address ? '<p class="text-xs text-blue-400 truncate">📍 ' + escHtml(item.gps_address) + '</p>' : '')
+                  + '</div>'
+                  + '</div>';
+        });
+        html += '</div>';
+        results.innerHTML = html;
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escAttr(s) {
+        return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    btn.addEventListener('click', search);
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') search(); });
+})();
+</script>

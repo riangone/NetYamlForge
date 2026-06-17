@@ -129,6 +129,9 @@
                 case "comment_form":
                     @await Html.PartialAsync("Components/_SectionCommentForm", renderModel)
                     break;
+                case "vector_search":
+                    @await Html.PartialAsync("Components/_SectionVectorSearch", renderModel)
+                    break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)
                     break;

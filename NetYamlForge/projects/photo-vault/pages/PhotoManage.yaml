@@ -15,7 +15,7 @@ sections:
              p.width || 'x' || p.height AS 分辨率,
              COALESCE(a.name, '—') AS 相册,
              COALESCE(p.scene_type, '—') AS 场景,
-             COALESCE(p.caption_short, '—') AS AI 描述,
+             COALESCE(p.caption_short, '—') AS "AI 描述",
              p.person_count AS 人数,
              CASE p.annotation_status
                WHEN 'done'       THEN '✅ 完成'

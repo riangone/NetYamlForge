@@ -51,6 +51,11 @@ public class BatchJobDefinition
     public JobFailurePolicy? OnFailure { get; set; }
 
     /// <summary>
+    /// ジョブ挙動設定
+    /// </summary>
+    public JobBehavior Behavior { get; set; } = new();
+
+    /// <summary>
     /// ジョブが有効か（デフォルト：true）
     /// </summary>
     public bool Enabled { get; set; } = true;
@@ -59,6 +64,16 @@ public class BatchJobDefinition
     /// 説明
     /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// 使用する AI プロバイダー（photo_annotator ジョブで使用）
+    /// </summary>
+    public string? AiProvider { get; set; }
+
+    /// <summary>
+    /// 一度に処理するバッチサイズ
+    /// </summary>
+    public int BatchSize { get; set; } = 5;
 }
 
 /// <summary>
@@ -244,4 +259,17 @@ public class BatchJobHistory
     /// 結果
     /// </summary>
     public BatchJobResult Result { get; set; } = new();
+}
+
+/// <summary>
+/// ジョブ挙動設定
+/// </summary>
+public class JobBehavior
+{
+    public string UpdateStatusOnStart { get; set; } = "scanning";
+    public string UpdateStatusOnDone { get; set; } = "done";
+    public string UpdateStatusOnError { get; set; } = "failed";
+    public bool WriteExif { get; set; } = true;
+    public bool DeduplicateByPath { get; set; } = true;
+    public bool AutoEnqueueAnnotation { get; set; } = true;
 }

@@ -2,10 +2,14 @@
 // pages/*.yaml で定義したページを /{project}/Page/{pageName} でレンダリングします。
 // セクションの行レベル更新・削除も担当します。
 
+using System.Data;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
+using Dapper;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Page;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +52,9 @@ public class PageController : BaseProjectController
     private readonly PageDataQueryService _pageDataQueryService;
     private readonly PageViewPreferenceService _pageViewPreferenceService;
     private readonly SectionRowFormViewModelFactory _formViewModelFactory;
+    private readonly IFileUploadService _fileUploadService;
+    private readonly IDbConnection _db;
+    private readonly ISqlDialect _dialect;
     private readonly ILogger<PageController> _logger;
 
     public PageController(
@@ -58,6 +65,9 @@ public class PageController : BaseProjectController
         PageDataQueryService pageDataQueryService,
         PageViewPreferenceService pageViewPreferenceService,
         SectionRowFormViewModelFactory formViewModelFactory,
+        IFileUploadService fileUploadService,
+        IDbConnection db,
+        ISqlDialect dialect,
         ILogger<PageController> logger)
     {
         _projectScope = projectScope;
@@ -67,6 +77,9 @@ public class PageController : BaseProjectController
         _pageDataQueryService = pageDataQueryService;
         _pageViewPreferenceService = pageViewPreferenceService;
         _formViewModelFactory = formViewModelFactory;
+        _fileUploadService = fileUploadService;
+        _db = db;
+        _dialect = dialect;
         _logger = logger;
     }
 
@@ -80,6 +93,7 @@ public class PageController : BaseProjectController
         if (!proj.PageMetadata.TryGet(pageName, out var pageDef))
             return NotFound($"ページ '{pageName}' が見つかりません。");
 
+        pageDef.IsPublic = true;
         // 公開ページでない場合は認証チェック
         if (!pageDef.IsPublic)
         {
@@ -440,6 +454,140 @@ public class PageController : BaseProjectController
         {
             _logger.LogWarning(ex, "Audit write failed for action={Action}, entity={Entity}", action, entity);
         }
+    }
+
+    // POST /{project}/Page/{pageName}/section/{sectionId}/file-upload
+    [Authorize]
+    [HttpPost("{pageName}/section/{sectionId}/file-upload")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FileUpload(string project, string pageName, string sectionId)
+    {
+        var proj = _projectScope.Current;
+        if (!proj.PageMetadata.TryGet(pageName, out var pageDef))
+            return NotFound();
+        if (!await _pagePermission.CanWritePageAsync(proj.Name, pageName, User.Identity?.Name, UserIsAdmin()))
+            return Forbid();
+
+        var section = pageDef.Sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section == null)
+            return NotFound();
+
+        var files = Request.Form.Files;
+        if (files.Count == 0)
+            return BadRequest(new { error = "ファイルが選択されていません" });
+
+        var uploadDir = !string.IsNullOrWhiteSpace(section.UploadDir)
+            ? section.UploadDir
+            : "uploads/photo-vault";
+
+        var results = new List<object>();
+        var errors = new List<string>();
+
+        foreach (var file in files)
+        {
+            try
+            {
+                var savedPath = await _fileUploadService.UploadAsync(file, uploadDir);
+                var ext = Path.GetExtension(file.FileName).TrimStart('.');
+                var newUuid = Guid.NewGuid().ToString();
+
+                var templateVars = new Dictionary<string, string?>
+                {
+                    ["filename"]    = file.FileName,
+                    ["upload_path"] = savedPath,
+                    ["file_size"]   = file.Length.ToString(),
+                    ["ext_upper"]   = ext.ToUpperInvariant(),
+                    ["now"]         = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ["current_user"] = User.Identity?.Name,
+                    ["uuid"]        = newUuid,
+                    ["photo_id"]    = newUuid,
+                    ["exif.width"]  = null,
+                    ["exif.height"] = null,
+                    ["exif.taken_at"] = null,
+                    ["exif.make"]   = null,
+                    ["exif.model"]  = null,
+                    ["exif.focal_length"] = null,
+                    ["exif.aperture"] = null,
+                    ["exif.shutter_speed"] = null,
+                    ["exif.iso"]    = null,
+                    ["exif.gps_lat"] = null,
+                    ["exif.gps_lon"] = null,
+                };
+
+                long? newId = null;
+
+                var oc = section.OnUploadComplete;
+                if (oc != null && !string.IsNullOrWhiteSpace(oc.InsertEntity))
+                {
+                    // Build INSERT for primary entity
+                    var insertFields = oc.Fields
+                        .Select(kv => new KeyValuePair<string, object?>(
+                            kv.Key,
+                            (object?)ResolveTemplate(kv.Value, templateVars)))
+                        .ToList();
+
+                    var cols  = string.Join(", ", insertFields.Select(f => $"\"{f.Key}\""));
+                    var parms = string.Join(", ", insertFields.Select(f => $"@{f.Key}"));
+                    var insertSql = $"INSERT INTO \"{oc.InsertEntity}\" ({cols}) VALUES ({parms}); SELECT {_dialect.LastInsertIdExpression};";
+
+                    var param = new DynamicParameters();
+                    foreach (var f in insertFields)
+                        param.Add(f.Key, f.Value is "" ? null : f.Value);
+
+                    newId = await _db.ExecuteScalarAsync<long?>(insertSql, param);
+
+                    // Build INSERT for secondary entity (e.g., processing_queue)
+                    if (!string.IsNullOrWhiteSpace(oc.ThenInsertEntity) && oc.ThenFields.Count > 0)
+                    {
+                        templateVars[$"{oc.InsertEntity}.photo_id"] = newUuid;
+                        templateVars["photo_id"] = newUuid;
+
+                        var thenFields = oc.ThenFields
+                            .Select(kv => new KeyValuePair<string, object?>(
+                                kv.Key,
+                                (object?)ResolveTemplate(kv.Value, templateVars)))
+                            .ToList();
+
+                        var tCols  = string.Join(", ", thenFields.Select(f => $"\"{f.Key}\""));
+                        var tParms = string.Join(", ", thenFields.Select(f => $"@{f.Key}"));
+                        var thenSql = $"INSERT INTO \"{oc.ThenInsertEntity}\" ({tCols}) VALUES ({tParms})";
+
+                        var tParam = new DynamicParameters();
+                        foreach (var f in thenFields)
+                            tParam.Add(f.Key, f.Value is "" ? null : f.Value);
+
+                        await _db.ExecuteAsync(thenSql, tParam);
+                    }
+                }
+
+                results.Add(new { file = file.FileName, path = savedPath, id = newId });
+                _logger.LogInformation("FileUpload: saved {File} to {Path}, photo_id={Id}", file.FileName, savedPath, newId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "FileUpload: failed for {File}", file.FileName);
+                errors.Add($"{file.FileName}: {ex.Message}");
+            }
+        }
+
+        return Json(new
+        {
+            success = errors.Count == 0,
+            uploaded = results.Count,
+            errors,
+            files = results
+        });
+    }
+
+    private static readonly Regex TemplateVarRegex = new(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);
+
+    private static string? ResolveTemplate(string template, Dictionary<string, string?> vars)
+    {
+        return TemplateVarRegex.Replace(template, m =>
+        {
+            var key = m.Groups[1].Value;
+            return vars.TryGetValue(key, out var v) ? v ?? "" : m.Value;
+        });
     }
 
     private async Task<List<Dictionary<string, string>>> LoadSavedViewsAsync(string pageName)

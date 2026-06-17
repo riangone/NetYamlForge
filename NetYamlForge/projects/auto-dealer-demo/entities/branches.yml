@@ -1,0 +1,132 @@
+imports: []
+entities:
+  branches:
+    table: branches
+    key: branch_id
+    displayName: 拠点マスタ
+    softDelete: false
+    isPublic: false
+
+    columns:
+      branch_id:
+        type: string
+        length: 50
+        required: true
+        label: 拠点 ID
+        searchable: true
+        sortable: true
+      branch_name:
+        type: string
+        length: 100
+        required: true
+        label: 拠点名
+        searchable: true
+        sortable: true
+      branch_type:
+        type: string
+        length: 20
+        required: true
+        label: 拠点種別
+        default: sub
+        options:
+          - main
+          - sub
+          - service
+        searchable: true
+        sortable: true
+      address:
+        type: string
+        length: 200
+        required: false
+        label: 住所
+        searchable: true
+        sortable: true
+      phone:
+        type: string
+        length: 20
+        required: false
+        label: 電話番号
+        searchable: true
+        sortable: true
+      email:
+        type: string
+        length: 100
+        required: false
+        label: メールアドレス
+        searchable: true
+        sortable: true
+      manager_id:
+        type: string
+        length: 50
+        required: false
+        label: 管理者（従業員 ID）
+        searchable: false
+        sortable: true
+      is_active:
+        type: int
+        required: true
+        label: 有効
+        default: 1
+        sortable: true
+      sort_order:
+        type: int
+        required: false
+        label: 表示順
+        default: 0
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      branch_id:
+        type: string
+        required: true
+        label: 拠点 ID
+        editable: false
+      branch_name:
+        type: string
+        required: true
+        label: 拠点名
+        editable: true
+      branch_type:
+        type: select
+        required: true
+        label: 拠点種別
+        editable: true
+      address:
+        type: string
+        required: false
+        label: 住所
+        editable: true
+      phone:
+        type: string
+        required: false
+        label: 電話番号
+        editable: true
+      email:
+        type: email
+        required: false
+        label: メールアドレス
+        editable: true
+      is_active:
+        type: select
+        required: true
+        label: 有効
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

@@ -1,0 +1,285 @@
+title: 📥 照片导入
+description: 支持两种方式：拖放上传文件 或 指定服务器目录批量扫描，完成后自动提取 EXIF 并送入 AI 标注队列
+permissions:
+  view:
+    roles:
+    - editor
+    - admin
+  create:
+    roles:
+    - editor
+    - admin
+sections:
+- id: import_stats
+  title: 当前状态
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '照片总数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F5BC️' AS metric_icon,\n       NULL AS metric_delta\nFROM photos WHERE deleted_at IS NULL\nUNION ALL\nSELECT '今日新增',\n       CAST(COUNT(*) AS TEXT),\n       '\U0001F4E5', NULL\nFROM photos\nWHERE deleted_at IS NULL\n  AND DATE(created_at) = DATE('now')\nUNION ALL\nSELECT '待标注',\n       CAST(COUNT(*) AS TEXT),\n       '⏳', NULL\nFROM processing_queue WHERE status = 'queued'\nUNION ALL\nSELECT '进行中任务',\n       CAST(COUNT(*) AS TEXT),\n       '⚙️', NULL\nFROM import_jobs WHERE status IN ('queued','scanning','importing')\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  editable: false
+  readOnly: true
+- id: photo_upload
+  title: 方式一：文件上传（拖放 / 点击浏览）
+  component: file_upload
+  description: '将照片文件拖入下方区域，或点击选择文件。支持多文件同时选择。
+
+    上传完成后系统自动：① 保存到服务器 `uploads/photo-vault/` → ② 提取 EXIF → ③ 加入 AI 标注队列。
+
+    '
+  uploadUrl: /api/photo-vault/import/upload
+  allowedTypes: .jpg,.jpeg,.png,.heic,.dng,.cr3,.webp,.gif,.tiff
+  maxFileSize: 52428800
+  multiple: true
+  maxFiles: 200
+  dropzoneLabel: 将照片拖放到此处，或点击选择文件
+  dropzoneHint: 支持 JPG · PNG · HEIC · DNG · CR3 · WebP · GIF · TIFF，单文件最大 50 MB，最多 200 张
+  showPreview: true
+  previewMaxThumbnails: 20
+  uploadDir: uploads/photo-vault
+  onUploadComplete:
+    insertEntity: photos
+    fields:
+      photo_id: '{{uuid}}'
+      file_name: '{{filename}}'
+      file_path: '{{upload_path}}'
+      file_size: '{{file_size}}'
+      file_format: '{{ext_upper}}'
+      width: '{{exif.width}}'
+      height: '{{exif.height}}'
+      taken_at: '{{exif.taken_at}}'
+      camera_make: '{{exif.make}}'
+      camera_model: '{{exif.model}}'
+      focal_length: '{{exif.focal_length}}'
+      aperture: '{{exif.aperture}}'
+      shutter_speed: '{{exif.shutter_speed}}'
+      iso: '{{exif.iso}}'
+      gps_lat: '{{exif.gps_lat}}'
+      gps_lon: '{{exif.gps_lon}}'
+      annotation_status: pending
+      created_at: '{{now}}'
+    thenInsertEntity: processing_queue
+    thenFields:
+      photo_id: '{{uuid}}'
+      file_path: '{{upload_path}}'
+      status: queued
+      provider: antigravity
+      priority: 1
+      queued_at: '{{now}}'
+  extraFields:
+  - id: upload_album_id
+    label: 导入到相册（可选）
+    type: entity_select
+    entity: albums
+    displayField: name
+    keyField: album_id
+    required: false
+    placeholder: — 不指定相册 —
+  - id: upload_ai_provider
+    label: AI 标注提供商
+    type: select
+    default: antigravity
+    options:
+    - value: antigravity
+      label: 🤖 Antigravity CLI（默认）
+    - value: gemini
+      label: ☁️ Gemini API
+    - value: ollama
+      label: 🦙 Ollama 本地 LLM
+  permissions:
+    create:
+      roles:
+      - editor
+      - admin
+  sourceType: none
+- id: dir_scan
+  title: 方式二：服务器目录扫描
+  component: form
+  description: '适合将服务器上现有照片库整体接入 Photo Vault。
+
+    填写目录路径后点击「开始扫描」，后台 Worker 将在 1 分钟内自动处理。
+
+    '
+  layout: vertical
+  fields:
+  - id: source_path
+    label: 目录路径 *
+    type: string
+    required: true
+    placeholder: /home/user/Photos/2024
+    hint: 服务器上的绝对路径（确保应用进程有读取权限）
+    icon: 📁
+  - id: recursive
+    label: 递归扫描子目录
+    type: bool
+    default: true
+    hint: 开启后自动扫描所有子文件夹（推荐）
+  - id: file_filter
+    label: 文件类型
+    type: string
+    default: '*.jpg,*.jpeg,*.png,*.heic,*.dng,*.cr3,*.webp'
+    hint: 逗号分隔的 glob 模式，留空则扫描全部文件
+  - id: dir_ai_provider
+    label: AI 标注提供商
+    type: select
+    default: antigravity
+    options:
+    - value: antigravity
+      label: 🤖 Antigravity CLI（默认）
+    - value: gemini
+      label: ☁️ Gemini API
+    - value: ollama
+      label: 🦙 Ollama 本地 LLM
+  - id: dir_album_id
+    label: 导入到相册（可选）
+    type: entity_select
+    entity: albums
+    displayField: name
+    keyField: album_id
+    required: false
+    placeholder: — 不指定相册 —
+  - id: priority
+    label: 处理优先级
+    type: select
+    default: '1'
+    options:
+    - value: '1'
+      label: 高（优先处理）
+    - value: '5'
+      label: 普通
+    - value: '10'
+      label: 低（后台低优先级）
+  actions:
+  - id: start_scan
+    label: 🚀 开始扫描导入
+    type: submit
+    style: primary
+    icon: 🔍
+    confirmMessage: '确认扫描目录「{{source_path}}」？
+
+
+      • 递归扫描：{{recursive}}
+
+      • 文件过滤：{{file_filter}}
+
+      • AI 提供商：{{dir_ai_provider}}
+
+
+      重复文件会被自动跳过，不会产生重复记录。
+
+      '
+    insertEntity: import_jobs
+    fields:
+      job_type: directory
+      source_path: '{{source_path}}'
+      recursive: '{{recursive}}'
+      file_filter: '{{file_filter}}'
+      ai_provider: '{{dir_ai_provider}}'
+      album_id: '{{dir_album_id}}'
+      priority: '{{priority}}'
+      status: queued
+      created_by: '{{current_user}}'
+      created_at: '{{now}}'
+    successMessage: ✅ 扫描任务已加入队列，Worker 将在 1 分钟内开始处理。可在下方「任务历史」查看进度。
+    refreshSection: import_history
+  - id: reset_form
+    label: 重置
+    type: reset
+    style: ghost
+  readOnly: false
+  editable: true
+  permissions:
+    create:
+      roles:
+      - editor
+      - admin
+  sourceType: none
+- id: import_history
+  title: 📋 导入任务历史
+  component: table
+  sourceType: custom
+  source: "SELECT\n  j.job_id,\n  CASE j.job_type\n    WHEN 'upload'    THEN '\U0001F4E4 文件上传'\n    WHEN 'directory' THEN '\U0001F4C1 目录扫描'\n    ELSE j.job_type\n  END AS 类型,\n  COALESCE(j.source_path, '—') AS 路径_或_来源,\n  CASE j.ai_provider\n    WHEN 'antigravity' THEN '\U0001F916 Antigravity'\n    WHEN 'gemini'      THEN '☁️ Gemini'\n    WHEN 'ollama'      THEN '\U0001F999 Ollama'\n    ELSE j.ai_provider\n  END AS AI提供商,\n  COALESCE(a.name, '—') AS 相册,\n  CASE j.status\n    WHEN 'queued'    THEN '\U0001F550 等待中'\n    WHEN 'scanning'  THEN '\U0001F50D 扫描中…'\n    WHEN 'importing' THEN '⚙️ 导入中…'\n    WHEN 'done'      THEN '✅ 完成'\n    WHEN 'failed'    THEN '❌ 失败'\n    ELSE j.status\n  END AS 状态,\n  COALESCE(j.files_found, 0)    AS 发现,\n  COALESCE(j.files_imported, 0) AS 已导入,\n  COALESCE(j.files_skipped, 0)  AS 跳过,\n  COALESCE(j.files_failed, 0)   AS 失败数,\n  COALESCE(j.error_message, '—') AS 错误信息,\n  j.created_by AS 发起人,\n  strftime('%Y-%m-%d %H:%M', j.created_at)   AS 创建时间,\n  strftime('%Y-%m-%d\
+    \ %H:%M', j.completed_at) AS 完成时间\nFROM import_jobs j\nLEFT JOIN albums a ON j.album_id = a.album_id\nORDER BY j.created_at DESC\nLIMIT 50\n"
+  columns:
+  - 类型
+  - 路径_或_来源
+  - AI提供商
+  - 相册
+  - 状态
+  - 发现
+  - 已导入
+  - 跳过
+  - 失败数
+  - 错误信息
+  - 发起人
+  - 创建时间
+  - 完成时间
+  pageSize: 15
+  editable: false
+  readOnly: true
+  autoRefresh: 10
+  emptyMessage: 尚无导入任务，请使用上方任一方式开始导入
+  rowColorRules:
+  - condition: 状态 LIKE '%失败%'
+    colorClass: row-danger
+  - condition: 状态 LIKE '%扫描%' OR 状态 LIKE '%导入%'
+    colorClass: row-info
+  - condition: 状态 LIKE '%完成%'
+    colorClass: row-success
+- id: import_guide
+  title: 使用说明 & 常见问题
+  component: accordion
+  sourceType: none
+  readOnly: true
+  items:
+  - title: 两种导入方式如何选择？
+    content: '| 方式 | 适用场景 | 限制 |
+
+      |------|---------|------|
+
+      | **文件上传** | 少量照片（< 200 张），浏览器拖入 | 单文件最大 50 MB |
+
+      | **目录扫描** | 整批照片库迁移，路径已在服务器 | 需服务器文件系统读取权限 |
+
+      '
+  - title: 目录路径如何填写？
+    content: '填写服务器上的**绝对路径**，例如：
+
+      - `/home/ubuntu/Photos`
+
+      - `/mnt/nas/camera-roll/2024`
+
+      - `C:\Users\admin\Pictures`（Windows 环境）
+
+
+      确保运行 NetYamlForge 的进程对该目录有**读取权限**。
+
+      '
+  - title: 如何避免重复导入？
+    content: '系统以 `file_path`（文件绝对路径）作为唯一键，重复路径的文件会被自动跳过（`INSERT OR IGNORE`），不会产生重复记录。
+
+
+      大目录（> 10,000 张）建议按子目录分批扫描。
+
+      '
+  - title: AI 提供商有什么区别？
+    content: '| 提供商 | 速度 | 成本 | 说明 |
+
+      |--------|------|------|------|
+
+      | 🤖 **Antigravity CLI** | 快 | 免费 | 本地命令行，默认推荐 |
+
+      | ☁️ **Gemini API** | 中 | 按量计费 | 需设置 `GEMINI_API_KEY` 环境变量 |
+
+      | 🦙 **Ollama** | 慢 | 免费 | 完全离线，隐私优先，需先 `ollama pull llava:13b` |
+
+      '
+  - title: 导入后到显示需要多久？
+    content: "```\n文件上传 / 目录扫描完成\n     ↓（立即）\nphotos 表写入 + processing_queue 入队\n     ↓（≤ 3 分钟，antigravity_cli_worker 每 3 分钟运行一次）\nAI 标注完成 → annotation_status = 'done'\n     ↓（立即）\nGallery / AI 搜索 可查询\n```\n"

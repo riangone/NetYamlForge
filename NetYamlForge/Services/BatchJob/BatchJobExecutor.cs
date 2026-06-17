@@ -103,7 +103,10 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
         { "automated_blog_generator", typeof(AutomatedBlogGeneratorExecutor) },
         { "ai_dealer_engine", typeof(AiDealerEngineExecutor) },
         { "ai_communication_sender", typeof(AiCommunicationExecutor) },
-        { "ai_folder_processor", typeof(AiFolderProcessorExecutor) }
+        { "ai_folder_processor", typeof(AiFolderProcessorExecutor) },
+        { "directory_import", typeof(DirectoryImportExecutor) },
+        { "photo_annotator", typeof(PhotoAnnotatorExecutor) },
+        { "photo_embedding_generator", typeof(EmbeddingGeneratorExecutor) }
     };
 
     public RealBatchJobExecutor(

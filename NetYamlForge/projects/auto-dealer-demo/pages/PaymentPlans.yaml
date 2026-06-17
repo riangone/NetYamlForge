@@ -1,0 +1,265 @@
+title: ローン・支払管理
+description: 顧客ごとの支払プラン（現金・ローン・リース・残価設定）の作成・管理・シミュレーション
+permissions:
+  view:
+    roles:
+    - sales_rep
+    - sales_manager
+    - executive
+    - ai_admin
+  create:
+    roles:
+    - sales_rep
+    - sales_manager
+    - ai_admin
+  edit:
+    roles:
+    - sales_rep
+    - sales_manager
+    - ai_admin
+  delete:
+    roles:
+    - sales_manager
+    - ai_admin
+sections:
+- id: payment_kpi
+  title: 支払プラン サマリー
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT 'プラン総数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F4B3' AS metric_icon,\n       NULL AS metric_delta\nFROM payment_plans\nUNION ALL\nSELECT '承認済み',\n       CAST(SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS TEXT),\n       '✅', NULL\nFROM payment_plans\nUNION ALL\nSELECT 'シミュレーション中',\n       CAST(SUM(CASE WHEN status = 'simulation' THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F522', NULL\nFROM payment_plans\nUNION ALL\nSELECT '契約中（active）',\n       CAST(SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F4DD', NULL\nFROM payment_plans\nUNION ALL\nSELECT '今月承認ローン総額',\n       '¥' || printf('%,.0f', COALESCE(SUM(CASE WHEN status = 'approved' AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now') THEN loan_amount ELSE 0 END), 0)),\n       '\U0001F3E6', NULL\nFROM payment_plans\nUNION ALL\nSELECT '平均月次支払額',\n       '¥' || printf('%,.0f', COALESCE(AVG(CASE WHEN monthly_payment > 0 THEN monthly_payment\
+    \ END), 0)),\n       '\U0001F4C5', NULL\nFROM payment_plans WHERE status IN ('approved','active')\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: plan_type_chart
+  title: プラン種別分布
+  component: doughnut_chart
+  sourceType: custom
+  source: "SELECT CASE plan_type\n         WHEN 'cash'  THEN '\U0001F4B4 現金一括'\n         WHEN 'loan'  THEN '\U0001F3E6 ローン'\n         WHEN 'lease' THEN '\U0001F511 残価設定'\n       END AS label,\n       COUNT(*) AS value\nFROM payment_plans\nGROUP BY plan_type\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: loan_simulator
+  title: 💡 ローン月額シミュレーション目安（年利 1.9%）
+  component: table
+  sourceType: custom
+  source: 'SELECT ''200万円'' AS 車両価格, ''20万円'' AS 頭金, ''36回'' AS 回数, ''約 ¥51,400'' AS 月額目安
+
+    UNION ALL SELECT ''200万円'', ''20万円'', ''60回'', ''約 ¥31,400''
+
+    UNION ALL SELECT ''300万円'', ''30万円'', ''36回'', ''約 ¥77,100''
+
+    UNION ALL SELECT ''300万円'', ''30万円'', ''60回'', ''約 ¥47,200''
+
+    UNION ALL SELECT ''400万円'', ''50万円'', ''60回'', ''約 ¥60,900''
+
+    UNION ALL SELECT ''500万円'', ''50万円'', ''60回'', ''約 ¥76,100''
+
+    UNION ALL SELECT ''700万円'', ''100万円'', ''60回'', ''約 ¥106,500''
+
+    '
+  columns:
+  - 車両価格
+  - 頭金
+  - 回数
+  - 月額目安
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: payment_list
+  title: 支払プラン一覧
+  component: data_table
+  entity: payment_plans
+  sourceType: table
+  columns:
+    plan_id:
+      label: プラン ID
+      sortable: true
+      searchable: true
+    customer_id:
+      label: 顧客 ID
+      sortable: true
+      searchable: true
+    vehicle_id:
+      label: 車両 ID
+      sortable: true
+      searchable: true
+    plan_type:
+      label: プラン種別
+      sortable: true
+      renderAs: badge
+      colorMap:
+        cash: green
+        loan: blue
+        lease: purple
+    total_amount:
+      label: 車両総額
+      sortable: true
+    down_payment:
+      label: 頭金
+      sortable: true
+    monthly_payment:
+      label: 月次支払額
+      sortable: true
+    term_months:
+      label: 回数（月）
+      sortable: true
+    status:
+      label: ステータス
+      sortable: true
+      renderAs: badge
+      colorMap:
+        simulation: gray
+        approved: blue
+        active: green
+        completed: purple
+        cancelled: red
+    contract_date:
+      label: 契約日
+      sortable: true
+  defaultSort: created_at
+  pageSize: 20
+  searchable: true
+  editable: true
+  allowCreate: true
+  allowEdit: true
+  allowDelete: true
+  permissions:
+    create:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    edit:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    delete:
+      roles:
+      - sales_manager
+      - ai_admin
+  defaultSortDir: desc
+- id: payment_form
+  title: 支払プラン作成・編集
+  component: form
+  entity: payment_plans
+  mode: create_edit
+  fields:
+  - field: customer_id
+    label: 顧客 ID
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: C-001'
+  - field: vehicle_id
+    label: 車両 ID
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: V-001'
+  - field: lead_id
+    label: リード ID（任意）
+    type: text
+    required: false
+    editable: true
+    placeholder: '例: L-001'
+  - field: plan_type
+    label: プラン種別
+    type: select
+    options:
+    - value: cash
+      label: 現金一括
+    - value: loan
+      label: ローン
+    - value: lease
+      label: 残価設定型
+    required: true
+    editable: true
+    default: loan
+  - field: total_amount
+    label: 車両総額（円）
+    type: number
+    required: true
+    editable: true
+  - field: down_payment
+    label: 頭金（円）
+    type: number
+    required: false
+    editable: true
+    default: 0
+  - field: interest_rate
+    label: 年利（%）
+    type: number
+    required: false
+    editable: true
+    placeholder: '例: 1.9'
+  - field: term_months
+    label: 回数（月）
+    type: number
+    required: false
+    editable: true
+    placeholder: '例: 60'
+  - field: monthly_payment
+    label: 月次支払額（円）
+    type: number
+    required: false
+    editable: true
+  - field: balloon_payment
+    label: 残価設定額（円）
+    type: number
+    required: false
+    editable: true
+  - field: status
+    label: ステータス
+    type: select
+    options:
+    - value: simulation
+      label: シミュレーション
+    - value: approved
+      label: 承認済み
+    - value: active
+      label: 契約中
+    - value: completed
+      label: 完済
+    - value: cancelled
+      label: キャンセル
+    required: true
+    editable: true
+    default: simulation
+  - field: contract_date
+    label: 契約日
+    type: date
+    required: false
+    editable: true
+  - field: notes
+    label: 備考・条件
+    type: textarea
+    required: false
+    editable: true
+  permissions:
+    create:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+    edit:
+      roles:
+      - sales_rep
+      - sales_manager
+      - ai_admin
+  sourceType: none

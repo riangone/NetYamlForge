@@ -192,6 +192,7 @@ public class SectionDefinition
 {
     public string Id { get; set; } = "";
     public string? Title { get; set; }
+    public string? Description { get; set; }
     /// <summary>
     /// このセクションを表示するロールのホワイトリスト。
     /// 未設定（null/空）なら全ユーザーに表示。管理者は常に表示。
@@ -377,6 +378,7 @@ public class SectionDefinition
     public string? SubtitleField { get; set; }
     public string? DescriptionField { get; set; }
     public string? ImageField { get; set; }
+    public string? CaptionField { get; set; }
     public string? ActionUrl { get; set; }
     public string? ContentField { get; set; }
     public bool? ExpandedByDefault { get; set; }
@@ -398,6 +400,24 @@ public class SectionDefinition
     public string? StartDateField { get; set; }
     public string? EndDateField { get; set; }
     public string? ColorField { get; set; }
+
+    // ── file_upload ─────────────────────────────────────────────────────────
+    public string? DropzoneLabel { get; set; }
+    public string? DropzoneHint { get; set; }
+    public bool? ShowPreview { get; set; }
+    public int? PreviewMaxThumbnails { get; set; }
+    public int? MaxFiles { get; set; }
+    public string? UploadDir { get; set; }
+    public SectionFileUploadOnCompleteDefinition? OnUploadComplete { get; set; }
+}
+
+/// <summary>file_upload セクションの onUploadComplete 設定</summary>
+public class SectionFileUploadOnCompleteDefinition
+{
+    public string? InsertEntity { get; set; }
+    public Dictionary<string, string> Fields { get; set; } = new();
+    public string? ThenInsertEntity { get; set; }
+    public Dictionary<string, string> ThenFields { get; set; } = new();
 }
 
 /// <summary>PageView からコンポーネント部分ビューへ渡すレンダリングモデル</summary>

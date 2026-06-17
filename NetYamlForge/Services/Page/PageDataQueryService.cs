@@ -54,7 +54,7 @@ public sealed class PageDataQueryService
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(ex, "Section data load failed. section={SectionId}", section.Id);
+                _logger.LogError(ex, "Section data load failed. section={SectionId}", section.Id);
                 result[section.Id] = (Enumerable.Empty<Dictionary<string, object>>(), 0);
             }
         }
@@ -258,6 +258,20 @@ public sealed class PageDataQueryService
                 continue;
 
             var key = f.Key;
+
+            // If this is a custom SQL query and the query string already contains the parameter (e.g. @q),
+            // skip adding it to the outer WHERE clause, allowing the custom SQL to handle the filtering natively.
+            if (section.SourceType == "custom" &&
+                !string.IsNullOrEmpty(section.Source) &&
+                section.Source.Contains("@" + key))
+            {
+                if (filters.TryGetValue(key, out var val))
+                {
+                    param.Add(key, val);
+                }
+                continue;
+            }
+
             var expr = $"\"{key}\"";
             var filterType = (f.Value.Type ?? "eq").ToLowerInvariant();
 

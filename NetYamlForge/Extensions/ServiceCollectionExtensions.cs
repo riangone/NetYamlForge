@@ -206,6 +206,7 @@ public static class ServiceCollectionExtensions
         
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
+        services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.GeminiEmbeddingService>();
         services.AddSingleton<ToolCallValidator>();
         services.AddSingleton<IToolRegistry, InMemoryToolRegistry>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
@@ -251,6 +252,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiCommunicationExecutor>());
         services.AddScoped<AiFolderProcessorExecutor>();
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiFolderProcessorExecutor>());
+        services.AddScoped<DirectoryImportExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<DirectoryImportExecutor>());
+        services.AddScoped<PhotoAnnotatorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<PhotoAnnotatorExecutor>());
+        services.AddScoped<EmbeddingGeneratorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<EmbeddingGeneratorExecutor>());
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();

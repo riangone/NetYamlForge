@@ -121,4 +121,6 @@ INSERT OR IGNORE INTO employees (employee_id, user_name, employee_number, name, 
 -- 管理部
 ('EMP-012', 'admin_staff', '3001', '井上千秋', 'イノウチアキ', 'female', 'inoue@auto-dealer.com', 'administration', 'staff', 'operator', 'EMP-001', '2019-04-01', 'full_time', 'active'),
 -- パーツ部
-('EMP-013', 'parts_staff', '4001', '林大樹', 'ハヤシダイキ', 'male', 'hayashi@auto-dealer.com', 'parts', 'staff', 'service_staff', 'EMP-008', '2021-04-01', 'full_time', 'active');
+('EMP-013', 'parts_staff', '4001', '林大樹', 'ハヤシダイキ', 'male', 'hayashi@auto-dealer.com', 'parts', 'staff', 'service_staff', 'EMP-008', '2021-04-01', 'full_time', 'active'),
+-- システム管理
+('EMP-014', 'ai_admin', '9001', '清水デジタル', 'シミズデジタル', 'male', 'shimizu.ai@auto-dealer.com', 'administration', 'manager', 'ai_admin', 'EMP-001', '2020-04-01', 'full_time', 'active');

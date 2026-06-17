@@ -50,7 +50,7 @@ public class PageMetadataProvider : IPageMetadataProvider
             }
             catch (Exception ex)
             {
-                loadErrors.Add($"- {Path.GetFileName(file)}: {ex.Message}");
+                loadErrors.Add($"- {Path.GetFileName(file)}: {ex}");
             }
         }
 

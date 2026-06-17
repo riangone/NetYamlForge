@@ -21,6 +21,9 @@ public class SqlSafetyGuardTests
     [InlineData("TotalAmount")]
     [InlineData("_private")]
     [InlineData("col1")]
+    [InlineData("类型")]
+    [InlineData("AI提供商")]
+    [InlineData("相册")]
     public void EnsureIdentifier_ValidIdentifier_DoesNotThrow(string value)
     {
         // 正当な SQL 識別子は例外なしで通過する
@@ -59,6 +62,8 @@ public class SqlSafetyGuardTests
     [InlineData("amount > 1000")]                  // 数値比較
     [InlineData("strftime('%Y-%m', invoice_date)")]// SQLite 日付関数
     [InlineData("BillingCountry")]                 // 単純カラム名
+    [InlineData("状态 = '完成'")]                  // 中文条件
+    [InlineData("创建时间 IS NOT NULL")]           // 中文カラム名条件
     public void EnsureExpression_ValidExpression_DoesNotThrow(string? value)
     {
         // 正当な SQL 式は例外なしで通過する
@@ -125,6 +130,8 @@ public class SqlSafetyGuardTests
         Assert.True(SqlSafetyGuard.IsValidIdentifier("invoice_date"));
         Assert.True(SqlSafetyGuard.IsValidIdentifier("_col"));
         Assert.True(SqlSafetyGuard.IsValidIdentifier("A1"));
+        Assert.True(SqlSafetyGuard.IsValidIdentifier("类型"));
+        Assert.True(SqlSafetyGuard.IsValidIdentifier("照片_ID"));
     }
 
     [Fact]

@@ -83,6 +83,56 @@ layout:
         icon: 📅
         section: 运营与服务
         roles: [service_staff, sales_manager]
+      - label: 販売リード一覧
+        url: /auto-dealer-demo/Page/SalesLeads
+        icon: 📋
+        section: 运营与服务
+        roles: [sales_rep, sales_manager]
+      - label: サービスリクエスト
+        url: /auto-dealer-demo/Page/ServiceRequests
+        icon: 🔧
+        section: 运营与服务
+        roles: [service_staff, sales_manager]
+      - label: 従業員管理
+        url: /auto-dealer-demo/Page/Employees
+        icon: 👔
+        section: 运营与服务
+        roles: [ai_admin, executive]
+      - label: データインポート
+        url: /auto-dealer-demo/Page/DataImport
+        icon: 📥
+        section: 运营与服务
+        roles: [ai_admin, executive, sales_manager]
+      - label: 拠点管理
+        url: /auto-dealer-demo/Page/Branches
+        icon: 🏢
+        section: 运营与服务
+        roles: [ai_admin, executive]
+      - label: 車両画像管理
+        url: /auto-dealer-demo/Page/VehicleImages
+        icon: 📷
+        section: 运营与服务
+        roles: [sales_rep, sales_manager, ai_admin]
+      - label: 試乗管理
+        url: /auto-dealer-demo/Page/TestDrives
+        icon: 🚘
+        section: 运营与服务
+        roles: [sales_rep, sales_manager, service_staff]
+      - label: 売上目標管理
+        url: /auto-dealer-demo/Page/SalesQuota
+        icon: 🎯
+        section: 运营与服务
+        roles: [sales_manager, executive]
+      - label: 通知設定
+        url: /auto-dealer-demo/Page/NotificationSettings
+        icon: 🔔
+        section: 运营与服务
+        roles: [ai_admin, executive]
+      - label: ローン・支払管理
+        url: /auto-dealer-demo/Page/PaymentPlans
+        icon: 💳
+        section: 运营与服务
+        roles: [sales_rep, sales_manager, executive]
 
       # ─── 沟通中心 (Communication) ───
       - label: オペレーターチャット
@@ -110,6 +160,11 @@ layout:
       - label: 在庫車両を見る
         url: /auto-dealer-demo/Page/CustomerVehicles
         icon: 🚗
+        section: 顾客入口
+        roles: [customer]
+      - label: 予約・サービス確認
+        url: /auto-dealer-demo/Page/CustomerAppointments
+        icon: 📆
         section: 顾客入口
         roles: [customer]
 

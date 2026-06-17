@@ -1,0 +1,127 @@
+imports: []
+entities:
+  import_jobs:
+    table: import_jobs
+    key: job_id
+    displayName: 导入任务
+    softDelete: false
+
+    columns:
+      job_id:
+        type: string
+        length: 64
+        required: true
+        label: 任务 ID
+        searchable: true
+        sortable: true
+
+      job_type:
+        type: string
+        length: 20
+        required: true
+        label: 导入类型
+        options: [upload, directory]
+        searchable: true
+        sortable: true
+
+      source_path:
+        type: string
+        length: 1024
+        required: false
+        label: 来源路径（目录或上传目标目录）
+        searchable: true
+
+      recursive:
+        type: bool
+        required: false
+        label: 扫描子目录
+        default: true
+
+      file_filter:
+        type: string
+        length: 200
+        required: false
+        label: 文件过滤（如 *.jpg,*.png）
+        default: "*.jpg,*.jpeg,*.png,*.heic,*.dng,*.cr3,*.webp"
+
+      ai_provider:
+        type: string
+        length: 30
+        required: false
+        label: AI 提供商
+        options: [antigravity, gemini, ollama]
+        default: antigravity
+
+      album_id:
+        type: string
+        length: 64
+        required: false
+        label: 导入到相册
+        searchable: true
+
+      status:
+        type: string
+        length: 20
+        required: false
+        label: 状态
+        options: [queued, scanning, importing, done, failed]
+        default: queued
+        searchable: true
+        sortable: true
+
+      files_found:
+        type: int
+        required: false
+        label: 发现文件数
+        default: 0
+        sortable: true
+
+      files_imported:
+        type: int
+        required: false
+        label: 已导入数
+        default: 0
+        sortable: true
+
+      files_skipped:
+        type: int
+        required: false
+        label: 已跳过数
+        default: 0
+        sortable: true
+
+      files_failed:
+        type: int
+        required: false
+        label: 失败数
+        default: 0
+        sortable: true
+
+      error_message:
+        type: text
+        required: false
+        label: 错误信息
+
+      created_by:
+        type: string
+        length: 100
+        required: false
+        label: 发起人
+
+      created_at:
+        type: datetime
+        required: false
+        label: 创建时间
+        sortable: true
+
+      started_at:
+        type: datetime
+        required: false
+        label: 开始时间
+        sortable: true
+
+      completed_at:
+        type: datetime
+        required: false
+        label: 完成时间
+        sortable: true

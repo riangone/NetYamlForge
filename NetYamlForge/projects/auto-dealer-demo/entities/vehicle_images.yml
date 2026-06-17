@@ -1,0 +1,117 @@
+imports: []
+entities:
+  vehicle_images:
+    table: vehicle_images
+    key: image_id
+    displayName: 車両画像
+    softDelete: false
+    isPublic: true
+
+    columns:
+      image_id:
+        type: string
+        length: 50
+        required: true
+        label: 画像 ID
+        searchable: false
+        sortable: true
+      vehicle_id:
+        type: string
+        length: 50
+        required: true
+        label: 車両 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: vehicles
+          key: vehicle_id
+          display: model
+      image_url:
+        type: string
+        length: 1000
+        required: true
+        label: 画像 URL
+        searchable: false
+        sortable: false
+      caption:
+        type: string
+        length: 200
+        required: false
+        label: キャプション
+        searchable: true
+        sortable: false
+      image_type:
+        type: string
+        length: 30
+        required: true
+        label: 画像種別
+        default: exterior
+        options:
+          - exterior
+          - interior
+          - engine
+          - detail
+          - other
+        searchable: true
+        sortable: true
+      sort_order:
+        type: int
+        required: false
+        label: 表示順
+        default: 0
+        sortable: true
+      is_primary:
+        type: int
+        required: false
+        label: メイン画像
+        default: 0
+        sortable: true
+      uploaded_by:
+        type: string
+        length: 50
+        required: false
+        label: アップロード者
+        searchable: false
+        sortable: false
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+
+    forms:
+      vehicle_id:
+        type: string
+        required: true
+        label: 車両 ID
+        editable: true
+      image_url:
+        type: string
+        required: true
+        label: 画像 URL
+        editable: true
+      caption:
+        type: string
+        required: false
+        label: キャプション
+        editable: true
+      image_type:
+        type: select
+        required: true
+        label: 画像種別
+        editable: true
+      sort_order:
+        type: number
+        required: false
+        label: 表示順
+        editable: true
+      is_primary:
+        type: select
+        required: false
+        label: メイン画像
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

@@ -68,6 +68,11 @@ layout:
         icon: 🔌
         section: 运营管理
         roles: [admin]
+      - label: 照片导入
+        url: /photo-vault/Page/PhotoImport
+        icon: 📥
+        section: 运营管理
+        roles: [editor, admin]
       - label: 照片管理
         url: /photo-vault/Page/PhotoManage
         icon: 📋

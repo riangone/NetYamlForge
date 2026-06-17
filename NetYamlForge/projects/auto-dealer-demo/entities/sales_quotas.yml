@@ -1,0 +1,132 @@
+imports: []
+entities:
+  sales_quotas:
+    table: sales_quotas
+    key: quota_id
+    displayName: 売上目標（配額）
+    softDelete: false
+    isPublic: false
+
+    columns:
+      quota_id:
+        type: string
+        length: 50
+        required: true
+        label: 配額 ID
+        searchable: false
+        sortable: true
+      employee_id:
+        type: string
+        length: 50
+        required: true
+        label: 従業員 ID
+        searchable: true
+        sortable: true
+        reference:
+          entity: employees
+          key: employee_id
+          display: name
+      branch_id:
+        type: string
+        length: 50
+        required: false
+        label: 拠点 ID
+        searchable: false
+        sortable: true
+      year:
+        type: int
+        required: true
+        label: 年
+        sortable: true
+      month:
+        type: int
+        required: true
+        label: 月
+        sortable: true
+      quota_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: true
+        label: 目標売上金額（円）
+        sortable: true
+      quota_units:
+        type: int
+        required: true
+        label: 目標台数
+        sortable: true
+      achieved_amount:
+        type: decimal
+        precision: 12
+        scale: 2
+        required: false
+        label: 実績売上金額（円）
+        default: 0
+        sortable: true
+      achieved_units:
+        type: int
+        required: false
+        label: 実績台数
+        default: 0
+        sortable: true
+      notes:
+        type: text
+        required: false
+        label: 備考
+      created_at:
+        type: datetime
+        required: true
+        label: 作成日時
+        sortable: true
+      updated_at:
+        type: datetime
+        required: true
+        label: 更新日時
+        sortable: true
+
+    forms:
+      employee_id:
+        type: string
+        required: true
+        label: 従業員 ID
+        editable: true
+      year:
+        type: number
+        required: true
+        label: 年
+        editable: true
+      month:
+        type: number
+        required: true
+        label: 月
+        editable: true
+      quota_amount:
+        type: number
+        required: true
+        label: 目標売上金額
+        editable: true
+      quota_units:
+        type: number
+        required: true
+        label: 目標台数
+        editable: true
+      achieved_amount:
+        type: number
+        required: false
+        label: 実績売上金額
+        editable: true
+      achieved_units:
+        type: number
+        required: false
+        label: 実績台数
+        editable: true
+      notes:
+        type: textarea
+        required: false
+        label: 備考
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

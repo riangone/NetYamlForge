@@ -7,7 +7,7 @@ SELECT
     q.priority,
     q.retry_count,
     p.file_name,
-    p.file_size_bytes,
+    p.file_size,
     p.width,
     p.height,
     p.taken_at

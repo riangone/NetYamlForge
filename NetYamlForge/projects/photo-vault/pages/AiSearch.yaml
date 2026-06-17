@@ -1,66 +1,20 @@
 title: 🔍 语义搜索
-description: "用自然语言检索照片 — 支持场景、标签、OCR 文字、描述全文搜索"
+description: "基于 Gemini text-embedding-004 的多语言向量语义检索 — 支持中、英、日等 100+ 语言"
 
 sections:
-  # ─── 搜索示例说明 ───
-  - id: search_hint
-    title: 💡 搜索技巧
-    component: stat_cards
+  # ─── 向量语义搜索主界面 ───
+  - id: vector_search_main
+    title: 🧠 向量语义搜索
+    component: vector_search
     sourceType: custom
-    source: |
-      SELECT '支持描述搜索' AS metric_name,
-             '例: 海边日落风景' AS metric_value,
-             '🌅' AS metric_icon,
-             NULL AS metric_delta
-      UNION ALL
-      SELECT '支持标签检索',
-             '例: portrait, food',
-             '🏷️', NULL
-      UNION ALL
-      SELECT '支持 OCR 文字',
-             '例: 发票, 收据',
-             '📄', NULL
-      UNION ALL
-      SELECT '支持地点搜索',
-             '例: 东京, 北海道',
-             '📍', NULL
-    columns: [metric_name, metric_value, metric_icon, metric_delta]
-    labelField: metric_name
-    valueField: metric_value
-    iconField: metric_icon
-    deltaField: metric_delta
-    pageSize: 4
+    source: "SELECT 1"   # 占位，实际数据由前端 JS 调用 API 获取
+    columns: []
     editable: false
     readOnly: true
 
-  # ─── 全文检索结果 ───
-  - id: search_results
-    title: 📋 全文检索结果（最近 50 张已标注）
-    component: table
-    sourceType: custom
-    source: |
-      SELECT p.photo_id AS ID,
-             p.file_name AS 文件名,
-             COALESCE(p.caption_short, '—') AS AI 简述,
-             COALESCE(p.scene_type, '—') AS 场景,
-             COALESCE(p.gps_address, '—') AS 地点,
-             CAST(p.person_count AS TEXT) AS 人数,
-             COALESCE(SUBSTR(p.ocr_text, 1, 60), '—') AS OCR 文字,
-             ROUND(p.confidence_score, 2) AS 置信度,
-             COALESCE(p.taken_at, p.created_at) AS 拍摄时间
-      FROM photos p
-      WHERE p.deleted_at IS NULL
-        AND p.annotation_status = 'done'
-      ORDER BY p.taken_at DESC
-      LIMIT 50
-    columns: [ID, 文件名, AI 简述, 场景, 地点, 人数, OCR 文字, 置信度, 拍摄时间]
-    pageSize: 20
-    editable: false
-    readOnly: true
-
-  # ─── 已标注场景统计 ───
+  # ─── 场景统计 ───
   - id: scene_stats
-    title: 场景类别统计
+    title: 场景分布
     component: pie_chart
     sourceType: custom
     source: |

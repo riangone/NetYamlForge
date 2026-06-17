@@ -96,7 +96,7 @@ sections:
       SELECT p.file_name AS 文件名,
              p.file_format AS 格式,
              p.scene_type AS 场景,
-             COALESCE(p.caption_short, '—') AS AI 描述,
+             COALESCE(p.caption_short, '—') AS "AI 描述",
              COALESCE(a.name, '未分相册') AS 相册,
              CASE p.annotation_status
                WHEN 'done'       THEN '✅ 已标注'
@@ -113,6 +113,33 @@ sections:
       LIMIT 30
     columns: [文件名, 格式, 场景, AI 描述, 相册, 状态, 时间]
     pageSize: 30
+    editable: false
+    readOnly: true
+
+  # ─── 照片缩略图网格（支持 Lightbox） ───
+  - id: photo_thumbnails
+    title: 📸 照片预览
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT p.file_name AS 标题,
+             COALESCE(p.scene_type, '未分类') AS 子标题,
+             COALESCE(p.caption_short, '待标注') AS 描述,
+             p.file_path AS image_url,
+             COALESCE(p.caption_long, p.caption_short, '') AS lightbox_caption,
+             p.file_format AS lightbox_format,
+             COALESCE(p.taken_at, p.created_at) AS lightbox_date
+      FROM photos p
+      WHERE p.deleted_at IS NULL AND p.file_path IS NOT NULL
+      ORDER BY p.created_at DESC
+      LIMIT 96
+    columns: [标题, 子标题, 描述, image_url, lightbox_caption, lightbox_format, lightbox_date]
+    titleField: 标题
+    subtitleField: 子标题
+    descriptionField: 描述
+    imageField: image_url
+    captionField: lightbox_caption
+    pageSize: 96
     editable: false
     readOnly: true
 

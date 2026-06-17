@@ -1,0 +1,357 @@
+title: データインポート
+description: 顧客・車両データの CSV 一括登録。新規ディーラー導入時の初期データ移行に使用します。
+permissions:
+  view:
+    roles:
+    - ai_admin
+    - executive
+    - sales_manager
+  create:
+    roles:
+    - ai_admin
+    - executive
+sections:
+- id: import_stats
+  title: データ登録状況
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '顧客総数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F465' AS metric_icon,\n       NULL AS metric_delta\nFROM customers\nUNION ALL\nSELECT '在庫車両数',\n       CAST(SUM(CASE WHEN status IN ('available','display','reserved') THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F697', NULL\nFROM vehicles\nUNION ALL\nSELECT '顧客所有車両数',\n       CAST(SUM(CASE WHEN customer_id IS NOT NULL THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F511', NULL\nFROM vehicles\nUNION ALL\nSELECT '従業員数',\n       CAST(COUNT(*) AS TEXT),\n       '\U0001F454', NULL\nFROM employees WHERE status = 'active'\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: customer_import
+  title: 顧客データ CSV インポート
+  component: csv_import
+  entity: customers
+  description: '顧客マスタデータを CSV ファイルから一括登録します。
+
+    既存の customer_id と重複する行はスキップされます（INSERT OR IGNORE）。
+
+    '
+  templateColumns:
+  - field: customer_id
+    label: 顧客ID
+    required: true
+    example: CUST-101
+    description: '一意の顧客識別子（例: CUST-101）'
+  - field: customer_type
+    label: 顧客区分
+    required: true
+    example: individual
+    description: individual（個人）または corporate（法人）
+    options:
+    - individual
+    - corporate
+  - field: name
+    label: 氏名・法人名
+    required: true
+    example: 山田太郎
+  - field: name_kana
+    label: フリガナ
+    required: false
+    example: ヤマダタロウ
+  - field: gender
+    label: 性別
+    required: false
+    example: male
+    options:
+    - male
+    - female
+    - other
+  - field: phone
+    label: 電話番号
+    required: true
+    example: 03-1234-5678
+  - field: mobile
+    label: 携帯電話
+    required: false
+    example: 090-1234-5678
+  - field: email
+    label: メールアドレス
+    required: false
+    example: yamada@example.com
+  - field: login_username
+    label: ログインユーザー名
+    required: false
+    example: yamada_t
+  - field: postal_code
+    label: 郵便番号
+    required: false
+    example: 100-0001
+  - field: address
+    label: 住所
+    required: false
+    example: 東京都千代田区丸の内1-1-1
+  - field: tier_level
+    label: 顧客ランク
+    required: false
+    example: regular
+    options:
+    - regular
+    - silver
+    - gold
+    - platinum
+    - vip
+    default: regular
+  - field: preferred_contact
+    label: 連絡手段
+    required: false
+    example: email
+    options:
+    - phone
+    - email
+    - line
+    - sms
+    default: phone
+  - field: notes
+    label: 備考
+    required: false
+    example: 紹介顧客
+  validationRules:
+  - field: customer_id
+    rule: not_empty
+    message: 顧客IDは必須です
+  - field: name
+    rule: not_empty
+    message: 氏名は必須です
+  - field: phone
+    rule: not_empty
+    message: 電話番号は必須です
+  - field: customer_type
+    rule: in_options
+    options:
+    - individual
+    - corporate
+    message: 顧客区分は individual または corporate を指定してください
+  - field: tier_level
+    rule: in_options
+    options:
+    - regular
+    - silver
+    - gold
+    - platinum
+    - vip
+    message: 顧客ランクが不正です
+  conflictStrategy: skip
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+      - sales_manager
+  sourceType: none
+- id: vehicle_import
+  title: 車両データ CSV インポート
+  component: csv_import
+  entity: vehicles
+  description: '在庫車両・顧客所有車両を CSV ファイルから一括登録します。
+
+    既存の vehicle_id と重複する行はスキップされます（INSERT OR IGNORE）。
+
+    '
+  templateColumns:
+  - field: vehicle_id
+    label: 車両ID
+    required: true
+    example: INV-101
+    description: 一意の車両識別子
+  - field: customer_id
+    label: 顧客ID
+    required: false
+    example: CUST-101
+    description: 顧客所有車両の場合のみ設定。在庫車は空欄
+  - field: vin
+    label: VIN
+    required: false
+    example: JT3HP10V7X7089001
+    description: 車台番号（17桁）
+  - field: maker
+    label: メーカー（英語）
+    required: true
+    example: Toyota
+  - field: brand
+    label: ブランド（日本語）
+    required: true
+    example: トヨタ
+  - field: model
+    label: 車種名
+    required: true
+    example: プリウス
+  - field: grade
+    label: グレード
+    required: false
+    example: Z
+  - field: year
+    label: 年式
+    required: true
+    example: '2024'
+  - field: color
+    label: カラー
+    required: false
+    example: パールホワイト
+  - field: mileage
+    label: 走行距離（km）
+    required: false
+    example: '0'
+    default: '0'
+  - field: vehicle_type
+    label: 車両タイプ
+    required: true
+    example: sedan
+    options:
+    - sedan
+    - wagon
+    - suv
+    - minivan
+    - truck
+    - sports
+    - kei
+  - field: fuel_type
+    label: 燃料タイプ
+    required: false
+    example: hybrid
+    options:
+    - gasoline
+    - diesel
+    - hybrid
+    - ev
+    - phev
+  - field: transmission
+    label: トランスミッション
+    required: false
+    example: CVT
+    options:
+    - AT
+    - MT
+    - CVT
+    - DCT
+  - field: engine_capacity
+    label: 排気量（cc）
+    required: false
+    example: '1800'
+  - field: price
+    label: 販売価格（円）
+    required: true
+    example: '3500000'
+  - field: cost
+    label: 仕入原価（円）
+    required: false
+    example: '2800000'
+  - field: status
+    label: ステータス
+    required: false
+    example: available
+    options:
+    - available
+    - reserved
+    - sold
+    - maintenance
+    - display
+    default: available
+  - field: arrival_date
+    label: 入庫日
+    required: false
+    example: '2024-01-15'
+  - field: inspection_date
+    label: 車検期限
+    required: false
+    example: '2026-01-15'
+  - field: features
+    label: オプション・特徴
+    required: false
+    example: 360度カメラ,ヒートシート
+  - field: notes
+    label: 備考
+    required: false
+    example: 試乗可能
+  validationRules:
+  - field: vehicle_id
+    rule: not_empty
+    message: 車両IDは必須です
+  - field: maker
+    rule: not_empty
+    message: メーカーは必須です
+  - field: model
+    rule: not_empty
+    message: 車種名は必須です
+  - field: year
+    rule: numeric
+    message: 年式は数値で入力してください
+  - field: price
+    rule: numeric
+    message: 価格は数値で入力してください
+  - field: vehicle_type
+    rule: in_options
+    options:
+    - sedan
+    - wagon
+    - suv
+    - minivan
+    - truck
+    - sports
+    - kei
+    message: 車両タイプが不正です
+  conflictStrategy: skip
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+      - sales_manager
+  sourceType: none
+- id: import_guide
+  title: インポート手順・注意事項
+  component: markdown
+  readOnly: true
+  content: '## CSV ファイル作成ガイド
+
+
+    ### 基本ルール
+
+    - **文字コード**: UTF-8（BOM なし推奨）
+
+    - **区切り文字**: カンマ（`,`）
+
+    - **1行目**: ヘッダー行（フィールド名）
+
+    - **日付形式**: `YYYY-MM-DD`（例: `2024-01-15`）
+
+    - **金額**: 数値のみ（カンマ・円記号不要、例: `3500000`）
+
+    - **空欄**: フィールドを空欄にする場合は `""` または何も入力しない
+
+
+    ### 重複処理
+
+    - 既存の ID（`customer_id` / `vehicle_id`）と重複する行は**スキップ**されます
+
+    - 上書き更新は現時点ではサポートしていません
+
+
+    ### テンプレートダウンロード
+
+    各セクションの「テンプレートをダウンロード」ボタンから CSV テンプレートファイルを取得できます。
+
+
+    ### 失敗した行の確認
+
+    インポート完了後、エラーになった行は詳細画面で確認・修正できます。
+
+
+    ### 大量データ（1,000件以上）の場合
+
+    - 500件ずつに分割してインポートすることを推奨します
+
+    - タイムアウトが発生した場合はページをリロードし、再度実行してください
+
+    '
+  sourceType: none

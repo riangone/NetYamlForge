@@ -1,103 +1,287 @@
 @using NetYamlForge.Models
 @model SectionRenderModel
 @{
-    var sec = Model.Sec;
-    var rows = Model.Rows;
-    var uploadUrl = sec.UploadUrl ?? Url.Content("~/api/upload");
-    var maxFileSize = sec.MaxFileSize ?? 10485760; // 10MB
-    var allowedTypes = sec.AllowedTypes ?? "*";
-    var multiple = sec.Multiple ?? true;
+    var sec        = Model.Sec;
+    var maxBytes   = sec.MaxFileSize ?? 52428800;
+    var allowedRaw = sec.AllowedTypes ?? ".jpg,.jpeg,.png,.gif,.webp";
+    var multiple   = sec.Multiple ?? true;
+    var label      = sec.DropzoneLabel ?? "ファイルをドラッグ＆ドロップ、またはクリックして選択";
+    var hint       = sec.DropzoneHint  ?? $"最大 {maxBytes / 1024 / 1024}MB • {allowedRaw}";
+    var maxFiles   = sec.MaxFiles ?? 200;
+    var showPreview = sec.ShowPreview ?? true;
+    var uploadUrl  = Url.Action("FileUpload", "Page",
+        new { project = Model.Project, pageName = Model.PageName, sectionId = sec.Id });
 }
 
 @if (!string.IsNullOrEmpty(sec.Title))
 {
-    <h2 class="text-lg font-semibold text-gray-700 mb-3">@sec.Title</h2>
+    <h2 class="text-lg font-semibold text-gray-700 mb-1">@sec.Title</h2>
+}
+@if (!string.IsNullOrEmpty(sec.Description))
+{
+    <p class="text-sm text-gray-500 mb-4">@sec.Description</p>
 }
 
-<div class="file-upload-container bg-base-100 rounded shadow p-6">
-    <div class="upload-zone border-2 border-dashed border-base-300 rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer"
-         onclick="document.getElementById('file-input-@sec.Id').click()">
-        <div class="flex flex-col items-center">
-            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <p class="text-lg font-medium mb-2">ファイルをドラッグ＆ドロップ</p>
-            <p class="text-sm text-gray-500 mb-4">またはクリックして選択</p>
-            <p class="text-xs text-gray-400">最大 @(maxFileSize / 1024 / 1024)MB • @allowedTypes</p>
-        </div>
-        <input type="file" id="file-input-@sec.Id" class="hidden" 
-               @(multiple ? "multiple" : "") 
-               accept="@allowedTypes"
-               onchange="handleFileSelect(this, '@sec.Id')" />
+<div class="file-upload-container" id="fuc-@sec.Id">
+
+    @* Drop zone *@
+    <div class="upload-dropzone border-2 border-dashed border-base-300 rounded-xl p-10 text-center
+                hover:border-primary transition-colors cursor-pointer select-none"
+         id="dz-@sec.Id"
+         onclick="document.getElementById('fi-@sec.Id').click()"
+         ondragover="nyfDzDragOver(event,'@sec.Id')"
+         ondragleave="nyfDzDragLeave(event,'@sec.Id')"
+         ondrop="nyfDzDrop(event,'@sec.Id')">
+        <svg class="w-14 h-14 mx-auto text-gray-400 mb-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <p class="text-base font-medium text-gray-600 pointer-events-none">@label</p>
+        <p class="text-xs text-gray-400 mt-1 pointer-events-none">@hint</p>
+        <input type="file" id="fi-@sec.Id" class="hidden"
+               @(multiple ? "multiple" : "")
+               accept="@allowedRaw"
+               onchange="nyfDzFilesAdded('@sec.Id', this.files)" />
     </div>
-    
-    @* アップロード済みファイル一覧 *@
-    @if (rows.Any())
-    {
-        <div class="file-list mt-6">
-            <h4 class="font-medium mb-3">アップロード済みファイル (@rows.Count)</h4>
-            <div class="divide-y">
-                @foreach (var row in rows)
-                {
-                    var fileName = row.TryGetValue("FileName", out var fn) ? fn?.ToString() ?? "" : "";
-                    var fileSize = row.TryGetValue("FileSize", out var fs) ? Convert.ToDouble(fs) : 0;
-                    var uploadDate = row.TryGetValue("UploadDate", out var ud) ? ud?.ToString() ?? "" : "";
-                    var fileUrl = row.TryGetValue("FileUrl", out var fu) ? fu?.ToString() ?? "" : "";
-                    
-                    <div class="flex items-center justify-between py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="file-icon text-2xl">
-                                @{
-                                    var ext = System.IO.Path.GetExtension(fileName).ToLower();
-                                    var icon = ext switch
-                                    {
-                                        ".pdf" => "📕",
-                                        ".doc" or ".docx" => "📘",
-                                        ".xls" or ".xlsx" => "📗",
-                                        ".ppt" or ".pptx" => "📙",
-                                        ".jpg" or ".jpeg" or ".png" or ".gif" => "🖼️",
-                                        ".zip" or ".rar" => "📦",
-                                        _ => "📄"
-                                    };
-                                }
-                                @icon
-                            </div>
-                            <div>
-                                <div class="font-medium">@fileName</div>
-                                <div class="text-xs text-gray-500">@(fileSize / 1024).ToString("N1") KB • @uploadDate</div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            @if (!string.IsNullOrEmpty(fileUrl))
-                            {
-                                <a href="@fileUrl" target="_blank" class="btn btn-ghost btn-sm">ダウンロード</a>
-                            }
-                            <button class="btn btn-ghost btn-sm text-error" onclick="deleteFile('@sec.Id', '@fileName')">削除</button>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
+
+    @* File staging list *@
+    <div id="fl-@sec.Id" class="mt-4 space-y-2 hidden"></div>
+
+    @* Action bar *@
+    <div id="ab-@sec.Id" class="mt-4 flex items-center gap-3 hidden">
+        <button type="button" class="btn btn-primary btn-sm"
+                onclick="nyfDzUploadAll('@sec.Id', '@uploadUrl')">
+            ⬆ アップロード開始
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm"
+                onclick="nyfDzClear('@sec.Id')">
+            クリア
+        </button>
+        <span id="cnt-@sec.Id" class="text-sm text-gray-500"></span>
+    </div>
+
+    @* Result banner *@
+    <div id="res-@sec.Id" class="mt-3 hidden"></div>
+
 </div>
 
 <script>
-    function handleFileSelect(input, containerId) {
-        var files = input.files;
-        if (!files.length) return;
-        
-        // 簡易アップロード処理（実際には API エンドポイントへ送信）
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            console.log('Selected file:', file.name, file.size);
-            // 実際のアップロード処理は Controller 側で実装
+(function () {
+    var _queues = {};   // secId -> [{file, itemEl, progressEl, statusEl}]
+
+    // ── drag & drop ────────────────────────────────────────────────────────
+    window.nyfDzDragOver = function (e, sid) {
+        e.preventDefault();
+        document.getElementById('dz-' + sid).classList.add('border-primary', 'bg-base-200');
+    };
+    window.nyfDzDragLeave = function (e, sid) {
+        document.getElementById('dz-' + sid).classList.remove('border-primary', 'bg-base-200');
+    };
+    window.nyfDzDrop = function (e, sid) {
+        e.preventDefault();
+        nyfDzDragLeave(e, sid);
+        nyfDzFilesAdded(sid, e.dataTransfer.files);
+    };
+
+    // ── files added (from input or drop) ──────────────────────────────────
+    window.nyfDzFilesAdded = function (sid, files) {
+        if (!files || !files.length) return;
+        var maxFiles = @maxFiles;
+        var maxBytes = @maxBytes;
+        var q = _queues[sid] = _queues[sid] || [];
+
+        Array.from(files).forEach(function (file) {
+            if (q.length >= maxFiles) return;
+            // size guard
+            if (file.size > maxBytes) {
+                showBanner(sid, 'warning',
+                    '⚠ ' + file.name + ' はサイズ超過（' + fmtSize(file.size) + '）でスキップされました。');
+                return;
+            }
+            q.push({ file: file, status: 'pending' });
+            renderFileItem(sid, q[q.length - 1], q.length - 1);
+        });
+
+        // reset input so same file can be re-added after clear
+        var inp = document.getElementById('fi-' + sid);
+        if (inp) inp.value = '';
+
+        refreshActionBar(sid);
+    };
+
+    // ── render single file row ─────────────────────────────────────────────
+    function renderFileItem(sid, entry, idx) {
+        var fl = document.getElementById('fl-' + sid);
+        fl.classList.remove('hidden');
+
+        var item = document.createElement('div');
+        item.className = 'flex items-center gap-3 p-2 bg-base-200 rounded-lg';
+        item.id = 'fi-item-' + sid + '-' + idx;
+
+        // preview / icon
+        var preview = '';
+        @if (showPreview)
+        {
+            <text>
+        if (entry.file.type.startsWith('image/')) {
+            var url = URL.createObjectURL(entry.file);
+            preview = '<img src="' + url + '" class="w-12 h-12 object-cover rounded" />';
+        } else {
+            preview = '<div class="w-12 h-12 flex items-center justify-center text-2xl bg-base-300 rounded">📄</div>';
+        }
+            </text>
+        }
+        else
+        {
+            <text>
+        preview = '<div class="w-10 h-10 flex items-center justify-center text-xl bg-base-300 rounded">📄</div>';
+            </text>
+        }
+
+        item.innerHTML =
+            preview +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="text-sm font-medium truncate">' + escHtml(entry.file.name) + '</div>' +
+              '<div class="text-xs text-gray-400">' + fmtSize(entry.file.size) + '</div>' +
+              '<div class="mt-1 h-1.5 bg-base-300 rounded-full overflow-hidden hidden" id="pb-' + sid + '-' + idx + '">' +
+                '<div class="h-full bg-primary transition-all" style="width:0%" id="pbi-' + sid + '-' + idx + '"></div>' +
+              '</div>' +
+            '</div>' +
+            '<span class="text-sm" id="st-' + sid + '-' + idx + '">⏳</span>' +
+            '<button type="button" class="btn btn-ghost btn-xs text-error" ' +
+              'onclick="nyfDzRemove(\'' + sid + '\',' + idx + ')">✕</button>';
+
+        fl.appendChild(item);
+    }
+
+    // ── remove a file from queue ───────────────────────────────────────────
+    window.nyfDzRemove = function (sid, idx) {
+        var q = _queues[sid] || [];
+        if (q[idx]) q[idx].removed = true;
+        var el = document.getElementById('fi-item-' + sid + '-' + idx);
+        if (el) el.remove();
+        refreshActionBar(sid);
+    };
+
+    // ── clear all ─────────────────────────────────────────────────────────
+    window.nyfDzClear = function (sid) {
+        _queues[sid] = [];
+        var fl = document.getElementById('fl-' + sid);
+        if (fl) { fl.innerHTML = ''; fl.classList.add('hidden'); }
+        var ab = document.getElementById('ab-' + sid);
+        if (ab) ab.classList.add('hidden');
+        var res = document.getElementById('res-' + sid);
+        if (res) { res.innerHTML = ''; res.classList.add('hidden'); }
+    };
+
+    // ── upload all pending ─────────────────────────────────────────────────
+    window.nyfDzUploadAll = function (sid, uploadUrl) {
+        var q = (_queues[sid] || []).filter(function (e) { return !e.removed && e.status === 'pending'; });
+        if (!q.length) return;
+
+        var csrf = getCsrfToken();
+        var promises = q.map(function (entry, localIdx) {
+            var globalIdx = (_queues[sid] || []).indexOf(entry);
+            return uploadOne(sid, entry, globalIdx, uploadUrl, csrf);
+        });
+
+        Promise.all(promises).then(function (results) {
+            var ok = results.filter(function (r) { return r.ok; }).length;
+            var fail = results.length - ok;
+            var msg = ok + ' 件アップロード完了';
+            if (fail) msg += '、' + fail + ' 件失敗';
+            showBanner(sid, fail ? 'warning' : 'success', msg);
+        });
+    };
+
+    function uploadOne(sid, entry, idx, uploadUrl, csrf) {
+        entry.status = 'uploading';
+        var pbWrap = document.getElementById('pb-' + sid + '-' + idx);
+        var pbi    = document.getElementById('pbi-' + sid + '-' + idx);
+        var stEl   = document.getElementById('st-' + sid + '-' + idx);
+        if (pbWrap) pbWrap.classList.remove('hidden');
+        if (stEl)   stEl.textContent = '⬆';
+
+        var fd = new FormData();
+        fd.append('files', entry.file, entry.file.name);
+
+        return new Promise(function (resolve) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', uploadUrl);
+            if (csrf.header && csrf.token)
+                xhr.setRequestHeader(csrf.header, csrf.token);
+
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable && pbi) {
+                    pbi.style.width = Math.round(e.loaded / e.total * 100) + '%';
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    entry.status = 'done';
+                    if (stEl) stEl.textContent = '✅';
+                    if (pbi)  pbi.style.width = '100%';
+                    resolve({ ok: true });
+                } else {
+                    var msg = '❌';
+                    try { msg = JSON.parse(xhr.responseText).error || msg; } catch (_) {}
+                    entry.status = 'error';
+                    if (stEl) stEl.textContent = '❌';
+                    resolve({ ok: false, msg: msg });
+                }
+            };
+            xhr.onerror = function () {
+                entry.status = 'error';
+                if (stEl) stEl.textContent = '❌';
+                resolve({ ok: false, msg: 'ネットワークエラー' });
+            };
+
+            xhr.send(fd);
+        });
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────
+    function refreshActionBar(sid) {
+        var q = (_queues[sid] || []).filter(function (e) { return !e.removed; });
+        var ab  = document.getElementById('ab-' + sid);
+        var cnt = document.getElementById('cnt-' + sid);
+        if (!ab) return;
+        if (q.length) {
+            ab.classList.remove('hidden');
+            if (cnt) cnt.textContent = q.length + ' 件選択中';
+        } else {
+            ab.classList.add('hidden');
         }
     }
-    
-    function deleteFile(containerId, fileName) {
-        if (confirm(fileName + ' を削除しますか？')) {
-            console.log('Delete file:', fileName);
-            // 実際の削除処理は API エンドポイントへ送信
-        }
+
+    function showBanner(sid, type, msg) {
+        var res = document.getElementById('res-' + sid);
+        if (!res) return;
+        var cls = type === 'success' ? 'alert-success' : type === 'warning' ? 'alert-warning' : 'alert-error';
+        res.innerHTML = '<div class="alert ' + cls + ' text-sm py-2 px-4">' + escHtml(msg) + '</div>';
+        res.classList.remove('hidden');
     }
+
+    function getCsrfToken() {
+        var hEl = document.querySelector('meta[name="csrf-token-header"]');
+        var tEl = document.querySelector('meta[name="csrf-token"]');
+        return {
+            header: hEl ? hEl.content : null,
+            token:  tEl ? tEl.content : null
+        };
+    }
+
+    function fmtSize(bytes) {
+        if (bytes < 1024)       return bytes + ' B';
+        if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+}());
 </script>

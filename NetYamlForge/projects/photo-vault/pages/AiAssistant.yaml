@@ -56,7 +56,7 @@ sections:
     source: |
       SELECT p.file_name AS 文件名,
              p.scene_type AS 场景,
-             COALESCE(p.caption_short, '—') AS AI 描述,
+             COALESCE(p.caption_short, '—') AS "AI 描述",
              COALESCE(p.annotation_model, '—') AS 模型,
              ROUND(p.confidence_score, 2) AS 置信度,
              p.annotation_at AS 标注时间

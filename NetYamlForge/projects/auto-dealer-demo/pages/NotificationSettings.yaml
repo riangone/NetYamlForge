@@ -1,0 +1,165 @@
+title: 通知設定
+description: "メール・LINE・Webhook 通知チャンネルの設定・テスト送信・Job 送信履歴確認"
+
+permissions:
+  view:
+    roles: [ai_admin, executive]
+  create:
+    roles: [ai_admin]
+  edit:
+    roles: [ai_admin, executive]
+  delete:
+    roles: [ai_admin]
+
+sections:
+  # ─────────────────────────────────────────
+  # 通知チャンネル稼働状況 KPI
+  # ─────────────────────────────────────────
+  - id: notification_stats
+    title: 通知システム状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '今月の AI 通信送信数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📧' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_communications
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+        AND status = 'sent'
+      UNION ALL
+      SELECT 'メール送信済み',
+             CAST(SUM(CASE WHEN channel = 'email' AND status = 'sent' THEN 1 ELSE 0 END) AS TEXT),
+             '✉️', NULL
+      FROM ai_communications
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'LINE 送信済み',
+             CAST(SUM(CASE WHEN channel = 'line' AND status = 'sent' THEN 1 ELSE 0 END) AS TEXT),
+             '💬', NULL
+      FROM ai_communications
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT '送信失敗',
+             CAST(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS TEXT),
+             '⚠️', NULL
+      FROM ai_communications
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 通知チャンネル設定ガイド
+  # ─────────────────────────────────────────
+  - id: channel_guide
+    title: 通知チャンネル設定ガイド
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 'Email (SendGrid)' AS チャンネル,
+             '✉️' AS アイコン,
+             'SENDGRID_API_KEY 環境変数に API キーを設定' AS 設定方法,
+             '予約リマインド・見積メール・育成メール' AS 用途,
+             '設定確認要' AS ステータス
+      UNION ALL
+      SELECT 'LINE Messaging API', '💬',
+             'LINE_CHANNEL_ACCESS_TOKEN 環境変数に設定。LINE Developers でチャンネル作成要',
+             'VIP フォローアップ・即時通知',
+             'line_user_id 要収集'
+      UNION ALL
+      SELECT 'Webhook (汎用)', '🔗',
+             'DEALER_WEBHOOK_URL 環境変数にエンドポイント URL を設定',
+             'Slack / Teams / 基幹連携',
+             '未設定'
+      UNION ALL
+      SELECT 'SMS (Twilio)', '📱',
+             'TWILIO_ACCOUNT_SID / AUTH_TOKEN 環境変数に設定',
+             '緊急連絡・予約直前リマインド',
+             'オプション'
+    columns: [チャンネル, アイコン, 設定方法, 用途, ステータス]
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 環境変数チェックリスト
+  # ─────────────────────────────────────────
+  - id: env_checklist
+    title: 必要な環境変数一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 'SENDGRID_API_KEY' AS 変数名, 'Email 送信用 API キー' AS 説明, '必須（Email 通知利用時）' AS 要否
+      UNION ALL SELECT 'DEALER_FROM_EMAIL', '送信元メールアドレス', '必須（Email 通知利用時）'
+      UNION ALL SELECT 'LINE_CHANNEL_ACCESS_TOKEN', 'LINE Messaging API トークン', '任意（LINE 通知利用時）'
+      UNION ALL SELECT 'LINE_CHANNEL_SECRET', 'LINE チャンネルシークレット', '任意（LINE 通知利用時）'
+      UNION ALL SELECT 'DEALER_WEBHOOK_URL', 'Webhook 送信先 URL（Slack等）', '任意'
+      UNION ALL SELECT 'TWILIO_ACCOUNT_SID', 'Twilio アカウント SID', '任意（SMS 利用時）'
+      UNION ALL SELECT 'TWILIO_AUTH_TOKEN', 'Twilio 認証トークン', '任意（SMS 利用時）'
+      UNION ALL SELECT 'TWILIO_FROM_PHONE', 'SMS 送信元電話番号', '任意（SMS 利用時）'
+    columns: [変数名, 説明, 要否]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # Job スケジュール一覧
+  # ─────────────────────────────────────────
+  - id: job_schedule
+    title: 自動 Job スケジュール一覧
+    component: table
+    sourceType: custom
+    source: |
+      SELECT 'appointment_reminder' AS ジョブ名, '予約リマインド送信' AS 説明, '毎日 10:00' AS スケジュール, 'sql_to_csv' AS 種別, '有効' AS 状態
+      UNION ALL SELECT 'stale_lead_alert', '停滞リードアラート', '平日毎朝 9:00', 'sql_to_csv', '有効'
+      UNION ALL SELECT 'vip_customer_followup', 'VIP 顧客フォローアップ', '毎週月曜 9:00', 'sql_to_csv', '有効'
+      UNION ALL SELECT 'ai_lead_scorer', 'AI リード再スコアリング', '2時間毎 30分', 'ai_dealer_engine', '有効'
+      UNION ALL SELECT 'ai_nurturing_generator', 'AI 育成タスク自動生成', '平日毎朝 8:00', 'ai_dealer_engine', '有効'
+      UNION ALL SELECT 'ai_quote_generator', 'AI 見積自動生成', '平日毎朝 9:00', 'ai_dealer_engine', '有効'
+      UNION ALL SELECT 'ai_nurturing_email_sender', 'AI 育成メール自動送信', '平日毎朝 10:30', 'ai_communication_sender', '有効'
+      UNION ALL SELECT 'ai_quote_email_sender', 'AI 見積メール自動送信', '平日毎朝 11:00', 'ai_communication_sender', '有効'
+      UNION ALL SELECT 'ai_response_check', 'AI 無返信フォローアップ', '平日毎日 14:00', 'ai_communication_sender', '有効'
+    columns: [ジョブ名, 説明, スケジュール, 種別, 状態]
+    pageSize: 15
+    editable: false
+    readOnly: true
+
+  # ─────────────────────────────────────────
+  # 最近の通信ログ
+  # ─────────────────────────────────────────
+  - id: recent_comms
+    title: 📧 最近の通信履歴（直近20件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT ac.comm_id AS ID,
+             c.name AS 顧客名,
+             CASE ac.channel
+               WHEN 'email' THEN '✉️ Email'
+               WHEN 'line'  THEN '💬 LINE'
+               WHEN 'sms'   THEN '📱 SMS'
+               ELSE ac.channel
+             END AS チャンネル,
+             ac.subject AS 件名,
+             CASE ac.status
+               WHEN 'sent'    THEN '✅ 送信済'
+               WHEN 'pending' THEN '⏳ 送信待'
+               WHEN 'failed'  THEN '❌ 失敗'
+               WHEN 'draft'   THEN '📝 下書き'
+               ELSE ac.status
+             END AS ステータス,
+             strftime('%m/%d %H:%M', ac.created_at) AS 日時
+      FROM ai_communications ac
+      LEFT JOIN customers c ON c.customer_id = ac.customer_id
+      ORDER BY ac.created_at DESC
+      LIMIT 20
+    columns: [ID, 顧客名, チャンネル, 件名, ステータス, 日時]
+    pageSize: 20
+    editable: false
+    readOnly: true

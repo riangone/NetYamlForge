@@ -1,0 +1,300 @@
+title: 従業員管理
+description: 従業員マスタの管理・ロール・部署・在籍状況の一元管理
+permissions:
+  view:
+    roles:
+    - ai_admin
+    - executive
+    - sales_manager
+  create:
+    roles:
+    - ai_admin
+    - executive
+  edit:
+    roles:
+    - ai_admin
+    - executive
+  delete:
+    roles:
+    - ai_admin
+sections:
+- id: employee_stats
+  title: 従業員統計
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '在籍従業員数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F454' AS metric_icon,\n       NULL AS metric_delta\nFROM employees WHERE status = 'active'\nUNION ALL\nSELECT '営業部', CAST(SUM(CASE WHEN department = 'sales' THEN 1 ELSE 0 END) AS TEXT), '\U0001F4C8', NULL\nFROM employees WHERE status = 'active'\nUNION ALL\nSELECT 'サービス部', CAST(SUM(CASE WHEN department = 'service' THEN 1 ELSE 0 END) AS TEXT), '\U0001F527', NULL\nFROM employees WHERE status = 'active'\nUNION ALL\nSELECT '管理部', CAST(SUM(CASE WHEN department IN ('administration','management') THEN 1 ELSE 0 END) AS TEXT), '\U0001F3E2', NULL\nFROM employees WHERE status = 'active'\nUNION ALL\nSELECT '休職中', CAST(COUNT(*) AS TEXT), '⏸️', NULL\nFROM employees WHERE status = 'on_leave'\nUNION ALL\nSELECT '今月入社', CAST(COUNT(*) AS TEXT), '\U0001F195', NULL\nFROM employees WHERE strftime('%Y-%m', hire_date) = strftime('%Y-%m', 'now')\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: dept_chart
+  title: 部署別人員分布
+  component: bar_chart
+  sourceType: custom
+  source: "SELECT CASE department\n         WHEN 'sales'           THEN '\U0001F4C8 営業'\n         WHEN 'service'         THEN '\U0001F527 サービス'\n         WHEN 'parts'           THEN '⚙️ パーツ'\n         WHEN 'administration'  THEN '\U0001F4CB 管理'\n         WHEN 'management'      THEN '\U0001F3E2 経営'\n         ELSE                        '❓ その他'\n       END AS label,\n       COUNT(*) AS value\nFROM employees\nWHERE status = 'active'\nGROUP BY department\nORDER BY value DESC\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: employee_list
+  title: 従業員一覧
+  component: data_table
+  entity: employees
+  sourceType: table
+  columns:
+    employee_number:
+      label: 従業員番号
+      sortable: true
+      searchable: true
+    name:
+      label: 氏名
+      sortable: true
+      searchable: true
+    name_kana:
+      label: フリガナ
+      sortable: true
+    department:
+      label: 部署
+      sortable: true
+      searchable: true
+      renderAs: badge
+      colorMap:
+        sales: blue
+        service: green
+        parts: orange
+        administration: gray
+        management: purple
+    position:
+      label: 役職
+      sortable: true
+    role:
+      label: ロール
+      sortable: true
+      searchable: true
+      renderAs: badge
+      colorMap:
+        executive: purple
+        sales_manager: blue
+        sales_rep: cyan
+        service_staff: green
+        operator: orange
+        ai_admin: red
+    email:
+      label: メールアドレス
+      sortable: true
+      searchable: true
+    status:
+      label: 在籍状態
+      sortable: true
+      renderAs: badge
+      colorMap:
+        active: green
+        on_leave: yellow
+        terminated: red
+        retired: gray
+    hire_date:
+      label: 入社日
+      sortable: true
+  defaultSort: employee_number
+  pageSize: 20
+  searchable: true
+  editable: true
+  allowCreate: true
+  allowEdit: true
+  allowDelete: true
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+    edit:
+      roles:
+      - ai_admin
+      - executive
+    delete:
+      roles:
+      - ai_admin
+  defaultSortDir: asc
+- id: employee_form
+  title: 従業員登録・編集
+  component: form
+  entity: employees
+  mode: create_edit
+  fields:
+  - field: employee_id
+    label: 従業員 ID
+    type: text
+    required: true
+    editable: false
+    placeholder: '例: EMP-001'
+  - field: employee_number
+    label: 従業員番号
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: E-00001'
+  - field: user_name
+    label: ユーザー名（ログイン用）
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: tanaka_manager'
+  - field: name
+    label: 氏名
+    type: text
+    required: true
+    editable: true
+  - field: name_kana
+    label: フリガナ
+    type: text
+    required: false
+    editable: true
+  - field: email
+    label: メールアドレス
+    type: email
+    required: true
+    editable: true
+  - field: phone
+    label: 電話番号
+    type: text
+    required: false
+    editable: true
+  - field: mobile
+    label: 携帯電話
+    type: text
+    required: false
+    editable: true
+  - field: gender
+    label: 性別
+    type: select
+    options:
+    - value: male
+      label: 男性
+    - value: female
+      label: 女性
+    - value: other
+      label: その他
+    required: false
+    editable: true
+  - field: birth_date
+    label: 生年月日
+    type: date
+    required: false
+    editable: true
+  - field: department
+    label: 部署
+    type: select
+    options:
+    - value: sales
+      label: 営業部
+    - value: service
+      label: サービス部
+    - value: parts
+      label: パーツ部
+    - value: administration
+      label: 管理部
+    - value: management
+      label: 経営管理
+    required: false
+    editable: true
+  - field: position
+    label: 役職
+    type: select
+    options:
+    - value: intern
+      label: インターン
+    - value: staff
+      label: スタッフ
+    - value: senior_staff
+      label: 主任
+    - value: assistant_manager
+      label: 係長
+    - value: manager
+      label: 課長
+    - value: general_manager
+      label: 部長
+    - value: executive
+      label: 役員
+    required: false
+    editable: true
+  - field: role
+    label: システムロール
+    type: select
+    options:
+    - value: operator
+      label: オペレーター
+    - value: sales_rep
+      label: 営業担当
+    - value: sales_manager
+      label: 営業部長
+    - value: service_staff
+      label: サービス担当
+    - value: ai_admin
+      label: AI 管理者
+    - value: executive
+      label: 役員
+    required: true
+    editable: true
+  - field: hire_date
+    label: 入社日
+    type: date
+    required: true
+    editable: true
+  - field: employment_type
+    label: 雇用形態
+    type: select
+    options:
+    - value: full_time
+      label: 正社員
+    - value: part_time
+      label: パートタイム
+    - value: contract
+      label: 契約社員
+    - value: temporary
+      label: 派遣
+    - value: intern
+      label: インターン
+    required: true
+    editable: true
+  - field: status
+    label: 在籍状態
+    type: select
+    options:
+    - value: active
+      label: 在籍
+    - value: on_leave
+      label: 休職中
+    - value: terminated
+      label: 退職
+    - value: retired
+      label: 定年退職
+    required: true
+    editable: true
+    default: active
+  - field: notes
+    label: 備考
+    type: textarea
+    required: false
+    editable: true
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+    edit:
+      roles:
+      - ai_admin
+      - executive
+  sourceType: none

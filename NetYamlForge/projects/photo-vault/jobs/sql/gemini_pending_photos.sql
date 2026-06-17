@@ -7,16 +7,14 @@ SELECT
     q.priority,
     q.retry_count,
     p.file_name,
-    p.file_size_bytes,
+    p.file_size,
     p.width,
     p.height,
     p.taken_at
 FROM processing_queue q
 JOIN photos p ON p.photo_id = q.photo_id
 WHERE q.status = 'queued'
-  AND (q.provider = 'gemini' OR q.provider IS NULL AND 'gemini' = (
-      SELECT value FROM app_settings WHERE key = 'default_annotation_provider' LIMIT 1
-  ))
+  AND q.provider = 'gemini'
   AND q.retry_count <= 3
   AND p.deleted_at IS NULL
 ORDER BY q.priority DESC, q.queued_at ASC

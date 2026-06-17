@@ -1,0 +1,193 @@
+title: 拠点管理
+description: ディーラー拠点（本店・支店・サービスセンター）のマスタ管理
+permissions:
+  view:
+    roles:
+    - ai_admin
+    - executive
+    - sales_manager
+  create:
+    roles:
+    - ai_admin
+    - executive
+  edit:
+    roles:
+    - ai_admin
+    - executive
+  delete:
+    roles:
+    - ai_admin
+sections:
+- id: branch_stats
+  title: 拠点サマリー
+  component: stat_cards
+  sourceType: custom
+  source: "SELECT '総拠点数' AS metric_name,\n       CAST(COUNT(*) AS TEXT) AS metric_value,\n       '\U0001F3E2' AS metric_icon,\n       NULL AS metric_delta\nFROM branches WHERE is_active = 1\nUNION ALL\nSELECT '本店・支店',\n       CAST(SUM(CASE WHEN branch_type IN ('main','sub') THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F3EA', NULL\nFROM branches WHERE is_active = 1\nUNION ALL\nSELECT 'サービスセンター',\n       CAST(SUM(CASE WHEN branch_type = 'service' THEN 1 ELSE 0 END) AS TEXT),\n       '\U0001F527', NULL\nFROM branches WHERE is_active = 1\nUNION ALL\nSELECT '在籍従業員（全拠点）',\n       CAST(COUNT(*) AS TEXT),\n       '\U0001F454', NULL\nFROM employees WHERE status = 'active'\n"
+  columns:
+  - metric_name
+  - metric_value
+  - metric_icon
+  - metric_delta
+  labelField: metric_name
+  valueField: metric_value
+  iconField: metric_icon
+  deltaField: metric_delta
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: branch_staffing
+  title: 拠点別人員配置
+  component: bar_chart
+  sourceType: custom
+  source: "SELECT b.branch_name AS label,\n       COUNT(e.employee_id) AS value\nFROM branches b\nLEFT JOIN employees e ON e.branch_id = b.branch_id AND e.status = 'active'\nWHERE b.is_active = 1\nGROUP BY b.branch_id, b.branch_name\nORDER BY value DESC\n"
+  columns:
+  - label
+  - value
+  xField: label
+  yField: value
+  color: rgba(99, 102, 241, 0.75)
+  pageSize: 10
+  editable: false
+  readOnly: true
+- id: branch_list
+  title: 拠点一覧
+  component: data_table
+  entity: branches
+  sourceType: table
+  columns:
+    branch_id:
+      label: 拠点 ID
+      sortable: true
+      searchable: true
+    branch_name:
+      label: 拠点名
+      sortable: true
+      searchable: true
+    branch_type:
+      label: 種別
+      sortable: true
+      renderAs: badge
+      colorMap:
+        main: purple
+        sub: blue
+        service: green
+    address:
+      label: 住所
+      sortable: false
+      searchable: true
+    phone:
+      label: 電話番号
+      sortable: false
+    email:
+      label: メールアドレス
+      sortable: false
+    is_active:
+      label: 有効
+      sortable: true
+      renderAs: badge
+      colorMap:
+        1: green
+        0: red
+  defaultSort: sort_order
+  pageSize: 20
+  searchable: true
+  editable: true
+  allowCreate: true
+  allowEdit: true
+  allowDelete: true
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+    edit:
+      roles:
+      - ai_admin
+      - executive
+    delete:
+      roles:
+      - ai_admin
+  defaultSortDir: asc
+- id: branch_form
+  title: 拠点登録・編集
+  component: form
+  entity: branches
+  mode: create_edit
+  fields:
+  - field: branch_id
+    label: 拠点 ID
+    type: text
+    required: true
+    editable: false
+    placeholder: '例: BR-003'
+  - field: branch_name
+    label: 拠点名
+    type: text
+    required: true
+    editable: true
+    placeholder: '例: 新宿支店'
+  - field: branch_type
+    label: 拠点種別
+    type: select
+    options:
+    - value: main
+      label: 本店
+    - value: sub
+      label: 支店
+    - value: service
+      label: サービスセンター
+    required: true
+    editable: true
+  - field: address
+    label: 住所
+    type: text
+    required: false
+    editable: true
+  - field: phone
+    label: 電話番号
+    type: text
+    required: false
+    editable: true
+  - field: email
+    label: メールアドレス
+    type: email
+    required: false
+    editable: true
+  - field: manager_id
+    label: 管理者（従業員 ID）
+    type: text
+    required: false
+    editable: true
+    placeholder: '例: EMP-001'
+  - field: sort_order
+    label: 表示順
+    type: number
+    required: false
+    editable: true
+    default: 0
+  - field: is_active
+    label: 有効
+    type: select
+    options:
+    - value: 1
+      label: 有効
+    - value: 0
+      label: 無効
+    required: true
+    editable: true
+    default: 1
+  - field: notes
+    label: 備考
+    type: textarea
+    required: false
+    editable: true
+  permissions:
+    create:
+      roles:
+      - ai_admin
+      - executive
+    edit:
+      roles:
+      - ai_admin
+      - executive
+  sourceType: none

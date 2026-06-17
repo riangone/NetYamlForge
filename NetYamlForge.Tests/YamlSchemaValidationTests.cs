@@ -272,4 +272,28 @@ public class YamlSchemaValidationTests
 
         Assert.Null(ex);
     }
+
+    [Fact]
+    public void DebugPhotoImportYaml()
+    {
+        var path = Path.Combine(ProjectsRoot, "photo-vault", "pages", "PhotoImport.yaml");
+        var yaml = File.ReadAllText(path);
+        
+        var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
+            .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
+            .Build();
+        var raw = deserializer.Deserialize<object>(yaml);
+        
+        try
+        {
+            YamlSchemaValidator.ValidateUiPageYaml(yaml, path);
+        }
+        catch (Exception ex)
+        {
+            var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            var json = System.Text.Json.JsonSerializer.Serialize(raw, options);
+            throw new Exception($"Converted JSON:\n{json}\n\nOriginal Exception:\n{ex}");
+        }
+    }
 }
+
