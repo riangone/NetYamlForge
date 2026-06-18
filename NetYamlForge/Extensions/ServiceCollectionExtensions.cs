@@ -206,7 +206,7 @@ public static class ServiceCollectionExtensions
         
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
-        services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.GeminiEmbeddingService>();
+        services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
         services.AddSingleton<ToolCallValidator>();
         services.AddSingleton<IToolRegistry, InMemoryToolRegistry>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();

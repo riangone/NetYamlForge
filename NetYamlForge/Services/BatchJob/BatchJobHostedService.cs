@@ -32,6 +32,11 @@ public interface IBatchJobScheduler
     Task TriggerJobNowAsync(string projectName, string jobId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// ジョブの有効/無効を切り替える（スケジューラへの即時反映 + YAML 永続化）
+    /// </summary>
+    Task SetJobEnabledAsync(string projectName, string jobId, bool enabled);
+
+    /// <summary>
     /// 現在実行中のジョブ ID セットを取得する
     /// </summary>
     IReadOnlySet<string> GetRunningJobIds();
@@ -335,6 +340,44 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
 
         _logger.LogWarning("手動トリガー失敗：ジョブが見つかりません {Project}/{JobId}", projectName, jobId);
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// ジョブの有効/無効を切り替える
+    /// </summary>
+    public async Task SetJobEnabledAsync(string projectName, string jobId, bool enabled)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
+        var loader = scope.ServiceProvider.GetRequiredService<IBatchJobLoader>();
+
+        var project = projectManager.GetAll()
+            .FirstOrDefault(p => string.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+        if (project == null)
+        {
+            _logger.LogWarning("SetJobEnabled: プロジェクトが見つかりません {Project}", projectName);
+            return;
+        }
+
+        // 永続化
+        await loader.SetJobEnabledAsync(project.ProjectDir, jobId, enabled);
+
+        if (!enabled)
+        {
+            // スケジューラから取り除く
+            if (_scheduledJobs.TryRemove(jobId, out _))
+                _logger.LogInformation("ジョブを無効化しました：{JobId}", jobId);
+        }
+        else
+        {
+            // 再登録（YAML 再読み込み）
+            var allJobs = await loader.LoadJobsAsync(project.ProjectDir);
+            if (allJobs.TryGetValue(jobId, out var jobDef) && !string.IsNullOrEmpty(jobDef.Schedule.Cron))
+            {
+                RegisterJob(jobDef, projectName);
+                _logger.LogInformation("ジョブを有効化しました：{JobId}", jobId);
+            }
+        }
     }
 
     /// <summary>

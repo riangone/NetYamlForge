@@ -17,10 +17,6 @@ navigation:
     - ad_user
     - ad_role
   items:
-    - label: 仪表盘
-      url: /jpcs/Page/Dashboard
-      icon: dashboard
-      section: 主要功能
     - label: 个人工作台
       url: /jpcs/Page/MyPage
       icon: user

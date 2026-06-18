@@ -1,6 +1,7 @@
 // ファイル概要：バッチジョブの YAML 定義を読み込むサービスです。
 
 using System.IO;
+using System.Text.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -15,6 +16,11 @@ public interface IBatchJobLoader
     /// プロジェクトからバッチジョブ定義を読み込む
     /// </summary>
     Task<Dictionary<string, BatchJobDefinition>> LoadJobsAsync(string projectPath);
+
+    /// <summary>
+    /// ジョブの有効/無効状態を永続化する（override ファイルに書き込む）
+    /// </summary>
+    Task SetJobEnabledAsync(string projectPath, string jobId, bool enabled);
 }
 
 /// <summary>
@@ -32,6 +38,8 @@ public class BatchJobLoader : IBatchJobLoader
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
     }
+
+    private static readonly string OverrideFileName = ".job-states.json";
 
     public async Task<Dictionary<string, BatchJobDefinition>> LoadJobsAsync(string projectPath)
     {
@@ -58,25 +66,18 @@ public class BatchJobLoader : IBatchJobLoader
                     .Build();
 
                 var jobContainer = deserializer.Deserialize<BatchJobContainer>(yaml);
-                
+
                 if (jobContainer.Jobs != null)
                 {
                     foreach (var kvp in jobContainer.Jobs)
                     {
                         var job = kvp.Value;
-                        // 複数ジョブ定義をサポートするため、IDは辞書キーを優先して使用する。
-                        // 単一ジョブファイルでキーが未設定の場合のみファイル名にフォールバック。
                         job.Id = string.IsNullOrEmpty(job.Id) ? kvp.Key : job.Id;
-                        
-                        // 相対パスを絶対パスに変換
+
                         if (!string.IsNullOrEmpty(job.Settings.SqlFile))
-                        {
                             job.Settings.SqlFile = Path.Combine(projectPath, job.Settings.SqlFile);
-                        }
                         if (!string.IsNullOrEmpty(job.Settings.OutputFile))
-                        {
                             job.Settings.OutputFile = Path.Combine(projectPath, job.Settings.OutputFile);
-                        }
 
                         result[job.Id] = job;
                         _logger.LogDebug("ジョブを読み込みました：{JobId}", job.Id);
@@ -89,7 +90,45 @@ public class BatchJobLoader : IBatchJobLoader
             }
         }
 
+        // Override ファイルで enabled 状態を上書き
+        var overrides = await LoadOverridesAsync(projectPath);
+        foreach (var kvp in overrides)
+        {
+            if (result.TryGetValue(kvp.Key, out var job))
+                job.Enabled = kvp.Value;
+        }
+
         return result;
+    }
+
+    public async Task SetJobEnabledAsync(string projectPath, string jobId, bool enabled)
+    {
+        var overrides = await LoadOverridesAsync(projectPath);
+        overrides[jobId] = enabled;
+        await SaveOverridesAsync(projectPath, overrides);
+    }
+
+    private async Task<Dictionary<string, bool>> LoadOverridesAsync(string projectPath)
+    {
+        var overridePath = Path.Combine(projectPath, "jobs", OverrideFileName);
+        if (!File.Exists(overridePath))
+            return new Dictionary<string, bool>();
+        try
+        {
+            var json = await File.ReadAllTextAsync(overridePath);
+            return JsonSerializer.Deserialize<Dictionary<string, bool>>(json) ?? new();
+        }
+        catch
+        {
+            return new Dictionary<string, bool>();
+        }
+    }
+
+    private async Task SaveOverridesAsync(string projectPath, Dictionary<string, bool> overrides)
+    {
+        var overridePath = Path.Combine(projectPath, "jobs", OverrideFileName);
+        var json = JsonSerializer.Serialize(overrides, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(overridePath, json);
     }
 }
 

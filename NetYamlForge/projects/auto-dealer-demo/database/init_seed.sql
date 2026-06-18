@@ -124,3 +124,99 @@ INSERT OR IGNORE INTO employees (employee_id, user_name, employee_number, name, 
 ('EMP-013', 'parts_staff', '4001', '林大樹', 'ハヤシダイキ', 'male', 'hayashi@auto-dealer.com', 'parts', 'staff', 'service_staff', 'EMP-008', '2021-04-01', 'full_time', 'active'),
 -- システム管理
 ('EMP-014', 'ai_admin', '9001', '清水デジタル', 'シミズデジタル', 'male', 'shimizu.ai@auto-dealer.com', 'administration', 'manager', 'ai_admin', 'EMP-001', '2020-04-01', 'full_time', 'active');
+
+-- ============================================================
+-- Phase 4 追加テーブル シードデータ
+-- ============================================================
+
+-- branches (拠点)
+INSERT OR IGNORE INTO branches (branch_id, branch_name, branch_type, address, phone, email, manager_id, is_active, sort_order, created_at, updated_at) VALUES
+  ('BR-001', '本店',            'main',    '東京都渋谷区代々木1-1-1',    '03-1234-5678', 'honten@example-dealer.co.jp',    'EMP-001', 1, 1, datetime('now'), datetime('now')),
+  ('BR-002', '横浜支店',        'sub',     '神奈川県横浜市西区高島2-2-2', '045-234-5678', 'yokohama@example-dealer.co.jp',  'EMP-002', 1, 2, datetime('now'), datetime('now')),
+  ('BR-003', 'サービスセンター', 'service', '東京都世田谷区三軒茶屋3-3-3', '03-5678-1234', 'service@example-dealer.co.jp',   NULL,      1, 3, datetime('now'), datetime('now'));
+
+-- sales_quotas (営業クォータ)
+INSERT OR IGNORE INTO sales_quotas (quota_id, employee_id, branch_id, year, month, quota_amount, quota_units, achieved_amount, achieved_units, created_at, updated_at) VALUES
+  ('QT-2026-001', 'EMP-001', 'BR-001', 2026, 4, 15000000.00, 5, 12000000.00, 4, datetime('now'), datetime('now')),
+  ('QT-2026-002', 'EMP-002', 'BR-001', 2026, 4,  8000000.00, 3,  9500000.00, 3, datetime('now'), datetime('now')),
+  ('QT-2026-003', 'EMP-003', 'BR-002', 2026, 4, 10000000.00, 4,  7200000.00, 3, datetime('now'), datetime('now')),
+  ('QT-2026-004', 'EMP-001', 'BR-001', 2026, 5, 15000000.00, 5, 16800000.00, 6, datetime('now'), datetime('now')),
+  ('QT-2026-005', 'EMP-002', 'BR-001', 2026, 5,  8000000.00, 3,  8100000.00, 3, datetime('now'), datetime('now'));
+
+-- vehicle_images (車両画像)
+INSERT OR IGNORE INTO vehicle_images (image_id, vehicle_id, image_url, caption, image_type, sort_order, is_primary, uploaded_by, created_at) VALUES
+  ('IMG-001', 'VH-001', '/uploads/vehicles/vh001_front.jpg', 'フロントビュー',   'exterior', 1, 1, 'EMP-001', datetime('now')),
+  ('IMG-002', 'VH-001', '/uploads/vehicles/vh001_rear.jpg',  'リアビュー',       'exterior', 2, 0, 'EMP-001', datetime('now')),
+  ('IMG-003', 'VH-002', '/uploads/vehicles/vh002_front.jpg', 'フロントビュー',   'exterior', 1, 1, 'EMP-002', datetime('now')),
+  ('IMG-004', 'VH-002', '/uploads/vehicles/vh002_int.jpg',   'インテリア',       'interior', 2, 0, 'EMP-002', datetime('now')),
+  ('IMG-005', 'VH-003', '/uploads/vehicles/vh003_main.jpg',  'メインビュー',     'exterior', 1, 1, 'EMP-001', datetime('now'));
+
+-- payment_plans (支払いプラン)
+INSERT OR IGNORE INTO payment_plans (plan_id, lead_id, customer_id, vehicle_id, plan_type, total_amount, down_payment, loan_amount, interest_rate, term_months, monthly_payment, status, contract_date, created_at, updated_at) VALUES
+  ('PP-001', 'LEAD-001', 'CUST-001', 'VH-001', 'loan',    4500000.00, 500000.00, 4000000.00, 2.9, 60, 71400.00, 'approved', '2026-04-15', datetime('now'), datetime('now')),
+  ('PP-002', 'LEAD-002', 'CUST-002', 'VH-002', 'cash',    3200000.00, 3200000.00, NULL,    NULL, NULL, NULL,    'approved', '2026-04-20', datetime('now'), datetime('now')),
+  ('PP-003', 'LEAD-003', 'CUST-003', 'VH-003', 'lease',   5800000.00, NULL,      5800000.00, 1.5, 36, 165000.00,'pending',  NULL,         datetime('now'), datetime('now')),
+  ('PP-004', NULL,       'CUST-004', 'VH-004', 'loan',    2800000.00, 300000.00, 2500000.00, 3.2, 48, 55700.00, 'draft',    NULL,         datetime('now'), datetime('now')),
+  ('PP-005', 'LEAD-004', 'CUST-005', 'VH-005', 'balloon', 6200000.00, 800000.00, 5400000.00, 2.5, 60, 82500.00, 'approved', '2026-05-01', datetime('now'), datetime('now'));
+
+-- test_drives (試乗)
+INSERT OR IGNORE INTO test_drives (test_drive_id, lead_id, customer_id, vehicle_id, assigned_staff_id, branch_id, scheduled_at, actual_start_at, actual_end_at, status, feedback_score, feedback_notes, created_at, updated_at) VALUES
+  ('TD-001', 'LEAD-001', 'CUST-001', 'VH-001', 'EMP-001', 'BR-001', '2026-04-10 10:00:00', '2026-04-10 10:05:00', '2026-04-10 10:45:00', 'completed', 5, '非常に満足しています', datetime('now'), datetime('now')),
+  ('TD-002', 'LEAD-002', 'CUST-002', 'VH-002', 'EMP-002', 'BR-001', '2026-04-12 14:00:00', '2026-04-12 14:10:00', '2026-04-12 14:50:00', 'completed', 4, '良かったです',         datetime('now'), datetime('now')),
+  ('TD-003', 'LEAD-003', 'CUST-003', 'VH-003', 'EMP-001', 'BR-002', '2026-04-18 11:00:00', NULL,                  NULL,                  'scheduled', NULL, NULL,                   datetime('now'), datetime('now')),
+  ('TD-004', 'LEAD-004', 'CUST-005', 'VH-005', 'EMP-003', 'BR-002', '2026-05-05 13:00:00', '2026-05-05 13:00:00', '2026-05-05 13:50:00', 'completed', 5, '購入を決めました',     datetime('now'), datetime('now')),
+  ('TD-005', NULL,       'CUST-004', 'VH-004', 'EMP-002', 'BR-001', '2026-05-15 15:00:00', NULL,                  NULL,                  'cancelled', NULL, NULL,                   datetime('now'), datetime('now'));
+
+-- ai_conversations (AI会話)
+INSERT OR IGNORE INTO ai_conversations (conversation_id, customer_id, channel, status, last_intent, last_confidence, sentiment_score, started_at, created_at, updated_at) VALUES
+  ('CONV-001', 'CUST-001', 'web',   'completed', 'vehicle_inquiry',  0.92, 0.75, '2026-04-01 09:00:00', datetime('now'), datetime('now')),
+  ('CONV-002', 'CUST-002', 'line',  'completed', 'price_inquiry',    0.88, 0.60, '2026-04-03 14:30:00', datetime('now'), datetime('now')),
+  ('CONV-003', 'CUST-003', 'email', 'active',    'financing_inquiry',0.79, 0.50, '2026-04-05 10:00:00', datetime('now'), datetime('now')),
+  ('CONV-004', 'CUST-004', 'web',   'completed', 'service_inquiry',  0.85, 0.70, '2026-04-08 16:00:00', datetime('now'), datetime('now')),
+  ('CONV-005', 'CUST-005', 'phone', 'completed', 'test_drive_request',0.95,0.85, '2026-04-10 11:00:00', datetime('now'), datetime('now'));
+
+-- ai_handovers (AI引継ぎ)
+INSERT OR IGNORE INTO ai_handovers (handover_id, conversation_id, reason, priority, target_department, status, handover_notes, escalated_at, created_at) VALUES
+  ('HO-001', 'CONV-001', 'complex_financing', 'high',   'sales',   'resolved', '複雑なローン相談', '2026-04-01 09:30:00', datetime('now')),
+  ('HO-002', 'CONV-003', 'complaint',         'urgent', 'service', 'pending',  '修理費用の苦情',   '2026-04-05 10:45:00', datetime('now')),
+  ('HO-003', 'CONV-004', 'escalation',        'medium', 'manager', 'resolved', '値引き交渉希望',   '2026-04-08 16:30:00', datetime('now'));
+
+-- ai_decisions (AI決定)
+INSERT OR IGNORE INTO ai_decisions (decision_id, decision_type, entity_type, entity_id, ai_reasoning, confidence_score, status, requires_human, created_at) VALUES
+  ('AD-001', 'price_recommendation',   'vehicle',    'VH-001', '市場価格分析に基づき3%値引きを推奨',     0.87, 'executed',  0, datetime('now')),
+  ('AD-002', 'lead_priority',          'sales_lead', 'LEAD-001','購買意欲スコア高、優先フォロー推奨',   0.92, 'executed',  0, datetime('now')),
+  ('AD-003', 'handover_decision',      'conversation','CONV-001','複雑な融資相談のため担当者引継ぎ推奨', 0.95, 'executed',  1, datetime('now')),
+  ('AD-004', 'financing_plan',         'customer',   'CUST-003','60回払いが最適と判断',                 0.81, 'pending',   1, datetime('now')),
+  ('AD-005', 'follow_up_timing',       'sales_lead', 'LEAD-002','3日後のフォローが最適タイミング',       0.78, 'executed',  0, datetime('now'));
+
+-- ai_quotes (AI見積)
+INSERT OR IGNORE INTO ai_quotes (quote_id, lead_id, customer_id, vehicle_id, base_price, discount_amount, final_price, ai_reasoning, status, valid_until, created_at) VALUES
+  ('AQ-001', 'LEAD-001', 'CUST-001', 'VH-001', 4800000.00, 300000.00, 4500000.00, 'ロイヤルティ割引適用', 'accepted', '2026-05-01 23:59:59', datetime('now')),
+  ('AQ-002', 'LEAD-002', 'CUST-002', 'VH-002', 3200000.00,       0.00, 3200000.00, '適正価格帯', 'draft', '2026-05-15 23:59:59', datetime('now')),
+  ('AQ-003', 'LEAD-003', 'CUST-003', 'VH-003', 6000000.00, 200000.00, 5800000.00, '法人割引適用', 'pending', '2026-05-31 23:59:59', datetime('now'));
+
+-- ai_action_log (AIアクションログ)
+INSERT OR IGNORE INTO ai_action_log (log_id, action_type, entity_type, entity_id, created_at) VALUES
+  ('LOG-001', 'send_email',        'sales_lead',   'LEAD-001', datetime('now')),
+  ('LOG-002', 'update_lead_score', 'sales_lead',   'LEAD-002', datetime('now')),
+  ('LOG-003', 'create_handover',   'conversation', 'CONV-001', datetime('now')),
+  ('LOG-004', 'generate_quote',    'ai_quote',     'AQ-001',   datetime('now')),
+  ('LOG-005', 'schedule_followup', 'sales_lead',   'LEAD-003', datetime('now'));
+
+-- ai_communications (AI通信)
+INSERT OR IGNORE INTO ai_communications (comm_id, lead_id, customer_id, comm_channel, subject, body_text, ai_personalized, ai_confidence, send_status, sent_at, created_at, updated_at) VALUES
+  ('COMM-001', 'LEAD-001', 'CUST-001', 'email', 'プリウスご案内', '山田様、お問い合わせの車両について詳細をご案内いたします。', 1, 0.90, 'sent', '2026-04-02 09:00:00', datetime('now'), datetime('now')),
+  ('COMM-002', 'LEAD-002', 'CUST-002', 'sms',   NULL,             '佐藤様、試乗のご予約が確定しました。', 1, 0.85, 'sent', '2026-04-04 10:00:00', datetime('now'), datetime('now')),
+  ('COMM-003', 'LEAD-003', 'CUST-003', 'email', 'ご提案：リース契約', '鈴木様、法人向けリース契約のご提案をさせていただきます。', 1, 0.88, 'pending', NULL, datetime('now'), datetime('now'));
+
+-- lead_nurturing_tasks (育成タスク)
+INSERT OR IGNORE INTO lead_nurturing_tasks (task_id, lead_id, customer_id, task_type, trigger_reason, priority_score, status, ai_recommendation, due_date, created_at, updated_at) VALUES
+  ('LNT-001', 'LEAD-001', 'CUST-001', 'follow_up_call',  '問い合わせ後3日経過',   80, 'completed', '電話フォロー推奨',    '2026-04-05 10:00:00', datetime('now'), datetime('now')),
+  ('LNT-002', 'LEAD-002', 'CUST-002', 'send_brochure',   '試乗後フォロー',        70, 'pending',   'カタログ送付推奨',    '2026-04-15 10:00:00', datetime('now'), datetime('now')),
+  ('LNT-003', 'LEAD-003', 'CUST-003', 'price_negotiation','高スコアリード',        90, 'in_progress','見積提示タイミング',  '2026-04-20 10:00:00', datetime('now'), datetime('now'));
+
+-- third_party_users (外部ユーザー)
+INSERT OR IGNORE INTO third_party_users (third_party_id, company_name, service_type, contact_person, contact_email, status, rating, created_at, updated_at) VALUES
+  ('TPU-001', '東京ファイナンス株式会社', 'financing',   '田中部長',   'tanaka@tokyo-finance.co.jp', 'active', 5, datetime('now'), datetime('now')),
+  ('TPU-002', '日本保険サービス',          'insurance',   '鈴木担当',   'suzuki@nihon-ins.co.jp',     'active', 4, datetime('now'), datetime('now')),
+  ('TPU-003', 'ロードサービスジャパン',    'roadservice', '佐藤責任者', 'sato@road-jp.co.jp',         'active', 5, datetime('now'), datetime('now'));

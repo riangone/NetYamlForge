@@ -1,0 +1,211 @@
+imports: []
+entities:
+  biz_activities:
+    table: biz_activities
+    key: id
+    displayName: 商業活動
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: business_cards
+        alias: bc
+        on: biz_activities.card_id = bc.id
+
+    forms:
+      card_id:
+        type: int
+        required: true
+        label: 名刺
+        editable: true
+        foreignKey:
+          entity: business_cards
+          displayColumn: last_name
+          picker: false
+          multiPicker: false
+      activity_type:
+        type: string
+        required: true
+        label: 活動種別
+        editable: true
+        options:
+          - meeting
+          - call
+          - email
+          - visit
+          - proposal
+          - contract
+          - exhibition
+          - other
+      subject:
+        type: string
+        required: true
+        label: 件名
+        editable: true
+      description:
+        type: textarea
+        required: false
+        label: 内容・詳細
+        editable: true
+      activity_date:
+        type: datetime
+        required: false
+        label: 活動日時
+        editable: true
+      outcome:
+        type: textarea
+        required: false
+        label: 結果・成果
+        editable: true
+      next_action:
+        type: string
+        required: false
+        label: 次のアクション
+        editable: true
+      next_action_date:
+        type: date
+        required: false
+        label: 次回予定日
+        editable: true
+      priority:
+        type: string
+        required: false
+        label: 優先度
+        editable: true
+        options: [high, normal, low]
+        default: normal
+      status:
+        type: string
+        required: false
+        label: ステータス
+        editable: true
+        options: [planned, done, cancelled]
+        default: planned
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      card_id:
+        type: int
+        label: 名刺ID
+        hidden: true
+      card_name:
+        type: string
+        label: 氏名
+        expression: "bc.last_name || ' ' || COALESCE(bc.first_name,'')"
+        searchable: true
+        sortable: true
+      card_company:
+        type: string
+        label: 会社名
+        expression: bc.company_name
+        searchable: true
+        sortable: true
+      activity_type:
+        type: string
+        label: 種別
+        sortable: true
+      subject:
+        type: string
+        label: 件名
+        searchable: true
+        sortable: true
+      activity_date:
+        type: datetime
+        label: 活動日時
+        sortable: true
+      priority:
+        type: string
+        label: 優先度
+        sortable: true
+      status:
+        type: string
+        label: ステータス
+        sortable: true
+      next_action:
+        type: string
+        label: 次のアクション
+        searchable: true
+      next_action_date:
+        type: date
+        label: 次回予定日
+        sortable: true
+      created_at:
+        type: datetime
+        label: 作成日時
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - card_id
+          - activity_type
+          - subject
+          - activity_date
+          - description
+          - outcome
+          - next_action
+          - next_action_date
+          - priority
+          - status
+      filters:
+        columns: 4
+        order:
+          - activity_type
+          - status
+          - priority
+          - subject
+
+    filters:
+      activity_type:
+        type: dropdown
+        label: 種別
+        expression: biz_activities.activity_type
+        options: [meeting, call, email, visit, proposal, contract, exhibition, other]
+      status:
+        type: dropdown
+        label: ステータス
+        expression: biz_activities.status
+        options: [planned, done, cancelled]
+      priority:
+        type: dropdown
+        label: 優先度
+        expression: biz_activities.priority
+        options: [high, normal, low]
+      subject:
+        type: like
+        label: 件名
+
+    exports:
+      activities_csv:
+        label: "活動記録 CSV"
+        format: csv
+        filename: "biz_activities_{date:yyyyMMdd}.csv"
+        columns:
+          - card_name
+          - card_company
+          - activity_type
+          - subject
+          - activity_date
+          - outcome
+          - next_action
+          - next_action_date
+          - priority
+          - status
+
+    links:
+      card:
+        label: 名刺情報
+        targetEntity: business_cards
+        filter:
+          id: card_id

@@ -1,0 +1,269 @@
+title: 📥 名刺取込
+description: "手動入力・画像/PDF ファイルの AI 自動解析インポート"
+permissions:
+  view:
+    roles: [editor, admin]
+  create:
+    roles: [editor, admin]
+
+sections:
+  # ─── 取込統計 ───
+  - id: import_stats
+    title: 取込状況
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '名刺総数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📇' AS metric_icon,
+             NULL AS metric_delta
+      FROM business_cards
+      UNION ALL
+      SELECT '今日追加',
+             CAST(COUNT(*) AS TEXT),
+             '📅', NULL
+      FROM business_cards
+      WHERE DATE(created_at) = DATE('now')
+      UNION ALL
+      SELECT '解析待ち',
+             CAST(COUNT(*) AS TEXT),
+             '⏳', NULL
+      FROM import_jobs WHERE status IN ('pending','processing')
+      UNION ALL
+      SELECT '解析完了',
+             CAST(COUNT(*) AS TEXT),
+             '✅', NULL
+      FROM import_jobs WHERE status = 'done'
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    editable: false
+    readOnly: true
+
+  # ─── ファイルアップロード（画像・PDF） ───
+  - id: file_upload
+    title: 方法①：画像・PDF アップロード（AI 自動解析）
+    component: file_upload
+    description: |
+      名刺の画像（JPG / PNG）または PDF をドラッグ＆ドロップ、またはクリックして選択してください。
+      アップロード後、AI が自動で氏名・会社名・連絡先を解析・抽出します。
+      複数枚同時アップロード対応（最大 50 枚）。
+    uploadUrl: /api/biz-card/import/upload
+    allowedTypes: .jpg,.jpeg,.png,.pdf,.heic,.webp
+    maxFileSize: 20971520
+    multiple: true
+    maxFiles: 50
+    dropzoneLabel: 名刺画像または PDF をここにドロップ、またはクリックして選択
+    dropzoneHint: 対応形式：JPG · PNG · PDF · HEIC · WebP　最大 20MB／枚　最大 50 枚
+    showPreview: true
+    previewMaxThumbnails: 12
+    uploadDir: uploads/biz-card
+    onUploadComplete:
+      insertEntity: import_jobs
+      fields:
+        file_name: '{{filename}}'
+        file_path: '{{upload_path}}'
+        file_type: '{{file_type}}'
+        file_size: '{{file_size}}'
+        status: pending
+        created_at: '{{now}}'
+    permissions:
+      create:
+        roles: [editor, admin]
+    sourceType: none
+
+  # ─── 手動入力フォーム ───
+  - id: manual_input
+    title: 方法②：手動入力
+    component: form
+    description: |
+      名刺情報を直接入力して登録します。氏名・会社名・連絡先を記入してください。
+    layout: vertical
+    fields:
+      - id: last_name
+        label: 姓 *
+        type: string
+        required: true
+        placeholder: 山田
+        icon: 👤
+      - id: first_name
+        label: 名
+        type: string
+        required: false
+        placeholder: 太郎
+      - id: last_name_kana
+        label: 姓（カナ）
+        type: string
+        required: false
+        placeholder: ヤマダ
+      - id: first_name_kana
+        label: 名（カナ）
+        type: string
+        required: false
+        placeholder: タロウ
+      - id: title
+        label: 役職
+        type: string
+        required: false
+        placeholder: 営業部長
+        icon: 💼
+      - id: department
+        label: 部署
+        type: string
+        required: false
+        placeholder: 営業本部
+      - id: company_name
+        label: 会社名 *
+        type: string
+        required: true
+        placeholder: 株式会社〇〇
+        icon: 🏢
+      - id: industry
+        label: 業種
+        type: select
+        required: false
+        options:
+          - value: IT・ソフトウェア
+            label: IT・ソフトウェア
+          - value: 製造業
+            label: 製造業
+          - value: 金融・保険
+            label: 金融・保険
+          - value: コンサルティング
+            label: コンサルティング
+          - value: 小売・流通
+            label: 小売・流通
+          - value: 医療・ヘルスケア
+            label: 医療・ヘルスケア
+          - value: 教育
+            label: 教育
+          - value: その他
+            label: その他
+      - id: email
+        label: メールアドレス
+        type: string
+        required: false
+        placeholder: yamada@example.co.jp
+        icon: 📧
+      - id: phone
+        label: 電話番号
+        type: string
+        required: false
+        placeholder: 03-1234-5678
+        icon: 📞
+      - id: mobile
+        label: 携帯番号
+        type: string
+        required: false
+        placeholder: 090-1234-5678
+      - id: postal_code
+        label: 郵便番号
+        type: string
+        required: false
+        placeholder: 100-0001
+      - id: address
+        label: 住所
+        type: string
+        required: false
+        placeholder: 東京都千代田区〇〇1-2-3
+        icon: 📍
+      - id: website
+        label: ウェブサイト
+        type: string
+        required: false
+        placeholder: https://example.co.jp
+      - id: received_at
+        label: 受取日
+        type: date
+        required: false
+      - id: notes
+        label: メモ
+        type: textarea
+        required: false
+        placeholder: 展示会で名刺交換...
+    actions:
+      - id: save_card
+        label: 💾 名刺を登録
+        type: submit
+        style: primary
+        icon: ✅
+        insertEntity: business_cards
+        fields:
+          card_no: 'BC-{{seq:05}}'
+          last_name: '{{last_name}}'
+          first_name: '{{first_name}}'
+          last_name_kana: '{{last_name_kana}}'
+          first_name_kana: '{{first_name_kana}}'
+          title: '{{title}}'
+          department: '{{department}}'
+          company_name: '{{company_name}}'
+          industry: '{{industry}}'
+          email: '{{email}}'
+          phone: '{{phone}}'
+          mobile: '{{mobile}}'
+          postal_code: '{{postal_code}}'
+          address: '{{address}}'
+          website: '{{website}}'
+          source_type: manual
+          parse_status: done
+          embedding_status: pending
+          received_at: '{{received_at}}'
+          notes: '{{notes}}'
+          created_at: '{{now}}'
+          updated_at: '{{now}}'
+        successMessage: ✅ 名刺を登録しました。ベクトル化処理を開始します。
+        refreshSection: import_history
+      - id: reset_form
+        label: リセット
+        type: reset
+        style: ghost
+    readOnly: false
+    editable: true
+    permissions:
+      create:
+        roles: [editor, admin]
+    sourceType: none
+
+  # ─── 取込履歴テーブル ───
+  - id: import_history
+    title: 📋 取込・解析履歴
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        j.id,
+        j.file_name AS ファイル名,
+        CASE j.file_type
+          WHEN 'image' THEN '📷 画像'
+          WHEN 'pdf'   THEN '📄 PDF'
+          ELSE COALESCE(j.file_type,'—')
+        END AS 種別,
+        CASE j.status
+          WHEN 'pending'    THEN '⏳ 待機中'
+          WHEN 'processing' THEN '⚙️ 解析中…'
+          WHEN 'done'       THEN '✅ 完了'
+          WHEN 'failed'     THEN '❌ 失敗'
+          ELSE j.status
+        END AS ステータス,
+        COALESCE(CAST(j.result_card_id AS TEXT),'—') AS 名刺ID,
+        COALESCE(j.error_message,'—') AS エラー,
+        strftime('%Y-%m-%d %H:%M', j.created_at) AS 取込日時,
+        strftime('%Y-%m-%d %H:%M', j.completed_at) AS 完了日時
+      FROM import_jobs j
+      ORDER BY j.created_at DESC
+      LIMIT 50
+    columns: [ファイル名, 種別, ステータス, 名刺ID, エラー, 取込日時, 完了日時]
+    pageSize: 15
+    editable: false
+    readOnly: true
+    autoRefresh: 10
+    emptyMessage: 取込履歴がありません。上記いずれかの方法で名刺を取込んでください。
+    rowColorRules:
+      - condition: "ステータス LIKE '%失敗%'"
+        colorClass: row-danger
+      - condition: "ステータス LIKE '%解析%'"
+        colorClass: row-info
+      - condition: "ステータス LIKE '%完了%'"
+        colorClass: row-success

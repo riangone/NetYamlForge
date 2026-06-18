@@ -107,7 +107,8 @@
         }
     </td>
     <td>
-        <div class="flex gap-1 justify-end">
+        <div class="flex gap-1 justify-end items-center">
+            @* ─── 実行ボタン ─── *@
             @if (User.IsInRole("Admin") && Model.Enabled && !isRunning)
             {
                 <form method="post"
@@ -129,6 +130,52 @@
             else if (isRunning)
             {
                 <span class="btn btn-sm btn-ghost btn-disabled opacity-50" title="実行中">▶</span>
+            }
+            else
+            {
+                <span class="btn btn-sm btn-ghost btn-disabled opacity-30" title="無効のため実行不可">▶</span>
+            }
+            @* ─── 有効/無効切り替えボタン ─── *@
+            @if (User.IsInRole("Admin") && !isRunning)
+            {
+                @if (Model.Enabled)
+                {
+                    <form method="post"
+                          asp-controller="BatchJob"
+                          asp-action="ToggleJob"
+                          asp-route-project="@projectName"
+                          asp-route-jobId="@Model.JobId"
+                          asp-route-enable="false">
+                        <button type="button"
+                                class="btn btn-sm btn-ghost text-warning"
+                                title="このジョブを無効化する"
+                                hx-post="/@projectName/BatchJob/ToggleJob?jobId=@Model.JobId&enable=false"
+                                hx-target="#job-row-@Model.JobId"
+                                hx-swap="outerHTML"
+                                hx-confirm="「@Model.DisplayName」を無効にしますか？スケジュール実行が停止されます。">
+                            ⏸
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form method="post"
+                          asp-controller="BatchJob"
+                          asp-action="ToggleJob"
+                          asp-route-project="@projectName"
+                          asp-route-jobId="@Model.JobId"
+                          asp-route-enable="true">
+                        <button type="button"
+                                class="btn btn-sm btn-ghost text-success"
+                                title="このジョブを有効化する"
+                                hx-post="/@projectName/BatchJob/ToggleJob?jobId=@Model.JobId&enable=true"
+                                hx-target="#job-row-@Model.JobId"
+                                hx-swap="outerHTML"
+                                hx-confirm="「@Model.DisplayName」を有効にしますか？スケジュール実行が再開されます。">
+                            ▶▶
+                        </button>
+                    </form>
+                }
             }
             <a class="btn btn-sm btn-ghost"
                asp-controller="BatchJob"

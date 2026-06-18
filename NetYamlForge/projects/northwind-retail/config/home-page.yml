@@ -22,7 +22,7 @@ metrics:
     trend: "高效闭环"
     tone: text-success
   - label: 库存水位
-    value: "Optimized"
+    value: "適正化済"
     trend: "零积压风险"
     tone: text-secondary
 

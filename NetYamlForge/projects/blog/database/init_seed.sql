@@ -2,6 +2,7 @@
 -- Blog System - SQLite Schema & Seed Data
 -- ============================================================
 
+-- entity alias: into category → BlogCategory (entity file category.yml maps to BlogCategory table)
 -- カテゴリ
 CREATE TABLE IF NOT EXISTS BlogCategory (
   Id          INTEGER PRIMARY KEY AUTOINCREMENT,

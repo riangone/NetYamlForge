@@ -1,0 +1,28 @@
+title: "AI アシスタント"
+description: "フレームワーク開発サポート AI チャット"
+
+sections:
+  - id: chat_intro
+    title: "AI 開発アシスタント"
+    component: markdown
+    sourceType: none
+    content: |
+      # NetYamlForge AI アシスタント
+
+      フレームワークの開発・設定に関する質問に AI がお答えします。
+
+      **サポート範囲：**
+      - YAML スキーマの書き方
+      - エンティティ定義のサンプル
+      - ページレイアウトの設計
+      - バッチジョブの設定
+      - データベース設計のアドバイス
+
+  - id: ai_chat
+    title: "チャット"
+    component: ai_chat
+    sourceType: none
+    placeholder: "例: 新しいエンティティの定義を作成してください"
+    systemPrompt: |
+      あなたは NetYamlForge フレームワークの専門家AIです。
+      YAML設定ファイルの書き方、エンティティ定義、ページ設計について具体的なサンプルコードを交えて回答してください。

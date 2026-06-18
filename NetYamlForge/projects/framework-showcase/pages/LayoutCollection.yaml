@@ -1,0 +1,44 @@
+title: "レイアウト集"
+description: "利用可能なレイアウトパターンの展示"
+
+sections:
+  - id: intro
+    title: "レイアウトパターン一覧"
+    component: markdown
+    sourceType: none
+    content: |
+      # レイアウトコレクション
+
+      NetYamlForge が提供するページレイアウトパターンを展示します。
+
+      ## 対応レイアウト
+      | タイプ | 説明 |
+      |---|---|
+      | `grid` | カード形式のグリッド表示 |
+      | `tabs` | タブ切り替えレイアウト |
+      | `accordion` | アコーディオン折りたたみ |
+      | `wizard` | ステップ式ウィザード |
+
+  - id: layout_demos
+    title: "レイアウトデモ一覧"
+    component: data_table
+    sourceType: table
+    entity: layout_demo
+    columns:
+      - Title
+      - LayoutType
+      - Description
+      - Status
+    filters:
+      LayoutType:
+        label: "レイアウトタイプ"
+        type: dropdown
+    pageSize: 10
+
+  - id: layout_stats
+    title: "レイアウト統計"
+    component: kpi_cards
+    sourceType: custom
+    source: |
+      SELECT COUNT(*) AS value, '登録済みデモ数' AS label FROM LayoutDemo
+      UNION ALL SELECT COUNT(DISTINCT LayoutType) AS value, 'レイアウトタイプ数' AS label FROM LayoutDemo

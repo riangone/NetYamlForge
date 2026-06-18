@@ -53,10 +53,6 @@ quickActions:
     url: /task-management/DynamicEntity/List/task
     style: btn-outline
     icon: ✅
-  - label: 项目列表
-    url: /task-management/DynamicEntity/List/project
-    style: btn-outline
-    icon: 🏗️
   - label: 评论汇总
     url: /task-management/DynamicEntity/List/comment
     style: btn-ghost

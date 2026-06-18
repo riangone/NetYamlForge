@@ -153,6 +153,18 @@ if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnor
     return;
 }
 
+if (args.Any(a => a.Equals("--validate-project", StringComparison.OrdinalIgnoreCase)))
+{
+    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
+    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
+    var validateResult = new CliScaffoldResult { Command = "validate-project" };
+    if (jsonMode) Console.SetOut(TextWriter.Null);
+    var exitCode = ProjectValidator.Run(Directory.GetCurrentDirectory(), projectName, validateResult);
+    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); validateResult.WriteJson(); }
+    Environment.Exit(exitCode);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Windows サービスとして実行する場合

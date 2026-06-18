@@ -75,7 +75,7 @@ jobs:
     enabled: true
 
     schedule:
-      cron: "*/3 * * * *"
+      cron: "0 * * * *"      # 每 60 分钟
       timezone: "Asia/Shanghai"
 
     type: photo_annotator

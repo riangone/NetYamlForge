@@ -1,0 +1,71 @@
+title: "YAML スキーマリファレンス"
+description: "NetYamlForge プロジェクト設定の YAML スキーマ定義一覧"
+
+sections:
+  - id: intro
+    title: "スキーマリファレンス"
+    component: markdown
+    sourceType: none
+    content: |
+      # NetYamlForge YAML スキーマ
+
+      各設定ファイルの構造とフィールド定義を参照してください。
+
+      ## 設定ファイル一覧
+
+      | ファイル | 用途 |
+      |---|---|
+      | `project.yaml` | プロジェクト基本設定・ナビゲーション |
+      | `config/layout.yml` | レイアウト・ナビ拡張設定 |
+      | `config/home-page.yml` | ホームページコンテンツ |
+      | `entities/*.yml` | エンティティ定義（一覧・フォーム） |
+      | `pages/*.yaml` | カスタムページ定義 |
+      | `database/init.sql` | DB初期化スクリプト |
+      | `database/init_seed.sql` | シードデータ |
+      | `jobs/jobs.yml` | バッチジョブ定義 |
+
+      ## project.yaml 主要フィールド
+
+      ```yaml
+      name: project-name          # URL プレフィックス
+      displayName: "表示名"
+      database:
+        type: sqlite | postgres
+        path: database/xxx.db
+      layout:
+        navigation:
+          showDashboard: true
+          showEntities: true
+          showPages: true
+          items:
+            - label: ラベル
+              url: /project/Page/Name
+              icon: 🏠
+      ```
+
+  - id: entity_schema
+    title: "entities/*.yml スキーマ"
+    component: markdown
+    sourceType: none
+    content: |
+      ## エンティティ定義スキーマ
+
+      ```yaml
+      name: table_name
+      displayName: "表示名"
+      columns:
+        - name: id
+          type: int
+          primaryKey: true
+        - name: title
+          type: string
+          required: true
+          label: "タイトル"
+      filters:
+        - field: status
+          type: select
+          options: [draft, published]
+      actions:
+        - label: 詳細
+          url: /project/DynamicEntity/Detail/{id}
+      ```

@@ -1,0 +1,332 @@
+imports: []
+entities:
+  business_cards:
+    table: business_cards
+    key: id
+    displayName: 名刺
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: companies
+        alias: co
+        on: business_cards.company_id = co.id
+
+    forms:
+      last_name:
+        type: string
+        required: false
+        label: 姓
+        editable: true
+      first_name:
+        type: string
+        required: false
+        label: 名
+        editable: true
+      last_name_kana:
+        type: string
+        required: false
+        label: 姓（カナ）
+        editable: true
+      first_name_kana:
+        type: string
+        required: false
+        label: 名（カナ）
+        editable: true
+      title:
+        type: string
+        required: false
+        label: 役職
+        editable: true
+      department:
+        type: string
+        required: false
+        label: 部署
+        editable: true
+      company_id:
+        type: int
+        label: 会社
+        editable: true
+        foreignKey:
+          entity: companies
+          displayColumn: name
+          picker: false
+          multiPicker: false
+      company_name:
+        type: string
+        required: false
+        label: 会社名
+        editable: true
+      company_name_kana:
+        type: string
+        required: false
+        label: 会社名（カナ）
+        editable: true
+      industry:
+        type: string
+        required: false
+        label: 業種
+        editable: true
+        options:
+          - IT・ソフトウェア
+          - 製造業
+          - 金融・保険
+          - 不動産
+          - 医療・ヘルスケア
+          - 教育
+          - 小売・流通
+          - 飲食・サービス
+          - 建設・土木
+          - コンサルティング
+          - メディア・広告
+          - 物流・運輸
+          - エネルギー
+          - 官公庁・公共
+          - その他
+      email:
+        type: string
+        required: false
+        label: メールアドレス
+        editable: true
+      email2:
+        type: string
+        required: false
+        label: サブメール
+        editable: true
+      phone:
+        type: string
+        required: false
+        label: 電話番号
+        editable: true
+      mobile:
+        type: string
+        required: false
+        label: 携帯番号
+        editable: true
+      fax:
+        type: string
+        required: false
+        label: FAX番号
+        editable: true
+      postal_code:
+        type: string
+        required: false
+        label: 郵便番号
+        editable: true
+      address:
+        type: textarea
+        required: false
+        label: 住所
+        editable: true
+      website:
+        type: string
+        required: false
+        label: ウェブサイト
+        editable: true
+      source_type:
+        type: string
+        required: false
+        label: 取込方法
+        editable: false
+        options: [manual, image, pdf]
+        default: manual
+      notes:
+        type: textarea
+        required: false
+        label: メモ
+        editable: true
+      is_favorite:
+        type: bool
+        required: false
+        label: お気に入り
+        editable: true
+        default: false
+      received_at:
+        type: date
+        required: false
+        label: 受取日
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      card_no:
+        type: string
+        label: 名刺番号
+        searchable: true
+        sortable: true
+      last_name:
+        type: string
+        label: 姓
+        searchable: true
+        sortable: true
+      first_name:
+        type: string
+        label: 名
+        searchable: true
+        sortable: true
+      title:
+        type: string
+        label: 役職
+        searchable: true
+        sortable: true
+      department:
+        type: string
+        label: 部署
+        searchable: true
+        sortable: true
+      company_id:
+        type: int
+        label: 会社ID
+        hidden: true
+      company_name:
+        type: string
+        label: 会社名
+        searchable: true
+        sortable: true
+      industry:
+        type: string
+        label: 業種
+        searchable: true
+        sortable: true
+      email:
+        type: string
+        label: メール
+        searchable: true
+        sortable: true
+      phone:
+        type: string
+        label: 電話
+        searchable: true
+      mobile:
+        type: string
+        label: 携帯
+        searchable: true
+      address:
+        type: string
+        label: 住所
+        searchable: true
+      source_type:
+        type: string
+        label: 取込方法
+        sortable: true
+      parse_status:
+        type: string
+        label: 解析状態
+        sortable: true
+      embedding_status:
+        type: string
+        label: ベクトル状態
+        sortable: true
+      is_favorite:
+        type: bool
+        label: お気に入り
+        sortable: true
+      received_at:
+        type: date
+        label: 受取日
+        sortable: true
+      created_at:
+        type: datetime
+        label: 登録日時
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - last_name
+          - first_name
+          - last_name_kana
+          - first_name_kana
+          - title
+          - department
+          - company_id
+          - company_name
+          - company_name_kana
+          - industry
+          - email
+          - email2
+          - phone
+          - mobile
+          - fax
+          - postal_code
+          - address
+          - website
+          - received_at
+          - notes
+          - is_favorite
+      filters:
+        columns: 4
+        order:
+          - industry
+          - source_type
+          - last_name
+          - company_name
+
+    filters:
+      industry:
+        type: dropdown
+        label: 業種
+        expression: business_cards.industry
+        options:
+          - IT・ソフトウェア
+          - 製造業
+          - 金融・保険
+          - 不動産
+          - 医療・ヘルスケア
+          - 教育
+          - 小売・流通
+          - コンサルティング
+          - その他
+      source_type:
+        type: dropdown
+        label: 取込方法
+        expression: business_cards.source_type
+        options: [manual, image, pdf]
+      last_name:
+        type: like
+        label: 姓名
+      company_name:
+        type: like
+        label: 会社名
+
+    exports:
+      cards_csv:
+        label: "名刺一覧 CSV"
+        format: csv
+        filename: "business_cards_{date:yyyyMMdd}.csv"
+        columns:
+          - card_no
+          - last_name
+          - first_name
+          - title
+          - department
+          - company_name
+          - industry
+          - email
+          - phone
+          - mobile
+          - address
+          - received_at
+
+    links:
+      company:
+        label: 会社情報
+        targetEntity: companies
+        filter:
+          id: company_id
+      activities:
+        label: 商業活動
+        targetEntity: biz_activities
+        filter:
+          card_id: id

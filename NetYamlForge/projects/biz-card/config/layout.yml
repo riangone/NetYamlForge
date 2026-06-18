@@ -1,0 +1,44 @@
+header:
+  title: 名刺管理
+
+navigation:
+  showDashboard: true
+  showPages: false
+  showEntities: false
+  entities: []
+  items:
+    - label: 名刺一覧
+      url: /biz-card/Page/CardGallery
+      icon: 📇
+      section: 名刺管理
+    - label: 名刺データ
+      url: /biz-card/DynamicEntity/Index?entity=business_cards
+      icon: 📋
+      section: 名刺管理
+    - label: 会社一覧
+      url: /biz-card/DynamicEntity/Index?entity=companies
+      icon: 🏢
+      section: 名刺管理
+    - label: 名刺取込
+      url: /biz-card/Page/CardImport
+      icon: 📥
+      section: 取込・解析
+    - label: 取込履歴
+      url: /biz-card/DynamicEntity/Index?entity=import_jobs
+      icon: 📁
+      section: 取込・解析
+    - label: ベクトル検索
+      url: /biz-card/Page/VectorSearch
+      icon: 🔍
+      section: AI検索
+    - label: 商業活動
+      url: /biz-card/Page/BizActivities
+      icon: 💼
+      section: 商業活動
+    - label: 活動記録
+      url: /biz-card/DynamicEntity/Index?entity=biz_activities
+      icon: 📝
+      section: 商業活動
+
+footer:
+  text: "名刺管理 — powered by NetYamlForge"

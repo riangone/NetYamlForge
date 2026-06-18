@@ -30,6 +30,42 @@
 
 ---
 
+## サブプロジェクト作成の必須ルール 🚨
+
+新規サブプロジェクトを作成・完了と宣言する前に、以下を**必ず**実施すること：
+
+### ① シードデータの生成（絶対に省略しない）
+
+`dashboard.yml` や `pages/` でデータを表示する全エンティティに対し、
+`database/init_seed.sql` に現実的なサンプルデータを **最低 5〜10 行** INSERT する。
+データなしの一覧ページを作成・提出してはならない。
+
+### ② ホームページの実データ化
+
+`config/home-page.yml` を生成する際、以下を禁止する：
+- `value: "Optimized"` / `"Enhanced"` / `"N/A"` / `"TBD"` などのプレースホルダー
+- `url: /project-name` のみで遷移先不明なリンク
+- 他プロジェクトからコピーした汎用 `capabilities` テキスト
+
+`metrics` はこのプロジェクトのビジネス指標を表す具体的な説明を書き、
+`quickActions` の URL は実際に到達可能なルートのみ使用する。
+
+### ③ ナビゲーション URL の自己検証
+
+`project.yaml` の `navigation.items` に URL を登録したら、
+その URL が以下のいずれかに一致するか必ず確認する：
+
+| URL パターン | 確認方法 |
+|---|---|
+| `/project/Page/PageName` | `pages/PageName.yaml` が存在するか |
+| `/project/DynamicEntity/List/entity` | `entities/entity.yml` が存在するか |
+| `/project/Dashboard` | フレームワーク標準（確認不要） |
+
+存在しないページへのリンクは登録してはならない。
+ページを登録するなら、そのページの `.yaml` ファイルも同時に作成する。
+
+---
+
 ## 重要な権限制限 ⚠️
 
 ### 絶対にしてはいけないこと

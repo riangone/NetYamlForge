@@ -1,0 +1,155 @@
+imports: []
+entities:
+  companies:
+    table: companies
+    key: id
+    displayName: 会社
+    softDelete: false
+    isPublic: false
+
+    forms:
+      name:
+        type: string
+        required: true
+        label: 会社名
+        editable: true
+      name_kana:
+        type: string
+        required: false
+        label: 会社名（カナ）
+        editable: true
+      industry:
+        type: string
+        required: false
+        label: 業種
+        editable: true
+        options:
+          - IT・ソフトウェア
+          - 製造業
+          - 金融・保険
+          - 不動産
+          - 医療・ヘルスケア
+          - 教育
+          - 小売・流通
+          - 飲食・サービス
+          - 建設・土木
+          - コンサルティング
+          - メディア・広告
+          - 物流・運輸
+          - エネルギー
+          - 官公庁・公共
+          - その他
+      website:
+        type: string
+        required: false
+        label: ウェブサイト
+        editable: true
+      address:
+        type: textarea
+        required: false
+        label: 住所
+        editable: true
+      phone:
+        type: string
+        required: false
+        label: 代表電話
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      name:
+        type: string
+        required: true
+        label: 会社名
+        searchable: true
+        sortable: true
+      name_kana:
+        type: string
+        label: カナ
+        searchable: true
+        sortable: true
+      industry:
+        type: string
+        label: 業種
+        searchable: true
+        sortable: true
+      website:
+        type: string
+        label: ウェブサイト
+        searchable: true
+      address:
+        type: string
+        label: 住所
+        searchable: true
+      phone:
+        type: string
+        label: 代表電話
+        searchable: true
+      card_count:
+        type: int
+        label: 名刺数
+        sortable: true
+      created_at:
+        type: datetime
+        label: 登録日時
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - name
+          - name_kana
+          - industry
+          - website
+          - phone
+          - address
+      filters:
+        columns: 3
+        order:
+          - industry
+          - name
+
+    filters:
+      industry:
+        type: dropdown
+        label: 業種
+        expression: companies.industry
+        options:
+          - IT・ソフトウェア
+          - 製造業
+          - 金融・保険
+          - コンサルティング
+          - その他
+      name:
+        type: like
+        label: 会社名
+
+    exports:
+      companies_csv:
+        label: "会社一覧 CSV"
+        format: csv
+        filename: "companies_{date:yyyyMMdd}.csv"
+        columns:
+          - name
+          - name_kana
+          - industry
+          - website
+          - phone
+          - address
+
+    links:
+      cards:
+        label: 名刺一覧
+        targetEntity: business_cards
+        filter:
+          company_id: id

@@ -835,3 +835,66 @@ INSERT INTO ResumeQualification (ResumeId, ObtainedDate, Category, Name, Issuing
   (2, '2019-11-01', '情報系', '基本情報技術者', '独立行政法人 情報処理推進機構'),
   (2, '2022-03-01', 'データ', 'データサイエンティスト検定 リテラシーレベル', '一般社団法人データサイエンティスト協会'),
   (2, '2023-07-01', 'クラウド', 'Google Cloud Professional Data Engineer', 'Google');
+
+-- ============================================================
+-- Seed: PdfTemplateCategory (5 rows)
+-- ============================================================
+INSERT OR IGNORE INTO PdfTemplateCategory (Code, Name, Description, SortOrder) VALUES
+  ('invoice', '請求書', '各種請求書テンプレート', 1),
+  ('estimate', '見積書', '見積書テンプレート', 2),
+  ('delivery', '納品書', '納品書・配送票テンプレート', 3),
+  ('contract', '契約書', '契約書テンプレート', 4),
+  ('general', '汎用', '汎用文書テンプレート', 5);
+
+-- ============================================================
+-- Seed: PdfTemplate (8 rows)
+-- ============================================================
+INSERT OR IGNORE INTO PdfTemplate (TemplateNo, CategoryId, Name, NameEn, Description, FileName, PageSize, Orientation, Theme, IsDefault, SortOrder, Status) VALUES
+  ('TPL-001', 1, '標準請求書', 'Standard Invoice', '日本標準請求書フォーマット', 'jp_invoice_standard.cshtml', 'A4', 'portrait', 'classic', 1, 1, 'active'),
+  ('TPL-002', 1, '銀行振込請求書', 'Bank Transfer Invoice', '銀行振込口座付き請求書', 'jp_invoice_bank.cshtml', 'A4', 'portrait', 'modern', 0, 2, 'active'),
+  ('TPL-003', 1, '青色申告請求書', 'Blue Form Invoice', '青色申告対応請求書', 'jp_invoice_blue.cshtml', 'A4', 'portrait', 'blue', 0, 3, 'active'),
+  ('TPL-004', 2, '標準見積書', 'Standard Estimate', '日本標準見積書フォーマット', 'jp_estimate.cshtml', 'A4', 'portrait', 'classic', 1, 1, 'active'),
+  ('TPL-005', 3, '納品書', 'Delivery Note', '標準納品書', 'jp_delivery.cshtml', 'A4', 'portrait', 'classic', 1, 1, 'active'),
+  ('TPL-006', 3, '配送伝票', 'Delivery Slip', '配送用伝票', 'jp_delivery_slip.cshtml', 'A4', 'portrait', 'compact', 0, 2, 'active'),
+  ('TPL-007', 4, '業務委託契約書', 'Service Contract', '業務委託契約書テンプレート', 'jp_contract.cshtml', 'A4', 'portrait', 'legal', 1, 1, 'active'),
+  ('TPL-008', 5, 'FAXカバーシート', 'Fax Cover Sheet', 'FAX送信用カバーシート', 'fax_cover.cshtml', 'A4', 'portrait', 'classic', 1, 1, 'active');
+
+-- ============================================================
+-- Seed: JpDeliverySlip (5 rows)
+-- ============================================================
+INSERT OR IGNORE INTO JpDeliverySlip (SlipNo, CustomerId, IssueDate, DeliveryDate, TotalPackages, Notes) VALUES
+  ('DS-2026-001', 1, '2026-04-01', '2026-04-03', 2, '精密機器、取扱注意'),
+  ('DS-2026-002', 2, '2026-04-05', '2026-04-07', 1, NULL),
+  ('DS-2026-003', 3, '2026-04-10', '2026-04-12', 5, '複数梱包'),
+  ('DS-2026-004', 1, '2026-05-01', '2026-05-03', 1, NULL),
+  ('DS-2026-005', 4, '2026-05-10', '2026-05-12', 3, '要冷蔵');
+
+-- ============================================================
+-- Seed: JpInvoiceBank (5 rows)
+-- ============================================================
+INSERT OR IGNORE INTO JpInvoiceBank (InvoiceNo, CustomerId, IssueDate, DueDate, Subtotal, TaxRate, TaxAmount, Total, BankName, BranchName, AccountType, AccountNumber, AccountHolder, Notes) VALUES
+  ('IB-2026-001', 1, '2026-04-30', '2026-05-31', 500000.00, 10.00, 50000.00, 550000.00, 'みずほ銀行', '渋谷支店', '普通', '1234567', '株式会社サンプル', NULL),
+  ('IB-2026-002', 2, '2026-04-30', '2026-05-31', 320000.00, 10.00, 32000.00, 352000.00, '三菱UFJ銀行', '新宿支店', '普通', '7654321', '株式会社サンプル', NULL),
+  ('IB-2026-003', 3, '2026-05-31', '2026-06-30', 1200000.00, 10.00, 120000.00, 1320000.00, 'みずほ銀行', '渋谷支店', '当座', '9876543', '株式会社サンプル', '大口取引'),
+  ('IB-2026-004', 1, '2026-05-31', '2026-06-30', 180000.00, 10.00, 18000.00, 198000.00, 'みずほ銀行', '渋谷支店', '普通', '1234567', '株式会社サンプル', NULL),
+  ('IB-2026-005', 5, '2026-06-30', '2026-07-31', 450000.00, 10.00, 45000.00, 495000.00, '三井住友銀行', '池袋支店', '普通', '1122334', '株式会社サンプル', NULL);
+
+-- ============================================================
+-- Seed: JpInvoiceBlue (5 rows)
+-- ============================================================
+INSERT OR IGNORE INTO JpInvoiceBlue (InvoiceNo, CustomerId, IssueDate, DueDate, Subtotal, TaxRate, TaxAmount, Total, Notes) VALUES
+  ('IBL-2026-001', 1, '2026-04-30', '2026-05-31', 300000.00, 10.00, 30000.00, 330000.00, '青色申告対応'),
+  ('IBL-2026-002', 2, '2026-04-30', '2026-05-31', 150000.00, 10.00, 15000.00, 165000.00, NULL),
+  ('IBL-2026-003', 4, '2026-05-31', '2026-06-30', 280000.00, 10.00, 28000.00, 308000.00, NULL),
+  ('IBL-2026-004', 1, '2026-05-31', '2026-06-30', 95000.00, 10.00, 9500.00, 104500.00, NULL),
+  ('IBL-2026-005', 3, '2026-06-30', '2026-07-31', 680000.00, 10.00, 68000.00, 748000.00, '法人向け');
+
+-- ============================================================
+-- Seed: JpInvoiceStandard (5 rows)
+-- ============================================================
+INSERT OR IGNORE INTO JpInvoiceStandard (InvoiceNo, CustomerId, IssueDate, DueDate, Subtotal, TaxRate, TaxAmount, Total, Notes) VALUES
+  ('IS-2026-001', 1, '2026-04-30', '2026-05-31', 450000.00, 10.00, 45000.00, 495000.00, NULL),
+  ('IS-2026-002', 2, '2026-04-30', '2026-05-31', 220000.00, 10.00, 22000.00, 242000.00, NULL),
+  ('IS-2026-003', 3, '2026-05-31', '2026-06-30', 1100000.00, 10.00, 110000.00, 1210000.00, '大口'),
+  ('IS-2026-004', 5, '2026-05-31', '2026-06-30', 380000.00, 10.00, 38000.00, 418000.00, NULL),
+  ('IS-2026-005', 1, '2026-06-30', '2026-07-31', 165000.00, 10.00, 16500.00, 181500.00, NULL);

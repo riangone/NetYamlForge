@@ -8,6 +8,7 @@ namespace NetYamlForge.Services.AI;
 public interface IGeminiEmbeddingService
 {
     Task<float[]?> EmbedAsync(string text, CancellationToken ct = default);
+    Task<List<float[]?>> EmbedBatchAsync(IList<string> texts, CancellationToken ct = default);
 }
 
 public class GeminiEmbeddingService : IGeminiEmbeddingService
@@ -33,6 +34,14 @@ public class GeminiEmbeddingService : IGeminiEmbeddingService
     {
         _config = config;
         _logger = logger;
+    }
+
+    public async Task<List<float[]?>> EmbedBatchAsync(IList<string> texts, CancellationToken ct = default)
+    {
+        var results = new List<float[]?>();
+        foreach (var t in texts)
+            results.Add(await EmbedAsync(t, ct));
+        return results;
     }
 
     public async Task<float[]?> EmbedAsync(string text, CancellationToken ct = default)

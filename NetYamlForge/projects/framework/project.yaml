@@ -21,10 +21,6 @@ layout:
     showDashboard: true
     items:
       # ─── システム管理 ───
-      - label: ダッシュボード
-        url: /framework/Dashboard
-        icon: 🏠
-        section: ""
       - label: 用户管理
         url: /framework/Users
         icon: 👥

@@ -1,0 +1,81 @@
+name: biz-card
+displayName: "📇 名刺管理"
+version: "1.0.0"
+description: "名刺情報の一元管理・AI解析・ベクトル検索・商業活動管理システム"
+
+database:
+  type: sqlite
+  path: database/biz-card.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+
+  landingPageByRole:
+    viewer: /biz-card/Page/CardGallery
+    editor: /biz-card/Page/CardGallery
+    admin:  /biz-card/Dashboard
+
+  navigation:
+    showDashboard: true
+    showPages: false
+    showEntities: false
+    entities: []
+    items:
+      # ─── 名刺管理 ───
+      - label: 名刺一覧
+        url: /biz-card/Page/CardGallery
+        icon: 📇
+        section: 名刺管理
+        roles: [viewer, editor, admin]
+      - label: 名刺データ
+        url: /biz-card/DynamicEntity/Index?entity=business_cards
+        icon: 📋
+        section: 名刺管理
+        roles: [viewer, editor, admin]
+      - label: 会社一覧
+        url: /biz-card/DynamicEntity/Index?entity=companies
+        icon: 🏢
+        section: 名刺管理
+        roles: [viewer, editor, admin]
+
+      # ─── 取込・解析 ───
+      - label: 名刺取込
+        url: /biz-card/Page/CardImport
+        icon: 📥
+        section: 取込・解析
+        roles: [editor, admin]
+      - label: 取込履歴
+        url: /biz-card/DynamicEntity/Index?entity=import_jobs
+        icon: 📁
+        section: 取込・解析
+        roles: [editor, admin]
+
+      # ─── AI検索 ───
+      - label: ベクトル検索
+        url: /biz-card/Page/VectorSearch
+        icon: 🔍
+        section: AI検索
+        roles: [viewer, editor, admin]
+
+      # ─── 商業活動 ───
+      - label: 商業活動
+        url: /biz-card/Page/BizActivities
+        icon: 💼
+        section: 商業活動
+        roles: [viewer, editor, admin]
+      - label: 活動記録
+        url: /biz-card/DynamicEntity/Index?entity=biz_activities
+        icon: 📝
+        section: 商業活動
+        roles: [viewer, editor, admin]
+
+settings:
+  locale: ja-JP
+  timezone: Asia/Tokyo

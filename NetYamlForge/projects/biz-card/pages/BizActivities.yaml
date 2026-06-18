@@ -1,0 +1,196 @@
+title: 💼 商業活動
+description: "名刺に紐づく商談・訪問・提案などのビジネス活動を管理し、次回アクションを追跡"
+
+sections:
+  # ─── KPI ───
+  - id: activity_kpi
+    title: 活動サマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '活動合計' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '💼' AS metric_icon,
+             NULL AS metric_delta
+      FROM biz_activities
+      UNION ALL
+      SELECT '今月の活動',
+             CAST(COUNT(*) AS TEXT),
+             '📅', NULL
+      FROM biz_activities
+      WHERE strftime('%Y-%m', activity_date) = strftime('%Y-%m','now')
+      UNION ALL
+      SELECT '予定中',
+             CAST(COUNT(*) AS TEXT),
+             '🎯', NULL
+      FROM biz_activities WHERE status = 'planned'
+      UNION ALL
+      SELECT '完了済み',
+             CAST(COUNT(*) AS TEXT),
+             '✅', NULL
+      FROM biz_activities WHERE status = 'done'
+      UNION ALL
+      SELECT '高優先度',
+             CAST(COUNT(*) AS TEXT),
+             '🔴', NULL
+      FROM biz_activities WHERE priority='high' AND status='planned'
+      UNION ALL
+      SELECT '今週期限',
+             CAST(COUNT(*) AS TEXT),
+             '⚠️', NULL
+      FROM biz_activities
+      WHERE status='planned'
+        AND next_action_date BETWEEN date('now') AND date('now','+7 days')
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── フォロー期限（直近30日） ───
+  - id: upcoming_actions
+    title: ⚠️ フォロー予定（直近 30 日）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        a.next_action_date                                            AS 予定日,
+        CASE a.priority
+          WHEN 'high'   THEN '🔴 高'
+          WHEN 'normal' THEN '🟡 普通'
+          WHEN 'low'    THEN '🟢 低'
+          ELSE a.priority
+        END                                                           AS 優先度,
+        bc.last_name || ' ' || COALESCE(bc.first_name,'')           AS 氏名,
+        COALESCE(bc.company_name,'—')                                AS 会社名,
+        CASE a.activity_type
+          WHEN 'meeting'    THEN '🤝 商談'
+          WHEN 'call'       THEN '📞 電話'
+          WHEN 'email'      THEN '📧 メール'
+          WHEN 'visit'      THEN '🚗 訪問'
+          WHEN 'proposal'   THEN '📋 提案'
+          WHEN 'contract'   THEN '✍️ 契約'
+          WHEN 'exhibition' THEN '🎪 展示会'
+          ELSE '📌 その他'
+        END                                                           AS 種別,
+        a.subject                                                     AS 件名,
+        COALESCE(a.next_action,'フォロー')                            AS 次のアクション
+      FROM biz_activities a
+      LEFT JOIN business_cards bc ON a.card_id = bc.id
+      WHERE a.status = 'planned'
+        AND a.next_action_date IS NOT NULL
+        AND a.next_action_date BETWEEN date('now') AND date('now','+30 days')
+      ORDER BY a.next_action_date ASC, a.priority DESC
+      LIMIT 30
+    columns: [予定日, 優先度, 氏名, 会社名, 種別, 件名, 次のアクション]
+    pageSize: 15
+    editable: false
+    readOnly: true
+    rowColorRules:
+      - condition: "優先度 LIKE '%高%'"
+        colorClass: row-danger
+      - condition: "優先度 LIKE '%普通%'"
+        colorClass: row-warning
+
+  # ─── 活動種別分布チャート ───
+  - id: activity_type_chart
+    title: 活動種別分布
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT
+        CASE activity_type
+          WHEN 'meeting'    THEN '🤝 商談'
+          WHEN 'call'       THEN '📞 電話'
+          WHEN 'email'      THEN '📧 メール'
+          WHEN 'visit'      THEN '🚗 訪問'
+          WHEN 'proposal'   THEN '📋 提案'
+          WHEN 'contract'   THEN '✍️ 契約'
+          WHEN 'exhibition' THEN '🎪 展示会'
+          ELSE 'その他'
+        END AS label,
+        COUNT(*) AS value
+      FROM biz_activities
+      GROUP BY activity_type
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # ─── 活動記録一覧 ───
+  - id: activity_list
+    title: 📝 全活動記録
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        strftime('%Y-%m-%d', a.activity_date)                        AS 活動日,
+        CASE a.activity_type
+          WHEN 'meeting'    THEN '🤝 商談'
+          WHEN 'call'       THEN '📞 電話'
+          WHEN 'email'      THEN '📧 メール'
+          WHEN 'visit'      THEN '🚗 訪問'
+          WHEN 'proposal'   THEN '📋 提案'
+          WHEN 'contract'   THEN '✍️ 契約'
+          WHEN 'exhibition' THEN '🎪 展示会'
+          ELSE '📌 その他'
+        END                                                           AS 種別,
+        bc.last_name || ' ' || COALESCE(bc.first_name,'')           AS 氏名,
+        COALESCE(bc.company_name,'—')                                AS 会社名,
+        a.subject                                                     AS 件名,
+        COALESCE(a.outcome,'—')                                       AS 結果,
+        COALESCE(a.next_action,'—')                                   AS 次のアクション,
+        a.next_action_date                                            AS 次回予定,
+        CASE a.priority
+          WHEN 'high'   THEN '🔴 高'
+          WHEN 'normal' THEN '🟡 普通'
+          WHEN 'low'    THEN '🟢 低'
+          ELSE a.priority
+        END                                                           AS 優先度,
+        CASE a.status
+          WHEN 'planned'   THEN '📌 予定'
+          WHEN 'done'      THEN '✅ 完了'
+          WHEN 'cancelled' THEN '❌ キャンセル'
+          ELSE a.status
+        END                                                           AS ステータス
+      FROM biz_activities a
+      LEFT JOIN business_cards bc ON a.card_id = bc.id
+      ORDER BY a.activity_date DESC
+      LIMIT 100
+    columns: [活動日, 種別, 氏名, 会社名, 件名, 結果, 次のアクション, 次回予定, 優先度, ステータス]
+    pageSize: 20
+    editable: false
+    readOnly: true
+    rowColorRules:
+      - condition: "ステータス LIKE '%完了%'"
+        colorClass: row-success
+      - condition: "ステータス LIKE '%キャンセル%'"
+        colorClass: row-muted
+      - condition: "優先度 LIKE '%高%' AND ステータス LIKE '%予定%'"
+        colorClass: row-danger
+
+  # ─── 月別活動推移 ───
+  - id: monthly_activity_chart
+    title: 📈 月別活動数（12ヶ月）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', activity_date) AS label,
+             COUNT(*) AS value
+      FROM biz_activities
+      WHERE activity_date IS NOT NULL
+      GROUP BY strftime('%Y-%m', activity_date)
+      ORDER BY label DESC
+      LIMIT 12
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 12
+    editable: false
+    readOnly: true

@@ -1,0 +1,63 @@
+hero:
+  eyebrow: 名刺管理ワークスペース
+  title: スマート名刺管理・ビジネス活動プラットフォーム
+  description: 名刺をスキャン・取込・AI解析し、連絡先とビジネス活動を一元管理。ベクトル検索で瞬時に最適な人脈を発掘。
+  primaryActionLabel: 名刺一覧を見る
+  primaryActionUrl: /biz-card/Page/CardGallery
+  secondaryActionLabel: 名刺を取込む
+  secondaryActionUrl: /biz-card/Page/CardImport
+  highlights:
+    - AI自動解析
+    - ベクトル意味検索
+    - 商業活動管理
+    - 多言語対応
+
+metrics:
+  - label: 登録名刺数
+    value: "150+"
+    trend: "継続増加中"
+    tone: text-primary
+  - label: 対応会社数
+    value: "85社"
+    trend: "多業種カバー"
+    tone: text-success
+  - label: 活動記録
+    value: "300件+"
+    trend: "商談・訪問・メール"
+    tone: text-secondary
+
+capabilities:
+  - icon: 🤖
+    title: AI自動名刺解析
+    description: 画像・PDF名刺をアップロードするだけでOCRとAIが氏名・会社・連絡先を自動抽出。手入力の手間をゼロに。
+    badge: AI解析
+  - icon: 🔍
+    title: ベクトル意味検索
+    description: 「マーケティング担当の山田さん」のような自然言語で検索。Gemini Embeddingによる高精度のセマンティック検索。
+    badge: AI検索
+  - icon: 📷
+    title: 名刺画像プレビュー
+    description: 取込んだ名刺原本をギャラリー表示。サムネイル一覧とライトボックスで原本を確認しながら管理。
+    badge: ギャラリー
+  - icon: 💼
+    title: 商業活動管理
+    description: 商談・訪問・メール・提案などのビジネス活動を名刺に紐付けて記録。次回アクション追跡で商機を逃さない。
+    badge: CRM連携
+
+quickActions:
+  - label: ダッシュボード
+    url: /biz-card/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 名刺一覧
+    url: /biz-card/DynamicEntity/Index?entity=business_cards
+    style: btn-outline
+    icon: 📇
+  - label: 会社一覧
+    url: /biz-card/DynamicEntity/Index?entity=companies
+    style: btn-outline
+    icon: 🏢
+  - label: 商業活動
+    url: /biz-card/DynamicEntity/Index?entity=biz_activities
+    style: btn-ghost
+    icon: 💼

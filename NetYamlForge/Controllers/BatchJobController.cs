@@ -196,6 +196,56 @@ public class BatchJobController : BaseProjectController
         return RedirectToAction("Index", new { project = projectName });
     }
 
+    // ─── ToggleJob (POST, HTMX) ──────────────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> ToggleJob(string jobId, bool enable)
+    {
+        if (!_projectScope.IsSet)
+            return NotFound();
+
+        var projectName = _projectScope.Current.Name;
+
+        _logger.LogInformation("ジョブ有効化切り替え：{Project}/{JobId} → {Enable} by {User}",
+            projectName, jobId, enable, User.Identity?.Name);
+
+        await _scheduler.SetJobEnabledAsync(projectName, jobId, enable);
+
+        if (IsHtmxRequest())
+        {
+            var project = _projectScope.Current;
+            var allJobs = await _loader.LoadJobsAsync(project.ProjectDir);
+            allJobs.TryGetValue(jobId, out var job);
+
+            var lastHistory = (await _historyStore.GetHistoryAsync(jobId, 1)).FirstOrDefault();
+            var scheduledJobs = _scheduler.GetScheduledJobsForProject(projectName)
+                .ToDictionary(j => j.Job.Id, j => j);
+            scheduledJobs.TryGetValue(jobId, out var scheduled);
+            var runningIds = _scheduler.GetRunningJobIds();
+
+            var item = new BatchJobListItemViewModel
+            {
+                JobId = jobId,
+                DisplayName = job != null && !string.IsNullOrEmpty(job.DisplayName) ? job.DisplayName : jobId,
+                Type = job?.Type ?? "",
+                CronExpression = job?.Schedule.Cron,
+                Timezone = job?.Schedule.Timezone ?? "UTC",
+                Enabled = job?.Enabled ?? enable,
+                NextRunTime = scheduled?.NextRunTime,
+                LastExecution = lastHistory,
+                IsRunning = runningIds.Contains(jobId),
+                Description = job?.Description
+            };
+
+            ViewData["ProjectName"] = projectName;
+            return PartialView("_JobRow", item);
+        }
+
+        return RedirectToAction("Index", new { project = projectName });
+    }
+
     // ─── JobStatus (GET, HTMX polling) ───────────────────────────────────────
 
     [HttpGet]

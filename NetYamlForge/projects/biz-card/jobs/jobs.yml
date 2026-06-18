@@ -1,0 +1,95 @@
+jobs:
+  # 名刺AI解析ワーカー（取込ジョブのpending → AI解析 → business_cards登録）
+  card_parse_worker:
+    displayName: 名刺AI解析ワーカー
+    description: "pendingの取込ジョブを処理し、OCR+AI解析で名刺情報を抽出・登録"
+    enabled: true
+
+    schedule:
+      cron: "*/3 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: photo_annotator
+    settings:
+      sourceTable: import_jobs
+      statusField: status
+      pendingValue: pending
+      processingValue: processing
+      doneValue: done
+
+    onFailure:
+      retryCount: 2
+      retryInterval: 180
+      logError: true
+
+  # ベクトル埋め込み生成ワーカー
+  embedding_worker:
+    displayName: ベクトル埋め込み生成
+    description: "embedding_status=pendingの名刺にGemini Embeddingを付与"
+    enabled: true
+
+    schedule:
+      cron: "*/5 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: embedding_generator
+    settings:
+      sourceTable: business_cards
+      statusField: embedding_status
+      pendingValue: pending
+      doneValue: done
+      textFields:
+        - company_name
+        - name
+        - title
+        - email
+        - note
+
+    onFailure:
+      retryCount: 3
+      retryInterval: 300
+      logError: true
+
+  # 商業活動フォローアップリマインダー
+  activity_reminder:
+    displayName: 活動フォローアップリマインダー
+    description: "本日フォロー期限の商業活動を集計・CSV出力"
+    enabled: true
+
+    schedule:
+      cron: "0 9 * * *"
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/today_followups.sql
+      outputFile: "jobs/output/followup_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 300
+      logError: true
+
+  # 月次名刺統計レポート
+  monthly_report:
+    displayName: 月次名刺統計レポート
+    description: "月間の名刺受取数・商業活動統計をCSVで出力"
+    enabled: true
+
+    schedule:
+      cron: "0 8 1 * *"
+      timezone: "Asia/Tokyo"
+
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/monthly_report.sql
+      outputFile: "jobs/output/monthly_report_{date:yyyyMM}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 1
+      retryInterval: 600
+      logError: true

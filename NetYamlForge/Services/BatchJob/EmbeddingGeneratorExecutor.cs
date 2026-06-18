@@ -63,13 +63,17 @@ public class EmbeddingGeneratorExecutor : IBatchStepHandler
             return;
         }
 
+        // Batch embed all texts in one Python call for efficiency
+        var texts = photos.Select(BuildText).ToList();
+        var vecs = await _embedding.EmbedBatchAsync(texts, ct);
+
         var done = 0;
-        foreach (var photo in photos)
+        for (var i = 0; i < photos.Count; i++)
         {
             if (ct.IsCancellationRequested) break;
 
-            var text = BuildText(photo);
-            var vec = await _embedding.EmbedAsync(text, ct);
+            var photo = photos[i];
+            var vec = i < vecs.Count ? vecs[i] : null;
             if (vec == null || vec.Length == 0)
             {
                 _logger.LogWarning("Embedding returned null for photo {Id}", photo.photo_id);

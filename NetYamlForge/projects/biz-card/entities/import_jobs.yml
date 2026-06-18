@@ -1,0 +1,63 @@
+imports: []
+entities:
+  import_jobs:
+    table: import_jobs
+    key: id
+    displayName: 取込ジョブ
+    softDelete: false
+    isPublic: false
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      file_name:
+        type: string
+        label: ファイル名
+        searchable: true
+        sortable: true
+      file_type:
+        type: string
+        label: 種別
+        sortable: true
+      file_size:
+        type: int
+        label: サイズ（バイト）
+        sortable: true
+      status:
+        type: string
+        label: ステータス
+        sortable: true
+      result_card_id:
+        type: int
+        label: 名刺ID
+        sortable: true
+      error_message:
+        type: string
+        label: エラー
+        searchable: true
+      created_at:
+        type: datetime
+        label: 取込日時
+        sortable: true
+      completed_at:
+        type: datetime
+        label: 完了日時
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    filters:
+      status:
+        type: dropdown
+        label: ステータス
+        expression: import_jobs.status
+        options: [pending, processing, done, failed]
+      file_name:
+        type: like
+        label: ファイル名

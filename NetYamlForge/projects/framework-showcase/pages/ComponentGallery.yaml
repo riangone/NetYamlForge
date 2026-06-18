@@ -1,0 +1,46 @@
+title: "部品ギャラリー"
+description: "フォームコンポーネントとUIパターンの視覚的ギャラリー"
+
+sections:
+  - id: intro
+    title: "コンポーネント一覧"
+    component: markdown
+    sourceType: none
+    content: |
+      # UI 部品ギャラリー
+
+      このページでは NetYamlForge で利用可能なフォームコンポーネントを一覧表示します。
+
+      ## フォームタイプカテゴリ
+      - **テキスト系**: TextField, EmailField, UrlField, TelField, TextArea, RichText, Markdown, Code
+      - **数値系**: NumberField, DecimalField, MoneyField, PercentField, RangeField, RatingField
+      - **日時系**: DateField, DateTimeField
+      - **選択系**: SelectField, RadioField, ToggleGroupField, MultiSelectField, BoolToggle
+      - **特殊系**: ColorPicker, TagsField, AutocompleteField, JsonField, SignatureField, MapField, SortableListField
+
+  - id: component_list
+    title: "フォーム部品デモ一覧"
+    component: data_table
+    sourceType: table
+    entity: form_component
+    columns:
+      - TextField
+      - EmailField
+      - NumberField
+      - DateField
+      - SelectField
+      - BoolToggle
+    filters:
+      SelectField:
+        label: "フィールドタイプ"
+        type: dropdown
+    pageSize: 10
+
+  - id: stats
+    title: "統計"
+    component: kpi_cards
+    sourceType: custom
+    source: |
+      SELECT COUNT(*) AS value, 'サンプル数' AS label FROM FormComponent
+      UNION ALL SELECT 30, '部品タイプ数', 'total'
+      UNION ALL SELECT 10, 'カテゴリ数', 'category'

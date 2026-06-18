@@ -49,7 +49,3 @@ quickActions:
     url: /ui-showcase/DynamicEntity/List/component_demo
     style: btn-outline
     icon: 🛠️
-  - label: 用户模拟
-    url: /ui-showcase/DynamicEntity/List/users
-    style: btn-ghost
-    icon: 👤

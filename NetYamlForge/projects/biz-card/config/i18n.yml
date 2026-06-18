@@ -1,0 +1,115 @@
+translations:
+  projects.biz-card.title:
+    en-US: Business Card Manager
+    zh-CN: 名片管理
+    ja-JP: 名刺管理
+
+  projects.biz-card.description:
+    en-US: Smart business card management with AI parsing and vector search
+    zh-CN: 智能名片管理——AI解析、向量检索、商业活动管理
+    ja-JP: スマート名刺管理・AI解析・ベクトル検索・商業活動管理
+
+  projects.biz-card.nav.cardGallery:
+    en-US: Card Gallery
+    zh-CN: 名片一览
+    ja-JP: 名刺一覧
+
+  projects.biz-card.nav.cardImport:
+    en-US: Import Cards
+    zh-CN: 取込名片
+    ja-JP: 名刺取込
+
+  projects.biz-card.nav.vectorSearch:
+    en-US: Semantic Search
+    zh-CN: 语义检索
+    ja-JP: ベクトル検索
+
+  projects.biz-card.nav.bizActivities:
+    en-US: Business Activities
+    zh-CN: 商业活动
+    ja-JP: 商業活動
+
+  projects.biz-card.entity.business_cards:
+    en-US: Business Cards
+    zh-CN: 名片
+    ja-JP: 名刺
+
+  projects.biz-card.entity.companies:
+    en-US: Companies
+    zh-CN: 公司
+    ja-JP: 会社
+
+  projects.biz-card.entity.biz_activities:
+    en-US: Business Activities
+    zh-CN: 商业活动
+    ja-JP: 商業活動
+
+  projects.biz-card.entity.import_jobs:
+    en-US: Import Jobs
+    zh-CN: 取込任务
+    ja-JP: 取込ジョブ
+
+  projects.biz-card.field.last_name:
+    en-US: Last Name
+    zh-CN: 姓
+    ja-JP: 姓
+
+  projects.biz-card.field.first_name:
+    en-US: First Name
+    zh-CN: 名
+    ja-JP: 名
+
+  projects.biz-card.field.company_name:
+    en-US: Company Name
+    zh-CN: 公司名
+    ja-JP: 会社名
+
+  projects.biz-card.field.title:
+    en-US: Job Title
+    zh-CN: 职位
+    ja-JP: 役職
+
+  projects.biz-card.field.department:
+    en-US: Department
+    zh-CN: 部门
+    ja-JP: 部署
+
+  projects.biz-card.field.activity_type.meeting:
+    en-US: Meeting
+    zh-CN: 会议
+    ja-JP: 商談・会議
+
+  projects.biz-card.field.activity_type.call:
+    en-US: Phone Call
+    zh-CN: 电话
+    ja-JP: 電話
+
+  projects.biz-card.field.activity_type.email:
+    en-US: Email
+    zh-CN: 邮件
+    ja-JP: メール
+
+  projects.biz-card.field.activity_type.visit:
+    en-US: Visit
+    zh-CN: 访问
+    ja-JP: 訪問
+
+  projects.biz-card.field.activity_type.proposal:
+    en-US: Proposal
+    zh-CN: 提案
+    ja-JP: 提案
+
+  projects.biz-card.field.activity_type.contract:
+    en-US: Contract
+    zh-CN: 签约
+    ja-JP: 契約
+
+  projects.biz-card.field.activity_type.exhibition:
+    en-US: Exhibition
+    zh-CN: 展会
+    ja-JP: 展示会
+
+  projects.biz-card.field.activity_type.other:
+    en-US: Other
+    zh-CN: 其他
+    ja-JP: その他

@@ -1,0 +1,146 @@
+title: 📇 名刺一覧
+description: "登録済み名刺のギャラリービュー・統計・最新一覧"
+
+sections:
+  # ─── KPI統計カード ───
+  - id: card_kpi
+    title: 名刺概要
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '名刺総数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📇' AS metric_icon,
+             NULL AS metric_delta
+      FROM business_cards
+      UNION ALL
+      SELECT '会社数',
+             CAST(COUNT(*) AS TEXT),
+             '🏢', NULL
+      FROM companies
+      UNION ALL
+      SELECT 'AI解析済み',
+             CAST(SUM(CASE WHEN parse_status='done' THEN 1 ELSE 0 END) AS TEXT),
+             '✅', NULL
+      FROM business_cards
+      UNION ALL
+      SELECT '今月受取',
+             CAST(COUNT(*) AS TEXT),
+             '📅', NULL
+      FROM business_cards
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+      UNION ALL
+      SELECT 'お気に入り',
+             CAST(SUM(CASE WHEN is_favorite=1 THEN 1 ELSE 0 END) AS TEXT),
+             '⭐', NULL
+      FROM business_cards
+      UNION ALL
+      SELECT '活動記録数',
+             CAST(COUNT(*) AS TEXT),
+             '💼', NULL
+      FROM biz_activities
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── 業種別分布チャート ───
+  - id: industry_chart
+    title: 業種別分布
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(industry,'未分類') AS label,
+             COUNT(*) AS value
+      FROM business_cards
+      GROUP BY industry
+      ORDER BY value DESC
+      LIMIT 12
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 12
+    editable: false
+    readOnly: true
+
+  # ─── 名刺カードギャラリー ───
+  - id: card_gallery
+    title: 📸 名刺プレビュー
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT
+        (bc.last_name || ' ' || COALESCE(bc.first_name,'')) AS 氏名,
+        COALESCE(bc.title,'') || ' / ' || COALESCE(bc.department,'') AS 役職部署,
+        COALESCE(bc.company_name,'会社不明') AS 会社名,
+        bc.file_path AS image_url,
+        COALESCE(bc.email,'—') AS lightbox_caption,
+        COALESCE(bc.phone, bc.mobile,'—') AS lightbox_format,
+        bc.received_at AS lightbox_date
+      FROM business_cards bc
+      WHERE bc.file_path IS NOT NULL AND bc.file_path != ''
+      ORDER BY bc.created_at DESC
+      LIMIT 96
+    columns: [氏名, 役職部署, 会社名, image_url, lightbox_caption, lightbox_format, lightbox_date]
+    titleField: 氏名
+    subtitleField: 会社名
+    descriptionField: 役職部署
+    imageField: image_url
+    captionField: lightbox_caption
+    pageSize: 96
+    editable: false
+    readOnly: true
+
+  # ─── 最新名刺一覧 ───
+  - id: recent_cards
+    title: 📋 最近登録した名刺（50件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        bc.card_no                                      AS 名刺番号,
+        bc.last_name || ' ' || COALESCE(bc.first_name,'') AS 氏名,
+        COALESCE(bc.title,'—')                          AS 役職,
+        COALESCE(bc.department,'—')                     AS 部署,
+        COALESCE(bc.company_name,'—')                   AS 会社名,
+        COALESCE(bc.industry,'—')                       AS 業種,
+        COALESCE(bc.email,'—')                          AS メール,
+        COALESCE(bc.phone, bc.mobile,'—')               AS 電話,
+        CASE bc.source_type
+          WHEN 'manual' THEN '✍️ 手動'
+          WHEN 'image'  THEN '📷 画像'
+          WHEN 'pdf'    THEN '📄 PDF'
+          ELSE bc.source_type
+        END                                             AS 取込方法,
+        CASE WHEN bc.is_favorite=1 THEN '⭐' ELSE '' END AS お気に入り,
+        COALESCE(bc.received_at, bc.created_at)         AS 受取日
+      FROM business_cards bc
+      ORDER BY bc.created_at DESC
+      LIMIT 50
+    columns: [名刺番号, 氏名, 役職, 部署, 会社名, 業種, メール, 電話, 取込方法, お気に入り, 受取日]
+    pageSize: 25
+    editable: false
+    readOnly: true
+
+  # ─── 月別受取トレンド ───
+  - id: monthly_trend
+    title: 📅 月別受取数（12ヶ月）
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT strftime('%Y-%m', created_at) AS label,
+             COUNT(*) AS value
+      FROM business_cards
+      GROUP BY strftime('%Y-%m', created_at)
+      ORDER BY label DESC
+      LIMIT 12
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 12
+    editable: false
+    readOnly: true

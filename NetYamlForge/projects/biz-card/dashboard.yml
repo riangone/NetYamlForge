@@ -1,0 +1,112 @@
+---
+stats:
+  - label: 名刺総数
+    entity: business_cards
+    aggregate: count
+    icon: 📇
+    color: badge-primary
+
+  - label: 会社数
+    entity: companies
+    aggregate: count
+    icon: 🏢
+    color: badge-info
+
+  - label: 今月受取
+    entity: business_cards
+    aggregate: count
+    filter: "strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')"
+    icon: 📅
+    color: badge-success
+
+  - label: 解析待ち
+    entity: import_jobs
+    aggregate: count
+    filter: "status IN ('pending','processing')"
+    icon: ⏳
+    color: badge-warning
+
+  - label: 商業活動数
+    entity: biz_activities
+    aggregate: count
+    icon: 💼
+    color: badge-secondary
+
+  - label: フォロー予定
+    entity: biz_activities
+    aggregate: count
+    filter: "status='planned' AND next_action_date >= date('now')"
+    icon: 🎯
+    color: badge-danger
+
+charts:
+  - title: 業種別名刺分布
+    type: pie
+    entity: business_cards
+    valueAggregate: count
+    groupExpression: "COALESCE(industry,'未分類')"
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+      - rgba(236, 72, 153, 0.85)
+      - rgba(20, 184, 166, 0.85)
+      - rgba(251, 146, 60, 0.85)
+      - rgba(99, 102, 241, 0.85)
+      - rgba(34, 197, 94, 0.85)
+
+  - title: 活動種別分布
+    type: doughnut
+    entity: biz_activities
+    valueAggregate: count
+    groupExpression: "COALESCE(activity_type,'その他')"
+    orderBy: value
+    orderDir: desc
+    limit: 8
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+      - rgba(236, 72, 153, 0.85)
+      - rgba(20, 184, 166, 0.85)
+      - rgba(251, 146, 60, 0.85)
+
+  - title: 月別名刺受取数（12ヶ月）
+    type: bar
+    entity: business_cards
+    valueAggregate: count
+    groupExpression: "strftime('%Y-%m', created_at)"
+    orderBy: label
+    orderDir: desc
+    limit: 12
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: 取込ソース別
+    type: bar
+    entity: business_cards
+    valueAggregate: count
+    groupExpression: "COALESCE(source_type,'manual')"
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)
+
+  - title: 活動ステータス（今月）
+    type: line
+    entity: biz_activities
+    valueAggregate: count
+    groupExpression: "date(activity_date)"
+    orderBy: label
+    orderDir: asc
+    limit: 30
+    colorBg: rgba(245, 158, 11, 0.7)
+    colorBorder: rgba(245, 158, 11, 1)

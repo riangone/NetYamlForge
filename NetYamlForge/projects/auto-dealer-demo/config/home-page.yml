@@ -14,11 +14,11 @@ hero:
 
 metrics:
   - label: 车辆库龄
-    value: "Optimized"
+    value: "最適化済"
     trend: "高效周转"
     tone: text-primary
   - label: 线索转化
-    value: "Enhanced"
+    value: "強化済"
     trend: "数据驱动"
     tone: text-success
   - label: 服务评价

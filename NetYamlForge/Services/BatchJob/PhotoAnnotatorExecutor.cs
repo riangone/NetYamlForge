@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -20,18 +21,19 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
+    private readonly IGeminiEmbeddingService _embedding;
     private readonly ILogger<PhotoAnnotatorExecutor> _logger;
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
 
     private const string AnnotationPrompt = """
-        Analyze the provided photo and return ONLY valid JSON (no markdown, no explanation) with exactly these fields:
+        你是专业的图片分析AI。请仔细分析图片，仅输出合法JSON（不加任何说明、不使用markdown代码块），字段如下：
         {
-          "caption_short": "concise one-sentence description (max 100 chars)",
-          "caption_long": "detailed description including what you see, colors, mood (max 500 chars)",
-          "scene_type": "one of: indoor, outdoor, portrait, landscape, food, architecture, street, nature, event, abstract, vehicle, document, other",
-          "subjects": "comma-separated list of main subjects",
-          "activities": "comma-separated list of activities visible",
-          "tags": ["array", "of", "descriptive", "tags", "max 15"],
+          "caption_short": "25字以内的简洁中文描述",
+          "caption_long": "100字以内的详细中文描述，包含画面内容、色调、氛围",
+          "scene_type": "场景类别，必须是以下之一：indoor/outdoor/portrait/landscape/food/architecture/street/nature/event/abstract/vehicle/document/other",
+          "subjects": "主体对象，中文逗号分隔，如：人物,建筑,动物",
+          "activities": "画面中可见的活动，中文逗号分隔，无则填null",
+          "tags": ["中文标签1", "中文标签2", "最多15个"],
           "person_count": 0,
           "confidence_score": 0.90
         }
@@ -40,10 +42,12 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     public PhotoAnnotatorExecutor(
         IWebHostEnvironment env,
         IConfiguration configuration,
+        IGeminiEmbeddingService embedding,
         ILogger<PhotoAnnotatorExecutor> logger)
     {
         _env = env;
         _configuration = configuration;
+        _embedding = embedding;
         _logger = logger;
     }
 
@@ -159,6 +163,40 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
                     }
                 }
 
+                // 标注完成后立即生成嵌入，无需等待 cron
+                try
+                {
+                    await db.ExecuteAsync("""
+                        CREATE TABLE IF NOT EXISTS photo_embeddings (
+                            photo_id   TEXT NOT NULL PRIMARY KEY,
+                            embedding  TEXT NOT NULL,
+                            created_at TEXT NOT NULL
+                        )
+                        """, transaction: tx);
+
+                    var embedText = BuildEmbedText(annotation, null, null, null);
+                    if (!string.IsNullOrWhiteSpace(embedText))
+                    {
+                        var vecs = await _embedding.EmbedBatchAsync([embedText], ct);
+                        var vec = vecs.Count > 0 ? vecs[0] : null;
+                        if (vec != null && vec.Length > 0)
+                        {
+                            await db.ExecuteAsync("""
+                                INSERT OR REPLACE INTO photo_embeddings(photo_id, embedding, created_at)
+                                VALUES (@PhotoId, @Embedding, @Now)
+                                """,
+                                new { PhotoId = row.photo_id, Embedding = JsonSerializer.Serialize(vec), Now = DateTime.UtcNow.ToString("o") },
+                                transaction: tx);
+                            _logger.LogInformation("Embedding generated inline for photo {PhotoId} ({Dims} dims)", row.photo_id, vec.Length);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 嵌入失败不影响标注结果，后续 cron 会补跑
+                    _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId}, will retry via cron", row.photo_id);
+                }
+
                 var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
                 await db.ExecuteAsync(@"
                     UPDATE processing_queue SET
@@ -184,6 +222,23 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     }
 
     // ──────────────────────────────────────────────────────────
+    // Embedding helpers
+    // ──────────────────────────────────────────────────────────
+
+    private static string BuildEmbedText(AnnotationResult a, string? sceneType, string? gpsAddress, string? ocrText)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(a.CaptionShort)) parts.Add(a.CaptionShort);
+        if (!string.IsNullOrWhiteSpace(a.CaptionLong))  parts.Add(a.CaptionLong);
+        if (!string.IsNullOrWhiteSpace(a.SceneType ?? sceneType)) parts.Add($"场景: {a.SceneType ?? sceneType}");
+        if (!string.IsNullOrWhiteSpace(a.Subjects))     parts.Add($"主体: {a.Subjects}");
+        if (!string.IsNullOrWhiteSpace(a.Activities))   parts.Add($"活动: {a.Activities}");
+        if (!string.IsNullOrWhiteSpace(gpsAddress))     parts.Add($"地点: {gpsAddress}");
+        if (!string.IsNullOrWhiteSpace(ocrText))        parts.Add($"文字: {ocrText}");
+        return string.Join(". ", parts);
+    }
+
+    // ──────────────────────────────────────────────────────────
     // Provider dispatch
     // ──────────────────────────────────────────────────────────
 
@@ -203,7 +258,8 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     private async Task<AnnotationResult?> AnnotateWithGeminiCliAsync(
         string absolutePath, CancellationToken ct)
     {
-        var prompt = $"Look at the image file at {absolutePath} and analyze it for photo annotation. {AnnotationPrompt}";
+        // @filepath 语法让 Gemini CLI 真正附加图片内容，而非仅在文本中提及路径
+        var prompt = $"@{absolutePath}\n{AnnotationPrompt}";
         var escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
         var startInfo = new ProcessStartInfo
@@ -464,9 +520,11 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
 
     private static string GetModelName(string provider) => provider switch
     {
-        "gemini"  => "gemini-2.0-flash",
-        "ollama"  => "llava:13b",
-        _         => "claude-haiku-4-5-20251001"
+        "gemini"       => "gemini-2.0-flash",
+        "gemini_cli"   => "gemini-cli",
+        "antigravity"  => "gemini-cli",
+        "ollama"       => "llava:13b",
+        _              => "claude-haiku-4-5-20251001"
     };
 
     private static async Task FailRow(IDbConnection db, IDbTransaction tx, QueueRow row, string error)
