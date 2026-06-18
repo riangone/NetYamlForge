@@ -42,7 +42,7 @@ providers:
 
   # 3. 本地 antigravity CLI
   antigravity:
-    enabled: true
+    enabled: false
     display_name: "Antigravity CLI"
     # CLI 可执行文件路径（默认 PATH 中查找）
     bin_path: "antigravity"
@@ -57,8 +57,17 @@ providers:
     timeout_seconds: 120
     max_retries: 3
 
+  # 4. LM Studio 本地模型（OpenAI-compatible endpoint）
+  lmstudio:
+    enabled: true
+    display_name: "LM Studio（本地）"
+    base_url: "http://localhost:1234/v1"
+    model: "google/gemma-4-e4b"
+    max_tokens: 1024
+    temperature: 0.2
+
 # 默认标注提供商（可被 processing_queue.provider 字段覆盖）
-default_annotation_provider: antigravity
+default_annotation_provider: lmstudio
 
 # 标注 Prompt（三个提供商共用）
 annotation_prompt: |

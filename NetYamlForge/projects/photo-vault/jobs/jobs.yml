@@ -30,11 +30,30 @@ jobs:
       retryInterval: 60
       logError: true
 
+  # ─── LM Studio 本地模型标注工作器 ───
+  lmstudio_annotation_worker:
+    displayName: LM Studio 视觉标注
+    description: "从 processing_queue 取出 provider=lmstudio 的待处理照片，调用 LM Studio 本地模型 (google/gemma-4-e4b) 生成标注"
+    enabled: true
+
+    schedule:
+      cron: "*/3 * * * *"
+      timezone: "Asia/Shanghai"
+
+    type: photo_annotator
+    aiProvider: lmstudio
+    batchSize: 3
+
+    onFailure:
+      retryCount: 3
+      retryInterval: 60
+      logError: true
+
   # ─── 本地 LLM 视觉标注工作器（Ollama）───
   annotation_worker:
     displayName: 本地 LLM 视觉标注（Ollama）
     description: "从 processing_queue 取出 provider=ollama 的待处理照片，调用 Ollama llava 模型生成标注"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "*/5 * * * *"
@@ -53,7 +72,7 @@ jobs:
   gemini_annotation_worker:
     displayName: Gemini API 视觉标注
     description: "从 processing_queue 取出 provider=gemini 的待处理照片，调用 Gemini Vision API 生成标注"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "*/10 * * * *"
@@ -72,7 +91,7 @@ jobs:
   antigravity_cli_worker:
     displayName: Antigravity 视觉标注（Claude API）
     description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 Anthropic Claude API 进行视觉标注"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "0 * * * *"      # 每 60 分钟

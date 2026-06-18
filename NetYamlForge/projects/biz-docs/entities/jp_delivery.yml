@@ -49,6 +49,7 @@ entities:
         type: date
         label: 納品日
         editable: true
+        required: true
       Total:
         type: decimal
         label: 合計
@@ -72,6 +73,11 @@ entities:
         label: ID
         identity: true
         hidden: true
+      Title:
+        type: string
+        label: 件名
+        sortable: true
+        searchable: true
       DeliveryNo:
         type: string
         label: 納品書番号

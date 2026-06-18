@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddMultiProjectInfrastructure();
         services.AddDatabaseServices();
-        services.AddDynamicCrudCore();
+        services.AddDynamicCrudCore(configuration);
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
@@ -170,7 +170,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// コア CRUD / 認証 / 監査サービスを登録します。
     /// </summary>
-    public static IServiceCollection AddDynamicCrudCore(this IServiceCollection services)
+    public static IServiceCollection AddDynamicCrudCore(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IValueConverter, ValueConverter>();
         services.AddScoped<FormValueValidationService>();
@@ -206,7 +206,22 @@ public static class ServiceCollectionExtensions
         
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
-        services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
+        // Embedding サービス（EmbeddingProvider で切替: local / lmstudio / gemini）
+        var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
+            ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
+            ?? "local";
+        switch (embedProvider)
+        {
+            case "lmstudio":
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LmStudioEmbeddingService>();
+                break;
+            case "local":
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
+                break;
+            case "gemini":
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.GeminiEmbeddingService>();
+                break;
+        }
         services.AddSingleton<ToolCallValidator>();
         services.AddSingleton<IToolRegistry, InMemoryToolRegistry>();
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();

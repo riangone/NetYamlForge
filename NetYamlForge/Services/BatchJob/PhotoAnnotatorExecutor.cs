@@ -247,6 +247,7 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     {
         return provider.ToLowerInvariant() switch
         {
+            "lmstudio"     => await AnnotateWithLmStudioAsync(absolutePath, ct),
             "gemini_cli"   => await AnnotateWithGeminiCliAsync(absolutePath, ct),
             "gemini"       => await AnnotateWithGeminiAsync(absolutePath, projectName, ct),
             "ollama"       => await AnnotateWithOllamaAsync(absolutePath, projectName, ct),
@@ -303,6 +304,55 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
         cleaned = Regex.Replace(cleaned, @"\x1B\[.*?[a-zA-Z]", "");
         cleaned = Regex.Replace(cleaned, @"Warning:.*?\n|YOLO mode.*?\n|Ripgrep.*?\n", "");
         return ParseAnnotationJson(cleaned);
+    }
+
+    private async Task<AnnotationResult?> AnnotateWithLmStudioAsync(
+        string absolutePath, CancellationToken ct)
+    {
+        var baseUrl = Environment.GetEnvironmentVariable("LMSTUDIO_BASE_URL") ?? "http://localhost:1234/v1";
+        var model   = Environment.GetEnvironmentVariable("LMSTUDIO_MODEL") ?? "google/gemma-4-e4b";
+        var (base64, mimeType) = EncodeImage(absolutePath);
+
+        var body = new
+        {
+            model,
+            messages = new[]
+            {
+                new
+                {
+                    role = "user",
+                    content = new object[]
+                    {
+                        new { type = "text", text = AnnotationPrompt },
+                        new { type = "image_url", image_url = new { url = $"data:{mimeType};base64,{base64}" } }
+                    }
+                }
+            },
+            max_tokens = 1024,
+            temperature = 0.2
+        };
+
+        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+
+        var resp = await _http.SendAsync(req, ct);
+        var respJson = await resp.Content.ReadAsStringAsync(ct);
+
+        if (!resp.IsSuccessStatusCode)
+        {
+            _logger.LogError("LM Studio API error {Status}: {Body}", resp.StatusCode, respJson);
+            return null;
+        }
+
+        using var doc = JsonDocument.Parse(respJson);
+        var text = doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content").GetString() ?? "";
+
+        return ParseAnnotationJson(text);
     }
 
     private async Task<AnnotationResult?> AnnotateWithAnthropicAsync(
@@ -520,6 +570,7 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
 
     private static string GetModelName(string provider) => provider switch
     {
+        "lmstudio"     => "google/gemma-4-e4b",
         "gemini"       => "gemini-2.0-flash",
         "gemini_cli"   => "gemini-cli",
         "antigravity"  => "gemini-cli",

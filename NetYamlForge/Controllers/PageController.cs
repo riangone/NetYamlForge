@@ -4,6 +4,7 @@
 
 using System.Data;
 using System.Security.Claims;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Dapper;
 using NetYamlForge.Models;
@@ -12,8 +13,11 @@ using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Page;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 
 namespace NetYamlForge.Controllers;
 
@@ -53,6 +57,7 @@ public class PageController : BaseProjectController
     private readonly PageViewPreferenceService _pageViewPreferenceService;
     private readonly SectionRowFormViewModelFactory _formViewModelFactory;
     private readonly IFileUploadService _fileUploadService;
+    private readonly IWebHostEnvironment _env;
     private readonly IDbConnection _db;
     private readonly ISqlDialect _dialect;
     private readonly ILogger<PageController> _logger;
@@ -66,6 +71,7 @@ public class PageController : BaseProjectController
         PageViewPreferenceService pageViewPreferenceService,
         SectionRowFormViewModelFactory formViewModelFactory,
         IFileUploadService fileUploadService,
+        IWebHostEnvironment env,
         IDbConnection db,
         ISqlDialect dialect,
         ILogger<PageController> logger)
@@ -78,6 +84,7 @@ public class PageController : BaseProjectController
         _pageViewPreferenceService = pageViewPreferenceService;
         _formViewModelFactory = formViewModelFactory;
         _fileUploadService = fileUploadService;
+        _env = env;
         _db = db;
         _dialect = dialect;
         _logger = logger;
@@ -491,6 +498,7 @@ public class PageController : BaseProjectController
                 var ext = Path.GetExtension(file.FileName).TrimStart('.');
                 var newUuid = Guid.NewGuid().ToString();
 
+                var exifData = ExtractExif(Path.Combine(_env.WebRootPath, savedPath.TrimStart('/')));
                 var templateVars = new Dictionary<string, string?>
                 {
                     ["filename"]    = file.FileName,
@@ -501,17 +509,17 @@ public class PageController : BaseProjectController
                     ["current_user"] = User.Identity?.Name,
                     ["uuid"]        = newUuid,
                     ["photo_id"]    = newUuid,
-                    ["exif.width"]  = null,
-                    ["exif.height"] = null,
-                    ["exif.taken_at"] = null,
-                    ["exif.make"]   = null,
-                    ["exif.model"]  = null,
-                    ["exif.focal_length"] = null,
-                    ["exif.aperture"] = null,
-                    ["exif.shutter_speed"] = null,
-                    ["exif.iso"]    = null,
-                    ["exif.gps_lat"] = null,
-                    ["exif.gps_lon"] = null,
+                    ["exif.width"]  = exifData.width?.ToString(),
+                    ["exif.height"] = exifData.height?.ToString(),
+                    ["exif.taken_at"] = exifData.taken_at,
+                    ["exif.make"]   = exifData.make,
+                    ["exif.model"]  = exifData.model,
+                    ["exif.focal_length"] = exifData.focal_length,
+                    ["exif.aperture"] = exifData.aperture,
+                    ["exif.shutter_speed"] = exifData.shutter_speed,
+                    ["exif.iso"]    = exifData.iso?.ToString(),
+                    ["exif.gps_lat"] = exifData.gps_lat?.ToString(),
+                    ["exif.gps_lon"] = exifData.gps_lon?.ToString(),
                 };
 
                 long? newId = null;
@@ -577,6 +585,96 @@ public class PageController : BaseProjectController
             errors,
             files = results
         });
+    }
+
+    private static (int? width, int? height, string? taken_at, string? make, string? model,
+        string? focal_length, string? aperture, string? shutter_speed, int? iso,
+        double? gps_lat, double? gps_lon) ExtractExif(string filePath)
+    {
+        try
+        {
+            using var image = Image.Load(filePath);
+            var exif = image.Metadata?.ExifProfile;
+            if (exif == null) return (null, null, null, null, null, null, null, null, null, null, null);
+
+            string? ExifStr(ExifTag<string> tag)
+            {
+                if (exif.TryGetValue(tag, out var v) && v is IExifValue<string> sv)
+                    return sv.Value;
+                return null;
+            }
+
+            Rational? ExifRat(ExifTag<Rational> tag)
+            {
+                if (exif.TryGetValue(tag, out var v) && v is IExifValue<Rational> rv)
+                    return rv.Value;
+                return null;
+            }
+
+            ushort[]? ExifUshortArr(ExifTag<ushort[]> tag)
+            {
+                if (exif.TryGetValue(tag, out var v) && v is IExifValue<ushort[]> iv)
+                    return iv.Value;
+                return null;
+            }
+
+            var width  = image.Width;
+            var height = image.Height;
+
+            var takenAt = ExifStr(ExifTag.DateTimeOriginal)
+                       ?? ExifStr(ExifTag.DateTimeDigitized)
+                       ?? ExifStr(ExifTag.DateTime);
+
+            var make  = ExifStr(ExifTag.Make);
+            var model = ExifStr(ExifTag.Model);
+
+            var focal = ExifRat(ExifTag.FocalLength);
+            var focalStr = focal.HasValue ? $"{focal.Value.Numerator / (double)focal.Value.Denominator:F1}" : null;
+
+            var apert = ExifRat(ExifTag.FNumber);
+            var apertStr = apert.HasValue ? $"f/{apert.Value.Numerator / (double)apert.Value.Denominator:F1}" : null;
+
+            var shutter = ExifRat(ExifTag.ExposureTime);
+            var shutterStr = shutter.HasValue
+                ? (shutter.Value.Numerator >= shutter.Value.Denominator
+                    ? $"{shutter.Value.Numerator / (double)shutter.Value.Denominator:F1}s"
+                    : $"{shutter.Value.Numerator}/{shutter.Value.Denominator}s")
+                : null;
+
+            var isoVal = (int?)ExifUshortArr(ExifTag.ISOSpeedRatings)?.FirstOrDefault();
+
+            double? gpsLat = null, gpsLon = null;
+            if (exif.TryGetValue(ExifTag.GPSLatitude, out var latV) && latV is IExifValue<Rational[]> latArr)
+            {
+                var vals = latArr.Value!;
+                if (vals.Length == 3)
+                {
+                    gpsLat = (double)vals[0].Numerator / vals[0].Denominator
+                           + (double)vals[1].Numerator / vals[1].Denominator / 60
+                           + (double)vals[2].Numerator / vals[2].Denominator / 3600;
+                }
+                if (exif.TryGetValue(ExifTag.GPSLatitudeRef, out var lr) && lr is IExifValue<string> latRef && latRef.Value == "S")
+                    gpsLat = -gpsLat;
+            }
+            if (exif.TryGetValue(ExifTag.GPSLongitude, out var lonV) && lonV is IExifValue<Rational[]> lonArr)
+            {
+                var vals = lonArr.Value!;
+                if (vals.Length == 3)
+                {
+                    gpsLon = (double)vals[0].Numerator / vals[0].Denominator
+                           + (double)vals[1].Numerator / vals[1].Denominator / 60
+                           + (double)vals[2].Numerator / vals[2].Denominator / 3600;
+                }
+                if (exif.TryGetValue(ExifTag.GPSLongitudeRef, out var lr) && lr is IExifValue<string> lonRef && lonRef.Value == "W")
+                    gpsLon = -gpsLon;
+            }
+
+            return (width, height, takenAt, make, model, focalStr, apertStr, shutterStr, isoVal, gpsLat, gpsLon);
+        }
+        catch
+        {
+            return (null, null, null, null, null, null, null, null, null, null, null);
+        }
     }
 
     private static readonly Regex TemplateVarRegex = new(@"\{\{([^}]+)\}\}", RegexOptions.Compiled);

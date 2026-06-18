@@ -64,6 +64,10 @@ entities:
         label: ID
         identity: true
         hidden: true
+      ReceivedDate:
+        type: date
+        label: 受領日
+        sortable: true
       ReceiptNo:
         type: string
         label: 領収書番号

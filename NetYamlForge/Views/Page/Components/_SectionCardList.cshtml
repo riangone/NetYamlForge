@@ -1,4 +1,6 @@
 @using NetYamlForge.Models
+@using System.Text.Encodings.Web
+@using System.Text.Json
 @model SectionRenderModel
 @{
     var sec = Model.Sec;
@@ -12,6 +14,8 @@
 
     // unique id per section to avoid conflicts when multiple card_lists on one page
     var sectionId = $"cl_{sec.Id ?? Guid.NewGuid().ToString("N")[..8]}";
+
+    var _jsonOpts = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 }
 
 @if (!string.IsNullOrEmpty(sec.Title))
@@ -96,25 +100,37 @@
 </div>
 
 @* ── Lightbox overlay ─────────────────────────────────────────────── *@
+@{
+    var lbItems = new System.Text.StringBuilder();
+    lbItems.Append("[");
+    var first = true;
+    foreach (var row in rows)
+    {
+        var imageUrl = !string.IsNullOrEmpty(imageField) && row.TryGetValue(imageField, out var img) ? img?.ToString() ?? "" : "";
+        if (string.IsNullOrEmpty(imageUrl)) continue;
+        var title    = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
+        var caption  = !string.IsNullOrEmpty(captionField) && row.TryGetValue(captionField, out var cap)
+                        ? cap?.ToString() ?? ""
+                        : (!string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d)
+                            ? d?.ToString() ?? "" : "");
+        var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? st?.ToString() ?? "" : "";
+        if (!first) lbItems.Append(",");
+        first = false;
+        lbItems.Append("{");
+        lbItems.Append("\"src\":");  lbItems.Append(System.Text.Json.JsonSerializer.Serialize(imageUrl, _jsonOpts));
+        lbItems.Append(",\"title\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(title, _jsonOpts));
+        lbItems.Append(",\"caption\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(caption, _jsonOpts));
+        lbItems.Append(",\"subtitle\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(subtitle, _jsonOpts));
+        lbItems.Append("}");
+    }
+    lbItems.Append("]");
+}
+
 @if (!string.IsNullOrEmpty(imageField) && rows.Any())
 {
-    <!-- build JS data array -->
     <script>
     (function(){
-      var _data = [
-        @foreach (var row in rows)
-        {
-            var imageUrl = !string.IsNullOrEmpty(imageField) && row.TryGetValue(imageField, out var img) ? img?.ToString() ?? "" : "";
-            if (string.IsNullOrEmpty(imageUrl)) continue;
-            var title    = row.TryGetValue(titleField, out var t) ? (t?.ToString() ?? "").Replace("'","\'") : "";
-            var caption  = !string.IsNullOrEmpty(captionField) && row.TryGetValue(captionField, out var cap)
-                            ? (cap?.ToString() ?? "").Replace("'","\'")
-                            : (!string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d)
-                                ? (d?.ToString() ?? "").Replace("'","\'") : "");
-            var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? (st?.ToString() ?? "").Replace("'","\'") : "";
-            <text>{'src':'@imageUrl','title':'@title','caption':'@caption','subtitle':'@subtitle'},</text>
-        }
-      ];
+      var _data = @Html.Raw(lbItems.ToString());
       if(!window._nyf_lb) window._nyf_lb = {};
       window._nyf_lb['@sectionId'] = _data;
     })();

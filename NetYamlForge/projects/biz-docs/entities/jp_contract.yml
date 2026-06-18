@@ -49,6 +49,7 @@ entities:
         type: date
         label: 開始日
         editable: true
+        required: true
       EndDate:
         type: date
         label: 終了日
@@ -72,6 +73,7 @@ entities:
         type: string
         label: 契約種別
         editable: true
+        required: true
         options: [sales, purchase, service, license, partnership, other]
       AutoRenew:
         type: bool

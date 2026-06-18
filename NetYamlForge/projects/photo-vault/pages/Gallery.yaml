@@ -154,6 +154,11 @@ sections:
       FROM photos
       WHERE deleted_at IS NULL AND taken_at IS NOT NULL
       GROUP BY strftime('%Y-%m', taken_at)
+      UNION ALL
+      SELECT '无拍摄时间',
+             COUNT(*)
+      FROM photos
+      WHERE deleted_at IS NULL AND taken_at IS NULL
       ORDER BY label DESC
       LIMIT 24
     columns: [label, value]

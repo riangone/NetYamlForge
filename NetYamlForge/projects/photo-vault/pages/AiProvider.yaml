@@ -1,5 +1,5 @@
 title: 🔌 AI 提供商管理
-description: "配置与监控三路 AI 标注后端：Ollama 本地 LLM、Google Gemini API、Antigravity CLI"
+description: "配置与监控 AI 标注后端：LM Studio（本地）、Ollama、Google Gemini API、Antigravity CLI"
 
 sections:
   # ─── 提供商状态概览 ───
@@ -8,10 +8,15 @@ sections:
     component: stat_cards
     sourceType: custom
     source: |
-      SELECT 'Ollama 本地 LLM' AS provider_label,
+      SELECT 'LM Studio' AS provider_label,
              CAST(COUNT(*) AS TEXT) AS total,
-             '🖥️' AS icon,
+             '🧠' AS icon,
              NULL AS delta
+      FROM processing_queue WHERE provider = 'lmstudio' AND status = 'done'
+      UNION ALL
+      SELECT 'Ollama 本地 LLM',
+             CAST(COUNT(*) AS TEXT),
+             '🖥️', NULL
       FROM processing_queue WHERE provider = 'ollama' AND status = 'done'
       UNION ALL
       SELECT 'Gemini API',
@@ -34,6 +39,31 @@ sections:
     iconField: icon
     deltaField: delta
     pageSize: 4
+    editable: false
+    readOnly: true
+
+  # ─── LM Studio 最近任务 ───
+  - id: lmstudio_recent
+    title: 🧠 LM Studio — 最近 10 条记录
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+          q.queue_id AS ID,
+          p.file_name AS 文件名,
+          q.status AS 状态,
+          q.retry_count AS 重试,
+          q.model_name AS 模型,
+          q.processing_ms AS 耗时ms,
+          q.error_message AS 错误信息,
+          q.completed_at AS 完成时间
+      FROM processing_queue q
+      JOIN photos p ON p.photo_id = q.photo_id
+      WHERE q.provider = 'lmstudio'
+      ORDER BY q.completed_at DESC NULLS LAST, q.queued_at DESC
+      LIMIT 10
+    columns: [ID, 文件名, 状态, 重试, 模型, 耗时ms, 错误信息, 完成时间]
+    pageSize: 10
     editable: false
     readOnly: true
 

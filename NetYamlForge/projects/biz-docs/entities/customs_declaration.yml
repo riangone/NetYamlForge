@@ -117,14 +117,22 @@ entities:
         label: ID
         identity: true
         hidden: true
-      DeclarationNo:
+      DeclNo:
         type: string
         label: 申告番号
         sortable: true
         searchable: true
-      CustomerId:
-        type: int
-        label: 取引先 ID
+      ExporterName:
+        type: string
+        label: 輸出者名
+        sortable: true
+      ImporterName:
+        type: string
+        label: 輸入者名
+        sortable: true
+      CargoDescription:
+        type: string
+        label: 貨物品名
         sortable: true
       InvoiceId:
         type: int

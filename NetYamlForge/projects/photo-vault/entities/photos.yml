@@ -228,3 +228,17 @@ entities:
         required: false
         label: 更新时间
         sortable: true
+
+    actions:
+      enqueue_annotation:
+        label: 触发标注
+        scope: row
+        class: btn-success
+        confirm: "确定要对此照片触发 AI 标注吗？"
+        handler: enqueue_annotation
+      batch_enqueue_pending:
+        label: 批量触发待标注
+        scope: header
+        class: btn-primary
+        confirm: "确定要为所有待处理的照片触发 AI 标注吗？"
+        handler: batch_enqueue_pending

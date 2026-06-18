@@ -75,6 +75,10 @@ entities:
         label: ID
         identity: true
         hidden: true
+      RecipientId:
+        type: int
+        label: 受信者 ID
+        sortable: true
       FaxNo:
         type: string
         label: FAX 番号

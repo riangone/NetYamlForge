@@ -54,8 +54,8 @@ entities:
         length: 20
         required: false
         label: AI 提供商
-        options: [ollama, gemini, antigravity]
-        default: ollama
+        options: [lmstudio, ollama, gemini, antigravity]
+        default: lmstudio
         searchable: true
         sortable: true
       model_name:

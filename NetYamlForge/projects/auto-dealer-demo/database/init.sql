@@ -197,3 +197,217 @@ CREATE INDEX IF NOT EXISTS idx_employees_employee_number ON employees(employee_n
 CREATE INDEX IF NOT EXISTS idx_employees_name ON employees(name);
 CREATE INDEX IF NOT EXISTS idx_employees_department ON employees(department);
 CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
+
+-- ============================================================
+-- Phase 4 追加テーブル
+-- ============================================================
+
+-- 拠点マスタ
+CREATE TABLE IF NOT EXISTS branches (
+    branch_id   VARCHAR(50)  NOT NULL PRIMARY KEY,
+    branch_name VARCHAR(100) NOT NULL,
+    branch_type VARCHAR(20)  NOT NULL DEFAULT 'sub',
+    address     VARCHAR(200),
+    phone       VARCHAR(20),
+    email       VARCHAR(100),
+    manager_id  VARCHAR(50),
+    is_active   INTEGER      NOT NULL DEFAULT 1,
+    sort_order  INTEGER      NOT NULL DEFAULT 0,
+    created_at  DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at  DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (manager_id) REFERENCES employees(employee_id)
+);
+
+-- 営業クォータ
+CREATE TABLE IF NOT EXISTS sales_quotas (
+    quota_id        VARCHAR(50)    NOT NULL PRIMARY KEY,
+    employee_id     VARCHAR(50)    NOT NULL,
+    branch_id       VARCHAR(50),
+    year            INTEGER        NOT NULL,
+    month           INTEGER        NOT NULL,
+    quota_amount    DECIMAL(12,2)  NOT NULL DEFAULT 0,
+    quota_units     INTEGER        NOT NULL DEFAULT 0,
+    achieved_amount DECIMAL(12,2)  NOT NULL DEFAULT 0,
+    achieved_units  INTEGER        NOT NULL DEFAULT 0,
+    created_at      DATETIME       NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at      DATETIME       NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id),
+    FOREIGN KEY (branch_id)   REFERENCES branches(branch_id)
+);
+
+-- 車両画像
+CREATE TABLE IF NOT EXISTS vehicle_images (
+    image_id    VARCHAR(50)  NOT NULL PRIMARY KEY,
+    vehicle_id  VARCHAR(50)  NOT NULL,
+    image_url   VARCHAR(500) NOT NULL,
+    caption     VARCHAR(200),
+    image_type  VARCHAR(20)  NOT NULL DEFAULT 'exterior',
+    sort_order  INTEGER      NOT NULL DEFAULT 0,
+    is_primary  INTEGER      NOT NULL DEFAULT 0,
+    uploaded_by VARCHAR(50),
+    created_at  DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
+);
+
+-- 支払いプラン
+CREATE TABLE IF NOT EXISTS payment_plans (
+    plan_id          VARCHAR(50)   NOT NULL PRIMARY KEY,
+    lead_id          VARCHAR(50),
+    customer_id      VARCHAR(50)   NOT NULL,
+    vehicle_id       VARCHAR(50)   NOT NULL,
+    plan_type        VARCHAR(20)   NOT NULL DEFAULT 'loan',
+    total_amount     DECIMAL(12,2) NOT NULL DEFAULT 0,
+    down_payment     DECIMAL(12,2),
+    loan_amount      DECIMAL(12,2),
+    interest_rate    DECIMAL(5,2),
+    term_months      INTEGER,
+    monthly_payment  DECIMAL(10,2),
+    status           VARCHAR(20)   NOT NULL DEFAULT 'draft',
+    contract_date    DATE,
+    created_at       DATETIME      NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at       DATETIME      NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id)     REFERENCES sales_leads(lead_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (vehicle_id)  REFERENCES vehicles(vehicle_id)
+);
+
+-- 試乗
+CREATE TABLE IF NOT EXISTS test_drives (
+    test_drive_id   VARCHAR(64)  NOT NULL PRIMARY KEY,
+    lead_id         VARCHAR(50),
+    customer_id     VARCHAR(50)  NOT NULL,
+    vehicle_id      VARCHAR(50)  NOT NULL,
+    assigned_staff_id VARCHAR(50),
+    branch_id       VARCHAR(50),
+    scheduled_at    DATETIME     NOT NULL,
+    actual_start_at DATETIME,
+    actual_end_at   DATETIME,
+    status          VARCHAR(20)  NOT NULL DEFAULT 'scheduled',
+    feedback_score  INTEGER,
+    feedback_notes  TEXT,
+    created_at      DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at      DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id)          REFERENCES sales_leads(lead_id),
+    FOREIGN KEY (customer_id)      REFERENCES customers(customer_id),
+    FOREIGN KEY (vehicle_id)       REFERENCES vehicles(vehicle_id),
+    FOREIGN KEY (assigned_staff_id) REFERENCES employees(employee_id),
+    FOREIGN KEY (branch_id)        REFERENCES branches(branch_id)
+);
+
+-- AI 会話
+CREATE TABLE IF NOT EXISTS ai_conversations (
+    conversation_id   VARCHAR(64)  NOT NULL PRIMARY KEY,
+    customer_id       VARCHAR(50),
+    channel           VARCHAR(20)  NOT NULL DEFAULT 'web',
+    status            VARCHAR(20)  NOT NULL DEFAULT 'active',
+    last_intent       VARCHAR(100),
+    last_confidence   REAL,
+    sentiment_score   REAL,
+    started_at        DATETIME,
+    created_at        DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at        DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- AI 引継ぎ
+CREATE TABLE IF NOT EXISTS ai_handovers (
+    handover_id       VARCHAR(64)  NOT NULL PRIMARY KEY,
+    conversation_id   VARCHAR(64)  NOT NULL,
+    reason            VARCHAR(100) NOT NULL,
+    priority          VARCHAR(20)  NOT NULL DEFAULT 'medium',
+    target_department VARCHAR(50),
+    status            VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    handover_notes    TEXT,
+    escalated_at      DATETIME,
+    created_at        DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (conversation_id) REFERENCES ai_conversations(conversation_id)
+);
+
+-- AI 決定
+CREATE TABLE IF NOT EXISTS ai_decisions (
+    decision_id      VARCHAR(64)  NOT NULL PRIMARY KEY,
+    decision_type    VARCHAR(50)  NOT NULL,
+    entity_type      VARCHAR(50),
+    entity_id        VARCHAR(64),
+    ai_reasoning     TEXT,
+    confidence_score REAL,
+    status           VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    requires_human   INTEGER      NOT NULL DEFAULT 0,
+    created_at       DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
+
+-- AI 見積
+CREATE TABLE IF NOT EXISTS ai_quotes (
+    quote_id        VARCHAR(64)   NOT NULL PRIMARY KEY,
+    lead_id         VARCHAR(50),
+    customer_id     VARCHAR(50),
+    vehicle_id      VARCHAR(50),
+    base_price      DECIMAL(12,2) NOT NULL DEFAULT 0,
+    discount_amount DECIMAL(12,2) NOT NULL DEFAULT 0,
+    final_price     DECIMAL(12,2) NOT NULL DEFAULT 0,
+    ai_reasoning    TEXT,
+    status          VARCHAR(20)   NOT NULL DEFAULT 'draft',
+    valid_until     DATETIME,
+    created_at      DATETIME      NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id)     REFERENCES sales_leads(lead_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (vehicle_id)  REFERENCES vehicles(vehicle_id)
+);
+
+-- AI アクションログ
+CREATE TABLE IF NOT EXISTS ai_action_log (
+    log_id      VARCHAR(64) NOT NULL PRIMARY KEY,
+    action_type VARCHAR(50) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id   VARCHAR(64),
+    created_at  DATETIME    NOT NULL DEFAULT (datetime('now', 'localtime'))
+);
+
+-- AI 通信
+CREATE TABLE IF NOT EXISTS ai_communications (
+    comm_id          VARCHAR(64)  NOT NULL PRIMARY KEY,
+    lead_id          VARCHAR(50),
+    customer_id      VARCHAR(50),
+    comm_channel     VARCHAR(20)  NOT NULL DEFAULT 'email',
+    subject          VARCHAR(200),
+    body_text        TEXT,
+    ai_personalized  INTEGER      NOT NULL DEFAULT 0,
+    ai_confidence    REAL,
+    send_status      VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    sent_at          DATETIME,
+    created_at       DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at       DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id)     REFERENCES sales_leads(lead_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- リード育成タスク
+CREATE TABLE IF NOT EXISTS lead_nurturing_tasks (
+    task_id            VARCHAR(64)  NOT NULL PRIMARY KEY,
+    lead_id            VARCHAR(50),
+    customer_id        VARCHAR(50),
+    task_type          VARCHAR(50)  NOT NULL,
+    trigger_reason     VARCHAR(200),
+    priority_score     INTEGER      NOT NULL DEFAULT 50,
+    status             VARCHAR(20)  NOT NULL DEFAULT 'pending',
+    ai_recommendation  TEXT,
+    due_date           DATETIME,
+    created_at         DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at         DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (lead_id)     REFERENCES sales_leads(lead_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+-- 外部ユーザー（提携会社）
+CREATE TABLE IF NOT EXISTS third_party_users (
+    third_party_id  VARCHAR(50)  NOT NULL PRIMARY KEY,
+    app_user_id     INTEGER      NOT NULL,
+    company_name    VARCHAR(100) NOT NULL,
+    service_type    VARCHAR(50)  NOT NULL,
+    contact_person  VARCHAR(100),
+    contact_email   VARCHAR(100),
+    status          VARCHAR(20)  NOT NULL DEFAULT 'active',
+    rating          INTEGER,
+    created_at      DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime')),
+    updated_at      DATETIME     NOT NULL DEFAULT (datetime('now', 'localtime'))
+);

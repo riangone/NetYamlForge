@@ -279,8 +279,8 @@ VALUES (@UserName, @PasswordHash, @DisplayName, @PreferredLanguage, @IsAdmin, @I
         ILogger logger)
     {
         var existing = await conn.QueryFirstOrDefaultAsync<string>(
-            "SELECT employee_id FROM employees WHERE employee_id = @EmployeeId",
-            new { EmployeeId = employeeId });
+            "SELECT employee_id FROM employees WHERE employee_id = @EmployeeId OR user_name = @UserName",
+            new { EmployeeId = employeeId, UserName = userName });
 
         if (!string.IsNullOrEmpty(existing))
         {
@@ -358,8 +358,8 @@ INSERT INTO employees (
 
         await conn.ExecuteAsync(@"
 INSERT INTO customers (
-    customer_id, user_name, customer_type, name, name_kana,
-    gender, phone, mobile, email, tier_level, purchase_count, 
+    customer_id, login_username, customer_type, name, name_kana,
+    gender, phone, mobile, email, tier_level, purchase_count,
     total_purchase_amount, preferred_contact, created_at, updated_at
 ) VALUES (
     @CustomerId, @UserName, @CustomerType, @Name, @NameKana,
@@ -421,14 +421,15 @@ INSERT INTO customers (
 
         await conn.ExecuteAsync(@"
 INSERT INTO third_party_users (
-    third_party_id, company_name, service_type, 
+    third_party_id, app_user_id, company_name, service_type,
     contact_person, contact_email, status, rating, created_at, updated_at
 ) VALUES (
-    @ThirdPartyId, @CompanyName, @ServiceType,
+    @ThirdPartyId, @AppUserId, @CompanyName, @ServiceType,
     @ContactPerson, @Email, @Status, 5, @Now, @Now
 )", new
         {
             ThirdPartyId = thirdPartyId,
+            AppUserId = appUserId!.Value,
             CompanyName = companyName,
             ServiceType = serviceType,
             ContactPerson = contactPerson,

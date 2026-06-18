@@ -42,7 +42,7 @@ public class VectorSearchController : Controller
         // 1. Embed the query
         var queryVec = await _embedding.EmbedAsync(q.Trim(), ct);
         if (queryVec == null)
-            return Ok(new { results = Array.Empty<object>(), message = "本地 Embedding 服务启动失败，请检查日志（python3 / sentence-transformers）" });
+            return Ok(new { results = Array.Empty<object>(), message = "Embedding 服务不可用，请检查 EmbeddingProvider 配置（当前: lmstudio）及 LM Studio 是否运行在 http://localhost:1234/v1" });
 
         // 2. Check table exists
         var tableExists = await _db.ExecuteScalarAsync<int>(

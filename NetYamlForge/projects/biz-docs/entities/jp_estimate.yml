@@ -93,6 +93,11 @@ entities:
         label: ID
         identity: true
         hidden: true
+      Title:
+        type: string
+        label: 件名
+        sortable: true
+        searchable: true
       EstimateNo:
         type: string
         label: 見積番号
