@@ -976,6 +976,76 @@ public class PageController : BaseProjectController
         return userContext.HasAnyRole(section.VisibleToRoles);
     }
 
+    // POST /{project}/Page/{pageName}/section/{sectionId}/form-submit
+    [Authorize]
+    [HttpPost("{pageName}/section/{sectionId}/form-submit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SectionFormSubmit(string project, string pageName, string sectionId,
+        [FromForm] string actionId)
+    {
+        var proj = _projectScope.Current;
+        if (!proj.PageMetadata.TryGet(pageName, out var pageDef))
+            return NotFound();
+        if (!await _pagePermission.CanWritePageAsync(proj.Name, pageName, User.Identity?.Name, UserIsAdmin()))
+            return Forbid();
+
+        var section = pageDef.Sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section == null)
+            return NotFound();
+
+        var action = section.Actions?.FirstOrDefault(a => a.Id == actionId && a.Type == "submit");
+        if (action?.InsertEntity == null)
+            return BadRequest("Invalid action");
+
+        var templateVars = new Dictionary<string, string?>
+        {
+            ["now"]          = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["current_user"] = User.Identity?.Name,
+            ["uuid"]         = Guid.NewGuid().ToString(),
+        };
+
+        if (section.Fields != null)
+        {
+            foreach (var field in section.Fields)
+            {
+                var val = Request.Form.TryGetValue(field.Id, out var fv) ? fv.ToString() : field.Default ?? "";
+                templateVars[field.Id] = val;
+            }
+        }
+
+        var insertFields = action.Fields
+            .Select(kv => new KeyValuePair<string, object?>(
+                kv.Key,
+                (object?)ResolveTemplate(kv.Value, templateVars)))
+            .ToList();
+
+        var cols  = string.Join(", ", insertFields.Select(f => $"\"{f.Key}\""));
+        var parms = string.Join(", ", insertFields.Select(f => $"@{f.Key}"));
+        var insertSql = $"INSERT INTO \"{action.InsertEntity}\" ({cols}) VALUES ({parms})";
+
+        var param = new Dapper.DynamicParameters();
+        foreach (var f in insertFields)
+            param.Add(f.Key, f.Value is "" ? null : f.Value);
+
+        await _db.ExecuteAsync(insertSql, param);
+
+        await TryWritePageAuditAsync("form_submit", action.InsertEntity,
+            $"Page={pageName},Section={sectionId},Action={actionId}");
+
+        var successMsg = action.SuccessMessage ?? "操作成功";
+        Response.Headers["HX-Trigger"] = ToAsciiJson(
+            $"{{\"show-toast\":{{\"message\":\"{successMsg.Replace("\"", "\\\"")}\",\"type\":\"success\"}}}}");
+
+        if (!string.IsNullOrEmpty(action.RefreshSection))
+            Response.Headers["HX-Trigger-After-Settle"] =
+                $"{{\"nyf-refresh-section\":{{\"sectionId\":\"{action.RefreshSection}\"," +
+                $"\"url\":\"/{project}/Page/{pageName}/section/{action.RefreshSection}\"}}}}";
+
+        return Content(
+            $"<div class=\"alert alert-success text-sm py-2 px-4 mt-2\">{System.Web.HttpUtility.HtmlEncode(successMsg)}</div>",
+            "text/html");
+    }
+
     private static string ToAsciiJson(string json)
     {
         if (string.IsNullOrEmpty(json)) return json;

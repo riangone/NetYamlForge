@@ -1,0 +1,232 @@
+@using NetYamlForge.Models
+@using System.Data
+@using Dapper
+@inject IDbConnection _formDb
+@model SectionRenderModel
+@{
+    var sec     = Model.Sec;
+    var project = Model.Project;
+    var pageName = Model.PageName;
+    var submitUrl = Url.Content($"~/{project}/Page/{pageName}/section/{sec.Id}/form-submit");
+    var resultId  = $"form-result-{sec.Id}";
+
+    // Load entity_select options for any field that needs it
+    var entityOptions = new Dictionary<string, List<(string Key, string Label)>>();
+    if (sec.Fields != null)
+    {
+        foreach (var field in sec.Fields.Where(f => f.Type == "entity_select" && !string.IsNullOrEmpty(f.Entity)))
+        {
+            try
+            {
+                var displayCol = field.DisplayField ?? field.KeyField ?? "name";
+                var keyCol     = field.KeyField ?? "id";
+                var sql = $"SELECT \"{keyCol}\" AS k, \"{displayCol}\" AS lbl FROM \"{field.Entity}\" ORDER BY \"{displayCol}\"";
+                var rows = await _formDb.QueryAsync<dynamic>(sql);
+                entityOptions[field.Id] = rows
+                    .Select(r => ((string)(r.k?.ToString() ?? ""), (string)(r.lbl?.ToString() ?? "")))
+                    .ToList();
+            }
+            catch
+            {
+                entityOptions[field.Id] = new List<(string, string)>();
+            }
+        }
+    }
+
+    string BtnClass(string? style) => style switch
+    {
+        "primary"   => "btn-primary",
+        "secondary" => "btn-secondary",
+        "danger"    => "btn-error",
+        "ghost"     => "btn-ghost",
+        _           => "btn-primary"
+    };
+}
+
+<div class="card bg-base-100 shadow-sm border border-base-200">
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(sec.Title))
+        {
+            <h2 class="card-title text-lg mb-1">@sec.Title</h2>
+        }
+        @if (!string.IsNullOrEmpty(sec.Description))
+        {
+            <p class="text-sm text-gray-500 mb-4 whitespace-pre-line">@sec.Description</p>
+        }
+
+        <div id="@resultId" class="mb-2"></div>
+
+        <form id="section-form-@sec.Id"
+              hx-post="@submitUrl"
+              hx-target="#@resultId"
+              hx-swap="innerHTML"
+              hx-on::after-request="nyfFormAfterRequest(event, '@sec.Id')"
+              class="space-y-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="actionId" id="form-action-id-@sec.Id" value="" />
+
+            @if (sec.Fields != null)
+            {
+                foreach (var field in sec.Fields)
+                {
+                    var fieldId = $"ff-{sec.Id}-{field.Id}";
+                    var label   = field.Label ?? field.Id;
+                    <div class="form-control w-full max-w-xl">
+                        <label class="label pb-1" for="@fieldId">
+                            <span class="label-text font-medium">
+                                @if (!string.IsNullOrEmpty(field.Icon)) { <span>@field.Icon </span> }
+                                @label
+                                @if (field.Required) { <span class="text-error ml-1">*</span> }
+                            </span>
+                        </label>
+
+                        @if (field.Type == "bool")
+                        {
+                            var defaultBool = string.Equals(field.Default, "true", StringComparison.OrdinalIgnoreCase);
+                            <input type="hidden" name="@field.Id" value="false" />
+                            <input type="checkbox" id="@fieldId" name="@field.Id" value="true"
+                                   class="toggle toggle-primary"
+                                   @(defaultBool ? "checked" : "") />
+                        }
+                        else if (field.Type == "select" && field.Options != null)
+                        {
+                            <select id="@fieldId" name="@field.Id" class="select select-bordered select-sm w-full max-w-sm"
+                                    @(field.Required ? "required" : "")>
+                                @if (!field.Required)
+                                {
+                                    <option value="">— @(field.Placeholder ?? "请选择") —</option>
+                                }
+                                @foreach (var opt in field.Options)
+                                {
+                                    var isSelected = string.Equals(opt.Value, field.Default, StringComparison.OrdinalIgnoreCase);
+                                    if (isSelected)
+                                    {
+                                        <option value="@opt.Value" selected="selected">@(opt.Label ?? opt.Value)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@opt.Value">@(opt.Label ?? opt.Value)</option>
+                                    }
+                                }
+                            </select>
+                        }
+                        else if (field.Type == "entity_select")
+                        {
+                            var opts = entityOptions.TryGetValue(field.Id, out var eo) ? eo : new();
+                            <select id="@fieldId" name="@field.Id" class="select select-bordered select-sm w-full max-w-sm"
+                                    @(field.Required ? "required" : "")>
+                                <option value="">— @(field.Placeholder ?? "请选择") —</option>
+                                @foreach (var (k, lbl) in opts)
+                                {
+                                    <option value="@k">@lbl</option>
+                                }
+                            </select>
+                        }
+                        else if (field.Type == "textarea")
+                        {
+                            <textarea id="@fieldId" name="@field.Id"
+                                      class="textarea textarea-bordered w-full max-w-xl"
+                                      placeholder="@field.Placeholder"
+                                      @(field.Required ? "required" : "")>@field.Default</textarea>
+                        }
+                        else
+                        {
+                            <input type="text" id="@fieldId" name="@field.Id"
+                                   class="input input-bordered input-sm w-full max-w-xl"
+                                   value="@field.Default"
+                                   placeholder="@field.Placeholder"
+                                   @(field.Required ? "required" : "") />
+                        }
+
+                        @if (!string.IsNullOrEmpty(field.Hint))
+                        {
+                            <label class="label pt-0">
+                                <span class="label-text-alt text-gray-400">@field.Hint</span>
+                            </label>
+                        }
+                    </div>
+                }
+            }
+
+            @if (sec.Actions != null && sec.Actions.Any())
+            {
+                <div class="flex gap-3 flex-wrap pt-2">
+                    @foreach (var action in sec.Actions)
+                    {
+                        if (string.Equals(action.Type, "reset", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <button type="reset" class="btn @BtnClass(action.Style) btn-sm">
+                                @if (!string.IsNullOrEmpty(action.Icon)) { <span>@action.Icon </span> }
+                                @action.Label
+                            </button>
+                        }
+                        else
+                        {
+                            var confirmMsg = System.Text.Json.JsonSerializer.Serialize(action.ConfirmMessage ?? "");
+                            <button type="button" class="btn @BtnClass(action.Style) btn-sm"
+                                    onclick="nyfFormSubmitAction('@sec.Id', '@(action.Id ?? "")', @confirmMsg, '@(action.RefreshSection ?? "")')">
+                                @if (!string.IsNullOrEmpty(action.Icon)) { <span>@action.Icon </span> }
+                                @action.Label
+                            </button>
+                        }
+                    }
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<script>
+(function() {
+    function collectFormValues(secId) {
+        var form = document.getElementById('section-form-' + secId);
+        if (!form) return {};
+        var vals = {};
+        var fd = new FormData(form);
+        fd.forEach(function(v, k) { if (k !== '__RequestVerificationToken' && k !== 'actionId') vals[k] = v; });
+        return vals;
+    }
+
+    function resolveTemplate(tmpl, vals) {
+        return tmpl.replace(/\{\{([^}]+)\}\}/g, function(_, key) {
+            return vals[key] !== undefined ? vals[key] : '';
+        });
+    }
+
+    window.nyfFormSubmitAction = function(secId, actionId, confirmTmpl, refreshSectionId) {
+        var form = document.getElementById('section-form-' + secId);
+        if (!form) return;
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        if (confirmTmpl) {
+            var vals = collectFormValues(secId);
+            var msg  = resolveTemplate(confirmTmpl, vals);
+            if (!window.confirm(msg)) return;
+        }
+
+        document.getElementById('form-action-id-' + secId).value = actionId;
+        form.dataset.refreshSection = refreshSectionId || '';
+        htmx.trigger(form, 'submit');
+    };
+
+    window.nyfFormAfterRequest = function(evt, secId) {
+        if (!evt.detail.successful) return;
+        var form = document.getElementById('section-form-' + secId);
+        if (!form) return;
+
+        var refreshId = form.dataset.refreshSection;
+        if (refreshId) {
+            var pathBase = (window.NetYamlForgeConfig && window.NetYamlForgeConfig.pathBase) || '';
+            var sectionUrl = pathBase + '/@project/Page/@pageName/section/' + refreshId;
+            htmx.ajax('GET', sectionUrl, {
+                target: '#section-' + refreshId,
+                swap: 'innerHTML'
+            });
+        }
+    };
+})();
+</script>
