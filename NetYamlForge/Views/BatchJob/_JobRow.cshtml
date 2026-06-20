@@ -44,7 +44,10 @@
 <tr id="job-row-@Model.JobId"
     @if (isRunning)
     {
-        <text>hx-get="/@projectName/BatchJob/JobStatus?jobId=@Model.JobId"
+        var sinceParam = Model.TriggerTime.HasValue
+            ? $"&since={Uri.EscapeDataString(Model.TriggerTime.Value.ToString("o"))}"
+            : "";
+        <text>hx-get="/@projectName/BatchJob/JobStatus?jobId=@Model.JobId@sinceParam"
               hx-trigger="every 3s"
               hx-target="#job-row-@Model.JobId"
               hx-swap="outerHTML"</text>

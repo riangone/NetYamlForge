@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Todo App Workspace
+  eyebrow: ✅ Todo App — 极简待办清单
   title: 个人高效办公待办清单
   description: 极简主义设计，助您专注于最重要的工作。轻松管理每日任务、灵感备注，量化您的每一天。
   primaryActionLabel: 待办清单
@@ -26,6 +26,7 @@ metrics:
     trend: "零干扰"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: ✍️
     title: 极速记录
@@ -40,6 +41,7 @@ capabilities:
     description: 自定义任务类别，助您在工作、生活与学习之间快速切换焦点。
     badge: 组织
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 我的待办
     url: /todo-app/DynamicEntity/List/task

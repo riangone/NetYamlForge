@@ -15,6 +15,7 @@ features:
   api: true
 
 layout:
+  theme: dim
   dashboardTheme: workspace
 
   landingPageByRole:
@@ -68,6 +69,11 @@ layout:
         icon: 🔌
         section: 运营管理
         roles: [admin]
+      - label: AI 配置
+        url: /photo-vault/Page/Settings
+        icon: ⚙️
+        section: 运营管理
+        roles: [admin]
       - label: 照片导入
         url: /photo-vault/Page/PhotoImport
         icon: 📥
@@ -76,6 +82,11 @@ layout:
       - label: 照片管理
         url: /photo-vault/Page/PhotoManage
         icon: 📋
+        section: 运营管理
+        roles: [editor, admin]
+      - label: 照片列表（实体）
+        url: /photo-vault/DynamicEntity/Index?entity=photos
+        icon: 🗂️
         section: 运营管理
         roles: [editor, admin]
 

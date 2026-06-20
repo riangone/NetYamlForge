@@ -1,0 +1,112 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: #050505;">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <section class="relative overflow-hidden" style="background: linear-gradient(180deg, #1A0000 0%, #0D0D0D 100%); border-bottom: 3px solid #DC2626;">
+            <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(90deg, transparent, transparent 40px, #DC2626 40px, #DC2626 41px);"></div>
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-red-600/20 rounded-full blur-3xl"></div>
+            <div class="relative p-8 md:p-12">
+                <div class="flex items-center gap-10">
+                    <div class="flex-1 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 border-l-4 border-red-600 bg-red-950/30 text-red-400 text-sm font-bold uppercase tracking-widest">
+                            @hero?.Eyebrow
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-black text-white leading-tight uppercase tracking-tight">
+                            @hero?.Title
+                        </h1>
+                        <p class="text-base text-gray-400 leading-relaxed max-w-xl">
+                            @hero?.Description
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-2">
+                            <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-7 py-3.5 font-bold uppercase tracking-wider text-sm transition-all hover:-translate-y-0.5 shadow-lg" style="background: linear-gradient(135deg, #DC2626, #EF4444); color: #fff; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);">
+                                @hero?.PrimaryActionLabel
+                            </a>
+                            <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-7 py-3.5 font-medium text-sm border-2 transition-all hover:-translate-y-0.5 uppercase tracking-wider" style="border-color: #DC2626; color: #DC2626;">
+                                @hero?.SecondaryActionLabel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex flex-col items-center gap-2 min-w-[180px]">
+                        <div class="text-8xl font-black text-red-600/20" style="font-size: 120px; line-height: 1;">🚗</div>
+                        <div class="text-xs text-red-600/60 uppercase tracking-[0.3em] font-bold">Drive Performance</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                @foreach (var m in metrics)
+                {
+                    <div class="border-t-2 p-5" style="border-top-color: #DC2626; background: rgba(255,255,255,0.02);">
+                        <div class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1.5">@m.Label</div>
+                        <div class="text-3xl font-black text-white">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs text-gray-500 mt-1 font-mono">@m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-lg font-black text-white uppercase tracking-wider mb-4 flex items-center gap-3">
+                    <span style="color: #DC2626;">//</span> @config?.CapabilitiesSectionTitle
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="group border p-5 transition-all hover:-translate-y-0.5" style="border-color: rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl group-hover:scale-110 transition-transform">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider" style="background: rgba(220, 38, 38, 0.15); color: #EF4444;">@cap.Badge</span>
+                                }
+                            </div>
+                            <h3 class="font-bold text-white text-base mb-1.5">@cap.Title</h3>
+                            <p class="text-sm text-gray-500 leading-relaxed">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="border p-6" style="border-color: rgba(255,255,255,0.06); background: rgba(255,255,255,0.02);">
+                <h2 class="text-sm text-gray-500 uppercase tracking-widest font-bold mb-4">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 font-bold uppercase tracking-wider text-sm transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #DC2626, #EF4444); color: #fff;">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <div class="text-center text-xs text-gray-700 font-mono py-3 border-t border-gray-800">
+            AUTO DEALER MANAGEMENT SYSTEM &mdash; &copy; 2026
+        </div>
+
+    </div>
+</div>

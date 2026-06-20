@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Auto Dealer Workspace
+  eyebrow: 🚗 Auto Dealer — 数字化汽车经销
   title: 数字化汽车经销与服务管理系统
   description: 连接销售线索、车辆库存与售后服务，打造闭环式汽车零售与维保体验，驱动业绩增长。
   primaryActionLabel: 销售看板
@@ -14,11 +14,11 @@ hero:
 
 metrics:
   - label: 车辆库龄
-    value: "最適化済"
+    value: "最优"
     trend: "高效周转"
     tone: text-primary
   - label: 线索转化
-    value: "強化済"
+    value: "强化"
     trend: "数据驱动"
     tone: text-success
   - label: 服务评价
@@ -26,6 +26,7 @@ metrics:
     trend: "客户至上"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 🚗
     title: 车辆资产管理
@@ -44,6 +45,7 @@ capabilities:
     description: 整合销售、服务与活动记录，为每一位车主构建精准的数字化画像。
     badge: 数据
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 业务大盘
     url: /auto-dealer-demo/Dashboard

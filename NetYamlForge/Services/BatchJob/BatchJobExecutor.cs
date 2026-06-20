@@ -106,7 +106,8 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
         { "ai_folder_processor", typeof(AiFolderProcessorExecutor) },
         { "directory_import", typeof(DirectoryImportExecutor) },
         { "photo_annotator", typeof(PhotoAnnotatorExecutor) },
-        { "photo_embedding_generator", typeof(EmbeddingGeneratorExecutor) }
+        { "photo_embedding_generator", typeof(EmbeddingGeneratorExecutor) },
+        { "embedding_generator", typeof(EmbeddingGeneratorExecutor) }
     };
 
     public RealBatchJobExecutor(

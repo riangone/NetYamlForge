@@ -90,6 +90,12 @@ public class DynamicEntityController : BaseProjectController
         _logger = logger;
     }
 
+    [HttpGet("List/{entity}")]
+    public IActionResult List(string entity)
+    {
+        return RedirectToAction(nameof(Index), new { entity });
+    }
+
     public async Task<IActionResult> Index(
         string entity = "customer",
         string? search = null,

@@ -152,6 +152,9 @@ ORDER BY c.ordinal_position
             }
         }
 
+        if (entity.SoftDelete && !physicalByName.ContainsKey("IsDeleted"))
+            operations.Add(new MigrationOperation(MigrationOpType.AddColumn, "IsDeleted", null, "INTEGER", false));
+
         return new MigrationPlan(entityName, entity.Table, operations);
     }
 

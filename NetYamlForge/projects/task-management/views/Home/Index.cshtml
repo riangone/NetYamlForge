@@ -1,0 +1,117 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: linear-gradient(180deg, #F0FDFA 0%, #CCFBF1 50%, #F0FDFA 100%);">
+    <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+        <section class="relative overflow-hidden rounded-xl bg-white shadow-lg shadow-teal-100/50 border-b-4 border-teal-500">
+            <div class="absolute inset-0 bg-gradient-to-r from-teal-50/50 via-transparent to-amber-50/50"></div>
+            <div class="relative p-8 md:p-12">
+                <div class="flex items-center gap-8">
+                    <div class="flex-1 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-teal-50 border border-teal-200 text-teal-700 text-sm font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                            @hero?.Eyebrow
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight tracking-tight">
+                            @hero?.Title
+                        </h1>
+                        <p class="text-base text-gray-500 leading-relaxed max-w-xl">
+                            @hero?.Description
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-teal-600 text-white font-bold shadow-lg shadow-teal-200 hover:bg-teal-700 hover:-translate-y-0.5 transition-all">
+                                @hero?.PrimaryActionLabel
+                            </a>
+                            <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-600 font-medium border-2 border-teal-200 hover:border-teal-400 hover:-translate-y-0.5 transition-all">
+                                @hero?.SecondaryActionLabel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex flex-col gap-2 min-w-[200px]">
+                        <div class="flex gap-2">
+                            <div class="w-12 h-16 rounded-lg bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-amber-600 font-bold text-xs">TODO</div>
+                            <div class="w-12 h-16 rounded-lg bg-teal-200 border-2 border-teal-300 flex items-center justify-center text-teal-600 font-bold text-xs">DOING</div>
+                            <div class="w-12 h-16 rounded-lg bg-emerald-200 border-2 border-emerald-300 flex items-center justify-center text-emerald-600 font-bold text-xs">DONE</div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span> 3 Todo
+                            <span class="w-2 h-2 rounded-full bg-teal-400 ml-2"></span> 2 Doing
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 ml-2"></span> 5 Done
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                @foreach (var m in metrics)
+                {
+                    <div class="bg-white rounded-xl border border-teal-100 p-5 shadow-sm hover:shadow-md hover:border-teal-200 transition-all">
+                        <div class="text-sm font-medium text-gray-400 mb-1">@m.Label</div>
+                        <div class="text-2xl font-extrabold text-teal-700">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs text-gray-400 mt-1">@m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-xl font-extrabold text-gray-800 mb-5 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-teal-500 rounded-full inline-block"></span>
+                    @config?.CapabilitiesSectionTitle
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="bg-white rounded-xl border border-teal-100 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all group">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl group-hover:scale-110 transition-transform">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-600 text-xs font-bold border border-teal-200">@cap.Badge</span>
+                                }
+                            </div>
+                            <h3 class="font-extrabold text-gray-800 text-base mb-1">@cap.Title</h3>
+                            <p class="text-sm text-gray-500 leading-relaxed">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="bg-white rounded-xl border border-teal-100 p-6 shadow-sm">
+                <h2 class="text-lg font-extrabold text-gray-800 mb-4">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #0D9488, #14B8A6); color: #fff; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+    </div>
+</div>

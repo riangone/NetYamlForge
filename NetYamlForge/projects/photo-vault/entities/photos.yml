@@ -230,8 +230,14 @@ entities:
         sortable: true
 
     actions:
+      annotate_now:
+        label: 立即标注
+        scope: row
+        class: btn-warning
+        confirm: "确定要立即触发 AI 标注吗？标注将在后台异步执行，请稍后刷新页面查看结果。"
+        handler: annotate_now
       enqueue_annotation:
-        label: 触发标注
+        label: 入队标注
         scope: row
         class: btn-success
         confirm: "确定要对此照片触发 AI 标注吗？"

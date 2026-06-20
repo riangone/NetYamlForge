@@ -125,11 +125,18 @@ public static class ProjectValidator
             return true;
         }
 
-        // /proj/DynamicEntity/List/table — 誤ったパターン (List action は存在しない)
-        if (Regex.IsMatch(url, $@"/{Regex.Escape(projName)}/DynamicEntity/List/", RegexOptions.IgnoreCase))
+        // /proj/DynamicEntity/List/table — 互換性パターンの検証 (List action は DynamicEntityController で Index へリダイレクトされます)
+        var listM = Regex.Match(url, $@"/{Regex.Escape(projName)}/DynamicEntity/List/(\w+)$", RegexOptions.IgnoreCase);
+        if (listM.Success)
         {
-            reason = "DynamicEntity/List/<table> は無効です。正しくは DynamicEntity/Index?entity=<table>";
-            return false;
+            var tbl = listM.Groups[1].Value;
+            if (!File.Exists(Path.Combine(entitiesDir, $"{tbl}.yml")) &&
+                !File.Exists(Path.Combine(entitiesDir, $"{tbl}.yaml")))
+            {
+                reason = $"entities/{tbl}.yml が存在しません";
+                return false;
+            }
+            return true;
         }
 
         // /proj/DynamicEntity/Index?entity=table

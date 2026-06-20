@@ -1,0 +1,187 @@
+title: ⚙️ AI 配置中心
+description: "选择标注与嵌入所使用的 AI 提供商，并调整接口地址和模型名称。"
+permissions:
+  view:
+    roles: [admin]
+
+sections:
+  # ─── 当前提供商状态 ───
+  - id: current_providers
+    title: 📊 当前 AI 提供商
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '标注 AI' AS metric_name,
+             COALESCE((SELECT value FROM project_settings WHERE setting_key = 'annotation_provider'), 'lmstudio') AS metric_value,
+             '🤖' AS metric_icon,
+             NULL AS metric_delta
+      UNION ALL
+      SELECT '嵌入 AI',
+             COALESCE((SELECT value FROM project_settings WHERE setting_key = 'embedding_provider'), 'lmstudio'),
+             '🔍', NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    editable: false
+    readOnly: true
+
+  # ─── 标注 AI 选择 ───
+  - id: annotation_provider_select
+    title: 🤖 选择标注 AI 提供商
+    description: "点击「选择」切换图片内容识别所使用的 AI 服务"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        'lmstudio'    AS provider_key,
+        '🧠 LM Studio'  AS 提供商,
+        '本地 OpenAI 兼容推理服务（推荐，速度快、完全离线）' AS 说明,
+        '运行 LM Studio + 加载视觉模型（如 gemma-4-e4b）' AS 前提条件,
+        CASE WHEN COALESCE((SELECT value FROM project_settings WHERE setting_key='annotation_provider'),'lmstudio') = 'lmstudio'
+             THEN '✅ 当前使用' ELSE '' END AS 状态
+      UNION ALL
+      SELECT
+        'ollama',
+        '🖥️ Ollama',
+        '本地命令行推理框架，支持多种开源模型',
+        '运行 ollama serve，执行 ollama pull llava:13b',
+        CASE WHEN (SELECT value FROM project_settings WHERE setting_key='annotation_provider') = 'ollama'
+             THEN '✅ 当前使用' ELSE '' END
+      UNION ALL
+      SELECT
+        'gemini',
+        '✨ Gemini API',
+        'Google 云端视觉 API，精度高',
+        '设置 GEMINI_API_KEY 环境变量，或在下方「标注 AI 配置」中填入密钥',
+        CASE WHEN (SELECT value FROM project_settings WHERE setting_key='annotation_provider') = 'gemini'
+             THEN '✅ 当前使用' ELSE '' END
+      UNION ALL
+      SELECT
+        'antigravity',
+        '⚡ Antigravity CLI',
+        '基于 Gemini CLI 的命令行工具',
+        '安装 gemini CLI 并完成 Google 账号登录认证',
+        CASE WHEN (SELECT value FROM project_settings WHERE setting_key='annotation_provider') = 'antigravity'
+             THEN '✅ 当前使用' ELSE '' END
+    columns: [provider_key, 提供商, 说明, 前提条件, 状态]
+    editable: false
+    readOnly: true
+    pageSize: 10
+    actions:
+      - label: 选择
+        url: /photo-vault/Page/Settings/switch-provider?type=annotation&provider={provider_key}
+        class: btn-primary btn-sm
+
+  # ─── 嵌入 AI 选择 ───
+  - id: embedding_provider_select
+    title: 🔍 选择嵌入 AI 提供商
+    description: "点击「选择」切换语义搜索向量生成所使用的 AI 服务（修改后需重启应用）"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        'lmstudio'   AS provider_key,
+        '🧠 LM Studio' AS 提供商,
+        '本地嵌入模型（nomic-embed-text 等），速度快、完全离线' AS 说明,
+        CASE WHEN COALESCE((SELECT value FROM project_settings WHERE setting_key='embedding_provider'),'lmstudio') = 'lmstudio'
+             THEN '✅ 当前使用' ELSE '' END AS 状态
+      UNION ALL
+      SELECT
+        'gemini',
+        '✨ Gemini API',
+        '使用 text-embedding-004，精度较高，需要 API 密钥与外网',
+        CASE WHEN (SELECT value FROM project_settings WHERE setting_key='embedding_provider') = 'gemini'
+             THEN '✅ 当前使用' ELSE '' END
+    columns: [provider_key, 提供商, 说明, 状态]
+    editable: false
+    readOnly: true
+    pageSize: 10
+    actions:
+      - label: 选择
+        url: /photo-vault/Page/Settings/switch-provider?type=embedding&provider={provider_key}
+        class: btn-primary btn-sm
+
+  # ─── 标注 AI 配置（高级） ───
+  - id: annotation_settings
+    title: 🔧 标注 AI 配置（高级）
+    description: "接口地址、模型名称、API 密钥等。点击「当前值」列单元格直接编辑。"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT id, label AS 配置项, value, default_value AS 默认值, description AS 说明
+      FROM project_settings
+      WHERE section_group = 'annotation'
+      ORDER BY id
+    columns:
+      配置项: {}
+      value:
+        label: 当前值
+      默认值: {}
+      说明: {}
+    targetTable: project_settings
+    targetPrimaryKey: id
+    editable: true
+    readOnly: false
+    updatableFields: [value]
+    pageSize: 10
+    emptyMessage: "⚠️ 暂无标注配置 — 请先触发一次照片标注（自动初始化），或点击实体管理页初始化。"
+
+  # ─── 嵌入 AI 配置（高级） ───
+  - id: embedding_settings
+    title: 🔧 嵌入 AI 配置（高级）
+    description: "嵌入服务接口地址与模型名称。修改后需重启应用。"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT id, label AS 配置项, value, default_value AS 默认值, description AS 说明
+      FROM project_settings
+      WHERE section_group = 'embedding'
+      ORDER BY id
+    columns:
+      配置项: {}
+      value:
+        label: 当前值
+      默认值: {}
+      说明: {}
+    targetTable: project_settings
+    targetPrimaryKey: id
+    editable: true
+    readOnly: false
+    updatableFields: [value]
+    pageSize: 10
+    emptyMessage: "⚠️ 暂无嵌入配置 — 请先触发一次照片标注（自动初始化），或点击实体管理页初始化。"
+
+  # ─── 生效说明 ───
+  - id: effect_guide
+    title: 📖 何时生效？
+    component: accordion
+    sourceType: none
+    readOnly: true
+    items:
+      - title: 切换标注提供商后何时生效？
+        content: |
+          **立即生效**：下次触发「单张标注」或「批量标注」时即使用新选择的提供商。无需重启应用。
+
+      - title: 切换嵌入提供商后何时生效？
+        content: |
+          **需要重启**：嵌入服务在应用启动时注册，切换 `embedding_provider` 后需要**重启应用**才能生效。
+          接口地址与模型名称的修改则即时生效，无需重启。
+
+      - title: Gemini API 密钥优先级
+        content: |
+          在「标注 AI 配置（高级）」中填入的 `gemini_api_key` **优先级高于**系统环境变量 `GEMINI_API_KEY`。
+          留空则从环境变量读取。
+
+      - title: 如何初始化默认配置？
+        content: |
+          **方式一（推荐）**：触发任意一张照片的 AI 标注，系统将自动以 `INSERT OR IGNORE` 写入所有默认配置项。
+
+          **方式二**：手动运行初始化 SQL：
+          ```bash
+          sqlite3 projects/photo-vault/database/photo-vault.db < projects/photo-vault/database/init_seed.sql
+          ```
+
+          **方式三**：通过实体管理页面操作：
+          [AI 配置实体管理](/photo-vault/Entity/project_settings)

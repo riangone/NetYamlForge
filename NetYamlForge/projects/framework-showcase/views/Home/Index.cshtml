@@ -1,0 +1,113 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: #0D1117;">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <section class="relative overflow-hidden rounded-lg border" style="background: linear-gradient(135deg, #161B22, #0D1117); border-color: #30363D;">
+            <div class="absolute inset-0 opacity-[0.03]" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px), repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.03) 20px, rgba(255,255,255,0.03) 21px);"></div>
+            <div class="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl" style="background: rgba(124, 58, 237, 0.08);"></div>
+            <div class="relative p-8 md:p-12">
+                <div class="flex items-start gap-8">
+                    <div class="flex-1 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded border font-mono text-xs font-bold" style="background: rgba(124, 58, 237, 0.1); border-color: rgba(124, 58, 237, 0.3); color: #A78BFA;">
+                            <span class="w-2 h-2 rounded-full" style="background: #7C3AED;"></span>
+                            $ <span style="color: #34D399;">~/</span> @hero?.Eyebrow
+                        </div>
+                        <div class="font-mono text-sm" style="color: #6B7280;">
+                            <span style="color: #7C3AED;">const</span> <span style="color: #F59E0B;">platform</span> = <span style="color: #34D399;">&quot;@hero?.Title&quot;</span>;
+                        </div>
+                        <p class="text-base leading-relaxed max-w-xl" style="color: #8B949E; font-family: 'JetBrains Mono', 'Cascadia Code', monospace;">
+                            // @hero?.Description
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-mono text-sm font-bold transition-all hover:-translate-y-0.5" style="background: #7C3AED; color: #fff;">
+                                $ <span style="color: #34D399;">run</span> @hero?.PrimaryActionLabel.ToLower().Replace(' ', '_')
+                            </a>
+                            <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border font-mono text-sm transition-all hover:-translate-y-0.5" style="border-color: #30363D; color: #8B949E;">
+                                $ <span style="color: #F59E0B;">cd</span> @hero?.SecondaryActionLabel.ToLower().Replace(' ', '_')
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex flex-col items-center gap-2 p-6 rounded-lg border font-mono text-xs min-w-[180px]" style="background: rgba(255,255,255,0.02); border-color: #30363D;">
+                        <div class="flex items-center gap-1.5 self-start mb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                        </div>
+                        <span style="color: #7C3AED;">framework@showcase</span>
+                        <span style="color: #34D399;">~ $</span> <span style="color: #8B949E;">./start</span>
+                        <span class="mt-2 text-green-400">[✓] Ready</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                @foreach (var m in metrics)
+                {
+                    <div class="rounded-lg border p-4 font-mono" style="border-color: #30363D; background: rgba(255,255,255,0.02);">
+                        <div class="text-xs" style="color: #6B7280;">// @m.Label</div>
+                        <div class="text-xl font-bold mt-1" style="color: #A78BFA;">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs mt-1" style="color: #4B5563;">&gt; @m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="font-mono text-sm font-bold mb-4" style="color: #6B7280;">// @config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="group rounded-lg border p-5 transition-all hover:-translate-y-0.5" style="border-color: #30363D; background: rgba(255,255,255,0.02);">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2 py-0.5 rounded text-xs font-mono font-bold" style="background: rgba(124, 58, 237, 0.1); color: #A78BFA;">&lt;@cap.Badge /&gt;</span>
+                                }
+                            </div>
+                            <h3 class="font-bold text-base mb-1.5 font-mono" style="color: #E4E4E7;">@cap.Title</h3>
+                            <p class="text-xs leading-relaxed font-mono" style="color: #6B7280;">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="rounded-lg border p-6 font-mono" style="border-color: #30363D; background: rgba(255,255,255,0.02);">
+                <h2 class="text-xs font-bold mb-4" style="color: #6B7280;">$ @config?.QuickActionsSectionTitle.ToLower().Replace(' ', '_')</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all hover:-translate-y-0.5" style="background: #7C3AED; color: #fff;">
+                            $ @action.Label.ToLower().Replace(' ', '_')
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <div class="text-center font-mono text-xs py-4" style="color: #30363D;">
+            <span style="color: #34D399;">[✓]</span> Framework Showcase <span style="color: #6B7280;">v1.0.0</span> <span style="color: #34D399;">[✓]</span>
+        </div>
+
+    </div>
+</div>

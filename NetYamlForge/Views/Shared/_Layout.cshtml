@@ -13,7 +13,7 @@
     var afTokens = Antiforgery.GetAndStoreTokens(Context);
 }
 <!DOCTYPE html>
-<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="corporate">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="@(ProjectScope?.Current?.Layout?.Theme ?? "corporate")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -956,6 +956,13 @@
 
         document.body.addEventListener('htmx:sendError', function (evt) {
             showToast('网络连接失败，请检查您的网络。', 'error');
+        });
+
+        // HX-Trigger: {"show-toast":{"message":"...","type":"success"}} 的全局处理
+        document.body.addEventListener('show-toast', function (evt) {
+            var msg  = evt.detail && evt.detail.message ? evt.detail.message : '';
+            var type = evt.detail && evt.detail.type    ? evt.detail.type    : 'info';
+            if (msg) showToast(msg, type);
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

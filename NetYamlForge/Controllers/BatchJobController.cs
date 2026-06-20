@@ -22,6 +22,8 @@ public class BatchJobListItemViewModel
     public BatchJobHistory? LastExecution { get; set; }
     public bool IsRunning { get; set; }
     public string? Description { get; set; }
+    /// <summary>Set after manual trigger; polling continues until LastExecution is newer than this.</summary>
+    public DateTime? TriggerTime { get; set; }
 }
 
 public class BatchJobIndexViewModel
@@ -175,6 +177,7 @@ public class BatchJobController : BaseProjectController
             scheduledJobs.TryGetValue(jobId, out var scheduled);
             var runningIds = _scheduler.GetRunningJobIds();
 
+            var triggerTime = DateTime.UtcNow;
             var item = new BatchJobListItemViewModel
             {
                 JobId = jobId,
@@ -185,7 +188,8 @@ public class BatchJobController : BaseProjectController
                 Enabled = job?.Enabled ?? false,
                 NextRunTime = scheduled?.NextRunTime,
                 LastExecution = lastHistory,
-                IsRunning = runningIds.Contains(jobId),
+                IsRunning = true, // Force polling; actual execution is async via outbox
+                TriggerTime = triggerTime,
                 Description = job?.Description
             };
 
@@ -249,7 +253,7 @@ public class BatchJobController : BaseProjectController
     // ─── JobStatus (GET, HTMX polling) ───────────────────────────────────────
 
     [HttpGet]
-    public async Task<IActionResult> JobStatus(string jobId)
+    public async Task<IActionResult> JobStatus(string jobId, DateTime? since = null)
     {
         if (!_projectScope.IsSet)
             return NotFound();
@@ -265,6 +269,12 @@ public class BatchJobController : BaseProjectController
         scheduledJobs.TryGetValue(jobId, out var scheduled);
         var runningIds = _scheduler.GetRunningJobIds();
 
+        // If triggered manually (since is set), keep polling until LastExecution has a result
+        // newer than the trigger time or the 10-minute safety timeout expires.
+        bool waitingForResult = since.HasValue
+            && since.Value > DateTime.UtcNow.AddMinutes(-10)
+            && (lastHistory == null || lastHistory.ExecutedAt < since.Value);
+
         var item = new BatchJobListItemViewModel
         {
             JobId = jobId,
@@ -275,7 +285,8 @@ public class BatchJobController : BaseProjectController
             Enabled = job?.Enabled ?? false,
             NextRunTime = scheduled?.NextRunTime,
             LastExecution = lastHistory,
-            IsRunning = runningIds.Contains(jobId),
+            IsRunning = runningIds.Contains(jobId) || waitingForResult,
+            TriggerTime = waitingForResult ? since : null,
             Description = job?.Description
         };
 

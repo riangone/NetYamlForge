@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Inventory Workspace
+  eyebrow: 📦 Inventory — 智能库存管理
   title: 智能库存与供应链管理平台
   description: 实时跟踪库存变动，优化仓储效率，集成供应商管理与产品生命周期监控。
   primaryActionLabel: 进入看板
@@ -26,6 +26,7 @@ metrics:
     trend: "效率领先"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 📦
     title: 多仓储管理
@@ -44,6 +45,7 @@ capabilities:
     description: 集成供应商准入、考核及订单执行，优化上游供应链效率。
     badge: 扩展
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 库存总览
     url: /inventory/Dashboard

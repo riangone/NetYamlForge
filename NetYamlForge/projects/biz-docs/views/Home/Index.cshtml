@@ -1,0 +1,102 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: #F7F6F3;">
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-8" style="font-family: 'Georgia', 'Times New Roman', serif;">
+
+        <section class="relative overflow-hidden rounded-sm bg-white shadow-md border-l-4" style="border-left-color: #4A5568;">
+            <div class="p-10 md:p-14">
+                <div class="max-w-3xl space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-600 text-xs uppercase tracking-widest font-semibold">
+                        @hero?.Eyebrow
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 leading-snug tracking-tight">
+                        @hero?.Title
+                    </h1>
+                    <p class="text-base text-gray-600 leading-relaxed">
+                        @hero?.Description
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white text-sm font-medium tracking-wide hover:bg-gray-800 transition-colors" style="font-family: 'Inter', sans-serif;">
+                            @hero?.PrimaryActionLabel
+                        </a>
+                        <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors" style="font-family: 'Inter', sans-serif;">
+                            @hero?.SecondaryActionLabel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+                @foreach (var m in metrics)
+                {
+                    <div class="bg-white border border-gray-200 p-6 shadow-sm">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-2" style="font-family: 'Inter', sans-serif;">@m.Label</div>
+                        <div class="text-2xl font-bold text-gray-800" style="font-family: 'Inter', sans-serif;">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs text-gray-400 mt-1.5 italic">@m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-xl font-bold text-gray-800 mb-5 border-b border-gray-200 pb-3" style="font-family: 'Inter', sans-serif;">@config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="bg-white border border-gray-200 p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-3xl">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-medium" style="font-family: 'Inter', sans-serif;">@cap.Badge</span>
+                                }
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-base mb-1.5">@cap.Title</h3>
+                            <p class="text-sm text-gray-500 leading-relaxed">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="bg-white border border-gray-200 p-6 shadow-sm">
+                <h2 class="text-sm text-gray-400 uppercase tracking-widest font-semibold mb-4" style="font-family: 'Inter', sans-serif;">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors" style="font-family: 'Inter', sans-serif;">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <div class="text-center text-xs text-gray-400 py-4 border-t border-gray-200" style="font-family: 'Inter', sans-serif;">
+            BizDocs &mdash; Enterprise Document Management System
+        </div>
+
+    </div>
+</div>

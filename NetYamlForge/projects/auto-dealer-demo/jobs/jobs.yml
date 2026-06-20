@@ -66,11 +66,11 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # AI リード再スコアリング（Gemini CLI 実行）
+  # AI リード再スコアリング（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_lead_scorer:
     displayName: 🤖 AI リード再スコアリング
-    description: "7 日以上未更新のリードを Gemini AI でスコアリングし、ai_decisions テーブルに書き込みます"
+    description: "7 日以上未更新のリードを Antigravity CLI でスコアリングし、ai_decisions テーブルに書き込みます"
     enabled: true
 
     schedule:
@@ -90,11 +90,11 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # AI 育成タスク自動生成（Gemini CLI 実行）
+  # AI 育成タスク自動生成（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_nurturing_generator:
     displayName: 🌱 AI 育成タスク自動生成
-    description: "スコア 30-79 のリードに対して Gemini AI が育成タスクを生成・登録します"
+    description: "スコア 30-79 のリードに対して Antigravity CLI が育成タスクを生成・登録します"
     enabled: true
 
     schedule:
@@ -114,11 +114,11 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # AI 見積自動生成（Gemini CLI 実行）
+  # AI 見積自動生成（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_quote_generator:
     displayName: 💰 AI 見積自動生成
-    description: "スコア 80 以上のリードに対して Gemini AI が最適見積を生成し、ai_quotes に登録します"
+    description: "スコア 80 以上のリードに対して Antigravity CLI が最適見積を生成し、ai_quotes に登録します"
     enabled: true
 
     schedule:
@@ -138,7 +138,7 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # Phase 3: AI 育成メール自動送信（Gemini CLI 実行）
+  # Phase 3: AI 育成メール自動送信（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_nurturing_email_sender:
     displayName: 📧 AI 育成メール自動送信
@@ -162,7 +162,7 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # Phase 3: AI 見積メール自動送信（Gemini CLI 実行）
+  # Phase 3: AI 見積メール自動送信（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_quote_email_sender:
     displayName: 💌 AI 見積メール自動送信
@@ -186,7 +186,7 @@ jobs:
       logError: true
 
   # ─────────────────────────────────────────────────────────────
-  # Phase 3: 無返信フォローアップ自動生成（Gemini CLI 実行）
+  # Phase 3: 無返信フォローアップ自動生成（Antigravity CLI 実行）
   # ─────────────────────────────────────────────────────────────
   ai_response_check:
     displayName: 🔍 AI 無返信フォローアップ

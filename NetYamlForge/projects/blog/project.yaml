@@ -27,6 +27,7 @@ features:
   pages: true
 
 layout:
+  theme: light
   dashboardTheme: workspace
   header:
     title: "Blog"

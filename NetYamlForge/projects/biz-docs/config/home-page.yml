@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Biz Docs Workspace
+  eyebrow: 📋 Biz Docs — 企业电子单据中心
   title: 企业级电子单据与合规文档中心
   description: 专注于日式及通用商业文档的自动化生成与管理，涵盖报价、发票、合同及配送单，确保业务合规高效。
   primaryActionLabel: 文档中心
@@ -26,6 +26,7 @@ metrics:
     trend: "企业级标准"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 📋
     title: 标准化模板
@@ -44,6 +45,7 @@ capabilities:
     description: 集成强大的 PDF 生成引擎，支持批量导出、套打及电子签名集成。
     badge: 输出
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 控制台
     url: /biz-docs/Dashboard

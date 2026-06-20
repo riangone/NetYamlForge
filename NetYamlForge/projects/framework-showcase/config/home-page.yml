@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Framework Showcase
+  eyebrow: 🧩 Framework Showcase — 框架能力中心
   title: NetYamlForge 核心框架功能演示
   description: 深度探索平台的核心扩展能力，涵盖动态布局、业务逻辑钩子、批量作业及复杂数据查询演示。
   primaryActionLabel: 功能地图
@@ -26,6 +26,7 @@ metrics:
     trend: "高性能"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 🧩
     title: 动态 UI 组件库
@@ -44,6 +45,7 @@ capabilities:
     description: 展示如何配置异步任务与批量作业，处理高耗时或大规模数据的后台任务。
     badge: 系统
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 示例面板
     url: /framework-showcase/Dashboard

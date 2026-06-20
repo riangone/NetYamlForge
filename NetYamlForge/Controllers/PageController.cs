@@ -61,6 +61,7 @@ public class PageController : BaseProjectController
     private readonly IDbConnection _db;
     private readonly ISqlDialect _dialect;
     private readonly ILogger<PageController> _logger;
+    private readonly NetYamlForge.Services.BatchJob.IBatchJobScheduler _scheduler;
 
     public PageController(
         ProjectScope projectScope,
@@ -74,7 +75,8 @@ public class PageController : BaseProjectController
         IWebHostEnvironment env,
         IDbConnection db,
         ISqlDialect dialect,
-        ILogger<PageController> logger)
+        ILogger<PageController> logger,
+        NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler)
     {
         _projectScope = projectScope;
         _audit = audit;
@@ -88,6 +90,7 @@ public class PageController : BaseProjectController
         _db = db;
         _dialect = dialect;
         _logger = logger;
+        _scheduler = scheduler;
     }
 
     // GET /{project}/Page/{pageName}
@@ -522,6 +525,22 @@ public class PageController : BaseProjectController
                     ["exif.gps_lon"] = exifData.gps_lon?.ToString(),
                 };
 
+                if (section.ExtraFields != null)
+                {
+                    foreach (var ef in section.ExtraFields)
+                    {
+                        var formVal = Request.Form.TryGetValue(ef.Id, out var val) ? val.ToString() : null;
+                        templateVars[ef.Id] = !string.IsNullOrEmpty(formVal) ? formVal : (ef.Default ?? "");
+                    }
+                }
+                foreach (var key in Request.Form.Keys)
+                {
+                    if (!templateVars.ContainsKey(key))
+                    {
+                        templateVars[key] = Request.Form[key].ToString();
+                    }
+                }
+
                 long? newId = null;
 
                 var oc = section.OnUploadComplete;
@@ -757,6 +776,153 @@ public class PageController : BaseProjectController
     /// HTMX リクエストならセクションを部分更新して返し、通常リクエストならページ全体にリダイレクトする。
     /// InsertRow / UpdateAllFields / DeleteRow で共通して使用する。
     /// </summary>
+    // GET /{project}/Page/{pageName}/switch-provider?type=annotation&provider=lmstudio
+    [Authorize]
+    [HttpGet("{pageName}/switch-provider")]
+    public async Task<IActionResult> SwitchProvider(string project, string pageName, string type, string provider)
+    {
+        if (!UserIsAdmin())
+            return Forbid();
+
+        var allowedAnnotation = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "lmstudio", "ollama", "gemini", "antigravity" };
+        var allowedEmbedding = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { "lmstudio", "gemini" };
+
+        var typeNorm = (type ?? "").ToLowerInvariant();
+        var providerNorm = (provider ?? "").ToLowerInvariant();
+
+        string? settingKey = typeNorm switch
+        {
+            "annotation" when allowedAnnotation.Contains(providerNorm) => "annotation_provider",
+            "embedding"  when allowedEmbedding.Contains(providerNorm)  => "embedding_provider",
+            _ => null
+        };
+
+        if (settingKey == null)
+            return BadRequest("无效的提供商类型或名称");
+
+        var sectionGroup = typeNorm == "annotation" ? "annotation" : "embedding";
+
+        // Try UPDATE first; if no row exists yet, INSERT.
+        // Avoids relying on ON CONFLICT(setting_key) which requires a UNIQUE index
+        // that the entity framework does not auto-generate.
+        var updated = await _db.ExecuteAsync("""
+            UPDATE project_settings
+            SET value = @V, updated_at = datetime('now')
+            WHERE setting_key = @K
+            """, new { K = settingKey, V = providerNorm });
+
+        if (updated == 0)
+        {
+            await _db.ExecuteAsync("""
+                INSERT OR IGNORE INTO project_settings
+                    (section_group, setting_key, label, value, default_value, description, updated_at)
+                VALUES (@SG, @K, @K, @V, @V, '', datetime('now'))
+                """, new { SG = sectionGroup, K = settingKey, V = providerNorm });
+        }
+
+        await TryWritePageAuditAsync(
+            action: "switch_provider",
+            entity: "project_settings",
+            detail: $"Page={pageName},Type={typeNorm},Provider={providerNorm}");
+
+        return Redirect($"/{project}/Page/{pageName}");
+    }
+
+    // GET /{project}/Page/{pageName}/annotate-photo?photo_id=xxx
+    // [Authorize]
+    [HttpGet("{pageName}/annotate-photo")]
+    public async Task<IActionResult> AnnotatePhoto(string project, string pageName, [FromQuery] string photo_id)
+    {
+        if (string.IsNullOrWhiteSpace(photo_id))
+            return BadRequest("照片 ID 未指定");
+
+        var photo = await _db.QueryFirstOrDefaultAsync(
+            "SELECT photo_id, file_path FROM photos WHERE photo_id = @Id AND deleted_at IS NULL",
+            new { Id = photo_id });
+        if (photo == null)
+            return NotFound("照片不存在");
+
+        await NetYamlForge.Projects.PhotoVault.Hooks.PhotoVaultSettingsHelper.EnsureSeedAsync(_db, null);
+        var provider = await NetYamlForge.Projects.PhotoVault.Hooks.PhotoVaultSettingsHelper.ReadProviderAsync(_db, null, "annotation_provider", "antigravity");
+
+        var now = DateTime.UtcNow;
+
+        var exists = await _db.QueryFirstOrDefaultAsync<int>(
+            "SELECT COUNT(1) FROM processing_queue WHERE photo_id = @Id AND status IN ('queued', 'processing')",
+            new { Id = photo_id });
+        if (exists == 0)
+        {
+            await _db.ExecuteAsync(@"
+                INSERT INTO processing_queue (photo_id, file_path, status, provider, priority, retry_count, queued_at)
+                VALUES (@PhotoId, @FilePath, 'queued', @Provider, 10, 0, @Now)",
+                new { PhotoId = photo_id, FilePath = (string)photo.file_path, Provider = provider, Now = now });
+        }
+
+        await _db.ExecuteAsync(
+            "UPDATE photos SET annotation_status = 'pending', updated_at = @Now WHERE photo_id = @Id",
+            new { Now = now, Id = photo_id });
+
+        // 立即触发 Worker
+        _ = _scheduler.TriggerJobNowAsync(project, "antigravity_cli_worker");
+
+        await TryWritePageAuditAsync(
+            action: "annotate_photo",
+            entity: "photos",
+            detail: $"Page={pageName},PhotoId={photo_id}");
+
+        if (IsHtmxRequest())
+        {
+            Response.Headers["HX-Trigger"] = ToAsciiJson("{\"show-toast\":{\"message\":\"已入队后台标注，请稍后刷新页面查看结果\",\"type\":\"success\"}}");
+            return Ok();
+        }
+
+        return Redirect($"/{project}/Page/{pageName}");
+    }
+
+    // GET /{project}/Page/{pageName}/embed-photo?photo_id=xxx
+    // [Authorize]
+    [HttpGet("{pageName}/embed-photo")]
+    public async Task<IActionResult> EmbedPhoto(string project, string pageName, [FromQuery] string photo_id)
+    {
+        if (string.IsNullOrWhiteSpace(photo_id))
+            return BadRequest("照片 ID 未指定");
+
+        var photo = await _db.QueryFirstOrDefaultAsync(
+            "SELECT photo_id, annotation_status FROM photos WHERE photo_id = @Id AND deleted_at IS NULL",
+            new { Id = photo_id });
+        if (photo == null)
+            return NotFound("照片不存在");
+
+        string annotationStatus = photo.annotation_status?.ToString() ?? "";
+        if (annotationStatus != "done")
+        {
+            if (IsHtmxRequest())
+            {
+                Response.Headers["HX-Trigger"] = ToAsciiJson("{\"show-toast\":{\"message\":\"请先等待标注完成再生成嵌入\",\"type\":\"warning\"}}");
+                return BadRequest("请先等待标注完成");
+            }
+            return BadRequest("请先等待标注完成");
+        }
+
+        // 立即触发嵌入 Generator Job
+        _ = _scheduler.TriggerJobNowAsync(project, "embedding_generator");
+
+        await TryWritePageAuditAsync(
+            action: "embed_photo",
+            entity: "photos",
+            detail: $"Page={pageName},PhotoId={photo_id}");
+
+        if (IsHtmxRequest())
+        {
+            Response.Headers["HX-Trigger"] = ToAsciiJson("{\"show-toast\":{\"message\":\"已开始生成嵌入向量\",\"type\":\"success\"}}");
+            return Ok();
+        }
+
+        return Redirect($"/{project}/Page/{pageName}");
+    }
+
     private async Task<IActionResult> ReturnSectionOrRedirectAsync(
         ProjectInfo proj, SectionDefinition section, string pageName, string sectionId)
     {
@@ -808,6 +974,24 @@ public class PageController : BaseProjectController
         if (userContext.IsAdmin)
             return true;
         return userContext.HasAnyRole(section.VisibleToRoles);
+    }
+
+    private static string ToAsciiJson(string json)
+    {
+        if (string.IsNullOrEmpty(json)) return json;
+        var sb = new System.Text.StringBuilder();
+        foreach (var c in json)
+        {
+            if (c > 127)
+            {
+                sb.AppendFormat("\\u{0:x4}", (int)c);
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
     }
 
 }

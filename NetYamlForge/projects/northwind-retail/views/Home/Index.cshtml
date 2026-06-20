@@ -1,0 +1,107 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <section class="relative overflow-hidden rounded-xl" style="background: linear-gradient(135deg, #1E3A5F 0%, #2D5F8A 100%);">
+            <div class="absolute inset-0 opacity-5" style="background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ffffff%22 opacity=%220.1%22 x=%2220%22 y=%2220%22 width=%2220%22 height=%2220%22 rx=%222%22/></svg>'); background-size: 40px 40px;"></div>
+            <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+            <div class="relative p-8 md:p-12">
+                <div class="flex items-start gap-8">
+                    <div class="flex-1 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-500/20 border border-yellow-500/30 text-yellow-300 text-sm font-medium">
+                            <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                            @hero?.Eyebrow
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight tracking-tight">
+                            @hero?.Title
+                        </h1>
+                        <p class="text-lg text-gray-300 leading-relaxed max-w-2xl">
+                            @hero?.Description
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold shadow-lg transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #D4A843, #E8C46A); color: #0F172A;">
+                                @hero?.PrimaryActionLabel
+                            </a>
+                            <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-gray-500/40 text-gray-200 font-medium hover:bg-white/10 transition-all">
+                                @hero?.SecondaryActionLabel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex flex-col items-center gap-2 p-6 rounded-xl bg-white/5 border border-white/10 min-w-[160px]">
+                        <span class="text-6xl">🏪</span>
+                        <span class="text-yellow-400 text-sm font-medium">Northwind Trading</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                @foreach (var m in metrics)
+                {
+                    <div class="rounded-lg border p-5 backdrop-blur-sm transition-all hover:-translate-y-0.5" style="background: rgba(30, 58, 95, 0.4); border-color: rgba(255, 255, 255, 0.08);">
+                        <div class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">@m.Label</div>
+                        <div class="text-2xl font-bold text-yellow-300">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs text-gray-400 mt-1">@m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-xl font-bold text-white mb-4">@config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="rounded-lg border p-5 backdrop-blur-sm hover:shadow-xl transition-all hover:-translate-y-0.5 group" style="background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.06);">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl group-hover:scale-110 transition-transform">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border" style="background: rgba(212, 168, 67, 0.15); color: #D4A843; border-color: rgba(212, 168, 67, 0.3);">@cap.Badge</span>
+                                }
+                            </div>
+                            <h3 class="font-bold text-white text-base mb-1">@cap.Title</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="rounded-lg border p-6 backdrop-blur-sm" style="background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.06);">
+                <h2 class="text-lg font-bold text-white mb-4">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #D4A843, #E8C46A); color: #0F172A;">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+    </div>
+</div>

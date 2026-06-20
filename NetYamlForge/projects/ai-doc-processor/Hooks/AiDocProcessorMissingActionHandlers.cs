@@ -1,5 +1,5 @@
 // 自动生成实现: 用于 ai-doc-processor 的 ZIP 批量上传与 AI 数据提取处理器。
-// 本文件支持解压 ZIP，后台异步调用 Gemini CLI，并在 SQLite 中根据文档类型动态建表与添加缺失字段。
+// 本文件支持解压 ZIP，后台异步调用 Antigravity CLI，并在 SQLite 中根据文档类型动态建表与添加缺失字段。
 
 using System;
 using System.IO;

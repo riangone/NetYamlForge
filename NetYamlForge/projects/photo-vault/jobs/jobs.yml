@@ -7,7 +7,7 @@ jobs:
     enabled: true
 
     schedule:
-      cron: "* * * * *"       # 每分钟检查一次
+      cron: "0 * * * *"       # 每小时检查一次
       timezone: "Asia/Shanghai"
 
     type: directory_import
@@ -34,7 +34,7 @@ jobs:
   lmstudio_annotation_worker:
     displayName: LM Studio 视觉标注
     description: "从 processing_queue 取出 provider=lmstudio 的待处理照片，调用 LM Studio 本地模型 (google/gemma-4-e4b) 生成标注"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "*/3 * * * *"
@@ -87,14 +87,14 @@ jobs:
       retryInterval: 120
       logError: true
 
-  # ─── Antigravity (Anthropic Claude) 标注工作器 ───
+  # ─── Antigravity CLI 标注工作器 ───
   antigravity_cli_worker:
-    displayName: Antigravity 视觉标注（Claude API）
-    description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 Anthropic Claude API 进行视觉标注"
-    enabled: false
+    displayName: Antigravity 视觉标注
+    description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 Antigravity CLI 进行视觉标注"
+    enabled: true
 
     schedule:
-      cron: "0 * * * *"      # 每 60 分钟
+      cron: "*/3 * * * *"    # 每 3 分钟
       timezone: "Asia/Shanghai"
 
     type: photo_annotator

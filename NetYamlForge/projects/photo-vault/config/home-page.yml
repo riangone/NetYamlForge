@@ -1,0 +1,90 @@
+hero:
+  eyebrow: 📷 Photo Vault — AI 智能相册
+  title: 本地 AI 驱动的照片语义标注与管理平台
+  description: 基于本地 LLM 的端到端照片管理解决方案。自动提取 EXIF 元数据、AI 场景分类、语义标签生成与向量检索，让海量照片档案馆藏井然有序、触手可及。
+  primaryActionLabel: 进入画廊
+  primaryActionUrl: /photo-vault/Page/Gallery
+  secondaryActionLabel: 导入照片
+  secondaryActionUrl: /photo-vault/Page/PhotoImport
+  highlights:
+    - 🤖 本地 LLM 语义标注（LM Studio / Ollama / Gemini）
+    - 🔍 自然语言向量检索
+    - 📄 EXIF 元数据自动提取
+    - 🏷️ 多维标签体系
+    - 🔒 离线优先、隐私安全
+    - ⚡ 批量导入与处理队列
+
+metrics:
+  - label: 照片总量
+    value: "已管理"
+    trend: 📈 持续归档中
+    tone: text-primary
+  - label: AI 标注率
+    value: "智能标注"
+    trend: ⚡ 无需人工干预
+    tone: text-success
+  - label: 相册/标签体系
+    value: "层级化"
+    trend: 🗂️ 灵活分组与分类
+    tone: text-secondary
+  - label: 语义搜索精度
+    value: "向量检索"
+    trend: 🎯 自然语言即搜即得
+    tone: text-accent
+
+capabilitiesSectionTitle: 核心能力
+capabilities:
+  - icon: 🤖
+    title: AI 语义标注引擎
+    description: 接入本地 LM Studio / Ollama / Gemini / Antigravity 等多种推理后端，自动分析照片内容、识别场景、人物、物体，生成高质量语义标签与描述。
+    badge: 本地推理
+  - icon: 🔍
+    title: 向量语义搜索
+    description: 基于 Embedding 模型的自然语言照片检索。无需记忆文件名或路径，输入「海边日落」「家人聚餐」等描述即可精准匹配。
+    badge: Embedding
+  - icon: 📄
+    title: EXIF 元数据萃取
+    description: 自动读取拍摄时间、GPS 地理位置、相机型号、镜头参数、光圈快门等 EXIF 信息，构建立体化照片档案与地理索引。
+    badge: 元数据
+  - icon: 🗂️
+    title: 相册与多维标签
+    description: 灵活的相册分组与标签分类体系，支持自定义标签、自动标签、置信度评分。画廊式浏览与批量操作让整理轻松高效。
+    badge: 组织管理
+
+quickActionsSectionTitle: 快捷入口
+quickActions:
+  - label: 照片画廊
+    url: /photo-vault/Page/Gallery
+    icon: 🖼️
+    style: btn-primary
+  - label: 相册管理
+    url: /photo-vault/Page/Albums
+    icon: 📂
+    style: btn-outline
+  - label: 标签浏览
+    url: /photo-vault/Page/TagBrowser
+    icon: 🏷️
+    style: btn-outline
+  - label: 语义搜索
+    url: /photo-vault/Page/AiSearch
+    icon: 🔍
+    style: btn-outline
+  - label: 处理队列
+    url: /photo-vault/Page/ProcessingQueue
+    icon: ⚙️
+    style: btn-ghost
+    adminOnly: true
+  - label: 照片导入
+    url: /photo-vault/Page/PhotoImport
+    icon: 📥
+    style: btn-ghost
+  - label: AI 提供商统计
+    url: /photo-vault/Page/AiProvider
+    icon: 🔌
+    style: btn-ghost
+    adminOnly: true
+  - label: AI 配置中心
+    url: /photo-vault/Page/Settings
+    icon: ⚙️
+    style: btn-ghost
+    adminOnly: true

@@ -327,10 +327,11 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
     }
 
     /// <summary>
-    /// 指定ジョブを即時実行する（手動トリガー）
+    /// 指定ジョブを即時実行する（手動トリガー）。無効なジョブも YAML から読み込んで実行可能。
     /// </summary>
     public Task TriggerJobNowAsync(string projectName, string jobId, CancellationToken cancellationToken = default)
     {
+        // 有効（スケジュール済み）のジョブはそのまま実行
         if (_scheduledJobs.TryGetValue(jobId, out var scheduledJob) &&
             string.Equals(scheduledJob.ProjectName, projectName, StringComparison.OrdinalIgnoreCase))
         {
@@ -338,8 +339,42 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
             return Task.CompletedTask;
         }
 
-        _logger.LogWarning("手動トリガー失敗：ジョブが見つかりません {Project}/{JobId}", projectName, jobId);
+        // 無効なジョブも手動トリガーでは実行できるように YAML から読み込む
+        _ = TriggerDisabledJobAsync(projectName, jobId, cancellationToken);
         return Task.CompletedTask;
+    }
+
+    private async Task TriggerDisabledJobAsync(string projectName, string jobId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
+            var loader = scope.ServiceProvider.GetRequiredService<IBatchJobLoader>();
+
+            var project = projectManager.GetAll()
+                .FirstOrDefault(p => string.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+            if (project == null)
+            {
+                _logger.LogWarning("手動トリガー失敗：プロジェクトが見つかりません {Project}", projectName);
+                return;
+            }
+
+            var allJobs = await loader.LoadJobsAsync(project.ProjectDir);
+            if (!allJobs.TryGetValue(jobId, out var jobDef))
+            {
+                _logger.LogWarning("手動トリガー失敗：ジョブ定義が見つかりません {Project}/{JobId}", projectName, jobId);
+                return;
+            }
+
+            _logger.LogInformation("無効なジョブを手動トリガーで実行します：{Project}/{JobId}", projectName, jobId);
+            var tempJob = new ScheduledJob { Job = jobDef, ProjectName = projectName, NextRunTime = null };
+            await RunJobAsync(tempJob, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "無効ジョブの手動トリガー中にエラーが発生しました {Project}/{JobId}", projectName, jobId);
+        }
     }
 
     /// <summary>

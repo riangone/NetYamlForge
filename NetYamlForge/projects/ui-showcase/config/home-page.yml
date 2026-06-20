@@ -1,9 +1,9 @@
 hero:
-  eyebrow: UI Showcase
+  eyebrow: 🎨 UI Showcase — 设计系统与组件库
   title: 企业级 UI 设计规范与组件库
   description: 基于 DaisyUI 和 Tailwind CSS 的视觉系统深度展示，为子项目开发提供标准化的设计指南与交互参考。
-  primaryActionLabel: 视觉总览
-  primaryActionUrl: /ui-showcase/Dashboard
+  primaryActionLabel: KPI 总览
+  primaryActionUrl: /ui-showcase/Page/KpiOverview
   secondaryActionLabel: 组件列表
   secondaryActionUrl: /ui-showcase/DynamicEntity/List/component_demo
   highlights:
@@ -26,6 +26,7 @@ metrics:
     trend: "统一体验"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心能力
 capabilities:
   - icon: 🎨
     title: 样式指南
@@ -39,13 +40,34 @@ capabilities:
     title: 响应式适配
     description: 演示核心组件在不同屏幕尺寸下的自适应表现，确保移动端与桌面端的无缝切换。
     badge: 兼容
+  - icon: 🔥
+    title: 可视化图表
+    description: 集成热力图、雷达图、饼图、趋势线等多种数据可视化组件，满足分析场景需求。
+    badge: 图表
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
-  - label: 样式大盘
-    url: /ui-showcase/Dashboard
+  - label: KPI 总览
+    url: /ui-showcase/Page/KpiOverview
     style: btn-primary
-    icon: 🌈
-  - label: 组件演示
-    url: /ui-showcase/DynamicEntity/List/component_demo
+    icon: 📊
+  - label: 销售趋势
+    url: /ui-showcase/Page/SalesTrend
     style: btn-outline
-    icon: 🛠️
+    icon: 📈
+  - label: 组件画廊
+    url: /ui-showcase/Page/ComponentGallery
+    style: btn-outline
+    icon: 🖼️
+  - label: 看板布局
+    url: /ui-showcase/Page/ProjectBoard
+    style: btn-outline
+    icon: 🗂️
+  - label: 表单演示
+    url: /ui-showcase/DynamicEntity/List/component_demo
+    style: btn-ghost
+    icon: 🧩
+  - label: 团队状态
+    url: /ui-showcase/Page/TeamStatus
+    style: btn-ghost
+    icon: 👥

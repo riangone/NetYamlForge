@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Task Management Workspace
+  eyebrow: 📋 Task Management — 协同任务追踪
   title: 协同项目与任务追踪系统
   description: 提升团队执行力，从项目规划到任务落实，提供全方位的进度监控、资源分配与沟通协作工具。
   primaryActionLabel: 项目概览
@@ -26,6 +26,7 @@ metrics:
     trend: "沟通无阻"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 🎯
     title: 敏捷看板
@@ -44,6 +45,7 @@ capabilities:
     description: 自动生成项目完成度曲线图，实时预警潜在的延期风险。
     badge: 分析
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 看板
     url: /task-management/Dashboard

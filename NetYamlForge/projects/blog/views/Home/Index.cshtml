@@ -1,0 +1,98 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen bg-white">
+    <div class="max-w-4xl mx-auto px-6 py-12 space-y-12">
+
+        <section class="text-center space-y-6 max-w-2xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 text-gray-500 text-xs uppercase tracking-widest font-medium">
+                @hero?.Eyebrow
+            </div>
+            <h1 class="text-5xl md:text-6xl font-serif font-bold text-gray-900 leading-tight tracking-tight">
+                @hero?.Title
+            </h1>
+            <p class="text-lg text-gray-400 leading-relaxed font-serif">
+                @hero?.Description
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 pt-4">
+                <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-8 py-3 bg-gray-900 text-white text-sm font-medium tracking-wide hover:bg-gray-800 transition-colors rounded-full">
+                    @hero?.PrimaryActionLabel
+                </a>
+                <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-8 py-3 border border-gray-200 text-gray-600 text-sm font-medium hover:border-gray-300 transition-colors rounded-full">
+                    @hero?.SecondaryActionLabel
+                </a>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-3 gap-8 max-w-lg mx-auto">
+                @foreach (var m in metrics)
+                {
+                    <div class="text-center">
+                        <div class="text-3xl font-serif font-bold text-gray-900">@m.Value</div>
+                        <div class="text-xs text-gray-400 mt-1.5 uppercase tracking-wider">@m.Label</div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-2xl font-serif font-bold text-gray-900 mb-8 text-center">@config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    @foreach (var cap in capabilities)
+                    {
+                        <article class="group border-b border-gray-100 pb-6 hover:border-gray-300 transition-colors">
+                            <div class="flex items-start gap-4">
+                                <span class="text-3xl flex-shrink-0 mt-1">@cap.Icon</span>
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="font-serif font-bold text-gray-900 text-lg">@cap.Title</h3>
+                                        @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                        {
+                                            <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">@cap.Badge</span>
+                                        }
+                                    </div>
+                                    <p class="text-sm text-gray-400 leading-relaxed font-serif">@cap.Description</p>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="bg-gray-50 rounded-2xl p-8 text-center">
+                <h2 class="text-lg font-serif font-bold text-gray-900 mb-5">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap justify-center gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-full hover:shadow-md hover:border-gray-300 transition-all">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <div class="text-center text-xs text-gray-300 py-6 border-t border-gray-100 font-serif">
+            &copy; 2026 Blog Platform
+        </div>
+
+    </div>
+</div>

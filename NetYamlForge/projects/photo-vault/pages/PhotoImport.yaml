@@ -70,7 +70,7 @@ sections:
       photo_id: '{{uuid}}'
       file_path: '{{upload_path}}'
       status: queued
-      provider: lmstudio
+      provider: '{{upload_ai_provider}}'
       priority: 1
       queued_at: '{{now}}'
   extraFields:
@@ -87,8 +87,10 @@ sections:
     type: select
     default: antigravity
     options:
+    - value: antigravity
+      label: 🤖 Antigravity（Gemini CLI，默认）
     - value: lmstudio
-      label: 🧠 LM Studio（默认）
+      label: 🧠 LM Studio
     - value: gemini
       label: ☁️ Gemini API
     - value: ollama
@@ -131,8 +133,10 @@ sections:
     type: select
     default: antigravity
     options:
+    - value: antigravity
+      label: 🤖 Antigravity（Gemini CLI，默认）
     - value: lmstudio
-      label: 🧠 LM Studio（默认）
+      label: 🧠 LM Studio
     - value: gemini
       label: ☁️ Gemini API
     - value: ollama

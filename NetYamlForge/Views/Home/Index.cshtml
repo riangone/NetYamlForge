@@ -7,6 +7,10 @@
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
     var isAdmin = User?.IsInRole("Admin") ?? false;
     string T(string? key, string fallback) => NetYamlForge.Models.I18nText.Resolve(null, fallback, key);
+
+    var currentProjectRoute = Context.GetRouteValue("project")?.ToString();
+    var isSubProjectHome = !string.IsNullOrEmpty(currentProjectRoute) 
+        && !string.Equals(currentProjectRoute, "home", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="space-y-8">
@@ -25,6 +29,18 @@
                 <p class="text-base text-base-content/70 max-w-xl leading-relaxed">
                     @T(hero.DescriptionKey, hero.Description)
                 </p>
+                @if (hero.Highlights != null && hero.Highlights.Count > 0)
+                {
+                    <div class="flex flex-wrap gap-2 pt-1 pb-1">
+                        @foreach (var highlight in hero.Highlights)
+                        {
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-base-200 border border-base-300 text-xs font-semibold text-base-content/80">
+                                <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                @highlight
+                            </span>
+                        }
+                    </div>
+                }
                 <div class="flex flex-wrap gap-3 pt-2">
                     <a class="btn btn-primary" href="@hero.PrimaryActionUrl">
                         @T(hero.PrimaryActionLabelKey, hero.PrimaryActionLabel)
@@ -115,67 +131,70 @@
         </section>
     }
 
-    @* ===== Projects ===== *@
-    <section id="products" class="space-y-4">
-        <div>
-            <h2 class="text-2xl font-bold">@T(config.ProjectsSectionTitleKey, config.ProjectsSectionTitle)</h2>
-            <p class="text-base-content/60 mt-0.5 text-sm">@T(config.ProjectsSectionLeadKey, config.ProjectsSectionLead)</p>
-        </div>
+    @if (!isSubProjectHome)
+    {
+        @* ===== Projects ===== *@
+        <section id="products" class="space-y-4">
+            <div>
+                <h2 class="text-2xl font-bold">@T(config.ProjectsSectionTitleKey, config.ProjectsSectionTitle)</h2>
+                <p class="text-base-content/60 mt-0.5 text-sm">@T(config.ProjectsSectionLeadKey, config.ProjectsSectionLead)</p>
+            </div>
 
-        @if (projects.Any())
-        {
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                @foreach (var project in projects)
-                {
-                    var profile = config.ProjectProfiles.TryGetValue(project.Name, out var matched)
-                        ? matched
-                        : config.DefaultProjectProfile;
-                    var profileTags = (profile.TagKeys != null && profile.TagKeys.Count > 0)
-                        ? profile.TagKeys.Select((k, i) =>
-                        {
-                            var fallback = i < profile.Tags.Count ? profile.Tags[i] : k;
-                            return T(k, fallback);
-                        }).ToList()
-                        : profile.Tags.ToList();
-                    <article class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow duration-200">
-                        <div class="card-body">
-                            <div class="flex items-start gap-3">
-                                <div class="p-2.5 rounded-xl bg-base-200 border border-base-300 text-2xl">
-                                    @profile.Icon
+            @if (projects.Any())
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    @foreach (var project in projects)
+                    {
+                        var profile = config.ProjectProfiles.TryGetValue(project.Name, out var matched)
+                            ? matched
+                            : config.DefaultProjectProfile;
+                        var profileTags = (profile.TagKeys != null && profile.TagKeys.Count > 0)
+                            ? profile.TagKeys.Select((k, i) =>
+                            {
+                                var fallback = i < profile.Tags.Count ? profile.Tags[i] : k;
+                                return T(k, fallback);
+                            }).ToList()
+                            : profile.Tags.ToList();
+                        <article class="group card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <div class="card-body">
+                                <div class="flex items-start gap-3">
+                                    <div class="p-2.5 rounded-xl bg-base-200 border border-base-300 text-2xl">
+                                        @profile.Icon
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="card-title text-lg font-semibold truncate">@project.DisplayName</h3>
+                                        <div class="text-xs text-base-content/50 font-mono">@project.Name</div>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="card-title text-lg font-semibold truncate">@project.DisplayName</h3>
-                                    <div class="text-xs text-base-content/50 font-mono">@project.Name</div>
+                                <p class="text-sm text-base-content/70 line-clamp-2">@T(profile.TaglineKey, profile.Tagline)</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
+                                        @project.DatabaseType.ToUpperInvariant()
+                                    </span>
+                                    @foreach (var tag in profileTags)
+                                    {
+                                        <span class="px-2 py-1 rounded-md bg-base-200 border border-base-300 text-xs font-medium">@tag</span>
+                                    }
+                                </div>
+                                <div class="pt-2 mt-1 border-t border-base-200">
+                                    <a asp-controller="Home" asp-action="Project" asp-route-project="@project.Name"
+                                       class="btn btn-primary btn-sm w-full gap-2">
+                                        @T(config.OpenWorkspaceLabelKey, config.OpenWorkspaceLabel)
+                                    </a>
                                 </div>
                             </div>
-                            <p class="text-sm text-base-content/70 line-clamp-2">@T(profile.TaglineKey, profile.Tagline)</p>
-                            <div class="flex flex-wrap gap-1.5">
-                                <span class="px-2 py-1 rounded-md bg-primary/10 border border-primary/20 text-xs font-medium text-primary">
-                                    @project.DatabaseType.ToUpperInvariant()
-                                </span>
-                                @foreach (var tag in profileTags)
-                                {
-                                    <span class="px-2 py-1 rounded-md bg-base-200 border border-base-300 text-xs font-medium">@tag</span>
-                                }
-                            </div>
-                            <div class="pt-2 mt-1 border-t border-base-200">
-                                <a asp-controller="Home" asp-action="Project" asp-route-project="@project.Name"
-                                   class="btn btn-primary btn-sm w-full gap-2">
-                                    @T(config.OpenWorkspaceLabelKey, config.OpenWorkspaceLabel)
-                                </a>
-                            </div>
-                        </div>
-                    </article>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-warning">
-                <span>@T(config.EmptyProjectsMessageKey, config.EmptyProjectsMessage)</span>
-            </div>
-        }
-    </section>
+                        </article>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    <span>@T(config.EmptyProjectsMessageKey, config.EmptyProjectsMessage)</span>
+                </div>
+            }
+        </section>
+    }
 
     @* ===== Quick Actions ===== *@
     @if (config.QuickActions.Count > 0)

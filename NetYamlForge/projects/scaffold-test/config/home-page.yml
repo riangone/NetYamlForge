@@ -1,5 +1,5 @@
 hero:
-  eyebrow: Scaffold Test Workspace
+  eyebrow: 🧪 Scaffold Test — 自动化沙箱
   title: 项目脚手架与自动化沙箱
   description: 专为开发者设计的集成测试环境，用于验证自动化代码生成、架构模板以及新功能的原型设计。
   primaryActionLabel: 进入沙箱
@@ -26,6 +26,7 @@ metrics:
     trend: "即时生效"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 🏗️
     title: 快速原型验证
@@ -40,6 +41,7 @@ capabilities:
     description: 独立的数据库与配置环境，确保实验性功能不会影响核心业务的稳定性。
     badge: 环境
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 沙箱控制台
     url: /scaffold-test/Dashboard
@@ -50,6 +52,6 @@ quickActions:
     style: btn-outline
     icon: 🧩
   - label: 脚手架指南
-    url: /scaffold-test/docs/README-ja.md
+    url: /scaffold-test/Dashboard
     style: btn-ghost
     icon: 📖

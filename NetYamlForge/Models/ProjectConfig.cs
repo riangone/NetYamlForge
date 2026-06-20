@@ -103,6 +103,11 @@ public class ProjectLayoutConfig
     public string DashboardTheme { get; set; } = "default";
     
     /// <summary>
+    /// 使用するテーマ（daisyUIテーマ名）。デフォルトは "corporate"。
+    /// </summary>
+    public string Theme { get; set; } = "corporate";
+    
+    /// <summary>
     /// サイドバーに表示するナビゲーション項目のカスタマイズ。
     /// </summary>
     public ProjectNavigationConfig? Navigation { get; set; }

@@ -68,13 +68,13 @@ public class AiEmailChatExecutor
             var aiModel = env.GetValueOrDefault("AI_MODEL", "gpt-3.5-turbo");
             var aiSystemPrompt = env.GetValueOrDefault("AI_SYSTEM_PROMPT", "You are a helpful AI assistant. Reply to the user's email.");
             var targetSender = env.GetValueOrDefault("TARGET_SENDER_EMAIL");
-            var useGeminiCli = bool.Parse(env.GetValueOrDefault("USE_GEMINI_CLI", "false")) || bool.Parse(env.GetValueOrDefault("USE_ANTIGRAVITY_CLI", "false"));
+            var useAntigravityCli = bool.Parse(env.GetValueOrDefault("USE_ANTIGRAVITY_CLI", "false")) || bool.Parse(env.GetValueOrDefault("USE_GEMINI_CLI", "false"));
             var invoiceKeywordsRaw = env.GetValueOrDefault("INVOICE_SUBJECT_KEYWORDS", "");
             var invoiceKeywords = invoiceKeywordsRaw
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToArray();
 
-            if (!useGeminiCli && (string.IsNullOrEmpty(imapServer) || string.IsNullOrEmpty(smtpServer) || string.IsNullOrEmpty(aiKey)))
+            if (!useAntigravityCli && (string.IsNullOrEmpty(imapServer) || string.IsNullOrEmpty(smtpServer) || string.IsNullOrEmpty(aiKey)))
             {
                 throw new InvalidOperationException("Missing required .env configuration (IMAP/SMTP/AI_API_KEY).");
             }
@@ -120,7 +120,7 @@ public class AiEmailChatExecutor
 
                 // 3. Call AI
                 string? replyContent = null;
-                if (useGeminiCli)
+                if (useAntigravityCli)
                 {
                     var prompt = $"System: {aiSystemPrompt}\n\nUser Email Content:\n{body}";
                     replyContent = await _antigravityCli.PromptAsync(prompt, aiModel, projectName, cancellationToken);

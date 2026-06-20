@@ -1,5 +1,5 @@
 hero:
-  eyebrow: 名刺管理ワークスペース
+  eyebrow: 📇 BizCard — AI 名刺管理
   title: スマート名刺管理・ビジネス活動プラットフォーム
   description: 名刺をスキャン・取込・AI解析し、連絡先とビジネス活動を一元管理。ベクトル検索で瞬時に最適な人脈を発掘。
   primaryActionLabel: 名刺一覧を見る
@@ -26,6 +26,7 @@ metrics:
     trend: "商談・訪問・メール"
     tone: text-secondary
 
+capabilitiesSectionTitle: コア機能
 capabilities:
   - icon: 🤖
     title: AI自動名刺解析
@@ -44,6 +45,7 @@ capabilities:
     description: 商談・訪問・メール・提案などのビジネス活動を名刺に紐付けて記録。次回アクション追跡で商機を逃さない。
     badge: CRM連携
 
+quickActionsSectionTitle: クイックアクセス
 quickActions:
   - label: ダッシュボード
     url: /biz-card/Dashboard

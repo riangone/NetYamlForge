@@ -5,7 +5,7 @@
 @inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
 @inject NetYamlForge.Services.ProjectScope ProjectScope
 <!DOCTYPE html>
-<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="corporate">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="@(ProjectScope?.Current?.Layout?.Theme ?? "corporate")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -24,6 +24,44 @@
 
 <div class="file-upload-container" id="fuc-@sec.Id">
 
+    @* Extra Fields Form *@
+    @if (sec.ExtraFields != null && sec.ExtraFields.Any())
+    {
+        <div class="extra-fields-container mb-4 p-4 bg-base-200 rounded-xl max-w-xl space-y-3">
+            @foreach (var ef in sec.ExtraFields)
+            {
+                <div class="form-control w-full">
+                    <label class="label pb-1">
+                        <span class="label-text font-medium text-gray-700">@ef.Label</span>
+                    </label>
+                    @if (ef.Type == "select")
+                    {
+                        <select id="ef-@sec.Id-@ef.Id" class="select select-bordered select-sm w-full max-w-xs">
+                            @if (ef.Options != null)
+                            {
+                                @foreach (var opt in ef.Options)
+                                {
+                                    if (opt.Value == ef.Default)
+                                    {
+                                        <option value="@opt.Value" selected="selected">@(opt.Label ?? opt.Value)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@opt.Value">@(opt.Label ?? opt.Value)</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <input type="text" id="ef-@sec.Id-@ef.Id" class="input input-bordered input-sm w-full max-w-xs" value="@ef.Default" />
+                    }
+                </div>
+            }
+        </div>
+    }
+
     @* Drop zone *@
     <div class="upload-dropzone border-2 border-dashed border-base-300 rounded-xl p-10 text-center
                 hover:border-primary transition-colors cursor-pointer select-none"
@@ -179,10 +217,24 @@
         var q = (_queues[sid] || []).filter(function (e) { return !e.removed && e.status === 'pending'; });
         if (!q.length) return;
 
+        var extraData = {};
+        @if (sec.ExtraFields != null)
+        {
+            foreach (var ef in sec.ExtraFields)
+            {
+                <text>
+                var efEl = document.getElementById('ef-' + sid + '-@ef.Id');
+                if (efEl) {
+                    extraData['@ef.Id'] = efEl.value;
+                }
+                </text>
+            }
+        }
+
         var csrf = getCsrfToken();
         var promises = q.map(function (entry, localIdx) {
             var globalIdx = (_queues[sid] || []).indexOf(entry);
-            return uploadOne(sid, entry, globalIdx, uploadUrl, csrf);
+            return uploadOne(sid, entry, globalIdx, uploadUrl, csrf, extraData);
         });
 
         Promise.all(promises).then(function (results) {
@@ -194,7 +246,7 @@
         });
     };
 
-    function uploadOne(sid, entry, idx, uploadUrl, csrf) {
+    function uploadOne(sid, entry, idx, uploadUrl, csrf, extraData) {
         entry.status = 'uploading';
         var pbWrap = document.getElementById('pb-' + sid + '-' + idx);
         var pbi    = document.getElementById('pbi-' + sid + '-' + idx);
@@ -204,6 +256,11 @@
 
         var fd = new FormData();
         fd.append('files', entry.file, entry.file.name);
+        if (extraData) {
+            for (var k in extraData) {
+                fd.append(k, extraData[k]);
+            }
+        }
 
         return new Promise(function (resolve) {
             var xhr = new XMLHttpRequest();

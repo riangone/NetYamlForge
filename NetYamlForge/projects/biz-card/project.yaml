@@ -15,6 +15,7 @@ features:
   api: true
 
 layout:
+  theme: emerald
   dashboardTheme: workspace
 
   landingPageByRole:

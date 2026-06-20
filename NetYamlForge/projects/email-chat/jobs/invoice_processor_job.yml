@@ -3,6 +3,6 @@ jobs:
     displayName: "Invoice Email Processor"
     enabled: true
     type: "invoice_email_processor"
-    description: "請求メールを受信し、AI（Gemini CLI）で請求情報を抽出してDB保存・PDF生成・返信送信を行う"
+    description: "請求メールを受信し、AI（Antigravity CLI）で請求情報を抽出してDB保存・PDF生成・返信送信を行う"
     schedule:
       cron: "*/5 * * * *"  # 5分ごとにポーリング

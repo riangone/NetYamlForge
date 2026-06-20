@@ -1,0 +1,69 @@
+hero:
+  eyebrow: 📝 Blog — 記事管理システム
+  title: 記事・カテゴリ・タグ・コメントを一元管理
+  description: 記事の作成から公開、コメント管理まで、シンプルでパワフルなブログ CMS。カテゴリとタグでコンテンツを整理し、公開ワークフローで品質を保ちます。
+  primaryActionLabel: ダッシュボード
+  primaryActionUrl: /blog/Dashboard
+  secondaryActionLabel: 記事一覧
+  secondaryActionUrl: /blog/DynamicEntity/Index?entity=post
+  highlights:
+    - 記事の作成・編集・公開
+    - カテゴリ & タグ分類
+    - コメント管理
+    - 公開ワークフロー
+
+metrics:
+  - label: コンテンツ
+    value: "Article"
+    trend: "作成・公開・管理"
+    tone: text-primary
+  - label: アクセス
+    value: "Public"
+    trend: "公開ブログ表示"
+    tone: text-success
+  - label: エンゲージメント
+    value: "Comment"
+    trend: "読者との対話"
+    tone: text-secondary
+
+capabilitiesSectionTitle: コア機能
+capabilities:
+  - icon: 📝
+    title: 記事管理
+    description: リッチな記事の作成、編集、公開。下書き・公開・アーカイブのステータス管理と Slug 自動生成。
+    badge: コア
+  - icon: 📂
+    title: カテゴリ分類
+    description: 記事をカテゴリで整理し、階層的なナビゲーションを実現。タグによるクロスリファレンスも可能。
+    badge: 整理
+  - icon: 💬
+    title: コメント管理
+    description: 承認・スパム・未承認のステータス管理。承認ワークフローでスパムを排除し健全な議論を促進。
+    badge: モデレーション
+  - icon: 📊
+    title: アクセス分析
+    description: 記事のパフォーマンスを分析。人気記事やトレンドを把握し、コンテンツ戦略に活用。
+    badge: 分析
+
+quickActionsSectionTitle: クイックアクセス
+quickActions:
+  - label: ダッシュボード
+    url: /blog/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 記事一覧
+    url: /blog/DynamicEntity/Index?entity=post
+    style: btn-outline
+    icon: 📝
+  - label: カテゴリ
+    url: /blog/DynamicEntity/Index?entity=category
+    style: btn-outline
+    icon: 📂
+  - label: コメント
+    url: /blog/DynamicEntity/Index?entity=comment
+    style: btn-ghost
+    icon: 💬
+  - label: 公開ブログ
+    url: /blog
+    style: btn-ghost
+    icon: 🌐

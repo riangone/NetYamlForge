@@ -19,15 +19,18 @@ public class DirectoryImportExecutor : IBatchStepHandler
     public string StepType => "directory_import";
     private readonly ProjectManager _projectManager;
     private readonly IWebHostEnvironment _env;
+    private readonly IBatchJobScheduler _scheduler;
     private readonly ILogger<DirectoryImportExecutor> _logger;
 
     public DirectoryImportExecutor(
         ProjectManager projectManager,
         IWebHostEnvironment env,
+        IBatchJobScheduler scheduler,
         ILogger<DirectoryImportExecutor> logger)
     {
         _projectManager = projectManager;
         _env = env;
+        _scheduler = scheduler;
         _logger = logger;
     }
 
@@ -259,8 +262,14 @@ public class DirectoryImportExecutor : IBatchStepHandler
             result.Success = true;
             result.RowsAffected = filesImported;
             result.EndedAt = DateTime.UtcNow;
-            _logger.LogInformation("Import job completed: {JobId}. Imported: {Imported}, Skipped: {Skipped}, Failed: {Failed}", 
+            _logger.LogInformation("Import job completed: {JobId}. Imported: {Imported}, Skipped: {Skipped}, Failed: {Failed}",
                 jobRow.job_id, filesImported, filesSkipped, filesFailed);
+
+            if (filesImported > 0 && job.Behavior.AutoEnqueueAnnotation && !string.IsNullOrEmpty(projectName))
+            {
+                _ = _scheduler.TriggerJobNowAsync(projectName, "antigravity_cli_worker");
+                _logger.LogInformation("Triggered antigravity_cli_worker immediately after import of {Count} photos", filesImported);
+            }
         }
         catch (Exception ex)
         {

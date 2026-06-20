@@ -1,0 +1,105 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: #0A0A0F;">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-10">
+
+        <section class="relative overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+            <div class="absolute inset-0 opacity-20" style="background: radial-gradient(circle at 30% 50%, #e94560 0%, transparent 50%), radial-gradient(circle at 70% 50%, #0f3460 0%, transparent 50%);"></div>
+            <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl" style="background: linear-gradient(135deg, #e94560, #533483);"></div>
+            <div class="relative p-10 md:p-16">
+                <div class="max-w-3xl space-y-6">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium" style="background: rgba(233, 69, 96, 0.2); color: #e94560; border: 1px solid rgba(233, 69, 96, 0.3);">
+                        <span class="w-2 h-2 rounded-full" style="background: #e94560;"></span>
+                        @hero?.Eyebrow
+                    </div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-white leading-tight">
+                        <span class="bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent">@hero?.Title</span>
+                    </h1>
+                    <p class="text-lg text-gray-400 leading-relaxed">
+                        @hero?.Description
+                    </p>
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:-translate-y-0.5 shadow-lg" style="background: linear-gradient(135deg, #e94560, #533483);">
+                            @hero?.PrimaryActionLabel
+                        </a>
+                        <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:-translate-y-0.5" style="background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1);">
+                            @hero?.SecondaryActionLabel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                @foreach (var m in metrics)
+                {
+                    <div class="rounded-xl border p-6 backdrop-blur-sm transition-all hover:scale-[1.02]" style="background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06);">
+                        <div class="text-sm font-medium mb-1.5" style="color: rgba(255,255,255,0.4);">@m.Label</div>
+                        <div class="text-2xl font-bold" style="background: linear-gradient(135deg, #e94560, #533483); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs mt-1" style="color: rgba(255,255,255,0.3);">@m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-2xl font-bold text-white mb-6">@config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="group rounded-xl border p-6 transition-all hover:scale-[1.02] hover:-translate-y-1 cursor-default" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06);">
+                            <div class="flex items-start gap-4">
+                                <div class="text-4xl group-hover:scale-110 transition-transform">@cap.Icon</div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <h3 class="font-bold text-white text-lg">@cap.Title</h3>
+                                        @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                        {
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium" style="background: rgba(233, 69, 96, 0.15); color: #e94560;">@cap.Badge</span>
+                                        }
+                                    </div>
+                                    <p class="text-sm leading-relaxed" style="color: rgba(255,255,255,0.5);">@cap.Description</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="rounded-xl border p-6" style="background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.06);">
+                <h2 class="text-lg font-bold text-white mb-4">@config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-white transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #e94560, #533483);">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+    </div>
+</div>

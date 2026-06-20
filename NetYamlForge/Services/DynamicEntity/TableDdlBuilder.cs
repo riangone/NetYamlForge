@@ -62,6 +62,9 @@ public static class TableDdlBuilder
             colSqls.Add($"PRIMARY KEY ({pkColsStr})");
         }
 
+        if (entity.SoftDelete)
+            colSqls.Add("\"IsDeleted\" INTEGER NOT NULL DEFAULT 0");
+
         var escapedTableName = tableName.Trim('"').Replace("\"", "\"\"");
         return $"CREATE TABLE \"{escapedTableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";
     }

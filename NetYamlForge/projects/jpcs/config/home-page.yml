@@ -1,0 +1,69 @@
+hero:
+  eyebrow: 📜 JPCS — JPiere 契約管理服務
+  title: JPiere 契約管理服務平台
+  description: 基於 iDempiere/JPiere 原始架構的企業級契約管理系統，覆蓋契約、訂單、發票、付款與收入確認的全業務流程。
+  primaryActionLabel: 儀表盤
+  primaryActionUrl: /jpcs/Page/Dashboard
+  secondaryActionLabel: 個人工作台
+  secondaryActionUrl: /jpcs/Page/MyPage
+  highlights:
+    - 契約全生命周期
+    - 銷售與財務整合
+    - 業務夥伴管理
+    - 多維度分析
+
+metrics:
+  - label: 業務模組
+    value: "6+"
+    trend: "契約・銷售・財務"
+    tone: text-primary
+  - label: 管理主體
+    value: "Multi"
+    trend: "業務夥伴・產品"
+    tone: text-success
+  - label: 分析視角
+    value: "360°"
+    trend: "客戶・業務分析"
+    tone: text-secondary
+
+capabilitiesSectionTitle: 核心功能
+capabilities:
+  - icon: 📜
+    title: 契約全生命周期
+    description: 從契約估價、內容定義到簽署執行，完整追蹤每一份契約的狀態與變更歷史。
+    badge: 核心
+  - icon: 🛒
+    title: 銷售與訂單管理
+    description: 整合訂單處理、發票開立、付款追蹤與收入確認，確保銷售流程閉環。
+    badge: 業務
+  - icon: 🤝
+    title: 業務夥伴管理
+    description: 統一管理客戶、供應商等業務夥伴資訊，支援多層級分類與關聯分析。
+    badge: 夥伴
+  - icon: 📊
+    title: 業務分析與儀表板
+    description: 提供客戶分析、業務趨勢等可視化儀表板，協助管理層快速掌握營運狀況。
+    badge: 分析
+
+quickActionsSectionTitle: 快捷入口
+quickActions:
+  - label: 儀表盤
+    url: /jpcs/Page/Dashboard
+    style: btn-primary
+    icon: 📊
+  - label: 契約管理
+    url: /jpcs/Entity/jp_contract
+    style: btn-outline
+    icon: 📜
+  - label: 訂單列表
+    url: /jpcs/Entity/c_order
+    style: btn-outline
+    icon: 🛒
+  - label: 業務夥伴
+    url: /jpcs/Entity/c_bpartner
+    style: btn-ghost
+    icon: 🤝
+  - label: 個人工作台
+    url: /jpcs/Page/MyPage
+    style: btn-ghost
+    icon: 👤

@@ -409,6 +409,22 @@ public class SectionDefinition
     public int? MaxFiles { get; set; }
     public string? UploadDir { get; set; }
     public SectionFileUploadOnCompleteDefinition? OnUploadComplete { get; set; }
+    public List<ExtraFieldDefinition>? ExtraFields { get; set; }
+}
+
+public class ExtraFieldDefinition
+{
+    public string Id { get; set; } = "";
+    public string? Label { get; set; }
+    public string? Type { get; set; }
+    public string? Default { get; set; }
+    public List<ExtraFieldOptionDefinition>? Options { get; set; }
+}
+
+public class ExtraFieldOptionDefinition
+{
+    public string? Value { get; set; }
+    public string? Label { get; set; }
 }
 
 /// <summary>file_upload セクションの onUploadComplete 設定</summary>

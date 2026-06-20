@@ -74,18 +74,56 @@
 
                 @if (sec.Actions != null && sec.Actions.Count > 0)
                 {
-                    <div class="card-actions justify-end mt-2 pt-2 border-t border-gray-100">
+                    <div class="card-actions justify-end mt-2 pt-2 border-t border-gray-100 flex gap-1">
                         @foreach (var action in sec.Actions)
                         {
                             var url = action.Url;
-                            foreach (var kv in row)
+                            if (!string.IsNullOrEmpty(url))
                             {
-                                url = url.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
+                                foreach (var kv in row)
+                                {
+                                    url = url.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
+                                }
+                                url = url.Replace("{project}", Model.Project).Replace("{pageName}", Model.PageName);
+                                if (url.StartsWith("/"))
+                                {
+                                    url = Url.Content("~/").TrimEnd('/') + url;
+                                }
                             }
                             var btnClass = string.IsNullOrEmpty(action.Class)
                                 ? "btn btn-outline btn-xs"
                                 : $"btn {action.Class} btn-xs";
-                            <a href="@url" class="@btnClass">@action.Label</a>
+
+                            var hasHtmx = !string.IsNullOrEmpty(action.Confirm) || !string.IsNullOrEmpty(action.HxGet);
+                            if (hasHtmx)
+                            {
+                                // If HxGet is explicitly set, process it separately; otherwise reuse already-processed url.
+                                var hxGetUrl = url;
+                                if (!string.IsNullOrEmpty(action.HxGet))
+                                {
+                                    hxGetUrl = action.HxGet;
+                                    foreach (var kv in row)
+                                    {
+                                        hxGetUrl = hxGetUrl.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
+                                    }
+                                    hxGetUrl = hxGetUrl.Replace("{project}", Model.Project).Replace("{pageName}", Model.PageName);
+                                    if (hxGetUrl.StartsWith("/"))
+                                    {
+                                        hxGetUrl = Url.Content("~/").TrimEnd('/') + hxGetUrl;
+                                    }
+                                }
+                                <button type="button" class="@btnClass"
+                                        hx-get="@hxGetUrl"
+                                        hx-confirm="@action.Confirm"
+                                        hx-swap="@(action.HxSwap ?? "none")"
+                                        hx-target="@(action.HxTarget ?? "body")">
+                                    @action.Label
+                                </button>
+                            }
+                            else
+                            {
+                                <a href="@url" class="@btnClass">@action.Label</a>
+                            }
                         }
                     </div>
                 }
@@ -114,6 +152,59 @@
                         : (!string.IsNullOrEmpty(descriptionField) && row.TryGetValue(descriptionField, out var d)
                             ? d?.ToString() ?? "" : "");
         var subtitle = !string.IsNullOrEmpty(subtitleField) && row.TryGetValue(subtitleField, out var st) ? st?.ToString() ?? "" : "";
+
+        var rowActions = new List<object>();
+        if (sec.Actions != null && sec.Actions.Count > 0)
+        {
+            foreach (var action in sec.Actions)
+            {
+                var url = action.Url;
+                if (!string.IsNullOrEmpty(url))
+                {
+                    foreach (var kv in row)
+                    {
+                        url = url.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
+                    }
+                    url = url.Replace("{project}", Model.Project).Replace("{pageName}", Model.PageName);
+                    if (url.StartsWith("/"))
+                    {
+                        url = Url.Content("~/").TrimEnd('/') + url;
+                    }
+                }
+                var btnClass = string.IsNullOrEmpty(action.Class)
+                    ? "btn btn-outline btn-xs"
+                    : $"btn {action.Class} btn-xs";
+
+                var hasHtmx = !string.IsNullOrEmpty(action.Confirm) || !string.IsNullOrEmpty(action.HxGet);
+                // If HxGet is explicitly set, process it separately; otherwise reuse already-processed url.
+                var hxGetUrl = hasHtmx ? url : "";
+                if (hasHtmx && !string.IsNullOrEmpty(action.HxGet))
+                {
+                    hxGetUrl = action.HxGet;
+                    foreach (var kv in row)
+                    {
+                        hxGetUrl = hxGetUrl.Replace($"{{{kv.Key}}}", kv.Value?.ToString() ?? "");
+                    }
+                    hxGetUrl = hxGetUrl.Replace("{project}", Model.Project).Replace("{pageName}", Model.PageName);
+                    if (hxGetUrl.StartsWith("/"))
+                    {
+                        hxGetUrl = Url.Content("~/").TrimEnd('/') + hxGetUrl;
+                    }
+                }
+
+                rowActions.Add(new {
+                    label = action.Label,
+                    @class = btnClass,
+                    url = url ?? "",
+                    confirm = action.Confirm ?? "",
+                    hxGet = hxGetUrl,
+                    hxSwap = action.HxSwap ?? "none",
+                    hxTarget = action.HxTarget ?? "body",
+                    hasHtmx = hasHtmx
+                });
+            }
+        }
+
         if (!first) lbItems.Append(",");
         first = false;
         lbItems.Append("{");
@@ -121,6 +212,7 @@
         lbItems.Append(",\"title\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(title, _jsonOpts));
         lbItems.Append(",\"caption\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(caption, _jsonOpts));
         lbItems.Append(",\"subtitle\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(subtitle, _jsonOpts));
+        lbItems.Append(",\"actions\":"); lbItems.Append(System.Text.Json.JsonSerializer.Serialize(rowActions, _jsonOpts));
         lbItems.Append("}");
     }
     lbItems.Append("]");
@@ -128,14 +220,6 @@
 
 @if (!string.IsNullOrEmpty(imageField) && rows.Any())
 {
-    <script>
-    (function(){
-      var _data = @Html.Raw(lbItems.ToString());
-      if(!window._nyf_lb) window._nyf_lb = {};
-      window._nyf_lb['@sectionId'] = _data;
-    })();
-    </script>
-
     <div id="@(sectionId)_modal"
          class="fixed inset-0 z-[9999] hidden flex-col items-center justify-center bg-black/90"
          role="dialog" aria-modal="true" aria-label="图片预览"
@@ -167,6 +251,7 @@
                 <div id="@(sectionId)_subtitle" class="text-white/60 text-sm mt-1"></div>
                 <div id="@(sectionId)_caption" class="text-white/80 text-sm mt-1 max-w-2xl"></div>
                 <div id="@(sectionId)_counter" class="text-white/40 text-xs mt-2"></div>
+                <div id="@(sectionId)_actions" class="mt-4 flex gap-2 justify-center"></div>
             </div>
         </div>
 
@@ -178,6 +263,14 @@
             </svg>
         </button>
     </div>
+
+    <script>
+    (function(){
+      var _data = @Html.Raw(lbItems.ToString());
+      if(!window._nyf_lb) window._nyf_lb = {};
+      window._nyf_lb['@sectionId'] = _data;
+    })();
+    </script>
 }
 
 @* ── Lightbox JS (injected once; idempotent) ────────────────────── *@
@@ -221,6 +314,35 @@ if(!window._nyf_lb_init){
     el('subtitle').textContent= item.subtitle|| '';
     el('caption').textContent = item.caption || '';
     el('counter').textContent = (_cur_idx+1)+' / '+data.length;
+
+    var actionsDiv = el('actions');
+    if (actionsDiv) {
+      actionsDiv.innerHTML = '';
+      if (item.actions && item.actions.length > 0) {
+        item.actions.forEach(function(act) {
+          var btn;
+          if (act.hasHtmx) {
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('hx-get', act.hxGet);
+            if (act.confirm) {
+              btn.setAttribute('hx-confirm', act.confirm);
+            }
+            btn.setAttribute('hx-swap', act.hxSwap);
+            btn.setAttribute('hx-target', act.hxTarget);
+          } else {
+            btn = document.createElement('a');
+            btn.href = act.url;
+          }
+          btn.className = act.class.replace('btn-xs', 'btn-sm');
+          btn.textContent = act.label;
+          actionsDiv.appendChild(btn);
+        });
+        if (window.htmx) {
+          window.htmx.process(actionsDiv);
+        }
+      }
+    }
   }
 
   document.addEventListener('keydown', function(e){

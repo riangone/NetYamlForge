@@ -1,5 +1,5 @@
 // ファイル概要：AI コミュニケーション自動化エンジン。
-// Gemini CLI でパーソナライズメッセージを生成し、EmailService で顧客へ自動送信します。
+// Antigravity CLI でパーソナライズメッセージを生成し、EmailService で顧客へ自動送信します。
 // lead_nurturing_tasks の pending タスクを処理し、ai_communications にログを残します。
 
 using System.Data;
@@ -238,7 +238,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
 
                 await LogActionAsync(db, tx, "comm_email_sent",
                     "lead_nurturing_tasks", taskId,
-                    "gemini", $"育成メール: {customerName}",
+                    "antigravity", $"育成メール: {customerName}",
                     $"件名: {aiResult.Subject} / 確信度: {aiResult.ConfidenceScore}%",
                     0);
 
@@ -398,7 +398,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
     }
 
     // ──────────────────────────────────────────────────────────────
-    // モード3: 無返信メール → Gemini で感情分析・追跡更新
+    // モード3: 無返信メール → Antigravity CLI で感情分析・追跡更新
     // ──────────────────────────────────────────────────────────────
 
     private async Task<int> RunResponseCheckAsync(

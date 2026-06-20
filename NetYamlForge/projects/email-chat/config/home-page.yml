@@ -1,5 +1,5 @@
 hero:
-  eyebrow: AI Email Chat — 自動請求書処理システム
+  eyebrow: 🤖 AI Email Chat — 自動請求書処理
   title: メールを受信するだけで、請求書処理が完結する
   description: IMAP でメールを取得し、Gemini AI が添付ファイルを解析。取引先・請求書データを自動で抽出・保存し、PDF を生成してそのまま返信まで行います。
   primaryActionLabel: 請求書一覧
@@ -21,6 +21,7 @@ metrics:
     trend: 定期ポーリング
     tone: text-success
 
+capabilitiesSectionTitle: 主な機能
 capabilities:
   - icon: 📧
     title: IMAP メール受信
@@ -39,6 +40,7 @@ capabilities:
     description: 保存済みデータから請求書 PDF を自動生成し、SMTP 経由で送信者へ自動返信。全フローをゼロタッチで完結させます。
     badge: 自動
 
+quickActionsSectionTitle: クイックアクセス
 quickActions:
   - label: 請求書一覧
     url: /email-chat/DynamicEntity/Index?entity=gosei_invoice

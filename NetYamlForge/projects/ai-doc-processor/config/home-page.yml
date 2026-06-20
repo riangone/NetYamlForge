@@ -26,6 +26,7 @@ metrics:
     trend: "Google AI 多模态"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 📤
     title: 便捷上传
@@ -44,6 +45,7 @@ capabilities:
     description: 实时显示每个文档的处理状态（待处理→处理中→完成/失败），Dashboard 提供总览统计与图表。
     badge: 监控
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 上传文件
     url: /ai-doc-processor/Page/UploadPage

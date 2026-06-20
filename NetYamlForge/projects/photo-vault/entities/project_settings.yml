@@ -1,0 +1,64 @@
+imports: []
+entities:
+  project_settings:
+    table: project_settings
+    key: id
+    displayName: AI 配置
+    softDelete: false
+
+    columns:
+      id:
+        type: int
+        required: true
+        label: ID
+        identity: true
+        sortable: true
+      section_group:
+        type: string
+        length: 20
+        required: true
+        label: 分组
+        searchable: true
+        sortable: true
+      setting_key:
+        type: string
+        length: 64
+        required: true
+        label: 配置键
+        searchable: true
+        sortable: true
+      label:
+        type: string
+        length: 128
+        required: true
+        label: 配置项名称
+        searchable: true
+      value:
+        type: string
+        length: 512
+        required: false
+        label: 当前值
+      default_value:
+        type: string
+        length: 512
+        required: false
+        label: 默认值
+      description:
+        type: string
+        length: 256
+        required: false
+        label: 说明
+        searchable: true
+      updated_at:
+        type: datetime
+        required: false
+        label: 更新时间
+        sortable: true
+
+    actions:
+      init_ai_settings:
+        label: 🔄 初始化默认配置
+        scope: header
+        class: btn-warning
+        confirm: "确定要初始化默认 AI 配置吗？（INSERT OR IGNORE，不会覆盖已有设置）"
+        handler: init_ai_settings

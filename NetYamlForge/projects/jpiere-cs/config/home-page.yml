@@ -1,5 +1,5 @@
 hero:
-  eyebrow: JPiere Cloud Services
+  eyebrow: 🏦 JPiere Cloud Services — 智能云财务
   title: JPiere 智能云财务与企业资源计划
   description: 集成财务核算、采购管理、合同执行与库存移动于一体的企业级开源 ERP 最佳实践方案。
   primaryActionLabel: 管理中心
@@ -26,6 +26,7 @@ metrics:
     trend: "全域视角"
     tone: text-secondary
 
+capabilitiesSectionTitle: 核心功能
 capabilities:
   - icon: 💰
     title: 财务自动化
@@ -44,6 +45,7 @@ capabilities:
     description: 支持复杂的业务伙伴、产品分类及多层级审批流配置，适配多样化业务模式。
     badge: 扩展
 
+quickActionsSectionTitle: 快捷入口
 quickActions:
   - label: 财务大盘
     url: /jpiere-cs/Dashboard

@@ -1,4 +1,4 @@
-// ファイル概要：AI ディーラーエンジン。Gemini CLI を使用してリードスコアリング・育成タスク・見積生成を自動実行します。
+// ファイル概要：AI ディーラーエンジン。Antigravity CLI を使用してリードスコアリング・育成タスク・見積生成を自動実行します。
 
 using System.Data;
 using Dapper;
@@ -8,7 +8,7 @@ namespace NetYamlForge.Services.BatchJob;
 
 /// <summary>
 /// AI 全面主導の汽車販売管理エンジン。
-/// リードスコアリング・育成タスク生成・見積生成を Gemini CLI で自動実行し、
+/// リードスコアリング・育成タスク生成・見積生成を Antigravity CLI で自動実行し、
 /// ai_decisions テーブルに結果を書き込む。
 /// </summary>
 public class AiDealerEngineExecutor : IBatchStepHandler

@@ -122,7 +122,8 @@ sections:
     component: card_list
     sourceType: custom
     source: |
-      SELECT p.file_name AS 标题,
+      SELECT p.photo_id,
+             p.file_name AS 标题,
              COALESCE(p.scene_type, '未分类') AS 子标题,
              COALESCE(p.caption_short, '待标注') AS 描述,
              p.file_path AS image_url,
@@ -133,7 +134,7 @@ sections:
       WHERE p.deleted_at IS NULL AND p.file_path IS NOT NULL
       ORDER BY p.created_at DESC
       LIMIT 96
-    columns: [标题, 子标题, 描述, image_url, lightbox_caption, lightbox_format, lightbox_date]
+    columns: [photo_id, 标题, 子标题, 描述, image_url, lightbox_caption, lightbox_format, lightbox_date]
     titleField: 标题
     subtitleField: 子标题
     descriptionField: 描述
@@ -142,6 +143,15 @@ sections:
     pageSize: 96
     editable: false
     readOnly: true
+    actions:
+      - label: 立即标注
+        class: btn-warning btn-outline
+        url: "/{project}/Page/{pageName}/annotate-photo?photo_id={photo_id}"
+        confirm: "确定要对此照片立即触发 AI 标注吗？"
+      - label: 生成嵌入
+        class: btn-success btn-outline
+        url: "/{project}/Page/{pageName}/embed-photo?photo_id={photo_id}"
+        confirm: "确定要对此照片生成嵌入向量吗？"
 
   # ─── 拍摄时间线（按月） ───
   - id: timeline_chart

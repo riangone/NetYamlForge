@@ -1,0 +1,111 @@
+@model NetYamlForge.Models.HomeIndexViewModel
+@{
+    var project = Model.Projects.FirstOrDefault();
+    var config = Model.Config;
+    var hero = config?.Hero;
+    var metrics = config?.Metrics ?? new();
+    var capabilities = config?.Capabilities ?? new();
+    var quickActions = config?.QuickActions ?? new();
+}
+
+<div class="min-h-screen" style="background: linear-gradient(180deg, #1C1917 0%, #292524 50%, #1C1917 100%);">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <section class="relative overflow-hidden rounded-lg border" style="background: linear-gradient(135deg, #292524, #44403C); border-color: #57534E;">
+            <div class="absolute inset-0 opacity-[0.03]" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, #fff 20px, #fff 21px);"></div>
+            <div class="absolute top-0 left-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl"></div>
+            <div class="relative p-8 md:p-12">
+                <div class="flex items-start gap-8">
+                    <div class="flex-1 space-y-5">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded border text-sm font-bold uppercase tracking-wider" style="background: rgba(249, 115, 22, 0.15); color: #FB923C; border-color: rgba(249, 115, 22, 0.3);">
+                            <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                            @hero?.Eyebrow
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-black text-white leading-tight tracking-tight uppercase">
+                            @hero?.Title
+                        </h1>
+                        <p class="text-base text-gray-400 leading-relaxed max-w-2xl font-mono">
+                            @hero?.Description
+                        </p>
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <a href="@hero?.PrimaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded font-bold uppercase tracking-wider text-sm transition-all hover:-translate-y-0.5 shadow-lg" style="background: linear-gradient(135deg, #EA580C, #F97316); color: #fff;">
+                                @hero?.PrimaryActionLabel
+                            </a>
+                            <a href="@hero?.SecondaryActionUrl" class="inline-flex items-center gap-2 px-6 py-3 rounded font-medium text-sm border transition-all hover:-translate-y-0.5" style="border-color: #57534E; color: #D6D3D1;">
+                                @hero?.SecondaryActionLabel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hidden lg:flex flex-col items-center gap-3 p-6 rounded-lg border min-w-[140px]" style="background: rgba(0,0,0,0.3); border-color: #57534E;">
+                        <span class="text-6xl">🏭</span>
+                        <span class="text-xs text-gray-500 uppercase tracking-wider font-bold">v2.0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        @if (metrics.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                @foreach (var m in metrics)
+                {
+                    <div class="rounded-lg border p-5" style="background: rgba(68, 64, 60, 0.5); border-color: #57534E;">
+                        <div class="text-xs font-mono text-gray-500 uppercase tracking-wider mb-1.5">@m.Label</div>
+                        <div class="text-2xl font-black text-orange-400">@m.Value</div>
+                        @if (!string.IsNullOrWhiteSpace(m.Trend))
+                        {
+                            <div class="text-xs text-gray-500 mt-1 font-mono">&gt; @m.Trend</div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        @if (capabilities.Any())
+        {
+            <section>
+                <h2 class="text-lg font-black text-white uppercase tracking-wider mb-4 font-mono">// @config?.CapabilitiesSectionTitle</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @foreach (var cap in capabilities)
+                    {
+                        <div class="rounded-lg border p-5 transition-all hover:-translate-y-0.5 group" style="background: rgba(68, 64, 60, 0.3); border-color: #57534E;">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl group-hover:scale-110 transition-transform">@cap.Icon</span>
+                                @if (!string.IsNullOrWhiteSpace(cap.Badge))
+                                {
+                                    <span class="px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase tracking-wider" style="background: rgba(249, 115, 22, 0.15); color: #FB923C;">@cap.Badge</span>
+                                }
+                            </div>
+                            <h3 class="font-bold text-white text-base mb-1 font-mono">@cap.Title</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed">@cap.Description</p>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @if (quickActions.Any())
+        {
+            <section class="rounded-lg border p-6" style="background: rgba(68, 64, 60, 0.3); border-color: #57534E;">
+                <h2 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 font-mono">// @config?.QuickActionsSectionTitle</h2>
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var action in quickActions)
+                    {
+                        <a href="@action.Url" class="inline-flex items-center gap-2 px-5 py-2.5 rounded font-bold text-sm uppercase tracking-wider transition-all hover:-translate-y-0.5" style="background: linear-gradient(135deg, #EA580C, #F97316); color: #fff;">
+                            @if (!string.IsNullOrWhiteSpace(action.Icon))
+                            {
+                                <span>@action.Icon</span>
+                            }
+                            @action.Label
+                        </a>
+                    }
+                </div>
+            </section>
+        }
+
+        <div class="text-center text-xs text-gray-600 font-mono py-4 border-t" style="border-color: #57534E;">
+            [ INVENTORY CONTROL SYSTEM v2.0 ] — All operations logged
+        </div>
+
+    </div>
+</div>

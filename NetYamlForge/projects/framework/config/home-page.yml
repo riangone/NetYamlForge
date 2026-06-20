@@ -1,0 +1,69 @@
+hero:
+  eyebrow: 🔧 Framework — 框架管理控制台
+  title: NetYamlForge 框架管理專案
+  description: YAML 驅動的 ASP.NET Core MVC 框架管理介面，提供使用者管理、動態實體配置、YAML Schema 瀏覽與 AI 助手等功能。
+  primaryActionLabel: 使用者管理
+  primaryActionUrl: /framework/Users
+  secondaryActionLabel: 動態實體配置
+  secondaryActionUrl: /framework/DynamicEntity/Index?entity=users
+  highlights:
+    - YAML 驅動架構
+    - 動態實體引擎
+    - 多專案管理
+    - AI 開發助手
+
+metrics:
+  - label: 框架版本
+    value: "v1.0"
+    trend: ".NET + YAML"
+    tone: text-primary
+  - label: 動態實體
+    value: "Auto"
+    trend: "零代碼配置"
+    tone: text-success
+  - label: 擴展方式
+    value: "Hooks"
+    trend: "宣告式編程"
+    tone: text-secondary
+
+capabilitiesSectionTitle: 核心功能
+capabilities:
+  - icon: 👥
+    title: 使用者管理
+    description: 集中管理平台使用者的帳號、角色與權限，支援 RBAC 權限控制模型。
+    badge: 管理
+  - icon: 🔧
+    title: 動態實體配置
+    description: 透過 YAML 定義資料實體與 CRUD 介面，無需撰寫程式碼即可建立完整的功能模組。
+    badge: 核心
+  - icon: 📄
+    title: YAML Schema
+    description: 瀏覽框架支援的所有 YAML 設定檔 Schema，快速了解各項配置的結構與欄位說明。
+    badge: 參考
+  - icon: 🤖
+    title: AI 開發助手
+    description: 內建 AI 對話助手，協助開發者快速生成 YAML 配置、偵錯與學習框架使用方式。
+    badge: 助理
+
+quickActionsSectionTitle: 快捷入口
+quickActions:
+  - label: 使用者管理
+    url: /framework/Users
+    style: btn-primary
+    icon: 👥
+  - label: 動態實體
+    url: /framework/DynamicEntity/Index?entity=users
+    style: btn-outline
+    icon: 🔧
+  - label: YAML Schema
+    url: /framework/Page/Schemas
+    style: btn-outline
+    icon: 📄
+  - label: AI 助手
+    url: /framework/Page/ChatDetail
+    style: btn-ghost
+    icon: 🤖
+  - label: 所有專案
+    url: /Home/Index
+    style: btn-ghost
+    icon: 📁
