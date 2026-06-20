@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace NetYamlForge.Services.AI;
 
-public class LmStudioEmbeddingService : IGeminiEmbeddingService
+public class LmStudioEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
 {
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(60) };
 

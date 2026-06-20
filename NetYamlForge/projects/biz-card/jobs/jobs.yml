@@ -1,49 +1,66 @@
 jobs:
-  # 名刺AI解析ワーカー（取込ジョブのpending → AI解析 → business_cards登録）
+  # 名刺AI解析ワーカー（取込ジョブのpending → AI OCR解析 → business_cards登録）
   card_parse_worker:
     displayName: 名刺AI解析ワーカー
-    description: "pendingの取込ジョブを処理し、OCR+AI解析で名刺情報を抽出・登録"
+    description: "pendingの取込ジョブを処理し、AI OCRで名刺情報を抽出・business_cardsへ登録"
     enabled: true
 
     schedule:
       cron: "*/3 * * * *"
       timezone: "Asia/Tokyo"
 
-    type: photo_annotator
-    settings:
-      sourceTable: import_jobs
-      statusField: status
-      pendingValue: pending
-      processingValue: processing
-      doneValue: done
+    type: biz_card_parser
+    aiProvider: lmstudio
+    batchSize: 3
+
+    bizCardParseConfig:
+      importTable: import_jobs
+      cardsTable: business_cards
+      embeddingTable: card_embeddings
+      autoEmbed: true
 
     onFailure:
       retryCount: 2
       retryInterval: 180
       logError: true
 
-  # ベクトル埋め込み生成ワーカー
+  # ベクトル埋め込み生成ワーカー（インライン埋め込みに漏れた名刺を補完）
   embedding_worker:
     displayName: ベクトル埋め込み生成
-    description: "embedding_status=pendingの名刺にGemini Embeddingを付与"
+    description: "embedding_status=pendingの名刺にベクトル埋め込みを付与"
     enabled: true
 
     schedule:
       cron: "*/5 * * * *"
       timezone: "Asia/Tokyo"
 
-    type: embedding_generator
-    settings:
+    type: ai_embedding_generator
+    batchSize: 10
+
+    embeddingConfig:
       sourceTable: business_cards
+      primaryKey: id
       statusField: embedding_status
-      pendingValue: pending
-      doneValue: done
+      statusValue: pending
+      embeddingTable: card_embeddings
+      updateStatusAfterEmbed: true
+      doneStatusValue: done
       textFields:
-        - company_name
-        - name
-        - title
-        - email
-        - note
+        - field: company_name
+          prefix: "会社"
+        - field: last_name
+        - field: first_name
+        - field: title
+          prefix: "役職"
+        - field: department
+          prefix: "部署"
+        - field: email
+          prefix: "メール"
+        - field: industry
+          prefix: "業界"
+        - field: address
+          prefix: "住所"
+        - field: notes
 
     onFailure:
       retryCount: 3

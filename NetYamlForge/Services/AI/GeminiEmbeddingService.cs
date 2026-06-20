@@ -5,13 +5,20 @@ using System.Text.Json.Nodes;
 
 namespace NetYamlForge.Services.AI;
 
-public interface IGeminiEmbeddingService
+/// <summary>
+/// Framework-level embedding service interface. Supports multiple providers:
+/// local (sentence-transformers), lmstudio, gemini.
+/// </summary>
+public interface IEmbeddingService
 {
     Task<float[]?> EmbedAsync(string text, CancellationToken ct = default);
     Task<List<float[]?>> EmbedBatchAsync(IList<string> texts, CancellationToken ct = default);
 }
 
-public class GeminiEmbeddingService : IGeminiEmbeddingService
+/// <summary>Backward-compat alias for IEmbeddingService.</summary>
+public interface IGeminiEmbeddingService : IEmbeddingService { }
+
+public class GeminiEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
 {
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(30) };
     private const string Model = "text-embedding-004";

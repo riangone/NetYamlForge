@@ -21,7 +21,7 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
-    private readonly IGeminiEmbeddingService _embedding;
+    private readonly IEmbeddingService _embedding;
     private readonly ILogger<PhotoAnnotatorExecutor> _logger;
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
 
@@ -42,7 +42,7 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     public PhotoAnnotatorExecutor(
         IWebHostEnvironment env,
         IConfiguration configuration,
-        IGeminiEmbeddingService embedding,
+        IEmbeddingService embedding,
         ILogger<PhotoAnnotatorExecutor> logger)
     {
         _env = env;

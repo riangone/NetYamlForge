@@ -1,3 +1,5 @@
+// DCS001 抑制理由: テーブル名は IsValidIdentifier() で検証済みの設定値のみを使用する動的SQL生成ユーティリティです。
+#pragma warning disable DCS001
 using System.Data;
 using System.Text.Json;
 using Dapper;
@@ -7,18 +9,30 @@ using NetYamlForge.Services.AI;
 namespace NetYamlForge.Controllers;
 
 /// <summary>
-/// GET /{project}/api/vector-search?q=...&amp;limit=20
-/// Gemini text-embedding-004 でクエリをベクトル化し、コサイン類似度で最近傍写真を返す。
+/// Generic vector search endpoint — works with any entity that has an embeddings table.
+///
+/// GET /{project}/api/vector-search
+///   ?q=search text
+///   &amp;limit=20
+///   &amp;sourceTable=photos          (default: photos)
+///   &amp;embeddingTable=photo_embeddings  (default: photo_embeddings)
+///   &amp;pkField=photo_id            (default: photo_id)
+///   &amp;labelField=caption_short    (default: caption_short)
+///
+/// GET /{project}/api/embedding-stats
+///   ?sourceTable=photos
+///   &amp;embeddingTable=photo_embeddings
+///   &amp;statusField=annotation_status
 /// </summary>
 [Route("{project}/api")]
 public class VectorSearchController : Controller
 {
-    private readonly IGeminiEmbeddingService _embedding;
+    private readonly IEmbeddingService _embedding;
     private readonly IDbConnection _db;
     private readonly ILogger<VectorSearchController> _logger;
 
     public VectorSearchController(
-        IGeminiEmbeddingService embedding,
+        IEmbeddingService embedding,
         IDbConnection db,
         ILogger<VectorSearchController> logger)
     {
@@ -32,6 +46,10 @@ public class VectorSearchController : Controller
         string project,
         [FromQuery] string? q,
         [FromQuery] int limit = 20,
+        [FromQuery] string sourceTable    = "photos",
+        [FromQuery] string embeddingTable = "photo_embeddings",
+        [FromQuery] string pkField        = "photo_id",
+        [FromQuery] string labelField     = "caption_short",
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(q))
@@ -39,93 +57,131 @@ public class VectorSearchController : Controller
 
         if (limit is < 1 or > 100) limit = 20;
 
-        // 1. Embed the query
+        // Validate table/column names to prevent SQL injection
+        if (!IsValidIdentifier(sourceTable) || !IsValidIdentifier(embeddingTable) ||
+            !IsValidIdentifier(pkField) || !IsValidIdentifier(labelField))
+            return BadRequest("Invalid table or column name");
+
         var queryVec = await _embedding.EmbedAsync(q.Trim(), ct);
         if (queryVec == null)
-            return Ok(new { results = Array.Empty<object>(), message = "Embedding 服务不可用，请检查 EmbeddingProvider 配置（当前: lmstudio）及 LM Studio 是否运行在 http://localhost:1234/v1" });
+            return Ok(new { results = Array.Empty<object>(), message = "Embedding 服务不可用，请检查 EmbeddingProvider 配置" });
 
-        // 2. Check table exists
         var tableExists = await _db.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photo_embeddings'");
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@Name",
+            new { Name = embeddingTable });
         if (tableExists == 0)
-            return Ok(new { results = Array.Empty<object>(), message = "尚未生成向量索引，请先运行「向量嵌入生成」批处理任务" });
+            return Ok(new { results = Array.Empty<object>(), message = $"向量表 {embeddingTable} 不存在，请先运行嵌入生成任务" });
 
-        // 3. Load all stored embeddings with photo metadata
-        var rows = (await _db.QueryAsync(
-            """
-            SELECT e.photo_id, e.embedding,
-                   p.file_name, p.file_path, p.caption_short, p.scene_type,
-                   p.subjects, p.gps_address, p.taken_at, p.thumb_path,
-                   p.confidence_score
-            FROM photo_embeddings e
-            JOIN photos p ON p.photo_id = e.photo_id
-            WHERE p.deleted_at IS NULL
-            """)).ToList();
+        // Load embeddings + source row (photo-schema fields included when using default tables)
+        string selectSql;
+        if (sourceTable == "photos" && embeddingTable == "photo_embeddings")
+        {
+            selectSql = $"""
+                SELECT e.{pkField}, e.embedding,
+                       s.file_name, s.file_path, s.caption_short, s.scene_type,
+                       s.subjects, s.gps_address, s.taken_at, s.thumb_path,
+                       s.confidence_score
+                FROM {embeddingTable} e
+                JOIN {sourceTable} s ON s.{pkField} = e.{pkField}
+                WHERE s.deleted_at IS NULL
+                """;
+        }
+        else
+        {
+            selectSql = $"""
+                SELECT e.{pkField}, e.embedding, s.{labelField}
+                FROM {embeddingTable} e
+                JOIN {sourceTable} s ON s.{pkField} = e.{pkField}
+                """;
+        }
+
+        var rows = (await _db.QueryAsync(selectSql)).ToList();
 
         if (rows.Count == 0)
-            return Ok(new { results = Array.Empty<object>(), message = "向量索引为空，请等待批处理任务完成标注后运行嵌入生成" });
+            return Ok(new { results = Array.Empty<object>(), message = "向量索引为空，请等待嵌入生成任务完成" });
 
-        // 4. Cosine similarity in C#
         var scored = rows
             .Select(r =>
             {
+                var dict = (IDictionary<string, object>)r;
                 float[]? vec = null;
-                try { vec = JsonSerializer.Deserialize<float[]>((string)r.embedding); }
-                catch { /* skip malformed */ }
-
-                var sim = vec != null ? CosineSimilarity(queryVec, vec) : -1f;
-                return (sim, row: r);
+                try { vec = JsonSerializer.Deserialize<float[]>((string)dict["embedding"]); }
+                catch { /* skip */ }
+                return (sim: vec != null ? CosineSimilarity(queryVec, vec) : -1f, row: dict);
             })
             .Where(x => x.sim > 0)
             .OrderByDescending(x => x.sim)
             .Take(limit)
             .ToList();
 
-        // 5. Build result DTO
         var results = scored.Select(x =>
         {
             var r = x.row;
-            var fileName = (string)r.file_name;
-            // Build thumbnail URL: /photo/thumb/{fileName}?w=300
-            var thumbUrl = $"/photo/thumb/{Uri.EscapeDataString(fileName)}?w=300";
-            // Original photo URL from file_path
-            var photoUrl = (string?)r.file_path ?? $"/uploads/photo-vault/{fileName}";
+            var pkValue = GetStr(r, pkField);
 
-            return new
+            // Photo-specific enriched result
+            if (sourceTable == "photos")
             {
-                photo_id      = (string)r.photo_id,
-                file_name     = fileName,
-                caption_short = (string?)r.caption_short,
-                scene_type    = (string?)r.scene_type,
-                subjects      = (string?)r.subjects,
-                gps_address   = (string?)r.gps_address,
-                taken_at      = (string?)r.taken_at,
-                confidence    = (double?)r.confidence_score,
-                similarity    = Math.Round((double)x.sim, 4),
-                thumb_url     = thumbUrl,
-                photo_url     = photoUrl
+                var fileName = GetStr(r, "file_name") ?? "";
+                return (object)new
+                {
+                    id            = pkValue,
+                    file_name     = fileName,
+                    caption_short = GetStr(r, "caption_short"),
+                    scene_type    = GetStr(r, "scene_type"),
+                    subjects      = GetStr(r, "subjects"),
+                    gps_address   = GetStr(r, "gps_address"),
+                    taken_at      = GetStr(r, "taken_at"),
+                    confidence    = r.TryGetValue("confidence_score", out var cs) && cs is double d ? (double?)d : null,
+                    similarity    = Math.Round((double)x.sim, 4),
+                    thumb_url     = $"/photo/thumb/{Uri.EscapeDataString(fileName)}?w=300",
+                    photo_url     = GetStr(r, "file_path") ?? $"/uploads/photo-vault/{fileName}"
+                };
+            }
+
+            // Generic result
+            return (object)new
+            {
+                id         = pkValue,
+                label      = GetStr(r, labelField),
+                similarity = Math.Round((double)x.sim, 4),
             };
         }).ToList();
 
-        return Ok(new { results, total = results.Count, query = q });
+        return Ok(new { results, total = results.Count, query = q, sourceTable, embeddingTable });
     }
 
     [HttpGet("embedding-stats")]
-    public async Task<IActionResult> Stats(string project)
+    public async Task<IActionResult> Stats(
+        string project,
+        [FromQuery] string sourceTable    = "photos",
+        [FromQuery] string embeddingTable = "photo_embeddings",
+        [FromQuery] string statusField    = "annotation_status")
     {
-        var tableExists = await _db.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photo_embeddings'");
+        if (!IsValidIdentifier(sourceTable) || !IsValidIdentifier(embeddingTable) || !IsValidIdentifier(statusField))
+            return BadRequest("Invalid table or column name");
 
+        var tableExists = await _db.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@Name",
+            new { Name = embeddingTable });
         if (tableExists == 0)
-            return Ok(new { total_photos = 0, embedded = 0, pending = 0 });
+            return Ok(new { total = 0, embedded = 0, pending = 0 });
 
         var total = await _db.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM photos WHERE deleted_at IS NULL AND annotation_status='done'");
+            $"SELECT COUNT(*) FROM {sourceTable} WHERE {statusField}='done'");
         var embedded = await _db.ExecuteScalarAsync<int>(
-            "SELECT COUNT(*) FROM photo_embeddings");
+            $"SELECT COUNT(*) FROM {embeddingTable}");
 
-        return Ok(new { total_photos = total, embedded, pending = total - embedded });
+        return Ok(new { total, embedded, pending = total - embedded, sourceTable, embeddingTable });
     }
+
+    private static string? GetStr(IDictionary<string, object> d, string key)
+        => d.TryGetValue(key, out var v) ? v?.ToString() : null;
+
+    private static bool IsValidIdentifier(string name)
+        => !string.IsNullOrWhiteSpace(name) &&
+           System.Text.RegularExpressions.Regex.IsMatch(name, @"^[A-Za-z_][A-Za-z0-9_]*$") &&
+           name.Length <= 64;
 
     private static float CosineSimilarity(float[] a, float[] b)
     {

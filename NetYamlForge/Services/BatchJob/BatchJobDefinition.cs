@@ -66,7 +66,7 @@ public class BatchJobDefinition
     public string? Description { get; set; }
 
     /// <summary>
-    /// 使用する AI プロバイダー（photo_annotator ジョブで使用）
+    /// 使用する AI プロバイダー（photo_annotator / ai_annotator ジョブで使用）
     /// </summary>
     public string? AiProvider { get; set; }
 
@@ -74,6 +74,102 @@ public class BatchJobDefinition
     /// 一度に処理するバッチサイズ
     /// </summary>
     public int BatchSize { get; set; } = 5;
+
+    /// <summary>
+    /// ai_annotator ジョブの設定（テーブル名・フィールドマッピング・プロンプトなど）
+    /// </summary>
+    public AnnotationJobConfig? AnnotationConfig { get; set; }
+
+    /// <summary>
+    /// ai_embedding_generator ジョブの設定
+    /// </summary>
+    public EmbeddingJobConfig? EmbeddingConfig { get; set; }
+
+    /// <summary>
+    /// biz_card_parser ジョブの設定
+    /// </summary>
+    public BizCardParseConfig? BizCardParseConfig { get; set; }
+}
+
+/// <summary>
+/// Generic AI annotation job configuration.
+/// Allows any project to run image/document annotation via YAML jobs.
+/// </summary>
+public class AnnotationJobConfig
+{
+    /// <summary>Entity table containing items to annotate.</summary>
+    public string SourceTable { get; set; } = "photos";
+    /// <summary>Primary key column of SourceTable.</summary>
+    public string PrimaryKey { get; set; } = "photo_id";
+    /// <summary>Column holding the file path to pass to the vision model.</summary>
+    public string FilePathField { get; set; } = "file_path";
+    /// <summary>Column tracking annotation status (pending/processing/done/failed).</summary>
+    public string StatusField { get; set; } = "annotation_status";
+    /// <summary>Queue table for deferred/batch annotation.</summary>
+    public string QueueTable { get; set; } = "processing_queue";
+    /// <summary>Table where embedding vectors are stored.</summary>
+    public string EmbeddingTable { get; set; } = "photo_embeddings";
+    /// <summary>Custom vision/annotation prompt. Null = use built-in default photo-analysis prompt.</summary>
+    public string? AnnotationPrompt { get; set; }
+    /// <summary>
+    /// Mapping from annotation JSON field → target DB column.
+    /// Null value means skip that field. Omit to use built-in photo schema defaults.
+    /// </summary>
+    public Dictionary<string, string?>? ResultFields { get; set; }
+    /// <summary>Whether to generate embeddings inline after annotation.</summary>
+    public bool AutoEmbed { get; set; } = true;
+    /// <summary>Text fields to build embedding input from (field name → optional label prefix).</summary>
+    public List<EmbeddingTextField>? EmbedTextFields { get; set; }
+}
+
+/// <summary>
+/// Generic AI embedding generator job configuration.
+/// </summary>
+public class EmbeddingJobConfig
+{
+    /// <summary>Entity table to read annotated rows from.</summary>
+    public string SourceTable { get; set; } = "photos";
+    /// <summary>Primary key column of SourceTable.</summary>
+    public string PrimaryKey { get; set; } = "photo_id";
+    /// <summary>Status column that gates which rows get embedded.</summary>
+    public string StatusField { get; set; } = "annotation_status";
+    /// <summary>Only embed rows where StatusField equals this value.</summary>
+    public string StatusValue { get; set; } = "done";
+    /// <summary>Table where vectors are stored (must have photo_id, embedding, created_at columns).</summary>
+    public string EmbeddingTable { get; set; } = "photo_embeddings";
+    /// <summary>
+    /// Source text columns and their optional label prefixes.
+    /// Defaults to caption_short + caption_long + scene_type/subjects/activities (photo schema).
+    /// </summary>
+    public List<EmbeddingTextField>? TextFields { get; set; }
+    /// <summary>If true, update StatusField to DoneStatusValue after embedding is written.</summary>
+    public bool UpdateStatusAfterEmbed { get; set; } = false;
+    /// <summary>Value to set StatusField to after embedding (e.g. "done"). Only used when UpdateStatusAfterEmbed=true.</summary>
+    public string DoneStatusValue { get; set; } = "done";
+}
+
+/// <summary>
+/// Biz-card import parse job configuration.
+/// </summary>
+public class BizCardParseConfig
+{
+    /// <summary>Table that queues uploaded card images (default: import_jobs).</summary>
+    public string ImportTable { get; set; } = "import_jobs";
+    /// <summary>Destination entity table for parsed contact info (default: business_cards).</summary>
+    public string CardsTable { get; set; } = "business_cards";
+    /// <summary>Table where embedding vectors are stored (default: card_embeddings).</summary>
+    public string EmbeddingTable { get; set; } = "card_embeddings";
+    /// <summary>Whether to generate embedding inline after parsing (default: true).</summary>
+    public bool AutoEmbed { get; set; } = true;
+}
+
+/// <summary>A source column that contributes text to the embedding input.</summary>
+public class EmbeddingTextField
+{
+    /// <summary>Column name in the source table.</summary>
+    public string Field { get; set; } = "";
+    /// <summary>Optional Chinese-label prefix (e.g. "场景" → "场景: outdoor").</summary>
+    public string? Prefix { get; set; }
 }
 
 /// <summary>

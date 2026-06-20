@@ -9,7 +9,7 @@ namespace NetYamlForge.Services.AI;
 /// Starts local_embed_server.py on port 5789 on first use.
 /// No external API key required — fully offline, supports 50+ languages.
 /// </summary>
-public class LocalEmbeddingService : IGeminiEmbeddingService
+public class LocalEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
 {
     private const int Port = 5789;
     private const string BaseUrl = "http://127.0.0.1:5789";

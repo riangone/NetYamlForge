@@ -207,19 +207,31 @@ public static class ServiceCollectionExtensions
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
         // Embedding サービス（EmbeddingProvider で切替: local / lmstudio / gemini）
+        // IEmbeddingService はフレームワーク公開インターフェース；IGeminiEmbeddingService は後方互換エイリアス
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
             ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
             ?? "local";
         switch (embedProvider)
         {
             case "lmstudio":
-                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LmStudioEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IEmbeddingService, NetYamlForge.Services.AI.LmStudioEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService>(
+                    sp => (NetYamlForge.Services.AI.IGeminiEmbeddingService)sp.GetRequiredService<NetYamlForge.Services.AI.IEmbeddingService>());
                 break;
             case "local":
-                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService>(
+                    sp => (NetYamlForge.Services.AI.IGeminiEmbeddingService)sp.GetRequiredService<NetYamlForge.Services.AI.IEmbeddingService>());
                 break;
             case "gemini":
-                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService, NetYamlForge.Services.AI.GeminiEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IEmbeddingService, NetYamlForge.Services.AI.GeminiEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService>(
+                    sp => (NetYamlForge.Services.AI.IGeminiEmbeddingService)sp.GetRequiredService<NetYamlForge.Services.AI.IEmbeddingService>());
+                break;
+            default:
+                services.AddSingleton<NetYamlForge.Services.AI.IEmbeddingService, NetYamlForge.Services.AI.LocalEmbeddingService>();
+                services.AddSingleton<NetYamlForge.Services.AI.IGeminiEmbeddingService>(
+                    sp => (NetYamlForge.Services.AI.IGeminiEmbeddingService)sp.GetRequiredService<NetYamlForge.Services.AI.IEmbeddingService>());
                 break;
         }
         services.AddSingleton<ToolCallValidator>();
@@ -273,6 +285,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<PhotoAnnotatorExecutor>());
         services.AddScoped<EmbeddingGeneratorExecutor>();
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<EmbeddingGeneratorExecutor>());
+        // Generic framework-level annotation/embedding executors
+        services.AddScoped<AiAnnotatorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiAnnotatorExecutor>());
+        services.AddScoped<AiEmbeddingGeneratorExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiEmbeddingGeneratorExecutor>());
+        services.AddScoped<BizCardParserExecutor>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<BizCardParserExecutor>());
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();

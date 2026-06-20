@@ -14,11 +14,11 @@ public class EmbeddingGeneratorExecutor : IBatchStepHandler
 {
     public string StepType => "photo_embedding_generator";
 
-    private readonly IGeminiEmbeddingService _embedding;
+    private readonly IEmbeddingService _embedding;
     private readonly ILogger<EmbeddingGeneratorExecutor> _logger;
 
     public EmbeddingGeneratorExecutor(
-        IGeminiEmbeddingService embedding,
+        IEmbeddingService embedding,
         ILogger<EmbeddingGeneratorExecutor> logger)
     {
         _embedding = embedding;
