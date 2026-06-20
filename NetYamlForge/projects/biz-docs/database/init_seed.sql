@@ -108,34 +108,6 @@ CREATE TABLE Invoice (
     FOREIGN KEY (QuotationId) REFERENCES Quotation(Id)
 );
 
-CREATE TABLE CustomsDeclaration (
-    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    DeclNo          TEXT    NOT NULL UNIQUE,
-    InvoiceId       INTEGER,
-    DeclType        TEXT    NOT NULL DEFAULT 'export',
-    ExporterName    TEXT    NOT NULL,
-    ExporterAddress TEXT,
-    ImporterName    TEXT    NOT NULL,
-    ImporterAddress TEXT,
-    PortOfLoading   TEXT,
-    PortOfDischarge TEXT,
-    DepartureDate   TEXT,
-    ArrivalDate     TEXT,
-    Incoterms       TEXT    NOT NULL DEFAULT 'FOB',
-    Currency        TEXT    NOT NULL DEFAULT 'USD',
-    TotalValue      REAL    NOT NULL DEFAULT 0,
-    Packages        INTEGER,
-    GrossWeightKg   REAL,
-    NetWeightKg     REAL,
-    HsCode          TEXT,
-    CargoDescription TEXT   NOT NULL,
-    ContainerNo     TEXT,
-    VesselName      TEXT,
-    Status          TEXT    NOT NULL DEFAULT 'draft',
-    Notes           TEXT,
-    FOREIGN KEY (InvoiceId) REFERENCES Invoice(Id)
-);
-
 PRAGMA foreign_keys = ON;
 
 -- ---- Seed: Customers ----
@@ -226,39 +198,49 @@ INSERT INTO Invoice (InvoiceNo, QuotationId, CustomerId, IssueDate, DueDate, Cur
 
 -- ---- Seed: Customs Declarations ----
 
-INSERT INTO CustomsDeclaration (DeclNo, InvoiceId, DeclType, ExporterName, ExporterAddress, ImporterName, ImporterAddress, PortOfLoading, PortOfDischarge, DepartureDate, ArrivalDate, Incoterms, Currency, TotalValue, Packages, GrossWeightKg, NetWeightKg, HsCode, CargoDescription, ContainerNo, VesselName, Status, Notes) VALUES
-  ('CD-2026-SH-001', 1, 'export',
-   '上海宏远贸易有限公司', '上海市浦东新区张江高科技园区科苑路88号',
-   'Acme Electronics GmbH', 'Industriestraße 42, 70565 Stuttgart, Germany',
-   'Shanghai Yangshan', 'Hamburg', '2026-02-15', '2026-03-08',
-   'FOB', 'USD', 48500.00, 24, 1250.5, 1180.0,
-   '8534.00', 'Printed Circuit Boards and Electronic Assemblies',
-   'TCKU3456789', 'COSCO SHIPPING FORTUNE', 'cleared',
-   'All duties paid; clearance completed 2026-03-10'),
-  ('CD-2026-SZ-001', 2, 'export',
-   '深圳市蓝海科技股份有限公司', '深圳市南山区科技园南区高新南七道18号',
-   'TechHub Singapore Pte. Ltd.', '80 Robinson Road #08-01, Singapore 068898',
-   'Yantian International', 'Singapore PSA', '2026-02-10', '2026-02-18',
-   'EXW', 'USD', 12800.00, 6, 320.0, 285.0,
-   '8517.62', 'WiFi Modules and RF Antennas',
-   'MSDU2987654', 'MSC ATHENS', 'cleared',
-   NULL),
-  ('CD-2026-SH-002', 3, 'export',
-   '上海宏远贸易有限公司', '上海市浦东新区张江高科技园区科苑路88号',
-   'Horizon Logistics B.V.', 'Maasvlakte 2, Rotterdam, Netherlands',
-   'Shanghai Yangshan', 'Rotterdam', '2026-04-01', NULL,
-   'CIF', 'USD', 9750.00, 8, 580.0, 530.0,
-   '8534.00;8517.62', 'Electronic Components (PCBs, WiFi Modules, Cables)',
-   NULL, NULL, 'submitted',
-   'Awaiting customs authority approval'),
-  ('CD-2026-GZ-001', 4, 'import',
-   'KOYO Machine Tools Co., Ltd.', '3-1-1 Nishimachi, Suita, Osaka 564-0034, Japan',
-   '广州绿洲国际物流有限公司', '广州市越秀区东风中路385号',
-   'Osaka', 'Guangzhou Nansha', '2026-03-20', '2026-04-05',
-   'CIF', 'JPY', 2850000.00, 2, 8500.0, 7200.0,
-   '8457.10', '5轴立式加工中心 型号5A×2台',
-   'OOLU8765432', 'ONE COMMITMENT', 'draft',
-   '设备进口：含免税申请（高新技术设备）');
+CREATE TABLE IF NOT EXISTS CustomsDeclaration (
+    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+    DeclarationNo TEXT NOT NULL,
+    CustomerId INTEGER NOT NULL,
+    InvoiceId INTEGER,
+    IssueDate DATE NOT NULL,
+    ExportDate DATE,
+    Currency TEXT NOT NULL DEFAULT 'USD',
+    Incoterms TEXT,
+    CountryOfOrigin TEXT,
+    PortOfLoading TEXT,
+    PortOfDischarge TEXT,
+    TotalValue DECIMAL(18,2) NOT NULL DEFAULT 0,
+    GrossWeight DECIMAL(10,3),
+    NetWeight DECIMAL(10,3),
+    Status TEXT NOT NULL DEFAULT 'draft',
+    Notes TEXT,
+    ExporterName TEXT,
+    ImporterName TEXT,
+    CargoDescription TEXT,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (CustomerId) REFERENCES Customer(Id),
+    FOREIGN KEY (InvoiceId) REFERENCES Invoice(Id)
+);
+
+INSERT INTO CustomsDeclaration (DeclarationNo, CustomerId, InvoiceId, IssueDate, ExportDate, Currency, Incoterms, CountryOfOrigin, PortOfLoading, PortOfDischarge, TotalValue, GrossWeight, NetWeight, Status, Notes, ExporterName, ImporterName, CargoDescription) VALUES
+  ('CD-2026-SH-001', 1, 1, '2026-02-15', '2026-03-08',
+   'USD', 'FOB', 'CN', 'Shanghai Yangshan', 'Hamburg', 48500.00, 1250.5, 1180.0, 'cleared',
+   'All duties paid; clearance completed 2026-03-10',
+   '上海宏远贸易有限公司', 'Acme Electronics GmbH', 'Printed Circuit Boards and Electronic Assemblies'),
+  ('CD-2026-SZ-001', 2, 2, '2026-02-10', '2026-02-18',
+   'USD', 'EXW', 'CN', 'Yantian International', 'Singapore PSA', 12800.00, 320.0, 285.0, 'cleared',
+   NULL,
+   '深圳市蓝海科技股份有限公司', 'TechHub Singapore Pte. Ltd.', 'WiFi Modules and RF Antennas'),
+  ('CD-2026-SH-002', 1, 3, '2026-04-01', NULL,
+   'USD', 'CIF', 'CN', 'Shanghai Yangshan', 'Rotterdam', 9750.00, 580.0, 530.0, 'submitted',
+   'Awaiting customs authority approval',
+   '上海宏远贸易有限公司', 'Horizon Logistics B.V.', 'Electronic Components (PCBs, WiFi Modules, Cables)'),
+  ('CD-2026-GZ-001', 4, 4, '2026-03-20', '2026-04-05',
+   'JPY', 'CIF', 'JP', 'Osaka', 'Guangzhou Nansha', 2850000.00, 8500.0, 7200.0, 'draft',
+   '设备进口：含免税申请（高新技术设备）',
+   'KOYO Machine Tools Co., Ltd.', '广州绿洲国际物流有限公司', '5轴立式加工中心 型号5A×2台');
 
 -- ============================================================
 -- 日本向けビジネス文書テーブル
@@ -530,7 +512,7 @@ CREATE TABLE JpResume (
     Hope            TEXT,
     AvailableDate   TEXT,
     Awards          TEXT,
-    References      TEXT,
+    "References"    TEXT,
     CreatedDate     TEXT,
     Status          TEXT    NOT NULL DEFAULT 'draft'
 );
@@ -797,7 +779,7 @@ INSERT INTO MeetingActionItem (MeetingId, ItemNo, Description, Owner, DueDate, P
 -- ---- 履歴書シードデータ（resume-jis テンプレート用）----
 
 INSERT INTO JpResume (Name, Kana, BirthDate, Gender, Address, Phone, Email,
-  Hobbies, Hope, AvailableDate, Awards, References, CreatedDate, Status) VALUES
+  Hobbies, Hope, AvailableDate, Awards, "References", CreatedDate, Status) VALUES
   ('田中 太郎', 'タナカ タロウ', '1990-05-15', '男', '東京都新宿区西新宿2丁目8番1号',
    '090-1234-5678', 'taro.tanaka@example.com',
    'プログラミング、読書（技術書）、登山',
@@ -877,7 +859,7 @@ INSERT OR IGNORE INTO JpInvoiceBank (InvoiceNo, CustomerId, IssueDate, DueDate, 
   ('IB-2026-002', 2, '2026-04-30', '2026-05-31', 320000.00, 10.00, 32000.00, 352000.00, '三菱UFJ銀行', '新宿支店', '普通', '7654321', '株式会社サンプル', NULL),
   ('IB-2026-003', 3, '2026-05-31', '2026-06-30', 1200000.00, 10.00, 120000.00, 1320000.00, 'みずほ銀行', '渋谷支店', '当座', '9876543', '株式会社サンプル', '大口取引'),
   ('IB-2026-004', 1, '2026-05-31', '2026-06-30', 180000.00, 10.00, 18000.00, 198000.00, 'みずほ銀行', '渋谷支店', '普通', '1234567', '株式会社サンプル', NULL),
-  ('IB-2026-005', 5, '2026-06-30', '2026-07-31', 450000.00, 10.00, 45000.00, 495000.00, '三井住友銀行', '池袋支店', '普通', '1122334', '株式会社サンプル', NULL);
+  ('IB-2026-005', 4, '2026-06-30', '2026-07-31', 450000.00, 10.00, 45000.00, 495000.00, '三井住友銀行', '池袋支店', '普通', '1122334', '株式会社サンプル', NULL);
 
 -- ============================================================
 -- Seed: JpInvoiceBlue (5 rows)
@@ -896,5 +878,5 @@ INSERT OR IGNORE INTO JpInvoiceStandard (InvoiceNo, CustomerId, IssueDate, DueDa
   ('IS-2026-001', 1, '2026-04-30', '2026-05-31', 450000.00, 10.00, 45000.00, 495000.00, NULL),
   ('IS-2026-002', 2, '2026-04-30', '2026-05-31', 220000.00, 10.00, 22000.00, 242000.00, NULL),
   ('IS-2026-003', 3, '2026-05-31', '2026-06-30', 1100000.00, 10.00, 110000.00, 1210000.00, '大口'),
-  ('IS-2026-004', 5, '2026-05-31', '2026-06-30', 380000.00, 10.00, 38000.00, 418000.00, NULL),
+  ('IS-2026-004', 4, '2026-05-31', '2026-06-30', 380000.00, 10.00, 38000.00, 418000.00, NULL),
   ('IS-2026-005', 1, '2026-06-30', '2026-07-31', 165000.00, 10.00, 16500.00, 181500.00, NULL);
