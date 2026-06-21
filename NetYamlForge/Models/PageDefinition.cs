@@ -192,12 +192,6 @@ public class SectionActionDefinition
     public string? Confirm { get; set; }
 
     // ── form コンポーネントのアクション専用 ──────────────────────────────
-    /// <summary>アクション種別（submit / reset）。</summary>
-    public string? Type { get; set; }
-    /// <summary>ボタンスタイル（primary / ghost 等）。</summary>
-    public string? Style { get; set; }
-    /// <summary>ボタンアイコン。</summary>
-    public string? Icon { get; set; }
     /// <summary>フォーム送信前の確認ダイアログメッセージ。{{field_id}} でフォーム値を参照可。</summary>
     public string? ConfirmMessage { get; set; }
     /// <summary>挿入先エンティティ名（テーブル名）</summary>
@@ -424,7 +418,17 @@ public class SectionDefinition
     public string? ProgressField { get; set; }
     public string? MaxField { get; set; }
 
+    // ── table コンポーネント ────────────────────────────────────────
+    /// <summary>秒単位の自動リフレッシュ間隔（0 または未設定で無効）</summary>
+    public int AutoRefresh { get; set; }
+    /// <summary>データが空のときに表示するメッセージ（未設定時は i18n "No data available"）</summary>
+    public string? EmptyMessage { get; set; }
+    /// <summary>行の条件付き色付けルール（YAML: rowColorRules）</summary>
+    public List<RowColorRule>? RowColorRules { get; set; }
+
     // ── card_list / accordion / leaderboard ─────────────────────────
+    /// <summary>accordion / card_list 用の静的アイテムリスト（sourceType: none のとき使用）</summary>
+    public List<AccordionItemDef>? Items { get; set; }
     public string? TitleField { get; set; }
     public string? SubtitleField { get; set; }
     public string? DescriptionField { get; set; }
@@ -476,6 +480,22 @@ public class ExtraFieldOptionDefinition
 {
     public string? Value { get; set; }
     public string? Label { get; set; }
+}
+
+/// <summary>accordion / card_list 用の静的アイテム定義</summary>
+public class AccordionItemDef
+{
+    public string Title { get; set; } = "";
+    public string? Content { get; set; }
+}
+
+/// <summary>table の行条件色付けルール（YAML: rowColorRules）</summary>
+public class RowColorRule
+{
+    /// <summary>SQLite CASE 風の条件式（列名 LIKE '%値%' 等）</summary>
+    public string Condition { get; set; } = "";
+    /// <summary>CSS クラス名（row-danger / row-info / row-success 等）</summary>
+    public string ColorClass { get; set; } = "";
 }
 
 /// <summary>file_upload セクションの onUploadComplete 設定</summary>

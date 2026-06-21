@@ -3,9 +3,13 @@
 @{
     var sec = Model.Sec;
     var rows = Model.Rows;
-    var titleField = sec.TitleField ?? (sec.GetColumnAt(0));
-    var contentField = sec.ContentField ?? (sec.GetColumnAt(1));
+    var titleField = sec.TitleField ?? sec.GetColumnAt(0);
+    var contentField = sec.ContentField ?? sec.GetColumnAt(1);
     var expanded = sec.ExpandedByDefault;
+
+    // Use static Items when sourceType: none, fall back to DB rows
+    var useStaticItems = sec.Items != null && sec.Items.Count > 0;
+    var itemCount = useStaticItems ? sec.Items!.Count : rows.Count;
 }
 
 @if (!string.IsNullOrEmpty(sec.Title))
@@ -14,32 +18,106 @@
 }
 
 <div class="accordion-container bg-base-100 rounded shadow divide-y">
-    @for (var i = 0; i < rows.Count; i++)
+    @if (useStaticItems)
     {
-        var row = rows[i];
-        var title = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
-        var content = row.TryGetValue(contentField, out var c) ? c?.ToString() ?? "" : "";
-        var itemId = $"accordion-{sec.Id}-{i}";
-        var isExpanded = (expanded ?? false) || i == 0;
-        
-        <div class="accordion-item">
-            <div class="accordion-header">
-                <button class="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-base-200 transition-colors"
-                        onclick="document.getElementById('@itemId').classList.toggle('hidden'); this.querySelector('.accordion-icon').classList.toggle('rotate-180')">
-                    <span class="font-medium">@title</span>
-                    <svg class="accordion-icon w-5 h-5 transition-transform duration-200 @(isExpanded ? "rotate-180" : "")"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
+        for (var i = 0; i < sec.Items!.Count; i++)
+        {
+            var item = sec.Items[i];
+            var itemId = $"accordion-{sec.Id}-{i}";
+            var isExpanded = (expanded ?? false) || i == 0;
+            <div class="accordion-item">
+                <div class="accordion-header">
+                    <button class="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-base-200 transition-colors"
+                            onclick="document.getElementById('@itemId').classList.toggle('hidden'); this.querySelector('.accordion-icon').classList.toggle('rotate-180')">
+                        <span class="font-medium">@item.Title</span>
+                        <svg class="accordion-icon w-5 h-5 transition-transform duration-200 @(isExpanded ? "rotate-180" : "")"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="@itemId" class="accordion-content @(isExpanded ? "" : "hidden") px-4 pb-4">
+                    <div class="text-gray-600 text-sm prose max-w-none">@Html.Raw(ConvertMarkdownToHtml(item.Content ?? ""))</div>
+                </div>
             </div>
-            <div id="@itemId" class="accordion-content @(isExpanded ? "" : "hidden") px-4 pb-4">
-                <div class="text-gray-600 text-sm">@content</div>
-            </div>
-        </div>
+        }
     }
-    @if (!rows.Any())
+    else
     {
-        <div class="text-center text-gray-400 py-8">No data available</div>
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var row = rows[i];
+            var title = row.TryGetValue(titleField, out var t) ? t?.ToString() ?? "" : "";
+            var content = row.TryGetValue(contentField, out var c) ? c?.ToString() ?? "" : "";
+            var itemId = $"accordion-{sec.Id}-{i}";
+            var isExpanded = (expanded ?? false) || i == 0;
+            <div class="accordion-item">
+                <div class="accordion-header">
+                    <button class="w-full px-4 py-3 text-left flex justify-between items-center hover:bg-base-200 transition-colors"
+                            onclick="document.getElementById('@itemId').classList.toggle('hidden'); this.querySelector('.accordion-icon').classList.toggle('rotate-180')">
+                        <span class="font-medium">@title</span>
+                        <svg class="accordion-icon w-5 h-5 transition-transform duration-200 @(isExpanded ? "rotate-180" : "")"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="@itemId" class="accordion-content @(isExpanded ? "" : "hidden") px-4 pb-4">
+                    <div class="text-gray-600 text-sm">@content</div>
+                </div>
+            </div>
+        }
+        @if (!rows.Any())
+        {
+            <div class="text-center text-gray-400 py-8">No data available</div>
+        }
     }
 </div>
+
+@functions {
+    static string ConvertMarkdownToHtml(string md)
+    {
+        if (string.IsNullOrEmpty(md)) return "";
+        // Simple table/bold/code/newline conversion for accordion static content
+        var lines = md.Split('\n');
+        var sb = new System.Text.StringBuilder();
+        bool inTable = false;
+        bool tableHeaderDone = false;
+        foreach (var line in lines)
+        {
+            var l = line.TrimEnd();
+            if (l.StartsWith("|"))
+            {
+                if (!inTable) { sb.Append("<div class=\"overflow-x-auto\"><table class=\"table table-sm w-full text-sm\">"); inTable = true; tableHeaderDone = false; }
+                if (l.Replace("|","").Replace("-","").Replace(" ","").Length == 0) { if (!tableHeaderDone) { sb.Append("</thead><tbody>"); tableHeaderDone = true; } continue; }
+                var cells = l.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                if (!tableHeaderDone) sb.Append("<thead><tr>");
+                else sb.Append("<tr>");
+                foreach (var cell in cells)
+                {
+                    var c = InlineMd(cell.Trim());
+                    if (!tableHeaderDone) sb.Append($"<th class=\"px-2 py-1\">{c}</th>");
+                    else sb.Append($"<td class=\"px-2 py-1\">{c}</td>");
+                }
+                if (!tableHeaderDone) sb.Append("</tr>");
+                else sb.Append("</tr>");
+            }
+            else
+            {
+                if (inTable) { sb.Append("</tbody></table></div>"); inTable = false; }
+                if (l.StartsWith("```")) { sb.Append(l == "```" ? "</pre>" : "<pre class=\"bg-gray-100 rounded p-3 text-xs overflow-x-auto\">"); }
+                else if (string.IsNullOrEmpty(l)) sb.Append("<br/>");
+                else sb.Append($"<p>{InlineMd(l)}</p>");
+            }
+        }
+        if (inTable) sb.Append("</tbody></table></div>");
+        return sb.ToString();
+    }
+
+    static string InlineMd(string s)
+    {
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        s = System.Text.RegularExpressions.Regex.Replace(s, @"`(.+?)`", "<code class=\"bg-gray-100 px-1 rounded text-xs\">$1</code>");
+        return s;
+    }
+}

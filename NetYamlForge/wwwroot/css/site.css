@@ -2,6 +2,14 @@ html {
   font-size: 14px;
 }
 
+/* Table row color rules */
+tr.row-danger { background-color: #fef2f2 !important; }
+tr.row-danger:hover { background-color: #fee2e2 !important; }
+tr.row-info { background-color: #eff6ff !important; }
+tr.row-info:hover { background-color: #dbeafe !important; }
+tr.row-success { background-color: #f0fdf4 !important; }
+tr.row-success:hover { background-color: #dcfce7 !important; }
+
 @media (min-width: 768px) {
   html {
     font-size: 16px;

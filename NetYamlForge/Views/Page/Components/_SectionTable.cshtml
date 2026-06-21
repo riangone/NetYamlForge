@@ -88,6 +88,9 @@
     }
 
     var hasFilters = sec.Filters != null && sec.Filters.Count > 0;
+    var autoRefresh = sec.AutoRefresh;
+    var emptyMessage = sec.EmptyMessage;
+    var hasRowColorRules = sec.RowColorRules != null && sec.RowColorRules.Count > 0;
 
     // _FilterControl 用: PageFilterDefinition → FilterDefinition 変換
     // キー名はセクションプレフィックス付き（{sec.Id}_{filterKey}）
@@ -104,6 +107,15 @@
             kv => kv.Key,
             kv => (string?)kv.Value,
             StringComparer.OrdinalIgnoreCase);
+}
+
+@if (autoRefresh > 0)
+{
+    <div hx-get="@sectionUrl"
+         hx-trigger="every @(autoRefresh)s"
+         hx-target="#section-@sec.Id"
+         hx-swap="innerHTML"
+         style="display:none"></div>
 }
 
 @if (!string.IsNullOrEmpty(sec.Title))
@@ -231,7 +243,8 @@
                     rowId = row.Values.FirstOrDefault()?.ToString();
                 }
 
-                <tr class="hover:bg-gray-50">
+                var rowColorClass = hasRowColorRules ? (sec.RowColorRules!.FirstOrDefault(r => EvaluateRowColorCondition(r.Condition, row))?.ColorClass ?? "") : "";
+                <tr class="hover:bg-gray-50 @rowColorClass">
                     @foreach (var col in visibleCols)
                     {
                         var colDef = sec.Columns.TryGetValue(col, out var cd) ? cd : new SectionColumnDef();
@@ -297,7 +310,9 @@
             {
                 <tr>
                     <td colspan="@(visibleCols.Count + (showActionsColumn ? 1 : 0))"
-                        class="px-4 py-8 text-center text-gray-400">@L["No data available"]</td>
+                        class="px-4 py-8 text-center text-gray-400">
+                        @(string.IsNullOrEmpty(emptyMessage) ? L["No data available"].Value : emptyMessage)
+                    </td>
                 </tr>
             }
         </tbody>
@@ -333,6 +348,26 @@
     };
 }
 @await Html.PartialAsync("_Pagination", secPagination)
+
+@functions {
+    // Evaluate simple "col LIKE '%val%'" or "col LIKE '%v1%' OR col LIKE '%v2%'" conditions
+    static bool EvaluateRowColorCondition(string condition, Dictionary<string, object> row)
+    {
+        if (string.IsNullOrEmpty(condition)) return false;
+        var parts = condition.Split(new[] { " OR " }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var part in parts)
+        {
+            var p = part.Trim();
+            var likeIdx = p.IndexOf(" LIKE ", StringComparison.OrdinalIgnoreCase);
+            if (likeIdx < 0) continue;
+            var col = p[..likeIdx].Trim();
+            var pattern = p[(likeIdx + 6)..].Trim().Trim('\'').Replace("%", "");
+            if (row.TryGetValue(col, out var val) && val?.ToString()?.Contains(pattern, StringComparison.OrdinalIgnoreCase) == true)
+                return true;
+        }
+        return false;
+    }
+}
 
 @* ── 新規/編集フォーム用モーダル ────────────────────────────────────────── *@
 @if (canEdit)

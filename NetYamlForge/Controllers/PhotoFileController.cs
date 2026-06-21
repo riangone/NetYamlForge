@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -7,49 +8,64 @@ using SixLabors.ImageSharp.Processing;
 namespace NetYamlForge.Controllers;
 
 [Route("{project}/photo-file")]
+[AllowAnonymous]
 public class PhotoFileController : Controller
 {
     private readonly IDbConnection _db;
+    private readonly IWebHostEnvironment _env;
     private readonly ILogger<PhotoFileController> _logger;
 
-    public PhotoFileController(IDbConnection db, ILogger<PhotoFileController> logger)
+    public PhotoFileController(IDbConnection db, IWebHostEnvironment env, ILogger<PhotoFileController> logger)
     {
         _db = db;
+        _env = env;
         _logger = logger;
     }
 
+    // Resolve stored path (web path like /uploads/... or absolute fs path) to absolute fs path
+    private string ResolveFilePath(string storedPath)
+    {
+        if (storedPath.StartsWith("/uploads/") || storedPath.StartsWith("uploads/"))
+            return Path.Combine(_env.WebRootPath, storedPath.TrimStart('/'));
+        return storedPath; // already absolute fs path (e.g. from directory import)
+    }
+
     [HttpGet("serve/{photoId}")]
-    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any)]
+    [HttpHead("serve/{photoId}")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Serve(string project, string photoId)
     {
         if (string.IsNullOrEmpty(photoId))
             return BadRequest();
 
-        var filePath = await _db.QueryFirstOrDefaultAsync<string>(
+        var storedPath = await _db.QueryFirstOrDefaultAsync<string>(
             "SELECT file_path FROM photos WHERE photo_id = @PhotoId AND deleted_at IS NULL",
             new { PhotoId = photoId });
 
-        if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
-            return NotFound();
+        if (string.IsNullOrEmpty(storedPath)) return NotFound();
+        var filePath = ResolveFilePath(storedPath);
+        if (!System.IO.File.Exists(filePath)) return NotFound();
 
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
         return PhysicalFile(filePath, GetMimeType(ext));
     }
 
     [HttpGet("thumb/{photoId}")]
-    [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any)]
+    [HttpHead("thumb/{photoId}")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Thumb(string project, string photoId, [FromQuery] int w = 400)
     {
         if (string.IsNullOrEmpty(photoId))
             return BadRequest();
         if (w <= 0 || w > 2000) w = 400;
 
-        var filePath = await _db.QueryFirstOrDefaultAsync<string>(
+        var storedPath = await _db.QueryFirstOrDefaultAsync<string>(
             "SELECT file_path FROM photos WHERE photo_id = @PhotoId AND deleted_at IS NULL",
             new { PhotoId = photoId });
 
-        if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
-            return NotFound();
+        if (string.IsNullOrEmpty(storedPath)) return NotFound();
+        var filePath = ResolveFilePath(storedPath);
+        if (!System.IO.File.Exists(filePath)) return NotFound();
 
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
 

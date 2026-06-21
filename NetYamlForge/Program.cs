@@ -282,6 +282,11 @@ var app = builder.Build();
 app.UsePathBase("/nyf");
 app.Use(async (context, next) =>
 {
+    if (context.Request.Path.Value.Contains("photo-file") || context.Request.Path.Value.Contains("photo/"))
+    {
+        Console.WriteLine($"[DEBUG-NYF] RawPath: {context.Request.Path}, PathBase: {context.Request.PathBase}, Host: {context.Request.Host}, Auth: {context.User.Identity?.IsAuthenticated}");
+    }
+
     // Caddy の handle_path で /nyf が剥がされると UsePathBase だけでは PathBase が空のままになる。
     // その場合でも Razor/Url.Content が正しく /nyf を含む URL を生成できるように補正する。
     if (!context.Request.PathBase.HasValue)
@@ -295,6 +300,11 @@ app.Use(async (context, next) =>
         {
             context.Request.PathBase = new PathString("/nyf");
         }
+    }
+
+    if (context.Request.Path.Value.Contains("photo-file") || context.Request.Path.Value.Contains("photo/"))
+    {
+        Console.WriteLine($"[DEBUG-NYF-AFTER] Path: {context.Request.Path}, PathBase: {context.Request.PathBase}");
     }
 
     await next();
@@ -348,6 +358,24 @@ app.UseMiddleware<ProjectMiddleware>(); // UseRouting 後・UseAuthentication �
 app.UseAuthentication();
 app.UseRequestLocalization(localizationOptions);
 app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
+app.Use(async (context, next) =>
+{
+    var endpoint = context.GetEndpoint();
+    if (context.Request.Path.Value.Contains("photo-file") || context.Request.Path.Value.Contains("photo/"))
+    {
+        if (endpoint != null)
+        {
+            var allowAnonymous = endpoint.Metadata.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>();
+            var authorizeData = endpoint.Metadata.GetOrderedMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>();
+            Console.WriteLine($"[DEBUG-ENDPOINT] Path: {context.Request.Path}, Endpoint: {endpoint.DisplayName}, AllowAnonymous: {allowAnonymous != null}, AuthDataCount: {authorizeData?.Count}");
+        }
+        else
+        {
+            Console.WriteLine($"[DEBUG-ENDPOINT] Path: {context.Request.Path}, Endpoint is NULL");
+        }
+    }
+    await next();
+});
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
 

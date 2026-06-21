@@ -135,9 +135,6 @@
                 case "vector_search":
                     @await Html.PartialAsync("Components/_SectionVectorSearch", renderModel)
                     break;
-                case "form":
-                    @await Html.PartialAsync("Components/_SectionForm", renderModel)
-                    break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)
                     break;

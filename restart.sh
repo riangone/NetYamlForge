@@ -59,7 +59,6 @@ mkdir -p "$(dirname "$LOG_FILE")"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 
 cd "$PROJECT_DIR" || { echo "Cannot cd to $PROJECT_DIR"; exit 1; }
-
 export ASPNETCORE_URLS=http://localhost:5001
 export ASPNETCORE_CONTENTROOT="$PROJECT_DIR"
 nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" --contentRoot "$PROJECT_DIR" >> "$LOG_FILE" 2>&1 &
