@@ -192,6 +192,12 @@ public class SectionActionDefinition
     public string? Confirm { get; set; }
 
     // ── form コンポーネントのアクション専用 ──────────────────────────────
+    /// <summary>アクション種別（submit / reset）。</summary>
+    public string? Type { get; set; }
+    /// <summary>ボタンスタイル（primary / ghost 等）。</summary>
+    public string? Style { get; set; }
+    /// <summary>ボタンアイコン。</summary>
+    public string? Icon { get; set; }
     /// <summary>フォーム送信前の確認ダイアログメッセージ。{{field_id}} でフォーム値を参照可。</summary>
     public string? ConfirmMessage { get; set; }
     /// <summary>挿入先エンティティ名（テーブル名）</summary>

@@ -111,6 +111,9 @@
                 case "goal_tracker":
                     @await Html.PartialAsync("Components/_SectionGoalTracker", renderModel)
                     break;
+                case "form":
+                    @await Html.PartialAsync("Components/_SectionForm", renderModel)
+                    break;
                 case "file_upload":
                     @await Html.PartialAsync("Components/_SectionFileUpload", renderModel)
                     break;

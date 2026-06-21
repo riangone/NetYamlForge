@@ -501,7 +501,7 @@ CREATE TABLE MeetingActionItem (
 -- 履歴書（resume-jis テンプレート用）
 CREATE TABLE JpResume (
     Id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    Name            TEXT    NOT NULL,
+    ApplicantName   TEXT    NOT NULL,
     Kana            TEXT,
     BirthDate       TEXT,
     Gender          TEXT,
@@ -778,7 +778,7 @@ INSERT INTO MeetingActionItem (MeetingId, ItemNo, Description, Owner, DueDate, P
 
 -- ---- 履歴書シードデータ（resume-jis テンプレート用）----
 
-INSERT INTO JpResume (Name, Kana, BirthDate, Gender, Address, Phone, Email,
+INSERT INTO JpResume (ApplicantName, Kana, BirthDate, Gender, Address, Phone, Email,
   Hobbies, Hope, AvailableDate, Awards, "References", CreatedDate, Status) VALUES
   ('田中 太郎', 'タナカ タロウ', '1990-05-15', '男', '東京都新宿区西新宿2丁目8番1号',
    '090-1234-5678', 'taro.tanaka@example.com',

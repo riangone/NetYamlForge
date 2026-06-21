@@ -149,17 +149,6 @@ sections:
     keyField: album_id
     required: false
     placeholder: — 不指定相册 —
-  - id: priority
-    label: 处理优先级
-    type: select
-    default: '1'
-    options:
-    - value: '1'
-      label: 高（优先处理）
-    - value: '5'
-      label: 普通
-    - value: '10'
-      label: 低（后台低优先级）
   actions:
   - id: start_scan
     label: 🚀 开始扫描导入
@@ -181,13 +170,13 @@ sections:
       '
     insertEntity: import_jobs
     fields:
+      job_id: '{{uuid}}'
       job_type: directory
       source_path: '{{source_path}}'
       recursive: '{{recursive}}'
       file_filter: '{{file_filter}}'
       ai_provider: '{{dir_ai_provider}}'
       album_id: '{{dir_album_id}}'
-      priority: '{{priority}}'
       status: queued
       created_by: '{{current_user}}'
       created_at: '{{now}}'

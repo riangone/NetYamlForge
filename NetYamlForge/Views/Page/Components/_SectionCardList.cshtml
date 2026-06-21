@@ -38,7 +38,9 @@
         var thumbUrl = string.IsNullOrEmpty(imageUrl) ? "" :
             imageUrl.StartsWith("/uploads/photo-vault/") || imageUrl.StartsWith("uploads/photo-vault/")
                 ? $"/nyf/photo/thumb/{System.IO.Path.GetFileName(imageUrl)}?w=400"
-                : imageUrl;
+                : imageUrl.Contains("/photo-file/serve/")
+                    ? imageUrl.Replace("/photo-file/serve/", "/photo-file/thumb/") + "?w=400"
+                    : imageUrl;
 
         <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow overflow-hidden">
             @if (!string.IsNullOrEmpty(imageUrl))

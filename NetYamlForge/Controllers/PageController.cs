@@ -454,6 +454,96 @@ public class PageController : BaseProjectController
         return await ReturnSectionOrRedirectAsync(proj, section, pageName, sectionId);
     }
 
+    // POST /{project}/Page/{pageName}/section/{sectionId}/form-submit
+#pragma warning disable DCS001 // Entity/table names come from YAML config, validated by section definition
+    [Authorize]
+    [HttpPost("{pageName}/section/{sectionId}/form-submit")]
+    public async Task<IActionResult> FormSubmit(string project, string pageName, string sectionId, [FromBody] Dictionary<string, string> formData)
+    {
+        var proj = _projectScope.Current;
+        if (!proj.PageMetadata.TryGet(pageName, out var pageDef))
+            return NotFound(new { error = $"Page '{pageName}' not found." });
+        if (!await _pagePermission.CanWritePageAsync(proj.Name, pageName, User.Identity?.Name, UserIsAdmin()))
+            return Forbid();
+
+        var section = pageDef.Sections.FirstOrDefault(s => s.Id == sectionId);
+        if (section == null || section.Fields == null)
+            return BadRequest(new { error = "Section not found or not a form." });
+
+        var submitAction = section.Actions?.FirstOrDefault(a =>
+            string.Equals(a.Type, "submit", StringComparison.OrdinalIgnoreCase));
+        if (submitAction == null || string.IsNullOrEmpty(submitAction.InsertEntity))
+            return BadRequest(new { error = "No submit action or insert entity defined." });
+
+        var entityName = submitAction.InsertEntity;
+        var fieldMapping = submitAction.Fields;
+        if (fieldMapping == null || fieldMapping.Count == 0)
+            return BadRequest(new { error = "No insert field mapping defined." });
+
+        try
+        {
+            // Build column → value map from form data
+            var insertCols = new List<string>();
+            var insertParams = new Dictionary<string, object?>();
+            foreach (var kv in fieldMapping)
+            {
+                var colName = kv.Key;       // DB column name
+                var template = kv.Value;    // e.g. "{{source_path}}" or literal like "directory"
+
+                object? val;
+                if (template == "{{uuid}}")
+                {
+                    val = Guid.NewGuid().ToString("N");
+                }
+                else if (template == "{{now}}")
+                {
+                    val = DateTime.UtcNow;
+                }
+                else if (template == "{{current_user}}")
+                {
+                    val = User.Identity?.Name ?? "";
+                }
+                else if (template.StartsWith("{{") && template.EndsWith("}}"))
+                {
+                    var fieldId = template[2..^2].Trim();
+                    formData.TryGetValue(fieldId, out var raw);
+                    val = raw;
+                }
+                else
+                {
+                    val = template; // literal value
+                }
+
+                insertCols.Add(colName);
+                var paramName = $"@{colName}";
+                insertParams[paramName] = val;
+            }
+
+            var colList = string.Join(", ", insertCols);
+            var paramList = string.Join(", ", insertParams.Keys);
+            var sql = $"INSERT INTO {entityName} ({colList}) VALUES ({paramList})";
+
+            await _db.ExecuteAsync(sql, insertParams);
+
+            await TryWritePageAuditAsync("page_form_submit", entityName,
+                $"Page={pageName},Section={sectionId},Entity={entityName}");
+
+            // Trigger the import worker immediately instead of waiting for cron
+            _ = _scheduler.TriggerJobNowAsync(proj.Name, "photo_import_worker");
+
+            return Ok(new
+            {
+                message = submitAction.SuccessMessage ?? "提交成功",
+                refreshSection = submitAction.RefreshSection
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "FormSubmit failed for {Page}/{Section}", pageName, sectionId);
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
     private async Task TryWritePageAuditAsync(string action, string? entity, string detail)
     {
         try

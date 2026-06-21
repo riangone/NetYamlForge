@@ -78,7 +78,7 @@ layout:
         url: /photo-vault/Page/PhotoImport
         icon: 📥
         section: 运营管理
-        roles: [editor, admin]
+        roles: [viewer, editor, admin]
       - label: 照片管理
         url: /photo-vault/Page/PhotoManage
         icon: 📋

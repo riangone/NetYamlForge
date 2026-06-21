@@ -126,7 +126,7 @@ sections:
              p.file_name AS 标题,
              COALESCE(p.scene_type, '未分类') AS 子标题,
              COALESCE(p.caption_short, '待标注') AS 描述,
-             p.file_path AS image_url,
+              '/nyf/photo-vault/photo-file/serve/' || p.photo_id AS image_url,
              COALESCE(p.caption_long, p.caption_short, '') AS lightbox_caption,
              p.file_format AS lightbox_format,
              COALESCE(p.taken_at, p.created_at) AS lightbox_date
