@@ -205,6 +205,15 @@ public class AnnotateNowHandler : ICustomActionHandler
         _scheduler = scheduler;
     }
 
+    private static readonly IReadOnlyDictionary<string, string> _providerToJobId =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "antigravity", "antigravity_cli_worker" },
+            { "lmstudio",    "lmstudio_annotation_worker" },
+            { "gemini",      "gemini_annotation_worker" },
+            { "ollama",      "annotation_worker" },
+        };
+
     public async Task<ActionHandlerResult> ExecuteAsync(CustomActionContext ctx, IDbConnection db, IDbTransaction? tx)
     {
         if (string.IsNullOrWhiteSpace(ctx.RecordId))
@@ -221,24 +230,29 @@ public class AnnotateNowHandler : ICustomActionHandler
 
         var now = DateTime.UtcNow;
 
-        // 已有 queued/processing 则跳过重复入队
-        var exists = await db.QueryFirstOrDefaultAsync<int>(
-            "SELECT COUNT(1) FROM processing_queue WHERE photo_id = @Id AND status IN ('queued', 'processing')",
+        // 清除该照片所有 queued/processing 条目（可能 provider 错误），确保以正确 provider 高优先级重新入队
+        await db.ExecuteAsync(
+            "DELETE FROM processing_queue WHERE photo_id = @Id AND status IN ('queued', 'processing')",
             new { Id = ctx.RecordId }, tx);
-        if (exists == 0)
-        {
-            await db.ExecuteAsync(@"
-                INSERT INTO processing_queue (photo_id, file_path, status, provider, priority, retry_count, queued_at)
-                VALUES (@PhotoId, @FilePath, 'queued', @Provider, 10, 0, @Now)",
-                new { PhotoId = ctx.RecordId, FilePath = (string)photo.file_path, Provider = provider, Now = now }, tx);
-        }
+
+        await db.ExecuteAsync(@"
+            INSERT INTO processing_queue (photo_id, file_path, status, provider, priority, retry_count, queued_at)
+            VALUES (@PhotoId, @FilePath, 'queued', @Provider, 10, 0, @Now)",
+            new { PhotoId = ctx.RecordId, FilePath = (string)photo.file_path, Provider = provider, Now = now }, tx);
 
         await db.ExecuteAsync(
             "UPDATE photos SET annotation_status = 'pending', updated_at = @Now WHERE photo_id = @Id",
             new { Now = now, Id = ctx.RecordId }, tx);
 
-        // 立即触发 Worker（fire-and-forget，不等待完成）
-        _ = _scheduler.TriggerJobNowAsync(ctx.Project, "antigravity_cli_worker");
+        // 延迟 1 秒后触发对应 provider 的 Worker，确保当前事务已提交
+        var projectName = ctx.Project;
+        var scheduler = _scheduler;
+        var jobId = _providerToJobId.TryGetValue(provider, out var jid) ? jid : "antigravity_cli_worker";
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(1000, CancellationToken.None);
+            await scheduler.TriggerJobNowAsync(projectName, jobId);
+        });
 
         return ActionHandlerResult.Success();
     }
