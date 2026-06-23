@@ -29,7 +29,7 @@ sections:
       FROM photos p
       WHERE p.deleted_at IS NULL AND p.file_path IS NOT NULL
       ORDER BY p.created_at DESC
-      LIMIT 4
+      LIMIT 96
     columns: [photo_id, 标题, 子标题, 描述, image_url, lightbox_caption, lightbox_format, lightbox_date]
     titleField: 标题
     subtitleField: 子标题

@@ -19,76 +19,55 @@ layout:
   dashboardTheme: workspace
 
   landingPageByRole:
-    viewer:  /photo-vault/Page/Gallery
-    editor:  /photo-vault/Page/Gallery
-    admin:   /photo-vault/Dashboard
+    viewer:  /photo-vault/Page/Home
+    editor:  /photo-vault/Page/Home
+    admin:   /photo-vault/Page/Home
 
   navigation:
-    showDashboard: true
+    showDashboard: false
     showPages: false
     showEntities: false
     entities: []
     items:
-      # ─── 相册浏览 ───
-      - label: 照片画廊
-        url: /photo-vault/Page/Gallery
-        icon: 🖼️
-        section: 相册浏览
+      - label: 首页
+        url: /photo-vault/Page/Home
+        icon: 🏠
         roles: [viewer, editor, admin]
-      - label: 相册管理
-        url: /photo-vault/Page/Albums
-        icon: 📂
-        section: 相册浏览
-        roles: [viewer, editor, admin]
-      - label: 标签浏览
-        url: /photo-vault/Page/TagBrowser
-        icon: 🏷️
-        section: 相册浏览
-        roles: [viewer, editor, admin]
-
-      # ─── AI 智能中心 ───
-      - label: 语义搜索
-        url: /photo-vault/Page/AiSearch
-        icon: 🔍
-        section: AI 智能中心
-        roles: [viewer, editor, admin]
-      - label: AI 助手
-        url: /photo-vault/Page/AiAssistant
-        icon: 🤖
-        section: AI 智能中心
-        roles: [editor, admin]
-
-      # ─── 运营管理 ───
       - label: 处理队列
         url: /photo-vault/Page/ProcessingQueue
         icon: ⚙️
-        section: 运营管理
         roles: [editor, admin]
-      - label: AI 提供商
-        url: /photo-vault/Page/AiProvider
-        icon: 🔌
-        section: 运营管理
-        roles: [admin]
-      - label: AI 配置
-        url: /photo-vault/Page/Settings
-        icon: ⚙️
-        section: 运营管理
-        roles: [admin]
-      - label: 照片导入
-        url: /photo-vault/Page/PhotoImport
-        icon: 📥
-        section: 运营管理
-        roles: [viewer, editor, admin]
-      - label: 照片管理
-        url: /photo-vault/Page/PhotoManage
-        icon: 📋
-        section: 运营管理
-        roles: [editor, admin]
-      - label: 照片列表（实体）
-        url: /photo-vault/DynamicEntity/Index?entity=photos
-        icon: 🗂️
-        section: 运营管理
-        roles: [editor, admin]
+      # ─── 隐藏项（保留备用）───
+      # - label: 照片画廊
+      #   url: /photo-vault/Page/Gallery
+      #   icon: 🖼️
+      # - label: 语义搜索
+      #   url: /photo-vault/Page/AiSearch
+      #   icon: 🔍
+      # - label: 照片导入
+      #   url: /photo-vault/Page/PhotoImport
+      #   icon: 📥
+      # - label: 相册管理
+      #   url: /photo-vault/Page/Albums
+      #   icon: 📂
+      # - label: 标签浏览
+      #   url: /photo-vault/Page/TagBrowser
+      #   icon: 🏷️
+      # - label: AI 助手
+      #   url: /photo-vault/Page/AiAssistant
+      #   icon: 🤖
+      # - label: AI 提供商
+      #   url: /photo-vault/Page/AiProvider
+      #   icon: 🔌
+      # - label: AI 配置
+      #   url: /photo-vault/Page/Settings
+      #   icon: ⚙️
+      # - label: 照片管理
+      #   url: /photo-vault/Page/PhotoManage
+      #   icon: 📋
+      # - label: 照片列表（实体）
+      #   url: /photo-vault/DynamicEntity/Index?entity=photos
+      #   icon: 🗂️
 
 settings:
   locale: zh-CN

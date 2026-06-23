@@ -1,7 +1,7 @@
 {
   "album_stats_refresh": false,
   "daily_annotation_report": false,
-  "embedding_generator": false,
+  "embedding_generator": true,
   "failed_retry": false,
   "lmstudio_annotation_worker": false,
   "photo_import_worker": true,

@@ -40,6 +40,9 @@ Thumbs.db
 # Claude memory
 memory/
 
+# Claude Code internal snapshot
+.shadow-git/
+
 # ai-doc-processor: exclude uploaded files
 NetYamlForge/wwwroot/uploads/ai-doc-processor/
 NetYamlForge/wwwroot/watch-docs/

@@ -238,6 +238,8 @@ public class SectionDefinition
     /// YAML: visibleToRoles: [sales_rep, manager]
     /// </summary>
     public List<string>? VisibleToRoles { get; set; }
+    /// <summary>true のとき、このセクションを画面・データ取得から除外する。YAML: hidden: true</summary>
+    public bool Hidden { get; set; } = false;
     /// <summary>ソース種別: table | custom</summary>
     public string SourceType { get; set; } = "table";
     /// <summary>テーブル名 (table) または SQL クエリ (custom)</summary>
