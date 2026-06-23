@@ -1,0 +1,153 @@
+@model NetYamlForge.Projects.FormForge.FfFillViewModel
+@{
+    ViewData["Title"] = Model.Form.Title;
+    Layout = "~/projects/form-forge/views/_FormLayout.cshtml";
+    var project = Model.ProjectName;
+    var submitUrl = Url.Content($"~/{project}/FormForge/Fill/{Model.Form.Id}/Submit");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/form-forge/fill.css" asp-append-version="true" />
+    <style>:root { --form-color: @Model.Form.ThemeColor; }</style>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <!-- Closed / not available -->
+    <div class="fill-wrap">
+        <div class="fill-closed" style="border-top-color: @Model.Form.ThemeColor">
+            <div class="fill-closed-icon">🔒</div>
+            <h1 class="fill-closed-title">@Model.Form.Title</h1>
+            <p class="fill-closed-msg">@Model.Error</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="fill-wrap">
+        <form method="post" action="@submitUrl" class="fill-form" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="fill-header-card" style="border-top-color: @Model.Form.ThemeColor">
+                <h1 class="fill-title">@Model.Form.Title</h1>
+                @if (!string.IsNullOrEmpty(Model.Form.Description))
+                {
+                    <p class="fill-desc">@Model.Form.Description</p>
+                }
+                @if (TempData["Errors"] is string errorStr)
+                {
+                    var errorFields = errorStr.Split('|');
+                    <div class="fill-error-banner">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                        <span>Please fill in required fields: @string.Join(", ", errorFields)</span>
+                    </div>
+                }
+            </div>
+
+            @foreach (var q in Model.Form.Questions)
+            {
+                <div class="fill-question-card">
+                    <div class="fq-header">
+                        <label class="fq-label" for="q_@q.Id">
+                            @q.Title
+                            @if (q.Required) { <span class="req-star">*</span> }
+                        </label>
+                        @if (!string.IsNullOrEmpty(q.Description))
+                        {
+                            <p class="fq-desc">@q.Description</p>
+                        }
+                    </div>
+
+                    @if (q.Type == "short_text")
+                    {
+                        <input type="text" name="q_@q.Id" id="q_@q.Id" class="fq-input" placeholder="Your answer" @(q.Required ? "required" : "") />
+                    }
+                    else if (q.Type == "paragraph")
+                    {
+                        <textarea name="q_@q.Id" id="q_@q.Id" class="fq-textarea" placeholder="Your answer" rows="4" @(q.Required ? "required" : "")></textarea>
+                    }
+                    else if (q.Type == "multiple_choice")
+                    {
+                        <div class="fq-options">
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="fq-option">
+                                    <input type="radio" name="q_@q.Id" value="@opt" @(q.Required ? "required" : "") />
+                                    <span class="fq-option-mark"></span>
+                                    <span>@opt</span>
+                                </label>
+                            }
+                        </div>
+                    }
+                    else if (q.Type == "checkboxes")
+                    {
+                        <div class="fq-options">
+                            @foreach (var opt in q.Options)
+                            {
+                                <label class="fq-option fq-checkbox">
+                                    <input type="checkbox" name="q_@q.Id" value="@opt" class="chk-item" data-name="q_@q.Id" />
+                                    <span class="fq-option-mark checkbox-mark"></span>
+                                    <span>@opt</span>
+                                </label>
+                            }
+                        </div>
+                        <input type="hidden" name="q_@q.Id" class="chk-hidden" id="chk_@q.Id" />
+                    }
+                    else if (q.Type == "dropdown")
+                    {
+                        <select name="q_@q.Id" id="q_@q.Id" class="fq-select" @(q.Required ? "required" : "")>
+                            <option value="">Choose an option</option>
+                            @foreach (var opt in q.Options)
+                            {
+                                <option value="@opt">@opt</option>
+                            }
+                        </select>
+                    }
+                    else if (q.Type == "linear_scale")
+                    {
+                        <div class="fq-scale">
+                            <div class="scale-labels">
+                                <span>@(string.IsNullOrEmpty(q.ScaleMinLabel) ? q.ScaleMin.ToString() : $"{q.ScaleMin} — {q.ScaleMinLabel}")</span>
+                                <span>@(string.IsNullOrEmpty(q.ScaleMaxLabel) ? q.ScaleMax.ToString() : $"{q.ScaleMax} — {q.ScaleMaxLabel}")</span>
+                            </div>
+                            <div class="scale-options">
+                                @for (int v = q.ScaleMin; v <= q.ScaleMax; v++)
+                                {
+                                    <label class="scale-option">
+                                        <input type="radio" name="q_@q.Id" value="@v" @(q.Required ? "required" : "") />
+                                        <span class="scale-num">@v</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (q.Type == "date")
+                    {
+                        <input type="date" name="q_@q.Id" id="q_@q.Id" class="fq-input" @(q.Required ? "required" : "") />
+                    }
+                    else if (q.Type == "time")
+                    {
+                        <input type="time" name="q_@q.Id" id="q_@q.Id" class="fq-input" @(q.Required ? "required" : "") />
+                    }
+                </div>
+            }
+
+            <div class="fill-submit-row">
+                <button type="submit" class="fill-submit-btn" style="background: @Model.Form.ThemeColor">Submit</button>
+            </div>
+        </form>
+    </div>
+}
+
+@section Scripts {
+<script>
+document.querySelectorAll('.chk-item').forEach(chk => {
+    chk.addEventListener('change', () => {
+        const name = chk.dataset.name;
+        const hidden = document.getElementById('chk_' + name.replace('q_', ''));
+        const checked = [...document.querySelectorAll(`input[data-name="${name}"]:checked`)].map(c => c.value);
+        if (hidden) hidden.value = checked.join('\n');
+    });
+});
+</script>
+}

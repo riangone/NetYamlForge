@@ -33,7 +33,7 @@
         }
     </div>
 
-    @foreach (var sec in pageDef.Sections)
+    @foreach (var sec in pageDef.Sections.Where(s => !s.Hidden))
     {
         if (!string.IsNullOrEmpty(sec.Title))
         {

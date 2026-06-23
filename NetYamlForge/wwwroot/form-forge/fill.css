@@ -1,0 +1,220 @@
+/* ── Fill Page (Public Form) ── */
+:root { --form-color: #7C3AED; }
+
+.fill-page { background: #F5F3FF; min-height: 100vh; padding: 32px 16px 64px; }
+.fill-wrap { max-width: 640px; margin: 0 auto; }
+
+.fill-form { display: flex; flex-direction: column; gap: 12px; }
+
+/* Header card */
+.fill-header-card {
+    background: #fff;
+    border-radius: 12px;
+    border-top: 8px solid var(--form-color);
+    padding: 32px 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(124,58,237,.06);
+}
+.fill-title { font-size: 28px; font-weight: 700; letter-spacing: -0.4px; color: #1E1B4B; margin-bottom: 8px; }
+.fill-desc { color: #6B7280; font-size: 15px; line-height: 1.6; margin-top: 8px; }
+
+.fill-error-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 14px;
+    color: #DC2626;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Question card */
+.fill-question-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 2px 8px rgba(124,58,237,.04);
+    border: 1.5px solid #F0EBF8;
+    transition: border-color 0.15s;
+}
+.fill-question-card:focus-within { border-color: var(--form-color); }
+
+.fq-header { margin-bottom: 16px; }
+
+.fq-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1E1B4B;
+    line-height: 1.5;
+}
+.req-star { color: #EF4444; margin-left: 3px; }
+.fq-desc { font-size: 13px; color: #9CA3AF; margin-top: 4px; }
+
+/* Inputs */
+.fq-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid #E8E4F4;
+    padding: 8px 0;
+    font-size: 15px;
+    color: #1E1B4B;
+    background: none;
+    transition: border-color 0.15s;
+}
+.fq-input:focus { border-bottom-color: var(--form-color); outline: none; }
+
+.fq-textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid #E8E4F4;
+    padding: 8px 0;
+    font-size: 15px;
+    color: #1E1B4B;
+    background: none;
+    resize: vertical;
+    transition: border-color 0.15s;
+    line-height: 1.6;
+}
+.fq-textarea:focus { border-bottom-color: var(--form-color); outline: none; }
+
+.fq-select {
+    width: 100%;
+    border: 1.5px solid #E8E4F4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: #1E1B4B;
+    background: #FAFAFE;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+.fq-select:focus { outline: none; border-color: var(--form-color); }
+
+/* Radio / Checkbox options */
+.fq-options { display: flex; flex-direction: column; gap: 8px; }
+
+.fq-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border: 1.5px solid transparent;
+}
+.fq-option:hover { background: #F5F3FF; }
+.fq-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.fq-option-mark {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #D1D5DB;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+}
+.fq-option input:checked ~ .fq-option-mark {
+    border-color: var(--form-color);
+    background: var(--form-color);
+    box-shadow: inset 0 0 0 3px #fff;
+}
+.fq-option input:checked ~ span:last-child { color: #1E1B4B; font-weight: 500; }
+.fq-option:has(input:checked) { background: #F5F3FF; border-color: #DDD6FE; }
+
+.checkbox-mark {
+    border-radius: 5px;
+}
+.fq-checkbox input:checked ~ .checkbox-mark {
+    border-color: var(--form-color);
+    background: var(--form-color);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    background-size: 13px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Linear scale */
+.fq-scale { display: flex; flex-direction: column; gap: 8px; }
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #9CA3AF;
+}
+
+.scale-options { display: flex; gap: 6px; }
+
+.scale-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+.scale-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+.scale-num {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1.5px solid #E8E4F4;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B7280;
+    transition: all 0.12s;
+}
+.scale-option:hover .scale-num { border-color: var(--form-color); color: var(--form-color); background: #F5F3FF; }
+.scale-option input:checked ~ .scale-num {
+    border-color: var(--form-color);
+    background: var(--form-color);
+    color: white;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--form-color) 40%, transparent);
+}
+
+/* Submit row */
+.fill-submit-row { padding: 8px 0 0; }
+
+.fill-submit-btn {
+    padding: 13px 40px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+.fill-submit-btn:hover { filter: brightness(1.08); box-shadow: 0 4px 16px color-mix(in srgb, var(--form-color) 40%, transparent); transform: translateY(-1px); }
+.fill-submit-btn:active { transform: translateY(0); filter: brightness(0.96); }
+
+/* ── Closed / Error state ── */
+.fill-closed {
+    background: #fff;
+    border-radius: 16px;
+    border-top: 6px solid var(--form-color, #7C3AED);
+    padding: 48px 32px;
+    max-width: 640px;
+    margin: 40px auto;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.fill-closed-icon { font-size: 56px; margin-bottom: 16px; }
+.fill-closed-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+.fill-closed-msg { color: #6B7280; font-size: 16px; }

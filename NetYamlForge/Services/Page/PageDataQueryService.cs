@@ -44,6 +44,7 @@ public sealed class PageDataQueryService
 
         foreach (var section in page.Sections)
         {
+            if (section.Hidden) continue;
             try
             {
                 var (rows, total) = await GetSectionDataAsync(

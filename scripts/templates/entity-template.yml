@@ -12,7 +12,13 @@ entities:
       ja: 表示名
       en: Display Name
       zh: 显示名称
-    
+
+    # === API 访问控制 ===
+    api: disabled       # disabled（默认）| readonly | readwrite
+                        # readwrite: 允许 GET/POST/PUT/DELETE /api/{project}/{entity}[/{id}]
+                        # readonly:  仅允许 GET，POST/PUT/DELETE 返回 403
+                        # disabled:  所有 API 请求返回 403
+
     # === 分页设置 ===
     paging:
       pageSize: 20

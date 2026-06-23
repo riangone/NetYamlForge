@@ -1,0 +1,17 @@
+@model FormForge.Models.Form
+@{
+    ViewData["Title"] = "Response submitted";
+    ViewData["BodyClass"] = "thanks-page";
+    Layout = "_Layout";
+}
+
+<div class="thanks-wrap">
+    <div class="thanks-card" style="border-top-color: @Model.ThemeColor">
+        <div class="thanks-icon" style="color: @Model.ThemeColor">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <h1>Your response has been recorded.</h1>
+        <p>Thank you for filling out <strong>@Model.Title</strong>.</p>
+        <a href="/f/@Model.Id" class="thanks-again" style="color: @Model.ThemeColor">Submit another response</a>
+    </div>
+</div>

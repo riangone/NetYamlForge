@@ -1,0 +1,101 @@
+title: 📷 Photo Vault
+description: "照片检索 · 导入 · 浏览"
+
+sections:
+  # ─── 语义搜索 ───
+  - id: vector_search_main
+    title: 🔍 语义搜索
+    component: vector_search
+    sourceType: custom
+    source: "SELECT 1"
+    columns: []
+    editable: false
+    readOnly: true
+
+  # ─── 照片画廊 ───
+  - id: photo_thumbnails
+    title: 📸 照片画廊
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT p.photo_id,
+             p.file_name AS 标题,
+             COALESCE(p.scene_type, '未分类') AS 子标题,
+             COALESCE(p.caption_short, '待标注') AS 描述,
+             '/nyf/photo-vault/photo-file/serve/' || p.photo_id AS image_url,
+             COALESCE(p.caption_long, p.caption_short, '') AS lightbox_caption,
+             p.file_format AS lightbox_format,
+             COALESCE(p.taken_at, p.created_at) AS lightbox_date
+      FROM photos p
+      WHERE p.deleted_at IS NULL AND p.file_path IS NOT NULL
+      ORDER BY p.created_at DESC
+      LIMIT 4
+    columns: [photo_id, 标题, 子标题, 描述, image_url, lightbox_caption, lightbox_format, lightbox_date]
+    titleField: 标题
+    subtitleField: 子标题
+    descriptionField: 描述
+    imageField: image_url
+    captionField: lightbox_caption
+    pageSize: 4
+    editable: false
+    readOnly: true
+    actions:
+      - label: 立即标注
+        class: btn-warning btn-outline
+        url: "/{project}/Page/{pageName}/annotate-photo?photo_id={photo_id}"
+        confirm: "确定要对此照片立即触发 AI 标注吗？"
+      - label: 生成嵌入
+        class: btn-success btn-outline
+        url: "/{project}/Page/{pageName}/embed-photo?photo_id={photo_id}"
+        confirm: "确定要对此照片生成嵌入向量吗？"
+
+  # ─── 照片导入 ───
+  - id: photo_upload
+    title: 📥 导入照片
+    component: file_upload
+    description: '将照片文件拖入下方区域，或点击选择文件。支持多文件同时选择。上传完成后自动提取 EXIF 并送入 AI 标注队列。'
+    uploadUrl: /api/photo-vault/import/upload
+    allowedTypes: .jpg,.jpeg,.png,.heic,.dng,.cr3,.webp,.gif,.tiff
+    maxFileSize: 52428800
+    multiple: true
+    maxFiles: 200
+    dropzoneLabel: 将照片拖放到此处，或点击选择文件
+    dropzoneHint: 支持 JPG · PNG · HEIC · DNG · CR3 · WebP · GIF · TIFF，单文件最大 50 MB
+    showPreview: true
+    previewMaxThumbnails: 12
+    uploadDir: uploads/photo-vault
+    onUploadComplete:
+      insertEntity: photos
+      fields:
+        photo_id: '{{uuid}}'
+        file_name: '{{filename}}'
+        file_path: '{{upload_path}}'
+        file_size: '{{file_size}}'
+        file_format: '{{ext_upper}}'
+        width: '{{exif.width}}'
+        height: '{{exif.height}}'
+        taken_at: '{{exif.taken_at}}'
+        camera_make: '{{exif.make}}'
+        camera_model: '{{exif.model}}'
+        focal_length: '{{exif.focal_length}}'
+        aperture: '{{exif.aperture}}'
+        shutter_speed: '{{exif.shutter_speed}}'
+        iso: '{{exif.iso}}'
+        gps_lat: '{{exif.gps_lat}}'
+        gps_lon: '{{exif.gps_lon}}'
+        annotation_status: pending
+        created_at: '{{now}}'
+      thenInsertEntity: processing_queue
+      thenFields:
+        photo_id: '{{uuid}}'
+        file_path: '{{upload_path}}'
+        status: queued
+        provider: antigravity
+        priority: 1
+        queued_at: '{{now}}'
+    permissions:
+      create:
+        roles:
+        - editor
+        - admin
+    sourceType: none

@@ -1,0 +1,16 @@
+@model FormForge.Models.FormFillViewModel
+@{
+    ViewData["Title"] = Model.Form.Title;
+    ViewData["BodyClass"] = "thanks-page";
+    Layout = "_Layout";
+}
+
+<div class="thanks-wrap">
+    <div class="thanks-card" style="border-top-color: @Model.Form.ThemeColor">
+        <div class="thanks-icon" style="color: #94A3B8">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        </div>
+        <h1>@Model.Form.Title</h1>
+        <p>@Model.Error</p>
+    </div>
+</div>

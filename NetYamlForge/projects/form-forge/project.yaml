@@ -1,0 +1,38 @@
+name: form-forge
+displayName: "FormForge"
+description: "Form builder — create, publish, and collect responses"
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/form-forge.db
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: false
+  pages: false
+
+layout:
+  theme: light
+  dashboardTheme: workspace
+  header:
+    title: "FormForge"
+  navigation:
+    showDashboard: false
+    showPages: false
+    showEntities: false
+    items:
+      - label: "My Forms"
+        url: /form-forge/FormForge
+        icon: 📋
+        section: Forms
+      - label: "Create Form"
+        url: /form-forge/FormForge/Create
+        icon: ➕
+        section: Forms
+
+home_page:
+  icon: "📋"
+  tagline: "Build and publish forms, collect responses"
+  tags: [Forms, Survey, Builder]

@@ -1,0 +1,132 @@
+@model FormResultsViewModel
+@{
+    ViewData["Title"] = $"Results — {Model.Form.Title}";
+    ViewData["BodyClass"] = "results-page";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="/css/results.css" />
+}
+
+<div class="results-wrap">
+    <header class="results-header" style="--theme: @Model.Form.ThemeColor">
+        <a href="/" class="results-back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            All Forms
+        </a>
+        <div class="results-title-group">
+            <h1>@Model.Form.Title</h1>
+            <p class="results-subtitle">@Model.Responses.Count total @(Model.Responses.Count == 1 ? "response" : "responses")</p>
+        </div>
+        <div class="results-header-actions">
+            <a href="/Forms/Builder/@Model.Form.Id" class="rh-btn-secondary">Edit Form</a>
+            @if (Model.Form.IsPublished)
+            {
+                <a href="/f/@Model.Form.Id" target="_blank" class="rh-btn-primary">Open Form ↗</a>
+            }
+        </div>
+    </header>
+
+    @if (Model.Responses.Count == 0)
+    {
+        <div class="results-empty">
+            <div class="re-icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <rect x="8" y="8" width="48" height="48" rx="12" fill="#EDE9FE"/>
+                    <path d="M20 32h24M20 40h16" stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="32" cy="24" r="4" stroke="#7C3AED" stroke-width="3"/>
+                </svg>
+            </div>
+            <h2>No responses yet</h2>
+            <p>Share your form to start collecting responses.</p>
+            @if (!Model.Form.IsPublished)
+            {
+                <p class="hint">Your form is currently a draft. Publish it first.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="results-body">
+            <!-- Summary section -->
+            <section class="summary-section">
+                <h2 class="section-title">Summary</h2>
+                @foreach (var s in Model.Summary)
+                {
+                    <div class="summary-card">
+                        <h3 class="sq-title">@s.Question.Title</h3>
+                        <p class="sq-meta">@s.TotalAnswers @(s.TotalAnswers == 1 ? "response" : "responses")</p>
+
+                        @if (s.Question.HasOptions && s.OptionCounts.Any())
+                        {
+                            <div class="sq-bar-chart">
+                                @foreach (var (opt, count) in s.OptionCounts.OrderByDescending(x => x.Value))
+                                {
+                                    var pct = s.TotalAnswers > 0 ? (int)Math.Round(count * 100.0 / s.TotalAnswers) : 0;
+                                    <div class="bar-row">
+                                        <span class="bar-label">@opt</span>
+                                        <div class="bar-track">
+                                            <div class="bar-fill" style="width:@pct%; background: @Model.Form.ThemeColor"></div>
+                                        </div>
+                                        <span class="bar-count">@count (@pct%)</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else if (s.Question.IsScale && s.Average.HasValue)
+                        {
+                            <div class="sq-scale-summary">
+                                <div class="scale-avg" style="color: @Model.Form.ThemeColor">@s.Average</div>
+                                <div class="scale-avg-label">average (scale @s.Question.ScaleMin–@s.Question.ScaleMax)</div>
+                            </div>
+                        }
+                        else if (s.TextAnswers.Any())
+                        {
+                            <div class="sq-text-answers">
+                                @foreach (var ans in s.TextAnswers.Take(10))
+                                {
+                                    <div class="text-answer-item">@ans</div>
+                                }
+                                @if (s.TextAnswers.Count > 10)
+                                {
+                                    <p class="text-more">+@(s.TextAnswers.Count - 10) more</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="sq-no-answers">No answers yet</p>
+                        }
+                    </div>
+                }
+            </section>
+
+            <!-- Individual responses section -->
+            <section class="responses-section">
+                <h2 class="section-title">Individual Responses</h2>
+                <div class="responses-list">
+                    @for (int i = 0; i < Model.Responses.Count; i++)
+                    {
+                        var resp = Model.Responses[i];
+                        <details class="resp-item">
+                            <summary class="resp-summary">
+                                <span class="resp-num">Response #@(i + 1)</span>
+                                <span class="resp-time">@DateTime.Parse(resp.SubmittedAt).ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
+                            </summary>
+                            <div class="resp-body">
+                                @foreach (var q in Model.Form.Questions)
+                                {
+                                    var ans = resp.Answers.FirstOrDefault(a => a.QuestionId == q.Id);
+                                    <div class="resp-answer">
+                                        <div class="resp-q">@q.Title</div>
+                                        <div class="resp-a">@(string.IsNullOrEmpty(ans?.Value) ? "—" : ans.Value)</div>
+                                    </div>
+                                }
+                            </div>
+                        </details>
+                    }
+                </div>
+            </section>
+        </div>
+    }
+</div>

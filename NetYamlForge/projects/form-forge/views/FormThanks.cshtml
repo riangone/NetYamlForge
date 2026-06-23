@@ -1,0 +1,23 @@
+@model NetYamlForge.Projects.FormForge.FfFillViewModel
+@{
+    ViewData["Title"] = $"Thanks — {Model.Form.Title}";
+    Layout = "~/projects/form-forge/views/_FormLayout.cshtml";
+}
+
+<div class="fill-wrap">
+    <div class="fill-thanks" style="border-top-color: @Model.Form.ThemeColor">
+        <div class="fill-thanks-icon">✅</div>
+        <h1 class="fill-thanks-title">Thank you!</h1>
+        <p class="fill-thanks-msg">Your response has been recorded.</p>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/form-forge/fill.css" asp-append-version="true" />
+    <style>
+        .fill-thanks { background:#fff; border-radius:16px; border-top:6px solid var(--form-color,#7C3AED); padding:48px 32px; max-width:640px; margin:40px auto; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+        .fill-thanks-icon { font-size:56px; margin-bottom:16px; }
+        .fill-thanks-title { font-size:28px; font-weight:700; margin-bottom:8px; }
+        .fill-thanks-msg { color:#6B7280; font-size:16px; }
+    </style>
+}

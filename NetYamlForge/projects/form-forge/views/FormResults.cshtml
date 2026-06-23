@@ -1,0 +1,128 @@
+@model NetYamlForge.Projects.FormForge.FfResultsViewModel
+@{
+    ViewData["Title"] = $"Results — {Model.Form.Title}";
+    Layout = "_Layout";
+    var project = Model.ProjectName;
+}
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+            <div class="flex items-center gap-2 text-sm opacity-60 mb-1">
+                <a href="~/@project/FormForge" class="hover:underline">My Forms</a>
+                <span>/</span>
+                <span>Results</span>
+            </div>
+            <h1 class="text-2xl font-bold">@Model.Form.Title</h1>
+            <p class="text-sm opacity-60">@Model.Responses.Count total @(Model.Responses.Count == 1 ? "response" : "responses")</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="~/@project/FormForge/Builder/@Model.Form.Id" class="btn btn-sm btn-ghost">Edit Form</a>
+            @if (Model.Form.IsPublished)
+            {
+                <a href="~/@project/FormForge/Fill/@Model.Form.Id" target="_blank" class="btn btn-sm btn-primary">Open Form ↗</a>
+            }
+        </div>
+    </div>
+
+    @if (!Model.Responses.Any())
+    {
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body items-center text-center py-16">
+                <div class="text-6xl mb-4">📊</div>
+                <h2 class="card-title">No responses yet</h2>
+                <p class="opacity-60">Share your form to start collecting responses.</p>
+                @if (!Model.Form.IsPublished)
+                {
+                    <p class="text-sm opacity-40 mt-1">Your form is currently a draft — publish it first.</p>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Summary -->
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-lg mb-4">Summary</h2>
+                <div class="space-y-6">
+                    @foreach (var s in Model.Summary)
+                    {
+                        <div class="border border-base-200 rounded-xl p-4">
+                            <h3 class="font-semibold mb-1">@s.Question.Title</h3>
+                            <p class="text-xs opacity-50 mb-3">@s.TotalAnswers @(s.TotalAnswers == 1 ? "response" : "responses")</p>
+
+                            @if (s.Question.HasOptions && s.OptionCounts.Any())
+                            {
+                                <div class="space-y-2">
+                                    @foreach (var (opt, count) in s.OptionCounts)
+                                    {
+                                        var pct = s.TotalAnswers > 0 ? (int)Math.Round(count * 100.0 / s.TotalAnswers) : 0;
+                                        <div>
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span>@opt</span>
+                                                <span class="opacity-60">@count (@pct%)</span>
+                                            </div>
+                                            <progress class="progress progress-primary w-full" value="@pct" max="100"></progress>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else if (s.Question.IsScale && s.Average.HasValue)
+                            {
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-3xl font-bold">@s.Average</span>
+                                    <span class="opacity-50 text-sm">/ @s.Question.ScaleMax average</span>
+                                </div>
+                            }
+                            else if (s.TextAnswers.Any())
+                            {
+                                <div class="space-y-1 max-h-40 overflow-y-auto">
+                                    @foreach (var ans in s.TextAnswers.Take(20))
+                                    {
+                                        <div class="text-sm bg-base-200 rounded px-3 py-1.5">@ans</div>
+                                    }
+                                    @if (s.TextAnswers.Count > 20)
+                                    {
+                                        <p class="text-xs opacity-40">... and @(s.TextAnswers.Count - 20) more</p>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual responses -->
+        <div class="card bg-base-100 border border-base-300 shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-lg mb-4">Individual Responses</h2>
+                <div class="space-y-4">
+                    @foreach (var r in Model.Responses)
+                    {
+                        <details class="border border-base-200 rounded-xl">
+                            <summary class="p-4 cursor-pointer flex justify-between items-center">
+                                <span class="font-medium text-sm">
+                                    @(string.IsNullOrEmpty(r.RespondentEmail) ? "Anonymous" : r.RespondentEmail)
+                                </span>
+                                <span class="text-xs opacity-50">@r.SubmittedAt</span>
+                            </summary>
+                            <div class="px-4 pb-4 space-y-2">
+                                @foreach (var a in r.Answers)
+                                {
+                                    var q = Model.Summary.FirstOrDefault(s => s.Question.Id == a.QuestionId)?.Question;
+                                    <div class="text-sm">
+                                        <span class="font-medium opacity-70">@(q?.Title ?? a.QuestionId):</span>
+                                        <span class="ml-2">@a.Value</span>
+                                    </div>
+                                }
+                            </div>
+                        </details>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

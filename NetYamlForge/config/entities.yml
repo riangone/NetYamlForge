@@ -2,6 +2,7 @@ entities:
   customer:
     table: Customer
     key: CustomerId
+    api: readwrite
     displayName: Customer
     softDelete: false
     paging:

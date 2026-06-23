@@ -1,0 +1,138 @@
+@model FormBuilderViewModel
+@{
+    ViewData["Title"] = "Form Builder — FormForge";
+    ViewData["BodyClass"] = "builder-page";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="/css/builder.css" />
+}
+
+<div class="builder-wrap" id="app" data-form-id="@Model.Form.Id">
+
+    <!-- Top bar -->
+    <header class="builder-header" id="builder-header">
+        <div class="bh-left">
+            <a href="/" class="bh-back" title="Back to forms">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            </a>
+            <div class="bh-title-wrap">
+                <input id="form-title-input" class="bh-title" type="text" value="@Model.Form.Title" placeholder="Untitled Form" maxlength="200" />
+            </div>
+        </div>
+        <div class="bh-tabs">
+            <button class="bh-tab active" data-tab="build">Build</button>
+            <button class="bh-tab" data-tab="preview" id="preview-tab-btn">Preview</button>
+        </div>
+        <div class="bh-right">
+            <div class="color-picker-wrap">
+                <input type="color" id="theme-color-picker" value="@Model.Form.ThemeColor" title="Theme color" />
+            </div>
+            <span id="save-status" class="save-status">All changes saved</span>
+            <button class="bh-btn-secondary" id="save-btn">Save</button>
+            <button class="bh-btn-primary @(Model.Form.IsPublished ? "published" : "")" id="publish-btn"
+                    data-published="@Model.Form.IsPublished.ToString().ToLower()">
+                @(Model.Form.IsPublished ? "Unpublish" : "Publish")
+            </button>
+            @if (Model.Form.IsPublished)
+            {
+                <a href="/f/@Model.Form.Id" target="_blank" class="bh-btn-link" title="Open live form">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </a>
+            }
+        </div>
+    </header>
+
+    <!-- Build tab -->
+    <div class="builder-content" id="tab-build">
+        <div class="builder-inner">
+
+            <!-- Form meta card -->
+            <div class="meta-card" id="meta-card" style="border-top-color: @Model.Form.ThemeColor">
+                <input id="meta-title-display" class="meta-title" type="text" value="@Model.Form.Title" placeholder="Form title" maxlength="200" />
+                <textarea id="meta-desc" class="meta-desc" placeholder="Form description (optional)" rows="2">@Model.Form.Description</textarea>
+            </div>
+
+            <!-- Questions list -->
+            <div id="questions-list" class="questions-list"></div>
+
+            <!-- Add question section -->
+            <div class="add-section">
+                <button class="add-question-btn" id="add-question-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Add question
+                </button>
+                <div class="add-type-pills" id="add-type-pills">
+                    <button class="type-pill" data-type="short_text">Short answer</button>
+                    <button class="type-pill" data-type="paragraph">Paragraph</button>
+                    <button class="type-pill" data-type="multiple_choice">Multiple choice</button>
+                    <button class="type-pill" data-type="checkboxes">Checkboxes</button>
+                    <button class="type-pill" data-type="dropdown">Dropdown</button>
+                    <button class="type-pill" data-type="linear_scale">Linear scale</button>
+                    <button class="type-pill" data-type="date">Date</button>
+                    <button class="type-pill" data-type="time">Time</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview tab -->
+    <div class="builder-content hidden" id="tab-preview">
+        <div class="preview-form-wrap">
+            <div class="preview-form" id="preview-container">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Question card template (hidden) -->
+<template id="q-card-tpl">
+    <div class="q-card" draggable="true">
+        <div class="q-drag-handle" title="Drag to reorder">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
+        </div>
+        <div class="q-body">
+            <div class="q-row-top">
+                <input class="q-title-input" type="text" placeholder="Question" />
+                <select class="q-type-select">
+                    <option value="short_text">Short answer</option>
+                    <option value="paragraph">Paragraph</option>
+                    <option value="multiple_choice">Multiple choice</option>
+                    <option value="checkboxes">Checkboxes</option>
+                    <option value="dropdown">Dropdown</option>
+                    <option value="linear_scale">Linear scale</option>
+                    <option value="date">Date</option>
+                    <option value="time">Time</option>
+                </select>
+            </div>
+            <input class="q-desc-input" type="text" placeholder="Question description (optional)" />
+            <div class="q-content-area">
+                <!-- Filled by JS based on type -->
+            </div>
+            <div class="q-footer">
+                <label class="q-required-label">
+                    <input type="checkbox" class="q-required-chk" />
+                    <span>Required</span>
+                </label>
+                <div class="q-actions">
+                    <button class="q-action-btn duplicate-btn" title="Duplicate">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    </button>
+                    <button class="q-action-btn delete-btn" title="Delete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+@section Scripts {
+    <script>
+        window.FORM_ID = '@Model.Form.Id';
+        window.FORM_DATA = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Form, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+    </script>
+    <script src="/js/builder.js"></script>
+}
