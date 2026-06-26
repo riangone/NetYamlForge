@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 
-namespace AutoDealer.Hooks;
+namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
 /// <summary>
 /// AI 对话后自动更新销售线索评分钩子
@@ -31,7 +31,8 @@ public class AiLeadScoringHook : IEntityHook
         try
         {
             // 获取关联的线索 ID(从 ctx.Data 或 ctx.Values)
-            var leadId = ctx.Data.GetValueOrDefault("related_lead_id")?.ToString();
+            ctx.Data.TryGetValue("related_lead_id", out var leadIdObj);
+            var leadId = leadIdObj?.ToString();
             if (string.IsNullOrEmpty(leadId) || !int.TryParse(leadId, out var leadIdInt))
             {
                 return; // 无关联线索,跳过
@@ -39,7 +40,8 @@ public class AiLeadScoringHook : IEntityHook
 
             // 计算评分增量
             var scoreDelta = CalculateScoreDelta(ctx);
-            var touchCount = ctx.Data.GetValueOrDefault("previous_touch_count") as int? ?? 0;
+            ctx.Data.TryGetValue("previous_touch_count", out var touchCountObj);
+            var touchCount = touchCountObj as int? ?? 0;
 
             // 更新线索表
             const string sql = @"
@@ -55,7 +57,7 @@ WHERE id = @LeadId";
             var param = new
             {
                 ScoreDelta = scoreDelta,
-                ConversationId = ctx.Id?.ToString() ?? ctx.Values.GetValueOrDefault("conversation_id"),
+                ConversationId = ctx.Id?.ToString() ?? (ctx.Values.TryGetValue("conversation_id", out var conv) ? conv : null),
                 UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff"),
                 LeadId = leadIdInt
             };
@@ -77,7 +79,8 @@ WHERE id = @LeadId";
         var delta = 0;
 
         // 意图评分
-        var intent = ctx.Values.GetValueOrDefault("detected_intent")?.ToString();
+        ctx.Values.TryGetValue("detected_intent", out var intentVal);
+        var intent = intentVal?.ToString();
         delta += intent switch
         {
             "test_drive_request" => 15,
@@ -97,7 +100,8 @@ WHERE id = @LeadId";
         }
 
         // 槽位完成度加分
-        var slotsCount = ctx.Data.GetValueOrDefault("slots_filled") as int? ?? 0;
+        ctx.Data.TryGetValue("slots_filled", out var slotsObj);
+        var slotsCount = slotsObj as int? ?? 0;
         if (slotsCount >= 5) delta += 10; // 信息收集完整
 
         return delta;

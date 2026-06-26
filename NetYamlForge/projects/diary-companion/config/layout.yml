@@ -1,0 +1,21 @@
+header:
+  title: Diary Companion
+
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /diary-companion
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "Diary Companion — powered by NetYamlForge"

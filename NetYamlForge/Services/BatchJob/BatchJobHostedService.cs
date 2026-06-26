@@ -40,6 +40,11 @@ public interface IBatchJobScheduler
     /// 現在実行中のジョブ ID セットを取得する
     /// </summary>
     IReadOnlySet<string> GetRunningJobIds();
+
+    /// <summary>
+    /// ジョブのスケジュール（cron/timezone）を更新する（永続化 + スケジューラ再登録）
+    /// </summary>
+    Task UpdateJobScheduleAsync(string projectName, string jobId, string? cron, string timezone, string? description = null);
 }
 
 /// <summary>
@@ -419,6 +424,34 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
     /// 現在実行中のジョブ ID セットを取得する
     /// </summary>
     public IReadOnlySet<string> GetRunningJobIds() => _runningJobs.Keys.ToHashSet();
+
+    /// <summary>
+    /// ジョブのスケジュール（cron/timezone）を更新する
+    /// </summary>
+    public async Task UpdateJobScheduleAsync(string projectName, string jobId, string? cron, string timezone, string? description = null)
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
+        var loader = scope.ServiceProvider.GetRequiredService<IBatchJobLoader>();
+
+        var project = projectManager.GetAll()
+            .FirstOrDefault(p => string.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+        if (project == null) return;
+
+        await loader.SetScheduleOverrideAsync(project.ProjectDir, jobId, cron, timezone, description);
+
+        // スケジューラの既存エントリを更新
+        var allJobs = await loader.LoadJobsAsync(project.ProjectDir);
+        if (allJobs.TryGetValue(jobId, out var jobDef) && jobDef.Enabled && !string.IsNullOrEmpty(jobDef.Schedule.Cron))
+        {
+            RegisterJob(jobDef, projectName);
+            _logger.LogInformation("ジョブスケジュールを更新しました：{JobId} cron={Cron} tz={Tz}", jobId, cron, timezone);
+        }
+        else if (string.IsNullOrEmpty(cron) && _scheduledJobs.TryRemove(jobId, out _))
+        {
+            _logger.LogInformation("Cron が空のためジョブをスケジューラから除外しました：{JobId}", jobId);
+        }
+    }
 }
 
 /// <summary>

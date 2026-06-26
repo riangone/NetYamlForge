@@ -7,7 +7,7 @@ using NetYamlForge.Services.Hooks;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 
-namespace AutoDealer.Hooks;
+namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
 /// <summary>
 /// AI 对话审计日志钩子
@@ -63,14 +63,17 @@ INSERT INTO audit_log (
     @CreatedAt
 )";
 
+            ctx.Values.TryGetValue("conversation_id", out var convId);
+            ctx.Data.TryGetValue("ip_address", out var ipAddr);
+
             var param = new
             {
                 UserName = ctx.UserName ?? "ai_system",
                 Action = ctx.Operation.ToString(),
                 Entity = ctx.Entity,
-                EntityId = ctx.Id?.ToString() ?? ctx.Values.GetValueOrDefault("conversation_id")?.ToString(),
+                EntityId = ctx.Id?.ToString() ?? convId?.ToString(),
                 Detail = detail,
-                IpAddress = ctx.Data.GetValueOrDefault("ip_address")?.ToString() ?? "N/A",
+                IpAddress = ipAddr?.ToString() ?? "N/A",
                 CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff")
             };
 
@@ -106,17 +109,17 @@ INSERT INTO audit_log (
         // 根据操作类型捕获关键数据
         if (ctx.Operation == CrudOperation.Create)
         {
-            details["conversation_id"] = ctx.Values.GetValueOrDefault("conversation_id");
-            details["intent"] = ctx.Values.GetValueOrDefault("detected_intent");
-            details["ai_tool"] = ctx.Values.GetValueOrDefault("ai_tool_used");
-            details["confidence"] = ctx.Values.GetValueOrDefault("last_confidence");
+            details["conversation_id"] = ctx.Values.TryGetValue("conversation_id", out var v1) ? v1 : null;
+            details["intent"] = ctx.Values.TryGetValue("detected_intent", out var v2) ? v2 : null;
+            details["ai_tool"] = ctx.Values.TryGetValue("ai_tool_used", out var v3) ? v3 : null;
+            details["confidence"] = ctx.Values.TryGetValue("last_confidence", out var v4) ? v4 : null;
         }
         else if (ctx.Operation == CrudOperation.Update)
         {
             details["conversation_id"] = ctx.Id?.ToString();
-            details["state_transition"] = ctx.Data.GetValueOrDefault("state_transition");
-            details["slots_collected"] = ctx.Data.GetValueOrDefault("slots_snapshot");
-            details["tool_calls_count"] = ctx.Data.GetValueOrDefault("tool_calls_count");
+            details["state_transition"] = ctx.Data.TryGetValue("state_transition", out var v5) ? v5 : null;
+            details["slots_collected"] = ctx.Data.TryGetValue("slots_snapshot", out var v6) ? v6 : null;
+            details["tool_calls_count"] = ctx.Data.TryGetValue("tool_calls_count", out var v7) ? v7 : null;
         }
 
         // 序列化(简化版,实际可使用 System.Text.Json)

@@ -40,7 +40,9 @@ public class PurchaseReceiptCompleteHook : IEntityHook
         var receiptLinesRows = await db.QueryAsync<dynamic>(
             "SELECT * FROM purchase_receipt_lines WHERE ReceiptId = @receiptId",
             new { receiptId }, tx);
-        var receiptLines = receiptLinesRows.Select(r => (IDictionary<string, object>)r);
+        var receiptLines = new List<IDictionary<string, object>>();
+        foreach (var r in receiptLinesRows)
+            receiptLines.Add((IDictionary<string, object>)r);
 
         foreach (var line in receiptLines)
         {

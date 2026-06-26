@@ -12,7 +12,6 @@ public class BatchJobDefinition
     /// <summary>
     /// ジョブ ID（YAML ファイル名または明示的な ID）
     /// </summary>
-    [JsonIgnore]
     public string Id { get; set; } = string.Empty;
 
     /// <summary>

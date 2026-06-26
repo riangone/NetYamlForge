@@ -1,0 +1,114 @@
+@* バッチジョブのスケジュール編集モーダル（HTMX 部分ビュー） *@
+@model NetYamlForge.Controllers.EditScheduleViewModel
+@{
+    var projectName = Model.ProjectName;
+    var commonTimezones = new[]
+    {
+        "UTC", "Asia/Tokyo", "Asia/Shanghai", "Asia/Seoul",
+        "America/New_York", "America/Los_Angeles", "America/Chicago",
+        "Europe/London", "Europe/Berlin", "Europe/Paris",
+        "Australia/Sydney", "Pacific/Auckland"
+    };
+}
+
+<dialog id="schedule-modal" class="modal modal-open">
+    <div class="modal-box w-full max-w-lg">
+        <h3 class="font-bold text-lg mb-1">スケジュール設定</h3>
+        <p class="text-sm text-base-content/60 mb-4">@Model.DisplayName</p>
+
+        <form hx-post="/@projectName/BatchJob/UpdateSchedule?jobId=@Model.JobId"
+              hx-target="#job-row-@Model.JobId"
+              hx-swap="outerHTML"
+              hx-on::after-request="if(event.detail.successful) document.getElementById('schedule-modal').remove()">
+            @Html.AntiForgeryToken()
+
+            @* ─── Cron 式 ─── *@
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-medium">Cron 式</span>
+                    <span class="label-text-alt text-base-content/50">分 時 日 月 曜日</span>
+                </label>
+                <input type="text"
+                       name="cron"
+                       id="cron-input"
+                       value="@Model.CronExpression"
+                       placeholder="例: 0 9 * * 1-5"
+                       class="input input-bordered font-mono"
+                       autocomplete="off" />
+
+                @* プリセットボタン *@
+                <div class="mt-2 flex flex-wrap gap-1">
+                    <span class="text-xs text-base-content/50 self-center mr-1">プリセット:</span>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 * * * *'">毎時</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 */6 * * *'">6時間毎</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 9 * * *'">毎日09:00</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 2 * * *'">毎日02:00</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 9 * * 1-5'">平日09:00</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300"
+                            onclick="document.getElementById('cron-input').value='0 1 1 * *'">毎月1日</button>
+                    <button type="button" class="btn btn-xs btn-ghost border border-base-300 text-warning"
+                            onclick="document.getElementById('cron-input').value=''">クリア</button>
+                </div>
+
+                <label class="label mt-1">
+                    <span class="label-text-alt text-base-content/40">空欄にするとスケジュール実行が無効になります（手動実行は可）</span>
+                </label>
+            </div>
+
+            @* ─── タイムゾーン ─── *@
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-medium">タイムゾーン</span>
+                </label>
+                <select name="timezone" class="select select-bordered">
+                    @foreach (var tz in commonTimezones)
+                    {
+                        if (tz == Model.Timezone)
+                        {
+                            <option value="@tz" selected>@tz</option>
+                        }
+                        else
+                        {
+                            <option value="@tz">@tz</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            @* ─── 説明 ─── *@
+            <div class="form-control mb-6">
+                <label class="label">
+                    <span class="label-text font-medium">説明</span>
+                </label>
+                <textarea name="description"
+                          rows="3"
+                          placeholder="このジョブの説明（任意）"
+                          class="textarea textarea-bordered resize-none">@Model.Description</textarea>
+            </div>
+
+            @if (Model.HasOverride)
+            {
+                <div class="alert alert-info alert-sm mb-4 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-xs">UIから変更済みです（YAML元定義を上書きしています）</span>
+                </div>
+            }
+
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost"
+                        onclick="document.getElementById('schedule-modal').remove()">キャンセル</button>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button onclick="document.getElementById('schedule-modal').remove()">close</button>
+    </form>
+</dialog>

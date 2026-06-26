@@ -26,4 +26,12 @@ public class CommandErrorHttpMapperTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public void TestSerialize()
+    {
+        var job = new NetYamlForge.Services.BatchJob.BatchJobDefinition { Id = "test-job-id" };
+        var json = System.Text.Json.JsonSerializer.Serialize(job);
+        Assert.Contains("test-job-id", json);
+    }
 }

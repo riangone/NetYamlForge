@@ -210,6 +210,7 @@ public static class MissingHookScaffolder
         sb.AppendLine($"// 各クラスの BeforeAsync / AfterAsync にビジネスロジックを実装してください。");
         sb.AppendLine();
         sb.AppendLine("using System.Data;");
+        sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine("using NetYamlForge.Services.Hooks;");
         sb.AppendLine("using Microsoft.Extensions.Logging;");
         sb.AppendLine();
@@ -248,6 +249,7 @@ public static class MissingHookScaffolder
         sb.AppendLine($"// 各クラスの ExecuteAsync にビジネスロジックを実装してください。");
         sb.AppendLine();
         sb.AppendLine("using System.Data;");
+        sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine("using NetYamlForge.Services.Hooks;");
         sb.AppendLine("using Microsoft.Extensions.Logging;");
         sb.AppendLine();

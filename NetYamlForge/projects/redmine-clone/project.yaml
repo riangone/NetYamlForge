@@ -1,0 +1,73 @@
+name: redmine-clone
+displayName: "RedmineClone"
+description: "Full-featured project management & issue tracker — Redmine clone"
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/redmine-clone.db
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  theme: light
+  dashboardTheme: workspace
+  header:
+    title: "RedmineClone"
+  navigation:
+    showDashboard: true
+    entities:
+      - issue
+      - milestone
+      - category
+      - time_entry
+      - issue_comment
+      - news
+      - wiki_page
+    items:
+      - label: "Dashboard"
+        controller: Dashboard
+        action: Index
+        icon: 📊
+        section: Overview
+      - label: "Issues"
+        url: /redmine-clone/DynamicEntity/Index?entity=issue
+        icon: 🐛
+        section: Tracker
+      - label: "New Issue"
+        url: /redmine-clone/DynamicEntity/Create?entity=issue
+        icon: ➕
+        section: Tracker
+      - label: "Milestones"
+        url: /redmine-clone/DynamicEntity/Index?entity=milestone
+        icon: 🏁
+        section: Planning
+      - label: "Categories"
+        url: /redmine-clone/DynamicEntity/Index?entity=category
+        icon: 🏷️
+        section: Planning
+      - label: "Time Log"
+        url: /redmine-clone/DynamicEntity/Index?entity=time_entry
+        icon: ⏱️
+        section: Tracking
+      - label: "Comments"
+        url: /redmine-clone/DynamicEntity/Index?entity=issue_comment
+        icon: 💬
+        section: Tracking
+      - label: "News"
+        url: /redmine-clone/DynamicEntity/Index?entity=news
+        icon: 📰
+        section: Content
+      - label: "Wiki"
+        url: /redmine-clone/DynamicEntity/Index?entity=wiki_page
+        icon: 📖
+        section: Content
+
+home_page:
+  icon: "🐛"
+  tagline: "Project management & issue tracking — inspired by Redmine"
+  tags: [Issues, Tracker, Milestones, Wiki, TimeLog]

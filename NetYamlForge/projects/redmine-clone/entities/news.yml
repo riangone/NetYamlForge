@@ -1,0 +1,87 @@
+imports: []
+entities:
+  news:
+    table: RmNews
+    key: Id
+    displayName: News
+    softDelete: false
+    isPublic: false
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: Title
+        editable: true
+      Summary:
+        type: string
+        label: Summary
+        editable: true
+      Description:
+        type: textarea
+        required: true
+        label: Description
+        editable: true
+      AuthorName:
+        type: string
+        label: Author
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        required: true
+        label: Title
+        searchable: true
+        sortable: true
+      Summary:
+        type: string
+        label: Summary
+        searchable: true
+        sortable: false
+      AuthorName:
+        type: string
+        label: Author
+        searchable: true
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Posted At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - current_user:AuthorName
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - Title
+          - Summary
+          - Description
+          - AuthorName
+      filters:
+        columns: 3
+        order:
+          - Title
+          - AuthorName
+
+    filters:
+      Title:
+        type: like
+        label: Title
+      AuthorName:
+        type: like
+        label: Author

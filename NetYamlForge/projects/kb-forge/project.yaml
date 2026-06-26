@@ -1,0 +1,47 @@
+name: kb-forge
+displayName: "KbForge"
+description: "AI-powered team knowledge base with semantic search"
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/kb-forge.db
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: false
+  pages: false
+
+layout:
+  theme: light
+  dashboardTheme: workspace
+  header:
+    title: "KbForge"
+  navigation:
+    showDashboard: false
+    showPages: false
+    showEntities: false
+    items:
+      - label: "All Articles"
+        url: /kb-forge/Kb
+        icon: 📚
+        section: Knowledge Base
+      - label: "New Article"
+        url: /kb-forge/Kb/New
+        icon: ✏️
+        section: Knowledge Base
+      - label: "Semantic Search"
+        url: /kb-forge/Kb/Search
+        icon: 🔍
+        section: Knowledge Base
+      - label: "Batch Jobs"
+        controller: BatchJob
+        action: Index
+        icon: ⚙️
+        section: System
+
+home_page:
+  icon: "📚"
+  tagline: "AI-powered knowledge base with semantic search"
+  tags: [Knowledge, Wiki, Search, AI]

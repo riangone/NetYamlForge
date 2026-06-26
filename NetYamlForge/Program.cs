@@ -225,6 +225,12 @@ builder.Services.AddAuthorization(options =>
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge(builder.Configuration);
 
+foreach (var sd in builder.Services.Where(s => s.ServiceType.Name.Contains("FormForge") || (s.ImplementationType != null && s.ImplementationType.Name.Contains("FormForge"))))
+{
+    Console.WriteLine($"[FormForge-DI-Check] Service: {sd.ServiceType.FullName}, Lifetime: {sd.Lifetime}");
+}
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -282,29 +288,29 @@ var app = builder.Build();
 app.UsePathBase("/nyf");
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.Value.Contains("photo-file") || context.Request.Path.Value.Contains("photo/"))
+    // 独立ドメイン (nyf.0101.click) 経由のアクセスは PathBase 不要
+    var forwardedHost = context.Request.Headers["X-Forwarded-Host"].FirstOrDefault() ?? "";
+    var hasDirectHeader = context.Request.Headers.ContainsKey("X-Direct-Domain")
+                         || string.Equals(context.Request.Headers["X-Direct-Domain"].FirstOrDefault(), "true", StringComparison.OrdinalIgnoreCase);
+    var isDirectDomain = hasDirectHeader
+                         || forwardedHost.StartsWith("nyf.", StringComparison.OrdinalIgnoreCase)
+                         || context.Request.Host.Host.Equals("nyf.0101.click", StringComparison.OrdinalIgnoreCase);
+    if (isDirectDomain)
     {
-        Console.WriteLine($"[DEBUG-NYF] RawPath: {context.Request.Path}, PathBase: {context.Request.PathBase}, Host: {context.Request.Host}, Auth: {context.User.Identity?.IsAuthenticated}");
+        context.Request.PathBase = PathString.Empty;
+        Serilog.Log.Information("[DirectDomain] Detected direct domain access. Host: {Host}, ForwardedHost: {ForwardedHost}, PathBase set to empty.", 
+            context.Request.Host.Value, forwardedHost);
+        await next();
+        return;
     }
 
-    // Caddy の handle_path で /nyf が剥がされると UsePathBase だけでは PathBase が空のままになる。
-    // その場合でも Razor/Url.Content が正しく /nyf を含む URL を生成できるように補正する。
+    // Caddy の handle_path で /nyf が剥がされた場合に PathBase を補正する。
     if (!context.Request.PathBase.HasValue)
     {
         var forwardedPrefix = context.Request.Headers["X-Forwarded-Prefix"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(forwardedPrefix))
-        {
-            context.Request.PathBase = new PathString(forwardedPrefix);
-        }
-        else
-        {
-            context.Request.PathBase = new PathString("/nyf");
-        }
-    }
-
-    if (context.Request.Path.Value.Contains("photo-file") || context.Request.Path.Value.Contains("photo/"))
-    {
-        Console.WriteLine($"[DEBUG-NYF-AFTER] Path: {context.Request.Path}, PathBase: {context.Request.PathBase}");
+        context.Request.PathBase = new PathString(
+            !string.IsNullOrWhiteSpace(forwardedPrefix) ? forwardedPrefix : "/nyf");
+        Serilog.Log.Information("[PathBaseFix] Corrected PathBase to: {PathBase}", context.Request.PathBase.Value);
     }
 
     await next();
@@ -378,6 +384,12 @@ app.Use(async (context, next) =>
 });
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
+
+app.MapGet("/trigger-test", async (NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
+{
+    await scheduler.TriggerJobNowAsync("blog", "japan_it_news_briefing");
+    return "ok";
+}).AllowAnonymous();
 
 // MCP サーバーエンドポイント：/mcp（/api/{project}/{entity} と同じ認証スキームを要求）
 app.MapMcp("/mcp")

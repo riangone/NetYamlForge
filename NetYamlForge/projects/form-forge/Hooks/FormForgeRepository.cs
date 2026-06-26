@@ -1,8 +1,12 @@
 // FormForge data access, adapted from the standalone FormForge app.
 // Uses IDbConnection (project-scoped by NetYamlForge) instead of SqliteConnection directly.
 
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace NetYamlForge.Projects.FormForge;

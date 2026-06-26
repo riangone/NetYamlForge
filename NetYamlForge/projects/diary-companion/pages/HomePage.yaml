@@ -1,0 +1,36 @@
+title: 智能日记首页
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: diary_list
+    title: 我的日记列表
+    sourceType: custom
+    source: >
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt
+      FROM DiaryEntry
+      ORDER BY CreatedAt DESC
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt]
+    pageSize: 100
+    editable: false
+    readOnly: true
+    ui:
+      component: DataTable
+
+  - id: mood_stats
+    title: 情绪分布
+    sourceType: custom
+    source: >
+      SELECT MoodBefore, COUNT(*) AS count
+      FROM DiaryEntry
+      GROUP BY MoodBefore
+    columns: [MoodBefore, count]
+    pageSize: 10
+    editable: false
+    readOnly: true
+    ui:
+      component: DataTable

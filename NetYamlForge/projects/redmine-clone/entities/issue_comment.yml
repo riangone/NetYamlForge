@@ -1,0 +1,126 @@
+imports: []
+entities:
+  issue_comment:
+    table: RmIssueComment
+    key: Id
+    displayName: Comment
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: RmIssue
+        alias: iss
+        on: RmIssueComment.IssueId = iss.Id
+
+    forms:
+      IssueId:
+        type: int
+        required: true
+        label: Issue
+        editable: true
+        foreignKey:
+          entity: issue
+          displayColumn: Subject
+          picker: false
+      Notes:
+        type: textarea
+        required: true
+        label: Notes
+        editable: true
+      StatusChange:
+        type: string
+        label: Change Status To
+        editable: true
+        options:
+          - ""
+          - in_progress
+          - resolved
+          - feedback
+          - closed
+        optionLabels:
+          "": "— no change —"
+          in_progress: "🔄 In Progress"
+          resolved: "✅ Resolved"
+          feedback: "💬 Feedback"
+          closed: "🔒 Closed"
+      AuthorName:
+        type: string
+        label: Author
+        editable: false
+      PostedAt:
+        type: datetime
+        label: Posted At
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      IssueId:
+        type: int
+        label: Issue ID
+        hidden: true
+      IssueSubject:
+        type: string
+        label: Issue
+        expression: iss.Subject
+        searchable: true
+        sortable: true
+      Notes:
+        type: string
+        label: Notes
+        searchable: true
+        sortable: false
+      StatusChange:
+        type: string
+        label: Status Change
+        sortable: false
+      AuthorName:
+        type: string
+        label: Author
+        searchable: true
+        sortable: true
+      PostedAt:
+        type: datetime
+        label: Posted At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - current_user:AuthorName
+        - now:PostedAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - IssueId
+          - Notes
+          - StatusChange
+          - AuthorName
+          - PostedAt
+      filters:
+        columns: 3
+        order:
+          - IssueId
+          - AuthorName
+
+    filters:
+      AuthorName:
+        type: like
+        label: Author
+      IssueId:
+        type: dropdown
+        label: Issue
+        expression: RmIssueComment.IssueId
+        foreignKey:
+          entity: issue
+          displayColumn: Subject

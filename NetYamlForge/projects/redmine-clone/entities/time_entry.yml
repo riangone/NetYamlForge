@@ -1,0 +1,173 @@
+imports: []
+entities:
+  time_entry:
+    table: RmTimeEntry
+    key: Id
+    displayName: Time Entry
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: RmIssue
+        alias: iss
+        on: RmTimeEntry.IssueId = iss.Id
+
+    forms:
+      IssueId:
+        type: int
+        required: true
+        label: Issue
+        editable: true
+        foreignKey:
+          entity: issue
+          displayColumn: Subject
+          picker: false
+      SpentOn:
+        type: date
+        required: true
+        label: Date
+        editable: true
+      Hours:
+        type: decimal
+        required: true
+        label: Hours
+        editable: true
+        precision: 2
+      Activity:
+        type: string
+        required: true
+        label: Activity
+        editable: true
+        options:
+          - design
+          - development
+          - testing
+          - documentation
+          - management
+          - support
+        optionLabels:
+          design: "🎨 Design"
+          development: "💻 Development"
+          testing: "🧪 Testing"
+          documentation: "📝 Documentation"
+          management: "📊 Management"
+          support: "🤝 Support"
+      Comments:
+        type: string
+        label: Comments
+        editable: true
+      UserName:
+        type: string
+        label: User
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      IssueId:
+        type: int
+        label: Issue ID
+        hidden: true
+      IssueSubject:
+        type: string
+        label: Issue
+        expression: iss.Subject
+        searchable: true
+        sortable: true
+      SpentOn:
+        type: date
+        label: Date
+        sortable: true
+      Hours:
+        type: decimal
+        label: Hours
+        sortable: true
+      Activity:
+        type: string
+        label: Activity
+        sortable: true
+      Comments:
+        type: string
+        label: Comments
+        searchable: true
+        sortable: false
+      UserName:
+        type: string
+        label: User
+        searchable: true
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Logged At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - current_user:UserName
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - IssueId
+          - SpentOn
+          - Hours
+          - Activity
+          - Comments
+          - UserName
+      filters:
+        columns: 4
+        order:
+          - UserName
+          - Activity
+          - SpentOn
+          - IssueId
+
+    filters:
+      UserName:
+        type: like
+        label: User
+      Activity:
+        type: dropdown
+        label: Activity
+        options:
+          - design
+          - development
+          - testing
+          - documentation
+          - management
+          - support
+      SpentOn:
+        type: date-range
+        label: Date
+        expression: RmTimeEntry.SpentOn
+      IssueId:
+        type: dropdown
+        label: Issue
+        expression: RmTimeEntry.IssueId
+        foreignKey:
+          entity: issue
+          displayColumn: Subject
+
+    exports:
+      filtered_csv:
+        label: "Export Time Log CSV"
+        format: csv
+        filename: "timelog_{date:yyyyMMdd}.csv"
+        columns:
+          - IssueSubject
+          - SpentOn
+          - Hours
+          - Activity
+          - Comments
+          - UserName

@@ -1,0 +1,111 @@
+@model NetYamlForge.Projects.KbForge.KbArticleListViewModel
+@{
+    ViewData["Title"] = "Knowledge Base — KbForge";
+    Layout = "_Layout";
+    var p = Model.ProjectName;
+    string ViewUrl(string slug) => Url.Content($"~/{p}/Kb/View/{slug}");
+    string EditUrl(string id)   => Url.Content($"~/{p}/Kb/Edit/{id}");
+    string TagUrl(string slug)  => Url.Content($"~/{p}/Kb?tag={slug}");
+    string StatusUrl(string s)  => Url.Content($"~/{p}/Kb?status={s}");
+}
+
+<div class="flex gap-6 p-6 max-w-7xl mx-auto">
+    <!-- Sidebar -->
+    <aside class="w-48 shrink-0 space-y-4">
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body p-4 gap-2">
+                <h2 class="font-semibold text-sm uppercase tracking-wide opacity-60">Status</h2>
+                <a href="@Url.Content($"~/{p}/Kb")" class="btn btn-ghost btn-xs justify-start @(Model.FilterStatus == null && Model.FilterTag == null ? "btn-active" : "")">All</a>
+                <a href="@StatusUrl("published")" class="btn btn-ghost btn-xs justify-start @(Model.FilterStatus == "published" ? "btn-active" : "")">Published</a>
+                <a href="@StatusUrl("draft")" class="btn btn-ghost btn-xs justify-start @(Model.FilterStatus == "draft" ? "btn-active" : "")">Drafts</a>
+                <a href="@StatusUrl("archived")" class="btn btn-ghost btn-xs justify-start @(Model.FilterStatus == "archived" ? "btn-active" : "")">Archived</a>
+            </div>
+        </div>
+
+        @if (Model.Tags.Any())
+        {
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4 gap-2">
+                    <h2 class="font-semibold text-sm uppercase tracking-wide opacity-60">Tags</h2>
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <a href="@TagUrl(tag.Slug)"
+                           class="btn btn-ghost btn-xs justify-between @(Model.FilterTag == tag.Slug ? "btn-active" : "")">
+                            <span>@tag.Name</span>
+                            <span class="badge badge-ghost badge-xs">@tag.ArticleCount</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 min-w-0 space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">📚 Knowledge Base</h1>
+                <p class="text-sm opacity-60 mt-0.5">@Model.Articles.Count article@(Model.Articles.Count == 1 ? "" : "s")</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="@Url.Content($"~/{p}/Kb/Search")" class="btn btn-ghost gap-1">🔍 Search</a>
+                <a href="@Url.Content($"~/{p}/Kb/New")" class="btn btn-primary gap-1">✏️ New Article</a>
+            </div>
+        </div>
+
+        @if (!Model.Articles.Any())
+        {
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body items-center text-center py-16">
+                    <div class="text-6xl mb-4">📚</div>
+                    <h2 class="card-title">No articles yet</h2>
+                    <p class="opacity-60">Start building your knowledge base.</p>
+                    <a href="@Url.Content($"~/{p}/Kb/New")" class="btn btn-primary mt-4">Write the first article</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-3">
+                @foreach (var article in Model.Articles)
+                {
+                    <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
+                        <div class="card-body p-5">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <a href="@ViewUrl(article.Slug)" class="card-title text-lg hover:underline line-clamp-1">
+                                            @article.Title
+                                        </a>
+                                        <span class="badge @article.StatusBadgeClass badge-sm">@article.Status</span>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(article.Summary))
+                                    {
+                                        <p class="text-sm opacity-70 mt-1 line-clamp-2">@article.Summary</p>
+                                    }
+                                    <div class="flex items-center gap-3 mt-2 text-xs opacity-50">
+                                        <span>by @article.Author</span>
+                                        <span>·</span>
+                                        <span>@DateTime.Parse(article.UpdatedAt).ToString("MMM d, yyyy")</span>
+                                        <span>·</span>
+                                        <span>@article.ViewCount views</span>
+                                    </div>
+                                    @if (article.Tags.Any())
+                                    {
+                                        <div class="flex flex-wrap gap-1 mt-2">
+                                            @foreach (var tag in article.Tags)
+                                            {
+                                                <span class="badge badge-outline badge-xs">@tag</span>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                <a href="@EditUrl(article.Id)" class="btn btn-ghost btn-xs shrink-0">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </main>
+</div>

@@ -180,6 +180,16 @@
                     </form>
                 }
             }
+            @* ─── スケジュール編集ボタン ─── *@
+            @if (User.IsInRole("Admin") && !isRunning)
+            {
+                <button type="button"
+                        class="btn btn-sm btn-ghost"
+                        title="スケジュール設定"
+                        hx-get="/@projectName/BatchJob/EditSchedule?jobId=@Model.JobId"
+                        hx-target="#modal-container"
+                        hx-swap="innerHTML">⚙</button>
+            }
             <a class="btn btn-sm btn-ghost"
                asp-controller="BatchJob"
                asp-action="History"

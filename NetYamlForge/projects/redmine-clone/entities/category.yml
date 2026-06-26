@@ -1,0 +1,66 @@
+imports: []
+entities:
+  category:
+    table: RmCategory
+    key: Id
+    displayName: Category
+    softDelete: false
+    isPublic: false
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      DefaultAssignee:
+        type: string
+        label: Default Assignee
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      DefaultAssignee:
+        type: string
+        label: Default Assignee
+        searchable: true
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Name
+          - DefaultAssignee
+      filters:
+        columns: 2
+        order:
+          - Name
+
+    filters:
+      Name:
+        type: like
+        label: Name

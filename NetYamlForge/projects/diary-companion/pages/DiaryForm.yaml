@@ -1,0 +1,22 @@
+title: 记录我的心路历程
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: diary_detail
+    title: 日记详情
+    sourceType: custom
+    source: >
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt
+      FROM DiaryEntry
+      WHERE Id = @id
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt]
+    pageSize: 1
+    editable: false
+    readOnly: true
+    ui:
+      component: DataTable

@@ -1,0 +1,75 @@
+name: hospital-mgmt
+displayName: 病院管理システム
+description: "患者台帳・予約・診療記録・処方箋・病床・請求の一元管理"
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/hospital-mgmt.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "病院管理システム"
+  navigation:
+    showDashboard: true
+    entities:
+      - patient
+      - doctor
+      - appointment
+      - medical_record
+      - prescription
+      - ward_bed
+      - billing
+    items:
+      - label: ホーム
+        url: /hospital-mgmt
+        icon: 🏥
+      - label: ダッシュボード
+        controller: Dashboard
+        action: Index
+        icon: 📊
+      - label: 患者台帳
+        url: /hospital-mgmt/DynamicEntity/Index?entity=patient
+        icon: 👤
+        section: 患者管理
+      - label: 医師一覧
+        url: /hospital-mgmt/DynamicEntity/Index?entity=doctor
+        icon: 👨‍⚕️
+        section: 医師・スタッフ
+      - label: 予約一覧
+        url: /hospital-mgmt/DynamicEntity/Index?entity=appointment
+        icon: 📅
+        section: 予約管理
+      - label: 診療記録
+        url: /hospital-mgmt/DynamicEntity/Index?entity=medical_record
+        icon: 📋
+        section: 診療
+      - label: 処方箋
+        url: /hospital-mgmt/DynamicEntity/Index?entity=prescription
+        icon: 💊
+        section: 診療
+      - label: 病床管理
+        url: /hospital-mgmt/DynamicEntity/Index?entity=ward_bed
+        icon: 🛏
+        section: 病棟管理
+      - label: 請求管理
+        url: /hospital-mgmt/DynamicEntity/Index?entity=billing
+        icon: 💴
+        section: 会計
+
+home_page:
+  icon: "🏥"
+  tagline: "患者・予約・診療・病床・請求を一元管理する病院情報システム"
+  tags:
+    - 病院管理
+    - 患者台帳
+    - 電子カルテ
+    - 処方箋
+    - 病床管理

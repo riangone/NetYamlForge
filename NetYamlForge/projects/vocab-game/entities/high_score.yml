@@ -1,0 +1,100 @@
+imports: []
+entities:
+  high_score:
+    table: high_scores
+    key: id
+    displayName: High Score
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      user_name:
+        type: string
+        required: true
+        label: 用户名
+        editable: true
+      score:
+        type: int
+        required: true
+        label: 得分
+        editable: true
+      correct:
+        type: int
+        label: 答对数
+        editable: true
+      incorrect:
+        type: int
+        label: 答错数
+        editable: true
+      max_combo:
+        type: int
+        label: 最高连击
+        editable: true
+      difficulty:
+        type: int
+        label: 难度
+        editable: true
+      played_at:
+        type: datetime
+        label: 游戏时间
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      user_name:
+        type: string
+        required: true
+        label: 用户名
+        searchable: true
+        sortable: true
+      score:
+        type: int
+        label: 得分
+        sortable: true
+      correct:
+        type: int
+        label: 答对数
+        sortable: true
+      incorrect:
+        type: int
+        label: 答错数
+        sortable: true
+      max_combo:
+        type: int
+        label: 最高连击
+        sortable: true
+      difficulty:
+        type: int
+        label: 难度
+        sortable: true
+      played_at:
+        type: datetime
+        label: 游戏时间
+        sortable: true
+
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [user_name, score, correct, incorrect, max_combo, difficulty, played_at]
+      filters:
+        columns: 2
+        order: [user_name, difficulty]
+
+    filters:
+      user_name:
+        type: equal
+        label: 用户名
+      difficulty:
+        type: equal
+        label: 难度

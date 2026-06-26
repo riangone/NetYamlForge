@@ -1,0 +1,22 @@
+header:
+  title: Vocabulary Game
+
+navigation:
+  showDashboard: true
+  entities:
+    - vocab_word
+    - learning_record
+  items:
+    - label: Home
+      url: /vocab-game
+      icon: 🏠
+    - label: 单词挑战
+      url: /vocab-game/Page/Game
+      icon: 🎮
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+
+footer:
+  text: "Vocabulary Game — powered by NetYamlForge"

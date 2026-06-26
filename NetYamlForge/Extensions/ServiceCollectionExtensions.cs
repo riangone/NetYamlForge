@@ -21,6 +21,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
 using Npgsql;
+using NetYamlForge.Projects.FormForge;
+using NetYamlForge.Projects.KbForge;
 
 namespace NetYamlForge.Extensions;
 
@@ -305,6 +307,13 @@ public static class ServiceCollectionExtensions
 
         // ワークフローガイドサービス
         services.AddScoped<WorkflowGuideService>();
+
+        // FormForge
+        services.AddScoped<FormForgeRepository>();
+        services.AddScoped<FormForgeResponseRepository>();
+
+        // KbForge
+        services.AddScoped<KbForgeRepository>();
 
         return services;
     }

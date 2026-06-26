@@ -1,0 +1,322 @@
+imports: []
+entities:
+  issue:
+    table: RmIssue
+    key: Id
+    displayName: Issue
+    softDelete: false
+    isPublic: false
+
+    joins:
+      - type: left
+        table: RmMilestone
+        alias: ms
+        on: RmIssue.MilestoneId = ms.Id
+      - type: left
+        table: RmCategory
+        alias: cat
+        on: RmIssue.CategoryId = cat.Id
+
+    forms:
+      Subject:
+        type: string
+        required: true
+        label: Subject
+        editable: true
+      Tracker:
+        type: string
+        required: true
+        label: Tracker
+        editable: true
+        options:
+          - bug
+          - feature
+          - support
+          - task
+        optionLabels:
+          bug: "🐛 Bug"
+          feature: "✨ Feature"
+          support: "💬 Support"
+          task: "📋 Task"
+      Status:
+        type: string
+        required: true
+        label: Status
+        editable: true
+        options:
+          - new
+          - in_progress
+          - resolved
+          - feedback
+          - closed
+          - rejected
+        optionLabels:
+          new: "🆕 New"
+          in_progress: "🔄 In Progress"
+          resolved: "✅ Resolved"
+          feedback: "💬 Feedback"
+          closed: "🔒 Closed"
+          rejected: "❌ Rejected"
+      Priority:
+        type: string
+        required: true
+        label: Priority
+        editable: true
+        options:
+          - low
+          - normal
+          - high
+          - urgent
+          - immediate
+        optionLabels:
+          low: "🟢 Low"
+          normal: "🔵 Normal"
+          high: "🟡 High"
+          urgent: "🟠 Urgent"
+          immediate: "🔴 Immediate"
+      AssignedTo:
+        type: string
+        label: Assigned To
+        editable: true
+      CategoryId:
+        type: int
+        label: Category
+        editable: true
+        foreignKey:
+          entity: category
+          displayColumn: Name
+          picker: false
+      MilestoneId:
+        type: int
+        label: Milestone
+        editable: true
+        foreignKey:
+          entity: milestone
+          displayColumn: Name
+          picker: false
+      StartDate:
+        type: date
+        label: Start Date
+        editable: true
+      DueDate:
+        type: date
+        label: Due Date
+        editable: true
+      EstimatedHours:
+        type: decimal
+        label: Estimated Hours
+        editable: true
+        precision: 1
+      DoneRatio:
+        type: int
+        label: Done (%)
+        editable: true
+      Description:
+        type: textarea
+        label: Description
+        editable: true
+      AuthorName:
+        type: string
+        label: Author
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: "#"
+        sortable: true
+      Tracker:
+        type: string
+        label: Tracker
+        sortable: true
+      Subject:
+        type: string
+        required: true
+        label: Subject
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        label: Status
+        sortable: true
+      Priority:
+        type: string
+        label: Priority
+        sortable: true
+      AssignedTo:
+        type: string
+        label: Assigned To
+        searchable: true
+        sortable: true
+      CategoryName:
+        type: string
+        label: Category
+        expression: cat.Name
+        sortable: true
+      MilestoneName:
+        type: string
+        label: Milestone
+        expression: ms.Name
+        sortable: true
+      DueDate:
+        type: date
+        label: Due Date
+        sortable: true
+      DoneRatio:
+        type: int
+        label: Done (%)
+        sortable: true
+      EstimatedHours:
+        type: decimal
+        label: Est. Hours
+        sortable: true
+      AuthorName:
+        type: string
+        label: Author
+        searchable: true
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: Updated At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - now:UpdatedAt
+        - current_user:AuthorName
+      beforeUpdate:
+        - now:UpdatedAt
+      afterCreate:
+        - audit_log
+      afterUpdate:
+        - audit_log
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Subject
+          - Tracker
+          - Status
+          - Priority
+          - AssignedTo
+          - CategoryId
+          - MilestoneId
+          - StartDate
+          - DueDate
+          - EstimatedHours
+          - DoneRatio
+          - Description
+          - AuthorName
+      filters:
+        columns: 4
+        order:
+          - Status
+          - Tracker
+          - Priority
+          - AssignedTo
+          - MilestoneId
+          - DueDate
+
+    filters:
+      Status:
+        type: toggle-group
+        label: Status
+        optionLabels:
+          new: "🆕 New"
+          in_progress: "🔄 In Progress"
+          resolved: "✅ Resolved"
+          feedback: "💬 Feedback"
+          closed: "🔒 Closed"
+          rejected: "❌ Rejected"
+      Tracker:
+        type: dropdown
+        label: Tracker
+        options:
+          - bug
+          - feature
+          - support
+          - task
+      Priority:
+        type: dropdown
+        label: Priority
+        options:
+          - low
+          - normal
+          - high
+          - urgent
+          - immediate
+      AssignedTo:
+        type: like
+        label: Assigned To
+      MilestoneId:
+        type: dropdown
+        label: Milestone
+        expression: RmIssue.MilestoneId
+        foreignKey:
+          entity: milestone
+          displayColumn: Name
+      DueDate:
+        type: date-range
+        label: Due Date
+        expression: RmIssue.DueDate
+
+    actions:
+      resolve:
+        label: "Resolve"
+        scope: row
+        confirm: "Mark this issue as Resolved?"
+        handler: resolve_issue
+      close_issue:
+        label: "Close"
+        scope: row
+        confirm: "Close this issue?"
+        handler: close_issue
+      reopen:
+        label: "Reopen"
+        scope: row
+        handler: reopen_issue
+        inputs:
+          - name: Reason
+            type: string
+            label: Reason
+            required: true
+
+    exports:
+      filtered_csv:
+        label: "Export CSV"
+        format: csv
+        filename: "issues_{date:yyyyMMdd}.csv"
+        columns:
+          - Id
+          - Tracker
+          - Subject
+          - Status
+          - Priority
+          - AssignedTo
+          - DueDate
+          - DoneRatio
+          - AuthorName
+
+    links:
+      comments:
+        label: Comments
+        targetEntity: issue_comment
+        filter:
+          IssueId: Id
+      time_entries:
+        label: Time Log
+        targetEntity: time_entry
+        filter:
+          IssueId: Id

@@ -1,0 +1,108 @@
+imports: []
+entities:
+  milestone:
+    table: RmMilestone
+    key: Id
+    displayName: Milestone
+    softDelete: false
+    isPublic: false
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: Name
+        editable: true
+      Description:
+        type: textarea
+        label: Description
+        editable: true
+      DueDate:
+        type: date
+        label: Due Date
+        editable: true
+      Status:
+        type: string
+        label: Status
+        editable: true
+        options:
+          - open
+          - locked
+          - closed
+        optionLabels:
+          open: "🟢 Open"
+          locked: "🔒 Locked"
+          closed: "✅ Closed"
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        required: true
+        label: Name
+        searchable: true
+        sortable: true
+      Description:
+        type: string
+        label: Description
+        searchable: true
+        sortable: false
+      DueDate:
+        type: date
+        label: Due Date
+        sortable: true
+      Status:
+        type: string
+        label: Status
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: Updated At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - now:UpdatedAt
+      beforeUpdate:
+        - now:UpdatedAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Name
+          - Status
+          - DueDate
+          - Description
+      filters:
+        columns: 3
+        order:
+          - Status
+          - DueDate
+
+    filters:
+      Status:
+        type: toggle-group
+        label: Status
+        optionLabels:
+          open: "🟢 Open"
+          locked: "🔒 Locked"
+          closed: "✅ Closed"
+      DueDate:
+        type: date-range
+        label: Due Date
+        expression: RmMilestone.DueDate

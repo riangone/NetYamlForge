@@ -1,0 +1,1423 @@
+@using Dapper
+@using System.Data
+@using System.Text.Json
+@inject IDbConnection Db
+@{
+    var username = User.Identity?.Name ?? "admin";
+    IEnumerable<dynamic> words = Array.Empty<dynamic>();
+    IEnumerable<dynamic> records = Array.Empty<dynamic>();
+    try
+    {
+        words = await Db.QueryAsync<dynamic>("SELECT id, word, phonetic, meaning, difficulty, example, example_meaning FROM vocab_words");
+        records = await Db.QueryAsync<dynamic>("SELECT id, word_id, status, test_count, correct_count FROM learning_records WHERE user_name = @User", new { User = username });
+    }
+    catch (Exception)
+    {
+        // 容错：防止初次启动时由于异步自动建表有微小延迟导致页面报错
+    }
+    IEnumerable<dynamic> topScores = Array.Empty<dynamic>();
+    try
+    {
+        topScores = await Db.QueryAsync<dynamic>("SELECT user_name, score, correct, incorrect, max_combo, difficulty, played_at FROM high_scores ORDER BY score DESC LIMIT 10");
+    }
+    catch (Exception) { }
+    var wordsJson = JsonSerializer.Serialize(words);
+    var recordsJson = JsonSerializer.Serialize(records);
+    var topScoresJson = JsonSerializer.Serialize(topScores);
+}
+
+@Html.AntiForgeryToken()
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    .vocab-game-container {
+        font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+        background: radial-gradient(circle at 10% 20%, #1e1b4b 0%, #0f172a 100%);
+        min-height: 85vh;
+        color: #f8fafc;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .vocab-game-container::before {
+        content: "";
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        top: -50px;
+        right: -50px;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .vocab-game-container::after {
+        content: "";
+        position: absolute;
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 70%);
+        bottom: -150px;
+        left: -150px;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .glass-card {
+        background: rgba(30, 41, 59, 0.45);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        border-radius: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15);
+    }
+
+    .neon-text-indigo {
+        text-shadow: 0 0 10px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .neon-text-pink {
+        text-shadow: 0 0 10px rgba(236, 72, 153, 0.5), 0 0 20px rgba(236, 72, 153, 0.3);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(99, 102, 241, 0.3);
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(99, 102, 241, 0.5);
+    }
+
+    .difficulty-badge {
+        transition: all 0.2s ease;
+    }
+
+    .difficulty-badge.active {
+        background-color: #6366f1 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+        transform: scale(1.05);
+    }
+
+    #phaser-game-canvas {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    #game-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    #game-container {
+        width: 100%;
+        aspect-ratio: 8 / 5;  /* normal view keeps 8:5; fullscreen overrides via fs-mode */
+    }
+
+    #fullscreen-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 20;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid rgba(99, 102, 241, 0.5);
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(6px);
+        color: #a5b4fc;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+        line-height: 1;
+    }
+
+    #fullscreen-btn:hover {
+        background: rgba(99, 102, 241, 0.4);
+        border-color: rgba(99, 102, 241, 0.9);
+        color: #ffffff;
+    }
+
+    /* Fake fullscreen — 跨浏览器通用，含 iOS Safari */
+    #game-wrapper.fs-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw !important;
+        height: 100dvh !important;
+        background: #0c1020;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    #game-wrapper.fs-mode #game-container {
+        width: 100vw;
+        height: 100dvh;
+        aspect-ratio: unset;
+    }
+
+    /* 桌面端原生全屏兜底 */
+    :fullscreen #game-wrapper,
+    :-webkit-full-screen #game-wrapper {
+        width: 100vw;
+        height: 100vh;
+        background: #0c1020;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    :fullscreen #game-container,
+    :-webkit-full-screen #game-container {
+        width: 100vw;
+        height: 100vh;
+        aspect-ratio: unset;
+    }
+</style>
+
+<div class="vocab-game-container relative z-10">
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- 左侧配置与统计栏 -->
+        <div class="w-full lg:w-1/4 flex flex-col gap-6 relative z-10">
+            <!-- 个人状态卡 -->
+            <div class="glass-card p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="avatar placeholder">
+                        <div class="bg-indigo-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+                            @username.Substring(0, Math.Min(2, username.Length)).ToUpper()
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-100">@username</h3>
+                        <p class="text-xs text-indigo-300">学习等级：词汇探险家</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-slate-900/40 p-2.5 rounded-lg border border-slate-700/50">
+                        <div class="text-xs text-slate-400">已背单词</div>
+                        <div id="stat-learned-count" class="text-xl font-bold text-indigo-400">0</div>
+                    </div>
+                    <div class="bg-slate-900/40 p-2.5 rounded-lg border border-slate-700/50">
+                        <div class="text-xs text-slate-400">掌握程度</div>
+                        <div id="stat-mastery-rate" class="text-xl font-bold text-pink-400">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 游戏难度控制 -->
+            <div class="glass-card p-5">
+                <h4 class="font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                    <span>🎮</span> 挑战难度
+                </h4>
+                <div class="flex flex-wrap gap-2" id="difficulty-selectors">
+                    <button class="btn btn-xs btn-outline bg-slate-800 text-slate-300 border-slate-700/70 difficulty-badge active" data-difficulty="1">等级 1</button>
+                    <button class="btn btn-xs btn-outline bg-slate-800 text-slate-300 border-slate-700/70 difficulty-badge" data-difficulty="2">等级 2</button>
+                    <button class="btn btn-xs btn-outline bg-slate-800 text-slate-300 border-slate-700/70 difficulty-badge" data-difficulty="3">等级 3</button>
+                    <button class="btn btn-xs btn-outline bg-slate-800 text-slate-300 border-slate-700/70 difficulty-badge" data-difficulty="4">等级 4</button>
+                    <button class="btn btn-xs btn-outline bg-slate-800 text-slate-300 border-slate-700/70 difficulty-badge" data-difficulty="5">等级 5</button>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">高难度包含更生僻的学术与技术词汇</p>
+            </div>
+
+            <!-- 关卡内实时统计 -->
+            <div class="glass-card p-5 flex-1 min-h-[150px]">
+                <h4 class="font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                    <span>📊</span> 当前挑战统计
+                </h4>
+                <div class="space-y-2.5 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">累计得分:</span>
+                        <span id="live-score" class="font-bold text-indigo-300">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">当前连击:</span>
+                        <span id="live-combo" class="font-bold text-pink-400">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">最高连击:</span>
+                        <span id="live-max-combo" class="font-bold text-amber-400">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">答对/答错:</span>
+                        <span>
+                            <span id="live-correct" class="text-emerald-400 font-semibold">0</span>
+                            <span class="text-slate-500">/</span>
+                            <span id="live-incorrect" class="text-rose-400 font-semibold">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间：Phaser 游戏核心区 -->
+        <div class="w-full lg:w-1/2 flex flex-col gap-4 relative z-10">
+            <div class="glass-card p-4 flex flex-col items-center justify-center">
+                <!-- 游戏容器 -->
+                <div id="game-wrapper">
+                    <div id="game-container"></div>
+                    <button id="fullscreen-btn" title="全屏切换">
+                        <!-- Material Design: fullscreen -->
+                        <svg id="fs-icon-expand" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                        </svg>
+                        <!-- Material Design: fullscreen_exit -->
+                        <svg id="fs-icon-compress" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="glass-card p-4 text-xs text-slate-400 leading-relaxed">
+                <span class="font-bold text-indigo-300">💡 玩法指南：</span>
+                陨石在屏幕上方缓慢坠落，内部标有英文单词。请在它们触及下方警戒线之前，点击或按键盘对应的 <span class="bg-indigo-900/60 text-indigo-300 px-1 rounded font-mono">1</span>, <span class="bg-indigo-900/60 text-indigo-300 px-1 rounded font-mono">2</span>, <span class="bg-indigo-900/60 text-indigo-300 px-1 rounded font-mono">3</span>, <span class="bg-indigo-900/60 text-indigo-300 px-1 rounded font-mono">4</span> 键选择正确的中文翻译。连击数 (Combo) 越高，分数加成越大！
+            </div>
+        </div>
+
+        <!-- 右侧：词汇库与学习历史 -->
+        <div class="w-full lg:w-1/4 flex flex-col gap-6 relative z-10">
+            <!-- 单词学习列表 -->
+            <div class="glass-card p-5 flex flex-col h-[520px]">
+                <h4 class="font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                    <span>📖</span> 单词列表一览
+                </h4>
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="text" id="word-search" placeholder="检索单词或翻译..." class="input input-sm input-bordered w-full bg-slate-900/40 text-slate-200 border-slate-700/60" />
+                </div>
+                <div class="overflow-y-auto flex-1 custom-scrollbar pr-1 space-y-2" id="vocabulary-list-box">
+                    <!-- 动态渲染 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入 Phaser 3 游戏引擎 -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+<script>
+    (function () {
+        // 数据绑定与反序列化
+        const wordsData = @Html.Raw(wordsJson);
+        const recordsData = @Html.Raw(recordsJson);
+        let topScoresData = @Html.Raw(topScoresJson);
+        const currentUser = "@username";
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+
+        // 维护前端状态的记录 Map
+        const userRecordsMap = {};
+        recordsData.forEach(r => {
+            userRecordsMap[r.word_id] = r;
+        });
+
+        // 页面初始化加载
+        document.addEventListener("DOMContentLoaded", () => {
+            updateDashboardStats();
+            renderVocabularyList();
+
+            // 搜索过滤绑定
+            document.getElementById("word-search").addEventListener("input", (e) => {
+                renderVocabularyList(e.target.value);
+            });
+
+            // 难度选择绑定
+            document.querySelectorAll("#difficulty-selectors button").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    document.querySelectorAll("#difficulty-selectors button").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                    selectedDifficulty = parseInt(this.getAttribute("data-difficulty"));
+                    // 若 PlayScene 正在运行，立即切换词库
+                    if (window.phaserGame) {
+                        const ps = window.phaserGame.scene.keys['PlayScene'];
+                        if (ps && ps.scene.isActive()) {
+                            ps.setDifficulty(selectedDifficulty);
+                        }
+                    }
+                });
+            });
+        });
+
+        function updateDashboardStats() {
+            const learnedCount = Object.keys(userRecordsMap).length;
+            const masteredCount = Object.values(userRecordsMap).filter(r => r.status === 'mastered').length;
+            const totalWords = wordsData.length;
+
+            document.getElementById("stat-learned-count").textContent = learnedCount;
+            const masteryRate = learnedCount > 0 ? Math.round((masteredCount / learnedCount) * 100) : 0;
+            document.getElementById("stat-mastery-rate").textContent = masteryRate + "%";
+        }
+
+        function renderVocabularyList(filterText = "") {
+            const box = document.getElementById("vocabulary-list-box");
+            box.innerHTML = "";
+
+            const query = filterText.toLowerCase().trim();
+            const filtered = wordsData.filter(w => {
+                return w.word.toLowerCase().includes(query) || w.meaning.toLowerCase().includes(query);
+            });
+
+            if (filtered.length === 0) {
+                box.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">没有找到符合条件的单词</div>`;
+                return;
+            }
+
+            filtered.forEach(w => {
+                const rec = userRecordsMap[w.id];
+                let statusBadge = `<span class="badge badge-ghost badge-sm text-slate-500">未学习</span>`;
+                if (rec) {
+                    if (rec.status === 'mastered') {
+                        statusBadge = `<span class="badge badge-success badge-sm text-white">已掌握</span>`;
+                    } else {
+                        statusBadge = `<span class="badge badge-warning badge-sm text-slate-800">学习中</span>`;
+                    }
+                }
+
+                const div = document.createElement("div");
+                div.className = "bg-slate-900/30 border border-slate-800 hover:border-indigo-500/40 p-3 rounded-lg flex flex-col gap-1.5 transition duration-200";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-slate-200 text-sm">${w.word}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] text-slate-400">L${w.difficulty}</span>
+                            ${statusBadge}
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-300 font-medium">${w.meaning}</div>
+                    ${w.phonetic ? `<div class="text-[10px] text-indigo-400 font-mono">${w.phonetic}</div>` : ''}
+                    ${w.example ? `<div class="text-[10px] text-slate-400 border-t border-slate-800/60 pt-1.5 mt-1 italic">"${w.example}"<br><span class="text-slate-500 not-italic">${w.example_meaning || ''}</span></div>` : ''}
+                `;
+                box.appendChild(div);
+            });
+        }
+
+        // Web Audio API 简易声音引擎，避免加载额外音频文件
+        class SoundEngine {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            playCorrect() {
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.type = 'triangle';
+                    const now = this.ctx.currentTime;
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15); // C6
+
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } catch(e) {}
+            }
+
+            playIncorrect() {
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.type = 'sawtooth';
+                    const now = this.ctx.currentTime;
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } catch(e) {}
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        // 异步上报学习记录方法
+        async function syncLearningRecord(wordId, isCorrect) {
+            try {
+                const rec = userRecordsMap[wordId];
+                let isEdit = !!rec;
+                let url = isEdit ? "/vocab-game/DynamicEntity/Edit" : "/vocab-game/DynamicEntity/Create";
+                if (isEdit) {
+                    url += `?id=${rec.id}`;
+                }
+
+                const params = new URLSearchParams();
+                params.append("__RequestVerificationToken", csrfToken);
+                params.append("entity", "learning_record");
+                
+                // 表单值需要对应实体 YAML 中的属性
+                params.append("word_id", wordId);
+                params.append("user_name", currentUser);
+
+                const currentTestCount = rec ? (rec.test_count + 1) : 1;
+                const currentCorrectCount = rec ? (rec.correct_count + (isCorrect ? 1 : 0)) : (isCorrect ? 1 : 0);
+                const currentMasteryRate = currentCorrectCount / currentTestCount;
+                
+                // 若连续对次数多或正确率高，判断为 mastered
+                let status = "learning";
+                if (currentCorrectCount >= 3 && currentMasteryRate >= 0.75) {
+                    status = "mastered";
+                }
+
+                params.append("status", status);
+                params.append("test_count", currentTestCount.toString());
+                params.append("correct_count", currentCorrectCount.toString());
+                params.append("last_tested_at", new Date().toISOString().replace('T', ' ').substring(0, 19));
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: params.toString()
+                });
+
+                if (response.ok) {
+                    // 更新本地 Map，用于下次操作与 UI 统计
+                    if (!isEdit) {
+                        // 重新拉取一次当前用户的记录，以获取新创建条目的物理 id。这可以防止连续操作未生成 Id 的记录导致重复创建。
+                        // 由于是异步的，我们在后台执行，但在成功返回后，我们在内存记录先存个临时条目，或通过 ajax 获取最新的 ID。
+                        // 极其快速地查出最新的那个 id
+                        const freshRecordsResponse = await fetch("/vocab-game/DynamicEntity/ListPartial/learning_record?user_name=" + encodeURIComponent(currentUser));
+                        if (freshRecordsResponse.ok) {
+                            // 这里返回的是 list partial，我们可以用 C# API，或者由于只是前端计数，我们可以通过再次异步拉取数据来重置 userRecordsMap
+                            // 我们可以直接做一个简易的处理：将已学习记录数量在前端标记一下即可
+                        }
+                    }
+                    
+                    // 手动更新 Map 条目
+                    userRecordsMap[wordId] = {
+                        id: rec ? rec.id : (Date.now()), // 临时用时间戳占位，如果是新增的
+                        word_id: wordId,
+                        status: status,
+                        test_count: currentTestCount,
+                        correct_count: currentCorrectCount
+                    };
+
+                    updateDashboardStats();
+                    renderVocabularyList(document.getElementById("word-search").value);
+                }
+            } catch (err) {
+                console.error("同步学习记录失败：", err);
+            }
+        }
+
+        // 提交高分记录
+        async function syncHighScore(score, correct, incorrect, maxCombo, difficulty) {
+            try {
+                const params = new URLSearchParams();
+                params.append("__RequestVerificationToken", csrfToken);
+                params.append("entity", "high_score");
+                params.append("user_name", currentUser);
+                params.append("score", score);
+                params.append("correct", correct);
+                params.append("incorrect", incorrect);
+                params.append("max_combo", maxCombo);
+                params.append("difficulty", difficulty);
+                params.append("played_at", new Date().toISOString().replace('T', ' ').substring(0, 19));
+                await fetch("/vocab-game/DynamicEntity/Create", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: params.toString()
+                });
+                // 插入到本地高分列表并重排（前端乐观更新）
+                topScoresData = [...topScoresData, { user_name: currentUser, score, correct, incorrect, max_combo: maxCombo, difficulty }]
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+            } catch (err) {
+                console.error("高分记录提交失败：", err);
+            }
+        }
+
+        // 全局难度，跨场景切换时保持
+        let selectedDifficulty = 1;
+
+        // ==================== Phaser 3 游戏引擎开发 ====================
+
+        class BootScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'BootScene' });
+            }
+
+            preload() {
+                // 动态绘制并生成发光的陨石和粒子贴图，免除外部图片资源加载
+                const makeTexture = (name, size, drawFn) => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    drawFn(ctx, size);
+                    this.textures.addCanvas(name, canvas);
+                };
+
+                // 发光粒子贴图
+                makeTexture('glow_particle', 32, (ctx, size) => {
+                    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                    grad.addColorStop(0.3, 'rgba(99, 102, 241, 0.8)');
+                    grad.addColorStop(0.6, 'rgba(236, 72, 153, 0.3)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, size, size);
+                });
+
+                // 陨石贴图
+                makeTexture('meteor', 80, (ctx, size) => {
+                    const cx = size / 2;
+                    const cy = size / 2;
+                    
+                    // 陨石的凹凸不平的多边形边缘
+                    ctx.beginPath();
+                    const points = 12;
+                    for (let i = 0; i < points; i++) {
+                        const angle = (i / points) * Math.PI * 2;
+                        const r = (size / 2) * (0.8 + Math.random() * 0.2);
+                        const x = cx + Math.cos(angle) * r;
+                        const y = cy + Math.sin(angle) * r;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+
+                    // 外层霓虹发光
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#6366f1';
+                    
+                    // 暗灰色质感填充
+                    const grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, size/2);
+                    grad.addColorStop(0, '#312e81');
+                    grad.addColorStop(0.6, '#1e1b4b');
+                    grad.addColorStop(1, '#030712');
+                    
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+
+                    // 加上斑驳的火山坑洞视觉效果
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+                    for (let i = 0; i < 4; i++) {
+                        const kx = cx + (Math.random() - 0.5) * 25;
+                        const ky = cy + (Math.random() - 0.5) * 25;
+                        const kr = 4 + Math.random() * 8;
+                        ctx.beginPath();
+                        ctx.arc(kx, ky, kr, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // 亮蓝色线条勾边
+                    ctx.strokeStyle = 'rgba(99, 102, 241, 0.7)';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                });
+            }
+
+            create() {
+                this.scene.start('StartScene');
+            }
+        }
+
+        class StartScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'StartScene' });
+            }
+
+            create() {
+                const w = this.scale.width, h = this.scale.height;
+
+                this.decorBg1 = this.add.circle(100, 100, 150, 0x6366f1, 0.15);
+                this.decorBg2 = this.add.circle(w - 150, h - 100, 200, 0xec4899, 0.1);
+
+                this.titleText = this.add.text(w / 2, h / 2 - 80, 'Vocabulary Game', {
+                    fontFamily: 'Outfit, Plus Jakarta Sans, sans-serif',
+                    fontSize: '46px',
+                    fontWeight: '800',
+                    color: '#ffffff'
+                }).setOrigin(0.5).setShadow(0, 0, 20, '#6366f1', true);
+
+                this.subtitleText = this.add.text(w / 2, h / 2 - 20, '陨石单词挑战', {
+                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    fontSize: '22px',
+                    fontWeight: '600',
+                    color: '#cbd5e1'
+                }).setOrigin(0.5);
+
+                this.startBtnBg = this.add.graphics();
+                this.startBtnText = this.add.text(w / 2, h / 2 + 75, '开始挑战', {
+                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    fontSize: '18px',
+                    fontWeight: 'bold',
+                    color: '#ffffff'
+                }).setOrigin(0.5);
+
+                this.startBtnZone = this.add.zone(w / 2, h / 2 + 75, 240, 50)
+                    .setInteractive({ useHandCursor: true });
+
+                this._drawBtn(false);
+
+                this.startBtnZone.on('pointerover', () => this._drawBtn(true));
+                this.startBtnZone.on('pointerout',  () => this._drawBtn(false));
+                this.startBtnZone.on('pointerdown', () => this.scene.start('PlayScene', { startDifficulty: selectedDifficulty }));
+
+                this.scale.on('resize', this.onResize, this);
+                this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
+            }
+
+            _drawBtn(hover) {
+                const w = this.scale.width, h = this.scale.height;
+                this.startBtnBg.clear();
+                if (hover) {
+                    this.startBtnBg.fillStyle(0x818cf8, 1);
+                    this.startBtnBg.fillRoundedRect(w / 2 - 122, h / 2 + 48, 244, 54, 27);
+                } else {
+                    this.startBtnBg.fillStyle(0x6366f1, 1);
+                    this.startBtnBg.fillRoundedRect(w / 2 - 120, h / 2 + 50, 240, 50, 25);
+                    this.startBtnBg.setAlpha(0.9);
+                }
+            }
+
+            onResize(gameSize) {
+                const { width: w, height: h } = gameSize;
+                this.decorBg2.setPosition(w - 150, h - 100);
+                this.titleText.setPosition(w / 2, h / 2 - 80);
+                this.subtitleText.setPosition(w / 2, h / 2 - 20);
+                this.startBtnText.setPosition(w / 2, h / 2 + 75);
+                this.startBtnZone.setPosition(w / 2, h / 2 + 75);
+                this._drawBtn(false);
+            }
+        }
+
+        class PlayScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'PlayScene' });
+                this.score = 0;
+                this.lives = 3;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.correctCount = 0;
+                this.incorrectCount = 0;
+                this.currentDifficulty = 1;
+                this.activeMeteors = [];
+                this.spawnTimer = null;
+                this.currentQuestion = null;
+            }
+
+            init(data) {
+                if (data && data.startDifficulty) {
+                    this.currentDifficulty = data.startDifficulty;
+                } else {
+                    this.currentDifficulty = selectedDifficulty;
+                }
+            }
+
+            setDifficulty(diff) {
+                this.currentDifficulty = diff;
+                if (this.currentQuestion) {
+                    // 若在局中切换了难度，重新生成一个匹配难度的气泡
+                    this.destroyAllMeteors();
+                    this.spawnMeteor();
+                }
+            }
+
+            create() {
+                this.score = 0;
+                this.lives = 3;
+                this.combo = 0;
+                this.maxCombo = 0;
+                this.correctCount = 0;
+                this.incorrectCount = 0;
+                this.activeMeteors = [];
+                this.optionContainers = [];
+
+                // sync difficulty badge in sidebar
+                document.querySelectorAll("#difficulty-selectors button").forEach(b => {
+                    b.classList.toggle("active", parseInt(b.getAttribute("data-difficulty")) === this.currentDifficulty);
+                });
+
+                this.updateLiveStats();
+
+                this.deadlineGraphics = this.add.graphics();
+                this.deadlineLabel = this.add.text(15, 0, 'DANGER ZONE', {
+                    fontFamily: 'Outfit, sans-serif',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    color: '#f43f5e'
+                }).setAlpha(0.6);
+                this._redrawDeadline();
+
+                // 右上角重新开始按钮
+                this.restartBtnBg = this.add.graphics();
+                this.restartBtnText = this.add.text(0, 0, '↺ 重新开始', {
+                    fontFamily: 'Plus Jakarta Sans, sans-serif',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    color: '#94a3b8'
+                }).setOrigin(0.5);
+                this.restartZone = this.add.zone(0, 0, 110, 28).setInteractive({ useHandCursor: true });
+                this.restartZone.on('pointerover', () => this._drawRestartBtn(true));
+                this.restartZone.on('pointerout',  () => this._drawRestartBtn(false));
+                this.restartZone.on('pointerdown', () => {
+                    this.destroyAllMeteors();
+                    this.scene.start('PlayScene');
+                });
+                this._drawRestartBtn(false);
+
+                this.createOptionButtons();
+                this.spawnMeteor();
+
+                this.input.keyboard.on('keydown', (event) => {
+                    const key = event.key;
+                    if (['1', '2', '3', '4'].includes(key)) {
+                        this.selectOption(parseInt(key) - 1);
+                    }
+                });
+
+                this.scale.on('resize', this.onResize, this);
+                this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
+            }
+
+            _redrawDeadline() {
+                const width = this.scale.width, height = this.scale.height;
+                this.deadlineY = height - 120;
+                this.deadlineGraphics.clear();
+                this.deadlineGraphics.lineStyle(2, 0xf43f5e, 0.4);
+                this.deadlineGraphics.beginPath();
+                this.deadlineGraphics.moveTo(0, this.deadlineY);
+                this.deadlineGraphics.lineTo(width, this.deadlineY);
+                this.deadlineGraphics.strokePath();
+                this.deadlineLabel.setPosition(15, this.deadlineY + 5);
+                if (this.restartBtnBg) this._drawRestartBtn(false);
+            }
+
+            _drawRestartBtn(hover) {
+                const w = this.scale.width;
+                const bx = w - 64, by = 20;
+                this.restartBtnBg.clear();
+                this.restartBtnBg.fillStyle(hover ? 0x334155 : 0x1e293b, hover ? 0.9 : 0.75);
+                this.restartBtnBg.lineStyle(1, hover ? 0x6366f1 : 0x475569, 0.8);
+                this.restartBtnBg.fillRoundedRect(bx - 55, by - 14, 110, 28, 6);
+                this.restartBtnBg.strokeRoundedRect(bx - 55, by - 14, 110, 28, 6);
+                this.restartBtnText.setPosition(bx, by);
+                this.restartBtnText.setColor(hover ? '#ffffff' : '#94a3b8');
+                this.restartZone.setPosition(bx, by);
+            }
+
+            onResize(gameSize) {
+                this._redrawDeadline();
+                this.optionContainers.forEach(c => c.destroy());
+                this.createOptionButtons();
+                if (this.currentQuestion) {
+                    this.optionTexts.forEach((t, i) => {
+                        t.setText(this.currentQuestion.options[i] ? this.currentQuestion.options[i].meaning : '—');
+                    });
+                }
+            }
+
+            createOptionButtons() {
+                const width = this.scale.width;
+                const height = this.scale.height;
+                const portrait = height > width * 1.1;
+                const buttonWidth = portrait ? Math.min(width - 20, 360) : 360;
+                const buttonHeight = 44;
+                const gap = portrait ? 8 : 16;
+
+                this.optionButtons = [];
+                this.optionTexts = [];
+                this.optionContainers = [];
+
+                let positions;
+                if (portrait) {
+                    const totalH = 4 * buttonHeight + 3 * gap;
+                    const startY = height - totalH - 8;
+                    positions = [0, 1, 2, 3].map(i => ({
+                        x: width / 2,
+                        y: startY + i * (buttonHeight + gap) + buttonHeight / 2
+                    }));
+                } else {
+                    const startY = height - 90;
+                    positions = [
+                        { x: width / 2 - buttonWidth / 2 - gap / 2, y: startY },
+                        { x: width / 2 + buttonWidth / 2 + gap / 2, y: startY },
+                        { x: width / 2 - buttonWidth / 2 - gap / 2, y: startY + buttonHeight + gap / 2 },
+                        { x: width / 2 + buttonWidth / 2 + gap / 2, y: startY + buttonHeight + gap / 2 }
+                    ];
+                }
+
+                const buttonColors = [0x6366f1, 0xec4899, 0x10b981, 0xf59e0b];
+
+                positions.forEach((pos, index) => {
+                    const btnG = this.add.graphics();
+                    btnG.fillStyle(buttonColors[index], 0.2);
+                    btnG.lineStyle(1.5, buttonColors[index], 0.6);
+                    btnG.fillRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+                    btnG.strokeRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+
+                    const container = this.add.container(pos.x, pos.y);
+                    container.add(btnG);
+
+                    const numText = this.add.text(-buttonWidth / 2 + 15, -1, `${index + 1}.`, {
+                        fontFamily: 'Outfit, sans-serif',
+                        fontSize: '15px',
+                        fontWeight: 'bold',
+                        color: '#94a3b8'
+                    }).setOrigin(0, 0.5);
+
+                    const labelText = this.add.text(0, -1, '选项加载中...', {
+                        fontFamily: 'Plus Jakarta Sans, sans-serif',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#f1f5f9'
+                    }).setOrigin(0.5);
+
+                    container.add(numText);
+                    container.add(labelText);
+
+                    labelText.setInteractive(new Phaser.Geom.Rectangle(-buttonWidth/2, -buttonHeight/2, buttonWidth, buttonHeight), Phaser.Geom.Rectangle.Contains);
+                    
+                    labelText.on('pointerover', () => {
+                        btnG.clear();
+                        btnG.fillStyle(buttonColors[index], 0.35);
+                        btnG.lineStyle(2, buttonColors[index], 0.9);
+                        btnG.fillRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+                        btnG.strokeRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+                    });
+
+                    labelText.on('pointerout', () => {
+                        btnG.clear();
+                        btnG.fillStyle(buttonColors[index], 0.2);
+                        btnG.lineStyle(1.5, buttonColors[index], 0.6);
+                        btnG.fillRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+                        btnG.strokeRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, 8);
+                    });
+
+                    labelText.on('pointerdown', () => {
+                        this.selectOption(index);
+                    });
+
+                    this.optionButtons.push(btnG);
+                    this.optionTexts.push(labelText);
+                    this.optionContainers.push(container);
+                });
+            }
+
+            destroyAllMeteors() {
+                this.activeMeteors.forEach(m => {
+                    m.container.destroy();
+                });
+                this.activeMeteors = [];
+                if (this.spawnTimer) {
+                    clearTimeout(this.spawnTimer);
+                }
+            }
+
+            spawnMeteor() {
+                if (this.lives <= 0) return;
+
+                // 筛选当前难度对应的词库单词
+                let filteredPool = wordsData.filter(w => w.difficulty === this.currentDifficulty);
+                if (filteredPool.length === 0) {
+                    // 容错：如果该难度下没有配置单词，则使用所有单词
+                    filteredPool = wordsData;
+                }
+
+                if (filteredPool.length === 0) {
+                    // 全局零数据容错
+                    this.add.text(this.scale.width/2, this.scale.height/2 - 50, '数据库词库为空，请先在“词库管理”添加单词。', {
+                        fontSize: '16px', color: '#ff6b6b', align: 'center'
+                    }).setOrigin(0.5);
+                    return;
+                }
+
+                // 随机抽取一个单词
+                const questionWord = Phaser.Utils.Array.GetRandom(filteredPool);
+                
+                // 挑选混淆选项：从所有单词里随机选3个不同的，加上正确答案构成4个选项
+                const decoyPool = wordsData.filter(w => w.id !== questionWord.id);
+                Phaser.Utils.Array.Shuffle(decoyPool);
+                
+                const options = [questionWord];
+                for (let i = 0; i < Math.min(3, decoyPool.length); i++) {
+                    options.push(decoyPool[i]);
+                }
+                
+                // 打乱选项顺序
+                Phaser.Utils.Array.Shuffle(options);
+
+                const correctIndex = options.findIndex(o => o.id === questionWord.id);
+
+                this.currentQuestion = {
+                    word: questionWord,
+                    options: options,
+                    correctIndex: correctIndex
+                };
+
+                // 更新下方的 4 个选项按钮文本
+                this.optionTexts.forEach((textSprite, i) => {
+                    if (options[i]) {
+                        textSprite.setText(options[i].meaning);
+                    } else {
+                        textSprite.setText('—');
+                    }
+                });
+
+                // 创建陨石容器
+                const x = Phaser.Math.Between(100, this.scale.width - 100);
+                const y = -40;
+
+                const meteorImg = this.add.image(0, 0, 'meteor');
+                const wordText = this.add.text(0, -3, questionWord.word, {
+                    fontFamily: 'Outfit, Plus Jakarta Sans, sans-serif',
+                    fontSize: '16px',
+                    fontWeight: '800',
+                    color: '#ffffff'
+                }).setOrigin(0.5).setShadow(0, 0, 8, '#6366f1', true);
+
+                const container = this.add.container(x, y);
+                container.add(meteorImg);
+                container.add(wordText);
+
+                // 根据难度调节下坠速度
+                const speed = 0.65 + (this.currentDifficulty * 0.18);
+
+                this.activeMeteors.push({
+                    container: container,
+                    word: questionWord,
+                    speed: speed
+                });
+            }
+
+            selectOption(index) {
+                if (!this.currentQuestion) return;
+
+                const isCorrect = (index === this.currentQuestion.correctIndex);
+                const wordId = this.currentQuestion.word.id;
+
+                const activeMeteor = this.activeMeteors[0];
+
+                if (isCorrect) {
+                    sound.playCorrect();
+                    this.score += 100 + (this.combo * 10);
+                    this.combo++;
+                    this.correctCount++;
+                    if (this.combo > this.maxCombo) {
+                        this.maxCombo = this.combo;
+                    }
+
+                    // 爆炸粒子特效
+                    if (activeMeteor) {
+                        this.triggerExplosion(activeMeteor.container.x, activeMeteor.container.y);
+                        activeMeteor.container.destroy();
+                        this.activeMeteors.shift();
+                    }
+
+                    // 触发同步上报数据库学习记录
+                    syncLearningRecord(wordId, true);
+
+                    this.flashBackground(0x10b981, 0.1); // 浅绿色闪烁提示正确
+                } else {
+                    sound.playIncorrect();
+                    this.lives--;
+                    this.combo = 0;
+                    this.incorrectCount++;
+
+                    // 陨石坠毁粒子特效
+                    if (activeMeteor) {
+                        this.triggerCrash(activeMeteor.container.x, activeMeteor.container.y);
+                        activeMeteor.container.destroy();
+                        this.activeMeteors.shift();
+                    }
+
+                    // 触发同步上报数据库学习记录
+                    syncLearningRecord(wordId, false);
+
+                    this.flashBackground(0xf43f5e, 0.25); // 红色闪烁提示错误
+                }
+
+                this.updateLiveStats();
+
+                if (this.lives <= 0) {
+                    this.gameOver();
+                } else {
+                    // 延迟 800ms 后掉落下一颗单词陨石
+                    this.spawnTimer = setTimeout(() => {
+                        this.spawnMeteor();
+                    }, 800);
+                }
+            }
+
+            triggerExplosion(x, y) {
+                const emitter = this.add.particles(x, y, 'glow_particle', {
+                    speed: { min: 80, max: 200 },
+                    scale: { start: 0.8, end: 0 },
+                    blendMode: 'ADD',
+                    lifespan: 600,
+                    gravityY: 100,
+                    quantity: 20
+                });
+                this.time.delayedCall(600, () => {
+                    emitter.destroy();
+                });
+            }
+
+            triggerCrash(x, y) {
+                const emitter = this.add.particles(x, y, 'glow_particle', {
+                    speed: { min: 50, max: 150 },
+                    scale: { start: 0.7, end: 0 },
+                    tint: 0xf43f5e,
+                    lifespan: 700,
+                    quantity: 15
+                });
+                this.time.delayedCall(700, () => {
+                    emitter.destroy();
+                });
+            }
+
+            flashBackground(color, alpha) {
+                const flash = this.add.graphics();
+                flash.fillStyle(color, alpha);
+                flash.fillRect(0, 0, this.scale.width, this.scale.height);
+                this.tweens.add({
+                    targets: flash,
+                    alpha: 0,
+                    duration: 250,
+                    onComplete: () => flash.destroy()
+                });
+            }
+
+            updateLiveStats() {
+                document.getElementById("live-score").textContent = this.score;
+                document.getElementById("live-combo").textContent = this.combo;
+                document.getElementById("live-max-combo").textContent = this.maxCombo;
+                document.getElementById("live-correct").textContent = this.correctCount;
+                document.getElementById("live-incorrect").textContent = this.incorrectCount;
+            }
+
+            update(time, delta) {
+                // 陨石位移及边界检测
+                for (let i = this.activeMeteors.length - 1; i >= 0; i--) {
+                    const m = this.activeMeteors[i];
+                    m.container.y += m.speed;
+
+                    // 触底判定
+                    if (m.container.y >= this.deadlineY) {
+                        sound.playIncorrect();
+                        this.lives--;
+                        this.combo = 0;
+                        this.incorrectCount++;
+                        this.flashBackground(0xf43f5e, 0.3);
+
+                        // 上报错误记录
+                        syncLearningRecord(m.word.id, false);
+
+                        this.triggerCrash(m.container.x, m.container.y);
+                        m.container.destroy();
+                        this.activeMeteors.splice(i, 1);
+
+                        this.updateLiveStats();
+
+                        if (this.lives <= 0) {
+                            this.gameOver();
+                        } else {
+                            this.spawnTimer = setTimeout(() => {
+                                this.spawnMeteor();
+                            }, 800);
+                        }
+                    }
+                }
+            }
+
+            gameOver() {
+                this.destroyAllMeteors();
+                const finalStats = {
+                    score: this.score,
+                    correct: this.correctCount,
+                    incorrect: this.incorrectCount,
+                    maxCombo: this.maxCombo,
+                    difficulty: this.currentDifficulty
+                };
+                this.time.delayedCall(500, () => {
+                    this.scene.start('GameOverScene', finalStats);
+                });
+            }
+        }
+
+        class GameOverScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'GameOverScene' });
+            }
+
+            init(data) {
+                this.stats = data;
+            }
+
+            create() {
+                // Submit high score in background
+                syncHighScore(this.stats.score, this.stats.correct, this.stats.incorrect, this.stats.maxCombo, this.stats.difficulty);
+
+                this.titleText = this.add.text(0, 0, 'GAME OVER', {
+                    fontFamily: 'Outfit, sans-serif',
+                    fontSize: '40px', fontWeight: '800', color: '#f43f5e'
+                }).setOrigin(0.5).setShadow(0, 0, 15, '#f43f5e', true);
+
+                // Stats panel
+                this.statPanel = this.add.graphics();
+                const statLabels = ['得分:', '答对词汇:', '答错词汇:', '最高连击:', '难度等级:'];
+                const statValues = [this.stats.score, this.stats.correct, this.stats.incorrect, this.stats.maxCombo, `Lv.${this.stats.difficulty}`];
+                const valueColors = ['#ffffff', '#10b981', '#f43f5e', '#f59e0b', '#a78bfa'];
+                this.statLabelTexts = [];
+                this.statValueTexts = [];
+                statLabels.forEach((label, i) => {
+                    this.statLabelTexts.push(this.add.text(0, 0, label, { fontFamily: 'Plus Jakarta Sans', fontSize: '14px', color: '#94a3b8' }));
+                    this.statValueTexts.push(this.add.text(0, 0, `${statValues[i]}`, { fontFamily: 'Outfit', fontSize: '16px', fontWeight: 'bold', color: valueColors[i] }).setOrigin(1, 0));
+                });
+
+                // Leaderboard panel
+                this.lbPanel = this.add.graphics();
+                this.lbTitle = this.add.text(0, 0, '🏆 排行榜 TOP 10', { fontFamily: 'Plus Jakarta Sans', fontSize: '13px', fontWeight: 'bold', color: '#f59e0b' });
+                this.lbTexts = [];
+                for (let i = 0; i < 5; i++) {
+                    this.lbTexts.push(this.add.text(0, 0, '', { fontFamily: 'Outfit', fontSize: '12px', color: '#cbd5e1' }));
+                }
+
+                // Retry button
+                this.retryBtnBg = this.add.graphics();
+                this.retryBtnText = this.add.text(0, 0, '↺ 重新开始', {
+                    fontFamily: 'Plus Jakarta Sans', fontSize: '14px', fontWeight: 'bold', color: '#ffffff'
+                }).setOrigin(0.5);
+                this.retryZone = this.add.zone(0, 0, 170, 40).setInteractive({ useHandCursor: true });
+                this.retryZone.on('pointerover', () => this._drawRetryBtn(true));
+                this.retryZone.on('pointerout',  () => this._drawRetryBtn(false));
+                this.retryZone.on('pointerdown', () => this.scene.start('PlayScene'));
+
+                // Next Level button (visible only if difficulty < 5 and score >= 300)
+                const canNextLevel = this.stats.difficulty < 5 && this.stats.score >= 300;
+                this.nextBtnBg = this.add.graphics();
+                this.nextBtnText = this.add.text(0, 0, `下一关 Lv.${this.stats.difficulty + 1} ▶`, {
+                    fontFamily: 'Plus Jakarta Sans', fontSize: '14px', fontWeight: 'bold', color: '#ffffff'
+                }).setOrigin(0.5).setVisible(canNextLevel);
+                this.nextBtnBg.setVisible(canNextLevel);
+                this.nextZone = this.add.zone(0, 0, 170, 40).setInteractive({ useHandCursor: true }).setVisible(canNextLevel);
+                if (canNextLevel) {
+                    this.nextZone.on('pointerover', () => this._drawNextBtn(true));
+                    this.nextZone.on('pointerout',  () => this._drawNextBtn(false));
+                    this.nextZone.on('pointerdown', () => this.scene.start('PlayScene', { startDifficulty: this.stats.difficulty + 1 }));
+                }
+
+                this._layout();
+
+                this.scale.on('resize', this.onResize, this);
+                this.events.once('shutdown', () => this.scale.off('resize', this.onResize, this));
+            }
+
+            _layout() {
+                const w = this.scale.width, h = this.scale.height;
+                const panelW = Math.min(w - 40, 380);
+                const cx = w / 2;
+                const canNextLevel = this.nextBtnBg.visible;
+
+                // Compute total block height and center it
+                const statsH = 140;  // 5 rows × 26px + padding
+                const lbH = 115;     // title + 5 rows
+                const btnH = 44;
+                const gap = 12;
+                const totalH = 42 + gap + statsH + gap + lbH + gap + btnH;
+                let y = (h - totalH) / 2;
+
+                // Title
+                this.titleText.setPosition(cx, y + 20);
+                y += 42 + gap;
+
+                // Stats panel background
+                this.statPanel.clear();
+                this.statPanel.fillStyle(0x1e293b, 0.85);
+                this.statPanel.lineStyle(1.5, 0x334155, 1);
+                this.statPanel.fillRoundedRect(cx - panelW / 2, y, panelW, statsH, 10);
+                this.statPanel.strokeRoundedRect(cx - panelW / 2, y, panelW, statsH, 10);
+                const rowStart = y + 14;
+                this.statLabelTexts.forEach((lbl, i) => lbl.setPosition(cx - panelW / 2 + 16, rowStart + i * 24));
+                this.statValueTexts.forEach((val, i) => val.setPosition(cx + panelW / 2 - 16, rowStart + i * 24));
+                y += statsH + gap;
+
+                // Leaderboard panel
+                this.lbPanel.clear();
+                this.lbPanel.fillStyle(0x172033, 0.85);
+                this.lbPanel.lineStyle(1.5, 0x2d3748, 1);
+                this.lbPanel.fillRoundedRect(cx - panelW / 2, y, panelW, lbH, 10);
+                this.lbPanel.strokeRoundedRect(cx - panelW / 2, y, panelW, lbH, 10);
+                this.lbTitle.setPosition(cx - panelW / 2 + 16, y + 8);
+                const topFive = topScoresData.slice(0, 5);
+                this.lbTexts.forEach((t, i) => {
+                    const s = topFive[i];
+                    if (s) {
+                        const isMe = s.user_name === currentUser;
+                        t.setText(`${i + 1}. ${s.user_name}   ${s.score}分   Lv.${s.difficulty}`);
+                        t.setColor(isMe ? '#f59e0b' : '#94a3b8');
+                    } else {
+                        t.setText('');
+                    }
+                    t.setPosition(cx - panelW / 2 + 16, y + 28 + i * 17);
+                });
+                y += lbH + gap;
+
+                // Buttons
+                const btnY = y + btnH / 2;
+                if (canNextLevel) {
+                    const halfGap = 6;
+                    const btnW = (panelW - halfGap * 2) / 2;
+                    this._drawRetryBtn(false, cx - halfGap - btnW / 2, btnY, btnW, btnH);
+                    this.retryBtnText.setPosition(cx - halfGap - btnW / 2, btnY);
+                    this.retryZone.setSize(btnW, btnH).setPosition(cx - halfGap - btnW / 2, btnY);
+                    this._drawNextBtn(false, cx + halfGap + btnW / 2, btnY, btnW, btnH);
+                    this.nextBtnText.setPosition(cx + halfGap + btnW / 2, btnY);
+                    this.nextZone.setSize(btnW, btnH).setPosition(cx + halfGap + btnW / 2, btnY);
+                } else {
+                    const btnW = Math.min(panelW, 220);
+                    this._drawRetryBtn(false, cx, btnY, btnW, btnH);
+                    this.retryBtnText.setPosition(cx, btnY);
+                    this.retryZone.setSize(btnW, btnH).setPosition(cx, btnY);
+                }
+            }
+
+            _drawRetryBtn(hover, x, y, w, h) {
+                if (x === undefined) return;
+                this.retryBtnBg.clear();
+                this.retryBtnBg.fillStyle(hover ? 0x818cf8 : 0x6366f1, hover ? 1 : 0.9);
+                this.retryBtnBg.fillRoundedRect(x - w / 2, y - h / 2, w, h, h / 2);
+            }
+
+            _drawNextBtn(hover, x, y, w, h) {
+                if (x === undefined) return;
+                this.nextBtnBg.clear();
+                this.nextBtnBg.fillStyle(hover ? 0x34d399 : 0x10b981, hover ? 1 : 0.9);
+                this.nextBtnBg.fillRoundedRect(x - w / 2, y - h / 2, w, h, h / 2);
+            }
+
+            onResize() { this._layout(); }
+        }
+
+        // 初始化 Phaser 3 游戏配置
+        const config = {
+            type: Phaser.AUTO,
+            backgroundColor: '#0c1020',
+            resolution: window.devicePixelRatio || 1,
+            scene: [BootScene, StartScene, PlayScene, GameOverScene],
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                parent: 'game-container',
+                fullscreenTarget: 'game-wrapper'
+            },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            }
+        };
+
+        window.phaserGame = new Phaser.Game(config);
+
+        // ── 全屏切换逻辑 ──────────────────────────────────────────────────────
+        const fsBtn        = document.getElementById('fullscreen-btn');
+        const fsIconExpand   = document.getElementById('fs-icon-expand');
+        const fsIconCompress = document.getElementById('fs-icon-compress');
+        const gameWrapper  = document.getElementById('game-wrapper');
+
+        let isFsMode = false;
+
+        function updateFsIcon(on) {
+            fsIconExpand.style.display   = on ? 'none'  : 'block';
+            fsIconCompress.style.display = on ? 'block' : 'none';
+        }
+
+        function forcePhaserResize() {
+            // 双 rAF 确保浏览器已完成 CSS layout 重算
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const gc = document.getElementById('game-container');
+                    const w = gc.clientWidth;
+                    const h = gc.clientHeight;
+                    if (w > 0 && h > 0) {
+                        window.phaserGame.scale.resize(w, h);
+                    }
+                });
+            });
+        }
+
+        function enterFs() {
+            gameWrapper.classList.add('fs-mode');
+            isFsMode = true;
+            updateFsIcon(true);
+            forcePhaserResize();
+            try {
+                if (gameWrapper.requestFullscreen) gameWrapper.requestFullscreen().catch(() => {});
+                else if (gameWrapper.webkitRequestFullscreen) gameWrapper.webkitRequestFullscreen();
+            } catch(e) {}
+        }
+
+        function exitFs() {
+            gameWrapper.classList.remove('fs-mode');
+            isFsMode = false;
+            updateFsIcon(false);
+            forcePhaserResize();
+            try {
+                if (document.exitFullscreen && document.fullscreenElement) document.exitFullscreen();
+                else if (document.webkitExitFullscreen && document.webkitFullscreenElement) document.webkitExitFullscreen();
+            } catch(e) {}
+        }
+
+        fsBtn.addEventListener('click', () => { isFsMode ? exitFs() : enterFs(); });
+
+        function onNativeFullscreenExit() {
+            const inNative = !!(document.fullscreenElement || document.webkitFullscreenElement);
+            if (!inNative && isFsMode) {
+                gameWrapper.classList.remove('fs-mode');
+                isFsMode = false;
+                updateFsIcon(false);
+                forcePhaserResize();
+            }
+        }
+        document.addEventListener('fullscreenchange',       onNativeFullscreenExit);
+        document.addEventListener('webkitfullscreenchange', onNativeFullscreenExit);
+
+        window.addEventListener('resize', () => { if (isFsMode) forcePhaserResize(); });
+
+    })();
+</script>

@@ -1,0 +1,102 @@
+@model NetYamlForge.Projects.KbForge.KbSearchViewModel
+@{
+    ViewData["Title"] = "Search — KbForge";
+    Layout = "_Layout";
+    var p = Model.ProjectName;
+}
+
+<div class="max-w-3xl mx-auto p-6 space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold flex items-center gap-2">🔍 Search Knowledge Base</h1>
+        <p class="text-sm opacity-60 mt-0.5">Keyword search or AI semantic search</p>
+    </div>
+
+    <form method="get" action="@Url.Content($"~/{p}/Kb/Search")" class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body gap-4">
+            <div class="flex gap-3">
+                <input name="q" value="@Model.Query" autofocus
+                       class="input input-bordered flex-1"
+                       placeholder="What are you looking for?…" />
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="flex items-center gap-3">
+                <label class="label cursor-pointer gap-2">
+                    <input type="checkbox" name="semantic" value="true" class="toggle toggle-sm toggle-primary"
+                           @(Model.Semantic ? "checked" : "") onchange="this.form.submit()" />
+                    <span class="label-text">AI Semantic Search</span>
+                    <span class="badge badge-ghost badge-xs">embedding-powered</span>
+                </label>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Query != null)
+    {
+        <div class="space-y-3">
+            <p class="text-sm opacity-60">
+                @Model.Results.Count result@(Model.Results.Count == 1 ? "" : "s") for
+                <strong>"@Model.Query"</strong>
+                @if (Model.Semantic) { <span class="badge badge-primary badge-xs ml-1">semantic</span> }
+            </p>
+
+            @if (!Model.Results.Any())
+            {
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body items-center text-center py-12">
+                        <div class="text-4xl mb-2">🤷</div>
+                        <p class="opacity-60">No articles found. Try different keywords or enable semantic search.</p>
+                    </div>
+                </div>
+            }
+
+            @foreach (var result in Model.Results)
+            {
+                var art = result.Article;
+                <div class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
+                    <div class="card-body p-5">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a href="@Url.Content($"~/{p}/Kb/View/{art.Slug}")"
+                                       class="card-title text-base hover:underline">
+                                        @art.Title
+                                    </a>
+                                    @if (result.IsSemantic)
+                                    {
+                                        <span class="badge badge-primary badge-xs">@(result.Score.ToString("P0"))</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(art.Summary))
+                                {
+                                    <p class="text-sm opacity-70 mt-1 line-clamp-2">@art.Summary</p>
+                                }
+                                <div class="flex items-center gap-3 mt-2 text-xs opacity-50 flex-wrap">
+                                    <span>by @art.Author</span>
+                                    <span>·</span>
+                                    <span>@DateTime.Parse(art.UpdatedAt).ToString("MMM d, yyyy")</span>
+                                    @if (art.Tags.Any())
+                                    {
+                                        <span>·</span>
+                                        @foreach (var tag in art.Tags)
+                                        {
+                                            <span class="badge badge-outline badge-xs">@tag</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body items-center text-center py-12 opacity-50">
+                <div class="text-4xl mb-2">🔍</div>
+                <p>Enter a query to search the knowledge base</p>
+            </div>
+        </div>
+    }
+</div>

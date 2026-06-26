@@ -40,6 +40,17 @@ public class BatchJobHistoryViewModel
     public List<BatchJobHistory> History { get; set; } = new();
 }
 
+public class EditScheduleViewModel
+{
+    public string JobId { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public string ProjectName { get; set; } = string.Empty;
+    public string? CronExpression { get; set; }
+    public string Timezone { get; set; } = "UTC";
+    public string? Description { get; set; }
+    public bool HasOverride { get; set; }
+}
+
 // ─── Controller ──────────────────────────────────────────────────────────────
 
 [Authorize]
@@ -244,6 +255,85 @@ public class BatchJobController : BaseProjectController
             };
 
             ViewData["ProjectName"] = projectName;
+            return PartialView("_JobRow", item);
+        }
+
+        return RedirectToAction("Index", new { project = projectName });
+    }
+
+    // ─── EditSchedule (GET, HTMX) ────────────────────────────────────────────
+
+    [HttpGet]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> EditSchedule(string jobId)
+    {
+        if (!_projectScope.IsSet) return NotFound();
+
+        var project = _projectScope.Current;
+        var allJobs = await _loader.LoadJobsAsync(project.ProjectDir);
+
+        if (!allJobs.TryGetValue(jobId, out var job))
+            return NotFound();
+
+        var vm = new EditScheduleViewModel
+        {
+            JobId = jobId,
+            DisplayName = string.IsNullOrEmpty(job.DisplayName) ? jobId : job.DisplayName,
+            ProjectName = project.Name,
+            CronExpression = job.Schedule.Cron,
+            Timezone = job.Schedule.Timezone,
+            Description = job.Description,
+            HasOverride = await _loader.GetScheduleOverrideAsync(project.ProjectDir, jobId) != null
+        };
+
+        return PartialView("_EditScheduleModal", vm);
+    }
+
+    // ─── UpdateSchedule (POST, HTMX) ─────────────────────────────────────────
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> UpdateSchedule(string jobId, string? cron, string timezone = "UTC", string? description = null)
+    {
+        if (!_projectScope.IsSet) return NotFound();
+
+        var projectName = _projectScope.Current.Name;
+
+        _logger.LogInformation("スケジュール更新：{Project}/{JobId} cron={Cron} tz={Tz} by {User}",
+            projectName, jobId, cron, timezone, User.Identity?.Name);
+
+        await _scheduler.UpdateJobScheduleAsync(projectName, jobId, cron?.Trim(), timezone, string.IsNullOrWhiteSpace(description) ? null : description.Trim());
+
+        if (IsHtmxRequest())
+        {
+            var project = _projectScope.Current;
+            var allJobs = await _loader.LoadJobsAsync(project.ProjectDir);
+            allJobs.TryGetValue(jobId, out var job);
+
+            var lastHistory = (await _historyStore.GetHistoryAsync(jobId, 1)).FirstOrDefault();
+            var scheduledJobs = _scheduler.GetScheduledJobsForProject(projectName)
+                .ToDictionary(j => j.Job.Id, j => j);
+            scheduledJobs.TryGetValue(jobId, out var scheduled);
+            var runningIds = _scheduler.GetRunningJobIds();
+
+            var item = new BatchJobListItemViewModel
+            {
+                JobId = jobId,
+                DisplayName = job != null && !string.IsNullOrEmpty(job.DisplayName) ? job.DisplayName : jobId,
+                Type = job?.Type ?? "",
+                CronExpression = job?.Schedule.Cron,
+                Timezone = job?.Schedule.Timezone ?? timezone,
+                Enabled = job?.Enabled ?? false,
+                NextRunTime = scheduled?.NextRunTime,
+                LastExecution = lastHistory,
+                IsRunning = runningIds.Contains(jobId),
+                Description = job?.Description
+            };
+
+            ViewData["ProjectName"] = projectName;
+            // モーダルを閉じて行を更新する
+            Response.Headers["HX-Trigger"] = "closeModal";
             return PartialView("_JobRow", item);
         }
 

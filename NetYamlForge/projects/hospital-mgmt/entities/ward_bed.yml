@@ -1,0 +1,176 @@
+imports: []
+entities:
+  ward_bed:
+    table: WardBed
+    key: Id
+    displayName: 病床
+    softDelete: false
+    isPublic: false
+
+    forms:
+      WardName:
+        type: string
+        required: true
+        label: 病棟名
+        editable: true
+        options:
+          - "北病棟"
+          - "南病棟"
+          - "東病棟"
+          - "西病棟"
+      RoomNumber:
+        type: string
+        required: true
+        label: 部屋番号
+        editable: true
+      BedNumber:
+        type: string
+        required: true
+        label: ベッド番号
+        editable: true
+      BedType:
+        type: string
+        required: true
+        label: 病床種別
+        editable: true
+        options:
+          - general
+          - icu
+          - private
+          - semi_private
+        optionLabels:
+          general: "一般病床"
+          icu: "ICU"
+          private: "個室"
+          semi_private: "準個室"
+      Status:
+        type: string
+        required: true
+        label: 状態
+        editable: true
+        options:
+          - available
+          - occupied
+          - maintenance
+        optionLabels:
+          available: "空き"
+          occupied: "使用中"
+          maintenance: "メンテナンス中"
+      PatientId:
+        type: int
+        label: 入院患者ID
+        editable: true
+        placeholder: "任意"
+      AdmissionDate:
+        type: date
+        label: 入院日
+        editable: true
+      ExpectedDischarge:
+        type: date
+        label: 退院予定日
+        editable: true
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      WardName:
+        type: string
+        label: 病棟名
+        searchable: true
+        sortable: true
+      RoomNumber:
+        type: string
+        label: 部屋番号
+        searchable: true
+        sortable: true
+      BedNumber:
+        type: string
+        label: ベッド番号
+        sortable: true
+      BedType:
+        type: string
+        label: 病床種別
+        sortable: true
+      Status:
+        type: string
+        label: 状態
+        sortable: true
+      PatientId:
+        type: int
+        label: 入院患者ID
+        sortable: true
+      AdmissionDate:
+        type: date
+        label: 入院日
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:UpdatedAt
+      beforeUpdate:
+        - now:UpdatedAt
+        - validate_bed_status
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - WardName
+          - RoomNumber
+          - BedNumber
+          - BedType
+          - Status
+          - PatientId
+          - AdmissionDate
+          - ExpectedDischarge
+          - Notes
+      filters:
+        columns: 3
+        order:
+          - WardName
+          - Status
+          - BedType
+
+    filters:
+      WardName:
+        type: dropdown
+        label: 病棟名
+        options:
+          - "北病棟"
+          - "南病棟"
+          - "東病棟"
+          - "西病棟"
+      Status:
+        type: dropdown
+        label: 状態
+        options:
+          - available
+          - occupied
+          - maintenance
+      BedType:
+        type: dropdown
+        label: 病床種別
+        options:
+          - general
+          - icu
+          - private
+          - semi_private
+
+    actions:
+      discharge_patient:
+        label: "退院処理"
+        scope: row
+        confirm: "この患者を退院させ、ベッドを空き状態にしますか？"
+        handler: discharge_patient

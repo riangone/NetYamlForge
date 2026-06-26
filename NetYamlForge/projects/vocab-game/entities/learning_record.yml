@@ -1,0 +1,108 @@
+imports: []
+entities:
+  learning_record:
+    table: learning_records
+    key: id
+    displayName: Learning Record
+    softDelete: false
+    isPublic: true
+
+    joins:
+      - type: left
+        table: vocab_words
+        alias: w
+        on: "learning_records.word_id = w.id"
+
+    forms:
+      word_id:
+        type: int
+        required: true
+        label: 单词ID
+        editable: true
+      user_name:
+        type: string
+        required: true
+        label: 用户名
+        editable: true
+      status:
+        type: string
+        label: 状态
+        editable: true
+      test_count:
+        type: int
+        label: 测试次数
+        editable: true
+      correct_count:
+        type: int
+        label: 正确次数
+        editable: true
+      last_tested_at:
+        type: datetime
+        label: 最近测试时间
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      word_id:
+        type: int
+        required: true
+        label: 单词ID
+        sortable: true
+      user_name:
+        type: string
+        required: true
+        label: 用户名
+        searchable: true
+        sortable: true
+      word_text:
+        type: string
+        label: 单词
+        expression: w.word
+        searchable: true
+        sortable: true
+      meaning:
+        type: string
+        label: 释义
+        expression: w.meaning
+        sortable: false
+      status:
+        type: string
+        label: 状态
+        sortable: true
+      test_count:
+        type: int
+        label: 测试次数
+        sortable: true
+      correct_count:
+        type: int
+        label: 正确次数
+        sortable: true
+      last_tested_at:
+        type: datetime
+        label: 最近测试时间
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [word_id, user_name, status, test_count, correct_count, last_tested_at]
+      filters:
+        columns: 2
+        order: [user_name, status]
+
+    filters:
+      user_name:
+        type: equal
+        label: 用户名
+      status:
+        type: equal
+        label: 状态

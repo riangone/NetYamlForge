@@ -1,0 +1,210 @@
+imports: []
+entities:
+  appointment:
+    table: Appointment
+    key: Id
+    displayName: 予約
+    softDelete: false
+    isPublic: false
+
+    forms:
+      PatientId:
+        type: int
+        required: true
+        label: 患者ID
+        editable: true
+        placeholder: "患者IDを入力"
+      DoctorId:
+        type: int
+        required: true
+        label: 医師ID
+        editable: true
+      AppointmentDate:
+        type: date
+        required: true
+        label: 予約日
+        editable: true
+      AppointmentTime:
+        type: string
+        required: true
+        label: 予約時間
+        editable: true
+        options:
+          - "08:30"
+          - "09:00"
+          - "09:30"
+          - "10:00"
+          - "10:30"
+          - "11:00"
+          - "11:30"
+          - "13:00"
+          - "13:30"
+          - "14:00"
+          - "14:30"
+          - "15:00"
+          - "15:30"
+          - "16:00"
+          - "16:30"
+      Department:
+        type: string
+        required: true
+        label: 診療科
+        editable: true
+        options:
+          - 内科
+          - 外科
+          - 小児科
+          - 産婦人科
+          - 整形外科
+          - 眼科
+          - 耳鼻咽喉科
+          - 皮膚科
+          - 精神科
+          - 救急科
+          - その他
+      ReasonForVisit:
+        type: string
+        label: 受診理由
+        editable: true
+      Status:
+        type: string
+        label: ステータス
+        editable: true
+        options:
+          - scheduled
+          - completed
+          - cancelled
+          - no_show
+        optionLabels:
+          scheduled: "📅 予約済"
+          completed: "✅ 診察済"
+          cancelled: "❌ キャンセル"
+          no_show: "⚠️ 無断欠席"
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PatientId:
+        type: int
+        label: 患者ID
+        sortable: true
+      DoctorId:
+        type: int
+        label: 医師ID
+        sortable: true
+      AppointmentDate:
+        type: date
+        label: 予約日
+        sortable: true
+      AppointmentTime:
+        type: string
+        label: 時間
+        sortable: true
+      Department:
+        type: string
+        label: 診療科
+        searchable: true
+        sortable: true
+      ReasonForVisit:
+        type: string
+        label: 受診理由
+        searchable: true
+        sortable: false
+      Status:
+        type: string
+        label: ステータス
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 登録日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - validate_appointment_date
+        - now:CreatedAt
+      beforeUpdate:
+        - validate_appointment_date
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - PatientId
+          - DoctorId
+          - AppointmentDate
+          - AppointmentTime
+          - Department
+          - ReasonForVisit
+          - Status
+          - Notes
+      filters:
+        columns: 4
+        order:
+          - Status
+          - Department
+          - AppointmentDate
+
+    filters:
+      Status:
+        type: toggle-group
+        label: ステータス
+        optionLabels:
+          scheduled: "📅 予約済"
+          completed: "✅ 診察済"
+          cancelled: "❌ キャンセル"
+          no_show: "⚠️ 無断欠席"
+      Department:
+        type: dropdown
+        label: 診療科
+        options:
+          - 内科
+          - 外科
+          - 小児科
+          - 産婦人科
+          - 整形外科
+          - 眼科
+          - 耳鼻咽喉科
+          - 皮膚科
+          - 精神科
+          - 救急科
+      AppointmentDate:
+        type: date-range
+        label: 予約日
+        expression: Appointment.AppointmentDate
+
+    actions:
+      cancel_appointment:
+        label: "キャンセル"
+        scope: row
+        confirm: "この予約をキャンセルしますか？"
+        handler: cancel_appointment
+      mark_completed:
+        label: "診察済"
+        scope: row
+        handler: complete_appointment
+
+    exports:
+      appointment_csv:
+        label: "予約一覧 CSV"
+        format: csv
+        filename: "appointments_{date:yyyyMMdd}.csv"
+        columns:
+          - PatientId
+          - DoctorId
+          - AppointmentDate
+          - AppointmentTime
+          - Department
+          - Status

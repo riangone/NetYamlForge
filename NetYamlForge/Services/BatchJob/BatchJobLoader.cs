@@ -21,6 +21,16 @@ public interface IBatchJobLoader
     /// ジョブの有効/無効状態を永続化する（override ファイルに書き込む）
     /// </summary>
     Task SetJobEnabledAsync(string projectPath, string jobId, bool enabled);
+
+    /// <summary>
+    /// ジョブのスケジュール（cron/timezone/description）をオーバーライドとして保存する
+    /// </summary>
+    Task SetScheduleOverrideAsync(string projectPath, string jobId, string? cron, string timezone, string? description = null);
+
+    /// <summary>
+    /// ジョブのスケジュールオーバーライドを取得する（存在しなければ null）
+    /// </summary>
+    Task<JobScheduleOverride?> GetScheduleOverrideAsync(string projectPath, string jobId);
 }
 
 /// <summary>
@@ -40,6 +50,7 @@ public class BatchJobLoader : IBatchJobLoader
     }
 
     private static readonly string OverrideFileName = ".job-states.json";
+    private static readonly string ScheduleOverrideFileName = ".schedule-overrides.json";
 
     public async Task<Dictionary<string, BatchJobDefinition>> LoadJobsAsync(string projectPath)
     {
@@ -98,6 +109,21 @@ public class BatchJobLoader : IBatchJobLoader
                 job.Enabled = kvp.Value;
         }
 
+        // スケジュールオーバーライドを適用
+        var scheduleOverrides = await LoadScheduleOverridesAsync(projectPath);
+        foreach (var kvp in scheduleOverrides)
+        {
+            if (result.TryGetValue(kvp.Key, out var job))
+            {
+                if (kvp.Value.Cron != null)
+                    job.Schedule.Cron = kvp.Value.Cron;
+                if (!string.IsNullOrEmpty(kvp.Value.Timezone))
+                    job.Schedule.Timezone = kvp.Value.Timezone;
+                if (kvp.Value.Description != null)
+                    job.Description = kvp.Value.Description;
+            }
+        }
+
         return result;
     }
 
@@ -106,6 +132,37 @@ public class BatchJobLoader : IBatchJobLoader
         var overrides = await LoadOverridesAsync(projectPath);
         overrides[jobId] = enabled;
         await SaveOverridesAsync(projectPath, overrides);
+    }
+
+    public async Task SetScheduleOverrideAsync(string projectPath, string jobId, string? cron, string timezone, string? description = null)
+    {
+        var overrides = await LoadScheduleOverridesAsync(projectPath);
+        overrides[jobId] = new JobScheduleOverride { Cron = cron, Timezone = timezone, Description = description };
+        var overridePath = Path.Combine(projectPath, "jobs", ScheduleOverrideFileName);
+        var json = JsonSerializer.Serialize(overrides, new JsonSerializerOptions { WriteIndented = true });
+        await File.WriteAllTextAsync(overridePath, json);
+    }
+
+    public async Task<JobScheduleOverride?> GetScheduleOverrideAsync(string projectPath, string jobId)
+    {
+        var overrides = await LoadScheduleOverridesAsync(projectPath);
+        return overrides.TryGetValue(jobId, out var val) ? val : null;
+    }
+
+    private async Task<Dictionary<string, JobScheduleOverride>> LoadScheduleOverridesAsync(string projectPath)
+    {
+        var overridePath = Path.Combine(projectPath, "jobs", ScheduleOverrideFileName);
+        if (!File.Exists(overridePath))
+            return new Dictionary<string, JobScheduleOverride>();
+        try
+        {
+            var json = await File.ReadAllTextAsync(overridePath);
+            return JsonSerializer.Deserialize<Dictionary<string, JobScheduleOverride>>(json) ?? new();
+        }
+        catch
+        {
+            return new Dictionary<string, JobScheduleOverride>();
+        }
     }
 
     private async Task<Dictionary<string, bool>> LoadOverridesAsync(string projectPath)
@@ -130,6 +187,16 @@ public class BatchJobLoader : IBatchJobLoader
         var json = JsonSerializer.Serialize(overrides, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(overridePath, json);
     }
+}
+
+/// <summary>
+/// スケジュールオーバーライドの値
+/// </summary>
+public class JobScheduleOverride
+{
+    public string? Cron { get; set; }
+    public string Timezone { get; set; } = "UTC";
+    public string? Description { get; set; }
 }
 
 /// <summary>

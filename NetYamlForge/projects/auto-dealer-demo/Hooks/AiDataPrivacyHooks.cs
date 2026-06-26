@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 
-namespace AutoDealer.Hooks;
+namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
 /// <summary>
 /// AI 对话数据 PII 自动脱敏钩子

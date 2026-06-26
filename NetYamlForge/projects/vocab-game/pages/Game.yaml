@@ -1,0 +1,9 @@
+title: 🎮 单词挑战游戏
+description: "基于 Phaser 的趣味背单词挑战游戏，测测你的词汇量！"
+template: Game
+sections:
+  - id: game_section
+    title: 游戏区域
+    component: markdown
+    sourceType: none
+    source: "Phaser Game Loading..."

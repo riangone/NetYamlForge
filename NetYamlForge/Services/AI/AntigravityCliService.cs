@@ -64,7 +64,7 @@ public class AntigravityCliService : IAntigravityCliService
         catch (OperationCanceledException)
         {
             if (!process.HasExited) process.Kill(true);
-            _logger.LogError("Antigravity CLI timed out after 90 seconds.");
+            _logger.LogError("Antigravity CLI timed out after 90 seconds. Output: {Output}, Error: {Error}", outputBuilder.ToString(), errorBuilder.ToString());
             return "";
         }
 

@@ -1,0 +1,155 @@
+imports: []
+entities:
+  diary_entry:
+    table: DiaryEntry
+    key: Id
+    displayName: 个人日记
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: 日记标题
+        editable: true
+        placeholder: "今天发生了什么有趣的事？"
+      Content:
+        type: textarea
+        required: true
+        label: 日记内容
+        editable: true
+        placeholder: "写下你的心情、所思所想..."
+      Weather:
+        type: string
+        required: true
+        label: 今日天气
+        editable: true
+        options:
+          - 晴朗
+          - 多云
+          - 阴天
+          - 雨天
+          - 雪天
+          - 微风
+      MoodBefore:
+        type: string
+        required: true
+        label: 记录前心情
+        editable: true
+        options:
+          - 喜悦
+          - 平静
+          - 焦虑
+          - 忧郁
+          - 愤怒
+          - 疲惫
+      Location:
+        type: string
+        required: false
+        label: 地理位置
+        editable: true
+        placeholder: "你在哪里写下这篇日记？(可选)"
+      Sentiment:
+        type: string
+        label: AI 情绪评估
+        editable: false
+        placeholder: "保存后由 AI 自动评估"
+      AiResponse:
+        type: textarea
+        label: AI 心灵伴侣寄语
+        editable: false
+        placeholder: "保存后由 AI 为你写下暖心寄语"
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: 日记标题
+        searchable: true
+        sortable: true
+      Weather:
+        type: string
+        label: 天气
+        sortable: true
+      MoodBefore:
+        type: string
+        label: 记录前心情
+        sortable: true
+      Location:
+        type: string
+        label: 地理位置
+        searchable: true
+        sortable: true
+      Sentiment:
+        type: string
+        label: AI 情绪评估
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 记录时间
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - analyze_diary_mood
+      beforeUpdate:
+        - analyze_diary_mood
+
+    paging:
+      pageSize: 15
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - Title
+          - Weather
+          - MoodBefore
+          - Location
+          - Content
+          - Sentiment
+          - AiResponse
+      filters:
+        columns: 3
+        order:
+          - Weather
+          - MoodBefore
+          - Sentiment
+
+    filters:
+      Weather:
+        type: dropdown
+        label: 天气
+        options:
+          - 晴朗
+          - 多云
+          - 阴天
+          - 雨天
+          - 雪天
+          - 微风
+      MoodBefore:
+        type: dropdown
+        label: 记录前心情
+        options:
+          - 喜悦
+          - 平静
+          - 焦虑
+          - 忧郁
+          - 愤怒
+          - 疲惫
+      Sentiment:
+        type: dropdown
+        label: AI 情绪评估
+        options:
+          - 积极
+          - 平和
+          - 消极

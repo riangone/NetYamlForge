@@ -1,0 +1,244 @@
+imports: []
+entities:
+  patient:
+    table: Patient
+    key: Id
+    displayName: 患者
+    softDelete: false
+    isPublic: false
+
+    forms:
+      PatientCode:
+        type: string
+        required: true
+        label: 患者番号
+        editable: false
+        placeholder: "自動生成"
+      LastName:
+        type: string
+        required: true
+        label: 姓
+        editable: true
+      FirstName:
+        type: string
+        required: true
+        label: 名
+        editable: true
+      LastNameKana:
+        type: string
+        label: 姓（カナ）
+        editable: true
+      FirstNameKana:
+        type: string
+        label: 名（カナ）
+        editable: true
+      Gender:
+        type: string
+        required: true
+        label: 性別
+        editable: true
+        options:
+          - male
+          - female
+          - other
+        optionLabels:
+          male: "男性"
+          female: "女性"
+          other: "その他"
+      BirthDate:
+        type: date
+        required: true
+        label: 生年月日
+        editable: true
+      BloodType:
+        type: string
+        label: 血液型
+        editable: true
+        options:
+          - A
+          - B
+          - O
+          - AB
+          - unknown
+        optionLabels:
+          A: "A型"
+          B: "B型"
+          O: "O型"
+          AB: "AB型"
+          unknown: "不明"
+      Phone:
+        type: string
+        label: 電話番号
+        editable: true
+      Address:
+        type: string
+        label: 住所
+        editable: true
+      InsuranceNumber:
+        type: string
+        label: 保険証番号
+        editable: true
+      EmergencyContact:
+        type: string
+        label: 緊急連絡先
+        editable: true
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PatientCode:
+        type: string
+        label: 患者番号
+        searchable: true
+        sortable: true
+      LastName:
+        type: string
+        required: true
+        label: 姓
+        searchable: true
+        sortable: true
+      FirstName:
+        type: string
+        required: true
+        label: 名
+        searchable: true
+        sortable: true
+      LastNameKana:
+        type: string
+        label: 姓（カナ）
+        searchable: true
+        sortable: true
+      Gender:
+        type: string
+        label: 性別
+        sortable: true
+      BirthDate:
+        type: date
+        label: 生年月日
+        sortable: true
+      BloodType:
+        type: string
+        label: 血液型
+        sortable: false
+      Phone:
+        type: string
+        label: 電話番号
+        searchable: true
+        sortable: false
+      InsuranceNumber:
+        type: string
+        label: 保険証番号
+        searchable: true
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: 登録日時
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: 更新日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - generate_patient_code
+        - now:CreatedAt
+        - now:UpdatedAt
+      beforeUpdate:
+        - now:UpdatedAt
+      afterCreate:
+        - audit_log
+      afterUpdate:
+        - audit_log
+
+    paging:
+      pageSize: 25
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - PatientCode
+          - Gender
+          - LastName
+          - FirstName
+          - LastNameKana
+          - FirstNameKana
+          - BirthDate
+          - BloodType
+          - Phone
+          - Address
+          - InsuranceNumber
+          - EmergencyContact
+          - Notes
+      filters:
+        columns: 4
+        order:
+          - LastName
+          - Gender
+          - BirthDate
+
+    filters:
+      LastName:
+        type: like
+        label: 姓
+      FirstName:
+        type: like
+        label: 名
+      Gender:
+        type: dropdown
+        label: 性別
+        options:
+          - male
+          - female
+          - other
+      BirthDate:
+        type: date-range
+        label: 生年月日
+        expression: Patient.BirthDate
+
+    actions:
+      view_records:
+        label: "診療記録"
+        scope: row
+        handler: view_medical_records
+
+    exports:
+      patient_list_csv:
+        label: "患者一覧 CSV"
+        format: csv
+        filename: "patients_{date:yyyyMMdd}.csv"
+        columns:
+          - PatientCode
+          - LastName
+          - FirstName
+          - Gender
+          - BirthDate
+          - Phone
+          - InsuranceNumber
+
+    links:
+      appointments:
+        label: 予約
+        targetEntity: appointment
+        filter:
+          PatientId: Id
+      medical_records:
+        label: 診療記録
+        targetEntity: medical_record
+        filter:
+          PatientId: Id
+      billings:
+        label: 請求
+        targetEntity: billing
+        filter:
+          PatientId: Id

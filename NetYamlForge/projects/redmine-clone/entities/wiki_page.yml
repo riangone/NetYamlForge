@@ -1,0 +1,110 @@
+imports: []
+entities:
+  wiki_page:
+    table: RmWikiPage
+    key: Id
+    displayName: Wiki Page
+    softDelete: false
+    isPublic: false
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: Title
+        editable: true
+      Slug:
+        type: string
+        required: true
+        label: Slug (URL key)
+        editable: true
+      Content:
+        type: textarea
+        required: true
+        label: Content (Markdown)
+        editable: true
+      AuthorName:
+        type: string
+        label: Author
+        editable: false
+      UpdatedBy:
+        type: string
+        label: Last Edited By
+        editable: false
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        required: true
+        label: Title
+        searchable: true
+        sortable: true
+      Slug:
+        type: string
+        label: Slug
+        searchable: true
+        sortable: true
+      AuthorName:
+        type: string
+        label: Author
+        searchable: true
+        sortable: true
+      UpdatedBy:
+        type: string
+        label: Last Edited By
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: Updated At
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - now:UpdatedAt
+        - current_user:AuthorName
+        - current_user:UpdatedBy
+      beforeUpdate:
+        - now:UpdatedAt
+        - current_user:UpdatedBy
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - Title
+          - Slug
+          - Content
+          - AuthorName
+          - UpdatedBy
+      filters:
+        columns: 3
+        order:
+          - Title
+          - Slug
+          - AuthorName
+
+    filters:
+      Title:
+        type: like
+        label: Title
+      Slug:
+        type: like
+        label: Slug
+      AuthorName:
+        type: like
+        label: Author

@@ -1,0 +1,35 @@
+name: diary-companion
+displayName: Diary Companion
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/diary-companion.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Diary Companion"
+  navigation:
+    showDashboard: true
+    entities:
+      - mood_insight
+    items:
+      - label: Home
+        url: /diary-companion/Page/HomePage
+        icon: 🏠
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📊
+
+home_page:
+  icon: "🗂️"
+  tagline: "Diary Companion"
+  tags: []

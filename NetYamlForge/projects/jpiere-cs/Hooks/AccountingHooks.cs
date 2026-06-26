@@ -215,7 +215,9 @@ public class BillReverseHook : IEntityHook
 
         var originalLinesRows = await db.QueryAsync<dynamic>(
             "SELECT * FROM journal_lines WHERE journal_id = @journalId ORDER BY line_no", new { journalId = originalJournalId }, tx);
-        var originalLines = originalLinesRows.Select(r => (IDictionary<string, object>)r);
+        var originalLines = new List<IDictionary<string, object>>();
+        foreach (var r in originalLinesRows)
+            originalLines.Add((IDictionary<string, object>)r);
 
         var lineNo = 10;
         foreach (var line in originalLines)

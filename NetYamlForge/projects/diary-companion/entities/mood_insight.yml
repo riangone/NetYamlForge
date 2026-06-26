@@ -1,0 +1,93 @@
+imports: []
+entities:
+  mood_insight:
+    table: MoodInsight
+    key: Id
+    displayName: 情绪统计与建议
+    softDelete: false
+    isPublic: false
+
+    forms:
+      StartDate:
+        type: date
+        required: true
+        label: 分析开始日期
+        editable: true
+      EndDate:
+        type: date
+        required: true
+        label: 分析结束日期
+        editable: true
+      OverallMood:
+        type: string
+        label: 主导情绪
+        editable: false
+        placeholder: "保存后自动分析"
+      Analysis:
+        type: textarea
+        label: 情绪深度分析
+        editable: false
+        placeholder: "分析报告详情"
+      Recommendations:
+        type: textarea
+        label: AI 行动建议
+        editable: false
+        placeholder: "建议详情"
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      StartDate:
+        type: date
+        label: 开始日期
+        sortable: true
+      EndDate:
+        type: date
+        label: 结束日期
+        sortable: true
+      OverallMood:
+        type: string
+        label: 主导情绪
+        sortable: true
+      GeneratedAt:
+        type: datetime
+        label: 分析时间
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:GeneratedAt
+        - generate_period_insight
+      beforeUpdate:
+        - generate_period_insight
+
+    paging:
+      pageSize: 10
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 1
+        order:
+          - StartDate
+          - EndDate
+          - OverallMood
+          - Analysis
+          - Recommendations
+      filters:
+        columns: 2
+        order:
+          - StartDate
+          - EndDate
+
+    filters:
+      StartDate:
+        type: date
+        label: 开始日期
+      EndDate:
+        type: date
+        label: 结束日期

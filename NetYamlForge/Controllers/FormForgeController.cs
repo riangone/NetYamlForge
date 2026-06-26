@@ -11,7 +11,6 @@ using NetYamlForge.Services;
 namespace NetYamlForge.Controllers;
 
 [Route("{project}/FormForge")]
-[Authorize]
 public class FormForgeController(
     FormForgeRepository forms,
     FormForgeResponseRepository responses,

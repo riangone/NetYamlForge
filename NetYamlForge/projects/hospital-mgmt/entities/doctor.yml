@@ -1,0 +1,157 @@
+imports: []
+entities:
+  doctor:
+    table: Doctor
+    key: Id
+    displayName: 医師
+    softDelete: false
+    isPublic: false
+
+    forms:
+      EmployeeCode:
+        type: string
+        required: true
+        label: 職員番号
+        editable: true
+      LastName:
+        type: string
+        required: true
+        label: 姓
+        editable: true
+      FirstName:
+        type: string
+        required: true
+        label: 名
+        editable: true
+      Department:
+        type: string
+        required: true
+        label: 診療科
+        editable: true
+        options:
+          - 内科
+          - 外科
+          - 小児科
+          - 産婦人科
+          - 整形外科
+          - 眼科
+          - 耳鼻咽喉科
+          - 皮膚科
+          - 精神科
+          - 救急科
+          - 放射線科
+          - その他
+      Specialization:
+        type: string
+        label: 専門分野
+        editable: true
+      LicenseNumber:
+        type: string
+        label: 医師免許番号
+        editable: true
+      Phone:
+        type: string
+        label: 内線番号
+        editable: true
+      IsActive:
+        type: boolean
+        label: 在籍
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      EmployeeCode:
+        type: string
+        label: 職員番号
+        searchable: true
+        sortable: true
+      LastName:
+        type: string
+        label: 姓
+        searchable: true
+        sortable: true
+      FirstName:
+        type: string
+        label: 名
+        searchable: true
+        sortable: true
+      Department:
+        type: string
+        label: 診療科
+        searchable: true
+        sortable: true
+      Specialization:
+        type: string
+        label: 専門分野
+        searchable: true
+        sortable: false
+      Phone:
+        type: string
+        label: 内線
+        sortable: false
+      IsActive:
+        type: boolean
+        label: 在籍
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: 登録日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - EmployeeCode
+          - Department
+          - LastName
+          - FirstName
+          - Specialization
+          - LicenseNumber
+          - Phone
+          - IsActive
+      filters:
+        columns: 3
+        order:
+          - Department
+          - LastName
+          - IsActive
+
+    filters:
+      Department:
+        type: dropdown
+        label: 診療科
+        options:
+          - 内科
+          - 外科
+          - 小児科
+          - 産婦人科
+          - 整形外科
+          - 眼科
+          - 耳鼻咽喉科
+          - 皮膚科
+          - 精神科
+          - 救急科
+          - 放射線科
+      LastName:
+        type: like
+        label: 姓
+      IsActive:
+        type: toggle-group
+        label: 在籍状況
+        optionLabels:
+          "1": "在籍中"
+          "0": "退職"

@@ -1,0 +1,94 @@
+imports: []
+entities:
+  vocab_word:
+    table: vocab_words
+    key: id
+    displayName: Word
+    softDelete: false
+    isPublic: true
+
+    joins: []
+
+    forms:
+      word:
+        type: string
+        required: true
+        label: 单词
+        editable: true
+      phonetic:
+        type: string
+        label: 音标
+        editable: true
+      meaning:
+        type: textarea
+        label: 释义
+        required: true
+        editable: true
+      difficulty:
+        type: select
+        label: 难度等级
+        options: [1, 2, 3, 4, 5]
+        editable: true
+      example:
+        type: textarea
+        label: 例句
+        editable: true
+      example_meaning:
+        type: textarea
+        label: 例句释义
+        editable: true
+
+    columns:
+      id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      word:
+        type: string
+        required: true
+        label: 单词
+        searchable: true
+        sortable: true
+      phonetic:
+        type: string
+        label: 音标
+        sortable: false
+      meaning:
+        type: string
+        label: 释义
+        searchable: true
+        sortable: false
+      difficulty:
+        type: int
+        label: 难度等级
+        sortable: true
+      example:
+        type: string
+        label: 例句
+        sortable: false
+      example_meaning:
+        type: string
+        label: 例句释义
+        sortable: false
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [word, phonetic, meaning, difficulty, example, example_meaning]
+      filters:
+        columns: 2
+        order: [word, difficulty]
+
+    filters:
+      word:
+        type: like
+        label: 单词
+      difficulty:
+        type: equal
+        label: 难度等级

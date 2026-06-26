@@ -1,5 +1,7 @@
 // FormForge domain models, view-models, and request types compiled as part of NetYamlForge.
 
+using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -1,0 +1,146 @@
+imports: []
+entities:
+  medical_record:
+    table: MedicalRecord
+    key: Id
+    displayName: 診療記録
+    softDelete: false
+    isPublic: false
+
+    forms:
+      PatientId:
+        type: int
+        required: true
+        label: 患者ID
+        editable: true
+      DoctorId:
+        type: int
+        required: true
+        label: 医師ID
+        editable: true
+      AppointmentId:
+        type: int
+        label: 予約ID
+        editable: true
+        placeholder: "任意"
+      VisitDate:
+        type: date
+        required: true
+        label: 受診日
+        editable: true
+      ChiefComplaint:
+        type: textarea
+        label: 主訴
+        editable: true
+      Diagnosis:
+        type: textarea
+        label: 診断名
+        editable: true
+      TreatmentPlan:
+        type: textarea
+        label: 治療方針
+        editable: true
+      VitalSigns:
+        type: string
+        label: バイタルサイン
+        editable: true
+        placeholder: "体温: 36.5℃ / 血圧: 120/80 / 脈拍: 72"
+      Notes:
+        type: textarea
+        label: 医師メモ
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PatientId:
+        type: int
+        label: 患者ID
+        sortable: true
+      DoctorId:
+        type: int
+        label: 医師ID
+        sortable: true
+      VisitDate:
+        type: date
+        label: 受診日
+        sortable: true
+      ChiefComplaint:
+        type: string
+        label: 主訴
+        searchable: true
+        sortable: false
+      Diagnosis:
+        type: string
+        label: 診断名
+        searchable: true
+        sortable: false
+      VitalSigns:
+        type: string
+        label: バイタル
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: 登録日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+      afterCreate:
+        - audit_log
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - PatientId
+          - DoctorId
+          - AppointmentId
+          - VisitDate
+          - VitalSigns
+          - ChiefComplaint
+          - Diagnosis
+          - TreatmentPlan
+          - Notes
+      filters:
+        columns: 3
+        order:
+          - PatientId
+          - DoctorId
+          - VisitDate
+
+    filters:
+      PatientId:
+        type: exact
+        label: 患者ID
+      DoctorId:
+        type: exact
+        label: 医師ID
+      VisitDate:
+        type: date-range
+        label: 受診日
+        expression: MedicalRecord.VisitDate
+      Diagnosis:
+        type: like
+        label: 診断名
+
+    links:
+      prescriptions:
+        label: 処方箋
+        targetEntity: prescription
+        filter:
+          MedicalRecordId: Id
+      billing:
+        label: 請求
+        targetEntity: billing
+        filter:
+          MedicalRecordId: Id

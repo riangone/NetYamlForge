@@ -1,0 +1,147 @@
+imports: []
+entities:
+  prescription:
+    table: Prescription
+    key: Id
+    displayName: 処方箋
+    softDelete: false
+    isPublic: false
+
+    forms:
+      MedicalRecordId:
+        type: int
+        required: true
+        label: 診療記録ID
+        editable: true
+      PatientId:
+        type: int
+        required: true
+        label: 患者ID
+        editable: true
+      DoctorId:
+        type: int
+        required: true
+        label: 医師ID
+        editable: true
+      MedicineName:
+        type: string
+        required: true
+        label: 薬品名
+        editable: true
+      Dosage:
+        type: string
+        required: true
+        label: 用量
+        editable: true
+      Frequency:
+        type: string
+        required: true
+        label: 服用頻度
+        editable: true
+        options:
+          - "1日3回 毎食後"
+          - "1日2回 朝夕食後"
+          - "1日1回 朝食後"
+          - "1日1回 就寝前"
+          - "頓服（症状発現時）"
+        optionLabels:
+          "1日3回 毎食後": "1日3回 毎食後"
+          "1日2回 朝夕食後": "1日2回 朝夕食後"
+          "1日1回 朝食後": "1日1回 朝食後"
+          "1日1回 就寝前": "1日1回 就寝前"
+          "頓服（症状発現時）": "頓服（症状発現時）"
+      DaysSupply:
+        type: int
+        required: true
+        label: 処方日数
+        editable: true
+      Instructions:
+        type: textarea
+        label: 服用指示
+        editable: true
+      PrescribedAt:
+        type: datetime
+        label: 処方日時
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      MedicalRecordId:
+        type: int
+        label: 診療記録ID
+        sortable: true
+      PatientId:
+        type: int
+        label: 患者ID
+        sortable: true
+      DoctorId:
+        type: int
+        label: 医師ID
+        sortable: true
+      MedicineName:
+        type: string
+        label: 薬品名
+        searchable: true
+        sortable: true
+      Dosage:
+        type: string
+        label: 用量
+        sortable: false
+      Frequency:
+        type: string
+        label: 服用頻度
+        sortable: false
+      DaysSupply:
+        type: int
+        label: 日数
+        sortable: true
+      PrescribedAt:
+        type: datetime
+        label: 処方日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:PrescribedAt
+      beforeUpdate:
+        - check_prescription_limits
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - MedicalRecordId
+          - PatientId
+          - DoctorId
+          - MedicineName
+          - Dosage
+          - Frequency
+          - DaysSupply
+          - PrescribedAt
+          - Instructions
+      filters:
+        columns: 3
+        order:
+          - PatientId
+          - DoctorId
+          - MedicineName
+
+    filters:
+      PatientId:
+        type: exact
+        label: 患者ID
+      DoctorId:
+        type: exact
+        label: 医師ID
+      MedicineName:
+        type: like
+        label: 薬品名

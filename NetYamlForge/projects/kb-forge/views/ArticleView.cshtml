@@ -1,0 +1,148 @@
+@model NetYamlForge.Projects.KbForge.KbArticleViewViewModel
+@{
+    ViewData["Title"] = Model.Article.Title + " — KbForge";
+    Layout = "_Layout";
+    var p = Model.ProjectName;
+    var a = Model.Article;
+}
+
+<div class="flex gap-6 p-6 max-w-7xl mx-auto">
+    <!-- Article -->
+    <article class="flex-1 min-w-0 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <a href="@Url.Content($"~/{p}/Kb")" class="btn btn-ghost btn-xs mb-2">← All Articles</a>
+                <h1 class="text-3xl font-bold">@a.Title</h1>
+                <div class="flex items-center gap-3 mt-2 text-sm opacity-60">
+                    <span class="badge @a.StatusBadgeClass badge-sm">@a.Status</span>
+                    <span>by <strong>@a.Author</strong></span>
+                    <span>·</span>
+                    <span>Updated @DateTime.Parse(a.UpdatedAt).ToString("MMM d, yyyy")</span>
+                    <span>·</span>
+                    <span>@a.ViewCount views</span>
+                </div>
+                @if (a.Tags.Any())
+                {
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        @foreach (var tag in a.Tags)
+                        {
+                            <a href="@Url.Content($"~/{p}/Kb?tag={tag.ToLower().Replace(" ", "-")}")"
+                               class="badge badge-outline badge-sm hover:badge-primary">@tag</a>
+                        }
+                    </div>
+                }
+            </div>
+            <a href="@Url.Content($"~/{p}/Kb/Edit/{a.Id}")" class="btn btn-ghost btn-sm shrink-0">Edit</a>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(a.Summary))
+        {
+            <div class="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span id="summary-text">@a.Summary</span>
+            </div>
+        }
+        else
+        {
+            <div class="flex items-center gap-2">
+                <button id="summarize-btn" onclick="summarize('@a.Id')"
+                        class="btn btn-ghost btn-xs gap-1">
+                    ✨ Generate AI Summary
+                </button>
+                <span id="summary-status" class="text-xs opacity-50"></span>
+            </div>
+        }
+
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body prose max-w-none" id="article-content">
+                @a.Content
+            </div>
+        </div>
+    </article>
+
+    <!-- Sidebar -->
+    <aside class="w-56 shrink-0 space-y-4">
+        @if (!string.IsNullOrWhiteSpace(a.Summary))
+        {
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4 gap-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-semibold text-sm uppercase tracking-wide opacity-60">AI Summary</h2>
+                        <button onclick="summarize('@a.Id')" class="btn btn-ghost btn-xs">↻</button>
+                    </div>
+                    <p id="summary-text" class="text-sm opacity-80">@a.Summary</p>
+                    <span id="summary-status" class="text-xs opacity-50"></span>
+                </div>
+            </div>
+        }
+
+        @if (Model.Revisions.Any())
+        {
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4 gap-2">
+                    <h2 class="font-semibold text-sm uppercase tracking-wide opacity-60">Revision History</h2>
+                    <ul class="space-y-2">
+                        @foreach (var rev in Model.Revisions.Take(5))
+                        {
+                            <li class="text-xs">
+                                <span class="opacity-60">@DateTime.Parse(rev.CreatedAt).ToString("MMM d HH:mm")</span>
+                                <br /><span class="font-medium opacity-80">@rev.ChangedBy</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body p-4 gap-2">
+                <h2 class="font-semibold text-sm uppercase tracking-wide opacity-60">Actions</h2>
+                <a href="@Url.Content($"~/{p}/Kb/Edit/{a.Id}")" class="btn btn-ghost btn-sm justify-start">✏️ Edit</a>
+                <a href="@Url.Content($"~/{p}/Kb/Search?q={Uri.EscapeDataString(a.Title)}&semantic=true")" class="btn btn-ghost btn-sm justify-start">🔍 Similar Articles</a>
+            </div>
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Render Markdown content
+        const contentEl = document.getElementById('article-content');
+        if (contentEl) {
+            contentEl.innerHTML = marked.parse(contentEl.innerText);
+        }
+
+        // AI summarize
+        async function summarize(articleId) {
+            const btn = document.getElementById('summarize-btn');
+            const status = document.getElementById('summary-status');
+            const summaryEl = document.getElementById('summary-text');
+            if (btn) { btn.disabled = true; btn.textContent = '⏳ Summarizing…'; }
+            if (status) status.textContent = 'Calling AI…';
+            try {
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+                const csrfHeader = document.querySelector('meta[name="csrf-token-header"]')?.content ?? 'X-CSRF-TOKEN';
+                const res = await fetch(`@Url.Content($"~/{p}/Kb/Summarize/{a.Id}")`, {
+                    method: 'POST',
+                    headers: { [csrfHeader]: csrf }
+                });
+                if (!res.ok) throw new Error('Request failed');
+                const data = await res.json();
+                if (summaryEl) summaryEl.textContent = data.summary;
+                else {
+                    // Inject new summary block
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-info';
+                    alert.innerHTML = `<span>${data.summary}</span>`;
+                    document.querySelector('article').insertBefore(alert, document.getElementById('article-content'));
+                }
+                if (status) status.textContent = '✓ Done';
+                if (btn) btn.textContent = '↻ Regenerate';
+            } catch (e) {
+                if (status) status.textContent = '✗ Failed';
+                if (btn) { btn.disabled = false; btn.textContent = '✨ Generate AI Summary'; }
+            }
+        }
+    </script>
+}

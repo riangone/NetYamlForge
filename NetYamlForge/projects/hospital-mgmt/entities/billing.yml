@@ -1,0 +1,162 @@
+imports: []
+entities:
+  billing:
+    table: Billing
+    key: Id
+    displayName: 請求
+    softDelete: false
+    isPublic: false
+
+    forms:
+      PatientId:
+        type: int
+        required: true
+        label: 患者ID
+        editable: true
+      MedicalRecordId:
+        type: int
+        label: 診療記録ID
+        editable: true
+        placeholder: "任意"
+      BillingDate:
+        type: date
+        required: true
+        label: 請求日
+        editable: true
+      TotalAmount:
+        type: decimal
+        required: true
+        label: 合計金額
+        editable: true
+      InsuranceCoverage:
+        type: decimal
+        required: true
+        label: 保険適用額
+        editable: true
+      PatientShare:
+        type: decimal
+        required: true
+        label: 患者負担額
+        editable: true
+      PaymentStatus:
+        type: string
+        required: true
+        label: 支払状況
+        editable: true
+        options:
+          - unpaid
+          - partial
+          - paid
+        optionLabels:
+          unpaid: "未払い"
+          partial: "一部支払い"
+          paid: "支払済"
+      PaymentMethod:
+        type: string
+        label: 支払方法
+        editable: true
+        options:
+          - cash
+          - card
+          - insurance
+          - bank_transfer
+        optionLabels:
+          cash: "現金"
+          card: "クレジットカード"
+          insurance: "保険請求"
+          bank_transfer: "銀行振込"
+      PaidAt:
+        type: datetime
+        label: 支払日時
+        editable: true
+        placeholder: "任意"
+      Notes:
+        type: textarea
+        label: 備考
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PatientId:
+        type: int
+        label: 患者ID
+        sortable: true
+      BillingDate:
+        type: date
+        label: 請求日
+        sortable: true
+      TotalAmount:
+        type: decimal
+        label: 合計金額
+        sortable: true
+      PatientShare:
+        type: decimal
+        label: 自己負担額
+        sortable: true
+      PaymentStatus:
+        type: string
+        label: 支払状況
+        sortable: true
+      PaidAt:
+        type: datetime
+        label: 支払日時
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - calculate_patient_share
+        - now:CreatedAt
+      beforeUpdate:
+        - calculate_patient_share
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - PatientId
+          - MedicalRecordId
+          - BillingDate
+          - TotalAmount
+          - InsuranceCoverage
+          - PatientShare
+          - PaymentStatus
+          - PaymentMethod
+          - PaidAt
+          - Notes
+      filters:
+        columns: 3
+        order:
+          - PatientId
+          - PaymentStatus
+          - BillingDate
+
+    filters:
+      PatientId:
+        type: exact
+        label: 患者ID
+      PaymentStatus:
+        type: dropdown
+        label: 支払状況
+        options:
+          - unpaid
+          - partial
+          - paid
+      BillingDate:
+        type: date-range
+        label: 請求日
+        expression: Billing.BillingDate
+
+    actions:
+      mark_as_paid:
+        label: "支払済にする"
+        scope: row
+        handler: mark_billing_as_paid

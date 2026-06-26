@@ -2,6 +2,7 @@
 // 各クラスの BeforeAsync / AfterAsync にビジネスロジックを実装してください。
 
 using System.Data;
+using System.Threading.Tasks;
 using NetYamlForge.Services.Hooks;
 using Microsoft.Extensions.Logging;
 

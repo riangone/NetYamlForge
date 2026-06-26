@@ -176,6 +176,7 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
 
                 var handler = (IBatchStepHandler)_serviceProvider.GetRequiredService(handlerType);
 
+                result.Success = true; // default; handler sets false on failure
                 await handler.ExecuteAsync(job, projectName, db, tx, result, cancellationToken);
 
                 // After フック
@@ -194,8 +195,6 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
                 result.EndedAt = DateTime.UtcNow;
                 return result;
             }
-
-            result.Success = true;
         }
         catch (Exception ex)
         {

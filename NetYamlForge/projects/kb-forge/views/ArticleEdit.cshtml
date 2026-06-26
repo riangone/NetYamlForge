@@ -1,0 +1,107 @@
+@model NetYamlForge.Projects.KbForge.KbArticleEditViewModel
+@{
+    ViewData["Title"] = (Model.IsNew ? "New Article" : "Edit: " + Model.Article.Title) + " — KbForge";
+    Layout = "_Layout";
+    var p = Model.ProjectName;
+    var a = Model.Article;
+    var formAction = Model.IsNew
+        ? Url.Content($"~/{p}/Kb")
+        : Url.Content($"~/{p}/Kb/Edit/{a.Id}");
+    var tagsCsv = string.Join(", ", a.Tags);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css" />
+}
+
+<div class="max-w-4xl mx-auto p-6 space-y-4">
+    <div class="flex items-center gap-3">
+        <a href="@Url.Content($"~/{p}/Kb")" class="btn btn-ghost btn-sm">← Back</a>
+        <h1 class="text-xl font-bold">@(Model.IsNew ? "New Article" : "Edit Article")</h1>
+    </div>
+
+    <form method="post" action="@formAction" class="space-y-4">
+        @Html.AntiForgeryToken()
+
+        <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body gap-4">
+                <!-- Title -->
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium">Title</span></label>
+                    <input name="Title" value="@a.Title" required
+                           class="input input-bordered w-full text-lg font-semibold"
+                           placeholder="Article title…" />
+                </div>
+
+                <!-- Content (Markdown) -->
+                <div class="form-control">
+                    <label class="label"><span class="label-text font-medium">Content</span> <span class="label-text-alt opacity-50">Markdown</span></label>
+                    <textarea id="kb-content" name="Content">@a.Content</textarea>
+                </div>
+
+                <!-- Summary -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-medium">Summary</span>
+                        <span class="label-text-alt opacity-50">Leave blank to auto-generate with AI</span>
+                    </label>
+                    <textarea name="Summary" rows="3"
+                              class="textarea textarea-bordered resize-none"
+                              placeholder="Brief description of this article…">@a.Summary</textarea>
+                </div>
+
+                <!-- Tags & Status row -->
+                <div class="flex gap-4 flex-wrap">
+                    <div class="form-control flex-1 min-w-48">
+                        <label class="label"><span class="label-text font-medium">Tags</span> <span class="label-text-alt opacity-50">comma-separated</span></label>
+                        <input name="TagsCsv" value="@tagsCsv"
+                               class="input input-bordered"
+                               placeholder="devops, api, security…" />
+                    </div>
+                    <div class="form-control w-40">
+                        <label class="label"><span class="label-text font-medium">Status</span></label>
+                        <select name="Status" class="select select-bordered">
+                            <option value="draft"     @(a.Status == "draft"     ? "selected" : "")>Draft</option>
+                            <option value="published" @(a.Status == "published" ? "selected" : "")>Published</option>
+                            <option value="archived"  @(a.Status == "archived"  ? "selected" : "")>Archived</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+            @if (!Model.IsNew)
+            {
+                <form method="post" action="@Url.Content($"~/{p}/Kb/Delete/{a.Id}")"
+                      onsubmit="return confirm('Delete this article?')">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-error btn-outline btn-sm">Delete</button>
+                </form>
+            }
+            else
+            {
+                <span></span>
+            }
+            <div class="flex gap-2">
+                <a href="@Url.Content($"~/{p}/Kb")" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    @(Model.IsNew ? "Create Article" : "Save Changes")
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script>
+        new EasyMDE({
+            element: document.getElementById('kb-content'),
+            spellChecker: false,
+            autosave: { enabled: false },
+            toolbar: ['bold','italic','heading','|','quote','unordered-list','ordered-list','|','link','image','|','preview','side-by-side','fullscreen','|','guide'],
+            minHeight: '360px'
+        });
+    </script>
+}
