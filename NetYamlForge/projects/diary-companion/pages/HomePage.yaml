@@ -18,8 +18,8 @@ sections:
     pageSize: 100
     editable: false
     readOnly: true
-    ui:
-      component: DataTable
+    component: fancy_diary_list
+    targetTable: DiaryEntry
 
   - id: mood_stats
     title: 情绪分布
@@ -32,5 +32,5 @@ sections:
     pageSize: 10
     editable: false
     readOnly: true
-    ui:
-      component: DataTable
+    component: mood_board
+    description: "日记不仅是发生事情的记录，更是你与自己对话的容器。无论今天天气如何，心情怎样，写下来，本身就是一种治愈的过程。"

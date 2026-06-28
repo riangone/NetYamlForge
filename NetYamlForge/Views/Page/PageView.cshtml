@@ -10,6 +10,11 @@
     ViewData["Title"] = localizedTitle;
     ViewData["ActivePage"] = "Page";
 
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+
     // グラフ系コンポーネントが存在するか判定（Chart.js ロード制御）
     var chartComponents = new HashSet<string> { "bar_chart", "line_chart", "pie_chart", "radar_chart" };
     var hasChart = pageDef.Sections.Any(s => chartComponents.Contains(s.Component));
@@ -24,14 +29,21 @@
     var hasMarkdown = pageDef.Sections.Any(s => s.Component == "markdown");
 }
 
+@{
+    var hasInteractiveForm = pageDef.Sections.Any(s => s.Component == "interactive_form");
+}
+
 <div class="container mx-auto px-4 py-8">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">@localizedTitle</h1>
-        @if (!string.IsNullOrEmpty(pageDef.Description))
-        {
-            <p class="text-gray-500 mt-1">@T($"{pageKeyBase}.description", pageDef.Description)</p>
-        }
-    </div>
+    @if (!hasInteractiveForm)
+    {
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">@localizedTitle</h1>
+            @if (!string.IsNullOrEmpty(pageDef.Description))
+            {
+                <p class="text-gray-500 mt-1">@T($"{pageKeyBase}.description", pageDef.Description)</p>
+            }
+        </div>
+    }
 
     @foreach (var sec in pageDef.Sections.Where(s => !s.Hidden))
     {
@@ -134,6 +146,15 @@
                     break;
                 case "vector_search":
                     @await Html.PartialAsync("Components/_SectionVectorSearch", renderModel)
+                    break;
+                case "mood_board":
+                    @await Html.PartialAsync("Components/_SectionMoodBoard", renderModel)
+                    break;
+                case "fancy_diary_list":
+                    @await Html.PartialAsync("Components/_SectionFancyDiaryList", renderModel)
+                    break;
+                case "interactive_form":
+                    @await Html.PartialAsync("Components/_SectionInteractiveForm", renderModel)
                     break;
                 default:
                     @await Html.PartialAsync("Components/_SectionTable", renderModel)

@@ -88,6 +88,21 @@ public class DashboardController : Controller
 
     public async Task<IActionResult> Index()
     {
+        // 如果是直接访问项目根目录（例如 "/diary-companion" 或 "/diary-companion/"），且定义了 HomePage，则重定向到 HomePage
+        var path = Request.Path.Value ?? "";
+        var project = RouteData.Values["project"]?.ToString() ?? "";
+        if (!string.IsNullOrEmpty(project))
+        {
+            var normPath = path.Trim('/');
+            if (string.Equals(normPath, project, StringComparison.OrdinalIgnoreCase))
+            {
+                if (_projectScope.IsSet && _projectScope.Current.PageMetadata.TryGet("HomePage", out _))
+                {
+                    return RedirectToAction("Index", "Page", new { project = project, pageName = "HomePage" });
+                }
+            }
+        }
+
         var config = _dashConfig.GetConfig();
         var vm     = new DashboardViewModel();
 

@@ -22,6 +22,48 @@
     <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
     <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    <style id="diary-pref-styles">
+        /* 动态配置类 */
+        .pref-hide-header header.navbar {
+            display: none !important;
+        }
+        .pref-hide-header .breadcrumbs {
+            display: none !important;
+        }
+        .pref-hide-sidebar main {
+            padding: 0 !important;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+    <script>
+        (function() {
+            const DEFAULT_PREFS = {
+                hideHeader: true,
+                hideSidebar: true,
+                showMenu: true,
+                menuPosition: 'bottom-right'
+            };
+            let prefs = DEFAULT_PREFS;
+            try {
+                const saved = localStorage.getItem('diary_preferences');
+                if (saved) {
+                    prefs = { ...DEFAULT_PREFS, ...JSON.parse(saved) };
+                }
+            } catch (e) {}
+
+            const docEl = document.documentElement;
+            if (prefs.hideHeader) {
+                docEl.classList.add('pref-hide-header');
+            }
+            if (prefs.hideSidebar) {
+                docEl.classList.add('pref-hide-sidebar');
+            }
+        })();
+    </script>
 </head>
 @functions {
     private sealed class NavSection
@@ -509,5 +551,122 @@
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- 统一悬浮侧边栏和设置按钮组 -->
+    <div id="diary-floating-group" class="fixed z-40 hidden flex-col gap-3">
+        <!-- 侧边栏唤出按钮 -->
+        <label id="diary-floating-menu-btn" for="app-sidebar" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-indigo-600 cursor-pointer w-12 h-12" title="打开侧边栏">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </label>
+        <!-- 齿轮设置按钮 -->
+        <a id="diary-floating-settings-btn" href="/@currentProject/Page/Settings" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-indigo-600 w-12 h-12" title="系统偏好设置">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </a>
+    </div>
+
+    <!-- 偏好应用与快捷键 JS 脚本 -->
+    <script>
+        (function() {
+            const DEFAULT_PREFS = {
+                hideHeader: true,
+                hideSidebar: true,
+                showMenu: true,
+                menuPosition: 'bottom-right'
+            };
+
+            window.applyDiaryPreferences = function() {
+                let prefs = DEFAULT_PREFS;
+                try {
+                    const saved = localStorage.getItem('diary_preferences');
+                    if (saved) {
+                        prefs = { ...DEFAULT_PREFS, ...JSON.parse(saved) };
+                    }
+                } catch (e) {}
+
+                const docEl = document.documentElement;
+                
+                // 应用 CSS 类
+                if (prefs.hideHeader) {
+                    docEl.classList.add('pref-hide-header');
+                } else {
+                    docEl.classList.remove('pref-hide-header');
+                }
+
+                if (prefs.hideSidebar) {
+                    docEl.classList.add('pref-hide-sidebar');
+                } else {
+                    docEl.classList.remove('pref-hide-sidebar');
+                }
+
+                // 调整悬浮菜单显示和位置
+                const floatingGroup = document.getElementById('diary-floating-group');
+                if (floatingGroup) {
+                    if (prefs.showMenu) {
+                        floatingGroup.classList.remove('hidden');
+                        floatingGroup.classList.add('flex');
+                        
+                        // 清除原有位置和定位类
+                        floatingGroup.classList.remove('bottom-6', 'left-6', 'top-6', 'right-6');
+                        
+                        // 根据偏好加上定位类
+                        switch(prefs.menuPosition) {
+                            case 'bottom-left':
+                                floatingGroup.classList.add('bottom-6', 'left-6');
+                                break;
+                            case 'top-left':
+                                floatingGroup.classList.add('top-6', 'left-6');
+                                break;
+                            case 'top-right':
+                                floatingGroup.classList.add('top-6', 'right-6');
+                                break;
+                            case 'bottom-right':
+                            default:
+                                floatingGroup.classList.add('bottom-6', 'right-6');
+                                break;
+                        }
+                    } else {
+                        floatingGroup.classList.remove('flex');
+                        floatingGroup.classList.add('hidden');
+                    }
+                }
+            };
+
+            // 初始化加载
+            document.addEventListener('DOMContentLoaded', window.applyDiaryPreferences);
+
+            // 极客快捷键支持 (非输入框聚焦时有效)
+            document.addEventListener('keydown', (e) => {
+                const activeEl = document.activeElement;
+                if (activeEl && (
+                    activeEl.tagName === 'INPUT' || 
+                    activeEl.tagName === 'TEXTAREA' || 
+                    activeEl.contentEditable === 'true' || 
+                    activeEl.tagName === 'SELECT'
+                )) {
+                    return; // 正在输入时忽略快捷键
+                }
+
+                const key = e.key.toLowerCase();
+                if (key === 'm') {
+                    e.preventDefault();
+                    const sidebarToggle = document.getElementById('app-sidebar');
+                    if (sidebarToggle) {
+                        sidebarToggle.checked = !sidebarToggle.checked;
+                    }
+                } else if (key === 's') {
+                    e.preventDefault();
+                    window.location.href = '/@currentProject/Page/Settings';
+                } else if (key === 'h') {
+                    e.preventDefault();
+                    window.location.href = '/@currentProject/Page/HomePage';
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

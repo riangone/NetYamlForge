@@ -1,0 +1,456 @@
+@using NetYamlForge.Models
+@using System.Text.Json
+@model NetYamlForge.Models.SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var currentProject = Model.Project;
+
+    // Helper to convert PascalCase to snake_case for API route resolution
+    string ToSnakeCase(string? input) {
+        if (string.IsNullOrEmpty(input)) return "";
+        return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+    }
+
+    var rawEntity = sec.TargetTable ?? sec.Source ?? sec.Id;
+    var apiEntity = ToSnakeCase(rawEntity);
+
+    var detailRow = rows.FirstOrDefault();
+    bool isEdit = detailRow != null;
+    var idKey = isEdit ? (rows.First().Keys.FirstOrDefault(k => k.Equals("Id", StringComparison.OrdinalIgnoreCase)) ?? "Id") : "Id";
+    var id = isEdit ? detailRow![idKey]?.ToString() : "";
+
+    var cancelUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "HomePage" });
+
+    // Fields to render in form
+    var fieldNames = sec.GetFormFields(isEdit ? "edit" : "create");
+
+    // Mood list & emojis
+    var moodList = new[] {
+        new { Name = "喜悦", Emoji = "🌸", Desc = "开心美好" },
+        new { Name = "平静", Emoji = "🍃", Desc = "波澜不惊" },
+        new { Name = "焦虑", Emoji = "🌪️", Desc = "有些烦躁" },
+        new { Name = "忧郁", Emoji = "🌧️", Desc = "有点难过" },
+        new { Name = "愤怒", Emoji = "⚡", Desc = "怒火中烧" },
+        new { Name = "疲惫", Emoji = "💤", Desc = "身心俱疲" }
+    };
+
+    // Weather list & emojis
+    var weatherList = new[] {
+        new { Name = "晴朗", Emoji = "☀️" },
+        new { Name = "多云", Emoji = "⛅" },
+        new { Name = "阴天", Emoji = "☁️" },
+        new { Name = "雨天", Emoji = "🌧️" },
+        new { Name = "雪天", Emoji = "❄️" },
+        new { Name = "微风", Emoji = "🌬️" }
+    };
+}
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .emoji-btn {
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .emoji-btn.active {
+        transform: scale(1.15);
+        border-color: #6366f1 !important;
+        background-color: #f5f3ff !important;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.15);
+    }
+    .input-focus-effect:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+    .animate-spin-slow {
+        animation: spin 3s linear infinite;
+    }
+    @@keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="card glass-card border border-purple-100 shadow-xl rounded-3xl overflow-hidden">
+    <!-- Header banner -->
+    <div class="p-6 md:p-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-purple-100 flex items-center justify-between">
+        <div class="space-y-1.5">
+            <span class="text-2xl">✍️</span>
+            <h2 class="text-2xl font-extrabold text-gray-800">@(isEdit ? "重温与编辑记录" : "创建全新篇章")</h2>
+            <p class="text-xs text-gray-500">
+                @(isEdit ? "随时可以完善和更改你的记录，系统将为您重新进行智能解读。" : "在这里倾诉吧，写下你最真实的一天。")
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="@cancelUrl" class="btn btn-sm bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm rounded-xl flex items-center gap-1.5 transition-all hover:scale-105 font-bold">
+                <span>🔙</span> 返回一览
+            </a>
+            <div class="text-3xl opacity-30 select-none hidden md:block">✏️</div>
+        </div>
+    </div>
+
+    <form id="interactive-form-@(sec.Id)" class="p-6 md:p-8 space-y-6">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="form-entity-id-@(sec.Id)" value="@id" />
+
+        @foreach (var fieldName in fieldNames)
+        {
+            var fieldDef = sec.GetFieldDef(fieldName);
+            var label = fieldDef.Label ?? fieldName;
+            var isRequired = fieldDef.Required;
+            var rowValue = isEdit && detailRow != null && detailRow.TryGetValue(fieldName, out var val) ? val?.ToString() ?? "" : "";
+
+            // 1. MoodBefore / Mood -> Custom Emoji Select
+            if (fieldName.Equals("MoodBefore", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Mood", StringComparison.OrdinalIgnoreCase))
+            {
+                <input type="hidden" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" />
+                <div class="form-control space-y-2">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                        @foreach (var mItem in moodList)
+                        {
+                            <button type="button" onclick="selectMood_@(sec.Id)('@mItem.Name')" id="mood-btn-@(sec.Id)-@mItem.Name" class="mood-option-@(sec.Id) emoji-btn flex flex-col items-center justify-center p-3 border border-gray-200 rounded-2xl bg-white hover:bg-indigo-50/50 hover:border-indigo-300">
+                                <span class="text-2xl mb-1 filter drop-shadow-sm">@mItem.Emoji</span>
+                                <span class="text-xs font-bold text-gray-700">@mItem.Name</span>
+                                <span class="text-[9px] text-gray-400">@mItem.Desc</span>
+                            </button>
+                        }
+                    </div>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+            // 2. Weather -> Weather Selection Buttons
+            else if (fieldName.Equals("Weather", StringComparison.OrdinalIgnoreCase))
+            {
+                <input type="hidden" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" />
+                <div class="form-control space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var wItem in weatherList)
+                        {
+                            <button type="button" onclick="selectWeather_@(sec.Id)('@wItem.Name')" id="weather-btn-@(sec.Id)-@wItem.Name" class="weather-option-@(sec.Id) btn btn-sm btn-outline border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg flex items-center gap-1 text-xs">
+                                <span>@wItem.Emoji</span>
+                                <span>@wItem.Name</span>
+                            </button>
+                        }
+                    </div>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+            // 3. Location -> Location Input with auto-detect geolocation button
+            else if (fieldName.Equals("Location", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Place", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="form-control space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="text" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" placeholder="记录地点(可选)" class="input input-bordered w-full rounded-xl pr-28 input-focus-effect" @(isRequired ? "required" : "") />
+                        <button type="button" onclick="getGeolocation_@(sec.Id)('@fieldName', this)" class="absolute right-2 btn btn-xs btn-primary bg-indigo-600 hover:bg-indigo-700 border-none rounded-lg text-white font-semibold">
+                            📍 自动获取
+                        </button>
+                    </div>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+            // 4. Content / Description -> Textarea
+            else if (fieldName.Equals("Content", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Description", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Body", StringComparison.OrdinalIgnoreCase) || fieldDef.Type == "textarea")
+            {
+                <div class="form-control w-full space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <textarea id="field-@(fieldName)-@(sec.Id)" name="@fieldName" rows="8" placeholder="写下详细内容..." class="textarea textarea-bordered w-full rounded-2xl min-h-[200px] input-focus-effect leading-relaxed" @(isRequired ? "required" : "")>@rowValue</textarea>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+            // 5. Default inputs
+            else
+            {
+                var inputType = fieldDef.Type switch {
+                    "number" => "number",
+                    "date" => "date",
+                    "datetime-local" => "datetime-local",
+                    "email" => "email",
+                    "password" => "password",
+                    _ => "text"
+                };
+
+                <div class="form-control w-full space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <input type="@inputType" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" class="input input-bordered w-full rounded-xl input-focus-effect" @(isRequired ? "required" : "") />
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+        }
+
+        <!-- Form Actions -->
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
+            <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500 flex items-center gap-1">
+                <span>↩️</span> 返回一览
+            </a>
+            <button type="submit" class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 flex items-center gap-2">
+                <span>💾</span> 保存数据
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- ===== Loading Mask ===== -->
+<div id="loading-overlay-@(sec.Id)" class="fixed inset-0 bg-gray-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden">
+    <div class="card glass bg-white/90 p-8 rounded-3xl max-w-sm text-center shadow-2xl space-y-4 border border-white">
+        <div class="flex justify-center">
+            <span class="text-5xl animate-spin-slow">🧠</span>
+        </div>
+        <div class="space-y-1.5">
+            <h4 class="font-extrabold text-gray-800 text-base" id="loading-title-@(sec.Id)">AI 对话中...</h4>
+            <p class="text-xs text-gray-500 leading-relaxed" id="loading-desc-@(sec.Id)">
+                系统正在深度处理，分析情绪并生成智能建议，请耐心等候...
+            </p>
+        </div>
+        <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-indigo-600 h-full animate-pulse" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const secId = "@sec.Id";
+        const isEdit = @(isEdit ? "true" : "false");
+        const entityId = "@id";
+        const project = "@currentProject";
+        const apiEntity = "@apiEntity";
+
+        // Initial setup for Mood/Weather options if values already exist
+        const moodVal = document.getElementById(`field-MoodBefore-${secId}`)?.value || document.getElementById(`field-Mood-${secId}`)?.value;
+        if (moodVal) {
+            selectMood_@(sec.Id)(moodVal);
+        }
+        const weatherVal = document.getElementById(`field-Weather-${secId}`)?.value;
+        if (weatherVal) {
+            selectWeather_@(sec.Id)(weatherVal);
+        }
+
+        window.selectMood_@(sec.Id) = function(name) {
+            // Update input fields
+            const inputMoodBefore = document.getElementById(`field-MoodBefore-${secId}`);
+            if (inputMoodBefore) inputMoodBefore.value = name;
+            const inputMood = document.getElementById(`field-Mood-${secId}`);
+            if (inputMood) inputMood.value = name;
+
+            // Update UI styles
+            document.querySelectorAll(`.mood-option-${secId}`).forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`mood-btn-${secId}-${name}`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        window.selectWeather_@(sec.Id) = function(name) {
+            const inputWeather = document.getElementById(`field-Weather-${secId}`);
+            if (inputWeather) inputWeather.value = name;
+
+            document.querySelectorAll(`.weather-option-${secId}`).forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-none');
+                btn.classList.add('btn-outline', 'border-gray-200');
+            });
+            const activeBtn = document.getElementById(`weather-btn-${secId}-${name}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('btn-outline', 'border-gray-200');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'border-none');
+            }
+        }
+
+        function mapWmoCodeToWeatherName(code) {
+            // WMO Weather interpretation codes (WW)
+            if (code === 0) return "晴朗";
+            if (code === 1 || code === 2) return "多云";
+            if (code === 3 || code === 45 || code === 48) return "阴天";
+            if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) return "雨天";
+            if ((code >= 71 && code <= 77) || code === 85 || code === 86) return "雪天";
+            return "多云";
+        }
+
+        window.getGeolocation_@(sec.Id) = function(fieldName, btnEl) {
+            const btn = btnEl || document.querySelector(`#field-${fieldName}-${secId} ~ button`);
+            const originalText = btn ? btn.innerHTML : '📍 自动获取';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⚡ 定位中...';
+            }
+
+            if (!navigator.geolocation) {
+                alert('您的浏览器不支持 Geolocation 定位。');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Fetch weather in parallel
+                    try {
+                        const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                        if (weatherResponse.ok) {
+                            const weatherData = await weatherResponse.json();
+                            const wmoCode = weatherData.current_weather?.weathercode;
+                            if (typeof wmoCode === 'number') {
+                                const mappedWeather = mapWmoCodeToWeatherName(wmoCode);
+                                selectWeather_@(sec.Id)(mappedWeather);
+                            }
+                        }
+                    } catch (we) {
+                        console.error('Weather fetch error:', we);
+                    }
+
+                    try {
+                        // Reverse geocoding using OSM Nominatim API (open / free)
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=zh-CN`, {
+                            headers: { 'User-Agent': 'NetYamlForge-App' }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const address = data.address;
+                            // Compose a readable city/district address
+                            const city = address.city || address.town || address.municipality || '';
+                            const suburb = address.suburb || address.village || '';
+                            const road = address.road || '';
+                            let formatted = [city, suburb, road].filter(Boolean).join(' · ');
+                            if (!formatted) {
+                                formatted = data.display_name || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                            }
+                            
+                            const locationInput = document.getElementById(`field-${fieldName}-${secId}`);
+                            if (locationInput) {
+                                locationInput.value = formatted;
+                            }
+                        } else {
+                            throw new Error('Reverse geocoding error');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        // Fallback to coordinates
+                        const locationInput = document.getElementById(`field-${fieldName}-${secId}`);
+                        if (locationInput) {
+                            locationInput.value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                        }
+                    } finally {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    }
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    alert('获取定位失败，请手动录入。');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalText;
+                    }
+                },
+                { timeout: 10000 }
+            );
+        }
+
+        // Auto-detect location and weather on enter page if it is not edit mode and fields are empty
+        if (!isEdit) {
+            const locField = document.getElementById(`field-Location-${secId}`) || document.getElementById(`field-Place-${secId}`);
+            if (locField && !locField.value) {
+                const fieldName = locField.name;
+                setTimeout(() => {
+                    window.getGeolocation_@(sec.Id)(fieldName);
+                }, 300);
+            }
+        }
+
+        // Handle AJAX submit
+        const formEl = document.getElementById(`interactive-form-${secId}`);
+        formEl.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Clear previous errors
+            document.querySelectorAll(`[id^="err-"]`).forEach(el => {
+                el.classList.add('hidden');
+                el.innerText = '';
+            });
+
+            // Gather inputs
+            const payload = {};
+            const formData = new FormData(formEl);
+            formData.forEach((value, key) => {
+                if (key !== '__RequestVerificationToken') {
+                    payload[key] = value;
+                }
+            });
+
+            // If it is diary subproject or has content and mood/weather, customize loading mask
+            if (apiEntity === 'diary_entry' || apiEntity.includes('diary')) {
+                document.getElementById(`loading-title-${secId}`).innerText = '心灵对话中...';
+                document.getElementById(`loading-desc-${secId}`).innerText = 'AI 伴侣正在认真阅读你的日记，感知你此时的心情，并为你撰写暖心的寄语……请稍候。';
+            } else {
+                document.getElementById(`loading-title-${secId}`).innerText = '正在提交数据...';
+                document.getElementById(`loading-desc-${secId}`).innerText = '系统正在保存记录，请稍后。';
+            }
+
+            // Show loading
+            document.getElementById(`loading-overlay-${secId}`).classList.remove('hidden');
+
+            const url = isEdit 
+                ? `/api/${project}/${apiEntity}/${entityId}`
+                : `/api/${project}/${apiEntity}`;
+            
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    // Redirect back to home
+                    window.location.href = "@cancelUrl";
+                } else {
+                    const data = await response.json();
+                    document.getElementById(`loading-overlay-${secId}`).classList.add('hidden');
+                    
+                    if (data.errors) {
+                        // Validation errors from ApiEntityController
+                        for (const key in data.errors) {
+                            const errEl = document.getElementById(`err-${key}-${secId}`);
+                            if (errEl) {
+                                errEl.innerText = data.errors[key].join(', ');
+                                errEl.classList.remove('hidden');
+                            }
+                        }
+                    } else {
+                        alert(data.error || '保存失败，请检查填写内容。');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById(`loading-overlay-${secId}`).classList.add('hidden');
+                alert('保存失败，发生网络错误，请稍后重试。');
+            }
+        });
+    })();
+</script>

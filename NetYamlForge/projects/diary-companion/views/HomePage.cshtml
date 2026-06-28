@@ -1,59 +1,44 @@
 @using NetYamlForge.Localization
-@using System.Text.Encodings.Web
+@using NetYamlForge.Models
 @model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
 @{
+    var pageDef = (PageDefinition)ViewData["PageDef"]!;
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "diary-companion";
+    var pageName = ViewData["PageName"] as string ?? "HomePage";
     ViewData["Title"] = "智能日记伴侣 — 主页";
 
     var diaryList = Model.TryGetValue("diary_list", out var diarySection)
         ? diarySection.Rows.ToList()
         : new List<Dictionary<string, object>>();
 
-    var moodStats = Model.TryGetValue("mood_stats", out var moodSection)
-        ? moodSection.Rows.ToList()
-        : new List<Dictionary<string, object>>();
-
     var newDiaryUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "DiaryForm" });
 
-    // 辅助方法：心情 Emoji 映射
-    string GetMoodEmoji(string? mood) => mood?.Trim() switch {
-        "喜悦" => "🌸",
-        "平静" => "🍃",
-        "焦虑" => "🌪️",
-        "忧郁" => "🌧️",
-        "愤怒" => "⚡",
-        "疲惫" => "💤",
-        _ => "📝"
+    // Resolve SectionDefinition definitions from YAML configuration or fallback
+    var diaryListSection = pageDef.Sections.FirstOrDefault(s => s.Id == "diary_list") 
+        ?? new SectionDefinition { Id = "diary_list", Title = "我的日记列表", Component = "fancy_diary_list" };
+    var moodStatsSection = pageDef.Sections.FirstOrDefault(s => s.Id == "mood_stats") 
+        ?? new SectionDefinition { Id = "mood_stats", Title = "情绪分布", Component = "mood_board" };
+
+    var diaryRenderModel = new SectionRenderModel
+    {
+        Sec = diaryListSection,
+        Rows = diaryList,
+        Total = Model.TryGetValue("diary_list", out var ds) ? ds.Total : 0,
+        Project = currentProject,
+        PageName = pageName
     };
 
-    // 辅助方法：天气 Emoji 映射
-    string GetWeatherEmoji(string? weather) => weather?.Trim() switch {
-        "晴朗" => "☀️",
-        "多云" => "⛅",
-        "阴天" => "☁️",
-        "雨天" => "🌧️",
-        "雪天" => "❄️",
-        "微风" => "🌬️",
-        _ => "🌡️"
-    };
-
-    // 辅助方法：情绪评估样式
-    (string text, string badgeClass, string borderClass, string bgClass) GetSentimentStyle(string? sentiment) => sentiment?.Trim() switch {
-        "积极" => ("充满阳光", "bg-emerald-100 text-emerald-800 border-emerald-300", "border-emerald-200", "bg-emerald-50/50"),
-        "消极" => ("雨过天晴", "bg-rose-100 text-rose-800 border-rose-300", "border-rose-200", "bg-rose-50/50"),
-        "平和" => ("风平浪静", "bg-sky-100 text-sky-800 border-sky-300", "border-sky-200", "bg-sky-50/50"),
-        _ => ("未知情绪", "bg-gray-100 text-gray-800 border-gray-300", "border-gray-200", "bg-gray-50/50")
+    var moodRenderModel = new SectionRenderModel
+    {
+        Sec = moodStatsSection,
+        Rows = Model.TryGetValue("mood_stats", out var ms) ? ms.Rows.ToList() : new List<Dictionary<string, object>>(),
+        Total = Model.TryGetValue("mood_stats", out var ms2) ? ms2.Total : 0,
+        Project = currentProject,
+        PageName = pageName
     };
 }
 
 <style>
-    .diary-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .diary-card:hover {
-        transform: translateY(-4px) scale(1.01);
-        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
-    }
     .text-glow {
         text-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
     }
@@ -86,7 +71,7 @@
             </p>
             <div class="pt-2">
                 <a href="@newDiaryUrl" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 hover:shadow-lg transition-all flex items-center gap-2 w-fit">
-                    <span class="text-lg">✍️</span> 开始记录今天
+                    <span>✍️</span> 开始记录今天
                 </a>
             </div>
         </div>
@@ -104,333 +89,12 @@
         
         <!-- Left Column: Mood dashboard & quick actions (4 cols) -->
         <aside class="lg:col-span-4 space-y-6">
-            <!-- Mood Stats Card -->
-            <div class="card glass-panel border border-white/60 shadow-sm rounded-2xl p-6 space-y-4">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">📊 情绪天气看板</h3>
-                @if (moodStats.Any())
-                {
-                    <div class="space-y-3 pt-2">
-                        @foreach (var row in moodStats)
-                        {
-                            var moodStr = row.TryGetValue("MoodBefore", out var m) ? m?.ToString() ?? "未知" : "未知";
-                            var countVal = row.TryGetValue("count", out var c) ? Convert.ToInt32(c) : 0;
-                            var percentage = diaryList.Count > 0 ? (double)countVal / diaryList.Count * 100 : 0;
-
-                            <div class="space-y-1">
-                                <div class="flex items-center justify-between text-xs font-semibold text-gray-700">
-                                    <span class="flex items-center gap-1.5">
-                                        <span class="text-sm">@GetMoodEmoji(moodStr)</span>
-                                        <span>@moodStr</span>
-                                    </span>
-                                    <span class="text-gray-500">@countVal 篇 (@Math.Round(percentage, 0)%)</span>
-                                </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: @percentage%"></div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-6 text-xs text-gray-400 space-y-1">
-                        <div>☁️</div>
-                        <div>记录几篇日记后即可开启情绪分析</div>
-                    </div>
-                }
-            </div>
-
-            <!-- Warm AI Tips -->
-            <div class="card bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-2xl p-6 shadow-sm relative overflow-hidden">
-                <div class="absolute -right-12 -bottom-12 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-                <div class="relative space-y-3">
-                    <div class="text-xl">💡</div>
-                    <h4 class="font-bold text-base">心灵小贴士</h4>
-                    <p class="text-xs text-indigo-100 leading-relaxed">
-                        “日记不仅是发生事情的记录，更是你与自己对话的容器。无论今天天气如何，心情怎样，写下来，本身就是一种治愈的过程。”
-                    </p>
-                </div>
-            </div>
+            @await Html.PartialAsync("Components/_SectionMoodBoard", moodRenderModel)
         </aside>
 
         <!-- Right Column: Diary Card Grid (8 cols) -->
         <main class="lg:col-span-8 space-y-6">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    📂 我的日记流 <span class="badge badge-sm badge-ghost border-gray-300">@diaryList.Count 篇</span>
-                </h2>
-            </div>
-
-            @if (diaryList.Count == 0)
-            {
-                <!-- Empty State -->
-                <div class="border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center space-y-4 bg-white/50">
-                    <div class="text-6xl text-gray-300">🍃</div>
-                    <div class="space-y-1">
-                        <p class="text-gray-700 font-medium">这里还空空如也呢</p>
-                        <p class="text-xs text-gray-400">点下方按钮开启你的第一篇精美日记吧</p>
-                    </div>
-                    <div>
-                        <a href="@newDiaryUrl" class="btn btn-sm btn-outline border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg">
-                            新建第一篇日记
-                        </a>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <!-- Diary Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach (var row in diaryList)
-                    {
-                        var id = row["Id"].ToString();
-                        var title = row.TryGetValue("Title", out var t) ? t?.ToString() ?? "未命名日记" : "未命名日记";
-                        var content = row.TryGetValue("Content", out var cn) ? cn?.ToString() ?? "" : "";
-                        var weather = row.TryGetValue("Weather", out var w) ? w?.ToString() ?? "" : "";
-                        var mood = row.TryGetValue("MoodBefore", out var m) ? m?.ToString() ?? "" : "";
-                        var location = row.TryGetValue("Location", out var l) ? l?.ToString() ?? "" : "";
-                        var sentiment = row.TryGetValue("Sentiment", out var s) ? s?.ToString() ?? "" : "";
-                        var aiResp = row.TryGetValue("AiResponse", out var ar) ? ar?.ToString() ?? "" : "";
-                        var createdAt = row.TryGetValue("CreatedAt", out var ca) && ca != null
-                            ? Convert.ToDateTime(ca).ToString("yyyy年MM月dd日 HH:mm")
-                            : "";
-
-                        var shortContent = content.Length > 65 ? content.Substring(0, 62) + "..." : content;
-                        var sentimentStyle = GetSentimentStyle(sentiment);
-
-                        <div id="diary-card-@id" class="diary-card card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
-                            <div class="p-5 space-y-3">
-                                <!-- Top status bar -->
-                                <div class="flex items-center justify-between text-xs">
-                                    <div class="flex items-center gap-2">
-                                        <span class="tooltip" data-tip="天气：@weather">@GetWeatherEmoji(weather)</span>
-                                        <span class="tooltip" data-tip="心情：@mood">@GetMoodEmoji(mood)</span>
-                                        @if (!string.IsNullOrEmpty(location))
-                                        {
-                                            <span class="text-gray-400 flex items-center gap-0.5 max-w-[100px] truncate" title="@location">
-                                                📍 @location
-                                            </span>
-                                        }
-                                    </div>
-                                    <span class="text-gray-400">@createdAt</span>
-                                </div>
-
-                                <!-- Title and Content -->
-                                <div class="space-y-1.5">
-                                    <h4 class="font-bold text-gray-800 text-base line-clamp-1">@title</h4>
-                                    <p class="text-xs text-gray-500 leading-relaxed min-h-[48px] whitespace-pre-line">@shortContent</p>
-                                </div>
-
-                                <!-- AI response / sentiment snippet -->
-                                @if (!string.IsNullOrEmpty(sentiment) || !string.IsNullOrEmpty(aiResp))
-                                {
-                                    <div class="p-3 rounded-xl border @sentimentStyle.borderClass @sentimentStyle.bgClass space-y-1.5">
-                                        <div class="flex items-center justify-between">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border @sentimentStyle.badgeClass">
-                                                🧠 AI评：@sentimentStyle.text
-                                            </span>
-                                        </div>
-                                        @if (!string.IsNullOrEmpty(aiResp))
-                                        {
-                                            <p class="text-[11px] text-gray-600 italic leading-relaxed line-clamp-2">
-                                                “@aiResp”
-                                            </p>
-                                        }
-                                    </div>
-                                }
-                            </div>
-
-                            <!-- Card Footer actions -->
-                            <div class="px-5 py-3 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-                                <button onclick="showDetailModal('@id')" class="btn btn-ghost btn-xs text-indigo-600 hover:text-indigo-800 font-semibold p-0 flex items-center gap-0.5">
-                                    🔍 展开阅读
-                                </button>
-                                <div class="flex items-center gap-2">
-                                    <a href="@Url.Action("Index", "Page", new { project = currentProject, pageName = "DiaryForm", id = id })" class="btn btn-ghost btn-xs text-gray-500 hover:text-indigo-600 font-semibold p-0">
-                                        编辑
-                                    </a>
-                                    <button onclick="confirmDeleteDiary('@id')" class="btn btn-ghost btn-xs text-rose-500 hover:text-rose-700 font-semibold p-0">
-                                        删除
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
+            @await Html.PartialAsync("Components/_SectionFancyDiaryList", diaryRenderModel)
         </main>
     </div>
 </div>
-
-<!-- ===== Detail View Modal ===== -->
-<dialog id="detail_modal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box glass-panel border border-white/60 p-6 rounded-2xl max-w-lg space-y-4">
-        <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-500">✕</button>
-        </form>
-        <div class="flex items-center gap-2.5 text-xs text-gray-400" id="modal_meta">
-            <!-- Filled dynamically -->
-        </div>
-        <h3 class="font-extrabold text-xl text-gray-800" id="modal_title"><!-- Filled dynamically --></h3>
-        <hr class="border-gray-100" />
-        <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line max-h-60 overflow-y-auto" id="modal_content">
-            <!-- Filled dynamically -->
-        </div>
-        <div class="hidden p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-2" id="modal_ai_section">
-            <div class="flex items-center justify-between text-xs font-bold text-indigo-700">
-                <span>🤖 AI 伴侣的心灵寄语</span>
-                <span class="badge badge-sm badge-primary text-white" id="modal_ai_sentiment"><!-- Sentiment --></span>
-            </div>
-            <p class="text-xs text-gray-600 italic leading-relaxed" id="modal_ai_response">
-                <!-- Filled dynamically -->
-            </p>
-        </div>
-        <div class="modal-action">
-            <form method="dialog" class="w-full flex justify-end gap-2">
-                <a href="#" id="modal_edit_btn" class="btn btn-sm btn-ghost rounded-lg text-gray-600">编辑日记</a>
-                <button class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none text-white rounded-lg">关闭</button>
-            </form>
-        </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-    </form>
-</dialog>
-
-<!-- ===== Delete Confirmation Modal ===== -->
-<dialog id="delete_modal" class="modal modal-bottom sm:modal-middle">
-    <div class="modal-box p-6 rounded-2xl max-w-sm space-y-4">
-        <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
-            ⚠️ 确定要删除这篇日记吗？
-        </h3>
-        <p class="text-xs text-gray-500 leading-relaxed">
-            此操作将永久删除该条日记及 AI 为你生成的情绪评估和暖心寄语，无法恢复。
-        </p>
-        <div class="modal-action flex justify-end gap-2">
-            <form method="dialog">
-                <button class="btn btn-sm btn-ghost rounded-lg">取消</button>
-            </form>
-            <button onclick="executeDeleteDiary()" class="btn btn-sm btn-error bg-rose-500 hover:bg-rose-600 text-white border-none rounded-lg">
-                确定删除
-            </button>
-        </div>
-    </div>
-</dialog>
-
-<script>
-    // 保存正在操作的日记数据用于 Modal 展示
-    const diaryData = {
-        @foreach (var row in diaryList)
-        {
-            var id = row["Id"].ToString();
-            var title = row.TryGetValue("Title", out var t) ? t?.ToString() ?? "未命名日记" : "未命名日记";
-            var content = row.TryGetValue("Content", out var cn) ? cn?.ToString() ?? "" : "";
-            var weather = row.TryGetValue("Weather", out var w) ? w?.ToString() ?? "" : "";
-            var mood = row.TryGetValue("MoodBefore", out var m) ? m?.ToString() ?? "" : "";
-            var location = row.TryGetValue("Location", out var l) ? l?.ToString() ?? "" : "";
-            var sentiment = row.TryGetValue("Sentiment", out var s) ? s?.ToString() ?? "" : "";
-            var aiResp = row.TryGetValue("AiResponse", out var ar) ? ar?.ToString() ?? "" : "";
-            var createdAt = row.TryGetValue("CreatedAt", out var ca) && ca != null
-                ? Convert.ToDateTime(ca).ToString("yyyy年MM月dd日 HH:mm")
-                : "";
-
-            <text>
-            "@id": {
-                id: "@id",
-                title: `@Html.Raw(JavaScriptEncoder.Default.Encode(title))`,
-                content: `@Html.Raw(JavaScriptEncoder.Default.Encode(content))`,
-                weather: "@weather",
-                weatherEmoji: "@GetWeatherEmoji(weather)",
-                mood: "@mood",
-                moodEmoji: "@GetMoodEmoji(mood)",
-                location: `@Html.Raw(JavaScriptEncoder.Default.Encode(location))`,
-                sentiment: "@sentiment",
-                aiResponse: `@Html.Raw(JavaScriptEncoder.Default.Encode(aiResp))`,
-                createdAt: "@createdAt",
-                editUrl: "@Url.Action("Index", "Page", new { project = currentProject, pageName = "DiaryForm", id = id })"
-            },
-            </text>
-        }
-    };
-
-    let selectedDiaryId = null;
-
-    function showDetailModal(id) {
-        const diary = diaryData[id];
-        if (!diary) return;
-
-        document.getElementById('modal_title').innerText = diary.title;
-        document.getElementById('modal_content').innerText = diary.content;
-        
-        let metaHtml = `<span>${diary.weatherEmoji} ${diary.weather}</span><span>•</span><span>${diary.moodEmoji} ${diary.mood}</span><span>•</span><span>${diary.createdAt}</span>`;
-        if (diary.location) {
-            metaHtml += `<span>•</span><span>📍 ${diary.location}</span>`;
-        }
-        document.getElementById('modal_meta').innerHTML = metaHtml;
-
-        const aiSection = document.getElementById('modal_ai_section');
-        if (diary.sentiment || diary.aiResponse) {
-            aiSection.classList.remove('hidden');
-            document.getElementById('modal_ai_sentiment').innerText = diary.sentiment || "有待评估";
-            document.getElementById('modal_ai_response').innerText = diary.aiResponse || "AI 正在思考中...";
-        } else {
-            aiSection.classList.add('hidden');
-        }
-
-        document.getElementById('modal_edit_btn').href = diary.editUrl;
-        document.getElementById('detail_modal').showModal();
-    }
-
-    function confirmDeleteDiary(id) {
-        selectedDiaryId = id;
-        document.getElementById('delete_modal').showModal();
-    }
-
-    async function executeDeleteDiary() {
-        if (!selectedDiaryId) return;
-        const id = selectedDiaryId;
-        
-        try {
-            const response = await fetch(`/api/${window.NetYamlForgeConfig.currentProject}/diary_entry/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                }
-            });
-
-            if (response.ok || response.status === 204) {
-                // 关闭 modal
-                document.getElementById('delete_modal').close();
-                
-                // 优雅的卡片删除动画
-                const card = document.getElementById(`diary-card-${id}`);
-                if (card) {
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9) translateY(10px)';
-                    card.style.transition = 'all 0.4s ease-out';
-                    
-                    setTimeout(() => {
-                        card.style.height = '0px';
-                        card.style.padding = '0px';
-                        card.style.margin = '0px';
-                        card.style.border = 'none';
-                        setTimeout(() => card.remove(), 300);
-                        // 如果移除了所有卡片，则刷新页面显示空状态
-                        if (document.querySelectorAll('.diary-card').length <= 1) {
-                            window.location.reload();
-                        }
-                    }, 400);
-                }
-            } else {
-                const data = await response.json();
-                alert(`删除失败: ${data.error || '未知错误'}`);
-            }
-        } catch (error) {
-            console.error('Error deleting diary:', error);
-            alert('删除发生网络错误，请重试');
-        }
-    }
-</script>
-
-<!-- 加入防伪标记 Token，供 AJAX 使用 -->
-@Html.AntiForgeryToken()

@@ -1,0 +1,190 @@
+@using NetYamlForge.Localization
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "diary-companion";
+    ViewData["Title"] = "智能日记伴侣 — 系统设置";
+    var cancelUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "HomePage" });
+}
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .settings-toggle:checked {
+        background-color: #6366f1 !important;
+        border-color: #6366f1 !important;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
+    <!-- Navigation Back Link -->
+    <div class="mb-6">
+        <a href="@cancelUrl" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 font-semibold transition-all">
+            <span>⬅️</span> 返回日记列表
+        </a>
+    </div>
+
+    <!-- Main Panel -->
+    <div class="card glass-card border border-purple-100 shadow-xl rounded-3xl overflow-hidden">
+        <!-- Header banner -->
+        <div class="p-6 md:p-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-purple-100 flex items-center justify-between">
+            <div class="space-y-1.5">
+                <span class="text-2xl">⚙️</span>
+                <h2 class="text-2xl font-extrabold text-gray-800">系统偏好设置</h2>
+                <p class="text-xs text-gray-500">
+                    个性化定制你的沉浸式日记书写与阅读体验。
+                </p>
+            </div>
+            <div class="text-3xl opacity-30 select-none">🛠️</div>
+        </div>
+
+        <div class="p-6 md:p-8 space-y-6">
+            <!-- Settings Form -->
+            <div class="space-y-6">
+                <!-- Hide Header -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">隐藏 Header 导航栏</h4>
+                        <p class="text-xs text-gray-500">默认隐藏顶部的系统全局导航栏，使页面更加沉浸、无干扰。</p>
+                    </div>
+                    <input type="checkbox" id="pref-hide-header" class="toggle toggle-primary settings-toggle" />
+                </div>
+
+                <!-- Hide Sidebar (Full Screen) -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">沉浸式全屏展示</h4>
+                        <p class="text-xs text-gray-500">自动去除主内容容器的默认边距，完全拉伸占满整个屏幕。</p>
+                    </div>
+                    <input type="checkbox" id="pref-hide-sidebar" class="toggle toggle-primary settings-toggle" />
+                </div>
+
+                <!-- Show Floating Menu -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">显示悬浮菜单与设置按钮</h4>
+                        <p class="text-xs text-gray-500">在屏幕边缘显示半透明的悬浮按钮，用于拉出侧边栏或快速回到设置页。</p>
+                    </div>
+                    <input type="checkbox" id="pref-show-menu" class="toggle toggle-primary settings-toggle" />
+                </div>
+
+                <!-- Floating Menu Position -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">悬浮菜单放置位置</h4>
+                        <p class="text-xs text-gray-500">为了防止遮挡正文内容，您可以自由调整悬浮按钮的定位。</p>
+                    </div>
+                    <select id="pref-menu-position" class="select select-bordered select-sm rounded-xl max-w-xs text-xs font-semibold text-gray-700 bg-white">
+                        <option value="bottom-right">右下角 (推荐 - 避开标题)</option>
+                        <option value="bottom-left">左下角</option>
+                        <option value="top-left">左上角</option>
+                        <option value="top-right">右上角</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Shortcut Tips -->
+            <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100/50 space-y-3">
+                <h4 class="font-bold text-xs text-indigo-800 uppercase tracking-wider flex items-center gap-1.5">
+                    ⌨️ 极客快捷键支持 (非输入框聚焦时有效)
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-600">
+                    <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
+                        <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">M</kbd>
+                        <span>打开 / 关闭侧边栏</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
+                        <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">S</kbd>
+                        <span>进入系统设置页面</span>
+                    </div>
+                    <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
+                        <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">H</kbd>
+                        <span>回到日记首页</span>
+                    </div>
+                </div>
+                <p class="text-[10px] text-indigo-500 italic">
+                    * 即使您完全隐藏了 Header、侧边栏和悬浮菜单，仍然可以通过在键盘上按下相应字母轻松呼出或返回。
+                </p>
+            </div>
+
+            <!-- Toast / Success feedback -->
+            <div id="toast-success" class="alert alert-success bg-emerald-50 border-emerald-200 text-emerald-800 text-xs rounded-xl hidden flex items-center gap-2 transition-all">
+                <span>✅</span> <span>偏好设置已成功保存并立即生效！</span>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
+                <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500">取消</a>
+                <button onclick="savePreferences()" class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 flex items-center gap-2">
+                    <span>💾</span> 保存并应用
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 默认偏好值
+    const DEFAULT_PREFS = {
+        hideHeader: true,
+        hideSidebar: true,
+        showMenu: true,
+        menuPosition: 'bottom-right'
+    };
+
+    // 从 localStorage 加载配置并初始化表单
+    document.addEventListener('DOMContentLoaded', () => {
+        let prefs = DEFAULT_PREFS;
+        try {
+            const saved = localStorage.getItem('diary_preferences');
+            if (saved) {
+                prefs = { ...DEFAULT_PREFS, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.error('Error loading preferences', e);
+        }
+
+        document.getElementById('pref-hide-header').checked = prefs.hideHeader;
+        document.getElementById('pref-hide-sidebar').checked = prefs.hideSidebar;
+        document.getElementById('pref-show-menu').checked = prefs.showMenu;
+        document.getElementById('pref-menu-position').value = prefs.menuPosition;
+    });
+
+    function savePreferences() {
+        const prefs = {
+            hideHeader: document.getElementById('pref-hide-header').checked,
+            hideSidebar: document.getElementById('pref-hide-sidebar').checked,
+            showMenu: document.getElementById('pref-show-menu').checked,
+            menuPosition: document.getElementById('pref-menu-position').value
+        };
+
+        try {
+            localStorage.setItem('diary_preferences', JSON.stringify(prefs));
+            
+            // 显示 Toast
+            const toast = document.getElementById('toast-success');
+            if (toast) toast.classList.remove('hidden');
+            
+            // 触发全局样式应用，使效果立即生效
+            if (window.applyDiaryPreferences) {
+                window.applyDiaryPreferences();
+            }
+
+            setTimeout(() => {
+                if (toast) toast.classList.add('hidden');
+                // 1.5秒后跳转回主页
+                window.location.href = '@cancelUrl';
+            }, 1000);
+        } catch (e) {
+            alert('保存设置失败，浏览器可能禁用了 LocalStorage。');
+        }
+    }
+</script>

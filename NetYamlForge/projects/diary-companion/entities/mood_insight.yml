@@ -52,6 +52,12 @@ entities:
         type: string
         label: 主导情绪
         sortable: true
+      Analysis:
+        type: string
+        label: 情绪深度分析
+      Recommendations:
+        type: string
+        label: AI 行动建议
       GeneratedAt:
         type: datetime
         label: 分析时间

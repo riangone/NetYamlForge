@@ -146,15 +146,16 @@ public class PageController : BaseProjectController
         ViewData["SavedViews"] = savedViews;
         ViewData["UserRoles"] = userCtx.Roles;
 
+        // プロジェクト固有のレイアウトを設定（PageView やカスタムビューで共有）
+        var layoutPath = $"~/projects/{proj.Name}/views/_Layout.cshtml";
+        ViewBag.LayoutPath = System.IO.File.Exists(Path.Combine(proj.ProjectDir, "views", "_Layout.cshtml"))
+            ? layoutPath
+            : "_Layout";
+
         // プロジェクト固有のビューを検索
         var projectViewPath = Path.Combine(proj.ProjectDir, "views", pageName + ".cshtml");
         if (System.IO.File.Exists(projectViewPath))
         {
-            // プロジェクト固有のビューを使用（Layout もプロジェクト固有のものを使用）
-            var layoutPath = $"~/projects/{proj.Name}/views/_Layout.cshtml";
-            ViewBag.LayoutPath = System.IO.File.Exists(Path.Combine(proj.ProjectDir, "views", "_Layout.cshtml"))
-                ? layoutPath
-                : "_Layout";
             return View($"~/projects/{proj.Name}/views/{pageName}.cshtml", model);
         }
 
@@ -164,10 +165,6 @@ public class PageController : BaseProjectController
             var templatePath = Path.Combine(proj.ProjectDir, "views", pageDef.Template + ".cshtml");
             if (System.IO.File.Exists(templatePath))
             {
-                var layoutPath = $"~/projects/{proj.Name}/views/_Layout.cshtml";
-                ViewBag.LayoutPath = System.IO.File.Exists(Path.Combine(proj.ProjectDir, "views", "_Layout.cshtml"))
-                    ? layoutPath
-                    : "_Layout";
                 return View($"~/projects/{proj.Name}/views/{pageDef.Template}.cshtml", model);
             }
         }

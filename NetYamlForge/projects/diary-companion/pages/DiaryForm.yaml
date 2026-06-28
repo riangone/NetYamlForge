@@ -18,5 +18,42 @@ sections:
     pageSize: 1
     editable: false
     readOnly: true
-    ui:
-      component: DataTable
+    component: interactive_form
+    targetTable: DiaryEntry
+    forms:
+      create:
+        fields:
+          - Title
+          - Location
+          - Weather
+          - MoodBefore
+          - Content
+      edit:
+        fields:
+          - Title
+          - Location
+          - Weather
+          - MoodBefore
+          - Content
+    fieldDefs:
+      Title:
+        type: string
+        required: true
+        label: 日记标题
+      Content:
+        type: textarea
+        required: false
+        label: 日记内容
+      Weather:
+        type: string
+        required: true
+        label: 今日天气
+      MoodBefore:
+        type: string
+        required: true
+        label: 记录前心情
+      Location:
+        type: string
+        required: false
+        label: 写日记的地点
+

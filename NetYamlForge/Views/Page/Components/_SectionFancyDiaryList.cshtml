@@ -1,0 +1,423 @@
+@using NetYamlForge.Models
+@using System.Text.Encodings.Web
+@model NetYamlForge.Models.SectionRenderModel
+@{
+    var sec = Model.Sec;
+    var rows = Model.Rows;
+    var currentProject = Model.Project;
+
+    // Helper to convert PascalCase to snake_case for API route resolution
+    string ToSnakeCase(string? input) {
+        if (string.IsNullOrEmpty(input)) return "";
+        return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+    }
+
+    // Resolve API Entity name for CRUD operations
+    var rawEntity = sec.TargetTable ?? sec.Source ?? sec.Id;
+    var apiEntity = ToSnakeCase(rawEntity);
+
+    // Emojis mapping helpers
+    string GetMoodEmoji(string? mood) => mood?.Trim() switch {
+        "喜悦" => "🌸",
+        "平静" => "🍃",
+        "焦虑" => "🌪️",
+        "忧郁" => "🌧️",
+        "愤怒" => "⚡",
+        "疲惫" => "💤",
+        _ => "📝"
+    };
+
+    string GetWeatherEmoji(string? weather) => weather?.Trim() switch {
+        "晴朗" => "☀️",
+        "多云" => "⛅",
+        "阴天" => "☁️",
+        "雨天" => "🌧️",
+        "雪天" => "❄️",
+        "微风" => "🌬️",
+        _ => "🌡️"
+    };
+
+    (string text, string badgeClass, string borderClass, string bgClass) GetSentimentStyle(string? sentiment) => sentiment?.Trim() switch {
+        "积极" => ("充满阳光", "bg-emerald-100 text-emerald-800 border-emerald-300", "border-emerald-200", "bg-emerald-50/50"),
+        "消极" => ("雨过天晴", "bg-rose-100 text-rose-800 border-rose-300", "border-rose-200", "bg-rose-50/50"),
+        "平和" => ("风平浪静", "bg-sky-100 text-sky-800 border-sky-300", "border-sky-200", "bg-sky-50/50"),
+        _ => ("未知情绪", "bg-gray-100 text-gray-800 border-gray-300", "border-gray-200", "bg-gray-50/50")
+    };
+
+    // Helper to find column keys case-insensitively
+    string? FindKey(Dictionary<string, object> row, params string[] possibleKeys) {
+        foreach (var pk in possibleKeys) {
+            var found = row.Keys.FirstOrDefault(k => k.Equals(pk, StringComparison.OrdinalIgnoreCase));
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    // Default Edit Page resolution (convention or custom action)
+    var editPageName = "DiaryForm"; // Default fallback
+    if (sec.Actions != null && sec.Actions.Any()) {
+        // If there's an action configured, we can extract URL pattern or handle it
+    }
+}
+
+<style>
+    .diary-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .diary-card:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+    }
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+</style>
+
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+            📂 @(string.IsNullOrEmpty(sec.Title) ? "内容列表" : sec.Title) 
+            <span class="badge badge-sm badge-ghost border-gray-300">@rows.Count 篇</span>
+        </h2>
+    </div>
+
+    @if (rows.Count == 0)
+    {
+        <!-- Empty State -->
+        <div class="border-2 border-dashed border-gray-200 rounded-3xl p-12 text-center space-y-4 bg-white/50">
+            <div class="text-6xl text-gray-300">🍃</div>
+            <div class="space-y-1">
+                <p class="text-gray-700 font-medium">这里还空空如也呢</p>
+                <p class="text-xs text-gray-400">点击页面上方按钮开启第一篇记录吧</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Diary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @foreach (var row in rows)
+            {
+                // Resolve values dynamically
+                var idKey = FindKey(row, "Id", "id") ?? "Id";
+                var id = row.TryGetValue(idKey, out var idVal) ? idVal?.ToString() : "";
+                
+                var titleKey = FindKey(row, "Title", "title", "subject", "name") ?? "Title";
+                var title = row.TryGetValue(titleKey, out var titleVal) ? titleVal?.ToString() ?? "无标题" : "无标题";
+                
+                var contentKey = FindKey(row, "Content", "content", "body", "text", "description") ?? "Content";
+                var content = row.TryGetValue(contentKey, out var contentVal) ? contentVal?.ToString() ?? "" : "";
+                
+                var weatherKey = FindKey(row, "Weather", "weather") ?? "Weather";
+                var weather = row.TryGetValue(weatherKey, out var weatherVal) ? weatherVal?.ToString() ?? "" : "";
+                
+                var moodKey = FindKey(row, "MoodBefore", "mood", "category") ?? "MoodBefore";
+                var mood = row.TryGetValue(moodKey, out var moodVal) ? moodVal?.ToString() ?? "" : "";
+                
+                var locationKey = FindKey(row, "Location", "location", "place") ?? "Location";
+                var location = row.TryGetValue(locationKey, out var locVal) ? locVal?.ToString() ?? "" : "";
+                
+                var sentimentKey = FindKey(row, "Sentiment", "sentiment", "status") ?? "Sentiment";
+                var sentiment = row.TryGetValue(sentimentKey, out var sentVal) ? sentVal?.ToString() ?? "" : "";
+                
+                var aiRespKey = FindKey(row, "AiResponse", "ai_response", "comment") ?? "AiResponse";
+                var aiResp = row.TryGetValue(aiRespKey, out var aiVal) ? aiVal?.ToString() ?? "" : "";
+                
+                var createdAtKey = FindKey(row, "CreatedAt", "created_at", "date") ?? "CreatedAt";
+                var createdAt = "";
+                if (row.TryGetValue(createdAtKey, out var caVal) && caVal != null) {
+                    if (DateTime.TryParse(caVal.ToString(), out var dt)) {
+                        createdAt = dt.ToString("yyyy年MM月dd日 HH:mm");
+                    } else {
+                        createdAt = caVal.ToString() ?? "";
+                    }
+                }
+
+                var shortContent = content.Length > 65 ? content.Substring(0, 62) + "..." : content;
+                var sentimentStyle = GetSentimentStyle(sentiment);
+
+                // Build Edit Link
+                var editUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = editPageName, id = id });
+                if (sec.Actions != null) {
+                    var editAct = sec.Actions.FirstOrDefault(a => a.Label?.Contains("编辑") == true || a.Label?.Contains("Edit") == true);
+                    if (editAct != null && !string.IsNullOrEmpty(editAct.Url)) {
+                        editUrl = editAct.Url.Replace("{id}", id).Replace("{project}", currentProject);
+                    }
+                }
+
+                <div id="diary-card-@id" class="diary-card card bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between">
+                    <div class="p-5 space-y-3">
+                        <!-- Top status bar -->
+                        <div class="flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                @if (!string.IsNullOrEmpty(weather)) {
+                                    <span class="tooltip" data-tip="天气：@weather">@GetWeatherEmoji(weather)</span>
+                                }
+                                @if (!string.IsNullOrEmpty(mood)) {
+                                    <span class="tooltip" data-tip="分类：@mood">@GetMoodEmoji(mood)</span>
+                                }
+                                @if (!string.IsNullOrEmpty(location))
+                                {
+                                    <span class="text-gray-400 flex items-center gap-0.5 max-w-[100px] truncate" title="@location">
+                                        📍 @location
+                                    </span>
+                                }
+                            </div>
+                            <span class="text-gray-400">@createdAt</span>
+                        </div>
+
+                        <!-- Title and Content -->
+                        <div class="space-y-1.5">
+                            <h4 class="font-bold text-gray-800 text-base line-clamp-1">@title</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed min-h-[48px] whitespace-pre-line">@shortContent</p>
+                        </div>
+
+                        <!-- AI response / sentiment snippet -->
+                        @if (!string.IsNullOrEmpty(sentiment) || !string.IsNullOrEmpty(aiResp))
+                        {
+                            <div class="p-3 rounded-xl border @sentimentStyle.borderClass @sentimentStyle.bgClass space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border @sentimentStyle.badgeClass">
+                                        🧠 AI评估：@sentimentStyle.text
+                                    </span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(aiResp))
+                                {
+                                    <p class="text-[11px] text-gray-600 italic leading-relaxed line-clamp-2">
+                                        “@aiResp”
+                                    </p>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Card Footer actions -->
+                    <div class="px-5 py-3 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+                        <button onclick="showDetailModal_@(sec.Id)('@id')" class="btn btn-ghost btn-xs text-indigo-600 hover:text-indigo-800 font-semibold p-0 flex items-center gap-0.5">
+                            🔍 展开阅读
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <a href="@editUrl" class="btn btn-ghost btn-xs text-gray-500 hover:text-indigo-600 font-semibold p-0">
+                                编辑
+                            </a>
+                            <button onclick="confirmDeleteDiary_@(sec.Id)('@id')" class="btn btn-ghost btn-xs text-rose-500 hover:text-rose-700 font-semibold p-0">
+                                删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- ===== Detail View Modal ===== -->
+<dialog id="detail_modal_@(sec.Id)" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box glass-panel border border-white/60 p-6 rounded-2xl max-w-lg space-y-4">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-500">✕</button>
+        </form>
+        <div class="flex items-center gap-2.5 text-xs text-gray-400" id="modal_meta_@(sec.Id)">
+            <!-- Filled dynamically -->
+        </div>
+        <h3 class="font-extrabold text-xl text-gray-800" id="modal_title_@(sec.Id)"><!-- Filled dynamically --></h3>
+        <hr class="border-gray-100" />
+        <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line max-h-60 overflow-y-auto" id="modal_content_@(sec.Id)">
+            <!-- Filled dynamically -->
+        </div>
+        <div class="hidden p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-2" id="modal_ai_section_@(sec.Id)">
+            <div class="flex items-center justify-between text-xs font-bold text-indigo-700">
+                <span>🤖 AI 伴侣评估</span>
+                <span class="badge badge-sm badge-primary text-white" id="modal_ai_sentiment_@(sec.Id)"><!-- Sentiment --></span>
+            </div>
+            <p class="text-xs text-gray-600 italic leading-relaxed" id="modal_ai_response_@(sec.Id)">
+                <!-- Filled dynamically -->
+            </p>
+        </div>
+        <div class="modal-action">
+            <form method="dialog" class="w-full flex justify-end gap-2">
+                <a href="#" id="modal_edit_btn_@(sec.Id)" class="btn btn-sm btn-ghost rounded-lg text-gray-600">编辑记录</a>
+                <button class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none text-white rounded-lg">关闭</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- ===== Delete Confirmation Modal ===== -->
+<dialog id="delete_modal_@(sec.Id)" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box p-6 rounded-2xl max-w-sm space-y-4">
+        <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+            ⚠️ 确定要删除该记录吗？
+        </h3>
+        <p class="text-xs text-gray-500 leading-relaxed">
+            此操作将永久删除此记录，无法恢复。
+        </p>
+        <div class="modal-action flex justify-end gap-2">
+            <form method="dialog">
+                <button class="btn btn-sm btn-ghost rounded-lg">取消</button>
+            </form>
+            <button onclick="executeDeleteDiary_@(sec.Id)()" class="btn btn-sm btn-error bg-rose-500 hover:bg-rose-600 text-white border-none rounded-lg">
+                确定删除
+            </button>
+        </div>
+    </div>
+</dialog>
+
+<script>
+    (function() {
+        // Store items dynamically inside a block-scoped variable
+        const diaryData = {
+            @foreach (var row in rows)
+            {
+                var idKey = FindKey(row, "Id", "id") ?? "Id";
+                var id = row[idKey].ToString();
+                
+                var titleKey = FindKey(row, "Title", "title", "subject", "name") ?? "Title";
+                var title = row.TryGetValue(titleKey, out var t) ? t?.ToString() ?? "无标题" : "无标题";
+                
+                var contentKey = FindKey(row, "Content", "content", "body") ?? "Content";
+                var content = row.TryGetValue(contentKey, out var cn) ? cn?.ToString() ?? "" : "";
+                
+                var weatherKey = FindKey(row, "Weather", "weather") ?? "Weather";
+                var weather = row.TryGetValue(weatherKey, out var w) ? w?.ToString() ?? "" : "";
+                
+                var moodKey = FindKey(row, "MoodBefore", "mood", "category") ?? "MoodBefore";
+                var mood = row.TryGetValue(moodKey, out var m) ? m?.ToString() ?? "" : "";
+                
+                var locationKey = FindKey(row, "Location", "location") ?? "Location";
+                var location = row.TryGetValue(locationKey, out var l) ? l?.ToString() ?? "" : "";
+                
+                var sentimentKey = FindKey(row, "Sentiment", "sentiment") ?? "Sentiment";
+                var sentiment = row.TryGetValue(sentimentKey, out var s) ? s?.ToString() ?? "" : "";
+                
+                var aiRespKey = FindKey(row, "AiResponse", "ai_response") ?? "AiResponse";
+                var aiResp = row.TryGetValue(aiRespKey, out var ar) ? ar?.ToString() ?? "" : "";
+                
+                var createdAtKey = FindKey(row, "CreatedAt", "created_at") ?? "CreatedAt";
+                var createdAt = "";
+                if (row.TryGetValue(createdAtKey, out var caVal) && caVal != null) {
+                    if (DateTime.TryParse(caVal.ToString(), out var dt)) {
+                        createdAt = dt.ToString("yyyy年MM月dd日 HH:mm");
+                    } else {
+                        createdAt = caVal.ToString() ?? "";
+                    }
+                }
+
+                var editUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = editPageName, id = id });
+                if (sec.Actions != null) {
+                    var editAct = sec.Actions.FirstOrDefault(a => a.Label?.Contains("编辑") == true || a.Label?.Contains("Edit") == true);
+                    if (editAct != null && !string.IsNullOrEmpty(editAct.Url)) {
+                        editUrl = editAct.Url.Replace("{id}", id).Replace("{project}", currentProject);
+                    }
+                }
+
+                <text>
+                "@id": {
+                    id: "@id",
+                    title: `@Html.Raw(JavaScriptEncoder.Default.Encode(title))`,
+                    content: `@Html.Raw(JavaScriptEncoder.Default.Encode(content))`,
+                    weather: "@weather",
+                    weatherEmoji: "@GetWeatherEmoji(weather)",
+                    mood: "@mood",
+                    moodEmoji: "@GetMoodEmoji(mood)",
+                    location: `@Html.Raw(JavaScriptEncoder.Default.Encode(location))`,
+                    sentiment: "@sentiment",
+                    aiResponse: `@Html.Raw(JavaScriptEncoder.Default.Encode(aiResp))`,
+                    createdAt: "@createdAt",
+                    editUrl: "@editUrl"
+                },
+                </text>
+            }
+        };
+
+        let selectedDiaryId = null;
+
+        window.showDetailModal_@(sec.Id) = function(id) {
+            const diary = diaryData[id];
+            if (!diary) return;
+
+            document.getElementById('modal_title_@(sec.Id)').innerText = diary.title;
+            document.getElementById('modal_content_@(sec.Id)').innerText = diary.content;
+            
+            let metaHtml = "";
+            if (diary.weather) metaHtml += `<span>${diary.weatherEmoji} ${diary.weather}</span><span>•</span>`;
+            if (diary.mood) metaHtml += `<span>${diary.moodEmoji} ${diary.mood}</span><span>•</span>`;
+            metaHtml += `<span>${diary.createdAt}</span>`;
+            if (diary.location) {
+                metaHtml += `<span>•</span><span>📍 ${diary.location}</span>`;
+            }
+            document.getElementById('modal_meta_@(sec.Id)').innerHTML = metaHtml;
+
+            const aiSection = document.getElementById('modal_ai_section_@(sec.Id)');
+            if (diary.sentiment || diary.aiResponse) {
+                aiSection.classList.remove('hidden');
+                document.getElementById('modal_ai_sentiment_@(sec.Id)').innerText = diary.sentiment || "有待评估";
+                document.getElementById('modal_ai_response_@(sec.Id)').innerText = diary.aiResponse || "AI 正在思考中...";
+            } else {
+                aiSection.classList.add('hidden');
+            }
+
+            document.getElementById('modal_edit_btn_@(sec.Id)').href = diary.editUrl;
+            document.getElementById('detail_modal_@(sec.Id)').showModal();
+        }
+
+        window.confirmDeleteDiary_@(sec.Id) = function(id) {
+            selectedDiaryId = id;
+            document.getElementById('delete_modal_@(sec.Id)').showModal();
+        }
+
+        window.executeDeleteDiary_@(sec.Id) = async function() {
+            if (!selectedDiaryId) return;
+            const id = selectedDiaryId;
+            
+            try {
+                const response = await fetch(`/api/${window.NetYamlForgeConfig?.currentProject || '@currentProject'}/@(apiEntity)/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                });
+
+                if (response.ok || response.status === 204) {
+                    // Close Modal
+                    document.getElementById('delete_modal_@(sec.Id)').close();
+                    
+                    // Elegant delete animation
+                    const card = document.getElementById(`diary-card-${id}`);
+                    if (card) {
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9) translateY(10px)';
+                        card.style.transition = 'all 0.4s ease-out';
+                        
+                        setTimeout(() => {
+                            card.style.height = '0px';
+                            card.style.padding = '0px';
+                            card.style.margin = '0px';
+                            card.style.border = 'none';
+                            setTimeout(() => {
+                                card.remove();
+                                // Reload if no cards left to show empty state
+                                if (document.querySelectorAll('#section-@(sec.Id) .diary-card').length === 0) {
+                                    window.location.reload();
+                                }
+                            }, 300);
+                        }, 400);
+                    }
+                } else {
+                    const data = await response.json();
+                    alert(`删除失败: ${data.error || '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('Error deleting:', error);
+                alert('删除发生网络错误，请重试');
+            }
+        }
+    })();
+</script>
+
+@Html.AntiForgeryToken()

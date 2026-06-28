@@ -28,6 +28,9 @@ layout:
         controller: Dashboard
         action: Index
         icon: 📊
+      - label: 设置
+        url: /diary-companion/Page/Settings
+        icon: ⚙️
 
 home_page:
   icon: "🗂️"

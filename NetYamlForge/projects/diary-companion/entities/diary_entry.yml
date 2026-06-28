@@ -17,7 +17,7 @@ entities:
         placeholder: "今天发生了什么有趣的事？"
       Content:
         type: textarea
-        required: true
+        required: false
         label: 日记内容
         editable: true
         placeholder: "写下你的心情、所思所想..."
@@ -73,6 +73,9 @@ entities:
         label: 日记标题
         searchable: true
         sortable: true
+      Content:
+        type: string
+        label: 日记内容
       Weather:
         type: string
         label: 天气
@@ -90,6 +93,9 @@ entities:
         type: string
         label: AI 情绪评估
         sortable: true
+      AiResponse:
+        type: string
+        label: AI 心灵伴侣寄语
       CreatedAt:
         type: datetime
         label: 记录时间
