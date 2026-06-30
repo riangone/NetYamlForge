@@ -123,6 +123,30 @@ public class ProjectManager
             }
         }
 
+        // tenant.yaml からマルチテナント設定を読み込み
+        var tenantYamlPath = Path.Combine(projectDir, "config", "tenant.yaml");
+        if (!File.Exists(tenantYamlPath))
+        {
+            tenantYamlPath = Path.Combine(projectDir, "tenant.yaml");
+        }
+        if (File.Exists(tenantYamlPath))
+        {
+            try
+            {
+                var tenantYamlContent = File.ReadAllText(tenantYamlPath);
+                var tenantConfig = strictDeserializer.Deserialize<TenantConfig>(tenantYamlContent);
+                if (tenantConfig != null)
+                {
+                    config.Multitenancy = tenantConfig;
+                    _logger.LogInformation("プロジェクト '{Name}' に tenant.yaml を適用, Strategy={Strategy}", config.Name, tenantConfig.Strategy);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "プロジェクト '{ProjectName}' の tenant.yaml 読み込みに失敗しました", config.Name);
+            }
+        }
+
         // 環境変数によるDB設定の上書き（Docker / CI 対応）
         // 形式: NYFORGE_{PROJECT_NAME}_DB_TYPE / NYFORGE_{PROJECT_NAME}_CONNECTION_STRING
         // 例:   NYFORGE_TODO_APP_DB_TYPE=postgresql
@@ -157,7 +181,8 @@ public class ProjectManager
             PageMetadata = pageMetadata,
             Layout = config.Layout,
             Calendar = config.Calendar,
-            Email = config.Email
+            Email = config.Email,
+            Multitenancy = config.Multitenancy
         };
 
         _projects[config.Name] = info;

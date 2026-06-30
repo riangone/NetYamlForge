@@ -295,6 +295,11 @@ public class BatchJobResult
     public bool Success { get; set; }
 
     /// <summary>
+    /// 步骤间传递的输入-输出上下文管道（Pipe Context）
+    /// </summary>
+    public BatchJobPipeContext PipeContext { get; set; } = new();
+
+    /// <summary>
     /// 処理開始時刻
     /// </summary>
     public DateTime StartedAt { get; set; }

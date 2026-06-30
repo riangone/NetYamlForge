@@ -277,6 +277,9 @@ public class FormDefinition
     /// </summary>
     public int ColSpan { get; set; } = 1;
 
+    public FieldSecurityDefinition? Security { get; set; }
+    public List<ValidatorDefinition> Validators { get; set; } = new();
+
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
@@ -311,6 +314,9 @@ public class ColumnDefinition : IColumnDef
     public string? Currency { get; set; }
     public string? Locale { get; set; }
     public int? Precision { get; set; }
+
+    public FieldSecurityDefinition? Security { get; set; }
+    public List<ValidatorDefinition> Validators { get; set; } = new();
 
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
@@ -368,6 +374,7 @@ public class EntityLayoutDefinition
 public class EntityDefinition
 {
     public string Table { get; set; } = default!;
+    public SecurityDefinition? Security { get; set; }
     /// <summary>
     /// 主键定義。単一主鍵の場合は列名を文字列で設定。
     /// 複合主鍵の場合は Keys プロパティを使用（こちらが優先される）。
@@ -814,4 +821,47 @@ public class EntityConfigRoot
     /// </summary>
     public List<string> Imports { get; set; } = new();
     public Dictionary<string, EntityDefinition> Entities { get; set; } = new();
+}
+
+public class ValidatorDefinition
+{
+    public string Type { get; set; } = default!;
+    public string? Pattern { get; set; }
+    public string? Min { get; set; }
+    public string? Max { get; set; }
+    public string? Condition { get; set; }
+    public string? HookName { get; set; }
+    public string? ErrorMessage { get; set; }
+}
+
+public class SecurityDefinition
+{
+    public PermissionsDefinition? Permissions { get; set; }
+    public RowLevelSecurityDefinition? RowLevelSecurity { get; set; }
+}
+
+public class PermissionsDefinition
+{
+    public List<string>? Read { get; set; }
+    public List<string>? Write { get; set; }
+    public List<string>? Delete { get; set; }
+}
+
+public class RowLevelSecurityDefinition
+{
+    public bool Enabled { get; set; }
+    public List<RowLevelSecurityPolicy>? Policies { get; set; }
+}
+
+public class RowLevelSecurityPolicy
+{
+    public string? Role { get; set; }
+    public string? FilterClause { get; set; }
+}
+
+public class FieldSecurityDefinition
+{
+    public string? ReadMask { get; set; }
+    public List<string>? ReadRoles { get; set; }
+    public List<string>? WriteRoles { get; set; }
 }

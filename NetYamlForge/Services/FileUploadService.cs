@@ -3,6 +3,11 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace NetYamlForge.Services;
 
@@ -69,6 +74,29 @@ public class FileUploadService : IFileUploadService
         if (allowedExtensions != null && !allowedExtensions.Contains(extension))
         {
             throw new InvalidOperationException($"許可されていないファイル形式です：{extension}");
+        }
+
+        // Magic Bytes 二进制签名校验与像素体积校验防范压缩炸弹
+        var readStream = file.OpenReadStream();
+        try
+        {
+            if (!ValidateFileSignature(readStream, extension))
+            {
+                throw new InvalidOperationException($"ファイルのシグネチャ検証に失敗しました。ファイル内容と拡張子（{extension}）が一致しません。");
+            }
+
+            var isImageExt = extension is ".jpg" or ".jpeg" or ".png" or ".gif" or ".webp" or ".bmp";
+            if (isImageExt)
+            {
+                ValidatePixelVolume(readStream);
+            }
+        }
+        finally
+        {
+            if (readStream.CanSeek)
+            {
+                readStream.Position = 0;
+            }
         }
 
         // 保存先ディレクトリの確保
@@ -159,13 +187,125 @@ public class FileUploadService : IFileUploadService
         }
     }
 
+    private static readonly Dictionary<string, byte[][]> FileSignatures = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { ".jpg", new[] { new byte[] { 0xFF, 0xD8, 0xFF } } },
+        { ".jpeg", new[] { new byte[] { 0xFF, 0xD8, 0xFF } } },
+        { ".png", new[] { new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A } } },
+        { ".gif", new[] { new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 }, new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 } } },
+        { ".bmp", new[] { new byte[] { 0x42, 0x4D } } },
+    };
+
+    private static bool ValidateFileSignature(Stream fileStream, string extension)
+    {
+        if (!FileSignatures.TryGetValue(extension, out var signatures) && !string.Equals(extension, ".webp", StringComparison.OrdinalIgnoreCase))
+        {
+            return true; 
+        }
+
+        var buffer = new byte[16];
+        var originalPosition = fileStream.Position;
+        fileStream.Position = 0;
+        var bytesRead = fileStream.Read(buffer, 0, buffer.Length);
+        fileStream.Position = originalPosition;
+
+        if (bytesRead < 2)
+        {
+            return false;
+        }
+
+        if (string.Equals(extension, ".webp", StringComparison.OrdinalIgnoreCase))
+        {
+            if (bytesRead < 12) return false;
+            return buffer[0] == 0x52 && buffer[1] == 0x49 && buffer[2] == 0x46 && buffer[3] == 0x46
+                && buffer[8] == 0x57 && buffer[9] == 0x45 && buffer[10] == 0x42 && buffer[11] == 0x50;
+        }
+
+        if (signatures != null)
+        {
+            foreach (var sig in signatures)
+            {
+                if (bytesRead >= sig.Length && buffer.Take(sig.Length).SequenceEqual(sig))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static void ValidatePixelVolume(Stream stream, long maxPixels = 50_000_000)
+    {
+        var originalPosition = stream.Position;
+        stream.Position = 0;
+        try
+        {
+            var info = Image.Identify(stream);
+            if (info != null)
+            {
+                long totalPixels = (long)info.Width * info.Height;
+                if (totalPixels > maxPixels)
+                {
+                    throw new InvalidOperationException($"画像の総ピクセル数が制限を超えています（{info.Width}x{info.Height} = {totalPixels} px、最大 {maxPixels} px）。圧縮爆弾の可能性があります。");
+                }
+            }
+        }
+        catch (SixLabors.ImageSharp.UnknownImageFormatException)
+        {
+            // Ignore unrecognized formats and pass
+        }
+        finally
+        {
+            stream.Position = originalPosition;
+        }
+    }
+
     /// <summary>
     /// 画像のサムネイルを生成します。
     /// </summary>
     private async Task GenerateThumbnailAsync(string imagePath, int maxWidth, int maxHeight)
     {
-        // 簡易実装：SixLabors.ImageSharp 等を使用する場合はここに実装
-        // 現時点ではサムネイル生成はスキップ
-        await Task.CompletedTask;
+        try
+        {
+            var wwwRoot = _environment.WebRootPath;
+            var fullPath = PathSafetyGuard.NormalizeAndValidatePath(imagePath.TrimStart('/'), wwwRoot, "ThumbnailSourcePath");
+            
+            if (!File.Exists(fullPath))
+            {
+                _logger.LogWarning("サムネイル生成対象の元画像が存在しません：{Path}", fullPath);
+                return;
+            }
+
+            var dir = Path.GetDirectoryName(fullPath);
+            var fileName = Path.GetFileNameWithoutExtension(fullPath);
+            var ext = Path.GetExtension(fullPath);
+            var thumbPath = Path.Combine(dir ?? "", $"{fileName}_thumb{ext}");
+
+            using (var image = await Image.LoadAsync(fullPath))
+            {
+                var width = image.Width;
+                var height = image.Height;
+
+                if (width > maxWidth || height > maxHeight)
+                {
+                    var ratioX = (double)maxWidth / width;
+                    var ratioY = (double)maxHeight / height;
+                    var ratio = Math.Min(ratioX, ratioY);
+
+                    var newWidth = (int)(width * ratio);
+                    var newHeight = (int)(height * ratio);
+
+                    image.Mutate(x => x.Resize(newWidth, newHeight));
+                }
+
+                await image.SaveAsync(thumbPath);
+                _logger.LogInformation("サムネイル生成成功：{Path}", thumbPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "サムネイル生成中にエラーが発生しました：{Path}", imagePath);
+        }
     }
 }

@@ -7,6 +7,8 @@ using Dapper;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace NetYamlForge.Projects.DiaryCompanion.Hooks;
 
@@ -59,11 +61,175 @@ public class AnalyzeDiaryMoodHook : IEntityHook
             var weather = ctx.Values.GetValueOrDefault("Weather")?.ToString();
             var moodBefore = ctx.Values.GetValueOrDefault("MoodBefore")?.ToString();
             var location = ctx.Values.GetValueOrDefault("Location")?.ToString();
+            var imageBase64 = ctx.Values.GetValueOrDefault("ImageBase64")?.ToString();
+            var imageLabel = ctx.Values.GetValueOrDefault("ImageLabel")?.ToString();
 
-            if (string.IsNullOrWhiteSpace(content))
+            // 如果提供了图片，则生成缩略图以减少列表页的流量消耗
+            if (!string.IsNullOrWhiteSpace(imageBase64))
+            {
+                try
+                {
+                    var base64Data = imageBase64;
+                    string? prefix = null;
+                    if (base64Data.Contains(","))
+                    {
+                        var commaIndex = base64Data.IndexOf(",");
+                        prefix = base64Data.Substring(0, commaIndex + 1);
+                        base64Data = base64Data.Substring(commaIndex + 1);
+                    }
+
+                    var bytes = Convert.FromBase64String(base64Data);
+                    using (var image = Image.Load(bytes))
+                    {
+                        int maxDim = 640; // 提升缩略图最大尺寸至 640px (适配高 DPI Retina 屏幕)
+                        int width = image.Width;
+                        int height = image.Height;
+                        if (width > maxDim || height > maxDim)
+                        {
+                            if (width > height)
+                            {
+                                height = (int)((double)height / width * maxDim);
+                                width = maxDim;
+                            }
+                            else
+                            {
+                                width = (int)((double)width / height * maxDim);
+                                height = maxDim;
+                            }
+                            image.Mutate(x => x.Resize(width, height));
+                        }
+
+                        using (var ms = new System.IO.MemoryStream())
+                        {
+                            // 使用高压缩率的 WebP 格式保存，确保图片高清晰度的同时体积极小
+                            image.SaveAsWebp(ms, new SixLabors.ImageSharp.Formats.Webp.WebpEncoder { Quality = 75 });
+                            var thumbBytes = ms.ToArray();
+                            var thumbBase64 = Convert.ToBase64String(thumbBytes);
+                            ctx.Values["ImageThumbnailBase64"] = "data:image/webp;base64," + thumbBase64;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "生成图片缩略图失败");
+                    // 降级：如果缩略图生成失败，直接将原图赋给缩略图以保证显示
+                    ctx.Values["ImageThumbnailBase64"] = imageBase64;
+                }
+            }
+            else
+            {
+                ctx.Values["ImageThumbnailBase64"] = null;
+            }
+
+            // 如果上传了图片，但是图片标注为空，则调用 AI 自动生成标注
+            if (!string.IsNullOrWhiteSpace(imageBase64) && string.IsNullOrWhiteSpace(imageLabel))
+            {
+                _logger.LogInformation("检测到上传了图片，但图片标注为空。正在启动 AI 自动生成标注...");
+                var base64Data = imageBase64;
+                if (base64Data.Contains(","))
+                {
+                    base64Data = base64Data.Substring(base64Data.IndexOf(",") + 1);
+                }
+
+                string tempFileName = $"temp_diary_img_{Guid.NewGuid():N}.jpg";
+                string tempFilePath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), tempFileName);
+
+                try
+                {
+                    var bytes = Convert.FromBase64String(base64Data);
+                    await System.IO.File.WriteAllBytesAsync(tempFilePath, bytes);
+
+                    var aiPrompt = $"""
+我上传了一张日记图片。请使用你的 view_file 工具查看位于 `{tempFilePath}` 的图片，并用中文为它生成一个非常简短的标注（2到6个字，例如“阳光下的咖啡”、“雨中的街道”、“美味的晚餐”）。
+请直接输出这个标注的内容，不要包含任何标点符号、引号或额外的解释文字。
+""";
+                    var generatedLabel = await _ai.PromptAsync(aiPrompt, projectName: "diary-companion");
+                    if (!string.IsNullOrWhiteSpace(generatedLabel))
+                    {
+                        imageLabel = generatedLabel.Trim().Trim('"', '“', '”', '`', '.', '。');
+                        ctx.Values["ImageLabel"] = imageLabel;
+                        _logger.LogInformation("AI 成功生成了图片标注: {Label}", imageLabel);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "调用 AI 生成图片标注失败");
+                }
+                finally
+                {
+                    if (System.IO.File.Exists(tempFilePath))
+                    {
+                        try { System.IO.File.Delete(tempFilePath); } catch { }
+                    }
+                }
+            }
+
+            // 如果是更新（Edit）操作，先清除旧的图片标注后缀/追加文本，防止重复叠加
+            if (ctx.Operation == CrudOperation.Update && ctx.Id.HasValue)
+            {
+                try
+                {
+                    var oldRow = await db.QueryFirstOrDefaultAsync<dynamic>(
+                        "SELECT ImageLabel FROM DiaryEntry WHERE Id = @Id",
+                        new { Id = ctx.Id.Value },
+                        tx);
+                    if (oldRow != null)
+                    {
+                        string? oldImageLabel = oldRow.ImageLabel?.ToString();
+                        if (!string.IsNullOrWhiteSpace(oldImageLabel))
+                        {
+                            if (!string.IsNullOrWhiteSpace(title))
+                            {
+                                var oldSuffix = $" [{oldImageLabel}]";
+                                if (title.EndsWith(oldSuffix))
+                                {
+                                    title = title.Substring(0, title.Length - oldSuffix.Length);
+                                }
+                            }
+                            if (!string.IsNullOrWhiteSpace(content))
+                            {
+                                var oldLabelText = $"\n\n[图片标注：{oldImageLabel}]";
+                                content = content.Replace(oldLabelText, "");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "尝试获取旧记录以清理旧图片标注时失败");
+                }
+            }
+
+            // 如果有图片标注，将其显示到日记标题和日记内容里
+            if (!string.IsNullOrWhiteSpace(imageLabel))
+            {
+                if (!string.IsNullOrWhiteSpace(title))
+                {
+                    var suffix = $" [{imageLabel}]";
+                    if (!title.EndsWith(suffix))
+                    {
+                        title = $"{title}{suffix}";
+                    }
+                    ctx.Values["Title"] = title;
+                }
+
+                if (!string.IsNullOrWhiteSpace(content))
+                {
+                    var labelText = $"\n\n[图片标注：{imageLabel}]";
+                    if (!content.Contains(labelText))
+                    {
+                        content = $"{content}{labelText}";
+                    }
+                    ctx.Values["Content"] = content;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(title))
             {
                 return HookResult.Continue();
             }
+
+            var diaryContentForAi = string.IsNullOrWhiteSpace(content) ? "（未填写正文）" : content;
 
             var prompt = $$"""
 你是一个温暖、贴心、充满同理心的智能心灵伴侣 AI。
@@ -73,7 +239,7 @@ public class AnalyzeDiaryMoodHook : IEntityHook
 - 记录前心情：{{moodBefore}}
 - 地理位置：{{location}}
 - 日记正文：
-{{content}}
+{{diaryContentForAi}}
 
 请输出合法的 JSON 格式数据（不要包含任何 markdown 代码块标识如 ```json，不要输出任何额外的解释性文字），包含以下两个字段：
 1. "Sentiment": 必须是 "积极"、"平和" 或 "消极" 之一。

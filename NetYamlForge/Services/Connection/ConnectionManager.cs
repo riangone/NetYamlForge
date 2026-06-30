@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
+using NetYamlForge.Services.Tenant;
 
 namespace NetYamlForge.Services.Connection;
 
@@ -169,12 +170,17 @@ public class ConnectionManager : IConnectionManager
             }
         }
 
-        using var scope = _scopeFactory.CreateScope();
-        var spProjectScope = scope.ServiceProvider.GetService<ProjectScope>();
-        
-        if (spProjectScope != null && spProjectScope.IsSet)
+        if (_scopeFactory != null)
         {
-            return await GetConnectionAsync(spProjectScope.Current.Name, cancellationToken);
+            using var scope = _scopeFactory.CreateScope();
+            if (scope != null)
+            {
+                var spProjectScope = scope.ServiceProvider?.GetService<ProjectScope>();
+                if (spProjectScope != null && spProjectScope.IsSet)
+                {
+                    return await GetConnectionAsync(spProjectScope.Current.Name, cancellationToken);
+                }
+            }
         }
 
         throw new InvalidOperationException("No project scope set. Use GetConnectionAsync(projectName) instead.");
@@ -186,7 +192,32 @@ public class ConnectionManager : IConnectionManager
             throw new InvalidOperationException($"Project not found: {projectName}");
 
         var dbType = project.DatabaseType.ToLowerInvariant();
-        var connectionString = AddPoolParametersIfNeeded(project.DatabaseType, project.ConnectionString);
+        
+        // Resolve tenant-specific connection string if TenantContext is available
+        var connectionString = project.ConnectionString;
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext != null)
+        {
+            var tenantCtx = httpContext.RequestServices.GetService<TenantContext>();
+            if (tenantCtx != null && !string.IsNullOrEmpty(tenantCtx.ConnectionString))
+            {
+                connectionString = tenantCtx.ConnectionString;
+            }
+        }
+        else if (_scopeFactory != null)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            if (scope != null)
+            {
+                var tenantCtx = scope.ServiceProvider?.GetService<TenantContext>();
+                if (tenantCtx != null && !string.IsNullOrEmpty(tenantCtx.ConnectionString))
+                {
+                    connectionString = tenantCtx.ConnectionString;
+                }
+            }
+        }
+
+        connectionString = AddPoolParametersIfNeeded(project.DatabaseType, connectionString);
 
 #pragma warning disable DCS003
         IDbConnection connection = dbType switch

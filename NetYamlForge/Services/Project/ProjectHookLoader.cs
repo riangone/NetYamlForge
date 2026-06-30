@@ -6,6 +6,7 @@ using System.Reflection;
 using NetYamlForge.Services.Hooks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
@@ -255,6 +256,29 @@ public class ProjectHookLoader : IProjectHookLoader
                             "TRANSFORMER_REGISTER_FAILED", projectName, transformerType.FullName);
                     }
                 }
+
+                var rlsTypes = assembly.GetTypes()
+                    .Where(t => typeof(IProjectRlsContextEvaluator).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+                foreach (var rlsType in rlsTypes)
+                {
+                    try
+                    {
+                        var evaluator = ActivatorUtilities.CreateInstance(serviceProvider, rlsType);
+                        if (evaluator is IProjectRlsContextEvaluator evaluatorInstance)
+                        {
+                            registry.RegisterRlsContextEvaluator(projectName, evaluatorInstance);
+                            _logger.LogInformation(
+                                "プロジェクト '{Project}' の RLS エバリュエーター '{Type}' を登録しました",
+                                projectName, rlsType.Name);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "プロジェクト '{Project}' の RLS エバリュエーター '{Type}' の登録に失敗しました",
+                            projectName, rlsType.FullName);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -393,13 +417,32 @@ public class ProjectHookLoader : IProjectHookLoader
 
         var references = GetMetadataReferences();
 
+        var syntaxTrees = sourceEntries
+            .Select(entry => CSharpSyntaxTree.ParseText(entry.SourceText, path: entry.FilePath))
+            .ToList();
+
+        var validator = new HookSecurityValidator();
+        foreach (var tree in syntaxTrees)
+        {
+            var root = tree.GetRoot();
+            validator.Visit(root);
+        }
+
+        if (validator.Violations.Count > 0)
+        {
+            _logger.LogError(
+                "[{ErrorCode}] プロジェクト '{Project}' のフックセキュリティ検証に失敗しました：{Violations}",
+                "HOOK_SECURITY_VIOLATION", projectName, string.Join("; ", validator.Violations));
+            return null;
+        }
+
         var compilation = CSharpCompilation.Create(
             $"ProjectHooks_{projectName}",
-            sourceEntries.Select(entry => CSharpSyntaxTree.ParseText(entry.SourceText, path: entry.FilePath)),
+            syntaxTrees,
             references,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 .WithOptimizationLevel(OptimizationLevel.Release)
-                .WithAllowUnsafe(true));
+                .WithAllowUnsafe(false));
 
         using var ms = new MemoryStream();
         using var pdbMs = new MemoryStream();
@@ -598,5 +641,57 @@ public class ProjectHookLoader : IProjectHookLoader
             "CS1503" => "引数の型が一致していません。メソッド定義と渡す値 of を確認してください。",
             _ => string.Empty
         };
+    }
+}
+
+public sealed class HookSecurityValidator : CSharpSyntaxWalker
+{
+    private readonly List<string> _violations = new();
+
+    private static readonly HashSet<string> BannedNamespaces = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "System.Diagnostics",
+        "System.Reflection",
+        "System.Runtime.InteropServices",
+        "System.EnterpriseServices"
+    };
+
+    private static readonly HashSet<string> BannedMethods = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Process.Start", "Process", "Start",
+        "Assembly.Load", "Assembly.LoadFrom", "Assembly.LoadFile",
+        "DllImport", "DllImportAttribute"
+    };
+
+    public IReadOnlyList<string> Violations => _violations;
+
+    public override void VisitUsingDirective(UsingDirectiveSyntax node)
+    {
+        var nsName = node.Name?.ToString().Trim() ?? string.Empty;
+        if (BannedNamespaces.Any(banned => nsName.Equals(banned, StringComparison.OrdinalIgnoreCase) || nsName.StartsWith(banned + ".", StringComparison.OrdinalIgnoreCase)))
+        {
+            _violations.Add($"Banned namespace using: {nsName}");
+        }
+        base.VisitUsingDirective(node);
+    }
+
+    public override void VisitIdentifierName(IdentifierNameSyntax node)
+    {
+        var id = node.Identifier.Text;
+        if (BannedMethods.Contains(id))
+        {
+            _violations.Add($"Banned call/identifier: {id}");
+        }
+        base.VisitIdentifierName(node);
+    }
+
+    public override void VisitAttribute(AttributeSyntax node)
+    {
+        var attrName = node.Name.ToString();
+        if (attrName.Contains("DllImport"))
+        {
+            _violations.Add("Banned attribute: DllImport");
+        }
+        base.VisitAttribute(node);
     }
 }

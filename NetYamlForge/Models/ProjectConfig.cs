@@ -22,6 +22,10 @@ public class ProjectConfig
     /// プロジェクト固有のメール設定（省略時はグローバル設定を使用）。
     /// </summary>
     public ProjectEmailConfig? Email { get; set; }
+    /// <summary>
+    /// マルチテナント設定（省略可能）。
+    /// </summary>
+    public TenantConfig? Multitenancy { get; set; }
 }
 
 /// <summary>

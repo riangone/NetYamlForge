@@ -68,9 +68,69 @@ ORDER BY c.ordinal_position
                 .ToList();
         }
 
+        if (IsMySql(dbType))
+        {
+            var mysqlRows = await conn.QueryAsync<PostgresColumnRow>(
+                """
+SELECT
+    ordinal_position AS Cid,
+    column_name AS Name,
+    data_type AS Type,
+    CASE WHEN is_nullable = 'NO' THEN 1 ELSE 0 END AS NotNullBool,
+    CASE WHEN column_key = 'PRI' THEN 1 ELSE 0 END AS Pk
+FROM information_schema.columns
+WHERE table_name = @TableName
+  AND table_schema = DATABASE()
+ORDER BY ordinal_position
+""",
+                new { TableName = tableName });
+
+            return mysqlRows
+                .OrderBy(r => r.Cid)
+                .Select(r => new ColumnSchemaInfo(
+                    r.Name,
+                    NormalizeSqlType(r.Type),
+                    r.NotNullBool,
+                    r.Pk != 0))
+                .ToList();
+        }
+
+        if (IsSqlServer(dbType))
+        {
+            var mssqlRows = await conn.QueryAsync<PostgresColumnRow>(
+                """
+SELECT
+    c.ORDINAL_POSITION AS Cid,
+    c.COLUMN_NAME AS Name,
+    c.DATA_TYPE AS Type,
+    CASE WHEN c.IS_NULLABLE = 'NO' THEN 1 ELSE 0 END AS NotNullBool,
+    CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS Pk
+FROM INFORMATION_SCHEMA.COLUMNS c
+LEFT JOIN (
+    SELECT ku.COLUMN_NAME, ku.TABLE_NAME
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku
+      ON tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
+    WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+) pk ON pk.TABLE_NAME = c.TABLE_NAME AND pk.COLUMN_NAME = c.COLUMN_NAME
+WHERE c.TABLE_NAME = @TableName
+ORDER BY c.ORDINAL_POSITION
+""",
+                new { TableName = tableName });
+
+            return mssqlRows
+                .OrderBy(r => r.Cid)
+                .Select(r => new ColumnSchemaInfo(
+                    r.Name,
+                    NormalizeSqlType(r.Type),
+                    r.NotNullBool,
+                    r.Pk != 0))
+                .ToList();
+        }
+
         if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
         {
-            throw new NotSupportedException("Schema migration column inspection supports SQLite and PostgreSQL only.");
+            throw new NotSupportedException("Schema migration column inspection supports SQLite, PostgreSQL, MySQL and SQL Server only.");
         }
 
 #pragma warning disable DCS001
@@ -173,9 +233,19 @@ ORDER BY c.ordinal_position
             return GeneratePostgresSql(plan, entity);
         }
 
+        if (IsMySql(dbType))
+        {
+            return GenerateMySqlSql(plan, entity);
+        }
+
+        if (IsSqlServer(dbType))
+        {
+            return GenerateSqlServerSql(plan, entity);
+        }
+
         if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
         {
-            throw new NotSupportedException("Schema migration supports SQLite and PostgreSQL only.");
+            throw new NotSupportedException("Schema migration supports SQLite, PostgreSQL, MySQL and SQL Server only.");
         }
 
         var backupTableName = $"{plan.TableName}__bak_{DateTime.UtcNow:yyyyMMddHHmmssfff}";
@@ -459,6 +529,8 @@ ORDER BY applied_at DESC
             "INT" => "INTEGER",
             "BIGINT" => "BIGINT",
             "SMALLINT" => "INTEGER",
+            "TINYINT" => "INTEGER",
+            "BIT" => "INTEGER",
             "BOOLEAN" => "INTEGER",
             "BOOL" => "INTEGER",
             "REAL" => "NUMERIC",
@@ -472,6 +544,10 @@ ORDER BY applied_at DESC
             "NVARCHAR" => "TEXT",
             "CHAR" => "TEXT",
             "NCHAR" => "TEXT",
+            "TEXT" => "TEXT",
+            "LONGTEXT" => "TEXT",
+            "MEDIUMTEXT" => "TEXT",
+            "DATETIME" => "TIMESTAMP",
             "TIMESTAMP WITHOUT TIME ZONE" => "TIMESTAMP",
             "TIMESTAMP WITH TIME ZONE" => "TIMESTAMP",
             "" => "TEXT",
@@ -485,6 +561,14 @@ ORDER BY applied_at DESC
     private static bool IsPostgres(string dbType) =>
         string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
         || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsMySql(string dbType) =>
+        string.Equals(dbType, "mysql", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(dbType, "mariadb", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsSqlServer(string dbType) =>
+        string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(dbType, "mssql", StringComparison.OrdinalIgnoreCase);
 
     private static string GetPostgresDefaultLiteral(string sqlType)
     {
@@ -500,6 +584,164 @@ ORDER BY applied_at DESC
             "TIMESTAMP" => "now()",
             _ => "''"
         };
+    }
+
+    private static string GetMySqlDefaultLiteral(string sqlType)
+    {
+        var upper = sqlType.Trim().ToUpperInvariant();
+        if (upper is "BOOLEAN" or "BOOL" or "BIT")
+        {
+            return "0";
+        }
+
+        return NormalizeSqlType(sqlType) switch
+        {
+            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
+            "TIMESTAMP" or "DATETIME" => "CURRENT_TIMESTAMP",
+            _ => "''"
+        };
+    }
+
+    private static string GetSqlServerDefaultLiteral(string sqlType)
+    {
+        var upper = sqlType.Trim().ToUpperInvariant();
+        if (upper is "BOOLEAN" or "BOOL" or "BIT")
+        {
+            return "0";
+        }
+
+        return NormalizeSqlType(sqlType) switch
+        {
+            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
+            "TIMESTAMP" or "DATETIME" => "GETDATE()",
+            _ => "''"
+        };
+    }
+
+    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GenerateMySqlSql(
+        MigrationPlan plan,
+        EntityDefinition entity)
+    {
+        var up = new List<string>();
+        var down = new List<string>();
+        var tableName = plan.TableName.Replace("`", "``");
+
+        foreach (var operation in plan.Operations)
+        {
+            var columnName = operation.ColumnName.Replace("`", "``");
+            switch (operation.OpType)
+            {
+                case MigrationOpType.AddColumn:
+                {
+                    var colDef = entity.Columns[operation.ColumnName];
+                    var sqlType = operation.NewSqlType ?? "VARCHAR(255)";
+                    if (colDef.Required)
+                    {
+                        up.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {sqlType} NULL");
+                        up.Add($"UPDATE `{tableName}` SET `{columnName}` = {GetMySqlDefaultLiteral(sqlType)} WHERE `{columnName}` IS NULL");
+                        up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {sqlType} NOT NULL");
+                    }
+                    else
+                    {
+                        up.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {sqlType} NULL");
+                    }
+
+                    down.Add($"ALTER TABLE `{tableName}` DROP COLUMN `{columnName}`");
+                    break;
+                }
+                case MigrationOpType.DropColumn:
+                {
+                    up.Add($"ALTER TABLE `{tableName}` DROP COLUMN `{columnName}`");
+                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
+                    {
+                        down.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {operation.OldSqlType} NULL");
+                    }
+                    break;
+                }
+                case MigrationOpType.AlterColumnType:
+                {
+                    var newType = operation.NewSqlType ?? "VARCHAR(255)";
+                    var oldType = operation.OldSqlType ?? "VARCHAR(255)";
+                    up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {newType}");
+                    down.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {oldType}");
+                    break;
+                }
+                case MigrationOpType.AlterNullability:
+                {
+                    var type = operation.NewSqlType ?? "VARCHAR(255)";
+                    var upAction = operation.NewNotNull == true ? "NOT NULL" : "NULL";
+                    var downAction = operation.NewNotNull == true ? "NULL" : "NOT NULL";
+                    up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {type} {upAction}");
+                    down.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {type} {downAction}");
+                    break;
+                }
+            }
+        }
+
+        return (up, down, string.Empty);
+    }
+
+    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GenerateSqlServerSql(
+        MigrationPlan plan,
+        EntityDefinition entity)
+    {
+        var up = new List<string>();
+        var down = new List<string>();
+        var tableName = plan.TableName.Replace("]", "]]");
+
+        foreach (var operation in plan.Operations)
+        {
+            var columnName = operation.ColumnName.Replace("]", "]]");
+            switch (operation.OpType)
+            {
+                case MigrationOpType.AddColumn:
+                {
+                    var colDef = entity.Columns[operation.ColumnName];
+                    var sqlType = operation.NewSqlType ?? "NVARCHAR(MAX)";
+                    if (colDef.Required)
+                    {
+                        up.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {sqlType} NULL");
+                        up.Add($"UPDATE [{tableName}] SET [{columnName}] = {GetSqlServerDefaultLiteral(sqlType)} WHERE [{columnName}] IS NULL");
+                        up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {sqlType} NOT NULL");
+                    }
+                    else
+                    {
+                        up.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {sqlType} NULL");
+                    }
+
+                    down.Add($"ALTER TABLE [{tableName}] DROP COLUMN [{columnName}]");
+                    break;
+                }
+                case MigrationOpType.DropColumn:
+                {
+                    up.Add($"ALTER TABLE [{tableName}] DROP COLUMN [{columnName}]");
+                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
+                    {
+                        down.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {operation.OldSqlType} NULL");
+                    }
+                    break;
+                }
+                case MigrationOpType.AlterColumnType:
+                {
+                    var newType = operation.NewSqlType ?? "NVARCHAR(MAX)";
+                    var oldType = operation.OldSqlType ?? "NVARCHAR(MAX)";
+                    up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {newType}");
+                    down.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {oldType}");
+                    break;
+                }
+                case MigrationOpType.AlterNullability:
+                {
+                    var type = operation.NewSqlType ?? "NVARCHAR(MAX)";
+                    var upAction = operation.NewNotNull == true ? "NOT NULL" : "NULL";
+                    var downAction = operation.NewNotNull == true ? "NULL" : "NOT NULL";
+                    up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {type} {upAction}");
+                    down.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {type} {downAction}");
+                    break;
+                }
+            }
+        }
+
+        return (up, down, string.Empty);
     }
 
     private sealed class PragmaColumnRow

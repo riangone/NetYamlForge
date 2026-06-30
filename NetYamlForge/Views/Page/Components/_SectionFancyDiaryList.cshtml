@@ -20,10 +20,18 @@
     string GetMoodEmoji(string? mood) => mood?.Trim() switch {
         "喜悦" => "🌸",
         "平静" => "🍃",
+        "轻松" => "🍹",
+        "期待" => "🌟",
+        "狂喜" => "🎉",
+        "欣慰" => "🥰",
+        "专注" => "🎯",
+        "治愈" => "🍀",
         "焦虑" => "🌪️",
         "忧郁" => "🌧️",
         "愤怒" => "⚡",
         "疲惫" => "💤",
+        "委屈" => "🥺",
+        "迷茫" => "🌀",
         _ => "📝"
     };
 
@@ -58,6 +66,32 @@
     if (sec.Actions != null && sec.Actions.Any()) {
         // If there's an action configured, we can extract URL pattern or handle it
     }
+
+    // Pagination parameters
+    var qParams = Context.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString(), StringComparer.OrdinalIgnoreCase);
+    var pageKey = $"{sec.Id}__page";
+    var psSizeKey = $"{sec.Id}__pagesize";
+    var effectivePageSize = sec.GetEffectivePageSize();
+    var currentPageSize = qParams.TryGetValue(psSizeKey, out var psStr2) &&
+                          int.TryParse(psStr2, out var psVal2) && psVal2 > 0
+        ? psVal2 : effectivePageSize;
+    var currentPage = qParams.TryGetValue(pageKey, out var pgStr) && int.TryParse(pgStr, out var pg)
+        ? Math.Max(1, pg) : 1;
+    var totalPages = currentPageSize > 0 && Model.Total > currentPageSize
+        ? (int)Math.Ceiling(Model.Total / (double)currentPageSize) : 1;
+
+    string BuildPageUrl(int pageNum)
+    {
+        var q = new Dictionary<string, string>(qParams, StringComparer.OrdinalIgnoreCase);
+        if (pageNum <= 1) q.Remove(pageKey);
+        else q[pageKey] = pageNum.ToString();
+        
+        if (currentPageSize != effectivePageSize) q[psSizeKey] = currentPageSize.ToString();
+        else q.Remove(psSizeKey);
+        
+        var baseUrl = Context.Request.Path.Value ?? "/";
+        return Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(baseUrl, q.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+    }
 }
 
 <style>
@@ -73,13 +107,20 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
     }
+    @@keyframes zoomIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-zoom-in {
+        animation: zoomIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 </style>
 
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
             📂 @(string.IsNullOrEmpty(sec.Title) ? "内容列表" : sec.Title) 
-            <span class="badge badge-sm badge-ghost border-gray-300">@rows.Count 篇</span>
+            <span class="badge badge-sm badge-ghost border-gray-300">共 @Model.Total 篇</span>
         </h2>
     </div>
 
@@ -135,6 +176,12 @@
                     }
                 }
 
+                var imageThumbnailBase64Key = FindKey(row, "ImageThumbnailBase64") ?? "ImageThumbnailBase64";
+                var imageThumbnailBase64 = row.TryGetValue(imageThumbnailBase64Key, out var imgThumbVal) ? imgThumbVal?.ToString() ?? "" : "";
+                
+                var imageLabelKey = FindKey(row, "ImageLabel") ?? "ImageLabel";
+                var imageLabel = row.TryGetValue(imageLabelKey, out var imgLabelVal) ? imgLabelVal?.ToString() ?? "" : "";
+
                 var shortContent = content.Length > 65 ? content.Substring(0, 62) + "..." : content;
                 var sentimentStyle = GetSentimentStyle(sentiment);
 
@@ -172,6 +219,13 @@
                         <div class="space-y-1.5">
                             <h4 class="font-bold text-gray-800 text-base line-clamp-1">@title</h4>
                             <p class="text-xs text-gray-500 leading-relaxed min-h-[48px] whitespace-pre-line">@shortContent</p>
+                            
+                            @if (!string.IsNullOrEmpty(imageThumbnailBase64))
+                            {
+                                <div class="mt-2 rounded-xl overflow-hidden border border-purple-100/40 max-h-36 flex items-center justify-center bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-blue-50/50 backdrop-blur-sm">
+                                    <img src="@imageThumbnailBase64" alt="@imageLabel" loading="lazy" class="object-cover w-full h-full max-h-36 cursor-zoom-in hover:scale-105 transition-all duration-500 ease-out" onclick="window.showLightboxLazy_@(sec.Id)('@id', `@Html.Raw(JavaScriptEncoder.Default.Encode(imageLabel))`)" />
+                                </div>
+                            }
                         </div>
 
                         <!-- AI response / sentiment snippet -->
@@ -180,7 +234,7 @@
                             <div class="p-3 rounded-xl border @sentimentStyle.borderClass @sentimentStyle.bgClass space-y-1.5">
                                 <div class="flex items-center justify-between">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border @sentimentStyle.badgeClass">
-                                        🧠 AI评估：@sentimentStyle.text
+                                        ✨ AI评估：@sentimentStyle.text
                                     </span>
                                 </div>
                                 @if (!string.IsNullOrEmpty(aiResp))
@@ -210,6 +264,83 @@
                 </div>
             }
         </div>
+
+        <!-- Pagination UI -->
+        @if (totalPages > 1)
+        {
+            <div class="flex justify-center items-center gap-2 mt-8 pt-4 border-t border-gray-100">
+                <div class="join bg-white/60 backdrop-blur border border-gray-100 p-1 rounded-2xl shadow-sm">
+                    @if (currentPage > 1)
+                    {
+                        <a href="@BuildPageUrl(currentPage - 1)" class="join-item btn btn-sm btn-ghost hover:bg-indigo-50 text-gray-500 rounded-xl transition-all">
+                            ‹ 上一页
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="join-item btn btn-sm btn-ghost btn-disabled text-gray-300 rounded-xl">
+                            ‹ 上一页
+                        </button>
+                    }
+
+                    @{
+                        var maxPageLinks = 5;
+                        var half = maxPageLinks / 2;
+                        var startPage = Math.Max(1, currentPage - half);
+                        var endPage = Math.Min(totalPages, startPage + maxPageLinks - 1);
+                        if (endPage - startPage + 1 < maxPageLinks)
+                            startPage = Math.Max(1, endPage - maxPageLinks + 1);
+                    }
+
+                    @if (startPage > 1)
+                    {
+                        <a href="@BuildPageUrl(1)" class="join-item btn btn-sm btn-ghost hover:bg-indigo-50 text-gray-500 rounded-xl transition-all">1</a>
+                        @if (startPage > 2)
+                        {
+                            <span class="join-item btn btn-sm btn-ghost btn-disabled text-gray-400">...</span>
+                        }
+                    }
+
+                    @for (int p = startPage; p <= endPage; p++)
+                    {
+                        if (p == currentPage)
+                        {
+                            <button class="join-item btn btn-sm btn-primary bg-indigo-600 text-white border-none rounded-xl shadow-sm shadow-indigo-100 font-bold">
+                                @p
+                            </button>
+                        }
+                        else
+                        {
+                            <a href="@BuildPageUrl(p)" class="join-item btn btn-sm btn-ghost hover:bg-indigo-50 text-gray-600 rounded-xl transition-all font-medium">
+                                @p
+                            </a>
+                        }
+                    }
+
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <span class="join-item btn btn-sm btn-ghost btn-disabled text-gray-400">...</span>
+                        }
+                        <a href="@BuildPageUrl(totalPages)" class="join-item btn btn-sm btn-ghost hover:bg-indigo-50 text-gray-500 rounded-xl transition-all">@totalPages</a>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="@BuildPageUrl(currentPage + 1)" class="join-item btn btn-sm btn-ghost hover:bg-indigo-50 text-gray-500 rounded-xl transition-all">
+                            下一页 ›
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="join-item btn btn-sm btn-ghost btn-disabled text-gray-300 rounded-xl">
+                            下一页 ›
+                        </button>
+                    }
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -226,6 +357,10 @@
         <hr class="border-gray-100" />
         <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line max-h-60 overflow-y-auto" id="modal_content_@(sec.Id)">
             <!-- Filled dynamically -->
+        </div>
+        <div id="modal_image_container_@(sec.Id)" class="hidden mt-3 text-center space-y-1 bg-gray-50/50 p-2.5 rounded-xl border border-gray-100">
+            <img id="modal_image_@(sec.Id)" src="" class="max-h-64 mx-auto rounded-lg shadow-sm object-contain cursor-zoom-in hover:scale-[1.02] transition-transform duration-300" onclick="window.showLightboxLazy_@(sec.Id)(currentDetailDiaryId, document.getElementById('modal_image_label_@(sec.Id)').innerText.replace('📸 图片标注：', ''))" />
+            <p id="modal_image_label_@(sec.Id)" class="text-[10px] text-gray-500 italic mt-1"></p>
         </div>
         <div class="hidden p-4 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-2" id="modal_ai_section_@(sec.Id)">
             <div class="flex items-center justify-between text-xs font-bold text-indigo-700">
@@ -265,6 +400,15 @@
                 确定删除
             </button>
         </div>
+    </div>
+</dialog>
+
+<!-- ===== Lightbox Modal ===== -->
+<dialog id="lightbox_modal_@(sec.Id)" class="modal modal-middle bg-black/85 backdrop-blur-md cursor-zoom-out" onclick="this.close()">
+    <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center justify-center p-4 cursor-default animate-zoom-in" onclick="event.stopPropagation()">
+        <button onclick="document.getElementById('lightbox_modal_@(sec.Id)').close()" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white bg-black/40 hover:bg-black/60 border-none z-10">✕</button>
+        <img id="lightbox_image_@(sec.Id)" src="" class="max-w-full max-h-[75vh] rounded-xl shadow-2xl object-contain border border-white/10" />
+        <p id="lightbox_label_@(sec.Id)" class="text-xs text-gray-200 mt-3 font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm hidden"></p>
     </div>
 </dialog>
 
@@ -308,63 +452,170 @@
                     }
                 }
 
-                var editUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = editPageName, id = id });
-                if (sec.Actions != null) {
-                    var editAct = sec.Actions.FirstOrDefault(a => a.Label?.Contains("编辑") == true || a.Label?.Contains("Edit") == true);
-                    if (editAct != null && !string.IsNullOrEmpty(editAct.Url)) {
-                        editUrl = editAct.Url.Replace("{id}", id).Replace("{project}", currentProject);
-                    }
-                }
-
-                <text>
-                "@id": {
-                    id: "@id",
-                    title: `@Html.Raw(JavaScriptEncoder.Default.Encode(title))`,
-                    content: `@Html.Raw(JavaScriptEncoder.Default.Encode(content))`,
-                    weather: "@weather",
-                    weatherEmoji: "@GetWeatherEmoji(weather)",
-                    mood: "@mood",
-                    moodEmoji: "@GetMoodEmoji(mood)",
-                    location: `@Html.Raw(JavaScriptEncoder.Default.Encode(location))`,
-                    sentiment: "@sentiment",
-                    aiResponse: `@Html.Raw(JavaScriptEncoder.Default.Encode(aiResp))`,
-                    createdAt: "@createdAt",
-                    editUrl: "@editUrl"
-                },
-                </text>
-            }
-        };
-
-        let selectedDiaryId = null;
-
-        window.showDetailModal_@(sec.Id) = function(id) {
-            const diary = diaryData[id];
-            if (!diary) return;
-
-            document.getElementById('modal_title_@(sec.Id)').innerText = diary.title;
-            document.getElementById('modal_content_@(sec.Id)').innerText = diary.content;
-            
-            let metaHtml = "";
-            if (diary.weather) metaHtml += `<span>${diary.weatherEmoji} ${diary.weather}</span><span>•</span>`;
-            if (diary.mood) metaHtml += `<span>${diary.moodEmoji} ${diary.mood}</span><span>•</span>`;
-            metaHtml += `<span>${diary.createdAt}</span>`;
-            if (diary.location) {
-                metaHtml += `<span>•</span><span>📍 ${diary.location}</span>`;
-            }
-            document.getElementById('modal_meta_@(sec.Id)').innerHTML = metaHtml;
-
-            const aiSection = document.getElementById('modal_ai_section_@(sec.Id)');
-            if (diary.sentiment || diary.aiResponse) {
-                aiSection.classList.remove('hidden');
-                document.getElementById('modal_ai_sentiment_@(sec.Id)').innerText = diary.sentiment || "有待评估";
-                document.getElementById('modal_ai_response_@(sec.Id)').innerText = diary.aiResponse || "AI 正在思考中...";
-            } else {
-                aiSection.classList.add('hidden');
-            }
-
-            document.getElementById('modal_edit_btn_@(sec.Id)').href = diary.editUrl;
-            document.getElementById('detail_modal_@(sec.Id)').showModal();
-        }
+                 var imageThumbnailBase64Key = FindKey(row, "ImageThumbnailBase64") ?? "ImageThumbnailBase64";
+                 var imageThumbnailBase64 = row.TryGetValue(imageThumbnailBase64Key, out var imgThumbVal) ? imgThumbVal?.ToString() ?? "" : "";
+                 
+                 var imageLabelKey = FindKey(row, "ImageLabel") ?? "ImageLabel";
+                 var imageLabel = row.TryGetValue(imageLabelKey, out var imgLabelVal) ? imgLabelVal?.ToString() ?? "" : "";
+ 
+                 var editUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = editPageName, id = id });
+                 if (sec.Actions != null) {
+                     var editAct = sec.Actions.FirstOrDefault(a => a.Label?.Contains("编辑") == true || a.Label?.Contains("Edit") == true);
+                     if (editAct != null && !string.IsNullOrEmpty(editAct.Url)) {
+                         editUrl = editAct.Url.Replace("{id}", id).Replace("{project}", currentProject);
+                     }
+                 }
+ 
+                 <text>
+                 "@id": {
+                     id: "@id",
+                     title: `@Html.Raw(JavaScriptEncoder.Default.Encode(title))`,
+                     content: `@Html.Raw(JavaScriptEncoder.Default.Encode(content))`,
+                     weather: "@weather",
+                     weatherEmoji: "@GetWeatherEmoji(weather)",
+                     mood: "@mood",
+                     moodEmoji: "@GetMoodEmoji(mood)",
+                     location: `@Html.Raw(JavaScriptEncoder.Default.Encode(location))`,
+                     sentiment: "@sentiment",
+                     aiResponse: `@Html.Raw(JavaScriptEncoder.Default.Encode(aiResp))`,
+                     createdAt: "@createdAt",
+                     editUrl: "@editUrl",
+                     imageBase64: "",
+                     imageThumbnailBase64: `@Html.Raw(imageThumbnailBase64)`,
+                     imageLabel: `@Html.Raw(JavaScriptEncoder.Default.Encode(imageLabel))`
+                 },
+                 </text>
+             }
+         };
+ 
+         let selectedDiaryId = null;
+         let currentDetailDiaryId = null;
+ 
+         window.showDetailModal_@(sec.Id) = async function(id) {
+             currentDetailDiaryId = id;
+             const diary = diaryData[id];
+             if (!diary) return;
+ 
+             document.getElementById('modal_title_@(sec.Id)').innerText = diary.title;
+             document.getElementById('modal_content_@(sec.Id)').innerText = diary.content;
+             
+             let metaHtml = "";
+             if (diary.weather) metaHtml += `<span>${diary.weatherEmoji} ${diary.weather}</span><span>•</span>`;
+             if (diary.mood) metaHtml += `<span>${diary.moodEmoji} ${diary.mood}</span><span>•</span>`;
+             metaHtml += `<span>${diary.createdAt}</span>`;
+             if (diary.location) {
+                 metaHtml += `<span>•</span><span>📍 ${diary.location}</span>`;
+             }
+             document.getElementById('modal_meta_@(sec.Id)').innerHTML = metaHtml;
+ 
+             const imgContainer = document.getElementById('modal_image_container_@(sec.Id)');
+             const modalImg = document.getElementById('modal_image_@(sec.Id)');
+             const modalImgLabel = document.getElementById('modal_image_label_@(sec.Id)');
+             if (diary.imageThumbnailBase64 && diary.imageThumbnailBase64.trim() !== '') {
+                 if (imgContainer && modalImg && modalImgLabel) {
+                     imgContainer.classList.remove('hidden');
+                     modalImg.src = diary.imageBase64 && diary.imageBase64.trim() !== '' ? diary.imageBase64 : diary.imageThumbnailBase64;
+                     modalImg.style.filter = diary.imageBase64 ? 'none' : 'blur(4px)';
+                     modalImg.style.transition = 'filter 0.3s ease-out';
+                     modalImgLabel.innerText = diary.imageLabel ? `📸 图片标注：${diary.imageLabel}` : '';
+ 
+                     if (!diary.imageBase64 || diary.imageBase64.trim() === '') {
+                         try {
+                             const response = await fetch(`/api/${window.NetYamlForgeConfig?.currentProject || '@currentProject'}/@(apiEntity)/${id}`);
+                             if (response.ok) {
+                                 const result = await response.json();
+                                 if (result && result.data && result.data.ImageBase64) {
+                                     diary.imageBase64 = result.data.ImageBase64;
+                                     if (currentDetailDiaryId === id) {
+                                         modalImg.src = diary.imageBase64;
+                                         modalImg.style.filter = 'none';
+                                     }
+                                 }
+                             }
+                         } catch (err) {
+                             console.error("加载大图失败:", err);
+                         }
+                     }
+                 }
+             } else {
+                 if (imgContainer && modalImg && modalImgLabel) {
+                     imgContainer.classList.add('hidden');
+                     modalImg.src = '';
+                     modalImgLabel.innerText = '';
+                 }
+             }
+ 
+             const aiSection = document.getElementById('modal_ai_section_@(sec.Id)');
+             if (diary.sentiment || diary.aiResponse) {
+                 aiSection.classList.remove('hidden');
+                 document.getElementById('modal_ai_sentiment_@(sec.Id)').innerText = diary.sentiment || "有待评估";
+                 document.getElementById('modal_ai_response_@(sec.Id)').innerText = diary.aiResponse || "AI 正在思考中...";
+             } else {
+                 aiSection.classList.add('hidden');
+             }
+ 
+             document.getElementById('modal_edit_btn_@(sec.Id)').href = diary.editUrl;
+             document.getElementById('detail_modal_@(sec.Id)').showModal();
+         }
+ 
+         window.showLightbox_@(sec.Id) = function(src, label = '') {
+             const lightbox = document.getElementById('lightbox_modal_@(sec.Id)');
+             const img = document.getElementById('lightbox_image_@(sec.Id)');
+             const lbl = document.getElementById('lightbox_label_@(sec.Id)');
+             if (lightbox && img) {
+                 img.src = src;
+                 img.style.filter = 'none';
+                 if (label && label.trim() !== '') {
+                     lbl.innerText = label;
+                     lbl.classList.remove('hidden');
+                 } else {
+                     lbl.innerText = '';
+                     lbl.classList.add('hidden');
+                 }
+                 lightbox.showModal();
+             }
+         }
+ 
+         window.showLightboxLazy_@(sec.Id) = async function(id, label = '') {
+             const diary = diaryData[id];
+             if (!diary) return;
+ 
+             const lightbox = document.getElementById('lightbox_modal_@(sec.Id)');
+             const img = document.getElementById('lightbox_image_@(sec.Id)');
+             const lbl = document.getElementById('lightbox_label_@(sec.Id)');
+             if (lightbox && img) {
+                 img.src = diary.imageBase64 && diary.imageBase64.trim() !== '' ? diary.imageBase64 : diary.imageThumbnailBase64;
+                 img.style.filter = diary.imageBase64 ? 'none' : 'blur(4px)';
+                 img.style.transition = 'filter 0.3s ease-out';
+ 
+                 if (label && label.trim() !== '') {
+                     lbl.innerText = label;
+                     lbl.classList.remove('hidden');
+                 } else {
+                     lbl.innerText = '';
+                     lbl.classList.add('hidden');
+                 }
+                 lightbox.showModal();
+ 
+                 if (!diary.imageBase64 || diary.imageBase64.trim() === '') {
+                     try {
+                         const response = await fetch(`/api/${window.NetYamlForgeConfig?.currentProject || '@currentProject'}/@(apiEntity)/${id}`);
+                         if (response.ok) {
+                             const result = await response.json();
+                             if (result && result.data && result.data.ImageBase64) {
+                                 diary.imageBase64 = result.data.ImageBase64;
+                                 if (lightbox.open) {
+                                     img.src = diary.imageBase64;
+                                     img.style.filter = 'none';
+                                 }
+                             }
+                         }
+                     } catch (err) {
+                         console.error("加载大图失败:", err);
+                     }
+                 }
+             }
+         }
 
         window.confirmDeleteDiary_@(sec.Id) = function(id) {
             selectedDiaryId = id;

@@ -11,11 +11,13 @@ sections:
     title: 我的日记列表
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageThumbnailBase64, ImageLabel
       FROM DiaryEntry
       ORDER BY CreatedAt DESC
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt]
-    pageSize: 100
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageThumbnailBase64, ImageLabel]
+    pageSize: 10
+    defaultSort: CreatedAt
+    defaultSortDir: desc
     editable: false
     readOnly: true
     component: fancy_diary_list

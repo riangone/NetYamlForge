@@ -385,10 +385,11 @@ app.Use(async (context, next) =>
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
 
-app.MapGet("/trigger-test", async (NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
+app.MapGet("/trigger-test", async (string? jobId, NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
 {
-    await scheduler.TriggerJobNowAsync("blog", "japan_it_news_briefing");
-    return "ok";
+    var targetJob = jobId ?? "japan_it_news_briefing";
+    await scheduler.TriggerJobNowAsync("blog", targetJob);
+    return $"Triggered: {targetJob}";
 }).AllowAnonymous();
 
 // MCP サーバーエンドポイント：/mcp（/api/{project}/{entity} と同じ認証スキームを要求）

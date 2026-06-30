@@ -25,6 +25,11 @@ public interface IProjectBusinessLogicRegistry
     IProjectDataTransformer? GetDataTransformer(string projectName);
 
     /// <summary>
+    /// 指定プロジェクトの RLS コンテキストエバリュエーターを取得します。
+    /// </summary>
+    IProjectRlsContextEvaluator? GetRlsContextEvaluator(string projectName);
+
+    /// <summary>
     /// プロジェクトにビジネスロジックを登録します。
     /// </summary>
     void Register(string projectName, IProjectBusinessLogic logic);
@@ -40,7 +45,12 @@ public interface IProjectBusinessLogicRegistry
     void RegisterDataTransformer(string projectName, IProjectDataTransformer transformer);
 
     /// <summary>
-    /// 指定プロジェクトのビジネスロジック、バリデーション、データ変換をクリアします。
+    /// プロジェクトに RLS コンテキストエバリュエーターを登録します。
+    /// </summary>
+    void RegisterRlsContextEvaluator(string projectName, IProjectRlsContextEvaluator evaluator);
+
+    /// <summary>
+    /// 指定プロジェクトのビジネスロジック、バリデーション、データ変換、RLS エバリュエーターをクリアします。
     /// </summary>
     void Clear(string projectName);
 }
@@ -53,6 +63,7 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
     private readonly ConcurrentDictionary<string, IProjectBusinessLogic> _businessLogics;
     private readonly ConcurrentDictionary<string, IProjectValidator> _validators;
     private readonly ConcurrentDictionary<string, IProjectDataTransformer> _transformers;
+    private readonly ConcurrentDictionary<string, IProjectRlsContextEvaluator> _rlsEvaluators;
     private readonly ILogger<ProjectBusinessLogicRegistry> _logger;
 
     public ProjectBusinessLogicRegistry(ILogger<ProjectBusinessLogicRegistry> logger)
@@ -61,6 +72,7 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
         _businessLogics = new ConcurrentDictionary<string, IProjectBusinessLogic>(StringComparer.OrdinalIgnoreCase);
         _validators = new ConcurrentDictionary<string, IProjectValidator>(StringComparer.OrdinalIgnoreCase);
         _transformers = new ConcurrentDictionary<string, IProjectDataTransformer>(StringComparer.OrdinalIgnoreCase);
+        _rlsEvaluators = new ConcurrentDictionary<string, IProjectRlsContextEvaluator>(StringComparer.OrdinalIgnoreCase);
     }
 
     public IProjectBusinessLogic? Get(string projectName)
@@ -79,6 +91,12 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
     {
         _transformers.TryGetValue(projectName, out var transformer);
         return transformer;
+    }
+
+    public IProjectRlsContextEvaluator? GetRlsContextEvaluator(string projectName)
+    {
+        _rlsEvaluators.TryGetValue(projectName, out var evaluator);
+        return evaluator;
     }
 
     public void Register(string projectName, IProjectBusinessLogic logic)
@@ -113,8 +131,20 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
         }
 
         _transformers[projectName] = transformer;
-        _logger.LogDebug("プロジェクト '{Project}' にデータ変換 '{Type}' を登録しました",
+        _logger.LogDebug("プロジェクト '{Project}' に数据转换 '{Type}' を登録しました",
             projectName, transformer.GetType().Name);
+    }
+
+    public void RegisterRlsContextEvaluator(string projectName, IProjectRlsContextEvaluator evaluator)
+    {
+        if (string.IsNullOrWhiteSpace(projectName))
+        {
+            throw new ArgumentException("プロジェクト名を指定してください。", nameof(projectName));
+        }
+
+        _rlsEvaluators[projectName] = evaluator;
+        _logger.LogDebug("プロジェクト '{Project}' に RLS コンテキストエバリュエーター '{Type}' を登録しました",
+            projectName, evaluator.GetType().Name);
     }
 
     public void Clear(string projectName)
@@ -124,6 +154,7 @@ public class ProjectBusinessLogicRegistry : IProjectBusinessLogicRegistry
         _businessLogics.TryRemove(projectName, out _);
         _validators.TryRemove(projectName, out _);
         _transformers.TryRemove(projectName, out _);
-        _logger.LogDebug("プロジェクト '{Project}' のビジネスロジック、バリデーション、データ変換をクリアしました", projectName);
+        _rlsEvaluators.TryRemove(projectName, out _);
+        _logger.LogDebug("プロジェクト '{Project}' のビジネスロジック、バリデーション、データ変換、RLS エバリュエーターをクリアしました", projectName);
     }
 }

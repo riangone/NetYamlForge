@@ -135,3 +135,35 @@ jobs:
             "content": "マークダウン形式の本文（各サイトセクション＋リンク付きトピック含む）",
             "slug": "it-news-briefing"
           }
+
+  china_it_news_hardcore:
+    displayName: "中国IT行业每日硬核技术简报"
+    description: "每天早上6点半根据博客园、开源中国、Solidot及美团技术团队自动生成中国硬核技术简报"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "30 6 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "中国IT与硬核技术领域"
+        categoryId: "5"
+        tags: "IT, 科技, 硬核技术, 开源, 每日简报"
+        author: "AI News Bot"
+        language: "zh-CN"
+
+  china_it_news_general:
+    displayName: "中国科技与IT行业每日综合简报"
+    description: "每天早上6点半根据36氪、少数派、IT之家及极客公园自动生成中国科技与IT行业综合简报"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "30 6 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "中国科技与IT行业综合领域"
+        categoryId: "5"
+        tags: "IT, 科技, 数码, 数字化生活, 每日简报"
+        author: "AI News Bot"
+        language: "zh-CN"

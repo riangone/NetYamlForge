@@ -12,6 +12,15 @@
         return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
     }
 
+    // Helper to find column keys case-insensitively
+    string? FindKey(Dictionary<string, object> row, params string[] possibleKeys) {
+        foreach (var pk in possibleKeys) {
+            var found = row.Keys.FirstOrDefault(k => k.Equals(pk, StringComparison.OrdinalIgnoreCase));
+            if (found != null) return found;
+        }
+        return null;
+    }
+
     var rawEntity = sec.TargetTable ?? sec.Source ?? sec.Id;
     var apiEntity = ToSnakeCase(rawEntity);
 
@@ -29,10 +38,18 @@
     var moodList = new[] {
         new { Name = "喜悦", Emoji = "🌸", Desc = "开心美好" },
         new { Name = "平静", Emoji = "🍃", Desc = "波澜不惊" },
+        new { Name = "轻松", Emoji = "🍹", Desc = "闲适惬意" },
+        new { Name = "期待", Emoji = "🌟", Desc = "满怀希望" },
+        new { Name = "狂喜", Emoji = "🎉", Desc = "兴奋雀跃" },
+        new { Name = "欣慰", Emoji = "🥰", Desc = "温暖贴心" },
+        new { Name = "专注", Emoji = "🎯", Desc = "聚精会神" },
+        new { Name = "治愈", Emoji = "🍀", Desc = "温暖放松" },
         new { Name = "焦虑", Emoji = "🌪️", Desc = "有些烦躁" },
         new { Name = "忧郁", Emoji = "🌧️", Desc = "有点难过" },
         new { Name = "愤怒", Emoji = "⚡", Desc = "怒火中烧" },
-        new { Name = "疲惫", Emoji = "💤", Desc = "身心俱疲" }
+        new { Name = "疲惫", Emoji = "💤", Desc = "身心俱疲" },
+        new { Name = "委屈", Emoji = "🥺", Desc = "楚楚可怜" },
+        new { Name = "迷茫", Emoji = "🌀", Desc = "不知所措" }
     };
 
     // Weather list & emojis
@@ -72,6 +89,13 @@
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
     }
+    @@keyframes zoomIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-zoom-in {
+        animation: zoomIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 </style>
 
 <div class="card glass-card border border-purple-100 shadow-xl rounded-3xl overflow-hidden">
@@ -101,7 +125,8 @@
             var fieldDef = sec.GetFieldDef(fieldName);
             var label = fieldDef.Label ?? fieldName;
             var isRequired = fieldDef.Required;
-            var rowValue = isEdit && detailRow != null && detailRow.TryGetValue(fieldName, out var val) ? val?.ToString() ?? "" : "";
+            string? foundKey = isEdit && detailRow != null ? detailRow.Keys.FirstOrDefault(k => k.Equals(fieldName, StringComparison.OrdinalIgnoreCase)) : null;
+            var rowValue = isEdit && detailRow != null && foundKey != null && detailRow.TryGetValue(foundKey, out var val) ? val?.ToString() ?? "" : "";
 
             // 1. MoodBefore / Mood -> Custom Emoji Select
             if (fieldName.Equals("MoodBefore", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Mood", StringComparison.OrdinalIgnoreCase))
@@ -111,7 +136,7 @@
                     <label class="label p-0">
                         <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
                     </label>
-                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                    <div class="grid grid-cols-4 md:grid-cols-7 gap-3">
                         @foreach (var mItem in moodList)
                         {
                             <button type="button" onclick="selectMood_@(sec.Id)('@mItem.Name')" id="mood-btn-@(sec.Id)-@mItem.Name" class="mood-option-@(sec.Id) emoji-btn flex flex-col items-center justify-center p-3 border border-gray-200 rounded-2xl bg-white hover:bg-indigo-50/50 hover:border-indigo-300">
@@ -160,6 +185,31 @@
                     <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
                 </div>
             }
+            // 3.5 ImageBase64 -> Single Image Upload & Compression
+            else if (fieldName.Equals("ImageBase64", StringComparison.OrdinalIgnoreCase))
+            {
+                <input type="hidden" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" />
+                <div class="form-control space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <div id="image-upload-zone-@(sec.Id)" class="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-2xl p-4 bg-indigo-50/10 text-center cursor-pointer transition-all hover:bg-indigo-50/20 flex flex-col items-center justify-center min-h-[120px]" onclick="document.getElementById('file-uploader-@(sec.Id)').click()">
+                            <div id="image-upload-prompt-@(sec.Id)" class="space-y-1">
+                                <span class="text-2xl">📸</span>
+                                <p class="text-xs font-bold text-gray-600">点击或拖拽上传图片</p>
+                                <p class="text-[10px] text-gray-400">仅限单张，支持智能压缩并存入SQLite</p>
+                            </div>
+                            <div id="image-preview-container-@(sec.Id)" class="hidden relative w-full flex flex-col items-center">
+                                <img id="image-preview-@(sec.Id)" src="" class="max-h-40 rounded-xl shadow-md object-contain border border-gray-100 cursor-zoom-in hover:scale-[1.02] transition-transform duration-300" onclick="window.showLightbox_@(sec.Id)(this.src, document.getElementById('field-ImageLabel-@(sec.Id)')?.value || '')" />
+                                <button type="button" onclick="clearSelectedImage_@(sec.Id)(event)" class="absolute -top-2 -right-2 btn btn-xs btn-circle btn-error bg-rose-500 hover:bg-rose-600 border-none text-white shadow-md">✕</button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-uploader-@(sec.Id)" accept="image/*" class="hidden" onchange="handleImageUpload_@(sec.Id)(this)" />
+                    </div>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
             // 4. Content / Description -> Textarea
             else if (fieldName.Equals("Content", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Description", StringComparison.OrdinalIgnoreCase) || fieldName.Equals("Body", StringComparison.OrdinalIgnoreCase) || fieldDef.Type == "textarea")
             {
@@ -193,6 +243,40 @@
             }
         }
 
+        @if (isEdit && detailRow != null)
+        {
+            var sentimentKey = FindKey(detailRow, "Sentiment", "sentiment") ?? "Sentiment";
+            var sentiment = detailRow.TryGetValue(sentimentKey, out var sentVal) ? sentVal?.ToString() ?? "" : "";
+            
+            var aiRespKey = FindKey(detailRow, "AiResponse", "ai_response") ?? "AiResponse";
+            var aiResp = detailRow.TryGetValue(aiRespKey, out var aiVal) ? aiVal?.ToString() ?? "" : "";
+            
+            if (!string.IsNullOrEmpty(sentiment) || !string.IsNullOrEmpty(aiResp))
+            {
+                (string text, string badgeClass, string borderClass, string bgClass) = sentiment.Trim() switch {
+                    "积极" => ("充满阳光", "bg-emerald-100 text-emerald-800 border-emerald-300", "border-emerald-200", "bg-emerald-50/50"),
+                    "消极" => ("雨过天晴", "bg-rose-100 text-rose-800 border-rose-300", "border-rose-200", "bg-rose-50/50"),
+                    "平和" => ("风平浪静", "bg-sky-100 text-sky-800 border-sky-300", "border-sky-200", "bg-sky-50/50"),
+                    _ => (sentiment, "bg-gray-100 text-gray-800 border-gray-300", "border-gray-200", "bg-gray-50/50")
+                };
+
+                <div class="p-5 rounded-2xl border @borderClass @bgClass space-y-3 mt-2 mb-4 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border @badgeClass">
+                            ✨ AI 情绪评估：@text
+                        </span>
+                        <span class="text-xs text-gray-400">来自 AI 心灵伴侣</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(aiResp))
+                    {
+                        <p class="text-xs text-gray-600 italic leading-relaxed whitespace-pre-line bg-white/40 p-4 rounded-xl border border-white/60">
+                            “@aiResp”
+                        </p>
+                    }
+                </div>
+            }
+        }
+
         <!-- Form Actions -->
         <div class="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
             <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500 flex items-center gap-1">
@@ -209,7 +293,7 @@
 <div id="loading-overlay-@(sec.Id)" class="fixed inset-0 bg-gray-900/40 backdrop-blur-md flex items-center justify-center z-50 hidden">
     <div class="card glass bg-white/90 p-8 rounded-3xl max-w-sm text-center shadow-2xl space-y-4 border border-white">
         <div class="flex justify-center">
-            <span class="text-5xl animate-spin-slow">🧠</span>
+            <span class="text-5xl animate-spin-slow">✨</span>
         </div>
         <div class="space-y-1.5">
             <h4 class="font-extrabold text-gray-800 text-base" id="loading-title-@(sec.Id)">AI 对话中...</h4>
@@ -223,6 +307,15 @@
     </div>
 </div>
 
+<!-- ===== Lightbox Modal ===== -->
+<dialog id="lightbox_modal_@(sec.Id)" class="modal modal-middle bg-black/85 backdrop-blur-md cursor-zoom-out" onclick="this.close()">
+    <div class="relative max-w-4xl max-h-[85vh] flex flex-col items-center justify-center p-4 cursor-default animate-zoom-in" onclick="event.stopPropagation()">
+        <button onclick="document.getElementById('lightbox_modal_@(sec.Id)').close()" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-white bg-black/40 hover:bg-black/60 border-none z-10">✕</button>
+        <img id="lightbox_image_@(sec.Id)" src="" class="max-w-full max-h-[75vh] rounded-xl shadow-2xl object-contain border border-white/10" />
+        <p id="lightbox_label_@(sec.Id)" class="text-xs text-gray-200 mt-3 font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm hidden"></p>
+    </div>
+</dialog>
+
 <script>
     (function() {
         const secId = "@sec.Id";
@@ -231,14 +324,21 @@
         const project = "@currentProject";
         const apiEntity = "@apiEntity";
 
-        // Initial setup for Mood/Weather options if values already exist
-        const moodVal = document.getElementById(`field-MoodBefore-${secId}`)?.value || document.getElementById(`field-Mood-${secId}`)?.value;
-        if (moodVal) {
-            selectMood_@(sec.Id)(moodVal);
-        }
-        const weatherVal = document.getElementById(`field-Weather-${secId}`)?.value;
-        if (weatherVal) {
-            selectWeather_@(sec.Id)(weatherVal);
+        window.showLightbox_@(sec.Id) = function(src, label = '') {
+            const lightbox = document.getElementById('lightbox_modal_@(sec.Id)');
+            const img = document.getElementById('lightbox_image_@(sec.Id)');
+            const lbl = document.getElementById('lightbox_label_@(sec.Id)');
+            if (lightbox && img) {
+                img.src = src;
+                if (label && label.trim() !== '') {
+                    lbl.innerText = label;
+                    lbl.classList.remove('hidden');
+                } else {
+                    lbl.innerText = '';
+                    lbl.classList.add('hidden');
+                }
+                lightbox.showModal();
+            }
         }
 
         window.selectMood_@(sec.Id) = function(name) {
@@ -375,6 +475,151 @@
                 setTimeout(() => {
                     window.getGeolocation_@(sec.Id)(fieldName);
                 }, 300);
+            }
+        }
+
+        window.handleImageUpload_@(sec.Id) = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('请选择有效的图片文件。');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    const MAX_EDGE = 800;
+                    if (width > MAX_EDGE || height > MAX_EDGE) {
+                        if (width > height) {
+                            height = Math.round((height * MAX_EDGE) / width);
+                            width = MAX_EDGE;
+                        } else {
+                            width = Math.round((width * MAX_EDGE) / height);
+                            height = MAX_EDGE;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+                    const hiddenInput = document.getElementById(`field-ImageBase64-${secId}`);
+                    if (hiddenInput) {
+                        hiddenInput.value = compressedBase64;
+                    }
+
+                    const previewImg = document.getElementById(`image-preview-${secId}`);
+                    const promptDiv = document.getElementById(`image-upload-prompt-${secId}`);
+                    const previewContainer = document.getElementById(`image-preview-container-${secId}`);
+                    const zoneDiv = document.getElementById(`image-upload-zone-${secId}`);
+
+                    if (previewImg && promptDiv && previewContainer) {
+                        previewImg.src = compressedBase64;
+                        promptDiv.classList.add('hidden');
+                        previewContainer.classList.remove('hidden');
+                        if (zoneDiv) {
+                            zoneDiv.classList.remove('border-dashed', 'bg-indigo-50/10');
+                            zoneDiv.classList.add('border-solid', 'border-indigo-300', 'bg-indigo-50/5');
+                        }
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.clearSelectedImage_@(sec.Id) = function(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            const hiddenInput = document.getElementById(`field-ImageBase64-${secId}`);
+            if (hiddenInput) hiddenInput.value = '';
+            
+            const fileUploader = document.getElementById(`file-uploader-${secId}`);
+            if (fileUploader) fileUploader.value = '';
+
+            const labelInput = document.getElementById(`field-ImageLabel-${secId}`);
+            if (labelInput) labelInput.value = '';
+
+            const previewImg = document.getElementById(`image-preview-${secId}`);
+            const promptDiv = document.getElementById(`image-upload-prompt-${secId}`);
+            const previewContainer = document.getElementById(`image-preview-container-${secId}`);
+            const zoneDiv = document.getElementById(`image-upload-zone-${secId}`);
+
+            if (previewImg && promptDiv && previewContainer) {
+                previewImg.src = '';
+                promptDiv.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                if (zoneDiv) {
+                    zoneDiv.classList.add('border-dashed', 'bg-indigo-50/10');
+                    zoneDiv.classList.remove('border-solid', 'border-indigo-300', 'bg-indigo-50/5');
+                }
+            }
+        }
+
+        const zoneDiv = document.getElementById(`image-upload-zone-${secId}`);
+        if (zoneDiv) {
+            zoneDiv.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zoneDiv.classList.add('border-indigo-400', 'bg-indigo-50/20');
+            });
+            zoneDiv.addEventListener('dragleave', () => {
+                zoneDiv.classList.remove('border-indigo-400', 'bg-indigo-50/20');
+            });
+            zoneDiv.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zoneDiv.classList.remove('border-indigo-400', 'bg-indigo-50/20');
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    const uploader = document.getElementById(`file-uploader-${secId}`);
+                    if (uploader) {
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        uploader.files = dataTransfer.files;
+                        window.handleImageUpload_@(sec.Id)(uploader);
+                    }
+                }
+            });
+        }
+
+        // Initial setup for Mood/Weather options if values already exist
+        const moodVal = document.getElementById(`field-MoodBefore-${secId}`)?.value || document.getElementById(`field-Mood-${secId}`)?.value;
+        if (moodVal) {
+            selectMood_@(sec.Id)(moodVal);
+        }
+        const weatherVal = document.getElementById(`field-Weather-${secId}`)?.value;
+        if (weatherVal) {
+            selectWeather_@(sec.Id)(weatherVal);
+        }
+
+        // Initial setup for ImageBase64 preview if it already has value
+        const imageBase64Val = document.getElementById(`field-ImageBase64-${secId}`)?.value;
+        if (imageBase64Val && imageBase64Val.trim() !== '') {
+            const previewImg = document.getElementById(`image-preview-${secId}`);
+            const promptDiv = document.getElementById(`image-upload-prompt-${secId}`);
+            const previewContainer = document.getElementById(`image-preview-container-${secId}`);
+            const zoneDiv = document.getElementById(`image-upload-zone-${secId}`);
+            
+            if (previewImg && promptDiv && previewContainer) {
+                previewImg.src = imageBase64Val;
+                promptDiv.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+                if (zoneDiv) {
+                    zoneDiv.classList.remove('border-dashed', 'bg-indigo-50/10');
+                    zoneDiv.classList.add('border-solid', 'border-indigo-300', 'bg-indigo-50/5');
+                }
             }
         }
 

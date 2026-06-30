@@ -23,4 +23,6 @@ public class ProjectInfo
     public ProjectCalendarConfig? Calendar { get; init; }
     /// <summary>プロジェクト固有のメール設定。null の場合はグローバル設定を使用。</summary>
     public ProjectEmailConfig? Email { get; init; }
+    /// <summary>マルチテナント設定</summary>
+    public TenantConfig? Multitenancy { get; init; }
 }

@@ -51,15 +51,29 @@ entities:
         label: 地理位置
         editable: true
         placeholder: "你在哪里写下这篇日记？(可选)"
+      ImageBase64:
+        type: string
+        label: 上传图片
+        editable: true
+        placeholder: "点击或拖拽上传图片"
+      ImageThumbnailBase64:
+        type: string
+        label: 缩略图片数据
+        editable: true
+      ImageLabel:
+        type: string
+        label: 图片标注
+        editable: true
+        placeholder: "为图片写一段标注"
       Sentiment:
         type: string
         label: AI 情绪评估
-        editable: false
+        editable: true
         placeholder: "保存后由 AI 自动评估"
       AiResponse:
         type: textarea
         label: AI 心灵伴侣寄语
-        editable: false
+        editable: true
         placeholder: "保存后由 AI 为你写下暖心寄语"
 
     columns:
@@ -89,6 +103,15 @@ entities:
         label: 地理位置
         searchable: true
         sortable: true
+      ImageBase64:
+        type: string
+        label: 图片数据
+      ImageThumbnailBase64:
+        type: string
+        label: 缩略图片数据
+      ImageLabel:
+        type: string
+        label: 图片标注
       Sentiment:
         type: string
         label: AI 情绪评估
@@ -121,6 +144,8 @@ entities:
           - Weather
           - MoodBefore
           - Location
+          - ImageBase64
+          - ImageLabel
           - Content
           - Sentiment
           - AiResponse

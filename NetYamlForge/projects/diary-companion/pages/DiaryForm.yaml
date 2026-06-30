@@ -11,10 +11,10 @@ sections:
     title: 日记详情
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel
       FROM DiaryEntry
       WHERE Id = @id
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt]
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel]
     pageSize: 1
     editable: false
     readOnly: true
@@ -27,6 +27,8 @@ sections:
           - Location
           - Weather
           - MoodBefore
+          - ImageBase64
+          - ImageLabel
           - Content
       edit:
         fields:
@@ -34,6 +36,8 @@ sections:
           - Location
           - Weather
           - MoodBefore
+          - ImageBase64
+          - ImageLabel
           - Content
     fieldDefs:
       Title:
@@ -56,4 +60,12 @@ sections:
         type: string
         required: false
         label: 写日记的地点
+      ImageBase64:
+        type: string
+        required: false
+        label: 上传图片
+      ImageLabel:
+        type: string
+        required: false
+        label: 图片标注
 

@@ -15,9 +15,14 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Security.Claims;
 using Dapper;
+using Microsoft.AspNetCore.Http;
 using NetYamlForge.Models;
 using NetYamlForge.Services.Dialect;
+using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.Hooks;
+using NetYamlForge.Services.Tenant;
 
 namespace NetYamlForge.Services;
 
@@ -68,6 +73,11 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     private readonly IEntityMetadataProvider _meta;
     private readonly ILogger<DynamicCrudRepository> _logger;
     private readonly ISqlDialect _dialect;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly IProjectBusinessLogicRegistry? _bizLogicRegistry;
+    private readonly IUserAuthService? _userAuthService;
+    private readonly ProjectScope? _projectScope;
+    private readonly TenantContext? _tenantContext;
     private int _slowQueryThresholdMs;
     private int _slowQuerySummaryIntervalMs;
     private long _lastSettingsRefreshUnixMs;
@@ -84,12 +94,26 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     // SQL 语句模板缓存，避免高并发下的字符串拼接开销
     private static readonly ConcurrentDictionary<string, string> SqlCache = new();
 
-    public DynamicCrudRepository(IDbConnection db, IEntityMetadataProvider meta, ISqlDialect dialect, ILogger<DynamicCrudRepository> logger)
+    public DynamicCrudRepository(
+        IDbConnection db,
+        IEntityMetadataProvider meta,
+        ISqlDialect dialect,
+        ILogger<DynamicCrudRepository> logger,
+        IHttpContextAccessor? httpContextAccessor = null,
+        IProjectBusinessLogicRegistry? bizLogicRegistry = null,
+        IUserAuthService? userAuthService = null,
+        ProjectScope? projectScope = null,
+        TenantContext? tenantContext = null)
     {
         _db = db;
         _meta = meta;
         _dialect = dialect;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
+        _bizLogicRegistry = bizLogicRegistry;
+        _userAuthService = userAuthService;
+        _projectScope = projectScope;
+        _tenantContext = tenantContext;
         _slowQueryThresholdMs = ResolveSlowQueryThresholdMs();
         _slowQuerySummaryIntervalMs = ResolveSlowQuerySummaryIntervalMs();
         _lastSettingsRefreshUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -109,6 +133,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "read");
         pageSize ??= meta.Paging.PageSize;
 
         var activeFilterKeys = filters == null
@@ -116,8 +141,17 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             : filters.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)).Select(kv => kv.Key).OrderBy(k => k).ToArray();
         var filterKeysStr = string.Join(",", activeFilterKeys);
         var hasSearch = !string.IsNullOrWhiteSpace(search);
-        var cacheKey = $"GetAll_{meta.GetHashCode()}_{sort}_{dir}_{keyset}_{fetchOneExtra}_{hasSearch}_{filterKeysStr}";
 
+        var rlsKey = "";
+        if (meta.Security?.RowLevelSecurity?.Enabled == true)
+        {
+            var userRoles = await GetCurrentUserRolesAsync();
+            rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
+        }
+
+        var cacheKey = $"GetAll_{meta.GetHashCode()}_{sort}_{dir}_{keyset}_{fetchOneExtra}_{hasSearch}_{filterKeysStr}{rlsKey}";
+
+        var tempParam = new DynamicParameters();
         if (!SqlCache.TryGetValue(cacheKey, out var statement))
         {
             var selectList = string.Join(", ",
@@ -127,8 +161,8 @@ public class DynamicCrudRepository : IDynamicCrudRepository
                         : $"{meta.Table}.{c.Key}"));
 
             var sql = new List<string> { $"SELECT {selectList} {BuildFromClause(meta)}" };
-            var tempParam = new DynamicParameters();
             var where = BuildWhere(meta, search, filters, tempParam);
+            await ApplyRowLevelSecurityAsync(meta, where, tempParam);
 
             if (keyset)
             {
@@ -173,6 +207,8 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // 重新构建参数，由于是从缓存命中，我们直接运行轻量参数构造
         var param = new DynamicParameters();
         BuildWhere(meta, search, filters, param);
+        var dummyWhere = new List<string>();
+        await ApplyRowLevelSecurityAsync(meta, dummyWhere, param);
 
         var effectivePageSize = fetchOneExtra ? pageSize.Value + 1 : pageSize.Value;
         if (keyset)
@@ -191,7 +227,14 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         }
 
         _logger.LogInformation("GetAllAsync entity={Entity} page={Page} pageSize={PageSize} sql={Sql}", entity, page, pageSize, statement);
-        return await TimedAsync("GetAllAsync", entity, statement, () => _db.QueryAsync(statement, param));
+        var results = await TimedAsync("GetAllAsync", entity, statement, () => _db.QueryAsync(statement, param));
+        
+        var secured = new List<dynamic>();
+        foreach (var r in results)
+        {
+            secured.Add(await ApplyFieldSecurityAsync(meta, r));
+        }
+        return secured;
     }
 
     public async Task<dynamic?> GetByIdAsync(string entity, object id)
@@ -199,6 +242,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // 主キー単件取得。soft-delete設定時は削除済みレコードを除外します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "read");
 
         var pkColumns = meta.GetPrimaryKeyColumns();
         if (pkColumns.Count > 1)
@@ -208,19 +252,37 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             return await GetByIdAsync(entity, keyValues);
         }
 
-        var cacheKey = $"GetById_{meta.GetHashCode()}";
+        var rlsKey = "";
+        if (meta.Security?.RowLevelSecurity?.Enabled == true)
+        {
+            var userRoles = await GetCurrentUserRolesAsync();
+            rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
+        }
+        var cacheKey = $"GetById_{meta.GetHashCode()}{rlsKey}";
+        
+        var param = new DynamicParameters();
+        param.Add("Id", id);
+
         if (!SqlCache.TryGetValue(cacheKey, out var statement))
         {
-            var sql = new StringBuilder();
-            sql.AppendLine($"SELECT * FROM {meta.Table} WHERE {pkColumns[0]} = @Id");
+            var sql = new List<string> { $"SELECT * FROM {meta.Table}" };
+            var where = new List<string> { $"{pkColumns[0]} = @Id" };
             if (meta.SoftDelete)
-                sql.Append($" AND {SoftDeleteClause(meta.Table)}");
-            statement = sql.ToString();
+                where.Add(SoftDeleteClause(meta.Table));
+            await ApplyRowLevelSecurityAsync(meta, where, param);
+            AppendWhere(sql, where);
+            statement = string.Join(Environment.NewLine, sql);
             SqlCache.TryAdd(cacheKey, statement);
+        }
+        else
+        {
+            var dummyWhere = new List<string>();
+            await ApplyRowLevelSecurityAsync(meta, dummyWhere, param);
         }
 
         _logger.LogInformation("GetByIdAsync entity={Entity} id={Id}", entity, id);
-        return (await TimedAsync("GetByIdAsync", entity, statement, () => _db.QueryAsync(statement, new { Id = id }))).FirstOrDefault();
+        var row = (await TimedAsync("GetByIdAsync", entity, statement, () => _db.QueryAsync(statement, param))).FirstOrDefault();
+        return row != null ? await ApplyFieldSecurityAsync(meta, row) : null;
     }
 
     private static Dictionary<string, object?> ParseCompositeId(string idStr, IReadOnlyList<string> pkColumns)
@@ -261,25 +323,39 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "read");
         var pkColumns = meta.GetPrimaryKeyColumns();
 
-        var cacheKey = $"GetByIdComposite_{meta.GetHashCode()}";
+        var rlsKey = "";
+        if (meta.Security?.RowLevelSecurity?.Enabled == true)
+        {
+            var userRoles = await GetCurrentUserRolesAsync();
+            rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
+        }
+        var cacheKey = $"GetByIdComposite_{meta.GetHashCode()}{rlsKey}";
+        
+        var param = new DynamicParameters();
         if (!SqlCache.TryGetValue(cacheKey, out var statement))
         {
-            var tempParam = new DynamicParameters();
-            var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, tempParam);
-            var sql = new StringBuilder($"SELECT * FROM {meta.Table} WHERE {whereClause}");
+            var sql = new List<string> { $"SELECT * FROM {meta.Table}" };
+            var where = new List<string> { BuildCompositeKeyWhere(pkColumns, keyValues, param) };
             if (meta.SoftDelete)
-                sql.Append($" AND {SoftDeleteClause(meta.Table)}");
-            statement = sql.ToString();
+                where.Add(SoftDeleteClause(meta.Table));
+            await ApplyRowLevelSecurityAsync(meta, where, param);
+            AppendWhere(sql, where);
+            statement = string.Join(Environment.NewLine, sql);
             SqlCache.TryAdd(cacheKey, statement);
         }
-
-        var param = new DynamicParameters();
-        BuildCompositeKeyWhere(pkColumns, keyValues, param);
+        else
+        {
+            BuildCompositeKeyWhere(pkColumns, keyValues, param);
+            var dummyWhere = new List<string>();
+            await ApplyRowLevelSecurityAsync(meta, dummyWhere, param);
+        }
 
         _logger.LogInformation("GetByIdAsync entity={Entity} keys={Keys}", entity, string.Join(",", pkColumns));
-        return (await TimedAsync("GetByIdAsync.Composite", entity, statement, () => _db.QueryAsync(statement, param))).FirstOrDefault();
+        var row = (await TimedAsync("GetByIdAsync.Composite", entity, statement, () => _db.QueryAsync(statement, param))).FirstOrDefault();
+        return row != null ? await ApplyFieldSecurityAsync(meta, row) : null;
     }
 
     public async Task<int> InsertAsync(string entity, IDictionary<string, object?> values, IDbTransaction? tx = null)
@@ -287,6 +363,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // identity列を除外してINSERT文を动的生成します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "write");
 
         var hasAutoIncrementIdentity = meta.Columns.Any(c => c.Value.Identity);
 
@@ -318,6 +395,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // editable=falseのフォーム列は更新対象から除外します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "write");
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
@@ -362,6 +440,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "write");
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
@@ -392,6 +471,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // softDelete=trueなら論理削除、falseなら物理削除を実行します。
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "delete");
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var cacheKey = $"Delete_{meta.GetHashCode()}";
@@ -431,6 +511,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "delete");
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var cacheKey = $"DeleteComposite_{meta.GetHashCode()}";
@@ -472,6 +553,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "read");
         var pkColumns = meta.GetPrimaryKeyColumns();
         var firstPk = pkColumns[0];
         var fk = foreignKey ?? new ForeignKeyDefinition { Entity = entity, DisplayColumn = "Id" };
@@ -480,13 +562,33 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var fkDisplayColsStr = string.Join(",", fkDisplayCols.OrderBy(c => c));
         var hasSearch = !string.IsNullOrWhiteSpace(search);
         var hasPageSize = pageSize.HasValue && pageSize.Value > 0;
-        var cacheKey = $"GetAllForEntity_{meta.GetHashCode()}_{fk.GetHashCode()}_{fkDisplayColsStr}_{hasSearch}_{hasPageSize}_{fetchOneExtra}";
 
+        var rlsKey = "";
+        if (meta.Security?.RowLevelSecurity?.Enabled == true)
+        {
+            var userRoles = await GetCurrentUserRolesAsync();
+            rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
+        }
+        var cacheKey = $"GetAllForEntity_{meta.GetHashCode()}_{fk.GetHashCode()}_{fkDisplayColsStr}_{hasSearch}_{hasPageSize}_{fetchOneExtra}{rlsKey}";
+
+        var param = new DynamicParameters();
         if (!SqlCache.TryGetValue(cacheKey, out var statement))
         {
             var baseSql = string.IsNullOrWhiteSpace(fk.Query)
                 ? $"SELECT {firstPk} AS Id, * FROM {meta.Table}"
                 : fk.Query!.Trim();
+
+            // Append RLS directly to baseSql if it is the default table query
+            if (string.IsNullOrWhiteSpace(fk.Query) && meta.Security?.RowLevelSecurity?.Enabled == true)
+            {
+                var rlsWhere = new List<string>();
+                var rlsParam = new DynamicParameters();
+                await ApplyRowLevelSecurityAsync(meta, rlsWhere, rlsParam);
+                if (rlsWhere.Count > 0)
+                {
+                    baseSql += " WHERE " + string.Join(" AND ", rlsWhere);
+                }
+            }
 
             var sql = new List<string> { $"SELECT * FROM ({baseSql}) fkq" };
             var where = new List<string>();
@@ -524,7 +626,6 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         }
 
         // 构建参数
-        var param = new DynamicParameters();
         if (hasSearch)
         {
             var cols = fk.GetDisplayColumns();
@@ -541,27 +642,46 @@ public class DynamicCrudRepository : IDynamicCrudRepository
             param.Add("Offset", offset);
         }
 
+        var dummyWhere = new List<string>();
+        await ApplyRowLevelSecurityAsync(meta, dummyWhere, param);
+
         _logger.LogDebug("GetAllForEntityAsync entity={Entity} sql={Sql}", entity, statement);
-        return await TimedAsync("GetAllForEntityAsync", entity, statement, () => _db.QueryAsync(statement, param));
+        var results = await TimedAsync("GetAllForEntityAsync", entity, statement, () => _db.QueryAsync(statement, param));
+        
+        var secured = new List<dynamic>();
+        foreach (var r in results)
+        {
+            secured.Add(await ApplyFieldSecurityAsync(meta, r));
+        }
+        return secured;
     }
 
     public async Task<int> CountAsync(string entity, string? search, Dictionary<string, string?>? filters = null)
     {
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
+        await EnsurePermissionAsync(meta, "read");
 
         var activeFilterKeys = filters == null
             ? Array.Empty<string>()
             : filters.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)).Select(kv => kv.Key).OrderBy(k => k).ToArray();
         var filterKeysStr = string.Join(",", activeFilterKeys);
         var hasSearch = !string.IsNullOrWhiteSpace(search);
-        var cacheKey = $"Count_{meta.GetHashCode()}_{hasSearch}_{filterKeysStr}";
+
+        var rlsKey = "";
+        if (meta.Security?.RowLevelSecurity?.Enabled == true)
+        {
+            var userRoles = await GetCurrentUserRolesAsync();
+            rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
+        }
+        var cacheKey = $"Count_{meta.GetHashCode()}_{hasSearch}_{filterKeysStr}{rlsKey}";
 
         if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
             var tempSql = $"SELECT COUNT(*) {BuildFromClause(meta)}";
             var tempParam = new DynamicParameters();
             var where = BuildWhere(meta, search, filters, tempParam);
+            await ApplyRowLevelSecurityAsync(meta, where, tempParam);
 
             if (where.Any())
             {
@@ -573,6 +693,8 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
         var param = new DynamicParameters();
         BuildWhere(meta, search, filters, param);
+        var dummyWhere = new List<string>();
+        await ApplyRowLevelSecurityAsync(meta, dummyWhere, param);
 
         _logger.LogInformation("CountAsync entity={Entity} sql={Sql}", entity, sql);
         return await TimedAsync("CountAsync", entity, sql, () => _db.ExecuteScalarAsync<int>(sql, param));
@@ -824,7 +946,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         return (key, "eq");
     }
 
-    private static List<string> BuildWhere(
+    private List<string> BuildWhere(
         EntityDefinition meta,
         string? search,
         Dictionary<string, string?>? filters,
@@ -833,6 +955,14 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         // 検索条件 + フィルタ条件 + softDelete条件を一元的に合成します。
         var where = new List<string>();
         ApplyFilters(meta, filters, where, param);
+
+        if (_tenantContext != null && 
+            _tenantContext.Strategy.Equals("logical", StringComparison.OrdinalIgnoreCase) && 
+            !string.IsNullOrEmpty(_tenantContext.TenantId))
+        {
+            where.Add($"{meta.Table}.tenant_id = @TenantId");
+            param.Add("TenantId", _tenantContext.TenantId);
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -978,5 +1108,203 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
         // 安全校验完全通过，加入缓存
         ValidatedMetadataCache.TryAdd(meta, true);
+    }
+
+    private async Task<IReadOnlyList<string>> GetCurrentUserRolesAsync()
+    {
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext == null) return Array.Empty<string>();
+        var user = httpContext.User;
+        if (user?.Identity?.IsAuthenticated != true) return Array.Empty<string>();
+        var userName = user.Identity.Name;
+        if (string.IsNullOrEmpty(userName) || _userAuthService == null) return Array.Empty<string>();
+        return await _userAuthService.GetUserRolesAsync(userName);
+    }
+
+    private async Task ApplyRowLevelSecurityAsync(EntityDefinition meta, List<string> where, DynamicParameters param)
+    {
+        if (meta.Security?.RowLevelSecurity?.Enabled != true)
+        {
+            return;
+        }
+
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext == null) return;
+        var user = httpContext.User;
+        if (user?.Identity?.IsAuthenticated != true)
+        {
+            where.Add("1 = 0");
+            return;
+        }
+
+        var userName = user.Identity.Name;
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+        int userId = 0;
+        if (userIdClaim != null)
+        {
+            int.TryParse(userIdClaim.Value, out userId);
+        }
+
+        var roles = await GetCurrentUserRolesAsync();
+        var policies = meta.Security.RowLevelSecurity.Policies ?? new List<RowLevelSecurityPolicy>();
+        var policyClauses = new List<string>();
+
+        var dynamicParams = new Dictionary<string, object?>();
+        if (_projectScope != null && _projectScope.IsSet && _bizLogicRegistry != null && !string.IsNullOrEmpty(userName))
+        {
+            var projectName = _projectScope.Current.Name;
+            var evaluator = _bizLogicRegistry.GetRlsContextEvaluator(projectName);
+            if (evaluator != null)
+            {
+                try
+                {
+                    dynamicParams = await evaluator.EvaluateRlsContextAsync(meta.Table, userName, userId, _db, null);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to evaluate dynamic RLS context via Roslyn hook for entity {Entity}", meta.Table);
+                }
+            }
+        }
+
+        param.Add("Rls_CurrentUser", userName);
+        param.Add("Rls_CurrentUserId", userId);
+
+        if (dynamicParams != null)
+        {
+            foreach (var kv in dynamicParams)
+            {
+                param.Add($"Rls_{kv.Key}", kv.Value);
+            }
+        }
+
+        foreach (var policy in policies)
+        {
+            if (roles.Any(r => string.Equals(r, policy.Role, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!string.IsNullOrWhiteSpace(policy.FilterClause))
+                {
+                    var rewritten = RewriteRlsClause(policy.FilterClause, dynamicParams!);
+                    policyClauses.Add($"({rewritten})");
+                }
+            }
+        }
+
+        if (policyClauses.Count > 0)
+        {
+            where.Add("(" + string.Join(" OR ", policyClauses) + ")");
+        }
+        else if (policies.Count > 0)
+        {
+            where.Add("1 = 0");
+        }
+    }
+
+    private static string RewriteRlsClause(string clause, Dictionary<string, object?> dynamicParams)
+    {
+        var rewritten = clause;
+        rewritten = Regex.Replace(rewritten, @"@CurrentUser\b", "@Rls_CurrentUser", RegexOptions.IgnoreCase);
+        rewritten = Regex.Replace(rewritten, @"@CurrentUserId\b", "@Rls_CurrentUserId", RegexOptions.IgnoreCase);
+
+        if (dynamicParams != null)
+        {
+            foreach (var key in dynamicParams.Keys)
+            {
+                rewritten = Regex.Replace(rewritten, $@"@{key}\b", $"@Rls_{key}", RegexOptions.IgnoreCase);
+            }
+        }
+        return rewritten;
+    }
+
+    private async Task EnsurePermissionAsync(EntityDefinition meta, string action)
+    {
+        if (meta.Security?.Permissions == null) return;
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext == null) return;
+        var user = httpContext.User;
+        var roles = await GetCurrentUserRolesAsync();
+
+        List<string>? allowedRoles = action.ToLowerInvariant() switch
+        {
+            "read" => meta.Security.Permissions.Read,
+            "write" => meta.Security.Permissions.Write,
+            "delete" => meta.Security.Permissions.Delete,
+            _ => null
+        };
+
+        if (allowedRoles == null || allowedRoles.Count == 0) return;
+
+        var hasAccess = roles.Any(r => allowedRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase))) ||
+                        (user?.Identity?.IsAuthenticated == true && user.IsInRole("Admin"));
+
+        if (!hasAccess)
+        {
+            throw new UnauthorizedAccessException($"User does not have '{action}' permission on entity {meta.Table}.");
+        }
+    }
+
+    private async Task<dynamic> ApplyFieldSecurityAsync(EntityDefinition meta, dynamic row)
+    {
+        if (row == null) return row;
+
+        var dict = row as IDictionary<string, object>;
+        if (dict == null) return row;
+
+        var expando = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
+        foreach (var kv in dict)
+        {
+            expando[kv.Key] = kv.Value;
+        }
+
+        var roles = await GetCurrentUserRolesAsync();
+
+        foreach (var col in meta.Columns)
+        {
+            var fieldName = col.Key;
+            var colDef = col.Value;
+            if (colDef.Security == null) continue;
+
+            if (colDef.Security.ReadRoles != null && colDef.Security.ReadRoles.Count > 0)
+            {
+                var hasReadRole = roles.Any(r => colDef.Security.ReadRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase)));
+                if (!hasReadRole)
+                {
+                    expando.Remove(fieldName);
+                    continue;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(colDef.Security.ReadMask) && expando.TryGetValue(fieldName, out var val) && val != null)
+            {
+                var valStr = val.ToString() ?? "";
+                if (colDef.Security.ReadMask.Equals("email", StringComparison.OrdinalIgnoreCase))
+                {
+                    expando[fieldName] = MaskEmail(valStr);
+                }
+                else
+                {
+                    expando[fieldName] = MaskGeneric(valStr);
+                }
+            }
+        }
+
+        return expando;
+    }
+
+    private static string MaskEmail(string email)
+    {
+        if (string.IsNullOrEmpty(email) || !email.Contains("@")) return email;
+        var parts = email.Split('@', 2);
+        var local = parts[0];
+        var domain = parts[1];
+        if (local.Length <= 2) return "*@" + domain;
+        return local[0] + new string('*', local.Length - 2) + local[^1] + "@" + domain;
+    }
+
+    private static string MaskGeneric(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        if (text.Length <= 4) return new string('*', text.Length);
+        return text[..2] + new string('*', text.Length - 4) + text[^2..];
     }
 }

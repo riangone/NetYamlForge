@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using NetYamlForge.Services.Hooks;
+using NetYamlForge.Services.AI;
 
 namespace NetYamlForge.Services.HotReload;
 
@@ -114,6 +115,16 @@ public class YamlHotReloadService : IHostedService, IDisposable
             {
                 _logger.LogWarning("プロジェクト '{Project}' が見つからないため、C# コードリロードをスキップします", projectName);
             }
+            return;
+        }
+
+        if (filePath.EndsWith("scenarios.yaml", StringComparison.OrdinalIgnoreCase) ||
+            filePath.EndsWith("scenarios.yml", StringComparison.OrdinalIgnoreCase))
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var scenarioLoader = scope.ServiceProvider.GetRequiredService<IAiScenarioYamlLoader>();
+            scenarioLoader.Reload(projectName);
+            _logger.LogInformation("プロジェクト '{Project}' の AI シナリオ設定がホットリロードされました：{File}", projectName, filePath);
             return;
         }
 
