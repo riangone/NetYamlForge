@@ -13,9 +13,12 @@ using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
 using NetYamlForge.Services.HotReload;
 using NetYamlForge.Services.Tenant;
+using NetYamlForge.Services.Workflow;
+using NetYamlForge.Services.Webhook;
 using NetYamlForge.Services.Cli;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.Services.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -96,6 +99,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEntityMetadataProvider, ProjectAwareEntityMetadataProvider>();
         services.AddScoped<IDashboardConfigProvider, ProjectAwareDashboardConfigProvider>();
 
+        services.AddScoped<TenantContext>();
+        services.AddScoped<ITenantQuotaValidator, TenantQuotaValidator>();
+        services.AddScoped<IWorkflowEngine, WorkflowEngine>();
+        services.AddHostedService<WebhookOutboxPoller>();
+
         return services;
     }
 
@@ -175,6 +183,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDynamicCrudCore(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IValueConverter, ValueConverter>();
+        services.AddSingleton<IProjectValidatorHookRegistry, ProjectValidatorHookRegistry>();
+        services.AddSingleton<IFieldValidator, RegexFieldValidator>();
+        services.AddSingleton<IFieldValidator, RangeFieldValidator>();
+        services.AddSingleton<IFieldValidator, ConditionalFieldValidator>();
         services.AddScoped<FormValueValidationService>();
         services.AddScoped<IDynamicCrudRepository, DynamicCrudRepository>();
         services.AddScoped<IRowMutationRepository, RowMutationRepository>();

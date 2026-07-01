@@ -74,7 +74,7 @@ public sealed class PageRowMutationService
         if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
         {
             var form = new Dictionary<string, string?> { [field] = value };
-            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, form);
+            var (values, errors) = await _formValidationService.ConvertAndValidateAsync(entityDef, form, projectName);
             if (errors.Any()) return (false, errors.First().Value);
 
             var result = await _commandService.UpdateAsync(
@@ -121,7 +121,7 @@ public sealed class PageRowMutationService
         // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲
         if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
         {
-            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+            var (values, errors) = await _formValidationService.ConvertAndValidateAsync(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value), projectName);
             if (errors.Any()) return (false, string.Join(", ", errors.Values));
 
             var result = await _commandService.CreateAsync(
@@ -184,7 +184,7 @@ public sealed class PageRowMutationService
         // エンティティ定義が存在する場合、共通の DynamicEntityCommandService に委譲
         if (_entityMeta.TryGet(section.TargetTable, out var entityDef))
         {
-            var (values, errors) = _formValidationService.ConvertAndValidate(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value));
+            var (values, errors) = await _formValidationService.ConvertAndValidateAsync(entityDef, fields.ToDictionary(kv => kv.Key, kv => (string?)kv.Value), projectName);
             if (errors.Any()) return (false, string.Join(", ", errors.Values));
 
             var result = await _commandService.UpdateAsync(

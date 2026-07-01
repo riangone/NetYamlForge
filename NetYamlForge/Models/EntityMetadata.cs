@@ -374,6 +374,8 @@ public class EntityLayoutDefinition
 public class EntityDefinition
 {
     public string Table { get; set; } = default!;
+    public WorkflowDefinition? Workflow { get; set; }
+    public RateLimitingDefinition? RateLimiting { get; set; }
     public SecurityDefinition? Security { get; set; }
     /// <summary>
     /// 主键定義。単一主鍵の場合は列名を文字列で設定。
@@ -864,4 +866,54 @@ public class FieldSecurityDefinition
     public string? ReadMask { get; set; }
     public List<string>? ReadRoles { get; set; }
     public List<string>? WriteRoles { get; set; }
+}
+
+
+public class WorkflowDefinition
+{
+    public bool Enabled { get; set; }
+    public string StateField { get; set; } = "status";
+    public string InitialState { get; set; } = "Draft";
+    public List<WorkflowState> States { get; set; } = new();
+    public List<WorkflowTransition> Transitions { get; set; } = new();
+}
+
+public class WorkflowState
+{
+    public string Name { get; set; } = default!;
+    public string Label { get; set; } = default!;
+}
+
+public class WorkflowTransition
+{
+    public string Name { get; set; } = default!;
+    public string Label { get; set; } = default!;
+    public List<string> From { get; set; } = new();
+    public string To { get; set; } = default!;
+    public List<string> Roles { get; set; } = new();
+    public List<WorkflowGuard> Guards { get; set; } = new();
+    public List<WorkflowAction> Actions { get; set; } = new();
+}
+
+public class WorkflowGuard
+{
+    public string Type { get; set; } = default!;
+    public string? ScriptPath { get; set; }
+}
+
+public class WorkflowAction
+{
+    public string Type { get; set; } = default!;
+    public string? Template { get; set; }
+    public string? Name { get; set; }
+}
+
+public class RateLimitingDefinition
+{
+    public bool Enabled { get; set; }
+    public string Strategy { get; set; } = "SlidingWindow";
+    public int PermitLimit { get; set; } = 100;
+    public int WindowSeconds { get; set; } = 60;
+    public int QueueLimit { get; set; } = 10;
+    public string LimitBy { get; set; } = "IP";
 }

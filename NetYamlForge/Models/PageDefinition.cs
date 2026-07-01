@@ -104,6 +104,7 @@ public class SectionColumnDef : IColumnDef
     Dictionary<string, string>? IColumnDef.OptionLabels => Options;
     /// <summary>entities.ColumnDefinition.ForeignKey に相当。</summary>
     public ForeignKeyDefinition? ForeignKey { get; set; }
+    public List<ValidatorDefinition> Validators { get; set; } = new();
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
 
@@ -142,6 +143,8 @@ public class SectionFormFieldDef
 
     /// <summary>表示時のグリッド列スパン（デフォルト 1）。</summary>
     public int ColSpan { get; set; } = 1;
+
+    public List<ValidatorDefinition> Validators { get; set; } = new();
 
     public string GetLabel(string fallback) => I18nText.Resolve(LabelI18n, Label ?? fallback, LabelKey);
 }
@@ -377,7 +380,8 @@ public class SectionDefinition
             {
                 Label = colDef.Label,
                 Type = colDef.Type,
-                Options = colDef.Options
+                Options = colDef.Options != null ? new Dictionary<string, string>(colDef.Options) : null,
+                Validators = colDef.Validators
             };
         }
 

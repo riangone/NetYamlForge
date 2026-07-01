@@ -217,7 +217,7 @@ public class ApiEntityController : BaseProjectController
         if (denied != null) return denied;
 
         var stringForm = body.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
-        var (values, errors) = _formValidationService.ConvertAndValidate(meta, stringForm);
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, stringForm, _projectScope.Current?.Name ?? "DefaultProject");
         if (errors.Any())
             return BadRequest(new { errors });
 
@@ -264,7 +264,7 @@ public class ApiEntityController : BaseProjectController
             return NotFound(new { error = $"Entity '{entity}' with id '{id}' not found" });
 
         var stringForm = body.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
-        var (values, errors) = _formValidationService.ConvertAndValidate(meta, stringForm);
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, stringForm, _projectScope.Current?.Name ?? "DefaultProject");
         if (errors.Any())
             return BadRequest(new { errors });
 
@@ -308,7 +308,7 @@ public class ApiEntityController : BaseProjectController
             return NotFound(new { error = $"Entity '{entity}' with id '{id}' not found" });
 
         var stringForm = body.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
-        var (values, errors) = _formValidationService.ConvertAndValidate(meta, stringForm);
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, stringForm, _projectScope.Current?.Name ?? "DefaultProject");
         if (errors.Any())
             return BadRequest(new { errors });
 

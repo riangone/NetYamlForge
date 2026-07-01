@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- ローカル開発環境では NuGet 監査ネットワーク依存警告（NU1900）を抑止。CI では監査を維持。 -->
     <NuGetAudit Condition="'$(CI)' != 'true'">false</NuGetAudit>
     <!-- Swagger XML doc -->

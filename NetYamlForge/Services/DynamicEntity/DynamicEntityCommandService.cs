@@ -4,6 +4,10 @@
 // このファイルを変更する場面: 新たな CRUD 操作（例: Upsert）追加時のみ。
 
 using NetYamlForge.Services.Hooks;
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace NetYamlForge.Services;
 
@@ -26,6 +30,18 @@ public sealed class DynamicEntityCommandService
     {
         _repo = repo;
         _crudExecutionService = crudExecutionService;
+    }
+
+    private static bool IsSensitiveField(string fieldName)
+    {
+        if (string.IsNullOrEmpty(fieldName)) return false;
+        var lower = fieldName.ToLowerInvariant();
+        return lower.Contains("password") || 
+               lower.Contains("pwd") || 
+               lower.Contains("secret") || 
+               lower.Contains("ssn") || 
+               lower.Contains("token") || 
+               lower.Contains("key");
     }
 
     /// <summary>
@@ -73,7 +89,18 @@ public sealed class DynamicEntityCommandService
         {
             newId = await _repo.InsertAsync(entity, hookCtx.Values, tx);
             hookCtx.Id = newId;
-            await _crudExecutionService.WriteCrudAuditAsync("create", entity, $"Created {entity}", userName, tx);
+
+            // 1. 自动计算审计日志的 JSON Diff (新建数据所有字段的 old 为 null)
+            var diff = new Dictionary<string, object>();
+            var changedFields = new Dictionary<string, object>();
+            foreach (var kv in hookCtx.Values)
+            {
+                var isSensitive = IsSensitiveField(kv.Key);
+                changedFields[kv.Key] = new { old = (object?)null, @new = isSensitive ? "[REDACTED]" : kv.Value };
+            }
+            diff["changed_fields"] = changedFields;
+
+            await _crudExecutionService.WriteCrudAuditAsync("create", entity, JsonSerializer.Serialize(diff), userName, tx);
             await _crudExecutionService.RunAfterHookAsync(afterHooks, hookCtx, tx);
         });
 
@@ -118,6 +145,13 @@ public sealed class DynamicEntityCommandService
                 beforeHookResult.CancelMessage ?? "前処理によりキャンセルされました。");
         }
 
+        // 变更追踪前置：查询旧记录
+        IDictionary<string, object?>? beforeRow = null;
+        if (keyValue != null)
+        {
+            beforeRow = await _repo.GetByIdAsync(entity, keyValue);
+        }
+
         try
         {
             await _crudExecutionService.ExecuteCrudTransactionAsync(async tx =>
@@ -128,7 +162,34 @@ public sealed class DynamicEntityCommandService
                     throw new NoRowsAffectedException("update");
                 }
 
-                await _crudExecutionService.WriteCrudAuditAsync("update", entity, $"Updated {entity} {keyName}={keyValue}", userName, tx);
+                // 2. 自动计算审计日志的 JSON Diff
+                var diff = new Dictionary<string, object>();
+                var changedFields = new Dictionary<string, object>();
+                if (beforeRow != null)
+                {
+                    foreach (var kv in hookCtx.Values)
+                    {
+                        beforeRow.TryGetValue(kv.Key, out var oldVal);
+                        
+                        var isChanged = false;
+                        if (oldVal == null && kv.Value != null) isChanged = true;
+                        else if (oldVal != null && kv.Value == null) isChanged = true;
+                        else if (oldVal != null && !oldVal.Equals(kv.Value)) isChanged = true;
+
+                        if (isChanged)
+                        {
+                            var isSensitive = IsSensitiveField(kv.Key);
+                            changedFields[kv.Key] = new 
+                            { 
+                                old = isSensitive ? "[REDACTED]" : oldVal, 
+                                @new = isSensitive ? "[REDACTED]" : kv.Value 
+                            };
+                        }
+                    }
+                }
+                diff["changed_fields"] = changedFields;
+
+                await _crudExecutionService.WriteCrudAuditAsync("update", entity, JsonSerializer.Serialize(diff), userName, tx);
                 await _crudExecutionService.RunAfterHookAsync(afterHooks, hookCtx, tx);
             });
         }
@@ -177,6 +238,13 @@ public sealed class DynamicEntityCommandService
                 beforeHookResult.CancelMessage ?? "前処理により削除がキャンセルされました。");
         }
 
+        // 变更追踪前置：查询旧记录
+        IDictionary<string, object?>? beforeRow = null;
+        if (keyValue != null)
+        {
+            beforeRow = await _repo.GetByIdAsync(entity, keyValue);
+        }
+
         try
         {
             await _crudExecutionService.ExecuteCrudTransactionAsync(async tx =>
@@ -187,7 +255,24 @@ public sealed class DynamicEntityCommandService
                     throw new NoRowsAffectedException("delete");
                 }
 
-                await _crudExecutionService.WriteCrudAuditAsync("delete", entity, $"Deleted {entity} {keyName}={keyValue}", userName, tx);
+                // 3. 自动计算审计日志的 JSON Diff (删除数据所有字段的 new 为 null)
+                var diff = new Dictionary<string, object>();
+                var changedFields = new Dictionary<string, object>();
+                if (beforeRow != null)
+                {
+                    foreach (var kv in beforeRow)
+                    {
+                        var isSensitive = IsSensitiveField(kv.Key);
+                        changedFields[kv.Key] = new 
+                        { 
+                            old = isSensitive ? "[REDACTED]" : kv.Value, 
+                            @new = (object?)null 
+                        };
+                    }
+                }
+                diff["changed_fields"] = changedFields;
+
+                await _crudExecutionService.WriteCrudAuditAsync("delete", entity, JsonSerializer.Serialize(diff), userName, tx);
                 await _crudExecutionService.RunAfterHookAsync(afterHooks, hookCtx, tx);
             });
         }

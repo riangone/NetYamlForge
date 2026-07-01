@@ -9,6 +9,8 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
+using NetYamlForge.Services.Tenant;
+
 namespace NetYamlForge.Services;
 
 /// <summary>
@@ -49,11 +51,26 @@ public class FileUploadService : IFileUploadService
 {
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<FileUploadService> _logger;
+    private readonly ITenantQuotaValidator _quotaValidator;
+    private readonly TenantContext _tenantContext;
 
-    public FileUploadService(IWebHostEnvironment environment, ILogger<FileUploadService> logger)
+    public FileUploadService(
+        IWebHostEnvironment environment, 
+        ILogger<FileUploadService> logger)
+        : this(environment, logger, null!, null!)
+    {
+    }
+
+    public FileUploadService(
+        IWebHostEnvironment environment, 
+        ILogger<FileUploadService> logger,
+        ITenantQuotaValidator quotaValidator,
+        TenantContext tenantContext)
     {
         _environment = environment;
         _logger = logger;
+        _quotaValidator = quotaValidator;
+        _tenantContext = tenantContext;
     }
 
     public async Task<string> UploadAsync(IFormFile file, string uploadPath, HashSet<string>? allowedExtensions = null, long maxSizeBytes = 10 * 1024 * 1024)
@@ -67,6 +84,13 @@ public class FileUploadService : IFileUploadService
         if (file.Length > maxSizeBytes)
         {
             throw new InvalidOperationException($"ファイルサイズが大きすぎます（最大 {maxSizeBytes / 1024 / 1024}MB）");
+        }
+
+        // 租户存储配额验证
+        var tenantId = _tenantContext?.TenantId ?? "DefaultTenant";
+        if (_quotaValidator != null)
+        {
+            await _quotaValidator.CheckStorageQuotaAsync(tenantId, file.Length);
         }
 
         // 拡張子検証

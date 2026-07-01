@@ -1,9 +1,12 @@
 // ファイル概要: HTTP フォームから受け取った文字列値を、エンティティ定義の型情報に基づいて
-// 適切な .NET 型に変換し、バリデーションエラーを収集するサービスです。
+// 適切な .NET 型に変換し、バリデーションエラーを収集する服务。
 // Controller がこのサービスを呼んで values / errors ペアを取得し、
 // エラーがなければ CommandService に渡します。
 
 using NetYamlForge.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NetYamlForge.Services;
 
@@ -25,14 +28,8 @@ public sealed class DynamicEntityFormValidationService
     }
 
     /// <summary>
-    /// フォーム値を EntityDefinition の列型定義に従って変換・検証します。
+    /// フォーム値を EntityDefinition の列型定義に従って変換・検証します（同期版）。
     /// </summary>
-    /// <param name="meta">エンティティ定義（columns セクションの型情報を使用）</param>
-    /// <param name="form">IFormCollection から取り出した文字列値マップ</param>
-    /// <returns>
-    /// values: 変換済み値マップ（INSERT/UPDATE の引数になる）、
-    /// errors: フィールド名 → エラーメッセージ（空の場合は検証通過）
-    /// </returns>
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         EntityDefinition meta,
         Dictionary<string, string?> form)
@@ -42,9 +39,28 @@ public sealed class DynamicEntityFormValidationService
             var name = kv.Key;
             var col = kv.Value;
             var editable = !(col.Identity || !string.IsNullOrWhiteSpace(col.Expression));
-            return new FormFieldSpec(name, col.Type, col.Required, editable);
+            return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
         });
 
         return _validator.ConvertAndValidate(fields, form);
+    }
+
+    /// <summary>
+    /// フォーム値を EntityDefinition の列型定義に従って変換・検証します（非同期版）。
+    /// </summary>
+    public async Task<(Dictionary<string, object?> values, Dictionary<string, string> errors)> ConvertAndValidateAsync(
+        EntityDefinition meta,
+        Dictionary<string, string?> form,
+        string projectName)
+    {
+        var fields = meta.Columns.Select(kv =>
+        {
+            var name = kv.Key;
+            var col = kv.Value;
+            var editable = !(col.Identity || !string.IsNullOrWhiteSpace(col.Expression));
+            return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
+        });
+
+        return await _validator.ConvertAndValidateAsync(fields, form, projectName);
     }
 }

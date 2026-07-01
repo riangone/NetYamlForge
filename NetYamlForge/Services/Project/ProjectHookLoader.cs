@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Reflection.Metadata;
 using NetYamlForge.Services.Hooks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -326,7 +327,9 @@ public class ProjectHookLoader : IProjectHookLoader
             {
                 try
                 {
-                    if (!assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+                    if (assembly.IsDynamic) continue;
+
+                    if (!string.IsNullOrEmpty(assembly.Location))
                     {
                         if (addedPaths.Add(assembly.Location))
                         {
@@ -358,12 +361,37 @@ public class ProjectHookLoader : IProjectHookLoader
             try
             {
                 var identityAssembly = typeof(Microsoft.AspNetCore.Identity.PasswordHasher<>).Assembly;
-                if (!string.IsNullOrEmpty(identityAssembly.Location) && addedPaths.Add(identityAssembly.Location))
+                if (!string.IsNullOrEmpty(identityAssembly.Location))
                 {
-                    references.Add(MetadataReference.CreateFromFile(identityAssembly.Location));
+                    if (addedPaths.Add(identityAssembly.Location))
+                    {
+                        references.Add(MetadataReference.CreateFromFile(identityAssembly.Location));
+                    }
                 }
             }
             catch { }
+
+            try
+            {
+                var imageSharpAssembly = typeof(SixLabors.ImageSharp.Image).Assembly;
+                _logger.LogInformation("ImageSharp Assembly Location is: {Location}", imageSharpAssembly.Location);
+                if (!string.IsNullOrEmpty(imageSharpAssembly.Location))
+                {
+                    if (addedPaths.Add(imageSharpAssembly.Location))
+                    {
+                        references.Add(MetadataReference.CreateFromFile(imageSharpAssembly.Location));
+                        _logger.LogInformation("Successfully added ImageSharp metadata reference from: {Location}", imageSharpAssembly.Location);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("ImageSharp Assembly Location is null or empty!");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ImageSharp 参照の強制追加中にエラーが発生しました");
+            }
 
             _cachedReferences = references;
             return _cachedReferences.ToList();

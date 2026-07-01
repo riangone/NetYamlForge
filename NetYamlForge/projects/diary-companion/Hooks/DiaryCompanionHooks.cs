@@ -325,8 +325,8 @@ public class GeneratePeriodInsightHook : IEntityHook
 
             // 查询此期间的所有日记
             // 实体 DiaryEntry 映射的表名是 DiaryEntry
-            var sql = "SELECT Title, Content, Weather, MoodBefore, Location, Sentiment, CreatedAt FROM DiaryEntry WHERE CreatedAt >= @Start AND CreatedAt <= @End ORDER BY CreatedAt ASC";
-            var diaries = (await db.QueryAsync<DiaryRow>(sql, new { Start = qStart, End = qEnd }, tx)).ToList();
+            var sql = "SELECT Title, Content, Weather, MoodBefore, Location, Sentiment, CreatedAt FROM DiaryEntry WHERE CreatedAt >= @BeginTime AND CreatedAt <= @EndTime ORDER BY CreatedAt ASC";
+            var diaries = (await db.QueryAsync<DiaryRow>(sql, new { BeginTime = qStart, EndTime = qEnd }, tx)).ToList();
 
             if (diaries.Count == 0)
             {

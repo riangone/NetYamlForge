@@ -266,7 +266,7 @@ public class DynamicEntityController : BaseProjectController
         {
             return accessDenied;
         }
-        var (values, errors) = _formValidationService.ConvertAndValidate(meta, form);
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, form, _projectScope.Current?.Name ?? "DefaultProject");
         var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
 
         if (errors.Any())
@@ -525,7 +525,7 @@ public class DynamicEntityController : BaseProjectController
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
         
         form ??= new Dictionary<string, string?>();
-        var (values, errors) = _formValidationService.ConvertAndValidate(meta, form);
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, form, _projectScope.Current?.Name ?? "DefaultProject");
         var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
 
         if (errors.Any())

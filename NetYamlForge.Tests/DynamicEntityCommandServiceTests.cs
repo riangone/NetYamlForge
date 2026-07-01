@@ -163,8 +163,16 @@ public class DynamicEntityCommandServiceTests
         public string? LastId { get; private set; }
 
         public Task<IEnumerable<dynamic>> GetAllAsync(string entity, string? search, string? sort, string? dir, Dictionary<string, string?>? filters = null, int page = 1, int? pageSize = null, string? cursor = null, bool keyset = false, bool fetchOneExtra = false) => throw new NotImplementedException();
-        public Task<dynamic?> GetByIdAsync(string entity, object id) => throw new NotImplementedException();
-        public Task<dynamic?> GetByIdAsync(string entity, IDictionary<string, object?> keyValues) => throw new NotImplementedException();
+        public Task<dynamic?> GetByIdAsync(string entity, object id)
+        {
+            var row = new Dictionary<string, object?> { ["id"] = id, ["Name"] = "Original" };
+            return Task.FromResult<dynamic?>(row);
+        }
+        public Task<dynamic?> GetByIdAsync(string entity, IDictionary<string, object?> keyValues)
+        {
+            var row = new Dictionary<string, object?>(keyValues);
+            return Task.FromResult<dynamic?>(row);
+        }
         public Task<int> InsertAsync(string entity, IDictionary<string, object?> values, IDbTransaction? tx = null)
         {
             InsertCallCount++;

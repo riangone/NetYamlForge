@@ -286,7 +286,7 @@ public sealed class EntityToolService
         if (error != null) return error;
 
         var stringForm = data.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
-        var (values, errors) = svc.FormValidationService.ConvertAndValidate(meta!, stringForm);
+        var (values, errors) = await svc.FormValidationService.ConvertAndValidateAsync(meta!, stringForm, project);
         if (errors.Count > 0)
             return McpToolResult.Failure(string.Join("; ", errors.Select(e => $"{e.Key}: {e.Value}")));
 
@@ -318,7 +318,7 @@ public sealed class EntityToolService
             return McpToolResult.Failure($"Entity '{entity}' with id '{id}' was not found.");
 
         var stringForm = data.ToDictionary(kv => kv.Key, kv => kv.Value?.ToString());
-        var (values, errors) = svc.FormValidationService.ConvertAndValidate(meta!, stringForm);
+        var (values, errors) = await svc.FormValidationService.ConvertAndValidateAsync(meta!, stringForm, project);
         if (errors.Count > 0)
             return McpToolResult.Failure(string.Join("; ", errors.Select(e => $"{e.Key}: {e.Value}")));
 

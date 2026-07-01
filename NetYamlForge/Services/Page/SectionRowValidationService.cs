@@ -4,6 +4,9 @@
 // IValueConverter に変換ロジックを委譲し、変換済み値マップとエラーマップを返します。
 
 using NetYamlForge.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NetYamlForge.Services.Page;
 
@@ -22,15 +25,8 @@ public sealed class SectionRowValidationService
     }
 
     /// <summary>
-    /// フォーム値を SectionDefinition のフィールド型定義に従って変換・検証します。
+    /// フォーム値を SectionDefinition のフィールド型定義に従って変換・検証します（同期版）。
     /// </summary>
-    /// <param name="section">セクション定義（フィールド型・必須・編集可能フラグを使用）</param>
-    /// <param name="form">IFormCollection から取り出した文字列値マップ</param>
-    /// <param name="mode">フォームモード（"create" / "edit"）</param>
-    /// <returns>
-    /// values: 変換済み値マップ（INSERT/UPDATE の引数になる）、
-    /// errors: フィールド名 → エラーメッセージ（空の場合は検証通過）
-    /// </returns>
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         SectionDefinition section,
         Dictionary<string, string?> form,
@@ -40,9 +36,28 @@ public sealed class SectionRowValidationService
             .Select(fieldName =>
             {
                 var def = section.GetFieldDef(fieldName);
-                return new FormFieldSpec(fieldName, def.Type, def.Required, def.Editable);
+                return new FormFieldSpec(fieldName, def.Type, def.Required, def.Editable, def.Validators);
             });
 
         return _validator.ConvertAndValidate(fields, form);
+    }
+
+    /// <summary>
+    /// フォーム値を SectionDefinition のフィールド型定义に従って変換・検証します（非同期版）。
+    /// </summary>
+    public async Task<(Dictionary<string, object?> values, Dictionary<string, string> errors)> ConvertAndValidateAsync(
+        SectionDefinition section,
+        Dictionary<string, string?> form,
+        string projectName,
+        string mode = "edit")
+    {
+        var fields = section.GetFormFields(mode)
+            .Select(fieldName =>
+            {
+                var def = section.GetFieldDef(fieldName);
+                return new FormFieldSpec(fieldName, def.Type, def.Required, def.Editable, def.Validators);
+            });
+
+        return await _validator.ConvertAndValidateAsync(fields, form, projectName);
     }
 }
