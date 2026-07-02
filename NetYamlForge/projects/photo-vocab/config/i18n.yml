@@ -126,6 +126,31 @@ translations:
     zh-CN: '❌ 正确答案：'
     ja-JP: '❌ 正解：'
     ko-KR: '❌ 정답: '
+  projects.photo-vocab.pages.Quiz.round.completeTitle:
+    en-US: 'Round complete!'
+    zh-CN: '本轮结束！'
+    ja-JP: 'ラウンド終了！'
+    ko-KR: '라운드 종료!'
+  projects.photo-vocab.pages.Quiz.round.completeSubtitle:
+    en-US: 'You answered {count} questions this round.'
+    zh-CN: '本轮共答了 {count} 道题。'
+    ja-JP: '今回は {count} 問に挑戦しました。'
+    ko-KR: '이번 라운드에서 {count}문제를 풀었습니다.'
+  projects.photo-vocab.pages.Quiz.round.accuracyLabel:
+    en-US: 'Accuracy'
+    zh-CN: '正确率'
+    ja-JP: '正答率'
+    ko-KR: '정답률'
+  projects.photo-vocab.pages.Quiz.round.bestStreakLabel:
+    en-US: 'Best streak'
+    zh-CN: '最高连对'
+    ja-JP: '最高連続正解'
+    ko-KR: '최고 연속 정답'
+  projects.photo-vocab.pages.Quiz.round.restartButton:
+    en-US: 'Start next round'
+    zh-CN: '开始下一轮'
+    ja-JP: '次のラウンドへ'
+    ko-KR: '다음 라운드 시작'
 
   projects.photo-vocab.pages.Stats.title:
     en-US: 'Learning Stats'

@@ -167,3 +167,53 @@ jobs:
         tags: "IT, 科技, 数码, 数字化生活, 每日简报"
         author: "AI News Bot"
         language: "zh-CN"
+
+  netyamlforge_tutorial_job:
+    displayName: "NetYamlForge 入门教程每日生成"
+    description: "每天生成一个关于 NetYamlForge 声明式低代码框架的入门与进阶教程"
+    type: "automated_blog_generator"
+    enabled: true
+    schedule:
+      cron: "0 8 * * *"
+      timezone: "Asia/Shanghai"
+    settings:
+      params:
+        target: "NetYamlForge 声明式框架"
+        categoryId: "1"
+        tags: "NetYamlForge, 声明式开发, 低代码, 后端开发, 教程"
+        author: "Hyperion 教程姬"
+        language: "zh-CN"
+        prompt: |
+          你是专注于低代码声明式系统架构和自动化开发的资深专家 Hyperion。
+          请为 NetYamlForge 框架撰写一篇高质量的**入门/进阶系列教程**。今天的时间是 {date}。
+
+          【教程主题范围】
+          为了让教程体系化，请根据当前日期或随机选择以下核心模块之一作为本次的主题（但每次生成时，请针对单个主题深入讲解，不要泛泛而谈）：
+          1. **NetYamlForge 简介与安装配置**：框架定位、依赖环境、初始化项目、配置文件 `project.yaml` 的基础结构。
+          2. **实体定义 (Entity Definition)**：如何在 `entities/` 目录下用 YAML 定义数据模型、主键、字段类型（string, integer, date, boolean, money 等）及表结构映射。
+          3. **页面与路由 (Pages & Routes)**：如何定义页面 YAML 渲染 CURD 界面，表单布局（grids, groups），以及自定义视图的路由映射。
+          4. **表单校验 (Form Validation)**：在实体定义中添加字段校验规则（如 `required`, `pattern`, `range` 等），并在前端与后端自动生效的机制。
+          5. **关联关系映射 (Relationships)**：如何在实体间配置 One-to-Many、Many-to-One 关联，并在 UI 上呈现关联下拉框/子表。
+          6. **后台批处理任务 (Batch Jobs)**：批处理调度系统架构，如何配置 Cron 任务（如 `sql_to_csv`, `sql_command`, 自定义 `automated_blog_generator`）。
+          7. **热刷新机制 (YamlHotReloadService)**：YAML 文件变更时框架如何无需重启即可动态重新加载实体和页面配置的实现原理。
+          8. **AI 核心服务整合 (AI Evolution)**：如何通过 AI 调用（PromptAsync）、Agent 偏好配置（AgentProfile）以及自动化生成内容（如当前正在执行的这个自动博客生成器）。
+
+          【写作要求】
+          - 使用中文（zh-CN）撰写。
+          - 教程结构：
+            1. **引人入胜的标题**（需包含 NetYamlForge 教程及今天的主题）
+            2. **前言**：阐明今天主题的核心价值和应用场景。
+            3. **核心概念/原理**：深入讲解该部分的设计思想。
+            4. **实战代码/配置示例**：必须提供**具体的、完整的 YAML 配置或 C# 代码示例**。代码块需使用正确的 markdown 标记。
+            5. **最佳实践与避坑指南**：写出在实际开发中需要注意的限制 and 技巧。
+            6. **总结与下期预告**。
+          - 不要泛泛而谈，也不要包含任何未定义的变量或伪代码，保证配置示例是符合 NetYamlForge 标准的可执行配置。
+
+          输出格式必须是以下 JSON 且不包含任何其他文本（且不要加 markdown ```json 标记包裹）：
+          {
+            "title": "NetYamlForge 极简教程：[今日主题]",
+            "summary": "一句话介绍本期教程的主要内容。",
+            "content": "这里是完整的 Markdown 格式的教程正文...",
+            "slug": "netyamlforge-tutorial-[主题英文简写]"
+          }
+

@@ -46,6 +46,11 @@
         nextButton = T("projects.photo-vocab.pages.Quiz.nextButton", "下一题 →"),
         feedbackCorrect = T("projects.photo-vocab.pages.Quiz.feedback.correct", "✅ 回答正确！"),
         feedbackIncorrectPrefix = T("projects.photo-vocab.pages.Quiz.feedback.incorrectPrefix", "❌ 正确答案："),
+        roundCompleteTitle = T("projects.photo-vocab.pages.Quiz.round.completeTitle", "本轮结束！"),
+        roundCompleteSubtitle = T("projects.photo-vocab.pages.Quiz.round.completeSubtitle", "本轮共答了 {count} 道题。"),
+        roundAccuracyLabel = T("projects.photo-vocab.pages.Quiz.round.accuracyLabel", "正确率"),
+        roundBestStreakLabel = T("projects.photo-vocab.pages.Quiz.round.bestStreakLabel", "最高连对"),
+        roundRestartButton = T("projects.photo-vocab.pages.Quiz.round.restartButton", "开始下一轮"),
     };
     var uiStringsJson = JsonSerializer.Serialize(uiStrings, jsonOpts);
 }
@@ -118,6 +123,23 @@
                 <div id="pv-feedback" class="mt-4 text-sm font-medium hidden"></div>
                 <button id="pv-next-btn" class="btn btn-primary rounded-full px-6 mt-6 hidden" onclick="pvNextQuestion()">@uiStrings.nextButton</button>
             </div>
+
+            <div id="pv-round-summary" class="hidden py-6 w-full">
+                <div class="text-5xl mb-3">🎉</div>
+                <h3 class="text-2xl font-extrabold text-base-content mb-1" id="pv-round-title">@uiStrings.roundCompleteTitle</h3>
+                <p class="text-base-content/60 mb-6" id="pv-round-subtitle"></p>
+                <div class="flex justify-center gap-10 mb-8">
+                    <div>
+                        <div class="text-3xl font-extrabold text-success" id="pv-round-accuracy">0%</div>
+                        <div class="text-xs text-base-content/50 mt-1">@uiStrings.roundAccuracyLabel</div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-primary" id="pv-round-best-streak">0</div>
+                        <div class="text-xs text-base-content/50 mt-1">@uiStrings.roundBestStreakLabel</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary rounded-full px-8" onclick="pvRestartRound()">@uiStrings.roundRestartButton</button>
+            </div>
         </div>
     </div>
 </div>
@@ -134,7 +156,9 @@
     var API_BASE = '@Url.Content("~/")'.replace(/\/$/, '') + '/api/@currentProject/quiz_record';
 
     var LANG_LABELS = { 'zh-CN': '简体中文', 'en-US': 'English', 'ja-JP': '日本語', 'ko-KR': '한국어' };
+    var ROUND_SIZE = 10; // 每轮题数，答完这么多题后弹出总结卡片，避免无限循环没有终点
     var stats = { correct: 0, total: 0, streak: 0 };
+    var bestStreak = 0;
     var current = null;
     var lastWordId = null;
     var answered = false;
@@ -230,7 +254,7 @@
         });
 
         stats.total++;
-        if (isCorrect) { stats.correct++; stats.streak++; } else { stats.streak = 0; }
+        if (isCorrect) { stats.correct++; stats.streak++; if (stats.streak > bestStreak) bestStreak = stats.streak; } else { stats.streak = 0; }
         document.getElementById('pv-stat-correct').textContent = stats.correct;
         document.getElementById('pv-stat-total').textContent = stats.total;
         document.getElementById('pv-stat-streak').textContent = stats.streak;
@@ -256,10 +280,37 @@
     };
 
     window.pvNextQuestion = function () {
+        if (stats.total > 0 && stats.total % ROUND_SIZE === 0) {
+            showRoundSummary();
+            return;
+        }
         current = pickWord();
         if (!current) return;
         lastWordId = current.id;
         render(current);
+    };
+
+    function showRoundSummary() {
+        document.getElementById('pv-question-area').classList.add('hidden');
+        var accuracy = stats.total > 0 ? Math.round(stats.correct / stats.total * 100) : 0;
+        document.getElementById('pv-round-subtitle').textContent = UI.roundCompleteSubtitle.replace('{count}', stats.total);
+        document.getElementById('pv-round-accuracy').textContent = accuracy + '%';
+        document.getElementById('pv-round-best-streak').textContent = bestStreak;
+        var summary = document.getElementById('pv-round-summary');
+        summary.classList.remove('hidden');
+        summary.classList.add('pv-fade-in');
+    }
+
+    window.pvRestartRound = function () {
+        stats = { correct: 0, total: 0, streak: 0 };
+        bestStreak = 0;
+        document.getElementById('pv-stat-correct').textContent = 0;
+        document.getElementById('pv-stat-total').textContent = 0;
+        document.getElementById('pv-stat-streak').textContent = 0;
+        document.getElementById('pv-round-summary').classList.add('hidden');
+        document.getElementById('pv-question-area').classList.remove('hidden');
+        lastWordId = null;
+        pvNextQuestion();
     };
 
     function renderPhotoPicker() {
@@ -299,9 +350,11 @@
         selectedPhotoId = photoId;
         // 切换练习范围后，本轮成绩重新计算
         stats = { correct: 0, total: 0, streak: 0 };
+        bestStreak = 0;
         document.getElementById('pv-stat-correct').textContent = 0;
         document.getElementById('pv-stat-total').textContent = 0;
         document.getElementById('pv-stat-streak').textContent = 0;
+        document.getElementById('pv-round-summary').classList.add('hidden');
         renderPhotoPicker();
 
         var pool = activeWords();
