@@ -66,6 +66,7 @@ public class DashboardController : Controller
     private readonly IDbConnection                   _db;
     private readonly ProjectScope                    _projectScope;
     private readonly ILogger<DashboardController>    _logger;
+    private readonly IWebHostEnvironment              _env;
 
     private static readonly JsonSerializerOptions _jsonOpts =
         new() { WriteIndented = false };
@@ -75,13 +76,15 @@ public class DashboardController : Controller
         IEntityMetadataProvider      meta,
         IDbConnection                db,
         ProjectScope                 projectScope,
-        ILogger<DashboardController> logger)
+        ILogger<DashboardController> logger,
+        IWebHostEnvironment          env)
     {
         _dashConfig   = dashConfig;
         _meta         = meta;
         _db           = db;
         _projectScope = projectScope;
         _logger       = logger;
+        _env          = env;
     }
 
     // ─── Index ───────────────────────────────────────────────────────────────
@@ -136,7 +139,7 @@ public class DashboardController : Controller
         if (!string.IsNullOrEmpty(projectName))
         {
             var projectViewPath = System.IO.Path.Combine(
-                System.IO.Directory.GetCurrentDirectory(),
+                _env.ContentRootPath,
                 $"projects/{projectName}/views/Dashboard/Index.cshtml");
             if (System.IO.File.Exists(projectViewPath))
                 return View($"/projects/{projectName}/views/Dashboard/Index.cshtml", vm);

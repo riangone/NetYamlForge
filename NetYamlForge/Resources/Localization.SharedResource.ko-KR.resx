@@ -1953,4 +1953,7 @@
   <data name="Language" xml:space="preserve">
     <value>언어</value>
   </data>
+  <data name="Back to List" xml:space="preserve">
+    <value>목록으로 돌아가기</value>
+  </data>
 </root>

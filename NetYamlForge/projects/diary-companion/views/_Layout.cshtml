@@ -620,21 +620,13 @@
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    <!-- 统一悬浮侧边栏和设置按钮组 -->
-    <div id="diary-floating-group" class="fixed z-40 hidden flex-col gap-3">
-        <!-- 侧边栏唤出按钮 -->
-        <label id="diary-floating-menu-btn" for="app-sidebar" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-indigo-600 cursor-pointer w-12 h-12" title="打开侧边栏">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- 悬浮侧边栏唤出按钮（设置入口已并入侧边栏，此处不再重复） -->
+    <div id="diary-floating-group" class="fixed z-40 hidden flex-col gap-3 opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300">
+        <label id="diary-floating-menu-btn" for="app-sidebar" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-indigo-600 cursor-pointer w-11 h-11" title="打开侧边栏">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </label>
-        <!-- 齿轮设置按钮 -->
-        <a id="diary-floating-settings-btn" href="/@currentProject/Page/Settings" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-indigo-600 w-12 h-12" title="系统偏好设置">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-        </a>
     </div>
 
     <!-- 偏好应用与快捷键 JS 脚本 -->
@@ -706,6 +698,20 @@
 
             // 初始化加载
             document.addEventListener('DOMContentLoaded', window.applyDiaryPreferences);
+
+            // 滚动时让悬浮按钮临时淡出，避免遮挡正在阅读的内容；停止滚动后淡回
+            document.addEventListener('DOMContentLoaded', function() {
+                const floatingGroup = document.getElementById('diary-floating-group');
+                if (!floatingGroup) return;
+                let scrollTimer = null;
+                window.addEventListener('scroll', function() {
+                    floatingGroup.classList.add('!opacity-20');
+                    clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(function() {
+                        floatingGroup.classList.remove('!opacity-20');
+                    }, 500);
+                }, { passive: true });
+            });
 
             // 编辑页面：从设置默认值预填 AiLanguage 字段（如果字段为空）
             document.addEventListener('DOMContentLoaded', function() {

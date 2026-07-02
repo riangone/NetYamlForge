@@ -326,6 +326,10 @@ public sealed class PageDataQueryService
         param.Add("currentUserRole", user.Roles.FirstOrDefault() ?? "");
         param.Add("isAdmin", user.IsAdmin ? 1 : 0);
         param.Add("isAuthenticated", user.IsAuthenticated ? 1 : 0);
+        // 現在の UI 言語 (例: zh-CN / en-US / ja-JP / ko-KR)。
+        // カスタム SQL 内で CASE @currentLanguage ... のように使い、
+        // 表示用リテラル文字列を UI 言語に応じて切り替えるために利用する。
+        param.Add("currentLanguage", System.Globalization.CultureInfo.CurrentUICulture.Name);
     }
 
 }

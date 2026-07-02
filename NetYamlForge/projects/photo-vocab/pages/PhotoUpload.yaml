@@ -1,0 +1,61 @@
+title: 上传图片
+titleKey: projects.photo-vocab.pages.PhotoUpload.title
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: photo_upload_form
+    title: 上传新图片
+    titleKey: projects.photo-vocab.pages.PhotoUpload.sections.photo_upload_form.title
+    sourceType: custom
+    source: >
+      SELECT Id, AnnotationLanguage, ImageBase64, Caption
+      FROM PhotoEntry
+      WHERE Id = @id
+    columns: [Id, AnnotationLanguage, ImageBase64, Caption]
+    pageSize: 1
+    editable: false
+    readOnly: true
+    component: interactive_form
+    targetTable: PhotoEntry
+    forms:
+      create:
+        titleKey: projects.photo-vocab.pages.PhotoUpload.form.createTitle
+        title: 📤 上传新图片
+        descriptionKey: projects.photo-vocab.pages.PhotoUpload.form.createDesc
+        description: 标注语言可以任意选择，AI 会自动生成图片描述并挑选几个单词供你背诵。
+        fields:
+          - AnnotationLanguage
+          - ImageBase64
+      edit:
+        titleKey: projects.photo-vocab.pages.PhotoUpload.form.editTitle
+        title: ✏️ 编辑图片
+        fields:
+          - AnnotationLanguage
+          - ImageBase64
+          - Caption
+    fieldDefs:
+      AnnotationLanguage:
+        type: select
+        required: true
+        label: 目标语言（要背的单词用这个语言，释义会自动用你当前系统语言生成）
+        labelKey: projects.photo-vocab.pages.PhotoUpload.fields.annotationLanguage
+        options:
+          zh-CN: 简体中文
+          en-US: English
+          ja-JP: 日本語
+          ko-KR: 한국어
+      ImageBase64:
+        type: string
+        required: true
+        label: 上传图片
+        labelKey: projects.photo-vocab.pages.PhotoUpload.fields.imageBase64
+      Caption:
+        type: textarea
+        required: false
+        label: AI 图片描述
+        labelKey: projects.photo-vocab.entity.photo_entry.fields.caption

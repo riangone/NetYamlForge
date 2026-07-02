@@ -1,0 +1,332 @@
+@using System.Text.Encodings.Web
+@using System.Text.Json
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "photo-vocab";
+
+    // 挑战使用系统当前选择的界面语言，而不是每张图片各自的标注语言
+    var systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    var pageTitle = T("projects.photo-vocab.pages.Quiz.title", "单词挑战");
+    ViewData["Title"] = pageTitle;
+
+    var uploadUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "PhotoUpload" });
+
+    var wordRows = Model.TryGetValue("recent_words", out var sec)
+        ? sec.Rows.ToList()
+        : new List<Dictionary<string, object>>();
+
+    var jsonOpts = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    var wordsJson = JsonSerializer.Serialize(wordRows.Select(r => new
+    {
+        id = r.TryGetValue("Id", out var idv) ? idv?.ToString() : "",
+        word = r.TryGetValue("Word", out var wv) ? wv?.ToString() ?? "" : "",
+        meaning = r.TryGetValue("Meaning", out var mv) ? mv?.ToString() ?? "" : "",
+        example = r.TryGetValue("Example", out var ev) ? ev?.ToString() ?? "" : "",
+        language = r.TryGetValue("Language", out var lv) ? lv?.ToString() ?? "" : "",
+        nativeLanguage = r.TryGetValue("NativeLanguage", out var nlv) ? nlv?.ToString() ?? "" : "",
+        photoEntryId = r.TryGetValue("PhotoEntryId", out var pev) ? pev?.ToString() ?? "" : "",
+        photoThumbnail = r.TryGetValue("PhotoThumbnail", out var ptv) ? ptv?.ToString() ?? "" : "",
+        photoCaption = r.TryGetValue("PhotoCaption", out var pcv) ? pcv?.ToString() ?? "" : ""
+    }), jsonOpts);
+
+    // すべてのユーザー向けテキストは i18n.yml のキー経由で現在の UI 言語に解決してから
+    // JSON として JS 側へ渡す。JS 内にハードコードされた文言は持たない。
+    var uiStrings = new
+    {
+        allPhotos = T("projects.photo-vocab.pages.Quiz.allPhotos", "全部图片"),
+        statCorrect = T("projects.photo-vocab.pages.Quiz.stats.correct", "本轮正确"),
+        statTotal = T("projects.photo-vocab.pages.Quiz.stats.total", "本轮总数"),
+        statStreak = T("projects.photo-vocab.pages.Quiz.stats.streak", "连对"),
+        defaultEmptyTitle = T("projects.photo-vocab.pages.Quiz.empty.defaultTitle", "还没有可用的单词"),
+        photoEmpty = T("projects.photo-vocab.pages.Quiz.empty.photoEmpty", "这张图片下还没有可用单词"),
+        languageEmptyTemplate = T("projects.photo-vocab.pages.Quiz.empty.languageEmpty", "还没有 {lang} 的可用单词"),
+        nextButton = T("projects.photo-vocab.pages.Quiz.nextButton", "下一题 →"),
+        feedbackCorrect = T("projects.photo-vocab.pages.Quiz.feedback.correct", "✅ 回答正确！"),
+        feedbackIncorrectPrefix = T("projects.photo-vocab.pages.Quiz.feedback.incorrectPrefix", "❌ 正确答案："),
+    };
+    var uiStringsJson = JsonSerializer.Serialize(uiStrings, jsonOpts);
+}
+
+<style>
+    .pv-fade-in { animation: pv-fade-in .35s ease both; }
+    @@keyframes pv-fade-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .pv-pop { animation: pv-pop .28s cubic-bezier(.34,1.56,.64,1) both; }
+    @@keyframes pv-pop {
+        from { opacity: 0; transform: scale(.92); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .pv-hero {
+        background: linear-gradient(135deg, oklch(var(--p)/0.14), oklch(var(--s)/0.10) 55%, transparent);
+    }
+    .pv-option-btn { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .pv-option-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 16px -6px oklch(var(--p)/0.35); }
+    .pv-option-btn:not(:disabled):active { transform: translateY(0); }
+    .pv-photo-chip { transition: transform .15s ease, opacity .15s ease, border-color .15s ease; }
+    .pv-photo-chip:hover { transform: translateY(-2px); }
+</style>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <header class="mb-6 text-center rounded-3xl pv-hero px-6 py-8">
+        <h1 class="text-3xl font-extrabold text-base-content tracking-tight">🎯 @pageTitle</h1>
+        <p class="text-base-content/60 mt-2">@T("projects.photo-vocab.pages.Quiz.subtitle", "从最近上传的图片中挑选单词，测测你还记得多少")</p>
+    </header>
+
+    <div id="pv-photo-picker" class="mb-6 hidden">
+        <p class="text-xs text-base-content/50 mb-2 text-left">@T("projects.photo-vocab.pages.Quiz.photoPickerHint", "📷 只想练某张图片的单词？选一张：")</p>
+        <div id="pv-photo-picker-scroll" class="flex gap-2 overflow-x-auto pb-2"></div>
+    </div>
+
+    <div id="pv-quiz-stats" class="flex justify-center gap-4 mb-6 text-sm">
+        <div class="stat bg-base-100 shadow-md rounded-2xl px-5 py-3 border border-base-300/60">
+            <div class="stat-title text-xs">@T("projects.photo-vocab.pages.Quiz.stats.correct", "本轮正确")</div>
+            <div class="stat-value text-lg text-success" id="pv-stat-correct">0</div>
+        </div>
+        <div class="stat bg-base-100 shadow-md rounded-2xl px-5 py-3 border border-base-300/60">
+            <div class="stat-title text-xs">@T("projects.photo-vocab.pages.Quiz.stats.total", "本轮总数")</div>
+            <div class="stat-value text-lg" id="pv-stat-total">0</div>
+        </div>
+        <div class="stat bg-base-100 shadow-md rounded-2xl px-5 py-3 border border-base-300/60">
+            <div class="stat-title text-xs">@T("projects.photo-vocab.pages.Quiz.stats.streak", "连对")</div>
+            <div class="stat-value text-lg text-primary" id="pv-stat-streak">0</div>
+        </div>
+    </div>
+
+    <div id="pv-quiz-card" class="card bg-base-100 shadow-xl rounded-3xl border border-base-300/50">
+        <div class="card-body items-center text-center">
+            <div id="pv-empty-state" class="hidden py-10 text-base-content/50">
+                <p class="text-lg mb-2" id="pv-empty-title">@uiStrings.defaultEmptyTitle</p>
+                <p class="text-sm">
+                    @T("projects.photo-vocab.pages.Quiz.empty.hintPrefix", "先去")
+                    <a class="link link-primary font-medium" href="@uploadUrl">@T("projects.photo-vocab.pages.PhotoUpload.title", "上传图片")</a>@T("projects.photo-vocab.pages.Quiz.empty.hintSuffix", "，标注语言可以任意选择（比如英语），AI 会自动用你当前的系统语言生成释义，挑战时题目一定能看懂。")
+                </p>
+            </div>
+
+            <div id="pv-question-area" class="hidden w-full">
+                <div id="pv-photo-context" class="mb-4 hidden">
+                    <img id="pv-photo-img" src="" alt="" class="mx-auto max-h-40 rounded-xl shadow-md" />
+                    <p id="pv-photo-caption" class="text-xs text-base-content/50 mt-1"></p>
+                </div>
+                <div class="badge badge-outline badge-primary mb-2" id="pv-question-lang"></div>
+                <h2 class="text-3xl font-extrabold text-base-content mb-6" id="pv-question-word"></h2>
+                <div id="pv-options" class="grid grid-cols-1 gap-3 w-full"></div>
+                <div id="pv-feedback" class="mt-4 text-sm font-medium hidden"></div>
+                <button id="pv-next-btn" class="btn btn-primary rounded-full px-6 mt-6 hidden" onclick="pvNextQuestion()">@uiStrings.nextButton</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var ALL_WORDS = @Html.Raw(wordsJson);
+    var SYSTEM_LANGUAGE = @Html.Raw(JsonSerializer.Serialize(systemLanguage));
+    var UI = @Html.Raw(uiStringsJson);
+    // 挑战题目里"单词"(word) 可以是任意标注语言（例如英语），但"释义"(meaning，也就是选项文字)
+    // 必须是用户看得懂的语言，因此按 nativeLanguage（释义语言，AI 生成时固定使用系统当前语言）
+    // 过滤，而不是按 word 本身的目标语言过滤——否则用英语标注的单词会被整体隐藏，永远练不到。
+    var WORDS = ALL_WORDS.filter(function (w) { return w.nativeLanguage === SYSTEM_LANGUAGE; });
+    var API_BASE = '@Url.Content("~/")'.replace(/\/$/, '') + '/api/@currentProject/quiz_record';
+
+    var LANG_LABELS = { 'zh-CN': '简体中文', 'en-US': 'English', 'ja-JP': '日本語', 'ko-KR': '한국어' };
+    var stats = { correct: 0, total: 0, streak: 0 };
+    var current = null;
+    var lastWordId = null;
+    var answered = false;
+    var selectedPhotoId = null; // null = 全部图片 / all photos
+
+    // 当前系统语言下，按图片去重出可选的图片列表（保留最近上传顺序）
+    var PHOTOS = (function () {
+        var seen = {};
+        var list = [];
+        WORDS.forEach(function (w) {
+            var pid = w.photoEntryId;
+            if (!pid || seen[pid]) return;
+            seen[pid] = true;
+            list.push({ id: pid, thumbnail: w.photoThumbnail, caption: w.photoCaption });
+        });
+        return list;
+    })();
+
+    function activeWords() {
+        if (!selectedPhotoId) return WORDS;
+        var filtered = WORDS.filter(function (w) { return w.photoEntryId === selectedPhotoId; });
+        return filtered.length > 0 ? filtered : WORDS;
+    }
+
+    function pickWord() {
+        var pool0 = activeWords();
+        if (pool0.length === 0) return null;
+        if (pool0.length === 1) return pool0[0];
+        var candidates = pool0.filter(function (w) { return w.id !== lastWordId; });
+        var pool = candidates.length > 0 ? candidates : pool0;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function buildOptions(correctWord) {
+        var others = activeWords().filter(function (w) {
+            return w.id !== correctWord.id && w.meaning && w.meaning !== correctWord.meaning;
+        });
+        // shuffle distractor pool
+        for (var i = others.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = others[i]; others[i] = others[j]; others[j] = t;
+        }
+        var distractors = others.slice(0, 3).map(function (w) { return w.meaning; });
+        var options = distractors.concat([correctWord.meaning]);
+        for (var k = options.length - 1; k > 0; k--) {
+            var l = Math.floor(Math.random() * (k + 1));
+            var s = options[k]; options[k] = options[l]; options[l] = s;
+        }
+        return options;
+    }
+
+    function render(word) {
+        document.getElementById('pv-question-lang').textContent = LANG_LABELS[word.language] || word.language || '';
+        document.getElementById('pv-question-word').textContent = word.word;
+
+        var photoBox = document.getElementById('pv-photo-context');
+        if (word.photoThumbnail) {
+            document.getElementById('pv-photo-img').src = word.photoThumbnail;
+            document.getElementById('pv-photo-caption').textContent = word.photoCaption || '';
+            photoBox.classList.remove('hidden');
+        } else {
+            photoBox.classList.add('hidden');
+        }
+
+        var options = buildOptions(word);
+        var optionsEl = document.getElementById('pv-options');
+        optionsEl.innerHTML = '';
+        options.forEach(function (opt, idx) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-outline justify-start text-left h-auto py-3 whitespace-normal rounded-xl pv-option-btn pv-pop';
+            btn.style.animationDelay = (idx * 40) + 'ms';
+            btn.textContent = opt;
+            btn.onclick = function () { pvAnswer(word, opt, btn); };
+            optionsEl.appendChild(btn);
+        });
+
+        document.getElementById('pv-feedback').classList.add('hidden');
+        document.getElementById('pv-next-btn').classList.add('hidden');
+        document.getElementById('pv-question-area').classList.add('pv-fade-in');
+        answered = false;
+    }
+
+    window.pvAnswer = function (word, selected, btnEl) {
+        if (answered) return;
+        answered = true;
+        var isCorrect = selected === word.meaning;
+
+        Array.prototype.forEach.call(document.getElementById('pv-options').children, function (btn) {
+            btn.disabled = true;
+            if (btn.textContent === word.meaning) btn.classList.add('btn-success');
+            else if (btn === btnEl) btn.classList.add('btn-error');
+        });
+
+        stats.total++;
+        if (isCorrect) { stats.correct++; stats.streak++; } else { stats.streak = 0; }
+        document.getElementById('pv-stat-correct').textContent = stats.correct;
+        document.getElementById('pv-stat-total').textContent = stats.total;
+        document.getElementById('pv-stat-streak').textContent = stats.streak;
+
+        var feedback = document.getElementById('pv-feedback');
+        feedback.textContent = isCorrect ? UI.feedbackCorrect : (UI.feedbackIncorrectPrefix + word.meaning);
+        feedback.className = 'mt-4 text-sm font-medium pv-fade-in ' + (isCorrect ? 'text-success' : 'text-error');
+        feedback.classList.remove('hidden');
+        document.getElementById('pv-next-btn').classList.remove('hidden');
+
+        fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                VocabWordId: word.id,
+                Word: word.word,
+                Language: word.language,
+                UserAnswer: selected,
+                IsCorrect: isCorrect ? 1 : 0
+            })
+        }).catch(function () { /* network errors must not block the quiz UX */ });
+    };
+
+    window.pvNextQuestion = function () {
+        current = pickWord();
+        if (!current) return;
+        lastWordId = current.id;
+        render(current);
+    };
+
+    function renderPhotoPicker() {
+        var wrap = document.getElementById('pv-photo-picker');
+        var scroll = document.getElementById('pv-photo-picker-scroll');
+        if (PHOTOS.length < 2) { wrap.classList.add('hidden'); return; }
+        wrap.classList.remove('hidden');
+        scroll.innerHTML = '';
+
+        var allBtn = document.createElement('button');
+        allBtn.type = 'button';
+        allBtn.className = 'pv-photo-chip flex-shrink-0 px-3 h-16 rounded-xl border-2 text-xs font-medium flex items-center justify-center ' +
+            (selectedPhotoId === null ? 'border-primary bg-primary/10 text-primary' : 'border-transparent bg-base-200 text-base-content/60');
+        allBtn.textContent = UI.allPhotos;
+        allBtn.onclick = function () { selectPhoto(null); };
+        scroll.appendChild(allBtn);
+
+        PHOTOS.forEach(function (p) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'pv-photo-chip flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 ' +
+                (selectedPhotoId === p.id ? 'border-primary' : 'border-transparent opacity-70 hover:opacity-100');
+            btn.title = p.caption || '';
+            btn.onclick = function () { selectPhoto(p.id); };
+            if (p.thumbnail) {
+                var img = document.createElement('img');
+                img.src = p.thumbnail;
+                img.className = 'w-full h-full object-cover';
+                btn.appendChild(img);
+            }
+            scroll.appendChild(btn);
+        });
+    }
+
+    function selectPhoto(photoId) {
+        if (selectedPhotoId === photoId) return;
+        selectedPhotoId = photoId;
+        // 切换练习范围后，本轮成绩重新计算
+        stats = { correct: 0, total: 0, streak: 0 };
+        document.getElementById('pv-stat-correct').textContent = 0;
+        document.getElementById('pv-stat-total').textContent = 0;
+        document.getElementById('pv-stat-streak').textContent = 0;
+        renderPhotoPicker();
+
+        var pool = activeWords();
+        if (pool.length === 0) {
+            document.getElementById('pv-question-area').classList.add('hidden');
+            document.getElementById('pv-empty-state').classList.remove('hidden');
+            document.getElementById('pv-empty-title').textContent = UI.photoEmpty;
+            return;
+        }
+        document.getElementById('pv-empty-state').classList.add('hidden');
+        document.getElementById('pv-question-area').classList.remove('hidden');
+        lastWordId = null;
+        pvNextQuestion();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (WORDS.length === 0) {
+            var langLabel = LANG_LABELS[SYSTEM_LANGUAGE] || SYSTEM_LANGUAGE;
+            document.getElementById('pv-empty-title').textContent = UI.languageEmptyTemplate.replace('{lang}', langLabel);
+            document.getElementById('pv-empty-state').classList.remove('hidden');
+            return;
+        }
+        renderPhotoPicker();
+        document.getElementById('pv-question-area').classList.remove('hidden');
+        pvNextQuestion();
+    });
+})();
+</script>

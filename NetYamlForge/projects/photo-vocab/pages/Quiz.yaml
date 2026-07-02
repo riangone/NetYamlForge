@@ -1,0 +1,25 @@
+title: 单词挑战
+titleKey: projects.photo-vocab.pages.Quiz.title
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: recent_words
+    titleKey: projects.photo-vocab.pages.Quiz.sections.recent_words.title
+    sourceType: custom
+    source: |
+      SELECT w.Id, w.Word, w.Meaning, w.Example, w.Language, w.NativeLanguage,
+             w.PhotoEntryId, p.ImageThumbnailBase64 AS PhotoThumbnail, p.Caption AS PhotoCaption
+      FROM VocabWord w
+      LEFT JOIN PhotoEntry p ON w.PhotoEntryId = p.Id
+      ORDER BY w.CreatedAt DESC
+      LIMIT 60
+    columns: [Id, Word, Meaning, Example, Language, NativeLanguage, PhotoEntryId, PhotoThumbnail, PhotoCaption]
+    pageSize: 60
+    editable: false
+    readOnly: true
+    component: table

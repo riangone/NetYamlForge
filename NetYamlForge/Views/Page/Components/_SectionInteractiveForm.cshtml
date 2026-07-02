@@ -45,6 +45,19 @@
     // Fields to render in form
     var fieldNames = sec.GetFormFields(isEdit ? "edit" : "create");
 
+    // フォームの見出し/説明。プロジェクト側が forms.create/edit.title(Key) を設定していれば
+    // それを使い、未設定時のみ既定（diary-companion 由来）のフォールバック文言を使う。
+    // これにより既存プロジェクト（diary-companion）の表示は変わらず、他プロジェクトは
+    // 自分のセクション定義で上書きできる。
+    var activeFormGroup = sec.Forms != null && sec.Forms.TryGetValue(isEdit ? "edit" : "create", out var fg) ? fg : null;
+    var headerTitleOverride = activeFormGroup?.GetTitle();
+    var headerDescOverride = activeFormGroup?.GetDescription();
+    var headerTitle = headerTitleOverride
+        ?? (isEdit ? T("projects.diary-companion.views.form.edit_title", "重温与编辑记录") : T("projects.diary-companion.views.form.create_title", "创建全新篇章"));
+    var headerDesc = headerTitleOverride != null
+        ? headerDescOverride
+        : (isEdit ? T("projects.diary-companion.views.form.edit_desc", "随时可以完善和更改你的记录，系统将为您重新进行智能解读。") : T("projects.diary-companion.views.form.create_desc", "在这里倾诉吧，写下你最真实的一天。"));
+
     // Mood list & emojis
     var moodList = new[] {
         new { Name = "喜悦", Emoji = "🌸", Desc = "开心美好" },
@@ -114,14 +127,15 @@
     <div class="p-6 md:p-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-purple-100 flex items-center justify-between">
         <div class="space-y-1.5">
             <span class="text-2xl">✍️</span>
-            <h2 class="text-2xl font-extrabold text-gray-800">@(isEdit ? T("projects.diary-companion.views.form.edit_title", "重温与编辑记录") : T("projects.diary-companion.views.form.create_title", "创建全新篇章"))</h2>
-            <p class="text-xs text-gray-500">
-                @(isEdit ? T("projects.diary-companion.views.form.edit_desc", "随时可以完善和更改你的记录，系统将为您重新进行智能解读。") : T("projects.diary-companion.views.form.create_desc", "在这里倾诉吧，写下你最真实的一天。"))
-            </p>
+            <h2 class="text-2xl font-extrabold text-gray-800">@headerTitle</h2>
+            @if (!string.IsNullOrWhiteSpace(headerDesc))
+            {
+                <p class="text-xs text-gray-500">@headerDesc</p>
+            }
         </div>
         <div class="flex items-center gap-3">
             <a href="@cancelUrl" class="btn btn-sm bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm rounded-xl flex items-center gap-1.5 transition-all hover:scale-105 font-bold">
-                <span>🔙</span> @T("projects.diary-companion.views.form.back_to_list", "返回一览")
+                <span>🔙</span> @T("Back to List", "Back to List")
             </a>
             <div class="text-3xl opacity-30 select-none hidden md:block">✏️</div>
         </div>
@@ -134,8 +148,14 @@
         @foreach (var fieldName in fieldNames)
         {
             var fieldDef = sec.GetFieldDef(fieldName);
-            var labelKey = $"projects.{currentProject}.entity.{apiEntity}.fields.{ToCamelCase(fieldName)}";
-            var label = T(labelKey, fieldDef.Label ?? fieldName);
+            // ページの fieldDefs 側で labelKey/labelI18n を明示指定していればそれを優先する
+            // （ページ固有の文言でエンティティ既定ラベルを上書き可能にする）。
+            // 未指定時は従来どおりエンティティ単位の既定キーにフォールバックする（既存プロジェクト互換）。
+            var hasFieldLevelLabelOverride = !string.IsNullOrWhiteSpace(fieldDef.LabelKey) || (fieldDef.LabelI18n != null && fieldDef.LabelI18n.Count > 0);
+            var entityLabelKey = $"projects.{currentProject}.entity.{apiEntity}.fields.{ToCamelCase(fieldName)}";
+            var label = hasFieldLevelLabelOverride
+                ? fieldDef.GetLabel(fieldDef.Label ?? fieldName)
+                : T(entityLabelKey, fieldDef.Label ?? fieldName);
             var isRequired = fieldDef.Required;
             string? foundKey = isEdit && detailRow != null ? detailRow.Keys.FirstOrDefault(k => k.Equals(fieldName, StringComparison.OrdinalIgnoreCase)) : null;
             var rowValue = isEdit && detailRow != null && foundKey != null && detailRow.TryGetValue(foundKey, out var val) ? val?.ToString() ?? "" : "";

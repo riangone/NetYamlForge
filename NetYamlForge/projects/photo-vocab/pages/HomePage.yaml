@@ -1,0 +1,77 @@
+title: 图片墙
+titleKey: projects.photo-vocab.pages.HomePage.title
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: gallery_kpi
+    title: 学习概览
+    titleKey: projects.photo-vocab.pages.HomePage.sections.gallery_kpi.title
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '已上传图片' WHEN 'ja-JP' THEN 'アップロード済み写真' WHEN 'ko-KR' THEN '업로드된 사진' ELSE 'Photos Uploaded' END) AS metric_name,
+        CAST(COUNT(*) AS TEXT) AS metric_value, '🖼️' AS metric_icon, NULL AS metric_delta
+      FROM PhotoEntry
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '已收录单词' WHEN 'ja-JP' THEN '登録済み単語' WHEN 'ko-KR' THEN '등록된 단어' ELSE 'Words Collected' END),
+        CAST(COUNT(*) AS TEXT), '📚', NULL
+      FROM VocabWord
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '答题次数' WHEN 'ja-JP' THEN '回答回数' WHEN 'ko-KR' THEN '응답 횟수' ELSE 'Quiz Attempts' END),
+        CAST(COUNT(*) AS TEXT), '✍️', NULL
+      FROM QuizRecord
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '正确率' WHEN 'ja-JP' THEN '正解率' WHEN 'ko-KR' THEN '정답률' ELSE 'Accuracy' END),
+        (CASE WHEN (SELECT COUNT(*) FROM QuizRecord) > 0
+             THEN CAST(ROUND(100.0 * (SELECT COUNT(*) FROM QuizRecord WHERE IsCorrect = 1) / (SELECT COUNT(*) FROM QuizRecord), 1) AS TEXT) || '%'
+             ELSE (CASE @currentLanguage WHEN 'zh-CN' THEN '暂无数据' WHEN 'ja-JP' THEN 'データなし' WHEN 'ko-KR' THEN '데이터 없음' ELSE 'No data yet' END) END), '🎯', NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 4
+    editable: false
+    readOnly: true
+
+  - id: photo_gallery
+    title: 我的图片
+    titleKey: projects.photo-vocab.pages.HomePage.sections.photo_gallery.title
+    component: card_list
+    sourceType: custom
+    source: |
+      SELECT Id,
+             COALESCE(NULLIF(Caption, ''), (CASE @currentLanguage
+                WHEN 'zh-CN' THEN '（AI 标注生成中…）'
+                WHEN 'ja-JP' THEN '（AI 注釈を生成中…）'
+                WHEN 'ko-KR' THEN '(AI 주석 생성 중…)'
+                ELSE '(AI caption generating…)' END)) AS title_text,
+             AnnotationLanguage AS subtitle_text,
+             (SELECT COUNT(*) FROM VocabWord w WHERE w.PhotoEntryId = PhotoEntry.Id) || (CASE @currentLanguage
+                WHEN 'zh-CN' THEN ' 个单词'
+                WHEN 'ja-JP' THEN ' 単語'
+                WHEN 'ko-KR' THEN '개 단어'
+                ELSE ' words' END) AS description_text,
+             ImageThumbnailBase64 AS image_url,
+             Caption AS lightbox_caption
+      FROM PhotoEntry
+      ORDER BY CreatedAt DESC
+      LIMIT 60
+    columns: [Id, title_text, subtitle_text, description_text, image_url, lightbox_caption]
+    titleField: title_text
+    subtitleField: subtitle_text
+    descriptionField: description_text
+    imageField: image_url
+    captionField: lightbox_caption
+    pageSize: 60
+    editable: false
+    readOnly: true

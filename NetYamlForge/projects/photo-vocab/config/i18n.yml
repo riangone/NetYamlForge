@@ -1,0 +1,226 @@
+translations:
+  projects.photo-vocab.pages.HomePage.title:
+    en-US: 'Photo Wall'
+    zh-CN: '图片墙'
+    ja-JP: '写真ウォール'
+    ko-KR: '사진 갤러리'
+  projects.photo-vocab.pages.HomePage.sections.gallery_kpi.title:
+    en-US: 'Overview'
+    zh-CN: '学习概览'
+    ja-JP: '概要'
+    ko-KR: '개요'
+  projects.photo-vocab.pages.HomePage.sections.photo_gallery.title:
+    en-US: 'My Photos'
+    zh-CN: '我的图片'
+    ja-JP: '私の写真'
+    ko-KR: '내 사진'
+
+  projects.photo-vocab.pages.PhotoUpload.title:
+    en-US: 'Upload Photo'
+    zh-CN: '上传图片'
+    ja-JP: '写真をアップロード'
+    ko-KR: '사진 업로드'
+  projects.photo-vocab.pages.PhotoUpload.sections.photo_upload_form.title:
+    en-US: 'Upload a new photo'
+    zh-CN: '上传新图片'
+    ja-JP: '新しい写真をアップロード'
+    ko-KR: '새 사진 업로드'
+  projects.photo-vocab.pages.PhotoUpload.fields.annotationLanguage:
+    en-US: 'Target language (the word to learn will be in this language; the meaning is generated in your current system language)'
+    zh-CN: '目标语言（要背的单词用这个语言，释义会自动用你当前系统语言生成）'
+    ja-JP: '対象言語（覚える単語はこの言語になります。意味は現在のシステム言語で自動生成されます）'
+    ko-KR: '대상 언어(외울 단어는 이 언어로 표시되며, 뜻은 현재 시스템 언어로 자동 생성됩니다)'
+  projects.photo-vocab.pages.PhotoUpload.fields.imageBase64:
+    en-US: 'Upload Photo'
+    zh-CN: '上传图片'
+    ja-JP: '写真をアップロード'
+    ko-KR: '사진 업로드'
+  projects.photo-vocab.pages.PhotoUpload.form.createTitle:
+    en-US: '📤 Upload a New Photo'
+    zh-CN: '📤 上传新图片'
+    ja-JP: '📤 新しい写真をアップロード'
+    ko-KR: '📤 새 사진 업로드'
+  projects.photo-vocab.pages.PhotoUpload.form.createDesc:
+    en-US: 'Pick any annotation language — the AI will write a caption and a few vocabulary words for you to learn.'
+    zh-CN: '标注语言可以任意选择，AI 会自动生成图片描述并挑选几个单词供你背诵。'
+    ja-JP: '注釈言語は自由に選べます。AI が画像の説明と、覚えるための単語をいくつか自動生成します。'
+    ko-KR: '주석 언어는 자유롭게 선택할 수 있습니다. AI가 사진 설명과 외울 단어 몇 개를 자동으로 생성합니다.'
+  projects.photo-vocab.pages.PhotoUpload.form.editTitle:
+    en-US: '✏️ Edit Photo'
+    zh-CN: '✏️ 编辑图片'
+    ja-JP: '✏️ 写真を編集'
+    ko-KR: '✏️ 사진 편집'
+
+  projects.photo-vocab.pages.Quiz.title:
+    en-US: 'Vocabulary Challenge'
+    zh-CN: '单词挑战'
+    ja-JP: '単語チャレンジ'
+    ko-KR: '단어 챌린지'
+  projects.photo-vocab.pages.Quiz.subtitle:
+    en-US: 'Pick a word from your recent photos — see how many you still remember'
+    zh-CN: '从最近上传的图片中挑选单词，测测你还记得多少'
+    ja-JP: '最近アップロードした写真から単語を出題します。どれだけ覚えているか試してみましょう'
+    ko-KR: '최근 업로드한 사진에서 단어를 골라 얼마나 기억하는지 확인해보세요'
+  projects.photo-vocab.pages.Quiz.photoPickerHint:
+    en-US: '📷 Want to practice one photo only? Pick one:'
+    zh-CN: '📷 只想练某张图片的单词？选一张：'
+    ja-JP: '📷 特定の写真だけ練習したい場合はこちらから選択：'
+    ko-KR: '📷 특정 사진의 단어만 연습하고 싶다면 선택하세요:'
+  projects.photo-vocab.pages.Quiz.allPhotos:
+    en-US: 'All Photos'
+    zh-CN: '全部图片'
+    ja-JP: 'すべての写真'
+    ko-KR: '전체 사진'
+  projects.photo-vocab.pages.Quiz.stats.correct:
+    en-US: 'Correct'
+    zh-CN: '本轮正确'
+    ja-JP: '今回の正解数'
+    ko-KR: '이번 정답 수'
+  projects.photo-vocab.pages.Quiz.stats.total:
+    en-US: 'Answered'
+    zh-CN: '本轮总数'
+    ja-JP: '今回の回答数'
+    ko-KR: '이번 응답 수'
+  projects.photo-vocab.pages.Quiz.stats.streak:
+    en-US: 'Streak'
+    zh-CN: '连对'
+    ja-JP: '連続正解'
+    ko-KR: '연속 정답'
+  projects.photo-vocab.pages.Quiz.empty.defaultTitle:
+    en-US: 'No words available yet'
+    zh-CN: '还没有可用的单词'
+    ja-JP: 'まだ利用できる単語がありません'
+    ko-KR: '아직 사용 가능한 단어가 없습니다'
+  projects.photo-vocab.pages.Quiz.empty.hintPrefix:
+    en-US: 'Go'
+    zh-CN: '先去'
+    ja-JP: 'まずは'
+    ko-KR: '먼저'
+  projects.photo-vocab.pages.Quiz.empty.hintSuffix:
+    en-US: 'first — pick any annotation language (e.g. English), the AI will generate meanings in your current system language automatically, so quiz questions will always be understandable.'
+    zh-CN: '，标注语言可以任意选择（比如英语），AI 会自动用你当前的系统语言生成释义，挑战时题目一定能看懂。'
+    ja-JP: 'してください。注釈言語は自由に選べます（例：英語）。AI が自動的に現在のシステム言語で意味を生成するため、チャレンジ時の問題は必ず理解できます。'
+    ko-KR: '해보세요. 주석 언어는 자유롭게 선택할 수 있으며(예: 영어), AI가 현재 시스템 언어로 자동으로 뜻을 생성하므로 문제를 이해할 수 있습니다.'
+  projects.photo-vocab.pages.Quiz.empty.photoEmpty:
+    en-US: 'No available words for this photo yet'
+    zh-CN: '这张图片下还没有可用单词'
+    ja-JP: 'この写真にはまだ利用できる単語がありません'
+    ko-KR: '이 사진에는 아직 사용 가능한 단어가 없습니다'
+  projects.photo-vocab.pages.Quiz.empty.languageEmpty:
+    en-US: 'No {lang} words available yet'
+    zh-CN: '还没有 {lang} 的可用单词'
+    ja-JP: 'まだ {lang} の単語がありません'
+    ko-KR: '아직 {lang} 단어가 없습니다'
+  projects.photo-vocab.pages.Quiz.nextButton:
+    en-US: 'Next →'
+    zh-CN: '下一题 →'
+    ja-JP: '次へ →'
+    ko-KR: '다음 →'
+  projects.photo-vocab.pages.Quiz.feedback.correct:
+    en-US: '✅ Correct!'
+    zh-CN: '✅ 回答正确！'
+    ja-JP: '✅ 正解です！'
+    ko-KR: '✅ 정답입니다!'
+  projects.photo-vocab.pages.Quiz.feedback.incorrectPrefix:
+    en-US: '❌ Correct answer: '
+    zh-CN: '❌ 正确答案：'
+    ja-JP: '❌ 正解：'
+    ko-KR: '❌ 정답: '
+
+  projects.photo-vocab.pages.Stats.title:
+    en-US: 'Learning Stats'
+    zh-CN: '学习统计'
+    ja-JP: '学習統計'
+    ko-KR: '학습 통계'
+  projects.photo-vocab.pages.Stats.sections.stats_kpi.title:
+    en-US: 'Overview'
+    zh-CN: '总览'
+    ja-JP: '概要'
+    ko-KR: '개요'
+  projects.photo-vocab.pages.Stats.sections.accuracy_by_language.title:
+    en-US: 'Accuracy by Language'
+    zh-CN: '各语言正确率'
+    ja-JP: '言語別正解率'
+    ko-KR: '언어별 정답률'
+  projects.photo-vocab.pages.Stats.sections.daily_practice.title:
+    en-US: 'Daily Practice Trend (14 days)'
+    zh-CN: '每日答题趋势（近 14 天）'
+    ja-JP: '日別学習推移（過去14日）'
+    ko-KR: '일별 학습 추세 (최근 14일)'
+  projects.photo-vocab.pages.Stats.sections.top_words.title:
+    en-US: '🏆 Top 10 Best-Known Words'
+    zh-CN: '🏆 正确率最高的单词 Top 10'
+    ja-JP: '🏆 正解率トップ10単語'
+    ko-KR: '🏆 정답률 상위 10개 단어'
+  projects.photo-vocab.pages.Stats.sections.recent_words.title:
+    en-US: '📝 Recently Added Words'
+    zh-CN: '📝 最近收录的单词'
+    ja-JP: '📝 最近追加された単語'
+    ko-KR: '📝 최근 추가된 단어'
+
+  projects.photo-vocab.pages.Stats.columns.word:
+    en-US: 'Word'
+    zh-CN: '单词'
+    ja-JP: '単語'
+    ko-KR: '단어'
+  projects.photo-vocab.pages.Stats.columns.accuracy:
+    en-US: 'Accuracy (%)'
+    zh-CN: '正确率'
+    ja-JP: '正解率'
+    ko-KR: '정답률'
+  projects.photo-vocab.pages.Stats.columns.attempts:
+    en-US: 'Attempts'
+    zh-CN: '作答次数'
+    ja-JP: '回答回数'
+    ko-KR: '응답 횟수'
+  projects.photo-vocab.pages.Stats.columns.meaning:
+    en-US: 'Meaning'
+    zh-CN: '释义'
+    ja-JP: '意味'
+    ko-KR: '뜻'
+  projects.photo-vocab.pages.Stats.columns.language:
+    en-US: 'Language'
+    zh-CN: '语言'
+    ja-JP: '言語'
+    ko-KR: '언어'
+  projects.photo-vocab.pages.Stats.columns.createdAt:
+    en-US: 'Added At'
+    zh-CN: '收录时间'
+    ja-JP: '登録日時'
+    ko-KR: '등록 시간'
+
+  projects.photo-vocab.entity.photo_entry.fields.id:
+    en-US: 'ID'
+    zh-CN: 'ID'
+    ja-JP: 'ID'
+    ko-KR: 'ID'
+  projects.photo-vocab.entity.photo_entry.fields.annotationLanguage:
+    en-US: 'Annotation Language'
+    zh-CN: '标注语言'
+    ja-JP: '注釈言語'
+    ko-KR: '주석 언어'
+  projects.photo-vocab.entity.photo_entry.fields.imageBase64:
+    en-US: 'Image Data'
+    zh-CN: '图片数据'
+    ja-JP: '画像データ'
+    ko-KR: '이미지 데이터'
+  projects.photo-vocab.entity.photo_entry.fields.imageThumbnailBase64:
+    en-US: 'Image Thumbnail'
+    zh-CN: '缩略图片数据'
+    ja-JP: '縮小画像データ'
+    ko-KR: '축소 이미지 데이터'
+  projects.photo-vocab.entity.photo_entry.fields.caption:
+    en-US: 'AI Caption'
+    zh-CN: 'AI 图片描述'
+    ja-JP: 'AI 画像説明'
+    ko-KR: 'AI 이미지 설명'
+  projects.photo-vocab.entity.photo_entry.fields.wordCount:
+    en-US: 'Extracted Word Count'
+    zh-CN: '提取单词数'
+    ja-JP: '抽出単語数'
+    ko-KR: '추출된 단어 수'
+  projects.photo-vocab.entity.photo_entry.fields.createdAt:
+    en-US: 'Uploaded At'
+    zh-CN: '上传时间'
+    ja-JP: 'アップロード日時'
+    ko-KR: '업로드 시간'

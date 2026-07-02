@@ -1,0 +1,45 @@
+name: photo-vocab
+displayName: Photo Vocab
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/photo-vocab.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: false
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Photo Vocab"
+  # 注意: config/layout.yml が存在する場合はそちらが優先され、この navigation ブロックは無視される
+  # (ProjectManager.LoadProjectAsync)。実際のナビはラベルのローカライズを含め config/layout.yml を編集すること。
+  navigation:
+    showDashboard: false
+    entities: []
+    items:
+      - label: 图片墙
+        labelKey: projects.photo-vocab.pages.HomePage.title
+        url: /photo-vocab/Page/HomePage
+        icon: 🖼️
+      - label: 上传图片
+        labelKey: projects.photo-vocab.pages.PhotoUpload.title
+        url: /photo-vocab/Page/PhotoUpload
+        icon: 📤
+      - label: 单词挑战
+        labelKey: projects.photo-vocab.pages.Quiz.title
+        url: /photo-vocab/Page/Quiz
+        icon: 🎯
+      - label: 学习统计
+        labelKey: projects.photo-vocab.pages.Stats.title
+        url: /photo-vocab/Page/Stats
+        icon: 📊
+
+home_page:
+  icon: "🖼️"
+  tagline: "Photo Vocab - 看图背单词"
+  tags: []

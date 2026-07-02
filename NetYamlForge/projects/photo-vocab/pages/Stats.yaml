@@ -1,0 +1,141 @@
+title: 学习统计
+titleKey: projects.photo-vocab.pages.Stats.title
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: stats_kpi
+    title: 总览
+    titleKey: projects.photo-vocab.pages.Stats.sections.stats_kpi.title
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '总图片数' WHEN 'ja-JP' THEN '写真総数' WHEN 'ko-KR' THEN '총 사진 수' ELSE 'Total Photos' END) AS metric_name,
+        CAST(COUNT(*) AS TEXT) AS metric_value, '🖼️' AS metric_icon, NULL AS metric_delta
+      FROM PhotoEntry
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '已收录单词数' WHEN 'ja-JP' THEN '登録済み単語数' WHEN 'ko-KR' THEN '등록된 단어 수' ELSE 'Words Collected' END),
+        CAST(COUNT(*) AS TEXT), '📚', NULL
+      FROM VocabWord
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '答题总次数' WHEN 'ja-JP' THEN '回答総回数' WHEN 'ko-KR' THEN '총 응답 횟수' ELSE 'Total Attempts' END),
+        CAST(COUNT(*) AS TEXT), '✍️', NULL
+      FROM QuizRecord
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '答对次数' WHEN 'ja-JP' THEN '正解数' WHEN 'ko-KR' THEN '정답 수' ELSE 'Correct Answers' END),
+        CAST(COUNT(*) AS TEXT), '✅', NULL
+      FROM QuizRecord WHERE IsCorrect = 1
+      UNION ALL
+      SELECT
+        (CASE @currentLanguage WHEN 'zh-CN' THEN '总体正确率' WHEN 'ja-JP' THEN '全体正解率' WHEN 'ko-KR' THEN '전체 정답률' ELSE 'Overall Accuracy' END),
+        (CASE WHEN (SELECT COUNT(*) FROM QuizRecord) > 0
+             THEN CAST(ROUND(100.0 * (SELECT COUNT(*) FROM QuizRecord WHERE IsCorrect = 1) / (SELECT COUNT(*) FROM QuizRecord), 1) AS TEXT) || '%'
+             ELSE (CASE @currentLanguage WHEN 'zh-CN' THEN '暂无数据' WHEN 'ja-JP' THEN 'データなし' WHEN 'ko-KR' THEN '데이터 없음' ELSE 'No data yet' END) END), '🎯', NULL
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  - id: accuracy_by_language
+    title: 各语言正确率
+    titleKey: projects.photo-vocab.pages.Stats.sections.accuracy_by_language.title
+    component: bar_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(Language, (CASE @currentLanguage WHEN 'zh-CN' THEN '未知' WHEN 'ja-JP' THEN '不明' WHEN 'ko-KR' THEN '알 수 없음' ELSE 'Unknown' END)) AS label,
+             ROUND(100.0 * SUM(CASE WHEN IsCorrect = 1 THEN 1 ELSE 0 END) / COUNT(*), 1) AS value
+      FROM QuizRecord
+      GROUP BY Language
+      ORDER BY value DESC
+    columns: [label, value]
+    xField: label
+    yField: value
+    color: "rgba(59, 130, 246, 0.75)"
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: daily_practice
+    title: 每日答题趋势（近 14 天）
+    titleKey: projects.photo-vocab.pages.Stats.sections.daily_practice.title
+    component: line_chart
+    sourceType: custom
+    source: |
+      SELECT DATE(AnsweredAt) AS label, COUNT(*) AS value
+      FROM QuizRecord
+      WHERE DATE(AnsweredAt) >= DATE('now', '-14 days')
+      GROUP BY DATE(AnsweredAt)
+      ORDER BY DATE(AnsweredAt)
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 14
+    editable: false
+    readOnly: true
+
+  - id: top_words
+    title: 🏆 正确率最高的单词 Top 10（至少作答 2 次）
+    titleKey: projects.photo-vocab.pages.Stats.sections.top_words.title
+    component: table
+    sourceType: custom
+    source: |
+      SELECT Word AS word_text,
+             ROUND(100.0 * SUM(CASE WHEN IsCorrect = 1 THEN 1 ELSE 0 END) / COUNT(*), 0) AS accuracy_pct,
+             COUNT(*) AS attempt_count
+      FROM QuizRecord
+      GROUP BY VocabWordId, Word
+      HAVING COUNT(*) >= 2
+      ORDER BY accuracy_pct DESC, attempt_count DESC
+      LIMIT 10
+    columns:
+      word_text:
+        label: 单词
+        labelKey: projects.photo-vocab.pages.Stats.columns.word
+      accuracy_pct:
+        label: 正确率
+        labelKey: projects.photo-vocab.pages.Stats.columns.accuracy
+      attempt_count:
+        label: 作答次数
+        labelKey: projects.photo-vocab.pages.Stats.columns.attempts
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  - id: recent_words
+    title: 📝 最近收录的单词
+    titleKey: projects.photo-vocab.pages.Stats.sections.recent_words.title
+    component: table
+    sourceType: custom
+    source: |
+      SELECT Word AS word_text, Meaning AS meaning_text, Language AS language_text, CreatedAt AS created_at_text
+      FROM VocabWord
+      ORDER BY CreatedAt DESC
+      LIMIT 30
+    columns:
+      word_text:
+        label: 单词
+        labelKey: projects.photo-vocab.pages.Stats.columns.word
+      meaning_text:
+        label: 释义
+        labelKey: projects.photo-vocab.pages.Stats.columns.meaning
+      language_text:
+        label: 语言
+        labelKey: projects.photo-vocab.pages.Stats.columns.language
+      created_at_text:
+        label: 收录时间
+        labelKey: projects.photo-vocab.pages.Stats.columns.createdAt
+    pageSize: 30
+    editable: false
+    readOnly: true

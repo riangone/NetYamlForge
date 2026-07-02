@@ -1,0 +1,111 @@
+imports: []
+entities:
+  vocab_word:
+    table: VocabWord
+    key: Id
+    displayName: 单词
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    joins:
+      - type: left
+        table: PhotoEntry
+        alias: p
+        on: "VocabWord.PhotoEntryId = p.Id"
+
+    forms:
+      PhotoEntryId:
+        type: int
+        required: true
+        label: 来源图片ID
+        editable: true
+      Word:
+        type: string
+        required: true
+        label: 单词
+        editable: true
+      Meaning:
+        type: textarea
+        required: true
+        label: 释义
+        editable: true
+      Example:
+        type: textarea
+        label: 例句
+        editable: true
+      Language:
+        type: string
+        label: 单词语言
+        editable: true
+      NativeLanguage:
+        type: string
+        label: 释义语言
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      PhotoEntryId:
+        type: int
+        label: 来源图片ID
+        sortable: true
+      Word:
+        type: string
+        label: 单词
+        searchable: true
+        sortable: true
+      Meaning:
+        type: string
+        label: 释义
+        searchable: true
+      Example:
+        type: string
+        label: 例句
+      Language:
+        type: string
+        label: 单词语言
+        sortable: true
+      NativeLanguage:
+        type: string
+        label: 释义语言
+        sortable: true
+      PhotoThumbnail:
+        type: string
+        label: 来源图片缩略图
+        expression: p.ImageThumbnailBase64
+      PhotoCaption:
+        type: string
+        label: 来源图片描述
+        expression: p.Caption
+      CreatedAt:
+        type: datetime
+        label: 收录时间
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [Word, Language, NativeLanguage, Meaning, Example, PhotoEntryId]
+      filters:
+        columns: 2
+        order: [Word, Language, NativeLanguage]
+
+    filters:
+      Word:
+        type: like
+        label: 单词
+      Language:
+        type: equal
+        label: 单词语言
+      NativeLanguage:
+        type: equal
+        label: 释义语言

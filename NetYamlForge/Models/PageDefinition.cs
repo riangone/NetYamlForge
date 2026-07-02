@@ -116,7 +116,24 @@ public class SectionColumnDef : IColumnDef
 public class SectionFormGroupDef
 {
     public string? Title { get; set; }
+    public string? TitleKey { get; set; }
+    public Dictionary<string, string>? TitleI18n { get; set; }
+    public string? Description { get; set; }
+    public string? DescriptionKey { get; set; }
+    public Dictionary<string, string>? DescriptionI18n { get; set; }
     public List<string> Fields { get; set; } = new();
+
+    /// <summary>未設定時は null（呼び出し側で汎用フォールバック文言を使う）。</summary>
+    public string? GetTitle() =>
+        string.IsNullOrWhiteSpace(Title) && string.IsNullOrWhiteSpace(TitleKey) && (TitleI18n == null || TitleI18n.Count == 0)
+            ? null
+            : I18nText.Resolve(TitleI18n, Title ?? "", TitleKey);
+
+    /// <summary>未設定時は null（呼び出し側で汎用フォールバック文言を使う）。</summary>
+    public string? GetDescription() =>
+        string.IsNullOrWhiteSpace(Description) && string.IsNullOrWhiteSpace(DescriptionKey) && (DescriptionI18n == null || DescriptionI18n.Count == 0)
+            ? null
+            : I18nText.Resolve(DescriptionI18n, Description ?? "", DescriptionKey);
 }
 
 /// <summary>

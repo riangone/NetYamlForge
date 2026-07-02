@@ -5,17 +5,20 @@
 
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using Dapper;
 using NetYamlForge.Controllers;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -28,6 +31,16 @@ namespace NetYamlForge.Tests;
 /// </summary>
 public class DashboardControllerTests
 {
+    private sealed class TestWebHostEnvironment : IWebHostEnvironment
+    {
+        public string ApplicationName { get; set; } = "TestApp";
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
+        public string ContentRootPath { get; set; } = Directory.GetCurrentDirectory();
+        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
+        public string WebRootPath { get; set; } = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        public string EnvironmentName { get; set; } = "Test";
+    }
+
     // ── 正常系テスト ─────────────────────────────────────────────────────────
 
     [Fact]
@@ -318,7 +331,8 @@ public class DashboardControllerTests
             metaProvider,
             db,
             scope,
-            NullLogger<DashboardController>.Instance)
+            NullLogger<DashboardController>.Instance,
+            new TestWebHostEnvironment())
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };

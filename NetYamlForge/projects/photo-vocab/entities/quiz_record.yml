@@ -1,0 +1,91 @@
+imports: []
+entities:
+  quiz_record:
+    table: QuizRecord
+    key: Id
+    displayName: 答题记录
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    joins: []
+
+    forms:
+      VocabWordId:
+        type: int
+        required: true
+        label: 单词ID
+        editable: true
+      Word:
+        type: string
+        required: true
+        label: 单词
+        editable: true
+      Language:
+        type: string
+        label: 语言
+        editable: true
+      UserAnswer:
+        type: string
+        label: 用户作答
+        editable: true
+      IsCorrect:
+        type: int
+        label: 是否正确
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      VocabWordId:
+        type: int
+        label: 单词ID
+        sortable: true
+      Word:
+        type: string
+        label: 单词
+        searchable: true
+        sortable: true
+      Language:
+        type: string
+        label: 语言
+        sortable: true
+      UserAnswer:
+        type: string
+        label: 用户作答
+      IsCorrect:
+        type: int
+        label: 是否正确
+        sortable: true
+      AnsweredAt:
+        type: datetime
+        label: 作答时间
+        sortable: true
+
+    hooks:
+      beforeCreate:
+        - now:AnsweredAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order: [VocabWordId, Word, Language, UserAnswer, IsCorrect]
+      filters:
+        columns: 2
+        order: [Language, IsCorrect]
+
+    filters:
+      Language:
+        type: equal
+        label: 语言
+      IsCorrect:
+        type: equal
+        label: 是否正确
