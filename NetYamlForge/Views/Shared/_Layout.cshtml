@@ -31,6 +31,7 @@
     <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
     <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
     <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
+    <link rel="manifest" href="@Url.Content("~/manifest.json")" />
     @await RenderSectionAsync("Styles", required: false)
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
 </head>
@@ -964,6 +965,28 @@
             var type = evt.detail && evt.detail.type    ? evt.detail.type    : 'info';
             if (msg) showToast(msg, type);
         });
+    </script>
+    <script>
+        // PWA Service Worker 注册
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                // 诊断 PWA 安装条件
+                var isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                if (!isSecure) {
+                    console.warn('[PWA Diagnostic] 当前页面并非在 HTTPS 或 localhost 下访问，浏览器将限制 PWA 的安装提示和 Service Worker 激活！请通过 HTTPS 或 localhost 访问以测试安装。');
+                }
+
+                var pathBase = window.NetYamlForgeConfig ? (window.NetYamlForgeConfig.pathBase || '') : '';
+                var swUrl = '@Url.Content("~/service-worker.js")' + '?pathBase=' + encodeURIComponent(pathBase);
+                navigator.serviceWorker.register(swUrl)
+                    .then(function (registration) {
+                        console.log('ServiceWorker 注册成功，作用域为: ', registration.scope);
+                    })
+                    .catch(function (error) {
+                        console.error('ServiceWorker 注册失败: ', error);
+                    });
+            });
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

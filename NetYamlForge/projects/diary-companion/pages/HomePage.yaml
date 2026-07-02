@@ -1,4 +1,5 @@
-title: 智能日记首页
+title: Home
+titleKey: projects.diary-companion.pages.HomePage.title
 isPublic: true
 
 ui:
@@ -8,7 +9,7 @@ ui:
 
 sections:
   - id: diary_list
-    title: 我的日记列表
+    titleKey: projects.diary-companion.pages.HomePage.sections.diary_list.title
     sourceType: custom
     source: >
       SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageThumbnailBase64, ImageLabel
@@ -24,7 +25,7 @@ sections:
     targetTable: DiaryEntry
 
   - id: mood_stats
-    title: 情绪分布
+    titleKey: projects.diary-companion.pages.HomePage.sections.mood_stats.title
     sourceType: custom
     source: >
       SELECT MoodBefore, COUNT(*) AS count
@@ -35,4 +36,4 @@ sections:
     editable: false
     readOnly: true
     component: mood_board
-    description: "日记不仅是发生事情的记录，更是你与自己对话的容器。无论今天天气如何，心情怎样，写下来，本身就是一种治愈的过程。"
+    descriptionKey: projects.diary-companion.pages.HomePage.sections.mood_stats.description

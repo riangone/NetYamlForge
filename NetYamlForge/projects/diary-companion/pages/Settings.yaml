@@ -1,4 +1,5 @@
-title: 系统偏好设置
+title: Settings
+titleKey: projects.diary-companion.pages.Settings.title
 isPublic: true
 
 ui:
@@ -8,7 +9,7 @@ ui:
 
 sections:
   - id: settings_section
-    title: 偏好设置
+    titleKey: projects.diary-companion.pages.Settings.sections.settings_section.title
     sourceType: custom
     source: "SELECT 1 AS DummyId"
     columns: [DummyId]

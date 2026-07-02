@@ -13,18 +13,21 @@ entities:
         type: string
         required: true
         label: 日记标题
+        labelKey: projects.diary-companion.entity.diary_entry.fields.title
         editable: true
         placeholder: "今天发生了什么有趣的事？"
       Content:
         type: textarea
         required: false
         label: 日记内容
+        labelKey: projects.diary-companion.entity.diary_entry.fields.content
         editable: true
         placeholder: "写下你的心情、所思所想..."
       Weather:
         type: string
         required: true
         label: 今日天气
+        labelKey: projects.diary-companion.entity.diary_entry.fields.weather
         editable: true
         options:
           - 晴朗
@@ -37,6 +40,7 @@ entities:
         type: string
         required: true
         label: 记录前心情
+        labelKey: projects.diary-companion.entity.diary_entry.fields.moodBefore
         editable: true
         options:
           - 喜悦
@@ -49,79 +53,117 @@ entities:
         type: string
         required: false
         label: 地理位置
+        labelKey: projects.diary-companion.entity.diary_entry.fields.location
         editable: true
         placeholder: "你在哪里写下这篇日记？(可选)"
       ImageBase64:
         type: string
         label: 上传图片
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageBase64
         editable: true
         placeholder: "点击或拖拽上传图片"
       ImageThumbnailBase64:
         type: string
         label: 缩略图片数据
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageThumbnailBase64
         editable: true
       ImageLabel:
         type: string
         label: 图片标注
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageLabel
         editable: true
         placeholder: "为图片写一段标注"
       Sentiment:
         type: string
         label: AI 情绪评估
+        labelKey: projects.diary-companion.entity.diary_entry.fields.sentiment
         editable: true
         placeholder: "保存后由 AI 自动评估"
       AiResponse:
         type: textarea
         label: AI 心灵伴侣寄语
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiResponse
         editable: true
         placeholder: "保存后由 AI 为你写下暖心寄语"
+      AiLanguage:
+        type: string
+        required: false
+        label: AI 评估语言
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiLanguage
+        editable: true
+        options:
+          - zh-CN
+          - en-US
+          - ja-JP
+          - ko-KR
+        optionLabels:
+          zh-CN: 简体中文
+          en-US: English
+          ja-JP: 日本語
+          ko-KR: 한국어
 
     columns:
       Id:
         type: int
         identity: true
         label: ID
+        labelKey: projects.diary-companion.entity.diary_entry.fields.id
         sortable: true
       Title:
         type: string
         label: 日记标题
+        labelKey: projects.diary-companion.entity.diary_entry.fields.title
         searchable: true
         sortable: true
       Content:
         type: string
         label: 日记内容
+        labelKey: projects.diary-companion.entity.diary_entry.fields.content
       Weather:
         type: string
         label: 天气
+        labelKey: projects.diary-companion.entity.diary_entry.fields.weather
         sortable: true
       MoodBefore:
         type: string
         label: 记录前心情
+        labelKey: projects.diary-companion.entity.diary_entry.fields.moodBefore
         sortable: true
       Location:
         type: string
         label: 地理位置
+        labelKey: projects.diary-companion.entity.diary_entry.fields.location
         searchable: true
         sortable: true
       ImageBase64:
         type: string
         label: 图片数据
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageBase64
       ImageThumbnailBase64:
         type: string
         label: 缩略图片数据
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageThumbnailBase64
       ImageLabel:
         type: string
         label: 图片标注
+        labelKey: projects.diary-companion.entity.diary_entry.fields.imageLabel
       Sentiment:
         type: string
         label: AI 情绪评估
+        labelKey: projects.diary-companion.entity.diary_entry.fields.sentiment
         sortable: true
       AiResponse:
         type: string
         label: AI 心灵伴侣寄语
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiResponse
+      AiLanguage:
+        type: string
+        label: AI 评估语言
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiLanguage
       CreatedAt:
         type: datetime
         label: 记录时间
+        labelKey: projects.diary-companion.entity.diary_entry.fields.createdAt
         sortable: true
 
     hooks:
@@ -143,6 +185,7 @@ entities:
           - Title
           - Weather
           - MoodBefore
+          - AiLanguage
           - Location
           - ImageBase64
           - ImageLabel
@@ -160,6 +203,7 @@ entities:
       Weather:
         type: dropdown
         label: 天气
+        labelKey: projects.diary-companion.entity.diary_entry.fields.weather
         options:
           - 晴朗
           - 多云
@@ -170,6 +214,7 @@ entities:
       MoodBefore:
         type: dropdown
         label: 记录前心情
+        labelKey: projects.diary-companion.entity.diary_entry.fields.moodBefore
         options:
           - 喜悦
           - 平静
@@ -180,6 +225,7 @@ entities:
       Sentiment:
         type: dropdown
         label: AI 情绪评估
+        labelKey: projects.diary-companion.entity.diary_entry.fields.sentiment
         options:
           - 积极
           - 平和

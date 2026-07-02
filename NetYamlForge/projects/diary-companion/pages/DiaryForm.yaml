@@ -1,4 +1,5 @@
-title: 记录我的心路历程
+title: Diary Form
+titleKey: projects.diary-companion.pages.DiaryForm.title
 isPublic: true
 
 ui:
@@ -8,13 +9,13 @@ ui:
 
 sections:
   - id: diary_detail
-    title: 日记详情
+    titleKey: projects.diary-companion.pages.DiaryForm.sections.diary_detail.title
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage
       FROM DiaryEntry
       WHERE Id = @id
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel]
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage]
     pageSize: 1
     editable: false
     readOnly: true
@@ -24,18 +25,20 @@ sections:
       create:
         fields:
           - Title
-          - Location
           - Weather
           - MoodBefore
+          - AiLanguage
+          - Location
           - ImageBase64
           - ImageLabel
           - Content
       edit:
         fields:
           - Title
-          - Location
           - Weather
           - MoodBefore
+          - AiLanguage
+          - Location
           - ImageBase64
           - ImageLabel
           - Content
@@ -68,4 +71,13 @@ sections:
         type: string
         required: false
         label: 图片标注
+      AiLanguage:
+        type: select
+        required: false
+        label: AI 评估语言
+        options:
+          zh-CN: 简体中文
+          en-US: English
+          ja-JP: 日本語
+          ko-KR: 한국어
 

@@ -2,20 +2,20 @@ header:
   title: Diary Companion
 
 navigation:
-  showDashboard: true
+  showDashboard: false
   entities: []
   items:
-    - label: Home
-      url: /diary-companion
+    - label: 首页
+      url: /diary-companion/Page/HomePage
       icon: 🏠
-    - label: Dashboard
+    - label: 情绪分析
       controller: Dashboard
       action: Index
       icon: 📊
-    - label: Schema
-      controller: DynamicEntity
-      action: AllDefinitions
-      icon: 🧩
+    - label: 应用设置
+      url: /diary-companion/Page/Settings
+      icon: ⚙️
 
 footer:
-  text: "Diary Companion — powered by NetYamlForge"
+  text: "✨ 智能心灵日记伴侣 — powered by NetYamlForge"
+

@@ -364,6 +364,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
         await EnsurePermissionAsync(meta, "write");
+        await VerifyFieldWritePermissionsAsync(meta, values);
 
         var hasAutoIncrementIdentity = meta.Columns.Any(c => c.Value.Identity);
 
@@ -396,6 +397,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
         await EnsurePermissionAsync(meta, "write");
+        await VerifyFieldWritePermissionsAsync(meta, values);
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
@@ -441,6 +443,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var meta = _meta.Get(entity);
         ValidateMetadata(meta, entity);
         await EnsurePermissionAsync(meta, "write");
+        await VerifyFieldWritePermissionsAsync(meta, values);
         var pkColumns = meta.GetPrimaryKeyColumns();
 
         var valuesKeysStr = string.Join(",", values.Keys.OrderBy(k => k));
@@ -1240,6 +1243,40 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         if (!hasAccess)
         {
             throw new UnauthorizedAccessException($"User does not have '{action}' permission on entity {meta.Table}.");
+        }
+    }
+
+    private async Task VerifyFieldWritePermissionsAsync(EntityDefinition meta, IDictionary<string, object?> values)
+    {
+        if (values == null || values.Count == 0) return;
+
+        var roles = await GetCurrentUserRolesAsync();
+        var httpContext = _httpContextAccessor?.HttpContext;
+        var user = httpContext?.User;
+        var isAdmin = user?.Identity?.IsAuthenticated == true && user.IsInRole("Admin");
+
+        foreach (var kv in values)
+        {
+            var fieldName = kv.Key;
+            FieldSecurityDefinition? fieldSec = null;
+
+            if (meta.Columns.TryGetValue(fieldName, out var colDef))
+            {
+                fieldSec = colDef.Security;
+            }
+            else if (meta.Forms.TryGetValue(fieldName, out var formDef))
+            {
+                fieldSec = formDef.Security;
+            }
+
+            if (fieldSec?.WriteRoles != null && fieldSec.WriteRoles.Count > 0)
+            {
+                var hasWriteRole = isAdmin || roles.Any(r => fieldSec.WriteRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase)));
+                if (!hasWriteRole)
+                {
+                    throw new UnauthorizedAccessException($"User does not have write permission for field '{fieldName}' on entity '{meta.Table}'.");
+                }
+            }
         }
     }
 

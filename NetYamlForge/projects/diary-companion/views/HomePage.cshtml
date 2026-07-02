@@ -5,7 +5,8 @@
     var pageDef = (PageDefinition)ViewData["PageDef"]!;
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "diary-companion";
     var pageName = ViewData["PageName"] as string ?? "HomePage";
-    ViewData["Title"] = "智能日记伴侣 — 主页";
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+    ViewData["Title"] = T("projects.diary-companion.pages.HomePage.title", "智能日记伴侣 — 主页");
 
     var diaryList = Model.TryGetValue("diary_list", out var diarySection)
         ? diarySection.Rows.ToList()
@@ -61,25 +62,25 @@
     <header class="relative overflow-hidden rounded-3xl mb-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border border-purple-100 shadow-sm p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="space-y-3 max-w-xl">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-purple-200 shadow-sm text-xs font-semibold text-purple-700">
-                <span>✨</span> 智能心灵日记伴侣
+                <span>✨</span> @T("projects.diary-companion.views.home.hero_subtitle", "智能心灵日记伴侣")
             </div>
             <h1 class="text-3xl font-extrabold tracking-tight text-gray-800">
-                记录日常，读懂内心。
+                @T("projects.diary-companion.views.home.hero_title", "记录日常，读懂内心。")
             </h1>
             <p class="text-sm text-gray-600 leading-relaxed">
-                这里是你的专属秘密花园。写下喜怒哀乐，AI 伴侣将悉心聆听并为你提供专属的暖心寄语与情绪分析。
+                @T("projects.diary-companion.views.home.hero_desc", "这里是你的专属秘密花园。写下喜怒哀乐，AI 伴侣将悉心聆听并为你提供专属的暖心寄语与情绪分析。")
             </p>
             <div class="pt-2">
                 <a href="@newDiaryUrl" class="btn btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 hover:shadow-lg transition-all flex items-center gap-2 w-fit">
-                    <span>✍️</span> 开始记录今天
+                    <span>✍️</span> @T("projects.diary-companion.views.home.start_btn", "开始记录今天")
                 </a>
             </div>
         </div>
         <div class="hidden md:flex items-center justify-center p-6 bg-white rounded-2xl border border-purple-100 shadow-sm w-72 shrink-0">
             <div class="text-center space-y-2">
                 <div class="text-5xl animate-bounce">📔</div>
-                <div class="text-sm font-bold text-gray-700">总共记录了 @diaryList.Count 篇日记</div>
-                <div class="text-xs text-gray-400">生活有迹可循，每一天都值得铭记</div>
+                <div class="text-sm font-bold text-gray-700">@Html.Raw(string.Format(T("projects.diary-companion.views.home.total_count", "总共记录了 {0} 篇日记"), diaryList.Count))</div>
+                <div class="text-xs text-gray-400">@T("projects.diary-companion.views.home.hero_right_desc", "生活有迹可循，每一天都值得铭记")</div>
             </div>
         </div>
     </header>

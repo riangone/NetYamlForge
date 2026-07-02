@@ -17,18 +17,17 @@ layout:
   header:
     title: "Diary Companion"
   navigation:
-    showDashboard: true
-    entities:
-      - mood_insight
+    showDashboard: false
+    entities: []
     items:
-      - label: Home
+      - label: 首页
         url: /diary-companion/Page/HomePage
         icon: 🏠
-      - label: Dashboard
+      - label: 情绪分析
         controller: Dashboard
         action: Index
         icon: 📊
-      - label: 设置
+      - label: 应用设置
         url: /diary-companion/Page/Settings
         icon: ⚙️
 

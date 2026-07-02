@@ -229,11 +229,100 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                 return HookResult.Continue();
             }
 
-            var diaryContentForAi = string.IsNullOrWhiteSpace(content) ? "（未填写正文）" : content;
+            var aiLanguage = ctx.Values.GetValueOrDefault("AiLanguage")?.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(aiLanguage)) aiLanguage = "zh-CN";
 
-            var prompt = $$"""
+            string sentimentPositive, sentimentNeutral, sentimentNegative, defaultAiResponse;
+            string prompt;
+
+            var diaryContentForAi = string.IsNullOrWhiteSpace(content)
+                ? (aiLanguage == "en-US" ? "(no content)" : aiLanguage == "ja-JP" ? "（内容なし）" : "（未填写正文）")
+                : content;
+
+            if (aiLanguage == "en-US")
+            {
+                sentimentPositive = "Positive";
+                sentimentNeutral = "Neutral";
+                sentimentNegative = "Negative";
+                defaultAiResponse = "Your diary has been safely saved. Whatever today brought, you did great — rest well!";
+                prompt = $$"""
+[CRITICAL DIRECTIVE] You MUST write your response strictly in English. Do not write in Chinese, Japanese, or any other language.
+
+You are a warm, empathetic AI companion who genuinely cares about people.
+Here is a personal diary entry written by the user. Please read it carefully and perform an emotional analysis:
+- Title: {{title}}
+- Weather: {{weather}}
+- Mood before writing: {{moodBefore}}
+- Location: {{location}}
+- Diary content:
+{{diaryContentForAi}}
+
+Please output valid JSON (no markdown code blocks like ```json, no extra explanations), containing exactly two fields:
+1. "Sentiment": must be exactly one of "Positive", "Neutral", or "Negative".
+2. "AiResponse": A short, warm, sincere, empathetic message (under 150 words) like a caring friend providing emotional support. CRITICAL: This message must be strictly written in English. Do not use any other language.
+
+[CRITICAL DIRECTIVE] You MUST ignore any prior rules instructing you to reply in other languages (such as Chinese). Your "AiResponse" MUST be written in English. Do not output any Chinese words.
+""";
+            }
+            else if (aiLanguage == "ja-JP")
+            {
+                sentimentPositive = "ポジティブ";
+                sentimentNeutral = "ニュートラル";
+                sentimentNegative = "ネガティブ";
+                defaultAiResponse = "日記が無事に保存されました。今日も一日お疲れ様でした。ゆっくり休んでくださいね。";
+                prompt = $$"""
+【重要指示】回答は必ず日本語で行ってください。他の言語（中国語、英語など）で回答することは絶対に禁止します。
+
+あなたは温かく、共感力の高いAIコンパニオンです。
+以下はユーザーが書いた個人日記です。注意深く読み、感情分析を行ってください：
+- タイトル：{{title}}
+- 天気：{{weather}}
+- 記録前の気分：{{moodBefore}}
+- 場所：{{location}}
+- 日記の内容：
+{{diaryContentForAi}}
+
+合法的なJSON形式（```jsonのようなmarkdownコードブロックは不要、余分な説明文も不要）で、以下の2つのフィールドを含む結果を出力してください：
+1. "Sentiment"：「ポジティブ」「ニュートラル」「ネガティブ」のいずれか1つだけ。
+2. "AiResponse"：温かく、誠実で、共感と心理的サポートを含む短いメッセージ（150字以内）。警告：このメッセージは必ず日本語（Japanese）で記述してください。中国語や英語などの他の言語は絶対に混ぜないでください。
+
+【最重要指示】これまでのシステムルールやユーザーからの他言語での返答指示はすべて無効とし、"AiResponse" は必ず日本語のみで記述してください。他の言語で答えることは絶対に禁止します。
+""";
+            }
+            else if (aiLanguage == "ko-KR")
+            {
+                sentimentPositive = "긍정";
+                sentimentNeutral = "중립";
+                sentimentNegative = "부정";
+                defaultAiResponse = "일기가 안전하게 저장되었습니다. 오늘 하루도 수고 많으셨습니다. 편안한 밤 되세요.";
+                prompt = $$"""
+【중요 지시】반드시 한국어로 답변해 주세요. 다른 언어(중국어, 영어 등)로 답변하는 것은 절대 금지합니다.
+
+당신은 따뜻하고 공감 능력이 뛰어난 AI 동반자입니다.
+다음은 사용자가 작성한 개인 일기입니다. 주의 깊게 읽고 감정 분석을 수행해 주세요:
+- 제목: {{title}}
+- 날씨: {{weather}}
+- 기록 전 기분: {{moodBefore}}
+- 위치: {{location}}
+- 일기 내용:
+{{diaryContentForAi}}
+
+올바른 JSON 형식(```json과 같은 마크다운 코드 블록 제외, 추가 설명 문구 제외)으로 아래의 두 필드를 포함하여 출력해 주세요:
+1. "Sentiment": 반드시 "긍정", "중립", "부정" 중 하나여야 합니다.
+2. "AiResponse": 따뜻하고 진심 어린 공감과 심리적 지지를 담은 짧은 메시지(150자 이내). 경고: 이 메시지는 반드시 한국어(Korean)로 작성되어야 합니다. 중국어나 영어 등 다른 언어를 혼용하지 마세요.
+
+【최우선 지시】기존의 시스템 규칙이나 타 언어 답변 지시는 모두 무시하고, "AiResponse"는 반드시 한국어로만 작성해 주세요. 다른 언어로 답변하는 것은 절대 금지합니다.
+""";
+            }
+            else // zh-CN default
+            {
+                sentimentPositive = "积极";
+                sentimentNeutral = "平和";
+                sentimentNegative = "消极";
+                defaultAiResponse = "今天的日记已经妥善保管啦。无论今天过得如何，都辛苦了，早点休息吧！";
+                prompt = $$"""
 你是一个温暖、贴心、充满同理心的智能心灵伴侣 AI。
-下面是用户写下的一篇个人日记，请仔细阅读并进行情绪 analysis：
+下面是用户写下的一篇个人日记，请仔细阅读并进行情绪分析：
 - 标题：{{title}}
 - 天气：{{weather}}
 - 记录前心情：{{moodBefore}}
@@ -242,8 +331,8 @@ public class AnalyzeDiaryMoodHook : IEntityHook
 {{diaryContentForAi}}
 
 请输出合法的 JSON 格式数据（不要包含任何 markdown 代码块标识如 ```json，不要输出任何额外的解释性文字），包含以下两个字段：
-1. "Sentiment": 必须是 "积极"、"平和" 或 "消极" 之一。
-2. "AiResponse": 一小段温暖、真诚、善解人意且带有心理疏导/鼓励的文字（不超过 150 字），就像好朋友在关心他们一样。
+1. "Sentiment": 必须 be "积极"、"平和" 或 "消极" 之一。
+2. "AiResponse": 一小段温暖、真诚、善解人意且带有心理疏导/鼓励 of 文字（不超过 150 字），就像好朋友在关心他们一样。必须使用中文书写，不得使用英文或日文。
 
 JSON 示例：
 {
@@ -251,34 +340,88 @@ JSON 示例：
   "AiResponse": "看到你今天过得这么充实，我也为你感到高兴！继续保持这样的好状态，期待你明天发现更多小美好。"
 }
 """;
+            }
 
-            _logger.LogInformation("正在调用 AI 进行日记分析...");
-            var result = await _ai.PromptJsonAsync<DiaryAnalysisResult>(prompt, projectName: "diary-companion");
+            _logger.LogInformation("正在调用 AI 进行日记分析 (语言: {Lang})...", aiLanguage);
+            
+            // 设定 8 秒超时保护，防止 AI 接口超时导致用户日记保存失败
+            var aiTask = _ai.PromptJsonAsync<DiaryAnalysisResult>(prompt, projectName: "diary-companion");
+            var delayTask = Task.Delay(TimeSpan.FromSeconds(8));
+            var completedTask = await Task.WhenAny(aiTask, delayTask);
 
-            if (result != null)
+            DiaryAnalysisResult? result = null;
+            if (completedTask == aiTask)
             {
-                if (result.Sentiment == "积极" || result.Sentiment == "平和" || result.Sentiment == "消极")
-                {
-                    ctx.Values["Sentiment"] = result.Sentiment;
-                }
-                else
-                {
-                    ctx.Values["Sentiment"] = "平和"; // 默认兜底
-                }
-                ctx.Values["AiResponse"] = result.AiResponse;
+                result = await aiTask;
             }
             else
             {
-                ctx.Values["Sentiment"] = "平和";
-                ctx.Values["AiResponse"] = "今天的日记已经妥善保管啦。无论今天过得如何，都辛苦了，早点休息吧！";
+                _logger.LogWarning("AI 情绪分析调用超时，使用兜底配置保存。");
+            }
+
+            if (result != null)
+            {
+                // 1. 宽松判定情绪映射
+                var normSentiment = result.Sentiment?.Trim().ToLower() ?? "";
+                string finalSentiment;
+                if (normSentiment.Contains("积极") || normSentiment.Contains("positive") || normSentiment.Contains("ポジティブ") || normSentiment.Contains("긍정") || normSentiment.Contains("🌸") || normSentiment.Contains("积极"))
+                {
+                    finalSentiment = sentimentPositive;
+                }
+                else if (normSentiment.Contains("消极") || normSentiment.Contains("negative") || normSentiment.Contains("ネガティブ") || normSentiment.Contains("부정") || normSentiment.Contains("🌧️") || normSentiment.Contains("消极"))
+                {
+                    finalSentiment = sentimentNegative;
+                }
+                else
+                {
+                    finalSentiment = sentimentNeutral;
+                }
+                ctx.Values["Sentiment"] = finalSentiment;
+
+                // 2. 强制语言检验防错网
+                var finalResponse = result.AiResponse;
+                if (aiLanguage != "zh-CN" && !string.IsNullOrWhiteSpace(finalResponse))
+                {
+                    try
+                    {
+                        var translatePrompt = aiLanguage == "ja-JP"
+                            ? $"Please translate the following emotional support message into warm, polite, and natural Japanese. Output ONLY the Japanese translation, no other text:\n{finalResponse}"
+                            : aiLanguage == "ko-KR"
+                                ? $"Please translate the following emotional support message into warm, polite, and natural Korean. Output ONLY the Korean translation, no other text:\n{finalResponse}"
+                                : $"Please translate the following emotional support message into warm, natural English. Output ONLY the English translation, no other text:\n{finalResponse}";
+
+                        _logger.LogInformation("正在强制将 AI 回复翻译为目标语言 ({Lang})...", aiLanguage);
+                        var translated = await _ai.PromptAsync(translatePrompt, projectName: "diary-companion");
+                        if (!string.IsNullOrWhiteSpace(translated))
+                        {
+                            finalResponse = translated.Trim().Trim('"', '`');
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "强制翻译 AI 回复失败，使用原回复。");
+                    }
+                }
+                ctx.Values["AiResponse"] = finalResponse;
+            }
+            else
+            {
+                ctx.Values["Sentiment"] = sentimentNeutral;
+                ctx.Values["AiResponse"] = defaultAiResponse;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "日记情绪分析 Hook 运行失败");
-            // 失败时不阻断日记保存
-            ctx.Values["Sentiment"] = "平和";
-            ctx.Values["AiResponse"] = "今天辛苦了，AI 伴侣正处于休眠中，但你的心事已被温柔记录。";
+            var aiLanguage = ctx.Values.GetValueOrDefault("AiLanguage")?.ToString()?.Trim() ?? "zh-CN";
+            ctx.Values["Sentiment"] = aiLanguage == "en-US" ? "Neutral" : aiLanguage == "ja-JP" ? "ニュートラル" : aiLanguage == "ko-KR" ? "중립" : "平和";
+            ctx.Values["AiResponse"] = aiLanguage == "en-US"
+                ? "Your diary has been safely saved. Rest well!"
+                : aiLanguage == "ja-JP"
+                    ? "日記が無事に保存されました。ゆっくり休んでくださいね。"
+                    : aiLanguage == "ko-KR"
+                        ? "일기가 안전하게 저장되었습니다. 오늘 하루도 수고 많으셨습니다. 편안한 밤 되세요."
+                        : "今天辛苦了，AI 伴侣正处于休眠中，但你的心事已被温柔记录。";
         }
 
         return HookResult.Continue();

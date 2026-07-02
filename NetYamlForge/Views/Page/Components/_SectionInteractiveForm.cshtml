@@ -1,10 +1,21 @@
 @using NetYamlForge.Models
 @using System.Text.Json
+@using System.Text.Encodings.Web
+@using NetYamlForge.Localization
 @model NetYamlForge.Models.SectionRenderModel
 @{
     var sec = Model.Sec;
     var rows = Model.Rows;
     var currentProject = Model.Project;
+
+    // Helper to resolve localization
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    // Helper to convert PascalCase to camelCase
+    string ToCamelCase(string? input) {
+        if (string.IsNullOrEmpty(input)) return "";
+        return char.ToLower(input[0]) + input.Substring(1);
+    }
 
     // Helper to convert PascalCase to snake_case for API route resolution
     string ToSnakeCase(string? input) {
@@ -103,14 +114,14 @@
     <div class="p-6 md:p-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-purple-100 flex items-center justify-between">
         <div class="space-y-1.5">
             <span class="text-2xl">✍️</span>
-            <h2 class="text-2xl font-extrabold text-gray-800">@(isEdit ? "重温与编辑记录" : "创建全新篇章")</h2>
+            <h2 class="text-2xl font-extrabold text-gray-800">@(isEdit ? T("projects.diary-companion.views.form.edit_title", "重温与编辑记录") : T("projects.diary-companion.views.form.create_title", "创建全新篇章"))</h2>
             <p class="text-xs text-gray-500">
-                @(isEdit ? "随时可以完善和更改你的记录，系统将为您重新进行智能解读。" : "在这里倾诉吧，写下你最真实的一天。")
+                @(isEdit ? T("projects.diary-companion.views.form.edit_desc", "随时可以完善和更改你的记录，系统将为您重新进行智能解读。") : T("projects.diary-companion.views.form.create_desc", "在这里倾诉吧，写下你最真实的一天。"))
             </p>
         </div>
         <div class="flex items-center gap-3">
             <a href="@cancelUrl" class="btn btn-sm bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm rounded-xl flex items-center gap-1.5 transition-all hover:scale-105 font-bold">
-                <span>🔙</span> 返回一览
+                <span>🔙</span> @T("projects.diary-companion.views.form.back_to_list", "返回一览")
             </a>
             <div class="text-3xl opacity-30 select-none hidden md:block">✏️</div>
         </div>
@@ -123,7 +134,8 @@
         @foreach (var fieldName in fieldNames)
         {
             var fieldDef = sec.GetFieldDef(fieldName);
-            var label = fieldDef.Label ?? fieldName;
+            var labelKey = $"projects.{currentProject}.entity.{apiEntity}.fields.{ToCamelCase(fieldName)}";
+            var label = T(labelKey, fieldDef.Label ?? fieldName);
             var isRequired = fieldDef.Required;
             string? foundKey = isEdit && detailRow != null ? detailRow.Keys.FirstOrDefault(k => k.Equals(fieldName, StringComparison.OrdinalIgnoreCase)) : null;
             var rowValue = isEdit && detailRow != null && foundKey != null && detailRow.TryGetValue(foundKey, out var val) ? val?.ToString() ?? "" : "";
@@ -141,8 +153,8 @@
                         {
                             <button type="button" onclick="selectMood_@(sec.Id)('@mItem.Name')" id="mood-btn-@(sec.Id)-@mItem.Name" class="mood-option-@(sec.Id) emoji-btn flex flex-col items-center justify-center p-3 border border-gray-200 rounded-2xl bg-white hover:bg-indigo-50/50 hover:border-indigo-300">
                                 <span class="text-2xl mb-1 filter drop-shadow-sm">@mItem.Emoji</span>
-                                <span class="text-xs font-bold text-gray-700">@mItem.Name</span>
-                                <span class="text-[9px] text-gray-400">@mItem.Desc</span>
+                                <span class="text-xs font-bold text-gray-700">@T($"projects.diary-companion.moods.{mItem.Name}.name", mItem.Name)</span>
+                                <span class="text-[9px] text-gray-400">@T($"projects.diary-companion.moods.{mItem.Name}.desc", mItem.Desc)</span>
                             </button>
                         }
                     </div>
@@ -162,7 +174,7 @@
                         {
                             <button type="button" onclick="selectWeather_@(sec.Id)('@wItem.Name')" id="weather-btn-@(sec.Id)-@wItem.Name" class="weather-option-@(sec.Id) btn btn-sm btn-outline border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg flex items-center gap-1 text-xs">
                                 <span>@wItem.Emoji</span>
-                                <span>@wItem.Name</span>
+                                <span>@T($"projects.diary-companion.weathers.{wItem.Name}.name", wItem.Name)</span>
                             </button>
                         }
                     </div>
@@ -177,9 +189,9 @@
                         <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
                     </label>
                     <div class="relative flex items-center">
-                        <input type="text" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" placeholder="记录地点(可选)" class="input input-bordered w-full rounded-xl pr-28 input-focus-effect" @(isRequired ? "required" : "") />
+                        <input type="text" id="field-@(fieldName)-@(sec.Id)" name="@fieldName" value="@rowValue" placeholder="@T("projects.diary-companion.views.form.location_placeholder", "记录地点(可选)")" class="input input-bordered w-full rounded-xl pr-28 input-focus-effect" @(isRequired ? "required" : "") />
                         <button type="button" onclick="getGeolocation_@(sec.Id)('@fieldName', this)" class="absolute right-2 btn btn-xs btn-primary bg-indigo-600 hover:bg-indigo-700 border-none rounded-lg text-white font-semibold">
-                            📍 自动获取
+                            📍 @T("projects.diary-companion.views.form.geolocation_btn", "自动获取")
                         </button>
                     </div>
                     <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
@@ -197,8 +209,8 @@
                         <div id="image-upload-zone-@(sec.Id)" class="w-full border-2 border-dashed border-indigo-200 hover:border-indigo-400 rounded-2xl p-4 bg-indigo-50/10 text-center cursor-pointer transition-all hover:bg-indigo-50/20 flex flex-col items-center justify-center min-h-[120px]" onclick="document.getElementById('file-uploader-@(sec.Id)').click()">
                             <div id="image-upload-prompt-@(sec.Id)" class="space-y-1">
                                 <span class="text-2xl">📸</span>
-                                <p class="text-xs font-bold text-gray-600">点击或拖拽上传图片</p>
-                                <p class="text-[10px] text-gray-400">仅限单张，支持智能压缩并存入SQLite</p>
+                                <p class="text-xs font-bold text-gray-600">@T("projects.diary-companion.views.form.image_prompt", "点击或拖拽上传图片")</p>
+                                <p class="text-[10px] text-gray-400">@T("projects.diary-companion.views.form.image_hint", "仅限单张，支持智能压缩并存入SQLite")</p>
                             </div>
                             <div id="image-preview-container-@(sec.Id)" class="hidden relative w-full flex flex-col items-center">
                                 <img id="image-preview-@(sec.Id)" src="" class="max-h-40 rounded-xl shadow-md object-contain border border-gray-100 cursor-zoom-in hover:scale-[1.02] transition-transform duration-300" onclick="window.showLightbox_@(sec.Id)(this.src, document.getElementById('field-ImageLabel-@(sec.Id)')?.value || '')" />
@@ -217,11 +229,34 @@
                     <label class="label p-0">
                         <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
                     </label>
-                    <textarea id="field-@(fieldName)-@(sec.Id)" name="@fieldName" rows="8" placeholder="写下详细内容..." class="textarea textarea-bordered w-full rounded-2xl min-h-[200px] input-focus-effect leading-relaxed" @(isRequired ? "required" : "")>@rowValue</textarea>
+                    <textarea id="field-@(fieldName)-@(sec.Id)" name="@fieldName" rows="8" placeholder="@T("projects.diary-companion.views.form.content_placeholder", "写下详细内容...")" class="textarea textarea-bordered w-full rounded-2xl min-h-[200px] input-focus-effect leading-relaxed" @(isRequired ? "required" : "")>@rowValue</textarea>
                     <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
                 </div>
             }
-            // 5. Default inputs
+            // 5. Select / options -> <select>
+            else if ((fieldDef.Type == "select" || (fieldDef.Options != null && fieldDef.Options.Any())))
+            {
+                <div class="form-control w-full space-y-1.5">
+                    <label class="label p-0">
+                        <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
+                    </label>
+                    <select id="field-@(fieldName)-@(sec.Id)" name="@fieldName" class="select select-bordered w-full rounded-xl input-focus-effect" @(isRequired ? "required" : "")>
+                        @if (!isRequired)
+                        {
+                            <option value="">@T("projects.diary-companion.views.form.select_placeholder", "— 选择 —")</option>
+                        }
+                        @if (fieldDef.Options != null)
+                        {
+                            @foreach (var opt in fieldDef.Options)
+                            {
+                                <option value="@opt.Key" selected="@(rowValue == opt.Key ? "selected" : null)">@opt.Value</option>
+                            }
+                        }
+                    </select>
+                    <span id="err-@(fieldName)-@(sec.Id)" class="text-xs text-rose-500 hidden"></span>
+                </div>
+            }
+            // 6. Default inputs
             else
             {
                 var inputType = fieldDef.Type switch {
@@ -253,19 +288,26 @@
             
             if (!string.IsNullOrEmpty(sentiment) || !string.IsNullOrEmpty(aiResp))
             {
+                var translatedSentiment = sentiment.Trim() switch {
+                    "积极" or "Positive" or "ポジティブ" => T("projects.diary-companion.sentiment.positive", "充满阳光"),
+                    "消极" or "Negative" or "ネガティブ" => T("projects.diary-companion.sentiment.negative", "雨过天晴"),
+                    "平和" or "Neutral" or "ニュートラル" => T("projects.diary-companion.sentiment.neutral", "风平浪静"),
+                    _ => sentiment
+                };
+
                 (string text, string badgeClass, string borderClass, string bgClass) = sentiment.Trim() switch {
-                    "积极" => ("充满阳光", "bg-emerald-100 text-emerald-800 border-emerald-300", "border-emerald-200", "bg-emerald-50/50"),
-                    "消极" => ("雨过天晴", "bg-rose-100 text-rose-800 border-rose-300", "border-rose-200", "bg-rose-50/50"),
-                    "平和" => ("风平浪静", "bg-sky-100 text-sky-800 border-sky-300", "border-sky-200", "bg-sky-50/50"),
+                    "积极" or "Positive" or "ポジティブ" => (translatedSentiment, "bg-emerald-100 text-emerald-800 border-emerald-300", "border-emerald-200", "bg-emerald-50/50"),
+                    "消极" or "Negative" or "ネガティブ" => (translatedSentiment, "bg-rose-100 text-rose-800 border-rose-300", "border-rose-200", "bg-rose-50/50"),
+                    "平和" or "Neutral" or "ニュートラル" => (translatedSentiment, "bg-sky-100 text-sky-800 border-sky-300", "border-sky-200", "bg-sky-50/50"),
                     _ => (sentiment, "bg-gray-100 text-gray-800 border-gray-300", "border-gray-200", "bg-gray-50/50")
                 };
 
                 <div class="p-5 rounded-2xl border @borderClass @bgClass space-y-3 mt-2 mb-4 animate-fade-in">
                     <div class="flex items-center justify-between">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border @badgeClass">
-                            ✨ AI 情绪评估：@text
+                            ✨ @T("projects.diary-companion.views.list.ai_title", "AI 伴侣评估")：@text
                         </span>
-                        <span class="text-xs text-gray-400">来自 AI 心灵伴侣</span>
+                        <span class="text-xs text-gray-400">@T("projects.diary-companion.views.form.ai_message_author", "来自 AI 心灵伴侣")</span>
                     </div>
                     @if (!string.IsNullOrEmpty(aiResp))
                     {
@@ -280,10 +322,10 @@
         <!-- Form Actions -->
         <div class="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
             <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500 flex items-center gap-1">
-                <span>↩️</span> 返回一览
+                <span>↩️</span> @T("projects.diary-companion.views.form.back_to_list", "返回一览")
             </a>
             <button type="submit" class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 flex items-center gap-2">
-                <span>💾</span> 保存数据
+                <span>💾</span> @T("projects.diary-companion.views.form.save", "保存数据")
             </button>
         </div>
     </form>
@@ -296,9 +338,9 @@
             <span class="text-5xl animate-spin-slow">✨</span>
         </div>
         <div class="space-y-1.5">
-            <h4 class="font-extrabold text-gray-800 text-base" id="loading-title-@(sec.Id)">AI 对话中...</h4>
+            <h4 class="font-extrabold text-gray-800 text-base" id="loading-title-@(sec.Id)">@T("projects.diary-companion.views.form.ai_thinking", "心灵对话中...")</h4>
             <p class="text-xs text-gray-500 leading-relaxed" id="loading-desc-@(sec.Id)">
-                系统正在深度处理，分析情绪并生成智能建议，请耐心等候...
+                @T("projects.diary-companion.views.form.ai_thinking_desc", "AI 伴侣正在认真阅读你的日记，感知你此时的心情，并为你撰写暖心的寄语……请稍候。")
             </p>
         </div>
         <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
@@ -381,10 +423,10 @@
 
         window.getGeolocation_@(sec.Id) = function(fieldName, btnEl) {
             const btn = btnEl || document.querySelector(`#field-${fieldName}-${secId} ~ button`);
-            const originalText = btn ? btn.innerHTML : '📍 自动获取';
+            const originalText = btn ? btn.innerHTML : '📍 ' + `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.geolocation_btn", "自动获取")))`;
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '⚡ 定位中...';
+                btn.innerHTML = '⚡ ' + `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.geolocation_detecting", "定位中...")))`;
             }
 
             if (!navigator.geolocation) {
@@ -604,6 +646,24 @@
             selectWeather_@(sec.Id)(weatherVal);
         }
 
+        // Initial setup for AiLanguage field
+        const aiLangField = document.getElementById(`field-AiLanguage-${secId}`);
+        if (aiLangField) {
+            if (!isEdit || !aiLangField.value) {
+                try {
+                    const saved = localStorage.getItem('diary_preferences');
+                    if (saved) {
+                        const prefs = JSON.parse(saved);
+                        if (prefs && prefs.aiLanguage) {
+                            aiLangField.value = prefs.aiLanguage;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading preferred AI language', e);
+                }
+            }
+        }
+
         // Initial setup for ImageBase64 preview if it already has value
         const imageBase64Val = document.getElementById(`field-ImageBase64-${secId}`)?.value;
         if (imageBase64Val && imageBase64Val.trim() !== '') {
@@ -645,19 +705,20 @@
 
             // If it is diary subproject or has content and mood/weather, customize loading mask
             if (apiEntity === 'diary_entry' || apiEntity.includes('diary')) {
-                document.getElementById(`loading-title-${secId}`).innerText = '心灵对话中...';
-                document.getElementById(`loading-desc-${secId}`).innerText = 'AI 伴侣正在认真阅读你的日记，感知你此时的心情，并为你撰写暖心的寄语……请稍候。';
+                document.getElementById(`loading-title-${secId}`).innerText = `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.ai_thinking", "心灵对话中...")))`;
+                document.getElementById(`loading-desc-${secId}`).innerText = `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.ai_thinking_desc", "AI 伴侣正在认真阅读你的日记，感知你此时的心情，并为你撰写暖心的寄语……请稍候。")))`;
             } else {
-                document.getElementById(`loading-title-${secId}`).innerText = '正在提交数据...';
-                document.getElementById(`loading-desc-${secId}`).innerText = '系统正在保存记录，请稍后。';
+                document.getElementById(`loading-title-${secId}`).innerText = `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.saving", "正在提交数据...")))`;
+                document.getElementById(`loading-desc-${secId}`).innerText = `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.saving_desc", "系统正在保存记录，请稍后。")))`;
             }
 
             // Show loading
             document.getElementById(`loading-overlay-${secId}`).classList.remove('hidden');
 
+            const pathBase = "@Context.Request.PathBase";
             const url = isEdit 
-                ? `/api/${project}/${apiEntity}/${entityId}`
-                : `/api/${project}/${apiEntity}`;
+                ? `${pathBase}/api/${project}/${apiEntity}/${entityId}`
+                : `${pathBase}/api/${project}/${apiEntity}`;
             
             const method = isEdit ? 'PUT' : 'POST';
 
@@ -688,13 +749,13 @@
                             }
                         }
                     } else {
-                        alert(data.error || '保存失败，请检查填写内容。');
+                        alert(data.error || `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.unknown_error", "保存失败，请检查填写内容。")))`);
                     }
                 }
             } catch (err) {
                 console.error(err);
                 document.getElementById(`loading-overlay-${secId}`).classList.add('hidden');
-                alert('保存失败，发生网络错误，请稍后重试。');
+                alert(`@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.unknown_error", "保存失败，发生网络错误，请稍后重试。")))`);
             }
         });
     })();

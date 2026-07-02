@@ -1,7 +1,12 @@
 @using NetYamlForge.Localization
+@using System.Text.Encodings.Web
 @{
     var currentProject = Context.GetRouteValue("project")?.ToString() ?? "diary-companion";
-    ViewData["Title"] = "智能日记伴侣 — 系统设置";
+    
+    // Helper to resolve localization
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    ViewData["Title"] = T("projects.diary-companion.views.settings.title", "智能日记伴侣 — 系统设置");
     var cancelUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "HomePage" });
 }
 
@@ -28,7 +33,7 @@
     <!-- Navigation Back Link -->
     <div class="mb-6">
         <a href="@cancelUrl" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-indigo-600 font-semibold transition-all">
-            <span>⬅️</span> 返回日记列表
+            <span>⬅️</span> @T("projects.diary-companion.views.settings.back", "返回日记列表")
         </a>
     </div>
 
@@ -38,9 +43,9 @@
         <div class="p-6 md:p-8 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-purple-100 flex items-center justify-between">
             <div class="space-y-1.5">
                 <span class="text-2xl">⚙️</span>
-                <h2 class="text-2xl font-extrabold text-gray-800">系统偏好设置</h2>
+                <h2 class="text-2xl font-extrabold text-gray-800">@T("projects.diary-companion.views.settings.title", "系统偏好设置")</h2>
                 <p class="text-xs text-gray-500">
-                    个性化定制你的沉浸式日记书写与阅读体验。
+                    @T("projects.diary-companion.views.settings.desc", "个性化定制你的沉浸式日记书写与阅读体验。")
                 </p>
             </div>
             <div class="text-3xl opacity-30 select-none">🛠️</div>
@@ -52,8 +57,8 @@
                 <!-- Hide Header -->
                 <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
                     <div class="space-y-1 pr-4">
-                        <h4 class="font-bold text-sm text-gray-800">隐藏 Header 导航栏</h4>
-                        <p class="text-xs text-gray-500">默认隐藏顶部的系统全局导航栏，使页面更加沉浸、无干扰。</p>
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.hide_header_title", "隐藏 Header 导航栏")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.hide_header_desc", "默认隐藏顶部的系统全局导航栏，使页面更加沉浸、无干扰。")</p>
                     </div>
                     <input type="checkbox" id="pref-hide-header" class="toggle toggle-primary settings-toggle" />
                 </div>
@@ -61,8 +66,8 @@
                 <!-- Hide Sidebar (Full Screen) -->
                 <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
                     <div class="space-y-1 pr-4">
-                        <h4 class="font-bold text-sm text-gray-800">沉浸式全屏展示</h4>
-                        <p class="text-xs text-gray-500">自动去除主内容容器的默认边距，完全拉伸占满整个屏幕。</p>
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.immersion_title", "沉浸式全屏展示")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.immersion_desc", "自动去除主内容容器的默认边距，完全拉伸占满整个屏幕。")</p>
                     </div>
                     <input type="checkbox" id="pref-hide-sidebar" class="toggle toggle-primary settings-toggle" />
                 </div>
@@ -70,8 +75,8 @@
                 <!-- Show Floating Menu -->
                 <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
                     <div class="space-y-1 pr-4">
-                        <h4 class="font-bold text-sm text-gray-800">显示悬浮菜单与设置按钮</h4>
-                        <p class="text-xs text-gray-500">在屏幕边缘显示半透明的悬浮按钮，用于拉出侧边栏或快速回到设置页。</p>
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.show_menu_title", "显示悬浮菜单与设置按钮")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.show_menu_desc", "在屏幕边缘显示半透明的悬浮按钮，用于拉出侧边栏或快速回到设置页。")</p>
                     </div>
                     <input type="checkbox" id="pref-show-menu" class="toggle toggle-primary settings-toggle" />
                 </div>
@@ -79,14 +84,42 @@
                 <!-- Floating Menu Position -->
                 <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
                     <div class="space-y-1 pr-4">
-                        <h4 class="font-bold text-sm text-gray-800">悬浮菜单放置位置</h4>
-                        <p class="text-xs text-gray-500">为了防止遮挡正文内容，您可以自由调整悬浮按钮的定位。</p>
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.menu_pos_title", "悬浮菜单放置位置")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.menu_pos_desc", "为了防止遮挡正文内容，您可以自由调整悬浮按钮的定位。")</p>
                     </div>
                     <select id="pref-menu-position" class="select select-bordered select-sm rounded-xl max-w-xs text-xs font-semibold text-gray-700 bg-white">
-                        <option value="bottom-right">右下角 (推荐 - 避开标题)</option>
-                        <option value="bottom-left">左下角</option>
-                        <option value="top-left">左上角</option>
-                        <option value="top-right">右上角</option>
+                        <option value="bottom-right">@T("projects.diary-companion.views.settings.menu_pos_br", "右下角 (推荐 - 避开标题)")</option>
+                        <option value="bottom-left">@T("projects.diary-companion.views.settings.menu_pos_bl", "左下角")</option>
+                        <option value="top-left">@T("projects.diary-companion.views.settings.menu_pos_tl", "左上角")</option>
+                        <option value="top-right">@T("projects.diary-companion.views.settings.menu_pos_tr", "右上角")</option>
+                    </select>
+                </div>
+
+                <!-- AI Evaluation Language -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.ai_lang_title", "🤖 AI 评估语言（默认）")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.ai_lang_desc", "AI 伴侣在分析日记情绪、生成回应时使用的默认语言。在编辑日记时可单独指定优先覆盖此设置。")</p>
+                    </div>
+                    <select id="pref-ai-language" class="select select-bordered select-sm rounded-xl max-w-xs text-xs font-semibold text-gray-700 bg-white">
+                        <option value="zh-CN">🇨🇳 中文</option>
+                        <option value="en-US">🇺🇸 English</option>
+                        <option value="ja-JP">🇯🇵 日本語</option>
+                        <option value="ko-KR">🇰🇷 한국어</option>
+                    </select>
+                </div>
+
+                <!-- UI Display Language -->
+                <div class="flex items-center justify-between p-4 bg-white/50 rounded-2xl border border-gray-100">
+                    <div class="space-y-1 pr-4">
+                        <h4 class="font-bold text-sm text-gray-800">@T("projects.diary-companion.views.settings.ui_lang_title", "🌐 界面显示语言")</h4>
+                        <p class="text-xs text-gray-500">@T("projects.diary-companion.views.settings.ui_lang_desc", "设置日记应用界面的显示语言（支持中文、英文、日语、韩语）。")</p>
+                    </div>
+                    <select id="pref-ui-language" class="select select-bordered select-sm rounded-xl max-w-xs text-xs font-semibold text-gray-700 bg-white">
+                        <option value="zh-CN">🇨🇳 简体中文</option>
+                        <option value="en-US">🇺🇸 English</option>
+                        <option value="ja-JP">🇯🇵 日本語</option>
+                        <option value="ko-KR">🇰🇷 한국어</option>
                     </select>
                 </div>
             </div>
@@ -94,37 +127,37 @@
             <!-- Shortcut Tips -->
             <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100/50 space-y-3">
                 <h4 class="font-bold text-xs text-indigo-800 uppercase tracking-wider flex items-center gap-1.5">
-                    ⌨️ 极客快捷键支持 (非输入框聚焦时有效)
+                    @T("projects.diary-companion.views.settings.shortcuts_title", "⌨️ 极客快捷键支持 (非输入框聚焦时有效)")
                 </h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-600">
                     <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
                         <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">M</kbd>
-                        <span>打开 / 关闭侧边栏</span>
+                        <span>@T("projects.diary-companion.views.settings.shortcut_m", "打开 / 关闭侧边栏")</span>
                     </div>
                     <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
                         <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">S</kbd>
-                        <span>进入系统设置页面</span>
+                        <span>@T("projects.diary-companion.views.settings.shortcut_s", "进入系统设置页面")</span>
                     </div>
                     <div class="flex items-center gap-2 p-2 bg-white/80 rounded-xl border border-indigo-50">
                         <kbd class="kbd kbd-sm bg-gray-100 border border-gray-200 shadow-sm text-gray-700">H</kbd>
-                        <span>回到日记首页</span>
+                        <span>@T("projects.diary-companion.views.settings.shortcut_h", "回到日记首页")</span>
                     </div>
                 </div>
                 <p class="text-[10px] text-indigo-500 italic">
-                    * 即使您完全隐藏了 Header、侧边栏和悬浮菜单，仍然可以通过在键盘上按下相应字母轻松呼出或返回。
+                    @T("projects.diary-companion.views.settings.shortcut_hint", "* 即使您完全隐藏了 Header、侧边栏和悬浮菜单，仍然可以通过在键盘上按下相应字母轻松呼出或返回。")
                 </p>
             </div>
 
             <!-- Toast / Success feedback -->
             <div id="toast-success" class="alert alert-success bg-emerald-50 border-emerald-200 text-emerald-800 text-xs rounded-xl hidden flex items-center gap-2 transition-all">
-                <span>✅</span> <span>偏好设置已成功保存并立即生效！</span>
+                <span>✅</span> <span>@T("projects.diary-companion.views.settings.save_success", "偏好设置已成功保存并立即生效！")</span>
             </div>
 
             <!-- Form Actions -->
             <div class="pt-4 flex items-center justify-end gap-3 border-t border-gray-100">
-                <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500">取消</a>
+                <a href="@cancelUrl" class="btn btn-sm btn-ghost rounded-xl px-4 text-gray-500">@T("projects.diary-companion.views.settings.cancel", "取消")</a>
                 <button onclick="savePreferences()" class="btn btn-sm btn-primary bg-indigo-600 hover:bg-indigo-700 border-none px-6 rounded-xl text-white shadow-md shadow-indigo-100 flex items-center gap-2">
-                    <span>💾</span> 保存并应用
+                    <span>💾</span> @T("projects.diary-companion.views.settings.save_btn", "保存并应用")
                 </button>
             </div>
         </div>
@@ -137,8 +170,20 @@
         hideHeader: true,
         hideSidebar: true,
         showMenu: true,
-        menuPosition: 'bottom-right'
+        menuPosition: 'bottom-right',
+        aiLanguage: 'zh-CN'
     };
+
+    // 服务端渲染的当前生效 UI 语言（Culture Cookie 是 HttpOnly，前端 JS 无法通过 document.cookie 读取，
+    // 必须用 Razor 直接输出 CurrentUICulture，否则下拉框每次都会回退成默认值，造成"设置没生效"的假象）
+    const CURRENT_UI_LANGUAGE = '@System.Globalization.CultureInfo.CurrentUICulture.Name';
+
+    function setUiLanguageCookie(lang) {
+        const value = `c=${lang}|uic=${lang}`;
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (365*24*60*60*1000));
+        document.cookie = `.AspNetCore.Culture=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+    }
 
     // 从 localStorage 加载配置并初始化表单
     document.addEventListener('DOMContentLoaded', () => {
@@ -156,6 +201,15 @@
         document.getElementById('pref-hide-sidebar').checked = prefs.hideSidebar;
         document.getElementById('pref-show-menu').checked = prefs.showMenu;
         document.getElementById('pref-menu-position').value = prefs.menuPosition;
+        document.getElementById('pref-ai-language').value = prefs.aiLanguage || 'zh-CN';
+        
+        // 兼容性语言匹配，避免 'zh', 'ko' 等简称导致下拉菜单未选中并回退到默认值的假象
+        let matchedLang = CURRENT_UI_LANGUAGE || 'zh-CN';
+        if (matchedLang === 'zh') matchedLang = 'zh-CN';
+        else if (matchedLang === 'en') matchedLang = 'en-US';
+        else if (matchedLang === 'ja') matchedLang = 'ja-JP';
+        else if (matchedLang === 'ko') matchedLang = 'ko-KR';
+        document.getElementById('pref-ui-language').value = matchedLang;
     });
 
     function savePreferences() {
@@ -163,28 +217,40 @@
             hideHeader: document.getElementById('pref-hide-header').checked,
             hideSidebar: document.getElementById('pref-hide-sidebar').checked,
             showMenu: document.getElementById('pref-show-menu').checked,
-            menuPosition: document.getElementById('pref-menu-position').value
+            menuPosition: document.getElementById('pref-menu-position').value,
+            aiLanguage: document.getElementById('pref-ai-language').value
         };
 
         try {
             localStorage.setItem('diary_preferences', JSON.stringify(prefs));
-            
-            // 显示 Toast
-            const toast = document.getElementById('toast-success');
-            if (toast) toast.classList.remove('hidden');
             
             // 触发全局样式应用，使效果立即生效
             if (window.applyDiaryPreferences) {
                 window.applyDiaryPreferences();
             }
 
-            setTimeout(() => {
-                if (toast) toast.classList.add('hidden');
-                // 1.5秒后跳转回主页
-                window.location.href = '@cancelUrl';
-            }, 1000);
+            const uiLang = document.getElementById('pref-ui-language').value;
+            const form = document.getElementById('settings-lang-form');
+            if (form) {
+                document.getElementById('settings-lang-culture').value = uiLang;
+                form.submit();
+            } else {
+                // Fallback
+                setUiLanguageCookie(uiLang);
+                const toast = document.getElementById('toast-success');
+                if (toast) toast.classList.remove('hidden');
+                setTimeout(() => {
+                    if (toast) toast.classList.add('hidden');
+                    window.location.href = '@cancelUrl';
+                }, 1000);
+            }
         } catch (e) {
-            alert('保存设置失败，浏览器可能禁用了 LocalStorage。');
+            alert('@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.unknown_error", "保存设置失败，浏览器可能禁用了 LocalStorage。")))');
         }
     }
 </script>
+
+<form id="settings-lang-form" asp-controller="Localization" asp-action="SetLanguage" method="post" class="hidden">
+    <input type="hidden" name="culture" id="settings-lang-culture" />
+    <input type="hidden" name="returnUrl" value="@cancelUrl" />
+</form>

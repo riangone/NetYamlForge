@@ -285,6 +285,7 @@ builder.Services
 
 var app = builder.Build();
 
+app.UseStaticFiles();
 app.UsePathBase("/nyf");
 app.Use(async (context, next) =>
 {
@@ -353,7 +354,6 @@ app.UseSerilogRequestLogging(options =>
         }
     };
 });
-app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

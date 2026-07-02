@@ -1,0 +1,347 @@
+@* 日记子项目专属精致 Dashboard 视图 — 情绪分析面板 *@
+@model NetYamlForge.Controllers.DashboardViewModel
+@{
+    Layout = "~/projects/diary-companion/views/_Layout.cshtml";
+    ViewData["Title"] = "情绪分析";
+    var projectName = ViewData["ProjectDisplayName"] as string ?? "日记伴侣";
+    var now = DateTime.Now;
+    
+    // 根据当前时间显示温馨问候语
+    var greeting = now.Hour < 5 ? "夜深了，注意休息哦 🌙" :
+                   now.Hour < 9 ? "清晨的阳光真好，开启美好的一天 ☀️" :
+                   now.Hour < 12 ? "上午好，今天也要元气满满 💪" :
+                   now.Hour < 14 ? "中午好，喝杯花茶小憩一下吧 ☕" :
+                   now.Hour < 18 ? "下午好，今天有什么精彩的故事吗 🍃" :
+                   now.Hour < 22 ? "晚上好，写下今天的点点滴滴吧 🌌" : 
+                                   "深夜了，静静聆听内心的声音 🕯️";
+
+    var dayLabel = now.ToString("yyyy年M月d日 dddd");
+}
+
+<div class="space-y-6 max-w-7xl mx-auto px-1 py-2">
+    @* 精致梦幻的手账风 Header Banner *@
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 border border-purple-200/50 p-6 md:p-8 text-slate-800 shadow-sm hover:shadow-md transition-all duration-300">
+        @* 背景装饰发光微光圈 *@
+        <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-pink-300/20 blur-2xl pointer-events-none"></div>
+        <div class="absolute right-1/4 -bottom-10 w-48 h-48 rounded-full bg-indigo-300/20 blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/60 text-purple-700 border border-purple-200/40">
+                    ✨ 心灵树洞数据室
+                </span>
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-purple-800 to-indigo-900 bg-clip-text text-transparent">
+                    @projectName · 情绪分析
+                </h1>
+                <p class="text-slate-600 font-medium max-w-2xl text-sm leading-relaxed">
+                    @greeting 这里的每一条数据都承载着你的故事。愿温润的文字能梳理思绪，愿温馨的伴侣能抚平波澜。
+                </p>
+            </div>
+            <div class="flex flex-col items-end shrink-0 bg-white/40 border border-white/60 rounded-2xl p-3 text-right">
+                <span class="text-xs text-slate-500 font-medium">今天是</span>
+                <span class="text-sm font-bold text-slate-700">@dayLabel</span>
+            </div>
+        </div>
+    </div>
+
+    @* 4个磨砂玻璃感、不同情绪主题色定义的统计卡片 *@
+    @if (Model.Stats.Count > 0)
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @for (int i = 0; i < Model.Stats.Count; i++)
+            {
+                var stat = Model.Stats[i];
+                var colorKey = stat.Color?.ToLowerInvariant() ?? "indigo";
+                
+                // 动态视觉配置映射
+                var cardBg = colorKey switch {
+                    "pink" => "from-rose-50/70 to-pink-100/30 border-pink-100 hover:border-pink-300/60 hover:shadow-pink-100/50",
+                    "emerald" => "from-emerald-50/70 to-teal-100/30 border-emerald-100 hover:border-emerald-300/60 hover:shadow-emerald-100/50",
+                    "amber" => "from-amber-50/70 to-orange-100/30 border-amber-100 hover:border-amber-300/60 hover:shadow-amber-100/50",
+                    _ => "from-indigo-50/70 to-purple-100/30 border-indigo-100 hover:border-indigo-300/60 hover:shadow-indigo-100/50"
+                };
+                
+                var valueColor = colorKey switch {
+                    "pink" => "text-pink-600 bg-gradient-to-br from-pink-600 to-rose-500",
+                    "emerald" => "text-emerald-600 bg-gradient-to-br from-emerald-600 to-teal-500",
+                    "amber" => "text-amber-600 bg-gradient-to-br from-amber-600 to-orange-500",
+                    _ => "text-indigo-600 bg-gradient-to-br from-indigo-600 to-purple-500"
+                };
+
+                var iconBg = colorKey switch {
+                    "pink" => "bg-pink-100/80 text-pink-600",
+                    "emerald" => "bg-emerald-100/80 text-emerald-600",
+                    "amber" => "bg-amber-100/80 text-amber-600",
+                    _ => "bg-indigo-100/80 text-indigo-600"
+                };
+
+                var hoverIndicator = colorKey switch {
+                    "pink" => "bg-pink-400",
+                    "emerald" => "bg-emerald-400",
+                    "amber" => "bg-amber-400",
+                    _ => "bg-indigo-400"
+                };
+
+                if (!string.IsNullOrEmpty(stat.EntityUrl))
+                {
+                    <a href="@stat.EntityUrl"
+                       class="group relative overflow-hidden rounded-2xl bg-gradient-to-br @cardBg border p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 no-underline flex flex-col justify-between min-h-[120px]">
+                        @* 悬浮顶边彩色条 *@
+                        <div class="absolute top-0 left-0 right-0 h-1 @hoverIndicator opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wide">@stat.Label</span>
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <span class="w-8 h-8 rounded-xl flex items-center justify-center text-lg @iconBg transition-transform duration-300 group-hover:scale-110">
+                                    @stat.Icon
+                                </span>
+                            }
+                        </div>
+                        <div class="mt-3">
+                            <span class="text-3xl font-black bg-clip-text text-transparent @valueColor font-mono">@stat.Value</span>
+                            <span class="text-[10px] text-slate-400 block mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">查看日记列表 &rarr;</span>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br @cardBg border p-5 transition-all duration-300 flex flex-col justify-between min-h-[120px]">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-500 tracking-wide">@stat.Label</span>
+                            @if (!string.IsNullOrEmpty(stat.Icon))
+                            {
+                                <span class="w-8 h-8 rounded-xl flex items-center justify-center text-lg @iconBg">
+                                    @stat.Icon
+                                </span>
+                            }
+                        </div>
+                        <div class="mt-3">
+                            <span class="text-3xl font-black bg-clip-text text-transparent @valueColor font-mono">@stat.Value</span>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+
+    @* 图表区域，采用精致圆角的毛玻璃卡片排版 *@
+    @if (Model.Charts.Count > 0)
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var chart = Model.Charts[i];
+                // 情绪评估比比例占更大的位置，或者让它优雅分布
+                var isWide = chart.Type == "line" ? "lg:col-span-2" : "lg:col-span-1";
+                
+                <div class="bg-white/80 backdrop-blur-md border border-purple-100/60 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col justify-between @isWide">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></span>
+                            <h3 class="text-sm font-bold text-slate-700">@chart.Title</h3>
+                        </div>
+                        <span class="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-medium uppercase font-mono">
+                            @chart.Type
+                        </span>
+                    </div>
+                    
+                    <div class="relative flex-grow flex items-center justify-center" style="height:260px">
+                        <canvas id="chart-@i" class="w-full h-full"></canvas>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="rounded-2xl border border-dashed border-purple-200 bg-white/40 p-12 text-center">
+            <span class="text-3xl mb-2 block">🌌</span>
+            <h3 class="text-sm font-bold text-slate-600">暂无图表配置</h3>
+            <p class="text-xs text-slate-400 mt-1">请在 `dashboard.yml` 中配置要展示的数据指标</p>
+        </div>
+    }
+
+    @* 底部暖心励志寄语栏 *@
+    <div class="bg-white/50 border border-white/60 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-4 hover:shadow-sm transition-all duration-300">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-400 to-indigo-400 flex items-center justify-center text-xl text-white shadow-md shadow-purple-100 shrink-0 animate-pulse">
+            💡
+        </div>
+        <div class="space-y-1 text-center md:text-left">
+            <h4 class="text-sm font-bold text-purple-950">AI 心灵之语</h4>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                “无论快乐还是烦恼，都是我们生命画布上独一无二的色彩。静静地凝视这些情绪指标，这正是你认真生活、爱护自己的最好证明。”
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @if (Model.Charts.Count > 0)
+    {
+        <script src="@Url.Content("~/lib/chartjs/chart.umd.min.js")"></script>
+        <script>
+            // 定制精致的全局 Chart.js 配置
+            Chart.defaults.font.family = "'Outfit', 'Inter', 'Helvetica Neue', 'PingFang SC', sans-serif";
+            Chart.defaults.font.size = 11;
+            Chart.defaults.color = '#64748B'; // slate-500
+            
+            // 莫兰迪高雅粉彩色系配色
+            var colorPalette = [
+                'rgba(129, 140, 248, 0.75)',  // 靛蓝 (Indigo-400)
+                'rgba(244, 114, 182, 0.75)',  // 粉红 (Pink-400)
+                'rgba(52, 211, 153, 0.75)',   // 薄荷绿 (Emerald-400)
+                'rgba(251, 191, 36, 0.75)',   // 蜜桃黄 (Amber-400)
+                'rgba(96, 165, 250, 0.75)',   // 天空蓝 (Blue-400)
+                'rgba(167, 139, 250, 0.75)'   // 紫罗兰 (Violet-400)
+            ];
+            var borderPalette = [
+                'rgba(129, 140, 248, 1)',
+                'rgba(244, 114, 182, 1)',
+                'rgba(52, 211, 153, 1)',
+                'rgba(251, 191, 36, 1)',
+                'rgba(96, 165, 250, 1)',
+                'rgba(167, 139, 250, 1)'
+            ];
+
+            // 情绪专用配色映射
+            var sentimentColors = {
+                '积极': 'rgba(244, 114, 182, 0.75)',
+                'Positive': 'rgba(244, 114, 182, 0.75)',
+                '平和': 'rgba(52, 211, 153, 0.75)',
+                '平静': 'rgba(52, 211, 153, 0.75)',
+                'Neutral': 'rgba(52, 211, 153, 0.75)',
+                '消极': 'rgba(251, 191, 36, 0.75)',
+                'Negative': 'rgba(251, 191, 36, 0.75)',
+                '焦虑': 'rgba(129, 140, 248, 0.75)',
+                '忧郁': 'rgba(167, 139, 250, 0.75)',
+                '愤怒': 'rgba(239, 68, 68, 0.75)',
+                '疲惫': 'rgba(156, 163, 175, 0.75)'
+            };
+
+            var sentimentBorders = {
+                '积极': 'rgba(244, 114, 182, 1)',
+                'Positive': 'rgba(244, 114, 182, 1)',
+                '平和': 'rgba(52, 211, 153, 1)',
+                '平静': 'rgba(52, 211, 153, 1)',
+                'Neutral': 'rgba(52, 211, 153, 1)',
+                '消极': 'rgba(251, 191, 36, 1)',
+                'Negative': 'rgba(251, 191, 36, 1)',
+                '焦虑': 'rgba(129, 140, 248, 1)',
+                '忧郁': 'rgba(167, 139, 250, 1)',
+                '愤怒': 'rgba(239, 68, 68, 1)',
+                '疲惫': 'rgba(156, 163, 175, 1)'
+            };
+
+            @for (int i = 0; i < Model.Charts.Count; i++)
+            {
+                var c = Model.Charts[i];
+                var type = c.Type.ToLowerInvariant();
+                
+                <text>
+                (function() {
+                    var canvasEl = document.getElementById('chart-@i');
+                    if (!canvasEl) return;
+                    
+                    var labels = @Html.Raw(c.LabelsJson);
+                    var values = @Html.Raw(c.ValuesJson);
+                    var chartType = '@type';
+
+                    // 动态分配颜色
+                    var bgColors = [];
+                    var borderColors = [];
+
+                    for (var j = 0; j < labels.length; j++) {
+                        var label = labels[j];
+                        if (sentimentColors[label]) {
+                            bgColors.push(sentimentColors[label]);
+                            borderColors.push(sentimentBorders[label]);
+                        } else {
+                            bgColors.push(colorPalette[j % colorPalette.length]);
+                            borderColors.push(borderPalette[j % borderPalette.length]);
+                        }
+                    }
+
+                    // 如果只有单一数据序列且不是饼图，则主色配置为淡雅紫
+                    if (chartType !== 'doughnut' && chartType !== 'pie' && bgColors.length > 0) {
+                        // 统一颜色以获得干净的渐变或单色
+                        if (chartType === 'line') {
+                            bgColors = 'rgba(167, 139, 250, 0.15)'; // 浅紫填充
+                            borderColors = 'rgba(167, 139, 250, 1)';
+                        } else {
+                            // 柱状图使用渐变或统一色
+                            bgColors = 'rgba(129, 140, 248, 0.8)';
+                            borderColors = 'rgba(129, 140, 248, 1)';
+                        }
+                    }
+
+                    var dataset = {
+                        data: values,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: chartType === 'line' ? 3 : 1.5,
+                        borderRadius: chartType === 'bar' ? 8 : 0,
+                        fill: chartType === 'line',
+                        tension: 0.4
+                    };
+
+                    new Chart(canvasEl, {
+                        type: chartType,
+                        data: { 
+                            labels: labels, 
+                            datasets: [dataset] 
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: chartType === 'doughnut' || chartType === 'pie',
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 10,
+                                        padding: 15,
+                                        font: {
+                                            size: 11,
+                                            weight: 'bold'
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                                    titleFont: { size: 12, weight: 'bold' },
+                                    bodyFont: { size: 12 },
+                                    padding: 10,
+                                    cornerRadius: 8,
+                                    displayColors: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            var val = context.parsed.y ?? context.parsed;
+                                            return ' ' + context.label + ': ' + val + ' 次';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: (chartType === 'doughnut' || chartType === 'pie') ? {} : {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { maxRotation: 45, autoSkip: true }
+                                },
+                                y: {
+                                    grid: { color: 'rgba(241, 245, 249, 1)' },
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1,
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })();
+                </text>
+            }
+        }
+    </script>
+    }
+}

@@ -1,18 +1,58 @@
 stats:
-  # Add stat cards here. Example:
-  # - label: Total Records
-  #   entity: my_entity
-  #   aggregate: count
-  #   icon: 📊
-  #   color: badge-info
-  []
+  - label: 日记总篇数
+    entity: diary_entry
+    aggregate: count
+    icon: 📔
+    color: "indigo"
+
+  - label: 积极治愈天数
+    entity: diary_entry
+    aggregate: count
+    filter: "Sentiment = '积极' OR Sentiment = 'Positive' OR MoodBefore = '喜悦'"
+    icon: 😊
+    color: "pink"
+
+  - label: 平静时光记录
+    entity: diary_entry
+    aggregate: count
+    filter: "Sentiment = '平和' OR Sentiment = 'Neutral' OR MoodBefore = '平静'"
+    icon: 🍃
+    color: "emerald"
+
+  - label: 情绪波动关注
+    entity: diary_entry
+    aggregate: count
+    filter: "Sentiment = '消极' OR Sentiment = 'Negative' OR MoodBefore = '焦虑' OR MoodBefore = '忧郁' OR MoodBefore = '愤怒' OR MoodBefore = '疲惫'"
+    icon: 🌧️
+    color: "amber"
 
 charts:
-  # Add charts here. Example:
-  # - id: trend
-  #   title: Monthly Trend
-  #   type: bar
-  #   source: "SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM YourTable GROUP BY Month ORDER BY Month DESC LIMIT 12"
-  #   xAxis: Month
-  #   yAxis: Count
-  []
+  - title: AI 情绪评估比例
+    type: doughnut
+    entity: diary_entry
+    valueAggregate: count
+    groupExpression: Sentiment
+    filter: "Sentiment IS NOT NULL AND Sentiment != ''"
+    orderBy: value
+    orderDir: desc
+
+  - title: 记录前心情统计
+    type: bar
+    entity: diary_entry
+    valueAggregate: count
+    groupExpression: MoodBefore
+    filter: "MoodBefore IS NOT NULL AND MoodBefore != ''"
+    orderBy: value
+    orderDir: desc
+    limit: 6
+
+  - title: 近期日记记录频次
+    type: line
+    entity: diary_entry
+    valueAggregate: count
+    groupExpression: "date(CreatedAt)"
+    filter: "CreatedAt IS NOT NULL"
+    orderBy: label
+    orderDir: asc
+    limit: 10
+
