@@ -42,13 +42,15 @@ public class DiaryRow
 public class AnalyzeDiaryMoodHook : IEntityHook
 {
     private readonly IAntigravityCliService _ai;
+    private readonly ICliChainService _cliChain;
     private readonly ILogger<AnalyzeDiaryMoodHook> _logger;
 
     public string Name => "analyze_diary_mood";
 
-    public AnalyzeDiaryMoodHook(IAntigravityCliService ai, ILogger<AnalyzeDiaryMoodHook> logger)
+    public AnalyzeDiaryMoodHook(IAntigravityCliService ai, ICliChainService cliChain, ILogger<AnalyzeDiaryMoodHook> logger)
     {
         _ai = ai;
+        _cliChain = cliChain;
         _logger = logger;
     }
 
@@ -139,16 +141,24 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                     var bytes = Convert.FromBase64String(base64Data);
                     await System.IO.File.WriteAllBytesAsync(tempFilePath, bytes);
 
-                    var aiPrompt = $"""
-我上传了一张日记图片。请使用你的 view_file 工具查看位于 `{tempFilePath}` 的图片，并用中文为它生成一个非常简短的标注（2到6个字，例如“阳光下的咖啡”、“雨中的街道”、“美味的晚餐”）。
+                    // 图片标注为可选功能：可通过 projects/diary-companion/.env 的
+                    // CLI_CHAIN_ENABLED=false 整体关闭，或用 CLI_CHAIN_ORDER 调整/裁剪优先级。
+                    // 默认优先顺序：opencode cli → antigravity cli → claude code cli
+                    // （均为订阅制 CLI，不使用按量计费的 API，避免费用不可控）。
+                    var aiPrompt = """
+请用中文为这张图片生成一个非常简短的标注（2到6个字，例如"阳光下的咖啡"、"雨中的街道"、"美味的晚餐"）。
 请直接输出这个标注的内容，不要包含任何标点符号、引号或额外的解释文字。
 """;
-                    var generatedLabel = await _ai.PromptAsync(aiPrompt, projectName: "diary-companion");
-                    if (!string.IsNullOrWhiteSpace(generatedLabel))
+                    var chainResult = await _cliChain.PromptAsync(aiPrompt, imagePath: tempFilePath, projectName: "diary-companion");
+                    if (chainResult.Success && !string.IsNullOrWhiteSpace(chainResult.Text))
                     {
-                        imageLabel = generatedLabel.Trim().Trim('"', '“', '”', '`', '.', '。');
+                        imageLabel = chainResult.Text.Trim().Trim('"', '“', '”', '`', '.', '。');
                         ctx.Values["ImageLabel"] = imageLabel;
-                        _logger.LogInformation("AI 成功生成了图片标注: {Label}", imageLabel);
+                        _logger.LogInformation("AI 成功生成了图片标注（via {Provider}）: {Label}", chainResult.Provider, imageLabel);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("图片自动标注未成功，已跳过（不影响日记保存）。原因: {Error}", chainResult.Error);
                     }
                 }
                 catch (Exception ex)

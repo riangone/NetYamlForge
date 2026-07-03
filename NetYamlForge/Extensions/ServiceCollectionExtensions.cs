@@ -220,6 +220,9 @@ public static class ServiceCollectionExtensions
         
         // AI サービス
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
+        // CLI フォールバックチェーン（優先順位: opencode → antigravity → claude code）。
+        // API Key 課金は使用量・費用を制御しづらいため、サブスクリプション型 CLI のみを対象とする。
+        services.AddScoped<NetYamlForge.Services.AI.ICliChainService, NetYamlForge.Services.AI.CliChainService>();
         // Embedding サービス（EmbeddingProvider で切替: local / lmstudio / gemini）
         // IEmbeddingService はフレームワーク公開インターフェース；IGeminiEmbeddingService は後方互換エイリアス
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
