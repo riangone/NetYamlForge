@@ -22,6 +22,46 @@
     <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
     <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    <style id="pv-pref-styles">
+        .pref-hide-header header.navbar {
+            display: none !important;
+        }
+        .pref-hide-header .breadcrumbs {
+            display: none !important;
+        }
+        .pref-hide-sidebar main {
+            padding: 0 !important;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+    <script>
+        (function() {
+            const DEFAULT_PREFS = {
+                hideHeader: true,
+                hideSidebar: false,
+                showMenu: true
+            };
+            let prefs = DEFAULT_PREFS;
+            try {
+                const saved = localStorage.getItem('pv_preferences');
+                if (saved) {
+                    prefs = { ...DEFAULT_PREFS, ...JSON.parse(saved) };
+                }
+            } catch (e) {}
+
+            const docEl = document.documentElement;
+            if (prefs.hideHeader === false) {
+                docEl.classList.add('pref-hide-header');
+            }
+            if (prefs.hideSidebar === false) {
+                docEl.classList.add('pref-hide-sidebar');
+            }
+        })();
+    </script>
 </head>
 @functions {
     private sealed class NavSection
@@ -174,159 +214,227 @@
         {
             <div class="drawer-side z-40">
                 <label for="app-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
-                <aside class="bg-base-100 w-72 min-h-full border-r border-base-300">
-                    <div class="p-4 border-b border-base-300 flex items-center justify-between">
-                        <div>
-                            <div class="text-sm opacity-70">Navigation</div>
-                            <div class="font-semibold">Photo Vocab</div>
+                <aside class="bg-gradient-to-b from-blue-50/95 via-cyan-50/95 to-teal-50/95 w-72 min-h-full border-r border-blue-100/40 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <!-- Header Section with rich aesthetics -->
+                        <div class="p-6 border-b border-blue-100/40 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl animate-pulse">🖼️</span>
+                                <div>
+                                    <div class="font-extrabold text-base bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">看图背单词</div>
+                                    <div class="text-[10px] text-blue-400 font-semibold tracking-wider uppercase">PHOTO VOCAB</div>
+                                </div>
+                            </div>
+                            <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square text-blue-600 hover:bg-blue-100/50" aria-label="close menu">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </label>
                         </div>
-                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </label>
-                    </div>
-                    <ul class="menu p-3 gap-1 w-full">
-                        @{
-                            var isDashboard = string.Equals(
-                                Context.Request.RouteValues["controller"]?.ToString(),
-                                "Dashboard",
-                                StringComparison.OrdinalIgnoreCase);
-                            var showDashboard = navConfig?.ShowDashboard ?? true;
-                            var navSections = new List<NavSection>();
-                            if (navConfig?.Items != null && navConfig.Items.Count > 0)
-                            {
-                                foreach (var item in navConfig.Items)
+                        
+                        <!-- Navigation Menu -->
+                        <ul class="menu p-4 gap-2 w-full">
+                            @{
+                                var isDashboard = string.Equals(
+                                    Context.Request.RouteValues["controller"]?.ToString(),
+                                    "Dashboard",
+                                    StringComparison.OrdinalIgnoreCase);
+                                var showDashboard = navConfig?.ShowDashboard ?? true;
+                                var navSections = new List<NavSection>();
+                                if (navConfig?.Items != null && navConfig.Items.Count > 0)
                                 {
-                                    var showItem = !item.AdminOnly || isAdminUser;
-                                    if (!showItem) continue;
-                                    var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
-                                    var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
-                                    if (section == null)
+                                    foreach (var item in navConfig.Items)
                                     {
-                                        section = new NavSection(sectionName);
-                                        navSections.Add(section);
+                                        var showItem = !item.AdminOnly || isAdminUser;
+                                        if (!showItem) continue;
+                                        var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
+                                        var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
+                                        if (section == null)
+                                        {
+                                            section = new NavSection(sectionName);
+                                            navSections.Add(section);
+                                        }
+                                        section.Items.Add(item);
                                     }
-                                    section.Items.Add(item);
+                                }
+                                var pathBase = Url.Content("~/").TrimEnd('/');
+                            }
+                            
+                            @if (showDashboard)
+                            {
+                                <li>
+                                    <a class="rounded-xl px-4 py-3 flex items-center gap-3 @(isDashboard ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md shadow-blue-200" : "text-gray-700 hover:bg-white/70 hover:text-blue-600 transition-all duration-200")"
+                                       asp-controller="Dashboard"
+                                       asp-action="Index"
+                                       asp-route-project="@currentProject">
+                                        <span class="text-lg">📊</span>
+                                        <span>Dashboard</span>
+                                    </a>
+                                </li>
+                            }
+                            
+                            @if (navSections.Count > 0)
+                            {
+                                foreach (var section in navSections)
+                                {
+                                    if (!string.IsNullOrEmpty(section.Title))
+                                    {
+                                        <li class="menu-title mt-2 px-2"><span class="text-xs font-semibold text-blue-400 tracking-wider">@(section.Title)</span></li>
+                                    }
+                                    foreach (var item in section.Items)
+                                    {
+                                        var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
+                                        var hasIcon = !string.IsNullOrEmpty(item.Icon);
+                                        
+                                        var isItemActive = false;
+                                        if (!string.IsNullOrEmpty(item.Url))
+                                        {
+                                            var reqPath = Context.Request.Path.Value ?? "";
+                                            var targetUrl = item.Url;
+                                            var normalizedTarget = targetUrl.StartsWith('/') ? pathBase + targetUrl : targetUrl;
+                                            isItemActive = string.Equals(reqPath, normalizedTarget, StringComparison.OrdinalIgnoreCase) || 
+                                                           reqPath.TrimEnd('/') == normalizedTarget.TrimEnd('/');
+                                        }
+                                        else if (!string.IsNullOrEmpty(item.Controller))
+                                        {
+                                            var curController = Context.Request.RouteValues["controller"]?.ToString();
+                                            var curAction = Context.Request.RouteValues["action"]?.ToString();
+                                            isItemActive = string.Equals(curController, item.Controller, StringComparison.OrdinalIgnoreCase) &&
+                                                           (string.IsNullOrEmpty(item.Action) || string.Equals(curAction, item.Action, StringComparison.OrdinalIgnoreCase));
+                                        }
+                                        
+                                        var activeClass = isItemActive 
+                                            ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md shadow-blue-200" 
+                                            : "text-gray-700 hover:bg-white/70 hover:text-blue-600 hover:shadow-sm transition-all duration-200";
+
+                                        @if (!string.IsNullOrEmpty(item.Url))
+                                        {
+                                            var targetUrl = item.Url;
+                                            var finalUrl = targetUrl.StartsWith('/') ? pathBase + targetUrl : targetUrl;
+                                            <li>
+                                                <a href="@finalUrl" class="rounded-xl px-4 py-3 flex items-center gap-3 @activeClass">
+                                                    @if (hasIcon) { <span class="text-lg">@item.Icon</span> }
+                                                    <span>@itemLabel</span>
+                                                </a>
+                                            </li>
+                                        }
+                                        else if (!string.IsNullOrEmpty(item.Controller))
+                                        {
+                                            <li>
+                                                <a asp-controller="@item.Controller"
+                                                   asp-action="@(item.Action ?? "Index")"
+                                                   asp-route-project="@currentProject"
+                                                   class="rounded-xl px-4 py-3 flex items-center gap-3 @activeClass">
+                                                    @if (hasIcon) { <span class="text-lg">@item.Icon</span> }
+                                                    <span>@itemLabel</span>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
                                 }
                             }
-                        }
-                        @if (showDashboard)
-                        {
-                            <li>
-                                <a class="@(isDashboard ? "active" : "")"
-                                   asp-controller="Dashboard"
-                                   asp-action="Index"
-                                   asp-route-project="@currentProject">📊 Dashboard</a>
-                            </li>
-                        }
-                        @if (navSections.Count > 0)
-                        {
-                            foreach (var section in navSections)
+                            
+                            @if (entityDefinitions.Count > 0)
                             {
-                                if (!string.IsNullOrEmpty(section.Title))
+                                <li class="menu-title mt-2 px-2"><span class="text-xs font-semibold text-blue-400 tracking-wider">Entities</span></li>
+                                @foreach (var definition in entityDefinitions)
                                 {
-                                    <li class="menu-title mt-1"><span>@(section.Title)</span></li>
-                                }
-                                foreach (var item in section.Items)
-                                {
-                                    var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
-                                    @if (!string.IsNullOrEmpty(item.Url))
-                                    {
-                                        <li><a href="@item.Url">@itemLabel</a></li>
-                                    }
-                                    else if (!string.IsNullOrEmpty(item.Controller))
+                                    var isActive = string.Equals(
+                                        Context.Request.RouteValues["controller"]?.ToString(),
+                                        "DynamicEntity",
+                                        StringComparison.OrdinalIgnoreCase) &&
+                                        string.Equals(
+                                            Context.Request.Query["entity"],
+                                            definition.Key,
+                                            StringComparison.OrdinalIgnoreCase);
+                                    var isDefinitionPage = isActive &&
+                                        string.Equals(
+                                            Context.Request.RouteValues["action"]?.ToString(),
+                                            "Definition",
+                                            StringComparison.OrdinalIgnoreCase);
+                                    @if (isAdminUser)
                                     {
                                         <li>
-                                            <a asp-controller="@item.Controller"
-                                               asp-action="@(item.Action ?? "Index")"
-                                               asp-route-project="@currentProject">@itemLabel</a>
+                                            <details @(isActive ? "open" : "") class="group">
+                                                <summary class="rounded-xl px-4 py-3 flex items-center gap-3 @(isActive && !isDefinitionPage ? "bg-blue-50 text-blue-600 font-semibold" : "text-gray-700 hover:bg-white/70")">
+                                                    <span>📦 @definition.Value.GetDisplayName()</span>
+                                                    <span class="badge badge-sm @(definition.Value.IsPublic ? "badge-success" : "badge-ghost") ml-auto">
+                                                        @(definition.Value.IsPublic ? "Pub" : "Priv")
+                                                    </span>
+                                                </summary>
+                                                <ul class="pl-4 mt-1 space-y-1 border-l border-blue-100/40 ml-3">
+                                                    <li>
+                                                        <a class="rounded-lg @(isActive && !isDefinitionPage ? "active font-semibold text-white bg-blue-600" : "text-gray-600 hover:bg-white/70")"
+                                                           asp-controller="DynamicEntity"
+                                                           asp-action="Index"
+                                                           asp-route-project="@currentProject"
+                                                           asp-route-entity="@definition.Key">List</a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="rounded-lg @(isDefinitionPage ? "active font-semibold text-white bg-blue-600" : "text-gray-600 hover:bg-white/70")"
+                                                           asp-controller="DynamicEntity"
+                                                           asp-action="Definition"
+                                                           asp-route-project="@currentProject"
+                                                           asp-route-entity="@definition.Key">Definition</a>
+                                                    </li>
+                                                </ul>
+                                            </details>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <a class="rounded-xl px-4 py-3 flex items-center gap-3 @(isActive ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md shadow-blue-200" : "text-gray-700 hover:bg-white/70 hover:text-blue-600 transition-all duration-200")"
+                                               asp-controller="DynamicEntity"
+                                               asp-action="Index"
+                                               asp-route-project="@currentProject"
+                                               asp-route-entity="@definition.Key">
+                                                <span>📦</span>
+                                                <span>@definition.Value.GetDisplayName()</span>
+                                            </a>
                                         </li>
                                     }
                                 }
                             }
-                        }
-                        @if (entityDefinitions.Count > 0)
-                        {
-                            <li class="menu-title mt-1"><span>Entities</span></li>
-                            @foreach (var definition in entityDefinitions)
+                            
+                            @if (isAdminUser)
                             {
-                                var isActive = string.Equals(
-                                    Context.Request.RouteValues["controller"]?.ToString(),
-                                    "DynamicEntity",
-                                    StringComparison.OrdinalIgnoreCase) &&
-                                    string.Equals(
-                                        Context.Request.Query["entity"],
-                                        definition.Key,
-                                        StringComparison.OrdinalIgnoreCase);
-                                var isDefinitionPage = isActive &&
-                                    string.Equals(
-                                        Context.Request.RouteValues["action"]?.ToString(),
-                                        "Definition",
-                                        StringComparison.OrdinalIgnoreCase);
-                                @if (isAdminUser)
-                                {
-                                    <li>
-                                        <details @(isActive ? "open" : "")>
-                                            <summary class="@(isActive && !isDefinitionPage ? "active" : "")">
-                                                @definition.Value.GetDisplayName()
-                                                <span class="badge badge-sm @(definition.Value.IsPublic ? "badge-success" : "badge-ghost") ml-auto">
-                                                    @(definition.Value.IsPublic ? "Pub" : "Priv")
-                                                </span>
-                                            </summary>
-                                            <ul>
-                                                <li>
-                                                    <a class="@(isActive && !isDefinitionPage ? "active" : "")"
-                                                       asp-controller="DynamicEntity"
-                                                       asp-action="Index"
-                                                       asp-route-project="@currentProject"
-                                                       asp-route-entity="@definition.Key">List</a>
-                                                </li>
-                                                <li>
-                                                    <a class="@(isDefinitionPage ? "active" : "")"
-                                                       asp-controller="DynamicEntity"
-                                                       asp-action="Definition"
-                                                       asp-route-project="@currentProject"
-                                                       asp-route-entity="@definition.Key">Definition</a>
-                                                </li>
-                                            </ul>
-                                        </details>
-                                    </li>
-                                }
-                                else
-                                {
-                                    <li>
-                                        <a class="@(isActive ? "active" : "")"
-                                           asp-controller="DynamicEntity"
-                                           asp-action="Index"
-                                           asp-route-project="@currentProject"
-                                           asp-route-entity="@definition.Key">@definition.Value.GetDisplayName()</a>
-                                    </li>
-                                }
+                                <li class="menu-title mt-4 px-2"><span class="text-xs font-semibold text-blue-400 tracking-wider">系统管理</span></li>
+                                <li>
+                                    <a asp-controller="BatchJob"
+                                       asp-action="Index"
+                                       asp-route-project="@currentProject"
+                                       class="rounded-xl px-4 py-3 flex items-center gap-3 @(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "BatchJob", StringComparison.OrdinalIgnoreCase) ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md" : "text-gray-700 hover:bg-white/70 hover:text-blue-600 transition-all duration-200")">
+                                        <span>⚙️</span>
+                                        <span>Batch Jobs</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="DynamicEntity"
+                                       asp-action="AllDefinitions"
+                                       asp-route-project="@currentProject"
+                                       class="rounded-xl px-4 py-3 flex items-center gap-3 @(string.Equals(Context.Request.RouteValues["action"]?.ToString(), "AllDefinitions", StringComparison.OrdinalIgnoreCase) ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md" : "text-gray-700 hover:bg-white/70 hover:text-blue-600 transition-all duration-200")">
+                                        <span>🗂️</span>
+                                        <span>Schema</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a asp-controller="Users"
+                                       asp-action="Index"
+                                       asp-route-project="@currentProject"
+                                       class="rounded-xl px-4 py-3 flex items-center gap-3 @(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "Users", StringComparison.OrdinalIgnoreCase) ? "active font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow-md" : "text-gray-700 hover:bg-white/70 hover:text-blue-600 transition-all duration-200")">
+                                        <span>👥</span>
+                                        <span>@L["Users"]</span>
+                                    </a>
+                                </li>
                             }
-                        }
-                        @if (isAdminUser)
-                        {
-                            <li class="menu-title mt-2"><span>Admin</span></li>
-                            <li>
-                                <a asp-controller="BatchJob"
-                                   asp-action="Index"
-                                   asp-route-project="@currentProject"
-                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "BatchJob", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                                    Batch Jobs
-                                </a>
-                            </li>
-                            <li>
-                                <a asp-controller="DynamicEntity"
-                                   asp-action="AllDefinitions"
-                                   asp-route-project="@currentProject"
-                                   class="@(string.Equals(Context.Request.RouteValues["action"]?.ToString(), "AllDefinitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
-                                    Schema
-                                </a>
-                            </li>
-                            <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
-                        }
-                    </ul>
+                        </ul>
+                    </div>
+                    <!-- Sidebar Footer with rich aesthetics -->
+                    <div class="p-4 border-t border-blue-100/40 bg-white/40 backdrop-blur-sm flex items-center justify-between text-xs text-blue-500 font-medium">
+                        <span>🖼️ 看图背单词</span>
+                        <span class="opacity-75">v1.0.0</span>
+                    </div>
                 </aside>
             </div>
         }
@@ -509,5 +617,71 @@
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- 悬浮侧边栏唤出按钮 -->
+    <div id="pv-floating-group" class="fixed z-40 hidden flex-col gap-3 opacity-60 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 bottom-6 right-6">
+        <label id="pv-floating-menu-btn" for="app-sidebar" class="btn btn-circle bg-white/80 backdrop-blur border border-white/50 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center text-gray-700 hover:text-blue-600 cursor-pointer w-11 h-11" title="打开侧边栏">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </label>
+    </div>
+
+    <!-- 偏好应用与快捷键 JS 脚本 -->
+    <script>
+        (function() {
+            // 初始时检查是否应该显示悬浮按钮
+            document.addEventListener('DOMContentLoaded', function() {
+                const floatingGroup = document.getElementById('pv-floating-group');
+                if (floatingGroup) {
+                    floatingGroup.classList.remove('hidden');
+                    floatingGroup.classList.add('flex');
+                }
+            });
+
+            // 滚动时让悬浮按钮临时淡出，避免遮挡正在阅读的内容；停止滚动后淡回
+            document.addEventListener('DOMContentLoaded', function() {
+                const floatingGroup = document.getElementById('pv-floating-group');
+                if (!floatingGroup) return;
+                let scrollTimer = null;
+                window.addEventListener('scroll', function() {
+                    floatingGroup.classList.add('!opacity-20');
+                    clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(function() {
+                        floatingGroup.classList.remove('!opacity-20');
+                    }, 500);
+                }, { passive: true });
+            });
+
+            // 极客快捷键支持 (非输入框聚焦时有效)
+            document.addEventListener('keydown', (e) => {
+                const activeEl = document.activeElement;
+                if (activeEl && (
+                    activeEl.tagName === 'INPUT' || 
+                    activeEl.tagName === 'TEXTAREA' || 
+                    activeEl.contentEditable === 'true' || 
+                    activeEl.tagName === 'SELECT'
+                )) {
+                    return; // 正在输入时忽略快捷键
+                }
+
+                const currentProject = window.NetYamlForgeConfig?.currentProject || 'photo-vocab';
+                const key = e.key.toLowerCase();
+                if (key === 'm') {
+                    e.preventDefault();
+                    const sidebarToggle = document.getElementById('app-sidebar');
+                    if (sidebarToggle) {
+                        sidebarToggle.checked = !sidebarToggle.checked;
+                    }
+                } else if (key === 's') {
+                    e.preventDefault();
+                    window.location.href = '/@currentProject/Page/Settings';
+                } else if (key === 'h') {
+                    e.preventDefault();
+                    window.location.href = '/@currentProject/Page/HomePage';
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

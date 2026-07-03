@@ -152,6 +152,148 @@ translations:
     ja-JP: '次のラウンドへ'
     ko-KR: '다음 라운드 시작'
 
+  projects.photo-vocab.pages.Settings.title:
+    en-US: 'Settings'
+    zh-CN: '应用设置'
+    ja-JP: '設定'
+    ko-KR: '설정'
+  projects.photo-vocab.pages.Settings.sections.settings_section.title:
+    en-US: 'Preferences'
+    zh-CN: '偏好设置'
+    ja-JP: '設定'
+    ko-KR: '설정'
+
+  projects.photo-vocab.views.settings.title:
+    en-US: 'Photo Vocab — Settings'
+    zh-CN: '看图背单词 — 系统设置'
+    ja-JP: '写真で英単語 — 設定'
+    ko-KR: '사진으로 단어 학습 — 설정'
+  projects.photo-vocab.views.settings.back:
+    en-US: 'Back to Photo Wall'
+    zh-CN: '返回图片墙'
+    ja-JP: '写真ウォールに戻る'
+    ko-KR: '사진 갤러리로 돌아가기'
+  projects.photo-vocab.views.settings.desc:
+    en-US: 'Customize your photo-vocab learning experience.'
+    zh-CN: '个性化配置你的看图背单词学习体验。'
+    ja-JP: '写真で英単語の学習体験をカスタマイズします。'
+    ko-KR: '사진으로 단어 학습 경험을 맞춤 설정하세요.'
+  projects.photo-vocab.views.settings.hide_header_title:
+    en-US: 'Hide Header Bar'
+    zh-CN: '隐藏 Header 导航栏'
+    ja-JP: 'ヘッダーを非表示'
+    ko-KR: '헤더 숨기기'
+  projects.photo-vocab.views.settings.hide_header_desc:
+    en-US: 'Hide the top global navigation bar for a more immersive, distraction-free view.'
+    zh-CN: '默认隐藏顶部的系统全局导航栏，使页面更加沉浸、无干扰。'
+    ja-JP: '上部のグローバルナビゲーションバーを非表示にし、没入感のある表示にします。'
+    ko-KR: '상단 글로벌 네비게이션 바를 숨겨 더욱 몰입감 있는 화면을 제공합니다.'
+  projects.photo-vocab.views.settings.immersion_title:
+    en-US: 'Fullscreen Immersive Mode'
+    zh-CN: '沉浸式全屏展示'
+    ja-JP: '没入型全画面表示'
+    ko-KR: '몰입형 전체화면 모드'
+  projects.photo-vocab.views.settings.immersion_desc:
+    en-US: 'Remove default content container padding to stretch content across the full screen.'
+    zh-CN: '自动去除主内容容器的默认边距，完全拉伸占满整个屏幕。'
+    ja-JP: 'メインコンテンツの余白を自動的に削除し、画面いっぱいに表示します。'
+    ko-KR: '기본 콘텐츠 컨테이너 여백을 제거하여 화면을 가득 채웁니다.'
+  projects.photo-vocab.views.settings.show_menu_title:
+    en-US: 'Show Floating Menu Button'
+    zh-CN: '显示悬浮菜单按钮'
+    ja-JP: 'フローティングメニューボタンを表示'
+    ko-KR: '플로팅 메뉴 버튼 표시'
+  projects.photo-vocab.views.settings.show_menu_desc:
+    en-US: 'Show a semi-transparent floating button in the bottom-right corner to quickly toggle the sidebar.'
+    zh-CN: '在屏幕右下角显示半透明的悬浮按钮，用于快速打开侧边栏。'
+    ja-JP: '画面右下に半透明のフローティングボタンを表示し、サイドバーを素早く開閉します。'
+    ko-KR: '화면 오른쪽 아래에 반투명 플로팅 버튼을 표시하여 사이드바를 빠르게 열고 닫습니다.'
+  projects.photo-vocab.views.settings.shortcuts_title:
+    en-US: '⌨️ Keyboard Shortcuts (when not focusing on input)'
+    zh-CN: '⌨️ 快捷键支持 (非输入框聚焦时有效)'
+    ja-JP: '⌨️ キーボードショートカット (入力欄フォーカス時は無効)'
+    ko-KR: '⌨️ 키보드 단축키 (입력란 포커스 시 비활성화)'
+  projects.photo-vocab.views.settings.shortcut_m:
+    en-US: 'Toggle sidebar'
+    zh-CN: '打开 / 关闭侧边栏'
+    ja-JP: 'サイドバー開閉'
+    ko-KR: '사이드바 열기/닫기'
+  projects.photo-vocab.views.settings.shortcut_s:
+    en-US: 'Go to Settings page'
+    zh-CN: '进入系统设置页面'
+    ja-JP: '設定ページへ移動'
+    ko-KR: '설정 페이지로 이동'
+  projects.photo-vocab.views.settings.shortcut_h:
+    en-US: 'Go to Home page'
+    zh-CN: '回到首页图片墙'
+    ja-JP: 'ホームページへ戻る'
+    ko-KR: '홈페이지로 돌아가기'
+  projects.photo-vocab.views.settings.shortcut_hint:
+    en-US: '* Even if you hide the Header, sidebar, and floating menu, you can still use keyboard shortcuts to navigate.'
+    zh-CN: '* 即使您完全隐藏了 Header、侧边栏和悬浮菜单，仍然可以通过键盘快捷键轻松呼出或返回。'
+    ja-JP: '* ヘッダー、サイドバー、フローティングメニューをすべて非表示にしても、キーボードショートカットで操作できます。'
+    ko-KR: '* 헤더, 사이드바, 플로팅 메뉴를 모두 숨겨도 키보드 단축키로 쉽게 탐색할 수 있습니다.'
+  projects.photo-vocab.views.settings.save_success:
+    en-US: 'Preferences saved and applied!'
+    zh-CN: '偏好设置已成功保存并立即生效！'
+    ja-JP: '設定を保存し、すぐに適用しました！'
+    ko-KR: '설정이 저장되고 즉시 적용되었습니다!'
+  projects.photo-vocab.views.settings.save_btn:
+    en-US: 'Save & Apply'
+    zh-CN: '保存并应用'
+    ja-JP: '保存して適用'
+    ko-KR: '저장 및 적용'
+  projects.photo-vocab.views.settings.cancel:
+    en-US: 'Cancel'
+    zh-CN: '取消'
+    ja-JP: 'キャンセル'
+    ko-KR: '취소'
+  projects.photo-vocab.views.settings.unknown_error:
+    en-US: 'Failed to save settings. Your browser may have disabled LocalStorage.'
+    zh-CN: '保存设置失败，浏览器可能禁用了 LocalStorage。'
+    ja-JP: '設定の保存に失敗しました。ブラウザが LocalStorage を無効にしている可能性があります。'
+    ko-KR: '설정 저장에 실패했습니다. 브라우저에서 LocalStorage를 비활성화했을 수 있습니다.'
+  projects.photo-vocab.views.settings.round_size_title:
+    en-US: 'Questions per Round'
+    zh-CN: '每轮挑战题数'
+    ja-JP: '1ラウンドの問題数'
+    ko-KR: '라운드당 문제 수'
+  projects.photo-vocab.views.settings.round_size_desc:
+    en-US: 'Set the number of questions in each vocabulary challenge round.'
+    zh-CN: '设置每轮单词挑战包含的题目数量。'
+    ja-JP: '各単語チャレンジラウンドの問題数を設定します。'
+    ko-KR: '각 단어 챌린지 라운드의 문제 수를 설정합니다.'
+  projects.photo-vocab.views.settings.questions_unit:
+    en-US: ' questions'
+    zh-CN: '题'
+    ja-JP: '問'
+    ko-KR: '문제'
+  projects.photo-vocab.views.settings.unlimited:
+    en-US: 'Unlimited (Classic)'
+    zh-CN: '不限（经典模式）'
+    ja-JP: '無制限（クラシックモード）'
+    ko-KR: '무제한 (클래식 모드)'
+  projects.photo-vocab.views.settings.quiz_lang_title:
+    en-US: '🎯 Default Challenge Language'
+    zh-CN: '🎯 默认挑战语言'
+    ja-JP: '🎯 デフォルトのチャレンジ言語'
+    ko-KR: '🎯 기본 챌린지 언어'
+  projects.photo-vocab.views.settings.quiz_lang_desc:
+    en-US: 'Default target language when entering vocabulary challenge.'
+    zh-CN: '进入单词挑战时的默认目标语言。'
+    ja-JP: '単語チャレンジ開始時のデフォルト言語。'
+    ko-KR: '단어 챌린지 진입 시 기본 대상 언어입니다.'
+  projects.photo-vocab.views.settings.ui_lang_title:
+    en-US: '🌐 Interface Language'
+    zh-CN: '🌐 界面显示语言'
+    ja-JP: '🌐 表示言語'
+    ko-KR: '🌐 인터페이스 언어'
+  projects.photo-vocab.views.settings.ui_lang_desc:
+    en-US: 'Set the application interface language (supports Chinese, English, Japanese, Korean).'
+    zh-CN: '设置应用界面的显示语言（支持中文、英文、日语、韩语）。'
+    ja-JP: 'アプリケーションの表示言語を設定します（中国語、英語、日本語、韓国語に対応）。'
+    ko-KR: '애플리케이션 인터페이스 언어를 설정합니다(중국어, 영어, 일본어, 한국어 지원).'
+
   projects.photo-vocab.pages.Stats.title:
     en-US: 'Learning Stats'
     zh-CN: '学习统计'

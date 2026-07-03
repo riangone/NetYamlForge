@@ -1,0 +1,20 @@
+title: Settings
+titleKey: projects.photo-vocab.pages.Settings.title
+isPublic: true
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: settings_section
+    titleKey: projects.photo-vocab.pages.Settings.sections.settings_section.title
+    sourceType: custom
+    source: "SELECT 1 AS DummyId"
+    columns: [DummyId]
+    pageSize: 1
+    editable: false
+    readOnly: true
+    ui:
+      component: DataTable

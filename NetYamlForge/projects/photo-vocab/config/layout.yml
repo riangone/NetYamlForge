@@ -21,6 +21,10 @@ navigation:
       labelKey: projects.photo-vocab.pages.Stats.title
       url: /photo-vocab/Page/Stats
       icon: 📊
+    - label: 应用设置
+      labelKey: projects.photo-vocab.pages.Settings.title
+      url: /photo-vocab/Page/Settings
+      icon: ⚙️
 
 footer:
   text: "🖼️ Photo Vocab — powered by NetYamlForge"
