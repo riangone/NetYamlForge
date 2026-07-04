@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
@@ -31,7 +33,7 @@ public class PhotoVocabAnalysisResult
 /// </summary>
 public class AnalyzePhotoAndExtractVocabHook : IEntityHook
 {
-    private readonly IAntigravityCliService _ai;
+    private readonly ICliChainService _cliChain;
     private readonly ILogger<AnalyzePhotoAndExtractVocabHook> _logger;
 
     public string Name => "analyze_photo_and_extract_vocab";
@@ -45,9 +47,9 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
         ["ko-KR"] = "한국어",
     };
 
-    public AnalyzePhotoAndExtractVocabHook(IAntigravityCliService ai, ILogger<AnalyzePhotoAndExtractVocabHook> logger)
+    public AnalyzePhotoAndExtractVocabHook(ICliChainService cliChain, ILogger<AnalyzePhotoAndExtractVocabHook> logger)
     {
-        _ai = ai;
+        _cliChain = cliChain;
         _logger = logger;
     }
 
@@ -137,7 +139,7 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
             await System.IO.File.WriteAllBytesAsync(tempFilePath, Convert.FromBase64String(rawBase64));
 
             var prompt = $$"""
-请使用你的 view_file 工具查看位于 `{{tempFilePath}}` 的图片。这是一张用于语言学习的素材图片。
+这是一张用于语言学习的素材图片。
 目标语言（要背诵记忆的语言）：{{langName}}（{{language}}）。
 释义语言（用户能看懂的语言，用于解释目标语言）：{{nativeLangName}}（{{nativeLanguage}}）。
 
@@ -160,13 +162,16 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
 }
 """;
 
-            var aiTask = _ai.PromptJsonAsync<PhotoVocabAnalysisResult>(prompt, projectName: "photo-vocab");
-            var delayTask = Task.Delay(TimeSpan.FromSeconds(20));
-            var completed = await Task.WhenAny(aiTask, delayTask);
-
-            if (completed == aiTask)
+            // 图片分析为可选功能：可通过 projects/photo-vocab/.env 的
+            // CLI_CHAIN_ENABLED=false 整体关闭，或用 CLI_CHAIN_ORDER 调整/裁剪优先级。
+            // 默认优先顺序：opencode cli → antigravity cli → claude code cli
+            // （均为订阅制 CLI，不使用按量计费的 API，避免费用不可控）。
+            // 链路内部对每个 CLI 各自有 90 秒超时并自动 fallback 到下一个，
+            // 这里不再叠加一层自造的 20 秒计时器（那样只会导致"判负但后台任务还在跑"的假超时）。
+            var chainResult = await _cliChain.PromptAsync(prompt, imagePath: tempFilePath, projectName: "photo-vocab");
+            if (chainResult.Success && !string.IsNullOrWhiteSpace(chainResult.Text))
             {
-                var result = await aiTask;
+                var result = ParseAnalysisResult(chainResult.Text);
                 if (result != null)
                 {
                     caption = result.Caption?.Trim() ?? "";
@@ -174,11 +179,16 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
                         .Where(w => !string.IsNullOrWhiteSpace(w.Word))
                         .Take(6)
                         .ToList();
+                    _logger.LogInformation("AI 成功分析了图片并提取了 {Count} 个单词（via {Provider}）", extractedWords.Count, chainResult.Provider);
+                }
+                else
+                {
+                    _logger.LogError("AI 返回内容无法解析为 JSON，跳过本次自动标注。原始内容: {Text}", chainResult.Text);
                 }
             }
             else
             {
-                _logger.LogWarning("AI 图片分析调用超时，跳过本次自动标注。");
+                _logger.LogWarning("图片自动分析未成功，已跳过（不影响图片保存）。原因: {Error}", chainResult.Error);
             }
         }
         catch (Exception ex)
@@ -202,6 +212,31 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
         ctx.Data["NativeLanguage"] = nativeLanguage;
 
         return HookResult.Continue();
+    }
+
+    /// <summary>
+    /// ICliChainService は生の文本しか返さない（IAntigravityCliService.PromptJsonAsync のような
+    /// 汎用 JSON パースは提供しない）ため、ここで同等のロジックを実装する：
+    /// markdown コードブロック記号を除去し、最初の '{' から最後の '}' までを JSON として解析する。
+    /// </summary>
+    private PhotoVocabAnalysisResult? ParseAnalysisResult(string text)
+    {
+        try
+        {
+            var cleaned = Regex.Replace(text, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
+            var start = cleaned.IndexOf('{');
+            var end = cleaned.LastIndexOf('}');
+            if (start >= 0 && end > start)
+            {
+                var json = cleaned.Substring(start, end - start + 1);
+                return JsonSerializer.Deserialize<PhotoVocabAnalysisResult>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "解析 AI JSON 返回内容失败: {Text}", text);
+        }
+        return null;
     }
 
     public async Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
