@@ -90,6 +90,8 @@ entities:
         - analyze_photo_and_extract_vocab
       afterCreate:
         - analyze_photo_and_extract_vocab
+      beforeDelete:
+        - cascade_delete_photo_vocab
 
     paging:
       pageSize: 12

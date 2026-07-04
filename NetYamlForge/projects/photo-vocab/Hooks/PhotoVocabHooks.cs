@@ -277,3 +277,60 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
         }
     }
 }
+
+/// <summary>
+/// 删除一张图片（PhotoEntry）前，级联清理由它提取出的背单词素材（VocabWord），
+/// 以及这些单词对应的答题记录（QuizRecord）。
+/// 该框架的 SQLite 表未声明外键 ON DELETE CASCADE，若不手动清理，
+/// 删除图片后 VocabWord/QuizRecord 会残留指向已不存在图片的孤儿数据
+/// （Quiz 抽题、统计页会因此引用失效的 PhotoEntryId）。
+/// </summary>
+public class CascadeDeletePhotoVocabHook : IEntityHook
+{
+    private readonly ILogger<CascadeDeletePhotoVocabHook> _logger;
+
+    public string Name => "cascade_delete_photo_vocab";
+
+    public CascadeDeletePhotoVocabHook(ILogger<CascadeDeletePhotoVocabHook> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        if (ctx.Operation != CrudOperation.Delete || ctx.Id == null)
+            return HookResult.Continue();
+
+        var photoEntryId = ctx.Id.Value;
+
+        try
+        {
+            var wordIds = (await db.QueryAsync<int>(
+                "SELECT Id FROM VocabWord WHERE PhotoEntryId = @PhotoEntryId",
+                new { PhotoEntryId = photoEntryId }, tx)).ToList();
+
+            if (wordIds.Count > 0)
+            {
+                await db.ExecuteAsync(
+                    "DELETE FROM QuizRecord WHERE VocabWordId IN @Ids",
+                    new { Ids = wordIds }, tx);
+            }
+
+            await db.ExecuteAsync(
+                "DELETE FROM VocabWord WHERE PhotoEntryId = @PhotoEntryId",
+                new { PhotoEntryId = photoEntryId }, tx);
+
+            _logger.LogInformation(
+                "删除图片前完成级联清理: PhotoEntryId={PhotoEntryId}, 清理单词数={WordCount}",
+                photoEntryId, wordIds.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "级联清理图片关联的单词/答题记录失败: PhotoEntryId={PhotoEntryId}", photoEntryId);
+        }
+
+        return HookResult.Continue();
+    }
+
+    public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx) => Task.CompletedTask;
+}

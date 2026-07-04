@@ -73,5 +73,7 @@ sections:
     imageField: image_url
     captionField: lightbox_caption
     pageSize: 60
-    editable: false
-    readOnly: true
+    editable: true
+    readOnly: false
+    targetTable: PhotoEntry
+    targetPrimaryKey: Id

@@ -12,6 +12,11 @@
     var captionField     = sec.CaptionField;
     var actionUrl        = sec.ActionUrl;
 
+    // カード単位の削除ボタン表示条件。data_table の canEdit と同じ規約：
+    // editable かつ readOnly でない かつ target_table が設定されている場合のみ削除操作を許可する。
+    var canDelete = sec.Editable && !sec.ReadOnly && !string.IsNullOrEmpty(sec.TargetTable);
+    var deletePkCol = sec.TargetPrimaryKey ?? "Id";
+
     // unique id per section to avoid conflicts when multiple card_lists on one page
     var sectionId = $"cl_{sec.Id ?? Guid.NewGuid().ToString("N")[..8]}";
 
@@ -41,6 +46,13 @@
                 : imageUrl.Contains("/photo-file/serve/")
                     ? imageUrl.Replace("/photo-file/serve/", "/photo-file/thumb/") + "?w=400"
                     : imageUrl;
+
+        string? deleteRowId = null;
+        if (canDelete)
+        {
+            var idKey = row.Keys.FirstOrDefault(k => k.Equals(deletePkCol, StringComparison.OrdinalIgnoreCase));
+            if (idKey != null) deleteRowId = row[idKey]?.ToString();
+        }
 
         <div class="card bg-base-100 shadow hover:shadow-lg transition-shadow overflow-hidden">
             @if (!string.IsNullOrEmpty(imageUrl))
@@ -74,9 +86,25 @@
                     <p class="text-xs text-gray-500 line-clamp-2">@description</p>
                 }
 
-                @if (sec.Actions != null && sec.Actions.Count > 0)
+                @if ((sec.Actions != null && sec.Actions.Count > 0) || (canDelete && deleteRowId != null))
                 {
                     <div class="card-actions justify-end mt-2 pt-2 border-t border-gray-100 flex gap-1">
+                        @if (canDelete && deleteRowId != null)
+                        {
+                            <form hx-post="@Url.Content($"~/{Model.Project}/Page/{Model.PageName}/section/{sec.Id}/delete-row")"
+                                  hx-target="#section-@sec.Id"
+                                  hx-swap="innerHTML"
+                                  hx-confirm="@(sec.Confirmation?.Delete ?? "确定要删除这张图片吗？此操作不可恢复，其提取的单词也会一并删除。")"
+                                  method="post"
+                                  action="@Url.Content($"~/{Model.Project}/Page/{Model.PageName}/section/{sec.Id}/delete-row")"
+                                  style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="rowId" value="@deleteRowId" />
+                                <button type="submit" class="btn btn-outline btn-error btn-xs">🗑️ 删除</button>
+                            </form>
+                        }
+                        @if (sec.Actions != null)
+                        {
                         @foreach (var action in sec.Actions)
                         {
                             var url = action.Url;
@@ -126,6 +154,7 @@
                             {
                                 <a href="@url" class="@btnClass">@action.Label</a>
                             }
+                        }
                         }
                     </div>
                 }
