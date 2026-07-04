@@ -410,11 +410,11 @@ public sealed class BatchUploadZipHandler : ICustomActionHandler
         if (string.IsNullOrWhiteSpace(responseText)) return "";
         var cleaned = Regex.Replace(responseText, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
         cleaned = Regex.Replace(cleaned, @"```\s*$", "", RegexOptions.IgnoreCase).Trim();
-        var start = cleaned.IndexOf('{');
+        var braceStart = cleaned.IndexOf('{');
         var end = cleaned.LastIndexOf('}');
-        if (start >= 0 && end > start)
+        if (braceStart >= 0 && end > braceStart)
         {
-            return cleaned.Substring(start, end - start + 1);
+            return cleaned.Substring(braceStart, end - braceStart + 1);
         }
         return cleaned;
     }

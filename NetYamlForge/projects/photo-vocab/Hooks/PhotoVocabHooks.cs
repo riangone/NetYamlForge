@@ -224,11 +224,11 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
         try
         {
             var cleaned = Regex.Replace(text, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-            var start = cleaned.IndexOf('{');
+            var braceStart = cleaned.IndexOf('{');
             var end = cleaned.LastIndexOf('}');
-            if (start >= 0 && end > start)
+            if (braceStart >= 0 && end > braceStart)
             {
-                var json = cleaned.Substring(start, end - start + 1);
+                var json = cleaned.Substring(braceStart, end - braceStart + 1);
                 return JsonSerializer.Deserialize<PhotoVocabAnalysisResult>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
         }
