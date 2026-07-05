@@ -1,7 +1,12 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using NetYamlForge.Models;
 
 namespace NetYamlForge.Services.DynamicEntity;
@@ -23,128 +28,37 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
 """;
 
     private readonly ILogger<DynamicEntitySchemaMigrationService> _logger;
+    private readonly IEnumerable<ISchemaDdlBuilder> _ddlBuilders;
 
-    public DynamicEntitySchemaMigrationService(ILogger<DynamicEntitySchemaMigrationService> logger)
+    public DynamicEntitySchemaMigrationService(
+        ILogger<DynamicEntitySchemaMigrationService> logger,
+        IEnumerable<ISchemaDdlBuilder>? ddlBuilders = null)
     {
         _logger = logger;
+        _ddlBuilders = ddlBuilders ?? new ISchemaDdlBuilder[]
+        {
+            new SqliteSchemaDdlBuilder(),
+            new PostgresSchemaDdlBuilder(),
+            new MySqlSchemaDdlBuilder(),
+            new SqlServerSchemaDdlBuilder()
+        };
+    }
+
+    private ISchemaDdlBuilder GetBuilder(string dbType)
+    {
+        var builder = _ddlBuilders.FirstOrDefault(b => b.Supports(dbType));
+        if (builder == null)
+        {
+            throw new NotSupportedException($"Schema migration column inspection / generation is not supported for dbType '{dbType}'.");
+        }
+        return builder;
     }
 
     public async Task<IReadOnlyList<ColumnSchemaInfo>> GetPhysicalColumnsAsync(IDbConnection conn, string tableName, string dbType = "sqlite")
     {
         EnsureOpen(conn);
-        if (IsPostgres(dbType))
-        {
-            var pgRows = await conn.QueryAsync<PostgresColumnRow>(
-                """
-SELECT
-    c.ordinal_position AS "Cid",
-    c.column_name AS "Name",
-    c.data_type AS "Type",
-    (c.is_nullable = 'NO') AS "NotNullBool",
-    CASE WHEN pk.column_name IS NOT NULL THEN 1 ELSE 0 END AS "Pk"
-FROM information_schema.columns c
-LEFT JOIN (
-    SELECT kcu.column_name
-    FROM information_schema.table_constraints tc
-    JOIN information_schema.key_column_usage kcu
-      ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
-    WHERE tc.constraint_type = 'PRIMARY KEY'
-      AND tc.table_name = @TableName
-      AND tc.table_schema = current_schema()
-) pk ON pk.column_name = c.column_name
-WHERE c.table_name = @TableName
-  AND c.table_schema = current_schema()
-ORDER BY c.ordinal_position
-""",
-                new { TableName = tableName });
-
-            return pgRows
-                .OrderBy(r => r.Cid)
-                .Select(r => new ColumnSchemaInfo(
-                    r.Name,
-                    NormalizeSqlType(r.Type),
-                    r.NotNullBool,
-                    r.Pk != 0))
-                .ToList();
-        }
-
-        if (IsMySql(dbType))
-        {
-            var mysqlRows = await conn.QueryAsync<PostgresColumnRow>(
-                """
-SELECT
-    ordinal_position AS Cid,
-    column_name AS Name,
-    data_type AS Type,
-    CASE WHEN is_nullable = 'NO' THEN 1 ELSE 0 END AS NotNullBool,
-    CASE WHEN column_key = 'PRI' THEN 1 ELSE 0 END AS Pk
-FROM information_schema.columns
-WHERE table_name = @TableName
-  AND table_schema = DATABASE()
-ORDER BY ordinal_position
-""",
-                new { TableName = tableName });
-
-            return mysqlRows
-                .OrderBy(r => r.Cid)
-                .Select(r => new ColumnSchemaInfo(
-                    r.Name,
-                    NormalizeSqlType(r.Type),
-                    r.NotNullBool,
-                    r.Pk != 0))
-                .ToList();
-        }
-
-        if (IsSqlServer(dbType))
-        {
-            var mssqlRows = await conn.QueryAsync<PostgresColumnRow>(
-                """
-SELECT
-    c.ORDINAL_POSITION AS Cid,
-    c.COLUMN_NAME AS Name,
-    c.DATA_TYPE AS Type,
-    CASE WHEN c.IS_NULLABLE = 'NO' THEN 1 ELSE 0 END AS NotNullBool,
-    CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 1 ELSE 0 END AS Pk
-FROM INFORMATION_SCHEMA.COLUMNS c
-LEFT JOIN (
-    SELECT ku.COLUMN_NAME, ku.TABLE_NAME
-    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
-    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku
-      ON tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
-    WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
-) pk ON pk.TABLE_NAME = c.TABLE_NAME AND pk.COLUMN_NAME = c.COLUMN_NAME
-WHERE c.TABLE_NAME = @TableName
-ORDER BY c.ORDINAL_POSITION
-""",
-                new { TableName = tableName });
-
-            return mssqlRows
-                .OrderBy(r => r.Cid)
-                .Select(r => new ColumnSchemaInfo(
-                    r.Name,
-                    NormalizeSqlType(r.Type),
-                    r.NotNullBool,
-                    r.Pk != 0))
-                .ToList();
-        }
-
-        if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new NotSupportedException("Schema migration column inspection supports SQLite, PostgreSQL, MySQL and SQL Server only.");
-        }
-
-#pragma warning disable DCS001
-        var rows = await conn.QueryAsync<PragmaColumnRow>(
-            $"SELECT cid AS \"Cid\", name AS \"Name\", type AS \"Type\", \"notnull\" AS \"NotNull\", pk AS \"Pk\" FROM pragma_table_info(\"{EscapeIdentifier(tableName)}\")");
-#pragma warning restore DCS001
-        return rows
-            .OrderBy(r => r.Cid)
-            .Select(r => new ColumnSchemaInfo(
-                r.Name,
-                NormalizeSqlType(r.Type),
-                r.NotNull != 0,
-                r.Pk != 0))
-            .ToList();
+        var builder = GetBuilder(dbType);
+        return await builder.GetPhysicalColumnsAsync(conn, tableName);
     }
 
     public MigrationPlan BuildPlan(
@@ -228,152 +142,8 @@ ORDER BY c.ORDINAL_POSITION
             return (Array.Empty<string>(), Array.Empty<string>(), string.Empty);
         }
 
-        if (IsPostgres(dbType))
-        {
-            return GeneratePostgresSql(plan, entity);
-        }
-
-        if (IsMySql(dbType))
-        {
-            return GenerateMySqlSql(plan, entity);
-        }
-
-        if (IsSqlServer(dbType))
-        {
-            return GenerateSqlServerSql(plan, entity);
-        }
-
-        if (!string.Equals(dbType, "sqlite", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new NotSupportedException("Schema migration supports SQLite, PostgreSQL, MySQL and SQL Server only.");
-        }
-
-        var backupTableName = $"{plan.TableName}__bak_{DateTime.UtcNow:yyyyMMddHHmmssfff}";
-        if (!plan.RequiresTableRebuild)
-        {
-            var up = plan.Operations
-                .Where(o => o.OpType == MigrationOpType.AddColumn)
-                .Select(o =>
-                {
-                    var colDef = entity.Columns[o.ColumnName];
-                    var nullable = colDef.Required ? "NOT NULL" : "NULL";
-                    return $"ALTER TABLE \"{EscapeIdentifier(plan.TableName)}\" ADD COLUMN \"{EscapeIdentifier(o.ColumnName)}\" {o.NewSqlType} {nullable}";
-                })
-                .ToList();
-
-            var down = plan.Operations
-                .Where(o => o.OpType == MigrationOpType.AddColumn)
-                .Select(o => $"ALTER TABLE \"{EscapeIdentifier(plan.TableName)}\" DROP COLUMN \"{EscapeIdentifier(o.ColumnName)}\"")
-                .ToList();
-
-            return (up, down, string.Empty);
-        }
-
-        var createSql = TableDdlBuilder.BuildCreateTableSql(plan.TableName, entity, dbType);
-        var yamlPhysicalColumns = entity.Columns
-            .Where(c => string.IsNullOrWhiteSpace(c.Value.Expression))
-            .Select(c => c.Key)
-            .ToList();
-        var droppedColumns = plan.Operations
-            .Where(o => o.OpType == MigrationOpType.DropColumn)
-            .Select(o => o.ColumnName)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var addedColumns = plan.Operations
-            .Where(o => o.OpType == MigrationOpType.AddColumn)
-            .Select(o => o.ColumnName)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var copyColumns = yamlPhysicalColumns
-            .Where(c => !droppedColumns.Contains(c) && !addedColumns.Contains(c))
-            .ToList();
-        var typeChangedColumns = plan.Operations
-            .Where(o => o.OpType == MigrationOpType.AlterColumnType)
-            .ToDictionary(o => o.ColumnName, o => o.NewSqlType ?? "TEXT", StringComparer.OrdinalIgnoreCase);
-        var targetColumns = string.Join(", ", copyColumns.Select(c => $"\"{EscapeIdentifier(c)}\""));
-        var sourceColumns = string.Join(", ", copyColumns.Select(c =>
-            typeChangedColumns.TryGetValue(c, out var newType)
-                ? $"CAST(\"{EscapeIdentifier(c)}\" AS {newType})"
-                : $"\"{EscapeIdentifier(c)}\""));
-
-        var upSql = new List<string>
-        {
-            $"ALTER TABLE \"{EscapeIdentifier(plan.TableName)}\" RENAME TO \"{EscapeIdentifier(backupTableName)}\"",
-            createSql,
-        };
-
-        if (copyColumns.Count > 0)
-        {
-            upSql.Add($"INSERT INTO \"{EscapeIdentifier(plan.TableName)}\" ({targetColumns}) SELECT {sourceColumns} FROM \"{EscapeIdentifier(backupTableName)}\"");
-        }
-
-        var downSql = new List<string>
-        {
-            $"DROP TABLE \"{EscapeIdentifier(plan.TableName)}\"",
-            $"ALTER TABLE \"{EscapeIdentifier(backupTableName)}\" RENAME TO \"{EscapeIdentifier(plan.TableName)}\"",
-        };
-
-        return (upSql, downSql, backupTableName);
-    }
-
-    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GeneratePostgresSql(
-        MigrationPlan plan,
-        EntityDefinition entity)
-    {
-        var up = new List<string>();
-        var down = new List<string>();
-        var tableName = EscapeIdentifier(plan.TableName);
-
-        foreach (var operation in plan.Operations)
-        {
-            var columnName = EscapeIdentifier(operation.ColumnName);
-            switch (operation.OpType)
-            {
-                case MigrationOpType.AddColumn:
-                {
-                    var colDef = entity.Columns[operation.ColumnName];
-                    var sqlType = operation.NewSqlType ?? "TEXT";
-                    if (colDef.Required)
-                    {
-                        up.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqlType}");
-                        up.Add($"UPDATE \"{tableName}\" SET \"{columnName}\" = {GetPostgresDefaultLiteral(sqlType)} WHERE \"{columnName}\" IS NULL");
-                        up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" SET NOT NULL");
-                    }
-                    else
-                    {
-                        up.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {sqlType} NULL");
-                    }
-
-                    down.Add($"ALTER TABLE \"{tableName}\" DROP COLUMN \"{columnName}\"");
-                    break;
-                }
-                case MigrationOpType.DropColumn:
-                {
-                    up.Add($"ALTER TABLE \"{tableName}\" DROP COLUMN \"{columnName}\"");
-                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
-                    {
-                        down.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {operation.OldSqlType}");
-                    }
-                    break;
-                }
-                case MigrationOpType.AlterColumnType:
-                {
-                    var newType = operation.NewSqlType ?? "TEXT";
-                    var oldType = operation.OldSqlType ?? "TEXT";
-                    up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" TYPE {newType} USING \"{columnName}\"::{newType}");
-                    down.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" TYPE {oldType} USING \"{columnName}\"::{oldType}");
-                    break;
-                }
-                case MigrationOpType.AlterNullability:
-                {
-                    var upAction = operation.NewNotNull == true ? "SET NOT NULL" : "DROP NOT NULL";
-                    var downAction = operation.NewNotNull == true ? "DROP NOT NULL" : "SET NOT NULL";
-                    up.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" {upAction}");
-                    down.Add($"ALTER TABLE \"{tableName}\" ALTER COLUMN \"{columnName}\" {downAction}");
-                    break;
-                }
-            }
-        }
-
-        return (up, down, string.Empty);
+        var builder = GetBuilder(dbType);
+        return builder.GenerateSql(plan, entity);
     }
 
     public async Task<MigrationApplyResult> ApplyAsync(
@@ -513,8 +283,6 @@ ORDER BY applied_at DESC
         }
     }
 
-    private static string EscapeIdentifier(string name) => name.Replace("\"", "\"\"");
-
     public static string NormalizeSqlType(string? sqlType)
     {
         var text = (sqlType ?? string.Empty).Trim();
@@ -557,210 +325,6 @@ ORDER BY applied_at DESC
 
     private static bool SqlTypesEqual(string oldSqlType, string newSqlType) =>
         string.Equals(NormalizeSqlType(oldSqlType), NormalizeSqlType(newSqlType), StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsPostgres(string dbType) =>
-        string.Equals(dbType, "postgresql", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(dbType, "postgres", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsMySql(string dbType) =>
-        string.Equals(dbType, "mysql", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(dbType, "mariadb", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsSqlServer(string dbType) =>
-        string.Equals(dbType, "sqlserver", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(dbType, "mssql", StringComparison.OrdinalIgnoreCase);
-
-    private static string GetPostgresDefaultLiteral(string sqlType)
-    {
-        var upper = sqlType.Trim().ToUpperInvariant();
-        if (upper is "BOOLEAN" or "BOOL")
-        {
-            return "false";
-        }
-
-        return NormalizeSqlType(sqlType) switch
-        {
-            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
-            "TIMESTAMP" => "now()",
-            _ => "''"
-        };
-    }
-
-    private static string GetMySqlDefaultLiteral(string sqlType)
-    {
-        var upper = sqlType.Trim().ToUpperInvariant();
-        if (upper is "BOOLEAN" or "BOOL" or "BIT")
-        {
-            return "0";
-        }
-
-        return NormalizeSqlType(sqlType) switch
-        {
-            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
-            "TIMESTAMP" or "DATETIME" => "CURRENT_TIMESTAMP",
-            _ => "''"
-        };
-    }
-
-    private static string GetSqlServerDefaultLiteral(string sqlType)
-    {
-        var upper = sqlType.Trim().ToUpperInvariant();
-        if (upper is "BOOLEAN" or "BOOL" or "BIT")
-        {
-            return "0";
-        }
-
-        return NormalizeSqlType(sqlType) switch
-        {
-            "INTEGER" or "BIGINT" or "NUMERIC" => "0",
-            "TIMESTAMP" or "DATETIME" => "GETDATE()",
-            _ => "''"
-        };
-    }
-
-    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GenerateMySqlSql(
-        MigrationPlan plan,
-        EntityDefinition entity)
-    {
-        var up = new List<string>();
-        var down = new List<string>();
-        var tableName = plan.TableName.Replace("`", "``");
-
-        foreach (var operation in plan.Operations)
-        {
-            var columnName = operation.ColumnName.Replace("`", "``");
-            switch (operation.OpType)
-            {
-                case MigrationOpType.AddColumn:
-                {
-                    var colDef = entity.Columns[operation.ColumnName];
-                    var sqlType = operation.NewSqlType ?? "VARCHAR(255)";
-                    if (colDef.Required)
-                    {
-                        up.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {sqlType} NULL");
-                        up.Add($"UPDATE `{tableName}` SET `{columnName}` = {GetMySqlDefaultLiteral(sqlType)} WHERE `{columnName}` IS NULL");
-                        up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {sqlType} NOT NULL");
-                    }
-                    else
-                    {
-                        up.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {sqlType} NULL");
-                    }
-
-                    down.Add($"ALTER TABLE `{tableName}` DROP COLUMN `{columnName}`");
-                    break;
-                }
-                case MigrationOpType.DropColumn:
-                {
-                    up.Add($"ALTER TABLE `{tableName}` DROP COLUMN `{columnName}`");
-                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
-                    {
-                        down.Add($"ALTER TABLE `{tableName}` ADD COLUMN `{columnName}` {operation.OldSqlType} NULL");
-                    }
-                    break;
-                }
-                case MigrationOpType.AlterColumnType:
-                {
-                    var newType = operation.NewSqlType ?? "VARCHAR(255)";
-                    var oldType = operation.OldSqlType ?? "VARCHAR(255)";
-                    up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {newType}");
-                    down.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {oldType}");
-                    break;
-                }
-                case MigrationOpType.AlterNullability:
-                {
-                    var type = operation.NewSqlType ?? "VARCHAR(255)";
-                    var upAction = operation.NewNotNull == true ? "NOT NULL" : "NULL";
-                    var downAction = operation.NewNotNull == true ? "NULL" : "NOT NULL";
-                    up.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {type} {upAction}");
-                    down.Add($"ALTER TABLE `{tableName}` MODIFY COLUMN `{columnName}` {type} {downAction}");
-                    break;
-                }
-            }
-        }
-
-        return (up, down, string.Empty);
-    }
-
-    private static (IReadOnlyList<string> UpSql, IReadOnlyList<string> DownSql, string BackupTableName) GenerateSqlServerSql(
-        MigrationPlan plan,
-        EntityDefinition entity)
-    {
-        var up = new List<string>();
-        var down = new List<string>();
-        var tableName = plan.TableName.Replace("]", "]]");
-
-        foreach (var operation in plan.Operations)
-        {
-            var columnName = operation.ColumnName.Replace("]", "]]");
-            switch (operation.OpType)
-            {
-                case MigrationOpType.AddColumn:
-                {
-                    var colDef = entity.Columns[operation.ColumnName];
-                    var sqlType = operation.NewSqlType ?? "NVARCHAR(MAX)";
-                    if (colDef.Required)
-                    {
-                        up.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {sqlType} NULL");
-                        up.Add($"UPDATE [{tableName}] SET [{columnName}] = {GetSqlServerDefaultLiteral(sqlType)} WHERE [{columnName}] IS NULL");
-                        up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {sqlType} NOT NULL");
-                    }
-                    else
-                    {
-                        up.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {sqlType} NULL");
-                    }
-
-                    down.Add($"ALTER TABLE [{tableName}] DROP COLUMN [{columnName}]");
-                    break;
-                }
-                case MigrationOpType.DropColumn:
-                {
-                    up.Add($"ALTER TABLE [{tableName}] DROP COLUMN [{columnName}]");
-                    if (!string.IsNullOrWhiteSpace(operation.OldSqlType))
-                    {
-                        down.Add($"ALTER TABLE [{tableName}] ADD [{columnName}] {operation.OldSqlType} NULL");
-                    }
-                    break;
-                }
-                case MigrationOpType.AlterColumnType:
-                {
-                    var newType = operation.NewSqlType ?? "NVARCHAR(MAX)";
-                    var oldType = operation.OldSqlType ?? "NVARCHAR(MAX)";
-                    up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {newType}");
-                    down.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {oldType}");
-                    break;
-                }
-                case MigrationOpType.AlterNullability:
-                {
-                    var type = operation.NewSqlType ?? "NVARCHAR(MAX)";
-                    var upAction = operation.NewNotNull == true ? "NOT NULL" : "NULL";
-                    var downAction = operation.NewNotNull == true ? "NULL" : "NOT NULL";
-                    up.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {type} {upAction}");
-                    down.Add($"ALTER TABLE [{tableName}] ALTER COLUMN [{columnName}] {type} {downAction}");
-                    break;
-                }
-            }
-        }
-
-        return (up, down, string.Empty);
-    }
-
-    private sealed class PragmaColumnRow
-    {
-        public int Cid { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
-        public int NotNull { get; set; }
-        public int Pk { get; set; }
-    }
-
-    private sealed class PostgresColumnRow
-    {
-        public int Cid { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Type { get; set; } = string.Empty;
-        public bool NotNullBool { get; set; }
-        public int Pk { get; set; }
-    }
 
     private sealed class MigrationRow
     {

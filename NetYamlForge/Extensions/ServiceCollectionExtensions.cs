@@ -208,6 +208,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DynamicEntityConfigDiffService>();
         services.AddScoped<IBaseEntityMetadataProvider, BaseEntityMetadataProvider>();
         services.AddScoped<DynamicEntityConfigDiagnosticsService>();
+        services.AddScoped<ISchemaDdlBuilder, SqliteSchemaDdlBuilder>();
+        services.AddScoped<ISchemaDdlBuilder, PostgresSchemaDdlBuilder>();
+        services.AddScoped<ISchemaDdlBuilder, MySqlSchemaDdlBuilder>();
+        services.AddScoped<ISchemaDdlBuilder, SqlServerSchemaDdlBuilder>();
         services.AddScoped<DynamicEntitySchemaMigrationService>();
         services.AddScoped<DynamicEntityFormValidationService>();
         services.AddScoped<CommandErrorHttpMapper>();

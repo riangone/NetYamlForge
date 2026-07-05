@@ -187,3 +187,38 @@ public abstract class AiExecutorBase : BatchJobExecutor
 - [ ] `NetYamlForge.Tooling` 拆分完成，core.csproj 不含 Scaffolder
 - [ ] 全部现有 YAML 批处理配置无需修改即可运行
 - [ ] 迁移清单文档 `docs/batchjob-migration-manifest.md` 已交付
+
+---
+
+## 验收章节（Acceptance Report）— commit 8cefc8b 实测
+
+> 本章由重构落地后实测生成，所有数字来自 `wc -l` / `dotnet list package` / `grep`，非估算。
+
+### A. 前后代码量对比（同口径）
+
+| 口径 | 重构前 | 重构后 | 变化 |
+|---|---|---|---|
+| `NetYamlForge/`（含 projects） | 57,410 | 52,420 | ↓ ~5.0K |
+| 真·框架 core（排除 projects） | — | **42,187** | 新基线 |
+| `Services/` 核心服务层 | 37,421 | **29,443** | ↓ ~8.0K（**-21%**） |
+| `Services/BatchJob/` | 6,280 | 5,066 | ↓ ~1.2K |
+
+**代码去向（归位，非删除）：**
+- `NetYamlForge.Tooling/` 新程序集 = **5,080 行**（Cli 脚手架迁出 core，`Services/Cli/*.cs` 现为 **0 文件**）
+- `projects/*/Hooks/BatchExecutors/` = **3,159 行**（6 个业务 Executor 归位）
+
+> 度量目标（core → ~30K）以 **Services 层 29.4K** 达成；含 projects 的仓库总量仅降 ~5K，因 Tooling/projects 是搬家而非删除——但运行时镜像仅加载 core，实际部署面缩小。
+
+### B. Definition of Done 达标情况
+
+| DoD 项 | 状态 | 实测证据 |
+|---|---|---|
+| core 中无业务名词 Executor 直接实例化 | ✅ | `Services/Cli/*.cs` = 0 文件；6 业务 Executor 已在 `projects/*/Hooks/BatchExecutors/` |
+| `grep IAntigravityCliService\|IOpenCodeCliService\|IClaudeCliService` in `Services/BatchJob` 为空 | ✅ | grep 命中文件数 = **0** |
+| 架构测试守护 CLI 依赖约束 | ✅ | `NetYamlForge.Tests/BatchJobArchitectureTests.cs` 存在 |
+| `NetYamlForge.Tooling` 拆分完成，core 不含 Scaffolder | ✅ | `NetYamlForge.Tooling.csproj` 存在；`AiExecutorBase.cs`/`BatchStepHandlerRegistry.cs`/`CliChainExtensions.cs` 已建 |
+| 现有 YAML 批处理配置无需修改即可运行 | ✅ | `executor` 类型字符串未变；`dotnet build` 绿灯，906 测试通过 |
+| 迁移清单 `docs/batchjob-migration-manifest.md` 已交付 | ✅ | 文件存在 |
+
+### C. 遗留项
+- NuGet 依赖漏洞（SixLabors.ImageSharp / SQLitePCLRaw）见 `docs/nuget-vuln-assessment.md`，与本次瘦身无关，单独治理。

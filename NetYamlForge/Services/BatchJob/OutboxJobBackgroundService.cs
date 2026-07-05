@@ -1,83 +1,59 @@
+using System;
+using System.Linq;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Models.Email;
-using System.Text.Json;
 
 namespace NetYamlForge.Services.BatchJob;
 
 /// <summary>
 /// 持久化アウトボックスジョブキューを監視して、バックグラウンドで処理する HostedService です。
 /// </summary>
-public class OutboxJobBackgroundService : BackgroundService
+public class OutboxJobBackgroundService : BasePollingBackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<OutboxJobBackgroundService> _logger;
-
     public OutboxJobBackgroundService(
         IServiceProvider serviceProvider,
         ILogger<OutboxJobBackgroundService> logger)
+        : base(serviceProvider, logger, TimeSpan.FromSeconds(1))
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task OnStartupAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("OutboxJobBackgroundService is starting...");
+        // 启动时恢复中断的作业
+        using var startupScope = ServiceProvider.CreateScope();
+        var outboxJobService = startupScope.ServiceProvider.GetRequiredService<IOutboxJobService>();
+        await outboxJobService.RecoverInterruptedJobsAsync();
+    }
 
-        // 起動時にクラッシュや再起動で中立状態（Running）のままになったジョブを復元する
-        try
-        {
-            using var startupScope = _serviceProvider.CreateScope();
-            var outboxJobService = startupScope.ServiceProvider.GetRequiredService<IOutboxJobService>();
-            await outboxJobService.RecoverInterruptedJobsAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to recover interrupted jobs during startup.");
-        }
+    protected override async Task PollAsync(IServiceProvider serviceProvider, CancellationToken stoppingToken)
+    {
+        var outboxJobService = serviceProvider.GetRequiredService<IOutboxJobService>();
 
-        // ジョブの定期監視ループ
-        while (!stoppingToken.IsCancellationRequested)
+        // 一度に 5 件までのジョブを処理
+        var pendingJobs = await outboxJobService.GetPendingJobsAsync(limit: 5);
+
+        foreach (var job in pendingJobs)
         {
-            try
+            if (stoppingToken.IsCancellationRequested)
+                break;
+
+            // 楽観的ロック（ステータスを Running に変更できた場合のみ実行）
+            var locked = await outboxJobService.LockJobAsync(job.Id);
+            if (locked)
             {
-                using var scope = _serviceProvider.CreateScope();
-                var outboxJobService = scope.ServiceProvider.GetRequiredService<IOutboxJobService>();
-
-                // 一度に 5 件までのジョブを処理
-                var pendingJobs = await outboxJobService.GetPendingJobsAsync(limit: 5);
-
-                foreach (var job in pendingJobs)
-                {
-                    if (stoppingToken.IsCancellationRequested)
-                        break;
-
-                    // 楽観的ロック（ステータスを Running に変更できた場合のみ実行）
-                    var locked = await outboxJobService.LockJobAsync(job.Id);
-                    if (locked)
-                    {
-                        // 非同期実行
-                        _ = ExecuteJobAsync(job, stoppingToken);
-                    }
-                }
+                // 非同期実行
+                _ = ExecuteJobAsync(job, stoppingToken);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred during outbox job polling cycle.");
-            }
-
-            // 1秒待機
-            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
         }
-
-        _logger.LogInformation("OutboxJobBackgroundService is stopping.");
     }
 
     private async Task ExecuteJobAsync(OutboxJob job, CancellationToken stoppingToken)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = ServiceProvider.CreateScope();
         var outboxJobService = scope.ServiceProvider.GetRequiredService<IOutboxJobService>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<OutboxJobBackgroundService>>();
 
@@ -85,7 +61,7 @@ public class OutboxJobBackgroundService : BackgroundService
 
         try
         {
-            _logger.LogInformation("Processing job {JobId} of type {JobType}...", job.Id, job.JobType);
+            Logger.LogInformation("Processing job {JobId} of type {JobType}...", job.Id, job.JobType);
 
             if (job.JobType == "batch_job")
             {
@@ -134,7 +110,7 @@ public class OutboxJobBackgroundService : BackgroundService
         {
             logger.LogError(ex, "Error processing job {JobId} of type {JobType}", job.Id, job.JobType);
 
-            var attempts = job.Attempts + 1; // ロック時にDBでカウントアップされた後の現在の実行回数
+            var attempts = job.Attempts + 1; // ロック時にDBでカウントアップされた後の現在の执行回数
 
             if (attempts < job.MaxAttempts)
             {
@@ -171,7 +147,7 @@ public class OutboxJobBackgroundService : BackgroundService
             var emailService = emailFactory?.GetForProject(projectName);
             if (emailService == null)
             {
-                _logger.LogWarning("Email service factory is not available. Skipping error email notification.");
+                Logger.LogWarning("Email service factory is not available. Skipping error email notification.");
                 return;
             }
 
@@ -182,7 +158,7 @@ public class OutboxJobBackgroundService : BackgroundService
             {
                 try
                 {
-                    _logger.LogInformation("Sending failure notification email to: {Email} for job: {JobName}", email, jobName);
+                    Logger.LogInformation("Sending failure notification email to: {Email} for job: {JobName}", email, jobName);
                     await emailService.SendEmailAsync(new EmailMessage
                     {
                         To = email,
@@ -197,13 +173,13 @@ public class OutboxJobBackgroundService : BackgroundService
                 }
                 catch (Exception mailEx)
                 {
-                    _logger.LogWarning(mailEx, "Failed to send email to {Email}", email);
+                    Logger.LogWarning(mailEx, "Failed to send email to {Email}", email);
                 }
             }
         }
         catch (Exception notifyEx)
         {
-            _logger.LogError(notifyEx, "Error sending failure notification.");
+            Logger.LogError(notifyEx, "Error sending failure notification.");
         }
     }
 }

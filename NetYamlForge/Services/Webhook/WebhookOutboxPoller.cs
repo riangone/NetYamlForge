@@ -9,50 +9,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Dapper;
 
 namespace NetYamlForge.Services.Webhook;
 
-public class WebhookOutboxPoller : BackgroundService
+public class WebhookOutboxPoller : BasePollingBackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<WebhookOutboxPoller> _logger;
     private readonly HttpClient _httpClient;
 
     public WebhookOutboxPoller(IServiceProvider serviceProvider, ILogger<WebhookOutboxPoller> logger)
+        : base(serviceProvider, logger, TimeSpan.FromSeconds(5))
     {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task PollAsync(IServiceProvider serviceProvider, CancellationToken stoppingToken)
     {
-        _logger.LogInformation("WebhookOutboxPoller Background Service is starting.");
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await ProcessPendingWebhooksAsync(stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing pending webhooks in background poller.");
-            }
-
-            await Task.Delay(5000, stoppingToken); // Poll every 5 seconds
-        }
-
-        _logger.LogInformation("WebhookOutboxPoller Background Service is stopping.");
-    }
-
-    private async Task ProcessPendingWebhooksAsync(CancellationToken stoppingToken)
-    {
-        using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<IDbConnection>();
+        var db = serviceProvider.GetRequiredService<IDbConnection>();
 
         // Ensure table exists
         await db.ExecuteAsync(@"
@@ -79,7 +53,7 @@ public class WebhookOutboxPoller : BackgroundService
 
         if (!pendingItems.Any()) return;
 
-        _logger.LogInformation("Found {Count} pending webhooks to process.", pendingItems.Count);
+        Logger.LogInformation("Found {Count} pending webhooks to process.", pendingItems.Count);
 
         foreach (var item in pendingItems)
         {
@@ -115,7 +89,7 @@ public class WebhookOutboxPoller : BackgroundService
             catch (Exception ex)
             {
                 lastError = ex.Message;
-                _logger.LogWarning(ex, "Failed to send webhook {Id} to {Url}", item.Id, item.TargetUrl);
+                Logger.LogWarning(ex, "Failed to send webhook {Id} to {Url}", item.Id, item.TargetUrl);
             }
 
             if (success)
@@ -125,7 +99,7 @@ public class WebhookOutboxPoller : BackgroundService
                     SET ""State"" = 1, ""Attempts"" = ""Attempts"" + 1, ""LastError"" = NULL
                     WHERE ""Id"" = @Id";
                 await db.ExecuteAsync(updateSql, new { Id = item.Id });
-                _logger.LogInformation("Webhook {Id} sent successfully.", item.Id);
+                Logger.LogInformation("Webhook {Id} sent successfully.", item.Id);
             }
             else
             {
@@ -147,7 +121,7 @@ public class WebhookOutboxPoller : BackgroundService
                     LastError = lastError,
                     Id = item.Id
                 });
-                _logger.LogWarning("Webhook {Id} failed (Attempt {Attempts}). Next retry: {NextAttemptAt}", item.Id, attempts, nextAttemptStr);
+                Logger.LogWarning("Webhook {Id} failed (Attempt {Attempts}). Next retry: {NextAttemptAt}", item.Id, attempts, nextAttemptStr);
             }
         }
     }
