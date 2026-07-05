@@ -1,37 +1,42 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Net.Smtp;
 using MailKit.Search;
 using MimeKit;
+using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.BizDocs.Hooks;
 
 /// <summary>
 /// メールから請求情報を抽出し、DB保存・PDF生成・返信送信を行うジョブ実行器。
 /// </summary>
-public class InvoiceEmailProcessorExecutor : IBatchStepHandler
+public class InvoiceEmailProcessorExecutor : AiExecutorBase
 {
-    public string StepType => "invoice_email_processor";
+    public override string StepType => "invoice_email_processor";
     private readonly IDocumentPdfService _docPdf;
-    private readonly IAntigravityCliService _antigravityCli;
     private readonly ILogger<InvoiceEmailProcessorExecutor> _logger;
 
-    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, IAntigravityCliService antigravityCli, ILogger<InvoiceEmailProcessorExecutor> logger)
+    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, ICliChainService cliChain, ILogger<InvoiceEmailProcessorExecutor> logger) : base(cliChain, logger)
     {
         _docPdf = docPdf;
-        _antigravityCli = antigravityCli;
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
@@ -229,7 +234,7 @@ public class InvoiceEmailProcessorExecutor : IBatchStepHandler
 
         var prompt = $"{systemPrompt}\n\nメール本文:\n{emailBody}";
 
-        var extracted = await _antigravityCli.PromptJsonAsync<ExtractedInvoiceContainer>(prompt, aiModel, projectName, cancellationToken);
+        var extracted = await Cli.PromptJsonAsync<ExtractedInvoiceContainer>(prompt, projectName: projectName, cancellationToken: cancellationToken);
         
         if (extracted?.Invoices != null)
         {

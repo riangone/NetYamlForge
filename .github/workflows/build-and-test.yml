@@ -28,6 +28,11 @@ jobs:
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
       timeout-minutes: 10
     
+    - name: Export and verify JSON schemas
+      run: |
+        dotnet run --project NetYamlForge -- --export-json-schema
+        git diff --exit-code docs/schemas
+
     - name: Upload coverage
       uses: codecov/codecov-action@v5
       with:

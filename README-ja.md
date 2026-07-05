@@ -18,11 +18,14 @@
 
 ## ログイン情報
 
-初期セットアップ完了後、以下の認証情報でログインできます。
+初回起動時に、デフォルトの管理者アカウントがシードされます。パスワードは以下の優先順位で決定されます：
+1. 環境変数 `NYF_ADMIN_PASSWORD`
+2. `appsettings.json` の `Auth:DefaultAdminPassword` 設定値
+3. 上記のいずれも設定されていない場合、ランダムなパスワードが自動生成され、起動ログに出力されます。
 
-| ユーザー名 | パスワード | 用途 |
-|------------|------------|------|
-| `admin` | `Admin123!` | システム管理者（全プロジェクトアクセス可） |
+| ユーザー名 | 用途 |
+|------------|------|
+| `admin` | システム管理者（全プロジェクトアクセス可） |
 
 ---
 
@@ -142,3 +145,40 @@ dotnet test --filter "FullyQualifiedName~ClassName.MethodName"
 | `SqlGenerationSnapshotTests.cs` | SQL生成の回帰テスト |
 | `YamlConfigStartupValidatorTests.cs` | 起動時型バリデーション |
 | `ListStateUrlBuilderTests.cs` | URL状態ビルダー |
+
+## データマイグレーション (Data Migrations)
+
+NetYamlForgeは、テナントデータベース of 各プロジェクトのデータマイグレーションを自動および手動でサポートしています。
+
+### ディレクトリ構成
+マイグレーションSQLスクリプトは以下のパスに配置します：
+`projects/<project-name>/database/migrations/NNN_description.sql` （`NNN` は3桁以上のバージョン番号。例: `001_init.sql`）
+
+### SQLの分割
+スクリプト内は `-- +up` と `-- +down` で分割します：
+```sql
+-- +up
+CREATE TABLE posts (id INT, title TEXT);
+
+-- +down
+DROP TABLE posts;
+```
+セグメントタグがない場合、ファイル全体が `up` SQL として扱われます。
+
+### CLIコマンド
+以下のコマンドでマイグレーションを管理できます（`<project-name>` は実際のプロジェクト名に置き換えてください）：
+
+- **保留中のマイグレーションを適用する**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data --project=<project-name>
+  ```
+- **マイグレーションステータスを確認する**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data-status --project=<project-name>
+  ```
+- **特定のバージョンにロールバックする**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data-rollback --version=<version-number> --project=<project-name>
+  ```
+
+アプリケーションの起動時にも、保留中のマイグレーションが自動的に適用されます。

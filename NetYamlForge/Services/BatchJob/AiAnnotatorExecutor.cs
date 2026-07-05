@@ -31,9 +31,9 @@ namespace NetYamlForge.Services.BatchJob;
 ///       tags: null
 ///     autoEmbed: true
 /// </summary>
-public class AiAnnotatorExecutor : IBatchStepHandler
+public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.QueueRow>
 {
-    public string StepType => "ai_annotator";
+    public override string StepType => "ai_annotator";
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
@@ -82,7 +82,8 @@ public class AiAnnotatorExecutor : IBatchStepHandler
         IWebHostEnvironment env,
         IConfiguration configuration,
         IEmbeddingService embedding,
-        ILogger<AiAnnotatorExecutor> logger)
+        ICliChainService cliChain,
+        ILogger<AiAnnotatorExecutor> logger) : base(cliChain, logger)
     {
         _env = env;
         _configuration = configuration;
@@ -90,15 +91,12 @@ public class AiAnnotatorExecutor : IBatchStepHandler
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
-        BatchJobDefinition job, string? projectName,
-        IDbConnection db, IDbTransaction tx,
-        BatchJobResult result, CancellationToken ct)
+    protected override async Task<IReadOnlyList<QueueRow>> FetchPendingAsync(
+        BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        int batchSize, CancellationToken ct)
     {
         var cfg      = job.AnnotationConfig ?? new AnnotationJobConfig();
         var provider = job.AiProvider ?? "antigravity";
-        var batch    = job.BatchSize > 0 ? job.BatchSize : 5;
-        var prompt   = cfg.AnnotationPrompt ?? DefaultAnnotationPrompt;
 
         var rows = (await db.QueryAsync<QueueRow>(
             $"""
@@ -109,72 +107,68 @@ public class AiAnnotatorExecutor : IBatchStepHandler
             ORDER BY q.priority DESC, q.queued_at ASC
             LIMIT @Batch
             """,
-            new { Batch = batch, Provider = provider },
+            new { Batch = batchSize, Provider = provider },
             transaction: tx)).ToList();
+        return rows;
+    }
 
-        if (rows.Count == 0)
+    protected override async Task MarkProcessingAsync(
+        QueueRow row, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        var cfg = job.AnnotationConfig ?? new AnnotationJobConfig();
+        var now = DateTime.UtcNow;
+        await db.ExecuteAsync(
+            $"UPDATE {cfg.QueueTable} SET status='processing', started_at=@Now WHERE queue_id=@Id",
+            new { Now = now, Id = row.queue_id }, transaction: tx);
+    }
+
+    protected override async Task<RowOutcome> ProcessRowAsync(
+        QueueRow row, BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        CancellationToken ct)
+    {
+        var cfg      = job.AnnotationConfig ?? new AnnotationJobConfig();
+        var provider = job.AiProvider ?? "antigravity";
+        var prompt   = cfg.AnnotationPrompt ?? DefaultAnnotationPrompt;
+        var now      = DateTime.UtcNow;
+
+        var absolutePath = ResolveFilePath(row.file_path);
+        if (!File.Exists(absolutePath))
         {
-            result.Success = true;
-            result.RowsAffected = 0;
-            return;
+            return RowOutcome.Fail($"File not found: {absolutePath}");
         }
 
-        var done = 0; var failed = 0;
+        var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
+        var annotation = await AnnotateAsync(absolutePath, usedProvider, prompt, projectName, ct);
 
-        foreach (var row in rows)
+        if (annotation == null)
         {
-            if (ct.IsCancellationRequested) break;
-            var now = DateTime.UtcNow;
-
-            await db.ExecuteAsync(
-                $"UPDATE {cfg.QueueTable} SET status='processing', started_at=@Now WHERE queue_id=@Id",
-                new { Now = now, Id = row.queue_id }, transaction: tx);
-
-            try
-            {
-                var absolutePath = ResolveFilePath(row.file_path);
-                if (!File.Exists(absolutePath))
-                {
-                    await FailRow(db, tx, row, cfg, $"File not found: {absolutePath}");
-                    failed++;
-                    continue;
-                }
-
-                var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
-                var annotation = await AnnotateAsync(absolutePath, usedProvider, prompt, projectName, ct);
-
-                if (annotation == null)
-                {
-                    await FailRow(db, tx, row, cfg, "AI returned empty or unparseable response");
-                    failed++;
-                    continue;
-                }
-
-                await WriteAnnotationResult(db, tx, row.pk_value, cfg, annotation, usedProvider, now);
-
-                if (cfg.AutoEmbed)
-                    await TryInlineEmbed(db, tx, row.pk_value, cfg, annotation, ct);
-
-                var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
-                await db.ExecuteAsync(
-                    $"UPDATE {cfg.QueueTable} SET status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider WHERE queue_id=@Id",
-                    new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
-                    transaction: tx);
-
-                done++;
-                _logger.LogInformation("Annotated {Table}/{Id} via {Provider}", cfg.SourceTable, row.pk_value, usedProvider);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to annotate {Table}/{Id}", cfg.SourceTable, row.pk_value);
-                await FailRow(db, tx, row, cfg, ex.Message);
-                failed++;
-            }
+            return RowOutcome.Fail("AI returned empty or unparseable response");
         }
 
-        result.Success = failed == 0 || done > 0;
-        result.RowsAffected = done;
-        result.ErrorMessage = failed > 0 ? $"{failed} item(s) failed annotation" : null;
+        await WriteAnnotationResult(db, tx, row.pk_value, cfg, annotation, usedProvider, now);
+
+        if (cfg.AutoEmbed)
+            await TryInlineEmbed(db, tx, row.pk_value, cfg, annotation, ct);
+
+        var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
+        await db.ExecuteAsync(
+            $"UPDATE {cfg.QueueTable} SET status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider WHERE queue_id=@Id",
+            new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
+            transaction: tx);
+
+        _logger.LogInformation("Annotated {Table}/{Id} via {Provider}", cfg.SourceTable, row.pk_value, usedProvider);
+        return RowOutcome.Ok();
+    }
+
+    protected override async Task WriteOutcomeAsync(
+        QueueRow row, RowOutcome outcome, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        if (outcome.Status == RowStatus.Failed)
+        {
+            var cfg = job.AnnotationConfig ?? new AnnotationJobConfig();
+            var error = outcome.Reason ?? "Unknown error";
+            await FailRow(db, tx, row, cfg, error);
+        }
     }
 
     // ──────────────────────────────────────────────────────────
@@ -298,10 +292,10 @@ public class AiAnnotatorExecutor : IBatchStepHandler
         => provider.ToLowerInvariant() switch
         {
             "lmstudio"    => await AnnotateWithLmStudioAsync(absolutePath, prompt, ct),
-            "gemini_cli"  => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, ct),
+            "gemini_cli"  => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, projectName, ct),
             "gemini"      => await AnnotateWithGeminiAsync(absolutePath, prompt, projectName, ct),
             "ollama"      => await AnnotateWithOllamaAsync(absolutePath, prompt, projectName, ct),
-            "antigravity" => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, ct),
+            "antigravity" => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, projectName, ct),
             "anthropic"   => await AnnotateWithAnthropicAsync(absolutePath, prompt, projectName, ct),
             _ => LogAndNull(provider)
         };
@@ -313,49 +307,14 @@ public class AiAnnotatorExecutor : IBatchStepHandler
     }
 
     private async Task<AnnotationResult?> AnnotateWithAntigravityCliAsync(
-        string absolutePath, string prompt, CancellationToken ct)
+        string absolutePath, string prompt, string? projectName, CancellationToken ct)
     {
-        var fullPrompt = $"@{absolutePath}\n{prompt}";
-        var escaped = fullPrompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
-
-        using var process = new Process
+        var result = await Cli.PromptAsync(prompt, imagePath: absolutePath, projectName: projectName, cancellationToken: ct);
+        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "antigravity",
-                Arguments = $"-p \"{escaped}\" --dangerously-skip-permissions",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        var sb = new StringBuilder();
-        process.OutputDataReceived += (_, e) => { if (e.Data != null) sb.AppendLine(e.Data); };
-        process.ErrorDataReceived  += (_, _) => { };
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(180));
-        try { await process.WaitForExitAsync(cts.Token); }
-        catch (OperationCanceledException)
-        {
-            if (!process.HasExited) process.Kill(true);
-            _logger.LogError("antigravity CLI timed out");
             return null;
         }
-        if (process.ExitCode != 0)
-        {
-            _logger.LogError("antigravity CLI exited {Code}", process.ExitCode);
-            return null;
-        }
-
-        var cleaned = Regex.Replace(sb.ToString(), @"\x1B\[[0-9;]*[mGKHFJ]", "");
-        cleaned = Regex.Replace(cleaned, @"\x1B\[.*?[a-zA-Z]", "");
-        return ParseAnnotationJson(cleaned);
+        return ParseAnnotationJson(result.Text);
     }
 
     private async Task<AnnotationResult?> AnnotateWithLmStudioAsync(
@@ -580,7 +539,7 @@ public class AiAnnotatorExecutor : IBatchStepHandler
             transaction: tx);
     }
 
-    private class QueueRow
+    public class QueueRow
     {
         public int    queue_id  { get; set; }
         public string pk_value  { get; set; } = "";

@@ -14,30 +14,28 @@ namespace NetYamlForge.Services.BatchJob;
 /// 指定フォルダーを定期スキャンし、新しい文書ファイルを AI で自動処理するジョブ実行器。
 /// job.Settings.Params で watch_folder / processed_folder / error_folder を設定します。
 /// </summary>
-public class AiFolderProcessorExecutor : IBatchStepHandler
+public class AiFolderProcessorExecutor : AiExecutorBase
 {
-    public string StepType => "ai_folder_processor";
+    public override string StepType => "ai_folder_processor";
 
     private static readonly string[] SupportedExtensions = { ".pdf", ".jpg", ".jpeg", ".png", ".webp", ".bmp" };
 
-    private readonly IAntigravityCliService _antigravity;
     private readonly IWebHostEnvironment _env;
     private readonly ILogger<AiFolderProcessorExecutor> _logger;
     private readonly IOutboxJobService _outboxJobService;
 
     public AiFolderProcessorExecutor(
-        IAntigravityCliService antigravity,
+        ICliChainService cliChain,
         IWebHostEnvironment env,
         ILogger<AiFolderProcessorExecutor> logger,
-        IOutboxJobService outboxJobService)
+        IOutboxJobService outboxJobService) : base(cliChain, logger)
     {
-        _antigravity = antigravity;
         _env = env;
         _logger = logger;
         _outboxJobService = outboxJobService;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job,
         string? projectName,
         IDbConnection db,
@@ -217,7 +215,8 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
                     throw new FileNotFoundException("Physical file not found: " + absolutePath);
 
                 var prompt = BuildExtractionPrompt(absolutePath);
-                var responseText = await _antigravity.PromptAsync(prompt, projectName: projectName);
+                var chainResult = await Cli.PromptAsync(prompt, projectName: projectName);
+                var responseText = chainResult.Success ? (chainResult.Text ?? "") : "";
                 var jsonText = CleanJson(responseText);
 
                 if (string.IsNullOrWhiteSpace(jsonText))
@@ -422,7 +421,8 @@ public class AiFolderProcessorExecutor : IBatchStepHandler
                 throw new FileNotFoundException("Physical file not found: " + absolutePath);
 
             var prompt = BuildExtractionPrompt(absolutePath);
-            var responseText = await _antigravity.PromptAsync(prompt, projectName: projectName);
+            var chainResult = await Cli.PromptAsync(prompt, projectName: projectName);
+            var responseText = chainResult.Success ? (chainResult.Text ?? "") : "";
             var jsonText = CleanJson(responseText);
 
             if (string.IsNullOrWhiteSpace(jsonText))

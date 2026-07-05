@@ -52,23 +52,6 @@ public static class SqlSafetyGuard
     public static void EnsureExpression(string? value, string context)
     {
         if (string.IsNullOrWhiteSpace(value)) return;
-        if (IsUnsafeToken(value))
-            throw new InvalidOperationException(
-                $"Unsafe expression in '{context}': contains SQL injection markers");
-
-        // スペース付きキーワード: 列名への誤マッチを防ぐ（例: "created_at" が "CREATE" にマッチしない）
-        var dangerous = new[]
-        {
-            "DROP ", "ALTER ", "TRUNCATE ", "DELETE ", "INSERT ", "UPDATE ", "EXEC ", "EXECUTE ",
-            "CREATE ", "REPLACE ", "UNION ", "DECLARE ", "CAST("
-        };
-        foreach (var kw in dangerous)
-            if (value.Contains(kw, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException(
-                    $"Unsafe expression in '{context}': contains forbidden keyword '{kw}'");
-
-        if (!ExpressionRegex.IsMatch(value))
-            throw new InvalidOperationException(
-                $"Invalid expression in '{context}': '{value}'. Contains disallowed characters.");
+        SqlExpressionParser.Validate(value, context);
     }
 }

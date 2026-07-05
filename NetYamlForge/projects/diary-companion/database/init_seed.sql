@@ -1,0 +1,1 @@
+-- diary-companion: 管理者アカウントは DefaultAdminSeeder が自動作成します。

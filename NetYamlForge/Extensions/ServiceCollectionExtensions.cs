@@ -15,7 +15,6 @@ using NetYamlForge.Services.HotReload;
 using NetYamlForge.Services.Tenant;
 using NetYamlForge.Services.Workflow;
 using NetYamlForge.Services.Webhook;
-using NetYamlForge.Services.Cli;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.AI.ToolValidation;
 using NetYamlForge.Services.Validation;
@@ -272,43 +271,22 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
         services.AddScoped<IOutboxJobService, OutboxJobService>();
+        services.AddSingleton<BatchStepHandlerRegistry>();
         services.AddScoped<IRealBatchJobExecutor, RealBatchJobExecutor>();
         services.AddHostedService<OutboxJobBackgroundService>();
 
-        // IBatchStepHandler 実装を登録 (具体型とインターフェースの両方を登録して遅延解決に対応)
-        services.AddScoped<SqlToCsvHandler>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<SqlToCsvHandler>());
-        services.AddScoped<SqlCommandHandler>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<SqlCommandHandler>());
-        services.AddScoped<StoredProcedureHandler>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<StoredProcedureHandler>());
-        services.AddScoped<ChinaStockBriefingExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<ChinaStockBriefingExecutor>());
-        services.AddScoped<EmailFetchExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<EmailFetchExecutor>());
-        services.AddScoped<InvoiceEmailProcessorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<InvoiceEmailProcessorExecutor>());
-        services.AddScoped<AutomatedBlogGeneratorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AutomatedBlogGeneratorExecutor>());
-        services.AddScoped<AiDealerEngineExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiDealerEngineExecutor>());
-        services.AddScoped<AiCommunicationExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiCommunicationExecutor>());
-        services.AddScoped<AiFolderProcessorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiFolderProcessorExecutor>());
-        services.AddScoped<DirectoryImportExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<DirectoryImportExecutor>());
-        services.AddScoped<PhotoAnnotatorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<PhotoAnnotatorExecutor>());
-        services.AddScoped<EmbeddingGeneratorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<EmbeddingGeneratorExecutor>());
-        // Generic framework-level annotation/embedding executors
-        services.AddScoped<AiAnnotatorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiAnnotatorExecutor>());
-        services.AddScoped<AiEmbeddingGeneratorExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<AiEmbeddingGeneratorExecutor>());
-        services.AddScoped<BizCardParserExecutor>();
-        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<BizCardParserExecutor>());
+        // IBatchStepHandler 実装を登録
+        services.AddBatchStepHandler<SqlToCsvHandler>("sql_to_csv");
+        services.AddBatchStepHandler<SqlCommandHandler>("sql_command");
+        services.AddBatchStepHandler<StoredProcedureHandler>("stored_procedure");
+        services.AddBatchStepHandler<EmailFetchExecutor>("email_fetch");
+        services.AddBatchStepHandler<AiCommunicationExecutor>("ai_communication_sender");
+        services.AddBatchStepHandler<AiFolderProcessorExecutor>("ai_folder_processor");
+        services.AddBatchStepHandler<DirectoryImportExecutor>("directory_import");
+        services.AddBatchStepHandler<EmbeddingGeneratorExecutor>("photo_embedding_generator");
+        services.AddBatchStepHandler<EmbeddingGeneratorExecutor>("embedding_generator");
+        services.AddBatchStepHandler<AiEmbeddingGeneratorExecutor>("ai_embedding_generator");
+        services.AddBatchStepHandler<AiAnnotatorExecutor>("ai_annotator");
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();
@@ -398,6 +376,15 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IEntityHookRegistry, EntityHookRegistry>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddBatchStepHandler<THandler>(this IServiceCollection services, string stepType)
+        where THandler : class, IBatchStepHandler
+    {
+        services.AddScoped<THandler>();
+        services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<THandler>());
+        services.AddSingleton(new BatchStepHandlerRegistration(stepType, typeof(THandler)));
         return services;
     }
 }

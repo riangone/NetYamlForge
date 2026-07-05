@@ -16,24 +16,22 @@ namespace NetYamlForge.Services.BatchJob;
 /// ・見積(approved)を処理 → 見積メール自動送信
 /// ・応答トラッキング更新
 /// </summary>
-public class AiCommunicationExecutor : IBatchStepHandler
+public class AiCommunicationExecutor : AiExecutorBase
 {
-    public string StepType => "ai_communication_sender";
-    private readonly IAntigravityCliService _antigravity;
+    public override string StepType => "ai_communication_sender";
     private readonly IEmailServiceFactory _emailFactory;
     private readonly ILogger<AiCommunicationExecutor> _logger;
 
     public AiCommunicationExecutor(
-        IAntigravityCliService antigravity,
+        ICliChainService cliChain,
         IEmailServiceFactory emailFactory,
-        ILogger<AiCommunicationExecutor> logger)
+        ILogger<AiCommunicationExecutor> logger) : base(cliChain, logger)
     {
-        _antigravity = antigravity;
         _emailFactory = emailFactory;
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
@@ -151,7 +149,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
                 // Antigravity CLI でパーソナライズメッセージ生成
                 var prompt = BuildNurturingEmailPrompt(
                     customerName, vehicleInterest, budget, leadScore, taskType, aiRecommendation, aiReasoning);
-                var aiResult = await _antigravity.PromptJsonAsync<EmailMessageResult>(
+                var aiResult = await Cli.PromptJsonAsync<EmailMessageResult>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null)
@@ -317,7 +315,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
                     customerName, vehicleInterest, make, model, yearStr, color,
                     basePrice, finalPrice, discountRate, monthlyPayment,
                     accessories, notes, validUntil, leadScore);
-                var aiResult = await _antigravity.PromptJsonAsync<EmailMessageResult>(
+                var aiResult = await Cli.PromptJsonAsync<EmailMessageResult>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null) continue;
@@ -442,7 +440,7 @@ public class AiCommunicationExecutor : IBatchStepHandler
             {
                 // AI で無返信状態を分析し、次のアクションを提案
                 var prompt = BuildNoResponsePrompt(customerName, subject, sentAt, leadScore);
-                var aiResult = await _antigravity.PromptJsonAsync<NoResponseAnalysis>(
+                var aiResult = await Cli.PromptJsonAsync<NoResponseAnalysis>(
                     prompt, projectName: projectName, cancellationToken: ct);
 
                 if (aiResult == null) continue;

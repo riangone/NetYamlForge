@@ -7,11 +7,11 @@ using System.Reflection.Metadata;
 using NetYamlForge.Services.Hooks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Services;
 
@@ -54,6 +54,7 @@ public class ProjectHookLoader : IProjectHookLoader
     private readonly IProjectHookRegistry _hookRegistry;
     private readonly IProjectBusinessLogicRegistry _bizRegistry;
     private readonly IProjectActionRegistry _actionRegistry;
+    private readonly BatchStepHandlerRegistry _batchRegistry;
     private readonly ConcurrentDictionary<string, CollectibleAssemblyLoadContext> _assemblyContexts;
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _projectLocks;
@@ -65,13 +66,15 @@ public class ProjectHookLoader : IProjectHookLoader
         IServiceScopeFactory scopeFactory,
         IProjectHookRegistry hookRegistry,
         IProjectBusinessLogicRegistry bizRegistry,
-        IProjectActionRegistry actionRegistry)
+        IProjectActionRegistry actionRegistry,
+        BatchStepHandlerRegistry batchRegistry)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
         _hookRegistry = hookRegistry;
         _bizRegistry = bizRegistry;
         _actionRegistry = actionRegistry;
+        _batchRegistry = batchRegistry;
         _assemblyContexts = new ConcurrentDictionary<string, CollectibleAssemblyLoadContext>(StringComparer.OrdinalIgnoreCase);
         _loadedAssemblies = new ConcurrentDictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         _projectLocks = new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.OrdinalIgnoreCase);
@@ -136,6 +139,27 @@ public class ProjectHookLoader : IProjectHookLoader
                     {
                         _logger.LogError(ex, "[{ErrorCode}] プロジェクト '{Project}' のフック '{HookType}' の初期化に失敗しました",
                             "HOOK_INIT_FAILED", projectName, hookType.FullName);
+                    }
+                }
+
+                // 动态注册项目自定义的 BatchStepHandler
+                var batchStepHandlerTypes = assembly.GetTypes()
+                    .Where(t => typeof(IBatchStepHandler).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+                foreach (var handlerType in batchStepHandlerTypes)
+                {
+                    try
+                    {
+                        var handlerInstance = (IBatchStepHandler)ActivatorUtilities.CreateInstance(serviceProvider, handlerType);
+                        _batchRegistry.Register(handlerInstance.StepType, handlerType);
+                        _logger.LogInformation(
+                            "プロジェクト '{Project}' のバッチステップハンドラー '{HandlerType}' (Type: {StepType}) を登録しました",
+                            projectName, handlerType.FullName, handlerInstance.StepType);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "プロジェクト '{Project}' のバッチステップハンドラー '{HandlerType}' の登録に失敗しました",
+                            projectName, handlerType.FullName);
                     }
                 }
 
@@ -346,7 +370,7 @@ public class ProjectHookLoader : IProjectHookLoader
             try
             {
                 var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-                var stdLibs = new[] { "System.Runtime.dll", "System.Collections.dll", "System.Runtime.Extensions.dll", "System.Linq.dll", "System.Text.RegularExpressions.dll", "Microsoft.CSharp.dll", "System.IO.Compression.dll", "System.IO.Compression.ZipFile.dll", "System.Text.Json.dll" };
+                var stdLibs = new[] { "System.Runtime.dll", "System.Collections.dll", "System.Runtime.Extensions.dll", "System.Linq.dll", "System.Text.RegularExpressions.dll", "Microsoft.CSharp.dll", "System.IO.Compression.dll", "System.IO.Compression.ZipFile.dll", "System.Text.Json.dll", "System.Xml.Linq.dll", "System.Net.Http.dll" };
                 foreach (var lib in stdLibs)
                 {
                     var fullPath = Path.Combine(assemblyPath, lib);
@@ -449,21 +473,6 @@ public class ProjectHookLoader : IProjectHookLoader
             .Select(entry => CSharpSyntaxTree.ParseText(entry.SourceText, path: entry.FilePath))
             .ToList();
 
-        var validator = new HookSecurityValidator();
-        foreach (var tree in syntaxTrees)
-        {
-            var root = tree.GetRoot();
-            validator.Visit(root);
-        }
-
-        if (validator.Violations.Count > 0)
-        {
-            _logger.LogError(
-                "[{ErrorCode}] プロジェクト '{Project}' のフックセキュリティ検証に失敗しました：{Violations}",
-                "HOOK_SECURITY_VIOLATION", projectName, string.Join("; ", validator.Violations));
-            return null;
-        }
-
         var compilation = CSharpCompilation.Create(
             $"ProjectHooks_{projectName}",
             syntaxTrees,
@@ -471,6 +480,17 @@ public class ProjectHookLoader : IProjectHookLoader
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
                 .WithOptimizationLevel(OptimizationLevel.Release)
                 .WithAllowUnsafe(false));
+
+        var securityValidator = new HookSecurityValidator();
+        var violations = securityValidator.Validate(compilation);
+
+        if (violations.Count > 0)
+        {
+            _logger.LogError(
+                "[{ErrorCode}] プロジェクト '{Project}' のフックセキュリティ検証に失敗しました：{Violations}",
+                "HOOK_SECURITY_VIOLATION", projectName, string.Join("; ", violations));
+            return null;
+        }
 
         using var ms = new MemoryStream();
         using var pdbMs = new MemoryStream();
@@ -626,7 +646,8 @@ public class ProjectHookLoader : IProjectHookLoader
                 var serviceProvider = scope.ServiceProvider;
 
                 var handlerTypes = assembly.GetTypes()
-                    .Where(t => typeof(ICustomActionHandler).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                    .Where(t => typeof(ICustomActionHandler).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                    .ToList();
 
                 foreach (var handlerType in handlerTypes)
                 {
@@ -669,57 +690,5 @@ public class ProjectHookLoader : IProjectHookLoader
             "CS1503" => "引数の型が一致していません。メソッド定義と渡す値 of を確認してください。",
             _ => string.Empty
         };
-    }
-}
-
-public sealed class HookSecurityValidator : CSharpSyntaxWalker
-{
-    private readonly List<string> _violations = new();
-
-    private static readonly HashSet<string> BannedNamespaces = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "System.Diagnostics",
-        "System.Reflection",
-        "System.Runtime.InteropServices",
-        "System.EnterpriseServices"
-    };
-
-    private static readonly HashSet<string> BannedMethods = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Process.Start", "Process", "Start",
-        "Assembly.Load", "Assembly.LoadFrom", "Assembly.LoadFile",
-        "DllImport", "DllImportAttribute"
-    };
-
-    public IReadOnlyList<string> Violations => _violations;
-
-    public override void VisitUsingDirective(UsingDirectiveSyntax node)
-    {
-        var nsName = node.Name?.ToString().Trim() ?? string.Empty;
-        if (BannedNamespaces.Any(banned => nsName.Equals(banned, StringComparison.OrdinalIgnoreCase) || nsName.StartsWith(banned + ".", StringComparison.OrdinalIgnoreCase)))
-        {
-            _violations.Add($"Banned namespace using: {nsName}");
-        }
-        base.VisitUsingDirective(node);
-    }
-
-    public override void VisitIdentifierName(IdentifierNameSyntax node)
-    {
-        var id = node.Identifier.Text;
-        if (BannedMethods.Contains(id))
-        {
-            _violations.Add($"Banned call/identifier: {id}");
-        }
-        base.VisitIdentifierName(node);
-    }
-
-    public override void VisitAttribute(AttributeSyntax node)
-    {
-        var attrName = node.Name.ToString();
-        if (attrName.Contains("DllImport"))
-        {
-            _violations.Add("Banned attribute: DllImport");
-        }
-        base.VisitAttribute(node);
     }
 }

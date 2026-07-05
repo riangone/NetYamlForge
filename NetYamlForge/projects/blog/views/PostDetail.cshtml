@@ -39,6 +39,107 @@
     string CategoryFilter(object? id) => $"/blog?categoryId={id}";
 }
 
+@section Head {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+    <style>
+        /* 极致美化代码块 */
+        .prose-blog pre {
+            position: relative;
+            background: #1e1e1e !important;
+            padding: 2.75rem 1.25rem 1.25rem 1.25rem !important;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        /* Mac 风格的三色圆点控制按钮 */
+        .prose-blog pre::before {
+            content: "";
+            position: absolute;
+            top: 1rem;
+            left: 1.25rem;
+            width: 0.625rem;
+            height: 0.625rem;
+            border-radius: 50%;
+            background: #ff5f56;
+            box-shadow: 1.25rem 0 0 #ffbd2e, 2.5rem 0 0 #27c93f;
+            opacity: 0.8;
+        }
+
+        /* 右上角语言标识 */
+        .prose-blog pre[data-lang]::after {
+            content: attr(data-lang);
+            position: absolute;
+            top: 0.75rem;
+            right: 1.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .prose-blog code {
+            font-family: 'Fira Code', 'Cascadia Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important;
+        }
+
+        .prose-blog :not(pre) > code {
+            background: oklch(var(--b3));
+            color: oklch(var(--bc) / 0.9);
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid oklch(var(--b3) / 0.5);
+        }
+
+        .prose-blog pre code {
+            background: transparent !important;
+            padding: 0 !important;
+            color: #adbac7 !important;
+            display: block;
+            line-height: 1.5;
+        }
+
+        /* 美化 Mermaid 渲染的容器 */
+        .mermaid {
+            background: #1e1e1e !important;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        /* 针对 YAML 代码高亮的颜色微调 */
+        .hljs-attr {
+            color: #79c0ff !important; /* YAML 键 */
+        }
+        .hljs-string {
+            color: #a5d6ff !important; /* YAML 值 */
+        }
+        .hljs-number, .hljs-literal {
+            color: #ff938a !important; /* 数字与布尔值 */
+        }
+        .hljs-bullet {
+            color: #ff7b72 !important; /* YAML 列表符号 */
+        }
+        .hljs-meta {
+            color: #8b949e !important;
+        }
+    </style>
+}
+
 @if (post is null)
 {
     <div class="max-w-3xl mx-auto px-4 py-24 text-center text-base-content/40">
@@ -290,6 +391,9 @@ else
 }
 
 @section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
 <script>
     // Markdown レンダリング
     (function () {
@@ -297,8 +401,108 @@ else
         const contentEl = document.getElementById('post-content');
         if (!rawEl || !contentEl || typeof marked === 'undefined') return;
 
+        // 1. 预处理：自动检测并修复可能缺失 ```yaml 围栏的 yaml/yml 文本块
+        let lines = (rawEl.textContent || '').split('\n');
+        let inFixingYaml = false;
+        let yamlLines = [];
+        let newLines = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+            let trimmed = line.trim();
+            if (!inFixingYaml && (trimmed === 'yaml' || trimmed === 'yml')) {
+                // 检查下一行是否是 YAML 格式行（首行缩进、包含冒号或以注释 # 开头）
+                if (i + 1 < lines.length && (lines[i+1].trim().startsWith('#') || lines[i+1].includes(':'))) {
+                    inFixingYaml = true;
+                    yamlLines = [];
+                    continue;
+                }
+            }
+            
+            if (inFixingYaml) {
+                // 判断 YAML 段落结束：遇到不属于 YAML 特征且不为空的行（非缩进、非空、非注释、且不含冒号）
+                let isYamlLine = trimmed.startsWith('#') || trimmed.includes(':') || line.startsWith(' ') || line.startsWith('\t') || trimmed === '';
+                if (!isYamlLine) {
+                    newLines.push('```yaml');
+                    newLines.push(...yamlLines);
+                    newLines.push('```');
+                    newLines.push(line);
+                    inFixingYaml = false;
+                } else {
+                    yamlLines.push(line);
+                }
+            } else {
+                newLines.push(line);
+            }
+        }
+        if (inFixingYaml) {
+            newLines.push('```yaml');
+            newLines.push(...yamlLines);
+            newLines.push('```');
+        }
+        let processedText = newLines.join('\n');
+
+        // 2. 解析 Markdown
         marked.setOptions({ breaks: true, gfm: true });
-        contentEl.innerHTML = marked.parse(rawEl.textContent || '');
+        contentEl.innerHTML = marked.parse(processedText);
+
+        // 3. 处理 mermaid 元素 (将 pre > code.language-mermaid 转换为 div.mermaid 以脱离代码框的容器样式)
+        document.querySelectorAll('#post-content pre code.language-mermaid').forEach((el) => {
+            const preEl = el.parentNode;
+            if (preEl && preEl.tagName === 'PRE') {
+                const mermaidDiv = document.createElement('div');
+                mermaidDiv.className = 'mermaid';
+                mermaidDiv.textContent = el.textContent.trim();
+                preEl.parentNode.replaceChild(mermaidDiv, preEl);
+            }
+        });
+
+        // 4. 处理普通代码块的语法高亮与语言标签设置
+        document.querySelectorAll('#post-content pre code').forEach((el) => {
+            let lang = 'code';
+            const classes = el.className.split(' ');
+            for (const cls of classes) {
+                if (cls.startsWith('language-')) {
+                    lang = cls.replace('language-', '');
+                    break;
+                }
+            }
+
+            // 兼容 yml 和 yaml 的类名
+            if (lang === 'yml') {
+                el.classList.remove('language-yml');
+                el.classList.add('language-yaml');
+            }
+            
+            const preEl = el.parentNode;
+            if (preEl && preEl.tagName === 'PRE') {
+                preEl.setAttribute('data-lang', lang === 'yml' ? 'yaml' : lang);
+            }
+
+            if (typeof hljs !== 'undefined') {
+                hljs.highlightElement(el);
+            }
+        });
+
+        // 5. 初始化并触发 mermaid 渲染
+        if (typeof mermaid !== 'undefined') {
+            let mermaidTheme = 'default';
+            const currentTheme = document.documentElement.getAttribute('data-theme') || '';
+            const darkThemes = ['dark', 'synthwave', 'halloween', 'forest', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'];
+            if (darkThemes.includes(currentTheme)) {
+                mermaidTheme = 'dark';
+            }
+            
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: mermaidTheme,
+                securityLevel: 'loose',
+                themeVariables: {
+                    background: '#1e1e1e'
+                }
+            });
+            mermaid.run();
+        }
     })();
 
     // 记录阅读量

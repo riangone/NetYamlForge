@@ -10,7 +10,6 @@ using NetYamlForge.Extensions;
 using NetYamlForge.Middleware;
 using NetYamlForge.Models;
 using NetYamlForge.Services;
-using NetYamlForge.Services.Cli;
 using NetYamlForge.Services.Connection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -30,138 +29,86 @@ if (useWindowsService)
     args = args.Where(a => a != "--run-as-service").ToArray();
 }
 
-if (args.Any(a => a.Equals("--scaffold-entities", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var overwrite = !args.Any(a => a.Equals("--no-overwrite", StringComparison.OrdinalIgnoreCase));
-    var outputDirArg = args.FirstOrDefault(a => a.StartsWith("--output-dir=", StringComparison.OrdinalIgnoreCase));
-    var outputDirName = outputDirArg?.Split('=', 2).ElementAtOrDefault(1);
-    var withLabelKeys = args.Any(a => a.Equals("--with-label-keys", StringComparison.OrdinalIgnoreCase));
-    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-entities" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = EntityYamlScaffolder.Run(
-        Directory.GetCurrentDirectory(),
-        projectName,
-        overwrite,
-        string.IsNullOrWhiteSpace(outputDirName) ? "entities.generated" : outputDirName,
-        withLabelKeys,
-        scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
 
-if (args.Any(a => a.Equals("--scaffold-hook", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var nameArg = args.FirstOrDefault(a => a.StartsWith("--name=", StringComparison.OrdinalIgnoreCase));
-    var hookName = nameArg?.Split('=', 2).ElementAtOrDefault(1);
-    var withTests = args.Any(a => a.Equals("--with-tests", StringComparison.OrdinalIgnoreCase));
-    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-hook" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = HookScaffolder.Run(
-        Directory.GetCurrentDirectory(),
-        projectName,
-        hookName,
-        withTests,
-        scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
 
-if (args.Any(a => a.Equals("--upgrade-entity-yaml", StringComparison.OrdinalIgnoreCase)))
+if (args.Any(a => a.Equals("--migrate-data", StringComparison.OrdinalIgnoreCase) ||
+                   a.Equals("--migrate-data-status", StringComparison.OrdinalIgnoreCase) ||
+                   a.Equals("--migrate-data-rollback", StringComparison.OrdinalIgnoreCase)))
 {
+    var isStatus = args.Any(a => a.Equals("--migrate-data-status", StringComparison.OrdinalIgnoreCase));
+    var isRollback = args.Any(a => a.Equals("--migrate-data-rollback", StringComparison.OrdinalIgnoreCase));
     var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
     var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var scaffoldResult = new CliScaffoldResult { Command = "upgrade-entity-yaml" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = EntityYamlModernizer.Run(Directory.GetCurrentDirectory(), projectName, scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
+    var versionArg = args.FirstOrDefault(a => a.StartsWith("--version=", StringComparison.OrdinalIgnoreCase));
+    var versionStr = versionArg?.Split('=', 2).ElementAtOrDefault(1);
 
-if (args.Any(a => a.Equals("--init-project", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var displayNameArg = args.FirstOrDefault(a => a.StartsWith("--display-name=", StringComparison.OrdinalIgnoreCase));
-    var displayName = displayNameArg?.Split('=', 2).ElementAtOrDefault(1);
-    var dbTypeArg = args.FirstOrDefault(a => a.StartsWith("--db-type=", StringComparison.OrdinalIgnoreCase));
-    var dbType = dbTypeArg?.Split('=', 2).ElementAtOrDefault(1);
-    var dbPathArg = args.FirstOrDefault(a => a.StartsWith("--db-path=", StringComparison.OrdinalIgnoreCase));
-    var dbPath = dbPathArg?.Split('=', 2).ElementAtOrDefault(1);
-    var dbConnectionArg = args.FirstOrDefault(a => a.StartsWith("--db-connection=", StringComparison.OrdinalIgnoreCase));
-    var dbConnection = dbConnectionArg?.Split('=', 2).ElementAtOrDefault(1);
-    var i18nFallbackModeArg = args.FirstOrDefault(a => a.StartsWith("--i18n-fallback-mode=", StringComparison.OrdinalIgnoreCase));
-    var i18nFallbackMode = i18nFallbackModeArg?.Split('=', 2).ElementAtOrDefault(1);
-    var autoScaffold = !args.Any(a => a.Equals("--no-auto-scaffold", StringComparison.OrdinalIgnoreCase));
-    var force = args.Any(a => a.Equals("--force", StringComparison.OrdinalIgnoreCase));
-    var scaffoldResult = new CliScaffoldResult { Command = "init-project" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = ProjectTemplateScaffolder.Run(
-        Directory.GetCurrentDirectory(),
-        projectName,
-        displayName,
-        force,
-        dbType,
-        dbPath,
-        dbConnection,
-        autoScaffold,
-        i18nFallbackMode,
-        scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
+    if (string.IsNullOrWhiteSpace(projectName))
+    {
+        Console.Error.WriteLine("--project=<name> is required.");
+        Environment.Exit(1);
+        return;
+    }
 
-if (args.Any(a => a.Equals("--scaffold-missing-hooks", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var withTests = args.Any(a => a.Equals("--with-tests", StringComparison.OrdinalIgnoreCase));
-    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-missing-hooks" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = MissingHookScaffolder.Run(
-        Directory.GetCurrentDirectory(),
-        projectName,
-        withTests,
-        scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
+    var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName);
+    if (!Directory.Exists(projectDir))
+    {
+        Console.Error.WriteLine($"Project directory not found: {projectDir}");
+        Environment.Exit(1);
+        return;
+    }
 
-if (args.Any(a => a.Equals("--scaffold-batch-job", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var nameArg = args.FirstOrDefault(a => a.StartsWith("--name=", StringComparison.OrdinalIgnoreCase));
-    var jobName = nameArg?.Split('=', 2).ElementAtOrDefault(1);
-    var scaffoldResult = new CliScaffoldResult { Command = "scaffold-batch-job" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = BatchJobScaffolder.Run(
-        Directory.GetCurrentDirectory(),
-        projectName,
-        jobName ?? "sample_job",
-        scaffoldResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
-    Environment.Exit(exitCode);
-    return;
-}
+    var configBuilder = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", optional: true)
+        .AddEnvironmentVariables()
+        .AddCommandLine(args);
+    var config = configBuilder.Build();
+    var connectionString = config.GetConnectionString("DefaultConnection")
+        ?? "Data Source=system.db";
 
-if (args.Any(a => a.Equals("--validate-project", StringComparison.OrdinalIgnoreCase)))
-{
-    var projectArg = args.FirstOrDefault(a => a.StartsWith("--project=", StringComparison.OrdinalIgnoreCase));
-    var projectName = projectArg?.Split('=', 2).ElementAtOrDefault(1);
-    var validateResult = new CliScaffoldResult { Command = "validate-project" };
-    if (jsonMode) Console.SetOut(TextWriter.Null);
-    var exitCode = ProjectValidator.Run(Directory.GetCurrentDirectory(), projectName, validateResult);
-    if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); validateResult.WriteJson(); }
-    Environment.Exit(exitCode);
+    var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+    var runner = new ProjectDataMigrationRunner(loggerFactory.CreateLogger<ProjectDataMigrationRunner>());
+
+    if (isRollback)
+    {
+        if (string.IsNullOrWhiteSpace(versionStr) || !long.TryParse(versionStr, out var rollbackVersion))
+        {
+            Console.Error.WriteLine("--version=<number> is required for rollback.");
+            Environment.Exit(1);
+            return;
+        }
+        await runner.RollbackAsync(projectName, projectDir, connectionString, rollbackVersion, CancellationToken.None);
+        Console.WriteLine($"Rolled back migration version {rollbackVersion} for project '{projectName}'.");
+    }
+    else if (isStatus)
+    {
+        var records = await runner.GetStatusAsync(projectName, projectDir, connectionString, CancellationToken.None);
+        if (records.Count == 0)
+        {
+            Console.WriteLine($"No migrations found for project '{projectName}'.");
+        }
+        else
+        {
+            Console.WriteLine($"Migration status for '{projectName}':");
+            foreach (var r in records)
+            {
+                var status = r.Applied ? (r.RolledBackAt != null ? "ROLLED_BACK" : "APPLIED") : "PENDING";
+                Console.WriteLine($"  {r.Version}  {status,-12}  {r.Name}");
+            }
+        }
+    }
+    else
+    {
+        var summary = await runner.ApplyPendingAsync(projectName, projectDir, connectionString, CancellationToken.None);
+        Console.WriteLine($"Applied {summary.AppliedCount} migration(s), skipped {summary.SkippedCount} for project '{projectName}'.");
+        foreach (var r in summary.Records)
+        {
+            var status = r.Applied ? (r.RolledBackAt != null ? "ROLLED_BACK" : "APPLIED") : "FAILED";
+            Console.WriteLine($"  {r.Version}  {status,-12}  {r.Name}");
+        }
+    }
+
+    Environment.Exit(0);
     return;
 }
 
@@ -322,6 +269,27 @@ var projectManager = app.Services.GetRequiredService<ProjectManager>();
 await projectManager.InitializeAsync(app.Environment);
 
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
+
+// データマイグレーション適用
+{
+    var migrationLogger = app.Services.GetRequiredService<ILogger<ProjectDataMigrationRunner>>();
+    var migrationRunner = new ProjectDataMigrationRunner(migrationLogger);
+    foreach (var proj in projectManager.GetAll())
+    {
+        try
+        {
+            var projDir = Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", proj.Name);
+            if (!Directory.Exists(projDir)) continue;
+            var dbConfig = app.Configuration.GetSection($"Projects:{proj.Name}");
+            var connStr = dbConfig["Connection"] ?? app.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=system.db";
+            await migrationRunner.ApplyPendingAsync(proj.Name, projDir, connStr, CancellationToken.None);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning(ex, "データマイグレーション適用中にエラー: {Project}", proj.Name);
+        }
+    }
+}
 
 var supportedCultures = new[] { "en-US", "zh-CN", "ja-JP", "ko-KR" }
     .Select(x => new CultureInfo(x))

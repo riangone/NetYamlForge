@@ -1,17 +1,23 @@
 // DCS001 抑制理由: テーブル名・カラム名は設定値のみを使用する動的SQL生成ユーティリティです。
 #pragma warning disable DCS001
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.BizCard.Hooks;
 
 /// <summary>
 /// Biz-card business card OCR/parse executor.
@@ -28,9 +34,9 @@ namespace NetYamlForge.Services.BatchJob;
 ///     embeddingTable: card_embeddings   # optional inline embedding
 ///     autoEmbed: true
 /// </summary>
-public class BizCardParserExecutor : IBatchStepHandler
+public class BizCardParserExecutor : AiExecutorBase
 {
-    public string StepType => "biz_card_parser";
+    public override string StepType => "biz_card_parser";
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
@@ -68,7 +74,8 @@ public class BizCardParserExecutor : IBatchStepHandler
         IWebHostEnvironment env,
         IConfiguration configuration,
         IEmbeddingService embedding,
-        ILogger<BizCardParserExecutor> logger)
+        ICliChainService cliChain,
+        ILogger<BizCardParserExecutor> logger) : base(cliChain, logger)
     {
         _env = env;
         _configuration = configuration;
@@ -76,7 +83,7 @@ public class BizCardParserExecutor : IBatchStepHandler
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
@@ -287,10 +294,10 @@ public class BizCardParserExecutor : IBatchStepHandler
         => provider.ToLowerInvariant() switch
         {
             "lmstudio"    => await ParseWithLmStudioAsync(absolutePath, ct),
-            "gemini_cli"  => await ParseWithAntigravityCliAsync(absolutePath, ct),
+            "gemini_cli"  => await ParseWithAntigravityCliAsync(absolutePath, projectName, ct),
             "gemini"      => await ParseWithGeminiAsync(absolutePath, projectName, ct),
             "ollama"      => await ParseWithOllamaAsync(absolutePath, projectName, ct),
-            "antigravity" => await ParseWithAntigravityCliAsync(absolutePath, ct),
+            "antigravity" => await ParseWithAntigravityCliAsync(absolutePath, projectName, ct),
             "anthropic"   => await ParseWithAnthropicAsync(absolutePath, projectName, ct),
             _ => LogAndNull(provider)
         };
@@ -301,46 +308,14 @@ public class BizCardParserExecutor : IBatchStepHandler
         return null;
     }
 
-    private async Task<BizCardResult?> ParseWithAntigravityCliAsync(string absolutePath, CancellationToken ct)
+    private async Task<BizCardResult?> ParseWithAntigravityCliAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
-        var fullPrompt = $"@{absolutePath}\n{BizCardPrompt}";
-        var escaped = fullPrompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
-
-        using var process = new Process
+        var result = await Cli.PromptAsync(BizCardPrompt, imagePath: absolutePath, projectName: projectName, cancellationToken: ct);
+        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "antigravity",
-                Arguments = $"-p \"{escaped}\" --dangerously-skip-permissions",
-                RedirectStandardOutput = true,
-                RedirectStandardError  = true,
-                UseShellExecute        = false,
-                CreateNoWindow         = true
-            }
-        };
-
-        var sb = new StringBuilder();
-        process.OutputDataReceived += (_, e) => { if (e.Data != null) sb.AppendLine(e.Data); };
-        process.ErrorDataReceived  += (_, _) => { };
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(180));
-        try { await process.WaitForExitAsync(cts.Token); }
-        catch (OperationCanceledException)
-        {
-            if (!process.HasExited) process.Kill(true);
-            _logger.LogError("antigravity CLI timed out during biz-card parse");
             return null;
         }
-
-        if (process.ExitCode != 0) { _logger.LogError("antigravity CLI exited {Code}", process.ExitCode); return null; }
-
-        var cleaned = Regex.Replace(sb.ToString(), @"\x1B\[[0-9;]*[mGKHFJ]", "");
-        cleaned = Regex.Replace(cleaned, @"\x1B\[.*?[a-zA-Z]", "");
-        return ParseJson(cleaned);
+        return ParseJson(result.Text);
     }
 
     private async Task<BizCardResult?> ParseWithLmStudioAsync(string absolutePath, CancellationToken ct)

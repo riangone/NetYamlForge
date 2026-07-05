@@ -90,40 +90,22 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
     private readonly HookExecutionService _hookExecutionService;
     private readonly ILogger<RealBatchJobExecutor> _logger;
     private readonly IServiceProvider _serviceProvider;
+    private readonly BatchStepHandlerRegistry _registry;
     private readonly NetYamlForge.Services.Email.IEmailServiceFactory? _emailFactory;
-
-    private static readonly IReadOnlyDictionary<string, Type> _handlerTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase)
-    {
-        { "sql_to_csv", typeof(SqlToCsvHandler) },
-        { "sql_command", typeof(SqlCommandHandler) },
-        { "stored_procedure", typeof(StoredProcedureHandler) },
-        { "china_stock_briefing", typeof(ChinaStockBriefingExecutor) },
-        { "email_fetch", typeof(EmailFetchExecutor) },
-        { "invoice_email_processor", typeof(InvoiceEmailProcessorExecutor) },
-        { "automated_blog_generator", typeof(AutomatedBlogGeneratorExecutor) },
-        { "ai_dealer_engine", typeof(AiDealerEngineExecutor) },
-        { "ai_communication_sender", typeof(AiCommunicationExecutor) },
-        { "ai_folder_processor", typeof(AiFolderProcessorExecutor) },
-        { "directory_import", typeof(DirectoryImportExecutor) },
-        { "photo_annotator", typeof(PhotoAnnotatorExecutor) },
-        { "photo_embedding_generator", typeof(EmbeddingGeneratorExecutor) },
-        { "embedding_generator", typeof(EmbeddingGeneratorExecutor) },
-        { "ai_embedding_generator", typeof(AiEmbeddingGeneratorExecutor) },
-        { "biz_card_parser", typeof(BizCardParserExecutor) },
-        { "ai_annotator", typeof(AiAnnotatorExecutor) }
-    };
 
     public RealBatchJobExecutor(
         IDbConnectionFactory dbConnectionFactory,
         HookExecutionService hookExecutionService,
         IServiceProvider serviceProvider,
         ILogger<RealBatchJobExecutor> logger,
+        BatchStepHandlerRegistry registry,
         NetYamlForge.Services.Email.IEmailServiceFactory? emailFactory = null)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _hookExecutionService = hookExecutionService;
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _registry = registry;
         _emailFactory = emailFactory;
     }
 
@@ -171,10 +153,10 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
                 }
 
                 // IBatchStepHandler 延迟路由解析
-                if (!_handlerTypes.TryGetValue(job.Type, out var handlerType))
-                    throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _handlerTypes.Keys)}");
+                if (!_registry.TryGetHandlerType(job.Type, out var handlerType))
+                    throw new NotSupportedException($"Unsupported job type: {job.Type}. Registered: {string.Join(", ", _registry.RegisteredTypes)}");
 
-                var handler = (IBatchStepHandler)_serviceProvider.GetRequiredService(handlerType);
+                var handler = (IBatchStepHandler)ActivatorUtilities.CreateInstance(_serviceProvider, handlerType);
 
                 result.Success = true; // default; handler sets false on failure
                 await handler.ExecuteAsync(job, projectName, db, tx, result, cancellationToken);

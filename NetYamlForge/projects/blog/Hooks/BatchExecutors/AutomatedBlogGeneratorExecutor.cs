@@ -1,28 +1,33 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.Blog.Hooks;
 
 /// <summary>
 /// AI を使用してブログ記事を自動生成し、データベースに保存するジョブ実行器。
 /// </summary>
-public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
+public class AutomatedBlogGeneratorExecutor : AiExecutorBase
 {
-    public string StepType => "automated_blog_generator";
-    private readonly IAntigravityCliService _antigravity;
+    public override string StepType => "automated_blog_generator";
     private readonly ILogger<AutomatedBlogGeneratorExecutor> _logger;
 
-    public AutomatedBlogGeneratorExecutor(IAntigravityCliService antigravity, ILogger<AutomatedBlogGeneratorExecutor> logger)
+    public AutomatedBlogGeneratorExecutor(ICliChainService cliChain, ILogger<AutomatedBlogGeneratorExecutor> logger) : base(cliChain, logger)
     {
-        _antigravity = antigravity;
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
@@ -100,19 +105,19 @@ public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
             }
             else
             {
-                var rawResponse = await _antigravity.PromptAsync(prompt, projectName: projectName, cancellationToken: cancellationToken);
+                var chainResult = await Cli.PromptAsync(prompt, projectName: projectName, cancellationToken: cancellationToken);
+                var rawResponse = chainResult.Success ? (chainResult.Text ?? "") : "";
                 _logger.LogDebug("AI raw response (first 500 chars): {Resp}", rawResponse?[..Math.Min(500, rawResponse?.Length ?? 0)]);
 
                 if (!string.IsNullOrWhiteSpace(rawResponse))
                 {
                     try
                     {
-                        var cleaned = System.Text.RegularExpressions.Regex.Replace(rawResponse, @"```(?:json)?\s*", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
-                        var start = cleaned.IndexOf('{');
-                        var end = cleaned.LastIndexOf('}');
+                        var start = rawResponse.IndexOf('{');
+                        var end = rawResponse.LastIndexOf('}');
                         if (start >= 0 && end > start)
                         {
-                            var json = cleaned[start..(end + 1)];
+                            var json = rawResponse[start..(end + 1)];
                             blogData = System.Text.Json.JsonSerializer.Deserialize<BlogArticle>(json, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                         }
                     }
@@ -284,14 +289,14 @@ public class AutomatedBlogGeneratorExecutor : IBatchStepHandler
         NewsNarrative? narrative = null;
         try
         {
-            var raw = await _antigravity.PromptAsync(narrativePrompt, projectName: projectName, cancellationToken: ct);
+            var chainResult = await Cli.PromptAsync(narrativePrompt, projectName: projectName, cancellationToken: ct);
+            var raw = chainResult.Success ? (chainResult.Text ?? "") : "";
             _logger.LogDebug("News narrative AI response: {Raw}", raw?[..Math.Min(500, raw?.Length ?? 0)]);
             if (!string.IsNullOrWhiteSpace(raw))
             {
-                var cleaned = System.Text.RegularExpressions.Regex.Replace(raw, @"```(?:json)?\s*", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
-                var s = cleaned.IndexOf('{'); var e = cleaned.LastIndexOf('}');
+                var s = raw.IndexOf('{'); var e = raw.LastIndexOf('}');
                 if (s >= 0 && e > s)
-                    narrative = System.Text.Json.JsonSerializer.Deserialize<NewsNarrative>(cleaned[s..(e + 1)], new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    narrative = System.Text.Json.JsonSerializer.Deserialize<NewsNarrative>(raw[s..(e + 1)], new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
         }
         catch (Exception ex)

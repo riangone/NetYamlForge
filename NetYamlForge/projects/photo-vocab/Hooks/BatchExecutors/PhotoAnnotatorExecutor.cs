@@ -1,23 +1,29 @@
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.PhotoVocab.Hooks;
 
 /// <summary>
 /// processing_queue からフォトを取り出し、Antigravity CLI/Gemini API/Ollama で画像標注を実行する。
 /// job type: photo_annotator
 /// </summary>
-public class PhotoAnnotatorExecutor : IBatchStepHandler
+public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecutor.QueueRow>
 {
-    public string StepType => "photo_annotator";
+    public override string StepType => "photo_annotator";
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
@@ -43,7 +49,8 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
         IWebHostEnvironment env,
         IConfiguration configuration,
         IEmbeddingService embedding,
-        ILogger<PhotoAnnotatorExecutor> logger)
+        ICliChainService cliChain,
+        ILogger<PhotoAnnotatorExecutor> logger) : base(cliChain, logger)
     {
         _env = env;
         _configuration = configuration;
@@ -51,14 +58,11 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
-        BatchJobDefinition job, string? projectName,
-        IDbConnection db, IDbTransaction tx,
-        BatchJobResult result, CancellationToken ct)
+    protected override async Task<IReadOnlyList<QueueRow>> FetchPendingAsync(
+        BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        int batchSize, CancellationToken ct)
     {
-        var batchSize = job.BatchSize > 0 ? job.BatchSize : 5;
         var provider = job.AiProvider ?? "antigravity";
-
         var rows = (await db.QueryAsync<QueueRow>(
             @"SELECT q.queue_id, q.photo_id, q.file_path, q.provider, q.retry_count
               FROM processing_queue q
@@ -67,158 +71,148 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
               LIMIT @Batch",
             new { Batch = batchSize, Provider = provider },
             transaction: tx)).ToList();
+        return rows;
+    }
 
-        if (rows.Count == 0)
+    protected override async Task MarkProcessingAsync(
+        QueueRow row, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        var now = DateTime.UtcNow;
+        await db.ExecuteAsync(
+            "UPDATE processing_queue SET status='processing', started_at=@Now WHERE queue_id=@Id",
+            new { Now = now, Id = row.queue_id }, transaction: tx);
+    }
+
+    protected override async Task<RowOutcome> ProcessRowAsync(
+        QueueRow row, BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        CancellationToken ct)
+    {
+        var now = DateTime.UtcNow;
+        var absolutePath = ResolveFilePath(row.file_path);
+        if (!File.Exists(absolutePath))
         {
-            result.Success = true;
-            result.RowsAffected = 0;
-            return;
+            return RowOutcome.Fail($"File not found: {absolutePath}");
         }
 
-        var done = 0;
-        var failed = 0;
+        var provider = job.AiProvider ?? "antigravity";
+        var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
+        var annotation = await AnnotateAsync(absolutePath, usedProvider, projectName, ct);
 
-        foreach (var row in rows)
+        if (annotation == null)
         {
-            if (ct.IsCancellationRequested) break;
-            var now = DateTime.UtcNow;
+            return RowOutcome.Fail("AI returned empty or unparseable response");
+        }
 
-            await db.ExecuteAsync(
-                "UPDATE processing_queue SET status='processing', started_at=@Now WHERE queue_id=@Id",
-                new { Now = now, Id = row.queue_id }, transaction: tx);
-
-            try
+        // 写回 photos 表
+        await db.ExecuteAsync(@"
+            UPDATE photos SET
+                caption_short      = @CaptionShort,
+                caption_long       = @CaptionLong,
+                scene_type         = @SceneType,
+                subjects           = @Subjects,
+                activities         = @Activities,
+                person_count       = @PersonCount,
+                confidence_score   = @Confidence,
+                annotation_status  = 'done',
+                annotation_model   = @Model,
+                annotation_at      = @Now,
+                updated_at         = @Now
+            WHERE photo_id = @PhotoId",
+            new
             {
-                var absolutePath = ResolveFilePath(row.file_path);
-                if (!File.Exists(absolutePath))
-                {
-                    await FailRow(db, tx, row, $"File not found: {absolutePath}");
-                    failed++;
-                    continue;
-                }
+                CaptionShort = annotation.CaptionShort,
+                CaptionLong  = annotation.CaptionLong,
+                SceneType    = annotation.SceneType,
+                Subjects     = annotation.Subjects,
+                Activities   = annotation.Activities,
+                PersonCount  = annotation.PersonCount,
+                Confidence   = annotation.ConfidenceScore,
+                Model        = GetModelName(usedProvider),
+                Now          = now,
+                PhotoId      = row.photo_id,
+            }, transaction: tx);
 
-                var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
-                var annotation = await AnnotateAsync(absolutePath, usedProvider, projectName, ct);
-
-                if (annotation == null)
-                {
-                    await FailRow(db, tx, row, "AI returned empty or unparseable response");
-                    failed++;
-                    continue;
-                }
-
-                // 写回 photos 表
+        // 写回 tags（简单实现：INSERT OR IGNORE）
+        if (annotation.Tags?.Length > 0)
+        {
+            foreach (var tag in annotation.Tags.Take(15).Where(t => !string.IsNullOrWhiteSpace(t)))
+            {
+                var tagId = Guid.NewGuid().ToString("N");
                 await db.ExecuteAsync(@"
-                    UPDATE photos SET
-                        caption_short      = @CaptionShort,
-                        caption_long       = @CaptionLong,
-                        scene_type         = @SceneType,
-                        subjects           = @Subjects,
-                        activities         = @Activities,
-                        person_count       = @PersonCount,
-                        confidence_score   = @Confidence,
-                        annotation_status  = 'done',
-                        annotation_model   = @Model,
-                        annotation_at      = @Now,
-                        updated_at         = @Now
-                    WHERE photo_id = @PhotoId",
-                    new
-                    {
-                        CaptionShort = annotation.CaptionShort,
-                        CaptionLong  = annotation.CaptionLong,
-                        SceneType    = annotation.SceneType,
-                        Subjects     = annotation.Subjects,
-                        Activities   = annotation.Activities,
-                        PersonCount  = annotation.PersonCount,
-                        Confidence   = annotation.ConfidenceScore,
-                        Model        = GetModelName(usedProvider),
-                        Now          = now,
-                        PhotoId      = row.photo_id,
-                    }, transaction: tx);
-
-                // 写回 tags（简单实现：INSERT OR IGNORE）
-                if (annotation.Tags?.Length > 0)
-                {
-                    foreach (var tag in annotation.Tags.Take(15).Where(t => !string.IsNullOrWhiteSpace(t)))
-                    {
-                        var tagId = Guid.NewGuid().ToString("N");
-                        await db.ExecuteAsync(@"
-                            INSERT OR IGNORE INTO tags (tag_id, name, category, created_at)
-                            VALUES (@TagId, @Name, 'auto', @Now)",
-                            new { TagId = tagId, Name = tag.Trim().ToLowerInvariant(), Now = now },
-                            transaction: tx);
-
-                        var resolvedTagId = await db.QueryFirstOrDefaultAsync<string>(
-                            "SELECT tag_id FROM tags WHERE name = @Name",
-                            new { Name = tag.Trim().ToLowerInvariant() }, transaction: tx);
-
-                        if (resolvedTagId != null)
-                        {
-                            await db.ExecuteAsync(@"
-                                INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, tag_name, confidence)
-                                VALUES (@PhotoId, @TagId, @TagName, @Conf)",
-                                new { PhotoId = row.photo_id, TagId = resolvedTagId, TagName = tag.Trim().ToLowerInvariant(), Conf = annotation.ConfidenceScore },
-                                transaction: tx);
-                        }
-                    }
-                }
-
-                // 标注完成后立即生成嵌入，无需等待 cron
-                try
-                {
-                    await db.ExecuteAsync("""
-                        CREATE TABLE IF NOT EXISTS photo_embeddings (
-                            photo_id   TEXT NOT NULL PRIMARY KEY,
-                            embedding  TEXT NOT NULL,
-                            created_at TEXT NOT NULL
-                        )
-                        """, transaction: tx);
-
-                    var embedText = BuildEmbedText(annotation, null, null, null);
-                    if (!string.IsNullOrWhiteSpace(embedText))
-                    {
-                        var vecs = await _embedding.EmbedBatchAsync([embedText], ct);
-                        var vec = vecs.Count > 0 ? vecs[0] : null;
-                        if (vec != null && vec.Length > 0)
-                        {
-                            await db.ExecuteAsync("""
-                                INSERT OR REPLACE INTO photo_embeddings(photo_id, embedding, created_at)
-                                VALUES (@PhotoId, @Embedding, @Now)
-                                """,
-                                new { PhotoId = row.photo_id, Embedding = JsonSerializer.Serialize(vec), Now = DateTime.UtcNow.ToString("o") },
-                                transaction: tx);
-                            _logger.LogInformation("Embedding generated inline for photo {PhotoId} ({Dims} dims)", row.photo_id, vec.Length);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // 嵌入失败不影响标注结果，后续 cron 会补跑
-                    _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId}, will retry via cron", row.photo_id);
-                }
-
-                var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
-                await db.ExecuteAsync(@"
-                    UPDATE processing_queue SET
-                        status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider
-                    WHERE queue_id=@Id",
-                    new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
+                    INSERT OR IGNORE INTO tags (tag_id, name, category, created_at)
+                    VALUES (@TagId, @Name, 'auto', @Now)",
+                    new { TagId = tagId, Name = tag.Trim().ToLowerInvariant(), Now = now },
                     transaction: tx);
 
-                done++;
-                _logger.LogInformation("Photo annotated: {PhotoId} via {Provider}", row.photo_id, usedProvider);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to annotate photo {PhotoId}", row.photo_id);
-                await FailRow(db, tx, row, ex.Message);
-                failed++;
+                var resolvedTagId = await db.QueryFirstOrDefaultAsync<string>(
+                    "SELECT tag_id FROM tags WHERE name = @Name",
+                    new { Name = tag.Trim().ToLowerInvariant() }, transaction: tx);
+
+                if (resolvedTagId != null)
+                {
+                    await db.ExecuteAsync(@"
+                        INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, tag_name, confidence)
+                        VALUES (@PhotoId, @TagId, @TagName, @Conf)",
+                        new { PhotoId = row.photo_id, TagId = resolvedTagId, TagName = tag.Trim().ToLowerInvariant(), Conf = annotation.ConfidenceScore },
+                        transaction: tx);
+                }
             }
         }
 
-        result.Success = failed == 0 || done > 0;
-        result.RowsAffected = done;
-        result.ErrorMessage = failed > 0 ? $"{failed} photo(s) failed annotation" : null;
+        // 标注完成后立即生成嵌入，无需等待 cron
+        try
+        {
+            await db.ExecuteAsync("""
+                CREATE TABLE IF NOT EXISTS photo_embeddings (
+                    photo_id   TEXT NOT NULL PRIMARY KEY,
+                    embedding  TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+                """, transaction: tx);
+
+            var embedText = BuildEmbedText(annotation, null, null, null);
+            if (!string.IsNullOrWhiteSpace(embedText))
+            {
+                var vecs = await _embedding.EmbedBatchAsync([embedText], ct);
+                var vec = vecs.Count > 0 ? vecs[0] : null;
+                if (vec != null && vec.Length > 0)
+                {
+                    await db.ExecuteAsync("""
+                        INSERT OR REPLACE INTO photo_embeddings(photo_id, embedding, created_at)
+                        VALUES (@PhotoId, @Embedding, @Now)
+                        """,
+                        new { PhotoId = row.photo_id, Embedding = JsonSerializer.Serialize(vec), Now = DateTime.UtcNow.ToString("o") },
+                        transaction: tx);
+                    _logger.LogInformation("Embedding generated inline for photo {PhotoId} ({Dims} dims)", row.photo_id, vec.Length);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // 嵌入失败不影响标注结果，后续 cron 会补跑
+            _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId}, will retry via cron", row.photo_id);
+        }
+
+        var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
+        await db.ExecuteAsync(@"
+            UPDATE processing_queue SET
+                status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider
+            WHERE queue_id=@Id",
+            new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
+            transaction: tx);
+
+        _logger.LogInformation("Photo annotated: {PhotoId} via {Provider}", row.photo_id, usedProvider);
+        return RowOutcome.Ok();
+    }
+
+    protected override async Task WriteOutcomeAsync(
+        QueueRow row, RowOutcome outcome, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        if (outcome.Status == RowStatus.Failed)
+        {
+            var error = outcome.Reason ?? "Unknown error";
+            await FailRow(db, tx, row, error);
+        }
     }
 
     // ──────────────────────────────────────────────────────────
@@ -248,10 +242,10 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
         return provider.ToLowerInvariant() switch
         {
             "lmstudio"     => await AnnotateWithLmStudioAsync(absolutePath, ct),
-            "gemini_cli"   => await AnnotateWithAntigravityCliAsync(absolutePath, ct),
+            "gemini_cli"   => await AnnotateWithAntigravityCliAsync(absolutePath, projectName, ct),
             "gemini"       => await AnnotateWithGeminiAsync(absolutePath, projectName, ct),
             "ollama"       => await AnnotateWithOllamaAsync(absolutePath, projectName, ct),
-            "antigravity"  => await AnnotateWithAntigravityCliAsync(absolutePath, ct),
+            "antigravity"  => await AnnotateWithAntigravityCliAsync(absolutePath, projectName, ct),
             _ => LogAndReturnNull(provider),
         };
     }
@@ -263,52 +257,14 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
     }
 
     private async Task<AnnotationResult?> AnnotateWithAntigravityCliAsync(
-        string absolutePath, CancellationToken ct)
+        string absolutePath, string? projectName, CancellationToken ct)
     {
-        // @filepath 语法让 antigravity CLI 真正附加图片内容
-        var prompt = $"@{absolutePath}\n{AnnotationPrompt}";
-        var escapedPrompt = prompt.Replace("\\", "\\\\").Replace("\"", "\\\"");
-
-        var startInfo = new ProcessStartInfo
+        var result = await Cli.PromptAsync(AnnotationPrompt, imagePath: absolutePath, projectName: projectName, cancellationToken: ct);
+        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
         {
-            FileName = "antigravity",
-            Arguments = $"-p \"{escapedPrompt}\" --dangerously-skip-permissions",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process { StartInfo = startInfo };
-        var outputSb = new StringBuilder();
-        process.OutputDataReceived += (_, e) => { if (e.Data != null) outputSb.AppendLine(e.Data); };
-        process.ErrorDataReceived += (_, e) => { };
-
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(180));
-        try { await process.WaitForExitAsync(cts.Token); }
-        catch (OperationCanceledException)
-        {
-            if (!process.HasExited) process.Kill(true);
-            _logger.LogError("antigravity CLI timed out during photo annotation");
             return null;
         }
-
-        if (process.ExitCode != 0)
-        {
-            _logger.LogError("antigravity CLI exited with code {Code}", process.ExitCode);
-            return null;
-        }
-
-        var output = outputSb.ToString();
-        // Strip ANSI escape codes and control sequences
-        var cleaned = Regex.Replace(output, @"\x1B\[[0-9;]*[mGKHFJ]", "");
-        cleaned = Regex.Replace(cleaned, @"\x1B\[.*?[a-zA-Z]", "");
-        return ParseAnnotationJson(cleaned);
+        return ParseAnnotationJson(result.Text);
     }
 
     private async Task<AnnotationResult?> AnnotateWithLmStudioAsync(
@@ -737,7 +693,7 @@ public class PhotoAnnotatorExecutor : IBatchStepHandler
             transaction: tx);
     }
 
-    private class QueueRow
+    public class QueueRow
     {
         public int queue_id { get; set; }
         public string photo_id  { get; set; } = "";

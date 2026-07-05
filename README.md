@@ -70,10 +70,51 @@ dotnet test --filter "FullyQualifiedName~ClassName.MethodName"
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
+## Data Migrations
+
+NetYamlForge supports automated and manual data migrations for tenant databases.
+
+### Migration Directory
+Store your migration SQL scripts in the following path:
+`projects/<project-name>/database/migrations/NNN_description.sql` (where `NNN` is a 3+ digit version number, e.g., `001_init.sql`).
+
+### SQL Segmentation
+Use `-- +up` and `-- +down` to segment your migration script:
+```sql
+-- +up
+CREATE TABLE posts (id INT, title TEXT);
+
+-- +down
+DROP TABLE posts;
+```
+If no segment tags are specified, the entire file is treated as `up` SQL.
+
+### CLI Commands
+You can manage migrations using the following CLI parameters (replace `<project-name>` with your actual project name):
+
+- **Apply pending migrations**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data --project=<project-name>
+  ```
+- **Check migration status**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data-status --project=<project-name>
+  ```
+- **Rollback to a specific version**:
+  ```bash
+  dotnet run --project NetYamlForge -- --migrate-data-rollback --version=<version-number> --project=<project-name>
+  ```
+
+Pending migrations are also automatically applied upon application startup.
+
 ## Default Credentials
 
+During the first startup, a default administrator account is seeded. The password is determined by the following priority:
+1. `NYF_ADMIN_PASSWORD` environment variable.
+2. `Auth:DefaultAdminPassword` configuration value in `appsettings.json`.
+3. If neither is set, a random password is generated and printed in the startup logs.
+
 - **Username**: `admin`
-- **Password**: `Admin@123`
 
 ## License
 

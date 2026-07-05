@@ -15,6 +15,7 @@ using Dapper;
 using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.Hooks;
+using NetYamlForge.Services.BatchJob;
 using Xunit;
 
 namespace NetYamlForge.Tests;
@@ -101,7 +102,8 @@ public class AiDocProcessorTests
             scopeFactory,
             mockHookRegistry.Object,
             mockBizRegistry.Object,
-            actionRegistry);
+            actionRegistry,
+            new BatchStepHandlerRegistry(Enumerable.Empty<BatchStepHandlerRegistration>()));
 
         // テストプロジェクトのベースディレクトリからの相対パス
         var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/ai-doc-processor";

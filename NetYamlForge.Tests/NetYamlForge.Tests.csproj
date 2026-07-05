@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../NetYamlForge/NetYamlForge.csproj" />
+    <ProjectReference Include="../NetYamlForge.Tooling/NetYamlForge.Tooling.csproj" />
     <!-- アナライザーをテストプロジェクトにも適用 -->
     <ProjectReference Include="../NetYamlForge.Analyzers/NetYamlForge.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>

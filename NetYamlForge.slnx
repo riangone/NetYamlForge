@@ -3,4 +3,5 @@
   <Project Path="NetYamlForge.Tests/NetYamlForge.Tests.csproj" />
   <Project Path="NetYamlForge/NetYamlForge.csproj" />
   <Project Path="FormForge/FormForge.csproj" />
+  <Project Path="NetYamlForge.Tooling/NetYamlForge.Tooling.csproj" />
 </Solution>

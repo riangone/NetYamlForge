@@ -3,8 +3,11 @@
 using System.Data;
 using System.Text;
 using Dapper;
+using NetYamlForge.Services;
+using NetYamlForge.Services.BatchJob;
+using Microsoft.Extensions.Logging;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.TodoApp.Hooks;
 
 /// <summary>
 /// 中国股市简报任务执行器

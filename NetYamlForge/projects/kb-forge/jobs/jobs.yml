@@ -1,17 +1,18 @@
 jobs:
-  - name: kb_embedding
+  kb_embedding:
     displayName: "Generate Article Embeddings"
-    schedule: "0 */6 * * *"
-    steps:
-      - type: ai_embedding_generator
-        batchSize: 20
-        embeddingConfig:
-          sourceTable: articles
-          primaryKey: id
-          statusField: embedding_status
-          statusValue: pending
-          embeddingTable: article_embeddings
-          textFields:
-            - field: title
-            - field: summary
-            - field: content
+    schedule:
+      cron: "0 */6 * * *"
+      timezone: "UTC"
+    type: "ai_embedding_generator"
+    batchSize: 20
+    embeddingConfig:
+      sourceTable: "articles"
+      primaryKey: "id"
+      statusField: "embedding_status"
+      statusValue: "pending"
+      embeddingTable: "article_embeddings"
+      textFields:
+        - field: "title"
+        - field: "summary"
+        - field: "content"

@@ -1,30 +1,35 @@
 // ファイル概要：AI ディーラーエンジン。Antigravity CLI を使用してリードスコアリング・育成タスク・見積生成を自動実行します。
 
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob;
 
-namespace NetYamlForge.Services.BatchJob;
+namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
 /// <summary>
 /// AI 全面主導の汽車販売管理エンジン。
 /// リードスコアリング・育成タスク生成・見積生成を Antigravity CLI で自動実行し、
 /// ai_decisions テーブルに結果を書き込む。
 /// </summary>
-public class AiDealerEngineExecutor : IBatchStepHandler
+public class AiDealerEngineExecutor : AiExecutorBase
 {
-    public string StepType => "ai_dealer_engine";
+    public override string StepType => "ai_dealer_engine";
 
-    private readonly IAntigravityCliService _antigravity;
     private readonly ILogger<AiDealerEngineExecutor> _logger;
 
-    public AiDealerEngineExecutor(IAntigravityCliService antigravity, ILogger<AiDealerEngineExecutor> logger)
+    public AiDealerEngineExecutor(ICliChainService cliChain, ILogger<AiDealerEngineExecutor> logger) : base(cliChain, logger)
     {
-        _antigravity = antigravity;
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(
+    public override async Task ExecuteAsync(
         BatchJobDefinition job, string? projectName,
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
@@ -112,8 +117,8 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             var startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             try
             {
-                var prompt = BuildLeadScoringPrompt(lead);
-                var aiResult = await _antigravity.PromptJsonAsync<LeadScoringResult>(
+                string prompt = BuildLeadScoringPrompt(lead);
+                var aiResult = await Cli.PromptJsonAsync<LeadScoringResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;
@@ -209,8 +214,8 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             var startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             try
             {
-                var prompt = BuildNurturingPrompt(lead);
-                var aiResult = await _antigravity.PromptJsonAsync<NurturingResult>(
+                string prompt = BuildNurturingPrompt(lead);
+                var aiResult = await Cli.PromptJsonAsync<NurturingResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;
@@ -337,8 +342,8 @@ public class AiDealerEngineExecutor : IBatchStepHandler
             var startMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             try
             {
-                var prompt = BuildQuotePrompt(lead);
-                var aiResult = await _antigravity.PromptJsonAsync<QuoteResult>(
+                string prompt = BuildQuotePrompt(lead);
+                var aiResult = await Cli.PromptJsonAsync<QuoteResult>(
                     prompt, projectName: projectName, cancellationToken: cancellationToken);
 
                 if (aiResult == null) continue;

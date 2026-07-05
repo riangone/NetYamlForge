@@ -1,12 +1,26 @@
-// 目的: HookScaffolder のユーティリティ関数（名前変換）の回帰テスト。
-
-using NetYamlForge.Services;
+using System.Reflection;
 using Xunit;
 
 namespace NetYamlForge.Tests;
 
 public class HookScaffolderTests
 {
+    private static object InvokeMethod(string methodName, string input)
+    {
+        var assembly = Assembly.Load("NetYamlForge.Tooling");
+        var type = assembly.GetType("NetYamlForge.Services.HookScaffolder");
+        if (type == null)
+        {
+            throw new Exception("Type 'NetYamlForge.Services.HookScaffolder' not found in NetYamlForge.Tooling assembly.");
+        }
+        var method = type.GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+        if (method == null)
+        {
+            throw new Exception($"Method '{methodName}' not found in HookScaffolder.");
+        }
+        return method.Invoke(null, new object[] { input })!;
+    }
+
     // ─── ToPascalCase ────────────────────────────────────────────
 
     [Theory]
@@ -18,7 +32,7 @@ public class HookScaffolderTests
     [InlineData("b2b-order-ops",    "B2bOrderOps")]
     public void ToPascalCase_ConvertsCorrectly(string input, string expected)
     {
-        Assert.Equal(expected, HookScaffolder.ToPascalCase(input));
+        Assert.Equal(expected, InvokeMethod("ToPascalCase", input));
     }
 
     // ─── ToSnakeCase ─────────────────────────────────────────────
@@ -31,6 +45,6 @@ public class HookScaffolderTests
     [InlineData("ValidateEmailFormat",  "validate_email_format")]
     public void ToSnakeCase_ConvertsCorrectly(string input, string expected)
     {
-        Assert.Equal(expected, HookScaffolder.ToSnakeCase(input));
+        Assert.Equal(expected, InvokeMethod("ToSnakeCase", input));
     }
 }

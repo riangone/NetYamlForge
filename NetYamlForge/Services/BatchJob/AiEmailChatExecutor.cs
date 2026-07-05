@@ -14,12 +14,12 @@ namespace NetYamlForge.Services.BatchJob;
 
 public class AiEmailChatExecutor
 {
-    private readonly IAntigravityCliService _antigravityCli;
+    private readonly ICliChainService _cliChain;
     private readonly ILogger<AiEmailChatExecutor> _logger;
 
-    public AiEmailChatExecutor(IAntigravityCliService antigravityCli, ILogger<AiEmailChatExecutor> logger)
+    public AiEmailChatExecutor(ICliChainService cliChain, ILogger<AiEmailChatExecutor> logger)
     {
-        _antigravityCli = antigravityCli;
+        _cliChain = cliChain;
         _logger = logger;
     }
 
@@ -123,7 +123,8 @@ public class AiEmailChatExecutor
                 if (useAntigravityCli)
                 {
                     var prompt = $"System: {aiSystemPrompt}\n\nUser Email Content:\n{body}";
-                    replyContent = await _antigravityCli.PromptAsync(prompt, aiModel, projectName, cancellationToken);
+                    var chainResult = await _cliChain.PromptAsync(prompt, projectName: projectName, cancellationToken: cancellationToken);
+                    replyContent = chainResult.Success ? chainResult.Text : null;
                 }
                 else if (!string.IsNullOrEmpty(aiKey))
                 {

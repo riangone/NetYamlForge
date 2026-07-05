@@ -280,6 +280,65 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         Assert.Null(row);
     }
 
+    [Fact]
+    public async Task ExportCsv_ThroughHttpLayer_ReturnsCsvWithSeededRows()
+    {
+        using var client = CreateClient();
+
+        var response = await client.GetAsync("/blog/DynamicEntity/ExportCsv?entity=post");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var csvContent = await response.Content.ReadAsStringAsync();
+
+        Assert.Contains("别名", csvContent);
+        Assert.Contains("oss-contribution-guide", csvContent);
+    }
+
+    [Fact]
+    public async Task BulkDelete_ThroughHttpLayer_DeletesSelectedRows()
+    {
+        using var client = CreateClient();
+        var token = await GetAntiForgeryTokenAsync(client);
+
+        var slug1 = $"e2e-bulk-1-{Guid.NewGuid():N}";
+        var slug2 = $"e2e-bulk-2-{Guid.NewGuid():N}";
+        long id1, id2;
+
+        await using (var db = new SqliteConnection(_factory.TenantDbConnectionString))
+        {
+            id1 = await db.ExecuteScalarAsync<long>(
+                "INSERT INTO Post (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 1', @slug1, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
+                new { slug1 });
+            id2 = await db.ExecuteScalarAsync<long>(
+                "INSERT INTO Post (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 2', @slug2, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
+                new { slug2 });
+        }
+
+        var form = new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = token,
+            ["ids[0]"] = id1.ToString(),
+            ["ids[1]"] = id2.ToString()
+        };
+
+        var response = await client.PostAsync(
+            "/blog/DynamicEntity/BulkDelete?entity=post",
+            new FormUrlEncodedContent(form));
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.True(response.IsSuccessStatusCode,
+            $"Bulk delete failed: {(int)response.StatusCode} {response.StatusCode}\n{Truncate(body)}");
+
+        await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
+        var row1 = await checkDb.QuerySingleOrDefaultAsync<long?>(
+            "SELECT Id FROM Post WHERE Id = @id1", new { id1 });
+        var row2 = await checkDb.QuerySingleOrDefaultAsync<long?>(
+            "SELECT Id FROM Post WHERE Id = @id2", new { id2 });
+
+        Assert.Null(row1);
+        Assert.Null(row2);
+    }
+
     // ── ヘルパー ───────────────────────────────────────────────────────────
 
     private HttpClient CreateClient() =>
