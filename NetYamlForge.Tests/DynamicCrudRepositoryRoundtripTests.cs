@@ -77,6 +77,28 @@ public class DynamicCrudRepositoryRoundtripTests : IDisposable
         _userAuthServiceMock.Setup(u => u.GetUserRolesAsync(userName)).ReturnsAsync(roles);
     }
 
+    private DynamicCrudRepository CreateRepository()
+    {
+        var rls = new DynamicCrudRowLevelSecurity(
+            _httpContextAccessorMock.Object,
+            null,
+            _userAuthServiceMock.Object,
+            null,
+            null,
+            _db,
+            NullLogger<DynamicCrudRowLevelSecurity>.Instance);
+        return new DynamicCrudRepository(
+            _db,
+            _metaMock.Object,
+            new SqliteDialect(),
+            NullLogger<DynamicCrudRepository>.Instance,
+            rls,
+            _httpContextAccessorMock.Object,
+            bizLogicRegistry: null,
+            userAuthService: _userAuthServiceMock.Object
+        );
+    }
+
     private EntityDefinition CreateMockEntityDefinition(bool enableRls = false)
     {
         var columns = new Dictionary<string, ColumnDefinition>(StringComparer.OrdinalIgnoreCase)
@@ -160,15 +182,7 @@ public class DynamicCrudRepositoryRoundtripTests : IDisposable
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
         _metaMock.Setup(m => m.TryGet("test_entity", out entityDef)).Returns(true);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         // 1. Insert
         var values = new Dictionary<string, object?>
@@ -227,15 +241,7 @@ public class DynamicCrudRepositoryRoundtripTests : IDisposable
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
         _metaMock.Setup(m => m.TryGet("test_entity", out entityDef)).Returns(true);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var ids = (await _db.QueryAsync<int>("SELECT id FROM test_entity ORDER BY id")).ToList();
         Assert.Equal(3, ids.Count);
@@ -266,15 +272,7 @@ public class DynamicCrudRepositoryRoundtripTests : IDisposable
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
         _metaMock.Setup(m => m.TryGet("test_entity", out entityDef)).Returns(true);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         // 通过 GetAll 触发 SQL JOIN 检验是否有 category_name 字段
         var items = await repo.GetAllAsync("test_entity", search: null, sort: null, dir: null);
@@ -299,15 +297,7 @@ public class DynamicCrudRepositoryRoundtripTests : IDisposable
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
         _metaMock.Setup(m => m.TryGet("test_entity", out entityDef)).Returns(true);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var items = await repo.GetAllAsync("test_entity", search: null, sort: null, dir: null);
         var list = items.ToList();

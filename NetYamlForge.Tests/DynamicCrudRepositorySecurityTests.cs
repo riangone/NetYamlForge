@@ -48,6 +48,28 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         _httpContextAccessorMock.Setup(h => h.HttpContext).Returns(_httpContext);
     }
 
+    private DynamicCrudRepository CreateRepository()
+    {
+        var rls = new DynamicCrudRowLevelSecurity(
+            _httpContextAccessorMock.Object,
+            null,
+            _userAuthServiceMock.Object,
+            null,
+            null,
+            _db,
+            NullLogger<DynamicCrudRowLevelSecurity>.Instance);
+        return new DynamicCrudRepository(
+            _db,
+            _metaMock.Object,
+            new SqliteDialect(),
+            NullLogger<DynamicCrudRepository>.Instance,
+            rls,
+            _httpContextAccessorMock.Object,
+            bizLogicRegistry: null,
+            userAuthService: _userAuthServiceMock.Object
+        );
+    }
+
     private void SetupUser(string userName, string[] roles, bool isAdmin = false)
     {
         var claims = new List<Claim> { new Claim(ClaimTypes.Name, userName) };
@@ -124,15 +146,7 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         var entityDef = CreateMockEntityDefinition();
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var values = new Dictionary<string, object?>
         {
@@ -156,15 +170,7 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         var entityDef = CreateMockEntityDefinition();
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var values = new Dictionary<string, object?>
         {
@@ -184,15 +190,7 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         var entityDef = CreateMockEntityDefinition();
         _metaMock.Setup(m => m.Get("test_entity")).Returns(entityDef);
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var values = new Dictionary<string, object?>
         {
@@ -215,15 +213,7 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         // Pre-insert
         await _db.ExecuteAsync("INSERT INTO test_entity (id, email, ssn, normal_field) VALUES (1, 'old@email.com', 'ssn-old', 'old')");
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         var values = new Dictionary<string, object?>
         {
@@ -250,15 +240,7 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         // Pre-insert
         await _db.ExecuteAsync("INSERT INTO test_entity (id, email, ssn, normal_field) VALUES (42, 'secret@email.com', '123-45-6789', 'visible')");
 
-        var repo = new DynamicCrudRepository(
-            _db,
-            _metaMock.Object,
-            new SqliteDialect(),
-            NullLogger<DynamicCrudRepository>.Instance,
-            _httpContextAccessorMock.Object,
-            bizLogicRegistry: null,
-            userAuthService: _userAuthServiceMock.Object
-        );
+        var repo = CreateRepository();
 
         // Act
         var result = await repo.GetByIdAsync("test_entity", 42);

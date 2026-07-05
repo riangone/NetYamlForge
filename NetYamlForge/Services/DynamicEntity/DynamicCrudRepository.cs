@@ -9,15 +9,10 @@
 
 using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Security.Claims;
 using Dapper;
-using Microsoft.AspNetCore.Http;
 using NetYamlForge.Models;
 using NetYamlForge.Services.Dialect;
 using NetYamlForge.Services.Auth;
@@ -73,23 +68,12 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     private readonly IEntityMetadataProvider _meta;
     private readonly ILogger<DynamicCrudRepository> _logger;
     private readonly ISqlDialect _dialect;
-    private readonly IHttpContextAccessor? _httpContextAccessor;
-    private readonly IProjectBusinessLogicRegistry? _bizLogicRegistry;
-    private readonly IUserAuthService? _userAuthService;
-    private readonly ProjectScope? _projectScope;
-    private readonly TenantContext? _tenantContext;
+    private readonly DynamicCrudRowLevelSecurity _rls;
     private int _slowQueryThresholdMs;
     private int _slowQuerySummaryIntervalMs;
     private long _lastSettingsRefreshUnixMs;
     private static readonly ConcurrentDictionary<string, long> SlowQueryCounters = new(StringComparer.OrdinalIgnoreCase);
     private static long _lastSlowSummaryUnixMs;
-    // IdentifierRegex / ExpressionRegex は SqlSafetyGuard から参照（重複定義排除）
-    private static readonly Regex IdentifierRegex = SqlSafetyGuard.IdentifierRegex;
-    private static readonly Regex ExpressionRegex = SqlSafetyGuard.ExpressionRegex;
-    private static readonly HashSet<string> AllowedJoinTypes = new(StringComparer.OrdinalIgnoreCase) { "left", "inner", "right" };
-
-    // 缓存已通过安全校验的实体元数据，避免每次请求重复进行正则和标识符校验
-    private static readonly ConcurrentDictionary<EntityDefinition, bool> ValidatedMetadataCache = new();
 
     // SQL 语句模板缓存，避免高并发下的字符串拼接开销
     private static readonly ConcurrentDictionary<string, string> SqlCache = new();
@@ -99,6 +83,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         IEntityMetadataProvider meta,
         ISqlDialect dialect,
         ILogger<DynamicCrudRepository> logger,
+        DynamicCrudRowLevelSecurity rls,
         IHttpContextAccessor? httpContextAccessor = null,
         IProjectBusinessLogicRegistry? bizLogicRegistry = null,
         IUserAuthService? userAuthService = null,
@@ -109,11 +94,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         _meta = meta;
         _dialect = dialect;
         _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
-        _bizLogicRegistry = bizLogicRegistry;
-        _userAuthService = userAuthService;
-        _projectScope = projectScope;
-        _tenantContext = tenantContext;
+        _rls = rls;
         _slowQueryThresholdMs = ResolveSlowQueryThresholdMs();
         _slowQuerySummaryIntervalMs = ResolveSlowQuerySummaryIntervalMs();
         _lastSettingsRefreshUnixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -132,8 +113,8 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         bool fetchOneExtra = false)
     {
         var meta = _meta.Get(entity);
-        ValidateMetadata(meta, entity);
-        await EnsurePermissionAsync(meta, "read");
+        DynamicCrudMetadataValidator.ValidateMetadata(meta, entity);
+        await _rls.EnsurePermissionAsync(meta, "read");
         pageSize ??= meta.Paging.PageSize;
 
         var activeFilterKeys = filters == null
@@ -145,7 +126,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         var rlsKey = "";
         if (meta.Security?.RowLevelSecurity?.Enabled == true)
         {
-            var userRoles = await GetCurrentUserRolesAsync();
+            var userRoles = await _rls.GetCurrentUserRolesAsync();
             rlsKey = "_" + string.Join(",", userRoles.OrderBy(r => r));
         }
 
@@ -838,98 +819,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
         List<string> where,
         DynamicParameters param)
     {
-        // フィルタ型ごとのSQL変換:
-        // dropdown=一致, multi/checkbox=IN, range/date-range=境界条件
-        if (filters == null)
-        {
-            return;
-        }
-
-        // 1. YAML定義フィルター（UIフィルター）
-        foreach (var f in meta.Filters)
-        {
-            var key = f.Key;
-            var filterType = (f.Value.Type ?? "dropdown").ToLowerInvariant();
-            var expr = f.Value.Expression ?? $"{meta.Table}.{key}";
-
-            switch (filterType)
-            {
-                case "range":
-                    FilterSqlBuilder.AppendRange(key, expr, filters, where, param);
-                    break;
-                case "date-range":
-                    FilterSqlBuilder.AppendDateRange(key, expr, filters, where, param);
-                    break;
-                case "checkbox":
-                case "multi-select":
-                    FilterSqlBuilder.AppendMultiSelect(key, expr, filters, where, param);
-                    break;
-                default:
-                    FilterSqlBuilder.AppendExact(key, expr, filters, where, param);
-                    break;
-            }
-        }
-
-        // 2. AI生成動的フィルター（YAML未定義だが有効なカラム）
-        // QueryExecutionService.BuildFilters が生成するキー形式を解析して適用する
-        var yamlFilterKeys = meta.Filters.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var validColumns   = meta.Columns.Keys.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var kv in filters)
-        {
-            if (string.IsNullOrWhiteSpace(kv.Value)) continue;
-
-            var (baseField, op) = ParseDynamicFilterKey(kv.Key);
-
-            if (yamlFilterKeys.Contains(baseField)) continue;          // YAML定義済み → スキップ
-            if (!validColumns.Contains(baseField)) continue;           // 無効カラム → スキップ
-            if (!SqlSafetyGuard.IsValidIdentifier(baseField)) continue; // 識別子検証
-
-            var expr     = $"{meta.Table}.{baseField}";
-            var pName    = $"dyn_{baseField}_{op}";
-
-            switch (op)
-            {
-                case "eq":
-                    where.Add($"{expr} = @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "ne":
-                    where.Add($"{expr} != @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "gt":
-                    where.Add($"{expr} > @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "lt":
-                    where.Add($"{expr} < @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "gte":
-                    where.Add($"{expr} >= @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "lte":
-                    where.Add($"{expr} <= @{pName}");
-                    param.Add(pName, kv.Value);
-                    break;
-                case "like":
-                    where.Add($"{expr} LIKE @{pName}");
-                    param.Add(pName, kv.Value); // BuildFilters が既に %...% を付けている
-                    break;
-                case "in":
-                    var inVals = kv.Value.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    var inParams = inVals.Select((v, i) => $"@{pName}_{i}").ToList();
-                    where.Add($"{expr} IN ({string.Join(", ", inParams)})");
-                    for (var i = 0; i < inVals.Length; i++)
-                        param.Add($"{pName}_{i}", inVals[i].Trim());
-                    break;
-                case "is_null":
-                    where.Add($"{expr} IS NULL");
-                    break;
-            }
-        }
+        DynamicCrudFilterApplier.ApplyFilters(meta, filters, where, param);
     }
 
     /// <summary>
@@ -938,15 +828,7 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     /// </summary>
     private static (string BaseField, string Op) ParseDynamicFilterKey(string key)
     {
-        if (key.EndsWith("!=",     StringComparison.Ordinal)) return (key[..^2], "ne");
-        if (key.EndsWith(">=",     StringComparison.Ordinal)) return (key[..^2], "gte");
-        if (key.EndsWith("<=",     StringComparison.Ordinal)) return (key[..^2], "lte");
-        if (key.EndsWith(">",      StringComparison.Ordinal)) return (key[..^1], "gt");
-        if (key.EndsWith("<",      StringComparison.Ordinal)) return (key[..^1], "lt");
-        if (key.EndsWith(":",      StringComparison.Ordinal)) return (key[..^1], "like");
-        if (key.EndsWith("[]",     StringComparison.Ordinal)) return (key[..^2], "in");
-        if (key.EndsWith("__null", StringComparison.Ordinal)) return (key[..^6], "is_null");
-        return (key, "eq");
+        return DynamicCrudFilterApplier.ParseDynamicFilterKey(key);
     }
 
     private List<string> BuildWhere(
@@ -957,15 +839,9 @@ public class DynamicCrudRepository : IDynamicCrudRepository
     {
         // 検索条件 + フィルタ条件 + softDelete条件を一元的に合成します。
         var where = new List<string>();
-        ApplyFilters(meta, filters, where, param);
+        DynamicCrudFilterApplier.ApplyFilters(meta, filters, where, param);
 
-        if (_tenantContext != null && 
-            _tenantContext.Strategy.Equals("logical", StringComparison.OrdinalIgnoreCase) && 
-            !string.IsNullOrEmpty(_tenantContext.TenantId))
-        {
-            where.Add($"{meta.Table}.tenant_id = @TenantId");
-            param.Add("TenantId", _tenantContext.TenantId);
-        }
+        _rls.ApplyTenantContext(meta, where, param);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -1014,334 +890,35 @@ public class DynamicCrudRepository : IDynamicCrudRepository
 
     private static void ValidateMetadata(EntityDefinition meta, string entityName)
     {
-        if (ValidatedMetadataCache.ContainsKey(meta))
-        {
-            return;
-        }
-
-        // YAML由来メタデータの安全性チェック。
-        // SQL注入に繋がる文字や不正なトークンを事前に拒否します。
-        static void EnsureForeignKey(ForeignKeyDefinition fk, string name)
-        {
-            var displayColumns = fk.GetDisplayColumns();
-            if (displayColumns.Count == 0)
-            {
-                throw new InvalidOperationException($"fk.displayColumn(s) is required: {name}");
-            }
-
-            foreach (var displayCol in displayColumns)
-            {
-                SqlSafetyGuard.EnsureIdentifier(displayCol, $"{name}.displayColumn");
-            }
-
-            if (!string.IsNullOrWhiteSpace(fk.Query))
-            {
-                var query = fk.Query!.Trim();
-                if (SqlSafetyGuard.IsUnsafeToken(query))
-                {
-                    throw new InvalidOperationException($"Unsafe fk.query '{name}': {query}");
-                }
-
-                if (!query.StartsWith("select", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException($"fk.query must start with SELECT: {name}");
-                }
-
-                if (!Regex.IsMatch(query, "\\bId\\b", RegexOptions.IgnoreCase))
-                {
-                    throw new InvalidOperationException($"fk.query must include Id column: {name}");
-                }
-            }
-        }
-
-        SqlSafetyGuard.EnsureIdentifier(entityName, "entity");
-        SqlSafetyGuard.EnsureIdentifier(meta.Table, $"{entityName}.table");
-        
-        // 複合主鍵対応：Keys が設定されていればそれら、そうでなければ Key を検証
-        var pkColumns = meta.GetPrimaryKeyColumns();
-        foreach (var pkCol in pkColumns)
-        {
-            SqlSafetyGuard.EnsureIdentifier(pkCol, $"{entityName}.key.{pkCol}");
-        }
-
-        foreach (var col in meta.Columns)
-        {
-            SqlSafetyGuard.EnsureIdentifier(col.Key, $"{entityName}.column");
-            if (col.Value.Expression != null)
-            {
-                SqlSafetyGuard.EnsureExpression(col.Value.Expression, $"{entityName}.columnExpression.{col.Key}");
-            }
-        }
-
-        foreach (var form in meta.Forms)
-        {
-            SqlSafetyGuard.EnsureIdentifier(form.Key, $"{entityName}.form");
-            if (form.Value.ForeignKey != null)
-            {
-                EnsureForeignKey(form.Value.ForeignKey, $"{entityName}.form.fk.{form.Key}");
-            }
-        }
-
-        foreach (var filter in meta.Filters)
-        {
-            SqlSafetyGuard.EnsureIdentifier(filter.Key, $"{entityName}.filter");
-            if (filter.Value.Expression != null)
-            {
-                SqlSafetyGuard.EnsureExpression(filter.Value.Expression, $"{entityName}.filterExpression.{filter.Key}");
-            }
-
-            if (filter.Value.ForeignKey != null)
-            {
-                EnsureForeignKey(filter.Value.ForeignKey, $"{entityName}.filter.fk.{filter.Key}");
-            }
-        }
-
-        foreach (var j in meta.Joins)
-        {
-            if (!AllowedJoinTypes.Contains(j.Type))
-            {
-                throw new InvalidOperationException($"Unsafe join type '{entityName}.joinType': {j.Type}");
-            }
-
-            SqlSafetyGuard.EnsureIdentifier(j.Table, $"{entityName}.joinTable");
-            SqlSafetyGuard.EnsureIdentifier(j.Alias, $"{entityName}.joinAlias");
-            var joinOn = j.GetJoinCondition();
-            SqlSafetyGuard.EnsureExpression(joinOn, $"{entityName}.joinOn");
-        }
-
-        // 安全校验完全通过，加入缓存
-        ValidatedMetadataCache.TryAdd(meta, true);
+        DynamicCrudMetadataValidator.ValidateMetadata(meta, entityName);
     }
 
     private async Task<IReadOnlyList<string>> GetCurrentUserRolesAsync()
     {
-        var httpContext = _httpContextAccessor?.HttpContext;
-        if (httpContext == null) return Array.Empty<string>();
-        var user = httpContext.User;
-        if (user?.Identity?.IsAuthenticated != true) return Array.Empty<string>();
-        var userName = user.Identity.Name;
-        if (string.IsNullOrEmpty(userName) || _userAuthService == null) return Array.Empty<string>();
-        return await _userAuthService.GetUserRolesAsync(userName);
+        return await _rls.GetCurrentUserRolesAsync();
     }
 
     private async Task ApplyRowLevelSecurityAsync(EntityDefinition meta, List<string> where, DynamicParameters param)
     {
-        if (meta.Security?.RowLevelSecurity?.Enabled != true)
-        {
-            return;
-        }
-
-        var httpContext = _httpContextAccessor?.HttpContext;
-        if (httpContext == null) return;
-        var user = httpContext.User;
-        if (user?.Identity?.IsAuthenticated != true)
-        {
-            where.Add("1 = 0");
-            return;
-        }
-
-        var userName = user.Identity.Name;
-        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
-        int userId = 0;
-        if (userIdClaim != null)
-        {
-            int.TryParse(userIdClaim.Value, out userId);
-        }
-
-        var roles = await GetCurrentUserRolesAsync();
-        var policies = meta.Security.RowLevelSecurity.Policies ?? new List<RowLevelSecurityPolicy>();
-        var policyClauses = new List<string>();
-
-        var dynamicParams = new Dictionary<string, object?>();
-        if (_projectScope != null && _projectScope.IsSet && _bizLogicRegistry != null && !string.IsNullOrEmpty(userName))
-        {
-            var projectName = _projectScope.Current.Name;
-            var evaluator = _bizLogicRegistry.GetRlsContextEvaluator(projectName);
-            if (evaluator != null)
-            {
-                try
-                {
-                    dynamicParams = await evaluator.EvaluateRlsContextAsync(meta.Table, userName, userId, _db, null);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to evaluate dynamic RLS context via Roslyn hook for entity {Entity}", meta.Table);
-                }
-            }
-        }
-
-        param.Add("Rls_CurrentUser", userName);
-        param.Add("Rls_CurrentUserId", userId);
-
-        if (dynamicParams != null)
-        {
-            foreach (var kv in dynamicParams)
-            {
-                param.Add($"Rls_{kv.Key}", kv.Value);
-            }
-        }
-
-        foreach (var policy in policies)
-        {
-            if (roles.Any(r => string.Equals(r, policy.Role, StringComparison.OrdinalIgnoreCase)))
-            {
-                if (!string.IsNullOrWhiteSpace(policy.FilterClause))
-                {
-                    var rewritten = RewriteRlsClause(policy.FilterClause, dynamicParams!);
-                    policyClauses.Add($"({rewritten})");
-                }
-            }
-        }
-
-        if (policyClauses.Count > 0)
-        {
-            where.Add("(" + string.Join(" OR ", policyClauses) + ")");
-        }
-        else if (policies.Count > 0)
-        {
-            where.Add("1 = 0");
-        }
+        await _rls.ApplyRowLevelSecurityAsync(meta, where, param);
     }
 
-    private static string RewriteRlsClause(string clause, Dictionary<string, object?> dynamicParams)
-    {
-        var rewritten = clause;
-        rewritten = Regex.Replace(rewritten, @"@CurrentUser\b", "@Rls_CurrentUser", RegexOptions.IgnoreCase);
-        rewritten = Regex.Replace(rewritten, @"@CurrentUserId\b", "@Rls_CurrentUserId", RegexOptions.IgnoreCase);
 
-        if (dynamicParams != null)
-        {
-            foreach (var key in dynamicParams.Keys)
-            {
-                rewritten = Regex.Replace(rewritten, $@"@{key}\b", $"@Rls_{key}", RegexOptions.IgnoreCase);
-            }
-        }
-        return rewritten;
-    }
 
     private async Task EnsurePermissionAsync(EntityDefinition meta, string action)
     {
-        if (meta.Security?.Permissions == null) return;
-        var httpContext = _httpContextAccessor?.HttpContext;
-        if (httpContext == null) return;
-        var user = httpContext.User;
-        var roles = await GetCurrentUserRolesAsync();
-
-        List<string>? allowedRoles = action.ToLowerInvariant() switch
-        {
-            "read" => meta.Security.Permissions.Read,
-            "write" => meta.Security.Permissions.Write,
-            "delete" => meta.Security.Permissions.Delete,
-            _ => null
-        };
-
-        if (allowedRoles == null || allowedRoles.Count == 0) return;
-
-        var hasAccess = roles.Any(r => allowedRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase))) ||
-                        (user?.Identity?.IsAuthenticated == true && user.IsInRole("Admin"));
-
-        if (!hasAccess)
-        {
-            throw new UnauthorizedAccessException($"User does not have '{action}' permission on entity {meta.Table}.");
-        }
+        await _rls.EnsurePermissionAsync(meta, action);
     }
 
     private async Task VerifyFieldWritePermissionsAsync(EntityDefinition meta, IDictionary<string, object?> values)
     {
-        if (values == null || values.Count == 0) return;
-
-        var roles = await GetCurrentUserRolesAsync();
-        var httpContext = _httpContextAccessor?.HttpContext;
-        var user = httpContext?.User;
-        var isAdmin = user?.Identity?.IsAuthenticated == true && user.IsInRole("Admin");
-
-        foreach (var kv in values)
-        {
-            var fieldName = kv.Key;
-            FieldSecurityDefinition? fieldSec = null;
-
-            if (meta.Columns.TryGetValue(fieldName, out var colDef))
-            {
-                fieldSec = colDef.Security;
-            }
-            else if (meta.Forms.TryGetValue(fieldName, out var formDef))
-            {
-                fieldSec = formDef.Security;
-            }
-
-            if (fieldSec?.WriteRoles != null && fieldSec.WriteRoles.Count > 0)
-            {
-                var hasWriteRole = isAdmin || roles.Any(r => fieldSec.WriteRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase)));
-                if (!hasWriteRole)
-                {
-                    throw new UnauthorizedAccessException($"User does not have write permission for field '{fieldName}' on entity '{meta.Table}'.");
-                }
-            }
-        }
+        await _rls.VerifyFieldWritePermissionsAsync(meta, values);
     }
 
     private async Task<dynamic> ApplyFieldSecurityAsync(EntityDefinition meta, dynamic row)
     {
-        if (row == null) return row;
-
-        var dict = row as IDictionary<string, object>;
-        if (dict == null) return row;
-
-        var expando = new System.Dynamic.ExpandoObject() as IDictionary<string, object>;
-        foreach (var kv in dict)
-        {
-            expando[kv.Key] = kv.Value;
-        }
-
-        var roles = await GetCurrentUserRolesAsync();
-
-        foreach (var col in meta.Columns)
-        {
-            var fieldName = col.Key;
-            var colDef = col.Value;
-            if (colDef.Security == null) continue;
-
-            if (colDef.Security.ReadRoles != null && colDef.Security.ReadRoles.Count > 0)
-            {
-                var hasReadRole = roles.Any(r => colDef.Security.ReadRoles.Any(ar => string.Equals(r, ar, StringComparison.OrdinalIgnoreCase)));
-                if (!hasReadRole)
-                {
-                    expando.Remove(fieldName);
-                    continue;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(colDef.Security.ReadMask) && expando.TryGetValue(fieldName, out var val) && val != null)
-            {
-                var valStr = val.ToString() ?? "";
-                if (colDef.Security.ReadMask.Equals("email", StringComparison.OrdinalIgnoreCase))
-                {
-                    expando[fieldName] = MaskEmail(valStr);
-                }
-                else
-                {
-                    expando[fieldName] = MaskGeneric(valStr);
-                }
-            }
-        }
-
-        return expando;
+        return await _rls.ApplyFieldSecurityAsync(meta, row);
     }
 
-    private static string MaskEmail(string email)
-    {
-        if (string.IsNullOrEmpty(email) || !email.Contains("@")) return email;
-        var parts = email.Split('@', 2);
-        var local = parts[0];
-        var domain = parts[1];
-        if (local.Length <= 2) return "*@" + domain;
-        return local[0] + new string('*', local.Length - 2) + local[^1] + "@" + domain;
-    }
 
-    private static string MaskGeneric(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return text;
-        if (text.Length <= 4) return new string('*', text.Length);
-        return text[..2] + new string('*', text.Length - 4) + text[^2..];
-    }
 }

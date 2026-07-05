@@ -27,7 +27,11 @@ public class SqlGenerationSnapshotTests
     private static DynamicCrudRepository CreateSut(
         IDbConnection conn,
         IEntityMetadataProvider meta)
-        => new(conn, meta, new SqliteDialect(), NullLogger<DynamicCrudRepository>.Instance);
+    {
+        var rls = new DynamicCrudRowLevelSecurity(
+            null, null, null, null, null, conn, NullLogger<DynamicCrudRowLevelSecurity>.Instance);
+        return new(conn, meta, new SqliteDialect(), NullLogger<DynamicCrudRepository>.Instance, rls);
+    }
 
     private static StubMetadataProvider MetaOf(string name, EntityDefinition def)
         => new(name, def);

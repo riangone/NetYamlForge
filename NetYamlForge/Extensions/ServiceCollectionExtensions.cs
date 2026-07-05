@@ -187,6 +187,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IFieldValidator, RangeFieldValidator>();
         services.AddSingleton<IFieldValidator, ConditionalFieldValidator>();
         services.AddScoped<FormValueValidationService>();
+        services.AddScoped<DynamicCrudRowLevelSecurity>();
         services.AddScoped<IDynamicCrudRepository, DynamicCrudRepository>();
         services.AddScoped<IRowMutationRepository, RowMutationRepository>();
         services.AddScoped<HookExecutionService>();

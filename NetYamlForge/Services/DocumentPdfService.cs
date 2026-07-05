@@ -6,7 +6,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using NetYamlForge.Models;
 using PdfSharp.Drawing;
-using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -38,135 +37,12 @@ public interface IDocumentPdfService
 /// </summary>
 public class DocumentPdfService : IDocumentPdfService
 {
-    // Google Fonts (Noto Sans JP) の TTF ファイルを使用
-    // ttc (TrueType Collection) は使用せず、個別の TTF ファイルのみを使用
-    private const string RegularKey = "NetYamlForge-Regular";
-    private const string BoldKey    = "NetYamlForge-Bold";
-
-    // new XFont() に渡すファミリー名。UniversalFontResolver はどんな名前でも
-    // 横取りして自前データを返す。Linux でプラットフォームフォントが存在しなくても
-    // XFont("Arial", ...) が動作するようになる。
-    internal const string FontFamilyName = "Arial";
+    internal const string FontFamilyName = PdfFontLoader.FontFamilyName;
 
     static DocumentPdfService()
     {
-        // フォントリゾルバーを常に登録する。
-        // PdfSharp がデフォルトの FontResolver を自動的に登録する可能性があるため、
-        // 既存のチェックを削除して、常に UniversalFontResolver を使用する。
-        try
-        {
-            byte[]? regularData = null;
-            byte[]? boldData = null;
-
-            // 1. プロジェクトの wwwroot/fonts ディレクトリを優先的にチェック
-            // これが存在すれば、Google Fonts に依存せずに済む
-            var wwwrootFontsDir = Path.Combine(AppContext.BaseDirectory, "wwwroot", "fonts");
-            var wwwrootRegularPath = Path.Combine(wwwrootFontsDir, "NotoSansJP-Regular.ttf");
-            var wwwrootBoldPath = Path.Combine(wwwrootFontsDir, "NotoSansJP-Bold.ttf");
-
-            if (File.Exists(wwwrootRegularPath) && File.Exists(wwwrootBoldPath))
-            {
-                regularData = File.ReadAllBytes(wwwrootRegularPath);
-                boldData = File.ReadAllBytes(wwwrootBoldPath);
-            }
-            else
-            {
-                // 2. システムフォントディレクトリから TTF ファイルを検索
-                // ttc ファイルは使用せず、ttf ファイルのみを使用を原則とする
-                var fontPaths = new[]
-                {
-                    // Linux
-                    "/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf",
-                    "/usr/share/fonts/truetype/noto/NotoSansJP-Regular.ttf",
-                    // macOS
-                    "/Library/Fonts/Arial Unicode.ttf",
-                    // Windows
-                    "C:\\Windows\\Fonts\\ipaexg.ttf",
-                    "C:\\Windows\\Fonts\\YuGothR.ttf",
-                };
-
-                foreach (var path in fontPaths)
-                {
-                    if (File.Exists(path))
-                    {
-                        // ttf ファイルはそのまま使用
-                        regularData = File.ReadAllBytes(path);
-                        break;
-                    }
-                }
-
-                // フォントが見つからない場合は Google Fonts からダウンロード
-                if (regularData == null)
-                {
-                    try
-                    {
-                        var fontService = new GoogleFontService(AppContext.BaseDirectory);
-                        var regularPath = fontService.GetRegularFontPathAsync().GetAwaiter().GetResult();
-                        regularData = File.ReadAllBytes(regularPath);
-                    }
-                    catch
-                    {
-                        // ダウンロード失敗時は TTC ファイルから抽出を試みる
-                        var ttcPath = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc";
-                        if (File.Exists(ttcPath))
-                        {
-                            // TTC ファイルをそのまま読み込み（PDFSharp が内部で処理）
-                            // 注：これはフォールバックとしての処理
-                            regularData = File.ReadAllBytes(ttcPath);
-                        }
-                    }
-                }
-
-                // Bold フォント
-                var boldPaths = new[]
-                {
-                    "/usr/share/fonts/truetype/noto/NotoSansJP-Bold.ttf",
-                    "C:\\Windows\\Fonts\\ipaexg.ttf",
-                    "C:\\Windows\\Fonts\\YuGothB.ttf",
-                };
-
-                foreach (var path in boldPaths)
-                {
-                    if (File.Exists(path))
-                    {
-                        boldData = File.ReadAllBytes(path);
-                        break;
-                    }
-                }
-
-                if (boldData == null)
-                {
-                    try
-                    {
-                        var fontService = new GoogleFontService(AppContext.BaseDirectory);
-                        var boldPath = fontService.GetBoldFontPathAsync().GetAwaiter().GetResult();
-                        boldData = File.Exists(boldPath) ? File.ReadAllBytes(boldPath) : regularData;
-                    }
-                    catch
-                    {
-                        // ダウンロード失敗時は TTC ファイルをフォールバック
-                        var ttcPath = "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc";
-                        if (File.Exists(ttcPath))
-                        {
-                            boldData = File.ReadAllBytes(ttcPath);
-                        }
-                        else
-                        {
-                            boldData = regularData;
-                        }
-                    }
-                }
-            }
-
-            if (regularData != null && boldData != null)
-            {
-                GlobalFontSettings.FontResolver = new UniversalFontResolver(regularData, boldData);
-            }
-        }
-        catch
-        {
-            // フォントのロードに失敗した場合はフォールバック
-        }
+        // フォントローダーを初期化
+        PdfFontLoader.LoadFonts();
     }
 
     // ── テンプレート読み込み ──────────────────────────────────────────────────
@@ -902,106 +778,5 @@ public class DocumentPdfService : IDocumentPdfService
     {
         if (d == null || string.IsNullOrEmpty(key)) return "";
         return d.TryGetValue(key, out var v) && v != null ? v.ToString()! : "";
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // TTC フォント抽出ユーティリティ
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// TTC (TrueType Collection) データから最初のフォントを抽出します。
-    /// ttc ファイルは使用せず、ttf ファイルのみを使用することを原則としますが、
-    /// システムフォントに ttc しかない場合のために抽出ロジックを残しています。
-    /// </summary>
-    private static byte[] ExtractFirstFontFromTtc(byte[] ttcData)
-    {
-        // TTC シグネチャチェック ("ttcf")
-        if (ttcData.Length < 12 ||
-            ttcData[0] != 0x74 || ttcData[1] != 0x74 ||
-            ttcData[2] != 0x63 || ttcData[3] != 0x66)
-        {
-            throw new InvalidDataException("Invalid TTC file signature");
-        }
-
-        // フォント数の取得（ビッグエンディアン）
-        int fontCount = ReadBE32(ttcData, 8);
-        if (fontCount < 1)
-            throw new InvalidDataException("TTC contains no fonts");
-
-        // 最初のフォントのオフセットを取得
-        int fontOffset = ReadBE32(ttcData, 12);
-        if (fontOffset <= 0 || fontOffset + 12 >= ttcData.Length)
-            throw new InvalidDataException("Invalid font offset in TTC");
-
-        // TTF ヘッダから numTables を読み取り（ビッグエンディアン）
-        int numTables = (ttcData[fontOffset + 4] << 8) | ttcData[fontOffset + 5];
-
-        // 各テーブルの (offset + length) の最大値を求めてフォント全体のサイズを算出
-        int dirEnd = fontOffset + 12 + numTables * 16;
-        if (dirEnd > ttcData.Length)
-            throw new InvalidDataException("Invalid TTC table directory length");
-
-        int maxEnd = dirEnd;
-        for (int i = 0; i < numTables; i++)
-        {
-            int entryPos = fontOffset + 12 + i * 16;
-            int tblOffset = ReadBE32(ttcData, entryPos + 8);
-            int tblLength = ReadBE32(ttcData, entryPos + 12);
-            long tblEnd = (long)fontOffset + tblOffset + ((tblLength + 3) & ~3);
-            if (tblEnd > ttcData.Length)
-                throw new InvalidDataException("Invalid table offset in TTC");
-            if (tblEnd > maxEnd) maxEnd = (int)tblEnd;
-        }
-
-        int fontLength = maxEnd - fontOffset;
-        var fontData = new byte[fontLength];
-        Array.Copy(ttcData, fontOffset, fontData, 0, fontLength);
-        return fontData;
-    }
-
-    /// <summary>
-    /// ビッグエンディアンの 4 バイト整数を読み取ります。
-    /// </summary>
-    private static int ReadBE32(byte[] data, int offset)
-        => (data[offset] << 24) | (data[offset + 1] << 16)
-         | (data[offset + 2] << 8) | data[offset + 3];
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // ユニバーサルフォントリゾルバー
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// すべてのフォントリクエストを事前ロードしたフォントデータで処理するリゾルバー。
-    /// Linux 上で Arial 等のプラットフォームフォントが見つからない場合でも
-    /// 例外を投げないよう、null を一切返さない設計にしています。
-    /// </summary>
-    private sealed class UniversalFontResolver : IFontResolver
-    {
-        private readonly byte[] _regularData;
-        private readonly byte[] _boldData;
-
-        public UniversalFontResolver(byte[] regularData, byte[] boldData)
-        {
-            _regularData = regularData;
-            _boldData    = boldData;
-        }
-
-        public string DefaultFontName => FontFamilyName;
-
-        /// <summary>
-        /// 要求されたフォントファミリー・スタイルに関わらず、
-        /// 常に登録済みフォントの face キーを返します。
-        /// これにより Linux 上でも Arial / Helvetica 等の要求が安全に処理されます。
-        /// </summary>
-        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
-            => new(isBold ? BoldKey : RegularKey, XStyleSimulations.None);
-
-        /// <summary>face キーに対応するフォントデータを返します。</summary>
-        public byte[]? GetFont(string faceName) => faceName switch
-        {
-            BoldKey    => _boldData,
-            RegularKey => _regularData,
-            _          => _regularData,   // 予期しないキーも regular で代用
-        };
     }
 }

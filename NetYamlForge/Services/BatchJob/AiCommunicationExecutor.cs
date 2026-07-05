@@ -126,17 +126,17 @@ public class AiCommunicationExecutor : AiExecutorBase
         foreach (var task in tasks)
         {
             // Dapper dynamic → 型付き変数に明示的に取り出す（ILogger 拡張メソッドへの dynamic dispatch 回避）
-            string taskId       = Convert.ToString(task.task_id) ?? "";
-            string leadId       = Convert.ToString(task.lead_id) ?? "";
-            string customerId   = Convert.ToString(task.customer_id) ?? "";
-            string? customerEmail = Convert.ToString(task.customer_email);
-            string customerName = Convert.ToString(task.customer_name) ?? "";
-            string? vehicleInterest = Convert.ToString(task.vehicle_interest);
-            string? budget      = Convert.ToString(task.budget);
-            int leadScore       = task.lead_score == null ? 0 : (int)task.lead_score;
-            string taskType     = Convert.ToString(task.task_type) ?? "";
-            string aiRecommendation = Convert.ToString(task.ai_recommendation) ?? "";
-            string aiReasoning  = Convert.ToString(task.ai_reasoning) ?? "";
+            string taskId = AiCommunicationEmailHelper.ToStringOrDefault(task.task_id);
+            string leadId = AiCommunicationEmailHelper.ToStringOrDefault(task.lead_id);
+            string customerId = AiCommunicationEmailHelper.ToStringOrDefault(task.customer_id);
+            string? customerEmail = AiCommunicationEmailHelper.ToStringOrNull(task.customer_email);
+            string customerName = AiCommunicationEmailHelper.ToStringOrDefault(task.customer_name);
+            string? vehicleInterest = AiCommunicationEmailHelper.ToStringOrNull(task.vehicle_interest);
+            string? budget = AiCommunicationEmailHelper.ToStringOrNull(task.budget);
+            int leadScore = AiCommunicationEmailHelper.ToIntOrDefault(task.lead_score);
+            string taskType = AiCommunicationEmailHelper.ToStringOrDefault(task.task_type);
+            string aiRecommendation = AiCommunicationEmailHelper.ToStringOrDefault(task.ai_recommendation);
+            string aiReasoning = AiCommunicationEmailHelper.ToStringOrDefault(task.ai_reasoning);
 
             try
             {
@@ -158,83 +158,33 @@ public class AiCommunicationExecutor : AiExecutorBase
                     continue;
                 }
 
-                var commId = $"COMM-NE-{taskId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                var commId = AiCommunicationEmailHelper.GenerateCommId("NE", taskId);
                 var requiresHuman = aiResult.ConfidenceScore < autoSendThreshold;
 
                 // ai_communications に記録
-                await db.ExecuteAsync(@"
-                    INSERT OR IGNORE INTO ai_communications (
-                        comm_id, lead_id, customer_id, nurturing_task_id,
-                        comm_channel, subject, body_text,
-                        ai_personalized, ai_model, ai_confidence,
-                        send_status, requires_human, created_at, updated_at
-                    ) VALUES (
-                        @CommId, @LeadId, @CustomerId, @TaskId,
-                        'email', @Subject, @Body,
-                        1, 'antigravity', @Confidence,
-                        @Status, @RequiresHuman, @Now, @Now
-                    )", new
-                {
-                    CommId = commId,
-                    LeadId = leadId,
-                    CustomerId = customerId,
-                    TaskId = taskId,
-                    Subject = aiResult.Subject,
-                    Body = aiResult.Body,
-                    Confidence = aiResult.ConfidenceScore,
-                    Status = requiresHuman ? "pending" : "sent",
-                    RequiresHuman = requiresHuman ? 1 : 0,
-                    Now = DateTime.UtcNow
-                }, tx);
+                await AiCommunicationEmailHelper.InsertCommunicationAsync(
+                    db, tx, commId, leadId, customerId,
+                    aiResult.Subject, aiResult.Body, aiResult.ConfidenceScore,
+                    requiresHuman, taskId: taskId);
 
                 if (!requiresHuman)
                 {
                     // 実際にメール送信
-                    try
+                    var sent = await AiCommunicationEmailHelper.SendEmailAndUpdateStatusAsync(
+                        emailSvc, db, tx, commId, customerEmail, aiResult.Subject, aiResult.HtmlBody);
+
+                    if (sent)
                     {
-                        await emailSvc.SendEmailAsync(new EmailMessage
-                        {
-                            To = customerEmail,
-                            Subject = aiResult.Subject,
-                            Body = aiResult.HtmlBody,
-                            IsHtml = true
-                        });
-
-                        // sent_at 更新
-                        await db.ExecuteAsync(@"
-                            UPDATE ai_communications SET sent_at = @Now, updated_at = @Now
-                            WHERE comm_id = @CommId",
-                            new { Now = DateTime.UtcNow, CommId = commId }, tx);
-
                         // 育成タスクに送信記録
-                        await db.ExecuteAsync(@"
-                            UPDATE lead_nurturing_tasks
-                            SET comm_sent_at = @Now, comm_id = @CommId, status = 'in_progress', updated_at = @Now
-                            WHERE task_id = @TaskId",
-                            new { Now = DateTime.UtcNow, CommId = commId, TaskId = taskId }, tx);
-
-                        // リードの ai_touch_count 更新
-                        await db.ExecuteAsync(@"
-                            UPDATE sales_leads
-                            SET ai_touch_count = COALESCE(ai_touch_count, 0) + 1, updated_at = @Now
-                            WHERE lead_id = @LeadId",
-                            new { Now = DateTime.UtcNow, LeadId = leadId }, tx);
+                        await AiCommunicationEmailHelper.UpdateNurturingTaskStatusAsync(
+                            db, tx, taskId, commId, leadId);
 
                         _logger.LogInformation("[AiCommExecutor] Email sent to {Email}: {Subject}",
                             customerEmail, aiResult.Subject);
                     }
-                    catch (Exception emailEx)
-                    {
-                        _logger.LogError(emailEx, "[AiCommExecutor] Email send failed for comm {CommId}", commId);
-                        await db.ExecuteAsync(@"
-                            UPDATE ai_communications
-                            SET send_status = 'failed', error_message = @Err, updated_at = @Now
-                            WHERE comm_id = @CommId",
-                            new { Err = emailEx.Message, Now = DateTime.UtcNow, CommId = commId }, tx);
-                    }
                 }
 
-                await LogActionAsync(db, tx, "comm_email_sent",
+                await AiCommunicationEmailHelper.LogActionAsync(db, tx, "comm_email_sent",
                     "lead_nurturing_tasks", taskId,
                     "antigravity", $"育成メール: {customerName}",
                     $"件名: {aiResult.Subject} / 確信度: {aiResult.ConfidenceScore}%",
@@ -290,24 +240,24 @@ public class AiCommunicationExecutor : AiExecutorBase
         foreach (var quote in quotes)
         {
             // Dapper dynamic → 型付き変数
-            string quoteId       = Convert.ToString(quote.quote_id) ?? "";
-            string leadId        = Convert.ToString(quote.lead_id) ?? "";
-            string customerId    = Convert.ToString(quote.customer_id) ?? "";
-            string customerName  = Convert.ToString(quote.customer_name) ?? "";
-            string? customerEmail = Convert.ToString(quote.customer_email);
-            string? vehicleInterest = Convert.ToString(quote.vehicle_interest);
-            string? make         = Convert.ToString(quote.make);
-            string? model        = Convert.ToString(quote.model);
-            string? yearStr      = Convert.ToString(quote.year);
-            string? color        = Convert.ToString(quote.color);
-            double basePrice     = quote.base_price == null ? 0.0 : (double)quote.base_price;
-            double finalPrice    = quote.final_price == null ? 0.0 : (double)quote.final_price;
-            double discountRate  = quote.discount_rate == null ? 0.0 : (double)quote.discount_rate;
-            double monthlyPayment = quote.monthly_payment == null ? 0.0 : (double)quote.monthly_payment;
-            string? accessories  = Convert.ToString(quote.accessories);
-            string? notes        = Convert.ToString(quote.notes);
-            string? validUntil   = Convert.ToString(quote.valid_until);
-            int leadScore        = quote.lead_score == null ? 0 : (int)quote.lead_score;
+            string quoteId = AiCommunicationEmailHelper.ToStringOrDefault(quote.quote_id);
+            string leadId = AiCommunicationEmailHelper.ToStringOrDefault(quote.lead_id);
+            string customerId = AiCommunicationEmailHelper.ToStringOrDefault(quote.customer_id);
+            string customerName = AiCommunicationEmailHelper.ToStringOrDefault(quote.customer_name);
+            string? customerEmail = AiCommunicationEmailHelper.ToStringOrNull(quote.customer_email);
+            string? vehicleInterest = AiCommunicationEmailHelper.ToStringOrNull(quote.vehicle_interest);
+            string? make = AiCommunicationEmailHelper.ToStringOrNull(quote.make);
+            string? model = AiCommunicationEmailHelper.ToStringOrNull(quote.model);
+            string? yearStr = AiCommunicationEmailHelper.ToStringOrNull(quote.year);
+            string? color = AiCommunicationEmailHelper.ToStringOrNull(quote.color);
+            double basePrice = AiCommunicationEmailHelper.ToDoubleOrDefault(quote.base_price);
+            double finalPrice = AiCommunicationEmailHelper.ToDoubleOrDefault(quote.final_price);
+            double discountRate = AiCommunicationEmailHelper.ToDoubleOrDefault(quote.discount_rate);
+            double monthlyPayment = AiCommunicationEmailHelper.ToDoubleOrDefault(quote.monthly_payment);
+            string? accessories = AiCommunicationEmailHelper.ToStringOrNull(quote.accessories);
+            string? notes = AiCommunicationEmailHelper.ToStringOrNull(quote.notes);
+            string? validUntil = AiCommunicationEmailHelper.ToStringOrNull(quote.valid_until);
+            int leadScore = AiCommunicationEmailHelper.ToIntOrDefault(quote.lead_score);
 
             try
             {
@@ -320,67 +270,25 @@ public class AiCommunicationExecutor : AiExecutorBase
 
                 if (aiResult == null) continue;
 
-                var commId = $"COMM-QE-{quoteId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                var commId = AiCommunicationEmailHelper.GenerateCommId("QE", quoteId);
                 var requiresHuman = aiResult.ConfidenceScore < autoSendThreshold;
 
-                await db.ExecuteAsync(@"
-                    INSERT OR IGNORE INTO ai_communications (
-                        comm_id, lead_id, customer_id,
-                        comm_channel, subject, body_text,
-                        ai_personalized, ai_model, ai_confidence,
-                        send_status, requires_human, created_at, updated_at
-                    ) VALUES (
-                        @CommId, @LeadId, @CustomerId,
-                        'email', @Subject, @Body,
-                        1, 'antigravity', @Confidence,
-                        @Status, @RequiresHuman, @Now, @Now
-                    )", new
-                {
-                    CommId = commId,
-                    LeadId = leadId,
-                    CustomerId = customerId,
-                    Subject = aiResult.Subject,
-                    Body = aiResult.Body,
-                    Confidence = aiResult.ConfidenceScore,
-                    Status = requiresHuman ? "pending" : "sent",
-                    RequiresHuman = requiresHuman ? 1 : 0,
-                    Now = DateTime.UtcNow
-                }, tx);
+                await AiCommunicationEmailHelper.InsertCommunicationAsync(
+                    db, tx, commId, leadId, customerId,
+                    aiResult.Subject, aiResult.Body, aiResult.ConfidenceScore,
+                    requiresHuman);
 
                 if (!requiresHuman)
                 {
-                    try
+                    var sent = await AiCommunicationEmailHelper.SendEmailAndUpdateStatusAsync(
+                        emailSvc, db, tx, commId, customerEmail ?? "", aiResult.Subject, aiResult.HtmlBody);
+
+                    if (sent)
                     {
-                        await emailSvc.SendEmailAsync(new EmailMessage
-                        {
-                            To = customerEmail ?? "",
-                            Subject = aiResult.Subject,
-                            Body = aiResult.HtmlBody,
-                            IsHtml = true
-                        });
-
-                        await db.ExecuteAsync(@"
-                            UPDATE ai_communications SET sent_at = @Now, updated_at = @Now
-                            WHERE comm_id = @CommId",
-                            new { Now = DateTime.UtcNow, CommId = commId }, tx);
-
-                        // ai_quotes に送信記録
-                        await db.ExecuteAsync(@"
-                            UPDATE ai_quotes
-                            SET quote_sent_at = @Now, quote_comm_id = @CommId, status = 'sent', updated_at = @Now
-                            WHERE quote_id = @QuoteId",
-                            new { Now = DateTime.UtcNow, CommId = commId, QuoteId = quoteId }, tx);
+                        await AiCommunicationEmailHelper.UpdateQuoteStatusAsync(
+                            db, tx, quoteId, commId);
 
                         _logger.LogInformation("[AiCommExecutor] Quote email sent: quote={QuoteId}", quoteId);
-                    }
-                    catch (Exception emailEx)
-                    {
-                        _logger.LogError(emailEx, "[AiCommExecutor] Quote email failed: {CommId}", commId);
-                        await db.ExecuteAsync(@"
-                            UPDATE ai_communications
-                            SET send_status = 'failed', error_message = @Err, updated_at = @Now
-                            WHERE comm_id = @CommId",
-                            new { Err = emailEx.Message, Now = DateTime.UtcNow, CommId = commId }, tx);
                     }
                 }
 
@@ -428,13 +336,13 @@ public class AiCommunicationExecutor : AiExecutorBase
         foreach (var comm in comms)
         {
             // Dapper dynamic → 型付き変数
-            string commId      = Convert.ToString(comm.comm_id) ?? "";
-            string leadId      = Convert.ToString(comm.lead_id) ?? "";
-            string customerId  = Convert.ToString(comm.customer_id) ?? "";
-            string customerName = Convert.ToString(comm.customer_name) ?? "";
-            string? subject    = Convert.ToString(comm.subject);
-            string? sentAt     = Convert.ToString(comm.sent_at);
-            int leadScore      = comm.lead_score == null ? 0 : (int)comm.lead_score;
+            string commId = AiCommunicationEmailHelper.ToStringOrDefault(comm.comm_id);
+            string leadId = AiCommunicationEmailHelper.ToStringOrDefault(comm.lead_id);
+            string customerId = AiCommunicationEmailHelper.ToStringOrDefault(comm.customer_id);
+            string customerName = AiCommunicationEmailHelper.ToStringOrDefault(comm.customer_name);
+            string? subject = AiCommunicationEmailHelper.ToStringOrNull(comm.subject);
+            string? sentAt = AiCommunicationEmailHelper.ToStringOrNull(comm.sent_at);
+            int leadScore = AiCommunicationEmailHelper.ToIntOrDefault(comm.lead_score);
 
             try
             {
@@ -471,7 +379,7 @@ public class AiCommunicationExecutor : AiExecutorBase
                     Now = DateTime.UtcNow
                 }, tx);
 
-                await LogActionAsync(db, tx, "no_response_followup",
+                await AiCommunicationEmailHelper.LogActionAsync(db, tx, "no_response_followup",
                     "ai_communications", commId,
                     "antigravity", $"無返信フォロー: {customerName}",
                     $"推奨: {aiResult.SuggestedChannel} - {aiResult.FollowUpTitle}",
@@ -595,38 +503,6 @@ public class AiCommunicationExecutor : AiExecutorBase
   ""urgencyLevel"": 数値(1-5),
   ""confidenceScore"": 数値(0-100)
 }}";
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // ユーティリティ
-    // ──────────────────────────────────────────────────────────────
-
-    private static async Task LogActionAsync(
-        IDbConnection db, IDbTransaction tx,
-        string actionType, string entityType, string? entityId,
-        string aiModel, string promptSummary, string resultSummary, int executionMs)
-    {
-        await db.ExecuteAsync(@"
-            INSERT INTO ai_action_log (
-                log_id, action_type, entity_type, entity_id,
-                ai_model, prompt_summary, result_summary,
-                execution_ms, created_at
-            ) VALUES (
-                'LOG-' || lower(hex(randomblob(6))),
-                @ActionType, @EntityType, @EntityId,
-                @AiModel, @PromptSummary, @ResultSummary,
-                @ExecutionMs, @Now
-            )", new
-        {
-            ActionType = actionType,
-            EntityType = entityType,
-            EntityId = entityId,
-            AiModel = aiModel,
-            PromptSummary = promptSummary,
-            ResultSummary = resultSummary,
-            ExecutionMs = executionMs,
-            Now = DateTime.UtcNow
-        }, tx);
     }
 
     // ──────────────────────────────────────────────────────────────
