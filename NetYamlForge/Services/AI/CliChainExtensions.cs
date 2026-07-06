@@ -15,7 +15,7 @@ public static class CliChainExtensions
         string? projectName = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await cli.PromptAsync(prompt, imagePath, projectName, cancellationToken);
+        var result = await cli.PromptAsync(prompt, imagePath, projectName, cancellationToken: cancellationToken);
         if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
             return default;
 

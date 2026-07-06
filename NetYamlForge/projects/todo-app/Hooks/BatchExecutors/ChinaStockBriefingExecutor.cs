@@ -1,7 +1,11 @@
 // ファイル概要：中国股市简报定时任务执行器 - 获取股市数据并保存到数据库
 
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;

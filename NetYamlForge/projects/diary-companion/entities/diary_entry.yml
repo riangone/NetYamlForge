@@ -101,6 +101,81 @@ entities:
           en-US: English
           ja-JP: 日本語
           ko-KR: 한국어
+      AiProvider:
+        type: string
+        required: false
+        label: AI 厂商
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiProvider
+        editable: true
+        options:
+          - antigravity
+          - claude
+          - opencode
+        optionLabels:
+          antigravity: Antigravity (Gemini)
+          claude: Claude
+          opencode: OpenCode (GPT-OSS)
+      AiModel:
+        type: string
+        required: false
+        label: AI 模型
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiModel
+        editable: true
+        options:
+          # Antigravity
+          - Gemini 3.5 Flash (Medium)
+          - Gemini 3.5 Flash (High)
+          - Gemini 3.5 Flash (Low)
+          - Gemini 3.1 Pro (Low)
+          - Gemini 3.1 Pro (High)
+          - Claude Sonnet 4.6 (Thinking)
+          - Claude Opus 4.6 (Thinking)
+          - GPT-OSS 120B (Medium)
+          # Claude
+          - claude-sonnet-4-6
+          - claude-opus-4-8
+          - claude-haiku-4-5-20251001
+          # OpenCode
+          - opencode/deepseek-v4-flash-free
+          - opencode/mimo-v2.5-free
+          - opencode/nemotron-3-ultra-free
+          - opencode/north-mini-code-free
+          - opencode/big-pickle
+        optionLabels:
+          Gemini 3.5 Flash (Medium): Gemini 3.5 Flash (Medium)
+          Gemini 3.5 Flash (High): Gemini 3.5 Flash (High)
+          Gemini 3.5 Flash (Low): Gemini 3.5 Flash (Low)
+          Gemini 3.1 Pro (Low): Gemini 3.1 Pro (Low)
+          Gemini 3.1 Pro (High): Gemini 3.1 Pro (High)
+          Claude Sonnet 4.6 (Thinking): Claude Sonnet 4.6 (Thinking)
+          Claude Opus 4.6 (Thinking): Claude Opus 4.6 (Thinking)
+          GPT-OSS 120B (Medium): GPT-OSS 120B (Medium)
+          claude-sonnet-4-6: Claude Sonnet 4.6
+          claude-opus-4-8: Claude Opus 4.8
+          claude-haiku-4-5-20251001: Claude Haiku 4.5
+          opencode/deepseek-v4-flash-free: DeepSeek V4 Flash (Free)
+          opencode/mimo-v2.5-free: MiMo v2.5 (Free)
+          opencode/nemotron-3-ultra-free: Nemotron 3 Ultra (Free)
+          opencode/north-mini-code-free: North Mini Code (Free)
+          opencode/big-pickle: Big Pickle
+      AiLevel:
+        type: string
+        required: false
+        label: AI 级别
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiLevel
+        editable: true
+        options:
+          - Low
+          - Medium
+          - High
+          - Thinking
+          - Max
+        optionLabels:
+          Low: Low (低级/快速)
+          Medium: Medium (中级/标准)
+          High: High (高级/深入)
+          Thinking: Thinking (思考模式)
+          Max: Max (最大化/最慢)
 
     columns:
       Id:
@@ -160,6 +235,18 @@ entities:
         type: string
         label: AI 评估语言
         labelKey: projects.diary-companion.entity.diary_entry.fields.aiLanguage
+      AiProvider:
+        type: string
+        label: AI 厂商
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiProvider
+      AiModel:
+        type: string
+        label: AI 模型
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiModel
+      AiLevel:
+        type: string
+        label: AI 级别
+        labelKey: projects.diary-companion.entity.diary_entry.fields.aiLevel
       CreatedAt:
         type: datetime
         label: 记录时间
@@ -186,6 +273,9 @@ entities:
           - Weather
           - MoodBefore
           - AiLanguage
+          - AiProvider
+          - AiModel
+          - AiLevel
           - Location
           - ImageBase64
           - ImageLabel

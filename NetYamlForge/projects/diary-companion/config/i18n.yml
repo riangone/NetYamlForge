@@ -127,6 +127,21 @@ translations:
     zh-CN: 'AI 评估语言'
     ja-JP: 'AI 評価言語'
     ko-KR: 'AI 평가 언어'
+  projects.diary-companion.entity.diary_entry.fields.aiProvider:
+    en-US: 'AI Provider'
+    zh-CN: 'AI 厂商'
+    ja-JP: 'AI プロバイダー'
+    ko-KR: 'AI 제공업체'
+  projects.diary-companion.entity.diary_entry.fields.aiModel:
+    en-US: 'AI Model'
+    zh-CN: 'AI 模型'
+    ja-JP: 'AI モデル'
+    ko-KR: 'AI 모델'
+  projects.diary-companion.entity.diary_entry.fields.aiLevel:
+    en-US: 'AI Level'
+    zh-CN: 'AI 级别'
+    ja-JP: 'AI レベル'
+    ko-KR: 'AI 레벨'
   projects.diary-companion.entity.diary_entry.fields.createdAt:
     en-US: 'Record Time'
     zh-CN: '记录时间'

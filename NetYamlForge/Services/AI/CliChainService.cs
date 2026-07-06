@@ -28,11 +28,21 @@ public interface ICliChainService
     /// <param name="prompt">送信するプロンプト本文</param>
     /// <param name="imagePath">画像を解析させたい場合は絶対パスを指定する（各 CLI 自身のファイル閲覧ツールを使わせる）</param>
     /// <param name="projectName">プロジェクト名。projects/{name}/.env の CLI_CHAIN_ORDER / CLI_CHAIN_ENABLED でオーバーライド可能</param>
+    /// <param name="preferredProvider">
+    /// 画面などでユーザーが明示的に選択した CLI プロバイダー（opencode / antigravity / claude）。
+    /// 指定された場合、そのプロバイダーをチェーン先頭に並べ替えて最優先で試す。
+    /// 残りのプロバイダーは可用性フォールバックとして後段に残す（ハードコードした固定順序は使わない）。
+    /// </param>
+    /// <param name="model">preferredProvider に渡すモデル名（--model）。フォールバック時の他プロバイダーには適用しない。</param>
+    /// <param name="variant">opencode 用のバリアント（--variant、AI レベル相当）。opencode が preferredProvider の場合のみ適用。</param>
     /// <param name="cancellationToken">キャンセルトークン</param>
     Task<CliChainResult> PromptAsync(
         string prompt,
         string? imagePath = null,
         string? projectName = null,
+        string? preferredProvider = null,
+        string? model = null,
+        string? variant = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -58,6 +68,9 @@ public class CliChainService : ICliChainService
         string prompt,
         string? imagePath = null,
         string? projectName = null,
+        string? preferredProvider = null,
+        string? model = null,
+        string? variant = null,
         CancellationToken cancellationToken = default)
     {
         var env = LoadProjectEnv(projectName);
@@ -71,6 +84,29 @@ public class CliChainService : ICliChainService
         }
 
         var order = ResolveOrder(env);
+
+        // ユーザーが画面で明示選択したプロバイダーを最優先にする（固定順序をハードコードしない）。
+        // 選択したプロバイダーが不調でも機能が止まらないよう、残りは後段のフォールバックとして維持する。
+        var normalizedPreferred = NormalizeProvider(preferredProvider);
+        if (normalizedPreferred != null)
+        {
+            var list = order.ToList();
+            list.Remove(normalizedPreferred);
+            list.Insert(0, normalizedPreferred);
+            order = list.ToArray();
+        }
+        else if (!string.IsNullOrWhiteSpace(imagePath))
+        {
+            // 明示選択が無い場合のみ、画像解析に強い antigravity を先頭に寄せる従来挙動を維持。
+            var list = order.ToList();
+            if (list.Contains("antigravity"))
+            {
+                list.Remove("antigravity");
+                list.Insert(0, "antigravity");
+            }
+            order = list.ToArray();
+        }
+
         var fullPrompt = string.IsNullOrWhiteSpace(imagePath)
             ? prompt
             : $"请使用你自己的文件查看工具打开图片文件：`{imagePath}`，然后完成以下任务：\n{prompt}";
@@ -81,13 +117,20 @@ public class CliChainService : ICliChainService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            // model / variant はユーザーが選んだ preferredProvider に対してのみ適用する。
+            // フォールバックで別 CLI に切り替わった際に、噛み合わないモデル名を渡さないため。
+            var isPreferred = normalizedPreferred != null
+                && string.Equals(provider, normalizedPreferred, StringComparison.OrdinalIgnoreCase);
+            var providerModel = isPreferred ? model : null;
+            var providerVariant = isPreferred ? variant : null;
+
             try
             {
                 var (output, error) = provider switch
                 {
-                    "opencode"    => await RunProcessAsync("opencode", BuildOpencodeArgs(fullPrompt), PerProviderTimeout, cancellationToken),
-                    "antigravity" => await RunProcessAsync("antigravity", BuildPrintModeArgs(fullPrompt), PerProviderTimeout, cancellationToken),
-                    "claude"      => await RunProcessAsync("claude", BuildPrintModeArgs(fullPrompt), PerProviderTimeout, cancellationToken),
+                    "opencode"    => await RunProcessAsync("opencode", BuildOpencodeArgs(fullPrompt, providerModel, providerVariant), PerProviderTimeout, cancellationToken),
+                    "antigravity" => await RunProcessAsync("antigravity", BuildPrintModeArgs(fullPrompt, providerModel), PerProviderTimeout, cancellationToken),
+                    "claude"      => await RunProcessAsync("claude", BuildPrintModeArgs(fullPrompt, providerModel), PerProviderTimeout, cancellationToken),
                     _ => (null, $"未知の CLI プロバイダー: {provider}")
                 };
 
@@ -118,11 +161,18 @@ public class CliChainService : ICliChainService
     // Provider argument builders
     // ──────────────────────────────────────────────────────────
 
-    private static string BuildOpencodeArgs(string prompt) =>
-        $"run \"{Escape(prompt)}\" --dangerously-skip-permissions";
+    private static string BuildOpencodeArgs(string prompt, string? model = null, string? variant = null)
+    {
+        var modelArg = string.IsNullOrWhiteSpace(model) ? "" : $" --model \"{Escape(model)}\"";
+        var variantArg = string.IsNullOrWhiteSpace(variant) ? "" : $" --variant \"{Escape(variant.ToLowerInvariant())}\"";
+        return $"run \"{Escape(prompt)}\"{modelArg}{variantArg} --dangerously-skip-permissions";
+    }
 
-    private static string BuildPrintModeArgs(string prompt) =>
-        $"-p \"{Escape(prompt)}\" --dangerously-skip-permissions";
+    private static string BuildPrintModeArgs(string prompt, string? model = null)
+    {
+        var modelArg = string.IsNullOrWhiteSpace(model) ? "" : $" --model \"{Escape(model)}\"";
+        return $"-p \"{Escape(prompt)}\"{modelArg} --dangerously-skip-permissions";
+    }
 
     private static string Escape(string s) => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
@@ -223,6 +273,17 @@ public class CliChainService : ICliChainService
     // ──────────────────────────────────────────────────────────
     // Config helpers
     // ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// ユーザー選択のプロバイダー名を正規化する。既知の CLI（opencode/antigravity/claude）
+    /// のみ受け付け、それ以外・空は null（＝選択なし）として扱う。
+    /// </summary>
+    private static string? NormalizeProvider(string? provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return null;
+        var normalized = provider.Trim().ToLowerInvariant();
+        return DefaultOrder.Contains(normalized) ? normalized : null;
+    }
 
     private static string[] ResolveOrder(Dictionary<string, string> env)
     {

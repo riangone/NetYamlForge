@@ -256,7 +256,7 @@
             // 5. Select / options -> <select>
             else if ((fieldDef.Type == "select" || (fieldDef.Options != null && fieldDef.Options.Any())))
             {
-                <div class="form-control w-full space-y-1.5">
+                <div class="form-control w-full space-y-1.5" id="container-field-@(fieldName)-@(sec.Id)">
                     <label class="label p-0">
                         <span class="label-text font-bold text-gray-700">@label @(isRequired ? "*" : "")</span>
                     </label>
@@ -682,6 +682,183 @@
                     console.error('Error loading preferred AI language', e);
                 }
             }
+        }
+
+        // Cascading logic for AI Provider and AI Model
+        const aiProviderField = document.getElementById(`field-AiProvider-${secId}`);
+        const aiModelField = document.getElementById(`field-AiModel-${secId}`);
+        if (aiProviderField && aiModelField) {
+            const providerModelMap = {
+                'antigravity': [
+                    { value: 'Gemini 3.5 Flash (Medium)', label: 'Gemini 3.5 Flash (Medium)' },
+                    { value: 'Gemini 3.5 Flash (High)', label: 'Gemini 3.5 Flash (High)' },
+                    { value: 'Gemini 3.5 Flash (Low)', label: 'Gemini 3.5 Flash (Low)' },
+                    { value: 'Gemini 3.1 Pro (Low)', label: 'Gemini 3.1 Pro (Low)' },
+                    { value: 'Gemini 3.1 Pro (High)', label: 'Gemini 3.1 Pro (High)' },
+                    { value: 'Claude Sonnet 4.6 (Thinking)', label: 'Claude Sonnet 4.6 (Thinking)' },
+                    { value: 'Claude Opus 4.6 (Thinking)', label: 'Claude Opus 4.6 (Thinking)' },
+                    { value: 'GPT-OSS 120B (Medium)', label: 'GPT-OSS 120B (Medium)' }
+                ],
+                'claude': [
+                    { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
+                    { value: 'claude-opus-4-8', label: 'Claude Opus 4.8' },
+                    { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' }
+                ],
+                'opencode': [
+                    { value: 'opencode/deepseek-v4-flash-free', label: 'DeepSeek V4 Flash (Free)' },
+                    { value: 'opencode/mimo-v2.5-free', label: 'MiMo v2.5 (Free)' },
+                    { value: 'opencode/nemotron-3-ultra-free', label: 'Nemotron 3 Ultra (Free)' },
+                    { value: 'opencode/north-mini-code-free', label: 'North Mini Code (Free)' },
+                    { value: 'opencode/big-pickle', label: 'Big Pickle' }
+                ]
+            };
+
+            const initialModelVal = aiModelField.value;
+
+            function updateModels() {
+                const selectedProvider = aiProviderField.value;
+                const models = providerModelMap[selectedProvider] || [];
+                
+                // Clear existing options except placeholder
+                aiModelField.innerHTML = '';
+                
+                const hasPlaceholder = @(sec.GetFieldDef("AiModel")?.Required == true ? "false" : "true");
+                if (hasPlaceholder || !selectedProvider) {
+                    const placeholderOpt = document.createElement('option');
+                    placeholderOpt.value = '';
+                    placeholderOpt.textContent = '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.select_placeholder", "— 选择 —")))';
+                    aiModelField.appendChild(placeholderOpt);
+                }
+
+                models.forEach(model => {
+                    const opt = document.createElement('option');
+                    opt.value = model.value;
+                    opt.textContent = model.label;
+                    aiModelField.appendChild(opt);
+                });
+
+                // Restore selection or pick first available if not found
+                if (models.some(m => m.value === aiModelField.dataset.pendingValue)) {
+                    aiModelField.value = aiModelField.dataset.pendingValue;
+                } else if (models.some(m => m.value === initialModelVal)) {
+                    aiModelField.value = initialModelVal;
+                } else {
+                    if (models.length > 0 && !hasPlaceholder) {
+                        aiModelField.value = models[0].value;
+                    } else {
+                        aiModelField.value = '';
+                    }
+                }
+                aiModelField.removeAttribute('data-pending-value');
+            }
+
+            const aiLevelField = document.getElementById(`field-AiLevel-${secId}`);
+            const aiLevelContainer = document.getElementById(`container-field-AiLevel-${secId}`);
+            const initialLevelVal = aiLevelField ? aiLevelField.value : '';
+
+            function updateAiLevel() {
+                if (!aiLevelField) return;
+                const selectedProvider = aiProviderField ? aiProviderField.value : '';
+                const selectedModel = aiModelField ? aiModelField.value : '';
+                
+                // AI Level is only visible and relevant when provider is 'opencode'
+                if (selectedProvider !== 'opencode') {
+                    if (aiLevelContainer) {
+                        aiLevelContainer.classList.add('hidden');
+                    }
+                    aiLevelField.value = '';
+                    return;
+                }
+                
+                // Show container if provider is 'opencode'
+                if (aiLevelContainer) {
+                    aiLevelContainer.classList.remove('hidden');
+                }
+                
+                // Define level options for opencode models
+                const modelLevelMap = {
+                    'opencode/deepseek-v4-flash-free': [
+                        { value: 'Low', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_low", "Low (低级/快速)")))' },
+                        { value: 'Medium', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_medium", "Medium (中级/标准)")))' },
+                        { value: 'High', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_high", "High (高级/深入)")))' },
+                        { value: 'Max', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_max", "Max (最大化/最慢)")))' }
+                    ],
+                    'opencode/mimo-v2.5-free': [
+                        { value: 'Low', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_low", "Low (低级/快速)")))' },
+                        { value: 'Medium', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_medium", "Medium (中级/标准)")))' },
+                        { value: 'High', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_high", "High (高级/深入)")))' }
+                    ],
+                    'opencode/nemotron-3-ultra-free': [
+                        { value: 'Low', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_low", "Low (低级/快速)")))' },
+                        { value: 'Medium', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_medium", "Medium (中级/标准)")))' },
+                        { value: 'High', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_high", "High (高级/深入)")))' }
+                    ],
+                    'opencode/north-mini-code-free': [
+                        { value: 'Low', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_low", "Low (低级/快速)")))' },
+                        { value: 'Medium', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_medium", "Medium (中级/标准)")))' },
+                        { value: 'High', label: '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.level_high", "High (高级/深入)")))' }
+                    ]
+                };
+                
+                const levels = modelLevelMap[selectedModel] || [];
+                
+                aiLevelField.innerHTML = '';
+                
+                // Add Select/Placeholder option if not required
+                const hasPlaceholder = @(sec.GetFieldDef("AiLevel")?.Required == true ? "false" : "true");
+                if (hasPlaceholder) {
+                    const placeholderOpt = document.createElement('option');
+                    placeholderOpt.value = '';
+                    placeholderOpt.textContent = '@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.form.select_placeholder", "— 选择 —")))';
+                    aiLevelField.appendChild(placeholderOpt);
+                }
+                
+                if (levels.length === 0) {
+                    // If the model doesn't support variants, hide the level container
+                    if (aiLevelContainer) {
+                        aiLevelContainer.classList.add('hidden');
+                    }
+                    aiLevelField.value = '';
+                    return;
+                }
+                
+                levels.forEach(level => {
+                    const opt = document.createElement('option');
+                    opt.value = level.value;
+                    opt.textContent = level.label;
+                    aiLevelField.appendChild(opt);
+                });
+                
+                // Restore initial selection if valid
+                if (levels.some(l => l.value === aiLevelField.dataset.pendingValue)) {
+                    aiLevelField.value = aiLevelField.dataset.pendingValue;
+                } else if (levels.some(l => l.value === initialLevelVal)) {
+                    aiLevelField.value = initialLevelVal;
+                } else {
+                    if (levels.length > 0 && !hasPlaceholder) {
+                        aiLevelField.value = levels[0].value;
+                    } else {
+                        aiLevelField.value = '';
+                    }
+                }
+                aiLevelField.removeAttribute('data-pending-value');
+            }
+
+            if (initialModelVal) {
+                aiModelField.dataset.pendingValue = initialModelVal;
+            }
+            if (initialLevelVal) {
+                aiLevelField.dataset.pendingValue = initialLevelVal;
+            }
+
+            aiProviderField.addEventListener('change', function() {
+                updateModels();
+                updateAiLevel();
+            });
+            aiModelField.addEventListener('change', updateAiLevel);
+
+            updateModels();
+            updateAiLevel();
         }
 
         // Initial setup for ImageBase64 preview if it already has value

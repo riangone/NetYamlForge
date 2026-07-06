@@ -24,7 +24,7 @@ public static class CliInvoker
 
         try
         {
-            var result = await cliService.PromptAsync(prompt, imagePath, projectName, cts.Token);
+            var result = await cliService.PromptAsync(prompt, imagePath, projectName, cancellationToken: cts.Token);
             return result;
         }
         catch (OperationCanceledException) when (cts.IsCancellationRequested && !ct.IsCancellationRequested)

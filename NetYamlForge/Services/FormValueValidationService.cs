@@ -66,6 +66,9 @@ public sealed class FormValueValidationService
         var values = new Dictionary<string, object?>();
         var errors = new Dictionary<string, string>();
 
+        // Ensure key lookups are case-insensitive to handle differences in JSON serialization/naming policies.
+        var formCaseInsensitive = new Dictionary<string, string?>(form, StringComparer.OrdinalIgnoreCase);
+
         foreach (var field in fields)
         {
             if (!field.Editable)
@@ -73,7 +76,7 @@ public sealed class FormValueValidationService
                 continue;
             }
 
-            var hasField = form.TryGetValue(field.Name, out var raw);
+            var hasField = formCaseInsensitive.TryGetValue(field.Name, out var raw);
 
             if (isPartial && !hasField)
             {

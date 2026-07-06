@@ -12,10 +12,10 @@ sections:
     titleKey: projects.diary-companion.pages.DiaryForm.sections.diary_detail.title
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel
       FROM DiaryEntry
       WHERE Id = @id
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage]
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel]
     pageSize: 1
     editable: false
     readOnly: true
@@ -28,6 +28,9 @@ sections:
           - Weather
           - MoodBefore
           - AiLanguage
+          - AiProvider
+          - AiModel
+          - AiLevel
           - Location
           - ImageBase64
           - ImageLabel
@@ -38,6 +41,9 @@ sections:
           - Weather
           - MoodBefore
           - AiLanguage
+          - AiProvider
+          - AiModel
+          - AiLevel
           - Location
           - ImageBase64
           - ImageLabel
@@ -80,4 +86,46 @@ sections:
           en-US: English
           ja-JP: 日本語
           ko-KR: 한국어
+      AiProvider:
+        type: select
+        required: false
+        label: AI 厂商
+        options:
+          antigravity: Antigravity (Gemini)
+          claude: Claude
+          opencode: OpenCode (GPT-OSS)
+      AiModel:
+        type: select
+        required: false
+        label: AI 模型
+        options:
+          # Antigravity
+          Gemini 3.5 Flash (Medium): Gemini 3.5 Flash (Medium)
+          Gemini 3.5 Flash (High): Gemini 3.5 Flash (High)
+          Gemini 3.5 Flash (Low): Gemini 3.5 Flash (Low)
+          Gemini 3.1 Pro (Low): Gemini 3.1 Pro (Low)
+          Gemini 3.1 Pro (High): Gemini 3.1 Pro (High)
+          Claude Sonnet 4.6 (Thinking): Claude Sonnet 4.6 (Thinking)
+          Claude Opus 4.6 (Thinking): Claude Opus 4.6 (Thinking)
+          GPT-OSS 120B (Medium): GPT-OSS 120B (Medium)
+          # Claude
+          claude-sonnet-4-6: Claude Sonnet 4.6
+          claude-opus-4-8: Claude Opus 4.8
+          claude-haiku-4-5-20251001: Claude Haiku 4.5
+          # OpenCode
+          opencode/deepseek-v4-flash-free: DeepSeek V4 Flash (Free)
+          opencode/mimo-v2.5-free: MiMo v2.5 (Free)
+          opencode/nemotron-3-ultra-free: Nemotron 3 Ultra (Free)
+          opencode/north-mini-code-free: North Mini Code (Free)
+          opencode/big-pickle: Big Pickle
+      AiLevel:
+        type: select
+        required: false
+        label: AI 级别
+        options:
+          Low: Low (低级/快速)
+          Medium: Medium (中级/标准)
+          High: High (高级/深入)
+          Thinking: Thinking (思考模式)
+          Max: Max (最大化/最慢)
 

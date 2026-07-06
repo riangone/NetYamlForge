@@ -2,7 +2,9 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
@@ -149,7 +151,17 @@ public class AnalyzeDiaryMoodHook : IEntityHook
 请用中文为这张图片生成一个非常简短的标注（2到6个字，例如"阳光下的咖啡"、"雨中的街道"、"美味的晚餐"）。
 请直接输出这个标注的内容，不要包含任何标点符号、引号或额外的解释文字。
 """;
-                    var chainResult = await _cliChain.PromptAsync(aiPrompt, imagePath: tempFilePath, projectName: "diary-companion");
+                    // 复用与文本分析相同的选择：把页面选的 AI 厂商/模型/级别传入 CLI 链，
+                    // 优先使用用户选择的 provider（不再写死 opencode→antigravity→claude 顺序），
+                    // 仅在所选 provider 不可用时才沿链兜底。
+                    var (imgProvider, imgModel, imgVariant) = ResolveAiSelection(ctx);
+                    var chainResult = await _cliChain.PromptAsync(
+                        aiPrompt,
+                        imagePath: tempFilePath,
+                        projectName: "diary-companion",
+                        preferredProvider: imgProvider,
+                        model: imgModel,
+                        variant: imgVariant);
                     if (chainResult.Success && !string.IsNullOrWhiteSpace(chainResult.Text))
                     {
                         imageLabel = chainResult.Text.Trim().Trim('"', '“', '”', '`', '.', '。');
@@ -352,21 +364,40 @@ JSON 示例：
 """;
             }
 
-            _logger.LogInformation("正在调用 AI 进行日记分析 (语言: {Lang})...", aiLanguage);
-            
-            // 设定 8 秒超时保护，防止 AI 接口超时导致用户日记保存失败
-            var aiTask = _ai.PromptJsonAsync<DiaryAnalysisResult>(prompt, projectName: "diary-companion");
-            var delayTask = Task.Delay(TimeSpan.FromSeconds(8));
-            var completedTask = await Task.WhenAny(aiTask, delayTask);
+            // 用户在页面选择的 AI 厂商 / 模型 / 级别（与图片标注共用同一套归一化逻辑）
+            var (aiProvider, targetModel, opencodeVariant) = ResolveAiSelection(ctx);
+
+            _logger.LogInformation("正在调用 AI 进行日记分析 (提供商: {Provider}, 模型: {Model})...", aiProvider, targetModel);
 
             DiaryAnalysisResult? result = null;
-            if (completedTask == aiTask)
+            // 设定 8 秒超时保护，防止 AI 接口超时导致用户日记保存失败
+            var cleanedText = await CallCliPromptAsync(
+                aiProvider,
+                targetModel,
+                prompt,
+                TimeSpan.FromSeconds(8),
+                opencodeVariant);
+            if (!string.IsNullOrWhiteSpace(cleanedText))
             {
-                result = await aiTask;
+                try
+                {
+                    var jsonCleaned = System.Text.RegularExpressions.Regex.Replace(cleanedText, @"```(?:json)?\s*", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+                    int start = jsonCleaned.IndexOf('{');
+                    int end = jsonCleaned.LastIndexOf('}');
+                    if (start >= 0 && end > start)
+                    {
+                        var json = jsonCleaned.Substring(start, end - start + 1);
+                        result = JsonSerializer.Deserialize<DiaryAnalysisResult>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "解析日记情绪分析 JSON 失败。原始文本: {Text}", cleanedText);
+                }
             }
             else
             {
-                _logger.LogWarning("AI 情绪分析调用超时，使用兜底配置保存。");
+                _logger.LogWarning("AI 情绪分析调用超时或返回空，使用兜底配置保存。");
             }
 
             if (result != null)
@@ -401,7 +432,12 @@ JSON 示例：
                                 : $"Please translate the following emotional support message into warm, natural English. Output ONLY the English translation, no other text:\n{finalResponse}";
 
                         _logger.LogInformation("正在强制将 AI 回复翻译为目标语言 ({Lang})...", aiLanguage);
-                        var translated = await _ai.PromptAsync(translatePrompt, projectName: "diary-companion");
+                        var translated = await CallCliPromptAsync(
+                            aiProvider,
+                            targetModel,
+                            translatePrompt,
+                            TimeSpan.FromSeconds(8),
+                            opencodeVariant);
                         if (!string.IsNullOrWhiteSpace(translated))
                         {
                             finalResponse = translated.Trim().Trim('"', '`');
@@ -435,6 +471,110 @@ JSON 示例：
         }
 
         return HookResult.Continue();
+    }
+
+    // 注意：直接进程调用（System.Diagnostics.Process / ProcessStartInfo）已被 Hook 安全校验禁止，
+    // 否则整个 Hook 文件会因安全校验失败而无法编译（analyze_diary_mood 将被跳过，导致缩略图/标注/情绪全部缺失）。
+    // 因此 Escape / RunProcessAsync / ExtractText 等辅助方法已移除，所有 AI 调用统一改走框架侧的 ICliChainService。
+
+    /// <summary>
+    /// 从表单提交值中解析用户选择的 AI 厂商 / 模型 / 级别，并归一化为各 CLI 可识别的模型标识。
+    /// 文本情绪分析与图片自动标注两条路径共用，避免逻辑重复与不一致。
+    /// 返回：Provider（厂商）、Model（归一化后的模型名）、Variant（仅 opencode 有级别 variant，其他为 null）。
+    /// </summary>
+    private static (string Provider, string Model, string? Variant) ResolveAiSelection(EntityHookContext ctx)
+    {
+        var aiProvider = ctx.Values.GetValueOrDefault("AiProvider")?.ToString()?.Trim();
+        var aiModel = ctx.Values.GetValueOrDefault("AiModel")?.ToString()?.Trim();
+        var aiLevel = ctx.Values.GetValueOrDefault("AiLevel")?.ToString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(aiProvider)) aiProvider = "antigravity";
+
+        // 未选择模型时按厂商给出默认模型
+        if (string.IsNullOrWhiteSpace(aiModel))
+        {
+            aiModel = aiProvider.ToLowerInvariant() switch
+            {
+                "antigravity" => "Gemini 3.5 Flash (Medium)",
+                "claude" => "claude-sonnet-4-6",
+                "opencode" => "opencode/deepseek-v4-flash-free",
+                _ => "Gemini 3.5 Flash (Medium)"
+            };
+        }
+
+        string targetModel = aiModel;
+        // antigravity：把「模型 + 级别」组合成 CLI 可识别的完整模型标识
+        if (aiProvider.Equals("antigravity", StringComparison.OrdinalIgnoreCase))
+        {
+            if (aiModel == "Gemini 3.5 Flash" || aiModel == "Gemini 3.5 Flash (Medium)" || aiModel == "Gemini 3.5 Flash (High)" || aiModel == "Gemini 3.5 Flash (Low)")
+            {
+                string level = aiLevel switch
+                {
+                    "Low" => "Low",
+                    "High" => "High",
+                    _ => "Medium"
+                };
+                targetModel = $"Gemini 3.5 Flash ({level})";
+            }
+            else if (aiModel == "Gemini 3.1 Pro" || aiModel == "Gemini 3.1 Pro (Low)" || aiModel == "Gemini 3.1 Pro (High)")
+            {
+                string level = aiLevel == "High" ? "High" : "Low";
+                targetModel = $"Gemini 3.1 Pro ({level})";
+            }
+            else if (aiModel == "Claude Sonnet 4.6" || aiModel == "Claude Sonnet 4.6 (Thinking)")
+            {
+                targetModel = "Claude Sonnet 4.6 (Thinking)";
+            }
+            else if (aiModel == "Claude Opus 4.6" || aiModel == "Claude Opus 4.6 (Thinking)")
+            {
+                targetModel = "Claude Opus 4.6 (Thinking)";
+            }
+            else if (aiModel == "GPT-OSS 120B" || aiModel == "GPT-OSS 120B (Medium)")
+            {
+                targetModel = "GPT-OSS 120B (Medium)";
+            }
+        }
+
+        // 只有 opencode 才通过 --variant 传递级别；其他厂商级别已并入模型标识
+        string? variant = aiProvider.Equals("opencode", StringComparison.OrdinalIgnoreCase)
+            ? aiLevel
+            : null;
+
+        return (aiProvider, targetModel, variant);
+    }
+
+    /// <summary>
+    /// 统一走框架侧 ICliChainService 调用 AI（文本情绪分析 / 强制翻译）。
+    /// 复用页面所选 provider / model / variant，失败时按 CLI 链兜底；
+    /// 通过 timeout 施加整体超时保护，避免 AI 阻塞日记保存。
+    /// </summary>
+    private async Task<string?> CallCliPromptAsync(string provider, string model, string promptText, TimeSpan timeout, string? variant = null)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(timeout);
+            var result = await _cliChain.PromptAsync(
+                promptText,
+                projectName: "diary-companion",
+                preferredProvider: provider,
+                model: model,
+                variant: variant,
+                cancellationToken: cts.Token);
+            if (result.Success && !string.IsNullOrWhiteSpace(result.Text))
+            {
+                return result.Text.Trim();
+            }
+            _logger.LogWarning("CLI 链调用返回空或失败 (provider {Provider}, model {Model})。原因: {Error}", provider, model, result.Error ?? "No output");
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("CLI 链调用在 {Seconds} 秒后超时 (provider {Provider}, model {Model})", timeout.TotalSeconds, provider, model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "调用 CLI 链失败 (provider {Provider}, model {Model})", provider, model);
+        }
+        return null;
     }
 
     public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)

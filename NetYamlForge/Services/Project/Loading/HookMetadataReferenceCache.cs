@@ -107,6 +107,57 @@ public class HookMetadataReferenceCache
                 _logger.LogError(ex, "ImageSharp 参照の强制追加中にエラーが発生しました");
             }
 
+            try
+            {
+                var httpFeaturesAssembly = typeof(Microsoft.AspNetCore.Http.IHeaderDictionary).Assembly;
+                if (!string.IsNullOrEmpty(httpFeaturesAssembly.Location))
+                {
+                    if (addedPaths.Add(httpFeaturesAssembly.Location))
+                    {
+                        references.Add(MetadataReference.CreateFromFile(httpFeaturesAssembly.Location));
+                        _logger.LogInformation("Successfully added HttpFeatures metadata reference from: {Location}", httpFeaturesAssembly.Location);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "HttpFeatures 参照の強制追加中にエラーが発生しました（スキップ）");
+            }
+
+            try
+            {
+                var mailKitAssembly = typeof(MailKit.Net.Imap.ImapClient).Assembly;
+                if (!string.IsNullOrEmpty(mailKitAssembly.Location))
+                {
+                    if (addedPaths.Add(mailKitAssembly.Location))
+                    {
+                        references.Add(MetadataReference.CreateFromFile(mailKitAssembly.Location));
+                        _logger.LogInformation("Successfully added MailKit metadata reference from: {Location}", mailKitAssembly.Location);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "MailKit 参照の強制追加中にエラーが発生しました（スキップ）");
+            }
+
+            try
+            {
+                var mimeKitAssembly = typeof(MimeKit.MimeMessage).Assembly;
+                if (!string.IsNullOrEmpty(mimeKitAssembly.Location))
+                {
+                    if (addedPaths.Add(mimeKitAssembly.Location))
+                    {
+                        references.Add(MetadataReference.CreateFromFile(mimeKitAssembly.Location));
+                        _logger.LogInformation("Successfully added MimeKit metadata reference from: {Location}", mimeKitAssembly.Location);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "MimeKit 参照の強制追加中にエラーが発生しました（スキップ）");
+            }
+
             _cachedReferences = references;
             return _cachedReferences.ToList();
         }

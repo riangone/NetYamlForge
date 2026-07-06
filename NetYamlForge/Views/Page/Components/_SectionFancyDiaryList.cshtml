@@ -535,8 +535,9 @@
                              const response = await fetch(`/api/${window.NetYamlForgeConfig?.currentProject || '@currentProject'}/@(apiEntity)/${id}`);
                              if (response.ok) {
                                   const result = await response.json();
-                                  if (result && result.data && result.data.ImageBase64) {
-                                      diary.imageBase64 = result.data.ImageBase64;
+                                  var imgBase64 = result && result.data && (result.data.ImageBase64 || result.data.imageBase64);
+                                  if (imgBase64) {
+                                      diary.imageBase64 = imgBase64;
                                       if (currentDetailDiaryId === id) {
                                           modalImg.src = diary.imageBase64;
                                           modalImg.style.filter = 'none';
@@ -613,13 +614,14 @@
                          const response = await fetch(`/api/${window.NetYamlForgeConfig?.currentProject || '@currentProject'}/@(apiEntity)/${id}`);
                          if (response.ok) {
                              const result = await response.json();
-                             if (result && result.data && result.data.ImageBase64) {
-                                 diary.imageBase64 = result.data.ImageBase64;
-                                 if (lightbox.open) {
-                                     img.src = diary.imageBase64;
-                                     img.style.filter = 'none';
-                                 }
-                             }
+                              var imgBase64 = result && result.data && (result.data.ImageBase64 || result.data.imageBase64);
+                              if (imgBase64) {
+                                  diary.imageBase64 = imgBase64;
+                                  if (lightbox.open) {
+                                      img.src = diary.imageBase64;
+                                      img.style.filter = 'none';
+                                  }
+                              }
                          }
                      } catch (err) {
                          console.error("加载大图失败:", err);

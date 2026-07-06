@@ -18,7 +18,7 @@ public class AiBatchExecutorBaseTests
         public string Text { get; set; } = "ai-result";
         public string? PromptCalled { get; private set; }
 
-        public Task<CliChainResult> PromptAsync(string prompt, string? imagePath = null, string? projectName = null, CancellationToken cancellationToken = default)
+        public Task<CliChainResult> PromptAsync(string prompt, string? imagePath = null, string? projectName = null, string? preferredProvider = null, string? model = null, string? variant = null, CancellationToken cancellationToken = default)
         {
             PromptCalled = prompt;
             return Task.FromResult(new CliChainResult(Success, Text, "fake", null));
