@@ -53,6 +53,7 @@ public sealed class EntityToolService
     private readonly ProjectScope               _projectScope;
     private readonly IProjectActionRegistry     _actionRegistry;
     private readonly IAuditLogService           _audit;
+    private readonly IEntityHooksService        _entityHooks;
     private readonly ILogger<EntityToolService> _logger;
 
     public EntityToolService(
@@ -61,6 +62,7 @@ public sealed class EntityToolService
         ProjectScope                 projectScope,
         IProjectActionRegistry       actionRegistry,
         IAuditLogService             audit,
+        IEntityHooksService          entityHooks,
         ILogger<EntityToolService>   logger)
     {
         _serviceProvider = serviceProvider;
@@ -68,6 +70,7 @@ public sealed class EntityToolService
         _projectScope    = projectScope;
         _actionRegistry  = actionRegistry;
         _audit           = audit;
+        _entityHooks     = entityHooks;
         _logger          = logger;
     }
 
@@ -290,8 +293,8 @@ public sealed class EntityToolService
         if (errors.Count > 0)
             return McpToolResult.Failure(string.Join("; ", errors.Select(e => $"{e.Key}: {e.Value}")));
 
-        var beforeHooks = meta!.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterCreate,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta!.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterCreate,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await svc.CommandService.CreateAsync(entity, values, beforeHooks, afterHooks, userName: null);
         if (!result.Ok)
@@ -322,8 +325,8 @@ public sealed class EntityToolService
         if (errors.Count > 0)
             return McpToolResult.Failure(string.Join("; ", errors.Select(e => $"{e.Key}: {e.Value}")));
 
-        var beforeHooks = meta!.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta!.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await svc.CommandService.UpdateAsync(
             entity, meta.GetPrimaryKeyColumns()[0], id, values, beforeHooks, afterHooks, userName: null);
@@ -351,8 +354,8 @@ public sealed class EntityToolService
         if (await svc.Repo.GetByIdAsync(entity, id) == null)
             return McpToolResult.Failure($"Entity '{entity}' with id '{id}' was not found.");
 
-        var beforeHooks = meta!.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterDelete,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta!.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterDelete,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await svc.CommandService.DeleteAsync(
             entity, meta.GetPrimaryKeyColumns()[0], id, beforeHooks, afterHooks, userName: null);

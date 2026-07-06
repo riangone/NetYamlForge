@@ -75,6 +75,9 @@ RUN mkdir -p \
         /app/projects/todo-app/database \
         /app/projects/ui-showcase/database \
         /app/projects/biz-docs/database \
+        /app/var/data \
+        /app/var/run \
+        /app/var/log \
         /app/logs
 
 EXPOSE 8080

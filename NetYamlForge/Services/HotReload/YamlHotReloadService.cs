@@ -102,7 +102,7 @@ public class YamlHotReloadService : IHostedService, IDisposable
                 var projectDir = projectInfo.ProjectDir;
                 
                 // 1. 古いアセンブリと登録を解除
-                hookLoader.UnloadProjectAssembly(projectName);
+                await hookLoader.UnloadProjectAssemblyAsync(projectName);
 
                 // 2. 再コンパイルしてロード
                 await hookLoader.LoadProjectHooksAsync(projectName, projectDir, hookRegistry);

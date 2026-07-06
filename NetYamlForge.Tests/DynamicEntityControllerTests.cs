@@ -372,6 +372,7 @@ public class DynamicEntityControllerTests
             new StubPdfExportService(),
             new StubDocumentPdfService(),
             new TestWebHostEnvironment(),
+            new EntityHooksService(),
             NullLogger<DynamicEntityController>.Instance)
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }

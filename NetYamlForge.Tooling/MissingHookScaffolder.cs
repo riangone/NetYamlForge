@@ -68,6 +68,8 @@ public static class MissingHookScaffolder
         var hookNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var handlerNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        var hooksService = new EntityHooksService();
+
         foreach (var (entityName, def) in entities)
         {
             if (def.Hooks != null)
@@ -79,7 +81,7 @@ public static class MissingHookScaffolder
                 };
                 foreach (var selector in selectors)
                 {
-                    var list = def.Hooks.GetHookList(selector);
+                    var list = hooksService.GetHookList(def.Hooks, selector);
                     if (list == null) continue;
                     foreach (var name in list)
                     {

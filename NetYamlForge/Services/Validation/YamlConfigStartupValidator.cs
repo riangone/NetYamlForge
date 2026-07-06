@@ -62,6 +62,7 @@ public sealed class YamlConfigStartupValidator : IHostedService
     private readonly IEntityHookRegistry _hookRegistry;
     private readonly IProjectHookRegistry _projectHookRegistry;
     private readonly IProjectActionRegistry _projectActionRegistry;
+    private readonly IEntityHooksService _entityHooks;
     private readonly ILogger<YamlConfigStartupValidator> _logger;
 
     public YamlConfigStartupValidator(
@@ -69,12 +70,14 @@ public sealed class YamlConfigStartupValidator : IHostedService
         IEntityHookRegistry hookRegistry,
         IProjectHookRegistry projectHookRegistry,
         IProjectActionRegistry projectActionRegistry,
+        IEntityHooksService entityHooks,
         ILogger<YamlConfigStartupValidator> logger)
     {
         _projectManager = projectManager;
         _hookRegistry = hookRegistry;
         _projectHookRegistry = projectHookRegistry;
         _projectActionRegistry = projectActionRegistry;
+        _entityHooks = entityHooks;
         _logger = logger;
     }
 
@@ -125,7 +128,7 @@ public sealed class YamlConfigStartupValidator : IHostedService
                     };
                     foreach (var selector in hookSelectors)
                     {
-                        var hookList = def.Hooks.GetHookList(selector);
+                        var hookList = _entityHooks.GetHookList(def.Hooks, selector);
                         if (hookList == null) continue;
                         foreach (var hookName in hookList)
                         {

@@ -40,6 +40,7 @@ public partial class DynamicEntityController : BaseProjectController
     private readonly IPdfExportService _pdfExport;
     private readonly IDocumentPdfService _docPdf;
     private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _env;
+    private readonly IEntityHooksService _entityHooks;
     private readonly ILogger<DynamicEntityController> _logger;
 
     public DynamicEntityController(
@@ -64,6 +65,7 @@ public partial class DynamicEntityController : BaseProjectController
         IPdfExportService pdfExport,
         IDocumentPdfService docPdf,
         Microsoft.AspNetCore.Hosting.IWebHostEnvironment env,
+        IEntityHooksService entityHooks,
         ILogger<DynamicEntityController> logger)
     {
         _repo = repo;
@@ -87,6 +89,7 @@ public partial class DynamicEntityController : BaseProjectController
         _pdfExport = pdfExport;
         _docPdf = docPdf;
         _env = env;
+        _entityHooks = entityHooks;
         _logger = logger;
     }
 

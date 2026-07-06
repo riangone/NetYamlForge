@@ -1,8 +1,6 @@
 // DCS001 抑制理由: テーブル名・カラム名はすべて IsValidIdentifier() で検証済みの設定値のみを使用する動的SQL生成ユーティリティです。
 #pragma warning disable DCS001
 using System.Data;
-using System.Diagnostics;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dapper;
@@ -39,7 +37,7 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
     private readonly IConfiguration _configuration;
     private readonly IEmbeddingService _embedding;
     private readonly ILogger<AiAnnotatorExecutor> _logger;
-    private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
+    private readonly AiProviderDispatcher _providerDispatcher;
 
     private const string DefaultAnnotationPrompt = """
         你是专业的图片分析AI。请仔细分析图片，仅输出合法JSON（不加任何说明、不使用markdown代码块），字段如下：
@@ -89,6 +87,7 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         _configuration = configuration;
         _embedding = embedding;
         _logger = logger;
+        _providerDispatcher = new AiProviderDispatcher(logger);
     }
 
     protected override async Task<IReadOnlyList<QueueRow>> FetchPendingAsync(
@@ -138,7 +137,11 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         }
 
         var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
-        var annotation = await AnnotateAsync(absolutePath, usedProvider, prompt, projectName, ct);
+        var rawText = await _providerDispatcher.DispatchAsync(
+            usedProvider, prompt, absolutePath, projectName,
+            key => GetEnvValue(key, projectName), ct);
+
+        var annotation = rawText != null ? ParseAnnotationJson(rawText) : null;
 
         if (annotation == null)
         {
@@ -198,7 +201,7 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
                 "activities"       => annotation.Activities,
                 "person_count"     => (object)annotation.PersonCount,
                 "confidence_score" => annotation.ConfidenceScore,
-                "annotation_model" => GetModelName(provider),
+                "annotation_model" => AiProviderDispatcher.GetModelName(provider),
                 "tags"             => annotation.Tags != null ? string.Join(",", annotation.Tags) : null,
                 _                  => null
             };
@@ -212,7 +215,7 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         if (!fields.ContainsKey("annotation_model"))
         {
             setClauses.Add("annotation_model = @ModelName");
-            parameters["ModelName"] = GetModelName(provider);
+            parameters["ModelName"] = AiProviderDispatcher.GetModelName(provider);
         }
         setClauses.Add("annotation_at = @Now");
         setClauses.Add("updated_at = @Now");
@@ -284,173 +287,6 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
     }
 
     // ──────────────────────────────────────────────────────────
-    // Provider dispatch
-    // ──────────────────────────────────────────────────────────
-
-    private async Task<AnnotationResult?> AnnotateAsync(
-        string absolutePath, string provider, string prompt, string? projectName, CancellationToken ct)
-        => provider.ToLowerInvariant() switch
-        {
-            "lmstudio"    => await AnnotateWithLmStudioAsync(absolutePath, prompt, ct),
-            "gemini_cli"  => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, projectName, ct),
-            "gemini"      => await AnnotateWithGeminiAsync(absolutePath, prompt, projectName, ct),
-            "ollama"      => await AnnotateWithOllamaAsync(absolutePath, prompt, projectName, ct),
-            "antigravity" => await AnnotateWithAntigravityCliAsync(absolutePath, prompt, projectName, ct),
-            "anthropic"   => await AnnotateWithAnthropicAsync(absolutePath, prompt, projectName, ct),
-            _ => LogAndNull(provider)
-        };
-
-    private AnnotationResult? LogAndNull(string provider)
-    {
-        _logger.LogWarning("Unknown annotation provider '{Provider}'", provider);
-        return null;
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithAntigravityCliAsync(
-        string absolutePath, string prompt, string? projectName, CancellationToken ct)
-    {
-        var result = await Cli.PromptAsync(prompt, imagePath: absolutePath, projectName: projectName, cancellationToken: ct);
-        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
-        {
-            return null;
-        }
-        return ParseAnnotationJson(result.Text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithLmStudioAsync(
-        string absolutePath, string prompt, CancellationToken ct)
-    {
-        var baseUrl = Environment.GetEnvironmentVariable("LMSTUDIO_BASE_URL") ?? "http://localhost:1234/v1";
-        var model   = Environment.GetEnvironmentVariable("LMSTUDIO_MODEL") ?? "google/gemma-4-e4b";
-        var (base64, mimeType) = EncodeImage(absolutePath);
-
-        var body = new
-        {
-            model,
-            messages = new[]
-            {
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new { type = "text",      text = prompt },
-                        new { type = "image_url", image_url = new { url = $"data:{mimeType};base64,{base64}" } }
-                    }
-                }
-            },
-            max_tokens = 1024,
-            temperature = 0.2
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-        var resp = await _http.SendAsync(req, ct);
-        var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("LM Studio {Status}: {Body}", resp.StatusCode, json); return null; }
-
-        using var doc = JsonDocument.Parse(json);
-        var text = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
-        return ParseAnnotationJson(text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithGeminiAsync(
-        string absolutePath, string prompt, string? projectName, CancellationToken ct)
-    {
-        var apiKey = GetEnvValue("GEMINI_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("GEMINI_API_KEY not set"); return null; }
-
-        var (base64, mimeType) = EncodeImage(absolutePath);
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
-
-        var body = new
-        {
-            contents = new[]
-            {
-                new { parts = new object[] { new { text = prompt }, new { inline_data = new { mime_type = mimeType, data = base64 } } } }
-            },
-            generationConfig = new { maxOutputTokens = 1024, temperature = 0.2 }
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-        var resp = await _http.SendAsync(req, ct);
-        var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Gemini {Status}: {Body}", resp.StatusCode, json); return null; }
-
-        using var doc = JsonDocument.Parse(json);
-        var text = doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString() ?? "";
-        return ParseAnnotationJson(text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithOllamaAsync(
-        string absolutePath, string prompt, string? projectName, CancellationToken ct)
-    {
-        var baseUrl = GetEnvValue("OLLAMA_BASE_URL", projectName) ?? "http://localhost:11434";
-        var model   = GetEnvValue("OLLAMA_VISION_MODEL", projectName) ?? "llava:13b";
-        var (base64, _) = EncodeImage(absolutePath);
-
-        var body = new { model, prompt, images = new[] { base64 }, stream = false };
-        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/generate")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-        var resp = await _http.SendAsync(req, ct);
-        var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Ollama {Status}: {Body}", resp.StatusCode, json); return null; }
-
-        using var doc = JsonDocument.Parse(json);
-        return ParseAnnotationJson(doc.RootElement.GetProperty("response").GetString() ?? "");
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithAnthropicAsync(
-        string absolutePath, string prompt, string? projectName, CancellationToken ct)
-    {
-        var apiKey = GetEnvValue("ANTHROPIC_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("ANTHROPIC_API_KEY not set"); return null; }
-
-        var (base64, mediaType) = EncodeImage(absolutePath);
-        var model = GetEnvValue("ANTHROPIC_MODEL", projectName) ?? "claude-haiku-4-5-20251001";
-
-        var body = new
-        {
-            model,
-            max_tokens = 1024,
-            messages = new[]
-            {
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new { type = "image",  source = new { type = "base64", media_type = mediaType, data = base64 } },
-                        new { type = "text",   text = prompt }
-                    }
-                }
-            }
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, "https://api.anthropic.com/v1/messages")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-        req.Headers.Add("x-api-key", apiKey);
-        req.Headers.Add("anthropic-version", "2023-06-01");
-
-        var resp = await _http.SendAsync(req, ct);
-        var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Anthropic {Status}: {Body}", resp.StatusCode, json); return null; }
-
-        using var doc = JsonDocument.Parse(json);
-        var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString() ?? "";
-        return ParseAnnotationJson(text);
-    }
-
-    // ──────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────
 
@@ -458,22 +294,6 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
     {
         if (File.Exists(storedPath)) return storedPath;
         return Path.Combine(_env.WebRootPath, storedPath.TrimStart('/'));
-    }
-
-    private static (string base64, string mediaType) EncodeImage(string path)
-    {
-        var bytes = File.ReadAllBytes(path);
-        var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-        var mime = ext switch
-        {
-            "jpg" or "jpeg" => "image/jpeg",
-            "png"           => "image/png",
-            "gif"           => "image/gif",
-            "webp"          => "image/webp",
-            "heic" or "heif"=> "image/heic",
-            _               => "image/jpeg"
-        };
-        return (Convert.ToBase64String(bytes), mime);
     }
 
     private static AnnotationResult? ParseAnnotationJson(string text)
@@ -512,17 +332,6 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         }
         return _configuration[key];
     }
-
-    private static string GetModelName(string provider) => provider switch
-    {
-        "lmstudio"    => "google/gemma-4-e4b",
-        "gemini"      => "gemini-2.0-flash",
-        "gemini_cli"  => "antigravity-cli",
-        "antigravity" => "antigravity-cli",
-        "ollama"      => "llava:13b",
-        "anthropic"   => "claude-haiku-4-5-20251001",
-        _             => provider
-    };
 
     private static async Task FailRow(
         IDbConnection db, IDbTransaction tx, QueueRow row, AnnotationJobConfig cfg, string error)

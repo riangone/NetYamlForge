@@ -33,6 +33,9 @@ packages/
 reports/
 projects/*/jobs/output/
 
+# Runtime variable data directory (data, run, log)
+var/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 PROJECT_DIR="/home/ubuntu/ws/NetYamlForge/NetYamlForge"
-LOG_FILE="/home/ubuntu/ws/NetYamlForge/logs/netyamlforge.log"
-PID_FILE="/home/ubuntu/ws/NetYamlForge/netyamlforge.pid"
+LOG_FILE="/home/ubuntu/ws/NetYamlForge/var/log/netyamlforge.log"
+PID_FILE="/home/ubuntu/ws/NetYamlForge/var/run/netyamlforge.pid"
 
 # Check if already running
 if [ -f "$PID_FILE" ]; then
@@ -16,7 +16,7 @@ if [ -f "$PID_FILE" ]; then
     fi
 fi
 
-mkdir -p "$(dirname "$LOG_FILE")"
+mkdir -p "$(dirname "$LOG_FILE")" "$(dirname "$PID_FILE")"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 

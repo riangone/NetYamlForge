@@ -36,8 +36,8 @@ public partial class DynamicEntityController : BaseProjectController
         if (errors.Any())
             return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors);
 
-        var beforeCreateHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg));
-        var afterCreateHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg));
+        var beforeCreateHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterCreateHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg)) : null;
         var createResult = await _commandService.CreateAsync(
             entity,
             values,
@@ -79,8 +79,8 @@ public partial class DynamicEntityController : BaseProjectController
         if (errors.Any())
             return await RenderFormWithErrorsAsync(entity, meta, mode, form, errors, keyValue);
 
-        var beforeUpdateHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg));
-        var afterUpdateHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg));
+        var beforeUpdateHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterUpdateHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) : null;
         var updateResult = await _commandService.UpdateAsync(
             entity,
             pkColumns[0],
@@ -117,8 +117,8 @@ public partial class DynamicEntityController : BaseProjectController
         var pkColumns = meta.GetPrimaryKeyColumns();
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
 
-        var beforeDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg));
-        var afterDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg));
+        var beforeDeleteHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterDeleteHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
         var deleteResult = await _commandService.DeleteAsync(
             entity,
             pkColumns[0],
@@ -167,8 +167,8 @@ public partial class DynamicEntityController : BaseProjectController
 
         var pkColumns = meta.GetPrimaryKeyColumns();
         var pkCol = pkColumns[0];
-        var beforeDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg));
-        var afterDeleteHooks = meta.Hooks?.GetExpandedHookList(h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg));
+        var beforeDeleteHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterDeleteHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var errors = new List<string>();
         foreach (var idVal in ids ?? [])

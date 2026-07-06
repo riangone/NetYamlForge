@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PID_FILE="/home/ubuntu/ws/NetYamlForge/netyamlforge.pid"
-LOG_FILE="/home/ubuntu/ws/NetYamlForge/logs/netyamlforge.log"
+PID_FILE="/home/ubuntu/ws/NetYamlForge/var/run/netyamlforge.pid"
+LOG_FILE="/home/ubuntu/ws/NetYamlForge/var/log/netyamlforge.log"
 
 if [ ! -f "$PID_FILE" ]; then
     echo "PID file not found. NetYamlForge may not be running."

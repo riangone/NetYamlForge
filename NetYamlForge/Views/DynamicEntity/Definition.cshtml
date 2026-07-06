@@ -2,6 +2,7 @@
    Columns / Forms / Filters / Joins / Links / Settings の各タブで定義を一覧表示します。 *@
 
 @using NetYamlForge.Models
+@inject NetYamlForge.Services.IEntityHooksService EntityHooks
 @model NetYamlForge.Controllers.EntityDefinitionViewModel
 @{
     var meta = Model.Meta;
@@ -400,10 +401,10 @@
                         <h3 class="font-semibold text-sm uppercase tracking-wide text-base-content/60 mb-2">Hooks</h3>
                         <dl class="text-sm space-y-1">
                             @{
-                                var beforeCreate = meta.Hooks.GetHookList(h => h.BeforeCreate);
-                                var afterCreate = meta.Hooks.GetHookList(h => h.AfterCreate);
-                                var beforeUpdate = meta.Hooks.GetHookList(h => h.BeforeUpdate);
-                                var afterUpdate = meta.Hooks.GetHookList(h => h.AfterUpdate);
+                                var beforeCreate = EntityHooks.GetHookList(meta.Hooks, h => h.BeforeCreate);
+                                var afterCreate = EntityHooks.GetHookList(meta.Hooks, h => h.AfterCreate);
+                                var beforeUpdate = EntityHooks.GetHookList(meta.Hooks, h => h.BeforeUpdate);
+                                var afterUpdate = EntityHooks.GetHookList(meta.Hooks, h => h.AfterUpdate);
                             }
                             @if (beforeCreate != null && beforeCreate.Any())
                             {

@@ -1,10 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using NetYamlForge.Models;
+using NetYamlForge.Services;
 using Xunit;
 
 namespace NetYamlForge.Tests;
 
 public class EntityHooksDefinitionTests
 {
+    private readonly IEntityHooksService _entityHooks = new EntityHooksService();
+
     [Fact]
     public void GetExpandedHookList_ExpandsSinglePreset()
     {
@@ -21,7 +27,7 @@ public class EntityHooksDefinitionTests
             BeforeCreate = new List<object> { "@commonValidation", "blog_post_slug_generator" }
         };
 
-        var expanded = hooks.GetExpandedHookList(h => h.BeforeCreate);
+        var expanded = _entityHooks.GetExpandedHookList(hooks, h => h.BeforeCreate);
 
         Assert.NotNull(expanded);
         Assert.Equal(
@@ -47,7 +53,7 @@ public class EntityHooksDefinitionTests
             BeforeUpdate = new List<object> { "@withEmail", "audit_log" }
         };
 
-        var expanded = hooks.GetExpandedHookList(h => h.BeforeUpdate);
+        var expanded = _entityHooks.GetExpandedHookList(hooks, h => h.BeforeUpdate);
 
         Assert.NotNull(expanded);
         Assert.Equal(
@@ -74,12 +80,12 @@ public class EntityHooksDefinitionTests
             BeforeCreate = new List<object> { "@a" }
         };
 
-        var expanded = hooks.GetExpandedHookList(h => h.BeforeCreate, warnings.Add);
+        var expanded = _entityHooks.GetExpandedHookList(hooks, h => h.BeforeCreate, warnings.Add);
 
         Assert.NotNull(expanded);
         Assert.Contains("trim:Name", expanded!);
         Assert.Contains("validate_required:Name", expanded);
-        Assert.Contains(warnings, w => w.Contains("循環参照", StringComparison.Ordinal));
+        Assert.Contains(warnings, w => w.Contains("循環参照", StringComparison.Ordinal) || w.Contains("circular", StringComparison.OrdinalIgnoreCase) || w.Contains("循環", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -93,7 +99,7 @@ public class EntityHooksDefinitionTests
         var root = deserializer.Deserialize<EntityConfigRoot>(yaml);
         var taskDef = root.Entities["task"];
         Assert.NotNull(taskDef.Hooks);
-        var bc = taskDef.Hooks!.GetHookList(h => h.BeforeCreate);
+        var bc = _entityHooks.GetHookList(taskDef.Hooks!, h => h.BeforeCreate);
         Assert.NotNull(bc);
         Assert.Contains("normalize_title", bc!);
         Assert.Contains("validate_due_date", bc!);

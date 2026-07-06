@@ -2,6 +2,7 @@
 // Program.cs の肥大化を防ぎ、責務ごとに登録内容を把握しやすくします。
 // 新しいサービスを追加する際は、対応するグループメソッドに追記してください。
 
+using System;
 using System.Data;
 using NetYamlForge.Services;
 using NetYamlForge.Services.Auth;
@@ -25,6 +26,8 @@ using MySql.Data.MySqlClient;
 using Npgsql;
 using NetYamlForge.Projects.FormForge;
 using NetYamlForge.Projects.KbForge;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NetYamlForge.Extensions;
 
@@ -41,6 +44,11 @@ public static class ServiceCollectionExtensions
         services.AddMultiProjectInfrastructure();
         services.AddDatabaseServices();
         services.AddDynamicCrudCore(configuration);
+        services.AddAuthServices();
+        services.AddPdfServices();
+        services.AddAiServices(configuration);
+        services.AddBatchJobServices();
+        services.AddExternalFeatureServices();
         services.AddProjectHooks();
         services.AddEntityHooks();
         services.AddYamlHotReload();
@@ -154,7 +162,7 @@ public static class ServiceCollectionExtensions
             var connectionManager = sp.GetRequiredService<IConnectionManager>();
             return new NetYamlForge.Services.Connection.LazyDbConnection(() =>
             {
-                return connectionManager.GetConnectionAsync(scope.Current.Name).GetAwaiter().GetResult();
+                return connectionManager.GetConnection(scope.Current.Name);
             });
         });
 
@@ -177,7 +185,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// コア CRUD / 認証 / 監査サービスを登録します。
+    /// コア CRUD / 監査サービスを登録します。
     /// </summary>
     public static IServiceCollection AddDynamicCrudCore(this IServiceCollection services, IConfiguration configuration)
     {
@@ -216,19 +224,52 @@ public static class ServiceCollectionExtensions
         services.AddScoped<DynamicEntitySchemaMigrationService>();
         services.AddScoped<DynamicEntityFormValidationService>();
         services.AddScoped<CommandErrorHttpMapper>();
+        services.AddScoped<IHookExecutionTelemetry, HookExecutionTelemetryLogger>();
+        services.AddSingleton<IEntityHooksService, EntityHooksService>();
+        services.AddSingleton<IEntityMetadataParser, EntityMetadataParser>();
+        services.AddSingleton<IEntityMetadataValidator, EntityMetadataValidator>();
+        services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
+
+        // 页面自定义动作分发器与处理器注册
+        services.AddSingleton<IPageActionDispatcher, PageActionDispatcher>();
+        services.AddSingleton<IPageActionHandler, NetYamlForge.Services.AI.PageActions.SwitchProviderAction>();
+        services.AddSingleton<IPageActionHandler, NetYamlForge.Projects.PhotoVocab.Hooks.PageActions.AnnotatePhotoAction>();
+        services.AddSingleton<IPageActionHandler, NetYamlForge.Projects.PhotoVocab.Hooks.PageActions.EmbedPhotoAction>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// 認証・セキュリティ関連サービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddAuthServices(this IServiceCollection services)
+    {
         services.AddScoped<IUserAuthService, UserAuthService>();
         services.AddScoped<ITenantUserService, TenantUserService>();
         services.AddScoped<IAuditLogService, AuditLogService>();
-        services.AddScoped<IHookExecutionTelemetry, HookExecutionTelemetryLogger>();
         services.AddScoped<IPagePermissionService, PagePermissionService>();
-        
-        // AI サービス
+        return services;
+    }
+
+    /// <summary>
+    /// PDF生成およびエクスポート関連サービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddPdfServices(this IServiceCollection services)
+    {
+        services.AddScoped<IFileUploadService, FileUploadService>();
+        services.AddSingleton<IPdfExportService, PdfExportService>();
+        services.AddSingleton<IDocumentPdfService, DocumentPdfService>();
+        return services;
+    }
+
+    /// <summary>
+    /// AI 関連サービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddAiServices(this IServiceCollection services, IConfiguration configuration)
+    {
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
-        // CLI フォールバックチェーン（優先順位: opencode → antigravity → claude code）。
-        // API Key 課金は使用量・費用を制御しづらいため、サブスクリプション型 CLI のみを対象とする。
         services.AddScoped<NetYamlForge.Services.AI.ICliChainService, NetYamlForge.Services.AI.CliChainService>();
-        // Embedding サービス（EmbeddingProvider で切替: local / lmstudio / gemini）
-        // IEmbeddingService はフレームワーク公開インターフェース；IGeminiEmbeddingService は後方互換エイリアス
+        
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
             ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
             ?? "local";
@@ -263,16 +304,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISlotFillingManager, SlotFillingManager>();
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddHostedService<AiToolRegistryInitializer>();
+        return services;
+    }
 
-        // ファイルアップロードサービス
-        services.AddScoped<IFileUploadService, FileUploadService>();
-        // PDF エクスポートサービス (PDFsharp - MIT ライセンス)
-        services.AddSingleton<IPdfExportService, PdfExportService>();
-        // IDocumentPdfService の既定実装は PDFsharp (MIT ライセンス)
-        services.AddSingleton<IDocumentPdfService, DocumentPdfService>();
-        services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
-
-        // バッチジョブサービス
+    /// <summary>
+    /// バッチジョブおよび関連バックグラウンドサービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddBatchJobServices(this IServiceCollection services)
+    {
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
         services.AddScoped<IOutboxJobService, OutboxJobService>();
@@ -299,36 +338,32 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<BatchJobHostedService>();
         services.AddSingleton<IBatchJobScheduler>(sp => sp.GetRequiredService<BatchJobHostedService>());
         services.AddHostedService(sp => sp.GetRequiredService<BatchJobHostedService>());
+        return services;
+    }
 
-        // 中国股市行情数据服务
+    /// <summary>
+    /// 外部機能連携およびその他個別機能サービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddExternalFeatureServices(this IServiceCollection services)
+    {
         services.AddHttpClient<IChinaStockService, ChinaStockService>();
-
-        // ワークフローガイドサービス
         services.AddScoped<WorkflowGuideService>();
-
-        // FormForge
         services.AddScoped<FormForgeRepository>();
         services.AddScoped<FormForgeResponseRepository>();
-
-        // KbForge
         services.AddScoped<KbForgeRepository>();
-
         return services;
     }
 
     /// <summary>
     /// プロジェクト固有フック・ビジネスロジックのレジストリを登録します。
-    /// 新しいプロジェクトのフックは projects/&lt;name&gt;/Hooks/ に配置すると自動検出されます。
     /// </summary>
     public static IServiceCollection AddProjectHooks(this IServiceCollection services)
     {
         // ===== プロジェクト固有フック =====
-        // 各プロジェクトの Hooks/ ディレクトリから動的にフックを読み込みます。
         services.AddSingleton<IProjectHookRegistry, ProjectHookRegistry>();
         services.AddSingleton<IProjectHookLoader, ProjectHookLoader>();
 
         // ===== プロジェクト固有ビジネスロジック =====
-        // 各プロジェクトの Hooks/ ディレクトリからビジネスロジック・バリデーション・データ変換を読み込みます。
         services.AddSingleton<IProjectBusinessLogicRegistry, ProjectBusinessLogicRegistry>();
 
         // ===== プロジェクト固有カスタムアクション =====
@@ -339,7 +374,6 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// エンティティフック実装を全て登録します。
-    /// 新しいフックを追加する場合はここに IEntityHook の実装を追記してください。
     /// </summary>
     public static IServiceCollection AddEntityHooks(this IServiceCollection services)
     {

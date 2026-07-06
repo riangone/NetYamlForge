@@ -30,6 +30,16 @@ public interface IConnectionManager : IDisposable
     Task<IDbConnection> GetConnectionAsync(string projectName, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 获取当前项目的连接（同步）
+    /// </summary>
+    IDbConnection GetConnection();
+
+    /// <summary>
+    /// 获取指定项目的连接（同步）
+    /// </summary>
+    IDbConnection GetConnection(string projectName);
+
+    /// <summary>
     /// 释放指定项目的连接
     /// </summary>
     void ReleaseConnection(string projectName, IDbConnection connection);
@@ -246,6 +256,92 @@ public class ConnectionManager : IConnectionManager
         if (dbType == "sqlite")
         {
             await SqliteConnectionHardening.ApplyAsync(connection);
+        }
+
+        RecordConnectionAcquired(projectName);
+        return connection;
+    }
+
+    public IDbConnection GetConnection()
+    {
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext != null)
+        {
+            var projectScope = httpContext.RequestServices.GetService<ProjectScope>();
+            if (projectScope != null && projectScope.IsSet)
+            {
+                return GetConnection(projectScope.Current.Name);
+            }
+        }
+
+        if (_scopeFactory != null)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            if (scope != null)
+            {
+                var spProjectScope = scope.ServiceProvider?.GetService<ProjectScope>();
+                if (spProjectScope != null && spProjectScope.IsSet)
+                {
+                    return GetConnection(spProjectScope.Current.Name);
+                }
+            }
+        }
+
+        throw new InvalidOperationException("No project scope set. Use GetConnection(projectName) instead.");
+    }
+
+    public IDbConnection GetConnection(string projectName)
+    {
+        if (!_projectManager.TryGet(projectName, out var project) || project == null)
+            throw new InvalidOperationException($"Project not found: {projectName}");
+
+        var dbType = project.DatabaseType.ToLowerInvariant();
+        
+        // Resolve tenant-specific connection string if TenantContext is available
+        var connectionString = project.ConnectionString;
+        var httpContext = _httpContextAccessor?.HttpContext;
+        if (httpContext != null)
+        {
+            var tenantCtx = httpContext.RequestServices.GetService<TenantContext>();
+            if (tenantCtx != null && !string.IsNullOrEmpty(tenantCtx.ConnectionString))
+            {
+                connectionString = tenantCtx.ConnectionString;
+            }
+        }
+        else if (_scopeFactory != null)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            if (scope != null)
+            {
+                var tenantCtx = scope.ServiceProvider?.GetService<TenantContext>();
+                if (tenantCtx != null && !string.IsNullOrEmpty(tenantCtx.ConnectionString))
+                {
+                    connectionString = tenantCtx.ConnectionString;
+                }
+            }
+        }
+
+        connectionString = AddPoolParametersIfNeeded(project.DatabaseType, connectionString);
+
+#pragma warning disable DCS003
+        IDbConnection connection = dbType switch
+        {
+            "sqlserver" => new Microsoft.Data.SqlClient.SqlConnection(connectionString),
+            "postgresql" or "postgres" => new Npgsql.NpgsqlConnection(connectionString),
+            "mysql" or "mariadb" => new MySql.Data.MySqlClient.MySqlConnection(connectionString),
+            _ => new Microsoft.Data.Sqlite.SqliteConnection(connectionString)
+        };
+#pragma warning restore DCS003
+
+        if (connection.State != ConnectionState.Open)
+        {
+            connection.Open();
+        }
+
+        // Enable WAL mode for SQLite so concurrent reads and writes don't block each other.
+        if (dbType == "sqlite")
+        {
+            SqliteConnectionHardening.Apply(connection);
         }
 
         RecordConnectionAcquired(projectName);

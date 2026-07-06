@@ -346,6 +346,8 @@ public class MockConnectionManager : IConnectionManager
     public Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken = default) => Task.FromResult<IDbConnection>(null!);
     public void ReleaseConnection(IDbConnection connection) { }
     public Task<IDbConnection> GetConnectionAsync(string projectName, CancellationToken cancellationToken = default) => Task.FromResult<IDbConnection>(null!);
+    public IDbConnection GetConnection() => null!;
+    public IDbConnection GetConnection(string projectName) => null!;
     public void ReleaseConnection(string projectName, IDbConnection connection) { }
     public Dictionary<string, ConnectionPoolStats> GetAllPoolStats() => new();
     public ConnectionPoolStats GetPoolStats(string projectName) => null!;

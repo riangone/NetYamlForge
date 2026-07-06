@@ -1,0 +1,251 @@
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+
+namespace NetYamlForge.Services.AI;
+
+/// <summary>
+/// AI プロバイダー別の HTTP 呼び出しロジックを集約したユーティリティ。
+/// AiAnnotatorExecutor 等の複数プロバイダー対応 Executor で共通化するためのもの。
+/// プロバイダー別のリクエスト構築・レスポンス解析を1箇所に集約し、
+/// Executor はプロンプト構築と結果のビジネスロジック処理のみに集中します。
+/// </summary>
+public sealed class AiProviderDispatcher
+{
+    private readonly ILogger _logger;
+    private readonly HttpClient _http;
+
+    public AiProviderDispatcher(ILogger logger, HttpClient? httpClient = null)
+    {
+        _logger = logger;
+        _http = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
+    }
+
+    /// <summary>
+    /// 指定プロバイダーを用いて画像付きプロンプトを実行し、生のレスポンステキストを返す。
+    /// </summary>
+    public async Task<string?> DispatchAsync(
+        string provider,
+        string prompt,
+        string absoluteImagePath,
+        string? projectName,
+        Func<string, string?> getEnvValue,
+        CancellationToken ct)
+    {
+        return provider.ToLowerInvariant() switch
+        {
+            "lmstudio"    => await CallLmStudioAsync(prompt, absoluteImagePath, getEnvValue, ct),
+            "gemini_cli"  => await CallGeminiCliAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
+            "gemini"      => await CallGeminiAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
+            "ollama"      => await CallOllamaAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
+            "antigravity" => await CallGeminiCliAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
+            "anthropic"   => await CallAnthropicAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
+            _ => LogAndNull(provider)
+        };
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // LM Studio (local OpenAI-compatible)
+    // ──────────────────────────────────────────────────────────
+
+    private async Task<string?> CallLmStudioAsync(
+        string prompt, string imagePath,
+        Func<string, string?> getEnvValue, CancellationToken ct)
+    {
+        var baseUrl = getEnvValue("LMSTUDIO_BASE_URL") ?? "http://localhost:1234/v1";
+        var model = getEnvValue("LMSTUDIO_MODEL") ?? "google/gemma-4-e4b";
+        var (base64, mimeType) = EncodeImage(imagePath);
+
+        var body = new
+        {
+            model,
+            messages = new[]
+            {
+                new
+                {
+                    role = "user",
+                    content = new object[]
+                    {
+                        new { type = "text", text = prompt },
+                        new { type = "image_url", image_url = new { url = $"data:{mimeType};base64,{base64}" } }
+                    }
+                }
+            },
+            max_tokens = 1024,
+            temperature = 0.2
+        };
+
+        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+        var resp = await _http.SendAsync(req, ct);
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        if (!resp.IsSuccessStatusCode) { _logger.LogError("LM Studio {Status}: {Body}", resp.StatusCode, json); return null; }
+
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Gemini API (direct HTTP)
+    // ──────────────────────────────────────────────────────────
+
+    private async Task<string?> CallGeminiAsync(
+        string prompt, string imagePath, string? projectName,
+        Func<string, string?> getEnvValue, CancellationToken ct)
+    {
+        var apiKey = getEnvValue("GEMINI_API_KEY");
+        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("GEMINI_API_KEY not set"); return null; }
+
+        var (base64, mimeType) = EncodeImage(imagePath);
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
+
+        var body = new
+        {
+            contents = new[]
+            {
+                new { parts = new object[] { new { text = prompt }, new { inline_data = new { mime_type = mimeType, data = base64 } } } }
+            },
+            generationConfig = new { maxOutputTokens = 1024, temperature = 0.2 }
+        };
+
+        var req = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+        var resp = await _http.SendAsync(req, ct);
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        if (!resp.IsSuccessStatusCode) { _logger.LogError("Gemini {Status}: {Body}", resp.StatusCode, json); return null; }
+
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Gemini CLI (Antigravity / opencode)
+    // ──────────────────────────────────────────────────────────
+
+    private async Task<string?> CallGeminiCliAsync(
+        string prompt, string imagePath, string? projectName,
+        Func<string, string?> getEnvValue, CancellationToken ct)
+    {
+        var cli = new CliChainService(Microsoft.Extensions.Logging.Abstractions.NullLogger<CliChainService>.Instance);
+        var result = await cli.PromptAsync(prompt, imagePath: imagePath, projectName: projectName, cancellationToken: ct);
+        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
+            return null;
+        return result.Text;
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Ollama (local)
+    // ──────────────────────────────────────────────────────────
+
+    private async Task<string?> CallOllamaAsync(
+        string prompt, string imagePath, string? projectName,
+        Func<string, string?> getEnvValue, CancellationToken ct)
+    {
+        var baseUrl = getEnvValue("OLLAMA_BASE_URL") ?? "http://localhost:11434";
+        var model = getEnvValue("OLLAMA_VISION_MODEL") ?? "llava:13b";
+        var (base64, _) = EncodeImage(imagePath);
+
+        var body = new { model, prompt, images = new[] { base64 }, stream = false };
+        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/generate")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+        var resp = await _http.SendAsync(req, ct);
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        if (!resp.IsSuccessStatusCode) { _logger.LogError("Ollama {Status}: {Body}", resp.StatusCode, json); return null; }
+
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("response").GetString();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Anthropic Claude API
+    // ──────────────────────────────────────────────────────────
+
+    private async Task<string?> CallAnthropicAsync(
+        string prompt, string imagePath, string? projectName,
+        Func<string, string?> getEnvValue, CancellationToken ct)
+    {
+        var apiKey = getEnvValue("ANTHROPIC_API_KEY");
+        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("ANTHROPIC_API_KEY not set"); return null; }
+
+        var (base64, mediaType) = EncodeImage(imagePath);
+        var model = getEnvValue("ANTHROPIC_MODEL") ?? "claude-haiku-4-5-20251001";
+
+        var body = new
+        {
+            model,
+            max_tokens = 1024,
+            messages = new[]
+            {
+                new
+                {
+                    role = "user",
+                    content = new object[]
+                    {
+                        new { type = "image", source = new { type = "base64", media_type = mediaType, data = base64 } },
+                        new { type = "text", text = prompt }
+                    }
+                }
+            }
+        };
+
+        var req = new HttpRequestMessage(HttpMethod.Post, "https://api.anthropic.com/v1/messages")
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
+        };
+        req.Headers.Add("x-api-key", apiKey);
+        req.Headers.Add("anthropic-version", "2023-06-01");
+
+        var resp = await _http.SendAsync(req, ct);
+        var json = await resp.Content.ReadAsStringAsync(ct);
+        if (!resp.IsSuccessStatusCode) { _logger.LogError("Anthropic {Status}: {Body}", resp.StatusCode, json); return null; }
+
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────────────────────
+
+    private string? LogAndNull(string provider)
+    {
+        _logger.LogWarning("Unknown annotation provider '{Provider}'", provider);
+        return null;
+    }
+
+    internal static (string base64, string mediaType) EncodeImage(string path)
+    {
+        var bytes = File.ReadAllBytes(path);
+        var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
+        var mime = ext switch
+        {
+            "jpg" or "jpeg" => "image/jpeg",
+            "png"           => "image/png",
+            "gif"           => "image/gif",
+            "webp"          => "image/webp",
+            "heic" or "heif" => "image/heic",
+            _               => "image/jpeg"
+        };
+        return (Convert.ToBase64String(bytes), mime);
+    }
+
+    /// <summary>
+    /// プロバイダー名からモデル名を取得する。
+    /// </summary>
+    public static string GetModelName(string provider) => provider switch
+    {
+        "lmstudio"    => "google/gemma-4-e4b",
+        "gemini"      => "gemini-2.0-flash",
+        "gemini_cli"  => "antigravity-cli",
+        "antigravity" => "antigravity-cli",
+        "ollama"      => "llava:13b",
+        "anthropic"   => "claude-haiku-4-5-20251001",
+        _             => provider
+    };
+}

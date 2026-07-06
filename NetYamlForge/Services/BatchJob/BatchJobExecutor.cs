@@ -271,7 +271,7 @@ public class DbConnectionFactory : IDbConnectionFactory
         }
 
         // 使用连接管理器获取连接（从池中复用）
-        var connection = _connectionManager.GetConnectionAsync(projectName).GetAwaiter().GetResult();
+        var connection = _connectionManager.GetConnection(projectName);
         return connection;
     }
 

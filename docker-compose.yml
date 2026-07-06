@@ -53,6 +53,9 @@ services:
       - ui_showcase_sqlite:/app/projects/ui-showcase/database
       - biz_docs_sqlite:/app/projects/biz-docs/database
       - auto_dealer_demo_sqlite:/app/projects/auto-dealer-demo/database
+      - app_var_data:/app/var/data
+      - app_var_run:/app/var/run
+      - app_var_log:/app/var/log
       - app_logs:/app/logs
 
   # ───────────────────────────────────────────────────────
@@ -76,6 +79,9 @@ services:
         Username=${POSTGRES_USER:-nyforge};Password=${POSTGRES_PASSWORD:-nyforge_pass}
     volumes:
       - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_var_data:/app/var/data
+      - app_var_run:/app/var/run
+      - app_var_log:/app/var/log
       - app_logs:/app/logs
     depends_on:
       postgres:
@@ -120,6 +126,9 @@ services:
         CharSet=utf8mb4;AllowUserVariables=true
     volumes:
       - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_var_data:/app/var/data
+      - app_var_run:/app/var/run
+      - app_var_log:/app/var/log
       - app_logs:/app/logs
     depends_on:
       mysql:
@@ -167,6 +176,9 @@ services:
         TrustServerCertificate=True
     volumes:
       - ui_showcase_sqlite:/app/projects/ui-showcase/database
+      - app_var_data:/app/var/data
+      - app_var_run:/app/var/run
+      - app_var_log:/app/var/log
       - app_logs:/app/logs
     depends_on:
       sqlserver:
@@ -214,4 +226,7 @@ volumes:
   postgres_data:
   mysql_data:
   sqlserver_data:
+  app_var_data:
+  app_var_run:
+  app_var_log:
   app_logs:

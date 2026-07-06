@@ -96,6 +96,7 @@ public class AiDocProcessorTests
         var mockHookRegistry = new Mock<IProjectHookRegistry>();
         var mockBizRegistry = new Mock<IProjectBusinessLogicRegistry>();
         var actionRegistry = new ProjectActionRegistry(NullLogger<ProjectActionRegistry>.Instance);
+        var mockPageDispatcher = new Mock<NetYamlForge.Services.Page.IPageActionDispatcher>();
         
         var loader = new ProjectHookLoader(
             serviceProvider.GetRequiredService<ILogger<ProjectHookLoader>>(),
@@ -103,7 +104,8 @@ public class AiDocProcessorTests
             mockHookRegistry.Object,
             mockBizRegistry.Object,
             actionRegistry,
-            new BatchStepHandlerRegistry(Enumerable.Empty<BatchStepHandlerRegistration>()));
+            new BatchStepHandlerRegistry(Enumerable.Empty<BatchStepHandlerRegistration>()),
+            mockPageDispatcher.Object);
 
         // テストプロジェクトのベースディレクトリからの相対パス
         var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/ai-doc-processor";

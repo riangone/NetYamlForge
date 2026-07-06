@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Reflection.Metadata;
 using NetYamlForge.Services.Hooks;
+using NetYamlForge.Services.Page;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -40,7 +41,7 @@ public interface IProjectHookLoader
     /// <summary>
     /// 指定プロジェクトのロード済みアセンブリをアンロードし、レジストリ登録を解除します。
     /// </summary>
-    void UnloadProjectAssembly(string projectName);
+    Task UnloadProjectAssemblyAsync(string projectName);
 }
 
 /// <summary>
@@ -55,6 +56,7 @@ public class ProjectHookLoader : IProjectHookLoader
     private readonly IProjectBusinessLogicRegistry _bizRegistry;
     private readonly IProjectActionRegistry _actionRegistry;
     private readonly BatchStepHandlerRegistry _batchRegistry;
+    private readonly IPageActionDispatcher _pageActionDispatcher;
     private readonly ConcurrentDictionary<string, CollectibleAssemblyLoadContext> _assemblyContexts;
     private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _projectLocks;
@@ -67,7 +69,8 @@ public class ProjectHookLoader : IProjectHookLoader
         IProjectHookRegistry hookRegistry,
         IProjectBusinessLogicRegistry bizRegistry,
         IProjectActionRegistry actionRegistry,
-        BatchStepHandlerRegistry batchRegistry)
+        BatchStepHandlerRegistry batchRegistry,
+        IPageActionDispatcher pageActionDispatcher)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
@@ -75,6 +78,7 @@ public class ProjectHookLoader : IProjectHookLoader
         _bizRegistry = bizRegistry;
         _actionRegistry = actionRegistry;
         _batchRegistry = batchRegistry;
+        _pageActionDispatcher = pageActionDispatcher;
         _assemblyContexts = new ConcurrentDictionary<string, CollectibleAssemblyLoadContext>(StringComparer.OrdinalIgnoreCase);
         _loadedAssemblies = new ConcurrentDictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         _projectLocks = new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.OrdinalIgnoreCase);
@@ -581,10 +585,10 @@ public class ProjectHookLoader : IProjectHookLoader
         });
     }
 
-    public void UnloadProjectAssembly(string projectName)
+    public async Task UnloadProjectAssemblyAsync(string projectName)
     {
         var @lock = GetProjectLock(projectName);
-        @lock.Wait();
+        await @lock.WaitAsync();
         try
         {
             _logger.LogInformation("アンロード中: プロジェクト '{Project}' の Assembly と Registry 登録", projectName);
@@ -592,6 +596,7 @@ public class ProjectHookLoader : IProjectHookLoader
             _hookRegistry.Clear(projectName);
             _bizRegistry.Clear(projectName);
             _actionRegistry.Clear(projectName);
+            _pageActionDispatcher.Clear(projectName);
 
             UnloadAlcInternal(projectName);
 
@@ -662,8 +667,30 @@ public class ProjectHookLoader : IProjectHookLoader
                     catch (Exception ex)
                     {
                         _logger.LogError(ex,
-                            "[{ErrorCode}] プロジェクト '{Project}' のアクションハンドラー '{Type}' の初期化に失敗しました",
+                            "[{ErrorCode}] プロジェクト '{Project}' のアクションハンドラー '{Type}' の初期化に失败しました",
                             "ACTION_HANDLER_INIT_FAILED", projectName, handlerType.FullName);
+                    }
+                }
+
+                var pageHandlerTypes = assembly.GetTypes()
+                    .Where(t => typeof(IPageActionHandler).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
+                    .ToList();
+
+                foreach (var handlerType in pageHandlerTypes)
+                {
+                    try
+                    {
+                        var handler = ActivatorUtilities.CreateInstance(serviceProvider, handlerType);
+                        if (handler is IPageActionHandler h)
+                        {
+                            _pageActionDispatcher.Register(projectName, h);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "プロジェクト '{Project}' のページアクションハンドラー '{Type}' の初期化に失败しました",
+                            projectName, handlerType.FullName);
                     }
                 }
             }

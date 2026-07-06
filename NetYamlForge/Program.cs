@@ -114,6 +114,38 @@ if (args.Any(a => a.Equals("--migrate-data", StringComparison.OrdinalIgnoreCase)
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Paths configuration mapping for database and runtime directories
+var dataDir = builder.Configuration["Paths:Data"];
+if (!string.IsNullOrEmpty(dataDir))
+{
+    var fullDataDir = Path.Combine(Directory.GetCurrentDirectory(), dataDir);
+    if (!Directory.Exists(fullDataDir))
+    {
+        Directory.CreateDirectory(fullDataDir);
+    }
+
+    var oldSystemDb = Path.Combine(Directory.GetCurrentDirectory(), "system.db");
+    var newSystemDb = Path.Combine(fullDataDir, "system.db");
+    if (File.Exists(oldSystemDb) && !File.Exists(newSystemDb))
+    {
+        File.Copy(oldSystemDb, newSystemDb);
+    }
+
+    var oldChinookDb = Path.Combine(Directory.GetCurrentDirectory(), "chinook.db");
+    var newChinookDb = Path.Combine(fullDataDir, "chinook.db");
+    if (File.Exists(oldChinookDb) && !File.Exists(newChinookDb))
+    {
+        File.Copy(oldChinookDb, newChinookDb);
+    }
+
+    builder.Configuration["SystemDbPath"] = newSystemDb;
+    var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (defaultConn != null && defaultConn.Contains("chinook.db") && !defaultConn.Contains(dataDir))
+    {
+        builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConn.Replace("chinook.db", Path.Combine(dataDir, "chinook.db"));
+    }
+}
+
 // Windows サービスとして実行する場合
 if (useWindowsService)
 {
@@ -122,10 +154,12 @@ if (useWindowsService)
 
 builder.Host.UseSerilog((context, cfg) =>
 {
+    var logDir = context.Configuration["Paths:Log"] ?? "logs";
+    var logFile = Path.Combine(logDir, "app-.log");
     cfg.ReadFrom.Configuration(context.Configuration)
         .Enrich.FromLogContext()
         .WriteTo.Console()
-        .WriteTo.File("logs/app-.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14);
+        .WriteTo.File(logFile, rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14);
 });
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -268,6 +302,9 @@ app.Use(async (context, next) =>
 var projectManager = app.Services.GetRequiredService<ProjectManager>();
 await projectManager.InitializeAsync(app.Environment);
 
+// PDFフォントの非同期事前ロード
+await PdfFontLoader.LoadFontsAsync();
+
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
 
 // データマイグレーション適用
@@ -309,6 +346,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+app.UseMiddleware<NetYamlForge.Services.ApiExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestTraceMiddleware>();
 app.UseSerilogRequestLogging(options =>
 {

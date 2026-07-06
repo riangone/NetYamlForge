@@ -27,6 +27,7 @@ public class ApiEntityController : BaseProjectController
     private readonly ProjectScope                        _projectScope;
     private readonly IProjectActionRegistry              _actionRegistry;
     private readonly IAuditLogService                    _audit;
+    private readonly IEntityHooksService                 _entityHooks;
     private readonly ILogger<ApiEntityController>        _logger;
 
     public ApiEntityController(
@@ -37,6 +38,7 @@ public class ApiEntityController : BaseProjectController
         ProjectScope                       projectScope,
         IProjectActionRegistry             actionRegistry,
         IAuditLogService                   audit,
+        IEntityHooksService                entityHooks,
         ILogger<ApiEntityController>       logger)
     {
         _repo                 = repo;
@@ -46,6 +48,7 @@ public class ApiEntityController : BaseProjectController
         _projectScope         = projectScope;
         _actionRegistry       = actionRegistry;
         _audit                = audit;
+        _entityHooks          = entityHooks;
         _logger               = logger;
     }
 
@@ -221,8 +224,8 @@ public class ApiEntityController : BaseProjectController
         if (errors.Any())
             return BadRequest(new { errors });
 
-        var beforeHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterCreate,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterCreate,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await _commandService.CreateAsync(
             entity, values, beforeHooks, afterHooks, User.Identity?.Name);
@@ -268,8 +271,8 @@ public class ApiEntityController : BaseProjectController
         if (errors.Any())
             return BadRequest(new { errors });
 
-        var beforeHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await _commandService.UpdateAsync(
             entity, meta.GetPrimaryKeyColumns()[0], id, values, beforeHooks, afterHooks, User.Identity?.Name);
@@ -312,8 +315,8 @@ public class ApiEntityController : BaseProjectController
         if (errors.Any())
             return BadRequest(new { errors });
 
-        var beforeHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterUpdate,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await _commandService.UpdateAsync(
             entity, meta.GetPrimaryKeyColumns()[0], id, values, beforeHooks, afterHooks, User.Identity?.Name);
@@ -347,8 +350,8 @@ public class ApiEntityController : BaseProjectController
         if (await _repo.GetByIdAsync(entity, id) == null)
             return NotFound(new { error = $"Entity '{entity}' with id '{id}' not found" });
 
-        var beforeHooks = meta.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg));
-        var afterHooks  = meta.Hooks?.GetExpandedHookList(h => h.AfterDelete,  msg => _logger.LogWarning("{Message}", msg));
+        var beforeHooks = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) : null;
+        var afterHooks  = meta.Hooks != null ? _entityHooks.GetExpandedHookList(meta.Hooks, h => h.AfterDelete,  msg => _logger.LogWarning("{Message}", msg)) : null;
 
         var result = await _commandService.DeleteAsync(
             entity, meta.GetPrimaryKeyColumns()[0], id, beforeHooks, afterHooks, User.Identity?.Name);

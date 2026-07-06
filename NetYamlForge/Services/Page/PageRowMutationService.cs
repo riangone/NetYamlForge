@@ -22,6 +22,7 @@ public sealed class PageRowMutationService
     private readonly IEntityMetadataProvider _entityMeta;
     private readonly DynamicEntityCommandService _commandService;
     private readonly DynamicEntityFormValidationService _formValidationService;
+    private readonly IEntityHooksService _entityHooks;
     private readonly ILogger<PageRowMutationService> _logger;
 
     public PageRowMutationService(
@@ -32,6 +33,7 @@ public sealed class PageRowMutationService
         IEntityMetadataProvider entityMeta,
         DynamicEntityCommandService commandService,
         DynamicEntityFormValidationService formValidationService,
+        IEntityHooksService entityHooks,
         ILogger<PageRowMutationService> logger)
     {
         _db = db;
@@ -41,6 +43,7 @@ public sealed class PageRowMutationService
         _entityMeta = entityMeta;
         _commandService = commandService;
         _formValidationService = formValidationService;
+        _entityHooks = entityHooks;
         _logger = logger;
     }
 
@@ -82,10 +85,10 @@ public sealed class PageRowMutationService
                 section.TargetPrimaryKey,
                 rowId.ToString(),
                 values,
-                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.BeforeUpdate ?? new())
                     .Distinct().ToList(),
-                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.AfterUpdate ?? new())
                     .Distinct().ToList(),
                 actorUserName);
@@ -127,10 +130,10 @@ public sealed class PageRowMutationService
             var result = await _commandService.CreateAsync(
                 section.TargetTable,
                 values,
-                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.BeforeCreate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.BeforeCreate ?? new())
                     .Distinct().ToList(),
-                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.AfterCreate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.AfterCreate ?? new())
                     .Distinct().ToList(),
                 actorUserName);
@@ -192,10 +195,10 @@ public sealed class PageRowMutationService
                 section.TargetPrimaryKey,
                 rowId.ToString(),
                 values,
-                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.BeforeUpdate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.BeforeUpdate ?? new())
                     .Distinct().ToList(),
-                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.AfterUpdate, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.AfterUpdate ?? new())
                     .Distinct().ToList(),
                 actorUserName);
@@ -248,10 +251,10 @@ public sealed class PageRowMutationService
                 section.TargetTable,
                 section.TargetPrimaryKey,
                 rowId.ToString(),
-                (entityDef.Hooks?.GetExpandedHookList(h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.BeforeDelete, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.BeforeDelete ?? new())
                     .Distinct().ToList(),
-                (entityDef.Hooks?.GetExpandedHookList(h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg)) ?? new())
+                ((entityDef.Hooks != null ? _entityHooks.GetExpandedHookList(entityDef.Hooks, h => h.AfterDelete, msg => _logger.LogWarning("{Message}", msg)) : null) ?? new())
                     .Concat(section.Hooks?.AfterDelete ?? new())
                     .Distinct().ToList(),
                 actorUserName);

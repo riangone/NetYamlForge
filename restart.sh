@@ -2,8 +2,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/NetYamlForge"
-LOG_FILE="$SCRIPT_DIR/logs/netyamlforge.log"
-PID_FILE="$SCRIPT_DIR/netyamlforge.pid"
+LOG_FILE="$SCRIPT_DIR/var/log/netyamlforge.log"
+PID_FILE="$SCRIPT_DIR/var/run/netyamlforge.pid"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === Restarting NetYamlForge ==="
 
@@ -55,7 +55,7 @@ else
 fi
 
 # --- Step 3: Start with the new DLL ---
-mkdir -p "$(dirname "$LOG_FILE")"
+mkdir -p "$(dirname "$LOG_FILE")" "$(dirname "$PID_FILE")"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 
 cd "$PROJECT_DIR" || { echo "Cannot cd to $PROJECT_DIR"; exit 1; }
