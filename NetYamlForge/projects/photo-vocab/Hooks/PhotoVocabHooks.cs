@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob.Sdk;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -221,21 +222,11 @@ public class AnalyzePhotoAndExtractVocabHook : IEntityHook
     /// </summary>
     private PhotoVocabAnalysisResult? ParseAnalysisResult(string text)
     {
-        try
+        if (AiResultParser.TryParseJson<PhotoVocabAnalysisResult>(text, out var result, out var error))
         {
-            var cleaned = Regex.Replace(text, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-            var braceStart = cleaned.IndexOf('{');
-            var end = cleaned.LastIndexOf('}');
-            if (braceStart >= 0 && end > braceStart)
-            {
-                var json = cleaned.Substring(braceStart, end - braceStart + 1);
-                return JsonSerializer.Deserialize<PhotoVocabAnalysisResult>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
+            return result;
         }
-        catch (JsonException ex)
-        {
-            _logger.LogError(ex, "解析 AI JSON 返回内容失败: {Text}", text);
-        }
+        _logger.LogError("解析 AI JSON 返回内容失败: {Error}。原始文本: {Text}", error, text);
         return null;
     }
 

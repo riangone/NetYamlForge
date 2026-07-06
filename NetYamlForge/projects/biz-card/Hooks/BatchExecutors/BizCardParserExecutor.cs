@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Projects.BizCard.Hooks;
 
@@ -341,7 +342,7 @@ public class BizCardParserExecutor : AiQueueStepHandlerBase<ImportJobRow>
 
     private async Task<BizCardResult?> ParseWithGeminiAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
-        var apiKey = GetEnvValue("GEMINI_API_KEY", projectName);
+        var apiKey = ProjectEnvLoader.GetValue("GEMINI_API_KEY", projectName, _configuration);
         if (string.IsNullOrWhiteSpace(apiKey)) { Logger.LogWarning("GEMINI_API_KEY not set"); return null; }
 
         var (base64, mimeType) = EncodeImage(absolutePath);
@@ -371,8 +372,8 @@ public class BizCardParserExecutor : AiQueueStepHandlerBase<ImportJobRow>
 
     private async Task<BizCardResult?> ParseWithOllamaAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
-        var baseUrl = GetEnvValue("OLLAMA_BASE_URL", projectName) ?? "http://localhost:11434";
-        var model   = GetEnvValue("OLLAMA_VISION_MODEL", projectName) ?? "llava:13b";
+        var baseUrl = ProjectEnvLoader.GetValue("OLLAMA_BASE_URL", projectName, _configuration) ?? "http://localhost:11434";
+        var model   = ProjectEnvLoader.GetValue("OLLAMA_VISION_MODEL", projectName, _configuration) ?? "llava:13b";
         var (base64, _) = EncodeImage(absolutePath);
 
         var body = new { model, prompt = BizCardPrompt, images = new[] { base64 }, stream = false };
@@ -390,11 +391,11 @@ public class BizCardParserExecutor : AiQueueStepHandlerBase<ImportJobRow>
 
     private async Task<BizCardResult?> ParseWithAnthropicAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
-        var apiKey = GetEnvValue("ANTHROPIC_API_KEY", projectName);
+        var apiKey = ProjectEnvLoader.GetValue("ANTHROPIC_API_KEY", projectName, _configuration);
         if (string.IsNullOrWhiteSpace(apiKey)) { Logger.LogWarning("ANTHROPIC_API_KEY not set"); return null; }
 
         var (base64, mediaType) = EncodeImage(absolutePath);
-        var model = GetEnvValue("ANTHROPIC_MODEL", projectName) ?? "claude-haiku-4-5-20251001";
+        var model = ProjectEnvLoader.GetValue("ANTHROPIC_MODEL", projectName, _configuration) ?? "claude-haiku-4-5-20251001";
 
         var body = new
         {
@@ -453,41 +454,7 @@ public class BizCardParserExecutor : AiQueueStepHandlerBase<ImportJobRow>
     }
 
     private static BizCardResult? ParseJson(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return null;
-        try
-        {
-            var cleaned = Regex.Replace(text, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-            var start = cleaned.IndexOf('{');
-            var end   = cleaned.LastIndexOf('}');
-            if (start < 0 || end <= start) return null;
-            return JsonSerializer.Deserialize<BizCardResult>(cleaned[start..(end + 1)],
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        }
-        catch { return null; }
-    }
-
-    private string? GetEnvValue(string key, string? projectName)
-    {
-        var val = Environment.GetEnvironmentVariable(key);
-        if (!string.IsNullOrEmpty(val)) return val;
-
-        if (!string.IsNullOrEmpty(projectName))
-        {
-            var envFile = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, ".env");
-            if (File.Exists(envFile))
-            {
-                foreach (var line in File.ReadAllLines(envFile))
-                {
-                    var t = line.Trim();
-                    if (t.StartsWith('#') || !t.Contains('=')) continue;
-                    var eq = t.IndexOf('=');
-                    if (t[..eq].Trim() == key) return t[(eq + 1)..].Trim().Trim('"');
-                }
-            }
-        }
-        return _configuration[key];
-    }
+        => AiResultParser.TryParseJson<BizCardResult>(text, out var result, out _) ? result : null;
 }
 
 internal class BizCardResult

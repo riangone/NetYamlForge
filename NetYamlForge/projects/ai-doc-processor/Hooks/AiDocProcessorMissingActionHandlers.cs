@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob.Sdk;
 using Dapper;
 
 namespace NetYamlForge.Projects.AiDocProcessor.Hooks;
@@ -406,16 +407,5 @@ public sealed class BatchUploadZipHandler : ICustomActionHandler
     }
 
     private static string CleanJsonString(string responseText)
-    {
-        if (string.IsNullOrWhiteSpace(responseText)) return "";
-        var cleaned = Regex.Replace(responseText, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-        cleaned = Regex.Replace(cleaned, @"```\s*$", "", RegexOptions.IgnoreCase).Trim();
-        var braceStart = cleaned.IndexOf('{');
-        var end = cleaned.LastIndexOf('}');
-        if (braceStart >= 0 && end > braceStart)
-        {
-            return cleaned.Substring(braceStart, end - braceStart + 1);
-        }
-        return cleaned;
-    }
+        => AiResultParser.ExtractJsonText(responseText);
 }

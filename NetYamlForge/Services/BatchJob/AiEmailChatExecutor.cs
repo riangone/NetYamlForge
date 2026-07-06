@@ -9,6 +9,7 @@ using MailKit.Search;
 using MimeKit;
 using NetYamlForge.Services.Email;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -47,7 +48,7 @@ public class AiEmailChatExecutor
                 throw new FileNotFoundException($".env file not found at {envPath}");
             }
 
-            var env = LoadEnv(envPath);
+            var env = ProjectEnvLoader.Load(envPath);
 
             var imapServer = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
             var imapPort = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
@@ -184,40 +185,6 @@ public class AiEmailChatExecutor
             result.EndedAt = DateTime.UtcNow;
             return result;
         }
-    }
-
-    private Dictionary<string, string> LoadEnv(string filePath)
-    {
-        var env = new Dictionary<string, string>();
-        if (!File.Exists(filePath)) return env;
-
-        foreach (var line in File.ReadAllLines(filePath))
-        {
-            var trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#")) continue;
-            
-            var eqIndex = trimmed.IndexOf('=');
-            if (eqIndex > 0)
-            {
-                var key = trimmed.Substring(0, eqIndex).Trim();
-                var value = trimmed.Substring(eqIndex + 1).Trim();
-                
-                // Handle inline comments
-                var commentIndex = value.IndexOf('#');
-                if (commentIndex >= 0)
-                {
-                    value = value.Substring(0, commentIndex).Trim();
-                }
-
-                // Remove quotes if present
-                if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length >= 2)
-                {
-                    value = value.Substring(1, value.Length - 2);
-                }
-                env[key] = value;
-            }
-        }
-        return env;
     }
 
     private async Task<string> GenerateAiReplyAsync(

@@ -7,6 +7,7 @@ using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.BatchJob;
 
@@ -139,7 +140,7 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
         var rawText = await _providerDispatcher.DispatchAsync(
             usedProvider, prompt, absolutePath, projectName,
-            key => GetEnvValue(key, projectName), ct);
+            key => ProjectEnvLoader.GetValue(key, projectName, _configuration), ct);
 
         var annotation = rawText != null ? ParseAnnotationJson(rawText) : null;
 
@@ -313,28 +314,6 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
             // JSON反序列化解析失败时吞掉异常并返回null以作fallback
             return null;
         }
-    }
-
-    private string? GetEnvValue(string key, string? projectName)
-    {
-        var val = Environment.GetEnvironmentVariable(key);
-        if (!string.IsNullOrEmpty(val)) return val;
-
-        if (!string.IsNullOrEmpty(projectName))
-        {
-            var envFile = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, ".env");
-            if (File.Exists(envFile))
-            {
-                foreach (var line in File.ReadAllLines(envFile))
-                {
-                    var t = line.Trim();
-                    if (t.StartsWith('#') || !t.Contains('=')) continue;
-                    var eq = t.IndexOf('=');
-                    if (t[..eq].Trim() == key) return t[(eq + 1)..].Trim().Trim('"');
-                }
-            }
-        }
-        return _configuration[key];
     }
 
     private static async Task FailRow(

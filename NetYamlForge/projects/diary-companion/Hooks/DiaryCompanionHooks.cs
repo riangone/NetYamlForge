@@ -8,6 +8,7 @@ using System.Text.Json;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.BatchJob.Sdk;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -148,8 +149,11 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                     // 默认优先顺序：opencode cli → antigravity cli → claude code cli
                     // （均为订阅制 CLI，不使用按量计费的 API，避免费用不可控）。
                     var aiPrompt = """
-请用中文为这张图片生成一个非常简短的标注（2到6个字，例如"阳光下的咖啡"、"雨中的街道"、"美味的晚餐"）。
-请直接输出这个标注的内容，不要包含任何标点符号、引号或额外的解释文字。
+你是一位温柔、细腻、善解人意的智能日记伴侣。请用中文为主人今天记录的这张照片，写一句温暖而有画面感的标注。
+要求：
+1. 像朋友在身边轻声描述，捕捉画面里的光线、氛围与心情，而不是冷冰冰地罗列物体。
+2. 一句话，约 12 到 24 个字，可以带一点点温柔的情绪或诗意（例如"午后的阳光落进这杯咖啡里，很暖"、"雨把街道洗得发亮，也把心事悄悄收好了"）。
+3. 只输出这一句标注本身，不要引号、不要 markdown、不要任何额外解释。
 """;
                     // 复用与文本分析相同的选择：把页面选的 AI 厂商/模型/级别传入 CLI 链，
                     // 优先使用用户选择的 provider（不再写死 opencode→antigravity→claude 顺序），
@@ -379,20 +383,13 @@ JSON 示例：
                 opencodeVariant);
             if (!string.IsNullOrWhiteSpace(cleanedText))
             {
-                try
+                if (AiResultParser.TryParseJson<DiaryAnalysisResult>(cleanedText, out var parsed, out var parseError))
                 {
-                    var jsonCleaned = System.Text.RegularExpressions.Regex.Replace(cleanedText, @"```(?:json)?\s*", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
-                    int start = jsonCleaned.IndexOf('{');
-                    int end = jsonCleaned.LastIndexOf('}');
-                    if (start >= 0 && end > start)
-                    {
-                        var json = jsonCleaned.Substring(start, end - start + 1);
-                        result = JsonSerializer.Deserialize<DiaryAnalysisResult>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    }
+                    result = parsed;
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.LogError(ex, "解析日记情绪分析 JSON 失败。原始文本: {Text}", cleanedText);
+                    _logger.LogError("解析日记情绪分析 JSON 失败: {Error}。原始文本: {Text}", parseError, cleanedText);
                 }
             }
             else

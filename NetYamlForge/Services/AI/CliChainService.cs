@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.AI;
 
@@ -73,7 +74,7 @@ public class CliChainService : ICliChainService
         string? variant = null,
         CancellationToken cancellationToken = default)
     {
-        var env = LoadProjectEnv(projectName);
+        var env = ProjectEnvLoader.LoadForProject(projectName);
 
         // 機能全体を無効化するオプション（"设置为可选" 対応）。既定は有効。
         if (env.TryGetValue("CLI_CHAIN_ENABLED", out var enabledRaw)
@@ -298,34 +299,4 @@ public class CliChainService : ICliChainService
         return DefaultOrder;
     }
 
-    private static Dictionary<string, string> LoadProjectEnv(string? projectName)
-    {
-        var env = new Dictionary<string, string>();
-        if (string.IsNullOrEmpty(projectName)) return env;
-
-        var envPath = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, ".env");
-        if (!File.Exists(envPath)) return env;
-
-        foreach (var line in File.ReadAllLines(envPath))
-        {
-            var trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith('#')) continue;
-
-            var eqIndex = trimmed.IndexOf('=');
-            if (eqIndex <= 0) continue;
-
-            var key = trimmed[..eqIndex].Trim();
-            var value = trimmed[(eqIndex + 1)..].Trim();
-
-            var commentIndex = value.IndexOf('#');
-            if (commentIndex >= 0) value = value[..commentIndex].Trim();
-
-            if (value.StartsWith('"') && value.EndsWith('"') && value.Length >= 2)
-            {
-                value = value[1..^1];
-            }
-            env[key] = value;
-        }
-        return env;
-    }
 }

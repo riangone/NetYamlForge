@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.AI;
 
@@ -18,7 +19,7 @@ public class AntigravityCliService : IAntigravityCliService
 
     public async Task<string> PromptAsync(string prompt, string? model = null, string? projectName = null, CancellationToken cancellationToken = default)
     {
-        var env = LoadProjectEnv(projectName);
+        var env = ProjectEnvLoader.LoadForProject(projectName);
         var aiModel = model ?? env.GetValueOrDefault("AI_MODEL", "");
         
         var modelArg = (string.IsNullOrWhiteSpace(aiModel) || aiModel.Equals("auto", StringComparison.OrdinalIgnoreCase)) 
@@ -129,37 +130,4 @@ public class AntigravityCliService : IAntigravityCliService
         return fullOutput.Trim();
     }
 
-    private Dictionary<string, string> LoadProjectEnv(string? projectName)
-    {
-        var env = new Dictionary<string, string>();
-        if (string.IsNullOrEmpty(projectName)) return env;
-
-        var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
-        var envPath = Path.Combine(projectDir, ".env");
-        
-        if (!File.Exists(envPath)) return env;
-
-        foreach (var line in File.ReadAllLines(envPath))
-        {
-            var trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#")) continue;
-            
-            var eqIndex = trimmed.IndexOf('=');
-            if (eqIndex > 0)
-            {
-                var key = trimmed.Substring(0, eqIndex).Trim();
-                var value = trimmed.Substring(eqIndex + 1).Trim();
-                
-                var commentIndex = value.IndexOf('#');
-                if (commentIndex >= 0) value = value.Substring(0, commentIndex).Trim();
-
-                if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length >= 2)
-                {
-                    value = value.Substring(1, value.Length - 2);
-                }
-                env[key] = value;
-            }
-        }
-        return env;
-    }
 }

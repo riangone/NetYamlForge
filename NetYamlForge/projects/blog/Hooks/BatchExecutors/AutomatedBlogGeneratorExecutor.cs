@@ -13,6 +13,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Projects.Blog.Hooks;
 
@@ -229,32 +230,21 @@ public class AutomatedBlogGeneratorExecutor : ProjectBatchExecutorBase<BlogJobIn
     protected override BlogJobResult? ParseResult(string raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return null;
-        try
-        {
-            var cleaned = Regex.Replace(raw, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-            var start = cleaned.IndexOf('{');
-            var end   = cleaned.LastIndexOf('}');
-            if (start < 0 || end <= start) return null;
-            var json = cleaned[start..(end + 1)];
 
-            if (json.Contains("trend_overview", StringComparison.OrdinalIgnoreCase))
-            {
-                var narrative = JsonSerializer.Deserialize<NewsNarrative>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return new BlogJobResult { Narrative = narrative };
-            }
-            else
-            {
-                var article = JsonSerializer.Deserialize<BlogArticle>(json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return new BlogJobResult { Article = article };
-            }
-        }
-        catch (Exception ex)
+        // ニュース系ジョブは trend_overview を含む NewsNarrative、それ以外は BlogArticle として解釈する。
+        if (raw.Contains("trend_overview", StringComparison.OrdinalIgnoreCase))
         {
-            Logger.LogError(ex, "Failed to parse AI response: {Raw}", raw);
+            if (AiResultParser.TryParseJson<NewsNarrative>(raw, out var narrative, out var narrErr))
+                return new BlogJobResult { Narrative = narrative };
+            Logger.LogError("Failed to parse AI narrative response: {Error} / {Raw}", narrErr, raw);
             return null;
         }
+
+        if (AiResultParser.TryParseJson<BlogArticle>(raw, out var article, out var artErr))
+            return new BlogJobResult { Article = article };
+
+        Logger.LogError("Failed to parse AI article response: {Error} / {Raw}", artErr, raw);
+        return null;
     }
 
     protected override async Task PersistAsync(

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using NetYamlForge.Services;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Projects.BizDocs.Hooks;
 
@@ -53,7 +54,7 @@ public class InvoiceEmailProcessorExecutor : ProjectBatchExecutorBase<InvoiceEma
         IDbConnection db, IDbTransaction tx, CancellationToken ct)
     {
         var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName ?? "");
-        var env = LoadEnv(Path.Combine(projectDir, ".env"));
+        var env = ProjectEnvLoader.Load(Path.Combine(projectDir, ".env"));
 
         var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
         var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
@@ -217,7 +218,7 @@ public class InvoiceEmailProcessorExecutor : ProjectBatchExecutorBase<InvoiceEma
         IDbConnection db, IDbTransaction tx, CancellationToken ct)
     {
         var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName ?? "");
-        var env = LoadEnv(Path.Combine(projectDir, ".env"));
+        var env = ProjectEnvLoader.Load(Path.Combine(projectDir, ".env"));
 
         var smtpServer  = env.GetValueOrDefault("SMTP_SERVER") ?? string.Empty;
         var smtpPort    = int.Parse(env.GetValueOrDefault("SMTP_PORT", "587"));
@@ -469,7 +470,7 @@ public class InvoiceEmailProcessorExecutor : ProjectBatchExecutorBase<InvoiceEma
         try
         {
             var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
-            var env = LoadEnv(Path.Combine(projectDir, ".env"));
+            var env = ProjectEnvLoader.Load(Path.Combine(projectDir, ".env"));
 
             var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
             var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
@@ -492,32 +493,6 @@ public class InvoiceEmailProcessorExecutor : ProjectBatchExecutorBase<InvoiceEma
         }
     }
 
-    private static Dictionary<string, string> LoadEnv(string filePath)
-    {
-        var env = new Dictionary<string, string>();
-        if (!File.Exists(filePath)) return env;
-
-        foreach (var line in File.ReadAllLines(filePath))
-        {
-            var trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith("#")) continue;
-
-            var eqIndex = trimmed.IndexOf('=');
-            if (eqIndex <= 0) continue;
-
-            var key   = trimmed[..eqIndex].Trim();
-            var value = trimmed[(eqIndex + 1)..].Trim();
-
-            var commentIdx = value.IndexOf('#');
-            if (commentIdx >= 0) value = value[..commentIdx].Trim();
-
-            if (value.StartsWith('"') && value.EndsWith('"') && value.Length >= 2)
-                value = value[1..^1];
-
-            env[key] = value;
-        }
-        return env;
-    }
 }
 
 public class ExtractedInvoiceContainer
