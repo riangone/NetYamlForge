@@ -17,7 +17,7 @@ public class SqliteSchemaDdlBuilder : ISchemaDdlBuilder
     {
 #pragma warning disable DCS001
         var rows = await conn.QueryAsync<PragmaColumnRow>(
-            $"SELECT cid AS \"Cid\", name AS \"Name\", type AS \"Type\", \"notnull\" AS \"NotNull\", pk AS \"Pk\" FROM pragma_table_info(\"{EscapeIdentifier(tableName)}\")");
+            $"SELECT cid AS \"Cid\", name AS \"Name\", type AS \"Type\", \"notnull\" AS \"NotNull\", pk AS \"Pk\" FROM pragma_table_info('{EscapeString(tableName)}')");
 #pragma warning restore DCS001
         return rows
             .OrderBy(r => r.Cid)
@@ -98,6 +98,8 @@ public class SqliteSchemaDdlBuilder : ISchemaDdlBuilder
     }
 
     private static string EscapeIdentifier(string name) => name.Replace("\"", "\"\"");
+
+    private static string EscapeString(string val) => val.Replace("'", "''");
 
     private sealed class PragmaColumnRow
     {
