@@ -3,8 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,35 +14,31 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Projects.BizCard.Hooks;
 
+public class ImportJobRow
+{
+    public int    id        { get; set; }
+    public string file_name { get; set; } = "";
+    public string file_path { get; set; } = "";
+    public string file_type { get; set; } = "";
+}
+
 /// <summary>
 /// Biz-card business card OCR/parse executor.
-/// Reads pending import_jobs, sends the image to an AI vision model,
-/// extracts structured contact info, and inserts/updates business_cards.
-///
-/// jobs.yml:
-///   type: biz_card_parser
-///   aiProvider: lmstudio | gemini | antigravity | ollama | anthropic
-///   batchSize: 3
-///   bizCardParseConfig:
-///     importTable: import_jobs          # queue table
-///     cardsTable:  business_cards       # destination entity table
-///     embeddingTable: card_embeddings   # optional inline embedding
-///     autoEmbed: true
 /// </summary>
-public class BizCardParserExecutor : AiExecutorBase
+public class BizCardParserExecutor : AiQueueStepHandlerBase<ImportJobRow>
 {
     public override string StepType => "biz_card_parser";
 
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _configuration;
     private readonly IEmbeddingService _embedding;
-    private readonly ILogger<BizCardParserExecutor> _logger;
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
 
     private const string BizCardPrompt = """
@@ -80,18 +77,14 @@ public class BizCardParserExecutor : AiExecutorBase
         _env = env;
         _configuration = configuration;
         _embedding = embedding;
-        _logger = logger;
+        Logger = logger;
     }
 
-    public override async Task ExecuteAsync(
-        BatchJobDefinition job, string? projectName,
-        IDbConnection db, IDbTransaction tx,
-        BatchJobResult result, CancellationToken ct)
+    protected override async Task<IReadOnlyList<ImportJobRow>> FetchPendingAsync(
+        BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        int batchSize, CancellationToken ct)
     {
-        var cfg      = job.BizCardParseConfig ?? new BizCardParseConfig();
-        var provider = job.AiProvider ?? "antigravity";
-        var batch    = job.BatchSize > 0 ? job.BatchSize : 3;
-
+        var cfg = job.BizCardParseConfig ?? new BizCardParseConfig();
         var rows = (await db.QueryAsync<ImportJobRow>(
             $"""
             SELECT id, file_name, file_path, file_type
@@ -100,76 +93,74 @@ public class BizCardParserExecutor : AiExecutorBase
             ORDER BY id ASC
             LIMIT @Batch
             """,
-            new { Batch = batch },
+            new { Batch = batchSize },
             transaction: tx)).ToList();
-
-        if (rows.Count == 0)
-        {
-            result.Success = true;
-            result.RowsAffected = 0;
-            return;
-        }
-
-        var done = 0; var failed = 0;
-
-        foreach (var row in rows)
-        {
-            if (ct.IsCancellationRequested) break;
-            var now = DateTime.UtcNow;
-
-            await db.ExecuteAsync(
-                $"UPDATE {cfg.ImportTable} SET status='processing' WHERE id=@Id",
-                new { Id = row.id }, transaction: tx);
-
-            try
-            {
-                var absolutePath = ResolveFilePath(row.file_path);
-                if (!File.Exists(absolutePath))
-                {
-                    await FailRow(db, tx, row.id, cfg, $"File not found: {absolutePath}");
-                    failed++;
-                    continue;
-                }
-
-                var parsed = await ParseCardAsync(absolutePath, provider, projectName, ct);
-
-                if (parsed == null)
-                {
-                    await FailRow(db, tx, row.id, cfg, "AI returned empty or unparseable response");
-                    failed++;
-                    continue;
-                }
-
-                var cardNo = $"BC-{now:yyyyMMddHHmmss}-{row.id}";
-                var cardId = await InsertBusinessCard(db, tx, row, cfg, parsed, cardNo, now);
-
-                if (cfg.AutoEmbed)
-                    await TryInlineEmbed(db, tx, cardId.ToString(), cfg, parsed, ct);
-
-                await db.ExecuteAsync(
-                    $"UPDATE {cfg.ImportTable} SET status='done', result_card_id=@CardId, completed_at=@Now WHERE id=@Id",
-                    new { CardId = cardId, Now = now.ToString("o"), Id = row.id }, transaction: tx);
-
-                done++;
-                _logger.LogInformation("BizCard parsed: import_job/{Id} → {CardsTable}/{CardId} via {Provider}",
-                    row.id, cfg.CardsTable, cardId, provider);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to parse biz-card import_job/{Id}", row.id);
-                await FailRow(db, tx, row.id, cfg, ex.Message);
-                failed++;
-            }
-        }
-
-        result.Success = failed == 0 || done > 0;
-        result.RowsAffected = done;
-        result.ErrorMessage = failed > 0 ? $"{failed} import job(s) failed parsing" : null;
+        return rows;
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Insert parsed card into business_cards
-    // ──────────────────────────────────────────────────────────
+    protected override async Task MarkProcessingAsync(ImportJobRow row, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        var cfg = job.BizCardParseConfig ?? new BizCardParseConfig();
+        await db.ExecuteAsync(
+            $"UPDATE {cfg.ImportTable} SET status='processing' WHERE id=@Id",
+            new { Id = row.id }, transaction: tx);
+    }
+
+    protected override async Task<RowOutcome> ProcessRowAsync(
+        ImportJobRow row, BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
+        CancellationToken ct)
+    {
+        var cfg = job.BizCardParseConfig ?? new BizCardParseConfig();
+        var provider = job.AiProvider ?? "antigravity";
+        var absolutePath = ResolveFilePath(row.file_path);
+
+        if (!File.Exists(absolutePath))
+        {
+            return RowOutcome.Fail($"File not found: {absolutePath}");
+        }
+
+        var parsed = await ParseCardAsync(absolutePath, provider, projectName, ct);
+        if (parsed == null)
+        {
+            return RowOutcome.Fail("AI returned empty or unparseable response");
+        }
+
+        var now = DateTime.UtcNow;
+        var cardNo = $"BC-{now:yyyyMMddHHmmss}-{row.id}";
+        var cardId = await InsertBusinessCard(db, tx, row, cfg, parsed, cardNo, now);
+
+        if (cfg.AutoEmbed)
+        {
+            await TryInlineEmbed(db, tx, cardId.ToString(), cfg, parsed, ct);
+        }
+
+        return RowOutcome.Ok(cardId);
+    }
+
+    protected override async Task WriteOutcomeAsync(ImportJobRow row, RowOutcome outcome, BatchJobDefinition job, IDbConnection db, IDbTransaction tx)
+    {
+        var cfg = job.BizCardParseConfig ?? new BizCardParseConfig();
+        var now = DateTime.UtcNow;
+
+        if (outcome.Status == RowStatus.Ok)
+        {
+            var cardId = (long)outcome.Payload!;
+            await db.ExecuteAsync(
+                $"UPDATE {cfg.ImportTable} SET status='done', result_card_id=@CardId, completed_at=@Now WHERE id=@Id",
+                new { CardId = cardId, Now = now.ToString("o"), Id = row.id }, transaction: tx);
+            
+            Logger.LogInformation("BizCard parsed: import_job/{Id} → {CardsTable}/{CardId}",
+                row.id, cfg.CardsTable, cardId);
+        }
+        else
+        {
+            var error = outcome.Reason ?? "Unknown error";
+            await db.ExecuteAsync(
+                $"UPDATE {cfg.ImportTable} SET status='failed', error_message=@Err WHERE id=@Id",
+                new { Err = error[..Math.Min(error.Length, 500)], Id = row.id },
+                transaction: tx);
+        }
+    }
 
     private static async Task<long> InsertBusinessCard(
         IDbConnection db, IDbTransaction tx,
@@ -224,10 +215,6 @@ public class BizCardParserExecutor : AiExecutorBase
         return await db.QueryFirstAsync<long>("SELECT last_insert_rowid()", transaction: tx);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Inline embedding after parse
-    // ──────────────────────────────────────────────────────────
-
     private async Task TryInlineEmbed(
         IDbConnection db, IDbTransaction tx,
         string cardId, BizCardParseConfig cfg,
@@ -263,11 +250,11 @@ public class BizCardParserExecutor : AiExecutorBase
                 $"UPDATE {cfg.CardsTable} SET embedding_status='done', updated_at=@Now WHERE id=@Id",
                 new { Now = DateTime.UtcNow.ToString("o"), Id = cardId }, transaction: tx);
 
-            _logger.LogInformation("Inline embedding generated for card/{Id} ({Dims} dims)", cardId, vec.Length);
+            Logger.LogInformation("Inline embedding generated for card/{Id} ({Dims} dims)", cardId, vec.Length);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Inline embedding failed for card/{Id}, will retry via cron", cardId);
+            Logger.LogWarning(ex, "Inline embedding failed for card/{Id}, will retry via cron", cardId);
         }
     }
 
@@ -285,10 +272,6 @@ public class BizCardParserExecutor : AiExecutorBase
         return string.Join(". ", parts);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Provider dispatch
-    // ──────────────────────────────────────────────────────────
-
     private async Task<BizCardResult?> ParseCardAsync(
         string absolutePath, string provider, string? projectName, CancellationToken ct)
         => provider.ToLowerInvariant() switch
@@ -304,7 +287,7 @@ public class BizCardParserExecutor : AiExecutorBase
 
     private BizCardResult? LogAndNull(string provider)
     {
-        _logger.LogWarning("Unknown biz-card parse provider '{Provider}'", provider);
+        Logger.LogWarning("Unknown biz-card parse provider '{Provider}'", provider);
         return null;
     }
 
@@ -349,7 +332,7 @@ public class BizCardParserExecutor : AiExecutorBase
         };
         var resp = await _http.SendAsync(req, ct);
         var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("LM Studio {Status}: {Body}", resp.StatusCode, json); return null; }
+        if (!resp.IsSuccessStatusCode) { Logger.LogError("LM Studio {Status}: {Body}", resp.StatusCode, json); return null; }
 
         using var doc = JsonDocument.Parse(json);
         var text = doc.RootElement.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString() ?? "";
@@ -359,7 +342,7 @@ public class BizCardParserExecutor : AiExecutorBase
     private async Task<BizCardResult?> ParseWithGeminiAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
         var apiKey = GetEnvValue("GEMINI_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("GEMINI_API_KEY not set"); return null; }
+        if (string.IsNullOrWhiteSpace(apiKey)) { Logger.LogWarning("GEMINI_API_KEY not set"); return null; }
 
         var (base64, mimeType) = EncodeImage(absolutePath);
         var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
@@ -379,7 +362,7 @@ public class BizCardParserExecutor : AiExecutorBase
         };
         var resp = await _http.SendAsync(req, ct);
         var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Gemini {Status}: {Body}", resp.StatusCode, json); return null; }
+        if (!resp.IsSuccessStatusCode) { Logger.LogError("Gemini {Status}: {Body}", resp.StatusCode, json); return null; }
 
         using var doc = JsonDocument.Parse(json);
         var text = doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString() ?? "";
@@ -399,7 +382,7 @@ public class BizCardParserExecutor : AiExecutorBase
         };
         var resp = await _http.SendAsync(req, ct);
         var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Ollama {Status}: {Body}", resp.StatusCode, json); return null; }
+        if (!resp.IsSuccessStatusCode) { Logger.LogError("Ollama {Status}: {Body}", resp.StatusCode, json); return null; }
 
         using var doc = JsonDocument.Parse(json);
         return ParseJson(doc.RootElement.GetProperty("response").GetString() ?? "");
@@ -408,7 +391,7 @@ public class BizCardParserExecutor : AiExecutorBase
     private async Task<BizCardResult?> ParseWithAnthropicAsync(string absolutePath, string? projectName, CancellationToken ct)
     {
         var apiKey = GetEnvValue("ANTHROPIC_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("ANTHROPIC_API_KEY not set"); return null; }
+        if (string.IsNullOrWhiteSpace(apiKey)) { Logger.LogWarning("ANTHROPIC_API_KEY not set"); return null; }
 
         var (base64, mediaType) = EncodeImage(absolutePath);
         var model = GetEnvValue("ANTHROPIC_MODEL", projectName) ?? "claude-haiku-4-5-20251001";
@@ -440,16 +423,12 @@ public class BizCardParserExecutor : AiExecutorBase
 
         var resp = await _http.SendAsync(req, ct);
         var json = await resp.Content.ReadAsStringAsync(ct);
-        if (!resp.IsSuccessStatusCode) { _logger.LogError("Anthropic {Status}: {Body}", resp.StatusCode, json); return null; }
+        if (!resp.IsSuccessStatusCode) { Logger.LogError("Anthropic {Status}: {Body}", resp.StatusCode, json); return null; }
 
         using var doc = JsonDocument.Parse(json);
         var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString() ?? "";
         return ParseJson(text);
     }
-
-    // ──────────────────────────────────────────────────────────
-    // Helpers
-    // ──────────────────────────────────────────────────────────
 
     private string ResolveFilePath(string storedPath)
     {
@@ -509,43 +488,27 @@ public class BizCardParserExecutor : AiExecutorBase
         }
         return _configuration[key];
     }
+}
 
-    private static async Task FailRow(IDbConnection db, IDbTransaction tx, int id, BizCardParseConfig cfg, string error)
-    {
-        await db.ExecuteAsync(
-            $"UPDATE {cfg.ImportTable} SET status='failed', error_message=@Err WHERE id=@Id",
-            new { Err = error[..Math.Min(error.Length, 500)], Id = id },
-            transaction: tx);
-    }
-
-    private class ImportJobRow
-    {
-        public int    id        { get; set; }
-        public string file_name { get; set; } = "";
-        public string file_path { get; set; } = "";
-        public string file_type { get; set; } = "";
-    }
-
-    internal class BizCardResult
-    {
-        [JsonPropertyName("last_name")]         public string? LastName        { get; set; }
-        [JsonPropertyName("first_name")]        public string? FirstName       { get; set; }
-        [JsonPropertyName("last_name_kana")]    public string? LastNameKana    { get; set; }
-        [JsonPropertyName("first_name_kana")]   public string? FirstNameKana   { get; set; }
-        [JsonPropertyName("company_name")]      public string? CompanyName     { get; set; }
-        [JsonPropertyName("company_name_kana")] public string? CompanyNameKana { get; set; }
-        [JsonPropertyName("title")]             public string? Title           { get; set; }
-        [JsonPropertyName("department")]        public string? Department      { get; set; }
-        [JsonPropertyName("email")]             public string? Email           { get; set; }
-        [JsonPropertyName("email2")]            public string? Email2          { get; set; }
-        [JsonPropertyName("phone")]             public string? Phone           { get; set; }
-        [JsonPropertyName("mobile")]            public string? Mobile          { get; set; }
-        [JsonPropertyName("fax")]               public string? Fax             { get; set; }
-        [JsonPropertyName("postal_code")]       public string? PostalCode      { get; set; }
-        [JsonPropertyName("address")]           public string? Address         { get; set; }
-        [JsonPropertyName("website")]           public string? Website         { get; set; }
-        [JsonPropertyName("industry")]          public string? Industry        { get; set; }
-        [JsonPropertyName("tags")]              public string[]? Tags          { get; set; }
-        [JsonPropertyName("notes")]             public string? Notes           { get; set; }
-    }
+internal class BizCardResult
+{
+    [JsonPropertyName("last_name")]         public string? LastName        { get; set; }
+    [JsonPropertyName("first_name")]        public string? FirstName       { get; set; }
+    [JsonPropertyName("last_name_kana")]    public string? LastNameKana    { get; set; }
+    [JsonPropertyName("first_name_kana")]   public string? FirstNameKana   { get; set; }
+    [JsonPropertyName("company_name")]      public string? CompanyName     { get; set; }
+    [JsonPropertyName("company_name_kana")] public string? CompanyNameKana { get; set; }
+    [JsonPropertyName("title")]             public string? Title           { get; set; }
+    [JsonPropertyName("department")]        public string? Department      { get; set; }
+    [JsonPropertyName("email")]             public string? Email           { get; set; }
+    [JsonPropertyName("email2")]            public string? Email2          { get; set; }
+    [JsonPropertyName("phone")]             public string? Phone           { get; set; }
+    [JsonPropertyName("mobile")]            public string? Mobile          { get; set; }
+    [JsonPropertyName("fax")]               public string? Fax             { get; set; }
+    [JsonPropertyName("postal_code")]       public string? PostalCode      { get; set; }
+    [JsonPropertyName("address")]           public string? Address         { get; set; }
+    [JsonPropertyName("website")]           public string? Website         { get; set; }
+    [JsonPropertyName("industry")]          public string? Industry        { get; set; }
+    [JsonPropertyName("tags")]              public string[]? Tags          { get; set; }
+    [JsonPropertyName("notes")]             public string? Notes           { get; set; }
 }

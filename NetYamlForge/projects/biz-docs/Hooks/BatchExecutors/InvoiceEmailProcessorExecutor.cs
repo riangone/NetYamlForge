@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -21,173 +20,102 @@ using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Projects.BizDocs.Hooks;
 
+public class InvoiceEmailItem
+{
+    public UniqueId Uid { get; set; }
+    public string MessageId { get; set; } = "";
+    public string Subject { get; set; } = "";
+    public string SenderEmail { get; set; } = "";
+    public string Body { get; set; } = "";
+    public MimeMessage OriginalMessage { get; set; } = null!;
+}
+
 /// <summary>
 /// メールから請求情報を抽出し、DB保存・PDF生成・返信送信を行うジョブ実行器。
 /// </summary>
-public class InvoiceEmailProcessorExecutor : AiExecutorBase
+public class InvoiceEmailProcessorExecutor : ProjectBatchExecutorBase<InvoiceEmailItem, ExtractedInvoiceContainer>
 {
     public override string StepType => "invoice_email_processor";
     private readonly IDocumentPdfService _docPdf;
-    private readonly ILogger<InvoiceEmailProcessorExecutor> _logger;
 
-    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, ICliChainService cliChain, ILogger<InvoiceEmailProcessorExecutor> logger) : base(cliChain, logger)
+    public InvoiceEmailProcessorExecutor(IDocumentPdfService docPdf, ICliChainService cliChain, ILogger<InvoiceEmailProcessorExecutor> logger) 
+        : base(cliChain, logger)
     {
         _docPdf = docPdf;
-        _logger = logger;
     }
 
-    public override async Task ExecuteAsync(
+    protected override Task<InvoiceEmailItem?> LoadInputAsync(
         BatchJobDefinition job, string? projectName,
-        IDbConnection db, IDbTransaction tx,
-        BatchJobResult result, CancellationToken ct)
-    {
-        var r = await ExecuteAsync(job, projectName ?? "", db, ct);
-        result.Success = r.Success;
-        result.RowsAffected = r.RowsAffected;
-        result.ErrorMessage = r.ErrorMessage;
-        result.ErrorDetail = r.ErrorDetail;
-    }
+        IDbConnection db, IDbTransaction tx, CancellationToken ct) => Task.FromResult<InvoiceEmailItem?>(null);
 
-    public async Task<BatchJobResult> ExecuteAsync(
-        BatchJobDefinition job,
-        string projectName,
-        IDbConnection db,
-        CancellationToken cancellationToken = default)
+    protected override async Task<IReadOnlyList<InvoiceEmailItem>> LoadItemsAsync(
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx, CancellationToken ct)
     {
-        var result = new BatchJobResult { JobId = job.Id, StartedAt = DateTime.UtcNow };
+        var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName ?? "");
+        var env = LoadEnv(Path.Combine(projectDir, ".env"));
 
-        try
+        var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
+        var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
+        var imapSsl     = bool.Parse(env.GetValueOrDefault("IMAP_SSL", "true"));
+        var imapUser    = env.GetValueOrDefault("IMAP_USER") ?? string.Empty;
+        var imapPass    = env.GetValueOrDefault("IMAP_PASSWORD") ?? string.Empty;
+
+        var targetSender = env.GetValueOrDefault("TARGET_SENDER_EMAIL");
+        var invoiceKeywordsRaw = env.GetValueOrDefault("INVOICE_SUBJECT_KEYWORDS", "");
+        var invoiceKeywords = invoiceKeywordsRaw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToArray();
+
+        using var imapClient = new ImapClient();
+        await imapClient.ConnectAsync(imapServer, imapPort, imapSsl, ct);
+        await imapClient.AuthenticateAsync(imapUser, imapPass, ct);
+
+        var inbox = imapClient.Inbox;
+        await inbox.OpenAsync(FolderAccess.ReadWrite, ct);
+
+        var uids = await inbox.SearchAsync(SearchQuery.NotSeen, ct);
+        var items = new List<InvoiceEmailItem>();
+
+        foreach (var uid in uids.OrderBy(x => x.Id).Take(10))
         {
-            _logger.LogInformation("InvoiceEmailProcessor 開始: {JobId} (Project: {Project})", job.Id, projectName);
+            var message = await inbox.GetMessageAsync(uid, ct);
+            var senderEmail = message.From.Mailboxes.FirstOrDefault()?.Address ?? "";
 
-            var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
-            var env = LoadEnv(Path.Combine(projectDir, ".env"));
-
-            var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
-            var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
-            var imapSsl     = bool.Parse(env.GetValueOrDefault("IMAP_SSL", "true"));
-            var imapUser    = env.GetValueOrDefault("IMAP_USER") ?? string.Empty;
-            var imapPass    = env.GetValueOrDefault("IMAP_PASSWORD") ?? string.Empty;
-
-            var smtpServer  = env.GetValueOrDefault("SMTP_SERVER") ?? string.Empty;
-            var smtpPort    = int.Parse(env.GetValueOrDefault("SMTP_PORT", "587"));
-            var smtpSsl     = bool.Parse(env.GetValueOrDefault("SMTP_SSL", "false"));
-            var smtpUser    = env.GetValueOrDefault("SMTP_USER") ?? string.Empty;
-            var smtpPass    = env.GetValueOrDefault("SMTP_PASSWORD") ?? string.Empty;
-            var fromName    = env.GetValueOrDefault("SMTP_FROM_NAME", "請求処理システム");
-            var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
-            var aiModel     = env.GetValueOrDefault("AI_MODEL", "");
-            var targetSender = env.GetValueOrDefault("TARGET_SENDER_EMAIL");
-            var invoiceKeywordsRaw = env.GetValueOrDefault("INVOICE_SUBJECT_KEYWORDS", "");
-            var invoiceKeywords = invoiceKeywordsRaw
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                .ToArray();
-
-            using var imapClient = new ImapClient();
-            await imapClient.ConnectAsync(imapServer, imapPort, imapSsl, cancellationToken);
-            await imapClient.AuthenticateAsync(imapUser, imapPass, cancellationToken);
-
-            var inbox = imapClient.Inbox;
-            await inbox.OpenAsync(FolderAccess.ReadWrite, cancellationToken);
-
-            var uids = await inbox.SearchAsync(SearchQuery.NotSeen, cancellationToken);
-            var processed = 0;
-
-            foreach (var uid in uids.OrderBy(x => x.Id).Take(10))
+            if (!string.IsNullOrEmpty(targetSender))
             {
-                var message = await inbox.GetMessageAsync(uid, cancellationToken);
-                var senderEmail = message.From.Mailboxes.FirstOrDefault()?.Address ?? "";
-
-                if (!string.IsNullOrEmpty(targetSender))
+                var allowed = targetSender.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (!allowed.Any(s => s.Equals(senderEmail, StringComparison.OrdinalIgnoreCase)))
                 {
-                    var allowed = targetSender.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    if (!allowed.Any(s => s.Equals(senderEmail, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        _logger.LogInformation("スキップ（送信者不一致）: {Sender}", senderEmail);
-                        continue;
-                    }
-                }
-
-                // INVOICE_SUBJECT_KEYWORDS が設定されている場合、件名が一致するメールのみ処理
-                if (invoiceKeywords.Length > 0 && !invoiceKeywords.Any(kw =>
-                    message.Subject?.Contains(kw, StringComparison.OrdinalIgnoreCase) == true))
-                {
-                    _logger.LogInformation("スキップ（請求キーワード不一致）: {Subject}", message.Subject);
+                    Logger.LogInformation("スキップ（送信者不一致）: {Sender}", senderEmail);
                     continue;
                 }
-
-                var body = message.TextBody ?? message.HtmlBody ?? "";
-                _logger.LogInformation("請求メール処理中: {Subject} from {Sender}", message.Subject, senderEmail);
-
-                // AI で請求データをJSON抽出
-                var extracted = await ExtractInvoicesFromEmailAsync(body, aiModel, projectName, cancellationToken);
-                if (extracted == null || extracted.Invoices == null || extracted.Invoices.Count == 0)
-                {
-                    _logger.LogWarning("請求情報を抽出できませんでした: {Subject}", message.Subject);
-                    continue;
-                }
-
-                // DB保存・PDF生成
-                var attachments = new List<(string Filename, byte[] Bytes)>();
-
-                foreach (var inv in extracted.Invoices)
-                {
-                    try
-                    {
-                        var dbResult = await SaveInvoiceToDbAsync(db, inv);
-                        var invoiceId = dbResult.InvoiceId;
-                        var invoiceNo = dbResult.InvoiceNo;
-                        _logger.LogInformation("請求書保存完了: {InvoiceNo} (Id={Id})", invoiceNo, invoiceId);
-
-                        var pdfBytes = await GenerateInvoicePdfAsync(db, invoiceId, projectDir);
-                        if (pdfBytes != null)
-                        {
-                            attachments.Add(($"請求書_{invoiceNo}.pdf", pdfBytes));
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "請求书処理エラー: {Client}", inv.ClientName);
-                    }
-                }
-
-                // 返信メール送信（PDFを添付）— 送信元アドレスにのみ返信
-                if (attachments.Count > 0 && !string.IsNullOrEmpty(senderEmail))
-                {
-                    var recipients = new List<string> { senderEmail };
-
-                    await SendReplyWithAttachmentsAsync(
-                        smtpServer!, smtpPort, smtpSsl, smtpUser!, smtpPass!,
-                        fromName, fromAddress!, message, recipients, attachments, extracted.Invoices, cancellationToken);
-                }
-
-                await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, cancellationToken);
-                processed++;
             }
 
-            await imapClient.DisconnectAsync(true, cancellationToken);
+            if (invoiceKeywords.Length > 0 && !invoiceKeywords.Any(kw =>
+                message.Subject?.Contains(kw, StringComparison.OrdinalIgnoreCase) == true))
+            {
+                Logger.LogInformation("スキップ（請求キーワード不一致）: {Subject}", message.Subject);
+                continue;
+            }
 
-            result.Success = true;
-            result.RowsAffected = processed;
-            result.EndedAt = DateTime.UtcNow;
+            var body = message.TextBody ?? message.HtmlBody ?? "";
+            items.Add(new InvoiceEmailItem
+            {
+                Uid = uid,
+                MessageId = message.MessageId,
+                Subject = message.Subject ?? "",
+                SenderEmail = senderEmail,
+                Body = body,
+                OriginalMessage = message
+            });
+        }
 
-            _logger.LogInformation("InvoiceEmailProcessor 完了: {JobId}, 処理数: {Count}", job.Id, processed);
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "InvoiceEmailProcessor エラー: {JobId}", job.Id);
-            result.Success = false;
-            result.ErrorMessage = ex.Message;
-            result.EndedAt = DateTime.UtcNow;
-            return result;
-        }
+        await imapClient.DisconnectAsync(true, ct);
+        return items;
     }
 
-    // ─── AI 抽出 ────────────────────────────────────────────────────────────────
-
-    private async Task<ExtractedInvoiceContainer?> ExtractInvoicesFromEmailAsync(
-        string emailBody, string aiModel, string projectName, CancellationToken cancellationToken)
+    protected override string BuildPrompt(InvoiceEmailItem input)
     {
         var systemPrompt = """
             あなたは日本語メールから請求情報を抽出するAIです。
@@ -224,7 +152,7 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
             ルール:
             - 金額・小計・合計の計算が正しいか、必ずセルフチェックしてください
             - 金額(amount) = 数量(quantity) × 単価(unit_price) です
-            - 小計(subtotal) = すべての明細の金額(amount)の合計 です
+            - 小計(subtotal) = すべての明细の金額(amount)の合計 です
             - 消費税(tax_amount) = 小計 × 0.10 です（小数点以下四捨五入）
             - 合計(total) = 小計 + 消費税 です
             - 金額が明示されていない場合は上記ルールで計算してください
@@ -232,15 +160,21 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
             - 情報が不足している請求先もできる限り含める
             """;
 
-        var prompt = $"{systemPrompt}\n\nメール本文:\n{emailBody}";
+        return $"{systemPrompt}\n\nメール本文:\n{input.Body}";
+    }
 
-        var extracted = await Cli.PromptJsonAsync<ExtractedInvoiceContainer>(prompt, projectName: projectName, cancellationToken: cancellationToken);
-        
+    protected override ExtractedInvoiceContainer? ParseResult(string raw)
+    {
+        if (!TryParseJson(raw, out ExtractedInvoiceContainer? extracted, out var error))
+        {
+            Logger.LogWarning("Failed to parse ExtractedInvoiceContainer: {Error}", error);
+            return null;
+        }
+
         if (extracted?.Invoices != null)
         {
             foreach (var inv in extracted.Invoices)
             {
-                // 合計・小計の検証と補正
                 foreach (var item in inv.Items)
                 {
                     var calculatedAmount = item.Quantity * item.UnitPrice;
@@ -277,12 +211,60 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
         return extracted;
     }
 
-    // ─── DB 保存 ─────────────────────────────────────────────────────────────
+    protected override async Task PersistAsync(
+        InvoiceEmailItem input, ExtractedInvoiceContainer result,
+        BatchJobDefinition job, string? projectName,
+        IDbConnection db, IDbTransaction tx, CancellationToken ct)
+    {
+        var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName ?? "");
+        var env = LoadEnv(Path.Combine(projectDir, ".env"));
+
+        var smtpServer  = env.GetValueOrDefault("SMTP_SERVER") ?? string.Empty;
+        var smtpPort    = int.Parse(env.GetValueOrDefault("SMTP_PORT", "587"));
+        var smtpSsl     = bool.Parse(env.GetValueOrDefault("SMTP_SSL", "false"));
+        var smtpUser    = env.GetValueOrDefault("SMTP_USER") ?? string.Empty;
+        var smtpPass    = env.GetValueOrDefault("SMTP_PASSWORD") ?? string.Empty;
+        var fromName    = env.GetValueOrDefault("SMTP_FROM_NAME", "請求処理システム");
+        var fromAddress = env.GetValueOrDefault("SMTP_FROM_ADDRESS") ?? smtpUser;
+
+        var attachments = new List<(string Filename, byte[] Bytes)>();
+
+        foreach (var inv in result.Invoices)
+        {
+            try
+            {
+                var dbResult = await SaveInvoiceToDbAsync(db, inv);
+                var invoiceId = dbResult.InvoiceId;
+                var invoiceNo = dbResult.InvoiceNo;
+                Logger.LogInformation("請求書保存完了: {InvoiceNo} (Id={Id})", invoiceNo, invoiceId);
+
+                var pdfBytes = await GenerateInvoicePdfAsync(db, invoiceId, projectDir);
+                if (pdfBytes != null)
+                {
+                    attachments.Add(($"請求書_{invoiceNo}.pdf", pdfBytes));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "請求書処理エラー: {Client}", inv.ClientName);
+            }
+        }
+
+        if (attachments.Count > 0 && !string.IsNullOrEmpty(input.SenderEmail))
+        {
+            var recipients = new List<string> { input.SenderEmail };
+
+            await SendReplyWithAttachmentsAsync(
+                smtpServer, smtpPort, smtpSsl, smtpUser, smtpPass,
+                fromName, fromAddress, input.OriginalMessage, recipients, attachments, result.Invoices, ct);
+        }
+
+        await MarkSeenAsync(input.Uid, projectName ?? "", ct);
+    }
 
     private async Task<(int InvoiceId, string InvoiceNo)> SaveInvoiceToDbAsync(
         IDbConnection db, ExtractedInvoice inv)
     {
-        // 取引先を名前で検索 or 新規作成
         var clientId = await db.QueryFirstOrDefaultAsync<int?>(
             "SELECT Id FROM GoseiClient WHERE Name = @Name LIMIT 1",
             new { Name = inv.ClientName });
@@ -292,10 +274,9 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
             clientId = await db.QuerySingleAsync<int>(
                 "INSERT INTO GoseiClient (Name, CreatedAt, UpdatedAt) VALUES (@Name, @Now, @Now); SELECT last_insert_rowid()",
                 new { Name = inv.ClientName, Now = DateTime.UtcNow });
-            _logger.LogInformation("取引先新規作成: {Name} (Id={Id})", inv.ClientName, clientId);
+            Logger.LogInformation("取引先新規作成: {Name} (Id={Id})", inv.ClientName, clientId);
         }
 
-        // 請求書番号を自動採番（AI-YYYYMM-XXXX 形式）
         var prefix = $"AI-{DateTime.UtcNow:yyyyMM}-";
         var lastNo = await db.QueryFirstOrDefaultAsync<string>(
             "SELECT InvoiceNo FROM GoseiInvoice WHERE InvoiceNo LIKE @Prefix ORDER BY InvoiceNo DESC LIMIT 1",
@@ -329,7 +310,6 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
                 Now       = DateTime.UtcNow
             });
 
-        // 明細行を挿入
         for (int i = 0; i < inv.Items.Count; i++)
         {
             var item = inv.Items[i];
@@ -357,13 +337,10 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
         return (invoiceId, invoiceNo);
     }
 
-    // ─── PDF 生成 ────────────────────────────────────────────────────────────
-
     private async Task<byte[]?> GenerateInvoicePdfAsync(IDbConnection db, int invoiceId, string projectDir)
     {
         try
         {
-            // ヘッダーデータ取得（クライクライアントのテンプレート設定も含む）
             var invoiceRow = await db.QueryFirstOrDefaultAsync(
                 "SELECT gi.*, gc.Name AS ClientName, gc.InvoiceTemplate, gc.TemplateVars FROM GoseiInvoice gi LEFT JOIN GoseiClient gc ON gi.ClientId = gc.Id WHERE gi.Id = @Id",
                 new { Id = invoiceId });
@@ -373,7 +350,6 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
             var header = ((IDictionary<string, object>)invoiceRow)
                 .ToDictionary(kv => kv.Key, kv => (object?)kv.Value);
 
-            // クライアント別テンプレート名（未設定時はデフォルト）
             var templateName = header.TryGetValue("InvoiceTemplate", out var tmplVal) && tmplVal is string s && !string.IsNullOrWhiteSpace(s)
                 ? s
                 : "gosei-invoice";
@@ -381,17 +357,16 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
             var template = _docPdf.LoadTemplate(projectDir, templateName);
             if (template == null && templateName != "gosei-invoice")
             {
-                _logger.LogWarning("PDFテンプレート '{Template}' が見つかりません。デフォルトにフォールバックします", templateName);
+                Logger.LogWarning("PDFテンプレート '{Template}' が見つかりません。デフォルトにフォールバックします", templateName);
                 template = _docPdf.LoadTemplate(projectDir, "gosei-invoice");
             }
 
             if (template == null)
             {
-                _logger.LogWarning("PDFテンプレート 'gosei-invoice' が見つかりません");
+                Logger.LogWarning("PDFテンプレート 'gosei-invoice' が見つかりません");
                 return null;
             }
 
-            // TemplateVars（JSON）をヘッダーにマージ
             if (header.TryGetValue("TemplateVars", out var tvRaw) && tvRaw is string tvJson && !string.IsNullOrWhiteSpace(tvJson))
             {
                 try
@@ -402,11 +377,10 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "TemplateVars のJSONパース失敗: {Json}", tvJson);
+                    Logger.LogWarning(ex, "TemplateVars のJSONパース失敗: {Json}", tvJson);
                 }
             }
 
-            // dataSources 構築（テンプレートのクエリを実行）
             var dataSources = new Dictionary<string, IList<IDictionary<string, object?>>>();
 
             foreach (var ds in template.DataSources)
@@ -422,12 +396,10 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "PDF生成エラー: InvoiceId={Id}", invoiceId);
+            Logger.LogError(ex, "PDF生成エラー: InvoiceId={Id}", invoiceId);
             return null;
         }
     }
-
-    // ─── 返信メール送信 ──────────────────────────────────────────────────────
 
     private async Task SendReplyWithAttachmentsAsync(
         string smtpServer, int smtpPort, bool smtpSsl,
@@ -489,10 +461,36 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
         await smtp.SendAsync(reply, cancellationToken);
         await smtp.DisconnectAsync(true, cancellationToken);
 
-        _logger.LogInformation("返信メール送信完了: {To}, 添付: {Count}件", string.Join(", ", recipients), attachments.Count);
+        Logger.LogInformation("返信メール送信完了: {To}, 添付: {Count}件", string.Join(", ", recipients), attachments.Count);
     }
 
-    // ─── ユーティリティ ──────────────────────────────────────────────────────
+    private async Task MarkSeenAsync(UniqueId uid, string projectName, CancellationToken ct)
+    {
+        try
+        {
+            var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
+            var env = LoadEnv(Path.Combine(projectDir, ".env"));
+
+            var imapServer  = env.GetValueOrDefault("IMAP_SERVER") ?? string.Empty;
+            var imapPort    = int.Parse(env.GetValueOrDefault("IMAP_PORT", "993"));
+            var imapSsl     = bool.Parse(env.GetValueOrDefault("IMAP_SSL", "true"));
+            var imapUser    = env.GetValueOrDefault("IMAP_USER") ?? string.Empty;
+            var imapPass    = env.GetValueOrDefault("IMAP_PASSWORD") ?? string.Empty;
+
+            using var imapClient = new ImapClient();
+            await imapClient.ConnectAsync(imapServer, imapPort, imapSsl, ct);
+            await imapClient.AuthenticateAsync(imapUser, imapPass, ct);
+
+            var inbox = imapClient.Inbox;
+            await inbox.OpenAsync(FolderAccess.ReadWrite, ct);
+            await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, ct);
+            await imapClient.DisconnectAsync(true, ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to mark email {Uid} as seen", uid);
+        }
+    }
 
     private static Dictionary<string, string> LoadEnv(string filePath)
     {
@@ -522,9 +520,7 @@ public class InvoiceEmailProcessorExecutor : AiExecutorBase
     }
 }
 
-// ─── 抽出データモデル ────────────────────────────────────────────────────────
-
-internal class ExtractedInvoiceContainer
+public class ExtractedInvoiceContainer
 {
     [System.Text.Json.Serialization.JsonPropertyName("invoices")]
     public List<ExtractedInvoice> Invoices { get; set; } = new();
@@ -533,7 +529,7 @@ internal class ExtractedInvoiceContainer
     public string ExtractionNotes { get; set; } = "";
 }
 
-internal class ExtractedInvoice
+public class ExtractedInvoice
 {
     [System.Text.Json.Serialization.JsonPropertyName("client_name")]
     public string ClientName { get; set; } = "";
@@ -560,7 +556,7 @@ internal class ExtractedInvoice
     public List<string> VerificationNotes { get; set; } = new();
 }
 
-internal class ExtractedInvoiceItem
+public class ExtractedInvoiceItem
 {
     [System.Text.Json.Serialization.JsonPropertyName("item_name")]
     public string ItemName { get; set; } = "";
