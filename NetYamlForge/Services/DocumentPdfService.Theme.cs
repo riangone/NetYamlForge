@@ -45,7 +45,11 @@ public partial class DocumentPdfService
     private static XColor? TryParseXColor(string hex)
     {
         try { return ParseXColor(hex); }
-        catch { return null; }
+        catch (Exception)
+        {
+            // Hex颜色格式不正确时，安全吞掉异常并返回null以作fallback
+            return null;
+        }
     }
 
     private static (double Width, double Height) ParsePageSize(string size, string orient)

@@ -1,18 +1,17 @@
 // ファイル概要：プロジェクト固有の Hooks/ ディレクトリからフッククラスを動的に読み込みます。
 // 各プロジェクトは Hooks/ サブディレクトリに独自のフッククラスを配置できます。
 
-using System.Collections.Concurrent;
+using System;
+using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.Page;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.Project.Loading;
 
 namespace NetYamlForge.Services;
 
@@ -57,11 +56,10 @@ public class ProjectHookLoader : IProjectHookLoader
     private readonly IProjectActionRegistry _actionRegistry;
     private readonly BatchStepHandlerRegistry _batchRegistry;
     private readonly IPageActionDispatcher _pageActionDispatcher;
-    private readonly ConcurrentDictionary<string, CollectibleAssemblyLoadContext> _assemblyContexts;
-    private readonly ConcurrentDictionary<string, Assembly> _loadedAssemblies;
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _projectLocks;
-    private static List<MetadataReference>? _cachedReferences;
-    private static readonly object _refLock = new();
+
+    private readonly HookAssemblyCompiler _compiler;
+    private readonly CollectibleAssemblyManager _assemblyManager;
+    private readonly ProjectLoadLockRegistry _lockRegistry;
 
     public ProjectHookLoader(
         ILogger<ProjectHookLoader> logger,
@@ -70,7 +68,10 @@ public class ProjectHookLoader : IProjectHookLoader
         IProjectBusinessLogicRegistry bizRegistry,
         IProjectActionRegistry actionRegistry,
         BatchStepHandlerRegistry batchRegistry,
-        IPageActionDispatcher pageActionDispatcher)
+        IPageActionDispatcher pageActionDispatcher,
+        HookAssemblyCompiler compiler,
+        CollectibleAssemblyManager assemblyManager,
+        ProjectLoadLockRegistry lockRegistry)
     {
         _logger = logger;
         _scopeFactory = scopeFactory;
@@ -79,19 +80,14 @@ public class ProjectHookLoader : IProjectHookLoader
         _actionRegistry = actionRegistry;
         _batchRegistry = batchRegistry;
         _pageActionDispatcher = pageActionDispatcher;
-        _assemblyContexts = new ConcurrentDictionary<string, CollectibleAssemblyLoadContext>(StringComparer.OrdinalIgnoreCase);
-        _loadedAssemblies = new ConcurrentDictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
-        _projectLocks = new ConcurrentDictionary<string, SemaphoreSlim>(StringComparer.OrdinalIgnoreCase);
-    }
-
-    private SemaphoreSlim GetProjectLock(string projectName)
-    {
-        return _projectLocks.GetOrAdd(projectName, _ => new SemaphoreSlim(1, 1));
+        _compiler = compiler;
+        _assemblyManager = assemblyManager;
+        _lockRegistry = lockRegistry;
     }
 
     public async Task LoadProjectHooksAsync(string projectName, string projectDir, IProjectHookRegistry registry)
     {
-        var @lock = GetProjectLock(projectName);
+        var @lock = _lockRegistry.For(projectName);
         await @lock.WaitAsync();
         try
         {
@@ -111,7 +107,7 @@ public class ProjectHookLoader : IProjectHookLoader
 
             try
             {
-                var assembly = await CompileHooksAsync(projectName, csFiles);
+                var assembly = await _compiler.CompileHooksAsync(projectName, csFiles);
                 if (assembly == null)
                 {
                     _logger.LogError("[{ErrorCode}] プロジェクト '{Project}' のフックコンパイルに失敗しました",
@@ -119,7 +115,7 @@ public class ProjectHookLoader : IProjectHookLoader
                     return;
                 }
 
-                _loadedAssemblies[projectName] = assembly;
+                _assemblyManager.Register(projectName, assembly);
 
                 using var scope = _scopeFactory.CreateScope();
                 var serviceProvider = scope.ServiceProvider;
@@ -185,7 +181,7 @@ public class ProjectHookLoader : IProjectHookLoader
 
     public async Task LoadProjectBusinessLogicAsync(string projectName, string projectDir, IProjectBusinessLogicRegistry registry)
     {
-        var @lock = GetProjectLock(projectName);
+        var @lock = _lockRegistry.For(projectName);
         await @lock.WaitAsync();
         try
         {
@@ -203,14 +199,14 @@ public class ProjectHookLoader : IProjectHookLoader
 
             try
             {
-                if (!_loadedAssemblies.TryGetValue(projectName, out var assembly))
+                if (!_assemblyManager.TryGetLoadedAssembly(projectName, out var assembly) || assembly == null)
                 {
-                    assembly = await CompileHooksAsync(projectName, csFiles);
+                    assembly = await _compiler.CompileHooksAsync(projectName, csFiles);
                     if (assembly == null)
                     {
                         return;
                     }
-                    _loadedAssemblies[projectName] = assembly;
+                    _assemblyManager.Register(projectName, assembly);
                 }
 
                 using var scope = _scopeFactory.CreateScope();
@@ -321,273 +317,9 @@ public class ProjectHookLoader : IProjectHookLoader
         }
     }
 
-    private string CalculateSourceHash(IEnumerable<string> sourceFiles)
-    {
-        using var sha256 = System.Security.Cryptography.SHA256.Create();
-        var sortedFiles = sourceFiles.OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
-        var combinedBytes = new List<byte>();
-
-        foreach (var file in sortedFiles)
-        {
-            var relativePath = Path.GetFileName(file);
-            var content = File.ReadAllText(file);
-            combinedBytes.AddRange(System.Text.Encoding.UTF8.GetBytes(relativePath));
-            combinedBytes.AddRange(System.Text.Encoding.UTF8.GetBytes(content));
-        }
-
-        var hashBytes = sha256.ComputeHash(combinedBytes.ToArray());
-        return Convert.ToHexString(hashBytes);
-    }
-
-    private List<MetadataReference> GetMetadataReferences()
-    {
-        lock (_refLock)
-        {
-            if (_cachedReferences != null)
-            {
-                return _cachedReferences.ToList();
-            }
-
-            var references = new List<MetadataReference>();
-            var addedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                try
-                {
-                    if (assembly.IsDynamic) continue;
-
-                    if (!string.IsNullOrEmpty(assembly.Location))
-                    {
-                        if (addedPaths.Add(assembly.Location))
-                        {
-                            references.Add(MetadataReference.CreateFromFile(assembly.Location));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug("アセンブリ参照の追加中にエラー（スキップ）：{Name}, {Message}", assembly.FullName, ex.Message);
-                }
-            }
-
-            try
-            {
-                var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
-                var stdLibs = new[] { "System.Runtime.dll", "System.Collections.dll", "System.Runtime.Extensions.dll", "System.Linq.dll", "System.Text.RegularExpressions.dll", "Microsoft.CSharp.dll", "System.IO.Compression.dll", "System.IO.Compression.ZipFile.dll", "System.Text.Json.dll", "System.Xml.Linq.dll", "System.Net.Http.dll" };
-                foreach (var lib in stdLibs)
-                {
-                    var fullPath = Path.Combine(assemblyPath, lib);
-                    if (File.Exists(fullPath) && addedPaths.Add(fullPath))
-                    {
-                        references.Add(MetadataReference.CreateFromFile(fullPath));
-                    }
-                }
-            }
-            catch { }
-
-            try
-            {
-                var identityAssembly = typeof(Microsoft.AspNetCore.Identity.PasswordHasher<>).Assembly;
-                if (!string.IsNullOrEmpty(identityAssembly.Location))
-                {
-                    if (addedPaths.Add(identityAssembly.Location))
-                    {
-                        references.Add(MetadataReference.CreateFromFile(identityAssembly.Location));
-                    }
-                }
-            }
-            catch { }
-
-            try
-            {
-                var imageSharpAssembly = typeof(SixLabors.ImageSharp.Image).Assembly;
-                _logger.LogInformation("ImageSharp Assembly Location is: {Location}", imageSharpAssembly.Location);
-                if (!string.IsNullOrEmpty(imageSharpAssembly.Location))
-                {
-                    if (addedPaths.Add(imageSharpAssembly.Location))
-                    {
-                        references.Add(MetadataReference.CreateFromFile(imageSharpAssembly.Location));
-                        _logger.LogInformation("Successfully added ImageSharp metadata reference from: {Location}", imageSharpAssembly.Location);
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning("ImageSharp Assembly Location is null or empty!");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "ImageSharp 参照の強制追加中にエラーが発生しました");
-            }
-
-            _cachedReferences = references;
-            return _cachedReferences.ToList();
-        }
-    }
-
-    private async Task<Assembly?> CompileHooksAsync(string projectName, IEnumerable<string> sourceFiles)
-    {
-        var hash = CalculateSourceHash(sourceFiles);
-        var cacheDir = Path.Combine(Directory.GetCurrentDirectory(), "cache", "ProjectHooks");
-        if (!Directory.Exists(cacheDir))
-        {
-            Directory.CreateDirectory(cacheDir);
-        }
-        var dllPath = Path.Combine(cacheDir, $"{projectName}_{hash}.dll");
-        var pdbPath = Path.Combine(cacheDir, $"{projectName}_{hash}.pdb");
-
-        if (File.Exists(dllPath))
-        {
-            _logger.LogInformation("プロジェクト '{Project}' のキャッシュされたフックアセンブリを使用します (Hash: {Hash})", projectName, hash);
-            try
-            {
-                UnloadAlcInternal(projectName);
-
-                var cachedContextName = $"ProjectContext_{projectName}_{Guid.NewGuid():N}";
-                var cachedAlc = new CollectibleAssemblyLoadContext(cachedContextName);
-                _assemblyContexts[projectName] = cachedAlc;
-
-                using var dllStream = File.OpenRead(dllPath);
-                if (File.Exists(pdbPath))
-                {
-                    using var pdbStream = File.OpenRead(pdbPath);
-                    return cachedAlc.LoadFromStream(dllStream, pdbStream);
-                }
-                return cachedAlc.LoadFromStream(dllStream);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "キャッシュされたアセンブリのロードに失敗しました。再コンパイルします：{Project}", projectName);
-                try { File.Delete(dllPath); File.Delete(pdbPath); } catch {}
-            }
-        }
-
-        var sourceEntries = sourceFiles
-            .Select(filePath => new
-            {
-                FilePath = filePath,
-                SourceText = Microsoft.CodeAnalysis.Text.SourceText.From(File.ReadAllText(filePath), System.Text.Encoding.UTF8)
-            })
-            .ToList();
-
-        var references = GetMetadataReferences();
-
-        var syntaxTrees = sourceEntries
-            .Select(entry => CSharpSyntaxTree.ParseText(entry.SourceText, path: entry.FilePath))
-            .ToList();
-
-        var compilation = CSharpCompilation.Create(
-            $"ProjectHooks_{projectName}",
-            syntaxTrees,
-            references,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-                .WithOptimizationLevel(OptimizationLevel.Release)
-                .WithAllowUnsafe(false));
-
-        var securityValidator = new HookSecurityValidator();
-        var violations = securityValidator.Validate(compilation);
-
-        if (violations.Count > 0)
-        {
-            _logger.LogError(
-                "[{ErrorCode}] プロジェクト '{Project}' のフックセキュリティ検証に失敗しました：{Violations}",
-                "HOOK_SECURITY_VIOLATION", projectName, string.Join("; ", violations));
-            return null;
-        }
-
-        using var ms = new MemoryStream();
-        using var pdbMs = new MemoryStream();
-        var result = compilation.Emit(ms, pdbMs);
-
-        if (!result.Success)
-        {
-            var errors = result.Diagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Error)
-                .Select(d =>
-                {
-                    var lineSpan = d.Location.GetLineSpan();
-                    var fileName = Path.GetFileName(lineSpan.Path);
-                    var line = lineSpan.StartLinePosition.Line + 1;
-                    var column = lineSpan.StartLinePosition.Character + 1;
-                    var hint = GetHookCompileHint(d.Id);
-                    return $"{fileName}({line},{column}) {d.Id}: {d.GetMessage()}{(string.IsNullOrEmpty(hint) ? string.Empty : $" | Hint: {hint}")}";
-                })
-                .ToList();
-
-            _logger.LogError(
-                "[{ErrorCode}] プロジェクト '{Project}' のフックコンパイルエラー：{Errors}",
-                "HOOK_COMPILE_DIAGNOSTICS", projectName, string.Join(Environment.NewLine, errors));
-            return null;
-        }
-
-        ms.Seek(0, SeekOrigin.Begin);
-        pdbMs.Seek(0, SeekOrigin.Begin);
-
-        try
-        {
-            await File.WriteAllBytesAsync(dllPath, ms.ToArray());
-            await File.WriteAllBytesAsync(pdbPath, pdbMs.ToArray());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "フックアセンブリのキャッシュ保存に失敗しました：{Project}", projectName);
-        }
-
-        ms.Seek(0, SeekOrigin.Begin);
-        pdbMs.Seek(0, SeekOrigin.Begin);
-
-        UnloadAlcInternal(projectName);
-
-        var contextName = $"ProjectContext_{projectName}_{Guid.NewGuid():N}";
-        var alc = new CollectibleAssemblyLoadContext(contextName);
-        _assemblyContexts[projectName] = alc;
-
-        return alc.LoadFromStream(ms, pdbMs);
-    }
-
-    private void UnloadAlcInternal(string projectName)
-    {
-        if (_assemblyContexts.TryRemove(projectName, out var oldAlc))
-        {
-            try
-            {
-                oldAlc.Unload();
-                TrackUnload(projectName, oldAlc);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "古い AssemblyLoadContext のアンロードに失敗：{Project}", projectName);
-            }
-        }
-    }
-
-    private void TrackUnload(string projectName, System.Runtime.Loader.AssemblyLoadContext alc)
-    {
-        var weakRef = new WeakReference(alc);
-        Task.Run(async () =>
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                await Task.Delay(1000);
-            }
-
-            if (weakRef.IsAlive)
-            {
-                _logger.LogWarning("警告: プロジェクト '{Project}' の AssemblyLoadContext (Collectible) がアンロード後に GC によって回収されませんでした。メモリリークの可能性があります。", projectName);
-            }
-            else
-            {
-                _logger.LogInformation("プロジェクト '{Project}' の AssemblyLoadContext が正常に GC によって回収されました。", projectName);
-            }
-        });
-    }
-
     public async Task UnloadProjectAssemblyAsync(string projectName)
     {
-        var @lock = GetProjectLock(projectName);
+        var @lock = _lockRegistry.For(projectName);
         await @lock.WaitAsync();
         try
         {
@@ -598,9 +330,9 @@ public class ProjectHookLoader : IProjectHookLoader
             _actionRegistry.Clear(projectName);
             _pageActionDispatcher.Clear(projectName);
 
-            UnloadAlcInternal(projectName);
+            _assemblyManager.UnloadAlcInternal(projectName);
 
-            _loadedAssemblies.TryRemove(projectName, out _);
+            _assemblyManager.RemoveLoadedAssembly(projectName);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -611,21 +343,9 @@ public class ProjectHookLoader : IProjectHookLoader
         }
     }
 
-    private class CollectibleAssemblyLoadContext : System.Runtime.Loader.AssemblyLoadContext
-    {
-        public CollectibleAssemblyLoadContext(string name) : base(name, isCollectible: true)
-        {
-        }
-
-        protected override Assembly? Load(AssemblyName assemblyName)
-        {
-            return null;
-        }
-    }
-
     public async Task LoadProjectActionHandlersAsync(string projectName, string projectDir, IProjectActionRegistry registry)
     {
-        var @lock = GetProjectLock(projectName);
+        var @lock = _lockRegistry.For(projectName);
         await @lock.WaitAsync();
         try
         {
@@ -639,12 +359,12 @@ public class ProjectHookLoader : IProjectHookLoader
 
             try
             {
-                if (!_loadedAssemblies.TryGetValue(projectName, out var assembly))
+                if (!_assemblyManager.TryGetLoadedAssembly(projectName, out var assembly) || assembly == null)
                 {
-                    assembly = await CompileHooksAsync(projectName, csFiles);
+                    assembly = await _compiler.CompileHooksAsync(projectName, csFiles);
                     if (assembly == null)
                         return;
-                    _loadedAssemblies[projectName] = assembly;
+                    _assemblyManager.Register(projectName, assembly);
                 }
 
                 using var scope = _scopeFactory.CreateScope();
@@ -705,17 +425,5 @@ public class ProjectHookLoader : IProjectHookLoader
         {
             @lock.Release();
         }
-    }
-
-    private static string GetHookCompileHint(string diagnosticId)
-    {
-        return diagnosticId switch
-        {
-            "CS0246" => "型/名前空間が見つかりません。using 追加または参照アセンブリを確認してください。",
-            "CS0103" => "名前が現在のコンテキストに存在しません。変数名・スコープを確認してください。",
-            "CS1061" => "メンバーが見つかりません。型定義と拡張メソッド using を確認してください。",
-            "CS1503" => "引数の型が一致していません。メソッド定義と渡す値 of を確認してください。",
-            _ => string.Empty
-        };
     }
 }

@@ -170,8 +170,7 @@ public class SectionHooksConverter : IYamlTypeConverter
 
             if (_keyMap.TryGetValue(normalizedKey, out var propName))
             {
-                var prop = typeof(SectionHooksDefinition).GetProperty(propName);
-                prop?.SetValue(result, hookList);
+                PropertyAccessorCache.SetValue(result, propName, hookList);
             }
         }
 

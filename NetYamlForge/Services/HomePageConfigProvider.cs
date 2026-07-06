@@ -52,7 +52,7 @@ public class HomePageConfigProvider : IHomePageConfigProvider
         }
     }
 
-    private static HomePageConfig Load(string filePath)
+    private HomePageConfig Load(string filePath)
     {
         if (!File.Exists(filePath))
         {
@@ -68,8 +68,9 @@ public class HomePageConfigProvider : IHomePageConfigProvider
                 .Build();
             return deserializer.Deserialize<HomePageConfig>(yaml) ?? new HomePageConfig();
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to load home-page config from {FilePath}. Using default configuration.", filePath);
             return new HomePageConfig();
         }
     }

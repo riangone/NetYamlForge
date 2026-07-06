@@ -28,6 +28,10 @@ using NetYamlForge.Projects.FormForge;
 using NetYamlForge.Projects.KbForge;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+using NetYamlForge.Services.Diagnostics;
 
 namespace NetYamlForge.Extensions;
 
@@ -53,6 +57,8 @@ public static class ServiceCollectionExtensions
         services.AddEntityHooks();
         services.AddYamlHotReload();
         services.AddEmailServices(configuration);
+        services.AddApiServices();
+        services.AddForgeTelemetry(configuration);
         
         // AI Prompt 配置配置化
         services.Configure<PromptHotReloadOptions>(configuration.GetSection(PromptHotReloadOptions.SectionName));
@@ -228,6 +234,10 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEntityHooksService, EntityHooksService>();
         services.AddSingleton<IEntityMetadataParser, EntityMetadataParser>();
         services.AddSingleton<IEntityMetadataValidator, EntityMetadataValidator>();
+        // R2-01: スキーマ検証オプション（Forge:SchemaValidation）とランナーを登録。既定は Warn（現状互換）。
+        services.AddOptions<NetYamlForge.Services.Validation.SchemaValidationOptions>()
+            .BindConfiguration(NetYamlForge.Services.Validation.SchemaValidationOptions.SectionName);
+        services.AddSingleton<NetYamlForge.Services.Validation.SchemaValidationRunner>();
         services.AddHostedService<NetYamlForge.Services.Validation.YamlConfigStartupValidator>();
 
         // 页面自定义动作分发器与处理器注册
@@ -301,6 +311,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
         services.AddSingleton<PromptVersionResolver>();
         services.AddSingleton<IAiScenarioYamlLoader, AiScenarioYamlLoader>();
+        services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.ISlotSessionStore, NetYamlForge.Services.AI.SlotFilling.InMemorySlotSessionStore>();
+        services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.IConversationFsmStore, NetYamlForge.Services.AI.SlotFilling.InMemoryConversationFsmStore>();
+        services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.ScenarioResolver>();
+        services.Configure<NetYamlForge.Services.AI.SlotFilling.SlotFillingOptions>(configuration.GetSection("SlotFilling"));
+        services.Configure<NetYamlForge.Services.AI.AppointmentOptions>(configuration.GetSection("Appointment"));
         services.AddScoped<ISlotFillingManager, SlotFillingManager>();
         services.AddScoped<IAppointmentService, AppointmentService>();
         services.AddHostedService<AiToolRegistryInitializer>();
@@ -361,6 +376,10 @@ public static class ServiceCollectionExtensions
     {
         // ===== プロジェクト固有フック =====
         services.AddSingleton<IProjectHookRegistry, ProjectHookRegistry>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.HookMetadataReferenceCache>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.CollectibleAssemblyManager>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.ProjectLoadLockRegistry>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.HookAssemblyCompiler>();
         services.AddSingleton<IProjectHookLoader, ProjectHookLoader>();
 
         // ===== プロジェクト固有ビジネスロジック =====
@@ -424,6 +443,76 @@ public static class ServiceCollectionExtensions
         services.AddScoped<THandler>();
         services.AddScoped<IBatchStepHandler>(sp => sp.GetRequiredService<THandler>());
         services.AddSingleton(new BatchStepHandlerRegistration(stepType, typeof(THandler)));
+        return services;
+    }
+
+    /// <summary>
+    /// APIサービスを登録します。
+    /// </summary>
+    public static IServiceCollection AddApiServices(this IServiceCollection services)
+    {
+        services.AddScoped<NetYamlForge.Services.Api.ApiEntityAccessGuard>();
+        services.AddScoped<NetYamlForge.Services.Api.ApiEntityQueryService>();
+        services.AddScoped<NetYamlForge.Services.Api.ApiEntityWriteService>();
+        services.AddScoped<NetYamlForge.Services.Api.ApiEntityActionService>();
+        return services;
+    }
+
+    /// <summary>
+    /// OpenTelemetry テレメトリ（メトリクス・トレース）を設定し、登録します。
+    /// </summary>
+    public static IServiceCollection AddForgeTelemetry(this IServiceCollection services, IConfiguration configuration)
+    {
+        var enabled = configuration.GetValue<bool>("Forge:Telemetry:Enabled", false);
+        if (!enabled)
+        {
+            return services;
+        }
+
+        var exporter = configuration.GetValue<string>("Forge:Telemetry:Exporter", "Otlp");
+        var otlpEndpoint = configuration.GetValue<string>("Forge:Telemetry:OtlpEndpoint", "http://localhost:4317");
+        var sampleRatio = configuration.GetValue<double>("Forge:Telemetry:SampleRatio", 1.0);
+        var metricsEnabled = configuration.GetValue<bool>("Forge:Telemetry:Metrics", true);
+        var tracingEnabled = configuration.GetValue<bool>("Forge:Telemetry:Tracing", true);
+
+        services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource.AddService(ForgeTelemetry.ServiceName))
+            .WithTracing(tracing =>
+            {
+                if (!tracingEnabled) return;
+
+                tracing.AddSource(ForgeTelemetry.ServiceName)
+                    .SetSampler(new ParentBasedSampler(new TraceIdRatioBasedSampler(sampleRatio)))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation();
+
+                if (string.Equals(exporter, "Console", StringComparison.OrdinalIgnoreCase))
+                {
+                    tracing.AddConsoleExporter();
+                }
+                else if (string.Equals(exporter, "Otlp", StringComparison.OrdinalIgnoreCase))
+                {
+                    tracing.AddOtlpExporter(opt => opt.Endpoint = new Uri(otlpEndpoint));
+                }
+            })
+            .WithMetrics(metrics =>
+            {
+                if (!metricsEnabled) return;
+
+                metrics.AddMeter(ForgeTelemetry.ServiceName)
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation();
+
+                if (string.Equals(exporter, "Console", StringComparison.OrdinalIgnoreCase))
+                {
+                    metrics.AddConsoleExporter();
+                }
+                else if (string.Equals(exporter, "Otlp", StringComparison.OrdinalIgnoreCase))
+                {
+                    metrics.AddOtlpExporter(opt => opt.Endpoint = new Uri(otlpEndpoint));
+                }
+            });
+
         return services;
     }
 }

@@ -83,6 +83,10 @@ public class AiDocProcessorTests
         var services = new ServiceCollection();
         services.AddSingleton(mockAi.Object);
         services.AddSingleton(mockEnv.Object);
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.HookMetadataReferenceCache>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.CollectibleAssemblyManager>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.ProjectLoadLockRegistry>();
+        services.AddSingleton<NetYamlForge.Services.Project.Loading.HookAssemblyCompiler>();
         services.AddLogging(builder =>
         {
             builder.ClearProviders();
@@ -105,7 +109,10 @@ public class AiDocProcessorTests
             mockBizRegistry.Object,
             actionRegistry,
             new BatchStepHandlerRegistry(Enumerable.Empty<BatchStepHandlerRegistration>()),
-            mockPageDispatcher.Object);
+            mockPageDispatcher.Object,
+            serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.HookAssemblyCompiler>(),
+            serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.CollectibleAssemblyManager>(),
+            serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.ProjectLoadLockRegistry>());
 
         // テストプロジェクトのベースディレクトリからの相対パス
         var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/ai-doc-processor";

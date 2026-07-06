@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using Microsoft.Extensions.Options;
 using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 
@@ -13,16 +14,18 @@ public class AppointmentService : IAppointmentService
     private readonly IDbConnectionFactory _dbConnectionFactory;
     private readonly ProjectScope _projectScope;
     private readonly ILogger<AppointmentService> _logger;
-    private const string DefaultProjectId = "auto-dealer-demo";
+    private readonly AppointmentOptions _options;
 
     public AppointmentService(
         IDbConnectionFactory dbConnectionFactory,
         ProjectScope projectScope,
-        ILogger<AppointmentService> logger)
+        ILogger<AppointmentService> logger,
+        IOptions<AppointmentOptions> options)
     {
         _dbConnectionFactory = dbConnectionFactory;
         _projectScope = projectScope;
         _logger = logger;
+        _options = options.Value;
     }
 
     private string ResolveProject(string? projectId)
@@ -31,7 +34,13 @@ public class AppointmentService : IAppointmentService
             return projectId;
         if (_projectScope.IsSet)
             return _projectScope.Current.Name;
-        return DefaultProjectId;
+        
+        var defaultPid = _options.DefaultProjectId;
+        if (string.IsNullOrWhiteSpace(defaultPid))
+        {
+            throw new InvalidOperationException("Project ID is not specified and no DefaultProjectId is configured in AppointmentOptions.");
+        }
+        return defaultPid;
     }
 
     /// <inheritdoc />

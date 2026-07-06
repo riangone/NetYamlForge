@@ -112,6 +112,16 @@ if (args.Any(a => a.Equals("--migrate-data", StringComparison.OrdinalIgnoreCase)
     return;
 }
 
+// R2-01 PR-4: スキーマ検証 CLI 入口（CI 用）。
+// Web ホストを起動せず SchemaValidationRunner のみ実行し、GitHub Actions 注釈形式で出力、
+// 違反あり=1 / なし=0 で終了する。既存の起動時検証（YamlConfigStartupValidator）とは独立に呼べる。
+if (args.Any(a => a.Equals("--validate-schemas", StringComparison.OrdinalIgnoreCase)))
+{
+    var exitCode = NetYamlForge.Services.Validation.SchemaValidationCli.Run(args);
+    Environment.Exit(exitCode);
+    return;
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Paths configuration mapping for database and runtime directories

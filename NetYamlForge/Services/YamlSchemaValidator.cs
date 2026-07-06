@@ -57,6 +57,60 @@ public static class YamlSchemaValidator
         ValidateBySchema(schema, yamlContent, filePath, "dashboard");
     }
 
+    // ------------------------------------------------------------------
+    // R2-01: 例外を投げずに EvaluationResults を返す Try 系オーバーロード。
+    // 既存の Validate* メソッド（違反時に例外）は後方互換のためそのまま維持する。
+    // SchemaValidationRunner が「最初の違反で中断せず全違反を集約」するために使う。
+    // ------------------------------------------------------------------
+
+    /// <summary>検証対象スキーマの種別。</summary>
+    public enum SchemaKind
+    {
+        Project,
+        UiPage,
+        Entity,
+        Dashboard
+    }
+
+    /// <summary>
+    /// 指定種別のスキーマで YAML を検証し、結果を返します（例外を投げません）。
+    /// YAML 構文エラー時は <see cref="YamlDotNet.Core.YamlException"/> 等が伝播するため、
+    /// 呼び出し側で捕捉すること。
+    /// </summary>
+    public static EvaluationResults TryValidateYaml(SchemaKind kind, string yamlContent)
+    {
+        var schema = kind switch
+        {
+            SchemaKind.Project => GetProjectSchema(),
+            SchemaKind.UiPage => GetUiPageSchema(),
+            SchemaKind.Entity => GetEntitySchema(),
+            SchemaKind.Dashboard => GetDashboardSchema(),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
+
+        var jsonElement = ConvertYamlToJsonElement(yamlContent);
+        return schema.Evaluate(jsonElement, new EvaluationOptions
+        {
+            OutputFormat = OutputFormat.List
+        });
+    }
+
+    /// <summary>project.yaml を検証し結果を返します（例外を投げません）。</summary>
+    public static EvaluationResults TryValidateProjectYaml(string yamlContent)
+        => TryValidateYaml(SchemaKind.Project, yamlContent);
+
+    /// <summary>pages/*.yaml を検証し結果を返します（例外を投げません）。</summary>
+    public static EvaluationResults TryValidateUiPageYaml(string yamlContent)
+        => TryValidateYaml(SchemaKind.UiPage, yamlContent);
+
+    /// <summary>entities/*.yml を検証し結果を返します（例外を投げません）。</summary>
+    public static EvaluationResults TryValidateEntityYaml(string yamlContent)
+        => TryValidateYaml(SchemaKind.Entity, yamlContent);
+
+    /// <summary>dashboard.yml を検証し結果を返します（例外を投げません）。</summary>
+    public static EvaluationResults TryValidateDashboardYaml(string yamlContent)
+        => TryValidateYaml(SchemaKind.Dashboard, yamlContent);
+
     private static void ValidateBySchema(JsonSchema schema, string yamlContent, string filePath, string schemaName)
     {
         var jsonElement = ConvertYamlToJsonElement(yamlContent);

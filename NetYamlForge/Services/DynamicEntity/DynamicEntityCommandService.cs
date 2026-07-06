@@ -16,7 +16,7 @@ namespace NetYamlForge.Services;
 /// DynamicEntityController から呼ばれ、Create / Update / Delete の
 /// フック実行・トランザクション管理・監査ログ記録を一括で処理します。
 /// </summary>
-public sealed class DynamicEntityCommandService
+public class DynamicEntityCommandService
 {
     private const string ConcurrencyConflictCode = CommandErrorCodes.ConcurrencyConflictOrNotFound;
     private const string ConcurrencyConflictMessage = "対象データが更新済みか、既に削除されています。";
@@ -54,7 +54,7 @@ public sealed class DynamicEntityCommandService
     /// <param name="afterHooks">entities.yml の hooks.afterCreate フック名リスト</param>
     /// <param name="userName">操作ユーザー名（監査ログ用）</param>
     /// <returns>成功時は新規 ID、失敗時はエラーコードとメッセージ</returns>
-    public async Task<CommandResult<int>> CreateAsync(
+    public virtual async Task<CommandResult<int>> CreateAsync(
         string entity,
         IDictionary<string, object?> values,
         List<string>? beforeHooks,
@@ -111,7 +111,7 @@ public sealed class DynamicEntityCommandService
     /// 既存レコードを更新します。
     /// 更新行数が 0 の場合（楽観的排他競合 or レコード消失）は ConcurrencyConflict エラーを返します。
     /// </summary>
-    public async Task<CommandResult> UpdateAsync(
+    public virtual async Task<CommandResult> UpdateAsync(
         string entity,
         string keyName,
         string? keyValue,
@@ -205,7 +205,7 @@ public sealed class DynamicEntityCommandService
     /// レコードを削除（またはソフトデリート）します。
     /// 影響行数が 0 の場合は ConcurrencyConflict エラーを返します。
     /// </summary>
-    public async Task<CommandResult> DeleteAsync(
+    public virtual async Task<CommandResult> DeleteAsync(
         string entity,
         string keyName,
         string? keyValue,

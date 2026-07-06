@@ -2,6 +2,7 @@
 // 未知の列型・フィルター型・未登録フック参照を構造化ログとして警告します。
 // IHostedService として登録し、アプリ起動直後に一度だけ実行されます。
 
+using Microsoft.Extensions.Options;
 using NetYamlForge.Services.Hooks;
 
 namespace NetYamlForge.Services.Validation;
@@ -64,6 +65,9 @@ public sealed class YamlConfigStartupValidator : IHostedService
     private readonly IProjectActionRegistry _projectActionRegistry;
     private readonly IEntityHooksService _entityHooks;
     private readonly ILogger<YamlConfigStartupValidator> _logger;
+    private readonly IHostEnvironment _env;
+    private readonly SchemaValidationRunner _schemaRunner;
+    private readonly SchemaValidationOptions _schemaOptions;
 
     public YamlConfigStartupValidator(
         ProjectManager projectManager,
@@ -71,7 +75,10 @@ public sealed class YamlConfigStartupValidator : IHostedService
         IProjectHookRegistry projectHookRegistry,
         IProjectActionRegistry projectActionRegistry,
         IEntityHooksService entityHooks,
-        ILogger<YamlConfigStartupValidator> logger)
+        ILogger<YamlConfigStartupValidator> logger,
+        IHostEnvironment env,
+        SchemaValidationRunner schemaRunner,
+        IOptions<SchemaValidationOptions> schemaOptions)
     {
         _projectManager = projectManager;
         _hookRegistry = hookRegistry;
@@ -79,6 +86,9 @@ public sealed class YamlConfigStartupValidator : IHostedService
         _projectActionRegistry = projectActionRegistry;
         _entityHooks = entityHooks;
         _logger = logger;
+        _env = env;
+        _schemaRunner = schemaRunner;
+        _schemaOptions = schemaOptions.Value;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -172,7 +182,52 @@ public sealed class YamlConfigStartupValidator : IHostedService
         else
             _logger.LogInformation("yaml_config_summary 起動時設定検証: 問題なし（全プロジェクト）");
 
+        // R2-01: JSON Schema 検証（型/フック参照チェックとは独立・相補）。
+        RunSchemaValidation();
+
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// R2-01: 全プロジェクト YAML を JSON Schema で検証し、Mode に応じて処置する。
+    /// Off=skip / Warn=警告のみ / Strict=エラー（FailFastOnStartup=true で起動中止）。
+    /// </summary>
+    private void RunSchemaValidation()
+    {
+        if (_schemaOptions.Mode == SchemaValidationMode.Off)
+            return;
+
+        var projectsRoot = Path.Combine(_env.ContentRootPath, "projects");
+        var violations = _schemaRunner.ValidateAll(projectsRoot, _schemaOptions);
+
+        if (violations.Count == 0)
+        {
+            _logger.LogInformation("schema_validation スキーマ検証: 違反なし（mode={Mode}）", _schemaOptions.Mode);
+            return;
+        }
+
+        foreach (var v in violations)
+        {
+            if (_schemaOptions.Mode == SchemaValidationMode.Strict)
+                _logger.LogError(
+                    "schema_validation event=violation schema={Schema} file={File} pointer={Pointer} message={Message}",
+                    v.SchemaName, v.FilePath, v.Pointer, v.Message);
+            else
+                _logger.LogWarning(
+                    "schema_validation event=violation schema={Schema} file={File} pointer={Pointer} message={Message}",
+                    v.SchemaName, v.FilePath, v.Pointer, v.Message);
+        }
+
+        _logger.LogWarning(
+            "schema_validation_summary スキーマ検証: {Count} 件の違反（mode={Mode}）",
+            violations.Count, _schemaOptions.Mode);
+
+        if (_schemaOptions.Mode == SchemaValidationMode.Strict && _schemaOptions.FailFastOnStartup)
+        {
+            throw new InvalidOperationException(
+                $"スキーマ検証に失敗しました: {violations.Count} 件の違反。" +
+                "Forge:SchemaValidation:Mode を Warn に下げるか、違反を修正してください。");
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

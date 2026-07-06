@@ -23,7 +23,12 @@ jobs:
     
     - name: Build solution
       run: dotnet build --no-restore --configuration Release
-    
+
+    # R2-01 PR-4: プロジェクト YAML を JSON Schema で検証（構造ゲート）。
+    # 導入初期は continue-on-error で観察し、存量違反ゼロ確認後に硬ゲート化する。
+    - name: Validate project YAML against schemas
+      run: dotnet run --project NetYamlForge --no-build --configuration Release -- --validate-schemas
+
     - name: Run tests
       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
       timeout-minutes: 10

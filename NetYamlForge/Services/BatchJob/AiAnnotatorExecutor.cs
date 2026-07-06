@@ -308,7 +308,11 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
             return JsonSerializer.Deserialize<AnnotationResult>(cleaned[start..(end + 1)],
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
-        catch { return null; }
+        catch (Exception)
+        {
+            // JSON反序列化解析失败时吞掉异常并返回null以作fallback
+            return null;
+        }
     }
 
     private string? GetEnvValue(string key, string? projectName)

@@ -60,7 +60,8 @@ public sealed class FormValueValidationService
     /// </summary>
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         IEnumerable<FormFieldSpec> fields,
-        Dictionary<string, string?> form)
+        Dictionary<string, string?> form,
+        bool isPartial = false)
     {
         var values = new Dictionary<string, object?>();
         var errors = new Dictionary<string, string>();
@@ -73,6 +74,11 @@ public sealed class FormValueValidationService
             }
 
             var hasField = form.TryGetValue(field.Name, out var raw);
+
+            if (isPartial && !hasField)
+            {
+                continue;
+            }
 
             // bool/チェックボックス列: フォームに含まれない = チェックなし = false として扱う
             if (field.Type.Equals("bool", StringComparison.OrdinalIgnoreCase) && !hasField)
@@ -126,10 +132,11 @@ public sealed class FormValueValidationService
     public async Task<(Dictionary<string, object?> values, Dictionary<string, string> errors)> ConvertAndValidateAsync(
         IEnumerable<FormFieldSpec> fields,
         Dictionary<string, string?> form,
-        string projectName)
+        string projectName,
+        bool isPartial = false)
     {
         // 1. 同期チェックを実行
-        var (values, errors) = ConvertAndValidate(fields, form);
+        var (values, errors) = ConvertAndValidate(fields, form, isPartial);
 
         // 2. 既にエラーがある場合はカスタムDB検証に進まない
         if (errors.Any())

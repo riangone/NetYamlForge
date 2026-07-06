@@ -368,7 +368,10 @@ public class ConnectionManager : IConnectionManager
                 connection.Close();
             connection.Dispose();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to close or dispose database connection in ReleaseConnection.");
+        }
     }
 
     public void ReleaseConnection(string projectName, IDbConnection connection)
@@ -381,7 +384,10 @@ public class ConnectionManager : IConnectionManager
                 connection.Close();
             connection.Dispose();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to close or dispose database connection in ReleaseConnection with project {ProjectName}.", projectName);
+        }
         finally
         {
             RecordConnectionReleased(projectName);

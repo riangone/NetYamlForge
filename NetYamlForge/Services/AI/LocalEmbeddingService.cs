@@ -98,7 +98,12 @@ public class LocalEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
             var resp = await _http.GetAsync($"{BaseUrl}/health", cts.Token);
             return resp.IsSuccessStatusCode;
         }
-        catch { return false; }
+        catch (Exception ex)
+        {
+            // 健康检查失败视为服务不健康，不需上报严重错误，仅以 Debug 等级记录
+            _logger.LogDebug(ex, "Local embedding server health check failed.");
+            return false;
+        }
     }
 
     private async Task StartServerAsync(CancellationToken ct)
@@ -114,7 +119,12 @@ public class LocalEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
         // Kill stale process
         if (_serverProcess != null && !_serverProcess.HasExited)
         {
-            try { _serverProcess.Kill(); } catch { }
+            try { _serverProcess.Kill(); }
+            catch (Exception ex)
+            {
+                // 杀掉已存的本地服务进程失败时，仅记录 Debug 日志并继续
+                _logger.LogDebug(ex, "Failed to kill stale embedding server process.");
+            }
         }
         _serverProcess = null;
 

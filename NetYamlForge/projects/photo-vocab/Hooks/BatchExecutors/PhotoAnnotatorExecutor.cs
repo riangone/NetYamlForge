@@ -1,24 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NetYamlForge.Services.AI;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Projects.PhotoVocab.Hooks;
 
 /// <summary>
-/// processing_queue からフォトを取り出し、Antigravity CLI/Gemini API/Ollama で画像標注を実行する。
+/// processing_queue からフォトを取り出し、Unified CLI Chain を用いて画像標注を実行する。
 /// job type: photo_annotator
 /// </summary>
 public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecutor.QueueRow>
@@ -26,10 +25,8 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
     public override string StepType => "photo_annotator";
 
     private readonly IWebHostEnvironment _env;
-    private readonly IConfiguration _configuration;
     private readonly IEmbeddingService _embedding;
     private readonly ILogger<PhotoAnnotatorExecutor> _logger;
-    private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(120) };
 
     private const string AnnotationPrompt = """
         你是专业的图片分析AI。请仔细分析图片，仅输出合法JSON（不加任何说明、不使用markdown代码块），字段如下：
@@ -47,13 +44,11 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
 
     public PhotoAnnotatorExecutor(
         IWebHostEnvironment env,
-        IConfiguration configuration,
         IEmbeddingService embedding,
         ICliChainService cliChain,
         ILogger<PhotoAnnotatorExecutor> logger) : base(cliChain, logger)
     {
         _env = env;
-        _configuration = configuration;
         _embedding = embedding;
         _logger = logger;
     }
@@ -87,122 +82,132 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
         QueueRow row, BatchJobDefinition job, string? projectName, IDbConnection db, IDbTransaction tx,
         CancellationToken ct)
     {
-        var now = DateTime.UtcNow;
-        var absolutePath = ResolveFilePath(row.file_path);
-        if (!File.Exists(absolutePath))
-        {
-            return RowOutcome.Fail($"File not found: {absolutePath}");
-        }
-
-        var provider = job.AiProvider ?? "antigravity";
-        var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
-        var annotation = await AnnotateAsync(absolutePath, usedProvider, projectName, ct);
-
-        if (annotation == null)
-        {
-            return RowOutcome.Fail("AI returned empty or unparseable response");
-        }
-
-        // 写回 photos 表
-        await db.ExecuteAsync(@"
-            UPDATE photos SET
-                caption_short      = @CaptionShort,
-                caption_long       = @CaptionLong,
-                scene_type         = @SceneType,
-                subjects           = @Subjects,
-                activities         = @Activities,
-                person_count       = @PersonCount,
-                confidence_score   = @Confidence,
-                annotation_status  = 'done',
-                annotation_model   = @Model,
-                annotation_at      = @Now,
-                updated_at         = @Now
-            WHERE photo_id = @PhotoId",
-            new
-            {
-                CaptionShort = annotation.CaptionShort,
-                CaptionLong  = annotation.CaptionLong,
-                SceneType    = annotation.SceneType,
-                Subjects     = annotation.Subjects,
-                Activities   = annotation.Activities,
-                PersonCount  = annotation.PersonCount,
-                Confidence   = annotation.ConfidenceScore,
-                Model        = GetModelName(usedProvider),
-                Now          = now,
-                PhotoId      = row.photo_id,
-            }, transaction: tx);
-
-        // 写回 tags（简单实现：INSERT OR IGNORE）
-        if (annotation.Tags?.Length > 0)
-        {
-            foreach (var tag in annotation.Tags.Take(15).Where(t => !string.IsNullOrWhiteSpace(t)))
-            {
-                var tagId = Guid.NewGuid().ToString("N");
-                await db.ExecuteAsync(@"
-                    INSERT OR IGNORE INTO tags (tag_id, name, category, created_at)
-                    VALUES (@TagId, @Name, 'auto', @Now)",
-                    new { TagId = tagId, Name = tag.Trim().ToLowerInvariant(), Now = now },
-                    transaction: tx);
-
-                var resolvedTagId = await db.QueryFirstOrDefaultAsync<string>(
-                    "SELECT tag_id FROM tags WHERE name = @Name",
-                    new { Name = tag.Trim().ToLowerInvariant() }, transaction: tx);
-
-                if (resolvedTagId != null)
-                {
-                    await db.ExecuteAsync(@"
-                        INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, tag_name, confidence)
-                        VALUES (@PhotoId, @TagId, @TagName, @Conf)",
-                        new { PhotoId = row.photo_id, TagId = resolvedTagId, TagName = tag.Trim().ToLowerInvariant(), Conf = annotation.ConfidenceScore },
-                        transaction: tx);
-                }
-            }
-        }
-
-        // 标注完成后立即生成嵌入，无需等待 cron
+        using var telemetry = new BatchTelemetryScope(_logger, StepType, projectName, job.Id);
         try
         {
-            await db.ExecuteAsync("""
-                CREATE TABLE IF NOT EXISTS photo_embeddings (
-                    photo_id   TEXT NOT NULL PRIMARY KEY,
-                    embedding  TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                )
-                """, transaction: tx);
-
-            var embedText = BuildEmbedText(annotation, null, null, null);
-            if (!string.IsNullOrWhiteSpace(embedText))
+            var now = DateTime.UtcNow;
+            var absolutePath = ResolveFilePath(row.file_path);
+            if (!File.Exists(absolutePath))
             {
-                var vecs = await _embedding.EmbedBatchAsync([embedText], ct);
-                var vec = vecs.Count > 0 ? vecs[0] : null;
-                if (vec != null && vec.Length > 0)
+                telemetry.RecordError($"File not found: {absolutePath}");
+                return RowOutcome.Fail($"File not found: {absolutePath}");
+            }
+
+            var provider = job.AiProvider ?? "antigravity";
+            var usedProvider = string.IsNullOrEmpty(row.provider) ? provider : row.provider;
+            var annotation = await AnnotateAsync(absolutePath, usedProvider, projectName, ct);
+
+            if (annotation == null)
+            {
+                telemetry.RecordError("AI returned empty or unparseable response");
+                return RowOutcome.Fail("AI returned empty or unparseable response");
+            }
+
+            // 写回 photos 表
+            await db.ExecuteAsync(@"
+                UPDATE photos SET
+                    caption_short      = @CaptionShort,
+                    caption_long       = @CaptionLong,
+                    scene_type         = @SceneType,
+                    subjects           = @Subjects,
+                    activities         = @Activities,
+                    person_count       = @PersonCount,
+                    confidence_score   = @Confidence,
+                    annotation_status  = 'done',
+                    annotation_model   = @Model,
+                    annotation_at      = @Now,
+                    updated_at         = @Now
+                WHERE photo_id = @PhotoId",
+                new
                 {
-                    await db.ExecuteAsync("""
-                        INSERT OR REPLACE INTO photo_embeddings(photo_id, embedding, created_at)
-                        VALUES (@PhotoId, @Embedding, @Now)
-                        """,
-                        new { PhotoId = row.photo_id, Embedding = JsonSerializer.Serialize(vec), Now = DateTime.UtcNow.ToString("o") },
+                    CaptionShort = annotation.CaptionShort,
+                    CaptionLong  = annotation.CaptionLong,
+                    SceneType    = annotation.SceneType,
+                    Subjects     = annotation.Subjects,
+                    Activities   = annotation.Activities,
+                    PersonCount  = annotation.PersonCount,
+                    Confidence   = annotation.ConfidenceScore,
+                    Model        = "antigravity-cli",
+                    Now          = now,
+                    PhotoId      = row.photo_id,
+                }, transaction: tx);
+
+            // 写回 tags（简单实现：INSERT OR IGNORE）
+            if (annotation.Tags?.Length > 0)
+            {
+                foreach (var tag in annotation.Tags.Take(15).Where(t => !string.IsNullOrWhiteSpace(t)))
+                {
+                    var tagId = Guid.NewGuid().ToString("N");
+                    await db.ExecuteAsync(@"
+                        INSERT OR IGNORE INTO tags (tag_id, name, category, created_at)
+                        VALUES (@TagId, @Name, 'auto', @Now)",
+                        new { TagId = tagId, Name = tag.Trim().ToLowerInvariant(), Now = now },
                         transaction: tx);
-                    _logger.LogInformation("Embedding generated inline for photo {PhotoId} ({Dims} dims)", row.photo_id, vec.Length);
+
+                    var resolvedTagId = await db.QueryFirstOrDefaultAsync<string>(
+                        "SELECT tag_id FROM tags WHERE name = @Name",
+                        new { Name = tag.Trim().ToLowerInvariant() }, transaction: tx);
+
+                    if (resolvedTagId != null)
+                    {
+                        await db.ExecuteAsync(@"
+                            INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, tag_name, confidence)
+                            VALUES (@PhotoId, @TagId, @TagName, @Conf)",
+                            new { PhotoId = row.photo_id, TagId = resolvedTagId, TagName = tag.Trim().ToLowerInvariant(), Conf = annotation.ConfidenceScore },
+                            transaction: tx);
+                    }
                 }
             }
+
+            // 标注完成后立即生成嵌入，无需等待 cron
+            try
+            {
+                await db.ExecuteAsync("""
+                    CREATE TABLE IF NOT EXISTS photo_embeddings (
+                        photo_id   TEXT NOT NULL PRIMARY KEY,
+                        embedding  TEXT NOT NULL,
+                        created_at TEXT NOT NULL
+                    )
+                    """, transaction: tx);
+
+                var embedText = BuildEmbedText(annotation, null, null, null);
+                if (!string.IsNullOrWhiteSpace(embedText))
+                {
+                    var vecs = await _embedding.EmbedBatchAsync([embedText], ct);
+                    var vec = vecs.Count > 0 ? vecs[0] : null;
+                    if (vec != null && vec.Length > 0)
+                    {
+                        await db.ExecuteAsync("""
+                            INSERT OR REPLACE INTO photo_embeddings(photo_id, embedding, created_at)
+                            VALUES (@PhotoId, @Embedding, @Now)
+                            """,
+                            new { PhotoId = row.photo_id, Embedding = JsonSerializer.Serialize(vec), Now = DateTime.UtcNow.ToString("o") },
+                            transaction: tx);
+                        _logger.LogInformation("Embedding generated inline for photo {PhotoId} ({Dims} dims)", row.photo_id, vec.Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId}, will retry via cron", row.photo_id);
+            }
+
+            var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
+            await db.ExecuteAsync(@"
+                UPDATE processing_queue SET
+                    status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider
+                WHERE queue_id=@Id",
+                new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
+                transaction: tx);
+
+            _logger.LogInformation("Photo annotated: {PhotoId} via {Provider}", row.photo_id, usedProvider);
+            return RowOutcome.Ok();
         }
         catch (Exception ex)
         {
-            // 嵌入失败不影响标注结果，后续 cron 会补跑
-            _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId}, will retry via cron", row.photo_id);
+            telemetry.RecordError(ex.Message);
+            throw;
         }
-
-        var ms = (long)(DateTime.UtcNow - now).TotalMilliseconds;
-        await db.ExecuteAsync(@"
-            UPDATE processing_queue SET
-                status='done', completed_at=@Now, processing_ms=@Ms, provider=@Provider
-            WHERE queue_id=@Id",
-            new { Now = DateTime.UtcNow, Ms = ms, Provider = usedProvider, Id = row.queue_id },
-            transaction: tx);
-
-        _logger.LogInformation("Photo annotated: {PhotoId} via {Provider}", row.photo_id, usedProvider);
-        return RowOutcome.Ok();
     }
 
     protected override async Task WriteOutcomeAsync(
@@ -214,10 +219,6 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
             await FailRow(db, tx, row, error);
         }
     }
-
-    // ──────────────────────────────────────────────────────────
-    // Embedding helpers
-    // ──────────────────────────────────────────────────────────
 
     private static string BuildEmbedText(AnnotationResult a, string? sceneType, string? gpsAddress, string? ocrText)
     {
@@ -232,312 +233,31 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
         return string.Join(". ", parts);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Provider dispatch
-    // ──────────────────────────────────────────────────────────
-
     private async Task<AnnotationResult?> AnnotateAsync(
         string absolutePath, string provider, string? projectName, CancellationToken ct)
     {
-        return provider.ToLowerInvariant() switch
+        var cliResult = await CliInvoker.RunCliAsync(Cli, AnnotationPrompt, absolutePath, projectName, ct);
+        if (!cliResult.Success || string.IsNullOrWhiteSpace(cliResult.Text))
         {
-            "lmstudio"     => await AnnotateWithLmStudioAsync(absolutePath, ct),
-            "gemini_cli"   => await AnnotateWithAntigravityCliAsync(absolutePath, projectName, ct),
-            "gemini"       => await AnnotateWithGeminiAsync(absolutePath, projectName, ct),
-            "ollama"       => await AnnotateWithOllamaAsync(absolutePath, projectName, ct),
-            "antigravity"  => await AnnotateWithAntigravityCliAsync(absolutePath, projectName, ct),
-            _ => LogAndReturnNull(provider),
-        };
-    }
+            _logger.LogWarning("Unified CLI Chain annotation failed (project: {Project})", projectName);
+            return null;
+        }
 
-    private AnnotationResult? LogAndReturnNull(string provider)
-    {
-        _logger.LogWarning("Unknown annotation provider '{Provider}'; skipping annotation", provider);
+        if (AiResultParser.TryParseJson<AnnotationResult>(cliResult.Text, out var annotation, out var error))
+        {
+            return annotation;
+        }
+
+        _logger.LogWarning("Failed to parse annotation JSON: {Error}", error);
         return null;
     }
-
-    private async Task<AnnotationResult?> AnnotateWithAntigravityCliAsync(
-        string absolutePath, string? projectName, CancellationToken ct)
-    {
-        var result = await Cli.PromptAsync(AnnotationPrompt, imagePath: absolutePath, projectName: projectName, cancellationToken: ct);
-        if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
-        {
-            return null;
-        }
-        return ParseAnnotationJson(result.Text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithLmStudioAsync(
-        string absolutePath, CancellationToken ct)
-    {
-        var baseUrl = Environment.GetEnvironmentVariable("LMSTUDIO_BASE_URL") ?? "http://localhost:1234/v1";
-        var model   = Environment.GetEnvironmentVariable("LMSTUDIO_MODEL") ?? "google/gemma-4-e4b";
-        var (base64, mimeType) = EncodeImage(absolutePath);
-
-        var body = new
-        {
-            model,
-            messages = new[]
-            {
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new { type = "text", text = AnnotationPrompt },
-                        new { type = "image_url", image_url = new { url = $"data:{mimeType};base64,{base64}" } }
-                    }
-                }
-            },
-            max_tokens = 1024,
-            temperature = 0.2
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-
-        var resp = await _http.SendAsync(req, ct);
-        var respJson = await resp.Content.ReadAsStringAsync(ct);
-
-        if (!resp.IsSuccessStatusCode)
-        {
-            _logger.LogError("LM Studio API error {Status}: {Body}", resp.StatusCode, respJson);
-            return null;
-        }
-
-        using var doc = JsonDocument.Parse(respJson);
-        var text = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content").GetString() ?? "";
-
-        return ParseAnnotationJson(text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithAnthropicAsync(
-        string absolutePath, string? projectName, CancellationToken ct)
-    {
-        var apiKey = GetEnvValue("ANTHROPIC_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("ANTHROPIC_API_KEY not set; skipping Anthropic annotation");
-            return null;
-        }
-
-        var (base64, mediaType) = EncodeImage(absolutePath);
-        var model = GetEnvValue("ANTHROPIC_MODEL", projectName) ?? "claude-haiku-4-5-20251001";
-
-        var body = new
-        {
-            model,
-            max_tokens = 1024,
-            messages = new[]
-            {
-                new
-                {
-                    role = "user",
-                    content = new object[]
-                    {
-                        new { type = "image", source = new { type = "base64", media_type = mediaType, data = base64 } },
-                        new { type = "text",  text = AnnotationPrompt }
-                    }
-                }
-            }
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, "https://api.anthropic.com/v1/messages")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-        req.Headers.Add("x-api-key", apiKey);
-        req.Headers.Add("anthropic-version", "2023-06-01");
-
-        var resp = await _http.SendAsync(req, ct);
-        var respJson = await resp.Content.ReadAsStringAsync(ct);
-
-        if (!resp.IsSuccessStatusCode)
-        {
-            _logger.LogError("Anthropic API error {Status}: {Body}", resp.StatusCode, respJson);
-            return null;
-        }
-
-        using var doc = JsonDocument.Parse(respJson);
-        var text = doc.RootElement
-            .GetProperty("content")[0]
-            .GetProperty("text").GetString() ?? "";
-
-        return ParseAnnotationJson(text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithGeminiAsync(
-        string absolutePath, string? projectName, CancellationToken ct)
-    {
-        var apiKey = GetEnvValue("GEMINI_API_KEY", projectName);
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            _logger.LogWarning("GEMINI_API_KEY not set; skipping Gemini annotation");
-            return null;
-        }
-
-        var (base64, mimeType) = EncodeImage(absolutePath);
-        var model = "gemini-2.0-flash";
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
-
-        var body = new
-        {
-            contents = new[]
-            {
-                new
-                {
-                    parts = new object[]
-                    {
-                        new { text = AnnotationPrompt },
-                        new { inline_data = new { mime_type = mimeType, data = base64 } }
-                    }
-                }
-            },
-            generationConfig = new { maxOutputTokens = 1024, temperature = 0.2 }
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-
-        var resp = await _http.SendAsync(req, ct);
-        var respJson = await resp.Content.ReadAsStringAsync(ct);
-
-        if (!resp.IsSuccessStatusCode)
-        {
-            _logger.LogError("Gemini API error {Status}: {Body}", resp.StatusCode, respJson);
-            return null;
-        }
-
-        using var doc = JsonDocument.Parse(respJson);
-        var text = doc.RootElement
-            .GetProperty("candidates")[0]
-            .GetProperty("content")
-            .GetProperty("parts")[0]
-            .GetProperty("text").GetString() ?? "";
-
-        return ParseAnnotationJson(text);
-    }
-
-    private async Task<AnnotationResult?> AnnotateWithOllamaAsync(
-        string absolutePath, string? projectName, CancellationToken ct)
-    {
-        var baseUrl = GetEnvValue("OLLAMA_BASE_URL", projectName) ?? "http://localhost:11434";
-        var model   = GetEnvValue("OLLAMA_VISION_MODEL", projectName) ?? "llava:13b";
-        var (base64, _) = EncodeImage(absolutePath);
-
-        var body = new
-        {
-            model,
-            prompt = AnnotationPrompt,
-            images = new[] { base64 },
-            stream = false
-        };
-
-        var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/api/generate")
-        {
-            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json")
-        };
-
-        var resp = await _http.SendAsync(req, ct);
-        var respJson = await resp.Content.ReadAsStringAsync(ct);
-
-        if (!resp.IsSuccessStatusCode)
-        {
-            _logger.LogError("Ollama API error {Status}: {Body}", resp.StatusCode, respJson);
-            return null;
-        }
-
-        using var doc = JsonDocument.Parse(respJson);
-        var text = doc.RootElement.GetProperty("response").GetString() ?? "";
-        return ParseAnnotationJson(text);
-    }
-
-    // ──────────────────────────────────────────────────────────
-    // Helpers
-    // ──────────────────────────────────────────────────────────
 
     private string ResolveFilePath(string storedPath)
     {
         if (File.Exists(storedPath)) return storedPath;
-        // URL path → wwwroot relative
         var relative = storedPath.TrimStart('/');
         return Path.Combine(_env.WebRootPath, relative);
     }
-
-    private static (string base64, string mediaType) EncodeImage(string path)
-    {
-        var bytes = File.ReadAllBytes(path);
-        var ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
-        var mime = ext switch
-        {
-            "jpg" or "jpeg" => "image/jpeg",
-            "png"           => "image/png",
-            "gif"           => "image/gif",
-            "webp"          => "image/webp",
-            "heic" or "heif"=> "image/heic",
-            _               => "image/jpeg"
-        };
-        return (Convert.ToBase64String(bytes), mime);
-    }
-
-    private static AnnotationResult? ParseAnnotationJson(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return null;
-        try
-        {
-            var cleaned = Regex.Replace(text, @"```(?:json)?\s*", "", RegexOptions.IgnoreCase).Trim();
-            var start = cleaned.IndexOf('{');
-            var end   = cleaned.LastIndexOf('}');
-            if (start < 0 || end <= start) return null;
-            var json = cleaned[start..(end + 1)];
-            return JsonSerializer.Deserialize<AnnotationResult>(json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private string? GetEnvValue(string key, string? projectName)
-    {
-        var val = Environment.GetEnvironmentVariable(key);
-        if (!string.IsNullOrEmpty(val)) return val;
-
-        if (!string.IsNullOrEmpty(projectName))
-        {
-            var envFile = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, ".env");
-            if (File.Exists(envFile))
-            {
-                foreach (var line in File.ReadAllLines(envFile))
-                {
-                    var t = line.Trim();
-                    if (t.StartsWith('#') || !t.Contains('=')) continue;
-                    var eq = t.IndexOf('=');
-                    if (t[..eq].Trim() == key)
-                        return t[(eq + 1)..].Trim().Trim('"');
-                }
-            }
-        }
-        return _configuration[key];
-    }
-
-    private static string GetModelName(string provider) => provider switch
-    {
-        "lmstudio"     => "google/gemma-4-e4b",
-        "gemini"       => "gemini-2.0-flash",
-        "gemini_cli"   => "antigravity-cli",
-        "antigravity"  => "antigravity-cli",
-        "ollama"       => "llava:13b",
-        _              => "claude-haiku-4-5-20251001"
-    };
 
     /// <summary>
     /// 直接标注单张照片，不经过 processing_queue，适合「立即触发」场景。
@@ -550,15 +270,6 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
             new { Id = photoId }, transaction: tx);
 
         if (row == null) return (false, "照片不存在");
-
-        var provider = "antigravity";
-        try
-        {
-            provider = await db.QueryFirstOrDefaultAsync<string>(
-                "SELECT COALESCE(value, 'antigravity') FROM project_settings WHERE setting_key = 'annotation_provider' ORDER BY id DESC LIMIT 1",
-                transaction: tx) ?? "antigravity";
-        }
-        catch { }
 
         var absolutePath = ResolveFilePath(row.file_path);
         if (!File.Exists(absolutePath))
@@ -573,7 +284,7 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
         AnnotationResult? annotation;
         try
         {
-            annotation = await AnnotateAsync(absolutePath, provider, projectName, ct);
+            annotation = await AnnotateAsync(absolutePath, "antigravity", projectName, ct);
         }
         catch (Exception ex)
         {
@@ -615,7 +326,7 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
                 Activities   = annotation.Activities,
                 PersonCount  = annotation.PersonCount,
                 Confidence   = annotation.ConfidenceScore,
-                Model        = GetModelName(provider),
+                Model        = "antigravity-cli",
                 Now          = now,
                 PhotoId      = photoId
             }, transaction: tx);
@@ -676,7 +387,7 @@ public class PhotoAnnotatorExecutor : AiQueueStepHandlerBase<PhotoAnnotatorExecu
             _logger.LogWarning(ex, "Inline embedding failed for photo {PhotoId} during AnnotateSingle", photoId);
         }
 
-        _logger.LogInformation("Photo annotated (immediate): {PhotoId} via {Provider}", photoId, provider);
+        _logger.LogInformation("Photo annotated (immediate): {PhotoId} via Unified CLI Chain", photoId);
         return (true, null);
     }
 

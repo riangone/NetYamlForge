@@ -15,8 +15,9 @@ namespace NetYamlForge.Services;
 /// </summary>
 public sealed class HookSecurityValidator
 {
-    // 禁止「型」リスト（名前空間ごと禁止ではなく型単位。Stopwatch/Debug 等は許可される）
-    private static readonly HashSet<string> BannedTypes = new(StringComparer.Ordinal)
+    // 禁止「型」リスト（名前空間ごと禁止ではなく型単位。Stopwatch/Debug 等は許可される）。
+    // 既定で常に禁止。R2-05 で BinaryFormatter / Socket / TcpClient を追加（正規のフックでの使用実績ゼロ）。
+    private static readonly HashSet<string> DefaultBannedTypes = new(StringComparer.Ordinal)
     {
         "System.Diagnostics.Process",
         "System.Diagnostics.ProcessStartInfo",
@@ -26,6 +27,24 @@ public sealed class HookSecurityValidator
         "System.Runtime.Loader.AssemblyLoadContext",
         "System.Activator",                    // Activator.CreateInstance(Type) 反射起動
         "System.AppDomain",
+        // R2-05 追加（安全に硬禁止できる逃逸ベクター。プロジェクト フックでの使用実績なし）
+        "System.Runtime.Serialization.Formatters.Binary.BinaryFormatter", // 危険な逆シリアライズ
+        "System.Net.Sockets.Socket",
+        "System.Net.Sockets.TcpClient",
+    };
+
+    // R2-05: strict モードでのみ追加で禁止する型。
+    // これらは「信頼済みフック」では正当に使われうる（File/HttpClient/Environment を実際に使う既存プロジェクトあり）ため、
+    // 既定では禁止しない（誤検知でビルドを壊さない）。攻撃者視点の対抗テストで strict=true として拦截能力を検証する。
+    private static readonly HashSet<string> StrictOnlyBannedTypes = new(StringComparer.Ordinal)
+    {
+        "System.IO.File",
+        "System.IO.Directory",
+        "System.IO.FileStream",
+        "System.IO.FileInfo",
+        "System.IO.DirectoryInfo",
+        "System.Net.Http.HttpClient",
+        "System.Environment",                  // GetEnvironmentVariable など（秘密の読み取り）
     };
 
     // 例外的に許可するメンバー（型は禁止だがこのメンバーだけは安全）
@@ -36,6 +55,22 @@ public sealed class HookSecurityValidator
         "System.Activator.CreateInstance",
     };
 
+    private readonly HashSet<string> _bannedTypes;
+
+    /// <summary>
+    /// フック安全性バリデーター。
+    /// </summary>
+    /// <param name="strict">
+    /// true の場合、File/Directory/HttpClient/Environment など「信頼済みフックでは正当だが
+    /// 攻撃面にもなる」型も禁止に加える。既定 false は現行のビルド動作を維持する。
+    /// </param>
+    public HookSecurityValidator(bool strict = false)
+    {
+        _bannedTypes = new HashSet<string>(DefaultBannedTypes, StringComparer.Ordinal);
+        if (strict)
+            _bannedTypes.UnionWith(StrictOnlyBannedTypes);
+    }
+
     /// <summary>
     /// コンパイル全体を検証し、禁止 API の使用箇所を返します。
     /// </summary>
@@ -45,7 +80,7 @@ public sealed class HookSecurityValidator
         foreach (var tree in compilation.SyntaxTrees)
         {
             var model = compilation.GetSemanticModel(tree);
-            var walker = new SemanticWalker(model, BannedTypes, AllowedMembers, violations);
+            var walker = new SemanticWalker(model, _bannedTypes, AllowedMembers, violations);
             walker.Visit(tree.GetRoot());
         }
         return violations;

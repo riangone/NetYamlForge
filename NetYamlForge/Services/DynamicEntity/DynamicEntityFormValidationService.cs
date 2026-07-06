@@ -32,7 +32,8 @@ public sealed class DynamicEntityFormValidationService
     /// </summary>
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         EntityDefinition meta,
-        Dictionary<string, string?> form)
+        Dictionary<string, string?> form,
+        bool isPartial = false)
     {
         var fields = meta.Columns.Select(kv =>
         {
@@ -42,16 +43,17 @@ public sealed class DynamicEntityFormValidationService
             return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
         });
 
-        return _validator.ConvertAndValidate(fields, form);
+        return _validator.ConvertAndValidate(fields, form, isPartial);
     }
 
     /// <summary>
-    /// フォーム値を EntityDefinition の列型定義に従って変換・検証します（非同期版）。
+    /// フォーム値を EntityDefinition の列型定義に従って変換・検証します（非异步版）。
     /// </summary>
     public async Task<(Dictionary<string, object?> values, Dictionary<string, string> errors)> ConvertAndValidateAsync(
         EntityDefinition meta,
         Dictionary<string, string?> form,
-        string projectName)
+        string projectName,
+        bool isPartial = false)
     {
         var fields = meta.Columns.Select(kv =>
         {
@@ -61,6 +63,6 @@ public sealed class DynamicEntityFormValidationService
             return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
         });
 
-        return await _validator.ConvertAndValidateAsync(fields, form, projectName);
+        return await _validator.ConvertAndValidateAsync(fields, form, projectName, isPartial);
     }
 }

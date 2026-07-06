@@ -184,7 +184,7 @@ public class GeminiEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
         }
     }
 
-    private static (string? ClientId, string? ClientSecret) ReadCliOAuthCredentials()
+    private (string? ClientId, string? ClientSecret) ReadCliOAuthCredentials()
     {
         // Read OAuth client credentials from the installed Gemini CLI bundle at runtime
         // This avoids hardcoding secrets in source code
@@ -204,7 +204,12 @@ public class GeminiEmbeddingService : IEmbeddingService, IGeminiEmbeddingService
                 ? (idMatch.Groups[1].Value, secretMatch.Groups[1].Value)
                 : (null, null);
         }
-        catch { return (null, null); }
+        catch (Exception ex)
+        {
+            // 读取或解析 Gemini CLI 凭据失败时，吞掉异常并记录调试日志
+            _logger.LogDebug(ex, "Failed to read Gemini CLI OAuth credentials.");
+            return (null, null);
+        }
     }
 
     private async Task<(string AccessToken, long ExpiryMs)?> RefreshAccessTokenAsync(string refreshToken, CancellationToken ct)
