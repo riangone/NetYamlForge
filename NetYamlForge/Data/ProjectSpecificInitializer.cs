@@ -178,15 +178,12 @@ public class ProjectSpecificInitializer
 
         var tables = await conn.QueryAsync<string>(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='TaskComment'");
-        if (tables.Any())
+        bool tableExists = tables.Any();
+        if (!tableExists)
         {
-            logger.LogDebug("TaskComment テーブルは既に存在します。スキップします。");
-            return;
-        }
-
-        // DCS001 抑制理由：ハードコードされたスキーマ定義のため安全
+            // DCS001 抑制理由：ハードコードされたスキーマ定義のため安全
 #pragma warning disable DCS001
-        await conn.ExecuteAsync(@"
+            await conn.ExecuteAsync(@"
 CREATE TABLE ""TaskComment"" (
     ""Id""          INTEGER PRIMARY KEY AUTOINCREMENT,
     ""TaskId""      INTEGER NOT NULL,
@@ -196,7 +193,35 @@ CREATE TABLE ""TaskComment"" (
     FOREIGN KEY (""TaskId"") REFERENCES ""Task""(""Id"")
 )");
 #pragma warning restore DCS001
-        logger.LogInformation("TaskComment テーブルを作成しました。");
+            logger.LogInformation("TaskComment テーブルを作成しました。");
+        }
+
+        // データベースが空、またはデータが存在しない場合にシードデータを挿入する
+        var count = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM \"TaskComment\"");
+        if (count == 0)
+        {
+            logger.LogInformation("TaskComment テーブルが空のため、初期シードデータを投入します。");
+#pragma warning disable DCS001
+            await conn.ExecuteAsync(@"
+INSERT OR IGNORE INTO ""TaskComment"" (""Id"", ""TaskId"", ""CommentText"", ""PostedBy"", ""PostedAt"") VALUES
+(1,  1, '優先順位を再検討しました。P0タスクから着手します。', 'taskmgr_manager', '2026-07-01 09:00:00'),
+(2,  1, '承知しました。P0の洗い出しを開始します。',          'taskmgr_worker1', '2026-07-01 09:30:00'),
+(3,  1, 'P0リストをチームに展開しました。',                'taskmgr_manager', '2026-07-01 10:00:00'),
+(4,  2, 'E2Eの観点表のテンプレートを共有します。',           'taskmgr_manager', '2026-07-01 11:00:00'),
+(5,  2, '観点表を作成しました。レビューお願いします。',         'taskmgr_worker1', '2026-07-02 14:20:00'),
+(6,  3, 'デプロイ先の環境変数一覧を添付します。',            'taskmgr_manager', '2026-07-02 09:10:00'),
+(7,  4, '指摘のうち命名規則の件は修正済みです。',            'taskmgr_worker1', '2026-07-02 16:40:00'),
+(8,  4, '残りの2件はリファクタ範囲が広いので別タスク化を提案します。', 'taskmgr_worker1', '2026-07-03 10:05:00'),
+(9,  4, '別タスク化に賛成です。チケットを切ってください。',       'taskmgr_manager', '2026-07-03 10:30:00'),
+(10, 5, 'インフラ準備は7/9完了予定と連絡ありました。',        'taskmgr_manager', '2026-07-03 13:00:00'),
+(11, 6, 'リリースチェックリストを更新しました。',            'taskmgr_manager', '2026-07-04 09:00:00'),
+(12, 7, '説明会資料のドラフトv1を共有しました。',           'taskmgr_worker1', '2026-07-04 15:15:00'),
+(13, 7, '構成は良いです。デモ画面のスクショを追加しましょう。',    'taskmgr_manager', '2026-07-05 09:45:00'),
+(14, 8, 'マニュアル更新完了。次回定例で周知します。',          'taskmgr_worker1', '2026-07-05 17:00:00');
+");
+#pragma warning restore DCS001
+            logger.LogInformation("TaskComment テーブルの初期シードデータを投入完了。");
+        }
     }
 
     /// <summary>

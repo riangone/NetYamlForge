@@ -1,0 +1,227 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/task-management/views/_Layout.cshtml";
+
+    var taskRows    = Model.ContainsKey("tasks")    ? Model["tasks"].Rows.ToList()    : new();
+    var commentRows = Model.ContainsKey("comments") ? Model["comments"].Rows.ToList() : new();
+    var statsRow    = (Model.ContainsKey("stats") ? Model["stats"].Rows.FirstOrDefault() : null)
+                      ?? new Dictionary<string, object>();
+
+    ViewData["Title"] = "タスクボード";
+
+    // コメントを TaskId でグルーピング
+    var commentsByTask = commentRows
+        .GroupBy(c => c.GetValueOrDefault("TaskId")?.ToString() ?? "")
+        .ToDictionary(g => g.Key, g => g.ToList());
+
+    string S(Dictionary<string, object> r, string k) => r.GetValueOrDefault(k)?.ToString() ?? "";
+
+    string StatusLabel(string s) => s switch {
+        "not_started" => "📋 未着手",
+        "in_progress" => "🔄 進行中",
+        "completed"   => "✅ 完了",
+        "on_hold"     => "⏸ 保留",
+        _ => s
+    };
+    // status -> DaisyUI badge クラス
+    string StatusBadge(string s) => s switch {
+        "in_progress" => "badge-info",
+        "completed"   => "badge-success",
+        "on_hold"     => "badge-warning",
+        _ => "badge-ghost"
+    };
+    string PriorityLabel(string p) => p switch {
+        "high"   => "🔴 高",
+        "medium" => "🟡 中",
+        "low"    => "🟢 低",
+        _ => p
+    };
+    string PriorityBorder(string p) => p switch {
+        "high"   => "border-l-error",
+        "medium" => "border-l-warning",
+        "low"    => "border-l-success",
+        _ => "border-l-base-300"
+    };
+
+    string FmtDate(object? v) {
+        if (v is null) return "";
+        return DateTime.TryParse(v.ToString(), out var dt) ? dt.ToString("yyyy/MM/dd") : v.ToString() ?? "";
+    }
+    string FmtDateTime(object? v) {
+        if (v is null) return "";
+        return DateTime.TryParse(v.ToString(), out var dt) ? dt.ToString("yyyy/MM/dd HH:mm") : v.ToString() ?? "";
+    }
+    bool IsOverdue(string status, object? due) {
+        if (status == "completed") return false;
+        return DateTime.TryParse(due?.ToString(), out var dt) && dt.Date < DateTime.Now.Date;
+    }
+    string Initial(string name) => string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1).ToUpper();
+
+    string Stat(string k) => statsRow.GetValueOrDefault(k)?.ToString() ?? "0";
+}
+
+@section Styles {
+    <style>
+        .task-card { transition: transform .15s ease, box-shadow .15s ease; }
+        .task-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(0,0,0,.18); }
+        .comment-thread::-webkit-scrollbar { width: 6px; }
+        .comment-thread::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 3px; }
+    </style>
+}
+
+<div class="max-w-5xl mx-auto px-3 sm:px-4 py-5 sm:py-8">
+
+    <!-- ヘッダー -->
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                <span>📋</span> タスクボード
+            </h1>
+            <p class="text-sm text-base-content/60 mt-1">各タスクの基本情報とコメントをまとめて表示します。</p>
+        </div>
+        <a href="/task-management/DynamicEntity/Create?entity=task"
+           class="btn btn-primary btn-sm gap-1">＋ 新規タスク</a>
+    </div>
+
+    <!-- サマリー KPI（モバイルは 2 列、以降 5 列） -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-5">
+        <div class="stat bg-base-100 rounded-xl border border-base-300 py-3 px-4">
+            <div class="stat-title text-xs">全タスク</div>
+            <div class="stat-value text-2xl">@Stat("Total")</div>
+        </div>
+        <div class="stat bg-base-100 rounded-xl border border-base-300 py-3 px-4">
+            <div class="stat-title text-xs">🔄 進行中</div>
+            <div class="stat-value text-2xl text-info">@Stat("InProgress")</div>
+        </div>
+        <div class="stat bg-base-100 rounded-xl border border-base-300 py-3 px-4">
+            <div class="stat-title text-xs">📋 未着手</div>
+            <div class="stat-value text-2xl">@Stat("NotStarted")</div>
+        </div>
+        <div class="stat bg-base-100 rounded-xl border border-base-300 py-3 px-4">
+            <div class="stat-title text-xs">⏸ 保留</div>
+            <div class="stat-value text-2xl text-warning">@Stat("OnHold")</div>
+        </div>
+        <div class="stat bg-base-100 rounded-xl border border-base-300 py-3 px-4">
+            <div class="stat-title text-xs">✅ 完了</div>
+            <div class="stat-value text-2xl text-success">@Stat("Completed")</div>
+        </div>
+    </div>
+
+    <!-- フィルタ（クライアント側） -->
+    <div class="flex flex-wrap gap-2 mb-4" id="statusFilter">
+        <button class="btn btn-xs sm:btn-sm btn-active" data-status="all">すべて</button>
+        <button class="btn btn-xs sm:btn-sm btn-ghost" data-status="in_progress">🔄 進行中</button>
+        <button class="btn btn-xs sm:btn-sm btn-ghost" data-status="not_started">📋 未着手</button>
+        <button class="btn btn-xs sm:btn-sm btn-ghost" data-status="on_hold">⏸ 保留</button>
+        <button class="btn btn-xs sm:btn-sm btn-ghost" data-status="completed">✅ 完了</button>
+    </div>
+
+    <!-- タスクカード一覧 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4" id="taskGrid">
+        @if (!taskRows.Any())
+        {
+            <div class="col-span-full text-center text-base-content/50 py-16">タスクがありません。</div>
+        }
+        @foreach (var t in taskRows)
+        {
+            var id       = S(t, "Id");
+            var status   = S(t, "Status");
+            var priority = S(t, "Priority");
+            var comments = commentsByTask.GetValueOrDefault(id) ?? new();
+            var overdue  = IsOverdue(status, t.GetValueOrDefault("DueDate"));
+
+            <div class="task-card bg-base-100 rounded-xl border border-base-300 border-l-4 @PriorityBorder(priority) overflow-hidden"
+                 data-status="@status">
+                <div class="p-4">
+                    <!-- 見出し行 -->
+                    <div class="flex items-start justify-between gap-2">
+                        <h2 class="font-semibold text-base leading-snug break-words">@S(t, "Title")</h2>
+                        <span class="badge @StatusBadge(status) badge-sm whitespace-nowrap">@StatusLabel(status)</span>
+                    </div>
+
+                    <!-- メタ情報（モバイルでも折り返す） -->
+                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-base-content/70">
+                        <span class="inline-flex items-center gap-1">👤 @S(t, "AssignedTo")</span>
+                        <span class="inline-flex items-center gap-1 @(overdue ? "text-error font-semibold" : "")">
+                            📅 @FmtDate(t.GetValueOrDefault("DueDate"))@(overdue ? "（期限超過）" : "")
+                        </span>
+                        <span class="badge badge-ghost badge-xs">@PriorityLabel(priority)</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(S(t, "Notes")))
+                    {
+                        <p class="mt-2 text-sm text-base-content/80 whitespace-pre-wrap break-words">@S(t, "Notes")</p>
+                    }
+
+                    <!-- コメント（折りたたみ） -->
+                    <details class="mt-3 group" @(comments.Any() ? "open" : "")>
+                        <summary class="cursor-pointer select-none text-sm font-medium text-base-content/70 flex items-center gap-1 list-none">
+                            💬 コメント
+                            <span class="badge badge-primary badge-xs">@comments.Count</span>
+                        </summary>
+
+                        <div class="comment-thread mt-2 space-y-2 max-h-72 overflow-y-auto pr-1">
+                            @if (!comments.Any())
+                            {
+                                <p class="text-xs text-base-content/40 py-1">まだコメントはありません。</p>
+                            }
+                            @foreach (var c in comments)
+                            {
+                                var poster = S(c, "PostedBy");
+                                <div class="flex gap-2">
+                                    <div class="avatar placeholder shrink-0">
+                                        <div class="bg-neutral text-neutral-content rounded-full w-7 h-7">
+                                            <span class="text-xs">@Initial(poster)</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 bg-base-200 rounded-lg px-3 py-2">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="text-xs font-semibold">@poster</span>
+                                            <span class="text-[10px] text-base-content/50">@FmtDateTime(c.GetValueOrDefault("PostedAt"))</span>
+                                        </div>
+                                        <p class="text-sm mt-0.5 whitespace-pre-wrap break-words">@S(c, "CommentText")</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <a href="/task-management/DynamicEntity/Create?entity=comment&TaskId=@id"
+                           class="btn btn-ghost btn-xs mt-2 gap-1">＋ コメント追加</a>
+                    </details>
+
+                    <!-- 操作 -->
+                    <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-base-200">
+                        <a href="/task-management/DynamicEntity/Edit?entity=task&id=@id"
+                           class="btn btn-outline btn-xs flex-1 sm:flex-none">編集</a>
+                        <a href="/task-management/DynamicEntity/Details?entity=task&id=@id"
+                           class="btn btn-ghost btn-xs flex-1 sm:flex-none">詳細</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const bar = document.getElementById('statusFilter');
+            const cards = Array.from(document.querySelectorAll('#taskGrid .task-card'));
+            if (!bar) return;
+            bar.addEventListener('click', function (e) {
+                const btn = e.target.closest('button[data-status]');
+                if (!btn) return;
+                bar.querySelectorAll('button').forEach(b => {
+                    b.classList.remove('btn-active');
+                    b.classList.add('btn-ghost');
+                });
+                btn.classList.add('btn-active');
+                btn.classList.remove('btn-ghost');
+                const want = btn.dataset.status;
+                cards.forEach(c => {
+                    c.style.display = (want === 'all' || c.dataset.status === want) ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+}

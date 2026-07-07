@@ -1,0 +1,86 @@
+# AI ユーザーシミュレーション探測ジョブ定義 (auto-dealer-demo)。
+#
+# 意図的に jobs.yml とは別ファイルに分離している：
+# - このジョブは「自分自身への越権/破壊的探测」を行う性質上、本番業務ジョブの onFailure.notify / retry 設定と混ざらないようにする。
+# - persona アカウント（yamada / suzuki / takahashi / sato、トークンは setup-simulation-users-auto-dealer.sql 参照）は本番ユーザーと完全に分離済みという前提。
+#
+# デフォルトは enabled: false。理由：
+# - rep ロールでの探測は POST を実行するため、実データに sim: プレフィックス付きの行が増える（副作用ゼロではない）。
+# - 有効化する場合は enabled: true にし、cron 間隔と jitterMaxSeconds を運用方針に合わせて調整すること。
+jobs:
+  simulation_probe_cust_read:
+    displayName: "🔎 AI ユーザーシミュレーション（Customer 読み取り探測）"
+    description: "Customer(sato) ロールで GET /api/auto-dealer-demo/sales_leads を叩き、他顧客のデータ漏洩（CROSS_CUSTOMER_LEAK）等の不変量違反を検出する。"
+    enabled: false
+
+    schedule:
+      cron: "*/15 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: ai_user_simulation
+    settings:
+      params:
+        script: scripts/experiments/run_simulation_step_auto_dealer.py
+        user: cust
+        method: GET
+        path: /api/auto-dealer-demo/sales_leads
+        apiBaseUrl: "http://localhost:5001"
+        timeoutSeconds: "20"
+        jitterMaxSeconds: "120"
+
+    onFailure:
+      retryCount: 0
+      retryInterval: 60
+      logError: true
+
+  simulation_probe_rep_write:
+    displayName: "🔎 AI ユーザーシミュレーション（Sales Rep 書き込み探測）"
+    description: "Sales Rep(suzuki) ロールで POST /api/auto-dealer-demo/sales_leads を叩き、正しく書き込み権限が通ることを検証する。"
+    enabled: false
+
+    schedule:
+      cron: "*/20 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: ai_user_simulation
+    settings:
+      params:
+        script: scripts/experiments/run_simulation_step_auto_dealer.py
+        user: rep
+        method: POST
+        path: /api/auto-dealer-demo/sales_leads
+        data: '{"customer_id":"CUST001","vehicle_interest":"Toyota Camry","status":"new"}'
+        apiBaseUrl: "http://localhost:5001"
+        timeoutSeconds: "20"
+        jitterMaxSeconds: "120"
+
+    onFailure:
+      retryCount: 0
+      retryInterval: 60
+      logError: true
+
+  simulation_probe_cust_write_attempt:
+    displayName: "🔎 AI ユーザーシミュレーション（Customer 越権書き込み試行）"
+    description: "Customer(sato) が本来 403 になるべき POST を試み、auth_leak 不変量を突く。"
+    enabled: false
+
+    schedule:
+      cron: "*/30 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: ai_user_simulation
+    settings:
+      params:
+        script: scripts/experiments/run_simulation_step_auto_dealer.py
+        user: cust
+        method: POST
+        path: /api/auto-dealer-demo/sales_leads
+        data: '{"customer_id":"CUST001","vehicle_interest":"Toyota Camry","status":"new"}'
+        apiBaseUrl: "http://localhost:5001"
+        timeoutSeconds: "20"
+        jitterMaxSeconds: "120"
+
+    onFailure:
+      retryCount: 0
+      retryInterval: 60
+      logError: true

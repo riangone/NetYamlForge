@@ -1,0 +1,69 @@
+# AI ユーザーシミュレーション探測ジョブ定義。
+#
+# 意図的に deadline_reminder.yml とは別ファイルに分離している：
+# - このジョブは「自分自身への越権/破壊的探測」を行う性質上、本番業務ジョブ
+#   （deadline_reminder 等）の onFailure.notify / retry 設定と混ざらないようにする。
+# - persona アカウント（taskmgr_manager / taskmgr_worker1 / taskmgr_viewer、
+#   トークンは scripts/experiments/run_simulation_step.py の USER_TOKENS 参照）は
+#   本番ユーザーと完全に分離済みという前提。
+#
+# デフォルトは enabled: false。理由：
+# - pm/dev ロールでの探測は POST/PUT を実行し得るため、実データに sim: プレフィックス
+#   付きの行が増える（副作用ゼロではない）。
+# - 常時 5 分間隔で回す運用にするかは、まず手動 TriggerJobNowAsync で 1 回試してから
+#   判断すべき。有効化する場合は enabled: true にし、cron 間隔と jitterMaxSeconds を
+#   運用方針（smoke/normal/chaos）に合わせて調整すること。
+jobs:
+  simulation_probe_obs_read:
+    displayName: "🔎 AI ユーザーシミュレーション（Observer 読み取り探測）"
+    description: "Observer(taskmgr_viewer) ロールで GET /api/task-management/task を叩き、権限/監査系の不変量違反を検出する。exit code 2（違反検出）はジョブ失敗として扱われ onFailure.notify 経由で通知される。"
+    # 2026-07-07 19:36 JST: 手動エンドツーエンド検証済み（exit=0, success=True,
+    # logs/experiments/simulation.jsonl に記録済み）。検証後、安全なデフォルトに戻した。
+    # 有効化する場合は enabled: true にし、cron 間隔と jitterMaxSeconds を
+    # 運用方針（smoke/normal/chaos）に合わせて調整すること。
+    enabled: false
+
+    schedule:
+      cron: "*/15 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: ai_user_simulation
+    settings:
+      params:
+        script: scripts/experiments/run_simulation_step.py
+        user: obs
+        method: GET
+        path: /api/task-management/task
+        apiBaseUrl: "http://localhost:5001"   # このホストでは port 5000 が別アプリ(AiChatApp)に占有されているため明示指定が必須（検証で確認済み）
+        timeoutSeconds: "20"
+        jitterMaxSeconds: "120"   # cron の固定間隔に不定期らしさを足す（playbook のジッタ設計の簡易版）
+
+    onFailure:
+      retryCount: 0        # 探測ジョブなので自動リトライはしない（違反検出=想定内の情報として扱う）
+      retryInterval: 60
+      logError: true
+
+  simulation_probe_obs_write_attempt:
+    displayName: "🔎 AI ユーザーシミュレーション（Observer 越権書き込み試行）"
+    description: "Observer(taskmgr_viewer) が本来 403 になるべき POST を試み、auth_leak 不変量を突く。"
+    enabled: false
+
+    schedule:
+      cron: "*/20 * * * *"
+      timezone: "Asia/Tokyo"
+
+    type: ai_user_simulation
+    settings:
+      params:
+        script: scripts/experiments/run_simulation_step.py
+        user: obs
+        method: POST
+        path: /api/task-management/task
+        data: '{"Title":"sim: probe task","DueDate":"2099-01-01"}'
+        timeoutSeconds: "20"
+        jitterMaxSeconds: "180"
+
+    onFailure:
+      retryCount: 0
+      retryInterval: 60
+      logError: true

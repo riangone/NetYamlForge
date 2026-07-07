@@ -29,7 +29,7 @@ public class LeadScoringExecutor : ProjectBatchExecutorBase<LeadScoringItem, Lea
 {
     public override string StepType => "lead_scoring";
 
-    public LeadScoringExecutor(ICliChainService cli, ILogger logger) : base(cli, logger)
+    public LeadScoringExecutor(ICliChainService cli, ILoggerFactory loggerFactory) : base(cli, loggerFactory.CreateLogger<LeadScoringExecutor>())
     {
     }
 

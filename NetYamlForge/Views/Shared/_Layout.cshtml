@@ -411,6 +411,9 @@
                             <li><a asp-controller="Users"
                                    asp-action="Index"
                                    asp-route-project="@currentProject">@L["Users"]</a></li>
+                            <li><a asp-controller="Simulation"
+                                   asp-action="Index"
+                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "Simulation", StringComparison.OrdinalIgnoreCase) ? "active" : "")">Simulation</a></li>
                         }
                     </ul>
                 </aside>

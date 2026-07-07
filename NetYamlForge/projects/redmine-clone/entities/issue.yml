@@ -6,6 +6,7 @@ entities:
     displayName: Issue
     softDelete: false
     isPublic: false
+    api: readwrite
 
     joins:
       - type: left
@@ -18,6 +19,44 @@ entities:
         on: RmIssue.CategoryId = cat.Id
 
     forms:
+      Module:
+        type: string
+        label: Module
+        editable: true
+        options:
+          - frontend
+          - backend
+          - ai_logic
+          - devops
+        optionLabels:
+          frontend: "💻 Frontend"
+          backend: "⚙️ Backend"
+          ai_logic: "🧠 AI Logic"
+          devops: "🚀 DevOps"
+      StepsToReproduce:
+        type: textarea
+        label: Steps to Reproduce
+        editable: true
+      RelatedCommit:
+        type: string
+        label: Related Commit
+        editable: true
+      Severity:
+        type: string
+        label: Severity
+        editable: true
+        options:
+          - blocker
+          - critical
+          - major
+          - minor
+          - trivial
+        optionLabels:
+          blocker: "🚨 Blocker"
+          critical: "💥 Critical"
+          major: "🔶 Major"
+          minor: "🔷 Minor"
+          trivial: "ℹ️ Trivial"
       Subject:
         type: string
         required: true
@@ -144,10 +183,30 @@ entities:
         type: string
         label: Priority
         sortable: true
+      Severity:
+        type: string
+        label: Severity
+        sortable: true
+      Module:
+        type: string
+        label: Module
+        sortable: true
+      RelatedCommit:
+        type: string
+        label: Related Commit
+        sortable: true
       AssignedTo:
         type: string
         label: Assigned To
         searchable: true
+        sortable: true
+      CategoryId:
+        type: int
+        label: Category
+        sortable: true
+      MilestoneId:
+        type: int
+        label: Milestone
         sortable: true
       CategoryName:
         type: string
@@ -210,6 +269,8 @@ entities:
           - Tracker
           - Status
           - Priority
+          - Severity
+          - Module
           - AssignedTo
           - CategoryId
           - MilestoneId
@@ -218,6 +279,8 @@ entities:
           - EstimatedHours
           - DoneRatio
           - Description
+          - StepsToReproduce
+          - RelatedCommit
           - AuthorName
       filters:
         columns: 4

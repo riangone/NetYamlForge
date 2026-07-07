@@ -3,6 +3,7 @@ header:
 
 navigation:
   showDashboard: true
+  showPages: false
   entities:
     - task
     - comment
@@ -14,8 +15,11 @@ navigation:
       controller: Dashboard
       action: Index
       icon: 📊
+    - label: タスクボード
+      url: /task-management/Page/TaskBoard
+      icon: 🗂️
     - label: タスク一覧
-      url: /task-management/DynamicEntity/Index?entity=task
+      url: /task-management/Page/TaskList
       icon: 📋
     - label: コメント一覧
       url: /task-management/DynamicEntity/Index?entity=comment

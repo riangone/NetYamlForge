@@ -1,0 +1,96 @@
+title: タスクボード
+description: "タスクとコメントを一体表示するカスタム一覧ページ（モバイル対応）"
+isPublic: true
+
+sections:
+  # KPI 集計（ステータス別件数）
+  - id: stats
+    title: サマリー
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        COUNT(*)                                                   AS Total,
+        SUM(CASE WHEN Status = 'not_started' THEN 1 ELSE 0 END)    AS NotStarted,
+        SUM(CASE WHEN Status = 'in_progress' THEN 1 ELSE 0 END)    AS InProgress,
+        SUM(CASE WHEN Status = 'completed'   THEN 1 ELSE 0 END)    AS Completed,
+        SUM(CASE WHEN Status = 'on_hold'     THEN 1 ELSE 0 END)    AS OnHold
+      FROM Task
+    columns:
+      Total:      { label: 全タスク,  type: int }
+      NotStarted: { label: 未着手,    type: int }
+      InProgress: { label: 進行中,    type: int }
+      Completed:  { label: 完了,      type: int }
+      OnHold:     { label: 保留,      type: int }
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # タスク本体（コメント件数付き）
+  - id: tasks
+    title: タスク
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        t.Id,
+        t.Title,
+        t.AssignedTo,
+        t.DueDate,
+        t.Priority,
+        t.Status,
+        t.Notes,
+        t.CreatedBy,
+        t.CreatedAt,
+        t.UpdatedAt,
+        (SELECT COUNT(*) FROM TaskComment c WHERE c.TaskId = t.Id) AS CommentCount
+      FROM Task t
+      ORDER BY
+        CASE t.Status
+          WHEN 'in_progress' THEN 1
+          WHEN 'not_started' THEN 2
+          WHEN 'on_hold'     THEN 3
+          WHEN 'completed'   THEN 4
+          ELSE 5
+        END,
+        CASE t.Priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
+        t.DueDate ASC
+    columns:
+      Id:           { label: ID,        type: int, hidden: true }
+      Title:        { label: タスク名,   type: string }
+      AssignedTo:   { label: 担当者,     type: string }
+      DueDate:      { label: 期限日,     type: date }
+      Priority:     { label: 優先度,     type: string }
+      Status:       { label: ステータス, type: string }
+      Notes:        { label: 備考,       type: string }
+      CreatedBy:    { label: 登録者,     type: string }
+      CreatedAt:    { label: 登録日時,   type: datetime }
+      UpdatedAt:    { label: 更新日時,   type: datetime }
+      CommentCount: { label: コメント数, type: int }
+    pageSize: 200
+    editable: false
+    readOnly: true
+
+  # 全コメント（ビュー側で TaskId ごとにグルーピング）
+  - id: comments
+    title: コメント
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        c.Id,
+        c.TaskId,
+        c.CommentText,
+        c.PostedBy,
+        c.PostedAt
+      FROM TaskComment c
+      ORDER BY c.PostedAt ASC
+    columns:
+      Id:          { label: ID,       type: int, hidden: true }
+      TaskId:      { label: タスクID,  type: int, hidden: true }
+      CommentText: { label: 本文,     type: string }
+      PostedBy:    { label: 投稿者,    type: string }
+      PostedAt:    { label: 投稿日時,  type: datetime }
+    pageSize: 200
+    editable: false
+    readOnly: true

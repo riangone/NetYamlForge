@@ -1,0 +1,335 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/task-management/views/_Layout.cshtml";
+
+    var taskRows    = Model.ContainsKey("tasks")    ? Model["tasks"].Rows.ToList()    : new();
+    var commentRows = Model.ContainsKey("comments") ? Model["comments"].Rows.ToList() : new();
+    var statsRow    = (Model.ContainsKey("stats") ? Model["stats"].Rows.FirstOrDefault() : null)
+                      ?? new Dictionary<string, object>();
+
+    ViewData["Title"] = "タスク一覧";
+
+    // コメントを TaskId でグルーピング
+    var commentsByTask = commentRows
+        .GroupBy(c => c.GetValueOrDefault("TaskId")?.ToString() ?? "")
+        .ToDictionary(g => g.Key, g => g.ToList());
+
+    string S(Dictionary<string, object> r, string k) => r.GetValueOrDefault(k)?.ToString() ?? "";
+
+    string StatusLabel(string s) => s switch {
+        "not_started" => "📋 未着手",
+        "in_progress" => "🔄 進行中",
+        "completed"   => "✅ 完了",
+        "on_hold"     => "⏸ 保留",
+        _ => s
+    };
+
+    string StatusBadge(string s) => s switch {
+        "in_progress" => "badge-info text-info-content",
+        "completed"   => "badge-success text-success-content",
+        "on_hold"     => "badge-warning text-warning-content",
+        _ => "badge-ghost"
+    };
+
+    string PriorityLabel(string p) => p switch {
+        "high"   => "🔴 高",
+        "medium" => "🟡 中",
+        "low"    => "🟢 低",
+        _ => p
+    };
+
+    string PriorityBorder(string p) => p switch {
+        "high"   => "border-l-error border-l-4",
+        "medium" => "border-l-warning border-l-4",
+        "low"    => "border-l-success border-l-4",
+        _ => "border-l-base-300 border-l-4"
+    };
+
+    string FmtDate(object? v) {
+        if (v is null) return "";
+        return DateTime.TryParse(v.ToString(), out var dt) ? dt.ToString("yyyy/MM/dd") : v.ToString() ?? "";
+    }
+
+    string FmtDateTime(object? v) {
+        if (v is null) return "";
+        return DateTime.TryParse(v.ToString(), out var dt) ? dt.ToString("yyyy/MM/dd HH:mm") : v.ToString() ?? "";
+    }
+
+    bool IsOverdue(string status, object? due) {
+        if (status == "completed") return false;
+        return DateTime.TryParse(due?.ToString(), out var dt) && dt.Date < DateTime.Now.Date;
+    }
+
+    string Initial(string name) => string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1).ToUpper();
+
+    string Stat(string k) => statsRow.GetValueOrDefault(k)?.ToString() ?? "0";
+}
+
+@section Styles {
+    <style>
+        .task-card-list {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .task-card-list:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .comment-item {
+            position: relative;
+        }
+        .comment-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 28px;
+            bottom: -12px;
+            width: 2px;
+            background-color: hsl(var(--bc) / 0.1);
+        }
+    </style>
+}
+
+<div class="max-w-6xl mx-auto px-4 py-6 sm:py-10">
+
+    <!-- ヘッダー -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold flex items-center gap-3">
+                <span class="text-primary">📋</span> タスク一覧
+            </h1>
+            <p class="text-sm text-base-content/60 mt-1">カスタムデザインでタスクと進捗コメントを一覧表示します。</p>
+        </div>
+        <div>
+            <a href="/task-management/DynamicEntity/Create?entity=task"
+               class="btn btn-primary btn-md gap-2 shadow-lg w-full sm:w-auto">
+                <span class="text-lg">＋</span> 新規タスク登録
+            </a>
+        </div>
+    </div>
+
+    <!-- サマリー KPI -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat p-4">
+                <div class="stat-title text-xs font-semibold text-base-content/50">全タスク</div>
+                <div class="stat-value text-2xl mt-1">@Stat("Total")</div>
+            </div>
+        </div>
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat p-4">
+                <div class="stat-title text-xs font-semibold text-info">🔄 進行中</div>
+                <div class="stat-value text-2xl text-info mt-1">@Stat("InProgress")</div>
+            </div>
+        </div>
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat p-4">
+                <div class="stat-title text-xs font-semibold text-base-content/70">📋 未着手</div>
+                <div class="stat-value text-2xl mt-1">@Stat("NotStarted")</div>
+            </div>
+        </div>
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat p-4">
+                <div class="stat-title text-xs font-semibold text-warning">⏸ 保留</div>
+                <div class="stat-value text-2xl text-warning mt-1">@Stat("OnHold")</div>
+            </div>
+        </div>
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat p-4">
+                <div class="stat-title text-xs font-semibold text-success">✅ 完了</div>
+                <div class="stat-value text-2xl text-success mt-1">@Stat("Completed")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- フィルターコントロール -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap gap-1.5" id="statusFilterBar">
+            <button class="btn btn-sm btn-active" data-status="all">すべて</button>
+            <button class="btn btn-sm btn-ghost" data-status="in_progress">🔄 進行中</button>
+            <button class="btn btn-sm btn-ghost" data-status="not_started">📋 未着手</button>
+            <button class="btn btn-sm btn-ghost" data-status="on_hold">⏸ 保留</button>
+            <button class="btn btn-sm btn-ghost" data-status="completed">✅ 完了</button>
+        </div>
+        <div class="text-xs text-base-content/50">
+            全 <span class="font-bold text-base-content" id="visibleCount">@taskRows.Count</span> 件表示中
+        </div>
+    </div>
+
+    <!-- タスクカードリスト -->
+    <div class="space-y-4" id="taskListContainer">
+        @if (!taskRows.Any())
+        {
+            <div class="text-center text-base-content/50 py-16 bg-base-100 rounded-2xl border border-dashed border-base-300">
+                <div class="text-4xl mb-2">📭</div>
+                <div>登録されているタスクがありません。</div>
+            </div>
+        }
+        @foreach (var t in taskRows)
+        {
+            var id       = S(t, "Id");
+            var status   = S(t, "Status");
+            var priority = S(t, "Priority");
+            var comments = commentsByTask.GetValueOrDefault(id) ?? new();
+            var overdue  = IsOverdue(status, t.GetValueOrDefault("DueDate"));
+
+            <div class="task-card-list bg-base-100 rounded-2xl border border-base-200 @PriorityBorder(priority) p-5 sm:p-6"
+                 data-status="@status">
+                
+                <!-- メイン部: タイトル・ステータス・メタ情報 -->
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="flex-1 space-y-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="badge @StatusBadge(status) font-medium text-xs py-2 px-3">@StatusLabel(status)</span>
+                            <span class="badge badge-ghost text-xs">@PriorityLabel(priority) 優先</span>
+                            @if (overdue)
+                            {
+                                <span class="badge badge-error text-error-content text-xs font-semibold animate-pulse">⚠️ 期限超過</span>
+                            }
+                        </div>
+                        <h2 class="text-lg sm:text-xl font-bold text-base-content leading-tight">
+                            @S(t, "Title")
+                        </h2>
+                        
+                        <!-- 基本情報メタタグ -->
+                        <div class="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-base-content/70 pt-1">
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                担当: <strong class="text-base-content">@S(t, "AssignedTo")</strong>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 @(overdue ? "text-error font-semibold" : "")">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-base-content/40 @(overdue ? "text-error" : "")" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                期限日: @FmtDate(t.GetValueOrDefault("DueDate"))
+                            </span>
+                            @if (!string.IsNullOrEmpty(S(t, "CreatedBy")))
+                            {
+                                <span class="inline-flex items-center gap-1">
+                                    登録: @S(t, "CreatedBy") (@FmtDate(t.GetValueOrDefault("CreatedAt")))
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 操作系ボタン (スマホ・モバイル対応: 横並びから適切に並ぶように) -->
+                    <div class="flex flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto mt-2 md:mt-0">
+                        <a href="/task-management/DynamicEntity/Edit?entity=task&id=@id"
+                           class="btn btn-outline btn-sm flex-1 md:w-28 gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2.01 2.01 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            編集
+                        </a>
+                        <a href="/task-management/DynamicEntity/Details?entity=task&id=@id"
+                           class="btn btn-ghost btn-sm flex-1 md:w-28 gap-1.5 border border-base-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            詳細
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 備考 / Notes -->
+                @if (!string.IsNullOrWhiteSpace(S(t, "Notes")))
+                {
+                    <div class="mt-4 p-3.5 bg-base-200/50 rounded-xl text-sm text-base-content/85 leading-relaxed whitespace-pre-wrap break-words border border-base-200">
+                        @S(t, "Notes")
+                    </div>
+                }
+
+                <!-- コメントスレッドセクション -->
+                <div class="mt-6 pt-5 border-t border-base-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-base-content/80 flex items-center gap-2">
+                            <span>💬</span> コメントスレッド 
+                            <span class="badge badge-primary badge-sm font-semibold">@comments.Count</span>
+                        </h3>
+                        <a href="/task-management/DynamicEntity/Create?entity=comment&TaskId=@id"
+                           class="btn btn-ghost btn-xs text-primary gap-1 font-semibold hover:bg-primary/10">
+                            ＋ 新規コメント追加
+                        </a>
+                    </div>
+
+                    @if (!comments.Any())
+                    {
+                        <div class="text-xs text-base-content/40 py-2 pl-2">
+                            このタスクにはまだコメントがありません。進捗やメモを投稿してください。
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="space-y-4 pl-1 pr-1 max-h-96 overflow-y-auto">
+                            @foreach (var c in comments)
+                            {
+                                var poster = S(c, "PostedBy");
+                                <div class="comment-item flex gap-3">
+                                    <!-- アバター -->
+                                    <div class="avatar placeholder shrink-0 z-10">
+                                        <div class="bg-primary/10 text-primary rounded-full w-8 h-8 ring-2 ring-base-100">
+                                            <span class="text-xs font-bold">@Initial(poster)</span>
+                                        </div>
+                                    </div>
+                                    <!-- コメントフキダシ -->
+                                    <div class="flex-1 bg-base-200/60 rounded-2xl px-4 py-3 border border-base-200">
+                                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                                            <span class="text-xs font-bold text-base-content/90">@poster</span>
+                                            <span class="text-[10px] text-base-content/40">@FmtDateTime(c.GetValueOrDefault("PostedAt"))</span>
+                                        </div>
+                                        <p class="text-sm mt-1 text-base-content/85 whitespace-pre-wrap break-words leading-relaxed">@S(c, "CommentText")</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const bar = document.getElementById('statusFilterBar');
+            const container = document.getElementById('taskListContainer');
+            const countLabel = document.getElementById('visibleCount');
+            if (!bar || !container) return;
+
+            const cards = Array.from(container.querySelectorAll('.task-card-list'));
+
+            bar.addEventListener('click', function (e) {
+                const btn = e.target.closest('button[data-status]');
+                if (!btn) return;
+
+                // アクティブ状態の切り替え
+                bar.querySelectorAll('button').forEach(b => {
+                    b.classList.remove('btn-active');
+                    b.classList.add('btn-ghost');
+                });
+                btn.classList.add('btn-active');
+                btn.classList.remove('btn-ghost');
+
+                const wantStatus = btn.dataset.status;
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    if (wantStatus === 'all' || card.dataset.status === wantStatus) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (countLabel) {
+                    countLabel.textContent = visibleCount;
+                }
+            });
+        })();
+    </script>
+}

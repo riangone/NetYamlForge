@@ -33,7 +33,7 @@ public class QuoteGenerationExecutor : ProjectBatchExecutorBase<QuoteItem, Quote
 {
     public override string StepType => "quote_generation";
 
-    public QuoteGenerationExecutor(ICliChainService cli, ILogger logger) : base(cli, logger)
+    public QuoteGenerationExecutor(ICliChainService cli, ILoggerFactory loggerFactory) : base(cli, loggerFactory.CreateLogger<QuoteGenerationExecutor>())
     {
     }
 

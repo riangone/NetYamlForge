@@ -6,6 +6,7 @@ entities:
     displayName: Category
     softDelete: false
     isPublic: false
+    api: readwrite
 
     forms:
       Name:

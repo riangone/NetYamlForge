@@ -58,9 +58,9 @@ public partial class DynamicCrudRepository
         var cacheKey = $"Update_{meta.GetHashCode()}_{valuesKeysStr}";
         if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
-            var fields = meta.Forms
-                .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
-                .Select(f => f.Key)
+            var fields = meta.Columns
+                .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression) && values.ContainsKey(c.Key))
+                .Select(c => c.Key)
                 .ToArray();
 
             var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));
@@ -104,9 +104,9 @@ public partial class DynamicCrudRepository
         var cacheKey = $"UpdateComposite_{meta.GetHashCode()}_{valuesKeysStr}";
         if (!SqlCache.TryGetValue(cacheKey, out var sql))
         {
-            var fields = meta.Forms
-                .Where(f => !f.Value.Identity && values.ContainsKey(f.Key) && f.Value.Editable)
-                .Select(f => f.Key)
+            var fields = meta.Columns
+                .Where(c => !c.Value.Identity && string.IsNullOrWhiteSpace(c.Value.Expression) && values.ContainsKey(c.Key))
+                .Select(c => c.Key)
                 .ToArray();
 
             var setClause = string.Join(", ", fields.Select(f => $"{f} = @{f}"));

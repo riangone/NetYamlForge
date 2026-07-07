@@ -5,7 +5,10 @@ entities:
     key: Id
     displayName: タスク
     softDelete: false
-    isPublic: false
+    isPublic: true
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation.md）。
+    # ApiEntityAccessGuard は entity 級のみ判定＝役割/所有者フィルタは無い点に留意。
+    api: readwrite
 
     forms:
       Title:
@@ -85,10 +88,28 @@ entities:
         type: string
         label: 優先度
         sortable: true
+        options:
+          - high
+          - medium
+          - low
+        optionLabels:
+          high: "🔴 高"
+          medium: "🟡 中"
+          low: "🟢 低"
       Status:
         type: string
         label: ステータス
         sortable: true
+        options:
+          - not_started
+          - in_progress
+          - completed
+          - on_hold
+        optionLabels:
+          not_started: "📋 未着手"
+          in_progress: "🔄 進行中"
+          completed: "✅ 完了"
+          on_hold: "⏸ 保留"
       Notes:
         type: string
         label: 備考

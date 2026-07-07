@@ -346,6 +346,7 @@ public static class ServiceCollectionExtensions
         services.AddBatchStepHandler<EmbeddingGeneratorExecutor>("embedding_generator");
         services.AddBatchStepHandler<AiEmbeddingGeneratorExecutor>("ai_embedding_generator");
         services.AddBatchStepHandler<AiAnnotatorExecutor>("ai_annotator");
+        services.AddBatchStepHandler<SimulationProbeExecutor>("ai_user_simulation");
 
         services.AddScoped<IBatchJobExecutor, BatchJobExecutor>();
         services.AddSingleton<IBatchJobHistoryStore, InMemoryBatchJobHistoryStore>();

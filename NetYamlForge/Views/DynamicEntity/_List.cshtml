@@ -159,7 +159,8 @@
             </div>
         }
 
-        <div class="overflow-x-auto">
+        @* Desktop: table view *@
+        <div class="entity-table-wrap overflow-x-auto">
             <table class="table table-zebra w-full">
                 <thead>
                     <tr>
@@ -245,7 +246,6 @@
                             <td class="text-right">
                                 <div class="flex flex-wrap gap-1 justify-end">
                                     @{
-                                        // filter が設定されているリンクを行ごとに描画
                                         var rowLinks = Model.Meta.Links
                                             .Where(l => l.Value.Filter != null && l.Value.Filter.Count > 0)
                                             .ToList();
@@ -259,7 +259,6 @@
                                             ? rowLink.Query.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
                                             : new Dictionary<string, string?>();
                                         rowLinkParams["entity"] = rowLink.TargetEntity;
-                                        // 現在のページ状態（検索・ソート・フィルタ）を returnUrl に含めて遷移後に復元できるようにする
                                         rowLinkParams["returnUrl"] = currentStateUrl;
                                         foreach (var fkv in rowLink.Filter!)
                                         {
@@ -318,7 +317,6 @@
                                         var actionBtnClass = $"btn btn-xs {(string.IsNullOrWhiteSpace(actionDef.Class) ? "btn-accent btn-outline" : actionDef.Class)}";
                                         if (hasInputs || hasConfirm)
                                         {
-                                            // 入力フォームまたは確認ダイアログが必要な場合はモーダルを開く
                                             <button class="@actionBtnClass"
                                                     hx-get="@Url.Action("ActionForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
                                                     hx-target="#modal-form-content"
@@ -328,7 +326,6 @@
                                         }
                                         else
                                         {
-                                            // 入力も確認もない場合は直接実行
                                             <form hx-post="@Url.Action("InvokeAction", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, ["actionKey"] = actionKey, [pkParamName] = itemId })"
                                                   hx-target="#list-container"
                                                   hx-swap="innerHTML"
@@ -346,6 +343,145 @@
                     }
                 </tbody>
             </table>
+        </div>
+
+        @* Mobile: card list view *@
+        <div class="entity-card-list">
+            @foreach (var item in Model.Items)
+            {
+                var dict = item as IDictionary<string, object>;
+                var cbItemId = buildItemId(dict);
+                var itemId = cbItemId;
+                var rowDict = dict;
+
+                @* Determine primary display field: skip identity/PK so the card title
+                   shows a meaningful label (e.g. Title) instead of the numeric Id. *@
+                var primaryCol = displayColumns.FirstOrDefault(c => !c.Value.Identity && c.Value.Type == "string");
+                if (primaryCol.Key == null)
+                {
+                    primaryCol = displayColumns.FirstOrDefault(c => !c.Value.Identity);
+                }
+                if (primaryCol.Key == null)
+                {
+                    primaryCol = displayColumns.FirstOrDefault();
+                }
+                var primaryName = primaryCol.Key;
+                object? primaryVal = null;
+                try { primaryVal = dict[primaryName]; } catch { }
+                var primaryFormatted = primaryCol.Value != null
+                    ? ColumnValueFormatter.FormatValue(primaryCol.Value.Type, primaryVal, primaryCol.Value.OptionLabels)
+                    : primaryVal?.ToString();
+
+                @* Build badges for key fields *@
+                var badgeCols = displayColumns
+                    .Where(c => c.Value.Options != null && c.Value.Options.Count > 0)
+                    .Take(2)
+                    .ToList();
+
+                @* Body fields (all non-hidden except primary & badge fields) *@
+                var bodyCols = displayColumns
+                    .Where(c => c.Key != primaryName && !badgeCols.Any(b => b.Key == c.Key))
+                    .Take(4)
+                    .ToList();
+
+                <div class="entity-card">
+                    <div class="entity-card-header">
+                        <div class="entity-card-title">
+                            <a href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
+                                @primaryFormatted
+                            </a>
+                        </div>
+                        <div class="entity-card-badges">
+                            @foreach (var badgeCol in badgeCols)
+                            {
+                                object? bVal = null;
+                                try { bVal = dict[badgeCol.Key]; } catch { }
+                                var bFormatted = ColumnValueFormatter.FormatValue(badgeCol.Value.Type, bVal, badgeCol.Value.OptionLabels);
+                                if (!string.IsNullOrEmpty(bFormatted))
+                                {
+                                    <span class="badge badge-sm badge-outline">@bFormatted</span>
+                                }
+                            }
+                            <input type="checkbox" class="checkbox checkbox-sm row-checkbox card-checkbox" value="@cbItemId" />
+                        </div>
+                    </div>
+                    @if (bodyCols.Count > 0)
+                    {
+                        <div class="entity-card-body">
+                            @foreach (var col in bodyCols)
+                            {
+                                object? val = null;
+                                try { val = dict[col.Key]; } catch { }
+                                var formatted = ColumnValueFormatter.FormatValue(col.Value.Type, val, col.Value.OptionLabels);
+                                var isLongText = col.Key.Contains("Text", StringComparison.OrdinalIgnoreCase)
+                                    || col.Key.Contains("Notes", StringComparison.OrdinalIgnoreCase)
+                                    || col.Key.Contains("Description", StringComparison.OrdinalIgnoreCase);
+                                var fieldClass = isLongText ? "entity-card-field col-span-2 text-wrap-normal" : "entity-card-field";
+                                <div class="@fieldClass">
+                                    <span class="entity-card-field-label">@col.Value.GetLabel(col.Key)</span>
+                                    <span class="entity-card-field-value">@(string.IsNullOrEmpty(formatted) ? "—" : formatted)</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    <div class="entity-card-actions">
+                        <a class="btn btn-xs btn-info btn-outline"
+                           href="@Url.Action("DetailPage", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["returnUrl"] = currentReturnUrl })">
+                            @(I18nText.ResolveByKey("ui.detail") ?? "Detail")
+                        </a>
+                        <button class="btn btn-xs btn-outline"
+                                hx-get="@Url.Action("EditForm", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId, ["mode"] = "modal" })"
+                                hx-target="#modal-form-content"
+                                hx-swap="innerHTML">
+                            @(I18nText.ResolveByKey("ui.edit") ?? "Edit")
+                        </button>
+                        @{
+                            var mobileRowLinks = Model.Meta.Links
+                                .Where(l => l.Value.Filter != null && l.Value.Filter.Count > 0)
+                                .ToList();
+                        }
+                        @foreach (var linkEntry in mobileRowLinks)
+                        {
+                            var rowLink = linkEntry.Value;
+                            var rowLinkParams = rowLink.Query != null
+                                ? rowLink.Query.ToDictionary(kv => kv.Key, kv => (string?)kv.Value)
+                                : new Dictionary<string, string?>();
+                            rowLinkParams["entity"] = rowLink.TargetEntity;
+                            rowLinkParams["returnUrl"] = currentStateUrl;
+                            foreach (var fkv in rowLink.Filter!)
+                            {
+                                if (rowDict != null && rowDict.TryGetValue(fkv.Value, out var rowVal))
+                                {
+                                    rowLinkParams[fkv.Key] = rowVal?.ToString();
+                                }
+                            }
+                            var rowLinkHref = QueryHelpers.AddQueryString(baseIndexUrl, rowLinkParams
+                                .Where(kv => kv.Value != null)
+                                .ToDictionary(kv => kv.Key, kv => kv.Value));
+                            <a class="btn btn-xs btn-secondary btn-outline" href="@rowLinkHref">
+                                @rowLink.GetLabel()
+                            </a>
+                        }
+                        <form hx-post="@Url.Action("Delete", "DynamicEntity", new Dictionary<string, string?> { ["entity"] = Model.Entity, [pkParamName] = itemId })"
+                              hx-target="#list-container"
+                              hx-swap="innerHTML"
+                              hx-confirm="@(I18nText.ResolveByKey("bulk.delete_confirm") ?? "Delete this item?")"
+                              style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-xs btn-error">
+                                @(I18nText.ResolveByKey("bulk.delete") ?? "Delete")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            @if (Model.Total == 0)
+            {
+                <div class="text-center py-12 text-base-content/40">
+                    <span class="text-4xl block mb-2">📭</span>
+                    @(I18nText.ResolveByKey("ui.no_data") ?? "データがありません")
+                </div>
+            }
         </div>
 
         @{

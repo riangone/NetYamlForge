@@ -173,3 +173,99 @@ input, textarea, select { font-family: inherit; font-size: 15px; color: var(--te
 
 /* ── Utility ── */
 .hidden { display: none !important; }
+
+/* ── Responsive & Aesthetic Enhancements for Mobile ── */
+@media (max-width: 640px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .dash-header {
+        padding: 0 16px;
+        height: 56px;
+    }
+    
+    .dash-brand span {
+        font-size: 16px;
+    }
+    
+    .dash-subtitle {
+        display: none; /* Hide subtitle on very small screens to save space */
+    }
+    
+    .dash-main {
+        padding: 24px 16px;
+    }
+    
+    .dash-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .dash-title {
+        font-size: 22px;
+        text-align: center;
+    }
+    
+    .btn-create {
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        font-size: 15px;
+    }
+    
+    .forms-grid {
+        grid-template-columns: 1fr; /* Full width cards on mobile */
+        gap: 16px;
+    }
+    
+    .form-card {
+        border-radius: 16px; /* slightly more rounded for premium feel */
+    }
+    
+    .form-card-body {
+        padding: 18px;
+    }
+    
+    .form-card-title {
+        font-size: 17px;
+    }
+    
+    .form-card-footer {
+        padding: 12px;
+        flex-wrap: wrap; /* allow wrapping for buttons if they overflow */
+        gap: 6px;
+        justify-content: flex-start;
+    }
+    
+    .card-action {
+        padding: 8px 12px; /* larger tap targets for mobile touch */
+        font-size: 13px;
+        background: #F3F4F6; /* light bg for actions on mobile */
+        border-radius: 8px;
+        flex: 1 1 calc(50% - 6px); /* 2x2 grid for actions on small screens */
+        justify-content: center;
+        min-height: 38px;
+    }
+    
+    .card-action-primary {
+        background: var(--brand-light);
+    }
+    
+    .card-action-danger {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+    
+    form[action*="Delete"] {
+        width: 100%;
+        margin-left: 0 !important;
+        display: flex;
+    }
+    
+    form[action*="Delete"] button {
+        width: 100%;
+    }
+}

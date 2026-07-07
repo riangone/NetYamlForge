@@ -2,9 +2,5 @@ nyf.0101.click {
     # 内部リライト：ブラウザの URL は /blog のまま、Kestrel にはフルパスを渡す
     rewrite /blog /blog/Page/BlogHome
 
-    reverse_proxy https://localhost:5001 {
-        transport http {
-            tls_insecure_skip_verify
-        }
-    }
+    reverse_proxy http://localhost:5001
 }

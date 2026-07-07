@@ -6,6 +6,8 @@ entities:
     displayName: 試乗記録
     softDelete: false
     isPublic: false
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation-auto-dealer.md）。
+    api: readwrite
 
     columns:
       test_drive_id:

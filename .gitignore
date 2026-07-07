@@ -43,6 +43,10 @@ Thumbs.db
 # Claude memory
 memory/
 
+# Simulation credentials (contain live bearer tokens, never commit)
+.tokens.env
+*.tokens.env
+
 # Claude Code internal snapshot
 .shadow-git/
 

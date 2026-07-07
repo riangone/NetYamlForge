@@ -45,7 +45,7 @@ grep -E "(passed|failed|skipped)" /tmp/playwright-output.txt | tail -5
 cat > "$REPORT_FILE" << REPORT
 # NetYamlForge E2E Bug Report
 **Date**: $(date)
-**App URL**: http://localhost:5000
+**App URL**: http://localhost:5001
 
 ## Test Results Summary
 

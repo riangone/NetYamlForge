@@ -30,7 +30,7 @@ public class NurturingExecutor : ProjectBatchExecutorBase<NurturingItem, Nurturi
 {
     public override string StepType => "nurturing";
 
-    public NurturingExecutor(ICliChainService cli, ILogger logger) : base(cli, logger)
+    public NurturingExecutor(ICliChainService cli, ILoggerFactory loggerFactory) : base(cli, loggerFactory.CreateLogger<NurturingExecutor>())
     {
     }
 

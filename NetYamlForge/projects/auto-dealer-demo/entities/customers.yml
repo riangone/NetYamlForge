@@ -6,6 +6,8 @@ entities:
     displayName: 顧客マスタ
     softDelete: false
     isPublic: true
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation-auto-dealer.md）。
+    api: readonly
 
     columns:
       customer_id:

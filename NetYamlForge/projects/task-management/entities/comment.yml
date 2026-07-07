@@ -5,7 +5,9 @@ entities:
     key: Id
     displayName: コメント
     softDelete: false
-    isPublic: false
+    isPublic: true
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation.md）。
+    api: readwrite
 
     joins:
       - type: left

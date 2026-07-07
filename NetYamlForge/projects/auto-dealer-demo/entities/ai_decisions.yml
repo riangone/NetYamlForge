@@ -7,6 +7,8 @@ entities:
     description: AI が自動生成した決定・提案を管理し、必要に応じて人間が承認/却下します
     softDelete: false
     isPublic: true
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation-auto-dealer.md）。
+    api: readwrite
 
     columns:
       decision_id:

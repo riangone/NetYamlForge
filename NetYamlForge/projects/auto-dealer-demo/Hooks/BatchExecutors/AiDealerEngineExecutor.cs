@@ -8,20 +8,18 @@ using NetYamlForge.Services.BatchJob;
 
 namespace NetYamlForge.Projects.AutoDealerDemo.Hooks;
 
-/// <summary>
-/// AI 全面主導の汽車販売管理エンジン。
-/// リードスコアリング・育成タスク生成・見積生成を、それぞれの専用子バッチ実行器に委譲します。
-/// </summary>
 public class AiDealerEngineExecutor : AiExecutorBase
 {
     public override string StepType => "ai_dealer_engine";
 
-    private readonly ILogger<AiDealerEngineExecutor> _logger;
+    private readonly ILogger _logger;
+    private readonly ILoggerFactory _loggerFactory;
 
-    public AiDealerEngineExecutor(ICliChainService cliChain, ILogger<AiDealerEngineExecutor> logger) 
+    public AiDealerEngineExecutor(ICliChainService cliChain, ILoggerFactory loggerFactory, ILogger<AiDealerEngineExecutor> logger) 
         : base(cliChain, logger)
     {
         _logger = logger;
+        _loggerFactory = loggerFactory;
     }
 
     public override async Task ExecuteAsync(
@@ -29,14 +27,14 @@ public class AiDealerEngineExecutor : AiExecutorBase
         IDbConnection db, IDbTransaction tx,
         BatchJobResult result, CancellationToken ct)
     {
-        var mode = job.Settings.Params?.GetValueOrDefault("mode") ?? "lead_scoring";
+        var mode = job.Settings.Params != null && job.Settings.Params.TryGetValue("mode", out var m) ? m : "lead_scoring";
         _logger.LogInformation("[AiDealerEngine] Start: mode={Mode}, project={Project}", mode, projectName);
 
         IBatchStepHandler executor = mode switch
         {
-            "lead_scoring"     => new LeadScoringExecutor(Cli, _logger),
-            "nurturing"        => new NurturingExecutor(Cli, _logger),
-            "quote_generation" => new QuoteGenerationExecutor(Cli, _logger),
+            "lead_scoring"     => new LeadScoringExecutor(Cli, _loggerFactory),
+            "nurturing"        => new NurturingExecutor(Cli, _loggerFactory),
+            "quote_generation" => new QuoteGenerationExecutor(Cli, _loggerFactory),
             _                  => throw new NotSupportedException($"Unknown mode: {mode}")
         };
 
