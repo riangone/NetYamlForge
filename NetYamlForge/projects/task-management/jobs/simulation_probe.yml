@@ -21,10 +21,10 @@ jobs:
     # logs/experiments/simulation.jsonl に記録済み）。検証後、安全なデフォルトに戻した。
     # 有効化する場合は enabled: true にし、cron 間隔と jitterMaxSeconds を
     # 運用方針（smoke/normal/chaos）に合わせて調整すること。
-    enabled: false
+    enabled: true
 
     schedule:
-      cron: "*/15 * * * *"
+      cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
 
     type: ai_user_simulation
@@ -46,10 +46,10 @@ jobs:
   simulation_probe_obs_write_attempt:
     displayName: "🔎 AI ユーザーシミュレーション（Observer 越権書き込み試行）"
     description: "Observer(taskmgr_viewer) が本来 403 になるべき POST を試み、auth_leak 不変量を突く。"
-    enabled: false
+    enabled: true
 
     schedule:
-      cron: "*/20 * * * *"
+      cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
 
     type: ai_user_simulation

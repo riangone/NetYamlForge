@@ -11,10 +11,10 @@ jobs:
   simulation_probe_cust_read:
     displayName: "🔎 AI ユーザーシミュレーション（Customer 読み取り探測）"
     description: "Customer(sato) ロールで GET /api/auto-dealer-demo/sales_leads を叩き、他顧客のデータ漏洩（CROSS_CUSTOMER_LEAK）等の不変量違反を検出する。"
-    enabled: false
+    enabled: true
 
     schedule:
-      cron: "*/15 * * * *"
+      cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
 
     type: ai_user_simulation
@@ -36,10 +36,10 @@ jobs:
   simulation_probe_rep_write:
     displayName: "🔎 AI ユーザーシミュレーション（Sales Rep 書き込み探測）"
     description: "Sales Rep(suzuki) ロールで POST /api/auto-dealer-demo/sales_leads を叩き、正しく書き込み権限が通ることを検証する。"
-    enabled: false
+    enabled: true
 
     schedule:
-      cron: "*/20 * * * *"
+      cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
 
     type: ai_user_simulation
@@ -62,10 +62,10 @@ jobs:
   simulation_probe_cust_write_attempt:
     displayName: "🔎 AI ユーザーシミュレーション（Customer 越権書き込み試行）"
     description: "Customer(sato) が本来 403 になるべき POST を試み、auth_leak 不変量を突く。"
-    enabled: false
+    enabled: true
 
     schedule:
-      cron: "*/30 * * * *"
+      cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
 
     type: ai_user_simulation
