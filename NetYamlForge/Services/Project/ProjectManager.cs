@@ -182,7 +182,8 @@ public class ProjectManager
             Layout = config.Layout,
             Calendar = config.Calendar,
             Email = config.Email,
-            Multitenancy = config.Multitenancy
+            Multitenancy = config.Multitenancy,
+            ApiWriteRoles = config.ApiWriteRoles != null ? config.ApiWriteRoles.AsReadOnly() : null
         };
 
         _projects[config.Name] = info;

@@ -6,6 +6,27 @@ entities:
     displayName: 销售线索
     softDelete: false
     isPublic: true
+    # AI User Simulation 実験用に REST を開放（docs/experiments/ai-user-simulation-auto-dealer.md）。
+    api: readwrite
+
+    security:
+      rowLevelSecurity:
+        enabled: true
+        policies:
+          - role: customer
+            filterClause: "customer_id = (SELECT customer_id FROM customers WHERE user_name = @CurrentUser)"
+          - role: sales_rep
+            filterClause: "1 = 1"
+          - role: sales_manager
+            filterClause: "1 = 1"
+          - role: operator
+            filterClause: "1 = 1"
+          - role: executive
+            filterClause: "1 = 1"
+          - role: ai_admin
+            filterClause: "1 = 1"
+          - role: admin
+            filterClause: "1 = 1"
 
     columns:
       lead_id:

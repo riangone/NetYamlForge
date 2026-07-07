@@ -149,7 +149,9 @@ public class DynamicCrudRowLevelSecurity
         if (user?.Identity?.IsAuthenticated != true) return Array.Empty<string>();
         var userName = user.Identity.Name;
         if (string.IsNullOrEmpty(userName) || _userAuthService == null) return Array.Empty<string>();
-        return await _userAuthService.GetUserRolesAsync(userName);
+        
+        string? projectName = _projectScope?.IsSet == true ? _projectScope.Current.Name : null;
+        return await _userAuthService.GetUserRolesAsync(userName, projectName);
     }
 
     /// <summary>

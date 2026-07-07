@@ -7,6 +7,13 @@ database:
   type: sqlite
   path: database/auto-dealer-demo.db
 
+apiWriteRoles:
+  - sales_manager
+  - sales_rep
+  - operator
+  - executive
+  - ai_admin
+
 features:
   multiLanguage: true
   userAuthentication: true

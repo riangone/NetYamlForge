@@ -3,6 +3,13 @@
   "type": "object",
   "required": ["name", "database"],
   "properties": {
+    "apiWriteRoles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "APIでの書き込みを許可するロールのリスト"
+    },
     "name": {
       "type": "string",
       "minLength": 1,

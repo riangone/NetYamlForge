@@ -12,6 +12,7 @@ public interface IUserAuthService
     Task<AppUser?> ValidateCredentialsAsync(string userName, string password);
     Task<AppUser?> GetByApiTokenAsync(string token);
     Task<IReadOnlyList<string>> GetUserRolesAsync(string userName);
+    Task<IReadOnlyList<string>> GetUserRolesAsync(string userName, string? projectName);
     Task UpdateLastLoginAsync(int userId);
     Task<IReadOnlyList<AppUser>> GetAllAsync(string? owningProject = null);
     Task<AppUser?> GetByIdAsync(int id);

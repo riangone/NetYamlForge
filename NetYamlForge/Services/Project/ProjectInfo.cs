@@ -17,6 +17,10 @@ public class ProjectInfo
     public IDashboardConfigProvider DashboardConfig { get; init; } = default!;
     public IPageMetadataProvider PageMetadata { get; init; } = NullPageMetadataProvider.Instance;
     /// <summary>
+    /// APIでの書き込みを許可するロールのリスト。未指定の場合はデフォルトのロールが使用されます。
+    /// </summary>
+    public IReadOnlyCollection<string>? ApiWriteRoles { get; init; }
+    /// <summary>
     /// プロジェクト固有のレイアウト設定（project.yaml から読み込み）。
     /// </summary>
     public ProjectLayoutConfig? Layout { get; init; }

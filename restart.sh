@@ -2,6 +2,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$SCRIPT_DIR/NetYamlForge"
+PORT="${PORT:-5001}"
 LOG_FILE="$SCRIPT_DIR/var/log/netyamlforge.log"
 PID_FILE="$SCRIPT_DIR/var/run/netyamlforge.pid"
 
@@ -32,11 +33,11 @@ fi
 
 # Wait for port 5001 to be released
 for i in $(seq 1 10); do
-    ss -tlnp | grep -q ':5001' || break
+    ss -tlnp | grep -q ":${PORT}" || break
     sleep 1
 done
-if ss -tlnp | grep -q ':5001'; then
-    echo "ERROR: Port 5001 still in use after 10s. Aborting."
+if ss -tlnp | grep -q ":${PORT}"; then
+    echo "ERROR: Port ${PORT} still in use after 10s. Aborting."
     exit 1
 fi
 
@@ -59,9 +60,9 @@ mkdir -p "$(dirname "$LOG_FILE")" "$(dirname "$PID_FILE")"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 
 cd "$PROJECT_DIR" || { echo "Cannot cd to $PROJECT_DIR"; exit 1; }
-export ASPNETCORE_URLS=http://localhost:5001
+export ASPNETCORE_URLS=http://localhost:${PORT}
 export ASPNETCORE_CONTENTROOT="$PROJECT_DIR"
-nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" --contentRoot "$PROJECT_DIR" --urls "http://localhost:5001" >> "$LOG_FILE" 2>&1 &
+nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" >> "$LOG_FILE" 2>&1 &
 
 APP_PID=$!
 echo $APP_PID > "$PID_FILE"

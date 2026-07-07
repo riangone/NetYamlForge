@@ -49,7 +49,11 @@ if (args.Any(a => a.Equals("--migrate-data", StringComparison.OrdinalIgnoreCase)
         return;
     }
 
-    var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName);
+    var projectDir = Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName);
+    if (!Directory.Exists(projectDir))
+    {
+        projectDir = Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName);
+    }
     if (!Directory.Exists(projectDir))
     {
         Console.Error.WriteLine($"Project directory not found: {projectDir}");
@@ -57,8 +61,14 @@ if (args.Any(a => a.Equals("--migrate-data", StringComparison.OrdinalIgnoreCase)
         return;
     }
 
+    var basePath = Directory.GetCurrentDirectory();
+    if (Directory.Exists(Path.Combine(basePath, "NetYamlForge")))
+    {
+        basePath = Path.Combine(basePath, "NetYamlForge");
+    }
+
     var configBuilder = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
+        .SetBasePath(basePath)
         .AddJsonFile("appsettings.json", optional: true)
         .AddEnvironmentVariables()
         .AddCommandLine(args);
@@ -123,6 +133,7 @@ if (args.Any(a => a.Equals("--validate-schemas", StringComparison.OrdinalIgnoreC
 }
 
 var builder = WebApplication.CreateBuilder(args);
+Directory.SetCurrentDirectory(builder.Environment.ContentRootPath);
 
 // Paths configuration mapping for database and runtime directories
 var dataDir = builder.Configuration["Paths:Data"];
@@ -325,7 +336,7 @@ await DbInitializer.InitializeAsync(app.Services, app.Configuration);
     {
         try
         {
-            var projDir = Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", proj.Name);
+            var projDir = proj.ProjectDir;
             if (!Directory.Exists(projDir)) continue;
             var dbConfig = app.Configuration.GetSection($"Projects:{proj.Name}");
             var connStr = dbConfig["Connection"] ?? app.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=system.db";
@@ -403,11 +414,12 @@ app.Use(async (context, next) =>
 app.UseConnectionPreloading(); // 接続プリロード中間件
 app.UseAuthorization();
 
-app.MapGet("/trigger-test", async (string? jobId, NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
+app.MapGet("/trigger-test", async (string? jobId, string? project, NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
 {
     var targetJob = jobId ?? "japan_it_news_briefing";
-    await scheduler.TriggerJobNowAsync("blog", targetJob);
-    return $"Triggered: {targetJob}";
+    var targetProject = project ?? "blog";
+    await scheduler.TriggerJobNowAsync(targetProject, targetJob);
+    return $"Triggered: {targetProject}/{targetJob}";
 }).AllowAnonymous();
 
 // MCP サーバーエンドポイント：/mcp（/api/{project}/{entity} と同じ認証スキームを要求）

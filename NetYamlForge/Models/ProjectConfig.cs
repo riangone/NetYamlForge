@@ -11,6 +11,10 @@ public class ProjectConfig
     public ProjectDatabaseConfig Database { get; set; } = new();
     public ProjectFeaturesConfig Features { get; set; } = new();
     /// <summary>
+    /// APIでの書き込みを許可するロールのリスト。未指定の場合はデフォルトのロールが使用されます。
+    /// </summary>
+    public List<string>? ApiWriteRoles { get; set; }
+    /// <summary>
     /// レイアウト設定（省略可能）。設定されている場合、プロジェクト固有のレイアウトが使用されます。
     /// </summary>
     public ProjectLayoutConfig? Layout { get; set; }

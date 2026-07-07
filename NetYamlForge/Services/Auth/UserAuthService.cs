@@ -77,13 +77,32 @@ public partial class UserAuthService : IUserAuthService
             new { Token = token });
     }
 
-    public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName)
+    public Task<IReadOnlyList<string>> GetUserRolesAsync(string userName) => GetUserRolesAsync(userName, null);
+
+    public async Task<IReadOnlyList<string>> GetUserRolesAsync(string userName, string? projectName)
     {
         await using var conn = await GetConnectionAsync();
-        var roles = await conn.QueryAsync<string>(
-            "SELECT role_name FROM app_user_role WHERE user_name = @UserName",
-            new { UserName = userName });
-        return roles.Distinct(StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
+        if (string.IsNullOrEmpty(projectName))
+        {
+            var roles = await conn.QueryAsync<string>(
+                "SELECT role_name FROM app_user_role WHERE user_name = @UserName",
+                new { UserName = userName });
+            return roles.Distinct(StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
+        }
+        else
+        {
+            var roles = await conn.QueryAsync<string>(@"
+                SELECT pr.role_name 
+                FROM app_user_project_role pr 
+                JOIN app_user u ON pr.user_id = u.id 
+                WHERE u.user_name = @UserName AND pr.project_name = @ProjectName
+                UNION
+                SELECT role_name 
+                FROM app_user_role 
+                WHERE user_name = @UserName",
+                new { UserName = userName, ProjectName = projectName });
+            return roles.Distinct(StringComparer.OrdinalIgnoreCase).ToList().AsReadOnly();
+        }
     }
 
     public async Task UpdateLastLoginAsync(int userId)
