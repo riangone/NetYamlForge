@@ -14,11 +14,20 @@ public sealed class AiProviderDispatcher
 {
     private readonly ILogger _logger;
     private readonly HttpClient _http;
+    private readonly ICliChainService? _cliChainService;
 
-    public AiProviderDispatcher(ILogger logger, HttpClient? httpClient = null)
+    /// <param name="logger">ログ出力先</param>
+    /// <param name="httpClient">HTTP 呼び出し用クライアント（未指定時は既定タイムアウト付きで新規作成）</param>
+    /// <param name="cliChainService">
+    /// 呼び出し元が既に DI で解決済みの <see cref="ICliChainService"/> を持つ場合はそれを渡す。
+    /// 渡された場合は appsettings.json の AiCliChain 設定がそのまま反映される。
+    /// 未指定の場合は既定設定の CliChainService を都度生成する（設定ファイルの上書きは反映されない）。
+    /// </param>
+    public AiProviderDispatcher(ILogger logger, HttpClient? httpClient = null, ICliChainService? cliChainService = null)
     {
         _logger = logger;
         _http = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
+        _cliChainService = cliChainService;
     }
 
     /// <summary>
@@ -130,7 +139,9 @@ public sealed class AiProviderDispatcher
         string prompt, string imagePath, string? projectName,
         Func<string, string?> getEnvValue, CancellationToken ct)
     {
-        var cli = new CliChainService(Microsoft.Extensions.Logging.Abstractions.NullLogger<CliChainService>.Instance);
+        // DI から渡された ICliChainService があれば優先して使う（appsettings.json の AiCliChain 設定を反映）。
+        // 無い場合のみ既定設定のインスタンスをフォールバック生成する。
+        var cli = _cliChainService ?? new CliChainService(Microsoft.Extensions.Logging.Abstractions.NullLogger<CliChainService>.Instance);
         var result = await cli.PromptAsync(prompt, imagePath: imagePath, projectName: projectName, cancellationToken: ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.Text))
             return null;

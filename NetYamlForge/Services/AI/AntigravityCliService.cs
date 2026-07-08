@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.AI;
@@ -10,25 +11,37 @@ public class AntigravityCliService : IAntigravityCliService
 {
     private readonly ILogger<AntigravityCliService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly CliChainOptions _cliOptions;
 
-    public AntigravityCliService(ILogger<AntigravityCliService> logger, IConfiguration configuration)
+    public AntigravityCliService(
+        ILogger<AntigravityCliService> logger,
+        IConfiguration configuration,
+        IOptions<CliChainOptions> cliOptions)
     {
         _logger = logger;
         _configuration = configuration;
+        _cliOptions = cliOptions.Value;
     }
 
     public async Task<string> PromptAsync(string prompt, string? model = null, string? projectName = null, CancellationToken cancellationToken = default)
     {
         var env = ProjectEnvLoader.LoadForProject(projectName);
         var aiModel = model ?? env.GetValueOrDefault("AI_MODEL", "");
-        
-        var modelArg = (string.IsNullOrWhiteSpace(aiModel) || aiModel.Equals("auto", StringComparison.OrdinalIgnoreCase)) 
-            ? "" 
+
+        var modelArg = (string.IsNullOrWhiteSpace(aiModel) || aiModel.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            ? ""
             : $"--model \"{aiModel}\"";
-        
+
+        // 実行ファイル名は appsettings.json の AiCliChain:Providers:antigravity:Command から取得する。
+        // 未設定の場合のみ従来の既定値 "antigravity" にフォールバックする。
+        var command = _cliOptions.Providers.TryGetValue("antigravity", out var providerConfig)
+            && !string.IsNullOrWhiteSpace(providerConfig.Command)
+            ? providerConfig.Command
+            : "antigravity";
+
         var startInfo = new ProcessStartInfo
         {
-            FileName = "antigravity",
+            FileName = command,
             Arguments = $"-p \"{prompt.Replace("\\", "\\\\").Replace("\"", "\\\"")}\" {modelArg} --dangerously-skip-permissions",
             RedirectStandardOutput = true,
             RedirectStandardError = true,

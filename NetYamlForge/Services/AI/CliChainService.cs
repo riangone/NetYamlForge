@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 using NetYamlForge.Services.BatchJob.Sdk;
 
 namespace NetYamlForge.Services.AI;
@@ -54,15 +55,20 @@ public record CliChainResult(bool Success, string? Text, string? Provider, strin
 
 public class CliChainService : ICliChainService
 {
-    /// <summary>ユーザー指定の既定優先順位：opencode → antigravity → claude code</summary>
-    private static readonly string[] DefaultOrder = ["opencode", "antigravity", "claude"];
-    private static readonly TimeSpan PerProviderTimeout = TimeSpan.FromSeconds(90);
-
     private readonly ILogger<CliChainService> _logger;
+    private readonly CliChainOptions _options;
 
-    public CliChainService(ILogger<CliChainService> logger)
+    /// <summary>DI 経由のコンストラクタ。appsettings.json の "AiCliChain" セクションを反映する。</summary>
+    public CliChainService(ILogger<CliChainService> logger, IOptions<CliChainOptions> options)
     {
         _logger = logger;
+        _options = options.Value;
+    }
+
+    /// <summary>設定ファイルにアクセスできない呼び出し元向けの簡易コンストラクタ（既定値を使用）。</summary>
+    public CliChainService(ILogger<CliChainService> logger)
+        : this(logger, Options.Create(new CliChainOptions()))
+    {
     }
 
     public async Task<CliChainResult> PromptAsync(
@@ -98,14 +104,17 @@ public class CliChainService : ICliChainService
         }
         else if (!string.IsNullOrWhiteSpace(imagePath))
         {
-            // 明示選択が無い場合のみ、画像解析に強い antigravity を先頭に寄せる従来挙動を維持。
-            var list = order.ToList();
-            if (list.Contains("antigravity"))
+            // 明示選択が無い場合のみ、設定で PreferredForImages=true とマークされた CLI を先頭に寄せる
+            // （従来は "antigravity" 固定のハードコードだったが、設定ファイル側で切り替え可能にする）。
+            var imagePreferred = order.FirstOrDefault(p =>
+                _options.Providers.TryGetValue(p, out var c) && c.PreferredForImages);
+            if (imagePreferred != null)
             {
-                list.Remove("antigravity");
-                list.Insert(0, "antigravity");
+                var list = order.ToList();
+                list.Remove(imagePreferred);
+                list.Insert(0, imagePreferred);
+                order = list.ToArray();
             }
-            order = list.ToArray();
         }
 
         var fullPrompt = string.IsNullOrWhiteSpace(imagePath)
@@ -127,13 +136,17 @@ public class CliChainService : ICliChainService
 
             try
             {
-                var (output, error) = provider switch
+                if (!_options.Providers.TryGetValue(provider, out var providerConfig)
+                    || string.IsNullOrWhiteSpace(providerConfig.Command))
                 {
-                    "opencode"    => await RunProcessAsync("opencode", BuildOpencodeArgs(fullPrompt, providerModel, providerVariant), PerProviderTimeout, cancellationToken),
-                    "antigravity" => await RunProcessAsync("antigravity", BuildPrintModeArgs(fullPrompt, providerModel), PerProviderTimeout, cancellationToken),
-                    "claude"      => await RunProcessAsync("claude", BuildPrintModeArgs(fullPrompt, providerModel), PerProviderTimeout, cancellationToken),
-                    _ => (null, $"未知の CLI プロバイダー: {provider}")
-                };
+                    errors.Add($"{provider}: 設定ファイル (AiCliChain:Providers) に起動情報が見つかりません");
+                    _logger.LogWarning("CLI chain provider {Provider} has no configuration, skipping", provider);
+                    continue;
+                }
+
+                var args = BuildArgs(providerConfig, fullPrompt, providerModel, providerVariant);
+                var timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds > 0 ? _options.TimeoutSeconds : 90);
+                var (output, error) = await RunProcessAsync(providerConfig.Command, args, timeout, cancellationToken);
 
                 var text = ExtractText(output);
                 if (!string.IsNullOrWhiteSpace(text))
@@ -162,17 +175,22 @@ public class CliChainService : ICliChainService
     // Provider argument builders
     // ──────────────────────────────────────────────────────────
 
-    private static string BuildOpencodeArgs(string prompt, string? model = null, string? variant = null)
+    /// <summary>
+    /// 設定ファイル (CliProviderOptions.ArgsTemplate) に基づき、CLI に渡す引数文字列を組み立てる。
+    /// CLI 種別ごとの引数フォーマットの違い（opencode の "run" サブコマンド等）はコード変更ではなく
+    /// appsettings.json 側のテンプレート編集で吸収できるようにする。
+    /// </summary>
+    private static string BuildArgs(CliProviderOptions config, string prompt, string? model, string? variant)
     {
         var modelArg = string.IsNullOrWhiteSpace(model) ? "" : $" --model \"{Escape(model)}\"";
-        var variantArg = string.IsNullOrWhiteSpace(variant) ? "" : $" --variant \"{Escape(variant.ToLowerInvariant())}\"";
-        return $"run \"{Escape(prompt)}\"{modelArg}{variantArg} --dangerously-skip-permissions";
-    }
+        var variantArg = (config.SupportsVariant && !string.IsNullOrWhiteSpace(variant))
+            ? $" --variant \"{Escape(variant.ToLowerInvariant())}\""
+            : "";
 
-    private static string BuildPrintModeArgs(string prompt, string? model = null)
-    {
-        var modelArg = string.IsNullOrWhiteSpace(model) ? "" : $" --model \"{Escape(model)}\"";
-        return $"-p \"{Escape(prompt)}\"{modelArg} --dangerously-skip-permissions";
+        return config.ArgsTemplate
+            .Replace("{prompt}", Escape(prompt))
+            .Replace("{model}", modelArg)
+            .Replace("{variant}", variantArg);
     }
 
     private static string Escape(string s) => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
@@ -276,27 +294,38 @@ public class CliChainService : ICliChainService
     // ──────────────────────────────────────────────────────────
 
     /// <summary>
-    /// ユーザー選択のプロバイダー名を正規化する。既知の CLI（opencode/antigravity/claude）
-    /// のみ受け付け、それ以外・空は null（＝選択なし）として扱う。
+    /// ユーザー選択のプロバイダー名を正規化する。appsettings.json の AiCliChain:Providers に
+    /// 定義済みの CLI のみ受け付け、それ以外・空は null（＝選択なし）として扱う。
     /// </summary>
-    private static string? NormalizeProvider(string? provider)
+    private string? NormalizeProvider(string? provider)
     {
         if (string.IsNullOrWhiteSpace(provider)) return null;
         var normalized = provider.Trim().ToLowerInvariant();
-        return DefaultOrder.Contains(normalized) ? normalized : null;
+        return _options.Providers.ContainsKey(normalized) ? normalized : null;
     }
 
-    private static string[] ResolveOrder(Dictionary<string, string> env)
+    /// <summary>
+    /// 試行順序を解決する。優先順位：プロジェクト .env の CLI_CHAIN_ORDER
+    /// &gt; appsettings.json の AiCliChain:DefaultOrder &gt; 設定済みプロバイダー全件。
+    /// いずれの場合も、実際に AiCliChain:Providers に定義されている CLI のみを対象にする
+    /// （設定ファイルに存在しない名前をハードコードで許可しない）。
+    /// </summary>
+    private string[] ResolveOrder(Dictionary<string, string> env)
     {
         if (env.TryGetValue("CLI_CHAIN_ORDER", out var raw) && !string.IsNullOrWhiteSpace(raw))
         {
             var custom = raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select(s => s.ToLowerInvariant())
-                .Where(s => DefaultOrder.Contains(s))
+                .Where(s => _options.Providers.ContainsKey(s))
                 .ToArray();
             if (custom.Length > 0) return custom;
         }
-        return DefaultOrder;
+
+        var configuredDefault = _options.DefaultOrder
+            .Where(s => _options.Providers.ContainsKey(s))
+            .ToArray();
+
+        return configuredDefault.Length > 0 ? configuredDefault : _options.Providers.Keys.ToArray();
     }
 
 }

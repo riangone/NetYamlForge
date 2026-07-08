@@ -277,6 +277,8 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddAiServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<NetYamlForge.Services.AI.CliChainOptions>(
+            configuration.GetSection(NetYamlForge.Services.AI.CliChainOptions.SectionName));
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
         services.AddScoped<NetYamlForge.Services.AI.ICliChainService, NetYamlForge.Services.AI.CliChainService>();
         
