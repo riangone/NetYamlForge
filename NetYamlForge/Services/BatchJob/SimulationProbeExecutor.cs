@@ -109,28 +109,37 @@ public class SimulationProbeExecutor : IBatchStepHandler
                 }
             }
 
-            var args = new StringBuilder();
-            args.Append('"').Append(scriptPath).Append('"');
-            args.Append(" --user ").Append(user);
-            args.Append(" --method ").Append(method);
-            args.Append(" --path \"").Append(path).Append('"');
-            if (!string.IsNullOrEmpty(data))
-            {
-                // JSON 文字列をそのままシングルクォートで包む単純な方式。
-                // data 側に単一引用符が含まれるケースは想定しない（実験用途の既知の制約）。
-                args.Append(" --data '").Append(data).Append('\'');
-            }
-
             var psi = new ProcessStartInfo
             {
                 FileName = "python3",
-                Arguments = args.ToString(),
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = _env.ContentRootPath
             };
+            // 注意：ProcessStartInfo.Arguments（単一文字列）は使わない。
+            // UseShellExecute=false の場合、.NET はこの文字列を独自の argv 分割規則
+            // （Windows の CommandLineToArgvW 相当）でトークン化する。この規則では
+            // シングルクォートには一切の特殊な意味がなく、ダブルクォートだけが
+            // グループ化記号として解釈されて最終的な引数から取り除かれる。
+            // data は JSON（ダブルクォートを含む）なので、シングルクォートで囲む
+            // 旧実装（下記コメントアウト参照）は JSON 内部のダブルクォートを
+            // 引数境界と誤認されて破壊し、Python 側の json.loads() が失敗していた。
+            // ArgumentList はトークンをそのまま exec() に渡すため、この種の
+            // 文字列解析の曖昧さを根本的に回避できる。
+            psi.ArgumentList.Add(scriptPath);
+            psi.ArgumentList.Add("--user");
+            psi.ArgumentList.Add(user);
+            psi.ArgumentList.Add("--method");
+            psi.ArgumentList.Add(method);
+            psi.ArgumentList.Add("--path");
+            psi.ArgumentList.Add(path);
+            if (!string.IsNullOrEmpty(data))
+            {
+                psi.ArgumentList.Add("--data");
+                psi.ArgumentList.Add(data);
+            }
             if (!string.IsNullOrEmpty(apiBaseUrl))
             {
                 psi.Environment["API_BASE_URL"] = apiBaseUrl;

@@ -190,6 +190,13 @@ public class JobSchedule
     /// 実行間隔（秒）- Cron を使わない場合
     /// </summary>
     public int? IntervalSeconds { get; set; }
+
+    /// <summary>
+    /// ジョブの有効期限（UTC）。指定時刻に達すると自動的に enabled:false へ切り替わり、
+    /// スケジューラから除外される（YAML 本体は書き換えず .job-states.json オーバーライドで無効化）。
+    /// null の場合は無期限。
+    /// </summary>
+    public DateTime? EndDate { get; set; }
 }
 
 /// <summary>

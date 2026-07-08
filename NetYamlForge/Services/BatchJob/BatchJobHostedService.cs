@@ -196,10 +196,19 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
                 var jobs = await jobLoader.LoadJobsAsync(project.ProjectDir);
                 foreach (var job in jobs.Values)
                 {
+                    if (job.Enabled && job.Schedule.EndDate.HasValue && job.Schedule.EndDate.Value <= DateTime.UtcNow)
+                    {
+                        // 起動時点ですでに有効期限切れ：スケジュールせず無効化して永続化する
+                        await jobLoader.SetJobEnabledAsync(project.ProjectDir, job.Id, false);
+                        _logger.LogInformation("ジョブは有効期限切れのため無効化しました：{Project}/{JobId} (endDate={EndDate})",
+                            project.Name, job.Id, job.Schedule.EndDate);
+                        continue;
+                    }
+
                     if (job.Enabled && !string.IsNullOrEmpty(job.Schedule.Cron))
                     {
                         RegisterJob(job, project.Name);
-                        _logger.LogInformation("ジョブをスケジュールしました：{Project}/{JobId}", 
+                        _logger.LogInformation("ジョブをスケジュールしました：{Project}/{JobId}",
                             project.Name, job.Id);
                     }
                 }
@@ -218,6 +227,20 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
         foreach (var kvp in _scheduledJobs)
         {
             var scheduledJob = kvp.Value;
+
+            // 有効期限チェック：期限に達したら自動的にスケジュールから除外し、無効化を永続化する
+            var endDate = scheduledJob.Job.Schedule.EndDate;
+            if (endDate.HasValue && endDate.Value <= now)
+            {
+                if (_scheduledJobs.TryRemove(kvp.Key, out _))
+                {
+                    _logger.LogInformation("ジョブが有効期限に達したため自動的に無効化します：{Project}/{JobId} (endDate={EndDate})",
+                        scheduledJob.ProjectName, scheduledJob.Job.Id, endDate);
+                    _ = PersistAutoDisableAsync(scheduledJob.ProjectName, scheduledJob.Job.Id);
+                }
+                continue;
+            }
+
             var nextRun = scheduledJob.NextRunTime;
 
             if (nextRun.HasValue && nextRun.Value <= now)
@@ -282,6 +305,34 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
         catch (Exception ex)
         {
             _logger.LogError(ex, "ジョブのキュー登録中に例外が発生しました：{JobId}", job.Id);
+        }
+    }
+
+    /// <summary>
+    /// 期限切れジョブの無効化を YAML オーバーライドファイルへ永続化する（enabled:false）。
+    /// スケジューラからの除外自体は呼び出し元（CheckAndRunJobsAsync）が即座に行う。
+    /// </summary>
+    private async Task PersistAutoDisableAsync(string projectName, string jobId)
+    {
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var projectManager = scope.ServiceProvider.GetRequiredService<ProjectManager>();
+            var loader = scope.ServiceProvider.GetRequiredService<IBatchJobLoader>();
+
+            var project = projectManager.GetAll()
+                .FirstOrDefault(p => string.Equals(p.Name, projectName, StringComparison.OrdinalIgnoreCase));
+            if (project == null)
+            {
+                _logger.LogWarning("期限切れジョブの自動無効化失敗：プロジェクトが見つかりません {Project}", projectName);
+                return;
+            }
+
+            await loader.SetJobEnabledAsync(project.ProjectDir, jobId, false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "期限切れジョブの自動無効化永続化中にエラーが発生しました：{Project}/{JobId}", projectName, jobId);
         }
     }
 

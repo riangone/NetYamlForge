@@ -26,6 +26,7 @@ jobs:
     schedule:
       cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
+      endDate: "2026-07-10T15:43:00Z"   # 有効化から3日後に自動的に enabled:false へ切り替わる（BatchJobHostedService が毎分チェック）
 
     type: ai_user_simulation
     settings:
@@ -51,6 +52,7 @@ jobs:
     schedule:
       cron: "0 */5 * * *"
       timezone: "Asia/Tokyo"
+      endDate: "2026-07-10T15:43:00Z"   # 有効化から3日後に自動的に enabled:false へ切り替わる（BatchJobHostedService が毎分チェック）
 
     type: ai_user_simulation
     settings:
