@@ -1,0 +1,17 @@
+project: memo2
+displayName: Memo2 App
+dbType: sqlite
+
+entities:
+  - table: memo
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - { name: title, type: text, notNull: true }
+      - { name: body, type: text }
+      - { name: priority, type: text, notNull: true, default: "'normal'" }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+acceptanceCriteria:
+  - "memo テーブルの CRUD entities YAML が生成されている"
+  - "memo の E2E テストが生成されている"
+  - "validate-project がエラー無く通過する"

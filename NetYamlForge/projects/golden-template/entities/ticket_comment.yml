@@ -1,0 +1,36 @@
+entities:
+  ticket_comment:
+    table: 'ticket_comment'
+    key: 'id'
+    displayName: 'Ticket Comment'
+    displayNameKey: 'entities.ticket_comment.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ticket_id', 'body', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.ticket_comment.columns.id.label', sortable: true }
+      ticket_id: { type: int, required: true, label: 'Ticket Id', labelKey: 'entities.ticket_comment.columns.ticket_id.label', sortable: true }
+      body: { type: string, required: true, label: 'Body', labelKey: 'entities.ticket_comment.columns.body.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ticket_comment.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      ticket_id:
+        type: int
+        required: true
+        label: 'Ticket Id'
+        labelKey: 'entities.ticket_comment.forms.ticket_id.label'
+        editable: true
+        foreignKey:
+          entity: ticket
+          displayColumn: 'subject'
+      body: { type: string, required: true, label: 'Body', labelKey: 'entities.ticket_comment.forms.body.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ticket_comment.forms.created_at.label', editable: true }
+    filters: {}
+    links: {}

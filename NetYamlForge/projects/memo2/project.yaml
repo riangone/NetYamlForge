@@ -1,0 +1,38 @@
+name: memo2
+displayName: Memo2 App
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/memo2.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Memo2 App"
+  navigation:
+    showDashboard: true
+    entities:
+      - memo
+    items:
+      - label: Home
+        url: /memo2
+        icon: 🏠
+      - label: Memo Dashboard
+        url: /memo2/Page/MemoDashboard
+        icon: 📊
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📉
+
+home_page:
+  icon: "🗂️"
+  tagline: "Memo2 App"
+  tags: []

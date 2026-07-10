@@ -1,0 +1,94 @@
+---
+stats:
+  - label: AI ID 数
+    entity: ai_identity
+    aggregate: count
+    icon: 🤖
+    color: badge-primary
+
+  - label: 認証済み
+    entity: ai_identity
+    aggregate: count
+    filter: "verified = 1"
+    icon: ✅
+    color: badge-success
+
+  - label: Handshake 数
+    entity: handshake_session
+    aggregate: count
+    icon: 🤝
+    color: badge-info
+
+  - label: 進行中
+    entity: handshake_session
+    aggregate: count
+    filter: "state IN ('pending','connected')"
+    icon: ⏳
+    color: badge-warning
+
+  - label: 完了
+    entity: handshake_session
+    aggregate: count
+    filter: "state = 'completed'"
+    icon: 🎉
+    color: badge-secondary
+
+  - label: QR 生成数
+    entity: qr_token
+    aggregate: count
+    icon: 🔲
+    color: badge-accent
+
+charts:
+  - title: Handshake 状態分布
+    type: doughnut
+    entity: handshake_session
+    valueAggregate: count
+    groupExpression: "state"
+    orderBy: value
+    orderDir: desc
+    limit: 8
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+      - rgba(236, 72, 153, 0.85)
+
+  - title: Intent 種別分布
+    type: pie
+    entity: handshake_session
+    valueAggregate: count
+    groupExpression: "COALESCE(intent_type,'未設定')"
+    orderBy: value
+    orderDir: desc
+    limit: 10
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+      - rgba(239, 68, 68, 0.85)
+
+  - title: 月別 Handshake 数（12ヶ月）
+    type: bar
+    entity: handshake_session
+    valueAggregate: count
+    groupExpression: "strftime('%Y-%m', created_at)"
+    orderBy: label
+    orderDir: desc
+    limit: 12
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)
+
+  - title: AI ID OwnerType 分布
+    type: bar
+    entity: ai_identity
+    valueAggregate: count
+    groupExpression: "COALESCE(owner_type,'individual')"
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colorBg: rgba(16, 185, 129, 0.7)
+    colorBorder: rgba(16, 185, 129, 1)

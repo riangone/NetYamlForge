@@ -1,0 +1,145 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/ai-card/views/_Layout.cshtml";
+
+    var project = Context.GetRouteValue("project")?.ToString() ?? "ai-card";
+    ViewData["Title"] = "QR を発行する";
+
+    string Route(string path) => $"/{project}{path}";
+    IEnumerable<Dictionary<string, object>> Rows(string key)
+        => Model.TryGetValue(key, out var section) ? section.Rows : Enumerable.Empty<Dictionary<string, object>>();
+
+    string S(Dictionary<string, object>? row, string key, string fallback = "—")
+        => row != null && row.TryGetValue(key, out var value) && value != null && !string.IsNullOrWhiteSpace(value.ToString())
+            ? value.ToString()!
+            : fallback;
+
+    // qr_form セクションの source は AI ID の選択肢（ai_identity_id / label）
+    var identityOptions = Rows("qr_form").ToList();
+    // qr_list セクションの source は発行済み QR トークン一覧
+    var tokenRows = Rows("qr_list").ToList();
+
+    var intentOptions = new (string Value, string Label)[]
+    {
+        ("business_meeting", "🤝 ビジネス会議"),
+        ("sales", "💰 営業"),
+        ("recruiting", "👥 採用"),
+        ("partnership", "🤝 パートナーシップ"),
+        ("consulting", "💼 コンサルティング"),
+        ("networking", "🌐 ネットワーキング"),
+        ("other", "📋 その他"),
+    };
+
+    var qrError = TempData["QrError"] as string;
+}
+
+<div class="container mx-auto px-4 py-8 max-w-3xl space-y-8">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">🔲 QR コード生成</h1>
+        <p class="text-gray-500 mt-1">AI Handshake 用 QR コードを生成します。通常は「QR を見せる」画面が自動で発行するため、
+            ここは用途（商談 / 採用 など）や話題を変えて発行したいときだけ使います。</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(qrError))
+    {
+        <div class="alert alert-error">
+            <span>@qrError</span>
+        </div>
+    }
+
+    <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
+            <h2 class="card-title text-base">🔲 新しい QR コードを生成</h2>
+
+            @if (identityOptions.Count == 0)
+            {
+                <p class="text-sm text-base-content/60">
+                    有効な AI ID がありません。先に
+                    <a class="link link-primary" href="@Route("/DynamicEntity/Index?entity=ai_identity")">AI ID</a>
+                    を作成してください。
+                </p>
+            }
+            else
+            {
+                <form method="post" action="@Route("/api/qr/generate")" class="space-y-4">
+                    <div class="form-control">
+                        <label class="label" for="ai_identity_id">
+                            <span class="label-text">AI ID</span>
+                        </label>
+                        <select id="ai_identity_id" name="ai_identity_id" class="select select-bordered w-full max-w-md" required>
+                            @foreach (var row in identityOptions)
+                            {
+                                <option value="@S(row, "ai_identity_id")">@S(row, "label")</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label" for="intent_type">
+                            <span class="label-text">Intent タイプ</span>
+                        </label>
+                        <select id="intent_type" name="intent_type" class="select select-bordered w-full max-w-md">
+                            @foreach (var opt in intentOptions)
+                            {
+                                <option value="@opt.Value">@opt.Label</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label" for="intent_topic">
+                            <span class="label-text">トピック</span>
+                        </label>
+                        <input id="intent_topic" name="intent_topic" type="text"
+                               class="input input-bordered w-full max-w-md"
+                               placeholder="例：製造業のDX推進" />
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="btn btn-primary">🔲 QR コードを生成</button>
+                        <a href="@Route("/Page/StarterOverview")" class="btn btn-ghost">キャンセル</a>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div>
+        <h2 class="font-bold mb-2">🎫 生成済み QR トークン</h2>
+        <div class="overflow-x-auto">
+            <table class="table table-zebra table-sm">
+                <thead>
+                    <tr>
+                        <th>AI_ID</th>
+                        <th>Intent</th>
+                        <th>トピック</th>
+                        <th>スキャン数</th>
+                        <th>上限</th>
+                        <th>状態</th>
+                        <th>作成日</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in tokenRows)
+                    {
+                        <tr>
+                            <td>@S(row, "AI_ID")</td>
+                            <td>@S(row, "Intent")</td>
+                            <td>@S(row, "トピック")</td>
+                            <td>@S(row, "スキャン数")</td>
+                            <td>@S(row, "上限")</td>
+                            <td>@S(row, "状態")</td>
+                            <td>@S(row, "作成日")</td>
+                        </tr>
+                    }
+                    @if (tokenRows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-base-content/60">まだ発行された QR はありません。</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

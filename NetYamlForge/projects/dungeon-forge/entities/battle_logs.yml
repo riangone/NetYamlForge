@@ -1,0 +1,136 @@
+imports: []
+entities:
+  battle_logs:
+    table: battle_logs
+    key: Id
+    displayName: 战斗日志
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      CharacterId:
+        type: int
+        required: true
+        label: 角色ID
+        sortable: true
+      MonsterId:
+        type: int
+        required: true
+        label: 怪物ID
+        sortable: true
+      RoundNumber:
+        type: int
+        required: true
+        label: 回合数
+        sortable: true
+      PlayerAction:
+        type: string
+        length: 20
+        required: true
+        label: 玩家动作
+        options:
+          - attack
+          - defend
+          - use_item
+          - flee
+        searchable: true
+        sortable: true
+      DamageDealt:
+        type: int
+        required: true
+        label: 造成伤害
+        default: 0
+        sortable: true
+      DamageTaken:
+        type: int
+        required: true
+        label: 受到伤害
+        default: 0
+        sortable: true
+      MonsterHpAfter:
+        type: int
+        required: true
+        label: 怪物剩余HP
+        sortable: true
+      PlayerHpAfter:
+        type: int
+        required: true
+        label: 玩家剩余HP
+        sortable: true
+      PlayerMpAfter:
+        type: int
+        required: true
+        label: 玩家剩余MP
+        default: 0
+        sortable: true
+      NarrativeText:
+        type: text
+        required: false
+        label: 叙事文本
+      CreatedAt:
+        type: datetime
+        required: true
+        label: 记录时间
+        sortable: true
+
+    forms:
+      CharacterId:
+        type: number
+        required: true
+        label: 角色ID
+        editable: false
+      MonsterId:
+        type: number
+        required: true
+        label: 怪物ID
+        editable: false
+      RoundNumber:
+        type: number
+        required: true
+        label: 回合数
+        editable: false
+      PlayerAction:
+        type: select
+        required: true
+        label: 玩家动作
+        editable: false
+      DamageDealt:
+        type: number
+        required: true
+        label: 造成伤害
+        editable: false
+      DamageTaken:
+        type: number
+        required: true
+        label: 受到伤害
+        editable: false
+      MonsterHpAfter:
+        type: number
+        required: true
+        label: 怪物剩余HP
+        editable: false
+      PlayerHpAfter:
+        type: number
+        required: true
+        label: 玩家剩余HP
+        editable: false
+      NarrativeText:
+        type: textarea
+        required: false
+        label: 叙事文本
+        editable: false
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

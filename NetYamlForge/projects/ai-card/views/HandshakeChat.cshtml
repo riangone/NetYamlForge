@@ -1,0 +1,502 @@
+@model NetYamlForge.Controllers.AhpChatViewModel
+@{
+    Layout = null;
+    var postUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/message";
+    var completeUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/complete";
+    var linkAiUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/link-ai";
+    var registerUrl = Model.RegisterUrl;
+    var isClosed = Model.State != "pending" && Model.State != "connected";
+    var initial = string.IsNullOrEmpty(Model.InitiatorName) ? "A" : Model.InitiatorName.Substring(0, 1);
+}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.InitiatorName — AI Card</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+            background: #f4f5f7; color: #1e293b;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .shell { width: 100%; max-width: 560px; height: 100dvh; background: #fff; display: flex; flex-direction: column; }
+
+        /* ── Identity strip (secondary, compact — the point is the chat, not the card) ── */
+        .strip { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+        .avatar {
+            width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0; font-size: 16px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; color: #fff; background: #6366f1;
+        }
+        .strip-text { flex: 1; min-width: 0; }
+        .name { font-size: 14px; font-weight: 800; line-height: 1.3; }
+        .meta { font-size: 11px; color: #64748b; line-height: 1.3; }
+        .aiid { font-family: ui-monospace, monospace; color: #4f46e5; }
+        .strip-toggle {
+            flex-shrink: 0; font-size: 11px; color: #6366f1; background: #eef2ff; border: 1px solid #e0e7ff;
+            border-radius: 8px; padding: 6px 9px; cursor: pointer;
+        }
+        .strip-toggle:hover { background: #e0e7ff; }
+
+        /* ── Expanded card detail (opt-in, hidden until requested) ── */
+        .card-detail { display: none; padding: 0 14px 14px; border-bottom: 1px solid #f1f5f9; }
+        .card-detail.on { display: block; }
+        .intent { margin-top: 4px; padding: 8px 12px; border-radius: 10px; font-size: 12px; color: #6d28d9; background: #faf5ff; }
+        .section { margin-top: 14px; }
+        .section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6366f1; margin-bottom: 8px; }
+        .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag { font-size: 12px; padding: 4px 11px; border-radius: 99px; color: #4338ca; background: #eef2ff; border: 1px solid #e0e7ff; }
+        .goal-list { margin: 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.7; }
+        .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .btn { border: none; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+        .btn:disabled { opacity: .4; cursor: not-allowed; }
+        .btn-save { background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; }
+        .btn-save:hover { background: #f1f5f9; }
+        .btn-cta { background: #7c3aed; color: #fff; }
+
+        /* ── Link AI (collapsed, low priority) ── */
+        .link-ai-toggle { font-size: 12px; color: #6366f1; background: none; border: none; cursor: pointer; padding: 0; margin-top: 14px; }
+        .link-ai-body { display: none; margin-top: 10px; }
+        .link-ai-body.on { display: block; }
+        .link-ai-row { display: flex; gap: 6px; }
+        .link-ai-row input {
+            flex: 1; min-width: 0; border-radius: 10px; border: 1px solid #e2e8f0;
+            background: #f8fafc; color: #1e293b; padding: 8px 10px; font-size: 12px; outline: none;
+        }
+        .link-ai-row input::placeholder { color: #94a3b8; }
+        .link-ai-status { font-size: 11px; color: #059669; margin-top: 6px; min-height: 14px; }
+
+        /* ── Register CTA (slim strip, not a distraction from chat) ── */
+        .cta-banner {
+            margin: 10px 14px 0; padding: 10px 12px; border-radius: 12px;
+            background: #faf5ff; border: 1px solid #f3e8ff; font-size: 11px; color: #6d28d9;
+            display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between;
+        }
+        .cta-banner .cta-text { flex: 1; min-width: 160px; line-height: 1.5; }
+        .cta-banner .btn { padding: 6px 12px; font-size: 12px; }
+
+        /* ── Chat panel: the primary surface, always visible ── */
+        .chat-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        .msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #fff; }
+        .msg { display: flex; gap: 9px; max-width: 88%; animation: msgIn .38s cubic-bezier(.2,.7,.3,1) both; }
+        .msg.ai { align-self: flex-start; }
+        .msg.human { align-self: flex-end; flex-direction: row-reverse; }
+        .msg .mini { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+        .msg.ai .mini { background: #eef2ff; }
+        .msg.human .mini { background: #f1f5f9; }
+        .bubble { padding: 9px 12px; border-radius: 13px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+        .msg.ai .bubble { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; border-top-left-radius: 4px; }
+        .msg.human .bubble { background: #4f46e5; color: #fff; border-top-right-radius: 4px; }
+        .msg.system .bubble { background: transparent; color: #94a3b8; font-size: 12px; text-align: center; }
+
+        @@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        .typing { display: none; align-self: flex-start; padding: 8px 16px; }
+        .typing.on { display: flex; gap: 5px; }
+        .typing span { width: 6px; height: 6px; border-radius: 50%; background: #a5b4fc; animation: blink 1.2s infinite; }
+        .typing span:nth-child(2) { animation-delay: .2s; }
+        .typing span:nth-child(3) { animation-delay: .4s; }
+        @@keyframes blink { 0%, 60%, 100% { opacity: .25 } 30% { opacity: 1 } }
+
+        .summary-card { display: none; margin: 0 16px 12px; padding: 14px; border-radius: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; font-size: 12px; }
+        .summary-card.on { display: block; }
+        .summary-card h3 { font-size: 12px; color: #059669; margin-bottom: 8px; }
+        .summary-card ul { margin: 8px 0 0 18px; color: #475569; }
+
+        .chip-row { display: flex; gap: 8px; padding: 10px 16px 0; overflow-x: auto; }
+        .chip {
+            flex-shrink: 0; font-size: 12px; padding: 6px 12px; border-radius: 99px; cursor: pointer;
+            background: #eef2ff; border: 1px solid #e0e7ff; color: #4338ca; white-space: nowrap;
+        }
+        .chip:hover { background: #e0e7ff; }
+        .chip:disabled { opacity: .4; cursor: not-allowed; }
+
+        .composer { padding: 12px 16px; display: flex; gap: 8px; background: #fff; border-top: 1px solid #f1f5f9; }
+        .composer textarea {
+            flex: 1; resize: none; border: 1px solid #e2e8f0; border-radius: 10px;
+            background: #f8fafc; color: #1e293b; padding: 9px 12px; font-size: 13px; font-family: inherit;
+            line-height: 1.5; max-height: 100px; outline: none;
+        }
+        .composer textarea:focus { border-color: #6366f1; }
+        .btn-send { background: #4f46e5; color: #fff; padding: 0 16px; }
+        .btn-done { background: transparent; color: #94a3b8; font-size: 12px; padding: 0 8px; }
+        .btn-done:hover { color: #64748b; }
+
+        .powered { text-align: center; font-size: 10px; color: #94a3b8; padding: 8px 0; }
+    </style>
+</head>
+<body>
+<div class="shell">
+    <div class="strip" id="idcardCapture">
+        <div class="avatar">@initial</div>
+        <div class="strip-text">
+            <div class="name">@Model.InitiatorName</div>
+            <div class="meta">
+                <span class="aiid">@Model.InitiatorAiId</span>
+                @if (!string.IsNullOrEmpty(Model.InitiatorOrg)) { <text> ・ @Model.InitiatorOrg</text> }
+                @if (!string.IsNullOrEmpty(Model.InitiatorRole)) { <text> ・ @Model.InitiatorRole</text> }
+            </div>
+        </div>
+        <button type="button" class="strip-toggle" id="cardToggleBtn">🪪 名刺</button>
+    </div>
+
+    <div class="card-detail" id="cardDetail">
+        @if (!string.IsNullOrEmpty(Model.IntentType) || !string.IsNullOrEmpty(Model.IntentTopic))
+        {
+            <div class="intent">🎯 @Model.IntentType@(string.IsNullOrEmpty(Model.IntentTopic) ? "" : $" — {Model.IntentTopic}")</div>
+        }
+
+        @if (Model.InitiatorExpertise.Count > 0)
+        {
+            <div class="section">
+                <h4>専門分野</h4>
+                <div class="tag-row">
+                    @foreach (var e in Model.InitiatorExpertise) { <span class="tag">@e</span> }
+                </div>
+            </div>
+        }
+
+        @if (Model.InitiatorGoals.Count > 0)
+        {
+            <div class="section">
+                <h4>関心・ゴール</h4>
+                <ul class="goal-list">
+                    @foreach (var g in Model.InitiatorGoals) { <li>@g</li> }
+                </ul>
+            </div>
+        }
+
+        <div class="card-actions">
+            <button type="button" class="btn btn-save" id="saveCardBtn">🖼 画像として保存</button>
+        </div>
+
+        <button type="button" class="link-ai-toggle" id="linkAiToggleBtn">🔗 自分の AI ID を連携する（任意）</button>
+        <div class="link-ai-body" id="linkAiBody">
+            <div class="link-ai-row">
+                <input type="text" id="responderAiIdInput" placeholder="ai://your-id" value="@Model.LinkedResponderAiId" />
+                <button type="button" class="btn btn-save" id="linkAiBtn">連携</button>
+            </div>
+            <div class="link-ai-status" id="linkAiStatus">@(string.IsNullOrEmpty(Model.LinkedResponderAiId) ? "" : "連携済み。将来、双方の AI 同士が自動でやり取りできるようになります。")</div>
+        </div>
+    </div>
+
+    <div class="cta-banner">
+        <div class="cta-text">🚀 あなたも AI カードを作ると、次回からはお互いの AI 同士が自動で連絡を取り合えます。</div>
+        <a class="btn btn-cta" href="@registerUrl" target="_blank" rel="noopener">登録する</a>
+    </div>
+
+    <div class="chat-panel">
+        <div class="msgs" id="msgs">
+            <div class="typing" id="typing"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="summary-card" id="summaryCard">
+            <h3>📋 会話サマリー（相手の CRM に登録されました）</h3>
+            <div id="summaryText"></div>
+            <ul id="nextActions"></ul>
+        </div>
+
+        <div class="chip-row" id="chipRow">
+            <button type="button" class="chip" data-text="何ができますか？" @(isClosed ? "disabled" : "")>💬 何ができる？</button>
+            <button type="button" class="chip" data-text="資料を送ってください" @(isClosed ? "disabled" : "")>📄 資料が欲しい</button>
+            <button type="button" class="chip" data-text="一度お話（商談）したいです" @(isClosed ? "disabled" : "")>🤝 会いたい</button>
+        </div>
+
+        <div class="composer">
+            <textarea id="input" rows="1" placeholder="@(isClosed ? "このセッションは終了しています" : "メッセージを入力…")" @(isClosed ? "disabled" : "")></textarea>
+            <button class="btn btn-send" id="sendBtn" @(isClosed ? "disabled" : "")>送信</button>
+            <button class="btn btn-done" id="doneBtn" @(isClosed ? "disabled" : "") title="会話を終了して要約を生成">終了</button>
+        </div>
+    </div>
+
+    <div class="powered">Powered by AHP — AI Handshake Protocol (PoC)</div>
+</div>
+
+<script>
+    const postUrl = '@postUrl';
+    const completeUrl = '@completeUrl';
+    const initialMessages = @Html.Raw(Json.Serialize(Model.Messages.Select(m => new { role = m.Role, content = m.Content })));
+    const msgs = document.getElementById('msgs');
+    const typing = document.getElementById('typing');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const doneBtn = document.getElementById('doneBtn');
+    let busy = false;
+
+    function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
+
+    function addMsg(role, text) {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg ' + role;
+        const mini = document.createElement('div');
+        mini.className = 'mini';
+        mini.textContent = role === 'ai' ? '🤖' : '🙂';
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
+        wrap.appendChild(mini);
+        wrap.appendChild(bubble);
+        msgs.insertBefore(wrap, typing);
+        scrollBottom();
+        return wrap;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ── 開場時にAIの最初の発言（挨拶＋できること案内）を「タイピング→吹き出し表示」の
+    //    アニメーションで自動再生する。相手が一切操作しなくても "生きた体験" が伝わるように。
+    //    既に人間の返信があるセッション（再訪問時）は、そこから先は即時表示に切り替える。
+    async function playInitialMessages() {
+        const firstHumanIdx = initialMessages.findIndex(m => m.role === 'human');
+        const autoPlayCount = firstHumanIdx === -1 ? initialMessages.length : firstHumanIdx;
+
+        for (let i = 0; i < initialMessages.length; i++) {
+            const m = initialMessages[i];
+            if (i < autoPlayCount && m.role === 'ai') {
+                typing.classList.add('on');
+                scrollBottom();
+                await sleep(550 + Math.min(m.content.length * 6, 900));
+                typing.classList.remove('on');
+            }
+            addMsg(m.role, m.content);
+            if (i < autoPlayCount) await sleep(150);
+        }
+        scrollBottom();
+    }
+    playInitialMessages();
+
+    async function send() {
+        const text = input.value.trim();
+        if (!text || busy) return;
+        busy = true;
+        input.value = '';
+        sendBtn.disabled = true;
+        addMsg('human', text);
+        typing.classList.add('on');
+        scrollBottom();
+        try {
+            const res = await fetch(postUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await res.json();
+            addMsg('ai', res.ok ? data.reply : (data.error || 'エラーが発生しました。'));
+        } catch (e) {
+            addMsg('ai', '通信エラーが発生しました。もう一度お試しください。');
+        } finally {
+            typing.classList.remove('on');
+            busy = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    }
+
+    async function complete() {
+        if (busy) return;
+        if (!confirm('会話を終了して要約を生成しますか？')) return;
+        busy = true;
+        doneBtn.disabled = true; sendBtn.disabled = true; input.disabled = true;
+        typing.classList.add('on');
+        try {
+            const res = await fetch(completeUrl, { method: 'POST' });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('summaryText').textContent = data.summary || '';
+                const ul = document.getElementById('nextActions');
+                ul.innerHTML = '';
+                try {
+                    (JSON.parse(data.nextActions || '[]')).forEach(a => {
+                        const li = document.createElement('li');
+                        li.textContent = a;
+                        ul.appendChild(li);
+                    });
+                } catch {}
+                document.getElementById('summaryCard').classList.add('on');
+                scrollBottom();
+            } else {
+                alert(data.error || 'エラーが発生しました。');
+                doneBtn.disabled = false; sendBtn.disabled = false; input.disabled = false;
+            }
+        } catch {
+            alert('通信エラーが発生しました。');
+            doneBtn.disabled = false; sendBtn.disabled = false; input.disabled = false;
+        } finally {
+            typing.classList.remove('on');
+            busy = false;
+        }
+    }
+
+    sendBtn.addEventListener('click', send);
+    doneBtn.addEventListener('click', complete);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+
+    // ── 名刺の詳細（専門分野・ゴール・画像保存・AI連携）は既定で折りたたみ。主役はチャット ──
+    const cardToggleBtn = document.getElementById('cardToggleBtn');
+    const cardDetail = document.getElementById('cardDetail');
+    cardToggleBtn?.addEventListener('click', () => cardDetail.classList.toggle('on'));
+
+    // ── クイック返信チップ（チャットが面倒な相手でもタップだけで済むように） ──
+    document.querySelectorAll('#chipRow .chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (input.disabled || busy) return;
+            input.value = btn.getAttribute('data-text') || '';
+            send();
+        });
+    });
+
+    // ── 相手の AI ID を連携（将来の AI 同士の自動連携の下地）。既定で折りたたみ ──
+    const linkAiToggleBtn = document.getElementById('linkAiToggleBtn');
+    const linkAiBody = document.getElementById('linkAiBody');
+    linkAiToggleBtn?.addEventListener('click', () => linkAiBody.classList.toggle('on'));
+
+    const linkAiBtn = document.getElementById('linkAiBtn');
+    const linkAiInput = document.getElementById('responderAiIdInput');
+    const linkAiStatus = document.getElementById('linkAiStatus');
+    linkAiBtn?.addEventListener('click', async () => {
+        const aiId = (linkAiInput.value || '').trim();
+        if (!aiId) { linkAiStatus.textContent = 'AI ID を入力してください。'; return; }
+        linkAiBtn.disabled = true;
+        try {
+            const res = await fetch('@linkAiUrl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ aiId })
+            });
+            const data = await res.json();
+            linkAiStatus.textContent = res.ok
+                ? '連携済み。将来、双方の AI 同士が自動でやり取りできるようになります。'
+                : (data.error || 'エラーが発生しました。');
+        } catch (e) {
+            linkAiStatus.textContent = '通信エラーが発生しました。';
+        } finally {
+            linkAiBtn.disabled = false;
+        }
+    });
+
+    // ── 名刺を画像として保存（外部ライブラリ不要、canvas で自前描画） ──
+    const saveCardBtn = document.getElementById('saveCardBtn');
+    saveCardBtn?.addEventListener('click', () => {
+        try {
+            downloadCardImage();
+        } catch (e) {
+            alert('画像の生成に失敗しました。');
+        }
+    });
+
+    function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+        const words = text.split('');
+        let line = '';
+        let curY = y;
+        for (const ch of words) {
+            const test = line + ch;
+            if (ctx.measureText(test).width > maxWidth && line) {
+                ctx.fillText(line, x, curY);
+                line = ch;
+                curY += lineHeight;
+            } else {
+                line = test;
+            }
+        }
+        if (line) ctx.fillText(line, x, curY);
+        return curY + lineHeight;
+    }
+
+    function downloadCardImage() {
+        const W = 720, H = 1000;
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, W - 2, H - 2);
+
+        const cx = 100, cy = 110, r = 54;
+        ctx.fillStyle = '#eef2ff';
+        ctx.beginPath();
+        ctx.roundRect(cx - r, cy - r, r * 2, r * 2, 20);
+        ctx.fill();
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = '700 44px sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center';
+        ctx.fillText('@initial', cx, cy + 4);
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '800 34px sans-serif';
+        ctx.fillText(@Json.Serialize(Model.InitiatorName), cx + r + 24, cy - 4);
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = '400 18px monospace';
+        ctx.fillText(@Json.Serialize(Model.InitiatorAiId), cx + r + 24, cy + 26);
+
+        const orgLine = @Json.Serialize(string.Join(" ・ ", new[] { Model.InitiatorOrg, Model.InitiatorRole }.Where(s => !string.IsNullOrEmpty(s))));
+        if (orgLine) {
+            ctx.fillStyle = '#475569';
+            ctx.font = '400 16px sans-serif';
+            ctx.fillText(orgLine, cx + r + 24, cy + 52);
+        }
+
+        let y = cy + r + 60;
+
+        const expertise = @Json.Serialize(Model.InitiatorExpertise);
+        if (expertise.length) {
+            ctx.fillStyle = '#6366f1';
+            ctx.font = '700 15px sans-serif';
+            ctx.fillText('専門分野', 60, y);
+            y += 30;
+            let x = 60;
+            ctx.font = '400 15px sans-serif';
+            expertise.forEach(tag => {
+                const w = ctx.measureText(tag).width + 28;
+                if (x + w > W - 60) { x = 60; y += 42; }
+                ctx.fillStyle = '#eef2ff';
+                ctx.beginPath();
+                ctx.roundRect(x, y - 24, w, 34, 99);
+                ctx.fill();
+                ctx.fillStyle = '#4338ca';
+                ctx.fillText(tag, x + 14, y);
+                x += w + 10;
+            });
+            y += 56;
+        }
+
+        const goals = @Json.Serialize(Model.InitiatorGoals);
+        if (goals.length) {
+            ctx.fillStyle = '#6366f1';
+            ctx.font = '700 15px sans-serif';
+            ctx.fillText('関心・ゴール', 60, y);
+            y += 30;
+            ctx.fillStyle = '#475569';
+            ctx.font = '400 15px sans-serif';
+            goals.forEach(g => {
+                y = wrapText(ctx, '・' + g, 60, y, W - 120, 24) + 4;
+            });
+        }
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, H - 70, W, 70);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '600 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('AI Handshake Protocol (AHP) — digital business card', W / 2, H - 30);
+
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (@Json.Serialize(Model.InitiatorName) || 'ai-card') + '-card.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+</script>
+</body>
+</html>

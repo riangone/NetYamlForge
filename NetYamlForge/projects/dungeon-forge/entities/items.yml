@@ -1,0 +1,73 @@
+imports: []
+entities:
+  items:
+    table: items
+    key: Id
+    displayName: 物品
+    softDelete: false
+    isPublic: true
+    api: readonly
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        length: 100
+        required: true
+        label: 物品名
+        searchable: true
+        sortable: true
+      Type:
+        type: string
+        length: 20
+        required: true
+        label: 类型
+        options:
+          - weapon
+          - armor
+          - potion
+          - key
+          - quest
+        searchable: true
+        sortable: true
+      EffectJson:
+        type: text
+        required: false
+        label: 效果配置(JSON)
+      Value:
+        type: int
+        required: true
+        label: 价值
+        default: 0
+        sortable: true
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 物品名
+        editable: true
+      Type:
+        type: select
+        required: true
+        label: 类型
+        editable: true
+      EffectJson:
+        type: textarea
+        required: false
+        label: 效果配置(JSON)
+        editable: true
+      Value:
+        type: number
+        required: true
+        label: 价值
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

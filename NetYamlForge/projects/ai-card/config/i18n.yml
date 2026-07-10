@@ -1,0 +1,41 @@
+translations:
+  projects.ai-card.pages.starterOverview.description:
+    en-US: 'Show the latest AI Card QR code for the other person to scan.'
+    zh-CN: '显示最新的 AI Card 二维码，让对方扫码。'
+    ja-JP: '相手に読み取ってもらう最新の AI Card QR を表示します。'
+  projects.ai-card.pages.starterOverview.title:
+    en-US: 'Show QR'
+    zh-CN: '出示二维码'
+    ja-JP: 'QR を見せる'
+  projects.ai-card.pages.starterOverview.sections.summary.title:
+    en-US: 'Control Summary'
+    zh-CN: '控制总览'
+    ja-JP: 'コントロールサマリー'
+  projects.ai-card.pages.starterOverview.sections.ai_identities.title:
+    en-US: 'Recent AI IDs'
+    zh-CN: '最近的 AI ID'
+    ja-JP: '最近の AI ID'
+  projects.ai-card.pages.starterOverview.sections.ai_profiles.title:
+    en-US: 'AI Profiles'
+    zh-CN: 'AI 简介'
+    ja-JP: 'AI プロフィール'
+  projects.ai-card.pages.starterOverview.sections.handshakes.title:
+    en-US: 'Recent Handshakes'
+    zh-CN: '最近的 Handshake'
+    ja-JP: '最近の Handshake'
+  projects.ai-card.pages.starterOverview.sections.qr_tokens.title:
+    en-US: 'QR Tokens'
+    zh-CN: '二维码令牌'
+    ja-JP: 'QR トークン'
+  projects.ai-card.pages.starterOverview.sections.permissions.title:
+    en-US: 'Permissions'
+    zh-CN: '权限'
+    ja-JP: '権限'
+  projects.ai-card.pages.starterOverview.sections.messages.title:
+    en-US: 'Recent Messages'
+    zh-CN: '最近的消息'
+    ja-JP: '最近のメッセージ'
+  projects.ai-card.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'

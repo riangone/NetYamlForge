@@ -1,0 +1,23 @@
+theme: light
+
+header:
+  title: AI Card (AI Handshake Protocol PoC)
+
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /ai-card
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "AI Card (AI Handshake Protocol PoC) — powered by NetYamlForge"

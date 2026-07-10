@@ -28,18 +28,27 @@ public class CliChainOptions
             {
                 Command = "opencode",
                 ArgsTemplate = "run \"{prompt}\"{model}{variant} --dangerously-skip-permissions",
-                SupportsVariant = true
+                SupportsVariant = true,
+                VariantFlag = "--variant"
             },
             ["antigravity"] = new CliProviderOptions
             {
                 Command = "antigravity",
                 ArgsTemplate = "-p \"{prompt}\"{model} --dangerously-skip-permissions",
                 PreferredForImages = true
+                // antigravity に --variant 相当のオプションは無い（`antigravity --help` で確認済み、2026-07-08）。
+                // 「レベル」は `antigravity models` が返すモデル名自体に埋め込まれている
+                // （例："Gemini 3.5 Flash (High)"）ため、SupportsVariant は false のままにする。
             },
             ["claude"] = new CliProviderOptions
             {
                 Command = "claude",
-                ArgsTemplate = "-p \"{prompt}\"{model} --dangerously-skip-permissions"
+                // claude は --variant ではなく --effort というフラグ名でレベルを受け取る
+                // （`claude --help` で確認済み、2026-07-08: "--effort <level> ... low, medium, high, xhigh, max"）。
+                // 以前は ArgsTemplate に {variant} が無く、variant を渡しても黙って無視されていたバグがあった。
+                ArgsTemplate = "-p \"{prompt}\"{model}{variant} --dangerously-skip-permissions",
+                SupportsVariant = true,
+                VariantFlag = "--effort"
             }
         };
 }
@@ -54,16 +63,33 @@ public class CliProviderOptions
     /// 引数テンプレート。以下のプレースホルダーを置換して使用する。
     /// {prompt}  … エスケープ済みのプロンプト文字列（呼び出し側でクォートを付与すること）
     /// {model}   … " --model \"xxx\"" 形式の断片（未指定なら空文字）
-    /// {variant} … " --variant \"xxx\"" 形式の断片（SupportsVariant=false または未指定なら空文字）
+    /// {variant} … " {VariantFlag} \"xxx\"" 形式の断片（SupportsVariant=false または未指定なら空文字）
     /// </summary>
     public string ArgsTemplate { get; set; } = "-p \"{prompt}\"{model} --dangerously-skip-permissions";
 
-    /// <summary>この CLI が --variant オプションをサポートするか。</summary>
+    /// <summary>この CLI が「レベル（reasoning effort 相当）」を渡すオプションを持つか。</summary>
     public bool SupportsVariant { get; set; } = false;
+
+    /// <summary>
+    /// レベルを渡す実際のフラグ名。CLI ごとに異なる（opencode は --variant、claude は --effort）ため
+    /// 固定文字列にせず設定可能にしている。SupportsVariant=false の場合は使用されない。
+    /// </summary>
+    public string VariantFlag { get; set; } = "--variant";
 
     /// <summary>
     /// 画像解析タスクでこの CLI を優先的に先頭へ寄せるか。
     /// ユーザーが preferredProvider を明示指定しなかった場合にのみ参照される。
     /// </summary>
     public bool PreferredForImages { get; set; } = false;
+
+    /// <summary>
+    /// システム設定画面で管理者が指定する「既定モデル」。呼び出し元が model を明示しなかった場合に使用される。
+    /// </summary>
+    public string DefaultModel { get; set; } = "";
+
+    /// <summary>
+    /// システム設定画面で管理者が指定する「既定レベル」。呼び出し元が variant を明示しなかった場合に使用される。
+    /// SupportsVariant=false の CLI では無視される。
+    /// </summary>
+    public string DefaultVariant { get; set; } = "";
 }

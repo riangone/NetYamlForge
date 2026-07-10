@@ -1,0 +1,61 @@
+hero:
+  eyebrow: ⚔️ 地下城纪元
+  title: 文字交互式地下城探索
+  description: AI 担任地下城主(DM)叙事者，带领你在神秘的地下城中展开冒险。探索房间、击败怪物、收集宝物、挑战 Boss。
+  primaryActionLabel: 开始冒险
+  primaryActionUrl: /dungeon-forge/Page/DungeonMap
+  secondaryActionLabel: 角色面板
+  secondaryActionUrl: /dungeon-forge/Page/CharacterSheet
+  highlights:
+    - 沉浸式 AI 叙事
+    - 经典 RPG 战斗
+    - 房间探索解谜
+    - 装备收集成长
+
+metrics:
+  - label: 地下城
+    value: "5+"
+    trend: 房间
+    tone: text-primary
+  - label: 怪物
+    value: "3+"
+    trend: 种类
+    tone: text-success
+  - label: Boss
+    value: "1"
+    trend: 等待挑战
+    tone: text-secondary
+
+capabilitiesSectionTitle: 游戏特色
+capabilities:
+  - icon: 🗺️
+    title: 房间探索
+    description: 在错综复杂的地下城房间中穿梭，每个房间都有独特的描述和隐藏的秘密。
+    badge: 探索
+  - icon: ⚔️
+    title: 回合制战斗
+    description: 与多种怪物进行回合制战斗，合理运用攻击、防御、道具和逃跑策略。
+    badge: 战斗
+  - icon: 🎒
+    title: 物品收集
+    description: 拾取和使用各种道具——武器增强攻击、药水恢复生命、钥匙开启新区域。
+    badge: 收集
+  - icon: 🤖
+    title: AI 叙事
+    description: AI 地下城主将战斗结果和房间描述转化为沉浸式哥特奇幻叙事文本。
+    badge: AI
+
+quickActionsSectionTitle: 快捷入口
+quickActions:
+  - label: 地下城探索
+    url: /dungeon-forge/Page/DungeonMap
+    style: btn-primary
+    icon: 🗺️
+  - label: 角色面板
+    url: /dungeon-forge/Page/CharacterSheet
+    style: btn-outline
+    icon: 🧙
+  - label: 战斗日志
+    url: /dungeon-forge/Page/BattleLog
+    style: btn-outline
+    icon: ⚔️

@@ -1,0 +1,58 @@
+hero:
+  eyebrow: AI Card
+  title: QR を見せる
+  description: まず相手に QR コードを読み取ってもらいます。必要な管理機能はあとから開けます。
+  primaryActionLabel: QR を見せる
+  primaryActionUrl: /ai-card/Page/StarterOverview
+  secondaryActionLabel: 新しい QR を発行
+  secondaryActionUrl: /ai-card/Page/QrGenerator
+  highlights:
+    - QR を表示
+    - 読み取り履歴
+    - AI ID 管理
+
+metrics:
+  - label: Identity
+    value: "AI ID"
+    trend: "Registry"
+    tone: text-primary
+  - label: Flow
+    value: "AHP"
+    trend: "Handshake"
+    tone: text-success
+  - label: Access
+    value: "RBAC"
+    trend: "Permissions"
+    tone: text-secondary
+
+capabilities:
+  - icon: QR
+    title: QR を見せる
+    description: 最新の有効 QR を大きく表示します。
+    badge: Start
+  - icon: +
+    title: QR を発行
+    description: 用途や話題ごとに QR を作成します。
+    badge: Create
+  - icon: H
+    title: 履歴を見る
+    description: 読み取り後の Handshake を確認します。
+    badge: Follow
+
+quickActions:
+  - label: QR を見せる
+    url: /ai-card/Page/StarterOverview
+    style: btn-primary
+    icon: QR
+  - label: QR を発行
+    url: /ai-card/Page/QrGenerator
+    style: btn-outline
+    icon: +
+  - label: 読み取り履歴
+    url: /ai-card/Page/HandshakeHistory
+    style: btn-outline
+    icon: H
+  - label: Entity Schema
+    url: /ai-card/DynamicEntity/AllDefinitions
+    style: btn-ghost
+    icon: DB

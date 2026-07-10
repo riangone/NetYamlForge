@@ -62,6 +62,12 @@ public class ProjectSpecificInitializer
             await EnsureColumnAsync(conn as SqliteConnection, "LeaveRequest", "ApprovedAt", "TEXT", logger);
             await EnsureColumnAsync(conn as SqliteConnection, "OvertimeRequest", "ApprovedAt", "TEXT", logger);
         }
+        else if (string.Equals(projectName, "dungeon-forge", StringComparison.OrdinalIgnoreCase))
+        {
+            // dungeon-forge: 实体表由 YAML 自动创建，init.sql 在表创建前会失败，因此跳过
+            // 种子数据在 AutoMigrateMissingColumnsAsync 之后执行
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+        }
         else
         {
             // 汎用フォールバック: database/init_seed.sql が存在すれば実行
@@ -103,6 +109,12 @@ public class ProjectSpecificInitializer
 
         // 调用基于 YAML 实体配置的自动物理列追加迁移机制
         await AutoMigrateMissingColumnsAsync(conn, projectName, dbType, metadataProvider, logger);
+
+        // dungeon-forge: 表创建后运行种子数据（seed.sql）
+        if (string.Equals(projectName, "dungeon-forge", StringComparison.OrdinalIgnoreCase))
+        {
+            await RunPostMigrationSeedSqlAsync(conn as SqliteConnection, projectName, logger, projectDir);
+        }
     }
 
     // 認証テーブル名（エンティティテーブル判定から除外）
@@ -167,6 +179,59 @@ public class ProjectSpecificInitializer
         {
             logger.LogInformation("プロジェクト '{Name}' の DB 初期化が完了しました。", projectName);
         }
+    }
+
+    /// <summary>
+    /// 在 AutoMigrateMissingColumnsAsync 创建 YAML 实体表后，运行 database/seed.sql 种子数据。
+    /// 适用于依赖 YAML 自动建表、但需要初始种子数据的项目（如 dungeon-forge）。
+    /// </summary>
+    private static async Task RunPostMigrationSeedSqlAsync(
+        SqliteConnection? conn,
+        string projectName,
+        ILogger logger,
+        string? projectDir = null)
+    {
+        if (conn == null) return;
+
+        // 如果表中已有数据则跳过
+        var tables = await conn.QueryAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type='table'");
+        var entityTables = tables.Where(t => !AuthTableNames.Contains(t) && !t.StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase)).ToList();
+        // DCS001 抑制理由：表名来源于 sqlite_master，非用户输入
+#pragma warning disable DCS001
+        foreach (var table in entityTables)
+        {
+            var count = await conn.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM \"{table}\"");
+            if (count > 0)
+            {
+                logger.LogInformation("プロジェクト '{Name}' の {Table} には既にデータがあります。seed.sql をスキップします。", projectName, table);
+                return;
+            }
+        }
+#pragma warning restore DCS001
+
+        string ResolveDbFile(string fileName) =>
+            new[]
+            {
+                string.IsNullOrWhiteSpace(projectDir)
+                    ? string.Empty
+                    : Path.Combine(projectDir, "database", fileName),
+                Path.Combine(AppContext.BaseDirectory, "projects", projectName, "database", fileName),
+                Path.Combine(Directory.GetCurrentDirectory(), "projects", projectName, "database", fileName),
+                Path.Combine(Directory.GetCurrentDirectory(), "NetYamlForge", "projects", projectName, "database", fileName),
+            }.FirstOrDefault(p => !string.IsNullOrEmpty(p) && File.Exists(p)) ?? string.Empty;
+
+        var seedPath = ResolveDbFile("seed.sql");
+        if (string.IsNullOrEmpty(seedPath))
+        {
+            logger.LogInformation("プロジェクト '{Name}' に seed.sql が見つかりません。スキップします。", projectName);
+            return;
+        }
+
+        logger.LogInformation("プロジェクト '{Name}' の seed.sql を実行します: {Path}", projectName, seedPath);
+        var sql = await File.ReadAllTextAsync(seedPath);
+        await conn.ExecuteAsync(sql);
+        logger.LogInformation("プロジェクト '{Name}' の seed.sql 実行完了", projectName);
     }
 
     /// <summary>

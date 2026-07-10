@@ -56,6 +56,25 @@
     "features": {
       "$ref": "#/definitions/ProjectFeaturesConfig"
     },
+    "apiWriteRoles": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    },
     "layout": {
       "$ref": "#/definitions/ProjectLayoutConfig"
     },

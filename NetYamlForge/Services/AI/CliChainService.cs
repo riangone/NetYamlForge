@@ -35,8 +35,16 @@ public interface ICliChainService
     /// 指定された場合、そのプロバイダーをチェーン先頭に並べ替えて最優先で試す。
     /// 残りのプロバイダーは可用性フォールバックとして後段に残す（ハードコードした固定順序は使わない）。
     /// </param>
-    /// <param name="model">preferredProvider に渡すモデル名（--model）。フォールバック時の他プロバイダーには適用しない。</param>
-    /// <param name="variant">opencode 用のバリアント（--variant、AI レベル相当）。opencode が preferredProvider の場合のみ適用。</param>
+    /// <param name="model">
+    /// preferredProvider に渡すモデル名（--model）。明示指定が無ければ、そのプロバイダーの
+    /// システム設定画面での DefaultModel が使われる。フォールバック先の他プロバイダーには適用しない
+    /// （ただし他プロバイダーも自分自身の DefaultModel は使う）。
+    /// </param>
+    /// <param name="variant">
+    /// AI レベル相当のパラメータ。CLI ごとにフラグ名が異なる（opencode: --variant、claude: --effort、
+    /// antigravity: 非対応）ため、実際に渡すフラグ名は CliProviderOptions.VariantFlag で解決する。
+    /// 明示指定が無ければ、そのプロバイダーの DefaultVariant が使われる。
+    /// </param>
     /// <param name="cancellationToken">キャンセルトークン</param>
     Task<CliChainResult> PromptAsync(
         string prompt,
@@ -56,19 +64,27 @@ public record CliChainResult(bool Success, string? Text, string? Provider, strin
 public class CliChainService : ICliChainService
 {
     private readonly ILogger<CliChainService> _logger;
-    private readonly CliChainOptions _options;
+    private readonly IOptionsMonitor<CliChainOptions>? _optionsMonitor;
+    private readonly CliChainOptions? _staticOptions;
+
+    /// <summary>
+    /// 現在有効な設定値。IOptionsMonitor 経由の場合は appsettings.json の変更が
+    /// アプリ再起動なしに即座に反映される（システム設定画面からの保存を想定）。
+    /// </summary>
+    private CliChainOptions _options => _optionsMonitor?.CurrentValue ?? _staticOptions!;
 
     /// <summary>DI 経由のコンストラクタ。appsettings.json の "AiCliChain" セクションを反映する。</summary>
-    public CliChainService(ILogger<CliChainService> logger, IOptions<CliChainOptions> options)
+    public CliChainService(ILogger<CliChainService> logger, IOptionsMonitor<CliChainOptions> optionsMonitor)
     {
         _logger = logger;
-        _options = options.Value;
+        _optionsMonitor = optionsMonitor;
     }
 
     /// <summary>設定ファイルにアクセスできない呼び出し元向けの簡易コンストラクタ（既定値を使用）。</summary>
     public CliChainService(ILogger<CliChainService> logger)
-        : this(logger, Options.Create(new CliChainOptions()))
     {
+        _logger = logger;
+        _staticOptions = new CliChainOptions();
     }
 
     public async Task<CliChainResult> PromptAsync(
@@ -127,13 +143,6 @@ public class CliChainService : ICliChainService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // model / variant はユーザーが選んだ preferredProvider に対してのみ適用する。
-            // フォールバックで別 CLI に切り替わった際に、噛み合わないモデル名を渡さないため。
-            var isPreferred = normalizedPreferred != null
-                && string.Equals(provider, normalizedPreferred, StringComparison.OrdinalIgnoreCase);
-            var providerModel = isPreferred ? model : null;
-            var providerVariant = isPreferred ? variant : null;
-
             try
             {
                 if (!_options.Providers.TryGetValue(provider, out var providerConfig)
@@ -143,6 +152,17 @@ public class CliChainService : ICliChainService
                     _logger.LogWarning("CLI chain provider {Provider} has no configuration, skipping", provider);
                     continue;
                 }
+
+                // model / variant の明示指定（呼び出し元が渡した引数）はユーザーが選んだ preferredProvider に
+                // 対してのみ適用する。フォールバックで別 CLI に切り替わった際に、噛み合わないモデル名を
+                // 渡さないため。ただし「システム設定画面」で CLI ごとに登録した既定値（DefaultModel/DefaultVariant）は、
+                // 明示指定が無い場合のフォールバックとしてどのプロバイダーでも使ってよい（CLI 固有の値なので安全）。
+                var isPreferred = normalizedPreferred != null
+                    && string.Equals(provider, normalizedPreferred, StringComparison.OrdinalIgnoreCase);
+                var explicitModel = isPreferred ? model : null;
+                var explicitVariant = isPreferred ? variant : null;
+                var providerModel = string.IsNullOrWhiteSpace(explicitModel) ? providerConfig.DefaultModel : explicitModel;
+                var providerVariant = string.IsNullOrWhiteSpace(explicitVariant) ? providerConfig.DefaultVariant : explicitVariant;
 
                 var args = BuildArgs(providerConfig, fullPrompt, providerModel, providerVariant);
                 var timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds > 0 ? _options.TimeoutSeconds : 90);
@@ -183,8 +203,11 @@ public class CliChainService : ICliChainService
     private static string BuildArgs(CliProviderOptions config, string prompt, string? model, string? variant)
     {
         var modelArg = string.IsNullOrWhiteSpace(model) ? "" : $" --model \"{Escape(model)}\"";
+        // レベルを渡すフラグ名は CLI ごとに異なる（opencode: --variant、claude: --effort）。
+        // 固定文字列にせず VariantFlag から取得する（未設定なら --variant を既定にフォールバック）。
+        var variantFlag = string.IsNullOrWhiteSpace(config.VariantFlag) ? "--variant" : config.VariantFlag;
         var variantArg = (config.SupportsVariant && !string.IsNullOrWhiteSpace(variant))
-            ? $" --variant \"{Escape(variant.ToLowerInvariant())}\""
+            ? $" {variantFlag} \"{Escape(variant.ToLowerInvariant())}\""
             : "";
 
         return config.ArgsTemplate

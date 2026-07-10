@@ -1,0 +1,86 @@
+name: ai-card
+displayName: "🤖 AI Card (AHP)"
+version: "1.0.0"
+description: "AI Handshake Protocol — AI時代の名刺交換プロトコル PoC"
+
+database:
+  type: sqlite
+  path: database/ai-card.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  theme: synthwave
+  dashboardTheme: workspace
+
+  landingPageByRole:
+    viewer: /ai-card/Page/StarterOverview
+    editor: /ai-card/Page/StarterOverview
+    admin:  /ai-card/Page/StarterOverview
+
+  navigation:
+    showDashboard: true
+    showPages: false
+    showEntities: false
+    entities: []
+    items:
+      - label: QR を見せる
+        url: /ai-card/Page/StarterOverview
+        icon: QR
+        section: はじめに
+        roles: [viewer, editor, admin]
+      - label: QR を発行する
+        url: /ai-card/Page/QrGenerator
+        icon: +
+        section: はじめに
+        roles: [viewer, editor, admin]
+      - label: 読み取り履歴
+        url: /ai-card/Page/HandshakeHistory
+        icon: H
+        section: はじめに
+        roles: [viewer, editor, admin]
+
+      # ─── AI ID 管理 ───
+      - label: AI ID ダッシュボード
+        url: /ai-card/Page/AiIdDashboard
+        icon: ID
+        section: 管理
+        roles: [viewer, editor, admin]
+      - label: AI ID 管理
+        url: /ai-card/DynamicEntity/Index?entity=ai_identity
+        icon: ID
+        section: 管理
+        roles: [editor, admin]
+      - label: プロフィール
+        url: /ai-card/DynamicEntity/Index?entity=ai_profile
+        icon: P
+        section: 管理
+        roles: [editor, admin]
+
+      # ─── Handshake ───
+      - label: セッション管理
+        url: /ai-card/DynamicEntity/Index?entity=handshake_session
+        icon: S
+        section: 管理
+        roles: [editor, admin]
+
+      # ─── 権限管理 ───
+      - label: Permission
+        url: /ai-card/DynamicEntity/Index?entity=ahp_permission
+        icon: L
+        section: 設定
+        roles: [admin]
+      - label: QR トークン
+        url: /ai-card/DynamicEntity/Index?entity=qr_token
+        icon: T
+        section: 設定
+        roles: [admin]
+
+settings:
+  locale: ja-JP
+  timezone: Asia/Tokyo

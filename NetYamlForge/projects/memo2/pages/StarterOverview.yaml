@@ -1,0 +1,25 @@
+title: Starter Overview
+titleKey: projects.memo2.pages.starterOverview.title
+description: Auto-generated starter page
+descriptionKey: projects.memo2.pages.starterOverview.description
+
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: starter_sample
+    title: Starter Sample
+    titleKey: projects.memo2.pages.starterOverview.sections.0.title
+    sourceType: custom
+    source: SELECT 1 AS SampleValue
+    columns: [SampleValue]
+    pageSize: 20
+    editable: false
+    readOnly: true
+    ui:
+      component: DataTable
+      selectable: none
+

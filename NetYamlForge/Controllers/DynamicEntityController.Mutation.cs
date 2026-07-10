@@ -73,7 +73,7 @@ public partial class DynamicEntityController : BaseProjectController
         var keyValue = _keyResolver.ResolvePrimaryKeyValue(meta, id, Request.Query);
         
         form ??= new Dictionary<string, string?>();
-        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, form, _projectScope.Current?.Name ?? "DefaultProject");
+        var (values, errors) = await _formValidationService.ConvertAndValidateAsync(meta, form, _projectScope.Current?.Name ?? "DefaultProject", isUpdate: true);
         var isPageMode = mode.Equals("page", StringComparison.OrdinalIgnoreCase);
 
         if (errors.Any())

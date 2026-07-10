@@ -1,0 +1,108 @@
+title: 🤝 Handshake 履歴
+description: "AI Handshake セッションの履歴と詳細"
+
+sections:
+  # ─── Handshake 状態別サマリー ───
+  - id: state_summary
+    title: 状態別サマリー
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🤝 合計' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🤝' AS metric_icon,
+             NULL AS metric_delta
+      FROM handshake_session
+      UNION ALL
+      SELECT '✅ 完了',
+             CAST(SUM(CASE WHEN state='completed' THEN 1 ELSE 0 END) AS TEXT),
+             '✅', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '⏳ 待機',
+             CAST(SUM(CASE WHEN state='pending' THEN 1 ELSE 0 END) AS TEXT),
+             '⏳', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '🔗 接続中',
+             CAST(SUM(CASE WHEN state='connected' THEN 1 ELSE 0 END) AS TEXT),
+             '🔗', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '⌛ 期限切れ',
+             CAST(SUM(CASE WHEN state='expired' THEN 1 ELSE 0 END) AS TEXT),
+             '⌛', NULL
+      FROM handshake_session
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+
+  # ─── Handshake 全履歴 ───
+  - id: handshake_full_list
+    title: 📋 全 Handshake 履歴
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        hs.id AS ID,
+        SUBSTR(hs.session_token, 1, 8) || '...' AS トークン,
+        ai.display_name AS イニシエーター,
+        ai.organization AS 組織,
+        COALESCE(hs.responder_name, '—') AS 相手名,
+        COALESCE(hs.responder_email, '—') AS メール,
+        COALESCE(hs.responder_company, '—') AS 相手会社,
+        CASE hs.state
+          WHEN 'pending'   THEN '⏳ 待機'
+          WHEN 'connected' THEN '🔗 接続中'
+          WHEN 'completed' THEN '✅ 完了'
+          WHEN 'expired'   THEN '⌛ 期限切れ'
+          WHEN 'rejected'  THEN '❌ 拒否'
+          WHEN 'revoked'   THEN '🚫 取消'
+          ELSE hs.state
+        END AS 状態,
+        hs.handshake_type AS タイプ,
+        COALESCE(hs.intent_type, '—') AS Intent,
+        COALESCE(hs.intent_topic, '—') AS トピック,
+        COALESCE(hs.conversation_summary, '—') AS 会話要約,
+        (SELECT COUNT(*) FROM chat_message WHERE session_id = hs.id) AS メッセージ数,
+        hs.created_at AS 開始日時
+      FROM handshake_session hs
+      LEFT JOIN ai_identity ai ON hs.initiator_id = ai.id
+      ORDER BY hs.created_at DESC
+    columns: [ID, トークン, イニシエーター, 組織, 相手名, メール, 相手会社, 状態, タイプ, Intent, トピック, 会話要約, メッセージ数, 開始日時]
+    pageSize: 25
+    editable: false
+    readOnly: true
+    rowColorRules:
+      - condition: "状態 LIKE '%完了%'"
+        colorClass: row-success
+      - condition: "状態 LIKE '%接続中%'"
+        colorClass: row-info
+      - condition: "状態 LIKE '%期限切れ%'"
+        colorClass: row-warning
+      - condition: "状態 LIKE '%拒否%'"
+        colorClass: row-danger
+
+  # ─── Intent 種別チャート ───
+  - id: intent_chart
+    title: Intent 種別分布
+    component: doughnut_chart
+    sourceType: custom
+    source: |
+      SELECT COALESCE(intent_type, '未設定') AS label,
+             COUNT(*) AS value
+      FROM handshake_session
+      GROUP BY intent_type
+      ORDER BY value DESC
+      LIMIT 10
+    columns: [label, value]
+    xField: label
+    yField: value
+    pageSize: 10
+    editable: false
+    readOnly: true

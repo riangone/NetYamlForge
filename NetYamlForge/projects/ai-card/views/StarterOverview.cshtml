@@ -1,0 +1,360 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    Layout = ViewBag.LayoutPath as string ?? "~/projects/ai-card/views/_Layout.cshtml";
+
+    var project = Context.GetRouteValue("project")?.ToString() ?? "ai-card";
+    ViewData["Title"] = "QR を見せる";
+
+    string Route(string path) => $"/{project}{path}";
+    IEnumerable<Dictionary<string, object>> Rows(string key)
+        => Model.TryGetValue(key, out var section) ? section.Rows : Enumerable.Empty<Dictionary<string, object>>();
+
+    string S(Dictionary<string, object>? row, string key, string fallback = "—")
+        => row != null && row.TryGetValue(key, out var value) && value != null && !string.IsNullOrWhiteSpace(value.ToString())
+            ? value.ToString()!
+            : fallback;
+
+    string FormatDate(object? value, string fallback = "—")
+    {
+        if (value == null) return fallback;
+        if (DateTime.TryParse(value.ToString(), out var dt))
+            return dt.ToString("yyyy/MM/dd HH:mm");
+        return value.ToString() ?? fallback;
+    }
+
+    var latestQr = Rows("latest_qr").FirstOrDefault();
+    var identityRows = Rows("ai_identities").ToList();
+    var qrRows = Rows("qr_tokens").ToList();
+    var handshakeRows = Rows("handshakes").ToList();
+    var latestQrPath = S(latestQr, "qr_url", "");
+    var hasQr = !string.IsNullOrWhiteSpace(latestQrPath);
+}
+
+@section Styles {
+    <style>
+        .start-shell {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 2.5rem;
+        }
+
+        .primary-panel {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 1.25rem;
+            align-items: stretch;
+            background: hsl(var(--b1));
+            border: 1px solid hsl(var(--b3));
+            border-radius: .75rem;
+            padding: 1.25rem;
+        }
+
+        .qr-stage {
+            display: grid;
+            place-items: center;
+            min-height: 340px;
+            background: hsl(var(--b2));
+            border: 1px solid hsl(var(--b3));
+            border-radius: .5rem;
+            padding: 1rem;
+        }
+
+        .qr-frame {
+            width: min(100%, 290px);
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
+            background: white;
+            border-radius: .5rem;
+            padding: .75rem;
+            box-shadow: 0 12px 36px rgb(15 23 42 / .12);
+        }
+
+        .qr-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .action-stack {
+            display: grid;
+            gap: .75rem;
+            align-content: start;
+        }
+
+        .next-card,
+        .simple-card {
+            background: hsl(var(--b1));
+            border: 1px solid hsl(var(--b3));
+            border-radius: .5rem;
+            padding: 1rem;
+        }
+
+        .step-list {
+            display: grid;
+            gap: .6rem;
+        }
+
+        .step-item {
+            display: grid;
+            grid-template-columns: 2rem 1fr;
+            gap: .75rem;
+            align-items: start;
+        }
+
+        .step-no {
+            width: 2rem;
+            height: 2rem;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            background: hsl(var(--p) / .12);
+            color: hsl(var(--p));
+            font-weight: 800;
+        }
+
+        .table-lite {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-lite th,
+        .table-lite td {
+            padding: .65rem .5rem;
+            border-bottom: 1px solid hsl(var(--b3));
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table-lite th {
+            font-size: .75rem;
+            color: hsl(var(--bc) / .6);
+            text-transform: uppercase;
+        }
+
+        @@media (max-width: 900px) {
+            .primary-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .qr-stage {
+                min-height: 300px;
+            }
+        }
+    </style>
+}
+
+<div class="start-shell space-y-5">
+    <section class="primary-panel">
+        <div class="space-y-4">
+            <div>
+                <div class="badge badge-primary badge-outline mb-3">最初にやること</div>
+                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">相手にこの QR を見せる</h1>
+                <p class="text-base-content/70 mt-3 max-w-2xl">
+                    画面を開いたら、まず相手に QR コードを読み取ってもらいます。読み取られると Handshake が始まります。
+                </p>
+            </div>
+
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-no">1</div>
+                    <div>
+                        <div class="font-semibold">相手に読み取ってもらう</div>
+                        <div class="text-sm text-base-content/60">スマートフォンのカメラで右側の QR を読み取ります。</div>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-no">2</div>
+                    <div>
+                        <div class="font-semibold">履歴で確認する</div>
+                        <div class="text-sm text-base-content/60">読み取り後は Handshake 履歴にセッションが残ります。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 pt-2">
+                <button type="button" id="btn-rotate-qr" class="btn btn-primary">新しい QR を発行</button>
+                <a class="btn btn-outline" href="@Route("/Page/HandshakeHistory")">読み取り履歴を見る</a>
+                <a class="btn btn-ghost btn-sm" href="@Route("/Page/QrGenerator")">用途を指定して発行</a>
+            </div>
+        </div>
+
+        <aside class="action-stack">
+            <div class="qr-stage" id="qr-stage" data-initial-path="@latestQrPath">
+                <div id="qr-loading" class="text-center max-w-xs @(hasQr ? "hidden" : "")">
+                    <span class="loading loading-spinner loading-lg"></span>
+                    <p class="text-sm text-base-content/60 mt-3">有効な QR を準備しています…</p>
+                </div>
+                <div id="qr-ready" class="text-center space-y-3 w-full @(hasQr ? "" : "hidden")">
+                    <div class="qr-frame mx-auto">
+                        <img id="latest-qr-image" alt="Handshake QR code" data-qr-path="@latestQrPath" />
+                    </div>
+                    <div>
+                        <div id="qr-ai-name" class="font-semibold">@S(latestQr, "ai_name")</div>
+                        <div id="qr-intent" class="text-sm text-base-content/60">@S(latestQr, "intent_type") / @S(latestQr, "intent_topic")</div>
+                    </div>
+                </div>
+                <div id="qr-empty" class="text-center max-w-xs hidden">
+                    <div class="text-5xl mb-3">QR</div>
+                    <h2 class="font-bold text-lg">先に AI ID が必要です</h2>
+                    <p class="text-sm text-base-content/60 mt-2">AI ID を作成すると QR が自動で発行されます。</p>
+                    <a class="btn btn-primary mt-4" href="@Route("/DynamicEntity/Index?entity=ai_identity")">AI ID を作成する</a>
+                </div>
+            </div>
+
+            <div class="next-card space-y-3 @(hasQr ? "" : "hidden")" id="qr-info-card">
+                <div>
+                    <div class="text-xs text-base-content/60">QR URL</div>
+                    <div id="latest-qr-url" class="font-mono text-xs break-all" data-qr-path="@latestQrPath">@latestQrPath</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <a id="open-qr-link" class="btn btn-outline btn-sm" href="@latestQrPath" target="_blank" rel="noopener">開く</a>
+                    <button type="button" class="btn btn-ghost btn-sm" data-copy-latest>コピー</button>
+                </div>
+                <div class="text-xs text-base-content/50" id="qr-created">
+                    作成: @FormatDate(latestQr?.TryGetValue("created_at", out var created) == true ? created : null)
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    <div class="text-sm">
+        <a class="link link-hover text-base-content/70" href="@Route("/DynamicEntity/Index?entity=ai_identity")">AI ID の表示名・組織・役割を編集する →</a>
+    </div>
+
+    <details class="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg">
+        <summary class="collapse-title font-semibold">管理者向けの詳細を見る</summary>
+        <div class="collapse-content space-y-5">
+            <div class="overflow-x-auto">
+                <h2 class="font-bold mb-2">最近の QR</h2>
+                <table class="table-lite">
+                    <thead>
+                        <tr>
+                            <th>AI ID</th>
+                            <th>用途</th>
+                            <th>URL</th>
+                            <th>Scan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in qrRows.Take(5))
+                        {
+                            <tr>
+                                <td>@S(row, "ai_name")</td>
+                                <td>@S(row, "intent_type")<br /><span class="text-xs text-base-content/60">@S(row, "intent_topic")</span></td>
+                                <td class="font-mono text-xs break-all">@S(row, "qr_url")</td>
+                                <td>@S(row, "scan_count")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h2 class="font-bold mb-2">AI ID</h2>
+                    <div class="space-y-2">
+                        @foreach (var row in identityRows.Take(4))
+                        {
+                            <div class="p-3 rounded border border-base-300">
+                                <div class="font-semibold">@S(row, "display_name")</div>
+                                <div class="text-xs text-base-content/60">@S(row, "ai_id")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div>
+                    <h2 class="font-bold mb-2">最近の Handshake</h2>
+                    <div class="space-y-2">
+                        @foreach (var row in handshakeRows.Take(4))
+                        {
+                            <div class="p-3 rounded border border-base-300">
+                                <div class="font-semibold">@S(row, "state")</div>
+                                <div class="text-xs text-base-content/60">@S(row, "initiator_name") → @S(row, "responder_name")</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+</div>
+
+<script>
+    (function () {
+        var apiBase = '@Route("/api/qr")';
+        var stage = document.getElementById('qr-stage');
+        var loadingEl = document.getElementById('qr-loading');
+        var readyEl = document.getElementById('qr-ready');
+        var emptyEl = document.getElementById('qr-empty');
+        var infoCard = document.getElementById('qr-info-card');
+        var qrImage = document.getElementById('latest-qr-image');
+        var qrUrlEl = document.getElementById('latest-qr-url');
+        var openLink = document.getElementById('open-qr-link');
+        var aiNameEl = document.getElementById('qr-ai-name');
+        var intentEl = document.getElementById('qr-intent');
+        var rotateBtn = document.getElementById('btn-rotate-qr');
+        var currentUrl = '';
+
+        function absoluteUrl(path) {
+            if (!path) return '';
+            try { return new URL(path, window.location.origin).toString(); }
+            catch { return path; }
+        }
+
+        function show(el, on) { if (el) el.classList.toggle('hidden', !on); }
+
+        function render(data) {
+            currentUrl = absoluteUrl(data.qr_url);
+            if (qrImage) qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=12&data=' + encodeURIComponent(currentUrl);
+            if (qrUrlEl) qrUrlEl.textContent = currentUrl;
+            if (openLink) openLink.href = currentUrl;
+            if (aiNameEl) aiNameEl.textContent = data.ai_name || 'AI ID';
+            if (intentEl) intentEl.textContent = (data.intent_type || '指定なし') + ' / ' + (data.intent_topic || '指定なし');
+            show(loadingEl, false); show(emptyEl, false); show(readyEl, true); show(infoCard, true);
+        }
+
+        function showEmpty() {
+            show(loadingEl, false); show(readyEl, false); show(infoCard, false); show(emptyEl, true);
+        }
+
+        async function callApi(action, body) {
+            var res = await fetch(apiBase + '/' + action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body || {})
+            });
+            return res.json();
+        }
+
+        async function ensure() {
+            show(loadingEl, true); show(readyEl, false); show(emptyEl, false);
+            try {
+                var data = await callApi('ensure');
+                if (data && data.ok) render(data); else showEmpty();
+            } catch (e) { showEmpty(); }
+        }
+
+        if (rotateBtn) {
+            rotateBtn.addEventListener('click', async function () {
+                var original = rotateBtn.textContent;
+                rotateBtn.disabled = true; rotateBtn.textContent = '発行中…';
+                try {
+                    var data = await callApi('rotate');
+                    if (data && data.ok) render(data); else showEmpty();
+                } catch (e) { /* keep current */ }
+                rotateBtn.disabled = false; rotateBtn.textContent = original;
+            });
+        }
+
+        document.querySelector('[data-copy-latest]')?.addEventListener('click', async function () {
+            if (!currentUrl) return;
+            await navigator.clipboard.writeText(currentUrl);
+            this.textContent = 'コピー済み';
+            setTimeout(() => this.textContent = 'コピー', 1200);
+        });
+
+        // 開いた瞬間に有効な QR を保証（無ければ／上限に達していれば自動発行）
+        ensure();
+    })();
+</script>

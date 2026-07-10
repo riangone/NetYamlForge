@@ -23,6 +23,7 @@ public static class SystemDatabaseInitializer
     public static async Task InitializeAsync(ILogger logger, string? dbPath = null)
     {
         var targetDbPath = dbPath ?? DbPath;
+        if (dbPath != null) DbPath = dbPath; // SyncTestUsersToSystemDbAsync が正しいパスを使うために更新
         // DCS003 抑制理由：システム DB 初期化は DI 開始前に実行されるため直接接続します
 #pragma warning disable DCS003
         var connectionString = new SqliteConnectionStringBuilder { DataSource = targetDbPath }.ConnectionString;

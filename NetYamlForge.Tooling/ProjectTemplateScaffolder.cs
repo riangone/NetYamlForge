@@ -1322,7 +1322,7 @@ sections:
         // Entity Picker
         var _pickerConfig = null;
         var _pickerSearchTimer = null;
-        var _pickerBaseUrl = '@@Url.Content("~/" + currentProject + "/DynamicEntity/PickerList")';
+        var _pickerBaseUrl = '@Url.Content("~/" + currentProject + "/DynamicEntity/PickerList")';
         function openEntityPicker(btn) {
 
             _pickerConfig = { fieldName: btn.dataset.pickerField, entity: btn.dataset.pickerEntity,
@@ -1424,6 +1424,69 @@ sections:
             document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(t) { if (t.checked) values.push(t.value); });
             hidden.value = values.join(',');
         }
+    </script>
+
+    <!-- 全局 Toast 容器 -->
+    <div class="toast toast-end toast-bottom z-[9999]" id="global-toast-container"></div>
+
+    <script>
+        // 全局 Toast 提示函数（与核心 Views/Shared/_Layout.cshtml 保持一致）
+        function showToast(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 4000;
+            var container = document.getElementById('global-toast-container');
+            if (!container) return;
+
+            var alertDiv = document.createElement('div');
+            var alertClass = 'alert shadow-lg flex items-center gap-2';
+            var iconSvg = '';
+
+            if (type === 'success') {
+                alertClass += ' alert-success text-success-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            } else if (type === 'error') {
+                alertClass += ' alert-error text-error-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            } else if (type === 'warning') {
+                alertClass += ' alert-warning text-warning-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+            } else {
+                alertClass += ' alert-info text-info-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+
+            alertDiv.className = alertClass;
+            alertDiv.innerHTML = iconSvg + '<span>' + message + '</span>';
+            container.appendChild(alertDiv);
+
+            setTimeout(function() {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transition = 'opacity 0.5s ease';
+                setTimeout(function() {
+                    alertDiv.remove();
+                }, 500);
+            }, duration);
+        }
+
+        // 全局监听 HTMX 响应与发送错误，避免服务端错误（如 500）在界面上完全无提示
+        document.body.addEventListener('htmx:responseError', function (evt) {
+            var errorMsg = evt.detail.xhr.responseText || '操作执行失败，请检查输入或重试。';
+            if (errorMsg.indexOf('<html') >= 0 || errorMsg.indexOf('<!DOCTYPE') >= 0) {
+                errorMsg = '服务器处理请求时发生内部错误。';
+            }
+            showToast(errorMsg, 'error');
+        });
+
+        document.body.addEventListener('htmx:sendError', function (evt) {
+            showToast('网络连接失败，请检查您的网络。', 'error');
+        });
+
+        // HX-Trigger: {"show-toast": {"message":"...","type":"success"} } 的全局处理
+        document.body.addEventListener('show-toast', function (evt) {
+            var msg  = evt.detail && evt.detail.message ? evt.detail.message : '';
+            var type = evt.detail && evt.detail.type    ? evt.detail.type    : 'info';
+            if (msg) showToast(msg, type);
+        });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

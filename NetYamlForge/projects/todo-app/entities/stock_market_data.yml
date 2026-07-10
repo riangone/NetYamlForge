@@ -1,0 +1,54 @@
+entities:
+  stock_market_data:
+    table: 'stock_market_data'
+    key: 'id'
+    displayName: 'Stock Market Data'
+    displayNameKey: 'entities.stock_market_data.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['market_code', 'market_name', 'current_price', 'change_amount', 'change_percent', 'open_price', 'high_price', 'low_price', 'prev_close', 'volume', 'amount', 'market_status', 'briefing_note', 'data_source', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.stock_market_data.columns.id.label', sortable: true }
+      market_code: { type: string, required: true, label: 'Market Code', labelKey: 'entities.stock_market_data.columns.market_code.label', searchable: true, sortable: true }
+      market_name: { type: string, required: true, label: 'Market Name', labelKey: 'entities.stock_market_data.columns.market_name.label', searchable: true, sortable: true }
+      current_price: { type: decimal, label: 'Current Price', labelKey: 'entities.stock_market_data.columns.current_price.label', sortable: true }
+      change_amount: { type: decimal, label: 'Change Amount', labelKey: 'entities.stock_market_data.columns.change_amount.label', sortable: true }
+      change_percent: { type: decimal, label: 'Change Percent', labelKey: 'entities.stock_market_data.columns.change_percent.label', sortable: true }
+      open_price: { type: decimal, label: 'Open Price', labelKey: 'entities.stock_market_data.columns.open_price.label', sortable: true }
+      high_price: { type: decimal, label: 'High Price', labelKey: 'entities.stock_market_data.columns.high_price.label', sortable: true }
+      low_price: { type: decimal, label: 'Low Price', labelKey: 'entities.stock_market_data.columns.low_price.label', sortable: true }
+      prev_close: { type: decimal, label: 'Prev Close', labelKey: 'entities.stock_market_data.columns.prev_close.label', sortable: true }
+      volume: { type: long, label: 'Volume', labelKey: 'entities.stock_market_data.columns.volume.label', sortable: true }
+      amount: { type: decimal, label: 'Amount', labelKey: 'entities.stock_market_data.columns.amount.label', sortable: true }
+      market_status: { type: string, label: 'Market Status', labelKey: 'entities.stock_market_data.columns.market_status.label', searchable: true, sortable: true }
+      briefing_note: { type: string, label: 'Briefing Note', labelKey: 'entities.stock_market_data.columns.briefing_note.label', searchable: true, sortable: true }
+      data_source: { type: string, label: 'Data Source', labelKey: 'entities.stock_market_data.columns.data_source.label', searchable: true, sortable: true }
+      created_at: { type: datetime, label: 'Created At', labelKey: 'entities.stock_market_data.columns.created_at.label', sortable: true }
+      updated_at: { type: datetime, label: 'Updated At', labelKey: 'entities.stock_market_data.columns.updated_at.label', sortable: true }
+    forms:
+      market_code: { type: string, required: true, label: 'Market Code', labelKey: 'entities.stock_market_data.forms.market_code.label', editable: true }
+      market_name: { type: string, required: true, label: 'Market Name', labelKey: 'entities.stock_market_data.forms.market_name.label', editable: true }
+      current_price: { type: decimal, label: 'Current Price', labelKey: 'entities.stock_market_data.forms.current_price.label', editable: true }
+      change_amount: { type: decimal, label: 'Change Amount', labelKey: 'entities.stock_market_data.forms.change_amount.label', editable: true }
+      change_percent: { type: decimal, label: 'Change Percent', labelKey: 'entities.stock_market_data.forms.change_percent.label', editable: true }
+      open_price: { type: decimal, label: 'Open Price', labelKey: 'entities.stock_market_data.forms.open_price.label', editable: true }
+      high_price: { type: decimal, label: 'High Price', labelKey: 'entities.stock_market_data.forms.high_price.label', editable: true }
+      low_price: { type: decimal, label: 'Low Price', labelKey: 'entities.stock_market_data.forms.low_price.label', editable: true }
+      prev_close: { type: decimal, label: 'Prev Close', labelKey: 'entities.stock_market_data.forms.prev_close.label', editable: true }
+      volume: { type: long, label: 'Volume', labelKey: 'entities.stock_market_data.forms.volume.label', editable: true }
+      amount: { type: decimal, label: 'Amount', labelKey: 'entities.stock_market_data.forms.amount.label', editable: true }
+      market_status: { type: string, label: 'Market Status', labelKey: 'entities.stock_market_data.forms.market_status.label', editable: true }
+      briefing_note: { type: string, label: 'Briefing Note', labelKey: 'entities.stock_market_data.forms.briefing_note.label', editable: true }
+      data_source: { type: string, label: 'Data Source', labelKey: 'entities.stock_market_data.forms.data_source.label', editable: true }
+      created_at: { type: datetime, label: 'Created At', labelKey: 'entities.stock_market_data.forms.created_at.label', editable: true }
+      updated_at: { type: datetime, label: 'Updated At', labelKey: 'entities.stock_market_data.forms.updated_at.label', editable: true }
+    filters: {}
+    links: {}

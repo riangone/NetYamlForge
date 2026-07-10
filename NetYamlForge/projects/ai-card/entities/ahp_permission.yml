@@ -1,0 +1,44 @@
+entities:
+  ahp_permission:
+    table: 'ahp_permission'
+    key: 'id'
+    displayName: 'Ahp Permission'
+    displayNameKey: 'entities.ahp_permission.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ai_identity_id', 'resource_type', 'resource_name', 'access_level', 'expires_at', 'is_active', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.ahp_permission.columns.id.label', sortable: true }
+      ai_identity_id: { type: int, required: true, label: 'Ai Identity Id', labelKey: 'entities.ahp_permission.columns.ai_identity_id.label', sortable: true }
+      resource_type: { type: string, required: true, label: 'Resource Type', labelKey: 'entities.ahp_permission.columns.resource_type.label', searchable: true, sortable: true }
+      resource_name: { type: string, required: true, label: 'Resource Name', labelKey: 'entities.ahp_permission.columns.resource_name.label', searchable: true, sortable: true }
+      access_level: { type: string, label: 'Access Level', labelKey: 'entities.ahp_permission.columns.access_level.label', searchable: true, sortable: true }
+      expires_at: { type: string, label: 'Expires At', labelKey: 'entities.ahp_permission.columns.expires_at.label', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', labelKey: 'entities.ahp_permission.columns.is_active.label', sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ahp_permission.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      ai_identity_id:
+        type: int
+        required: true
+        label: 'Ai Identity Id'
+        labelKey: 'entities.ahp_permission.forms.ai_identity_id.label'
+        editable: true
+        foreignKey:
+          entity: ai_identity
+          displayColumn: 'display_name'
+      resource_type: { type: string, required: true, label: 'Resource Type', labelKey: 'entities.ahp_permission.forms.resource_type.label', editable: true }
+      resource_name: { type: string, required: true, label: 'Resource Name', labelKey: 'entities.ahp_permission.forms.resource_name.label', editable: true }
+      access_level: { type: string, label: 'Access Level', labelKey: 'entities.ahp_permission.forms.access_level.label', editable: true }
+      expires_at: { type: string, label: 'Expires At', labelKey: 'entities.ahp_permission.forms.expires_at.label', editable: true }
+      is_active: { type: int, label: 'Is Active', labelKey: 'entities.ahp_permission.forms.is_active.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ahp_permission.forms.created_at.label', editable: true }
+    filters: {}
+    links: {}

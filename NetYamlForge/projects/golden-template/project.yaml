@@ -1,0 +1,34 @@
+name: golden-template
+displayName: Golden Template (Mini Helpdesk)
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/golden-template.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Golden Template (Mini Helpdesk)"
+  navigation:
+    showDashboard: true
+    entities: []
+    items:
+      - label: Home
+        url: /golden-template
+        icon: 🏠
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📊
+
+home_page:
+  icon: "🗂️"
+  tagline: "Golden Template (Mini Helpdesk)"
+  tags: []

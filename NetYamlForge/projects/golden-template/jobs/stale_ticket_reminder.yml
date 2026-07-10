@@ -1,0 +1,22 @@
+jobs:
+  stale_ticket_reminder:
+    displayName: Stale Ticket Reminder
+    description: "Stale Ticket Reminderを実行します"
+    enabled: true
+
+    schedule:
+      cron: "0 2 * * *"        # 毎日 02:00
+      timezone: "Asia/Tokyo"
+
+    # タイプ: sql_to_csv（SQL 結果を CSV 出力）または sql_command（SQL 実行のみ）
+    type: sql_to_csv
+    settings:
+      sqlFile: jobs/sql/stale_ticket_reminder.sql
+      outputFile: "jobs/output/stale_ticket_reminder_{date:yyyyMMdd}.csv"
+      includeHeader: true
+      delimiter: ","
+
+    onFailure:
+      retryCount: 3
+      retryInterval: 300       # 5 分後にリトライ
+      logError: true

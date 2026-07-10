@@ -1,0 +1,373 @@
+@model NetYamlForge.Models.Config.AiCliChainSettingsViewModel
+@{
+    ViewData["Title"] = "System Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mx-auto p-4 md:p-8 max-w-6xl">
+    <div class="mb-6">
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">System Settings</h1>
+        <p class="text-sm text-base-content/60 mt-1">
+            プロジェクトに依存しないグローバル設定を管理します。ここでの変更は
+            <code class="px-1 py-0.5 bg-base-content/10 rounded">appsettings.json</code> に直接保存され、
+            アプリの再起動なしで数秒以内に反映されます。
+        </p>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl border border-base-content/10">
+        <div class="card-body">
+            <h2 class="card-title">AI CLI Chain</h2>
+            <p class="text-xs text-base-content/60 mb-4">
+                対話型 AI CLI（opencode / antigravity / claude 等）をどの順序・コマンドで呼び出すかを設定します。
+                いずれか1つが失敗しても次のプロバイダーへ自動フォールバックします。
+                「Default model / Default level」はここで呼び出し元が model/level を指定しなかった場合のみ使われる既定値です。
+            </p>
+
+            <div class="alert alert-info text-xs mb-4 items-start">
+                <div>
+                    <p class="font-semibold mb-1">各 CLI で実在確認済みのオプション（2026-07-08 時点、--help / models サブコマンドを実機確認）</p>
+                    <ul class="list-disc list-inside space-y-0.5">
+                        @foreach (var kp in Model.KnownProviders)
+                        {
+                            <li><code class="px-1 bg-base-content/10 rounded">@kp.Name</code>: @kp.VerifiedNote</li>
+                        }
+                    </ul>
+                    <p class="mt-1 text-base-content/60">
+                        レベルを渡すフラグ名は CLI ごとに異なります（opencode: <code>--variant</code>、claude: <code>--effort</code>、
+                        antigravity: レベル用フラグ無し＝モデル名に埋め込み）。新しい CLI を追加する際は下の「Provider」欄で
+                        <strong>Custom</strong> を選び、必ずそのCLI自身の <code>--help</code> で確認した値を入力してください（推測入力はしないでください）。
+                    </p>
+                </div>
+            </div>
+
+            <form asp-controller="SystemSettings" asp-action="SaveAiCliChain" method="post" id="ai-cli-chain-form">
+                @Html.AntiForgeryToken()
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <label class="form-control w-full">
+                        <div class="label"><span class="label-text">Timeout (seconds)</span></div>
+                        <input type="number" min="1" max="3600" name="TimeoutSeconds"
+                               value="@Model.TimeoutSeconds" class="input input-bordered w-full" />
+                    </label>
+                    <label class="form-control w-full">
+                        <div class="label">
+                            <span class="label-text">Default order</span>
+                            <span class="label-text-alt">カンマ区切り。例：opencode, antigravity, claude</span>
+                        </div>
+                        <input type="text" name="DefaultOrderCsv"
+                               value="@Model.DefaultOrderCsv" class="input input-bordered w-full" />
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-semibold text-sm">Providers</h3>
+                    <button type="button" id="add-provider-row" class="btn btn-sm btn-outline">+ Add provider</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="table table-sm" id="providers-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Command</th>
+                                <th>Args template</th>
+                                <th class="text-center">Level flag</th>
+                                <th class="text-center">Images</th>
+                                <th>Default model</th>
+                                <th>Default level</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Providers.Count; i++)
+                            {
+                                var p = Model.Providers[i];
+                                var isKnown = Model.KnownProviders.Any(kp => string.Equals(kp.Name, p.Name, StringComparison.OrdinalIgnoreCase));
+                                <tr class="provider-row">
+                                    <td>
+                                        <select class="provider-name-select select select-bordered select-sm w-32" data-initial="@p.Name">
+                                            <option value="" disabled>-- 选择 --</option>
+                                            @foreach (var kp in Model.KnownProviders)
+                                            {
+                                                <option value="@kp.Name" selected="@(string.Equals(kp.Name, p.Name, StringComparison.OrdinalIgnoreCase))">@kp.Name</option>
+                                            }
+                                            <option value="__custom__" selected="@(!isKnown)">Custom…</option>
+                                        </select>
+                                        <input type="text" class="provider-name-custom input input-bordered input-sm w-32 mt-1 @(isKnown ? "hidden" : "")"
+                                               value="@(isKnown ? "" : p.Name)" placeholder="my-cli" />
+                                        <input type="hidden" name="Providers[@i].Name" class="provider-name-hidden" value="@p.Name" />
+                                    </td>
+                                    <td><input type="text" name="Providers[@i].Command" value="@p.Command" class="input input-bordered input-sm w-32 provider-command" placeholder="opencode" /></td>
+                                    <td><input type="text" name="Providers[@i].ArgsTemplate" value="@p.ArgsTemplate" class="input input-bordered input-sm w-full min-w-64 font-mono provider-args" /></td>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="Providers[@i].SupportsVariant" value="true" class="checkbox checkbox-sm provider-variant" @(p.SupportsVariant ? "checked" : "") />
+                                        <input type="text" name="Providers[@i].VariantFlag" value="@p.VariantFlag" class="input input-bordered input-xs w-20 mt-1 provider-variant-flag" placeholder="--variant" />
+                                    </td>
+                                    <td class="text-center"><input type="checkbox" name="Providers[@i].PreferredForImages" value="true" class="checkbox checkbox-sm provider-images" @(p.PreferredForImages ? "checked" : "") /></td>
+                                    <td>
+                                        <select class="provider-default-model-select select select-bordered select-sm w-40"></select>
+                                        <input type="text" class="provider-default-model-custom input input-bordered input-sm w-40 mt-1 hidden" placeholder="model name" />
+                                        <input type="hidden" name="Providers[@i].DefaultModel" class="provider-default-model-hidden" value="@p.DefaultModel" />
+                                        <button type="button" class="btn btn-ghost btn-xs refresh-models hidden" title="CLIから最新モデル一覧を取得">⟳ live</button>
+                                    </td>
+                                    <td>
+                                        <select class="provider-default-variant-select select select-bordered select-sm w-28"></select>
+                                        <input type="text" class="provider-default-variant-custom input input-bordered input-sm w-28 mt-1 hidden" placeholder="high" />
+                                        <input type="hidden" name="Providers[@i].DefaultVariant" class="provider-default-variant-hidden" value="@p.DefaultVariant" />
+                                    </td>
+                                    <td><button type="button" class="btn btn-ghost btn-xs text-error remove-provider-row">✕</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-xs text-base-content/50 mt-2">
+                    Args template のプレースホルダー：<code>{prompt}</code>（送信文）、<code>{model}</code>（Default model 設定時のみ）、
+                    <code>{variant}</code>（Level flag 対応時、Default level 設定時のみ、"Level flag" 欄のフラグ名で渡される）。
+                </p>
+
+                <div class="card-actions justify-end mt-6">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<template id="provider-row-template">
+    <tr class="provider-row">
+        <td>
+            <select class="provider-name-select select select-bordered select-sm w-32">
+                <option value="" disabled selected>-- 选择 --</option>
+                __KNOWN_OPTIONS__
+                <option value="__custom__">Custom…</option>
+            </select>
+            <input type="text" class="provider-name-custom input input-bordered input-sm w-32 mt-1 hidden" placeholder="my-cli" />
+            <input type="hidden" name="Providers[__index__].Name" class="provider-name-hidden" value="" />
+        </td>
+        <td><input type="text" name="Providers[__index__].Command" value="" class="input input-bordered input-sm w-32 provider-command" placeholder="my-cli" /></td>
+        <td><input type="text" name="Providers[__index__].ArgsTemplate" value="" class="input input-bordered input-sm w-full min-w-64 font-mono provider-args" /></td>
+        <td class="text-center">
+            <input type="checkbox" name="Providers[__index__].SupportsVariant" value="true" class="checkbox checkbox-sm provider-variant" />
+            <input type="text" name="Providers[__index__].VariantFlag" value="--variant" class="input input-bordered input-xs w-20 mt-1 provider-variant-flag" placeholder="--variant" />
+        </td>
+        <td class="text-center"><input type="checkbox" name="Providers[__index__].PreferredForImages" value="true" class="checkbox checkbox-sm provider-images" /></td>
+        <td>
+            <select class="provider-default-model-select select select-bordered select-sm w-40"></select>
+            <input type="text" class="provider-default-model-custom input input-bordered input-sm w-40 mt-1 hidden" placeholder="model name" />
+            <input type="hidden" name="Providers[__index__].DefaultModel" class="provider-default-model-hidden" value="" />
+            <button type="button" class="btn btn-ghost btn-xs refresh-models hidden" title="CLIから最新モデル一覧を取得">⟳ live</button>
+        </td>
+        <td>
+            <select class="provider-default-variant-select select select-bordered select-sm w-28"></select>
+            <input type="text" class="provider-default-variant-custom input input-bordered input-sm w-28 mt-1 hidden" placeholder="high" />
+            <input type="hidden" name="Providers[__index__].DefaultVariant" class="provider-default-variant-hidden" value="" />
+        </td>
+        <td><button type="button" class="btn btn-ghost btn-xs text-error remove-provider-row">✕</button></td>
+    </tr>
+</template>
+
+@section Scripts {
+    <script>
+        (function () {
+            // サーバー側（KnownCliProviders）で --help / models サブコマンド実機確認済みの値のみを渡す。
+            // JS 側で新規フラグやモデル名を作らない。
+            var KNOWN_PROVIDERS = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.KnownProviders,
+                new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+            var MODELS_URL = '@Url.Action("Models", "SystemSettings", new { provider = "__PROVIDER__" })';
+
+            var tbody = document.querySelector('#providers-table tbody');
+            var template = document.getElementById('provider-row-template');
+            var addBtn = document.getElementById('add-provider-row');
+            var rowIndex = tbody.querySelectorAll('tr.provider-row').length;
+
+            var knownOptionsHtml = KNOWN_PROVIDERS.map(function (kp) {
+                return '<option value="' + kp.name + '">' + kp.name + '</option>';
+            }).join('');
+
+            function findKnown(name) {
+                return KNOWN_PROVIDERS.find(function (k) { return k.name === name; });
+            }
+
+            function bindRemove(row) {
+                var btn = row.querySelector('.remove-provider-row');
+                if (btn) {
+                    btn.addEventListener('click', function () { row.remove(); });
+                }
+            }
+
+            // 「選択肢 + Custom」パターンの共通配線。select / custom-text / hidden の3点セットを、
+            // 与えられた choices（文字列配列）で毎回組み立て直す。現在値 currentValue が choices に
+            // 含まれていなければ自動的に Custom 側へフォールバックする。
+            function populateChoiceWidget(row, prefix, choices, currentValue, placeholderLabel) {
+                var select = row.querySelector('.' + prefix + '-select');
+                var custom = row.querySelector('.' + prefix + '-custom');
+                var hidden = row.querySelector('.' + prefix + '-hidden');
+                if (!select || !hidden) return;
+
+                select.innerHTML = '';
+                var emptyOpt = document.createElement('option');
+                emptyOpt.value = '';
+                emptyOpt.textContent = '(' + placeholderLabel + ')';
+                select.appendChild(emptyOpt);
+                (choices || []).forEach(function (c) {
+                    var opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    select.appendChild(opt);
+                });
+                var customOpt = document.createElement('option');
+                customOpt.value = '__custom__';
+                customOpt.textContent = 'Custom…';
+                select.appendChild(customOpt);
+
+                var inChoices = currentValue && (choices || []).indexOf(currentValue) !== -1;
+                if (currentValue && !inChoices) {
+                    select.value = '__custom__';
+                    if (custom) { custom.value = currentValue; custom.classList.remove('hidden'); }
+                } else {
+                    select.value = currentValue || '';
+                    if (custom) custom.classList.add('hidden');
+                }
+                hidden.value = currentValue || '';
+
+                select.onchange = function () {
+                    if (select.value === '__custom__') {
+                        if (custom) { custom.classList.remove('hidden'); custom.focus(); }
+                        hidden.value = custom ? custom.value : '';
+                    } else {
+                        if (custom) custom.classList.add('hidden');
+                        hidden.value = select.value;
+                    }
+                };
+                if (custom) {
+                    custom.oninput = function () { hidden.value = custom.value; };
+                }
+            }
+
+            // Name select が変わるたび、その CLI に応じて Default model / Default level の選択肢を作り直す。
+            function refreshDefaultsWidgets(row, providerName, keepValues) {
+                var kp = findKnown(providerName);
+                var modelHidden = row.querySelector('.provider-default-model-hidden');
+                var variantHidden = row.querySelector('.provider-default-variant-hidden');
+                var currentModel = keepValues && modelHidden ? modelHidden.value : '';
+                var currentVariant = keepValues && variantHidden ? variantHidden.value : '';
+
+                populateChoiceWidget(row, 'provider-default-model', kp ? kp.modelChoices : [], currentModel, 'CLI既定');
+
+                var variantSelect = row.querySelector('.provider-default-variant-select');
+                var variantCustom = row.querySelector('.provider-default-variant-custom');
+                var supportsVariant = row.querySelector('.provider-variant');
+                var isVariantSupported = kp ? kp.supportsVariant : (supportsVariant && supportsVariant.checked);
+
+                if (!isVariantSupported) {
+                    populateChoiceWidget(row, 'provider-default-variant', [], '', 'このCLIはレベル未対応');
+                    if (variantSelect) variantSelect.disabled = true;
+                    if (variantCustom) variantCustom.disabled = true;
+                } else {
+                    populateChoiceWidget(row, 'provider-default-variant', kp ? kp.variantChoices : [], currentVariant, 'CLI既定');
+                    if (variantSelect) variantSelect.disabled = false;
+                    if (variantCustom) variantCustom.disabled = false;
+                }
+
+                var refreshBtn = row.querySelector('.refresh-models');
+                if (refreshBtn) {
+                    if (kp && kp.modelsAreLive) {
+                        refreshBtn.classList.remove('hidden');
+                        refreshBtn.onclick = function () {
+                            refreshBtn.disabled = true;
+                            refreshBtn.textContent = '…';
+                            fetch(MODELS_URL.replace('__PROVIDER__', encodeURIComponent(providerName)))
+                                .then(function (r) { return r.json(); })
+                                .then(function (data) {
+                                    if (data && data.models) {
+                                        kp.modelChoices = data.models;
+                                        var modelHiddenNow = row.querySelector('.provider-default-model-hidden');
+                                        populateChoiceWidget(row, 'provider-default-model', data.models, modelHiddenNow ? modelHiddenNow.value : '', 'CLI既定');
+                                    }
+                                })
+                                .catch(function () { /* サイレント失敗。既存の選択肢はそのまま残す */ })
+                                .finally(function () {
+                                    refreshBtn.disabled = false;
+                                    refreshBtn.textContent = '⟳ live';
+                                });
+                        };
+                    } else {
+                        refreshBtn.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Name の select ⇄ hidden input ⇄ custom text input を同期し、
+            // 既知プロバイダーを選んだ場合は Command / ArgsTemplate / チェックボックス / レベルフラグを
+            // 検証済みの値で自動入力する（fillDefaultsOnChange=true の時のみ。既存行の初期化では呼ばない）。
+            function bindNameSelect(row, fillDefaultsOnChange) {
+                var select = row.querySelector('.provider-name-select');
+                var hidden = row.querySelector('.provider-name-hidden');
+                var custom = row.querySelector('.provider-name-custom');
+                if (!select || !hidden) return;
+
+                function applyKnownDefaults(name) {
+                    var kp = findKnown(name);
+                    if (!kp) return;
+                    var cmd = row.querySelector('.provider-command');
+                    var args = row.querySelector('.provider-args');
+                    var variant = row.querySelector('.provider-variant');
+                    var variantFlag = row.querySelector('.provider-variant-flag');
+                    var images = row.querySelector('.provider-images');
+                    if (cmd) cmd.value = kp.command;
+                    if (args) args.value = kp.argsTemplate;
+                    if (variant) variant.checked = kp.supportsVariant;
+                    if (variantFlag) variantFlag.value = kp.variantFlag;
+                    if (images) images.checked = kp.preferredForImages;
+                }
+
+                select.addEventListener('change', function () {
+                    if (select.value === '__custom__') {
+                        custom.classList.remove('hidden');
+                        hidden.value = custom.value;
+                        custom.focus();
+                        refreshDefaultsWidgets(row, null, false);
+                    } else {
+                        custom.classList.add('hidden');
+                        hidden.value = select.value;
+                        if (fillDefaultsOnChange) {
+                            applyKnownDefaults(select.value);
+                        }
+                        refreshDefaultsWidgets(row, select.value, false);
+                    }
+                });
+
+                if (custom) {
+                    custom.addEventListener('input', function () {
+                        hidden.value = custom.value;
+                    });
+                }
+            }
+
+            tbody.querySelectorAll('tr.provider-row').forEach(function (row) {
+                bindRemove(row);
+                // 既存行は保存済みの値をそのまま尊重し、select 変更時のみ以後の自動入力を有効にする
+                bindNameSelect(row, true);
+                var nameHidden = row.querySelector('.provider-name-hidden');
+                refreshDefaultsWidgets(row, nameHidden ? nameHidden.value : null, true);
+            });
+
+            addBtn.addEventListener('click', function () {
+                var html = template.innerHTML
+                    .split('__index__').join(String(rowIndex))
+                    .split('__KNOWN_OPTIONS__').join(knownOptionsHtml);
+                var wrapper = document.createElement('tbody');
+                wrapper.innerHTML = html.trim();
+                var newRow = wrapper.querySelector('tr');
+                tbody.appendChild(newRow);
+                bindRemove(newRow);
+                // 新規行は空なので、既知プロバイダー選択時に検証済みデフォルトを自動入力してよい
+                bindNameSelect(newRow, true);
+                refreshDefaultsWidgets(newRow, null, false);
+                rowIndex++;
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,174 @@
+imports: []
+entities:
+  characters:
+    table: characters
+    key: Id
+    displayName: 冒险者
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        length: 100
+        required: true
+        label: 角色名
+        searchable: true
+        sortable: true
+      Race:
+        type: string
+        length: 20
+        required: true
+        label: 种族
+        options:
+          - 人类
+          - 精灵
+          - 矮人
+          - 兽人
+        searchable: true
+        sortable: true
+      Class:
+        type: string
+        length: 20
+        required: true
+        label: 职业
+        options:
+          - 战士
+          - 法师
+          - 盗贼
+          - 牧师
+        searchable: true
+        sortable: true
+      Level:
+        type: int
+        required: true
+        label: 等级
+        default: 1
+        sortable: true
+      Hp:
+        type: int
+        required: true
+        label: 当前生命值
+        sortable: true
+      MaxHp:
+        type: int
+        required: true
+        label: 最大生命值
+        sortable: true
+      Mp:
+        type: int
+        required: true
+        label: 当前法力值
+        sortable: true
+      MaxMp:
+        type: int
+        required: true
+        label: 最大法力值
+        sortable: true
+      Gold:
+        type: int
+        required: true
+        label: 金币
+        default: 0
+        sortable: true
+      Experience:
+        type: int
+        required: true
+        label: 经验值
+        default: 0
+        sortable: true
+      CurrentRoomId:
+        type: int
+        required: true
+        label: 当前位置
+        default: 1
+        sortable: true
+      InventoryJson:
+        type: text
+        required: false
+        label: 背包
+      Status:
+        type: string
+        length: 10
+        required: true
+        label: 状态
+        default: alive
+        options:
+          - alive
+          - dead
+          - victorious
+        searchable: true
+        sortable: true
+      OwnerUserId:
+        type: int
+        required: false
+        label: 所属用户
+        sortable: true
+      CreatedAt:
+        type: datetime
+        required: true
+        label: 创建时间
+        sortable: true
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 角色名
+        editable: true
+      Race:
+        type: select
+        required: true
+        label: 种族
+        editable: true
+      Class:
+        type: select
+        required: true
+        label: 职业
+        editable: true
+      Hp:
+        type: number
+        required: true
+        label: 当前生命值
+        editable: false
+      MaxHp:
+        type: number
+        required: true
+        label: 最大生命值
+        editable: false
+      Mp:
+        type: number
+        required: true
+        label: 当前法力值
+        editable: false
+      MaxMp:
+        type: number
+        required: true
+        label: 最大法力值
+        editable: false
+      Gold:
+        type: number
+        required: true
+        label: 金币
+        editable: true
+      CurrentRoomId:
+        type: number
+        required: true
+        label: 当前位置
+        editable: false
+
+    hooks:
+      beforeCreate:
+        - now:CreatedAt
+        - init_starting_stats
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

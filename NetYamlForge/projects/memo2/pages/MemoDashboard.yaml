@@ -1,0 +1,63 @@
+title: Memo Dashboard
+titleKey: projects.memo2.pages.memoDashboard.title
+description: Memo overview dashboard with stats and recent entries
+descriptionKey: projects.memo2.pages.memoDashboard.description
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: memo_stats
+    title: Memo Statistics
+    titleKey: projects.memo2.pages.memoDashboard.sections.0.title
+    sourceType: custom
+    source: |
+      SELECT '📝 総メモ数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '📝' AS metric_icon,
+             '/memo2/DynamicEntity/memo' AS metric_delta
+      FROM memo
+      UNION ALL
+      SELECT '🔴 High', CAST(COUNT(*) AS TEXT), '🔴', '/memo2/DynamicEntity/memo?priority=high'
+      FROM memo WHERE priority = 'high'
+      UNION ALL
+      SELECT '🟡 Normal', CAST(COUNT(*) AS TEXT), '🟡', '/memo2/DynamicEntity/memo?priority=normal'
+      FROM memo WHERE priority = 'normal'
+      UNION ALL
+      SELECT '🟢 Low', CAST(COUNT(*) AS TEXT), '🟢', '/memo2/DynamicEntity/memo?priority=low'
+      FROM memo WHERE priority = 'low'
+    columns:
+      - metric_name
+      - metric_value
+      - metric_icon
+      - metric_delta
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 5
+    editable: false
+    readOnly: true
+    component: stat_cards
+
+  - id: recent_memos
+    title: Recent Memos
+    titleKey: projects.memo2.pages.memoDashboard.sections.1.title
+    sourceType: custom
+    source: |
+      SELECT id, title, body, priority, created_at
+      FROM memo
+      ORDER BY created_at DESC
+      LIMIT 20
+    columns:
+      - id
+      - title
+      - body
+      - priority
+      - created_at
+    pageSize: 20
+    editable: false
+    readOnly: true
+    component: DataTable

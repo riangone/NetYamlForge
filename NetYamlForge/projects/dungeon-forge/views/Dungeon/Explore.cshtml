@@ -1,0 +1,237 @@
+@{
+    ViewData["Title"] = "地下城探索";
+}
+
+<div id="dungeon-app" class="p-4 max-w-4xl mx-auto">
+    <div id="character-bar" class="flex flex-wrap gap-4 mb-4 p-3 bg-base-200 rounded-box text-sm">
+        <span>加载中...</span>
+    </div>
+
+    <div id="room-narrative" class="prose max-w-none mb-6 p-4 bg-base-200 rounded-box">
+        <p class="text-lg italic text-base-content/80">正在加载地下城...</p>
+    </div>
+
+    <div id="room-exits" class="flex flex-wrap gap-2 mb-6"></div>
+
+    <div id="pickup-panel" class="hidden mb-6 p-4 bg-info/10 rounded-box border border-info/30">
+        <p id="pickup-info" class="mb-2"></p>
+        <button id="pickup-btn" class="btn btn-info btn-sm">📦 拾取</button>
+    </div>
+
+    <div id="combat-panel" class="hidden mb-6 p-4 bg-error/10 rounded-box border border-error/30">
+        <h3 class="text-xl font-bold text-error mb-2">⚔️ 战斗！</h3>
+        <div id="monster-info" class="mb-4"></div>
+        <div id="combat-actions" class="flex flex-wrap gap-2">
+            <button class="btn btn-error" data-action="attack">⚔️ 攻击</button>
+        </div>
+    </div>
+
+    <div id="inventory-panel" class="mb-6 p-4 bg-base-200 rounded-box">
+        <h3 class="text-lg font-bold mb-2">🎒 背包</h3>
+        <div id="inventory-items" class="text-base-content/60 text-sm">加载中...</div>
+    </div>
+
+    <div id="end-banner" class="hidden mb-6 p-4 rounded-box text-center font-bold text-lg"></div>
+
+    <div id="message-log" class="space-y-2"></div>
+</div>
+
+<script>
+(function () {
+    const apiBase = '/api/dungeon-forge/dungeon';
+
+    async function api(path, method) {
+        const resp = await fetch(`${apiBase}${path}`, {
+            method: method || 'GET',
+            headers: method ? { 'Content-Type': 'application/json' } : undefined,
+            body: undefined
+        });
+        let data = null;
+        try { data = await resp.json(); } catch (e) { /* no body */ }
+        return { ok: resp.ok, status: resp.status, data };
+    }
+
+    async function post(path, body) {
+        const resp = await fetch(`${apiBase}${path}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body || {})
+        });
+        let data = null;
+        try { data = await resp.json(); } catch (e) { /* no body */ }
+        return { ok: resp.ok, status: resp.status, data };
+    }
+
+    async function loadState() {
+        const { ok, data } = await api('/state');
+        if (!ok) {
+            addLog('error', (data && data.error) || '无法加载地下城状态，请先创建角色');
+            return;
+        }
+        renderState(data);
+    }
+
+    function renderState(data) {
+        const c = data.character;
+        document.getElementById('character-bar').innerHTML = `
+            <span><strong>${escapeHtml(c.name)}</strong>（${escapeHtml(c.race)} ${escapeHtml(c.class)} Lv.${c.level}）</span>
+            <span>❤️ HP ${c.hp}/${c.maxHp}</span>
+            <span>💧 MP ${c.mp}/${c.maxMp}</span>
+            <span>💰 ${c.gold}</span>
+            <span>✨ EXP ${c.experience}</span>
+        `;
+
+        const narrative = document.getElementById('room-narrative');
+        narrative.innerHTML = `<h2 class="text-2xl font-bold mb-2">${escapeHtml(data.room.name)}</h2>
+            <p>${escapeHtml(data.room.description)}</p>`;
+
+        renderExits(data.exits);
+        renderCombat(data.monster);
+        renderPickup(data.roomItem);
+        renderInventory(data.inventory);
+        renderEndBanner(data);
+    }
+
+    function renderExits(exits) {
+        const el = document.getElementById('room-exits');
+        el.innerHTML = '';
+        if (exits && exits.length > 0) {
+            exits.forEach(ex => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline btn-sm';
+                btn.textContent = `🚪 ${ex.direction}`;
+                btn.onclick = () => move(ex.direction);
+                el.appendChild(btn);
+            });
+        } else {
+            el.innerHTML = '<span class="text-base-content/50">没有出口</span>';
+        }
+    }
+
+    function renderCombat(monster) {
+        const panel = document.getElementById('combat-panel');
+        if (monster) {
+            panel.classList.remove('hidden');
+            document.getElementById('monster-info').innerHTML =
+                `<p><strong>${escapeHtml(monster.name)}</strong> — HP ${monster.hp}/${monster.maxHp}（攻击力 ${monster.attack}）</p>
+                 <p class="text-sm text-base-content/60">${escapeHtml(monster.flavorText || '')}</p>`;
+        } else {
+            panel.classList.add('hidden');
+        }
+    }
+
+    function renderPickup(item) {
+        const panel = document.getElementById('pickup-panel');
+        if (item) {
+            panel.classList.remove('hidden');
+            document.getElementById('pickup-info').textContent = `地上有一件物品：${item.name}`;
+        } else {
+            panel.classList.add('hidden');
+        }
+    }
+
+    function renderInventory(items) {
+        const el = document.getElementById('inventory-items');
+        el.innerHTML = '';
+        if (!items || items.length === 0) {
+            el.innerHTML = '<span>背包是空的</span>';
+            return;
+        }
+        items.forEach(it => {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between py-1';
+            const label = document.createElement('span');
+            label.textContent = `${it.name} x${it.quantity}`;
+            row.appendChild(label);
+            if (it.type === 'potion') {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-xs btn-info';
+                btn.textContent = '使用';
+                btn.onclick = () => useItem(it.itemId);
+                row.appendChild(btn);
+            }
+            el.appendChild(row);
+        });
+    }
+
+    function renderEndBanner(data) {
+        const banner = document.getElementById('end-banner');
+        if (data.gameWon) {
+            banner.className = 'mb-6 p-4 rounded-box text-center font-bold text-lg bg-success/20 text-success';
+            banner.textContent = '🏆 你已击败暗影领主，本局冒险通关！';
+            banner.classList.remove('hidden');
+        } else if (data.characterDead) {
+            banner.className = 'mb-6 p-4 rounded-box text-center font-bold text-lg bg-error/20 text-error';
+            banner.textContent = '💀 你的角色已经死亡，冒险到此结束。';
+            banner.classList.remove('hidden');
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
+
+    async function move(direction) {
+        const { ok, data } = await post('/move', { direction });
+        if (ok) {
+            addLog('system', data.narrative || `你向${direction}移动。`);
+            await loadState();
+        } else {
+            addLog('error', (data && data.error) || '移动失败');
+        }
+    }
+
+    async function attack() {
+        const { ok, data } = await post('/attack');
+        if (ok) {
+            addLog(data.characterDead ? 'error' : 'system', data.narrative || '战斗结算完成。');
+            await loadState();
+        } else {
+            addLog('error', (data && data.error) || '攻击失败');
+        }
+    }
+
+    async function pickUp() {
+        const { ok, data } = await post('/pick-up');
+        if (ok) {
+            addLog('system', data.narrative || `你拾取了${data.item || '一件物品'}。`);
+            await loadState();
+        } else {
+            addLog('error', (data && data.error) || '拾取失败');
+        }
+    }
+
+    async function useItem(itemId) {
+        const { ok, data } = await post('/use-item', { itemId });
+        if (ok) {
+            addLog('system', data.narrative || '你使用了道具。');
+            await loadState();
+        } else {
+            addLog('error', (data && data.error) || '使用道具失败');
+        }
+    }
+
+    function addLog(type, text) {
+        const log = document.getElementById('message-log');
+        const entry = document.createElement('div');
+        entry.className = `p-2 rounded-box ${type === 'error' ? 'bg-error/10 text-error' : 'bg-base-200'}`;
+        entry.textContent = text;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+    }
+
+    document.getElementById('pickup-btn').addEventListener('click', pickUp);
+    document.getElementById('combat-actions').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        if (btn.dataset.action === 'attack') attack();
+    });
+
+    document.addEventListener('DOMContentLoaded', loadState);
+    if (document.readyState !== 'loading') loadState();
+})();
+</script>

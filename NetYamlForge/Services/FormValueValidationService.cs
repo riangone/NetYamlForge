@@ -61,7 +61,8 @@ public sealed class FormValueValidationService
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         IEnumerable<FormFieldSpec> fields,
         Dictionary<string, string?> form,
-        bool isPartial = false)
+        bool isPartial = false,
+        bool isUpdate = false)
     {
         var values = new Dictionary<string, object?>();
         var errors = new Dictionary<string, string>();
@@ -102,9 +103,19 @@ public sealed class FormValueValidationService
             }
             else if (hasField)
             {
-                // フォームに含まれないフィールドは values に含めず、
-                // INSERT/UPDATE 時に DB の DEFAULT や既存値を保持させる
-                values[field.Name] = val;
+                var isBlankOptionalField = val is null && !field.Required && string.IsNullOrWhiteSpace(raw);
+                if (!isBlankOptionalField)
+                {
+                    // INSERT/UPDATE 共通: 値ありのフィールドのみ values に含める。
+                    // 任意項目が空白の場合は values から除外することで:
+                    //   INSERT → DB の DEFAULT を効かせる
+                    //   UPDATE → 既存値を維持する（NOT NULL 制約違反を回避）
+                    values[field.Name] = val;
+                }
+                // isUpdate + isBlankOptionalField の場合、values に含めない = UPDATE 時に
+                // SET 節から除外され、DB の既存値がそのまま残る。NOT NULL 列に対して
+                // 空文字を SET しようとすると SQLite が NULL equivalent と解釈し
+                // NOT NULL 制約違反になるため、空文字でも除外が安全な振る舞いとなる。
 
                 // 同期高級検証（regex, range, required_if）
                 if (field.Validators != null && field.Validators.Any())
@@ -114,7 +125,8 @@ public sealed class FormValueValidationService
                         var validator = _validators.FirstOrDefault(v => v.ValidatorType.Equals(validatorDef.Type, StringComparison.OrdinalIgnoreCase));
                         if (validator != null)
                         {
-                            var result = validator.Validate(val, values, validatorDef);
+                            var validatedVal = isBlankOptionalField && isUpdate ? raw : val;
+                            var result = validator.Validate(validatedVal, values, validatorDef);
                             if (!result.IsValid)
                             {
                                 errors[field.Name] = result.ErrorMessage ?? "Validation failed";
@@ -136,10 +148,11 @@ public sealed class FormValueValidationService
         IEnumerable<FormFieldSpec> fields,
         Dictionary<string, string?> form,
         string projectName,
-        bool isPartial = false)
+        bool isPartial = false,
+        bool isUpdate = false)
     {
         // 1. 同期チェックを実行
-        var (values, errors) = ConvertAndValidate(fields, form, isPartial);
+        var (values, errors) = ConvertAndValidate(fields, form, isPartial, isUpdate);
 
         // 2. 既にエラーがある場合はカスタムDB検証に進まない
         if (errors.Any())

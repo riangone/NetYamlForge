@@ -1,0 +1,17 @@
+translations:
+  projects.memo2.pages.starterOverview.description:
+    en-US: 'Auto-generated starter page'
+    zh-CN: 'Auto-generated starter page'
+    ja-JP: 'Auto-generated starter page'
+  projects.memo2.pages.starterOverview.sections.0.title:
+    en-US: 'Starter Sample'
+    zh-CN: 'Starter Sample'
+    ja-JP: 'Starter Sample'
+  projects.memo2.pages.starterOverview.title:
+    en-US: 'Starter Overview'
+    zh-CN: 'Starter Overview'
+    ja-JP: 'Starter Overview'
+  projects.memo2.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'

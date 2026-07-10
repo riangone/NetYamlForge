@@ -1,0 +1,16 @@
+project: todo-app
+displayName: Todo App
+dbType: sqlite
+
+entities:
+  - table: todo_item
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - { name: title, type: text, notNull: true }
+      - { name: is_done, type: boolean, notNull: true, default: "0" }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+acceptanceCriteria:
+  - "todo_item テーブルの CRUD entities YAML が生成されている"
+  - "todo_item の E2E テストが生成されている"
+  - "validate-project がエラー無く通過する"

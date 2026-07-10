@@ -58,6 +58,57 @@ public class DynamicEntityFormValidationServiceTests
     }
 
     [Fact]
+    public void ConvertAndValidate_BlankOptionalStringField_ExcludedFromValues()
+    {
+        // 回帰テスト: golden-template の ticket.status / ticket.priority のように
+        // DB 側が NOT NULL DEFAULT '...' な任意項目（required=false）を
+        // フォームで空欄のまま送信した場合、values に null を明示投入すると
+        // INSERT/UPDATE で DEFAULT が適用されず NOT NULL 制約違反になる。
+        // 空欄の任意項目は values から除外し、DB の DEFAULT に委ねるべき。
+        var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));
+        var meta = new EntityDefinition
+        {
+            Table = "Ticket",
+            Key = "Id",
+            DisplayName = "Ticket",
+            Columns = new Dictionary<string, ColumnDefinition>
+            {
+                ["Subject"] = new() { Type = "string", Required = true },
+                ["Status"] = new() { Type = "string", Required = false }
+            }
+        };
+        var form = new Dictionary<string, string?> { ["Subject"] = "Broken login", ["Status"] = "" };
+
+        var (values, errors) = sut.ConvertAndValidate(meta, form);
+
+        Assert.Empty(errors);
+        Assert.Equal("Broken login", values["Subject"]);
+        Assert.False(values.ContainsKey("Status"), "空欄の任意項目は DB の DEFAULT を効かせるため values に含めてはならない。");
+    }
+
+    [Fact]
+    public void ConvertAndValidate_NonBlankOptionalStringField_IncludedInValues()
+    {
+        var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));
+        var meta = new EntityDefinition
+        {
+            Table = "Ticket",
+            Key = "Id",
+            DisplayName = "Ticket",
+            Columns = new Dictionary<string, ColumnDefinition>
+            {
+                ["Status"] = new() { Type = "string", Required = false }
+            }
+        };
+        var form = new Dictionary<string, string?> { ["Status"] = "closed" };
+
+        var (values, errors) = sut.ConvertAndValidate(meta, form);
+
+        Assert.Empty(errors);
+        Assert.Equal("closed", values["Status"]);
+    }
+
+    [Fact]
     public void ConvertAndValidate_ReturnsError_WhenConversionFails()
     {
         var sut = new DynamicEntityFormValidationService(new FormValueValidationService(new ValueConverter()));

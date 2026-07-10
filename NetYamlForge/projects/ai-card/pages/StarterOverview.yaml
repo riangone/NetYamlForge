@@ -1,0 +1,94 @@
+title: QR を見せる
+titleKey: projects.ai-card.pages.starterOverview.title
+description: 相手に読み取ってもらう最新の AI Card QR を表示します。
+descriptionKey: projects.ai-card.pages.starterOverview.description
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  - id: latest_qr
+    title: 最新の QR
+    sourceType: custom
+    source: |
+      SELECT
+        qt.id AS id,
+        qt.token AS token,
+        ai.display_name AS ai_name,
+        COALESCE(qt.intent_type, '指定なし') AS intent_type,
+        COALESCE(qt.intent_topic, '指定なし') AS intent_topic,
+        qt.qr_url AS qr_url,
+        qt.scan_count AS scan_count,
+        qt.created_at AS created_at
+      FROM qr_token qt
+      LEFT JOIN ai_identity ai ON qt.ai_identity_id = ai.id
+      WHERE qt.is_active = 1
+      ORDER BY qt.created_at DESC
+      LIMIT 1
+    columns: [id, token, ai_name, intent_type, intent_topic, qr_url, scan_count, created_at]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  - id: qr_tokens
+    title: 最近の QR
+    sourceType: custom
+    source: |
+      SELECT
+        qt.id AS id,
+        qt.token AS token,
+        ai.display_name AS ai_name,
+        COALESCE(qt.intent_type, '指定なし') AS intent_type,
+        COALESCE(qt.intent_topic, '指定なし') AS intent_topic,
+        qt.qr_url AS qr_url,
+        qt.scan_count AS scan_count,
+        qt.created_at AS created_at
+      FROM qr_token qt
+      LEFT JOIN ai_identity ai ON qt.ai_identity_id = ai.id
+      ORDER BY qt.created_at DESC
+      LIMIT 8
+    columns: [id, token, ai_name, intent_type, intent_topic, qr_url, scan_count, created_at]
+    pageSize: 8
+    editable: false
+    readOnly: true
+
+  - id: ai_identities
+    title: AI ID
+    sourceType: custom
+    source: |
+      SELECT
+        ai.id AS id,
+        ai.ai_id AS ai_id,
+        ai.display_name AS display_name,
+        COALESCE(ai.organization, '—') AS organization,
+        COALESCE(ai.role, '—') AS role,
+        CASE WHEN ai.is_active = 1 THEN '有効' ELSE '無効' END AS status
+      FROM ai_identity ai
+      ORDER BY ai.updated_at DESC
+      LIMIT 8
+    columns: [id, ai_id, display_name, organization, role, status]
+    pageSize: 8
+    editable: false
+    readOnly: true
+
+  - id: handshakes
+    title: 最近の Handshake
+    sourceType: custom
+    source: |
+      SELECT
+        hs.id AS id,
+        ai.display_name AS initiator_name,
+        COALESCE(hs.responder_name, '未入力') AS responder_name,
+        COALESCE(hs.state, 'pending') AS state,
+        COALESCE(hs.intent_topic, '—') AS intent_topic,
+        hs.created_at AS created_at
+      FROM handshake_session hs
+      LEFT JOIN ai_identity ai ON hs.initiator_id = ai.id
+      ORDER BY hs.created_at DESC
+      LIMIT 8
+    columns: [id, initiator_name, responder_name, state, intent_topic, created_at]
+    pageSize: 8
+    editable: false
+    readOnly: true

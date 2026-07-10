@@ -1,0 +1,42 @@
+entities:
+  chat_message:
+    table: 'chat_message'
+    key: 'id'
+    displayName: 'Chat Message'
+    displayNameKey: 'entities.chat_message.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['session_id', 'role', 'content', 'metadata_json', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.chat_message.columns.id.label', sortable: true }
+      session_id: { type: int, required: true, label: 'Session Id', labelKey: 'entities.chat_message.columns.session_id.label', sortable: true }
+      role: { type: string, required: true, label: 'Role', labelKey: 'entities.chat_message.columns.role.label', searchable: true, sortable: true }
+      content: { type: string, required: true, label: 'Content', labelKey: 'entities.chat_message.columns.content.label', searchable: true, sortable: true }
+      metadata_json: { type: string, label: 'Metadata Json', labelKey: 'entities.chat_message.columns.metadata_json.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.chat_message.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      session_id:
+        type: int
+        required: true
+        label: 'Session Id'
+        labelKey: 'entities.chat_message.forms.session_id.label'
+        editable: true
+        foreignKey:
+          entity: handshake_session
+          displayColumn: 'responder_name'
+      role: { type: string, required: true, label: 'Role', labelKey: 'entities.chat_message.forms.role.label', editable: true }
+      content: { type: string, required: true, label: 'Content', labelKey: 'entities.chat_message.forms.content.label', editable: true }
+      metadata_json: { type: string, label: 'Metadata Json', labelKey: 'entities.chat_message.forms.metadata_json.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.chat_message.forms.created_at.label', editable: true }
+    hooks:
+      beforeCreate: [ai_chat_handler]
+    filters: {}
+    links: {}

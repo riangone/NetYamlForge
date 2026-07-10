@@ -1,0 +1,38 @@
+entities:
+  appusersavedview:
+    table: 'AppUserSavedView'
+    key: 'Id'
+    displayName: 'Appusersavedview'
+    displayNameKey: 'entities.appusersavedview.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ProjectName', 'PageName', 'UserName', 'ViewName', 'FiltersJson', 'IsDefault', 'CreatedAt', 'UpdatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', labelKey: 'entities.appusersavedview.columns.Id.label', sortable: true }
+      ProjectName: { type: string, required: true, label: 'Project Name', labelKey: 'entities.appusersavedview.columns.ProjectName.label', searchable: true, sortable: true }
+      PageName: { type: string, required: true, label: 'Page Name', labelKey: 'entities.appusersavedview.columns.PageName.label', searchable: true, sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', labelKey: 'entities.appusersavedview.columns.UserName.label', searchable: true, sortable: true }
+      ViewName: { type: string, required: true, label: 'View Name', labelKey: 'entities.appusersavedview.columns.ViewName.label', searchable: true, sortable: true }
+      FiltersJson: { type: string, required: true, label: 'Filters Json', labelKey: 'entities.appusersavedview.columns.FiltersJson.label', searchable: true, sortable: true }
+      IsDefault: { type: int, label: 'Is Default', labelKey: 'entities.appusersavedview.columns.IsDefault.label', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.appusersavedview.columns.CreatedAt.label', searchable: true, sortable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', labelKey: 'entities.appusersavedview.columns.UpdatedAt.label', searchable: true, sortable: true }
+    forms:
+      ProjectName: { type: string, required: true, label: 'Project Name', labelKey: 'entities.appusersavedview.forms.ProjectName.label', editable: true }
+      PageName: { type: string, required: true, label: 'Page Name', labelKey: 'entities.appusersavedview.forms.PageName.label', editable: true }
+      UserName: { type: string, required: true, label: 'User Name', labelKey: 'entities.appusersavedview.forms.UserName.label', editable: true }
+      ViewName: { type: string, required: true, label: 'View Name', labelKey: 'entities.appusersavedview.forms.ViewName.label', editable: true }
+      FiltersJson: { type: string, required: true, label: 'Filters Json', labelKey: 'entities.appusersavedview.forms.FiltersJson.label', editable: true }
+      IsDefault: { type: int, label: 'Is Default', labelKey: 'entities.appusersavedview.forms.IsDefault.label', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.appusersavedview.forms.CreatedAt.label', editable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', labelKey: 'entities.appusersavedview.forms.UpdatedAt.label', editable: true }
+    filters: {}
+    links: {}

@@ -1,0 +1,51 @@
+# 「金標模板」子プロジェクト spec: --ai-scaffold の入力サンプル。
+#
+# これは AI が自由記述するコードではなく、entities/hooks/batchJobs/acceptanceCriteria を
+# 列挙するだけの「構造化 Spec」です。AI（または人間）の役割はこのファイルを埋めることだけに限定し、
+# 実際の DB スキーマ・entities YAML・hook 雛形・batchJob 雛形は
+# `dotnet run --project NetYamlForge.Tooling -- --ai-scaffold --spec=...` が決定的に生成します。
+#
+# 使い方:
+#   dotnet run --project NetYamlForge.Tooling -- --ai-scaffold \
+#     --spec=templates/ai-scaffold/golden-template.spec.yaml
+#
+# ミニ・ヘルプデスク（ticket + ticket_comment）を題材にした最小構成のサンプルです。
+# 新しい子プロジェクトを作るときは、このファイルをコピーして entities/hooks/batchJobs/
+# acceptanceCriteria を書き換えるだけで、同じ検証パイプラインに乗せられます。
+
+project: golden-template
+displayName: Golden Template (Mini Helpdesk)
+dbType: sqlite
+
+entities:
+  - table: ticket
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - { name: subject, type: text, notNull: true }
+      - { name: status, type: text, notNull: true, default: "'open'" }
+      - { name: priority, type: text, notNull: true, default: "'normal'" }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  - table: ticket_comment
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - name: ticket_id
+        type: integer
+        notNull: true
+        foreignKey: { table: ticket, column: id }
+      - { name: body, type: text, notNull: true }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+hooks:
+  - name: TicketStatusGuard
+    entity: ticket
+
+batchJobs:
+  - name: stale_ticket_reminder
+
+acceptanceCriteria:
+  - "ticket テーブルの CRUD entities YAML が生成されている"
+  - "ticket_comment テーブルの CRUD entities YAML が生成されている"
+  - "TicketStatusGuard フックの雛形が生成されている"
+  - "stale_ticket_reminder バッチジョブの雛形が生成されている"
+  - "validate-project がエラー無く通過する"

@@ -6,6 +6,7 @@ using NetYamlForge.Services.Tenant;
 using NetYamlForge.Services.Auth;
 using System.Globalization;
 using NetYamlForge.Data;
+using NetYamlForge.Data.Schemas;
 using NetYamlForge.Extensions;
 using NetYamlForge.Middleware;
 using NetYamlForge.Models;
@@ -327,6 +328,14 @@ await projectManager.InitializeAsync(app.Environment);
 await PdfFontLoader.LoadFontsAsync();
 
 await DbInitializer.InitializeAsync(app.Services, app.Configuration);
+
+// projects/ を実際にスキャンした結果を system.db の projects / app_user_project_role に反映する。
+// これを怠ると、新規に追加したサブプロジェクト（例: --ai-scaffold で生成したもの）が
+// 物理的には正常ロードされていても「マイホーム」の一覧に永久に出てこない（admin にロールが付与されないため）。
+{
+    var syncLogger = app.Services.GetRequiredService<ILogger<Program>>();
+    await SystemDatabaseInitializer.SyncProjectsAsync(projectManager.GetAll(), syncLogger);
+}
 
 // データマイグレーション適用
 {

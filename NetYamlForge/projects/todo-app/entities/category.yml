@@ -1,72 +1,28 @@
-imports: []
 entities:
   category:
-    table: Category
-    key: Id
-    displayName: Category
+    table: 'Category'
+    key: 'Id'
+    displayName: 'Category'
+    displayNameKey: 'entities.category.displayName'
     softDelete: false
-    isPublic: true
-
-    joins: []
-
-    forms:
-      Name:
-        type: string
-        required: true
-        label: カテゴリ名
-        editable: true
-      Color:
-        type: color
-        label: カラー
-        editable: true
-      Description:
-        type: textarea
-        label: 説明
-        editable: true
-
-    columns:
-      Id:
-        type: int
-        identity: true
-        label: ID
-        sortable: true
-      Name:
-        type: string
-        required: true
-        label: カテゴリ名
-        searchable: true
-        sortable: true
-      Color:
-        type: color
-        label: カラー
-        sortable: false
-      Description:
-        type: string
-        label: 説明
-        searchable: true
-        sortable: false
-
     paging:
       pageSize: 20
       mode: numbered
-      enableCount: true
-
     layout:
       forms:
         columns: 2
-        order: [Name, Color, Description]
+        order: ['Name', 'Color', 'Description']
       filters:
-        columns: 2
-        order: [Name]
-
-    filters:
-      Name:
-        type: like
-        label: カテゴリ名
-
-    links:
-      tasks:
-        label: タスク
-        targetEntity: task
-        filter:
-          CategoryId: Id
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', labelKey: 'entities.category.columns.Id.label', sortable: true }
+      Name: { type: string, required: true, label: 'Name', labelKey: 'entities.category.columns.Name.label', searchable: true, sortable: true }
+      Color: { type: string, label: 'Color', labelKey: 'entities.category.columns.Color.label', searchable: true, sortable: true }
+      Description: { type: string, label: 'Description', labelKey: 'entities.category.columns.Description.label', searchable: true, sortable: true }
+    forms:
+      Name: { type: string, required: true, label: 'Name', labelKey: 'entities.category.forms.Name.label', editable: true }
+      Color: { type: string, label: 'Color', labelKey: 'entities.category.forms.Color.label', editable: true }
+      Description: { type: string, label: 'Description', labelKey: 'entities.category.forms.Description.label', editable: true }
+    filters: {}
+    links: {}

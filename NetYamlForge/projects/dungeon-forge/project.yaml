@@ -1,0 +1,44 @@
+name: dungeon-forge
+displayName: "地下城纪元"
+version: "0.1.0"
+description: "文字交互式地下城探索游戏 —— AI 担任地下城主(DM)叙事者"
+
+database:
+  type: sqlite
+  path: database/dungeon-forge.db
+
+apiWriteRoles:
+  - player
+  - game_master
+
+features:
+  multiLanguage: false
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  dashboardTheme: workspace
+  landingPageByRole:
+    player: /dungeon-forge/Dungeon/Explore
+    game_master: /dungeon-forge/Page/BattleLog
+  navigation:
+    showDashboard: false
+    items:
+      - label: 角色面板
+        url: /dungeon-forge/Page/CharacterSheet
+        icon: 🧙
+      - label: 地下城探索
+        url: /dungeon-forge/Dungeon/Explore
+        icon: 🗺️
+      - label: 地下城状态（只读）
+        url: /dungeon-forge/Page/DungeonMap
+        icon: 📋
+      - label: 战斗日志
+        url: /dungeon-forge/Page/BattleLog
+        icon: ⚔️
+
+settings:
+  locale: zh-CN
+  timezone: Asia/Shanghai

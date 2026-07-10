@@ -1,0 +1,30 @@
+entities:
+  memo:
+    table: 'memo'
+    key: 'id'
+    displayName: 'Memo'
+    displayNameKey: 'entities.memo.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'body', 'priority', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.memo.columns.id.label', sortable: true }
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.memo.columns.title.label', searchable: true, sortable: true }
+      body: { type: string, label: 'Body', labelKey: 'entities.memo.columns.body.label', searchable: true, sortable: true }
+      priority: { type: string, label: 'Priority', labelKey: 'entities.memo.columns.priority.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.memo.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.memo.forms.title.label', editable: true }
+      body: { type: string, label: 'Body', labelKey: 'entities.memo.forms.body.label', editable: true }
+      priority: { type: string, label: 'Priority', labelKey: 'entities.memo.forms.priority.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.memo.forms.created_at.label', editable: true }
+    filters: {}
+    links: {}

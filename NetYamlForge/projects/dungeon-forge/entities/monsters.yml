@@ -1,0 +1,95 @@
+imports: []
+entities:
+  monsters:
+    table: monsters
+    key: Id
+    displayName: 怪物
+    softDelete: false
+    isPublic: true
+    api: readonly
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        length: 100
+        required: true
+        label: 怪物名
+        searchable: true
+        sortable: true
+      Level:
+        type: int
+        required: true
+        label: 等级
+        default: 1
+        sortable: true
+      Hp:
+        type: int
+        required: true
+        label: 生命值
+        sortable: true
+      Attack:
+        type: int
+        required: true
+        label: 攻击力
+        sortable: true
+      Defense:
+        type: int
+        required: true
+        label: 防御力
+        sortable: true
+      LootItemId:
+        type: int
+        required: false
+        label: 掉落物品
+        sortable: true
+      FlavorText:
+        type: text
+        required: false
+        label: 叙事素材
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 怪物名
+        editable: true
+      Level:
+        type: number
+        required: true
+        label: 等级
+        editable: true
+      Hp:
+        type: number
+        required: true
+        label: 生命值
+        editable: true
+      Attack:
+        type: number
+        required: true
+        label: 攻击力
+        editable: true
+      Defense:
+        type: number
+        required: true
+        label: 防御力
+        editable: true
+      LootItemId:
+        type: number
+        required: false
+        label: 掉落物品
+        editable: true
+      FlavorText:
+        type: textarea
+        required: false
+        label: 叙事素材
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

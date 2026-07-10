@@ -1,0 +1,21 @@
+header:
+  title: Golden Template (Mini Helpdesk)
+
+navigation:
+  showDashboard: true
+  entities: []
+  items:
+    - label: Home
+      url: /golden-template
+      icon: 🏠
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+
+footer:
+  text: "Golden Template (Mini Helpdesk) — powered by NetYamlForge"

@@ -532,10 +532,31 @@ JSON 示例：
             }
         }
 
-        // 只有 opencode 才通过 --variant 传递级别；其他厂商级别已并入模型标识
-        string? variant = aiProvider.Equals("opencode", StringComparison.OrdinalIgnoreCase)
-            ? aiLevel
-            : null;
+        // antigravity：级别已经并入模型标识（如 "Gemini 3.5 Flash (High)"），不再单独传 variant。
+        // opencode / claude：级别通过各自的 CLI 标志传递——opencode 是 --variant，claude 是 --effort。
+        // 曾经这里对 claude 恒为 null，导致用户在页面选的级别被静默丢弃（--effort 从未被调用）；
+        // 现在 CliChainService 会依据 AiCliChain:Providers[claude].VariantFlag="--effort" 正确拼接参数。
+        string? variant;
+        if (aiProvider.Equals("antigravity", StringComparison.OrdinalIgnoreCase))
+        {
+            variant = null;
+        }
+        else if (aiProvider.Equals("claude", StringComparison.OrdinalIgnoreCase))
+        {
+            // `claude --help` で確認済み（2026-07-08）：--effort が受け付けるのは low/medium/high/xhigh/max の
+            // 固定5値のみ。DiaryForm.yaml の AiLevel は元々 antigravity 向けの選択肢
+            // （Low/Medium/High/Thinking/Max）を共用しているため、claude が受け付けない値
+            // （例："Thinking"）をそのまま渡すと claude CLI がエラーで落ちる。存在しない値は
+            // 「未指定」扱いにして claude 自身の既定 effort に委ねる（推測でマッピングしない）。
+            var claudeEffortLevels = new[] { "low", "medium", "high", "xhigh", "max" };
+            variant = (!string.IsNullOrWhiteSpace(aiLevel) && claudeEffortLevels.Contains(aiLevel.Trim().ToLowerInvariant()))
+                ? aiLevel
+                : null;
+        }
+        else
+        {
+            variant = aiLevel;
+        }
 
         return (aiProvider, targetModel, variant);
     }

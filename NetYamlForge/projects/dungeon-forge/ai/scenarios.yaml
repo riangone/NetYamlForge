@@ -1,0 +1,21 @@
+allowed_entities:
+  - characters
+allowed_actions:
+  - create
+scenarios:
+  create_character:
+    description: "创建冒险者角色"
+    initial_state: "Init"
+    required_slots:
+      - name: "character_name"
+        prompt: "为你的冒险者取个名字吧"
+        is_required: true
+      - name: "race"
+        prompt: "选择种族：人类 / 精灵 / 矮人 / 兽人"
+        is_required: true
+      - name: "class"
+        prompt: "选择职业：战士 / 法师 / 盗贼 / 牧师"
+        is_required: true
+    tools:
+      Init:
+        - "query_data"

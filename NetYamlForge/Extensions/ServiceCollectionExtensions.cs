@@ -26,6 +26,7 @@ using MySql.Data.MySqlClient;
 using Npgsql;
 using NetYamlForge.Projects.FormForge;
 using NetYamlForge.Projects.KbForge;
+using NetYamlForge.Projects.DungeonForge.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Resources;
@@ -281,7 +282,13 @@ public static class ServiceCollectionExtensions
             configuration.GetSection(NetYamlForge.Services.AI.CliChainOptions.SectionName));
         services.AddScoped<NetYamlForge.Services.AI.IAntigravityCliService, NetYamlForge.Services.AI.AntigravityCliService>();
         services.AddScoped<NetYamlForge.Services.AI.ICliChainService, NetYamlForge.Services.AI.CliChainService>();
-        
+        // システム設定画面が「既定モデル」ドロップダウンをCLI実機（`antigravity models`/`opencode models`）から
+        // ライブ取得するためのサービス。claude はエイリアスの静的カタログを返す（一覧サブコマンドが無いため）。
+        services.AddScoped<NetYamlForge.Services.AI.ICliModelCatalogService, NetYamlForge.Services.AI.CliModelCatalogService>();
+        // システム設定画面（SystemSettingsController）が appsettings.json の AiCliChain セクション等を
+        // 書き換えるための汎用ライター。IOptionsMonitor と組み合わせることで再起動不要で設定が反映される。
+        services.AddScoped<NetYamlForge.Services.Config.IAppSettingsWriter, NetYamlForge.Services.Config.AppSettingsWriter>();
+
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
             ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
             ?? "local";
@@ -369,6 +376,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<FormForgeRepository>();
         services.AddScoped<FormForgeResponseRepository>();
         services.AddScoped<KbForgeRepository>();
+        services.AddScoped<IDungeonCombatService, DungeonCombatService>();
         return services;
     }
 

@@ -1,0 +1,106 @@
+imports: []
+entities:
+  rooms:
+    table: rooms
+    key: Id
+    displayName: 房间
+    softDelete: false
+    isPublic: true
+    api: readonly
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Name:
+        type: string
+        length: 100
+        required: true
+        label: 房间名
+        searchable: true
+        sortable: true
+      Description:
+        type: text
+        required: true
+        label: 描述
+      ExitsJson:
+        type: text
+        required: true
+        label: 出口
+        default: "{}"
+      MonsterId:
+        type: int
+        required: false
+        label: 驻留怪物
+        sortable: true
+      ItemId:
+        type: int
+        required: false
+        label: 可拾取物品
+        sortable: true
+      RequiredKeyItemId:
+        type: int
+        required: false
+        label: 需要钥匙
+        sortable: true
+      IsBossRoom:
+        type: bool
+        required: true
+        label: Boss房间
+        default: false
+        sortable: true
+      IsCleared:
+        type: bool
+        required: true
+        label: 已清理
+        default: false
+        sortable: true
+
+    forms:
+      Name:
+        type: string
+        required: true
+        label: 房间名
+        editable: true
+      Description:
+        type: textarea
+        required: true
+        label: 描述
+        editable: true
+      ExitsJson:
+        type: textarea
+        required: true
+        label: 出口配置(JSON)
+        editable: true
+      MonsterId:
+        type: number
+        required: false
+        label: 驻留怪物
+        editable: true
+      ItemId:
+        type: number
+        required: false
+        label: 可拾取物品
+        editable: true
+      RequiredKeyItemId:
+        type: number
+        required: false
+        label: 需要钥匙
+        editable: true
+      IsBossRoom:
+        type: checkbox
+        required: true
+        label: Boss房间
+        editable: true
+      IsCleared:
+        type: checkbox
+        required: true
+        label: 已清理
+        editable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true

@@ -1,0 +1,30 @@
+title: 战斗日志
+isPublic: false
+
+sections:
+  - id: battle_history
+    title: 战斗记录
+    sourceType: custom
+    source: |
+      SELECT
+        bl.Id,
+        bl.RoundNumber,
+        bl.PlayerAction,
+        bl.DamageDealt,
+        bl.DamageTaken,
+        bl.MonsterHpAfter,
+        bl.PlayerHpAfter,
+        bl.NarrativeText,
+        bl.CreatedAt,
+        c.Name AS CharacterName,
+        m.Name AS MonsterName
+      FROM battle_logs bl
+      LEFT JOIN characters c ON c.Id = bl.CharacterId
+      LEFT JOIN monsters m ON m.Id = bl.MonsterId
+      WHERE c.OwnerUserId = @currentUserId
+      ORDER BY bl.CreatedAt DESC
+    columns: [Id, RoundNumber, PlayerAction, DamageDealt, DamageTaken, MonsterHpAfter, PlayerHpAfter, NarrativeText, CreatedAt, CharacterName, MonsterName]
+    pageSize: 20
+    editable: false
+    readOnly: true
+    component: table

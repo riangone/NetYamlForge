@@ -160,6 +160,7 @@ public static class HookScaffolder
             // entities.yml の hooks.beforeCreate / hooks.beforeUpdate に「{{hookYamlName}}」と記述して使用。
 
             using System.Data;
+            using System.Threading.Tasks;
             using NetYamlForge.Services.Hooks;
             using Microsoft.Extensions.Logging;
 

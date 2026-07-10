@@ -1,0 +1,17 @@
+title: 角色面板
+isPublic: false
+
+sections:
+  - id: character_info
+    title: 我的冒险者
+    sourceType: custom
+    source: |
+      SELECT Id, Name, Race, Class, Level, Hp, MaxHp, Mp, MaxMp, Gold, Experience, Status, CurrentRoomId
+      FROM characters
+      WHERE OwnerUserId = @currentUserId
+    columns: [Id, Name, Race, Class, Level, Hp, MaxHp, Mp, MaxMp, Gold, Experience, Status, CurrentRoomId]
+    pageSize: 1
+    editable: true
+    readOnly: false
+    component: fancy_diary_list
+    targetTable: characters

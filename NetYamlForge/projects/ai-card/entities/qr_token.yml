@@ -1,0 +1,48 @@
+entities:
+  qr_token:
+    table: 'qr_token'
+    key: 'id'
+    displayName: 'Qr Token'
+    displayNameKey: 'entities.qr_token.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        # max_scans / expires_at は通常運用では不要（既定=無制限、上限到達時は自動で新しい QR に差し替え）。
+        # 必要な管理者だけが列編集で設定する想定。
+        order: ['ai_identity_id', 'intent_type', 'intent_topic']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.qr_token.columns.id.label', sortable: true }
+      ai_identity_id: { type: int, required: true, label: 'Ai Identity Id', labelKey: 'entities.qr_token.columns.ai_identity_id.label', sortable: true }
+      token: { type: string, label: 'Token', labelKey: 'entities.qr_token.columns.token.label', searchable: true, sortable: true }
+      intent_type: { type: string, label: 'Intent Type', labelKey: 'entities.qr_token.columns.intent_type.label', searchable: true, sortable: true }
+      intent_topic: { type: string, label: 'Intent Topic', labelKey: 'entities.qr_token.columns.intent_topic.label', searchable: true, sortable: true }
+      qr_url: { type: string, label: 'Qr Url', labelKey: 'entities.qr_token.columns.qr_url.label', searchable: true, sortable: true }
+      scan_count: { type: int, label: 'Scan Count', labelKey: 'entities.qr_token.columns.scan_count.label', sortable: true }
+      max_scans: { type: int, label: 'Max Scans', labelKey: 'entities.qr_token.columns.max_scans.label', sortable: true }
+      is_active: { type: int, label: 'Is Active', labelKey: 'entities.qr_token.columns.is_active.label', sortable: true }
+      expires_at: { type: string, label: 'Expires At', labelKey: 'entities.qr_token.columns.expires_at.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.qr_token.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      ai_identity_id:
+        type: int
+        required: true
+        label: 'Ai Identity Id'
+        labelKey: 'entities.qr_token.forms.ai_identity_id.label'
+        editable: true
+        foreignKey:
+          entity: ai_identity
+          displayColumn: 'display_name'
+      # token / qr_url / scan_count / is_active / created_at は qr_token_generator フックが自動生成するためフォームから除外
+      intent_type: { type: string, label: 'Intent Type', labelKey: 'entities.qr_token.forms.intent_type.label', editable: true }
+      intent_topic: { type: string, label: 'Intent Topic', labelKey: 'entities.qr_token.forms.intent_topic.label', editable: true }
+    hooks:
+      beforeCreate: [qr_token_generator]
+    filters: {}
+    links: {}

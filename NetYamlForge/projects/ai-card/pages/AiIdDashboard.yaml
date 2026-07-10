@@ -1,0 +1,112 @@
+title: 🤖 AI ID ダッシュボード
+description: "AI Handshake Protocol — AI ID・Handshake 管理ダッシュボード"
+
+sections:
+  # ─── KPI統計カード ───
+  - id: ahp_kpi
+    title: AHP 概要
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT '🤖 AI ID 数' AS metric_name,
+             CAST(COUNT(*) AS TEXT) AS metric_value,
+             '🤖' AS metric_icon,
+             NULL AS metric_delta
+      FROM ai_identity
+      WHERE is_active = 1
+      UNION ALL
+      SELECT '🤝 Handshake 合計',
+             CAST(COUNT(*) AS TEXT),
+             '🤝', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '✅ 完了',
+             CAST(SUM(CASE WHEN state='completed' THEN 1 ELSE 0 END) AS TEXT),
+             '✅', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '⏳ 進行中',
+             CAST(SUM(CASE WHEN state IN ('pending','connected') THEN 1 ELSE 0 END) AS TEXT),
+             '⏳', NULL
+      FROM handshake_session
+      UNION ALL
+      SELECT '🔲 QR トークン',
+             CAST(COUNT(*) AS TEXT),
+             '🔲', NULL
+      FROM qr_token
+      WHERE is_active = 1
+      UNION ALL
+      SELECT '💬 チャット数',
+             CAST(COUNT(*) AS TEXT),
+             '💬', NULL
+      FROM chat_message
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 6
+    editable: false
+    readOnly: true
+
+  # ─── 最新 Handshake 一覧 ───
+  - id: recent_handshakes
+    title: 🤝 最近の Handshake（20件）
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        hs.session_token AS トークン,
+        ai.display_name AS イニシエーター,
+        COALESCE(hs.responder_name, '—') AS 相手,
+        COALESCE(hs.responder_company, '—') AS 会社名,
+        CASE hs.state
+          WHEN 'pending'   THEN '⏳ 待機'
+          WHEN 'connected' THEN '🔗 接続中'
+          WHEN 'completed' THEN '✅ 完了'
+          WHEN 'expired'   THEN '⌛ 期限切れ'
+          WHEN 'rejected'  THEN '❌ 拒否'
+          ELSE hs.state
+        END AS 状態,
+        COALESCE(hs.intent_type, '—') AS Intent,
+        COALESCE(hs.intent_topic, '—') AS トピック,
+        hs.created_at AS 開始日時
+      FROM handshake_session hs
+      LEFT JOIN ai_identity ai ON hs.initiator_id = ai.id
+      ORDER BY hs.created_at DESC
+      LIMIT 20
+    columns: [トークン, イニシエーター, 相手, 会社名, 状態, Intent, トピック, 開始日時]
+    pageSize: 20
+    editable: false
+    readOnly: true
+    rowColorRules:
+      - condition: "状態 LIKE '%完了%'"
+        colorClass: row-success
+      - condition: "状態 LIKE '%接続中%'"
+        colorClass: row-info
+      - condition: "状態 LIKE '%期限切れ%'"
+        colorClass: row-warning
+      - condition: "状態 LIKE '%拒否%'"
+        colorClass: row-danger
+
+  # ─── AI ID 一覧 ───
+  - id: ai_id_list
+    title: 🪪 登録済み AI ID
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        ai.ai_id AS AI_ID,
+        ai.display_name AS 表示名,
+        COALESCE(ai.organization, '—') AS 組織,
+        COALESCE(ai.role, '—') AS 役職,
+        CASE WHEN ai.verified = 1 THEN '✅' ELSE '—' END AS 認証,
+        CASE WHEN ai.is_active = 1 THEN '🟢' ELSE '🔴' END AS 状態,
+        (SELECT COUNT(*) FROM handshake_session WHERE initiator_id = ai.id) AS HS数,
+        ai.created_at AS 登録日
+      FROM ai_identity ai
+      ORDER BY ai.created_at DESC
+    columns: [AI_ID, 表示名, 組織, 役職, 認証, 状態, HS数, 登録日]
+    pageSize: 20
+    editable: false
+    readOnly: true

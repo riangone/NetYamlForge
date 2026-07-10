@@ -1,0 +1,38 @@
+entities:
+  approlepermission:
+    table: 'AppRolePermission'
+    key: 'Id'
+    displayName: 'Approlepermission'
+    displayNameKey: 'entities.approlepermission.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ProjectName', 'RoleName', 'ResourceType', 'ResourceName', 'CanRead', 'CanWrite', 'CreatedAt', 'UpdatedAt']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      Id: { type: int, identity: true, label: 'Id', labelKey: 'entities.approlepermission.columns.Id.label', sortable: true }
+      ProjectName: { type: string, required: true, label: 'Project Name', labelKey: 'entities.approlepermission.columns.ProjectName.label', searchable: true, sortable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', labelKey: 'entities.approlepermission.columns.RoleName.label', searchable: true, sortable: true }
+      ResourceType: { type: string, required: true, label: 'Resource Type', labelKey: 'entities.approlepermission.columns.ResourceType.label', searchable: true, sortable: true }
+      ResourceName: { type: string, required: true, label: 'Resource Name', labelKey: 'entities.approlepermission.columns.ResourceName.label', searchable: true, sortable: true }
+      CanRead: { type: int, label: 'Can Read', labelKey: 'entities.approlepermission.columns.CanRead.label', sortable: true }
+      CanWrite: { type: int, label: 'Can Write', labelKey: 'entities.approlepermission.columns.CanWrite.label', sortable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.approlepermission.columns.CreatedAt.label', searchable: true, sortable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', labelKey: 'entities.approlepermission.columns.UpdatedAt.label', searchable: true, sortable: true }
+    forms:
+      ProjectName: { type: string, required: true, label: 'Project Name', labelKey: 'entities.approlepermission.forms.ProjectName.label', editable: true }
+      RoleName: { type: string, required: true, label: 'Role Name', labelKey: 'entities.approlepermission.forms.RoleName.label', editable: true }
+      ResourceType: { type: string, required: true, label: 'Resource Type', labelKey: 'entities.approlepermission.forms.ResourceType.label', editable: true }
+      ResourceName: { type: string, required: true, label: 'Resource Name', labelKey: 'entities.approlepermission.forms.ResourceName.label', editable: true }
+      CanRead: { type: int, label: 'Can Read', labelKey: 'entities.approlepermission.forms.CanRead.label', editable: true }
+      CanWrite: { type: int, label: 'Can Write', labelKey: 'entities.approlepermission.forms.CanWrite.label', editable: true }
+      CreatedAt: { type: string, required: true, label: 'Created At', labelKey: 'entities.approlepermission.forms.CreatedAt.label', editable: true }
+      UpdatedAt: { type: string, required: true, label: 'Updated At', labelKey: 'entities.approlepermission.forms.UpdatedAt.label', editable: true }
+    filters: {}
+    links: {}

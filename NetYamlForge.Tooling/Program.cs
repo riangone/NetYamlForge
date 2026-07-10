@@ -147,6 +147,23 @@ public class ToolingProgram
             return;
         }
 
+        if (args.Any(a => a.Equals("--ai-scaffold", StringComparison.OrdinalIgnoreCase)))
+        {
+            var specArg = args.FirstOrDefault(a => a.StartsWith("--spec=", StringComparison.OrdinalIgnoreCase));
+            var specPath = specArg?.Split('=', 2).ElementAtOrDefault(1);
+            var enableAiReview = args.Any(a => a.Equals("--ai-review", StringComparison.OrdinalIgnoreCase));
+            var scaffoldResult = new CliScaffoldResult { Command = "ai-scaffold" };
+            if (jsonMode) Console.SetOut(TextWriter.Null);
+            var exitCode = AiScaffoldOrchestrator.Run(
+                Directory.GetCurrentDirectory(),
+                specPath,
+                enableAiReview,
+                scaffoldResult);
+            if (jsonMode) { Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true }); scaffoldResult.WriteJson(); }
+            Environment.Exit(exitCode);
+            return;
+        }
+
         if (args.Any(a => a.Equals("--export-json-schema", StringComparison.OrdinalIgnoreCase)))
         {
             var outArg = args.FirstOrDefault(a => a.StartsWith("--out=", StringComparison.OrdinalIgnoreCase));
@@ -181,6 +198,7 @@ public class ToolingProgram
         Console.WriteLine("  --scaffold-missing-hooks --project=<name>");
         Console.WriteLine("  --scaffold-batch-job --project=<name> --name=<job>");
         Console.WriteLine("  --validate-project --project=<name>");
+        Console.WriteLine("  --ai-scaffold --spec=<spec.yaml> [--ai-review]");
         Console.WriteLine("  --export-json-schema --out=<dir>");
         Environment.Exit(1);
     }

@@ -1,0 +1,18 @@
+jobs:
+  expire_stale_sessions:
+    displayName: 期限切れセッション処理
+    description: "有効期限を過ぎた Handshake セッションを自動的に expired 状態に遷移させます"
+    enabled: true
+
+    schedule:
+      cron: "*/30 * * * *"     # 30分ごとに実行
+      timezone: "Asia/Tokyo"
+
+    type: sql_command
+    settings:
+      sqlFile: jobs/sql/expire_stale_sessions.sql
+
+    onFailure:
+      retryCount: 3
+      retryInterval: 300
+      logError: true

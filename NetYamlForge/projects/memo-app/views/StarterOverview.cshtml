@@ -1,0 +1,110 @@
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var title = ViewData["Title"]?.ToString() ?? "Starter Overview";
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "memo-app";
+}
+
+<div class="space-y-6">
+    <!-- Page header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold">@title</h1>
+            <p class="text-sm opacity-60 mt-1">
+                Auto-generated overview — edit
+                <code class="font-mono bg-base-200 px-1 rounded">pages/StarterOverview.yaml</code>
+                or
+                <code class="font-mono bg-base-200 px-1 rounded">entities/*.yml</code>
+                to customize.
+            </p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+            <a class="btn btn-sm btn-outline"
+               asp-controller="Dashboard" asp-action="Index" asp-route-project="@currentProject">
+                📊 Dashboard
+            </a>
+            <a class="btn btn-sm btn-ghost"
+               asp-controller="DynamicEntity" asp-action="AllDefinitions" asp-route-project="@currentProject">
+                🧩 Schema
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary stats -->
+    @if (Model.Any())
+    {
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            @foreach (var grp in Model)
+            {
+                <div class="stat bg-base-100 rounded-box border border-base-300 shadow-sm p-4">
+                    <div class="stat-title text-xs truncate">@grp.Key</div>
+                    <div class="stat-value text-2xl">@grp.Value.Total</div>
+                    <div class="stat-desc">records</div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Data sections -->
+    @if (!Model.Any())
+    {
+        <div class="hero bg-base-100 rounded-box border border-base-300 min-h-48">
+            <div class="hero-content text-center">
+                <div>
+                    <p class="text-4xl mb-3">🧭</p>
+                    <h2 class="text-xl font-semibold">No sections yet</h2>
+                    <p class="opacity-60 mt-1 text-sm">
+                        Run <code class="font-mono bg-base-200 px-1 rounded">--scaffold-entities</code> to auto-generate entity definitions,
+                        then edit <code class="font-mono bg-base-200 px-1 rounded">pages/StarterOverview.yaml</code>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var grp in Model)
+        {
+            <div class="card bg-base-100 border border-base-300 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="card-title text-base">@grp.Key</h2>
+                        <span class="badge badge-ghost badge-sm">@grp.Value.Total total</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra table-sm w-full">
+                            <thead>
+                                <tr class="bg-base-200">
+                                    @if (grp.Value.Rows.Any())
+                                    {
+                                        @foreach (var col in grp.Value.Rows.First().Keys)
+                                        {
+                                            <th class="text-xs font-semibold uppercase tracking-wide">@col</th>
+                                        }
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!grp.Value.Rows.Any())
+                                {
+                                    <tr><td colspan="99" class="text-center opacity-50 py-6">No records</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var row in grp.Value.Rows)
+                                    {
+                                        <tr class="hover">
+                                            @foreach (var val in row.Values)
+                                            {
+                                                <td class="text-sm">@(val?.ToString() ?? "—")</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

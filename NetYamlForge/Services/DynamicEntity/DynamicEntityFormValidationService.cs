@@ -33,7 +33,8 @@ public sealed class DynamicEntityFormValidationService
     public (Dictionary<string, object?> values, Dictionary<string, string> errors) ConvertAndValidate(
         EntityDefinition meta,
         Dictionary<string, string?> form,
-        bool isPartial = false)
+        bool isPartial = false,
+        bool isUpdate = false)
     {
         var fields = meta.Columns.Select(kv =>
         {
@@ -43,7 +44,7 @@ public sealed class DynamicEntityFormValidationService
             return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
         });
 
-        return _validator.ConvertAndValidate(fields, form, isPartial);
+        return _validator.ConvertAndValidate(fields, form, isPartial, isUpdate);
     }
 
     /// <summary>
@@ -53,7 +54,8 @@ public sealed class DynamicEntityFormValidationService
         EntityDefinition meta,
         Dictionary<string, string?> form,
         string projectName,
-        bool isPartial = false)
+        bool isPartial = false,
+        bool isUpdate = false)
     {
         var fields = meta.Columns.Select(kv =>
         {
@@ -63,6 +65,6 @@ public sealed class DynamicEntityFormValidationService
             return new FormFieldSpec(name, col.Type, col.Required, editable, col.Validators);
         });
 
-        return await _validator.ConvertAndValidateAsync(fields, form, projectName, isPartial);
+        return await _validator.ConvertAndValidateAsync(fields, form, projectName, isPartial, isUpdate);
     }
 }

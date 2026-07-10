@@ -1,0 +1,46 @@
+entities:
+  ai_identity:
+    table: 'ai_identity'
+    key: 'id'
+    displayName: 'Ai Identity'
+    displayNameKey: 'entities.ai_identity.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ai_id', 'display_name', 'owner_type', 'organization', 'role', 'email', 'endpoint_url', 'public_key', 'is_active', 'verified', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.ai_identity.columns.id.label', sortable: true }
+      ai_id: { type: string, required: true, label: 'Ai Id', labelKey: 'entities.ai_identity.columns.ai_id.label', searchable: true, sortable: true }
+      display_name: { type: string, required: true, label: 'Display Name', labelKey: 'entities.ai_identity.columns.display_name.label', searchable: true, sortable: true }
+      owner_type: { type: string, label: 'Owner Type', labelKey: 'entities.ai_identity.columns.owner_type.label', searchable: true, sortable: true }
+      organization: { type: string, label: 'Organization', labelKey: 'entities.ai_identity.columns.organization.label', searchable: true, sortable: true }
+      role: { type: string, label: 'Role', labelKey: 'entities.ai_identity.columns.role.label', searchable: true, sortable: true }
+      email: { type: string, label: 'Email', labelKey: 'entities.ai_identity.columns.email.label', searchable: true, sortable: true }
+      endpoint_url: { type: string, label: 'Endpoint Url', labelKey: 'entities.ai_identity.columns.endpoint_url.label', searchable: true, sortable: true }
+      public_key: { type: string, label: 'Public Key', labelKey: 'entities.ai_identity.columns.public_key.label', searchable: true, sortable: true }
+      is_active: { type: int, label: 'Is Active', labelKey: 'entities.ai_identity.columns.is_active.label', sortable: true }
+      verified: { type: int, label: 'Verified', labelKey: 'entities.ai_identity.columns.verified.label', sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ai_identity.columns.created_at.label', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.ai_identity.columns.updated_at.label', searchable: true, sortable: true }
+    forms:
+      ai_id: { type: string, required: true, label: 'Ai Id', labelKey: 'entities.ai_identity.forms.ai_id.label', editable: true }
+      display_name: { type: string, required: true, label: 'Display Name', labelKey: 'entities.ai_identity.forms.display_name.label', editable: true }
+      owner_type: { type: string, label: 'Owner Type', labelKey: 'entities.ai_identity.forms.owner_type.label', editable: true }
+      organization: { type: string, label: 'Organization', labelKey: 'entities.ai_identity.forms.organization.label', editable: true }
+      role: { type: string, label: 'Role', labelKey: 'entities.ai_identity.forms.role.label', editable: true }
+      email: { type: string, label: 'Email', labelKey: 'entities.ai_identity.forms.email.label', editable: true }
+      endpoint_url: { type: string, label: 'Endpoint Url', labelKey: 'entities.ai_identity.forms.endpoint_url.label', editable: true }
+      public_key: { type: string, label: 'Public Key', labelKey: 'entities.ai_identity.forms.public_key.label', editable: true }
+      is_active: { type: int, label: 'Is Active', labelKey: 'entities.ai_identity.forms.is_active.label', editable: true }
+      verified: { type: int, label: 'Verified', labelKey: 'entities.ai_identity.forms.verified.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ai_identity.forms.created_at.label', editable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.ai_identity.forms.updated_at.label', editable: true }
+    filters: {}
+    links: {}

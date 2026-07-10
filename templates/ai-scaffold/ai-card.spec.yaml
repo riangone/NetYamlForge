@@ -1,0 +1,154 @@
+# AI Card — AI Handshake Protocol (AHP) PoC サブプロジェクト spec
+#
+# 「AI 時代の名刺交換」を実現するプロトコルの PoC 実装。
+# 名刺の概念を超え、AI ID + Intent + Permission の三位一体で
+# AI 同士が安全に「握手」できる仕組みを構築する。
+#
+# 使い方:
+#   dotnet run --project NetYamlForge.Tooling -- --ai-scaffold \
+#     --spec=templates/ai-scaffold/ai-card.spec.yaml
+
+project: ai-card
+displayName: AI Card (AI Handshake Protocol PoC)
+dbType: sqlite
+
+entities:
+  # ────────────────────────────────────────────
+  # 1. AI ID 管理 — Identity 層
+  # ────────────────────────────────────────────
+  - table: ai_identity
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - { name: ai_id, type: text, notNull: true }
+      - { name: display_name, type: text, notNull: true }
+      - { name: owner_type, type: text, notNull: true, default: "'individual'" }
+      - { name: organization, type: text }
+      - { name: role, type: text }
+      - { name: email, type: text }
+      - { name: endpoint_url, type: text }
+      - { name: public_key, type: text }
+      - { name: is_active, type: boolean, notNull: true, default: "1" }
+      - { name: verified, type: boolean, notNull: true, default: "0" }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+      - { name: updated_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  # ────────────────────────────────────────────
+  # 2. Business Profile — IIP の拡張情報
+  # ────────────────────────────────────────────
+  - table: ai_profile
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - name: ai_identity_id
+        type: integer
+        notNull: true
+        foreignKey: { table: ai_identity, column: id }
+      - { name: goals_json, type: text }
+      - { name: can_share_json, type: text }
+      - { name: cannot_share_json, type: text }
+      - { name: expertise_json, type: text }
+      - { name: greeting_message, type: text }
+      - { name: ai_instructions, type: text }
+      - { name: updated_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  # ────────────────────────────────────────────
+  # 3. Handshake セッション — 状態管理
+  # ────────────────────────────────────────────
+  - table: handshake_session
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - { name: session_token, type: text, notNull: true }
+      - name: initiator_id
+        type: integer
+        notNull: true
+        foreignKey: { table: ai_identity, column: id }
+      - { name: responder_name, type: text }
+      - { name: responder_email, type: text }
+      - { name: responder_company, type: text }
+      - { name: state, type: text, notNull: true, default: "'pending'" }
+      - { name: handshake_type, type: text, notNull: true, default: "'asymmetric'" }
+      - { name: intent_type, type: text }
+      - { name: intent_topic, type: text }
+      - { name: intent_context_json, type: text }
+      - { name: offered_permissions_json, type: text }
+      - { name: granted_permissions_json, type: text }
+      - { name: conversation_summary, type: text }
+      - { name: next_actions_json, type: text }
+      - { name: expires_at, type: datetime }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+      - { name: updated_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  # ────────────────────────────────────────────
+  # 4. チャット会話ログ
+  # ────────────────────────────────────────────
+  - table: chat_message
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - name: session_id
+        type: integer
+        notNull: true
+        foreignKey: { table: handshake_session, column: id }
+      - { name: role, type: text, notNull: true }
+      - { name: content, type: text, notNull: true }
+      - { name: metadata_json, type: text }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  # ────────────────────────────────────────────
+  # 5. Permission 管理
+  # ────────────────────────────────────────────
+  - table: ahp_permission
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - name: ai_identity_id
+        type: integer
+        notNull: true
+        foreignKey: { table: ai_identity, column: id }
+      - { name: resource_type, type: text, notNull: true }
+      - { name: resource_name, type: text, notNull: true }
+      - { name: access_level, type: text, notNull: true, default: "'public'" }
+      - { name: expires_at, type: datetime }
+      - { name: is_active, type: boolean, notNull: true, default: "1" }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+  # ────────────────────────────────────────────
+  # 6. QR トークン管理
+  # ────────────────────────────────────────────
+  - table: qr_token
+    columns:
+      - { name: id, type: integer, primaryKey: true, identity: true }
+      - name: ai_identity_id
+        type: integer
+        notNull: true
+        foreignKey: { table: ai_identity, column: id }
+      - { name: token, type: text, notNull: true }
+      - { name: intent_type, type: text }
+      - { name: intent_topic, type: text }
+      - { name: qr_url, type: text, notNull: true }
+      - { name: scan_count, type: integer, notNull: true, default: "0" }
+      - { name: max_scans, type: integer }
+      - { name: is_active, type: boolean, notNull: true, default: "1" }
+      - { name: expires_at, type: datetime }
+      - { name: created_at, type: datetime, notNull: true, default: "CURRENT_TIMESTAMP" }
+
+hooks:
+  - name: HandshakeStateGuard
+    entity: handshake_session
+  - name: AiChatHandler
+    entity: chat_message
+  - name: QrTokenGenerator
+    entity: qr_token
+
+batchJobs:
+  - name: expire_stale_sessions
+
+acceptanceCriteria:
+  - "ai_identity テーブルの CRUD entities YAML が生成されている"
+  - "ai_profile テーブルの CRUD entities YAML が生成されている"
+  - "handshake_session テーブルの CRUD entities YAML が生成されている"
+  - "chat_message テーブルの CRUD entities YAML が生成されている"
+  - "ahp_permission テーブルの CRUD entities YAML が生成されている"
+  - "qr_token テーブルの CRUD entities YAML が生成されている"
+  - "HandshakeStateGuard フックの雛形が生成されている"
+  - "AiChatHandler フックの雛形が生成されている"
+  - "QrTokenGenerator フックの雛形が生成されている"
+  - "expire_stale_sessions バッチジョブの雛形が生成されている"
+  - "validate-project がエラー無く通過する"

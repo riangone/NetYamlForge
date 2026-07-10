@@ -1,0 +1,32 @@
+title: 地下城探索
+isPublic: false
+
+sections:
+  - id: current_room
+    title: 当前位置
+    sourceType: custom
+    source: |
+      SELECT r.Id, r.Name, r.Description, r.ExitsJson, r.MonsterId, r.ItemId, r.IsBossRoom, r.IsCleared,
+             m.Name AS MonsterName, m.Hp AS MonsterHp, m.Attack AS MonsterAttack
+      FROM rooms r
+      LEFT JOIN characters c ON c.CurrentRoomId = r.Id
+      LEFT JOIN monsters m ON m.Id = r.MonsterId
+      WHERE c.OwnerUserId = @currentUserId
+      LIMIT 1
+    columns: [Id, Name, Description, ExitsJson, MonsterId, ItemId, IsBossRoom, IsCleared, MonsterName, MonsterHp, MonsterAttack]
+    pageSize: 1
+    editable: false
+    readOnly: true
+    component: fancy_diary_list
+    targetTable: rooms
+
+  - id: room_actions
+    title: 行动
+    sourceType: none
+    component: markdown
+    content: |
+      使用 API 接口进行探索和战斗：
+      - `POST /api/dungeon-forge/dungeon/move` — 移动到相邻房间
+      - `POST /api/dungeon-forge/dungeon/attack` — 攻击当前房间怪物
+      - `POST /api/dungeon-forge/dungeon/use-item` — 使用背包物品
+      - `POST /api/dungeon-forge/dungeon/pick-up` — 拾取房间物品

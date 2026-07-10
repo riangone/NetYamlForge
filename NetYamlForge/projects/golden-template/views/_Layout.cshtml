@@ -1,0 +1,576 @@
+@using NetYamlForge.Localization
+@using NetYamlForge.Models
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> L
+@inject NetYamlForge.Services.IEntityMetadataProvider EntityMetadataProvider
+@inject NetYamlForge.Services.ProjectScope ProjectScope
+<!DOCTYPE html>
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="@(ProjectScope?.Current?.Layout?.Theme ?? "corporate")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")Golden Template (Mini Helpdesk)</title>
+    <script>
+        window.NetYamlForgeConfig = {
+            pathBase: '@Url.Content("~/").TrimEnd('/')',
+            currentProject: '@Context.GetRouteValue("project")?.ToString()'
+        };
+    </script>
+    <link href="@Url.Content("~/lib/daisyui/daisyui.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/lib/tailwindcss/browser.min.js")"></script>
+    <link rel="stylesheet" href="@Url.Content("~/css/site.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/NetYamlForge.styles.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="@Url.Content("~/css/ai-assistant.css")" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+@functions {
+    private sealed class NavSection
+    {
+        public string? Title { get; }
+        public List<ProjectNavigationItemConfig> Items { get; } = new();
+        public NavSection(string? title) => Title = title;
+    }
+}
+<body class="min-h-screen bg-base-200" data-user-authenticated="@(User.Identity?.IsAuthenticated ?? false ? "true" : "false")">
+    @{
+        var showSidebar = User.Identity?.IsAuthenticated ?? false;
+        var isAdminUser = User?.IsInRole("Admin") ?? false;
+        var projectLayout = ProjectScope?.Current?.Layout;
+        var navConfig = projectLayout?.Navigation;
+        var headerConfig = projectLayout?.Header;
+        var footerConfig = projectLayout?.Footer;
+        var allEntities = EntityMetadataProvider.GetAll()
+            .Where(pair => isAdminUser || pair.Value.IsPublic)
+            .OrderBy(pair => pair.Value.GetDisplayName(), StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var entityDefinitions = navConfig != null && navConfig.Entities.Count > 0
+            ? allEntities.Where(pair => navConfig.Entities.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))
+                .OrderBy(pair => navConfig.Entities.IndexOf(pair.Key))
+                .ToList()
+            : allEntities;
+        var currentProject = Context.GetRouteValue("project")?.ToString() ?? "golden-template";
+        var headerTitle = headerConfig?.Title ?? "Golden Template (Mini Helpdesk)";
+    }
+    <div class="drawer">
+        <input id="app-sidebar" type="checkbox" class="drawer-toggle" />
+
+        <div class="drawer-content flex flex-col min-h-screen">
+            <!-- ===== Navbar ===== -->
+            <header class="navbar bg-base-100 border-b border-base-300 px-3 lg:px-6 sticky top-0 z-30">
+                @if (showSidebar)
+                {
+                    <div class="flex-none">
+                        <label for="app-sidebar" class="btn btn-ghost btn-square">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </label>
+                    </div>
+                }
+                <div class="flex-1">
+                    <a class="btn btn-ghost text-xl font-bold tracking-tight"
+                       asp-controller="Home"
+                       asp-action="Project"
+                       asp-route-project="@currentProject">@headerTitle</a>
+                </div>
+                <div class="flex-none gap-2">
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                            <div class="w-10 rounded-full bg-base-300 text-base-content grid place-items-center font-semibold">
+                                @if (User.Identity?.IsAuthenticated ?? false)
+                                {
+                                    @((User.Identity?.Name ?? "U").Substring(0, 1).ToUpperInvariant())
+                                }
+                                else
+                                {
+                                    @("G")
+                                }
+                            </div>
+                        </div>
+                        <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-64 p-2 shadow">
+                            @if (User.Identity?.IsAuthenticated ?? false)
+                            {
+                                <li class="menu-title">
+                                    <span>@L["Hello"], @(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name)</span>
+                                </li>
+                            }
+                            <li class="menu-title"><span>Language</span></li>
+                            <li>
+                                <div class="flex gap-2 px-2 py-1">
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="en-US" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "en-US" ? "btn-active" : "")" title="English">🇺🇸</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="zh-CN" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "zh-CN" ? "btn-active" : "")" title="中文">🇨🇳</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="ja-JP" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ja-JP" ? "btn-active" : "")" title="日本語">🇯🇵</button>
+                                    </form>
+                                    <form asp-controller="Localization" asp-action="SetLanguage" method="post">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                        <input type="hidden" name="culture" value="ko-KR" />
+                                        <button type="submit" class="btn btn-ghost btn-sm btn-circle @(System.Globalization.CultureInfo.CurrentUICulture.Name == "ko-KR" ? "btn-active" : "")" title="한국어">🇰🇷</button>
+                                    </form>
+                                </div>
+                            </li>
+                            @if (User.Identity?.IsAuthenticated ?? false)
+                            {
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
+                                }
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" asp-route-project="@currentProject" method="post">
+                                        <button type="submit" class="text-left w-full">@L["Logout"]</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><a asp-controller="Account" asp-action="Login" asp-route-project="@currentProject">@L["Login"]</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ===== Breadcrumbs ===== -->
+            @if (ViewData["Breadcrumbs"] is IEnumerable<(string Label, string? Url)> crumbs)
+            {
+                <div class="px-4 py-2 bg-base-100 border-b border-base-200">
+                    <div class="breadcrumbs text-sm max-w-screen-xl mx-auto">
+                        <ul>
+                            <li><a asp-controller="Home" asp-action="Project" asp-route-project="@currentProject">Golden Template (Mini Helpdesk)</a></li>
+                            @foreach (var (label, url) in crumbs)
+                            {
+                                if (url != null)
+                                {
+                                    <li><a href="@url">@label</a></li>
+                                }
+                                else
+                                {
+                                    <li>@label</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            <!-- ===== Main content ===== -->
+            <main class="p-4 lg:p-6">
+                @RenderBody()
+            </main>
+        </div>
+
+        <!-- ===== Left Sidebar ===== -->
+        @if (showSidebar)
+        {
+            <div class="drawer-side z-40">
+                <label for="app-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
+                <aside class="bg-base-100 w-72 min-h-full border-r border-base-300">
+                    <div class="p-4 border-b border-base-300 flex items-center justify-between">
+                        <div>
+                            <div class="text-sm opacity-70">Navigation</div>
+                            <div class="font-semibold">Golden Template (Mini Helpdesk)</div>
+                        </div>
+                        <label for="app-sidebar" class="btn btn-ghost btn-sm btn-square" aria-label="close menu">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </label>
+                    </div>
+                    <ul class="menu p-3 gap-1 w-full">
+                        @{
+                            var isDashboard = string.Equals(
+                                Context.Request.RouteValues["controller"]?.ToString(),
+                                "Dashboard",
+                                StringComparison.OrdinalIgnoreCase);
+                            var showDashboard = navConfig?.ShowDashboard ?? true;
+                            var navSections = new List<NavSection>();
+                            if (navConfig?.Items != null && navConfig.Items.Count > 0)
+                            {
+                                foreach (var item in navConfig.Items)
+                                {
+                                    var showItem = !item.AdminOnly || isAdminUser;
+                                    if (!showItem) continue;
+                                    var sectionName = string.IsNullOrWhiteSpace(item.Section) ? null : item.Section!.Trim();
+                                    var section = navSections.FirstOrDefault(s => string.Equals(s.Title, sectionName, StringComparison.Ordinal));
+                                    if (section == null)
+                                    {
+                                        section = new NavSection(sectionName);
+                                        navSections.Add(section);
+                                    }
+                                    section.Items.Add(item);
+                                }
+                            }
+                        }
+                        @if (showDashboard)
+                        {
+                            <li>
+                                <a class="@(isDashboard ? "active" : "")"
+                                   asp-controller="Dashboard"
+                                   asp-action="Index"
+                                   asp-route-project="@currentProject">📊 Dashboard</a>
+                            </li>
+                        }
+                        @if (navSections.Count > 0)
+                        {
+                            foreach (var section in navSections)
+                            {
+                                if (!string.IsNullOrEmpty(section.Title))
+                                {
+                                    <li class="menu-title mt-1"><span>@(section.Title)</span></li>
+                                }
+                                foreach (var item in section.Items)
+                                {
+                                    var itemLabel = I18nText.Resolve(item.LabelI18n, item.Label, item.LabelKey);
+                                    @if (!string.IsNullOrEmpty(item.Url))
+                                    {
+                                        <li><a href="@item.Url">@itemLabel</a></li>
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.Controller))
+                                    {
+                                        <li>
+                                            <a asp-controller="@item.Controller"
+                                               asp-action="@(item.Action ?? "Index")"
+                                               asp-route-project="@currentProject">@itemLabel</a>
+                                        </li>
+                                    }
+                                }
+                            }
+                        }
+                        @if (entityDefinitions.Count > 0)
+                        {
+                            <li class="menu-title mt-1"><span>Entities</span></li>
+                            @foreach (var definition in entityDefinitions)
+                            {
+                                var isActive = string.Equals(
+                                    Context.Request.RouteValues["controller"]?.ToString(),
+                                    "DynamicEntity",
+                                    StringComparison.OrdinalIgnoreCase) &&
+                                    string.Equals(
+                                        Context.Request.Query["entity"],
+                                        definition.Key,
+                                        StringComparison.OrdinalIgnoreCase);
+                                var isDefinitionPage = isActive &&
+                                    string.Equals(
+                                        Context.Request.RouteValues["action"]?.ToString(),
+                                        "Definition",
+                                        StringComparison.OrdinalIgnoreCase);
+                                @if (isAdminUser)
+                                {
+                                    <li>
+                                        <details @(isActive ? "open" : "")>
+                                            <summary class="@(isActive && !isDefinitionPage ? "active" : "")">
+                                                @definition.Value.GetDisplayName()
+                                                <span class="badge badge-sm @(definition.Value.IsPublic ? "badge-success" : "badge-ghost") ml-auto">
+                                                    @(definition.Value.IsPublic ? "Pub" : "Priv")
+                                                </span>
+                                            </summary>
+                                            <ul>
+                                                <li>
+                                                    <a class="@(isActive && !isDefinitionPage ? "active" : "")"
+                                                       asp-controller="DynamicEntity"
+                                                       asp-action="Index"
+                                                       asp-route-project="@currentProject"
+                                                       asp-route-entity="@definition.Key">List</a>
+                                                </li>
+                                                <li>
+                                                    <a class="@(isDefinitionPage ? "active" : "")"
+                                                       asp-controller="DynamicEntity"
+                                                       asp-action="Definition"
+                                                       asp-route-project="@currentProject"
+                                                       asp-route-entity="@definition.Key">Definition</a>
+                                                </li>
+                                            </ul>
+                                        </details>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a class="@(isActive ? "active" : "")"
+                                           asp-controller="DynamicEntity"
+                                           asp-action="Index"
+                                           asp-route-project="@currentProject"
+                                           asp-route-entity="@definition.Key">@definition.Value.GetDisplayName()</a>
+                                    </li>
+                                }
+                            }
+                        }
+                        @if (isAdminUser)
+                        {
+                            <li class="menu-title mt-2"><span>Admin</span></li>
+                            <li>
+                                <a asp-controller="BatchJob"
+                                   asp-action="Index"
+                                   asp-route-project="@currentProject"
+                                   class="@(string.Equals(Context.Request.RouteValues["controller"]?.ToString(), "BatchJob", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    Batch Jobs
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="DynamicEntity"
+                                   asp-action="AllDefinitions"
+                                   asp-route-project="@currentProject"
+                                   class="@(string.Equals(Context.Request.RouteValues["action"]?.ToString(), "AllDefinitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
+                                    Schema
+                                </a>
+                            </li>
+                            <li><a asp-controller="Users" asp-action="Index" asp-route-project="@currentProject">@L["Users"]</a></li>
+                        }
+                    </ul>
+                </aside>
+            </div>
+        }
+    </div>
+
+    <!-- ===== CRUD 確認ダイアログ ===== -->
+    <dialog id="crud-confirm-modal" class="modal">
+        <div class="modal-box max-w-sm">
+            <h3 class="font-bold text-lg mb-4" id="crud-confirm-msg">確認</h3>
+            <div class="flex gap-3 justify-end">
+                <button id="crud-confirm-ok" class="btn btn-primary btn-sm">OK</button>
+                <button id="crud-confirm-cancel" class="btn btn-ghost btn-sm">キャンセル</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- ===== Entity Picker モーダル ===== -->
+    <dialog id="entity-picker-modal" class="modal">
+        <div class="modal-box max-w-3xl">
+            <div class="flex items-center justify-between mb-3">
+                <h3 id="entity-picker-title" class="font-bold text-lg">Select</h3>
+                <form method="dialog"><button class="btn btn-ghost btn-sm btn-circle">✕</button></form>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="entity-picker-search" class="input input-bordered w-full"
+                       placeholder="Search..." oninput="entityPickerSearch(this.value)" />
+            </div>
+            <div id="entity-picker-content" class="min-h-32"></div>
+            <div id="entity-picker-multi-footer" class="mt-3 hidden">
+                <form method="dialog"><button class="btn btn-primary btn-sm">Done</button></form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <script src="@Url.Content("~/lib/htmx/htmx.min.js")"></script>
+    <script src="@Url.Content("~/js/site.js")" asp-append-version="true"></script>
+    <script>
+        // CRUD確認ダイアログ
+        var _confirmCallback = null;
+        function showConfirmDialog(msg, onOk) {
+            _confirmCallback = onOk;
+            var msgEl = document.getElementById('crud-confirm-msg');
+            if (msgEl) msgEl.textContent = msg;
+            document.getElementById('crud-confirm-modal')?.showModal();
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('crud-confirm-ok')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                if (_confirmCallback) { var cb = _confirmCallback; _confirmCallback = null; cb(); }
+            });
+            document.getElementById('crud-confirm-cancel')?.addEventListener('click', function () {
+                document.getElementById('crud-confirm-modal').close();
+                _confirmCallback = null;
+            });
+        });
+        document.body.addEventListener('htmx:confirm', function (evt) {
+            var msg = evt.detail.question;
+            if (!msg) { evt.preventDefault(); evt.detail.issueRequest(true); return; }
+            evt.preventDefault();
+            showConfirmDialog(msg, function () { evt.detail.issueRequest(true); });
+        });
+        document.addEventListener('submit', function (evt) {
+            var form = evt.target;
+            var msg = form && form.dataset ? form.dataset.confirmMsg : '';
+            if (!msg || msg.length === 0) return;
+            if (form.dataset.skipConfirm === '1') { delete form.dataset.skipConfirm; return; }
+            evt.preventDefault();
+            showConfirmDialog(msg, function () {
+                form.dataset.skipConfirm = '1';
+                if (typeof form.requestSubmit === 'function') { form.requestSubmit(); } else { form.submit(); }
+            });
+        }, true);
+
+        // Entity Picker
+        var _pickerConfig = null;
+        var _pickerSearchTimer = null;
+        var _pickerBaseUrl = '@Url.Content("~/" + currentProject + "/DynamicEntity/PickerList")';
+        function openEntityPicker(btn) {
+
+            _pickerConfig = { fieldName: btn.dataset.pickerField, entity: btn.dataset.pickerEntity,
+                displayCol: btn.dataset.pickerDisplayCol || 'Id', query: btn.dataset.pickerQuery || '',
+                multi: btn.dataset.pickerMulti === 'true', sourceButton: btn };
+            var title = document.getElementById('entity-picker-title');
+            if (title) title.textContent = 'Select ' + _pickerConfig.entity;
+            var footer = document.getElementById('entity-picker-multi-footer');
+            if (footer) footer.classList.toggle('hidden', !_pickerConfig.multi);
+            var searchEl = document.getElementById('entity-picker-search');
+            if (searchEl) searchEl.value = '';
+            loadPickerContent('', 1);
+            document.getElementById('entity-picker-modal').showModal();
+        }
+        function loadPickerContent(search, page) {
+            if (!_pickerConfig) return;
+            var cfg = _pickerConfig;
+            var url = _pickerBaseUrl + '?entity=' + encodeURIComponent(cfg.entity)
+                + '&targetField=' + encodeURIComponent(cfg.fieldName)
+                + '&displayColumn=' + encodeURIComponent(cfg.displayCol)
+                + '&displayColumns=' + encodeURIComponent(cfg.displayCol)
+                + '&query=' + encodeURIComponent(cfg.query || '')
+                + '&multi=' + (cfg.multi ? 'true' : 'false')
+                + '&search=' + encodeURIComponent(search || '')
+                + '&page=' + (page || 1);
+            htmx.ajax('GET', url, { target: '#entity-picker-content', swap: 'innerHTML' });
+        }
+        function entityPickerSearch(value) {
+            clearTimeout(_pickerSearchTimer);
+            _pickerSearchTimer = setTimeout(function () { loadPickerContent(value, 1); }, 300);
+        }
+        function loadPickerPage(page) {
+            var search = document.getElementById('entity-picker-search')?.value ?? '';
+            loadPickerContent(search, page);
+        }
+        function pickerSelectFromRow(row) {
+            if (!_pickerConfig) return;
+            var id = row.dataset.pickerId, label = row.dataset.pickerLabel, cfg = _pickerConfig;
+            var container = row.closest('[data-picker-container]');
+            var selector = function(name) {
+                var el = container ? container.querySelector('[id="' + name + '"]') : null;
+                return el || document.querySelector('[id="' + name + '"]');
+            };
+            if (cfg.multi) {
+                var hidden = selector('picker-value-' + cfg.fieldName);
+                if (!hidden) return;
+                var vals = hidden.value ? hidden.value.split(',').filter(function(v) { return v !== ''; }) : [];
+                if (vals.indexOf(id) !== -1) return;
+                vals.push(id);
+                hidden.value = vals.join(',');
+                var chips = selector('picker-chips-' + cfg.fieldName);
+                if (chips) {
+                    var chip = document.createElement('div');
+                    chip.className = 'badge badge-neutral gap-1';
+                    chip.dataset.id = id;
+                    chip.innerHTML = label + ' <button type="button" onclick="removePickerChip(\'' + cfg.fieldName + '\',\'' + id.replace(/'/g, "\\'") + '\',this.parentElement)">✕</button>';
+                    chips.appendChild(chip);
+                }
+            } else {
+                var hidden2 = selector('picker-value-' + cfg.fieldName);
+                var display = selector('picker-display-' + cfg.fieldName);
+                if (hidden2) hidden2.value = id;
+                if (display) { if (display.tagName === 'INPUT') { display.value = label; } else { display.textContent = label; } }
+                document.getElementById('entity-picker-modal').close();
+            }
+        }
+        function removePickerChip(fieldName, id, chipEl) {
+            var container = chipEl?.closest('[data-picker-container]');
+            var hidden = container ? container.querySelector('[id="picker-value-' + fieldName + '"]') : document.querySelector('[id="picker-value-' + fieldName + '"]');
+            if (hidden) { hidden.value = hidden.value.split(',').filter(function(v) { return v !== id && v !== ''; }).join(','); }
+            if (chipEl) chipEl.remove();
+        }
+        function clearPickerValue(fieldName, sourceEl) {
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
+        }
+        function clearPickerFilterValue(fieldName, sourceEl) {
+            var container = sourceEl?.closest('[data-picker-container]');
+            var sel = function(n) { return (container ? container.querySelector('[id="' + n + '"]') : null) || document.querySelector('[id="' + n + '"]'); };
+            var h = sel('picker-value-' + fieldName), d = sel('picker-display-' + fieldName), c = sel('picker-chips-' + fieldName);
+            if (h) h.value = '';
+            if (d) { if (d.tagName === 'INPUT') { d.value = ''; } else { d.textContent = '(All)'; } }
+            if (c) c.innerHTML = '';
+        }
+        function toggleCheckboxGroup(fieldName, checkbox) {
+            var hidden = document.getElementById('checkbox-group-value-' + fieldName);
+            if (!hidden) return;
+            var values = [];
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(cb) { if (cb.checked) values.push(cb.value); });
+            hidden.value = values.join(',');
+        }
+        function toggleSwitchGroup(fieldName, toggle) {
+            var hidden = document.getElementById('switch-group-value-' + fieldName);
+            if (!hidden) return;
+            var values = [];
+            document.querySelectorAll('input[type=checkbox][name=' + fieldName + ']').forEach(function(t) { if (t.checked) values.push(t.value); });
+            hidden.value = values.join(',');
+        }
+    </script>
+
+    <!-- 全局 Toast 容器 -->
+    <div class="toast toast-end toast-bottom z-[9999]" id="global-toast-container"></div>
+
+    <script>
+        // 全局 Toast 提示函数（与核心 Views/Shared/_Layout.cshtml 保持一致）
+        function showToast(message, type, duration) {
+            type = type || 'success';
+            duration = duration || 4000;
+            var container = document.getElementById('global-toast-container');
+            if (!container) return;
+
+            var alertDiv = document.createElement('div');
+            var alertClass = 'alert shadow-lg flex items-center gap-2';
+            var iconSvg = '';
+
+            if (type === 'success') {
+                alertClass += ' alert-success text-success-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            } else if (type === 'error') {
+                alertClass += ' alert-error text-error-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            } else if (type === 'warning') {
+                alertClass += ' alert-warning text-warning-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+            } else {
+                alertClass += ' alert-info text-info-content';
+                iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            }
+
+            alertDiv.className = alertClass;
+            alertDiv.innerHTML = iconSvg + '<span>' + message + '</span>';
+            container.appendChild(alertDiv);
+
+            setTimeout(function() {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transition = 'opacity 0.5s ease';
+                setTimeout(function() {
+                    alertDiv.remove();
+                }, 500);
+            }, duration);
+        }
+
+        // 全局监听 HTMX 响应与发送错误，避免服务端错误（如 500）在界面上完全无提示
+        document.body.addEventListener('htmx:responseError', function (evt) {
+            var errorMsg = evt.detail.xhr.responseText || '操作执行失败，请检查输入或重试。';
+            if (errorMsg.indexOf('<html') >= 0 || errorMsg.indexOf('<!DOCTYPE') >= 0) {
+                errorMsg = '服务器处理请求时发生内部错误。';
+            }
+            showToast(errorMsg, 'error');
+        });
+
+        document.body.addEventListener('htmx:sendError', function (evt) {
+            showToast('网络连接失败，请检查您的网络。', 'error');
+        });
+
+        // HX-Trigger: {"show-toast":{"message":"...","type":"success"}} 的全局处理
+        document.body.addEventListener('show-toast', function (evt) {
+            var msg  = evt.detail && evt.detail.message ? evt.detail.message : '';
+            var type = evt.detail && evt.detail.type    ? evt.detail.type    : 'info';
+            if (msg) showToast(msg, type);
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

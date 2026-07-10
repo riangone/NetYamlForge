@@ -1,0 +1,28 @@
+entities:
+  todo_item:
+    table: 'todo_item'
+    key: 'id'
+    displayName: 'Todo Item'
+    displayNameKey: 'entities.todo_item.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'is_done', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.todo_item.columns.id.label', sortable: true }
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.todo_item.columns.title.label', searchable: true, sortable: true }
+      is_done: { type: int, label: 'Is Done', labelKey: 'entities.todo_item.columns.is_done.label', sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.todo_item.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      title: { type: string, required: true, label: 'Title', labelKey: 'entities.todo_item.forms.title.label', editable: true }
+      is_done: { type: int, label: 'Is Done', labelKey: 'entities.todo_item.forms.is_done.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.todo_item.forms.created_at.label', editable: true }
+    filters: {}
+    links: {}

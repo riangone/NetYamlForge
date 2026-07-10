@@ -1,0 +1,30 @@
+entities:
+  ticket:
+    table: 'ticket'
+    key: 'id'
+    displayName: 'Ticket'
+    displayNameKey: 'entities.ticket.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['subject', 'status', 'priority', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.ticket.columns.id.label', sortable: true }
+      subject: { type: string, required: true, label: 'Subject', labelKey: 'entities.ticket.columns.subject.label', searchable: true, sortable: true }
+      status: { type: string, label: 'Status', labelKey: 'entities.ticket.columns.status.label', searchable: true, sortable: true }
+      priority: { type: string, label: 'Priority', labelKey: 'entities.ticket.columns.priority.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ticket.columns.created_at.label', searchable: true, sortable: true }
+    forms:
+      subject: { type: string, required: true, label: 'Subject', labelKey: 'entities.ticket.forms.subject.label', editable: true }
+      status: { type: string, label: 'Status', labelKey: 'entities.ticket.forms.status.label', editable: true }
+      priority: { type: string, label: 'Priority', labelKey: 'entities.ticket.forms.priority.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.ticket.forms.created_at.label', editable: true }
+    filters: {}
+    links: {}

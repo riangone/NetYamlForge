@@ -1,0 +1,72 @@
+title: 🔲 QR コード生成
+description: "AI Handshake 用 QR コードを生成します"
+
+sections:
+  # ─── QR 生成フォーム ───
+  - id: qr_form
+    title: 🔲 新しい QR コードを生成
+    component: form
+    sourceType: custom
+    source: |
+      SELECT
+        ai.id AS ai_identity_id,
+        ai.ai_id || ' (' || ai.display_name || ')' AS label
+      FROM ai_identity ai
+      WHERE ai.is_active = 1
+      ORDER BY ai.display_name
+    columns: [ai_identity_id, label]
+    editable: true
+    readOnly: false
+    formFields:
+      - name: ai_identity_id
+        label: AI ID
+        type: select
+        required: true
+      - name: intent_type
+        label: Intent タイプ
+        type: select
+        options:
+          - { value: business_meeting, label: 🤝 ビジネス会議 }
+          - { value: sales, label: 💰 営業 }
+          - { value: recruiting, label: 👥 採用 }
+          - { value: partnership, label: 🤝 パートナーシップ }
+          - { value: consulting, label: 💼 コンサルティング }
+          - { value: networking, label: 🌐 ネットワーキング }
+          - { value: other, label: 📋 その他 }
+      - name: intent_topic
+        label: トピック
+        type: text
+        placeholder: 例：製造業のDX推進
+    action:
+      type: api
+      url: /ai-card/api/qr/generate
+      method: POST
+
+  # ─── 生成済み QR トークン一覧 ───
+  - id: qr_list
+    title: 🎫 生成済み QR トークン
+    component: table
+    sourceType: custom
+    source: |
+      SELECT
+        qt.token AS トークン,
+        ai.display_name AS AI_ID,
+        COALESCE(qt.intent_type, '—') AS Intent,
+        COALESCE(qt.intent_topic, '—') AS トピック,
+        qt.qr_url AS URL,
+        qt.scan_count AS スキャン数,
+        COALESCE(CAST(qt.max_scans AS TEXT), '無制限') AS 上限,
+        CASE WHEN qt.is_active = 1 THEN '🟢 有効' ELSE '🔴 無効' END AS 状態,
+        qt.created_at AS 作成日
+      FROM qr_token qt
+      LEFT JOIN ai_identity ai ON qt.ai_identity_id = ai.id
+      ORDER BY qt.created_at DESC
+    columns: [トークン, AI_ID, Intent, トピック, URL, スキャン数, 上限, 状態, 作成日]
+    pageSize: 20
+    editable: false
+    readOnly: true
+    rowColorRules:
+      - condition: "状態 LIKE '%有効%'"
+        colorClass: row-success
+      - condition: "状態 LIKE '%無効%'"
+        colorClass: row-danger

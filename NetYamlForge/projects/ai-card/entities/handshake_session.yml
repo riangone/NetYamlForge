@@ -1,0 +1,67 @@
+entities:
+  handshake_session:
+    table: 'handshake_session'
+    key: 'id'
+    displayName: 'Handshake Session'
+    displayNameKey: 'entities.handshake_session.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['session_token', 'initiator_id', 'responder_name', 'responder_email', 'responder_company', 'state', 'handshake_type', 'intent_type', 'intent_topic', 'intent_context_json', 'offered_permissions_json', 'granted_permissions_json', 'conversation_summary', 'next_actions_json', 'expires_at', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.handshake_session.columns.id.label', sortable: true }
+      session_token: { type: string, required: true, label: 'Session Token', labelKey: 'entities.handshake_session.columns.session_token.label', searchable: true, sortable: true }
+      initiator_id: { type: int, required: true, label: 'Initiator Id', labelKey: 'entities.handshake_session.columns.initiator_id.label', sortable: true }
+      responder_name: { type: string, label: 'Responder Name', labelKey: 'entities.handshake_session.columns.responder_name.label', searchable: true, sortable: true }
+      responder_email: { type: string, label: 'Responder Email', labelKey: 'entities.handshake_session.columns.responder_email.label', searchable: true, sortable: true }
+      responder_company: { type: string, label: 'Responder Company', labelKey: 'entities.handshake_session.columns.responder_company.label', searchable: true, sortable: true }
+      state: { type: string, label: 'State', labelKey: 'entities.handshake_session.columns.state.label', searchable: true, sortable: true }
+      handshake_type: { type: string, label: 'Handshake Type', labelKey: 'entities.handshake_session.columns.handshake_type.label', searchable: true, sortable: true }
+      intent_type: { type: string, label: 'Intent Type', labelKey: 'entities.handshake_session.columns.intent_type.label', searchable: true, sortable: true }
+      intent_topic: { type: string, label: 'Intent Topic', labelKey: 'entities.handshake_session.columns.intent_topic.label', searchable: true, sortable: true }
+      intent_context_json: { type: string, label: 'Intent Context Json', labelKey: 'entities.handshake_session.columns.intent_context_json.label', searchable: true, sortable: true }
+      offered_permissions_json: { type: string, label: 'Offered Permissions Json', labelKey: 'entities.handshake_session.columns.offered_permissions_json.label', searchable: true, sortable: true }
+      granted_permissions_json: { type: string, label: 'Granted Permissions Json', labelKey: 'entities.handshake_session.columns.granted_permissions_json.label', searchable: true, sortable: true }
+      conversation_summary: { type: string, label: 'Conversation Summary', labelKey: 'entities.handshake_session.columns.conversation_summary.label', searchable: true, sortable: true }
+      next_actions_json: { type: string, label: 'Next Actions Json', labelKey: 'entities.handshake_session.columns.next_actions_json.label', searchable: true, sortable: true }
+      expires_at: { type: string, label: 'Expires At', labelKey: 'entities.handshake_session.columns.expires_at.label', searchable: true, sortable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.handshake_session.columns.created_at.label', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.handshake_session.columns.updated_at.label', searchable: true, sortable: true }
+    forms:
+      session_token: { type: string, required: true, label: 'Session Token', labelKey: 'entities.handshake_session.forms.session_token.label', editable: true }
+      initiator_id:
+        type: int
+        required: true
+        label: 'Initiator Id'
+        labelKey: 'entities.handshake_session.forms.initiator_id.label'
+        editable: true
+        foreignKey:
+          entity: ai_identity
+          displayColumn: 'display_name'
+      responder_name: { type: string, label: 'Responder Name', labelKey: 'entities.handshake_session.forms.responder_name.label', editable: true }
+      responder_email: { type: string, label: 'Responder Email', labelKey: 'entities.handshake_session.forms.responder_email.label', editable: true }
+      responder_company: { type: string, label: 'Responder Company', labelKey: 'entities.handshake_session.forms.responder_company.label', editable: true }
+      state: { type: string, label: 'State', labelKey: 'entities.handshake_session.forms.state.label', editable: true }
+      handshake_type: { type: string, label: 'Handshake Type', labelKey: 'entities.handshake_session.forms.handshake_type.label', editable: true }
+      intent_type: { type: string, label: 'Intent Type', labelKey: 'entities.handshake_session.forms.intent_type.label', editable: true }
+      intent_topic: { type: string, label: 'Intent Topic', labelKey: 'entities.handshake_session.forms.intent_topic.label', editable: true }
+      intent_context_json: { type: string, label: 'Intent Context Json', labelKey: 'entities.handshake_session.forms.intent_context_json.label', editable: true }
+      offered_permissions_json: { type: string, label: 'Offered Permissions Json', labelKey: 'entities.handshake_session.forms.offered_permissions_json.label', editable: true }
+      granted_permissions_json: { type: string, label: 'Granted Permissions Json', labelKey: 'entities.handshake_session.forms.granted_permissions_json.label', editable: true }
+      conversation_summary: { type: string, label: 'Conversation Summary', labelKey: 'entities.handshake_session.forms.conversation_summary.label', editable: true }
+      next_actions_json: { type: string, label: 'Next Actions Json', labelKey: 'entities.handshake_session.forms.next_actions_json.label', editable: true }
+      expires_at: { type: string, label: 'Expires At', labelKey: 'entities.handshake_session.forms.expires_at.label', editable: true }
+      created_at: { type: string, label: 'Created At', labelKey: 'entities.handshake_session.forms.created_at.label', editable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.handshake_session.forms.updated_at.label', editable: true }
+    hooks:
+      beforeCreate: [handshake_state_guard]
+      beforeUpdate: [handshake_state_guard]
+    filters: {}
+    links: {}

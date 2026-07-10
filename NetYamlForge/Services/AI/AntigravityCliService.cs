@@ -11,22 +11,32 @@ public class AntigravityCliService : IAntigravityCliService
 {
     private readonly ILogger<AntigravityCliService> _logger;
     private readonly IConfiguration _configuration;
-    private readonly CliChainOptions _cliOptions;
+    private readonly IOptionsMonitor<CliChainOptions> _cliOptionsMonitor;
+
+    /// <summary>appsettings.json の変更（システム設定画面からの保存を含む）を即座に反映する。</summary>
+    private CliChainOptions _cliOptions => _cliOptionsMonitor.CurrentValue;
 
     public AntigravityCliService(
         ILogger<AntigravityCliService> logger,
         IConfiguration configuration,
-        IOptions<CliChainOptions> cliOptions)
+        IOptionsMonitor<CliChainOptions> cliOptions)
     {
         _logger = logger;
         _configuration = configuration;
-        _cliOptions = cliOptions.Value;
+        _cliOptionsMonitor = cliOptions;
     }
 
     public async Task<string> PromptAsync(string prompt, string? model = null, string? projectName = null, CancellationToken cancellationToken = default)
     {
         var env = ProjectEnvLoader.LoadForProject(projectName);
-        var aiModel = model ?? env.GetValueOrDefault("AI_MODEL", "");
+        _cliOptions.Providers.TryGetValue("antigravity", out var providerConfig);
+
+        // モデル指定の優先順位：呼び出し元の明示指定 > プロジェクト .env の AI_MODEL >
+        // システム設定画面（AiCliChain:Providers:antigravity:DefaultModel） > 未指定（CLI自身の既定）。
+        var aiModel = model
+            ?? env.GetValueOrDefault("AI_MODEL")
+            ?? providerConfig?.DefaultModel
+            ?? "";
 
         var modelArg = (string.IsNullOrWhiteSpace(aiModel) || aiModel.Equals("auto", StringComparison.OrdinalIgnoreCase))
             ? ""
@@ -34,9 +44,8 @@ public class AntigravityCliService : IAntigravityCliService
 
         // 実行ファイル名は appsettings.json の AiCliChain:Providers:antigravity:Command から取得する。
         // 未設定の場合のみ従来の既定値 "antigravity" にフォールバックする。
-        var command = _cliOptions.Providers.TryGetValue("antigravity", out var providerConfig)
-            && !string.IsNullOrWhiteSpace(providerConfig.Command)
-            ? providerConfig.Command
+        var command = !string.IsNullOrWhiteSpace(providerConfig?.Command)
+            ? providerConfig!.Command
             : "antigravity";
 
         var startInfo = new ProcessStartInfo

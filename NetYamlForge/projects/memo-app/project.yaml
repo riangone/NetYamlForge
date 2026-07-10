@@ -1,0 +1,34 @@
+name: memo-app
+displayName: Memo App
+version: "1.0.0"
+
+database:
+  type: sqlite
+  path: database/memo-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  dashboardTheme: workspace
+  header:
+    title: "Memo App"
+  navigation:
+    showDashboard: true
+    entities: []
+    items:
+      - label: Home
+        url: /memo-app
+        icon: 🏠
+      - label: Dashboard
+        controller: Dashboard
+        action: Index
+        icon: 📊
+
+home_page:
+  icon: "🗂️"
+  tagline: "Memo App"
+  tags: []

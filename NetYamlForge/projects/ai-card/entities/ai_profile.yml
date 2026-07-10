@@ -1,0 +1,46 @@
+entities:
+  ai_profile:
+    table: 'ai_profile'
+    key: 'id'
+    displayName: 'Ai Profile'
+    displayNameKey: 'entities.ai_profile.displayName'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['ai_identity_id', 'goals_json', 'can_share_json', 'cannot_share_json', 'expertise_json', 'greeting_message', 'ai_instructions', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'Id', labelKey: 'entities.ai_profile.columns.id.label', sortable: true }
+      ai_identity_id: { type: int, required: true, label: 'Ai Identity Id', labelKey: 'entities.ai_profile.columns.ai_identity_id.label', sortable: true }
+      goals_json: { type: string, label: 'Goals Json', labelKey: 'entities.ai_profile.columns.goals_json.label', searchable: true, sortable: true }
+      can_share_json: { type: string, label: 'Can Share Json', labelKey: 'entities.ai_profile.columns.can_share_json.label', searchable: true, sortable: true }
+      cannot_share_json: { type: string, label: 'Cannot Share Json', labelKey: 'entities.ai_profile.columns.cannot_share_json.label', searchable: true, sortable: true }
+      expertise_json: { type: string, label: 'Expertise Json', labelKey: 'entities.ai_profile.columns.expertise_json.label', searchable: true, sortable: true }
+      greeting_message: { type: string, label: 'Greeting Message', labelKey: 'entities.ai_profile.columns.greeting_message.label', searchable: true, sortable: true }
+      ai_instructions: { type: string, label: 'Ai Instructions', labelKey: 'entities.ai_profile.columns.ai_instructions.label', searchable: true, sortable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.ai_profile.columns.updated_at.label', searchable: true, sortable: true }
+    forms:
+      ai_identity_id:
+        type: int
+        required: true
+        label: 'Ai Identity Id'
+        labelKey: 'entities.ai_profile.forms.ai_identity_id.label'
+        editable: true
+        foreignKey:
+          entity: ai_identity
+          displayColumn: 'display_name'
+      goals_json: { type: string, label: 'Goals Json', labelKey: 'entities.ai_profile.forms.goals_json.label', editable: true }
+      can_share_json: { type: string, label: 'Can Share Json', labelKey: 'entities.ai_profile.forms.can_share_json.label', editable: true }
+      cannot_share_json: { type: string, label: 'Cannot Share Json', labelKey: 'entities.ai_profile.forms.cannot_share_json.label', editable: true }
+      expertise_json: { type: string, label: 'Expertise Json', labelKey: 'entities.ai_profile.forms.expertise_json.label', editable: true }
+      greeting_message: { type: string, label: 'Greeting Message', labelKey: 'entities.ai_profile.forms.greeting_message.label', editable: true }
+      ai_instructions: { type: string, label: 'Ai Instructions', labelKey: 'entities.ai_profile.forms.ai_instructions.label', editable: true }
+      updated_at: { type: string, label: 'Updated At', labelKey: 'entities.ai_profile.forms.updated_at.label', editable: true }
+    filters: {}
+    links: {}
