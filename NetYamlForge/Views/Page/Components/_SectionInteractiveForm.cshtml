@@ -305,7 +305,16 @@
             
             var aiRespKey = FindKey(detailRow, "AiResponse", "ai_response") ?? "AiResponse";
             var aiResp = detailRow.TryGetValue(aiRespKey, out var aiVal) ? aiVal?.ToString() ?? "" : "";
-            
+
+            var isFallbackKey = FindKey(detailRow, "IsFallback", "is_fallback") ?? "IsFallback";
+            var isFallbackRaw = detailRow.TryGetValue(isFallbackKey, out var fbVal) ? fbVal : null;
+            var isFallback = isFallbackRaw switch {
+                bool b => b,
+                string s => s == "1" || string.Equals(s, "true", StringComparison.OrdinalIgnoreCase),
+                int i => i != 0,
+                _ => false
+            };
+
             if (!string.IsNullOrEmpty(sentiment) || !string.IsNullOrEmpty(aiResp))
             {
                 var translatedSentiment = sentiment.Trim() switch {
@@ -329,6 +338,13 @@
                         </span>
                         <span class="text-xs text-gray-400">@T("projects.diary-companion.views.form.ai_message_author", "来自 AI 心灵伴侣")</span>
                     </div>
+                    @if (isFallback)
+                    {
+                        <div class="flex items-center gap-1.5 text-xs text-amber-600">
+                            <span>⏳</span>
+                            <span>@T("projects.diary-companion.views.form.ai_fallback_notice", "AI 伴侣暂时没跟上，先用这句话代替～不过你的日记已经稳稳保存好啦")</span>
+                        </div>
+                    }
                     @if (!string.IsNullOrEmpty(aiResp))
                     {
                         <p class="text-xs text-gray-600 italic leading-relaxed whitespace-pre-line bg-white/40 p-4 rounded-xl border border-white/60">

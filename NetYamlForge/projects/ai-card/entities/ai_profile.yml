@@ -1,3 +1,10 @@
+# *_json 列の想定フォーマット（A2A の Agent Card を参考に整理。DB スキーマは変更していない）:
+#   goals_json / can_share_json / cannot_share_json / expertise_json
+#     → JSON 文字列配列 '["a","b"]'（例は init_seed.sql 参照）。
+#        expertise_json は将来 Agent Card の "skills" に、goals_json は独自拡張 "goals" に対応する
+#        （AhpHandshakeController.BuildAgentCard 参照。/{project}/ahp/agent-card/{sessionToken} で確認可）。
+#   greeting_message  → Agent Card の "description" に相当。
+#   ai_instructions   → Agent Card には存在しない AHP 独自の運用指示（プロンプトにのみ使う。外部公開しない）。
 entities:
   ai_profile:
     table: 'ai_profile'

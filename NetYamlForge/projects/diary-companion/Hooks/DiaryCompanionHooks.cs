@@ -8,7 +8,11 @@ using System.Text.Json;
 using Dapper;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI;
+using NetYamlForge.Services.Auth;
+using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.BatchJob.Sdk;
+using NetYamlForge.Services.Connection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
@@ -47,14 +51,22 @@ public class AnalyzeDiaryMoodHook : IEntityHook
     private readonly IAntigravityCliService _ai;
     private readonly ICliChainService _cliChain;
     private readonly ILogger<AnalyzeDiaryMoodHook> _logger;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public string Name => "analyze_diary_mood";
 
-    public AnalyzeDiaryMoodHook(IAntigravityCliService ai, ICliChainService cliChain, ILogger<AnalyzeDiaryMoodHook> logger)
+    public AnalyzeDiaryMoodHook(
+        IAntigravityCliService ai,
+        ICliChainService cliChain,
+        ILogger<AnalyzeDiaryMoodHook> logger,
+        IServiceScopeFactory scopeFactory)
     {
         _ai = ai;
         _cliChain = cliChain;
         _logger = logger;
+        // 保存请求返回后，情绪分析在独立的 DI scope 中后台执行（见 RunBackgroundAnalysisAsync），
+        // 不能复用请求作用域内的 db/tx（保存完成时已被释放），因此需要自己开新的 scope 取 DB 连接。
+        _scopeFactory = scopeFactory;
     }
 
     public async Task<HookResult> BeforeAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
@@ -190,7 +202,8 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                 }
             }
 
-            // 如果是更新（Edit）操作，先清除旧的图片标注后缀/追加文本，防止重复叠加
+            // 如果是更新（Edit）操作，先清除旧的图片标注追加文本，防止重复叠加
+            // 注意：图片标注不再写入 Title，因此这里只需要清理 Content 里的旧标注文本。
             if (ctx.Operation == CrudOperation.Update && ctx.Id.HasValue)
             {
                 try
@@ -202,21 +215,10 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                     if (oldRow != null)
                     {
                         string? oldImageLabel = oldRow.ImageLabel?.ToString();
-                        if (!string.IsNullOrWhiteSpace(oldImageLabel))
+                        if (!string.IsNullOrWhiteSpace(oldImageLabel) && !string.IsNullOrWhiteSpace(content))
                         {
-                            if (!string.IsNullOrWhiteSpace(title))
-                            {
-                                var oldSuffix = $" [{oldImageLabel}]";
-                                if (title.EndsWith(oldSuffix))
-                                {
-                                    title = title.Substring(0, title.Length - oldSuffix.Length);
-                                }
-                            }
-                            if (!string.IsNullOrWhiteSpace(content))
-                            {
-                                var oldLabelText = $"\n\n[图片标注：{oldImageLabel}]";
-                                content = content.Replace(oldLabelText, "");
-                            }
+                            var oldLabelText = $"\n\n[图片标注：{oldImageLabel}]";
+                            content = content.Replace(oldLabelText, "");
                         }
                     }
                 }
@@ -226,28 +228,15 @@ public class AnalyzeDiaryMoodHook : IEntityHook
                 }
             }
 
-            // 如果有图片标注，将其显示到日记标题和日记内容里
-            if (!string.IsNullOrWhiteSpace(imageLabel))
+            // 如果有图片标注，只将其显示到日记内容里，不再追加到标题（按需求：标题保持用户原样）
+            if (!string.IsNullOrWhiteSpace(imageLabel) && !string.IsNullOrWhiteSpace(content))
             {
-                if (!string.IsNullOrWhiteSpace(title))
+                var labelText = $"\n\n[图片标注：{imageLabel}]";
+                if (!content.Contains(labelText))
                 {
-                    var suffix = $" [{imageLabel}]";
-                    if (!title.EndsWith(suffix))
-                    {
-                        title = $"{title}{suffix}";
-                    }
-                    ctx.Values["Title"] = title;
+                    content = $"{content}{labelText}";
                 }
-
-                if (!string.IsNullOrWhiteSpace(content))
-                {
-                    var labelText = $"\n\n[图片标注：{imageLabel}]";
-                    if (!content.Contains(labelText))
-                    {
-                        content = $"{content}{labelText}";
-                    }
-                    ctx.Values["Content"] = content;
-                }
+                ctx.Values["Content"] = content;
             }
 
             if (string.IsNullOrWhiteSpace(content) && string.IsNullOrWhiteSpace(title))
@@ -371,87 +360,25 @@ JSON 示例：
             // 用户在页面选择的 AI 厂商 / 模型 / 级别（与图片标注共用同一套归一化逻辑）
             var (aiProvider, targetModel, opencodeVariant) = ResolveAiSelection(ctx);
 
-            _logger.LogInformation("正在调用 AI 进行日记分析 (提供商: {Provider}, 模型: {Model})...", aiProvider, targetModel);
+            // 情绪分析改为「保存不等待」：不在这里同步调用 CLI 链，先用兜底文案让保存立即完成，
+            // 真正的 AI 调用挪到 AfterAsync 里异步触发（见 RunBackgroundAnalysisAsync），
+            // 完成后直接 UPDATE 回这一行记录。前端复用现有 IsFallback 徽章展示「AI 还没写完」的提示，
+            // 无需新增字段；用户重新打开详情页/刷新列表即可看到替换后的真实评估内容。
+            ctx.Values["Sentiment"] = sentimentNeutral;
+            ctx.Values["AiResponse"] = defaultAiResponse;
+            ctx.Values["IsFallback"] = true;
 
-            DiaryAnalysisResult? result = null;
-            // 设定 8 秒超时保护，防止 AI 接口超时导致用户日记保存失败
-            var cleanedText = await CallCliPromptAsync(
-                aiProvider,
-                targetModel,
-                prompt,
-                TimeSpan.FromSeconds(8),
-                opencodeVariant);
-            if (!string.IsNullOrWhiteSpace(cleanedText))
-            {
-                if (AiResultParser.TryParseJson<DiaryAnalysisResult>(cleanedText, out var parsed, out var parseError))
-                {
-                    result = parsed;
-                }
-                else
-                {
-                    _logger.LogError("解析日记情绪分析 JSON 失败: {Error}。原始文本: {Text}", parseError, cleanedText);
-                }
-            }
-            else
-            {
-                _logger.LogWarning("AI 情绪分析调用超时或返回空，使用兜底配置保存。");
-            }
-
-            if (result != null)
-            {
-                // 1. 宽松判定情绪映射
-                var normSentiment = result.Sentiment?.Trim().ToLower() ?? "";
-                string finalSentiment;
-                if (normSentiment.Contains("积极") || normSentiment.Contains("positive") || normSentiment.Contains("ポジティブ") || normSentiment.Contains("긍정") || normSentiment.Contains("🌸") || normSentiment.Contains("积极"))
-                {
-                    finalSentiment = sentimentPositive;
-                }
-                else if (normSentiment.Contains("消极") || normSentiment.Contains("negative") || normSentiment.Contains("ネガティブ") || normSentiment.Contains("부정") || normSentiment.Contains("🌧️") || normSentiment.Contains("消极"))
-                {
-                    finalSentiment = sentimentNegative;
-                }
-                else
-                {
-                    finalSentiment = sentimentNeutral;
-                }
-                ctx.Values["Sentiment"] = finalSentiment;
-
-                // 2. 强制语言检验防错网
-                var finalResponse = result.AiResponse;
-                if (aiLanguage != "zh-CN" && !string.IsNullOrWhiteSpace(finalResponse))
-                {
-                    try
-                    {
-                        var translatePrompt = aiLanguage == "ja-JP"
-                            ? $"Please translate the following emotional support message into warm, polite, and natural Japanese. Output ONLY the Japanese translation, no other text:\n{finalResponse}"
-                            : aiLanguage == "ko-KR"
-                                ? $"Please translate the following emotional support message into warm, polite, and natural Korean. Output ONLY the Korean translation, no other text:\n{finalResponse}"
-                                : $"Please translate the following emotional support message into warm, natural English. Output ONLY the English translation, no other text:\n{finalResponse}";
-
-                        _logger.LogInformation("正在强制将 AI 回复翻译为目标语言 ({Lang})...", aiLanguage);
-                        var translated = await CallCliPromptAsync(
-                            aiProvider,
-                            targetModel,
-                            translatePrompt,
-                            TimeSpan.FromSeconds(8),
-                            opencodeVariant);
-                        if (!string.IsNullOrWhiteSpace(translated))
-                        {
-                            finalResponse = translated.Trim().Trim('"', '`');
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "强制翻译 AI 回复失败，使用原回复。");
-                    }
-                }
-                ctx.Values["AiResponse"] = finalResponse;
-            }
-            else
-            {
-                ctx.Values["Sentiment"] = sentimentNeutral;
-                ctx.Values["AiResponse"] = defaultAiResponse;
-            }
+            // 把后台任务需要的一切都放进 Data，交给 AfterAsync（此时 ctx.Id 才保证有值，
+            // Create 场景下 Id 是 InsertAsync 之后才赋值的）。
+            ctx.Data["AiPrompt"] = prompt;
+            ctx.Data["AiLanguage"] = aiLanguage;
+            ctx.Data["AiProvider"] = aiProvider;
+            ctx.Data["AiTargetModel"] = targetModel;
+            ctx.Data["AiOpencodeVariant"] = opencodeVariant;
+            ctx.Data["AiSentimentPositive"] = sentimentPositive;
+            ctx.Data["AiSentimentNeutral"] = sentimentNeutral;
+            ctx.Data["AiSentimentNegative"] = sentimentNegative;
+            ctx.Data["AiDefaultResponse"] = defaultAiResponse;
         }
         catch (Exception ex)
         {
@@ -465,6 +392,7 @@ JSON 示例：
                     : aiLanguage == "ko-KR"
                         ? "일기가 안전하게 저장되었습니다. 오늘 하루도 수고 많으셨습니다. 편안한 밤 되세요."
                         : "今天辛苦了，AI 伴侣正处于休眠中，但你的心事已被温柔记录。";
+            ctx.Values["IsFallback"] = true;
         }
 
         return HookResult.Continue();
@@ -596,7 +524,177 @@ JSON 示例：
     }
 
     public Task AfterAsync(EntityHookContext ctx, IDbConnection db, IDbTransaction? tx)
-        => Task.CompletedTask;
+    {
+        // 此时 ctx.Id 对 Create/Update 都已确定（InsertAsync 之后才赋值），
+        // 是触发后台异步分析的唯一正确时机；BeforeAsync 阶段 Create 场景下还没有 Id。
+        if (!ctx.Id.HasValue)
+            return Task.CompletedTask;
+
+        if (ctx.Data.GetValueOrDefault("AiPrompt") is not string prompt || string.IsNullOrWhiteSpace(prompt))
+        {
+            // BeforeAsync 里标题和正文都为空时会提前 return，没有生成 prompt，这里自然跳过。
+            return Task.CompletedTask;
+        }
+
+        var diaryId = ctx.Id.Value;
+        var aiLanguage = ctx.Data.GetValueOrDefault("AiLanguage") as string ?? "zh-CN";
+        var aiProvider = ctx.Data.GetValueOrDefault("AiProvider") as string ?? "antigravity";
+        var targetModel = ctx.Data.GetValueOrDefault("AiTargetModel") as string ?? "";
+        var opencodeVariant = ctx.Data.GetValueOrDefault("AiOpencodeVariant") as string;
+        var sentimentPositive = ctx.Data.GetValueOrDefault("AiSentimentPositive") as string ?? "";
+        var sentimentNeutral = ctx.Data.GetValueOrDefault("AiSentimentNeutral") as string ?? "";
+        var sentimentNegative = ctx.Data.GetValueOrDefault("AiSentimentNegative") as string ?? "";
+        var defaultAiResponse = ctx.Data.GetValueOrDefault("AiDefaultResponse") as string ?? "";
+        var userName = ctx.UserName;
+
+        // 有意不 await：保存请求应立刻返回，AI 评估在后台跑完后直接 UPDATE 回这一行。
+        // RunBackgroundAnalysisAsync 内部把所有异常都吞掉并记日志，不会产生未观察异常。
+        _ = Task.Run(() => RunBackgroundAnalysisAsync(
+            diaryId, prompt, aiLanguage, aiProvider, targetModel, opencodeVariant,
+            sentimentPositive, sentimentNeutral, sentimentNegative, defaultAiResponse, userName));
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 在独立的 DI scope 中异步执行日记情绪分析 + 强制翻译，完成后直接 UPDATE 回 DiaryEntry。
+    /// 由 AfterAsync 以 fire-and-forget 方式触发，不阻塞保存请求，因此超时窗口可以放宽：
+    /// CLI 链单个 provider 内部已有约 90 秒超时，这里给到 100 秒，足够覆盖一次完整尝试。
+    /// </summary>
+    private async Task RunBackgroundAnalysisAsync(
+        int diaryId,
+        string prompt,
+        string aiLanguage,
+        string aiProvider,
+        string targetModel,
+        string? opencodeVariant,
+        string sentimentPositive,
+        string sentimentNeutral,
+        string sentimentNegative,
+        string defaultAiResponse,
+        string? userName)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "后台异步日记情绪分析开始 (id={Id}, provider={Provider}, model={Model})...",
+                diaryId, aiProvider, targetModel);
+
+            var cleanedText = await CallCliPromptAsync(
+                aiProvider, targetModel, prompt, TimeSpan.FromSeconds(100), opencodeVariant);
+
+            DiaryAnalysisResult? result = null;
+            if (!string.IsNullOrWhiteSpace(cleanedText))
+            {
+                if (AiResultParser.TryParseJson<DiaryAnalysisResult>(cleanedText, out var parsed, out var parseError))
+                {
+                    result = parsed;
+                }
+                else
+                {
+                    _logger.LogError(
+                        "解析日记情绪分析 JSON 失败(后台任务, id={Id}): {Error}。原始文本: {Text}",
+                        diaryId, parseError, cleanedText);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("AI 情绪分析调用超时或返回空(后台任务)，写回兜底配置。id={Id}", diaryId);
+            }
+
+            string finalSentiment;
+            string finalResponse;
+            bool isFallback;
+
+            if (result != null)
+            {
+                var normSentiment = result.Sentiment?.Trim().ToLower() ?? "";
+                if (normSentiment.Contains("积极") || normSentiment.Contains("positive") || normSentiment.Contains("ポジティブ") || normSentiment.Contains("긍정") || normSentiment.Contains("🌸"))
+                {
+                    finalSentiment = sentimentPositive;
+                }
+                else if (normSentiment.Contains("消极") || normSentiment.Contains("negative") || normSentiment.Contains("ネガティブ") || normSentiment.Contains("부정") || normSentiment.Contains("🌧️"))
+                {
+                    finalSentiment = sentimentNegative;
+                }
+                else
+                {
+                    finalSentiment = sentimentNeutral;
+                }
+
+                finalResponse = string.IsNullOrWhiteSpace(result.AiResponse) ? defaultAiResponse : result.AiResponse;
+                isFallback = false;
+
+                if (aiLanguage != "zh-CN" && !string.IsNullOrWhiteSpace(finalResponse))
+                {
+                    try
+                    {
+                        var translatePrompt = aiLanguage == "ja-JP"
+                            ? $"Please translate the following emotional support message into warm, polite, and natural Japanese. Output ONLY the Japanese translation, no other text:\n{finalResponse}"
+                            : aiLanguage == "ko-KR"
+                                ? $"Please translate the following emotional support message into warm, polite, and natural Korean. Output ONLY the Korean translation, no other text:\n{finalResponse}"
+                                : $"Please translate the following emotional support message into warm, natural English. Output ONLY the English translation, no other text:\n{finalResponse}";
+
+                        _logger.LogInformation("后台任务正在强制将 AI 回复翻译为目标语言 ({Lang}), id={Id}...", aiLanguage, diaryId);
+                        var translated = await CallCliPromptAsync(
+                            aiProvider, targetModel, translatePrompt, TimeSpan.FromSeconds(100), opencodeVariant);
+                        if (!string.IsNullOrWhiteSpace(translated))
+                        {
+                            finalResponse = translated.Trim().Trim('"', '`');
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "后台任务强制翻译 AI 回复失败，使用原回复。id={Id}", diaryId);
+                    }
+                }
+            }
+            else
+            {
+                // 后台重试仍然失败/超时：把兜底文案落回真正的兜底提示，而不是让「AI 还在思考」的占位文案永远留在库里。
+                finalSentiment = sentimentNeutral;
+                finalResponse = defaultAiResponse;
+                isFallback = true;
+            }
+
+            using var scope = _scopeFactory.CreateScope();
+            var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+            using var db = await dbFactory.CreateConnectionAsync("diary-companion");
+
+            await SqliteWriteGate.RunAsync(db, async () =>
+            {
+                await db.ExecuteAsync(
+                    "UPDATE DiaryEntry SET Sentiment = @Sentiment, AiResponse = @AiResponse, IsFallback = @IsFallback WHERE Id = @Id",
+                    new { Sentiment = finalSentiment, AiResponse = finalResponse, IsFallback = isFallback, Id = diaryId });
+            });
+
+            try
+            {
+                var audit = scope.ServiceProvider.GetRequiredService<IAuditLogService>();
+                var detail = JsonSerializer.Serialize(new
+                {
+                    type = "ai_background_update",
+                    entity = "DiaryEntry",
+                    id = diaryId,
+                    Sentiment = finalSentiment,
+                    IsFallback = isFallback
+                });
+                await audit.WriteAsync("ai_background_update", "DiaryEntry", detail, userName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "写入后台 AI 分析审计日志失败。id={Id}", diaryId);
+            }
+
+            _logger.LogInformation(
+                "后台异步日记情绪分析完成并已写回。id={Id}, fallback={Fallback}", diaryId, isFallback);
+        }
+        catch (Exception ex)
+        {
+            // 任何异常都在此吞掉：这是 fire-and-forget 任务，绝不能抛到 TaskScheduler.UnobservedTaskException。
+            _logger.LogError(ex, "后台异步日记情绪分析任务失败。id={Id}", diaryId);
+        }
+    }
 }
 
 /// <summary>

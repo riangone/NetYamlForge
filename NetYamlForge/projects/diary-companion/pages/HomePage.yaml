@@ -12,10 +12,10 @@ sections:
     titleKey: projects.diary-companion.pages.HomePage.sections.diary_list.title
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageThumbnailBase64, ImageLabel
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, IsFallback, CreatedAt, ImageThumbnailBase64, ImageLabel
       FROM DiaryEntry
       ORDER BY CreatedAt DESC
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageThumbnailBase64, ImageLabel]
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, IsFallback, CreatedAt, ImageThumbnailBase64, ImageLabel]
     pageSize: 10
     defaultSort: CreatedAt
     defaultSortDir: desc

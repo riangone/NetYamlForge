@@ -481,15 +481,15 @@
                      title: `@Html.Raw(JavaScriptEncoder.Default.Encode(title))`,
                      content: `@Html.Raw(JavaScriptEncoder.Default.Encode(content))`,
                      weather: "@weather",
-                     weatherText: "@weatherText",
-                     weatherEmoji: "@GetWeatherEmoji(weather)",
+                     weatherText: `@Html.Raw(JavaScriptEncoder.Default.Encode(weatherText))`,
+                     weatherEmoji: `@Html.Raw(JavaScriptEncoder.Default.Encode(GetWeatherEmoji(weather)))`,
                      mood: "@mood",
-                     moodText: "@moodText",
-                     moodEmoji: "@GetMoodEmoji(mood)",
+                     moodText: `@Html.Raw(JavaScriptEncoder.Default.Encode(moodText))`,
+                     moodEmoji: `@Html.Raw(JavaScriptEncoder.Default.Encode(GetMoodEmoji(mood)))`,
                      location: `@Html.Raw(JavaScriptEncoder.Default.Encode(location))`,
-                     sentiment: "@sentimentText",
+                     sentiment: `@Html.Raw(JavaScriptEncoder.Default.Encode(sentimentText))`,
                      aiResponse: `@Html.Raw(JavaScriptEncoder.Default.Encode(aiResp))`,
-                     createdAt: "@createdAt",
+                     createdAt: `@Html.Raw(JavaScriptEncoder.Default.Encode(createdAt))`,
                      editUrl: "@editUrl",
                      imageBase64: "",
                      imageThumbnailBase64: `@Html.Raw(imageThumbnailBase64)`,
@@ -528,7 +528,7 @@
                      modalImg.src = diary.imageBase64 && diary.imageBase64.trim() !== '' ? diary.imageBase64 : diary.imageThumbnailBase64;
                      modalImg.style.filter = diary.imageBase64 ? 'none' : 'blur(4px)';
                      modalImg.style.transition = 'filter 0.3s ease-out';
-                     modalImgLabel.innerText = diary.imageLabel ? `@T("projects.diary-companion.views.list.image_label_prefix", "📸 图片标注：")` + diary.imageLabel : '';
+                     modalImgLabel.innerText = diary.imageLabel ? `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.image_label_prefix", "📸 图片标注：")))` + diary.imageLabel : '';
  
                      if (!diary.imageBase64 || diary.imageBase64.trim() === '') {
                          try {
@@ -560,8 +560,8 @@
              const aiSection = document.getElementById('modal_ai_section_@(sec.Id)');
              if (diary.sentiment || diary.aiResponse) {
                  aiSection.classList.remove('hidden');
-                 document.getElementById('modal_ai_sentiment_@(sec.Id)').innerText = diary.sentiment || `@T("projects.diary-companion.views.list.pending_evaluation", "有待评估")`;
-                 document.getElementById('modal_ai_response_@(sec.Id)').innerText = diary.aiResponse || `@T("projects.diary-companion.views.list.ai_thinking", "AI 正在思考中...")`;
+                 document.getElementById('modal_ai_sentiment_@(sec.Id)').innerText = diary.sentiment || `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.pending_evaluation", "有待评估")))`;
+                 document.getElementById('modal_ai_response_@(sec.Id)').innerText = diary.aiResponse || `@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.ai_thinking", "AI 正在思考中...")))`;
              } else {
                  aiSection.classList.add('hidden');
              }
@@ -674,11 +674,11 @@
                      }
                  } else {
                      const data = await response.json();
-                     alert(`@T("projects.diary-companion.views.list.unknown_error", "删除失败:") ${data.error || ''}`);
+                     alert(`@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.unknown_error", "删除失败:"))) ${data.error || ''}`);
                  }
              } catch (error) {
                  console.error('Error deleting:', error);
-                 alert(`@T("projects.diary-companion.views.list.unknown_error", "删除发生网络错误，请重试")`);
+                 alert(`@Html.Raw(JavaScriptEncoder.Default.Encode(T("projects.diary-companion.views.list.unknown_error", "删除发生网络错误，请重试")))`);
              }
          }
      })();

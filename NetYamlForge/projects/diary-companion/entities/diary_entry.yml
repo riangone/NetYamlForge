@@ -85,6 +85,13 @@ entities:
         labelKey: projects.diary-companion.entity.diary_entry.fields.aiResponse
         editable: true
         placeholder: "保存后由 AI 为你写下暖心寄语"
+      IsFallback:
+        type: bool
+        required: false
+        default: false
+        label: 是否为兜底文案
+        labelKey: projects.diary-companion.entity.diary_entry.fields.isFallback
+        editable: true
       AiLanguage:
         type: string
         required: false
@@ -231,6 +238,10 @@ entities:
         type: string
         label: AI 心灵伴侣寄语
         labelKey: projects.diary-companion.entity.diary_entry.fields.aiResponse
+      IsFallback:
+        type: bool
+        label: 是否为兜底文案
+        labelKey: projects.diary-companion.entity.diary_entry.fields.isFallback
       AiLanguage:
         type: string
         label: AI 评估语言
@@ -258,6 +269,13 @@ entities:
         - now:CreatedAt
         - analyze_diary_mood
       beforeUpdate:
+        - analyze_diary_mood
+      # 情绪分析已改为「保存不等待」：BeforeAsync 只写兜底文案 + 把 prompt 等参数塞进 ctx.Data，
+      # 真正触发后台 AI 调用（Task.Run）的代码在 AfterAsync 里，afterCreate/afterUpdate
+      # 必须显式挂载 analyze_diary_mood，否则 AfterAsync 永远不会被框架调用，等于 AI 从未被触发。
+      afterCreate:
+        - analyze_diary_mood
+      afterUpdate:
         - analyze_diary_mood
 
     paging:

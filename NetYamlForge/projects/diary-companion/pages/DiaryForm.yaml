@@ -12,10 +12,10 @@ sections:
     titleKey: projects.diary-companion.pages.DiaryForm.sections.diary_detail.title
     sourceType: custom
     source: >
-      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel
+      SELECT Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, IsFallback, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel
       FROM DiaryEntry
       WHERE Id = @id
-    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel]
+    columns: [Id, Title, Content, Weather, MoodBefore, Location, Sentiment, AiResponse, IsFallback, CreatedAt, ImageBase64, ImageLabel, AiLanguage, AiProvider, AiModel, AiLevel]
     pageSize: 1
     editable: false
     readOnly: true

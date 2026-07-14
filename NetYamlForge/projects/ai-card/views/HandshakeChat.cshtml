@@ -4,9 +4,15 @@
     var postUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/message";
     var completeUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/complete";
     var linkAiUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/link-ai";
+    var aiTurnUrl = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/ai-turn";
+    var proposalDecideUrlBase = $"/{Model.ProjectName}/ahp/chat/{Model.SessionToken}/proposal/";
     var registerUrl = Model.RegisterUrl;
     var isClosed = Model.State != "pending" && Model.State != "connected";
-    var initial = string.IsNullOrEmpty(Model.InitiatorName) ? "A" : Model.InitiatorName.Substring(0, 1);
+    // Substring(0, 1) は絵文字などのサロゲートペアの前半だけを切り出して文字化けさせることがあるため、
+    // 書記素（テキスト要素）単位で先頭 1 文字を取り出す。
+    var initial = string.IsNullOrEmpty(Model.InitiatorName)
+        ? "A"
+        : System.Globalization.StringInfo.GetNextTextElement(Model.InitiatorName);
 }
 <!DOCTYPE html>
 <html lang="ja">
@@ -19,77 +25,207 @@
         html, body { height: 100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-            background: #f4f5f7; color: #1e293b;
+            background: #e7e9f3; color: #1e293b; font-size: 15px;
             display: flex; flex-direction: column; align-items: center;
         }
-        .shell { width: 100%; max-width: 560px; height: 100dvh; background: #fff; display: flex; flex-direction: column; }
+        .shell {
+            width: 100%; max-width: 560px; height: 100dvh; background: #fff; display: flex; flex-direction: column;
+            box-shadow: 0 0 0 1px rgba(15,23,42,.04), 0 12px 40px rgba(30,27,75,.10);
+        }
 
-        /* ── Identity strip (secondary, compact — the point is the chat, not the card) ── */
-        .strip { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+        /* ── Identity strip: still compact (chat is primary) but with enough weight/contrast to read as its own tier ── */
+        .strip {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            background: linear-gradient(135deg, #eef1ff 0%, #ffffff 100%);
+            border-bottom: 1px solid #e2e5f5; position: relative; z-index: 1;
+        }
         .avatar {
-            width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0; font-size: 16px; font-weight: 800;
-            display: flex; align-items: center; justify-content: center; color: #fff; background: #6366f1;
+            width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; font-size: 18px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; color: #fff;
+            background: linear-gradient(135deg, #6366f1, #4338ca); box-shadow: 0 3px 10px rgba(79,70,229,.35);
         }
         .strip-text { flex: 1; min-width: 0; }
-        .name { font-size: 14px; font-weight: 800; line-height: 1.3; }
-        .meta { font-size: 11px; color: #64748b; line-height: 1.3; }
-        .aiid { font-family: ui-monospace, monospace; color: #4f46e5; }
+        .name { font-size: 16px; font-weight: 800; line-height: 1.3; }
+        .meta { font-size: 12.5px; color: #64748b; line-height: 1.4; margin-top: 1px; }
+        .aiid { font-family: ui-monospace, monospace; color: #4f46e5; font-weight: 700; }
         .strip-toggle {
-            flex-shrink: 0; font-size: 11px; color: #6366f1; background: #eef2ff; border: 1px solid #e0e7ff;
-            border-radius: 8px; padding: 6px 9px; cursor: pointer;
+            flex-shrink: 0; font-size: 12px; font-weight: 700; color: #4338ca; background: #fff; border: 1px solid #c7d2fe;
+            border-radius: 9px; padding: 7px 11px; cursor: pointer; box-shadow: 0 1px 2px rgba(67,56,202,.08);
         }
-        .strip-toggle:hover { background: #e0e7ff; }
+        .strip-toggle:hover { background: #eef2ff; }
 
         /* ── Expanded card detail (opt-in, hidden until requested) ── */
-        .card-detail { display: none; padding: 0 14px 14px; border-bottom: 1px solid #f1f5f9; }
+        .card-detail { display: none; padding: 2px 16px 16px; border-bottom: 1px solid #e2e5f5; background: #fbfbfe; }
         .card-detail.on { display: block; }
-        .intent { margin-top: 4px; padding: 8px 12px; border-radius: 10px; font-size: 12px; color: #6d28d9; background: #faf5ff; }
-        .section { margin-top: 14px; }
-        .section h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6366f1; margin-bottom: 8px; }
-        .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
-        .tag { font-size: 12px; padding: 4px 11px; border-radius: 99px; color: #4338ca; background: #eef2ff; border: 1px solid #e0e7ff; }
-        .goal-list { margin: 0; padding-left: 18px; font-size: 13px; color: #475569; line-height: 1.7; }
-        .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-        .btn { border: none; border-radius: 10px; padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s; }
+        .intent { margin-top: 6px; padding: 9px 13px; border-radius: 10px; font-size: 13px; color: #6d28d9; background: #f3e8ff; font-weight: 600; }
+        .section { margin-top: 16px; }
+        .section h4 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #6366f1; margin-bottom: 9px; }
+        .tag-row { display: flex; flex-wrap: wrap; gap: 7px; }
+        .tag { font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 99px; color: #4338ca; background: #eef2ff; border: 1px solid #e0e7ff; }
+        .goal-list { margin: 0; padding-left: 19px; font-size: 14px; color: #475569; line-height: 1.75; }
+        .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .btn { border: none; border-radius: 10px; padding: 10px 15px; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .1s; }
+        .btn:active { transform: scale(.97); }
         .btn:disabled { opacity: .4; cursor: not-allowed; }
         .btn-save { background: #f8fafc; color: #1e293b; border: 1px solid #e2e8f0; }
         .btn-save:hover { background: #f1f5f9; }
-        .btn-cta { background: #7c3aed; color: #fff; }
+        .btn-cta { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; box-shadow: 0 3px 10px rgba(124,58,237,.3); }
 
-        /* ── Link AI (collapsed, low priority) ── */
-        .link-ai-toggle { font-size: 12px; color: #6366f1; background: none; border: none; cursor: pointer; padding: 0; margin-top: 14px; }
-        .link-ai-body { display: none; margin-top: 10px; }
-        .link-ai-body.on { display: block; }
+        /* ── 「自分のAIを用意する」: 既存ID連携／その場で作成／名前で正式登録の3経路を
+               1つの折りたたみパネル+タブに統合。以前は card-detail 内に隠れたトグル(既存ID連携、
+               その場で作成はさらにその中の「または」)と、常時表示バナー(名前で正式登録)に
+               分散していて、同じ目的の機能が別々の場所に散らばり分かりにくかった ── */
+        .own-ai-panel { margin: 12px 14px 0; }
+        .own-ai-head {
+            display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 14px;
+            background: linear-gradient(135deg, #f5f0ff 0%, #fdf4ff 100%);
+            border: 1.5px solid #e9d5ff; cursor: pointer; box-shadow: 0 2px 10px rgba(124,58,237,.08);
+        }
+        .own-ai-title { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 800; color: #6d28d9; }
+        .own-ai-toggle {
+            flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px; border: 1px solid #d8b4fe;
+            background: #fff; color: #7c3aed; font-size: 12px; cursor: pointer; transition: transform .2s;
+        }
+        .own-ai-toggle.collapsed { transform: rotate(-90deg); }
+        .own-ai-body { display: none; padding: 12px 14px 2px; }
+        .own-ai-body.on { display: block; }
+
+        .own-ai-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+        .own-ai-tab {
+            flex: 1; min-width: 0; border: 1.5px solid #e2e8f0; background: #fff; color: #64748b;
+            border-radius: 9px; padding: 7px 6px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .own-ai-tab.on { background: #f5f3ff; border-color: #c4b5fd; color: #6d28d9; }
+        .own-ai-pane { display: none; }
+        .own-ai-pane.on { display: block; }
+        .cta-text { line-height: 1.55; margin-bottom: 9px; font-size: 13px; font-weight: 600; color: #6d28d9; }
+
         .link-ai-row { display: flex; gap: 6px; }
         .link-ai-row input {
             flex: 1; min-width: 0; border-radius: 10px; border: 1px solid #e2e8f0;
-            background: #f8fafc; color: #1e293b; padding: 8px 10px; font-size: 12px; outline: none;
+            background: #f8fafc; color: #1e293b; padding: 9px 10px; font-size: 13px; outline: none;
         }
         .link-ai-row input::placeholder { color: #94a3b8; }
-        .link-ai-status { font-size: 11px; color: #059669; margin-top: 6px; min-height: 14px; }
-
-        /* ── Register CTA (slim strip, not a distraction from chat) ── */
-        .cta-banner {
-            margin: 10px 14px 0; padding: 10px 12px; border-radius: 12px;
-            background: #faf5ff; border: 1px solid #f3e8ff; font-size: 11px; color: #6d28d9;
-            display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between;
+        .link-ai-status { font-size: 12px; color: #059669; margin-top: 6px; min-height: 15px; font-weight: 600; }
+        .guest-ai-hint { font-size: 12px; color: #64748b; margin-bottom: 8px; line-height: 1.6; }
+        .guest-ai-row { display: flex; flex-direction: column; gap: 6px; }
+        .guest-ai-row input, .guest-ai-row textarea {
+            border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; color: #1e293b;
+            padding: 9px 10px; font-size: 13px; outline: none; font-family: inherit; resize: none;
         }
-        .cta-banner .cta-text { flex: 1; min-width: 160px; line-height: 1.5; }
-        .cta-banner .btn { padding: 6px 12px; font-size: 12px; }
+        .guest-ai-row input::placeholder, .guest-ai-row textarea::placeholder { color: #94a3b8; }
+        .guest-ai-row .btn { align-self: flex-start; }
+        .guest-ai-status { font-size: 12px; color: #7c3aed; margin-top: 6px; min-height: 15px; font-weight: 600; }
 
-        /* ── Chat panel: the primary surface, always visible ── */
-        .chat-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-        .msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: #fff; }
+        /* ── "Domain squat" style ai:// availability checker ── */
+        .id-check-row { display: flex; align-items: center; gap: 0; background: #fff; border: 1.5px solid #d8b4fe; border-radius: 10px; overflow: hidden; }
+        .id-check-row .id-prefix { padding: 9px 0 9px 11px; font-family: ui-monospace, monospace; font-size: 14px; color: #7c3aed; font-weight: 800; }
+        .id-check-row input {
+            flex: 1; min-width: 0; border: none; outline: none; padding: 9px 11px 9px 2px;
+            font-family: ui-monospace, monospace; font-size: 14px; font-weight: 600; color: #1e293b;
+        }
+        .id-check-result { min-height: 19px; margin-top: 7px; font-size: 13px; font-weight: 700; }
+        .id-check-result.ok { color: #059669; }
+        .id-check-result.taken { color: #b45309; }
+        .id-check-result.checking { color: #94a3b8; font-weight: 400; }
+
+        /* ── "Mirror gate" — live preview of the visitor's own would-be card ── */
+        .mirror-card {
+            margin-top: 10px; padding: 13px; border-radius: 13px;
+            background: #fff; border: 1.5px dashed #c4b5fd; box-shadow: 0 2px 10px rgba(124,58,237,.07);
+        }
+        .mirror-card .mirror-hint { font-size: 11px; color: #a78bfa; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; font-weight: 800; }
+        .mirror-card .mirror-head { display: flex; align-items: center; gap: 10px; }
+        .mirror-avatar {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; font-size: 15px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; color: #7c3aed; background: #f5f3ff;
+            border: 1px dashed #c4b5fd;
+        }
+        .mirror-name { font-size: 14px; font-weight: 800; color: #1e293b; }
+        .mirror-aiid { font-size: 12px; font-family: ui-monospace, monospace; color: #7c3aed; font-weight: 700; }
+        .mirror-card .btn-cta { display: block; width: 100%; margin-top: 11px; text-align: center; }
+
+        /* ── Chat panel: the primary surface — a visibly deeper/quieter tier than the strip/CTA above it ── */
+        .chat-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #f7f7fb; box-shadow: inset 0 1px 0 #eceef8; }
+        .msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 13px; }
         .msg { display: flex; gap: 9px; max-width: 88%; animation: msgIn .38s cubic-bezier(.2,.7,.3,1) both; }
         .msg.ai { align-self: flex-start; }
         .msg.human { align-self: flex-end; flex-direction: row-reverse; }
-        .msg .mini { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; font-size: 13px; display: flex; align-items: center; justify-content: center; }
-        .msg.ai .mini { background: #eef2ff; }
-        .msg.human .mini { background: #f1f5f9; }
-        .bubble { padding: 9px 12px; border-radius: 13px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
-        .msg.ai .bubble { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; border-top-left-radius: 4px; }
-        .msg.human .bubble { background: #4f46e5; color: #fff; border-top-right-radius: 4px; }
-        .msg.system .bubble { background: transparent; color: #94a3b8; font-size: 12px; text-align: center; }
+        .msg .mini { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+        .msg.ai .mini { background: #e0e7ff; }
+        .msg.human .mini { background: #e2e8f0; }
+        .bubble { padding: 10px 13px; border-radius: 14px; font-size: 14.5px; font-weight: 500; line-height: 1.62; white-space: pre-wrap; word-break: break-word; }
+        .msg.ai .bubble { background: #fff; border: 1px solid #e5e7f0; color: #1e293b; border-top-left-radius: 4px; box-shadow: 0 1px 3px rgba(30,27,75,.05); }
+        .msg.human .bubble { background: linear-gradient(135deg, #6366f1, #4338ca); color: #fff; border-top-right-radius: 4px; box-shadow: 0 2px 6px rgba(67,56,202,.25); }
+        .msg.system .bubble { background: transparent; color: #94a3b8; font-size: 12.5px; text-align: center; }
+
+        /* ── 双方AI自動交渉: 3種類目のバブル役割 ── 相手側AI(右・緑) / 人間の割り込み(中央・強調) ── */
+        .msg.system { align-self: center; max-width: 92%; }
+        .msg.system .mini { display: none; }
+        .msg.ai_responder { align-self: flex-end; flex-direction: row-reverse; }
+        .msg.ai_responder .mini { background: #d1fae5; }
+        .msg.ai_responder .bubble { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-top-right-radius: 4px; box-shadow: 0 1px 3px rgba(5,150,105,.08); }
+        .msg.human_intervene { align-self: center; max-width: 94%; }
+        .msg.human_intervene .mini { display: none; }
+        .msg.human_intervene .bubble { background: #fef9c3; border: 1.5px solid #fde047; color: #713f12; text-align: center; font-weight: 700; box-shadow: 0 2px 8px rgba(202,138,4,.12); }
+
+        /* ── 交渉パネル: 双方のAIが同一インスタンス内で解決できた場合のみ表示 ── */
+        .negotiate-panel {
+            margin: 12px 14px 0; padding: 13px 14px; border-radius: 14px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #eef2ff 100%);
+            border: 1.5px solid #a7f3d0; box-shadow: 0 2px 10px rgba(5,150,105,.08);
+        }
+        .negotiate-head { display: flex; align-items: center; gap: 10px; }
+        .negotiate-status { flex: 1; min-width: 0; font-size: 13.5px; font-weight: 800; color: #065f46; }
+        .negotiate-toggle {
+            flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px; border: 1px solid #a7f3d0;
+            background: #fff; color: #059669; font-size: 12px; cursor: pointer; transition: transform .2s;
+        }
+        .negotiate-toggle.collapsed { transform: rotate(-90deg); }
+        .negotiate-body { display: none; }
+        .negotiate-body.on { display: block; }
+        .negotiate-sub { font-size: 12.5px; color: #6b7280; margin-top: 10px; }
+        .negotiate-actions { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+        .negotiate-hint { font-size: 11.5px; color: #9ca3af; }
+
+        /* ── 状態トラック: 交渉が今どのステップにいるかを一目で示す(会話ログを遡らせない) ── */
+        .state-track { display: flex; align-items: flex-start; margin-top: 11px; margin-bottom: 2px; }
+        .st-step { display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; width: 60px; }
+        .st-dot {
+            width: 21px; height: 21px; border-radius: 50%; background: #fff; border: 2.5px solid #cbd5e1;
+            display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+            color: #fff; transition: background .25s, border-color .25s, box-shadow .25s;
+        }
+        .st-label { font-size: 10.5px; color: #94a3b8; font-weight: 700; text-align: center; line-height: 1.25; transition: color .25s; }
+        .st-line { flex: 1; height: 2.5px; background: #e2e8f0; margin-top: 9px; transition: background .3s; }
+        .st-step.done .st-dot { background: #10b981; border-color: #10b981; }
+        .st-step.done .st-label { color: #059669; }
+        .st-line.done { background: #10b981; }
+        .st-step.active .st-dot { border-color: #4338ca; box-shadow: 0 0 0 4px rgba(67,56,202,.15); animation: stPulse 1.6s infinite; }
+        .st-step.active .st-label { color: #4338ca; }
+        @@keyframes stPulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(67,56,202,.15); } 50% { box-shadow: 0 0 0 8px rgba(67,56,202,.04); } }
+        .state-track.stalled .st-step.active .st-dot { border-color: #d97706; box-shadow: 0 0 0 4px rgba(217,119,6,.18); animation: stPulseWarn 1.2s infinite; }
+        .state-track.stalled .st-step.active .st-label { color: #b45309; }
+        @@keyframes stPulseWarn { 0%, 100% { box-shadow: 0 0 0 4px rgba(217,119,6,.18); } 50% { box-shadow: 0 0 0 9px rgba(217,119,6,.05); } }
+
+        /* ── 提案カード: AI同士が合意しかけた「決めごと」。人間の承認/却下が必須 ── */
+        .proposal-card {
+            align-self: center; max-width: 92%; margin-top: -2px; padding: 14px 16px; border-radius: 13px;
+            background: #eef2ff; border: 1.5px solid #c7d2fe; animation: msgIn .38s cubic-bezier(.2,.7,.3,1) both;
+            box-shadow: 0 2px 8px rgba(67,56,202,.1);
+        }
+        .proposal-head { font-size: 12px; font-weight: 800; color: #4338ca; text-transform: uppercase; letter-spacing: .05em; }
+        .proposal-text { font-size: 14.5px; color: #1e293b; margin-top: 8px; line-height: 1.6; font-weight: 700; }
+        .proposal-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .proposal-actions .btn { padding: 8px 14px; font-size: 13px; }
+        .btn-approve { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 2px 6px rgba(5,150,105,.3); }
+        .btn-reject { background: #fff; color: #dc2626; border: 1.5px solid #fecaca; }
+        .proposal-decided { font-size: 13px; font-weight: 700; color: #4338ca; margin-top: 12px; }
+        .proposal-caution {
+            font-size: 11.5px; color: #b45309; background: #fffbeb; border: 1px solid #fde68a;
+            border-radius: 8px; padding: 6px 9px; margin-top: 9px; line-height: 1.55; font-weight: 600;
+        }
 
         @@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
@@ -100,31 +236,79 @@
         .typing span:nth-child(3) { animation-delay: .4s; }
         @@keyframes blink { 0%, 60%, 100% { opacity: .25 } 30% { opacity: 1 } }
 
-        .summary-card { display: none; margin: 0 16px 12px; padding: 14px; border-radius: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; font-size: 12px; }
+        .summary-card { display: none; margin: 0 0 12px; padding: 15px; border-radius: 13px; background: #ecfdf5; border: 1.5px solid #a7f3d0; font-size: 13px; box-shadow: 0 2px 8px rgba(5,150,105,.08); }
         .summary-card.on { display: block; }
-        .summary-card h3 { font-size: 12px; color: #059669; margin-bottom: 8px; }
-        .summary-card ul { margin: 8px 0 0 18px; color: #475569; }
+        .summary-card h3 { font-size: 13px; font-weight: 800; color: #059669; margin-bottom: 8px; }
+        .summary-card ul { margin: 8px 0 0 18px; color: #475569; line-height: 1.6; }
 
-        .chip-row { display: flex; gap: 8px; padding: 10px 16px 0; overflow-x: auto; }
-        .chip {
-            flex-shrink: 0; font-size: 12px; padding: 6px 12px; border-radius: 99px; cursor: pointer;
-            background: #eef2ff; border: 1px solid #e0e7ff; color: #4338ca; white-space: nowrap;
+        /* ── 会話終了カード群(サマリー/レシート)をまとめる折りたたみパネル。
+               negotiate-panel と同じ理由: 会話終了時に2枚のカードが無条件に積み上がって
+               チャットログ(#msgs)を圧迫していたため、1つの開閉可能な塊にまとめる ── */
+        .session-summary-panel { display: none; margin: 12px 16px 0; }
+        .session-summary-panel.on { display: block; }
+        .session-summary-head {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 13px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #eef2ff 100%); border: 1.5px solid #a7f3d0; cursor: pointer;
         }
-        .chip:hover { background: #e0e7ff; }
+        .session-summary-title { flex: 1; min-width: 0; font-size: 13px; font-weight: 800; color: #065f46; }
+        .session-summary-toggle {
+            flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px; border: 1px solid #a7f3d0;
+            background: #fff; color: #059669; font-size: 12px; cursor: pointer; transition: transform .2s;
+        }
+        .session-summary-toggle.collapsed { transform: rotate(-90deg); }
+        .session-summary-body { display: none; padding-top: 10px; }
+        .session-summary-body.on { display: block; }
+
+        /* ── "Intent → artifact" card — proof that a real record was created, not just a reply ── */
+        .artifact-card {
+            align-self: flex-start; max-width: 88%; margin-top: -2px; padding: 13px 15px; border-radius: 13px;
+            background: #fffbeb; border: 1.5px solid #fde68a; animation: msgIn .38s cubic-bezier(.2,.7,.3,1) both;
+            box-shadow: 0 2px 8px rgba(180,83,9,.08);
+        }
+        .artifact-card.skeleton { background: #f8fafc; border: 1px solid #e2e8f0; width: 220px; box-shadow: none; }
+        .artifact-skel-line { height: 10px; border-radius: 6px; background: #e2e8f0; margin: 4px 0; animation: shimmer 1.1s infinite; }
+        .artifact-skel-line.short { width: 60%; }
+        @@keyframes shimmer { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+        .artifact-head { font-size: 14px; font-weight: 800; color: #92400e; }
+        .artifact-meta { font-size: 12px; color: #b45309; margin-top: 4px; font-family: ui-monospace, monospace; }
+        .artifact-note { font-size: 13px; color: #92400e; margin-top: 8px; }
+        .artifact-link {
+            display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 700; color: #92400e;
+            background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 7px 13px; text-decoration: none;
+        }
+
+        /* ── Receipt / "boarding pass" card — shareable proof the experience happened ── */
+        .receipt-card { display: none; margin: 0 0 12px; padding: 17px; border-radius: 14px; background: #eef2ff; border: 1.5px solid #c7d2fe; box-shadow: 0 2px 10px rgba(67,56,202,.1); }
+        .receipt-card.on { display: block; }
+        .receipt-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .receipt-title { font-size: 14px; font-weight: 800; color: #4338ca; }
+        .receipt-id { font-size: 11px; font-family: ui-monospace, monospace; color: #818cf8; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 13px; color: #475569; padding: 6px 0; border-top: 1px dashed #c7d2fe; }
+        .receipt-row:first-of-type { border-top: none; }
+        .receipt-row span:last-child { font-weight: 700; color: #1e293b; }
+        .receipt-card .btn-save { display: block; width: 100%; margin-top: 12px; text-align: center; }
+
+        .chip-row { display: flex; gap: 8px; padding: 12px 16px 0; overflow-x: auto; }
+        .chip {
+            flex-shrink: 0; font-size: 13px; font-weight: 600; padding: 7px 13px; border-radius: 99px; cursor: pointer;
+            background: #fff; border: 1.5px solid #ddd6fe; color: #4338ca; white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(67,56,202,.06);
+        }
+        .chip:hover { background: #eef2ff; border-color: #c7d2fe; }
         .chip:disabled { opacity: .4; cursor: not-allowed; }
 
-        .composer { padding: 12px 16px; display: flex; gap: 8px; background: #fff; border-top: 1px solid #f1f5f9; }
+        .composer { padding: 13px 16px; display: flex; gap: 8px; background: #fff; border-top: 1px solid #e2e5f5; }
         .composer textarea {
-            flex: 1; resize: none; border: 1px solid #e2e8f0; border-radius: 10px;
-            background: #f8fafc; color: #1e293b; padding: 9px 12px; font-size: 13px; font-family: inherit;
+            flex: 1; resize: none; border: 1.5px solid #e2e8f0; border-radius: 11px;
+            background: #f8fafc; color: #1e293b; padding: 10px 13px; font-size: 14.5px; font-family: inherit;
             line-height: 1.5; max-height: 100px; outline: none;
         }
         .composer textarea:focus { border-color: #6366f1; }
-        .btn-send { background: #4f46e5; color: #fff; padding: 0 16px; }
-        .btn-done { background: transparent; color: #94a3b8; font-size: 12px; padding: 0 8px; }
+        .btn-send { background: linear-gradient(135deg, #6366f1, #4338ca); color: #fff; padding: 0 18px; box-shadow: 0 2px 8px rgba(67,56,202,.3); }
+        .btn-done { background: transparent; color: #94a3b8; font-size: 13px; font-weight: 600; padding: 0 8px; }
         .btn-done:hover { color: #64748b; }
 
-        .powered { text-align: center; font-size: 10px; color: #94a3b8; padding: 8px 0; }
+        .powered { text-align: center; font-size: 11px; color: #a0a7bb; padding: 9px 0; letter-spacing: .02em; }
     </style>
 </head>
 <body>
@@ -171,31 +355,127 @@
         <div class="card-actions">
             <button type="button" class="btn btn-save" id="saveCardBtn">🖼 画像として保存</button>
         </div>
+    </div>
 
-        <button type="button" class="link-ai-toggle" id="linkAiToggleBtn">🔗 自分の AI ID を連携する（任意）</button>
-        <div class="link-ai-body" id="linkAiBody">
-            <div class="link-ai-row">
-                <input type="text" id="responderAiIdInput" placeholder="ai://your-id" value="@Model.LinkedResponderAiId" />
-                <button type="button" class="btn btn-save" id="linkAiBtn">連携</button>
+    @* ── シナリオの排他表示: 「まだ AI 未連携の訪問者向け(自分のAIを用意する)」と
+           「AI 同士が接続済み」は同時に意味を持つ状態ではない。両方を常時積み上げると
+           チャットを圧迫するため、どちらか一方だけを出す（後者が成立したら前者は役目を終えている）。 ── *@
+    @if (!Model.ResponderLinkedLocally)
+    {
+        var ownAiExpanded = !string.IsNullOrEmpty(Model.LinkedResponderAiId);
+        <div class="own-ai-panel" id="ownAiPanel">
+            <div class="own-ai-head" id="ownAiHead">
+                <div class="own-ai-title">🔗 自分の AI を用意する（任意）</div>
+                <button type="button" class="own-ai-toggle@(ownAiExpanded ? "" : " collapsed")" id="ownAiToggleBtn" aria-label="詳細を開閉">▾</button>
             </div>
-            <div class="link-ai-status" id="linkAiStatus">@(string.IsNullOrEmpty(Model.LinkedResponderAiId) ? "" : "連携済み。将来、双方の AI 同士が自動でやり取りできるようになります。")</div>
-        </div>
-    </div>
+            <div class="own-ai-body@(ownAiExpanded ? " on" : "")" id="ownAiBody">
+                @* 3つの経路(既存ID連携／その場で作成／名前で正式登録)はどれも
+                   「AI同士の交渉を解錠する」という同じ目的の別手段なので、タブで並べて
+                   どれか1つだけを見せる。以前はこれらが別々の場所に無条件表示されていた。 *@
+                <div class="own-ai-tabs" id="ownAiTabs">
+                    <button type="button" class="own-ai-tab on" data-tab="existing">既存の ID を連携</button>
+                    <button type="button" class="own-ai-tab" data-tab="guest">その場で作成</button>
+                    <button type="button" class="own-ai-tab" data-tab="register">名前で正式登録</button>
+                </div>
 
-    <div class="cta-banner">
-        <div class="cta-text">🚀 あなたも AI カードを作ると、次回からはお互いの AI 同士が自動で連絡を取り合えます。</div>
-        <a class="btn btn-cta" href="@registerUrl" target="_blank" rel="noopener">登録する</a>
-    </div>
+                <div class="own-ai-pane on" data-pane="existing">
+                    <div class="link-ai-row">
+                        <input type="text" id="responderAiIdInput" placeholder="ai://your-id" value="@Model.LinkedResponderAiId" />
+                        <button type="button" class="btn btn-save" id="linkAiBtn">連携</button>
+                    </div>
+                    <div class="link-ai-status" id="linkAiStatus">@(string.IsNullOrEmpty(Model.LinkedResponderAiId) ? "" : "連携済み。将来、双方の AI 同士が自動でやり取りできるようになります。")</div>
+                </div>
+
+                <div class="own-ai-pane" data-pane="guest">
+                    <div class="guest-ai-hint">まだ ai:// をお持ちでない場合、その場で簡易 AI 名刺を作成して AI 同士の交渉を試せます（後からいつでも正式な ID に切り替え可能）。</div>
+                    <div class="guest-ai-row">
+                        <input type="text" id="guestNameInput" placeholder="お名前（任意）" />
+                        <textarea id="guestGoalInput" rows="2" placeholder="話したいこと・目的（任意）"></textarea>
+                        <button type="button" class="btn btn-save" id="guestAiBtn">🆕 その場で AI 名刺を作成</button>
+                    </div>
+                    <div class="guest-ai-status" id="guestAiStatus"></div>
+                </div>
+
+                <div class="own-ai-pane" data-pane="register">
+                    <div class="cta-text">🚀 あなたの名前で <b>ai://</b> アドレスが空いているか、その場で確認できます。</div>
+                    <div class="id-check-row">
+                        <span class="id-prefix">ai://</span>
+                        <input type="text" id="idCheckInput" placeholder="yourname" autocomplete="off" spellcheck="false" />
+                    </div>
+                    <div class="id-check-result" id="idCheckResult"></div>
+
+                    <div class="mirror-card" id="mirrorCard" style="display:none">
+                        <div class="mirror-hint">もしこれがあなたの AI カードだったら</div>
+                        <div class="mirror-head">
+                            <div class="mirror-avatar" id="mirrorAvatar">?</div>
+                            <div>
+                                <div class="mirror-name" id="mirrorName">-</div>
+                                <div class="mirror-aiid" id="mirrorAiId">ai://-</div>
+                            </div>
+                        </div>
+                        <a class="btn btn-cta" id="mirrorRegisterBtn" href="@registerUrl" target="_blank" rel="noopener">✨ このアドレスを自分のものにする</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* 折りたたみ可能: ステータス行は常時1行で見える。詳細(状態トラック/操作)は
+           開閉できるようにし、交渉成立後は既定で畳んでチャット領域を優先する。 *@
+        <div class="negotiate-panel" id="negotiatePanel">
+            <div class="negotiate-head" id="negotiateHead">
+                <div class="negotiate-status" id="negotiateStatus">🤖🤝🤖 @Model.InitiatorName の AI ⇄ @Model.ResponderDisplayName の AI が接続されました@(Model.ResponderIsGuest ? "（相手は現場生成の仮ID）" : "")</div>
+                <button type="button" class="negotiate-toggle" id="negotiateToggleBtn" aria-label="詳細を開閉">▾</button>
+            </div>
+            <div class="negotiate-body on" id="negotiateBody">
+                <div class="state-track" id="stateTrack">
+                    <div class="st-step" data-step="0"><div class="st-dot"></div><div class="st-label">挨拶</div></div>
+                    <div class="st-line"></div>
+                    <div class="st-step" data-step="1"><div class="st-dot"></div><div class="st-label">意図交換</div></div>
+                    <div class="st-line"></div>
+                    <div class="st-step" data-step="2"><div class="st-dot"></div><div class="st-label">確認待ち</div></div>
+                    <div class="st-line"></div>
+                    <div class="st-step" data-step="3"><div class="st-dot"></div><div class="st-label">成立</div></div>
+                </div>
+                <div class="negotiate-sub" id="negotiateSub">読み込み中…</div>
+                <div class="negotiate-actions">
+                    <button type="button" class="btn btn-cta" id="negotiateStartBtn">🤝 AI同士の交渉を開始</button>
+                    <span class="negotiate-hint">下のチャット欄からいつでも人間として割り込めます</span>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="chat-panel">
         <div class="msgs" id="msgs">
             <div class="typing" id="typing"><span></span><span></span><span></span></div>
         </div>
 
-        <div class="summary-card" id="summaryCard">
-            <h3>📋 会話サマリー（相手の CRM に登録されました）</h3>
-            <div id="summaryText"></div>
-            <ul id="nextActions"></ul>
+        <div class="session-summary-panel" id="sessionSummaryPanel">
+            <div class="session-summary-head" id="sessionSummaryHead">
+                <div class="session-summary-title">🎉 会話が終了しました — サマリー &amp; レシート</div>
+                <button type="button" class="session-summary-toggle" id="sessionSummaryToggleBtn" aria-label="詳細を開閉">▾</button>
+            </div>
+            <div class="session-summary-body on" id="sessionSummaryBody">
+                <div class="summary-card" id="summaryCard">
+                    <h3>📋 会話サマリー（相手の CRM に登録されました）</h3>
+                    <div id="summaryText"></div>
+                    <ul id="nextActions"></ul>
+                </div>
+
+                <div class="receipt-card" id="receiptCard">
+                    <div class="receipt-top">
+                        <div class="receipt-title">🎫 Handshake Receipt</div>
+                        <div class="receipt-id" id="receiptId"></div>
+                    </div>
+                    <div class="receipt-row"><span>相手</span><span>@Model.InitiatorName の AI</span></div>
+                    <div class="receipt-row"><span>会話時間</span><span id="receiptDuration">-</span></div>
+                    <div class="receipt-row"><span>メッセージ数</span><span id="receiptMessages">-</span></div>
+                    <div class="receipt-row"><span>生成された資料/記録</span><span id="receiptArtifacts">-</span></div>
+                    <button type="button" class="btn btn-save" id="saveReceiptBtn">📸 このレシートを保存してシェアする</button>
+                </div>
+            </div>
         </div>
 
         <div class="chip-row" id="chipRow">
@@ -217,6 +497,24 @@
 <script>
     const postUrl = '@postUrl';
     const completeUrl = '@completeUrl';
+    const checkIdUrl = '/@Model.ProjectName/ahp/check-id/';
+    const aiTurnUrl = '@aiTurnUrl';
+    const proposalDecideUrlBase = '@proposalDecideUrlBase';
+    const createGuestAiUrl = '/@Model.ProjectName/ahp/chat/@Model.SessionToken/create-guest-ai';
+    const responderLinkedLocally = @Json.Serialize(Model.ResponderLinkedLocally);
+    // 相手が正式登録ではなく、この場で現場生成された仮の ai_identity（owner_type='guest'）かどうか。
+    // 提案が相手発信のとき、情報が少ない仮IDである旨を提案カードに注意書きとして出すために使う。
+    const responderIsGuest = @Json.Serialize(Model.ResponderIsGuest);
+    const initialProposals = @Html.Raw(Json.Serialize(Model.Proposals.Select(p => new { id = p.Id, text = p.Text, state = p.State, proposedBy = p.ProposedBy })));
+    let negotiationState = @Json.Serialize(Model.NegotiationState);
+    let negotiationTurns = @Json.Serialize(Model.NegotiationTurns);
+    let negotiationActive = negotiationTurns > 0 && negotiationState !== 'agreed' && negotiationState !== 'rejected';
+    let negotiationRunning = false;
+    const initiatorQrUrl = @Json.Serialize(Model.InitiatorQrUrl);
+    // canvas に和文/絵文字を描画する際、既定の generic "sans-serif" だと
+    // 環境によって CJK グリフを持たないフォントにフォールバックし文字化け（豆腐/乱码）する。
+    // 画面表示に使っているのと同じ CJK 対応フォントスタックを明示する。
+    const CJK_FONT_STACK = "'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic', 'Segoe UI', sans-serif";
     const initialMessages = @Html.Raw(Json.Serialize(Model.Messages.Select(m => new { role = m.Role, content = m.Content })));
     const msgs = document.getElementById('msgs');
     const typing = document.getElementById('typing');
@@ -227,12 +525,25 @@
 
     function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
 
+    // 双方AI自動交渉では、通常の「AI / 人間」2種類に加えて
+    // 「相手側AI(ai_responder)」「人間の割り込み(human_intervene)」「システム通知(system)」が増える。
+    // role文字列 → { 表示用CSSクラス, アイコン } のマッピング。
+    const ROLE_META = {
+        ai:              { css: 'ai',              icon: '🤖' },
+        ai_initiator:    { css: 'ai',               icon: '🤖A' },
+        ai_responder:    { css: 'ai_responder',      icon: '🤖B' },
+        human:           { css: 'human',             icon: '🙂' },
+        human_intervene: { css: 'human_intervene',   icon: '⏸' },
+        system:          { css: 'system',            icon: '⚙️' }
+    };
+
     function addMsg(role, text) {
+        const meta = ROLE_META[role] || { css: role, icon: '🤖' };
         const wrap = document.createElement('div');
-        wrap.className = 'msg ' + role;
+        wrap.className = 'msg ' + meta.css;
         const mini = document.createElement('div');
         mini.className = 'mini';
-        mini.textContent = role === 'ai' ? '🤖' : '🙂';
+        mini.textContent = meta.icon;
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
         bubble.textContent = text;
@@ -241,6 +552,12 @@
         msgs.insertBefore(wrap, typing);
         scrollBottom();
         return wrap;
+    }
+
+    function escapeHtml(s) {
+        const div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
     }
 
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -265,7 +582,11 @@
         }
         scrollBottom();
     }
-    playInitialMessages();
+    async function bootstrap() {
+        await playInitialMessages();
+        initNegotiationPanel();
+    }
+    bootstrap();
 
     async function send() {
         const text = input.value.trim();
@@ -273,7 +594,7 @@
         busy = true;
         input.value = '';
         sendBtn.disabled = true;
-        addMsg('human', text);
+        addMsg(negotiationActive ? 'human_intervene' : 'human', text);
         typing.classList.add('on');
         scrollBottom();
         try {
@@ -284,6 +605,7 @@
             });
             const data = await res.json();
             addMsg('ai', res.ok ? data.reply : (data.error || 'エラーが発生しました。'));
+            if (res.ok && data.artifact) await showArtifactCard(data.artifact);
         } catch (e) {
             addMsg('ai', '通信エラーが発生しました。もう一度お試しください。');
         } finally {
@@ -292,6 +614,247 @@
             sendBtn.disabled = false;
             input.focus();
         }
+    }
+
+    // ── 「意図 → 実物」の可視化閉環：文字での返答だけでなく、
+    //    "何かが実際に作られた" ことが分かる実体カードを演出付きで見せる ──
+    async function showArtifactCard(artifact) {
+        const skeleton = document.createElement('div');
+        skeleton.className = 'artifact-card skeleton';
+        skeleton.innerHTML = '<div class="artifact-skel-line"></div><div class="artifact-skel-line short"></div>';
+        msgs.insertBefore(skeleton, typing);
+        scrollBottom();
+        await sleep(700);
+        skeleton.remove();
+
+        const icon = artifact.type === 'resource' ? '📄' : '🤝';
+        const card = document.createElement('div');
+        card.className = 'artifact-card';
+        const linkHtml = artifact.url
+            ? `<a class="artifact-link" href="${artifact.url}" target="_blank" rel="noopener">資料を開く →</a>`
+            : `<div class="artifact-note">担当 AI が商談記録を作成しました。追ってご連絡します。</div>`;
+        card.innerHTML = `
+            <div class="artifact-head">${icon} ${artifact.title}</div>
+            <div class="artifact-meta">ID: ${artifact.id} ・ ${artifact.createdAt}</div>
+            ${linkHtml}
+        `;
+        msgs.insertBefore(card, typing);
+        scrollBottom();
+    }
+
+    // ── 双方AI自動交渉 ── initiator と responder のAIが交互に1ターンずつ発言する。
+    //    「具体的な決めごと」を提案した瞬間に自動再生を止め、必ず人間の承認/却下を挟む
+    //    （AI同士の合意をそのまま実効化しない、という信頼境界をUI側でも徹底する）。
+    const negotiateStartBtn = document.getElementById('negotiateStartBtn');
+    const negotiateSub = document.getElementById('negotiateSub');
+    const negotiateBody = document.getElementById('negotiateBody');
+    const negotiateToggleBtn = document.getElementById('negotiateToggleBtn');
+    const NEGOTIATION_CLIENT_ROUND_CAP = 8; // サーバー側の MaxAutoTurns と揃えた安全弁
+
+    // ── パネルの開閉。交渉が終着点(成立)についたらチャットを圧迫しないよう既定で畳む。
+    //    却下時や進行中/確認待ちは、次の操作対象として見えていてほしいので畳まない。
+    function setNegotiateCollapsed(collapsed) {
+        if (!negotiateBody || !negotiateToggleBtn) return;
+        negotiateBody.classList.toggle('on', !collapsed);
+        negotiateToggleBtn.classList.toggle('collapsed', collapsed);
+    }
+    negotiateToggleBtn?.addEventListener('click', () => {
+        setNegotiateCollapsed(negotiateBody.classList.contains('on'));
+    });
+
+    // ── サマリー/レシートパネルの開閉。negotiate-panel と同じ理由: チャット終了後に
+    //    無条件で表示され続けると、直前までの会話ログを遡るスペースを圧迫するため。
+    const sessionSummaryBody = document.getElementById('sessionSummaryBody');
+    const sessionSummaryToggleBtn = document.getElementById('sessionSummaryToggleBtn');
+    sessionSummaryToggleBtn?.addEventListener('click', () => {
+        const collapsed = sessionSummaryBody.classList.contains('on');
+        sessionSummaryBody.classList.toggle('on', !collapsed);
+        sessionSummaryToggleBtn.classList.toggle('collapsed', collapsed);
+    });
+
+    function negotiationStateLabel(state) {
+        switch (state) {
+            case 'greeting': return '挨拶中…';
+            case 'intent_exchange': return '意図交換中…';
+            case 'pending_confirmation': return '⏸ 提案あり — 人間の確認待ち';
+            case 'agreed': return '✅ 交渉成立';
+            case 'rejected': return '❌ 交渉不成立（再開できます）';
+            case 'stalled': return '⏹ ターン上限に達しました（人間の介入が必要です）';
+            default: return state;
+        }
+    }
+
+    function setNegotiateSub(text) {
+        if (negotiateSub) negotiateSub.textContent = text;
+    }
+
+    // 状態トラック(挨拶→意図交換→確認待ち→成立)を現在の negotiationState に同期させる。
+    // rejected はサーバー側で intent_exchange に戻される仕様なので独立ノードは持たない。
+    // stalled(ターン上限)は「意図交換」ノードで足止めされている扱いにし、警告色で示す。
+    const STATE_TRACK_STEPS = ['greeting', 'intent_exchange', 'pending_confirmation', 'agreed'];
+    function stateTrackIndex(state) {
+        if (state === 'stalled') return 1;
+        const idx = STATE_TRACK_STEPS.indexOf(state);
+        return idx === -1 ? 0 : idx;
+    }
+    function renderStateTrack(state) {
+        const track = document.getElementById('stateTrack');
+        if (!track) return;
+        const activeIdx = stateTrackIndex(state);
+        track.classList.toggle('stalled', state === 'stalled');
+        const steps = track.querySelectorAll('.st-step');
+        steps.forEach((el, i) => {
+            el.classList.remove('done', 'active', 'pending');
+            const dot = el.querySelector('.st-dot');
+            if (i < activeIdx) {
+                el.classList.add('done');
+                dot.textContent = '✓';
+            } else if (i === activeIdx) {
+                el.classList.add('active');
+                dot.textContent = '';
+            } else {
+                el.classList.add('pending');
+                dot.textContent = '';
+            }
+        });
+        track.querySelectorAll('.st-line').forEach((el, i) => {
+            el.classList.toggle('done', i < activeIdx);
+        });
+    }
+
+    function refreshNegotiateButton() {
+        if (!negotiateStartBtn) return;
+        if (negotiationState === 'agreed') {
+            negotiateStartBtn.disabled = true;
+            negotiateStartBtn.textContent = '✅ 交渉成立';
+        } else if (negotiationState === 'pending_confirmation') {
+            negotiateStartBtn.disabled = true;
+            negotiateStartBtn.textContent = '⏸ 確認待ち';
+        } else {
+            negotiateStartBtn.disabled = false;
+            negotiateStartBtn.textContent = negotiationTurns > 0 ? '▶ 続きから再開' : '🤝 AI同士の交渉を開始';
+        }
+    }
+
+    async function showProposalCard(proposal) {
+        const card = document.createElement('div');
+        card.className = 'proposal-card';
+        // 提案の発信元が「現場生成の仮ID（ゲスト）」側なら、情報が少ない身元からの提案である旨を明示する。
+        // 信頼閾（人間の承認必須）自体は緩めない — あくまで承認前の判断材料を増やすだけ。
+        const cautionHtml = (proposal.proposedBy === 'responder' && responderIsGuest)
+            ? '<div class="proposal-caution">⚠️ この提案は現場生成の仮IDからのものです。情報が少ない可能性があるため、内容をよくご確認のうえ判断してください。</div>'
+            : '';
+        card.innerHTML = `
+            <div class="proposal-head">📝 交渉での提案 — 人間の確認が必要です</div>
+            <div class="proposal-text">${escapeHtml(proposal.text)}</div>
+            ${cautionHtml}
+            <div class="proposal-actions">
+                <button type="button" class="btn btn-approve">✅ 承認する</button>
+                <button type="button" class="btn btn-reject">❌ 却下する</button>
+            </div>
+        `;
+        msgs.insertBefore(card, typing);
+        scrollBottom();
+
+        const approveBtn = card.querySelector('.btn-approve');
+        const rejectBtn = card.querySelector('.btn-reject');
+        const decide = async (approve) => {
+            approveBtn.disabled = true; rejectBtn.disabled = true;
+            try {
+                const res = await fetch(proposalDecideUrlBase + encodeURIComponent(proposal.id) + '/decide', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ approve })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    card.querySelector('.proposal-actions').outerHTML =
+                        `<div class="proposal-decided">${approve ? '✅ 承認しました' : '❌ 却下しました。交渉を再開できます。'}</div>`;
+                    negotiationState = data.negotiationState;
+                    setNegotiateSub(negotiationStateLabel(negotiationState));
+                    renderStateTrack(negotiationState);
+                    refreshNegotiateButton();
+                    // 承認 = 交渉終着点。少し結果を見せてからパネルを畳み、チャットを主役に戻す。
+                    // 却下は再交渉が前提の状態なので畳まない。
+                    if (approve) setTimeout(() => setNegotiateCollapsed(true), 1200);
+                } else {
+                    alert(data.error || 'エラーが発生しました。');
+                    approveBtn.disabled = false; rejectBtn.disabled = false;
+                }
+            } catch (e) {
+                alert('通信エラーが発生しました。');
+                approveBtn.disabled = false; rejectBtn.disabled = false;
+            }
+        };
+        approveBtn.addEventListener('click', () => decide(true));
+        rejectBtn.addEventListener('click', () => decide(false));
+    }
+
+    // 1ターン進める。true を返したら自動ループを継続してよい、false なら停止すべき合図。
+    async function runNegotiationTurn() {
+        typing.classList.add('on');
+        scrollBottom();
+        try {
+            const res = await fetch(aiTurnUrl, { method: 'POST' });
+            const data = await res.json();
+            typing.classList.remove('on');
+            if (!res.ok) {
+                setNegotiateSub(data.error || 'エラーが発生しました。');
+                return false;
+            }
+            if (data.done || data.paused || data.stalled) {
+                negotiationState = data.negotiationState;
+                setNegotiateSub(negotiationStateLabel(negotiationState));
+                renderStateTrack(negotiationState);
+                refreshNegotiateButton();
+                return false;
+            }
+            negotiationActive = true;
+            addMsg(data.speaker, data.reply);
+            negotiationState = data.negotiationState;
+            negotiationTurns = data.turns;
+            setNegotiateSub(`${negotiationStateLabel(negotiationState)}（${negotiationTurns}ターン）`);
+            renderStateTrack(negotiationState);
+            if (data.proposal) {
+                await showProposalCard(data.proposal);
+                refreshNegotiateButton();
+                return false; // 人間の確認待ちに切り替わったので自動再生は止める
+            }
+            return true;
+        } catch (e) {
+            typing.classList.remove('on');
+            setNegotiateSub('通信エラーが発生しました。');
+            return false;
+        }
+    }
+
+    async function startNegotiation() {
+        if (negotiationRunning) return;
+        negotiationRunning = true;
+        if (negotiateStartBtn) { negotiateStartBtn.disabled = true; negotiateStartBtn.textContent = '🤝 交渉中…'; }
+        let rounds = 0;
+        while (rounds < NEGOTIATION_CLIENT_ROUND_CAP) {
+            const shouldContinue = await runNegotiationTurn();
+            rounds++;
+            if (!shouldContinue) break;
+            await sleep(900);
+        }
+        negotiationRunning = false;
+        refreshNegotiateButton();
+    }
+
+    negotiateStartBtn?.addEventListener('click', startNegotiation);
+
+    function initNegotiationPanel() {
+        if (!responderLinkedLocally) return;
+        setNegotiateSub(`${negotiationStateLabel(negotiationState)}${negotiationTurns ? `（${negotiationTurns}ターン）` : ''}`);
+        renderStateTrack(negotiationState);
+        refreshNegotiateButton();
+        // 再訪問時(リロード後)、既に成立済みなら結果は聞くまでもないので既定で畳んでおく。
+        // 確認待ち・進行中・却下(再交渉が前提)は開いたままにする。
+        setNegotiateCollapsed(negotiationState === 'agreed');
+        const pending = initialProposals.find(p => p.state === 'pending_confirmation');
+        if (pending) showProposalCard(pending);
     }
 
     async function complete() {
@@ -315,6 +878,10 @@
                     });
                 } catch {}
                 document.getElementById('summaryCard').classList.add('on');
+                if (data.receipt) renderReceipt(data.receipt);
+                // サマリー/レシートが確定した瞬間だけパネルを表に出す。開いたままにするのは
+                // 「会話が終わった今この瞬間」が一番見たいタイミングだから(以降は手動で畳める)。
+                document.getElementById('sessionSummaryPanel').classList.add('on');
                 scrollBottom();
             } else {
                 alert(data.error || 'エラーが発生しました。');
@@ -335,6 +902,127 @@
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
     });
 
+    // ── 「回執カード」— この体験そのものを持ち帰って共有したくなる社会的証明 ──
+    let lastReceipt = null;
+    function formatDuration(sec) {
+        const m = Math.floor(sec / 60), s = sec % 60;
+        return m > 0 ? `${m}分${s}秒` : `${s}秒`;
+    }
+    function renderReceipt(r) {
+        lastReceipt = r;
+        document.getElementById('receiptId').textContent = r.sessionShortId;
+        document.getElementById('receiptDuration').textContent = formatDuration(r.durationSeconds);
+        document.getElementById('receiptMessages').textContent = r.messageCount;
+        document.getElementById('receiptArtifacts').textContent = r.artifactCount;
+        document.getElementById('receiptCard').classList.add('on');
+    }
+
+    document.getElementById('saveReceiptBtn')?.addEventListener('click', () => {
+        if (!lastReceipt) return;
+        try { downloadReceiptImage(lastReceipt); } catch (e) { alert('画像の生成に失敗しました。'); }
+    });
+
+    function downloadReceiptImage(r) {
+        const W = 720, H = 320;
+        const canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, W - 2, H - 2);
+
+        const stubX = W * 0.7;
+        ctx.fillStyle = '#f4f5f7';
+        ctx.beginPath(); ctx.arc(stubX, 0, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(stubX, H, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#e5e7eb'; ctx.setLineDash([6, 6]);
+        ctx.beginPath(); ctx.moveTo(stubX, 22); ctx.lineTo(stubX, H - 22); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#1e293b';
+        ctx.font = `800 24px ${CJK_FONT_STACK}`;
+        ctx.fillText('🎫 Handshake Receipt', 36, 50);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '400 13px monospace';
+        ctx.fillText(r.sessionShortId, 36, 72);
+
+        const rows = [
+            ['相手', (@Json.Serialize(Model.InitiatorName)) + ' の AI'],
+            ['会話時間', formatDuration(r.durationSeconds)],
+            ['メッセージ数', String(r.messageCount)],
+            ['生成された資料/記録', String(r.artifactCount)]
+        ];
+        let y = 116;
+        rows.forEach(([k, v]) => {
+            ctx.fillStyle = '#94a3b8'; ctx.font = `400 12px ${CJK_FONT_STACK}`;
+            ctx.fillText(k, 36, y);
+            ctx.fillStyle = '#1e293b'; ctx.font = `700 18px ${CJK_FONT_STACK}`;
+            ctx.fillText(v, 36, y + 22);
+            y += 50;
+        });
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#4f46e5'; ctx.font = `700 18px ${CJK_FONT_STACK}`;
+        ctx.fillText('AHP', W * 0.85, 58);
+        ctx.fillStyle = '#94a3b8'; ctx.font = `400 11px ${CJK_FONT_STACK}`;
+        ctx.fillText('AI Handshake', W * 0.85, 80);
+        ctx.fillText('Protocol', W * 0.85, 96);
+        ctx.fillText(new Date().toLocaleDateString('ja-JP'), W * 0.85, H - 34);
+
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ahp-receipt-' + r.sessionShortId + '.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+
+    // ── 「域名抢注」体験 — 自分の名前で ai:// が空いているかその場で確認する ──
+    const idCheckInput = document.getElementById('idCheckInput');
+    const idCheckResult = document.getElementById('idCheckResult');
+    const mirrorCard = document.getElementById('mirrorCard');
+    const mirrorAvatar = document.getElementById('mirrorAvatar');
+    const mirrorName = document.getElementById('mirrorName');
+    const mirrorAiId = document.getElementById('mirrorAiId');
+    let idCheckTimer = null;
+
+    idCheckInput?.addEventListener('input', () => {
+        const raw = idCheckInput.value.trim();
+        clearTimeout(idCheckTimer);
+        if (!raw) {
+            idCheckResult.textContent = '';
+            idCheckResult.className = 'id-check-result';
+            mirrorCard.style.display = 'none';
+            return;
+        }
+        idCheckResult.textContent = '確認中…';
+        idCheckResult.className = 'id-check-result checking';
+        idCheckTimer = setTimeout(async () => {
+            try {
+                const res = await fetch(checkIdUrl + encodeURIComponent(raw));
+                const data = await res.json();
+                if (!data.aiId) { idCheckResult.textContent = ''; mirrorCard.style.display = 'none'; return; }
+                if (data.available) {
+                    idCheckResult.textContent = `✅ ${data.aiId} はまだ空いています！`;
+                    idCheckResult.className = 'id-check-result ok';
+                } else {
+                    idCheckResult.textContent = `⚠️ ${data.aiId} は既に使われています`;
+                    idCheckResult.className = 'id-check-result taken';
+                }
+                // ── 「鏡の門」— 自分の入力がその場で "自分のカード" として映し出される（損失回避） ──
+                mirrorName.textContent = raw;
+                mirrorAiId.textContent = data.aiId;
+                mirrorAvatar.textContent = raw.substring(0, 1).toUpperCase();
+                mirrorCard.style.display = 'block';
+            } catch (e) {
+                idCheckResult.textContent = '';
+                idCheckResult.className = 'id-check-result';
+            }
+        }, 400);
+    });
+
     // ── 名刺の詳細（専門分野・ゴール・画像保存・AI連携）は既定で折りたたみ。主役はチャット ──
     const cardToggleBtn = document.getElementById('cardToggleBtn');
     const cardDetail = document.getElementById('cardDetail');
@@ -349,10 +1037,23 @@
         });
     });
 
-    // ── 相手の AI ID を連携（将来の AI 同士の自動連携の下地）。既定で折りたたみ ──
-    const linkAiToggleBtn = document.getElementById('linkAiToggleBtn');
-    const linkAiBody = document.getElementById('linkAiBody');
-    linkAiToggleBtn?.addEventListener('click', () => linkAiBody.classList.toggle('on'));
+    // ── 「自分のAIを用意する」パネルの開閉。既存ID連携/その場で作成/名前で正式登録の
+    //    3経路をタブで切り替える(negotiate-panel/session-summary-panelと同じ開閉パターン)。
+    const ownAiToggleBtn = document.getElementById('ownAiToggleBtn');
+    const ownAiBody = document.getElementById('ownAiBody');
+    ownAiToggleBtn?.addEventListener('click', () => {
+        const collapsed = ownAiBody.classList.contains('on');
+        ownAiBody.classList.toggle('on', !collapsed);
+        ownAiToggleBtn.classList.toggle('collapsed', collapsed);
+    });
+
+    document.querySelectorAll('.own-ai-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+            document.querySelectorAll('.own-ai-tab').forEach(t => t.classList.toggle('on', t === tab));
+            document.querySelectorAll('.own-ai-pane').forEach(p => p.classList.toggle('on', p.getAttribute('data-pane') === target));
+        });
+    });
 
     const linkAiBtn = document.getElementById('linkAiBtn');
     const linkAiInput = document.getElementById('responderAiIdInput');
@@ -368,9 +1069,18 @@
                 body: JSON.stringify({ aiId })
             });
             const data = await res.json();
-            linkAiStatus.textContent = res.ok
-                ? '連携済み。将来、双方の AI 同士が自動でやり取りできるようになります。'
-                : (data.error || 'エラーが発生しました。');
+            if (!res.ok) {
+                linkAiStatus.textContent = data.error || 'エラーが発生しました。';
+            } else if (data.note) {
+                // 自分自身のAI IDを連携しようとした等、局所的なガードに引っかかったケース
+                linkAiStatus.textContent = data.note;
+            } else if (data.linkedLocally) {
+                // 同一インスタンス内で相手の ai_identity が解決できた → AI同士の自動交渉パネルを出すため再読み込み
+                linkAiStatus.textContent = `🤖🤝🤖 ${data.responderDisplayName || data.aiId} の AI と連携しました。交渉パネルを表示します…`;
+                setTimeout(() => location.reload(), 900);
+            } else {
+                linkAiStatus.textContent = '連携済み（この ID は同じサーバー内には見つかりませんでした）。将来、離れたサーバーの AI 同士でも自動でやり取りできるようになります。';
+            }
         } catch (e) {
             linkAiStatus.textContent = '通信エラーが発生しました。';
         } finally {
@@ -378,15 +1088,62 @@
         }
     });
 
-    // ── 名刺を画像として保存（外部ライブラリ不要、canvas で自前描画） ──
-    const saveCardBtn = document.getElementById('saveCardBtn');
-    saveCardBtn?.addEventListener('click', () => {
+    // ── 相手がまだ ai:// を持っていない場合、その場で仮の AI 名刺を発行する ──
+    // 「同じインスタンス内に相手の ai_identity が要る」という前提を、正式登録という重い壁なしで
+    // その場で満たす入口。owner_type='guest' として作成されるため、正式な身元より情報が少なく
+    // 信頼度が低いことは提案カード側（responderIsGuest）で別途明示する。
+    const guestAiBtn = document.getElementById('guestAiBtn');
+    const guestNameInput = document.getElementById('guestNameInput');
+    const guestGoalInput = document.getElementById('guestGoalInput');
+    const guestAiStatus = document.getElementById('guestAiStatus');
+    guestAiBtn?.addEventListener('click', async () => {
+        guestAiBtn.disabled = true;
+        guestAiStatus.textContent = '作成しています…';
         try {
-            downloadCardImage();
+            const res = await fetch(createGuestAiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    displayName: (guestNameInput.value || '').trim() || null,
+                    goal: (guestGoalInput.value || '').trim() || null
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                guestAiStatus.textContent = data.error || 'エラーが発生しました。';
+                guestAiBtn.disabled = false;
+                return;
+            }
+            guestAiStatus.textContent = `🆕 ${data.responderDisplayName || data.aiId} の仮 AI 名刺を作成しました。交渉パネルを表示します…`;
+            setTimeout(() => location.reload(), 900);
         } catch (e) {
-            alert('画像の生成に失敗しました。');
+            guestAiStatus.textContent = '通信エラーが発生しました。';
+            guestAiBtn.disabled = false;
         }
     });
+
+    // ── 名刺を画像として保存（外部ライブラリ不要、canvas で自前描画） ──
+    const saveCardBtn = document.getElementById('saveCardBtn');
+    saveCardBtn?.addEventListener('click', async () => {
+        saveCardBtn.disabled = true;
+        try {
+            await downloadCardImage();
+        } catch (e) {
+            alert('画像の生成に失敗しました。');
+        } finally {
+            saveCardBtn.disabled = false;
+        }
+    });
+
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous'; // QR 画像を canvas に描いた後 toDataURL() するために CORS 許可が必要
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
 
     function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
         const words = text.split('');
@@ -406,8 +1163,12 @@
         return curY + lineHeight;
     }
 
-    function downloadCardImage() {
-        const W = 720, H = 1000;
+    async function downloadCardImage() {
+        // スマホで撮った/保存した名刺画像は縦持ちで見返すことが多いため、縦長を既定にする。
+        // 比率は横長版（1050×600 ≒ 1.75:1）を単純に 90°回転させた 600×1050（≒ 1:1.75、
+        // 実物名刺 91mm×55mm を縦持ちにした場合と同じ比率）を採用し、「実物と比率が合わない」
+        // 問題が再発しないようにする。
+        const W = 600, H = 1050;
         const canvas = document.createElement('canvas');
         canvas.width = W; canvas.height = H;
         const ctx = canvas.getContext('2d');
@@ -418,76 +1179,125 @@
         ctx.lineWidth = 2;
         ctx.strokeRect(1, 1, W - 2, H - 2);
 
-        const cx = 100, cy = 110, r = 54;
+        const margin = 48;
+        const contentWidth = W - margin * 2;
+
+        // ── アバター（CJK 対応フォントを明示し、文字化け/豆腐表示を防ぐ） ──
+        const cx = W / 2, cy = margin + 55, r = 55;
         ctx.fillStyle = '#eef2ff';
         ctx.beginPath();
         ctx.roundRect(cx - r, cy - r, r * 2, r * 2, 20);
         ctx.fill();
         ctx.fillStyle = '#4f46e5';
-        ctx.font = '700 44px sans-serif';
+        ctx.font = `700 44px ${CJK_FONT_STACK}`;
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';
-        ctx.fillText('@initial', cx, cy + 4);
+        ctx.fillText(@Json.Serialize(initial), cx, cy + 4);
 
-        ctx.textAlign = 'left';
+        // ── 名前 / AI ID / 所属（縦持ちはアバター下に中央揃えで積む） ──
+        let y = cy + r + 44;
         ctx.textBaseline = 'alphabetic';
         ctx.fillStyle = '#1e293b';
-        ctx.font = '800 34px sans-serif';
-        ctx.fillText(@Json.Serialize(Model.InitiatorName), cx + r + 24, cy - 4);
+        ctx.font = `800 30px ${CJK_FONT_STACK}`;
+        ctx.fillText(@Json.Serialize(Model.InitiatorName), cx, y);
+        y += 30;
         ctx.fillStyle = '#4f46e5';
-        ctx.font = '400 18px monospace';
-        ctx.fillText(@Json.Serialize(Model.InitiatorAiId), cx + r + 24, cy + 26);
+        ctx.font = "400 17px ui-monospace, monospace";
+        ctx.fillText(@Json.Serialize(Model.InitiatorAiId), cx, y);
+        y += 26;
 
         const orgLine = @Json.Serialize(string.Join(" ・ ", new[] { Model.InitiatorOrg, Model.InitiatorRole }.Where(s => !string.IsNullOrEmpty(s))));
         if (orgLine) {
             ctx.fillStyle = '#475569';
-            ctx.font = '400 16px sans-serif';
-            ctx.fillText(orgLine, cx + r + 24, cy + 52);
+            ctx.font = `400 15px ${CJK_FONT_STACK}`;
+            ctx.fillText(orgLine, cx, y);
+            y += 26;
         }
 
-        let y = cy + r + 60;
+        // ── 区切り線 ──
+        y += 12;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.beginPath(); ctx.moveTo(margin, y); ctx.lineTo(W - margin, y); ctx.stroke();
+        y += 34;
 
+        // ── QR コード + URL（スキャンした人がその場で自分の AI エージェントと会話を始められる入口） ──
+        // 縦持ちは横幅が限られるため、QR はテキストの下に大きめに中央配置する。
+        const qrSize = 220;
+        const qrX = cx - qrSize / 2;
+        const qrY = y;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(qrX - 1, qrY - 1, qrSize + 2, qrSize + 2);
+        if (initiatorQrUrl) {
+            try {
+                const qrPixels = qrSize * 2; // Retina 表示でも滲まないよう高解像度で取得
+                const qrImgSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=' + qrPixels + 'x' + qrPixels
+                    + '&margin=8&data=' + encodeURIComponent(initiatorQrUrl);
+                const qrImg = await loadImage(qrImgSrc);
+                ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+            } catch (e) {
+                // QR 画像の取得に失敗しても名刺自体は保存できるようにする
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = `400 12px ${CJK_FONT_STACK}`;
+                ctx.textAlign = 'center';
+                ctx.fillText('QR 取得失敗', qrX + qrSize / 2, qrY + qrSize / 2);
+            }
+            ctx.fillStyle = '#64748b';
+            ctx.font = `400 11px ${CJK_FONT_STACK}`;
+            ctx.textAlign = 'center';
+            wrapText(ctx, initiatorQrUrl.replace(/^https?:\/\//, ''), qrX + qrSize / 2, qrY + qrSize + 20, qrSize + 24, 14);
+        }
+        y = qrY + qrSize + 46;
+
+        const bottomLimit = H - 90;
+        ctx.textAlign = 'left';
+
+        // ── 専門分野タグ ──
         const expertise = @Json.Serialize(Model.InitiatorExpertise);
-        if (expertise.length) {
+        if (expertise.length && y < bottomLimit) {
             ctx.fillStyle = '#6366f1';
-            ctx.font = '700 15px sans-serif';
-            ctx.fillText('専門分野', 60, y);
-            y += 30;
-            let x = 60;
-            ctx.font = '400 15px sans-serif';
-            expertise.forEach(tag => {
-                const w = ctx.measureText(tag).width + 28;
-                if (x + w > W - 60) { x = 60; y += 42; }
+            ctx.font = `700 14px ${CJK_FONT_STACK}`;
+            ctx.fillText('専門分野', margin, y);
+            y += 26;
+            let x = margin;
+            ctx.font = `400 14px ${CJK_FONT_STACK}`;
+            for (const tag of expertise) {
+                const w = ctx.measureText(tag).width + 26;
+                if (x + w > margin + contentWidth) { x = margin; y += 38; }
+                if (y > bottomLimit) break;
                 ctx.fillStyle = '#eef2ff';
                 ctx.beginPath();
-                ctx.roundRect(x, y - 24, w, 34, 99);
+                ctx.roundRect(x, y - 22, w, 30, 99);
                 ctx.fill();
                 ctx.fillStyle = '#4338ca';
-                ctx.fillText(tag, x + 14, y);
-                x += w + 10;
-            });
-            y += 56;
+                ctx.fillText(tag, x + 13, y);
+                x += w + 8;
+            }
+            y += 46;
         }
 
+        // ── 関心・ゴール（収まる分だけ表示） ──
         const goals = @Json.Serialize(Model.InitiatorGoals);
-        if (goals.length) {
+        if (goals.length && y < bottomLimit) {
             ctx.fillStyle = '#6366f1';
-            ctx.font = '700 15px sans-serif';
-            ctx.fillText('関心・ゴール', 60, y);
-            y += 30;
+            ctx.font = `700 14px ${CJK_FONT_STACK}`;
+            ctx.fillText('関心・ゴール', margin, y);
+            y += 24;
             ctx.fillStyle = '#475569';
-            ctx.font = '400 15px sans-serif';
-            goals.forEach(g => {
-                y = wrapText(ctx, '・' + g, 60, y, W - 120, 24) + 4;
-            });
+            ctx.font = `400 14px ${CJK_FONT_STACK}`;
+            for (const g of goals) {
+                if (y > bottomLimit) break;
+                y = wrapText(ctx, '・' + g, margin, y, contentWidth, 20) + 4;
+            }
         }
 
+        // ── フッター ──
         ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(0, H - 70, W, 70);
+        ctx.fillRect(0, H - 56, W, 56);
         ctx.fillStyle = '#64748b';
-        ctx.font = '600 14px sans-serif';
+        ctx.font = `600 13px ${CJK_FONT_STACK}`;
         ctx.textAlign = 'center';
-        ctx.fillText('AI Handshake Protocol (AHP) — digital business card', W / 2, H - 30);
+        ctx.fillText('AI Handshake Protocol (AHP) — digital business card', W / 2, H - 22);
 
         const url = canvas.toDataURL('image/png');
         const a = document.createElement('a');

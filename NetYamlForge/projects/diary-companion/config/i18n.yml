@@ -396,6 +396,11 @@ translations:
     zh-CN: '来自 AI 心灵伴侣'
     ja-JP: 'AIソウルメイトより'
     ko-KR: 'AI 소울메이트로부터'
+  projects.diary-companion.views.form.ai_fallback_notice:
+    en-US: 'AI Soulmate is a bit slow right now, so here''s a quick note instead — your diary is safely saved!'
+    zh-CN: 'AI 伴侣暂时没跟上，先用这句话代替～不过你的日记已经稳稳保存好啦'
+    ja-JP: 'AIソウルメイトが少し遅れています。代わりにこの一言を届けますが、日記はちゃんと保存されていますよ'
+    ko-KR: 'AI 소울메이트가 잠시 반응이 느려서 대신 이 문구를 전해드려요. 일기는 안전하게 저장되었습니다'
   projects.diary-companion.views.form.ai_thinking:
     en-US: 'AI Thinking...'
     zh-CN: '心灵对话中...'
