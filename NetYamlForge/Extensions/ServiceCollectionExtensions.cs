@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddNetYamlForge(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddMultiProjectInfrastructure();
+        services.AddMultiProjectInfrastructure(configuration);
         services.AddDatabaseServices();
         services.AddDynamicCrudCore(configuration);
         services.AddAuthServices();
@@ -100,7 +100,7 @@ public static class ServiceCollectionExtensions
     /// マルチプロジェクト基盤サービスを登録します。
     /// ProjectManager / ProjectScope / EntityMetadataProvider / DashboardConfigProvider
     /// </summary>
-    public static IServiceCollection AddMultiProjectInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddMultiProjectInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // ProjectManager は Singleton: 起動時に projects/ 配下を全スキャンします。
         services.AddSingleton<ProjectManager>();
@@ -117,6 +117,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantQuotaValidator, TenantQuotaValidator>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
         services.AddHostedService<WebhookOutboxPoller>();
+
+        // WebPush: VAPID鍵は起動時に一度生成/読込されるため Singleton。
+        // 購読ストア/エンキューサービスは IDbConnection(Scoped) に依存するため Scoped。
+        services.Configure<NetYamlForge.Services.WebPush.WebPushOptions>(configuration.GetSection("WebPush"));
+        services.AddSingleton<NetYamlForge.Services.WebPush.IVapidKeyProvider, NetYamlForge.Services.WebPush.VapidKeyProvider>();
+        services.AddScoped<NetYamlForge.Services.WebPush.IPushSubscriptionStore, NetYamlForge.Services.WebPush.PushSubscriptionStore>();
+        services.AddScoped<NetYamlForge.Services.WebPush.IPushNotificationService, NetYamlForge.Services.WebPush.PushNotificationService>();
+        services.AddHostedService<NetYamlForge.Services.WebPush.PushOutboxPoller>();
 
         return services;
     }
