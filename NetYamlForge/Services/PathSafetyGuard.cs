@@ -60,4 +60,22 @@ public static class PathSafetyGuard
 
         return fullTarget;
     }
+
+    /// <summary>
+    /// projectName が指定されていないシステムレベルの BatchJob 用の、安全なベースディレクトリを返します。
+    /// </summary>
+    /// <remarks>
+    /// <c>ContentRootPath</c> をそのまま baseDir として使うと、<c>projects/</c> がその直下にあるため
+    /// （<see cref="ProjectManager"/> 参照）、"projects/&lt;他テナント&gt;/data.db" のような相対パスが
+    /// ".." を一切使わずに <see cref="NormalizeAndValidatePath"/> の検証を通過してしまい、
+    /// テナント境界を越えたファイルアクセスが可能になってしまう。
+    /// この専用ディレクトリは <c>projects/</c> と兄弟関係（その祖先ではない）にあるため、
+    /// システムジョブから他テナントのディレクトリへ到達できない。
+    /// </remarks>
+    public static string GetSystemJobBaseDir(string contentRootPath)
+    {
+        var dir = Path.Combine(contentRootPath, "_system_jobs");
+        Directory.CreateDirectory(dir);
+        return dir;
+    }
 }

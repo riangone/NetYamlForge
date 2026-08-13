@@ -67,7 +67,8 @@ public class DirectoryImportExecutor : IBatchStepHandler
         }
         else
         {
-            baseDir = _env.ContentRootPath;
+            // ⚠️ システムレベル Job（projectName 未指定）はテナント境界外の専用ディレクトリへ隔離する
+            baseDir = PathSafetyGuard.GetSystemJobBaseDir(_env.ContentRootPath);
         }
 
         try

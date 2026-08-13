@@ -178,9 +178,9 @@ public class SlotFillingManager : ISlotFillingManager
     }
 
     /// <inheritdoc />
-    public async Task<string?> GetActiveScenarioAsync(string conversationId)
+    public async Task<string?> GetActiveScenarioAsync(string conversationId, string? projectId = null)
     {
-        var pid = GetResolvedProjectId(null);
+        var pid = GetResolvedProjectId(projectId);
         var prefix = $"{pid}:{conversationId}:";
         var activeSession = _sessionStore.GetAllSessions()
             .Where(kvp => kvp.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && !kvp.Value.IsComplete)
@@ -422,9 +422,9 @@ WHERE conversation_id = @ConversationId",
     // ===== FSM 統合メソッド =====
 
     /// <inheritdoc />
-    public async Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0)
+    public async Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0, string? projectId = null)
     {
-        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        var fsm = await GetOrRestoreFsmAsync(conversationId, projectId);
 
         if (confidence < 0.6)
         {
@@ -442,26 +442,26 @@ WHERE conversation_id = @ConversationId",
         }
 
         // 状態をDBに永続化
-        await PersistFsmStateAsync(conversationId, fsm, null);
+        await PersistFsmStateAsync(conversationId, fsm, projectId);
     }
 
     /// <inheritdoc />
-    public async Task<string?> GetCurrentFsmStateAsync(string conversationId)
+    public async Task<string?> GetCurrentFsmStateAsync(string conversationId, string? projectId = null)
     {
-        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        var fsm = await GetOrRestoreFsmAsync(conversationId, projectId);
         return fsm.CurrentState;
     }
 
     /// <inheritdoc />
-    public async Task<HashSet<string>> GetAllowedToolsAsync(string conversationId)
+    public async Task<HashSet<string>> GetAllowedToolsAsync(string conversationId, string? projectId = null)
     {
-        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        var fsm = await GetOrRestoreFsmAsync(conversationId, projectId);
         return new HashSet<string>(fsm.AllowedTools);
     }
 
-    public async Task<bool> IsToolAllowedAsync(string conversationId, string toolName)
+    public async Task<bool> IsToolAllowedAsync(string conversationId, string toolName, string? projectId = null)
     {
-        var fsm = await GetOrRestoreFsmAsync(conversationId, null);
+        var fsm = await GetOrRestoreFsmAsync(conversationId, projectId);
         return fsm.AllowedTools.Contains(toolName);
     }
 
@@ -482,7 +482,7 @@ WHERE conversation_id = @ConversationId",
                 new { Id = conversationId });
         });
 
-        var scenario = await GetActiveScenarioAsync(conversationId) ?? "test_drive";
+        var scenario = await GetActiveScenarioAsync(conversationId, projectId) ?? "test_drive";
         var resolvedProjectId = GetResolvedProjectId(projectId);
         var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
 
@@ -549,9 +549,9 @@ WHERE conversation_id = @Id",
     /// <summary>
     /// FSM 状態をリセット
     /// </summary>
-    public void ResetFsm(string conversationId)
+    public void ResetFsm(string conversationId, string? projectId = null)
     {
-        var fsmKey = GetFsmKey(conversationId, null);
+        var fsmKey = GetFsmKey(conversationId, projectId);
         _fsmStore.Remove(fsmKey);
         _logger.LogInformation("[FSM] 状態リセット Conv={ConvId}", conversationId);
     }
@@ -567,7 +567,7 @@ WHERE conversation_id = @Id",
     {
         var resolvedProjectId = GetResolvedProjectId(projectId);
         var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
-        var activeScenario = await GetActiveScenarioAsync(conversationId) ?? "test_drive";
+        var activeScenario = await GetActiveScenarioAsync(conversationId, projectId) ?? "test_drive";
 
         string? trigger = null;
         if (config.Scenarios.TryGetValue(activeScenario, out var scenarioConfig))
@@ -601,7 +601,7 @@ WHERE conversation_id = @Id",
         // トリガーが存在する場合、FSM を進行
         if (!string.IsNullOrEmpty(trigger))
         {
-            await UpdateFsmStateAsync(conversationId, trigger);
+            await UpdateFsmStateAsync(conversationId, trigger, projectId: projectId);
         }
     }
 }

@@ -45,27 +45,43 @@ public interface ISlotFillingManager
     /// <summary>
     /// アクティブ（未完了）なセッションのシナリオ名を返す。なければ null
     /// </summary>
-    Task<string?> GetActiveScenarioAsync(string conversationId);
+    /// <param name="conversationId">対話セッション ID</param>
+    /// <param name="projectId">
+    /// テナント ID。省略時は ProjectScope（リクエストスコープ）または DefaultProjectId にフォールバックするため、
+    /// マルチテナント文脈で呼び出す場合は必ず明示的に渡すこと（呼び出し元で検証済みの projectId をそのまま伝播する）。
+    /// </param>
+    Task<string?> GetActiveScenarioAsync(string conversationId, string? projectId = null);
 
     /// <summary>
     /// FSM 状態を更新
     /// </summary>
-    Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0);
+    /// <param name="conversationId">対話セッション ID</param>
+    /// <param name="trigger">発火させる FSM トリガー名</param>
+    /// <param name="confidence">信頼度（0.6 未満は低信頼度として扱う）</param>
+    /// <param name="projectId">テナント ID。省略時のフォールバック挙動は <see cref="GetActiveScenarioAsync"/> 参照。</param>
+    Task UpdateFsmStateAsync(string conversationId, string trigger, double confidence = 1.0, string? projectId = null);
 
     /// <summary>
     /// 現在の FSM 状態を文字列で取得
     /// </summary>
-    Task<string?> GetCurrentFsmStateAsync(string conversationId);
+    /// <param name="conversationId">対話セッション ID</param>
+    /// <param name="projectId">テナント ID。省略時のフォールバック挙動は <see cref="GetActiveScenarioAsync"/> 参照。</param>
+    Task<string?> GetCurrentFsmStateAsync(string conversationId, string? projectId = null);
 
     /// <summary>
     /// 状態に基づいて許可された Tool リストを取得
     /// </summary>
-    Task<HashSet<string>> GetAllowedToolsAsync(string conversationId);
+    /// <param name="conversationId">対話セッション ID</param>
+    /// <param name="projectId">テナント ID。省略時のフォールバック挙動は <see cref="GetActiveScenarioAsync"/> 参照。</param>
+    Task<HashSet<string>> GetAllowedToolsAsync(string conversationId, string? projectId = null);
 
     /// <summary>
     /// Tool 呼び出しが現在の状態で許可されているかチェック
     /// </summary>
-    Task<bool> IsToolAllowedAsync(string conversationId, string toolName);
+    /// <param name="conversationId">対話セッション ID</param>
+    /// <param name="toolName">チェック対象の Tool 名</param>
+    /// <param name="projectId">テナント ID。省略時のフォールバック挙動は <see cref="GetActiveScenarioAsync"/> 参照。</param>
+    Task<bool> IsToolAllowedAsync(string conversationId, string toolName, string? projectId = null);
 }
 
 /// <summary>

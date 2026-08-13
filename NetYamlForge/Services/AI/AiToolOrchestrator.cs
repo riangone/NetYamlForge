@@ -36,7 +36,12 @@ public interface IAiToolOrchestrator
     /// <summary>
     /// 获取当前会话的状态信息和允许的 Tool 列表
     /// </summary>
-    Task<SessionStateInfo> GetSessionStateAsync(string conversationId);
+    /// <param name="conversationId">会话 ID</param>
+    /// <param name="projectId">
+    /// テナント ID。未指定時は ProjectScope（リクエストスコープ）から解決する。
+    /// マルチテナント文脈で呼び出す場合は明示的に渡すことを推奨。
+    /// </param>
+    Task<SessionStateInfo> GetSessionStateAsync(string conversationId, string? projectId = null);
 }
 
 /// <summary>
@@ -125,13 +130,23 @@ public class AiToolOrchestrator : IAiToolOrchestrator
 
         if (string.IsNullOrEmpty(resolvedProjectId))
         {
-            resolvedProjectId = "default";
+            // ⚠️ ProjectScope 未設定かつ呼び出し元も projectId を指定しなかった場合、
+            // "default" テナントへ暗黙的にフォールバックすると他テナントとの串話リスクがあるため、
+            // ここでは処理を中断し監査ログを記録する（fail-closed）。
+            _logger.LogWarning(
+                "[ToolOrchestrator] projectId が未指定かつ ProjectScope 未設定のため Tool 呼び出しを拒否しました。Conv={ConvId}",
+                conversationId);
+
+            result.IsSuccess = false;
+            result.ValidationFailedReason = "访问被拒绝：无法确定租户上下文（projectId 未指定）";
+            result.ErrorMessage = result.ValidationFailedReason;
+            return result;
         }
 
         try
         {
             // [1] 获取当前 FSM 状态
-            var currentState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId);
+            var currentState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId, resolvedProjectId);
             result.FsmState = currentState;
 
             _logger.LogInformation(
@@ -164,7 +179,7 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             var toolName = toolCall["tool_call"]?.ToString();
             if (!string.IsNullOrEmpty(toolName))
             {
-                var isAllowed = await _slotFillingManager.IsToolAllowedAsync(conversationId, toolName);
+                var isAllowed = await _slotFillingManager.IsToolAllowedAsync(conversationId, toolName, resolvedProjectId);
                 if (!isAllowed)
                 {
                     result.IsSuccess = false;
@@ -221,11 +236,28 @@ public class AiToolOrchestrator : IAiToolOrchestrator
     /// <summary>
     /// 获取当前会话的状态信息和允许的 Tool 列表
     /// </summary>
-    public async Task<SessionStateInfo> GetSessionStateAsync(string conversationId)
+    public async Task<SessionStateInfo> GetSessionStateAsync(string conversationId, string? projectId = null)
     {
-        var fsmState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId);
-        var allowedTools = await _slotFillingManager.GetAllowedToolsAsync(conversationId);
-        var collectedSlots = await _slotFillingManager.GetCollectedSlotsAsync(conversationId);
+        var resolvedProjectId = projectId;
+        if (_projectScope != null && _projectScope.IsSet)
+        {
+            var activeProject = _projectScope.Current.Name;
+            if (string.IsNullOrEmpty(resolvedProjectId))
+            {
+                resolvedProjectId = activeProject;
+            }
+            else if (!string.Equals(resolvedProjectId, activeProject, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogWarning(
+                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}",
+                    conversationId, activeProject, resolvedProjectId);
+                throw new InvalidOperationException("访问被拒绝：不允许跨租户获取会话状态");
+            }
+        }
+
+        var fsmState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId, resolvedProjectId);
+        var allowedTools = await _slotFillingManager.GetAllowedToolsAsync(conversationId, resolvedProjectId);
+        var collectedSlots = await _slotFillingManager.GetCollectedSlotsAsync(conversationId, resolvedProjectId);
 
         var stateStr = fsmState?.ToString() ?? "Init";
         return new SessionStateInfo

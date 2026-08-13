@@ -93,8 +93,31 @@ public class PathSafetyGuardTests
     {
         Assert.Throws<ArgumentException>(() =>
             PathSafetyGuard.NormalizeAndValidatePath("", _baseDir, "Test"));
-        
+
         Assert.Throws<ArgumentException>(() =>
             PathSafetyGuard.NormalizeAndValidatePath(null, _baseDir, "Test"));
+    }
+
+    [Fact]
+    public void GetSystemJobBaseDir_ReturnsSiblingOfProjectsDir_NotAncestor()
+    {
+        // ContentRootPath 直下に projects/ が存在する構成（ProjectManager と同じ前提）を模した検証。
+        // システムジョブ用ディレクトリが projects/ の祖先（= ContentRootPath そのもの）だと、
+        // "projects/<他テナント>/data.db" のような相対パスがパストラバーサル無しで通ってしまうため、
+        // 必ず projects/ とは別の兄弟ディレクトリになっていることを保証する。
+        var contentRoot = _baseDir;
+        var projectsDir = Path.Combine(contentRoot, "projects");
+        Directory.CreateDirectory(projectsDir);
+
+        var systemJobBaseDir = PathSafetyGuard.GetSystemJobBaseDir(contentRoot);
+
+        Assert.True(Directory.Exists(systemJobBaseDir));
+        Assert.NotEqual(Path.GetFullPath(contentRoot), Path.GetFullPath(systemJobBaseDir));
+
+        // システムジョブ用ディレクトリを baseDir として、他テナントの projects/ 配下を指す相対パスを
+        // 解決しようとすると、パストラバーサル違反として拒否されなければならない。
+        var otherTenantRelativePath = Path.Combine("..", "projects", "other-tenant", "data.db");
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            PathSafetyGuard.NormalizeAndValidatePath(otherTenantRelativePath, systemJobBaseDir, "Test"));
     }
 }

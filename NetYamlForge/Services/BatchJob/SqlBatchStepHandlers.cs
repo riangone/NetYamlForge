@@ -44,7 +44,8 @@ public class SqlToCsvHandler : IBatchStepHandler
         }
         else
         {
-            baseDir = _env.ContentRootPath;
+            // ⚠️ システムレベル Job（projectName 未指定）はテナント境界外の専用ディレクトリへ隔離する
+            baseDir = PathSafetyGuard.GetSystemJobBaseDir(_env.ContentRootPath);
         }
 
         var sql = await GetSqlAsync(job, baseDir);
@@ -159,7 +160,8 @@ public class SqlCommandHandler : IBatchStepHandler
         }
         else
         {
-            baseDir = _env.ContentRootPath;
+            // ⚠️ システムレベル Job（projectName 未指定）はテナント境界外の専用ディレクトリへ隔離する
+            baseDir = PathSafetyGuard.GetSystemJobBaseDir(_env.ContentRootPath);
         }
 
         string sql;
