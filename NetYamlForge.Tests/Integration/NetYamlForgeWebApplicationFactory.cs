@@ -251,6 +251,7 @@ public sealed class UnpublishPostHandler : ICustomActionHandler
         base.Dispose(disposing);
         try
         {
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);

@@ -82,6 +82,9 @@ public class DynamicCrudRepositorySecurityTests : IDisposable
         _httpContext.User = principal;
 
         _userAuthServiceMock.Setup(u => u.GetUserRolesAsync(userName)).ReturnsAsync(roles);
+        // DynamicCrudRowLevelSecurity は projectName 付きの2引数オーバーロードを呼び出すため、
+        // そちらも明示的に stub しないと Moq の緩いモードで null が返り ArgumentNullException になる。
+        _userAuthServiceMock.Setup(u => u.GetUserRolesAsync(userName, It.IsAny<string?>())).ReturnsAsync(roles);
     }
 
     private EntityDefinition CreateMockEntityDefinition()

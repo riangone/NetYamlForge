@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS [memo] (
         try
         {
             SqliteConnection.ClearAllPools();
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);

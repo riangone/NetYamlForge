@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS [ticket_comment] (
         try
         {
             SqliteConnection.ClearAllPools();
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);

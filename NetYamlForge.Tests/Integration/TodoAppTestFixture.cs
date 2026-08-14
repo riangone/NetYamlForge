@@ -118,6 +118,9 @@ CREATE TABLE IF NOT EXISTS [todo_item] (
         try
         {
             SqliteConnection.ClearAllPools();
+            // Program.Main が TempContentRoot へプロセス CWD を書き換えているため、
+            // 削除前に安全な場所へ戻す(でないと後続テストの getcwd() が ENOENT で落ちる)。
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);

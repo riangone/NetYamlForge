@@ -194,6 +194,7 @@ CREATE TABLE IF NOT EXISTS [qr_token] (
         try
         {
             SqliteConnection.ClearAllPools();
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);

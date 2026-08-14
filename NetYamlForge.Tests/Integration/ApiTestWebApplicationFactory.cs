@@ -63,6 +63,7 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
         base.Dispose(disposing);
         try
         {
+            TestProcessCwdGuard.RestoreSafeCwd();
             if (Directory.Exists(TempContentRoot))
             {
                 Directory.Delete(TempContentRoot, recursive: true);
