@@ -137,6 +137,10 @@ public partial class PageController
             foreach (var field in section.Fields)
             {
                 var val = Request.Form.TryGetValue(field.Id, out var fv) ? fv.ToString() : field.Default ?? "";
+                if (field.Type == "bool" && Request.Form.TryGetValue(field.Id, out var boolValues))
+                {
+                    val = boolValues.Any(v => v == "true") ? "true" : "false";
+                }
                 templateVars[field.Id] = val;
             }
         }

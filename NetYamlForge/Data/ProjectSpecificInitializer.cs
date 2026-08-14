@@ -68,6 +68,12 @@ public class ProjectSpecificInitializer
             // 种子数据在 AutoMigrateMissingColumnsAsync 之后执行
             await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
         }
+        else if (string.Equals(projectName, "ai-card", StringComparison.OrdinalIgnoreCase))
+        {
+            // ai-card: 实体表由 YAML 自动创建，init_seed.sql 在表创建前会失败，因此跳过
+            // 种子数据在 AutoMigrateMissingColumnsAsync 之后执行
+            await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
+        }
         else
         {
             // 汎用フォールバック: database/init_seed.sql が存在すれば実行
@@ -110,8 +116,9 @@ public class ProjectSpecificInitializer
         // 调用基于 YAML 实体配置的自动物理列追加迁移机制
         await AutoMigrateMissingColumnsAsync(conn, projectName, dbType, metadataProvider, logger);
 
-        // dungeon-forge: 表创建后运行种子数据（seed.sql）
-        if (string.Equals(projectName, "dungeon-forge", StringComparison.OrdinalIgnoreCase))
+        // dungeon-forge / ai-card: 表创建后运行种子数据（seed.sql / init_seed.sql）
+        if (string.Equals(projectName, "dungeon-forge", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(projectName, "ai-card", StringComparison.OrdinalIgnoreCase))
         {
             await RunPostMigrationSeedSqlAsync(conn as SqliteConnection, projectName, logger, projectDir);
         }
@@ -224,11 +231,16 @@ public class ProjectSpecificInitializer
         var seedPath = ResolveDbFile("seed.sql");
         if (string.IsNullOrEmpty(seedPath))
         {
-            logger.LogInformation("プロジェクト '{Name}' に seed.sql が見つかりません。スキップします。", projectName);
+            // seed.sql がなければ init_seed.sql をフォールバックとして試す
+            seedPath = ResolveDbFile("init_seed.sql");
+        }
+        if (string.IsNullOrEmpty(seedPath))
+        {
+            logger.LogInformation("プロジェクト '{Name}' に seed.sql / init_seed.sql が見つかりません。スキップします。", projectName);
             return;
         }
 
-        logger.LogInformation("プロジェクト '{Name}' の seed.sql を実行します: {Path}", projectName, seedPath);
+        logger.LogInformation("プロジェクト '{Name}' のシードSQLを実行します: {Path}", projectName, seedPath);
         var sql = await File.ReadAllTextAsync(seedPath);
         await conn.ExecuteAsync(sql);
         logger.LogInformation("プロジェクト '{Name}' の seed.sql 実行完了", projectName);

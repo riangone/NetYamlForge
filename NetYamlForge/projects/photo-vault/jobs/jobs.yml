@@ -7,7 +7,7 @@ jobs:
     enabled: true
 
     schedule:
-      cron: "0 * * * *"       # 每小时检查一次
+      cron: "*/1 * * * *"       # 每分钟检查一次
       timezone: "Asia/Shanghai"
 
     type: directory_import
@@ -33,16 +33,16 @@ jobs:
   # ─── LM Studio 本地模型标注工作器 ───
   lmstudio_annotation_worker:
     displayName: LM Studio 视觉标注
-    description: "从 processing_queue 取出 provider=lmstudio 的待处理照片，调用 LM Studio 本地模型 (google/gemma-4-e4b) 生成标注"
+    description: "从 processing_queue 取出 provider=lmstudio 的待处理照片，调用 LM Studio 本地模型 (google/gemma-4-12b) 生成标注"
     enabled: false
 
     schedule:
       cron: "*/3 * * * *"
       timezone: "Asia/Shanghai"
 
-    type: photo_annotator
+    type: ai_annotator
     aiProvider: lmstudio
-    batchSize: 3
+    batchSize: 1
 
     onFailure:
       retryCount: 3
@@ -59,7 +59,7 @@ jobs:
       cron: "*/5 * * * *"
       timezone: "Asia/Shanghai"
 
-    type: photo_annotator
+    type: ai_annotator
     aiProvider: ollama
     batchSize: 5
 
@@ -78,7 +78,7 @@ jobs:
       cron: "*/10 * * * *"
       timezone: "Asia/Shanghai"
 
-    type: photo_annotator
+    type: ai_annotator
     aiProvider: gemini
     batchSize: 5
 
@@ -91,13 +91,13 @@ jobs:
   antigravity_cli_worker:
     displayName: Antigravity 视觉标注
     description: "从 processing_queue 取出 provider=antigravity 的待处理照片，通过 Antigravity CLI 进行视觉标注"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "*/3 * * * *"    # 每 3 分钟
       timezone: "Asia/Shanghai"
 
-    type: photo_annotator
+    type: ai_annotator
     aiProvider: antigravity
     batchSize: 5
 
@@ -111,7 +111,7 @@ jobs:
   embedding_generator:
     displayName: 向量嵌入生成（Gemini）
     description: "为 annotation_status=done 且尚无嵌入向量的照片调用 Gemini text-embedding-004，结果存入 photo_embeddings 表"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "0 * * * *"      # 每 60 分钟扫描一次
@@ -130,7 +130,7 @@ jobs:
   album_stats_refresh:
     displayName: 相册统计刷新
     description: "更新 albums 表中 photo_count 和 annotated_count 字段"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "0 * * * *"       # 每整点运行
@@ -153,7 +153,7 @@ jobs:
   failed_retry:
     displayName: 失败任务重试
     description: "将重试次数 <= 3 的失败队列任务状态重置为 queued"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "*/30 * * * *"    # 每 30 分钟
@@ -176,7 +176,7 @@ jobs:
   tag_usage_refresh:
     displayName: 标签使用统计刷新
     description: "统计 photo_tags 中各标签的使用次数并更新 tags 表"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "0 2 * * *"       # 每天凌晨 2:00
@@ -199,7 +199,7 @@ jobs:
   daily_annotation_report:
     displayName: 每日标注进度报告
     description: "生成前一天的标注统计报告 CSV"
-    enabled: true
+    enabled: false
 
     schedule:
       cron: "0 8 * * *"       # 每天早上 8:00

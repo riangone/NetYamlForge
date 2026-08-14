@@ -15,6 +15,7 @@ public sealed class AiProviderDispatcher
     private readonly ILogger _logger;
     private readonly HttpClient _http;
     private readonly ICliChainService? _cliChainService;
+    private readonly IAiScenarioYamlLoader? _scenarioLoader;
 
     /// <param name="logger">ログ出力先</param>
     /// <param name="httpClient">HTTP 呼び出し用クライアント（未指定時は既定タイムアウト付きで新規作成）</param>
@@ -23,11 +24,22 @@ public sealed class AiProviderDispatcher
     /// 渡された場合は appsettings.json の AiCliChain 設定がそのまま反映される。
     /// 未指定の場合は既定設定の CliChainService を都度生成する（設定ファイルの上書きは反映されない）。
     /// </param>
-    public AiProviderDispatcher(ILogger logger, HttpClient? httpClient = null, ICliChainService? cliChainService = null)
+    /// <param name="scenarioLoader">
+    /// プロジェクトの ai/scenarios.yaml からプロバイダー接続設定（model / base_url など）を
+    /// 解決するためのローダー。渡された場合、設定値は環境変数 → scenarios.yaml → ハードコード既定値 の順で解決される。
+    /// </param>
+    public AiProviderDispatcher(
+        ILogger logger,
+        HttpClient? httpClient = null,
+        ICliChainService? cliChainService = null,
+        IAiScenarioYamlLoader? scenarioLoader = null)
     {
         _logger = logger;
-        _http = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(120) };
+        var timeoutEnv = Environment.GetEnvironmentVariable("AI_HTTP_TIMEOUT_SECONDS");
+        var timeoutSeconds = int.TryParse(timeoutEnv, out var t) && t > 0 ? t : 300;
+        _http = httpClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) };
         _cliChainService = cliChainService;
+        _scenarioLoader = scenarioLoader;
     }
 
     /// <summary>
@@ -43,7 +55,7 @@ public sealed class AiProviderDispatcher
     {
         return provider.ToLowerInvariant() switch
         {
-            "lmstudio"    => await CallLmStudioAsync(prompt, absoluteImagePath, getEnvValue, ct),
+            "lmstudio"    => await CallLmStudioAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
             "gemini_cli"  => await CallGeminiCliAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
             "gemini"      => await CallGeminiAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
             "ollama"      => await CallOllamaAsync(prompt, absoluteImagePath, projectName, getEnvValue, ct),
@@ -53,16 +65,35 @@ public sealed class AiProviderDispatcher
         };
     }
 
+    /// <summary>
+    /// プロジェクトの ai/scenarios.yaml からプロバイダー設定を取得する（無ければ null）。
+    /// </summary>
+    private AiProviderConfig? GetProviderConfig(string provider, string? projectName)
+    {
+        if (string.IsNullOrEmpty(projectName) || _scenarioLoader == null) return null;
+        try
+        {
+            var config = _scenarioLoader.GetConfig(projectName);
+            return config.Providers.TryGetValue(provider, out var p) ? p : null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to load provider config from scenarios.yaml for {Provider} in {Project}", provider, projectName);
+            return null;
+        }
+    }
+
     // ──────────────────────────────────────────────────────────
     // LM Studio (local OpenAI-compatible)
     // ──────────────────────────────────────────────────────────
 
     private async Task<string?> CallLmStudioAsync(
-        string prompt, string imagePath,
+        string prompt, string imagePath, string? projectName,
         Func<string, string?> getEnvValue, CancellationToken ct)
     {
-        var baseUrl = getEnvValue("LMSTUDIO_BASE_URL") ?? "http://localhost:1234/v1";
-        var model = getEnvValue("LMSTUDIO_MODEL") ?? "google/gemma-4-e4b";
+        var cfg = GetProviderConfig("lmstudio", projectName);
+        var baseUrl = getEnvValue("LMSTUDIO_BASE_URL") ?? cfg?.BaseUrl ?? "http://localhost:1234/v1";
+        var model = getEnvValue("LMSTUDIO_MODEL") ?? cfg?.Model ?? cfg?.VisionModel ?? "google/gemma-4-12b";
         var (base64, mimeType) = EncodeImage(imagePath);
 
         var body = new
@@ -80,8 +111,8 @@ public sealed class AiProviderDispatcher
                     }
                 }
             },
-            max_tokens = 1024,
-            temperature = 0.2
+            max_tokens = cfg?.MaxTokens ?? 1024,
+            temperature = cfg?.Temperature ?? 0.2
         };
 
         var req = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/chat/completions")
@@ -104,11 +135,13 @@ public sealed class AiProviderDispatcher
         string prompt, string imagePath, string? projectName,
         Func<string, string?> getEnvValue, CancellationToken ct)
     {
-        var apiKey = getEnvValue("GEMINI_API_KEY");
+        var cfg = GetProviderConfig("gemini", projectName);
+        var apiKey = getEnvValue("GEMINI_API_KEY") ?? cfg?.ApiKey;
         if (string.IsNullOrWhiteSpace(apiKey)) { _logger.LogWarning("GEMINI_API_KEY not set"); return null; }
 
         var (base64, mimeType) = EncodeImage(imagePath);
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
+        var model = cfg?.VisionModel ?? "gemini-2.0-flash";
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
         var body = new
         {
@@ -116,7 +149,7 @@ public sealed class AiProviderDispatcher
             {
                 new { parts = new object[] { new { text = prompt }, new { inline_data = new { mime_type = mimeType, data = base64 } } } }
             },
-            generationConfig = new { maxOutputTokens = 1024, temperature = 0.2 }
+            generationConfig = new { maxOutputTokens = cfg?.MaxTokens ?? 1024, temperature = cfg?.Temperature ?? 0.2 }
         };
 
         var req = new HttpRequestMessage(HttpMethod.Post, url)
@@ -156,8 +189,9 @@ public sealed class AiProviderDispatcher
         string prompt, string imagePath, string? projectName,
         Func<string, string?> getEnvValue, CancellationToken ct)
     {
-        var baseUrl = getEnvValue("OLLAMA_BASE_URL") ?? "http://localhost:11434";
-        var model = getEnvValue("OLLAMA_VISION_MODEL") ?? "llava:13b";
+        var cfg = GetProviderConfig("ollama", projectName);
+        var baseUrl = getEnvValue("OLLAMA_BASE_URL") ?? cfg?.BaseUrl ?? "http://localhost:11434";
+        var model = getEnvValue("OLLAMA_VISION_MODEL") ?? cfg?.VisionModel ?? "llava:13b";
         var (base64, _) = EncodeImage(imagePath);
 
         var body = new { model, prompt, images = new[] { base64 }, stream = false };
@@ -251,7 +285,7 @@ public sealed class AiProviderDispatcher
     /// </summary>
     public static string GetModelName(string provider) => provider switch
     {
-        "lmstudio"    => "google/gemma-4-e4b",
+        "lmstudio"    => "google/gemma-4-12b",
         "gemini"      => "gemini-2.0-flash",
         "gemini_cli"  => "antigravity-cli",
         "antigravity" => "antigravity-cli",

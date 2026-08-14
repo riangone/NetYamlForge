@@ -62,7 +62,7 @@ providers:
     enabled: true
     display_name: "LM Studio（本地）"
     base_url: "http://localhost:1234/v1"
-    model: "google/gemma-4-e4b"
+    model: "qwen/qwen3.5-9b"
     max_tokens: 1024
     temperature: 0.2
 

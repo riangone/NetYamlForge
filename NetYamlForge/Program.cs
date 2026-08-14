@@ -288,8 +288,8 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseStaticFiles();
 app.UsePathBase("/nyf");
+app.UseStaticFiles();
 app.Use(async (context, next) =>
 {
     // 独立ドメイン (nyf.0101.click) 経由のアクセスは PathBase 不要

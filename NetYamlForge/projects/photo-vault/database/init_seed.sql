@@ -27,7 +27,7 @@ VALUES
      datetime('now')),
 
     ('annotation', 'lmstudio_annotation_model',
-     'LM Studio 视觉模型', 'google/gemma-4-e4b', 'google/gemma-4-e4b',
+     'LM Studio 视觉模型', 'google/gemma-4-12b', 'google/gemma-4-12b',
      'LM Studio 中加载的视觉语言模型 ID',
      datetime('now')),
 

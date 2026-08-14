@@ -126,8 +126,12 @@ CREATE TABLE IF NOT EXISTS _nyf_migrations (
             }
         }
 
-        if (entity.SoftDelete && !physicalByName.ContainsKey("IsDeleted"))
-            operations.Add(new MigrationOperation(MigrationOpType.AddColumn, "IsDeleted", null, "INTEGER", false));
+        if (entity.SoftDelete && !physicalByName.ContainsKey(entity.SoftDeleteColumn))
+        {
+            var softCol = entity.SoftDeleteColumn;
+            var isDefault = softCol.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase);
+            operations.Add(new MigrationOperation(MigrationOpType.AddColumn, softCol, null, isDefault ? "INTEGER" : "DATETIME", false));
+        }
 
         return new MigrationPlan(entityName, entity.Table, operations);
     }

@@ -161,7 +161,7 @@ public partial class DynamicCrudRepository
             var sql = new List<string> { $"SELECT * FROM {meta.Table}" };
             var where = new List<string> { $"{pkColumns[0]} = @Id" };
             if (meta.SoftDelete)
-                where.Add(SoftDeleteClause(meta.Table));
+                where.Add(SoftDeleteClause(meta));
             await ApplyRowLevelSecurityAsync(meta, where, param);
             AppendWhere(sql, where);
             statement = string.Join(Environment.NewLine, sql);
@@ -202,7 +202,7 @@ public partial class DynamicCrudRepository
             var sql = new List<string> { $"SELECT * FROM {meta.Table}" };
             var where = new List<string> { BuildCompositeKeyWhere(pkColumns, keyValues, param) };
             if (meta.SoftDelete)
-                where.Add(SoftDeleteClause(meta.Table));
+                where.Add(SoftDeleteClause(meta));
             await ApplyRowLevelSecurityAsync(meta, where, param);
             AppendWhere(sql, where);
             statement = string.Join(Environment.NewLine, sql);

@@ -141,7 +141,10 @@ public partial class DynamicCrudRepository
 
             if (meta.SoftDelete)
             {
-                sql = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
+                var softCol = meta.SoftDeleteColumn;
+                sql = meta.SoftDeleteColumn.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase)
+                    ? $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}"
+                    : $"UPDATE {meta.Table} SET {softCol} = datetime('now') WHERE {whereClause}";
             }
             else
             {
@@ -178,7 +181,10 @@ public partial class DynamicCrudRepository
             var whereClause = BuildCompositeKeyWhere(pkColumns, keyValues, tempParam);
             if (meta.SoftDelete)
             {
-                sql = $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}";
+                var softCol = meta.SoftDeleteColumn;
+                sql = meta.SoftDeleteColumn.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase)
+                    ? $"UPDATE {meta.Table} SET IsDeleted = 1 WHERE {whereClause}"
+                    : $"UPDATE {meta.Table} SET {softCol} = datetime('now') WHERE {whereClause}";
             }
             else
             {

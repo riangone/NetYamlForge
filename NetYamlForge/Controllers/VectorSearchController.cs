@@ -123,6 +123,9 @@ public class VectorSearchController : Controller
             if (sourceTable == "photos")
             {
                 var fileName = GetStr(r, "file_name") ?? "";
+                var pathBase = Request.PathBase.Value ?? "";
+                var thumb = $"{pathBase}/{project}/photo-file/thumb/{Uri.EscapeDataString(pkValue)}?w=300";
+                var serve = $"{pathBase}/{project}/photo-file/serve/{Uri.EscapeDataString(pkValue)}";
                 return (object)new
                 {
                     id            = pkValue,
@@ -134,8 +137,8 @@ public class VectorSearchController : Controller
                     taken_at      = GetStr(r, "taken_at"),
                     confidence    = r.TryGetValue("confidence_score", out var cs) && cs is double d ? (double?)d : null,
                     similarity    = Math.Round((double)x.sim, 4),
-                    thumb_url     = $"/photo/thumb/{Uri.EscapeDataString(fileName)}?w=300",
-                    photo_url     = GetStr(r, "file_path") ?? $"/uploads/photo-vault/{fileName}"
+                    thumb_url     = thumb,
+                    photo_url     = serve
                 };
             }
 

@@ -36,7 +36,7 @@ internal static class PhotoVaultSettingsHelper
                     (section_group, setting_key, label, value, default_value, description, updated_at)
                 VALUES
                     ('annotation', 'annotation_provider',
-                     '标注 AI 提供商', 'antigravity', 'antigravity',
+                     '标注 AI 提供商', 'lmstudio', 'lmstudio',
                      '可选值：lmstudio / ollama / gemini / antigravity',
                      datetime('now')),
                     ('annotation', 'lmstudio_base_url',
@@ -44,7 +44,7 @@ internal static class PhotoVaultSettingsHelper
                      'LM Studio 本地服务的 OpenAI 兼容接口地址',
                      datetime('now')),
                     ('annotation', 'lmstudio_annotation_model',
-                     'LM Studio 视觉模型', 'google/gemma-4-e4b', 'google/gemma-4-e4b',
+                     'LM Studio 视觉模型', 'google/gemma-4-12b', 'google/gemma-4-12b',
                      'LM Studio 中加载的视觉语言模型 ID',
                      datetime('now')),
                     ('annotation', 'ollama_base_url',
@@ -113,7 +113,7 @@ public class EnqueueAnnotationHandler : ICustomActionHandler
 
         await PhotoVaultSettingsHelper.EnsureSeedAsync(db, tx);
 
-        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "antigravity");
+        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "lmstudio");
 
         var now = DateTime.UtcNow;
 
@@ -147,7 +147,7 @@ public class BatchEnqueuePendingHandler : ICustomActionHandler
 
         await PhotoVaultSettingsHelper.EnsureSeedAsync(db, tx);
 
-        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "antigravity");
+        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "lmstudio");
 
         var now = DateTime.UtcNow;
         var queued = 0;
@@ -226,7 +226,7 @@ public class AnnotateNowHandler : ICustomActionHandler
             return ActionHandlerResult.Failure("照片不存在");
 
         await PhotoVaultSettingsHelper.EnsureSeedAsync(db, tx);
-        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "antigravity");
+        var provider = await PhotoVaultSettingsHelper.ReadProviderAsync(db, tx, "annotation_provider", "lmstudio");
 
         var now = DateTime.UtcNow;
 

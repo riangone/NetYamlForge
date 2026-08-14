@@ -1,11 +1,11 @@
 {
   "album_stats_refresh": false,
   "daily_annotation_report": false,
-  "embedding_generator": true,
+  "embedding_generator": false,
   "failed_retry": false,
-  "lmstudio_annotation_worker": false,
+  "lmstudio_annotation_worker": true,
   "photo_import_worker": true,
   "tag_usage_refresh": false,
-  "antigravity_cli_worker": true,
-  "gemini_annotation_worker": true
+  "antigravity_cli_worker": false,
+  "gemini_annotation_worker": false
 }

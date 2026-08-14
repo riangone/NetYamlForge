@@ -63,7 +63,12 @@ public static class TableDdlBuilder
         }
 
         if (entity.SoftDelete)
-            colSqls.Add("\"IsDeleted\" INTEGER NOT NULL DEFAULT 0");
+        {
+            if (entity.SoftDeleteColumn.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase))
+                colSqls.Add("\"IsDeleted\" INTEGER NOT NULL DEFAULT 0");
+            else
+                colSqls.Add($"\"{entity.SoftDeleteColumn}\" DATETIME NULL");
+        }
 
         var escapedTableName = tableName.Trim('"').Replace("\"", "\"\"");
         return $"CREATE TABLE \"{escapedTableName}\" (\n  {string.Join(",\n  ", colSqls)}\n)";

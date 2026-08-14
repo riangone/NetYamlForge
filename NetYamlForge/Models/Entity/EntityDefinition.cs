@@ -35,6 +35,11 @@ public class EntityDefinition
     public PagingDefinition Paging { get; set; } = new();
     public EntityLayoutDefinition Layout { get; set; } = new();
     public bool SoftDelete { get; set; }
+    /// <summary>
+    /// 論理削除フラグを保持する列名。既定は IsDeleted。
+    /// 例: photos エンティティは deleted_at（DATETIME）方式を使用するため softDeleteColumn: deleted_at を指定する。
+    /// </summary>
+    public string SoftDeleteColumn { get; set; } = "IsDeleted";
     public bool IsPublic { get; set; } = true;
     public string Api { get; set; } = "disabled";
     public Dictionary<string, FilterDefinition> Filters { get; set; } = new();

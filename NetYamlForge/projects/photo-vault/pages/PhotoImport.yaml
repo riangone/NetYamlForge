@@ -85,12 +85,12 @@ sections:
   - id: upload_ai_provider
     label: AI 标注提供商
     type: select
-    default: antigravity
+    default: lmstudio
     options:
-    - value: antigravity
-      label: 🤖 Antigravity（Gemini CLI，默认）
     - value: lmstudio
-      label: 🧠 LM Studio
+      label: 🧠 LM Studio（默认）
+    - value: antigravity
+      label: 🤖 Antigravity（Gemini CLI）
     - value: gemini
       label: ☁️ Gemini API
     - value: ollama
@@ -131,12 +131,12 @@ sections:
   - id: dir_ai_provider
     label: AI 标注提供商
     type: select
-    default: antigravity
+    default: lmstudio
     options:
-    - value: antigravity
-      label: 🤖 Antigravity（Gemini CLI，默认）
     - value: lmstudio
-      label: 🧠 LM Studio
+      label: 🧠 LM Studio（默认）
+    - value: antigravity
+      label: 🤖 Antigravity（Gemini CLI）
     - value: gemini
       label: ☁️ Gemini API
     - value: ollama

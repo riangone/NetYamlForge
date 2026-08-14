@@ -64,8 +64,11 @@ public partial class DynamicCrudRepository
     }
 
     /// <summary>論理削除フィルター条件を返す。</summary>
-    private static string SoftDeleteClause(string tableName) =>
-        $"({tableName}.IsDeleted = 0 OR {tableName}.IsDeleted IS NULL)";
+    private static string SoftDeleteClause(EntityDefinition meta)
+    {
+        var col = meta.SoftDeleteColumn;
+        return $"({meta.Table}.{col} = 0 OR {meta.Table}.{col} IS NULL)";
+    }
 
     private static void ApplyFilters(
         EntityDefinition meta,
@@ -116,7 +119,7 @@ public partial class DynamicCrudRepository
         }
 
         if (meta.SoftDelete)
-            where.Add(SoftDeleteClause(meta.Table));
+            where.Add(SoftDeleteClause(meta));
 
         return where;
     }

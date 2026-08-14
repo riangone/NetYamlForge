@@ -5,6 +5,7 @@ entities:
     key: photo_id
     displayName: 照片库
     softDelete: true
+    softDeleteColumn: deleted_at
 
     columns:
       photo_id:
@@ -228,6 +229,11 @@ entities:
         required: false
         label: 更新时间
         sortable: true
+      deleted_at:
+        type: datetime
+        required: false
+        label: 删除时间
+        sortable: false
 
     actions:
       annotate_now:

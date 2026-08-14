@@ -75,6 +75,10 @@ public partial class PageController
                     foreach (var ef in section.ExtraFields)
                     {
                         var formVal = Request.Form.TryGetValue(ef.Id, out var val) ? val.ToString() : null;
+                        if (ef.Type == "bool" && Request.Form.TryGetValue(ef.Id, out var boolValues))
+                        {
+                            formVal = boolValues.Any(v => v == "true") ? "true" : "false";
+                        }
                         templateVars[ef.Id] = !string.IsNullOrEmpty(formVal) ? formVal : (ef.Default ?? "");
                     }
                 }

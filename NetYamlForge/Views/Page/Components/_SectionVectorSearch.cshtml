@@ -4,7 +4,8 @@
     var sec     = Model.Sec;
     var project = Model.Project;
     var secId   = sec.Id;
-    var apiBase = $"/{project}/api";
+    var pathBase = Context.Request.PathBase.Value ?? "";
+    var apiBase = $"{pathBase}/{project}/api";
 }
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="vs-@secId">

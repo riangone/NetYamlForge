@@ -328,15 +328,14 @@ public sealed class RowMutationRepository : IRowMutationRepository
         // 支持自动软删除（逻辑删除）
         if (entityDef != null && entityDef.SoftDelete)
         {
-            var sets = new List<string> { "\"IsDeleted\" = 1" };
+            var softCol = entityDef.SoftDeleteColumn;
+            var sets = new List<string> { $"\"{softCol}\" = {(softCol.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase) ? "1" : "@DeletedAt")}" };
             var param = new DynamicParameters();
             param.Add("__pk", primaryKeyValue);
 
-            var deletedCol = entityDef.Columns.Keys.FirstOrDefault(k => string.Equals(k, "DeletedAt", StringComparison.OrdinalIgnoreCase) || string.Equals(k, "deleted_at", StringComparison.OrdinalIgnoreCase));
-            if (deletedCol != null)
+            if (!softCol.Equals("IsDeleted", StringComparison.OrdinalIgnoreCase))
             {
                 var nowStr = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
-                sets.Add($"\"{deletedCol}\" = @DeletedAt");
                 param.Add("DeletedAt", nowStr);
             }
 

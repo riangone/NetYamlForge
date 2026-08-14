@@ -44,9 +44,10 @@ layout:
       # - label: 语义搜索
       #   url: /photo-vault/Page/AiSearch
       #   icon: 🔍
-      # - label: 照片导入
-      #   url: /photo-vault/Page/PhotoImport
-      #   icon: 📥
+      - label: 照片导入
+        url: /photo-vault/Page/PhotoImport
+        icon: 📥
+        roles: [editor, admin]
       # - label: 相册管理
       #   url: /photo-vault/Page/Albums
       #   icon: 📂

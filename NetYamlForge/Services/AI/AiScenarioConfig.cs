@@ -11,6 +11,32 @@ public class AiScenarioConfig
     public Dictionary<string, ScenarioConfig> Scenarios { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> AllowedEntities { get; set; } = new();
     public List<string> AllowedActions { get; set; } = new();
+
+    /// <summary>providers セクション（AI プロバイダー別の接続設定）。</summary>
+    public Dictionary<string, AiProviderConfig> Providers { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>既定の标注プロバイダー（lmstudio / ollama / gemini / antigravity など）。</summary>
+    public string? DefaultAnnotationProvider { get; set; }
+
+    /// <summary>标注用プロンプト（プロジェクト固有の上書き）。</summary>
+    public string? AnnotationPrompt { get; set; }
+}
+
+/// <summary>
+/// AI プロバイダー別の接続設定（scenarios.yaml の providers セクションに対応）。
+/// </summary>
+public class AiProviderConfig
+{
+    public bool Enabled { get; set; } = true;
+    public string? DisplayName { get; set; }
+    public string? BaseUrl { get; set; }
+    public string? Model { get; set; }
+    public string? VisionModel { get; set; }
+    public string? TextModel { get; set; }
+    public string? ApiKey { get; set; }
+    public string? ApiKeyEnv { get; set; }
+    public int MaxTokens { get; set; } = 1024;
+    public double Temperature { get; set; } = 0.2;
 }
 
 public class ScenarioConfig

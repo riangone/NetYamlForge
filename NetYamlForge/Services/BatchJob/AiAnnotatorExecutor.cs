@@ -82,13 +82,14 @@ public class AiAnnotatorExecutor : AiQueueStepHandlerBase<AiAnnotatorExecutor.Qu
         IConfiguration configuration,
         IEmbeddingService embedding,
         ICliChainService cliChain,
+        IAiScenarioYamlLoader scenarioLoader,
         ILogger<AiAnnotatorExecutor> logger) : base(cliChain, logger)
     {
         _env = env;
         _configuration = configuration;
         _embedding = embedding;
         _logger = logger;
-        _providerDispatcher = new AiProviderDispatcher(logger, cliChainService: cliChain);
+        _providerDispatcher = new AiProviderDispatcher(logger, cliChainService: cliChain, scenarioLoader: scenarioLoader);
     }
 
     protected override async Task<IReadOnlyList<QueueRow>> FetchPendingAsync(
