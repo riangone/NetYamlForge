@@ -1,0 +1,48 @@
+entities:
+  learning_history:
+    table: 'LearningHistory'
+    key: 'Id'
+    displayName: 'Learning History'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    joins:
+      - type: left
+        table: DailyLesson
+        alias: dl
+        on: "LearningHistory.LessonId = dl.Id"
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'LessonId', 'CompletedAt', 'TotalQuestions', 'CorrectAnswers', 'XpEarned']
+      filters:
+        columns: 2
+        order: ['UserName', 'LessonId']
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', searchable: true, sortable: true }
+      LessonId: { type: int, required: true, label: 'Lesson ID', sortable: true }
+      LessonDate: { type: string, label: 'Lesson Date', expression: 'dl.LessonDate', sortable: true }
+      CompletedAt: { type: string, required: true, label: 'Completed At', sortable: true }
+      TotalQuestions: { type: int, required: true, label: 'Total Questions', sortable: true }
+      CorrectAnswers: { type: int, required: true, label: 'Correct Answers', sortable: true }
+      XpEarned: { type: int, required: true, label: 'XP Earned', sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', editable: true }
+      LessonId:
+        type: int
+        required: true
+        label: 'Lesson ID'
+        editable: true
+        foreignKey:
+          entity: daily_lesson
+          displayColumn: 'Id'
+      CompletedAt: { type: string, required: true, label: 'Completed At', editable: true }
+      TotalQuestions: { type: int, required: true, label: 'Total Questions', editable: true }
+      CorrectAnswers: { type: int, required: true, label: 'Correct Answers', editable: true }
+      XpEarned: { type: int, required: true, label: 'XP Earned', editable: true }
+    filters:
+      UserName: { type: equal, label: 'User Name' }
+      LessonId: { type: equal, label: 'Lesson ID' }

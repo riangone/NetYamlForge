@@ -1,0 +1,52 @@
+entities:
+  learning_profile:
+    table: 'LearningProfile'
+    key: 'Id'
+    displayName: 'User Learning Profile'
+    softDelete: false
+    api: enabled
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'CurrentLevel', 'TotalXp', 'Streak', 'LastActiveDate', 'CompletedLessonsCount']
+      filters:
+        columns: 2
+        order: ['UserName', 'CurrentLevel']
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', searchable: true, sortable: true }
+      CurrentLevel: { type: int, required: true, label: 'Current Level', sortable: true }
+      TotalXp: { type: int, required: true, label: 'Total XP', sortable: true }
+      Streak: { type: int, required: true, label: 'Daily Streak', sortable: true }
+      LastActiveDate: { type: string, label: 'Last Active Date', sortable: true }
+      CompletedLessonsCount: { type: int, required: true, label: 'Completed Lessons Count', sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', editable: true }
+      CurrentLevel:
+        type: int
+        required: true
+        label: 'Current Level'
+        editable: true
+        options:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+      TotalXp: { type: int, required: true, label: 'Total XP', editable: true }
+      Streak: { type: int, required: true, label: 'Daily Streak', editable: true }
+      LastActiveDate: { type: string, label: 'Last Active Date', editable: true }
+      CompletedLessonsCount: { type: int, required: true, label: 'Completed Lessons Count', editable: true }
+    filters:
+      UserName: { type: equal, label: 'User Name' }
+      CurrentLevel: { type: equal, label: 'Current Level' }
+    actions:
+      generate_daily_lesson:
+        label: "Generate Daily Lesson"
+        scope: row
+        confirm: "Are you sure you want to generate a new daily lesson for your level?"
+        handler: generate_daily_lesson

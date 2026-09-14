@@ -1,0 +1,64 @@
+theme: cupcake
+dashboardTheme: workspace
+
+header:
+  title: English Learning
+
+navigation:
+  showDashboard: true
+  entities:
+    - english_word
+    - english_exercise
+    - learning_profile
+    - daily_lesson
+    - learning_history
+  items:
+    - label: Home
+      url: /english-learning
+      icon: 🏠
+      section: Overview
+    - label: Dashboard
+      controller: Dashboard
+      action: Index
+      icon: 📊
+      section: Overview
+    - label: Start Learning
+      url: /english-learning/Page/LearningSession
+      icon: 🚀
+      section: Main Study
+    - label: Study Dashboard
+      url: /english-learning/Page/DailyDashboard
+      icon: 🎯
+      section: Main Study
+    - label: Starter Overview
+      url: /english-learning/Page/StarterOverview
+      icon: 🧭
+      section: Main Study
+    - label: Vocabulary List
+      url: /english-learning/DynamicEntity/Index?entity=english_word
+      icon: 📖
+      section: Content Management
+    - label: Exercise List
+      url: /english-learning/DynamicEntity/Index?entity=english_exercise
+      icon: 📝
+      section: Content Management
+    - label: Daily Schedules
+      url: /english-learning/DynamicEntity/Index?entity=daily_lesson
+      icon: 📅
+      section: Learning Progress
+    - label: Learning History
+      url: /english-learning/DynamicEntity/Index?entity=learning_history
+      icon: 📜
+      section: Learning Progress
+    - label: Profiles
+      url: /english-learning/DynamicEntity/Index?entity=learning_profile
+      icon: 👤
+      section: Setup
+    - label: Schema
+      controller: DynamicEntity
+      action: AllDefinitions
+      icon: 🧩
+      section: Setup
+
+footer:
+  text: "English Learning — powered by NetYamlForge"

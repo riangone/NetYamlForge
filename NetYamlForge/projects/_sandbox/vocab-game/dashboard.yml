@@ -1,0 +1,18 @@
+stats:
+  # Add stat cards here. Example:
+  # - label: Total Records
+  #   entity: my_entity
+  #   aggregate: count
+  #   icon: 📊
+  #   color: badge-info
+  []
+
+charts:
+  # Add charts here. Example:
+  # - id: trend
+  #   title: Monthly Trend
+  #   type: bar
+  #   source: "SELECT strftime('%Y-%m', CreatedAt) AS Month, COUNT(*) AS Count FROM YourTable GROUP BY Month ORDER BY Month DESC LIMIT 12"
+  #   xAxis: Month
+  #   yAxis: Count
+  []

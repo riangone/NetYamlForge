@@ -191,7 +191,6 @@ sections:
   permissions:
     create:
       roles:
-      - editor
       - admin
   sourceType: none
 - id: import_history
@@ -253,6 +252,15 @@ sections:
 
 
       确保运行 NetYamlForge 的进程对该目录有**读取权限**。
+
+
+      ⚠️ **安全限制**：出于防止任意文件系统读取的考虑，路径必须落在
+
+      `appsettings.json` → `DirectoryImport:AllowedRoots` 中管理员显式列出的目录（或其子目录）之下，
+
+      否则任务会被拒绝并标记为失败。该配置项默认为空，即默认拒绝所有路径，需要管理员先行配置。
+
+      因此本功能仅对 `admin` 角色开放。
 
       '
   - title: 如何避免重复导入？

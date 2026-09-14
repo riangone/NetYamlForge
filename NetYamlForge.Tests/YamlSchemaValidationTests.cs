@@ -29,6 +29,27 @@ public class YamlSchemaValidationTests
     }
 
     /// <summary>
+    /// プロジェクトディレクトリの一覧を返す。ProjectsRoot 直下に加え、
+    /// アーカイブ済みプロジェクトを格納する "_sandbox" 配下も1階層だけ辿る。
+    /// 無制限に再帰すると entities/*.yml のような同名ファイル
+    /// （例: entities/project.yml という名前のエンティティ定義）を
+    /// 誤ってプロジェクトルート設定として拾ってしまうため、深さを限定する。
+    /// </summary>
+    private static IEnumerable<string> EnumerateProjectDirectories()
+    {
+        foreach (var dir in Directory.GetDirectories(ProjectsRoot))
+        {
+            yield return dir;
+
+            if (Path.GetFileName(dir) == "_sandbox")
+            {
+                foreach (var archivedDir in Directory.GetDirectories(dir))
+                    yield return archivedDir;
+            }
+        }
+    }
+
+    /// <summary>
     /// 全プロジェクトの entities/*.yml ファイルを収集して Theory データとして提供する。
     /// </summary>
     public static IEnumerable<object[]> AllEntityYamlFiles()
@@ -36,7 +57,7 @@ public class YamlSchemaValidationTests
         if (!Directory.Exists(ProjectsRoot))
             yield break;
 
-        foreach (var projectDir in Directory.GetDirectories(ProjectsRoot))
+        foreach (var projectDir in EnumerateProjectDirectories())
         {
             var entitiesDir = Path.Combine(projectDir, "entities");
             if (!Directory.Exists(entitiesDir))
@@ -83,7 +104,7 @@ public class YamlSchemaValidationTests
         if (!Directory.Exists(ProjectsRoot))
             yield break;
 
-        foreach (var projectDir in Directory.GetDirectories(ProjectsRoot))
+        foreach (var projectDir in EnumerateProjectDirectories())
         {
             foreach (var name in new[] { "project.yaml", "project.yml" })
             {

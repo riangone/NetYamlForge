@@ -1,0 +1,139 @@
+title: Study Dashboard
+description: "Duolingo-style daily dashboard for English learning"
+
+sections:
+  # stat_cards: User statistics
+  - id: user_stats
+    title: Current Statistics
+    component: stat_cards
+    sourceType: custom
+    source: |
+      SELECT 'Level' AS metric_name, COALESCE(CAST(CurrentLevel AS TEXT), '1') AS metric_value, '🎓' AS metric_icon, NULL AS metric_delta FROM LearningProfile WHERE UserName = @currentUser
+      UNION ALL
+      SELECT 'Daily Streak', COALESCE(CAST(Streak AS TEXT), '0') AS metric_value, '🔥' AS metric_icon, NULL AS metric_delta FROM LearningProfile WHERE UserName = @currentUser
+      UNION ALL
+      SELECT 'Total XP', COALESCE(CAST(TotalXp AS TEXT), '0') AS metric_value, '⭐' AS metric_icon, NULL AS metric_delta FROM LearningProfile WHERE UserName = @currentUser
+      UNION ALL
+      SELECT 'Lessons Completed', COALESCE(CAST(CompletedLessonsCount AS TEXT), '0') AS metric_value, '✅' AS metric_icon, NULL AS metric_delta FROM LearningProfile WHERE UserName = @currentUser
+    columns: [metric_name, metric_value, metric_icon, metric_delta]
+    labelField: metric_name
+    valueField: metric_value
+    iconField: metric_icon
+    deltaField: metric_delta
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # leaderboard: XP Leaderboard
+  - id: xp_leaderboard
+    title: XP Leaderboard
+    component: leaderboard
+    sourceType: custom
+    source: |
+      SELECT UserName AS name, TotalXp AS value, NULL AS avatar, NULL AS trend
+      FROM LearningProfile
+      ORDER BY TotalXp DESC
+      LIMIT 10
+    columns: [name, value, avatar, trend]
+    nameField: name
+    valueField: value
+    avatarField: avatar
+    trendField: trend
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # table: Today's vocabulary
+  - id: today_vocabulary
+    title: "Today's Vocabulary Words"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT w.Id, w.Word AS word, w.Phonetic AS phonetic, w.Meaning AS meaning,
+             w.ExampleSentence AS example, w.ExampleTranslation AS example_translation
+      FROM EnglishWord w
+      INNER JOIN DailyLesson dl ON (',' || dl.WordIds || ',') LIKE ('%,' || w.Id || ',%')
+      WHERE dl.UserName = @currentUser AND dl.Status = 'pending'
+    columns:
+      Id:
+        label: ID
+        type: int
+      word:
+        label: Word
+        type: string
+      phonetic:
+        label: Phonetic
+        type: string
+      meaning:
+        label: Meaning
+        type: string
+      example:
+        label: Example Sentence
+        type: string
+      example_translation:
+        label: Example Translation
+        type: string
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # table: Today's exercises
+  - id: today_exercises
+    title: "Today's Lesson Exercises"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT ex.Id, ex.Type AS type, ex.Question AS question,
+             ex.Choices AS choices, ex.Answer AS answer
+      FROM EnglishExercise ex
+      INNER JOIN DailyLesson dl ON (',' || dl.ExerciseIds || ',') LIKE ('%,' || ex.Id || ',%')
+      WHERE dl.UserName = @currentUser AND dl.Status = 'pending'
+    columns:
+      Id:
+        label: ID
+        type: int
+      type:
+        label: Question Type
+        type: string
+      question:
+        label: Question / Phrase
+        type: string
+      choices:
+        label: Multiple Choice Options
+        type: string
+      answer:
+        label: Correct Answer
+        type: string
+    pageSize: 10
+    editable: false
+    readOnly: true
+
+  # table: Past study records
+  - id: study_history
+    title: "Your Study History"
+    component: table
+    sourceType: custom
+    source: |
+      SELECT CompletedAt AS completed_at, TotalQuestions AS total_questions,
+             CorrectAnswers AS correct_answers, XpEarned AS xp_earned
+      FROM LearningHistory
+      WHERE UserName = @currentUser
+      ORDER BY CompletedAt DESC
+    columns:
+      completed_at:
+        label: Study Date
+        type: string
+        sortable: true
+      total_questions:
+        label: Total Questions
+        type: int
+      correct_answers:
+        label: Correct Answers
+        type: int
+      xp_earned:
+        label: XP Earned
+        type: int
+        sortable: true
+    pageSize: 15
+    editable: false
+    readOnly: true

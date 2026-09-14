@@ -2,6 +2,15 @@
 
 A high-productivity, multi-tenant web application framework built with ASP.NET Core (.NET 10.0) that uses YAML configuration to automatically generate CRUD interfaces, business logic hooks, and data management features.
 
+**What makes it different:** NetYamlForge is built for the case where an AI
+assistant (or a developer working fast with one) generates the YAML/SQL/hook
+code, and the framework's job is to keep that generated code safe *by
+construction* — a compile-time Roslyn analyzer rejects dangerous patterns
+(raw SQL interpolation, blocking async calls, hardcoded roles) before the
+build succeeds, and runtime guardrails (`PathSafetyGuard`, `SqlSafetyGuard`)
+bind file access and AI-tool queries to tenant boundaries and allow-lists. See
+[SECURITY.md](SECURITY.md) for exactly what's covered today and what isn't.
+
 ## Features
 
 - **YAML-Driven Development**: Define database schemas, UI layouts, business logic hooks, and dashboards through YAML files
@@ -11,6 +20,25 @@ A high-productivity, multi-tenant web application framework built with ASP.NET C
 - **Multi-Database Support**: SQLite (default), PostgreSQL, MySQL, SQL Server
 - **AI Integration**: Built-in support for multiple LLM providers (Gemini, Claude, Qwen, Ollama, LM Studio, etc.)
 - **Hot Reload**: YAML configuration hot-reload in development mode
+
+## Example Projects
+
+`projects/` ships four maintained, end-to-end reference projects that exercise
+real business complexity (multi-role permissions, PDF export, hooks, AI
+integration) rather than toy CRUD:
+
+| Project | What it demonstrates |
+|---|---|
+| [`blog`](NetYamlForge/projects/blog) | Articles/categories/tags/comments — the baseline YAML-to-CRUD workflow |
+| [`photo-vault`](NetYamlForge/projects/photo-vault) | Local-LLM-powered photo tagging, search, and asset management |
+| [`auto-dealer-demo`](NetYamlForge/projects/auto-dealer-demo) | Dealership CRM: customers, inventory, service appointments, role-based dashboards |
+| [`biz-docs`](NetYamlForge/projects/biz-docs) | Quote/invoice/customs-form generation with PDF export templates |
+
+The remaining directories under `projects/` (plus anything in
+`projects/_sandbox/`) are internal test fixtures and single-feature technical
+spikes used by the test suite or by specific Controllers/Services — not
+curated showcases. Don't use them as a gauge of what a "typical" NetYamlForge
+project looks like; start from one of the four above instead.
 
 ## Quick Start
 
@@ -48,6 +76,7 @@ NetYamlForge/
 
 ## Documentation
 
+- [Security Posture](SECURITY.md)
 - [Japanese Documentation](README-ja.md)
 - [Quick Start Guide](docs/quickstart-ja.md)
 - [Framework Overview](docs/framework-overview-tutorial-ja.md)

@@ -1,0 +1,29 @@
+translations:
+  projects.english-learning.pages.learningSession.title:
+    en-US: 'Start Learning'
+    zh-CN: '开始学习'
+    ja-JP: '学習を始める'
+  projects.english-learning.pages.learningSession.description:
+    en-US: "Interactive Duolingo-style study session: flashcards + quiz for today's lesson"
+    zh-CN: '互动式学习：先刷单词卡，再做今日测验（Duolingo 风格）'
+    ja-JP: 'フラッシュカードとクイズで学ぶインタラクティブなレッスン'
+  projects.english-learning.pages.learningSession.subtitle:
+    en-US: "Flashcards first, then a quick quiz — the Duolingo way."
+    zh-CN: '先看单词卡，再做小测验——Duolingo 式学习法。'
+    ja-JP: 'まず単語カード、それから小テスト。'
+  projects.english-learning.pages.starterOverview.description:
+    en-US: 'Auto-generated starter page'
+    zh-CN: 'Auto-generated starter page'
+    ja-JP: 'Auto-generated starter page'
+  projects.english-learning.pages.starterOverview.sections.0.title:
+    en-US: 'Starter Sample'
+    zh-CN: 'Starter Sample'
+    ja-JP: 'Starter Sample'
+  projects.english-learning.pages.starterOverview.title:
+    en-US: 'Starter Overview'
+    zh-CN: 'Starter Overview'
+    ja-JP: 'Starter Overview'
+  projects.english-learning.template.welcome:
+    en-US: 'Starter template'
+    zh-CN: 'Starter template'
+    ja-JP: 'Starter template'

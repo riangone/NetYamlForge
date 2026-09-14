@@ -1,0 +1,413 @@
+@using System.Text.Encodings.Web
+@using System.Text.Json
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = Context.GetRouteValue("project")?.ToString() ?? "english-learning";
+
+    string T(string key, string fallback) => I18nText.ResolveByKey(key) ?? fallback;
+
+    var pageTitle = T("projects.english-learning.pages.learningSession.title", "Start Learning");
+    ViewData["Title"] = pageTitle;
+
+    var dashboardUrl = Url.Action("Index", "Page", new { project = currentProject, pageName = "DailyDashboard" });
+
+    var stateRow = Model.TryGetValue("session_state", out var stateSec) ? stateSec.Rows.FirstOrDefault() : null;
+    var wordRows = Model.TryGetValue("lesson_words", out var wSec) ? wSec.Rows.ToList() : new List<Dictionary<string, object>>();
+    var exerciseRows = Model.TryGetValue("lesson_exercises", out var eSec) ? eSec.Rows.ToList() : new List<Dictionary<string, object>>();
+
+    var jsonOpts = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    object? Val(Dictionary<string, object> row, string key) => row.TryGetValue(key, out var v) ? v : null;
+
+    var stateJson = JsonSerializer.Serialize(stateRow == null ? null : new
+    {
+        profileId = Val(stateRow, "ProfileId")?.ToString() ?? "",
+        currentLevel = Val(stateRow, "CurrentLevel")?.ToString() ?? "1",
+        totalXp = Val(stateRow, "TotalXp")?.ToString() ?? "0",
+        streak = Val(stateRow, "Streak")?.ToString() ?? "0",
+        completedLessonsCount = Val(stateRow, "CompletedLessonsCount")?.ToString() ?? "0",
+        lessonId = Val(stateRow, "LessonId")?.ToString(),
+        lessonStatus = Val(stateRow, "LessonStatus")?.ToString(),
+        lessonDate = Val(stateRow, "LessonDate")?.ToString()
+    }, jsonOpts);
+
+    var wordsJson = JsonSerializer.Serialize(wordRows.Select(r => new
+    {
+        id = Val(r, "Id")?.ToString() ?? "",
+        word = Val(r, "word")?.ToString() ?? "",
+        phonetic = Val(r, "phonetic")?.ToString() ?? "",
+        meaning = Val(r, "meaning")?.ToString() ?? "",
+        example = Val(r, "example")?.ToString() ?? "",
+        exampleTranslation = Val(r, "example_translation")?.ToString() ?? ""
+    }), jsonOpts);
+
+    var exercisesJson = JsonSerializer.Serialize(exerciseRows.Select(r => new
+    {
+        id = Val(r, "Id")?.ToString() ?? "",
+        type = Val(r, "type")?.ToString() ?? "",
+        question = Val(r, "question")?.ToString() ?? "",
+        choicesRaw = Val(r, "choices")?.ToString(),
+        answer = Val(r, "answer")?.ToString() ?? ""
+    }), jsonOpts);
+
+    var uiStrings = new
+    {
+        subtitle = T("projects.english-learning.pages.learningSession.subtitle", "Flashcards first, then a quick quiz — the Duolingo way."),
+        noProfileTitle = T("projects.english-learning.pages.learningSession.noProfile.title", "No learning profile found"),
+        noProfileBody = T("projects.english-learning.pages.learningSession.noProfile.body", "Ask an administrator to create a learning profile for your account."),
+        startTitle = T("projects.english-learning.pages.learningSession.start.title", "Ready for today's lesson?"),
+        startBody = T("projects.english-learning.pages.learningSession.start.body", "We'll pick 5 words and 4 exercises matched to your current level."),
+        startButton = T("projects.english-learning.pages.learningSession.start.button", "🚀 Start Today's Lesson"),
+        startError = T("projects.english-learning.pages.learningSession.start.error", "Could not start a new lesson: "),
+        alreadyDoneHint = T("projects.english-learning.pages.learningSession.start.alreadyDoneHint", "If this says a lesson was already generated today, you've likely already completed it — come back tomorrow, or check your Study Dashboard."),
+        flashcardsStep = T("projects.english-learning.pages.learningSession.flashcards.step", "Step 1 · Vocabulary"),
+        flashcardsHint = T("projects.english-learning.pages.learningSession.flashcards.hint", "Tap the card to flip it, then mark whether you knew it."),
+        flipHint = T("projects.english-learning.pages.learningSession.flashcards.flipHint", "Tap to flip"),
+        knewIt = T("projects.english-learning.pages.learningSession.flashcards.knewIt", "👍 Knew it"),
+        didNotKnow = T("projects.english-learning.pages.learningSession.flashcards.didNotKnow", "🤔 Still learning"),
+        startQuizButton = T("projects.english-learning.pages.learningSession.flashcards.startQuiz", "Start the quiz →"),
+        quizStep = T("projects.english-learning.pages.learningSession.quiz.step", "Step 2 · Quiz"),
+        submitAnswer = T("projects.english-learning.pages.learningSession.quiz.submitAnswer", "Submit"),
+        nextQuestion = T("projects.english-learning.pages.learningSession.quiz.nextQuestion", "Next →"),
+        finishLesson = T("projects.english-learning.pages.learningSession.quiz.finishLesson", "Finish lesson →"),
+        correctFeedback = T("projects.english-learning.pages.learningSession.quiz.correct", "✅ Correct!"),
+        incorrectFeedbackPrefix = T("projects.english-learning.pages.learningSession.quiz.incorrectPrefix", "❌ Correct answer: "),
+        typeAnswerPlaceholder = T("projects.english-learning.pages.learningSession.quiz.typeAnswer", "Type your answer..."),
+        resultTitle = T("projects.english-learning.pages.learningSession.result.title", "Lesson complete! 🎉"),
+        resultXp = T("projects.english-learning.pages.learningSession.result.xp", "XP earned"),
+        resultAccuracy = T("projects.english-learning.pages.learningSession.result.accuracy", "Accuracy"),
+        resultBackToDashboard = T("projects.english-learning.pages.learningSession.result.backToDashboard", "📊 View Study Dashboard"),
+        submitError = T("projects.english-learning.pages.learningSession.result.submitError", "Could not submit your results: "),
+        noWordsOrExercises = T("projects.english-learning.pages.learningSession.noContent", "Today's lesson has no vocabulary or exercises yet. Please contact an administrator."),
+    };
+    var uiStringsJson = JsonSerializer.Serialize(uiStrings, jsonOpts);
+}
+
+<style>
+    .els-fade-in { animation: els-fade-in .35s ease both; }
+    @@keyframes els-fade-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .els-flip-card { perspective: 1200px; height: 220px; cursor: pointer; }
+    .els-flip-inner { position: relative; width: 100%; height: 100%; transition: transform .5s; transform-style: preserve-3d; }
+    .els-flip-card.flipped .els-flip-inner { transform: rotateY(180deg); }
+    .els-flip-face { position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 1.5rem; padding: 1.5rem; text-align: center; }
+    .els-flip-back { transform: rotateY(180deg); }
+    .els-option-btn { transition: transform .15s ease, box-shadow .15s ease; }
+    .els-option-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 16px -6px oklch(var(--p)/0.35); }
+    .els-progress-dot { width: 8px; height: 8px; border-radius: 999px; }
+</style>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <header class="mb-6 text-center">
+        <h1 class="text-3xl font-extrabold text-base-content tracking-tight">🎓 @pageTitle</h1>
+        <p class="text-base-content/60 mt-2">@uiStrings.subtitle</p>
+    </header>
+
+    <div id="els-root"></div>
+</div>
+
+<script>
+(function () {
+    var STATE = @Html.Raw(stateJson);
+    var WORDS = @Html.Raw(wordsJson);
+    var RAW_EXERCISES = @Html.Raw(exercisesJson);
+    var UI = @Html.Raw(uiStringsJson);
+    var DASHBOARD_URL = @Html.Raw(JsonSerializer.Serialize(dashboardUrl));
+    var API_BASE = '@Url.Content("~/")'.replace(/\/$/, '') + '/api/@currentProject';
+
+    var EXERCISES = RAW_EXERCISES.map(function (ex) {
+        var choices = null;
+        if (ex.choicesRaw) {
+            try { choices = JSON.parse(ex.choicesRaw); } catch (e) { choices = null; }
+        }
+        return { id: ex.id, type: ex.type, question: ex.question, choices: choices, answer: ex.answer };
+    });
+
+    var root = document.getElementById('els-root');
+    var quizIndex = 0;
+    var quizAnswered = false;
+    var correctCount = 0;
+    var flashIndex = 0;
+
+    function el(html) {
+        var div = document.createElement('div');
+        div.innerHTML = html.trim();
+        return div.firstChild;
+    }
+
+    function normalize(str) {
+        return (str || '').toString().trim().toLowerCase().replace(/[.!?,;:]+$/g, '').replace(/\s+/g, ' ');
+    }
+
+    function render() {
+        if (!STATE || !STATE.profileId) {
+            root.innerHTML = '';
+            root.appendChild(el(
+                '<div class="hero bg-base-100 rounded-box border border-base-300 min-h-48 els-fade-in">' +
+                '<div class="hero-content text-center"><div>' +
+                '<p class="text-4xl mb-3">🙁</p>' +
+                '<h2 class="text-xl font-semibold">' + UI.noProfileTitle + '</h2>' +
+                '<p class="opacity-60 mt-1 text-sm">' + UI.noProfileBody + '</p>' +
+                '</div></div></div>'));
+            return;
+        }
+        if (!STATE.lessonId) {
+            renderStart();
+            return;
+        }
+        if (WORDS.length === 0 && EXERCISES.length === 0) {
+            root.innerHTML = '';
+            root.appendChild(el(
+                '<div class="hero bg-base-100 rounded-box border border-base-300 min-h-48 els-fade-in">' +
+                '<div class="hero-content text-center"><div><p class="text-4xl mb-3">🧭</p>' +
+                '<p class="opacity-60 mt-1 text-sm">' + UI.noWordsOrExercises + '</p></div></div></div>'));
+            return;
+        }
+        if (WORDS.length > 0) {
+            renderFlashcards();
+        } else {
+            renderQuiz();
+        }
+    }
+
+    function renderStart() {
+        root.innerHTML = '';
+        var card = el(
+            '<div class="card bg-base-100 shadow-xl rounded-3xl border border-base-300/50 els-fade-in">' +
+            '<div class="card-body items-center text-center py-10">' +
+            '<div class="text-5xl mb-3">🎯</div>' +
+            '<h2 class="text-xl font-bold mb-2">' + UI.startTitle + '</h2>' +
+            '<p class="text-base-content/60 mb-6">' + UI.startBody + '</p>' +
+            '<button id="els-start-btn" class="btn btn-primary rounded-full px-8">' + UI.startButton + '</button>' +
+            '<div id="els-start-error" class="alert alert-error mt-4 hidden text-sm"></div>' +
+            '</div></div>');
+        root.appendChild(card);
+
+        document.getElementById('els-start-btn').onclick = function () {
+            var btn = this;
+            btn.disabled = true;
+            btn.classList.add('loading');
+            fetch(API_BASE + '/learning_profile/' + encodeURIComponent(STATE.profileId) + '/actions/generate_daily_lesson', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({})
+            }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+              .then(function (res) {
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                    var err = document.getElementById('els-start-error');
+                    err.textContent = UI.startError + (res.body && res.body.error ? res.body.error : '?') + '  ' + UI.alreadyDoneHint;
+                    err.classList.remove('hidden');
+                }
+              })
+              .catch(function () {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                var err = document.getElementById('els-start-error');
+                err.textContent = UI.startError + 'network error';
+                err.classList.remove('hidden');
+              });
+        };
+    }
+
+    function progressDots(total, current) {
+        var wrap = '<div class="flex justify-center gap-1.5 mb-4">';
+        for (var i = 0; i < total; i++) {
+            wrap += '<span class="els-progress-dot ' + (i <= current ? 'bg-primary' : 'bg-base-300') + '"></span>';
+        }
+        return wrap + '</div>';
+    }
+
+    function renderFlashcards() {
+        root.innerHTML = '';
+        var w = WORDS[flashIndex];
+        var wrap = el(
+            '<div class="els-fade-in">' +
+            '<div class="badge badge-outline badge-primary mb-2">' + UI.flashcardsStep + ' (' + (flashIndex + 1) + '/' + WORDS.length + ')</div>' +
+            '<p class="text-xs text-base-content/50 mb-3">' + UI.flashcardsHint + '</p>' +
+            progressDots(WORDS.length, flashIndex) +
+            '<div id="els-flip-card" class="els-flip-card">' +
+              '<div class="els-flip-inner">' +
+                '<div class="els-flip-face bg-primary/10 border-2 border-primary/30">' +
+                  '<div class="text-3xl font-extrabold mb-1">' + w.word + '</div>' +
+                  '<div class="text-sm opacity-60">' + (w.phonetic || '') + '</div>' +
+                  '<div class="text-xs opacity-40 mt-4">' + UI.flipHint + '</div>' +
+                '</div>' +
+                '<div class="els-flip-face els-flip-back bg-secondary/10 border-2 border-secondary/30">' +
+                  '<div class="text-2xl font-bold mb-2">' + w.meaning + '</div>' +
+                  '<div class="text-sm opacity-70 italic">' + (w.example || '') + '</div>' +
+                  '<div class="text-xs opacity-50 mt-2">' + (w.exampleTranslation || '') + '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="flex justify-center gap-3 mt-6">' +
+              '<button id="els-know-no" class="btn btn-outline rounded-full">' + UI.didNotKnow + '</button>' +
+              '<button id="els-know-yes" class="btn btn-primary rounded-full">' + UI.knewIt + '</button>' +
+            '</div>' +
+            '</div>');
+        root.appendChild(wrap);
+
+        var card = document.getElementById('els-flip-card');
+        card.onclick = function () { card.classList.toggle('flipped'); };
+
+        function advance() {
+            flashIndex++;
+            if (flashIndex >= WORDS.length) {
+                renderStartQuizPrompt();
+            } else {
+                renderFlashcards();
+            }
+        }
+        document.getElementById('els-know-yes').onclick = function (e) { e.stopPropagation(); advance(); };
+        document.getElementById('els-know-no').onclick = function (e) { e.stopPropagation(); advance(); };
+    }
+
+    function renderStartQuizPrompt() {
+        root.innerHTML = '';
+        root.appendChild(el(
+            '<div class="card bg-base-100 shadow-xl rounded-3xl border border-base-300/50 els-fade-in">' +
+            '<div class="card-body items-center text-center py-10">' +
+            '<div class="text-5xl mb-3">📝</div>' +
+            '<p class="text-base-content/60 mb-6">' + WORDS.length + ' words reviewed. Ready for the quiz?</p>' +
+            '<button id="els-to-quiz" class="btn btn-primary rounded-full px-8">' + UI.startQuizButton + '</button>' +
+            '</div></div>'));
+        document.getElementById('els-to-quiz').onclick = function () { renderQuiz(); };
+    }
+
+    function renderQuiz() {
+        if (EXERCISES.length === 0) {
+            submitResults();
+            return;
+        }
+        quizAnswered = false;
+        root.innerHTML = '';
+        var ex = EXERCISES[quizIndex];
+        var isTextInput = !ex.choices || ex.choices.length === 0;
+
+        var body =
+            '<div class="els-fade-in">' +
+            '<div class="badge badge-outline badge-secondary mb-2">' + UI.quizStep + ' (' + (quizIndex + 1) + '/' + EXERCISES.length + ')</div>' +
+            progressDots(EXERCISES.length, quizIndex) +
+            '<div class="card bg-base-100 shadow-xl rounded-3xl border border-base-300/50">' +
+            '<div class="card-body items-center text-center">' +
+            '<h2 class="text-xl font-bold mb-6">' + ex.question + '</h2>';
+
+        if (isTextInput) {
+            body += '<input id="els-text-answer" type="text" placeholder="' + UI.typeAnswerPlaceholder + '" class="input input-bordered w-full max-w-sm text-center" />' +
+                '<button id="els-submit-text" class="btn btn-primary rounded-full px-6 mt-4">' + UI.submitAnswer + '</button>';
+        } else {
+            body += '<div id="els-options" class="grid grid-cols-1 gap-3 w-full max-w-sm"></div>';
+        }
+
+        body += '<div id="els-feedback" class="mt-4 text-sm font-medium hidden"></div>' +
+            '<button id="els-next-btn" class="btn btn-primary rounded-full px-6 mt-6 hidden"></button>' +
+            '</div></div></div>';
+
+        root.appendChild(el(body));
+
+        var nextBtn = document.getElementById('els-next-btn');
+        nextBtn.textContent = (quizIndex === EXERCISES.length - 1) ? UI.finishLesson : UI.nextQuestion;
+        nextBtn.onclick = function () {
+            if (quizIndex < EXERCISES.length - 1) {
+                quizIndex++;
+                renderQuiz();
+            } else {
+                submitResults();
+            }
+        };
+
+        function grade(selected) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            var isCorrect = normalize(selected) === normalize(ex.answer);
+            if (isCorrect) correctCount++;
+
+            var feedback = document.getElementById('els-feedback');
+            feedback.textContent = isCorrect ? UI.correctFeedback : (UI.incorrectFeedbackPrefix + ex.answer);
+            feedback.className = 'mt-4 text-sm font-medium els-fade-in ' + (isCorrect ? 'text-success' : 'text-error');
+            feedback.classList.remove('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        if (isTextInput) {
+            var input = document.getElementById('els-text-answer');
+            var submitBtn = document.getElementById('els-submit-text');
+            var doSubmit = function () {
+                submitBtn.disabled = true;
+                input.disabled = true;
+                grade(input.value);
+            };
+            submitBtn.onclick = doSubmit;
+            input.addEventListener('keydown', function (e) { if (e.key === 'Enter') doSubmit(); });
+        } else {
+            var optionsEl = document.getElementById('els-options');
+            ex.choices.forEach(function (opt, idx) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-outline justify-start text-left h-auto py-3 whitespace-normal rounded-xl els-option-btn';
+                btn.style.animationDelay = (idx * 40) + 'ms';
+                btn.textContent = opt;
+                btn.onclick = function () {
+                    Array.prototype.forEach.call(optionsEl.children, function (b) {
+                        b.disabled = true;
+                        if (normalize(b.textContent) === normalize(ex.answer)) b.classList.add('btn-success');
+                        else if (b === btn) b.classList.add('btn-error');
+                    });
+                    grade(opt);
+                };
+                optionsEl.appendChild(btn);
+            });
+        }
+    }
+
+    function submitResults() {
+        root.innerHTML = '<div class="flex justify-center py-16"><span class="loading loading-spinner loading-lg"></span></div>';
+        fetch(API_BASE + '/daily_lesson/' + encodeURIComponent(STATE.lessonId) + '/actions/submit_lesson_results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ CorrectAnswers: correctCount, TotalQuestions: EXERCISES.length })
+        }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+          .then(function (res) {
+            if (res.ok) {
+                renderResult();
+            } else {
+                root.innerHTML = '';
+                root.appendChild(el(
+                    '<div class="alert alert-error els-fade-in">' + UI.submitError + (res.body && res.body.error ? res.body.error : '?') + '</div>'));
+            }
+          })
+          .catch(function () {
+            root.innerHTML = '';
+            root.appendChild(el('<div class="alert alert-error els-fade-in">' + UI.submitError + 'network error</div>'));
+          });
+    }
+
+    function renderResult() {
+        var xp = correctCount * 10;
+        var accuracy = EXERCISES.length > 0 ? Math.round(correctCount / EXERCISES.length * 100) : 0;
+        root.innerHTML = '';
+        root.appendChild(el(
+            '<div class="card bg-base-100 shadow-xl rounded-3xl border border-base-300/50 els-fade-in">' +
+            '<div class="card-body items-center text-center py-10">' +
+            '<div class="text-6xl mb-3">🎉</div>' +
+            '<h2 class="text-2xl font-extrabold mb-6">' + UI.resultTitle + '</h2>' +
+            '<div class="flex justify-center gap-10 mb-8">' +
+              '<div><div class="text-3xl font-extrabold text-primary">' + xp + '</div>' +
+              '<div class="text-xs text-base-content/50 mt-1">' + UI.resultXp + '</div></div>' +
+              '<div><div class="text-3xl font-extrabold text-success">' + accuracy + '%</div>' +
+              '<div class="text-xs text-base-content/50 mt-1">' + UI.resultAccuracy + '</div></div>' +
+            '</div>' +
+            '<a href="' + DASHBOARD_URL + '" class="btn btn-primary rounded-full px-8">' + UI.resultBackToDashboard + '</a>' +
+            '</div></div>'));
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+})();
+</script>

@@ -1,0 +1,61 @@
+entities:
+  daily_lesson:
+    table: 'DailyLesson'
+    key: 'Id'
+    displayName: 'Daily Lesson'
+    softDelete: false
+    api: enabled
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order: ['UserName', 'LessonDate', 'TargetLevel', 'WordIds', 'ExerciseIds', 'Status', 'Score']
+      filters:
+        columns: 2
+        order: ['UserName', 'LessonDate', 'Status']
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      UserName: { type: string, required: true, label: 'User Name', searchable: true, sortable: true }
+      LessonDate: { type: string, required: true, label: 'Lesson Date', searchable: true, sortable: true }
+      TargetLevel: { type: int, required: true, label: 'Target Level', sortable: true }
+      WordIds: { type: string, label: 'Vocabulary Word IDs', sortable: false }
+      ExerciseIds: { type: string, label: 'Exercise IDs', sortable: false }
+      Status: { type: string, required: true, label: 'Status', searchable: true, sortable: true }
+      Score: { type: int, label: 'Lesson Score (XP)', sortable: true }
+    forms:
+      UserName: { type: string, required: true, label: 'User Name', editable: true }
+      LessonDate: { type: string, required: true, label: 'Lesson Date', editable: true }
+      TargetLevel: { type: int, required: true, label: 'Target Level', editable: true }
+      WordIds: { type: string, label: 'Vocabulary Word IDs (comma separated)', editable: true }
+      ExerciseIds: { type: string, label: 'Exercise IDs (comma separated)', editable: true }
+      Status:
+        type: string
+        required: true
+        label: 'Status'
+        editable: true
+        options:
+          - pending
+          - in_progress
+          - completed
+      Score: { type: int, label: 'Lesson Score (XP)', editable: true }
+    filters:
+      UserName: { type: equal, label: 'User Name' }
+      LessonDate: { type: equal, label: 'Lesson Date' }
+      Status: { type: equal, label: 'Status' }
+    actions:
+      submit_lesson_results:
+        label: "Submit Lesson Results"
+        scope: row
+        handler: submit_lesson_results
+        inputs:
+          - name: CorrectAnswers
+            type: int
+            label: "Correct Answers Count"
+            required: true
+          - name: TotalQuestions
+            type: int
+            label: "Total Questions Count"
+            required: true

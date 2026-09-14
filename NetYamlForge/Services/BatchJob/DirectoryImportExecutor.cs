@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace NetYamlForge.Services.BatchJob;
@@ -20,17 +21,28 @@ public class DirectoryImportExecutor : IBatchStepHandler
     private readonly ProjectManager _projectManager;
     private readonly IWebHostEnvironment _env;
     private readonly IBatchJobScheduler _scheduler;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<DirectoryImportExecutor> _logger;
+
+    /// <summary>
+    /// ディレクトリスキャンによるインポートで読み取りを許可するルートディレクトリの設定キー。
+    /// 未設定（空配列）の場合はセキュアデフォルトとして全ての source_path を拒否する。
+    /// appsettings.json 例:
+    /// "DirectoryImport": { "AllowedRoots": [ "/home/ubuntu/Photos", "/mnt/nas/camera-roll" ] }
+    /// </summary>
+    public const string AllowedRootsConfigKey = "DirectoryImport:AllowedRoots";
 
     public DirectoryImportExecutor(
         ProjectManager projectManager,
         IWebHostEnvironment env,
         IBatchJobScheduler scheduler,
+        IConfiguration configuration,
         ILogger<DirectoryImportExecutor> logger)
     {
         _projectManager = projectManager;
         _env = env;
         _scheduler = scheduler;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -90,9 +102,37 @@ public class DirectoryImportExecutor : IBatchStepHandler
 
             _logger.LogInformation("Processing import job: {JobId}, path: {Path}", jobRow.job_id, jobRow.source_path);
 
-            if (string.IsNullOrEmpty(jobRow.source_path) || !Directory.Exists(jobRow.source_path))
+            // ⚠️ source_path はフォーム入力由来のユーザー制御値（サーバー上の任意絶対パス）。
+            // 管理者が明示的に許可したルート配下でなければ拒否する（未設定時は全拒否がデフォルト）。
+            string validatedSourcePath;
+            try
             {
-                var errorMsg = $"Directory not found or empty path: '{jobRow.source_path}'";
+                var allowedRoots = _configuration.GetSection(AllowedRootsConfigKey).Get<string[]>();
+                validatedSourcePath = PathSafetyGuard.ValidateAgainstAllowList(
+                    jobRow.source_path, allowedRoots, "DirectoryImport.source_path");
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or ArgumentException)
+            {
+                var errorMsg = $"Rejected source_path '{jobRow.source_path}': {ex.Message}";
+                _logger.LogWarning(ex, "Directory import job {JobId} rejected an unauthorized source_path", jobRow.job_id);
+
+                await db.ExecuteAsync(
+                    "UPDATE import_jobs SET status = @Status, error_message = @Error, completed_at = @CompletedAt WHERE job_id = @JobId",
+                    new { Status = job.Behavior.UpdateStatusOnError, Error = errorMsg, CompletedAt = DateTime.UtcNow, JobId = jobRow.job_id },
+                    transaction: tx
+                );
+
+                result.Success = false;
+                result.ErrorMessage = errorMsg;
+                result.EndedAt = DateTime.UtcNow;
+                return result;
+            }
+
+            jobRow.source_path = validatedSourcePath;
+
+            if (!Directory.Exists(jobRow.source_path))
+            {
+                var errorMsg = $"Directory not found: '{jobRow.source_path}'";
                 _logger.LogWarning(errorMsg);
 
                 await db.ExecuteAsync(

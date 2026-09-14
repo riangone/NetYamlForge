@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using NetYamlForge.Services;
 using Xunit;
@@ -119,5 +120,109 @@ public class PathSafetyGuardTests
         var otherTenantRelativePath = Path.Combine("..", "projects", "other-tenant", "data.db");
         Assert.Throws<UnauthorizedAccessException>(() =>
             PathSafetyGuard.NormalizeAndValidatePath(otherTenantRelativePath, systemJobBaseDir, "Test"));
+    }
+
+    // --- ValidateAgainstAllowList: directory_import (source_path) の許可リスト検証 ---
+    // 背景: FRAMEWORK-SECURITY-REFACTOR-PLAN.md で指摘された「DirectoryImportExecutor の
+    // source_path が PathSafetyGuard を通っておらず、フォーム入力の任意絶対パスを
+    // そのまま Directory.GetFiles に渡している」問題への対処。バッチ機能の性質上
+    // "テナントプロジェクト配下限定" ではなく "管理者が明示許可したルートのみ" が正しい制約。
+
+    [Fact]
+    public void ValidateAgainstAllowList_NoRootsConfigured_ThrowsUnauthorizedAccess_SecureDefault()
+    {
+        // 設定が空（未構成）の場合はデフォルトで全拒否でなければならない
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList(_baseDir, Array.Empty<string>(), "Test"));
+
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList(_baseDir, null, "Test"));
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_PathIsAllowedRootItself_ReturnsFullPath()
+    {
+        var result = PathSafetyGuard.ValidateAgainstAllowList(_baseDir, new[] { _baseDir }, "Test");
+        Assert.Equal(Path.GetFullPath(_baseDir), result);
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_PathIsSubdirectoryOfAllowedRoot_ReturnsFullPath()
+    {
+        var subDir = Path.Combine(_baseDir, "camera-roll", "2024");
+        Directory.CreateDirectory(subDir);
+
+        var result = PathSafetyGuard.ValidateAgainstAllowList(subDir, new[] { _baseDir }, "Test");
+
+        Assert.Equal(Path.GetFullPath(subDir), result);
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_PathOutsideAllAllowedRoots_ThrowsUnauthorizedAccess()
+    {
+        var allowedRoot = Path.Combine(_baseDir, "photos");
+        Directory.CreateDirectory(allowedRoot);
+        var attackerPath = Path.Combine(Path.GetTempPath(), "etc-like-sensitive-dir");
+        Directory.CreateDirectory(attackerPath);
+
+        try
+        {
+            Assert.Throws<UnauthorizedAccessException>(() =>
+                PathSafetyGuard.ValidateAgainstAllowList(attackerPath, new[] { allowedRoot }, "Test"));
+        }
+        finally
+        {
+            try { Directory.Delete(attackerPath, true); } catch { }
+        }
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_SamePrefixFolderDeception_ThrowsUnauthorizedAccess()
+    {
+        // 許可ルートが /tmp/photos の場合、/tmp/photos-backup のような
+        // 文字列前方一致だけの別ディレクトリを騙し取れてはいけない
+        var allowedRoot = Path.Combine(_baseDir, "photos");
+        var deceivedPath = Path.Combine(_baseDir, "photos-backup", "leak.txt");
+        Directory.CreateDirectory(allowedRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(deceivedPath)!);
+
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList(deceivedPath, new[] { allowedRoot }, "Test"));
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_TraversalOutOfAllowedRoot_ThrowsUnauthorizedAccess()
+    {
+        var allowedRoot = Path.Combine(_baseDir, "photos");
+        Directory.CreateDirectory(allowedRoot);
+        var traversal = Path.Combine(allowedRoot, "..", "..", "etc");
+
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList(traversal, new[] { allowedRoot }, "Test"));
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_MatchesSecondOfMultipleAllowedRoots_ReturnsFullPath()
+    {
+        var root1 = Path.Combine(_baseDir, "root1");
+        var root2 = Path.Combine(_baseDir, "root2");
+        Directory.CreateDirectory(root1);
+        Directory.CreateDirectory(root2);
+        var target = Path.Combine(root2, "sub");
+        Directory.CreateDirectory(target);
+
+        var result = PathSafetyGuard.ValidateAgainstAllowList(target, new List<string> { root1, root2 }, "Test");
+
+        Assert.Equal(Path.GetFullPath(target), result);
+    }
+
+    [Fact]
+    public void ValidateAgainstAllowList_EmptyPath_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList("", new[] { _baseDir }, "Test"));
+
+        Assert.Throws<ArgumentException>(() =>
+            PathSafetyGuard.ValidateAgainstAllowList(null, new[] { _baseDir }, "Test"));
     }
 }

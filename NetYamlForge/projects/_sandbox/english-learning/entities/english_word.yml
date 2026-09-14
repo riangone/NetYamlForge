@@ -1,0 +1,45 @@
+entities:
+  english_word:
+    table: 'EnglishWord'
+    key: 'Id'
+    displayName: 'English Word'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order: ['Word', 'Phonetic', 'Meaning', 'Difficulty', 'ExampleSentence', 'ExampleTranslation']
+      filters:
+        columns: 2
+        order: ['Word', 'Difficulty']
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      Word: { type: string, required: true, label: 'Word', searchable: true, sortable: true }
+      Phonetic: { type: string, label: 'Phonetic', sortable: false }
+      Meaning: { type: string, required: true, label: 'Meaning', searchable: true, sortable: false }
+      Difficulty: { type: int, required: true, label: 'Difficulty (1:Beg, 5:Adv)', sortable: true }
+      ExampleSentence: { type: string, label: 'Example Sentence', sortable: false }
+      ExampleTranslation: { type: string, label: 'Example Translation', sortable: false }
+    forms:
+      Word: { type: string, required: true, label: 'Word', editable: true }
+      Phonetic: { type: string, label: 'Phonetic', editable: true }
+      Meaning: { type: string, required: true, label: 'Meaning', editable: true }
+      Difficulty:
+        type: int
+        required: true
+        label: 'Difficulty Level'
+        editable: true
+        options:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+      ExampleSentence: { type: textarea, label: 'Example Sentence', editable: true }
+      ExampleTranslation: { type: textarea, label: 'Example Translation', editable: true }
+    filters:
+      Word: { type: like, label: 'Word' }
+      Difficulty: { type: equal, label: 'Difficulty Level' }

@@ -38,6 +38,27 @@ public class JsonSchemaExportTests
         return JsonSchema.FromText(json);
     }
 
+    /// <summary>
+    /// プロジェクトディレクトリの一覧を返す。ProjectsDir 直下に加え、
+    /// アーカイブ済みプロジェクトを格納する "_sandbox" 配下も1階層だけ辿る。
+    /// 無制限に再帰すると entities/*.yml のような同名ファイル
+    /// （例: entities/project.yml という名前のエンティティ定義）を
+    /// 誤ってプロジェクトルート設定として拾ってしまうため、深さを限定する。
+    /// </summary>
+    private static IEnumerable<string> EnumerateProjectDirectories()
+    {
+        foreach (var dir in Directory.GetDirectories(ProjectsDir))
+        {
+            yield return dir;
+
+            if (Path.GetFileName(dir) == "_sandbox")
+            {
+                foreach (var archivedDir in Directory.GetDirectories(dir))
+                    yield return archivedDir;
+            }
+        }
+    }
+
     private JsonElement ConvertYamlToJsonElement(string yaml)
     {
         var deserializer = new DeserializerBuilder()
@@ -84,7 +105,7 @@ public class JsonSchemaExportTests
         var pagesSchema = LoadSchema("pages.schema.json");
         var dashboardSchema = LoadSchema("dashboard.schema.json");
 
-        var directories = Directory.GetDirectories(ProjectsDir);
+        var directories = EnumerateProjectDirectories();
         foreach (var dir in directories)
         {
             var projectYamlPath = Path.Combine(dir, "project.yaml");

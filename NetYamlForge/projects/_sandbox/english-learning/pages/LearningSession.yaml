@@ -1,0 +1,56 @@
+title: Start Learning
+titleKey: projects.english-learning.pages.learningSession.title
+description: "Interactive Duolingo-style study session: flashcards + quiz for today's lesson"
+descriptionKey: projects.english-learning.pages.learningSession.description
+
+ui:
+  page:
+    layout: single
+    density: comfortable
+
+sections:
+  # Current profile + today's pending lesson header info (0 or 1 row)
+  - id: session_state
+    title: Session State
+    sourceType: custom
+    source: |
+      SELECT lp.Id AS ProfileId, lp.CurrentLevel AS CurrentLevel, lp.TotalXp AS TotalXp,
+             lp.Streak AS Streak, lp.CompletedLessonsCount AS CompletedLessonsCount,
+             dl.Id AS LessonId, dl.Status AS LessonStatus, dl.LessonDate AS LessonDate
+      FROM LearningProfile lp
+      LEFT JOIN DailyLesson dl ON dl.UserName = lp.UserName AND dl.Status = 'pending'
+      WHERE lp.UserName = @currentUser
+    columns: [ProfileId, CurrentLevel, TotalXp, Streak, CompletedLessonsCount, LessonId, LessonStatus, LessonDate]
+    pageSize: 1
+    editable: false
+    readOnly: true
+
+  # Vocabulary flashcards belonging to the pending lesson
+  - id: lesson_words
+    title: "Lesson Vocabulary"
+    sourceType: custom
+    source: |
+      SELECT w.Id, w.Word AS word, w.Phonetic AS phonetic, w.Meaning AS meaning,
+             w.ExampleSentence AS example, w.ExampleTranslation AS example_translation
+      FROM EnglishWord w
+      INNER JOIN DailyLesson dl ON (',' || dl.WordIds || ',') LIKE ('%,' || w.Id || ',%')
+      WHERE dl.UserName = @currentUser AND dl.Status = 'pending'
+    columns: [Id, word, phonetic, meaning, example, example_translation]
+    pageSize: 20
+    editable: false
+    readOnly: true
+
+  # Quiz exercises belonging to the pending lesson
+  - id: lesson_exercises
+    title: "Lesson Exercises"
+    sourceType: custom
+    source: |
+      SELECT ex.Id, ex.Type AS type, ex.Question AS question,
+             ex.Choices AS choices, ex.Answer AS answer, ex.Difficulty AS difficulty
+      FROM EnglishExercise ex
+      INNER JOIN DailyLesson dl ON (',' || dl.ExerciseIds || ',') LIKE ('%,' || ex.Id || ',%')
+      WHERE dl.UserName = @currentUser AND dl.Status = 'pending'
+    columns: [Id, type, question, choices, answer, difficulty]
+    pageSize: 20
+    editable: false
+    readOnly: true

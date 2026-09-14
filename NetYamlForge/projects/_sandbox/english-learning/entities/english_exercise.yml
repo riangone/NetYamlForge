@@ -1,0 +1,52 @@
+entities:
+  english_exercise:
+    table: 'EnglishExercise'
+    key: 'Id'
+    displayName: 'English Exercise'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+    layout:
+      forms:
+        columns: 2
+        order: ['Type', 'Question', 'Choices', 'Answer', 'Difficulty']
+      filters:
+        columns: 2
+        order: ['Type', 'Difficulty']
+    columns:
+      Id: { type: int, identity: true, label: 'Id', sortable: true }
+      Type: { type: string, required: true, label: 'Type', searchable: true, sortable: true }
+      Question: { type: string, required: true, label: 'Question', searchable: true, sortable: false }
+      Choices: { type: string, label: 'Choices (JSON list, if multiple choice)', sortable: false }
+      Answer: { type: string, required: true, label: 'Correct Answer', sortable: false }
+      Difficulty: { type: int, required: true, label: 'Difficulty Level', sortable: true }
+    forms:
+      Type:
+        type: string
+        required: true
+        label: 'Exercise Type'
+        editable: true
+        options:
+          - choice_word_to_meaning
+          - choice_meaning_to_word
+          - fill_blank
+          - translate
+      Question: { type: textarea, required: true, label: 'Question Content', editable: true }
+      Choices: { type: textarea, label: 'Choices (JSON array like ["A", "B", "C"])', editable: true }
+      Answer: { type: string, required: true, label: 'Answer Key', editable: true }
+      Difficulty:
+        type: int
+        required: true
+        label: 'Difficulty Level'
+        editable: true
+        options:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+    filters:
+      Type: { type: equal, label: 'Exercise Type' }
+      Difficulty: { type: equal, label: 'Difficulty' }

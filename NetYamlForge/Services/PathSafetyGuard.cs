@@ -1,7 +1,9 @@
 // ファイル概要: パス・トラバーサルを防止するための安全なパス解決・検証ユーティリティ。
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace NetYamlForge.Services;
 
@@ -77,5 +79,64 @@ public static class PathSafetyGuard
         var dir = Path.Combine(contentRootPath, "_system_jobs");
         Directory.CreateDirectory(dir);
         return dir;
+    }
+
+    /// <summary>
+    /// 対象パスを正規化し、許可されたルートディレクトリの一覧のいずれか配下に
+    /// 存在することを確認します（一致するルートが 1 つも無い場合は例外）。
+    /// </summary>
+    /// <remarks>
+    /// バッチジョブ設定（例: フォトインポートの「サーバーディレクトリ指定」機能）のように、
+    /// テナントのプロジェクトディレクトリ外にある絶対パスへの読み取りアクセスを、
+    /// 意図的に許可する必要があるユースケース向け。
+    /// <paramref name="allowedRoots"/> が空/未設定の場合はセキュアデフォルトとして
+    /// 常に拒否する（「設定していない = 全許可」を避けるため）。
+    /// </remarks>
+    /// <param name="rawPath">ユーザー入力の検証対象パス（絶対パス想定）</param>
+    /// <param name="allowedRoots">管理者が明示的に許可したルートディレクトリの一覧</param>
+    /// <param name="context">ログや例外メッセージで使用するコンテキスト表記</param>
+    /// <returns>解決された絶対パス</returns>
+    /// <exception cref="ArgumentException">パスが空の場合</exception>
+    /// <exception cref="UnauthorizedAccessException">
+    /// 許可ルートが未設定、またはどの許可ルート配下にも一致しない場合
+    /// </exception>
+    public static string ValidateAgainstAllowList(string? rawPath, IEnumerable<string>? allowedRoots, string context)
+    {
+        if (string.IsNullOrWhiteSpace(rawPath))
+        {
+            throw new ArgumentException($"Path cannot be empty in context '{context}'", nameof(rawPath));
+        }
+
+        var roots = (allowedRoots ?? Array.Empty<string>())
+            .Where(r => !string.IsNullOrWhiteSpace(r))
+            .ToList();
+
+        if (roots.Count == 0)
+        {
+            throw new UnauthorizedAccessException(
+                $"[PathSafetyGuard] No allowed roots configured for context '{context}'. " +
+                "Refusing arbitrary filesystem access by default; an administrator must explicitly allow-list root directories.");
+        }
+
+        var fullTarget = Path.GetFullPath(rawPath);
+
+        foreach (var root in roots)
+        {
+            var fullRoot = Path.GetFullPath(root);
+            var checkRoot = fullRoot.EndsWith(Path.DirectorySeparatorChar)
+                ? fullRoot
+                : fullRoot + Path.DirectorySeparatorChar;
+
+            // ルート自体との完全一致、またはルート配下のサブディレクトリであることを許可
+            if (string.Equals(fullTarget, fullRoot, StringComparison.OrdinalIgnoreCase) ||
+                (fullTarget + Path.DirectorySeparatorChar).StartsWith(checkRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                return fullTarget;
+            }
+        }
+
+        throw new UnauthorizedAccessException(
+            $"[PathSafetyGuard] Path traversal / unauthorized directory access detected in '{context}'. " +
+            $"Target path '{rawPath}' (resolved: '{fullTarget}') is outside of all allowed roots.");
     }
 }
