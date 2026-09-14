@@ -115,7 +115,7 @@ public class AiDocProcessorTests
             serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.ProjectLoadLockRegistry>());
 
         // テストプロジェクトのベースディレクトリからの相対パス
-        var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/ai-doc-processor";
+        var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/_sandbox/ai-doc-processor";
         
         // Hooks / ActionHandlers のロードを実行
         await loader.LoadProjectActionHandlersAsync("ai-doc-processor", projectDir, actionRegistry);

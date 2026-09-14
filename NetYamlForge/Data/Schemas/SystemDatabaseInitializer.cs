@@ -228,6 +228,8 @@ public static class SystemDatabaseInitializer
 #pragma warning restore DCS003
             await NetYamlForge.Services.Connection.SqliteConnectionHardening.ApplyAsync(conn);
 
+            var currentNames = new HashSet<string>(projects.Select(p => p.Name), StringComparer.Ordinal);
+
             foreach (var project in projects)
             {
                 await conn.ExecuteAsync(@"
@@ -244,6 +246,38 @@ public static class SystemDatabaseInitializer
             }
 
             logger.LogInformation("プロジェクトメタデータを同期しました：{Count} 件", projects.Count());
+
+            // スキャン結果から消えたプロジェクト（_sandbox への退避や削除など）を掃除する。
+            // INSERT OR REPLACE / INSERT OR IGNORE だけでは projects テーブルにレコードが
+            // 残り続け、/UserHome にデッドリンクのカードが表示され続けてしまうため、
+            // ここで明示的に DELETE する。
+            var staleNames = (await conn.QueryAsync<string>("SELECT name FROM projects"))
+                .Where(name => !currentNames.Contains(name))
+                .ToList();
+
+            if (staleNames.Count > 0)
+            {
+                foreach (var staleName in staleNames)
+                {
+                    await conn.ExecuteAsync(
+                        "DELETE FROM app_user_project_role WHERE project_name = @Name",
+                        new { Name = staleName });
+
+                    // 既定プロジェクトが削除対象を指していた場合は解除する
+                    // （EnsureAdminProjectRolesAsync が後段で妥当な代替を再設定する）
+                    await conn.ExecuteAsync(
+                        "UPDATE app_user SET default_project_name = NULL WHERE default_project_name = @Name",
+                        new { Name = staleName });
+
+                    await conn.ExecuteAsync(
+                        "DELETE FROM projects WHERE name = @Name",
+                        new { Name = staleName });
+                }
+
+                logger.LogInformation(
+                    "スキャン結果に存在しなくなったプロジェクトをクリーンアップしました：{Names}",
+                    string.Join(", ", staleNames));
+            }
 
             // admin ユーザーに全プロジェクトの Admin ロールを付与
             await EnsureAdminProjectRolesAsync(conn, logger);

@@ -71,4 +71,68 @@ public class SystemDatabaseInitializerSyncProjectsTests
             }
         }
     }
+
+    [Fact]
+    public async Task SyncProjectsAsync_RemovesStaleProject_AndClearsAdminRoleAndDefault()
+    {
+        // 背景: projects/ 配下から _sandbox への退避などでスキャン結果から消えたプロジェクトが、
+        // INSERT OR REPLACE / INSERT OR IGNORE だけでは projects / app_user_project_role に
+        // 残り続け、/UserHome にデッドリンクのカードが表示され続ける不具合の回帰テストです。
+        var dbPath = Path.Combine(Path.GetTempPath(), $"nyf-systemdb-test-{Guid.NewGuid():N}.db");
+        try
+        {
+            var logger = NullLogger.Instance;
+
+            await SystemDatabaseInitializer.InitializeAsync(logger, dbPath);
+
+            // 1回目: 3プロジェクトが存在する状態を模擬し、退避対象を admin の既定プロジェクトにする
+            var initialProjects = new[]
+            {
+                MakeFakeProject("keep-me"),
+                MakeFakeProject("archive-me"),
+                MakeFakeProject("also-keep"),
+            };
+            await SystemDatabaseInitializer.SyncProjectsAsync(initialProjects, logger, dbPath);
+
+            var connectionString = new SqliteConnectionStringBuilder { DataSource = dbPath }.ConnectionString;
+#pragma warning disable DCS003 // テストコードから直接検証用の接続を張るため許容
+            await using var conn = new SqliteConnection(connectionString);
+#pragma warning restore DCS003
+            await conn.OpenAsync();
+
+            await conn.ExecuteAsync(
+                "UPDATE app_user SET default_project_name = 'archive-me' WHERE user_name = 'admin'");
+
+            // 2回目: archive-me がスキャン結果から消えた状態（_sandbox 退避を模擬）
+            var projectsAfterArchive = new[]
+            {
+                MakeFakeProject("keep-me"),
+                MakeFakeProject("also-keep"),
+            };
+            await SystemDatabaseInitializer.SyncProjectsAsync(projectsAfterArchive, logger, dbPath);
+
+            var projectNames = (await conn.QueryAsync<string>("SELECT name FROM projects")).ToList();
+            Assert.DoesNotContain("archive-me", projectNames);
+            Assert.Contains("keep-me", projectNames);
+            Assert.Contains("also-keep", projectNames);
+
+            var staleRoleCount = await conn.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM app_user_project_role WHERE project_name = 'archive-me'");
+            Assert.Equal(0, staleRoleCount);
+
+            // 既定プロジェクトが消滅した場合、EnsureAdminProjectRolesAsync が
+            // 生存しているプロジェクトへ再設定していること（null のまま放置されない）
+            var defaultProjectName = await conn.ExecuteScalarAsync<string?>(
+                "SELECT default_project_name FROM app_user WHERE user_name = 'admin'");
+            Assert.NotNull(defaultProjectName);
+            Assert.NotEqual("archive-me", defaultProjectName);
+        }
+        finally
+        {
+            if (File.Exists(dbPath))
+            {
+                File.Delete(dbPath);
+            }
+        }
+    }
 }
