@@ -49,32 +49,36 @@ capabilities:
     badge: Extensibility
 
 solutions:
-  - name: 零售 ERP 方案
-    audience: 零售商 / 供应链团队
-    summary: 覆盖从采购、库存到销售的全链路管理，支持多店协同。
+  - name: 工业级 ERP 契约服务 (JPiere)
+    audience: 企业信息化 / 供应链团队
+    summary: 承载 28 个关联实体，覆盖合同生命周期、报价审批、订单跟踪与原生 C# 业务 Hooks。
+    status: Enterprise
+  - name: 安全护栏与运行时沙箱 (Security)
+    audience: 架构师 / AI Agent 开发者
+    summary: 编译期 AST 阻断非法 SQL 与未白名单 Join，运行期隔离路径穿越与 API 默认拒绝。
+    status: Reference
+  - name: 智能体互联协议 (AI Card / AHP)
+    audience: AI 工程师 / 开放网络极客
+    summary: 声明式 AI 身份管理、有限状态机守卫与动态 QR 令牌生命周期，实现 Agent 受控握手。
+    status: PoC
+  - name: 企业级动态表单 (FormForge)
+    audience: 内部 IT / 业务运营人员
+    summary: 零代码拖拽构建表单、字段级动态验证、内网外网双模填报与数据一键导出。
     status: Production
-  - name: 文档审批系统
-    audience: 企业行政 / 法务部门
-    summary: 电子文档集中管理与自动化审批流程，提升办公效率。
-    status: Production
-  - name: 任务协同平台
-    audience: 项目团队 / 运营人员
-    summary: 轻量级任务看板与项目追踪，支持灵活的自定义字段。
-    status: Beta
 
 quickActions:
-  - label: 系统概览
-    url: "#products"
+  - label: 样板间体验中心
+    url: "/showcase"
     style: btn-primary
-    icon: 🚀
-  - label: 查看 Dashboard 演示
-    url: "/northwind-retail/Dashboard"
+    icon: 🎪
+  - label: 查看 Security Demo
+    url: "/security-demo/Dashboard"
     style: btn-outline
-    icon: 📈
-  - label: 开发者文档
-    url: "/docs/northwind-design.md"
+    icon: 🛡️
+  - label: 红蓝对抗演练靶场
+    url: "/security-demo/challenge"
     style: btn-ghost
-    icon: 📖
+    icon: ⚔️
 
 projectsSectionTitle: 企业产品工作区
 projectsSectionLead: 选择一个工作区进入对应产品的运营与管理界面。
@@ -85,26 +89,22 @@ openWorkspaceLabel: 进入工作区
 emptyProjectsMessage: 未找到可用项目，请检查 projects/ 目录配置。
 
 projectProfiles:
+  security-demo:
+    icon: 🛡️
+    tagline: 安全护栏与动态 CRUD 标杆演示项目
+    tags: [Security, Demo, CRUD, Guardrails]
   userhome:
     icon: 👤
     tagline: 用户个人主页与项目管理
     tags: [User, Personal]
-  northwind-retail:
-    icon: 🛒
-    tagline: 经典零售 ERP 系统的元数据实现参考
-    tags: [Retail, ERP, Reference]
-  biz-docs:
-    icon: 📄
-    tagline: 文档管理与审批流业务模板
-    tags: [DMS, Workflow]
-  inventory:
-    icon: 📦
-    tagline: 库存管理与补货协同工作台
-    tags: [SCM, Inventory]
-  todo-app:
-    icon: ✅
-    tagline: 任务协作与项目管理快速原型
-    tags: [Productivity, Demo]
+  ai-card:
+    icon: 🤖
+    tagline: AI 名片与 Handshake 协议
+    tags: [AI, Card, Handshake]
+  ai-doc-processor:
+    icon: 📑
+    tagline: AI 智能文档批处理
+    tags: [AI, Document, Batch]
 
 defaultProjectProfile:
   icon: 🧱

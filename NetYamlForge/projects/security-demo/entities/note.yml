@@ -1,0 +1,201 @@
+imports: []
+entities:
+  note:
+    table: Note
+    key: Id
+    displayName: Note
+    softDelete: false
+    isPublic: false
+    api: enabled
+
+    forms:
+      Title:
+        type: string
+        required: true
+        label: Title
+        editable: true
+      Slug:
+        type: string
+        required: true
+        label: Slug
+        editable: true
+      Summary:
+        type: textarea
+        label: Summary
+        editable: true
+      Content:
+        type: markdown
+        label: Content (Markdown)
+        editable: true
+      AuthorName:
+        type: string
+        required: true
+        label: Author
+        editable: true
+      Status:
+        type: string
+        required: true
+        label: Status
+        editable: true
+        options:
+          - draft
+          - published
+          - archived
+      FeaturedFlag:
+        type: int
+        label: Featured
+        editable: true
+        options:
+          - 0
+          - 1
+      ViewCount:
+        type: int
+        label: View Count
+        editable: false
+      PublishedAt:
+        type: datetime
+        label: Published At
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      Title:
+        type: string
+        label: Title
+        searchable: true
+        sortable: true
+      Slug:
+        type: string
+        label: Slug
+        searchable: true
+        sortable: false
+      AuthorName:
+        type: string
+        label: Author
+        searchable: true
+        sortable: true
+      Status:
+        type: string
+        label: Status
+        sortable: true
+      FeaturedFlag:
+        type: int
+        label: Featured
+        sortable: true
+      ViewCount:
+        type: int
+        label: View Count
+        sortable: true
+      PublishedAt:
+        type: datetime
+        label: Published At
+        sortable: true
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+      UpdatedAt:
+        type: datetime
+        label: Updated At
+        sortable: true
+      Summary:
+        type: string
+        label: Summary
+        searchable: true
+        sortable: false
+
+    hooks:
+      beforeCreate:
+        - generate_slug       # Title から Slug を自動生成
+        - sanitize_content    # Content の XSS サニタイズ
+      afterCreate:
+        - audit_log
+      beforeUpdate:
+        - sanitize_content
+        - set_published_at    # Status=published のとき PublishedAt を自動設定
+      afterUpdate:
+        - audit_log
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - Title
+          - Slug
+          - AuthorName
+          - Status
+          - FeaturedFlag
+          - PublishedAt
+          - Summary
+          - Content
+          - ViewCount
+      filters:
+        columns: 3
+        order:
+          - Status
+          - AuthorName
+          - FeaturedFlag
+          - PublishedAt
+
+    filters:
+      Status:
+        type: toggle-group
+        label: Status
+        optionLabels:
+          draft:     "✏️ Draft"
+          published: "✅ Published"
+          archived:  "📦 Archived"
+      AuthorName:
+        type: like
+        label: Author
+      FeaturedFlag:
+        type: toggle-group
+        label: Featured
+        expression: Note.FeaturedFlag
+        optionLabels:
+          "0": "Normal"
+          "1": "⭐ Featured"
+      PublishedAt:
+        type: date-range
+        label: Published At
+        expression: Note.PublishedAt
+
+    actions:
+      publish:
+        label: "Publish"
+        scope: row
+        confirm: "Publish this note?"
+        handler: publish_note
+      unpublish:
+        label: "Unpublish"
+        scope: row
+        confirm: "Set this note back to draft?"
+        handler: unpublish_note
+      archive:
+        label: "Archive"
+        scope: row
+        confirm: "Archive this note?"
+        handler: archive_note
+
+    exports:
+      notes_csv:
+        label: "Export CSV"
+        format: csv
+        filename: "notes_{date:yyyyMMdd}.csv"
+        columns:
+          - Title
+          - Slug
+          - AuthorName
+          - Status
+          - ViewCount
+          - PublishedAt
+          - CreatedAt

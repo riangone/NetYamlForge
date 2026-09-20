@@ -1,0 +1,643 @@
+@{
+    ViewData["Title"] = "红蓝对抗 · AI安全护栏沙箱 (Interactive Security Challenge)";
+}
+
+<div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- Header Banner -->
+    <div class="card bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl border border-indigo-800/40 mb-8 overflow-hidden relative">
+        <div class="absolute -right-10 -bottom-10 opacity-10 text-9xl select-none pointer-events-none">
+            🛡️
+        </div>
+        <div class="card-body p-8">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="badge badge-primary font-mono uppercase tracking-wider text-xs px-3 py-2">Security Benchmark</span>
+                        <span class="badge badge-outline text-indigo-200 border-indigo-400/50 text-xs">NetYamlForge Reference Implementation</span>
+                    </div>
+                    <h1 class="text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
+                        <span>🛡️ 红蓝对抗 · AI 代码安全护栏实训靶场</span>
+                    </h1>
+                    <p class="text-indigo-200 mt-2 max-w-3xl text-sm lg:text-base leading-relaxed">
+                        当使用 <strong>Cursor / Claude / Copilot</strong> 或自主 Agent 生成声明式配置与 Hook 逻辑时，极易埋入未授权 SQL、路径穿越与全量 API 泄露隐患。
+                        NetYamlForge 通过<strong>编译期 AST 静态约束</strong>、<strong>元数据白名单</strong>与<strong>运行期边界防御</strong>，为企业级 AI 生产交付筑起安全底座。
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <a href="/security-demo/Dashboard" class="btn btn-outline btn-sm text-indigo-100 border-indigo-400 hover:bg-indigo-800">
+                        📊 查看 Demo 看板
+                    </a>
+                    <a href="/security-demo/DynamicEntity/Index?entity=note" class="btn btn-primary btn-sm">
+                        📝 体验标准 Note CRUD
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-indigo-800/60">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-indigo-900/60 rounded-xl border border-indigo-700/50 text-2xl">⚡</div>
+                    <div>
+                        <div class="text-xs uppercase text-indigo-300 font-semibold tracking-wider">防御层级 1</div>
+                        <div class="text-sm font-bold text-white">元数据静态解析阻断 (零执行)</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-indigo-900/60 rounded-xl border border-indigo-700/50 text-2xl">🔒</div>
+                    <div>
+                        <div class="text-xs uppercase text-indigo-300 font-semibold tracking-wider">防御层级 2</div>
+                        <div class="text-sm font-bold text-white">运行时文件路径边界隔离 (Path Guard)</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-indigo-900/60 rounded-xl border border-indigo-700/50 text-2xl">🤖</div>
+                    <div>
+                        <div class="text-xs uppercase text-indigo-300 font-semibold tracking-wider">防御层级 3</div>
+                        <div class="text-sm font-bold text-white">Agent MCP / API 默认拒绝 (Default-Deny)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 靶场 1: YAML 元数据安全与 SQL 注入对抗 -->
+    <div class="card bg-base-100 shadow-xl border border-base-300 mb-8">
+        <div class="card-body p-6 lg:p-8">
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-base-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-error badge-sm text-white font-bold">LAB 01</span>
+                        <h2 class="text-xl font-bold text-base-content flex items-center gap-2">
+                            AI 恶意 YAML & SQL 注入防御 (Schema Guardrail)
+                        </h2>
+                    </div>
+                    <p class="text-xs text-base-content/70 mt-1">
+                        验证在实体声明解析期，框架如何识别并阻断未授权的 Join 类型（如 full outer join）、恶意外键 Query 以及伪装在 filter 表达式中的 SQL 注入语句。
+                    </p>
+                </div>
+                <span class="text-xs font-mono bg-base-200 px-2.5 py-1 rounded text-base-content/80">
+                    Component: DynamicCrudMetadataValidator & SqlSafetyGuard
+                </span>
+            </div>
+
+            <!-- Presets -->
+            <div class="mt-4">
+                <label class="text-xs font-bold text-base-content/80 block mb-2">🎯 快速加载红队攻击载荷与参考样本：</label>
+                <div class="flex flex-wrap gap-2" id="yamlPresetButtons">
+                    <button type="button" onclick="loadYamlPreset('unsafe-join')" class="btn btn-xs btn-outline btn-error">
+                        😈 恶意外键 Join (full outer join)
+                    </button>
+                    <button type="button" onclick="loadYamlPreset('raw-sql-injection')" class="btn btn-xs btn-outline btn-error">
+                        😈 伪装 SQL 注入 (1=1; DROP TABLE)
+                    </button>
+                    <button type="button" onclick="loadYamlPreset('keyword-injection')" class="btn btn-xs btn-outline btn-error">
+                        😈 标识符注入 (DROP TABLE 命名)
+                    </button>
+                    <button type="button" onclick="loadYamlPreset('safe-note')" class="btn btn-xs btn-outline btn-success">
+                        🛡️ 官方基线 (安全 Note 实体)
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                <!-- Red Team Editor -->
+                <div class="flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono text-error font-bold flex items-center gap-1">
+                            <span>🔴 红队攻击/配置输入 (YAML Payload)</span>
+                        </span>
+                        <span class="text-xs text-base-content/50">支持实时编辑输入</span>
+                    </div>
+                    <textarea id="yamlInput" rows="14" class="textarea textarea-bordered font-mono text-xs w-full leading-relaxed bg-slate-950 text-emerald-400 border-slate-700 focus:border-indigo-500 rounded-lg shadow-inner"></textarea>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-xs text-base-content/60" id="yamlHint">点击上方预设按钮可快速载入</span>
+                        <button type="button" id="btnTestYaml" onclick="executeYamlChallenge()" class="btn btn-primary btn-sm px-6">
+                            <span id="btnTestYamlSpinner" class="loading loading-spinner loading-xs hidden"></span>
+                            <span>🚨 触发红队攻击测试</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Blue Team Defense Output -->
+                <div class="flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono text-info font-bold flex items-center gap-1">
+                            <span>🔵 蓝队安全护栏拦截日志 (Defense Log)</span>
+                        </span>
+                        <span id="yamlStatusBadge" class="badge badge-ghost text-xs">等待测试</span>
+                    </div>
+                    <div id="yamlResultBox" class="bg-base-200 border border-base-300 rounded-lg p-5 flex-1 min-h-[300px] flex flex-col justify-center">
+                        <div class="text-center text-base-content/50 py-12">
+                            <div class="text-4xl mb-3">🛡️</div>
+                            <div class="font-medium text-sm">尚未执行测试</div>
+                            <div class="text-xs mt-1 text-base-content/40">选择左侧载荷并点击「触发红队攻击测试」查看拦截效果</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 靶场 2: 运行时 Hook 路径穿越与逃逸防御 -->
+    <div class="card bg-base-100 shadow-xl border border-base-300 mb-8">
+        <div class="card-body p-6 lg:p-8">
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-base-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-warning badge-sm text-slate-900 font-bold">LAB 02</span>
+                        <h2 class="text-xl font-bold text-base-content flex items-center gap-2">
+                            Hook 运行时路径穿越防御 (Path Traversal Guardrail)
+                        </h2>
+                    </div>
+                    <p class="text-xs text-base-content/70 mt-1">
+                        AI 生成的业务 Hook（如附件下载、PDF 生成）常使用朴素的 <code>Path.Combine(base, input)</code>，极易遭受 <code>../../</code> 跨租户或主机根目录逃逸。
+                    </p>
+                </div>
+                <span class="text-xs font-mono bg-base-200 px-2.5 py-1 rounded text-base-content/80">
+                    Component: PathSafetyGuard
+                </span>
+            </div>
+
+            <!-- Presets -->
+            <div class="mt-4">
+                <label class="text-xs font-bold text-base-content/80 block mb-2">🎯 快速载入路径穿越攻击 Payload：</label>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="loadPathPreset('../../../../etc/passwd')" class="btn btn-xs btn-outline btn-warning">
+                        😈 ../../../../etc/passwd (主机根逃逸)
+                    </button>
+                    <button type="button" onclick="loadPathPreset('../../other-tenant/database/tenant.db')" class="btn btn-xs btn-outline btn-warning">
+                        😈 ../../other-tenant/database/tenant.db (跨租户数据偷窥)
+                    </button>
+                    <button type="button" onclick="loadPathPreset('/etc/shadow')" class="btn btn-xs btn-outline btn-warning">
+                        😈 /etc/shadow (根路径绝对越权)
+                    </button>
+                    <button type="button" onclick="loadPathPreset('notes/1/attachment-report.pdf')" class="btn btn-xs btn-outline btn-success">
+                        🛡️ notes/1/attachment-report.pdf (合规受控路径)
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                <div>
+                    <label class="text-xs font-mono text-error font-bold block mb-1">🔴 目标文件请求路径 (Target Path Payload):</label>
+                    <div class="join w-full">
+                        <input id="pathInput" type="text" value="../../../../etc/passwd" class="input input-bordered join-item w-full font-mono text-sm bg-slate-950 text-amber-300 border-slate-700" placeholder="例如: ../../../../etc/passwd" />
+                        <button type="button" id="btnTestPath" onclick="executePathChallenge()" class="btn btn-warning join-item text-slate-900 font-bold">
+                            <span id="btnTestPathSpinner" class="loading loading-spinner loading-xs hidden"></span>
+                            <span>🚨 触发逃逸测试</span>
+                        </button>
+                    </div>
+
+                    <!-- Code comparison card -->
+                    <div class="mt-4 p-4 rounded-lg bg-base-200 border border-base-300 text-xs">
+                        <div class="font-bold text-base-content mb-2 flex items-center gap-2">
+                            <span>💡 对比：AI 朴素代码 vs NetYamlForge 护栏</span>
+                        </div>
+                        <div class="font-mono text-error bg-slate-900 p-2 rounded mb-2 overflow-x-auto">
+                            // ❌ 传统 AI 生成代码 (极度危险)<br/>
+                            var path = Path.Combine(baseDir, userInput); // 遇绝对路径或 ../ 彻底失守！<br/>
+                            return File.ReadAllBytes(path);
+                        </div>
+                        <div class="font-mono text-success bg-slate-900 p-2 rounded overflow-x-auto">
+                            // ✅ NetYamlForge 安全护栏 (自动前缀边界强制验证)<br/>
+                            var path = PathSafetyGuard.NormalizeAndValidatePath(userInput, baseDir, "action");<br/>
+                            return File.ReadAllBytes(path); // 任何越界立即抛出 UnauthorizedAccessException
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blue Team Output -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono text-info font-bold flex items-center gap-1">
+                            <span>🔵 路径拦截与安全沙箱执行状态</span>
+                        </span>
+                        <span id="pathStatusBadge" class="badge badge-ghost text-xs">等待测试</span>
+                    </div>
+                    <div id="pathResultBox" class="bg-base-200 border border-base-300 rounded-lg p-5 min-h-[220px] flex flex-col justify-center">
+                        <div class="text-center text-base-content/50 py-8">
+                            <div class="text-4xl mb-3">🔒</div>
+                            <div class="font-medium text-sm">尚未执行路径逃逸测试</div>
+                            <div class="text-xs mt-1 text-base-content/40">输入或选择上方越权路径，验证前缀安全隔离</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 靶场 3: AI Agent 与 API 默认拒绝（Default-Deny）机制 -->
+    <div class="card bg-base-100 shadow-xl border border-base-300 mb-8">
+        <div class="card-body p-6 lg:p-8">
+            <div class="flex items-center justify-between flex-wrap gap-2 pb-4 border-b border-base-200">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info badge-sm text-white font-bold">LAB 03</span>
+                        <h2 class="text-xl font-bold text-base-content flex items-center gap-2">
+                            Agent MCP / REST 接口「默认拒绝」策略 (Default-Deny)
+                        </h2>
+                    </div>
+                    <p class="text-xs text-base-content/70 mt-1">
+                        实体配置未显式声明 <code>api: enabled</code> 时，NetYamlForge 强制禁止将其暴露给外部 REST API 与 LLM Agent MCP 工具集。
+                    </p>
+                </div>
+                <span class="text-xs font-mono bg-base-200 px-2.5 py-1 rounded text-base-content/80">
+                    Component: DynamicApiPipeline & McpServer
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 items-center">
+                <div>
+                    <label class="text-xs font-bold text-base-content/80 block mb-2">选择要探测的动态实体：</label>
+                    <div class="flex flex-col gap-3">
+                        <div class="p-4 rounded-xl border border-error/40 bg-error/5 hover:bg-error/10 cursor-pointer transition-colors" onclick="selectEntity('attachment')">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-sm text-error flex items-center gap-2">
+                                    <input type="radio" name="entityRadio" id="radioAttachment" value="attachment" checked class="radio radio-error radio-sm" />
+                                    📎 attachment (附件实体)
+                                </span>
+                                <span class="badge badge-xs badge-error">api: 未显式声明 (Default Disabled)</span>
+                            </div>
+                            <p class="text-xs text-base-content/70 mt-1 pl-6">
+                                仅在系统内部作为关联表使用，禁止任何外部 Agent 或 REST 接口无凭证批量读取。
+                            </p>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-success/40 bg-success/5 hover:bg-success/10 cursor-pointer transition-colors" onclick="selectEntity('note')">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-sm text-success flex items-center gap-2">
+                                    <input type="radio" name="entityRadio" id="radioNote" value="note" class="radio radio-success radio-sm" />
+                                    📝 note (笔记实体)
+                                </span>
+                                <span class="badge badge-xs badge-success">api: enabled (显式开启)</span>
+                            </div>
+                            <p class="text-xs text-base-content/70 mt-1 pl-6">
+                                显式声明开启 API，受控注册为 MCP Tool（如 create_entity_record, list_entity_records）。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="button" id="btnTestApi" onclick="executeApiCheckChallenge()" class="btn btn-info btn-sm text-white w-full">
+                            <span id="btnTestApiSpinner" class="loading loading-spinner loading-xs hidden"></span>
+                            <span>🤖 模拟 AI Agent 尝试调用该实体的 MCP / API 接口</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Inspection Output -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-mono text-info font-bold flex items-center gap-1">
+                            <span>🔵 Agent 接口探测响应</span>
+                        </span>
+                        <span id="apiStatusBadge" class="badge badge-ghost text-xs">等待测试</span>
+                    </div>
+                    <div id="apiResultBox" class="bg-base-200 border border-base-300 rounded-lg p-5 min-h-[220px] flex flex-col justify-center">
+                        <div class="text-center text-base-content/50 py-8">
+                            <div class="text-4xl mb-3">🤖</div>
+                            <div class="font-medium text-sm">尚未探测 API 权限</div>
+                            <div class="text-xs mt-1 text-base-content/40">点击左侧「模拟 AI Agent 调用」检验 Default-Deny 阻断机制</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推广与宣传生态赋能 (Promotion & Value Proposition Footer) -->
+    <div class="card bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-xl border border-indigo-900">
+        <div class="card-body p-8">
+            <h3 class="text-2xl font-black mb-3 text-white flex items-center gap-2">
+                <span>🚀 如何向社区推广 NetYamlForge？</span>
+            </h3>
+            <p class="text-indigo-200 text-sm leading-relaxed mb-6">
+                NetYamlForge 并非简单的低代码脚手架，而是<strong>业界首个为 AI Agent 代码生成时代打造的声明式安全运行时</strong>。利用本靶场可在社交媒体、GitHub 及企业内训中进行精准布道。
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900/80 p-5 rounded-xl border border-indigo-800/40">
+                    <div class="text-xl mb-2">🎯 宣传口号 (Pitch)</div>
+                    <p class="text-xs text-indigo-200 leading-relaxed">
+                        “别让 AI 生成的 SQL 和危险 Hook 毁掉生产库！NetYamlForge：一行 YAML 自动生成安全受控的 CRUD、看板与 MCP 工具集。”
+                    </p>
+                </div>
+                <div class="bg-slate-900/80 p-5 rounded-xl border border-indigo-800/40">
+                    <div class="text-xl mb-2">📢 开发者痛点共鸣</div>
+                    <p class="text-xs text-indigo-200 leading-relaxed">
+                        指出传统方式下 AI 生成业务代码极易产生 Path.Combine 穿越、分号注入与表结构泄露；展示 NetYamlForge 如何在<strong>零手写护栏</strong>下完成拦截。
+                    </p>
+                </div>
+                <div class="bg-slate-900/80 p-5 rounded-xl border border-indigo-800/40">
+                    <div class="text-xl mb-2">🤝 一键复制分享卡片</div>
+                    <button type="button" onclick="copyShareText()" class="btn btn-outline btn-xs text-indigo-300 border-indigo-500 hover:bg-indigo-700 w-full mt-2">
+                        📋 复制红蓝对抗宣传文案
+                    </button>
+                    <span id="copyToast" class="text-[11px] text-emerald-400 block mt-1 hidden text-center">已复制到剪贴板！</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 预设数据缓存
+    let presetsCache = null;
+
+    async function initPresets() {
+        try {
+            const res = await fetch('/security-demo/SecurityDemo/GetPresets');
+            if (res.ok) {
+                presetsCache = await res.json();
+                // 默认载入第一个恶意 Join 样本
+                loadYamlPreset('unsafe-join');
+            }
+        } catch (e) {
+            console.error("加载预设失败", e);
+        }
+    }
+
+    function loadYamlPreset(id) {
+        if (!presetsCache || !presetsCache.yamlPresets) return;
+        const p = presetsCache.yamlPresets.find(x => x.id === id);
+        if (p) {
+            document.getElementById('yamlInput').value = p.yaml;
+            document.getElementById('yamlHint').innerText = p.description;
+        }
+    }
+
+    function loadPathPreset(path) {
+        document.getElementById('pathInput').value = path;
+    }
+
+    function selectEntity(name) {
+        if (name === 'attachment') {
+            document.getElementById('radioAttachment').checked = true;
+        } else {
+            document.getElementById('radioNote').checked = true;
+        }
+    }
+
+    // 演练 1: 验证 YAML 注入
+    async function executeYamlChallenge() {
+        const yaml = document.getElementById('yamlInput').value;
+        const spinner = document.getElementById('btnTestYamlSpinner');
+        const badge = document.getElementById('yamlStatusBadge');
+        const box = document.getElementById('yamlResultBox');
+
+        spinner.classList.remove('hidden');
+        badge.className = 'badge badge-warning text-xs';
+        badge.innerText = '正在执行安全检测...';
+
+        try {
+            const res = await fetch('/security-demo/SecurityDemo/ValidateYaml', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ yamlContent: yaml, entityName: 'note' })
+            });
+
+            const data = await res.json();
+            renderYamlResult(data);
+        } catch (err) {
+            box.innerHTML = `<div class="alert alert-error text-xs">网络或请求异常: ${err.message}</div>`;
+        } finally {
+            spinner.classList.add('hidden');
+        }
+    }
+
+    function renderYamlResult(data) {
+        const badge = document.getElementById('yamlStatusBadge');
+        const box = document.getElementById('yamlResultBox');
+
+        if (data.blocked) {
+            badge.className = 'badge badge-error text-xs text-white';
+            badge.innerText = '🛡️ 已成功拦截 (Blocked)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-error text-white font-mono text-xs">DEFENSE SUCCESSFUL</span>
+                        <span class="text-xs font-bold text-error">${data.stage || '解析拦截'}</span>
+                    </div>
+                    <div class="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-red-200 font-mono text-xs overflow-x-auto">
+                        ${escapeHtml(data.message)}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-base-100 rounded-lg border border-base-300">
+                            <span class="font-bold text-error block mb-1">🔴 攻击/隐患分析：</span>
+                            <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.attackExplanation || '')}</p>
+                        </div>
+                        <div class="p-3 bg-base-100 rounded-lg border border-base-300">
+                            <span class="font-bold text-info block mb-1">🔵 NetYamlForge 护栏机制：</span>
+                            <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-base-content/60 font-mono">
+                        触发防御模块: <code class="bg-base-300 px-1 py-0.5 rounded">${data.guard || 'DynamicCrudMetadataValidator'}</code>
+                    </div>
+                </div>
+            `;
+        } else {
+            badge.className = 'badge badge-success text-xs text-white';
+            badge.innerText = '✅ 安全通过 (Allowed)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success text-white font-mono text-xs">VALIDATION PASSED</span>
+                        <span class="text-xs font-bold text-success">${data.stage || '通过'}</span>
+                    </div>
+                    <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-lg text-emerald-200 font-mono text-xs">
+                        ${escapeHtml(data.message)}
+                    </div>
+                    <div class="p-3 bg-base-100 rounded-lg border border-base-300 text-xs">
+                        <span class="font-bold text-success block mb-1">🔵 合规说明：</span>
+                        <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                    </div>
+                    <div class="text-[11px] text-base-content/60 font-mono">
+                        通过验证组件: <code class="bg-base-300 px-1 py-0.5 rounded">${data.guard || 'DynamicCrudMetadataValidator'}</code>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 演练 2: 验证路径穿越
+    async function executePathChallenge() {
+        const pathVal = document.getElementById('pathInput').value;
+        const spinner = document.getElementById('btnTestPathSpinner');
+        const badge = document.getElementById('pathStatusBadge');
+        const box = document.getElementById('pathResultBox');
+
+        spinner.classList.remove('hidden');
+        badge.className = 'badge badge-warning text-xs';
+        badge.innerText = '正在执行沙箱检测...';
+
+        try {
+            const res = await fetch('/security-demo/SecurityDemo/ValidatePath', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetPath: pathVal })
+            });
+
+            const data = await res.json();
+            renderPathResult(data);
+        } catch (err) {
+            box.innerHTML = `<div class="alert alert-error text-xs">网络请求异常: ${err.message}</div>`;
+        } finally {
+            spinner.classList.add('hidden');
+        }
+    }
+
+    function renderPathResult(data) {
+        const badge = document.getElementById('pathStatusBadge');
+        const box = document.getElementById('pathResultBox');
+
+        if (data.blocked) {
+            badge.className = 'badge badge-error text-xs text-white';
+            badge.innerText = '🛡️ 越界已阻断 (Blocked)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-error text-white font-mono text-xs">ESCAPE BLOCKED</span>
+                        <span class="text-xs font-bold text-error">${data.stage || '运行时阻断'}</span>
+                    </div>
+                    <div class="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-red-200 font-mono text-xs overflow-x-auto">
+                        ${escapeHtml(data.message)}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-base-100 rounded-lg border border-base-300">
+                            <span class="font-bold text-error block mb-1">🔴 路径逃逸风险：</span>
+                            <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.attackExplanation || '')}</p>
+                        </div>
+                        <div class="p-3 bg-base-100 rounded-lg border border-base-300">
+                            <span class="font-bold text-info block mb-1">🔵 PathSafetyGuard 机制：</span>
+                            <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            badge.className = 'badge badge-success text-xs text-white';
+            badge.innerText = '✅ 路径合规 (Safe)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success text-white font-mono text-xs">IN-BOUNDS</span>
+                        <span class="text-xs font-bold text-success">${data.stage || '合规'}</span>
+                    </div>
+                    <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-lg text-emerald-200 font-mono text-xs">
+                        ${escapeHtml(data.message)}
+                        <div class="mt-1 text-[11px] text-emerald-300">实际解析路径: ${escapeHtml(data.resolvedPath || '')}</div>
+                    </div>
+                    <div class="p-3 bg-base-100 rounded-lg border border-base-300 text-xs">
+                        <span class="font-bold text-success block mb-1">🔵 安全确认：</span>
+                        <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // 演练 3: 探测 API Default-Deny
+    async function executeApiCheckChallenge() {
+        const entity = document.querySelector('input[name="entityRadio"]:checked').value;
+        const spinner = document.getElementById('btnTestApiSpinner');
+        const badge = document.getElementById('apiStatusBadge');
+        const box = document.getElementById('apiResultBox');
+
+        spinner.classList.remove('hidden');
+        badge.className = 'badge badge-warning text-xs';
+        badge.innerText = '正在探测 Agent 接口授权...';
+
+        try {
+            const res = await fetch('/security-demo/SecurityDemo/CheckApiAccess', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ entityName: entity })
+            });
+
+            const data = await res.json();
+            renderApiResult(data);
+        } catch (err) {
+            box.innerHTML = `<div class="alert alert-error text-xs">网络请求异常: ${err.message}</div>`;
+        } finally {
+            spinner.classList.add('hidden');
+        }
+    }
+
+    function renderApiResult(data) {
+        const badge = document.getElementById('apiStatusBadge');
+        const box = document.getElementById('apiResultBox');
+
+        if (data.blocked) {
+            badge.className = 'badge badge-error text-xs text-white';
+            badge.innerText = '🛡️ 默认拒绝 (Denied)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-error text-white font-mono text-xs">DEFAULT DENIED</span>
+                        <span class="text-xs font-bold text-error">外部 Agent 接口隐身</span>
+                    </div>
+                    <div class="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-red-200 font-mono text-xs">
+                        ${escapeHtml(data.message)}
+                    </div>
+                    <div class="p-3 bg-base-100 rounded-lg border border-base-300 text-xs">
+                        <span class="font-bold text-info block mb-1">🔵 默认安全准则 (Default-Deny)：</span>
+                        <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            badge.className = 'badge badge-success text-xs text-white';
+            badge.innerText = '✅ API 已授权 (Enabled)';
+
+            box.innerHTML = `
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success text-white font-mono text-xs">API ENABLED</span>
+                        <span class="text-xs font-bold text-success">MCP 协议已注册</span>
+                    </div>
+                    <div class="p-3 bg-emerald-950/40 border border-emerald-800/60 rounded-lg text-emerald-200 font-mono text-xs">
+                        ${escapeHtml(data.message)}
+                    </div>
+                    <div class="p-3 bg-base-100 rounded-lg border border-base-300 text-xs">
+                        <span class="font-bold text-success block mb-1">🔵 受控开放：</span>
+                        <p class="text-base-content/80 leading-relaxed">${escapeHtml(data.defenseExplanation || '')}</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function copyShareText() {
+        const text = `🔥 告别 AI 编程的 SQL 注入与路径穿越隐患！
+我正在体验 NetYamlForge（专为 AI Agent 设计的 .NET 声明式运行时与安全护栏）。
+无论是恶意外键 Join、注入表达式还是 Hook 路径越权，框架都能在编译期 AST 与运行时秒级拦截！
+在线实训靶场：https://nyf.0101.click/security-demo/challenge`;
+
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.getElementById('copyToast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        });
+    }
+
+    // 页面载入时初始化
+    document.addEventListener('DOMContentLoaded', () => {
+        initPresets();
+    });
+</script>

@@ -25,14 +25,8 @@ x-app-base: &app-base
     ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
     TZ: ${TZ:-UTC}
     # Per-project DB overrides (empty = use SQLite from project.yaml)
-    NYFORGE_TODO_APP_DB_TYPE: ${NYFORGE_TODO_APP_DB_TYPE:-sqlite}
-    NYFORGE_TODO_APP_CONNECTION_STRING: ${NYFORGE_TODO_APP_CONNECTION_STRING:-}
-    NYFORGE_UI_SHOWCASE_DB_TYPE: ${NYFORGE_UI_SHOWCASE_DB_TYPE:-sqlite}
-    NYFORGE_UI_SHOWCASE_CONNECTION_STRING: ${NYFORGE_UI_SHOWCASE_CONNECTION_STRING:-}
-    NYFORGE_BIZ_DOCS_DB_TYPE: ${NYFORGE_BIZ_DOCS_DB_TYPE:-sqlite}
-    NYFORGE_BIZ_DOCS_CONNECTION_STRING: ${NYFORGE_BIZ_DOCS_CONNECTION_STRING:-}
-    NYFORGE_AUTO_DEALER_DEMO_DB_TYPE: ${NYFORGE_AUTO_DEALER_DEMO_DB_TYPE:-sqlite}
-    NYFORGE_AUTO_DEALER_DEMO_CONNECTION_STRING: ${NYFORGE_AUTO_DEALER_DEMO_CONNECTION_STRING:-}
+    NYFORGE_SECURITY_DEMO_DB_TYPE: ${NYFORGE_SECURITY_DEMO_DB_TYPE:-sqlite}
+    NYFORGE_SECURITY_DEMO_CONNECTION_STRING: ${NYFORGE_SECURITY_DEMO_CONNECTION_STRING:-}
   restart: unless-stopped
   healthcheck:
     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -49,10 +43,7 @@ services:
   app:
     <<: *app-base
     volumes:
-      - todo_app_sqlite:/app/projects/todo-app/database
-      - ui_showcase_sqlite:/app/projects/_sandbox/ui-showcase/database
-      - biz_docs_sqlite:/app/projects/biz-docs/database
-      - auto_dealer_demo_sqlite:/app/projects/auto-dealer-demo/database
+      - security_demo_sqlite:/app/projects/security-demo/database
       - app_var_data:/app/var/data
       - app_var_run:/app/var/run
       - app_var_log:/app/var/log
@@ -78,7 +69,6 @@ services:
         Host=postgres;Port=5432;Database=${POSTGRES_DB:-auto_dealer_demo};
         Username=${POSTGRES_USER:-nyforge};Password=${POSTGRES_PASSWORD:-nyforge_pass}
     volumes:
-      - ui_showcase_sqlite:/app/projects/_sandbox/ui-showcase/database
       - app_var_data:/app/var/data
       - app_var_run:/app/var/run
       - app_var_log:/app/var/log
@@ -125,7 +115,6 @@ services:
         Uid=${MYSQL_USER:-nyforge};Pwd=${MYSQL_PASSWORD:-nyforge_pass};
         CharSet=utf8mb4;AllowUserVariables=true
     volumes:
-      - ui_showcase_sqlite:/app/projects/_sandbox/ui-showcase/database
       - app_var_data:/app/var/data
       - app_var_run:/app/var/run
       - app_var_log:/app/var/log
@@ -175,7 +164,6 @@ services:
         User Id=${MSSQL_USER:-nyforge};Password=${MSSQL_PASSWORD:-Nyforge@123};
         TrustServerCertificate=True
     volumes:
-      - ui_showcase_sqlite:/app/projects/_sandbox/ui-showcase/database
       - app_var_data:/app/var/data
       - app_var_run:/app/var/run
       - app_var_log:/app/var/log
@@ -219,10 +207,7 @@ services:
       "
 
 volumes:
-  todo_app_sqlite:
-  ui_showcase_sqlite:
-  biz_docs_sqlite:
-  auto_dealer_demo_sqlite:
+  security_demo_sqlite:
   postgres_data:
   mysql_data:
   sqlserver_data:

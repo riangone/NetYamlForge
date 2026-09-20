@@ -9,16 +9,18 @@ public class DocumentPdfServiceTests
     private static readonly DocumentPdfService Svc = new();
 
     /// <summary>
-    /// biz-docs プロジェクトの pdf-templates/ ディレクトリを解決します。
+    /// pdf-templates/ ディレクトリを解決します（旧 biz-docs デモから security-demo に
+    /// 移設済み。テンプレート自体はフレームワークの PDF/フォント解決エンジンを
+    /// 検証するための素材であり、biz-docs のビジネスコンテンツとは無関係）。
     /// テスト実行時の AppContext.BaseDirectory からリポジトリルートを逆算します。
     /// </summary>
-    private static string BizDocsProjectDir()
+    private static string SecurityDemoProjectDir()
     {
-        // bin/Debug/net10.0 → リポジトリルート → NetYamlForge/projects/biz-docs
+        // bin/Debug/net10.0 → リポジトリルート → NetYamlForge/projects/security-demo
         var dir = AppContext.BaseDirectory;
         while (dir != null && !Directory.Exists(Path.Combine(dir, "NetYamlForge", "projects")))
             dir = Path.GetDirectoryName(dir);
-        return Path.Combine(dir ?? AppContext.BaseDirectory, "NetYamlForge", "projects", "biz-docs");
+        return Path.Combine(dir ?? AppContext.BaseDirectory, "NetYamlForge", "projects", "security-demo");
     }
 
     private static Dictionary<string, object?> InvoiceHeader() => new()
@@ -61,9 +63,9 @@ public class DocumentPdfServiceTests
     [InlineData("others/fax-cover")]
     [InlineData("others/minutes-03")]
     [InlineData("others/resume-jis")]
-    public void Generate_BizDocsTemplates_ReturnValidPdf(string templateName)
+    public void Generate_PdfTemplates_ReturnValidPdf(string templateName)
     {
-        var projectDir = BizDocsProjectDir();
+        var projectDir = SecurityDemoProjectDir();
         var template = Svc.LoadTemplate(projectDir, templateName);
         Assert.NotNull(template);
 

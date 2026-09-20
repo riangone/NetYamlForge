@@ -1,9 +1,0 @@
-entities:
-  ad_attachment_entry:
-    table: ad_attachment_entry
-    key: ad_attachment_id
-    displayName: AD_ATTACHMENT_ENTRY
-    columns:
-      ad_attachment_id: {type: decimal, identity: true}
-      seqno: {type: decimal}
-      binarydata: {type: string}

@@ -1,5 +1,5 @@
 // ファイル概要: 「YAML 設定 → ランタイム挙動」E2E テスト用の WebApplicationFactory です。
-// 一時ディレクトリにサンプルプロジェクト（blog）のコピーを作り、それを
+// 一時ディレクトリにサンプルプロジェクト（security-demo）のコピーを作り、それを
 // コンテンツルートとしてアプリ全体を起動します。テナント DB（SQLite）は
 // コピーに含めず、フレームワーク起動時の初期化（init_seed.sql ＋ YAML からの
 // 自動テーブル作成）で毎回再構築させます。これにより開発者の作業 DB を
@@ -14,13 +14,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace NetYamlForge.Tests.Integration;
 
 /// <summary>
-/// blog サンプルプロジェクトだけを読み込む隔離されたテストホストファクトリ。
+/// security-demo プロジェクト（フレームワーク唯一の公式デモ）だけを読み込む
+/// 隔離されたテストホストファクトリ。
 /// 共有フィクスチャとして利用し、将来の E2E テストはこのクラスに乗せて拡張できます。
 /// </summary>
 public sealed class NetYamlForgeWebApplicationFactory : WebApplicationFactory<Program>
 {
     /// <summary>テスト対象のサンプルプロジェクト名。</summary>
-    public const string ProjectName = "blog";
+    public const string ProjectName = "security-demo";
 
     /// <summary>一時コンテンツルート（テスト終了時に削除されます）。</summary>
     public string TempContentRoot { get; }

@@ -9,7 +9,7 @@ namespace NetYamlForge.Tests.Integration;
 public class LocalizationIntegrationTests : IClassFixture<NetYamlForgeWebApplicationFactory>
 {
     private readonly NetYamlForgeWebApplicationFactory _factory;
-    private const string IndexUrl = "/blog/DynamicEntity/Index?entity=post";
+    private const string IndexUrl = "/security-demo/DynamicEntity/Index?entity=note";
 
     private static readonly Regex AntiForgeryTokenRegex = new(
         "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"",
@@ -44,7 +44,7 @@ public class LocalizationIntegrationTests : IClassFixture<NetYamlForgeWebApplica
         };
 
         var responseZh = await client.PostAsync(
-            "/blog/Localization/SetLanguage",
+            "/security-demo/Localization/SetLanguage",
             new FormUrlEncodedContent(formZh));
 
         // 3. Assert: 302 または 200 であることを確認し、適切にCookieと表示内容を検証する
@@ -85,7 +85,7 @@ public class LocalizationIntegrationTests : IClassFixture<NetYamlForgeWebApplica
         };
 
         var responseJa = await client.PostAsync(
-            "/blog/Localization/SetLanguage",
+            "/security-demo/Localization/SetLanguage",
             new FormUrlEncodedContent(formJa));
 
         Assert.True(responseJa.StatusCode == HttpStatusCode.Redirect || responseJa.StatusCode == HttpStatusCode.OK);
@@ -122,7 +122,7 @@ public class LocalizationIntegrationTests : IClassFixture<NetYamlForgeWebApplica
         };
 
         var responseEn = await client.PostAsync(
-            "/blog/Localization/SetLanguage",
+            "/security-demo/Localization/SetLanguage",
             new FormUrlEncodedContent(formEn));
 
         Assert.True(responseEn.StatusCode == HttpStatusCode.Redirect || responseEn.StatusCode == HttpStatusCode.OK);

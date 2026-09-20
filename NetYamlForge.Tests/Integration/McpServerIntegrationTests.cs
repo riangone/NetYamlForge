@@ -90,7 +90,7 @@ public class McpServerIntegrationTests : IClassFixture<ApiTestWebApplicationFact
         var result = await client.CallToolAsync("list_entity_records", new Dictionary<string, object?>
         {
             ["project"] = ApiTestWebApplicationFactory.ProjectName,
-            ["entity"] = "post"
+            ["entity"] = "note"
         });
 
         var content = GetStructuredContent(result);
@@ -109,7 +109,7 @@ public class McpServerIntegrationTests : IClassFixture<ApiTestWebApplicationFact
         var createArgs = new Dictionary<string, object?>
         {
             ["project"] = ApiTestWebApplicationFactory.ProjectName,
-            ["entity"] = "post",
+            ["entity"] = "note",
             ["data"] = new Dictionary<string, object?>
             {
                 ["Title"] = "MCP Test Post",
@@ -131,7 +131,7 @@ public class McpServerIntegrationTests : IClassFixture<ApiTestWebApplicationFact
         var getResult = await client.CallToolAsync("get_entity_record", new Dictionary<string, object?>
         {
             ["project"] = ApiTestWebApplicationFactory.ProjectName,
-            ["entity"] = "post",
+            ["entity"] = "note",
             ["id"] = createdId!
         });
 
@@ -145,11 +145,11 @@ public class McpServerIntegrationTests : IClassFixture<ApiTestWebApplicationFact
     {
         await using var client = await CreateMcpClientAsync("admin-api-token");
 
-        // comment エンティティは entities/comment.yml で `api` が未設定（既定値 "disabled"）。
+        // attachment エンティティは entities/attachment.yml で `api` が未設定（既定値 "disabled"）。
         var result = await client.CallToolAsync("list_entity_records", new Dictionary<string, object?>
         {
             ["project"] = ApiTestWebApplicationFactory.ProjectName,
-            ["entity"] = "comment"
+            ["entity"] = "attachment"
         });
 
         var content = GetStructuredContent(result);

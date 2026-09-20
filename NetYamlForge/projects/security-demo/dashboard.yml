@@ -1,0 +1,60 @@
+---
+stats:
+  - label: Notes 总数
+    entity: note
+    aggregate: count
+    icon: 📝
+    color: badge-primary
+
+  - label: 已发布 Note
+    entity: note
+    aggregate: count
+    filter: "status = 'published'"
+    icon: 🌐
+    color: badge-success
+
+  - label: 草稿 Note
+    entity: note
+    aggregate: count
+    filter: "status = 'draft'"
+    icon: ✍️
+    color: badge-warning
+
+  - label: 归档 Note
+    entity: note
+    aggregate: count
+    filter: "status = 'archived'"
+    icon: 📦
+    color: badge-ghost
+
+  - label: Attachments (禁用API)
+    entity: attachment
+    aggregate: count
+    icon: 📎
+    color: badge-info
+
+charts:
+  - title: Note 状态分布
+    type: doughnut
+    entity: note
+    valueAggregate: count
+    groupExpression: "status"
+    orderBy: value
+    orderDir: desc
+    limit: 6
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(139, 92, 246, 0.85)
+
+  - title: 附件类型分布
+    type: bar
+    entity: attachment
+    valueAggregate: count
+    groupExpression: "COALESCE(content_type, 'unknown')"
+    orderBy: value
+    orderDir: desc
+    limit: 5
+    colorBg: rgba(59, 130, 246, 0.7)
+    colorBorder: rgba(59, 130, 246, 1)

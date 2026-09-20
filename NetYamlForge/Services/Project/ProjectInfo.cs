@@ -1,6 +1,7 @@
 // ファイル概要：プロジェクトの実行時情報を保持する不変オブジェクトです。
 // ProjectManager が生成し、ProjectScope 経由でリクエストスコープ内に提供します。
 
+using System.IO;
 using NetYamlForge.Models;
 
 namespace NetYamlForge.Services;
@@ -29,4 +30,10 @@ public class ProjectInfo
     public ProjectEmailConfig? Email { get; init; }
     /// <summary>マルチテナント設定</summary>
     public TenantConfig? Multitenancy { get; init; }
+
+    /// <summary>
+    /// dashboard.yml が存在し、ダッシュボード機能が利用可能かどうか。
+    /// </summary>
+    public bool HasDashboard => !string.IsNullOrEmpty(ProjectDir) && File.Exists(Path.Combine(ProjectDir, "dashboard.yml"));
 }
+

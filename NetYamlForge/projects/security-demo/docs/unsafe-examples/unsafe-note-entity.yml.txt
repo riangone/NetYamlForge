@@ -1,0 +1,55 @@
+# ⚠️ THIS FILE IS NOT LOADED BY THE APP.
+#
+# It is a plain-text reference copy (note the .yml.txt extension, not .yml)
+# of the kind of entity YAML an AI code generator might produce when asked to
+# "add a note search filter by raw SQL condition". It is intentionally
+# invalid so it can be used as a fixture in
+# NetYamlForge.Tests/SecurityDemoGuardRailTests.cs, which loads this exact
+# text as a string and asserts that NetYamlForge.Services.YamlSchemaValidator
+# + NetYamlForge.Services.DynamicCrudMetadataValidator reject it before it
+# could ever reach a database connection.
+#
+# If this were saved as entities/*.yml inside a real project directory,
+# ProjectManager.InitializeAsync would fail to load the ENTIRE project at
+# startup (by design — a demo is not allowed to silently boot with a broken
+# entity), which is exactly why this reference copy is kept outside
+# entities/ and never given a .yml extension.
+
+imports: []
+entities:
+  note:
+    table: Note
+    key: Id
+    displayName: Note
+    api: enabled
+
+    # ── Unsafe pattern #1: join type not in the allowlist (left/inner/right) ──
+    # An AI might write "full" to mean "full outer join" without knowing the
+    # framework only allows the three join types it can safely translate.
+    joins:
+      - type: full
+        table: Attachment
+        alias: a
+        on: Note.Id = a.NoteId
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+      Title:
+        type: string
+        label: Title
+
+    filters:
+      # ── Unsafe pattern #2: raw SQL smuggled into a "safe" YAML expression ──
+      # An AI asked to "let admins filter notes by an arbitrary SQL condition"
+      # might wire the user's free-text search box straight into `expression`,
+      # assuming YAML config is inherently safe because it "isn't user input".
+      # SqlSafetyGuard.EnsureExpression rejects statement-separator/comment
+      # tokens (';', '--', '/*', '*/') and any character outside a strict
+      # allowlist, so this never reaches the query builder.
+      AdminRawFilter:
+        type: like
+        label: "Raw filter (unsafe)"
+        expression: "1=1; DROP TABLE Note; --"

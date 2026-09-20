@@ -89,19 +89,32 @@ public class EntityHooksDefinitionTests
     }
 
     [Fact]
-    public void TaskYaml_DeserializesHooksCorrectly()
+    public void NoteYaml_DeserializesHooksCorrectly()
     {
-        var yaml = File.ReadAllText("../../../../NetYamlForge/projects/todo-app/entities/task.yml");
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        string? appDir = null;
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, "NetYamlForge");
+            if (File.Exists(Path.Combine(candidate, "Program.cs")))
+            {
+                appDir = candidate;
+                break;
+            }
+            dir = dir.Parent;
+        }
+        var path = Path.Combine(appDir ?? throw new DirectoryNotFoundException("NetYamlForge directory not found"), "projects", "security-demo", "entities", "note.yml");
+        var yaml = File.ReadAllText(path);
         var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
             .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
             .Build();
         var root = deserializer.Deserialize<EntityConfigRoot>(yaml);
-        var taskDef = root.Entities["task"];
-        Assert.NotNull(taskDef.Hooks);
-        var bc = _entityHooks.GetHookList(taskDef.Hooks!, h => h.BeforeCreate);
+        var noteDef = root.Entities["note"];
+        Assert.NotNull(noteDef.Hooks);
+        var bc = _entityHooks.GetHookList(noteDef.Hooks!, h => h.BeforeCreate);
         Assert.NotNull(bc);
-        Assert.Contains("normalize_title", bc!);
-        Assert.Contains("validate_due_date", bc!);
+        Assert.Contains("generate_slug", bc!);
+        Assert.Contains("sanitize_content", bc!);
     }
 }

@@ -1,5 +1,5 @@
 // ファイル概要: 「YAML 設定 → ランタイム挙動」パイプラインの E2E 統合テストです。
-// WebApplicationFactory で blog サンプルプロジェクトを実際に起動し、
+// WebApplicationFactory で security-demo サンプルプロジェクトを実際に起動し、
 //   1. YAML 実体定義から構築された一覧ページの表示（GET）
 //   2. HTTP 経由の CRUD 作成 → テナント SQLite DB への永続化
 //   3. YAML 定義のカスタムアクション実行 → DB 変更
@@ -19,11 +19,11 @@ using Xunit;
 namespace NetYamlForge.Tests.Integration;
 
 /// <summary>
-/// blog プロジェクトを使った最小 E2E チェーン（一覧表示 → 作成 → アクション実行）。
+/// security-demo プロジェクトを使った最小 E2E チェーン（一覧表示 → 作成 → アクション実行）。
 /// </summary>
 public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicationFactory>
 {
-    private const string IndexUrl = "/blog/DynamicEntity/Index?entity=post";
+    private const string IndexUrl = "/security-demo/DynamicEntity/Index?entity=note";
 
     private static readonly Regex AntiForgeryTokenRegex = new(
         "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"",
@@ -43,7 +43,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
     [Fact]
     public async Task ListPage_BootsFromYamlConfig_ReturnsSeededRows()
     {
-        // YAML(entities/post.yml) から構築された一覧ページが表示され、
+        // YAML(entities/note.yml) から構築された一覧ページが表示され、
         // 起動時に init_seed.sql で再構築されたシードデータが含まれること
         using var client = CreateClient();
 
@@ -58,13 +58,13 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         Assert.Matches(AntiForgeryTokenRegex, html);
 
         // HTMX が呼び出す一覧パーシャルにシード記事が含まれること
-        var listResponse = await client.GetAsync("/blog/DynamicEntity/ListPartial?entity=post");
+        var listResponse = await client.GetAsync("/security-demo/DynamicEntity/ListPartial?entity=note");
 
         Assert.Equal(HttpStatusCode.OK, listResponse.StatusCode);
         var listHtml = await listResponse.Content.ReadAsStringAsync();
 
         // init_seed.sql のシード記事（Slug 列は一覧に表示される）
-        Assert.Contains("oss-contribution-guide", listHtml);
+        Assert.Contains("safe-by-construction-field-guide", listHtml);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         // YAML に存在しないエンティティは 404 になること
         using var client = CreateClient();
 
-        var response = await client.GetAsync("/blog/DynamicEntity/Index?entity=no-such-entity");
+        var response = await client.GetAsync("/security-demo/DynamicEntity/Index?entity=no-such-entity");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -106,7 +106,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         };
 
         var response = await client.PostAsync(
-            "/blog/DynamicEntity/Create?entity=post",
+            "/security-demo/DynamicEntity/Create?entity=note",
             new FormUrlEncodedContent(form));
 
         var body = await response.Content.ReadAsStringAsync();
@@ -116,7 +116,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         // テナント SQLite DB に行が永続化されていること（hooks 経由の作成パス）
         await using var db = new SqliteConnection(_factory.TenantDbConnectionString);
         var created = await db.QuerySingleOrDefaultAsync<(string Title, string Status)?>(
-            "SELECT Title, Status FROM Post WHERE Slug = @slug", new { slug });
+            "SELECT Title, Status FROM Note WHERE Slug = @slug", new { slug });
 
         Assert.NotNull(created);
         Assert.Equal("E2E Created Post", created.Value.Title);
@@ -138,18 +138,18 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         {
             postId = await db.ExecuteScalarAsync<long>(
                 """
-                INSERT INTO Post (Title, Slug, AuthorName, Status)
+                INSERT INTO Note (Title, Slug, AuthorName, Status)
                 VALUES ('E2E Publish Target', @slug, 'E2E Tester', 'draft');
                 SELECT last_insert_rowid();
                 """,
                 new { slug });
         }
 
-        // 実行: YAML（entities/post.yml）の actions.publish を HTTP 経由で起動。
+        // 実行: YAML（entities/note.yml）の actions.publish を HTTP 経由で起動。
         // HX-Request ヘッダー付きで一覧パーシャルが返るパスを使う。
         using var request = new HttpRequestMessage(
             HttpMethod.Post,
-            $"/blog/DynamicEntity/InvokeAction?entity=post&actionKey=publish&id={postId}")
+            $"/security-demo/DynamicEntity/InvokeAction?entity=note&actionKey=publish&id={postId}")
         {
             Content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
@@ -164,11 +164,11 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         Assert.True(response.IsSuccessStatusCode,
             $"InvokeAction failed: {(int)response.StatusCode} {response.StatusCode}\n{Truncate(body)}");
 
-        // 検証: publish_post ハンドラー（projects/blog/Hooks）による DB 変更
+        // 検証: publish_note ハンドラー（projects/security-demo/Hooks）による DB 変更
         await using (var db = new SqliteConnection(_factory.TenantDbConnectionString))
         {
             var row = await db.QuerySingleAsync<(string Status, string? PublishedAt)>(
-                "SELECT Status, PublishedAt FROM Post WHERE Id = @postId", new { postId });
+                "SELECT Status, PublishedAt FROM Note WHERE Id = @postId", new { postId });
 
             Assert.Equal("published", row.Status);
             Assert.False(string.IsNullOrWhiteSpace(row.PublishedAt));
@@ -180,14 +180,14 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
     {
         using var client = CreateClient();
 
-        var response = await client.GetAsync("/blog/DynamicEntity/DetailPage?entity=post&id=1");
+        var response = await client.GetAsync("/security-demo/DynamicEntity/DetailPage?entity=note&id=1");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var htmlRaw = await response.Content.ReadAsStringAsync();
         var html = System.Net.WebUtility.HtmlDecode(htmlRaw);
 
-        Assert.Contains("NetYamlForge 入門", html);
-        Assert.Contains("netyamlforge-getting-started", html);
+        Assert.Contains("Why Guardrails Beat Another Demo", html);
+        Assert.Contains("why-guardrails-beat-another-demo", html);
     }
 
     [Fact]
@@ -202,7 +202,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         {
             postId = await db.ExecuteScalarAsync<long>(
                 """
-                INSERT INTO Post (Title, Slug, AuthorName, Status)
+                INSERT INTO Note (Title, Slug, AuthorName, Status)
                 VALUES ('E2E Update Target', @slug, 'E2E Tester', 'draft');
                 SELECT last_insert_rowid();
                 """,
@@ -225,7 +225,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         };
 
         var response = await client.PostAsync(
-            $"/blog/DynamicEntity/Edit?entity=post&id={postId}",
+            $"/security-demo/DynamicEntity/Edit?entity=note&id={postId}",
             new FormUrlEncodedContent(form));
 
         var body = await response.Content.ReadAsStringAsync();
@@ -234,7 +234,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
 
         await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
         var updated = await checkDb.QuerySingleOrDefaultAsync<(string Title, int FeaturedFlag)?>(
-            "SELECT Title, FeaturedFlag FROM Post WHERE Id = @postId", new { postId });
+            "SELECT Title, FeaturedFlag FROM Note WHERE Id = @postId", new { postId });
 
         Assert.NotNull(updated);
         Assert.Equal("E2E Updated Post Title", updated.Value.Title);
@@ -253,7 +253,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         {
             postId = await db.ExecuteScalarAsync<long>(
                 """
-                INSERT INTO Post (Title, Slug, AuthorName, Status)
+                INSERT INTO Note (Title, Slug, AuthorName, Status)
                 VALUES ('E2E Delete Target', @slug, 'E2E Tester', 'draft');
                 SELECT last_insert_rowid();
                 """,
@@ -266,7 +266,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         };
 
         var response = await client.PostAsync(
-            $"/blog/DynamicEntity/Delete?entity=post&id={postId}",
+            $"/security-demo/DynamicEntity/Delete?entity=note&id={postId}",
             new FormUrlEncodedContent(form));
 
         var body = await response.Content.ReadAsStringAsync();
@@ -275,7 +275,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
 
         await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
         var row = await checkDb.QuerySingleOrDefaultAsync<long?>(
-            "SELECT Id FROM Post WHERE Id = @postId", new { postId });
+            "SELECT Id FROM Note WHERE Id = @postId", new { postId });
 
         Assert.Null(row);
     }
@@ -285,13 +285,13 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
     {
         using var client = CreateClient();
 
-        var response = await client.GetAsync("/blog/DynamicEntity/ExportCsv?entity=post");
+        var response = await client.GetAsync("/security-demo/DynamicEntity/ExportCsv?entity=note");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var csvContent = await response.Content.ReadAsStringAsync();
 
-        Assert.Contains("别名", csvContent);
-        Assert.Contains("oss-contribution-guide", csvContent);
+        Assert.Contains("Slug", csvContent);
+        Assert.Contains("safe-by-construction-field-guide", csvContent);
     }
 
     [Fact]
@@ -307,10 +307,10 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         await using (var db = new SqliteConnection(_factory.TenantDbConnectionString))
         {
             id1 = await db.ExecuteScalarAsync<long>(
-                "INSERT INTO Post (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 1', @slug1, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
+                "INSERT INTO Note (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 1', @slug1, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
                 new { slug1 });
             id2 = await db.ExecuteScalarAsync<long>(
-                "INSERT INTO Post (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 2', @slug2, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
+                "INSERT INTO Note (Title, Slug, AuthorName, Status) VALUES ('Bulk Delete 2', @slug2, 'E2E Tester', 'draft'); SELECT last_insert_rowid();",
                 new { slug2 });
         }
 
@@ -322,7 +322,7 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
         };
 
         var response = await client.PostAsync(
-            "/blog/DynamicEntity/BulkDelete?entity=post",
+            "/security-demo/DynamicEntity/BulkDelete?entity=note",
             new FormUrlEncodedContent(form));
 
         var body = await response.Content.ReadAsStringAsync();
@@ -331,9 +331,9 @@ public class YamlPipelineEndToEndTests : IClassFixture<NetYamlForgeWebApplicatio
 
         await using var checkDb = new SqliteConnection(_factory.TenantDbConnectionString);
         var row1 = await checkDb.QuerySingleOrDefaultAsync<long?>(
-            "SELECT Id FROM Post WHERE Id = @id1", new { id1 });
+            "SELECT Id FROM Note WHERE Id = @id1", new { id1 });
         var row2 = await checkDb.QuerySingleOrDefaultAsync<long?>(
-            "SELECT Id FROM Post WHERE Id = @id2", new { id2 });
+            "SELECT Id FROM Note WHERE Id = @id2", new { id2 });
 
         Assert.Null(row1);
         Assert.Null(row2);

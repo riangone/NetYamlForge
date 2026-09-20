@@ -1,8 +1,0 @@
-entities:
-  ad_image_blob:
-    table: ad_image_blob
-    key: ad_image_id
-    displayName: AD_IMAGE_BLOB
-    columns:
-      ad_image_id: {type: decimal, identity: true}
-      binarydata: {type: string}

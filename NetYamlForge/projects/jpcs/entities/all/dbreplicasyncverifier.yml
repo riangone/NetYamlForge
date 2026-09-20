@@ -1,7 +1,0 @@
-entities:
-  dbreplicasyncverifier:
-    table: dbreplicasyncverifier
-    key: lastupdate
-    displayName: DBREPLICASYNCVERIFIER
-    columns:
-      lastupdate: {type: string, identity: true}

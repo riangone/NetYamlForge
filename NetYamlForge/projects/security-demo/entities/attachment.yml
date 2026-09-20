@@ -1,0 +1,79 @@
+imports: []
+entities:
+  attachment:
+    table: Attachment
+    key: Id
+    displayName: Attachment
+    softDelete: false
+    isPublic: false
+    # 注意: `api` を意図的に未設定のままにしている（既定値 "disabled"）。
+    # 「レコード自体には機微情報がなくても、テナント外部への公開 API は
+    # 明示的にオプトインするまで閉じておく」という既定 deny のデモ。
+    # NetYamlForge.Tests/Integration/McpServerIntegrationTests.ToolCall_OnDisabledApiEntity_ShouldReturnError
+    # がこの既定動作を検証する。
+
+    forms:
+      NoteId:
+        type: int
+        required: true
+        label: Note
+        editable: true
+        foreignKey:
+          entity: note
+          displayColumn: Title
+          picker: false
+          multiPicker: false
+      FileName:
+        type: string
+        required: true
+        label: File Name
+        editable: true
+      # StoredPath は「フレームワークが提供する安全なパス解決を経由して初めて
+      # ファイルシステムに触れる」ことを示すためのフィールド。
+      # 実際の解決は Services.PathSafetyGuard.NormalizeAndValidatePath 経由でのみ行う。
+      # 素朴な Path.Combine(baseDir, userInput) による解決は
+      # docs/unsafe-examples/path-traversal-hook.cs.txt に「悪い例」として置いてあり、
+      # SecurityDemoGuardRailTests がそれを再現して拒否されることを検証する。
+      StoredPath:
+        type: string
+        required: true
+        label: Stored Relative Path
+        editable: true
+
+    columns:
+      Id:
+        type: int
+        identity: true
+        label: ID
+        sortable: true
+      NoteId:
+        type: int
+        label: Note ID
+        hidden: true
+      FileName:
+        type: string
+        label: File Name
+        searchable: true
+        sortable: true
+      StoredPath:
+        type: string
+        label: Stored Relative Path
+        searchable: false
+        sortable: false
+      CreatedAt:
+        type: datetime
+        label: Created At
+        sortable: true
+
+    paging:
+      pageSize: 20
+      mode: numbered
+      enableCount: true
+
+    layout:
+      forms:
+        columns: 2
+        order:
+          - NoteId
+          - FileName
+          - StoredPath

@@ -26,14 +26,22 @@ public class AccountController : Controller
     private readonly IAuditLogService _audit;
     private readonly ProjectScope _projectScope;
     private readonly ITenantUserService _tenantUsers;
+    private readonly ProjectManager _projectManager;
 
-    public AccountController(IUserAuthService users, ILogger<AccountController> logger, IAuditLogService audit, ProjectScope projectScope, ITenantUserService tenantUsers)
+    public AccountController(
+        IUserAuthService users,
+        ILogger<AccountController> logger,
+        IAuditLogService audit,
+        ProjectScope projectScope,
+        ITenantUserService tenantUsers,
+        ProjectManager projectManager)
     {
         _users = users;
         _logger = logger;
         _audit = audit;
         _projectScope = projectScope;
         _tenantUsers = tenantUsers;
+        _projectManager = projectManager;
     }
 
     [AllowAnonymous]
@@ -63,8 +71,9 @@ public class AccountController : Controller
         // カスタムロール（AppUserRole）を取得してクレームに追加
         var customRolesList = (await _tenantUsers.GetUserRolesAsync(user.UserName)).ToList();
         
-        // プロジェクト固有のロールも取得（マルチテナント対応）
-        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+        // プロジェクト固有のロールも取得（マルチテナント対応：ルートパラメータに明示されている場合のみ）
+        var projectInRoute = RouteData.Values["project"]?.ToString();
+        var projectName = !string.IsNullOrWhiteSpace(projectInRoute) ? projectInRoute : null;
         if (!string.IsNullOrWhiteSpace(projectName))
         {
             var projectRoles = await _tenantUsers.GetProjectRolesAsync(user.Id, projectName);
@@ -79,6 +88,7 @@ public class AccountController : Controller
         
         var customRoles = customRolesList.AsReadOnly();
 
+        var defaultProjectName = !string.IsNullOrWhiteSpace(user.DefaultProjectName) ? user.DefaultProjectName : "security-demo";
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -86,6 +96,7 @@ public class AccountController : Controller
             new(ClaimTypes.GivenName, user.DisplayName),
             new("lang", user.PreferredLanguage),
             new("owning_project", user.OwningProject ?? ""),
+            new("default_project", defaultProjectName),
             new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
 
@@ -125,15 +136,23 @@ public class AccountController : Controller
         _logger.LogInformation("User '{UserName}' signed in (roles: {Roles})", user.UserName, string.Join(", ", customRoles));
         await TryWriteAuditAsync("login", "account", "Sign in", user.UserName);
 
-        if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+        var isRootReturnUrl = string.IsNullOrWhiteSpace(model.ReturnUrl) 
+            || model.ReturnUrl == "/" 
+            || model.ReturnUrl.Equals(Url.Content("~/"), StringComparison.OrdinalIgnoreCase);
+
+        if (!isRootReturnUrl && Url.IsLocalUrl(model.ReturnUrl))
         {
             return Redirect(model.ReturnUrl);
         }
 
-        // ロール別ランディングページへリダイレクト
-        if (!string.IsNullOrWhiteSpace(projectName))
+        // 确定重定向的目标项目：优先路由中的项目，其次使用用户默认项目，再次降级到 security-demo
+        var targetProject = !string.IsNullOrWhiteSpace(projectName)
+            ? projectName
+            : defaultProjectName;
+
+        if (!string.IsNullOrWhiteSpace(targetProject) && _projectManager.TryGet(targetProject, out var targetProjInfo))
         {
-            var landingByRole = _projectScope.Current.Layout?.LandingPageByRole;
+            var landingByRole = targetProjInfo.Layout?.LandingPageByRole;
             if (landingByRole != null && landingByRole.Count > 0 && customRoles.Count > 0)
             {
                 foreach (var role in customRoles)
@@ -146,11 +165,17 @@ public class AccountController : Controller
                     }
                 }
             }
-            return RedirectToAction("Project", "Home", new { project = projectName });
+
+            // 具有看板特性时优先进入看板（Demo 项目展示首选）
+            if (targetProjInfo.HasDashboard)
+            {
+                return Redirect(Url.Content($"~/{targetProject}/Dashboard"));
+            }
+            return Redirect(Url.Content($"~/{targetProject}"));
         }
 
         // デフォルト：ユーザー個人ホームページへリダイレクト
-        return Redirect("/userhome");
+        return Redirect(Url.Content("~/userhome"));
     }
 
     [Authorize]
@@ -163,7 +188,8 @@ public class AccountController : Controller
         _logger.LogInformation("User '{UserName}' signed out", userName);
         await TryWriteAuditAsync("logout", "account", "Sign out", userName);
 
-        var projectName = _projectScope.IsSet ? _projectScope.Current.Name : null;
+        var projectInRoute = RouteData.Values["project"]?.ToString();
+        var projectName = !string.IsNullOrWhiteSpace(projectInRoute) ? projectInRoute : null;
         return RedirectToAction(nameof(Login), new { project = projectName });
     }
 

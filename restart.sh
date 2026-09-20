@@ -9,6 +9,8 @@ PID_FILE="$SCRIPT_DIR/var/run/netyamlforge.pid"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] === Restarting NetYamlForge ==="
 
 # --- Step 1: Force stop any running instance ---
+systemctl --user stop netyamlforge 2>/dev/null || true
+
 # Via PID file
 if [ -f "$PID_FILE" ]; then
     PID=$(cat "$PID_FILE")
@@ -60,13 +62,40 @@ mkdir -p "$(dirname "$LOG_FILE")" "$(dirname "$PID_FILE")"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting NetYamlForge..." >> "$LOG_FILE"
 
 cd "$PROJECT_DIR" || { echo "Cannot cd to $PROJECT_DIR"; exit 1; }
-export ASPNETCORE_URLS=http://localhost:${PORT}
-export ASPNETCORE_CONTENTROOT="$PROJECT_DIR"
-nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" >> "$LOG_FILE" 2>&1 &
 
-APP_PID=$!
-echo $APP_PID > "$PID_FILE"
-disown $APP_PID
+if systemctl --user status >/dev/null 2>&1; then
+    echo "Starting via systemd-run --user (netyamlforge.service)..."
+    systemd-run --user --unit=netyamlforge \
+      --setenv=ASPNETCORE_URLS=http://localhost:${PORT} \
+      --setenv=ASPNETCORE_CONTENTROOT="$PROJECT_DIR" \
+      --working-directory="$PROJECT_DIR" \
+      /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" >> "$LOG_FILE" 2>&1
+else
+    export ASPNETCORE_URLS=http://localhost:${PORT}
+    export ASPNETCORE_CONTENTROOT="$PROJECT_DIR"
+    nohup /home/ubuntu/.dotnet/dotnet "$PROJECT_DIR/bin/Release/net10.0/NetYamlForge.dll" >> "$LOG_FILE" 2>&1 &
+    APP_PID=$!
+    echo $APP_PID > "$PID_FILE"
+    disown $APP_PID 2>/dev/null || true
+fi
 
-echo "NetYamlForge started (PID: $APP_PID)"
+echo "Waiting for port ${PORT} to listen..."
+READY=0
+for i in $(seq 1 30); do
+    if ss -tlnp | grep -q ":${PORT}"; then
+        READY=1
+        break
+    fi
+    sleep 1
+done
+
+APP_PID=$(pgrep -f "NetYamlForge.dll" | head -n 1)
+[ -n "$APP_PID" ] && echo "$APP_PID" > "$PID_FILE"
+
+if [ $READY -eq 1 ]; then
+    echo "NetYamlForge is up and listening on port ${PORT} (PID: ${APP_PID:-unknown})."
+else
+    echo "WARNING: Port ${PORT} not yet detected after 30s. Check logs at $LOG_FILE."
+fi
 echo "Log: $LOG_FILE"
+

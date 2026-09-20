@@ -58,17 +58,17 @@ public class ProjectMiddleware
                 }
 
                 // それでも未設定の場合は以下の優先度でプロジェクトを選択
-                // 1. framework プロジェクト（フレームワーク管理用）
+                // 1. security-demo プロジェクト（唯一の公式代表デモ）
                 // 2. 最初のプロジェクト（フォールバック）
                 if (!scope.IsSet)
                 {
                     var allProjects = pm.GetAll().ToList();
                     
-                    // framework プロジェクトを優先的に選択（デフォルトプロジェクト）
-                    var frameworkProject = allProjects.FirstOrDefault(p => p.Name == "framework");
-                    if (frameworkProject != null)
+                    // security-demo プロジェクトを優先的に選択（公式代表デモ）
+                    var demoProject = allProjects.FirstOrDefault(p => string.Equals(p.Name, "security-demo", StringComparison.OrdinalIgnoreCase));
+                    if (demoProject != null)
                     {
-                        scope.Set(frameworkProject);
+                        scope.Set(demoProject);
                     }
                     else
                     {

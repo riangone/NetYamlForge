@@ -318,15 +318,18 @@ public static class SystemDatabaseInitializer
             CreatedAt = DateTime.UtcNow
         });
 
-        // デフォルトプロジェクトが設定されていない場合は設定
-        if (string.IsNullOrEmpty(adminUser.DefaultProjectName))
+        // デフォルトプロジェクトが設定されていない、または存在しないプロジェクトを指している場合は再設定
+        var isValidDefault = !string.IsNullOrEmpty(adminUser.DefaultProjectName) &&
+            await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM projects WHERE name = @Name", new { Name = adminUser.DefaultProjectName }) > 0;
+
+        if (!isValidDefault)
         {
-            // 'framework' プロジェクトを優先的に検索
+            // 'security-demo' プロジェクトを優先的に検索（唯一の公式代表デモ）
             var defaultProject = await conn.ExecuteScalarAsync<string>(
-                "SELECT name FROM projects WHERE name = 'framework' LIMIT 1"
+                "SELECT name FROM projects WHERE name = 'security-demo' LIMIT 1"
             );
 
-            // 'framework' がない場合は最初に見つかったプロジェクトを使用
+            // 'security-demo' がない場合は最初に見つかったプロジェクトを使用
             if (string.IsNullOrEmpty(defaultProject))
             {
                 defaultProject = await conn.ExecuteScalarAsync<string>(

@@ -1,0 +1,63 @@
+name: security-demo
+displayName: "Security Demo"
+description: "NetYamlForge が「安全性を強制する足場」であることを示すための唯一の公式デモ。CRUD の一通りの流れに加え、AI が生成しがちな危険な YAML/SQL パターンをフレームワークがどこで・なぜ拒否するかを実例で示す。"
+version: "1.0.0"
+
+aiHints:
+  primaryLanguage: en
+  authRequired: true
+  customHooks:
+    - generate_slug        # Title から Slug を自動生成
+    - sanitize_content      # Content の簡易 XSS サニタイズ
+    - set_published_at      # Status=published のとき PublishedAt を設定
+    - audit_log             # 変更操作を記録
+  notes:
+    - "note.status の値: draft / published / archived"
+    - "このプロジェクトが実演する安全性ガードの一覧・根拠・対応テストは README.md を参照"
+    - "docs/unsafe-examples/ には *意図的に危険な* YAML/SQL の例を置いている。"
+    - "これらは entities/ には配置していない（配置すると ProjectManager 起動時に"
+    - "DynamicCrudMetadataValidator が例外を投げ、アプリ全体の起動が止まるため）。"
+    - "代わりに NetYamlForge.Tests/SecurityDemoGuardRailTests.cs が、これらのサンプルを"
+    - "文字列として読み込み、ガードが実際に例外を送出することを検証する。"
+
+database:
+  type: sqlite
+  path: database/security-demo.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: false
+
+layout:
+  theme: light
+  header:
+    title: "Security Demo"
+  navigation:
+    showDashboard: true
+    entities:
+      - note
+      - attachment
+    items:
+      - label: "🛡️ 红蓝对抗靶场 (Challenge)"
+        url: /security-demo/challenge
+        icon: 🛡️
+        section: Security
+      - label: "🎪 样板间体验馆 (Showcase)"
+        url: /showcase
+        icon: 🎪
+        section: Showcase
+      - label: "Notes"
+        url: /security-demo/DynamicEntity/Index?entity=note
+        icon: 📝
+        section: Content
+      - label: "Attachments (API disabled by default)"
+        url: /security-demo/DynamicEntity/Index?entity=attachment
+        icon: 📎
+        section: Content
+
+home_page:
+  icon: "🛡️"
+  tagline: "安全性を強制する足場としての NetYamlForge を実例で示す唯一の公式デモ"
+  tags: [Security, Guardrails, CRUD, Reference]

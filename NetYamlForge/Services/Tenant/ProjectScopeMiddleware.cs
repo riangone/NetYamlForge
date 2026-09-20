@@ -90,7 +90,7 @@ public class ProjectScopeMiddleware
             }
 
             // 跳过已知的非项目路径
-            var skipPrefixes = new[] { "Account", "Dashboard", "Api", "signalr", "health", "swagger", "MyHome", "UserHome", "userhome" };
+            var skipPrefixes = new[] { "Account", "Dashboard", "Api", "signalr", "health", "swagger", "MyHome", "UserHome", "userhome", "showcase", "Showcase" };
             if (!skipPrefixes.Any(p => projectName.Equals(p, StringComparison.OrdinalIgnoreCase)))
             {
                 return projectName;

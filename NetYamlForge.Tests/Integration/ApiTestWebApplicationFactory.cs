@@ -11,7 +11,7 @@ namespace NetYamlForge.Tests.Integration;
 
 public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program>
 {
-    public const string ProjectName = "blog";
+    public const string ProjectName = "security-demo";
     public string TempContentRoot { get; }
     public string TenantDbPath =>
         Path.Combine(TempContentRoot, "projects", ProjectName, "database", $"{ProjectName}.db");

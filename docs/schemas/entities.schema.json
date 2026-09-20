@@ -252,6 +252,22 @@
         "softDelete": {
           "type": "boolean"
         },
+        "softDeleteColumn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
         "isPublic": {
           "type": "boolean"
         },

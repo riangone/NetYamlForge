@@ -22,6 +22,24 @@ namespace NetYamlForge.Tests;
 
 public class AiDocProcessorTests
 {
+    private static string FindAppProjectDirectory()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, "NetYamlForge");
+            if (File.Exists(Path.Combine(candidate, "Program.cs")) &&
+                Directory.Exists(Path.Combine(candidate, "projects", "ai-doc-processor")))
+            {
+                return candidate;
+            }
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException(
+            $"NetYamlForge app project directory not found. Search started at: {AppContext.BaseDirectory}");
+    }
+
     private sealed class TestWebHostEnvironment : IWebHostEnvironment
     {
         public string ApplicationName { get; set; } = "TestApp";
@@ -114,9 +132,10 @@ public class AiDocProcessorTests
             serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.CollectibleAssemblyManager>(),
             serviceProvider.GetRequiredService<NetYamlForge.Services.Project.Loading.ProjectLoadLockRegistry>());
 
-        // テストプロジェクトのベースディレクトリからの相対パス
-        var projectDir = "/home/ubuntu/ws/NetYamlForge/NetYamlForge/projects/_sandbox/ai-doc-processor";
-        
+        // テストプロジェクトのベースディレクトリから NetYamlForge アプリディレクトリを逆算する
+        // （ハードコードされた絶対パスは他マシン/CI で壊れるため、相対探索に置き換え）
+        var projectDir = Path.Combine(FindAppProjectDirectory(), "projects", "ai-doc-processor");
+
         // Hooks / ActionHandlers のロードを実行
         await loader.LoadProjectActionHandlersAsync("ai-doc-processor", projectDir, actionRegistry);
 

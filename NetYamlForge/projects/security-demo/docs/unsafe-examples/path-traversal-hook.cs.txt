@@ -1,0 +1,42 @@
+// ⚠️ THIS FILE IS NOT COMPILED. Note the .cs.txt extension, not .cs — the
+// .NET SDK's default glob (**/*.cs) would otherwise pick it up and compile
+// this deliberately-broken handler straight into the running app.
+//
+// This is a reference copy of the kind of "attachment download" action
+// handler an AI code generator might produce when asked to "let users
+// download an attachment by file name". It naively joins user input onto a
+// base directory with Path.Combine and never checks the result stays inside
+// that directory — the textbook path-traversal bug (`../../../etc/passwd`,
+// or an absolute path that Path.Combine will happily honor outright).
+//
+// NetYamlForge.Tests/SecurityDemoGuardRailTests.cs exercises
+// NetYamlForge.Services.PathSafetyGuard.NormalizeAndValidatePath with the
+// same traversal payload used here and asserts it throws
+// UnauthorizedAccessException — i.e. the guard that SHOULD wrap the call
+// below (and does, in Hooks/SecurityDemoActionHandlers.cs) actually rejects
+// the payload this unsafe version would have let through.
+
+public sealed class UnsafeDownloadAttachmentHandler
+{
+    // BAD: raw Path.Combine with no traversal check.
+    // A request for fileName = "../../../../etc/passwd" (or an absolute
+    // path like "/etc/passwd", which Path.Combine returns unchanged) reads
+    // arbitrary files on the host, including other tenants' project data.
+    public byte[] Execute(string baseDir, string fileName)
+    {
+        var path = System.IO.Path.Combine(baseDir, fileName);
+        return System.IO.File.ReadAllBytes(path);
+    }
+
+    // GOOD (what this project actually does — see PathSafetyGuard):
+    //
+    //   var path = PathSafetyGuard.NormalizeAndValidatePath(
+    //       fileName, baseDir, "security-demo.attachment.download");
+    //   return File.ReadAllBytes(path);
+    //
+    // NormalizeAndValidatePath resolves the path, then verifies the result
+    // still starts with baseDir (with a directory-separator boundary check
+    // to prevent "/base-evil" from matching "/base"). Any traversal attempt
+    // or absolute path outside baseDir throws UnauthorizedAccessException
+    // instead of silently returning attacker-controlled file contents.
+}

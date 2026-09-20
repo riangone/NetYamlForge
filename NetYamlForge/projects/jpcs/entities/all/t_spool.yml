@@ -1,9 +1,0 @@
-entities:
-  t_spool:
-    table: t_spool
-    key: ad_pinstance_id
-    displayName: T_SPOOL
-    columns:
-      ad_pinstance_id: {type: decimal, identity: true}
-      seqno: {type: decimal}
-      msgtext: {type: string}

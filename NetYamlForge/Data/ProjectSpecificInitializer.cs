@@ -101,11 +101,6 @@ public class ProjectSpecificInitializer
             {
                 await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
             }
-            // ui-showcase: UI 展示测试用户
-            else if (string.Equals(projectName, "ui-showcase", StringComparison.OrdinalIgnoreCase))
-            {
-                await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
-            }
             // 其他项目使用通用测试用户
             else
             {
