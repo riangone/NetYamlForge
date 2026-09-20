@@ -1,0 +1,42 @@
+---
+stats:
+  - label: 总演进任务
+    entity: agent_task
+    aggregate: count
+    icon: 📋
+    color: badge-primary
+
+  - label: 进行中
+    entity: agent_task
+    aggregate: count
+    filter: "status NOT IN ('Completed', 'Failed')"
+    icon: ⚡
+    color: badge-warning
+
+  - label: 已完成
+    entity: agent_task
+    aggregate: count
+    filter: "status = 'Completed'"
+    icon: ✅
+    color: badge-success
+
+  - label: 执行日志数
+    entity: agent_task_log
+    aggregate: count
+    icon: 📜
+    color: badge-info
+
+charts:
+  - title: 任务状态分布
+    type: doughnut
+    entity: agent_task
+    valueAggregate: count
+    groupExpression: "status"
+    orderBy: value
+    orderDir: desc
+    limit: 6
+    colors:
+      - rgba(59, 130, 246, 0.85)
+      - rgba(16, 185, 129, 0.85)
+      - rgba(245, 158, 11, 0.85)
+      - rgba(239, 68, 68, 0.85)

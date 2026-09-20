@@ -1,0 +1,308 @@
+@using System.Web
+@model NetYamlForge.Models.ShowcaseIndexViewModel
+@{
+    ViewData["Title"] = "多场景样板间体验馆 · Showcase Gallery";
+    var pathBase = Url.Content("~/").TrimEnd('/');
+}
+
+<div class="space-y-8 max-w-7xl mx-auto pb-12">
+    @* ===== 1. Hero 区域 ===== *@
+    <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 opacity-80 pointer-events-none"></div>
+        <div class="relative p-6 sm:p-10 lg:p-12">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+                <div class="max-w-3xl space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-base-200 border border-base-300 text-xs font-semibold uppercase tracking-wider text-primary">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        NetYamlForge Application Matrix
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-base-content leading-tight">
+                        多场景样板间体验馆
+                    </h1>
+                    <p class="text-base sm:text-lg text-base-content/80 leading-relaxed font-normal max-w-2xl">
+                        从专为 <strong>AI Agent</strong> 设计的安全护栏沙箱，到承载 <strong>28 个关联实体的复杂 ERP 契约系统</strong> —— 见证声明式元数据驱动与现代 .NET 的全景生产力。
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🛡️ 编译期/运行期双重安全护栏</span>
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🤖 AHP 智能体握手协议</span>
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">📋 5分钟表单在线发布</span>
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🏭 工业级 ERP & 深度 C# Hooks</span>
+                    </div>
+                </div>
+
+                @* 宣发卡片复制助手 *@
+                <div class="card bg-base-100/90 backdrop-blur border border-base-300 shadow-md p-5 w-full lg:w-96 shrink-0 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="font-bold text-sm flex items-center gap-2">
+                            <span>📣</span> 社区宣发与推广文案
+                        </div>
+                        <span class="badge badge-xs badge-primary">一键分发</span>
+                    </div>
+                    <p class="text-xs text-base-content/70">
+                        一键复制预设的宣传卡片文案，直接分享到技术社区、微信群、Twitter 或 Reddit。
+                    </p>
+                    <div class="bg-base-200/80 p-3 rounded-lg text-xs font-mono max-h-24 overflow-y-auto border border-base-300">
+                        @Model.PromotionalCopyMarkdown
+                    </div>
+                    <button id="copy-promo-btn" class="btn btn-primary btn-sm w-full gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        </svg>
+                        复制宣传文案 (Markdown)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @* ===== 2. 分类筛选 Tabs ===== *@
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-4">
+        <div class="tabs tabs-boxed bg-base-100 p-1.5 border border-base-300">
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "all" ? "tab-active font-bold" : "")" data-filter="all">全部场景 (@Model.Showcases.Count)</button>
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "security" ? "tab-active font-bold" : "")" data-filter="security">🛡️ 安全基线</button>
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "ai" ? "tab-active font-bold" : "")" data-filter="ai">🤖 前沿 AI</button>
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "forms" ? "tab-active font-bold" : "")" data-filter="forms">📋 动态表单</button>
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "erp" ? "tab-active font-bold" : "")" data-filter="erp">🏭 工业 ERP</button>
+            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "workflow" ? "tab-active font-bold" : "")" data-filter="workflow">📑 流程与状态机</button>
+        </div>
+
+        <div class="text-xs text-base-content/60 flex items-center gap-2">
+            <span>💡 提示：点击任意样板间可查看真实 YAML 配置并一键跳转体验</span>
+        </div>
+    </div>
+
+    @* ===== 3. 样板间卡片网格 ===== *@
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="showcases-container">
+        @foreach (var item in Model.Showcases)
+        {
+            var primaryUrl = item.PrimaryActionUrl.StartsWith('/') ? pathBase + item.PrimaryActionUrl : item.PrimaryActionUrl;
+            var secondaryUrl = !string.IsNullOrEmpty(item.SecondaryActionUrl) && item.SecondaryActionUrl.StartsWith('/')
+                ? pathBase + item.SecondaryActionUrl
+                : item.SecondaryActionUrl;
+
+            <div class="showcase-card card bg-base-100 border border-base-300 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col justify-between"
+                 data-category="@item.Category">
+                <div class="card-body p-6 space-y-4">
+                    @* 标头与 Badge *@
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-base-200 border border-base-300 flex items-center justify-center text-2xl shadow-inner">
+                                @item.Icon
+                            </div>
+                            <div>
+                                <h2 class="card-title text-xl font-bold">@item.Title</h2>
+                                <div class="text-xs text-base-content/60 font-mono">projects/@item.Id</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="badge @item.BadgeClass badge-sm font-semibold">@item.Badge</span>
+                            <span class="badge badge-ghost badge-xs">@item.CategoryLabel</span>
+                        </div>
+                    </div>
+
+                    @* 标语与描述 *@
+                    <div class="space-y-1.5">
+                        <p class="font-medium text-sm text-primary">
+                            @item.Tagline
+                        </p>
+                        <p class="text-xs text-base-content/70 leading-relaxed">
+                            @item.Description
+                        </p>
+                    </div>
+
+                    @* 架构师视角 (Architect Insight) *@
+                    <div class="bg-base-200/60 rounded-xl p-3 border border-base-300/80 space-y-1">
+                        <div class="text-xs font-bold text-base-content/80 flex items-center gap-1.5">
+                            <span class="text-warning">⚡</span> 架构师选型解析 (Why NetYamlForge?)
+                        </div>
+                        <p class="text-xs text-base-content/70 italic leading-relaxed">
+                            “@item.ArchitectInsight”
+                        </p>
+                    </div>
+
+                    @* 核心亮点列表 *@
+                    <div class="space-y-1.5">
+                        <div class="text-xs font-bold uppercase tracking-wider text-base-content/50">核心能力与场景亮点</div>
+                        <ul class="space-y-1 text-xs text-base-content/80">
+                            @foreach (var hl in item.Highlights)
+                            {
+                                <li class="flex items-start gap-2">
+                                    <span class="text-success font-bold mt-0.5">✓</span>
+                                    <span>@hl</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    @* 目标受众与技术标签 *@
+                    <div class="pt-2 border-t border-base-200 space-y-2">
+                        <div class="flex items-center gap-1.5 text-xs text-base-content/60">
+                            <span class="font-semibold">适用受众:</span>
+                            <span>@item.TargetAudience</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            @foreach (var tag in item.TechTags)
+                            {
+                                <span class="badge badge-sm badge-outline">@tag</span>
+                            }
+                        </div>
+                    </div>
+
+                    @* 代码透视面板 (Code Spec Collapsible) *@
+                    @if (!string.IsNullOrEmpty(item.CodeSnippet))
+                    {
+                        <div class="collapse collapse-arrow bg-base-200 border border-base-300 rounded-xl">
+                            <input type="checkbox" />
+                            <div class="collapse-title text-xs font-semibold font-mono flex items-center gap-2">
+                                <span>🔍</span> 查看核心架构定义：@item.CodeSnippetTitle
+                            </div>
+                            <div class="collapse-content">
+                                <div class="relative mt-2">
+                                    <pre class="text-xs bg-base-300 p-3 rounded-lg overflow-x-auto font-mono text-base-content/90 max-h-52"><code>@item.CodeSnippet</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @* 底部操作栏 *@
+                <div class="card-footer bg-base-200/40 p-4 border-t border-base-300 rounded-b-2xl flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        @if (!string.IsNullOrEmpty(secondaryUrl))
+                        {
+                            <a href="@secondaryUrl" class="btn btn-outline btn-sm">
+                                @item.SecondaryActionLabel
+                            </a>
+                        }
+                    </div>
+                    <a href="@primaryUrl" class="btn btn-primary btn-sm gap-1.5">
+                        <span>@item.PrimaryActionLabel</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* ===== 4. 架构设计哲学对比 (三位一体) ===== *@
+    <section class="rounded-2xl border border-base-300 bg-base-100 p-6 md:p-8 space-y-6">
+        <div class="max-w-3xl space-y-2">
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+                <span>🏛️</span> 架构哲学：为什么 NetYamlForge 能支撑从 AI 沙箱到 ERP 核心？
+            </h2>
+            <p class="text-sm text-base-content/70">
+                传统架构在「开发速度」与「业务复杂性/安全性」之间往往非此即彼。NetYamlForge 通过独创的<strong>三位一体架构</strong>，破解了这一困境：
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-5 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                <div class="text-2xl">📑</div>
+                <h3 class="font-bold text-base">1. 声明式 YAML 元数据驱动</h3>
+                <p class="text-xs text-base-content/70 leading-relaxed">
+                    实体、字段、校验、看板、导航与权限完全配置化。页面秒级生成，代码量减少 80%，AI Agent 可直接理解并安全生成结构定义。
+                </p>
+            </div>
+            <div class="p-5 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                <div class="text-2xl">🛡️</div>
+                <h3 class="font-bold text-base">2. 编译期与运行期硬安全护栏</h3>
+                <p class="text-xs text-base-content/70 leading-relaxed">
+                    SqlSafetyGuard、PathSafetyGuard 与 Default-Deny 实体管道，在底层熔断注入与越权行为，为 AI 编程与开放互联提供确定性保护。
+                </p>
+            </div>
+            <div class="p-5 rounded-2xl bg-base-200/50 border border-base-300 space-y-2">
+                <div class="text-2xl">⚡</div>
+                <h3 class="font-bold text-base">3. 原生 C# 业务 Hooks 无限扩展</h3>
+                <p class="text-xs text-base-content/70 leading-relaxed">
+                    拒绝“黑盒无代码”的灵活性死胡同。通过清晰的 IEntityHook 接口与 Dapper/EF Core 事务注入，深水区的复杂 ERP 状态机与审批流游刃有余。
+                </p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-base-300">
+            <table class="table table-zebra w-full text-xs">
+                <thead class="bg-base-200/80 text-base-content font-bold">
+                    <tr>
+                        <th>对比维度</th>
+                        <th>传统纯手写开发 (ASP.NET / Spring)</th>
+                        <th>通用商用无代码 (Directus / Strapi)</th>
+                        <th class="text-primary font-extrabold">NetYamlForge (声明式 + 护栏 + C# Hooks)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="font-bold">交付速度</td>
+                        <td class="text-error">慢（大量重复样板代码）</td>
+                        <td class="text-success">快（图形化操作）</td>
+                        <td class="text-success font-bold">极快（YAML 驱动，秒级生成）</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">AI Agent 代码友好度</td>
+                        <td class="text-warning">中（需生成复杂 C# 代码，易出错）</td>
+                        <td class="text-error">差（强依赖 GUI，Agent 难操作）</td>
+                        <td class="text-success font-bold">极高（纯结构化 YAML，自然对齐 LLM）</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">AI 生成安全防护</td>
+                        <td class="text-error">无（依赖人工 Code Review 兜底）</td>
+                        <td class="text-warning">弱（依赖通用鉴权）</td>
+                        <td class="text-success font-bold">极强（编译期 AST 阻断 + Path 隔离）</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold">复杂 ERP 业务上限</td>
+                        <td class="text-success">极高（代码随心所欲）</td>
+                        <td class="text-error">受限（遇到复杂外键/审批流触顶）</td>
+                        <td class="text-success font-bold">无上限（原生 C# 事务 Hooks 随需挂载）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+@* 简易交互脚本 *@
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 分类切换
+        var tabs = document.querySelectorAll('.filter-tab');
+        var cards = document.querySelectorAll('.showcase-card');
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var filter = this.getAttribute('data-filter');
+                tabs.forEach(function(t) { t.classList.remove('tab-active', 'font-bold'); });
+                this.classList.add('tab-active', 'font-bold');
+
+                cards.forEach(function(card) {
+                    var cardCat = card.getAttribute('data-category');
+                    if (filter === 'all' || cardCat === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 复制宣传文案
+        var copyBtn = document.getElementById('copy-promo-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                var markdown = `@Html.Raw(HttpUtility.JavaScriptStringEncode(Model.PromotionalCopyMarkdown))`;
+                navigator.clipboard.writeText(markdown).then(function() {
+                    var originalHtml = copyBtn.innerHTML;
+                    copyBtn.classList.remove('btn-primary');
+                    copyBtn.classList.add('btn-success');
+                    copyBtn.innerHTML = '<span>✓ 已成功复制到剪贴板！</span>';
+                    setTimeout(function() {
+                        copyBtn.classList.remove('btn-success');
+                        copyBtn.classList.add('btn-primary');
+                        copyBtn.innerHTML = originalHtml;
+                    }, 2500);
+                });
+            });
+        }
+    });
+</script>

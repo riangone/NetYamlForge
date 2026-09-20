@@ -334,7 +334,8 @@ await DbInitializer.InitializeAsync(app.Services, app.Configuration);
 // 物理的には正常ロードされていても「マイホーム」の一覧に永久に出てこない（admin にロールが付与されないため）。
 {
     var syncLogger = app.Services.GetRequiredService<ILogger<Program>>();
-    await SystemDatabaseInitializer.SyncProjectsAsync(projectManager.GetAll(), syncLogger);
+    var systemDbPath = app.Configuration["SystemDbPath"] ?? SystemDatabaseInitializer.DbPath;
+    await SystemDatabaseInitializer.SyncProjectsAsync(projectManager.GetAll(), syncLogger, systemDbPath);
 }
 
 // データマイグレーション適用
@@ -425,10 +426,12 @@ app.UseAuthorization();
 
 app.MapGet("/trigger-test", async (string? jobId, string? project, NetYamlForge.Services.BatchJob.IBatchJobScheduler scheduler) =>
 {
-    var targetJob = jobId ?? "japan_it_news_briefing";
-    var targetProject = project ?? "blog";
-    await scheduler.TriggerJobNowAsync(targetProject, targetJob);
-    return $"Triggered: {targetProject}/{targetJob}";
+    if (string.IsNullOrEmpty(jobId) || string.IsNullOrEmpty(project))
+    {
+        return Results.BadRequest("jobId and project query parameters are required.");
+    }
+    await scheduler.TriggerJobNowAsync(project, jobId);
+    return Results.Ok($"Triggered: {project}/{jobId}");
 }).AllowAnonymous();
 
 // MCP サーバーエンドポイント：/mcp（/api/{project}/{entity} と同じ認証スキームを要求）
@@ -444,11 +447,11 @@ app.MapControllerRoute(
     pattern: "userhome/{action=Index}",
     defaults: new { controller = "UserHome", project = "userhome" });
 
-// 博客公开首页快捷路由：/blog -> /blog/Page/BlogHome
+// 多场景样板间中心：/showcase（全局展示，先于 {project} 通配路由评估）
 app.MapControllerRoute(
-    name: "blog-public",
-    pattern: "blog",
-    defaults: new { controller = "Page", action = "Index", project = "blog", pageName = "BlogHome" });
+    name: "showcase",
+    pattern: "showcase/{action=Index}/{id?}",
+    defaults: new { controller = "Showcase", action = "Index" });
 
 // プロジェクトホーム：/{project}
 app.MapControllerRoute(

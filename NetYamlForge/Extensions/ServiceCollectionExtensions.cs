@@ -297,6 +297,11 @@ public static class ServiceCollectionExtensions
         // 書き換えるための汎用ライター。IOptionsMonitor と組み合わせることで再起動不要で設定が反映される。
         services.AddScoped<NetYamlForge.Services.Config.IAppSettingsWriter, NetYamlForge.Services.Config.AppSettingsWriter>();
 
+        // Agent Studio: 多 Agent 自助演进编排
+        services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRandomRoleBinder, NetYamlForge.Services.AI.AgentStudio.RandomRoleBinder>();
+        services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRolePromptBuilder, NetYamlForge.Services.AI.AgentStudio.RolePromptBuilder>();
+        services.AddScoped<NetYamlForge.Services.AI.AgentStudio.IAgentOrchestrationService, NetYamlForge.Services.AI.AgentStudio.AgentOrchestrationService>();
+
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
             ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
             ?? "local";

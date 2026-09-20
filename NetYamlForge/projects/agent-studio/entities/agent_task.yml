@@ -1,0 +1,43 @@
+entities:
+  agent_task:
+    table: 'agent_task'
+    key: 'id'
+    displayName: 'Agent Task'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['title', 'status', 'description', 'architect_cli', 'developer_cli', 'tester_cli', 'architect_output', 'developer_output', 'tester_output', 'created_at', 'updated_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'ID', sortable: true }
+      title: { type: string, required: true, label: '任务名称', searchable: true, sortable: true }
+      description: { type: string, label: '需求描述', searchable: true }
+      status: { type: string, label: '当前状态', searchable: true, sortable: true }
+      architect_cli: { type: string, label: '架构师 CLI', searchable: true, sortable: true }
+      developer_cli: { type: string, label: '开发者 CLI', searchable: true, sortable: true }
+      tester_cli: { type: string, label: '测试者 CLI', searchable: true, sortable: true }
+      architect_output: { type: string, label: '架构产物' }
+      developer_output: { type: string, label: '开发产物' }
+      tester_output: { type: string, label: '测试结果' }
+      created_at: { type: string, label: '创建时间', sortable: true }
+      updated_at: { type: string, label: '更新时间', sortable: true }
+    forms:
+      title: { type: string, required: true, label: '任务名称', editable: true }
+      status: { type: string, label: '当前状态', editable: true }
+      description: { type: string, label: '需求描述', editable: true }
+      architect_cli: { type: string, label: '架构师 CLI', editable: true }
+      developer_cli: { type: string, label: '开发者 CLI', editable: true }
+      tester_cli: { type: string, label: '测试者 CLI', editable: true }
+      architect_output: { type: string, label: '架构产物', editable: true }
+      developer_output: { type: string, label: '开发产物', editable: true }
+      tester_output: { type: string, label: '测试结果', editable: true }
+      created_at: { type: string, label: '创建时间', editable: true }
+      updated_at: { type: string, label: '更新时间', editable: true }
+    filters: {}
+    links: {}

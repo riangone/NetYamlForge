@@ -1,0 +1,37 @@
+entities:
+  agent_task_log:
+    table: 'agent_task_log'
+    key: 'id'
+    displayName: 'Agent Task Log'
+    softDelete: false
+    paging:
+      pageSize: 20
+      mode: numbered
+    layout:
+      forms:
+        columns: 2
+        order: ['task_id', 'stage', 'role', 'provider', 'success', 'log_content', 'error_message', 'created_at']
+      filters:
+        columns: 4
+        order: []
+    columns:
+      id: { type: int, identity: true, label: 'ID', sortable: true }
+      task_id: { type: int, label: '任务 ID', sortable: true }
+      stage: { type: string, label: '执行阶段', searchable: true, sortable: true }
+      role: { type: string, label: '执行角色', searchable: true, sortable: true }
+      provider: { type: string, label: 'CLI 提供商', searchable: true, sortable: true }
+      success: { type: int, label: '是否成功', sortable: true }
+      log_content: { type: string, label: '日志输出' }
+      error_message: { type: string, label: '错误信息' }
+      created_at: { type: string, label: '记录时间', sortable: true }
+    forms:
+      task_id: { type: int, label: '任务 ID', editable: true }
+      stage: { type: string, label: '执行阶段', editable: true }
+      role: { type: string, label: '执行角色', editable: true }
+      provider: { type: string, label: 'CLI 提供商', editable: true }
+      success: { type: int, label: '是否成功', editable: true }
+      log_content: { type: string, label: '日志输出', editable: true }
+      error_message: { type: string, label: '错误信息', editable: true }
+      created_at: { type: string, label: '记录时间', editable: true }
+    filters: {}
+    links: {}
