@@ -228,10 +228,7 @@ builder.Services.AddAuthorization(options =>
 // グループ別の詳細は AddNetYamlForge の各メソッドを参照してください。
 builder.Services.AddNetYamlForge(builder.Configuration);
 
-foreach (var sd in builder.Services.Where(s => s.ServiceType.Name.Contains("FormForge") || (s.ImplementationType != null && s.ImplementationType.Name.Contains("FormForge"))))
-{
-    Console.WriteLine($"[FormForge-DI-Check] Service: {sd.ServiceType.FullName}, Lifetime: {sd.Lifetime}");
-}
+
 
 
 builder.Services.AddEndpointsApiExplorer();

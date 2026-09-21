@@ -24,9 +24,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
 using Npgsql;
-using NetYamlForge.Projects.FormForge;
-using NetYamlForge.Projects.KbForge;
-using NetYamlForge.Projects.DungeonForge.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Resources;
@@ -252,8 +249,6 @@ public static class ServiceCollectionExtensions
         // 页面自定义动作分发器与处理器注册
         services.AddSingleton<IPageActionDispatcher, PageActionDispatcher>();
         services.AddSingleton<IPageActionHandler, NetYamlForge.Services.AI.PageActions.SwitchProviderAction>();
-        services.AddSingleton<IPageActionHandler, NetYamlForge.Projects.PhotoVocab.Hooks.PageActions.AnnotatePhotoAction>();
-        services.AddSingleton<IPageActionHandler, NetYamlForge.Projects.PhotoVocab.Hooks.PageActions.EmbedPhotoAction>();
 
         return services;
     }
@@ -386,10 +381,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddHttpClient<IChinaStockService, ChinaStockService>();
         services.AddScoped<WorkflowGuideService>();
-        services.AddScoped<FormForgeRepository>();
-        services.AddScoped<FormForgeResponseRepository>();
-        services.AddScoped<KbForgeRepository>();
-        services.AddScoped<IDungeonCombatService, DungeonCombatService>();
         return services;
     }
 
