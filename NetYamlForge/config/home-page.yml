@@ -71,14 +71,14 @@ quickActions:
     url: "/showcase"
     style: btn-primary
     icon: 🎪
-  - label: 查看 Security Demo
-    url: "/security-demo/Dashboard"
+  - label: Agent Studio 工作台
+    url: "/agent-studio/Dashboard"
     style: btn-outline
-    icon: 🛡️
-  - label: 红蓝对抗演练靶场
-    url: "/security-demo/challenge"
+    icon: 🤖
+  - label: 智能体任务看板
+    url: "/agent-studio/DynamicEntity/Index?entity=agent_task"
     style: btn-ghost
-    icon: ⚔️
+    icon: 🚀
 
 projectsSectionTitle: 企业产品工作区
 projectsSectionLead: 选择一个工作区进入对应产品的运营与管理界面。
@@ -89,22 +89,26 @@ openWorkspaceLabel: 进入工作区
 emptyProjectsMessage: 未找到可用项目，请检查 projects/ 目录配置。
 
 projectProfiles:
-  security-demo:
-    icon: 🛡️
-    tagline: 安全护栏与动态 CRUD 标杆演示项目
-    tags: [Security, Demo, CRUD, Guardrails]
+  agent-studio:
+    icon: 🤖
+    tagline: 声明式 AI 智能体演进工作台与多角色编排
+    tags: [Agent, MultiRole, AI, SelfEvolution]
   userhome:
     icon: 👤
     tagline: 用户个人主页与项目管理
     tags: [User, Personal]
+  security-demo:
+    icon: 🛡️
+    tagline: 安全护栏与动态 CRUD 标杆（架构蓝图）
+    tags: [Security, Blueprint, Guardrails]
   ai-card:
     icon: 🤖
-    tagline: AI 名片与 Handshake 协议
-    tags: [AI, Card, Handshake]
+    tagline: AI 名片与 Handshake 协议（架构蓝图）
+    tags: [AI, Blueprint, Handshake]
   ai-doc-processor:
     icon: 📑
-    tagline: AI 智能文档批处理
-    tags: [AI, Document, Batch]
+    tagline: AI 智能文档批处理（架构蓝图）
+    tags: [AI, Blueprint, Batch]
 
 defaultProjectProfile:
   icon: 🧱

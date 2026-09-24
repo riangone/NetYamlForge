@@ -27,6 +27,7 @@ public class ShowcaseItemViewModel
     public string CodeSnippetTitle { get; set; } = string.Empty;
     public string CodeLanguage { get; set; } = "yaml";
     public string CodeSnippet { get; set; } = string.Empty;
+    public bool IsBlueprintOnly { get; set; } = false;
 }
 
 /// <summary>
