@@ -127,7 +127,7 @@ public class ConnectionManager : IConnectionManager
     /// <summary>
     /// 为连接字符串添加原生连接池参数
     /// </summary>
-    private static string AddPoolParametersIfNeeded(string dbType, string connectionString)
+    private string AddPoolParametersIfNeeded(string dbType, string connectionString)
     {
         if (string.IsNullOrEmpty(dbType) || dbType.ToLowerInvariant() == "sqlite")
             return connectionString;
@@ -141,31 +141,37 @@ public class ConnectionManager : IConnectionManager
         };
     }
 
-    private static string AddSqlPoolParamsIfNeeded(string connectionString)
+    private string AddSqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("Max Pool Size", StringComparison.OrdinalIgnoreCase))
             return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
-        return $"{connectionString}{separator}Max Pool Size=100;Min Pool Size=5;Connection Lifetime=300;";
+        var maxPool = _defaultOptions?.MaxPoolSize ?? 100;
+        var lifetime = Math.Max(1, (_defaultOptions?.MaxLifetimeMs ?? 300000) / 1000);
+        return $"{connectionString}{separator}Max Pool Size={maxPool};Min Pool Size=5;Connection Lifetime={lifetime};";
     }
 
-    private static string AddNpgsqlPoolParamsIfNeeded(string connectionString)
+    private string AddNpgsqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("MaxPoolSize", StringComparison.OrdinalIgnoreCase))
             return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
-        return $"{connectionString}{separator}MaxPoolSize=100;MinPoolSize=5;Connection Idle Lifetime=300;";
+        var maxPool = _defaultOptions?.MaxPoolSize ?? 100;
+        var idleLifetime = Math.Max(1, (_defaultOptions?.IdleTimeoutMs ?? 60000) / 1000);
+        return $"{connectionString}{separator}MaxPoolSize={maxPool};MinPoolSize=5;Connection Idle Lifetime={idleLifetime};";
     }
 
-    private static string AddMySqlPoolParamsIfNeeded(string connectionString)
+    private string AddMySqlPoolParamsIfNeeded(string connectionString)
     {
         if (connectionString.Contains("MaximumPoolSize", StringComparison.OrdinalIgnoreCase))
             return connectionString;
 
         var separator = connectionString.EndsWith(";") ? "" : ";";
-        return $"{connectionString}{separator}MaximumPoolSize=100;MinimumPoolSize=5;ConnectionLifeTime=300;";
+        var maxPool = _defaultOptions?.MaxPoolSize ?? 100;
+        var lifetime = Math.Max(1, (_defaultOptions?.MaxLifetimeMs ?? 300000) / 1000);
+        return $"{connectionString}{separator}MaximumPoolSize={maxPool};MinimumPoolSize=5;ConnectionLifeTime={lifetime};";
     }
 
     public async Task<IDbConnection> GetConnectionAsync(CancellationToken cancellationToken = default)

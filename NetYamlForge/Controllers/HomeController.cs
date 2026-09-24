@@ -23,15 +23,11 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        // 已登录用户自动跳转到默认项目（如 security-demo）看板，未配置默认项目时跳转至个人主页
+        // 已登录用户自动跳转到默认项目看板，未配置默认项目时跳转至个人主页
         if (User.Identity?.IsAuthenticated == true)
         {
             var defaultProject = User.FindFirst("default_project")?.Value;
-            if (string.IsNullOrWhiteSpace(defaultProject) || !_projectManager.TryGet(defaultProject, out _))
-            {
-                defaultProject = "security-demo";
-            }
-            if (_projectManager.TryGet(defaultProject, out var projInfo) && projInfo.HasDashboard)
+            if (!string.IsNullOrWhiteSpace(defaultProject) && _projectManager.TryGet(defaultProject, out var projInfo) && projInfo?.HasDashboard == true)
             {
                 return Redirect(Url.Content($"~/{defaultProject}/Dashboard"));
             }
@@ -41,12 +37,6 @@ public class HomeController : Controller
         if (_projectManager.TryGet("home", out var homeProject) && homeProject != null)
         {
             return RedirectToAction(nameof(Project), new { project = homeProject.Name });
-        }
-
-        // 默认优先展示官方代表演示项目 security-demo
-        if (_projectManager.TryGet("security-demo", out var securityDemo) && securityDemo != null)
-        {
-            return Redirect(Url.Content("~/security-demo/Dashboard"));
         }
 
         var projects = _projectManager.GetAll();

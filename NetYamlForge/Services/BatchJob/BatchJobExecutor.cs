@@ -22,6 +22,11 @@ public interface IBatchJobExecutor
     /// ジョブを実行する
     /// </summary>
     Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 带有幂等键的作业入队执行
+    /// </summary>
+    Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, string? idempotencyKey, CancellationToken cancellationToken = default);
 }
 
 public class BatchJobExecutor : IBatchJobExecutor
@@ -35,7 +40,12 @@ public class BatchJobExecutor : IBatchJobExecutor
         _logger = logger;
     }
 
-    public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
+    public Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, CancellationToken cancellationToken = default)
+    {
+        return ExecuteAsync(job, projectName, null, cancellationToken);
+    }
+
+    public async Task<BatchJobResult> ExecuteAsync(BatchJobDefinition job, string? projectName, string? idempotencyKey, CancellationToken cancellationToken = default)
     {
         var result = new BatchJobResult
         {
@@ -48,15 +58,33 @@ public class BatchJobExecutor : IBatchJobExecutor
             var payload = System.Text.Json.JsonSerializer.Serialize(job);
             var maxAttempts = (job.OnFailure?.RetryCount ?? 0) + 1;
 
-            await _outboxJobService.EnqueueAsync(
-                "batch_job",
-                payload,
-                projectName,
-                maxAttempts
-            );
+            if (!string.IsNullOrEmpty(idempotencyKey))
+            {
+                var enqueued = await _outboxJobService.EnqueueWithIdempotencyAsync(
+                    "batch_job",
+                    payload,
+                    projectName,
+                    idempotencyKey,
+                    maxAttempts
+                );
 
-            result.Success = true;
-            result.ErrorMessage = "Job enqueued successfully to the persistent job queue";
+                result.Success = true;
+                result.ErrorMessage = enqueued 
+                    ? "Job enqueued successfully to the persistent job queue"
+                    : "Job already enqueued (idempotency skipped duplicate)";
+            }
+            else
+            {
+                await _outboxJobService.EnqueueAsync(
+                    "batch_job",
+                    payload,
+                    projectName,
+                    maxAttempts
+                );
+
+                result.Success = true;
+                result.ErrorMessage = "Job enqueued successfully to the persistent job queue";
+            }
         }
         catch (Exception ex)
         {
@@ -234,61 +262,21 @@ public class RealBatchJobExecutor : IRealBatchJobExecutor
 }
 
 /// <summary>
-/// DB コネクションファクトリ
+/// DB コネクションファクトリ（向后兼容桥接）
 /// </summary>
-public interface IDbConnectionFactory
+public interface IDbConnectionFactory : NetYamlForge.Services.Database.IDbConnectionFactory
 {
-    IDbConnection CreateConnection(string? projectName);
-    Task<IDbConnection> CreateConnectionAsync(string? projectName, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// DB コネクションファクトリ実装 - 使用连接池
+/// DB コネクションファクトリ実装（向后兼容桥接）
 /// </summary>
-public class DbConnectionFactory : IDbConnectionFactory
+public class DbConnectionFactory : NetYamlForge.Services.Database.DbConnectionFactory, IDbConnectionFactory
 {
-    private readonly IConnectionManager _connectionManager;
-    private readonly ProjectManager _projectManager;
-
     public DbConnectionFactory(
         IConnectionManager connectionManager,
         ProjectManager projectManager)
+        : base(connectionManager, projectManager)
     {
-        _connectionManager = connectionManager;
-        _projectManager = projectManager;
-    }
-
-    public IDbConnection CreateConnection(string? projectName)
-    {
-        if (string.IsNullOrEmpty(projectName))
-        {
-            throw new InvalidOperationException("Project name is required");
-        }
-
-        if (!_projectManager.TryGet(projectName, out var project) || project == null)
-        {
-            throw new InvalidOperationException($"Project not found: {projectName}");
-        }
-
-        // 使用连接管理器获取连接（从池中复用）
-        var connection = _connectionManager.GetConnection(projectName);
-        return connection;
-    }
-
-    public async Task<IDbConnection> CreateConnectionAsync(string? projectName, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(projectName))
-        {
-            throw new InvalidOperationException("Project name is required");
-        }
-
-        if (!_projectManager.TryGet(projectName, out var project) || project == null)
-        {
-            throw new InvalidOperationException($"Project not found: {projectName}");
-        }
-
-        // 使用连接管理器异步获取连接（从池中复用）
-        var connection = await _connectionManager.GetConnectionAsync(projectName, cancellationToken);
-        return connection;
     }
 }

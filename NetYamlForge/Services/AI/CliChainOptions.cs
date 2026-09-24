@@ -15,10 +15,10 @@ public class CliChainOptions
     public const string SectionName = "AiCliChain";
 
     /// <summary>既定の優先順位。プロジェクト .env の CLI_CHAIN_ORDER で上書き可能。</summary>
-    public string[] DefaultOrder { get; set; } = ["opencode", "antigravity", "claude"];
+    public string[] DefaultOrder { get; set; } = [];
 
     /// <summary>各 CLI プロセスの実行タイムアウト（秒）。</summary>
-    public int TimeoutSeconds { get; set; } = 90;
+    public int TimeoutSeconds { get; set; } = 300;
 
     /// <summary>プロバイダー名 → CLI 起動設定。</summary>
     public Dictionary<string, CliProviderOptions> Providers { get; set; } =

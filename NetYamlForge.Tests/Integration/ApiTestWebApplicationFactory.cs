@@ -36,7 +36,10 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
 
         Directory.CreateDirectory(Path.Combine(TempContentRoot, "wwwroot"));
 
-        var sourceProjectDir = Path.Combine(appProjectDir, "projects", ProjectName);
+        var testProjectDir = Path.Combine(appProjectDir, "..", "NetYamlForge.Tests", "TestProjects", ProjectName);
+        var sourceProjectDir = Directory.Exists(testProjectDir)
+            ? testProjectDir
+            : Path.Combine(appProjectDir, "projects", ProjectName);
         CopyDirectoryFiltered(sourceProjectDir, Path.Combine(TempContentRoot, "projects", ProjectName));
         Directory.CreateDirectory(Path.Combine(TempContentRoot, "projects", ProjectName, "database"));
 
@@ -78,8 +81,7 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
         while (dir != null)
         {
             var candidate = Path.Combine(dir.FullName, "NetYamlForge");
-            if (File.Exists(Path.Combine(candidate, "Program.cs")) &&
-                Directory.Exists(Path.Combine(candidate, "projects", ProjectName)))
+            if (File.Exists(Path.Combine(candidate, "Program.cs")))
             {
                 return candidate;
             }

@@ -16,10 +16,15 @@ public class DocumentPdfServiceTests
     /// </summary>
     private static string SecurityDemoProjectDir()
     {
-        // bin/Debug/net10.0 → リポジトリルート → NetYamlForge/projects/security-demo
+        // bin/Debug/net10.0 → リポジトリルート → NetYamlForge.Tests/TestProjects/security-demo
         var dir = AppContext.BaseDirectory;
-        while (dir != null && !Directory.Exists(Path.Combine(dir, "NetYamlForge", "projects")))
+        while (dir != null && !Directory.Exists(Path.Combine(dir, "NetYamlForge.Tests")))
             dir = Path.GetDirectoryName(dir);
+
+        var testProjectDir = Path.Combine(dir ?? AppContext.BaseDirectory, "NetYamlForge.Tests", "TestProjects", "security-demo");
+        if (Directory.Exists(testProjectDir))
+            return testProjectDir;
+
         return Path.Combine(dir ?? AppContext.BaseDirectory, "NetYamlForge", "projects", "security-demo");
     }
 

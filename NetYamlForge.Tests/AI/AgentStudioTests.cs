@@ -74,6 +74,7 @@ public class AgentStudioTests
                 "claude",
                 It.IsAny<string>(),
                 It.IsAny<string>(),
+                It.IsAny<int?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CliChainResult(true, "Spec: Add OAuth", "claude", null));
 
@@ -84,6 +85,7 @@ public class AgentStudioTests
                 "antigravity",
                 It.IsAny<string>(),
                 It.IsAny<string>(),
+                It.IsAny<int?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CliChainResult(true, "Code: AuthController.cs created", "antigravity", null));
 
@@ -94,6 +96,7 @@ public class AgentStudioTests
                 "opencode",
                 It.IsAny<string>(),
                 It.IsAny<string>(),
+                It.IsAny<int?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new CliChainResult(true, "Tests: 5 passed", "opencode", null));
 

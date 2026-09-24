@@ -57,27 +57,15 @@ public class ProjectMiddleware
                     }
                 }
 
-                // それでも未設定の場合は以下の優先度でプロジェクトを選択
-                // 1. security-demo プロジェクト（唯一の公式代表デモ）
-                // 2. 最初のプロジェクト（フォールバック）
+                // それでも未設定の場合は登録済みプロジェクトから選択（userhome / agent-studio または先頭）
                 if (!scope.IsSet)
                 {
                     var allProjects = pm.GetAll().ToList();
-                    
-                    // security-demo プロジェクトを優先的に選択（公式代表デモ）
-                    var demoProject = allProjects.FirstOrDefault(p => string.Equals(p.Name, "security-demo", StringComparison.OrdinalIgnoreCase));
-                    if (demoProject != null)
+                    var defaultProject = allProjects.FirstOrDefault(p => string.Equals(p.Name, "userhome", StringComparison.OrdinalIgnoreCase))
+                        ?? allProjects.FirstOrDefault();
+                    if (defaultProject != null)
                     {
-                        scope.Set(demoProject);
-                    }
-                    else
-                    {
-                        // フォールバック：最初のプロジェクト
-                        var firstProject = allProjects.FirstOrDefault();
-                        if (firstProject != null)
-                        {
-                            scope.Set(firstProject);
-                        }
+                        scope.Set(defaultProject);
                     }
                 }
             }

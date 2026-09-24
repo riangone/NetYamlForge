@@ -1,7 +1,9 @@
 using System.Text.Json.Nodes;
 using Json.Schema;
 using Microsoft.Extensions.Logging;
+using NetYamlForge.Exceptions;
 using NetYamlForge.Services.AI.ToolValidation;
+using NetYamlForge.Services.Auth;
 
 namespace NetYamlForge.Services.AI;
 
@@ -80,19 +82,22 @@ public class AiToolOrchestrator : IAiToolOrchestrator
     private readonly IToolRegistry _toolRegistry;
     private readonly ILogger<AiToolOrchestrator> _logger;
     private readonly ProjectScope? _projectScope;
+    private readonly IAuditLogService? _auditLogService;
 
     public AiToolOrchestrator(
         ToolCallValidator validator,
         ISlotFillingManager slotFillingManager,
         IToolRegistry toolRegistry,
         ILogger<AiToolOrchestrator> logger,
-        ProjectScope? projectScope = null)
+        ProjectScope? projectScope = null,
+        IAuditLogService? auditLogService = null)
     {
         _validator = validator;
         _slotFillingManager = slotFillingManager;
         _toolRegistry = toolRegistry;
         _logger = logger;
         _projectScope = projectScope;
+        _auditLogService = auditLogService;
     }
 
     /// <summary>
@@ -118,8 +123,17 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             else if (!string.Equals(resolvedProjectId, activeProject, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogWarning(
-                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}",
-                    conversationId, activeProject, resolvedProjectId);
+                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}, StackTrace={StackTrace}",
+                    conversationId, activeProject, resolvedProjectId, Environment.StackTrace);
+
+                if (_auditLogService != null)
+                {
+                    await _auditLogService.WriteAsync(
+                        action: "AI_SECURITY_VIOLATION",
+                        entity: "AiTool",
+                        detail: $"Cross-tenant access violation: Conv={conversationId}, ActiveTenant={activeProject}, RequestTenant={resolvedProjectId}",
+                        userName: null);
+                }
                 
                 result.IsSuccess = false;
                 result.ValidationFailedReason = "访问被拒绝：不允许跨租户调用 Tool";
@@ -134,8 +148,17 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             // "default" テナントへ暗黙的にフォールバックすると他テナントとの串話リスクがあるため、
             // ここでは処理を中断し監査ログを記録する（fail-closed）。
             _logger.LogWarning(
-                "[ToolOrchestrator] projectId が未指定かつ ProjectScope 未設定のため Tool 呼び出しを拒否しました。Conv={ConvId}",
-                conversationId);
+                "[ToolOrchestrator] projectId が未指定かつ ProjectScope 未設定のため Tool 呼び出しを拒否しました。Conv={ConvId}, StackTrace={StackTrace}",
+                conversationId, Environment.StackTrace);
+
+            if (_auditLogService != null)
+            {
+                await _auditLogService.WriteAsync(
+                    action: "AI_SECURITY_VIOLATION",
+                    entity: "AiTool",
+                    detail: $"Tenant context missing: Conv={conversationId}, ProjectId was empty and ProjectScope not set",
+                    userName: null);
+            }
 
             result.IsSuccess = false;
             result.ValidationFailedReason = "访问被拒绝：无法确定租户上下文（projectId 未指定）";
@@ -249,10 +272,38 @@ public class AiToolOrchestrator : IAiToolOrchestrator
             else if (!string.Equals(resolvedProjectId, activeProject, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogWarning(
-                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}",
-                    conversationId, activeProject, resolvedProjectId);
+                    "[ToolOrchestrator] 检测到跨租户越权调用试图！Conv={ConvId}, ActiveTenant={Active}, RequestTenant={Request}, StackTrace={StackTrace}",
+                    conversationId, activeProject, resolvedProjectId, Environment.StackTrace);
+
+                if (_auditLogService != null)
+                {
+                    await _auditLogService.WriteAsync(
+                        action: "AI_SECURITY_VIOLATION",
+                        entity: "AiSessionState",
+                        detail: $"Cross-tenant access violation in GetSessionState: Conv={conversationId}, ActiveTenant={activeProject}, RequestTenant={resolvedProjectId}",
+                        userName: null);
+                }
+
                 throw new InvalidOperationException("访问被拒绝：不允许跨租户获取会话状态");
             }
+        }
+
+        if (string.IsNullOrEmpty(resolvedProjectId))
+        {
+            _logger.LogWarning(
+                "[ToolOrchestrator] projectId が未指定かつ ProjectScope 未設定のため会話状態取得を拒否しました。Conv={ConvId}, StackTrace={StackTrace}",
+                conversationId, Environment.StackTrace);
+
+            if (_auditLogService != null)
+            {
+                await _auditLogService.WriteAsync(
+                    action: "AI_SECURITY_VIOLATION",
+                    entity: "AiSessionState",
+                    detail: $"Tenant context missing in GetSessionState: Conv={conversationId}",
+                    userName: null);
+            }
+
+            throw new TenantContextMissingException("访问被拒绝：无法确定租户上下文（projectId 未指定且 ProjectScope 未设定）");
         }
 
         var fsmState = await _slotFillingManager.GetCurrentFsmStateAsync(conversationId, resolvedProjectId);

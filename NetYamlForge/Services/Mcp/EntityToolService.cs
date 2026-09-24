@@ -7,6 +7,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using NetYamlForge.Models;
+using NetYamlForge.Services.AI;
+using NetYamlForge.Services.AI.AgentStudio;
 using NetYamlForge.Services.Auth;
 using NetYamlForge.Services.Hooks;
 
@@ -438,6 +440,70 @@ public sealed class EntityToolService
 
         await _audit.WriteAsync("mcp.action", entity, $"id={id} action={actionKey}", userName: null);
         return McpToolResult.Success(new { success = true, message = result.ErrorMessage ?? "Action executed successfully." });
+    }
+
+    // ─── AI Metadata Methods ──────────────────────────────────────────────────
+
+    public McpToolResult ListAiScenarios(string project)
+    {
+        var bind = BindProject(project);
+        if (!bind.Ok) return bind;
+
+        var loader = _serviceProvider.GetService<IAiScenarioYamlLoader>();
+        if (loader == null)
+            return McpToolResult.Failure("AI scenario service is not configured.");
+
+        var config = loader.GetConfig(project);
+        var scenarios = config.Scenarios.Select(s => new
+        {
+            name = s.Key,
+            description = s.Value.Description,
+            initialState = s.Value.InitialState,
+            requiredSlots = s.Value.RequiredSlots.Select(r => new { name = r.Name, prompt = r.Prompt }).ToList(),
+            availableTools = s.Value.Tools
+        }).ToList();
+
+        return McpToolResult.Success(scenarios);
+    }
+
+    public McpToolResult ListAiRoles(string? project = null)
+    {
+        var provider = _serviceProvider.GetService<IRoleDefinitionProvider>();
+        if (provider == null)
+            return McpToolResult.Failure("AI role service is not configured.");
+
+        var roles = provider.GetRoles(project).Select(r => new
+        {
+            name = r.Key,
+            description = r.Value.Description,
+            responsibilities = r.Value.Responsibilities,
+            guidelines = r.Value.Guidelines,
+            allowedTools = r.Value.AllowedTools
+        }).ToList();
+
+        return McpToolResult.Success(roles);
+    }
+
+    public McpToolResult ListAiIntents(string project)
+    {
+        var bind = BindProject(project);
+        if (!bind.Ok) return bind;
+
+        var router = _serviceProvider.GetService<IIntentRouterService>();
+        if (router == null)
+            return McpToolResult.Failure("AI intent router service is not configured.");
+
+        var intents = router.GetIntents(project).Select(i => new
+        {
+            name = i.Key,
+            description = i.Value.Description,
+            targetScenario = i.Value.TargetScenario,
+            requiredSlots = i.Value.RequiredSlots,
+            allowedTools = i.Value.AllowedTools,
+            confidenceThreshold = i.Value.ConfidenceThreshold
+        }).ToList();
+
+        return McpToolResult.Success(intents);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────────────────

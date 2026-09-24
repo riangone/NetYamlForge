@@ -14,6 +14,8 @@ namespace NetYamlForge.Services.BatchJob;
 /// </summary>
 public class OutboxJobBackgroundService : BasePollingBackgroundService
 {
+    private readonly string _workerId = $"{Environment.MachineName}_{Guid.NewGuid():N}";
+
     public OutboxJobBackgroundService(
         IServiceProvider serviceProvider,
         ILogger<OutboxJobBackgroundService> logger)
@@ -23,10 +25,11 @@ public class OutboxJobBackgroundService : BasePollingBackgroundService
 
     protected override async Task OnStartupAsync(CancellationToken stoppingToken)
     {
-        // 启动时恢复中断的作业
+        // 启动时恢复中断的作业，并清理超时的僵死任务
         using var startupScope = ServiceProvider.CreateScope();
         var outboxJobService = startupScope.ServiceProvider.GetRequiredService<IOutboxJobService>();
         await outboxJobService.RecoverInterruptedJobsAsync();
+        await outboxJobService.RecoverStaleRunningJobsAsync(TimeSpan.FromMinutes(15));
     }
 
     protected override async Task PollAsync(IServiceProvider serviceProvider, CancellationToken stoppingToken)
@@ -41,8 +44,8 @@ public class OutboxJobBackgroundService : BasePollingBackgroundService
             if (stoppingToken.IsCancellationRequested)
                 break;
 
-            // 楽観的ロック（ステータスを Running に変更できた場合のみ実行）
-            var locked = await outboxJobService.LockJobAsync(job.Id);
+            // 楽観的ロックと Worker リース（10 分間のタイムアウト付き）
+            var locked = await outboxJobService.LockJobAsync(job.Id, _workerId, TimeSpan.FromMinutes(10));
             if (locked)
             {
                 // 非同期実行

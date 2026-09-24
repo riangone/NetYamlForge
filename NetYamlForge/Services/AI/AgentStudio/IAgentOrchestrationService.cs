@@ -7,7 +7,8 @@ public record AgentTaskExecutionRequest(
     string Title,
     string Description,
     string? ProjectName = null,
-    IReadOnlyList<string>? CustomProviders = null
+    IReadOnlyList<string>? CustomProviders = null,
+    int? TimeoutSeconds = null
 );
 
 /// <summary>
@@ -51,5 +52,6 @@ public interface IAgentOrchestrationService
     /// </summary>
     Task<AgentTaskExecutionResult> ExecutePipelineAsync(
         AgentTaskExecutionRequest request,
+        Func<AgentExecutionLogEntry, Task>? onStageCompleted = null,
         CancellationToken cancellationToken = default);
 }

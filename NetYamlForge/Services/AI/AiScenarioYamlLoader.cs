@@ -75,6 +75,17 @@ public class AiScenarioYamlLoader : IAiScenarioYamlLoader
                             }
                         }
 
+                        if (config.Intents != null)
+                        {
+                            foreach (var kvp in config.Intents)
+                            {
+                                if (string.IsNullOrEmpty(kvp.Value.Name))
+                                {
+                                    kvp.Value.Name = kvp.Key;
+                                }
+                            }
+                        }
+
                         _logger.LogInformation("Loaded AI scenario config from {Path} for project {ProjectId}", yamlPath, projectId);
                         return config;
                     }

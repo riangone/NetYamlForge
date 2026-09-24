@@ -96,4 +96,22 @@ public sealed class EntityMcpTools
         [Description("実行するアクション名（entities.yml の actions キー）")] string actionKey,
         [Description("アクションに渡す入力パラメータ（任意）")] Dictionary<string, object?>? inputs = null)
         => _service.InvokeActionAsync(project, entity, id, actionKey, inputs);
+
+    [McpServerTool(Name = "list_ai_scenarios", ReadOnly = true)]
+    [Description("指定プロジェクトに定義された宣言式 AI 场景（Scenarios）、初始状态与槽位列表を取得します。")]
+    public McpToolResult ListAiScenarios(
+        [Description("テナントプロジェクト名")] string project)
+        => _service.ListAiScenarios(project);
+
+    [McpServerTool(Name = "list_ai_roles", ReadOnly = true)]
+    [Description("指定プロジェクトまたはシステム全体で利用可能な AI 角色（Roles）定義、責務、実行ガイドラインを取得します。")]
+    public McpToolResult ListAiRoles(
+        [Description("テナントプロジェクト名（任意、未指定時はシステム共通角色）")] string? project = null)
+        => _service.ListAiRoles(project);
+
+    [McpServerTool(Name = "list_ai_intents", ReadOnly = true)]
+    [Description("指定プロジェクトに定義された宣言式 AI 意图（Intents）一覧、対応シナリオ、ツール権限を取得します。")]
+    public McpToolResult ListAiIntents(
+        [Description("テナントプロジェクト名")] string project)
+        => _service.ListAiIntents(project);
 }

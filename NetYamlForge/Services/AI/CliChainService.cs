@@ -45,7 +45,6 @@ public interface ICliChainService
     /// antigravity: 非対応）ため、実際に渡すフラグ名は CliProviderOptions.VariantFlag で解決する。
     /// 明示指定が無ければ、そのプロバイダーの DefaultVariant が使われる。
     /// </param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
     Task<CliChainResult> PromptAsync(
         string prompt,
         string? imagePath = null,
@@ -54,6 +53,21 @@ public interface ICliChainService
         string? model = null,
         string? variant = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 指定された timeoutSeconds（秒）で各 CLI を試行するオーバーロード。
+    /// 未指定（null）の場合は設定ファイル (AiCliChain:TimeoutSeconds) の値が使われる。
+    /// </summary>
+    Task<CliChainResult> PromptAsync(
+        string prompt,
+        string? imagePath,
+        string? projectName,
+        string? preferredProvider,
+        string? model,
+        string? variant,
+        int? timeoutSeconds,
+        CancellationToken cancellationToken = default) =>
+        PromptAsync(prompt, imagePath, projectName, preferredProvider, model, variant, cancellationToken);
 }
 
 /// <summary>
@@ -87,7 +101,7 @@ public class CliChainService : ICliChainService
         _staticOptions = new CliChainOptions();
     }
 
-    public async Task<CliChainResult> PromptAsync(
+    public Task<CliChainResult> PromptAsync(
         string prompt,
         string? imagePath = null,
         string? projectName = null,
@@ -95,6 +109,19 @@ public class CliChainService : ICliChainService
         string? model = null,
         string? variant = null,
         CancellationToken cancellationToken = default)
+    {
+        return PromptAsync(prompt, imagePath, projectName, preferredProvider, model, variant, null, cancellationToken);
+    }
+
+    public async Task<CliChainResult> PromptAsync(
+        string prompt,
+        string? imagePath,
+        string? projectName,
+        string? preferredProvider,
+        string? model,
+        string? variant,
+        int? timeoutSeconds,
+        CancellationToken cancellationToken)
     {
         var env = ProjectEnvLoader.LoadForProject(projectName);
 
@@ -165,7 +192,8 @@ public class CliChainService : ICliChainService
                 var providerVariant = string.IsNullOrWhiteSpace(explicitVariant) ? providerConfig.DefaultVariant : explicitVariant;
 
                 var args = BuildArgs(providerConfig, fullPrompt, providerModel, providerVariant);
-                var timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds > 0 ? _options.TimeoutSeconds : 90);
+                var effectiveTimeoutSec = timeoutSeconds ?? (_options.TimeoutSeconds > 0 ? _options.TimeoutSeconds : 300);
+                var timeout = TimeSpan.FromSeconds(effectiveTimeoutSec);
                 var (output, error) = await RunProcessAsync(providerConfig.Command, args, timeout, cancellationToken);
 
                 var text = ExtractText(output);
@@ -267,13 +295,23 @@ public class CliChainService : ICliChainService
         }
         catch (OperationCanceledException)
         {
-            if (!process.HasExited) process.Kill(true);
-            return (null, $"{timeout.TotalSeconds}秒でタイムアウト");
+            if (!process.HasExited)
+            {
+                try { process.Kill(true); } catch { }
+            }
+            var partialOut = outputBuilder.ToString().Trim();
+            var errMsg = $"{timeout.TotalSeconds}秒でタイムアウト";
+            if (errorBuilder.Length > 0)
+            {
+                errMsg += $": {errorBuilder.ToString().Trim()}";
+            }
+            return (string.IsNullOrEmpty(partialOut) ? null : partialOut, errMsg);
         }
 
         if (process.ExitCode != 0)
         {
-            return (null, $"exit code {process.ExitCode}: {errorBuilder}".Trim());
+            var partialOut = outputBuilder.ToString().Trim();
+            return (string.IsNullOrEmpty(partialOut) ? null : partialOut, $"exit code {process.ExitCode}: {errorBuilder}".Trim());
         }
 
         return (outputBuilder.ToString(), null);
@@ -332,6 +370,7 @@ public class CliChainService : ICliChainService
     /// &gt; appsettings.json の AiCliChain:DefaultOrder &gt; 設定済みプロバイダー全件。
     /// いずれの場合も、実際に AiCliChain:Providers に定義されている CLI のみを対象にする
     /// （設定ファイルに存在しない名前をハードコードで許可しない）。
+    /// 重複は Distinct で排除する。
     /// </summary>
     private string[] ResolveOrder(Dictionary<string, string> env)
     {
@@ -339,12 +378,14 @@ public class CliChainService : ICliChainService
         {
             var custom = raw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select(s => s.ToLowerInvariant())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Where(s => _options.Providers.ContainsKey(s))
                 .ToArray();
             if (custom.Length > 0) return custom;
         }
 
         var configuredDefault = _options.DefaultOrder
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .Where(s => _options.Providers.ContainsKey(s))
             .ToArray();
 

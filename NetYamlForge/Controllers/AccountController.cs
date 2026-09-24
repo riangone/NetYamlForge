@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Services.Tenant;
+using NetYamlForge.Services.Api;
 using AppUser = NetYamlForge.Models.Auth.AppUser;
 
 namespace NetYamlForge.Controllers;
@@ -27,6 +28,7 @@ public class AccountController : Controller
     private readonly ProjectScope _projectScope;
     private readonly ITenantUserService _tenantUsers;
     private readonly ProjectManager _projectManager;
+    private readonly IFailedLoginTracker? _loginTracker;
 
     public AccountController(
         IUserAuthService users,
@@ -34,7 +36,8 @@ public class AccountController : Controller
         IAuditLogService audit,
         ProjectScope projectScope,
         ITenantUserService tenantUsers,
-        ProjectManager projectManager)
+        ProjectManager projectManager,
+        IFailedLoginTracker? loginTracker = null)
     {
         _users = users;
         _logger = logger;
@@ -42,6 +45,7 @@ public class AccountController : Controller
         _projectScope = projectScope;
         _tenantUsers = tenantUsers;
         _projectManager = projectManager;
+        _loginTracker = loginTracker;
     }
 
     [AllowAnonymous]
@@ -61,12 +65,25 @@ public class AccountController : Controller
             return View(model);
         }
 
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP";
+        if (_loginTracker != null && (_loginTracker.IsLockedOut(clientIp) || _loginTracker.IsLockedOut(model.UserName)))
+        {
+            _logger.LogWarning("Login rejected due to lockout: User={UserName}, IP={IP}", model.UserName, clientIp);
+            ModelState.AddModelError(string.Empty, "账户或客户端IP已被锁定，请稍后再试。");
+            return View(model);
+        }
+
         var user = await _tenantUsers.ValidateCredentialsAsync(model.UserName, model.Password);
         if (user == null)
         {
+            _loginTracker?.RecordFailedAttempt(clientIp);
+            _loginTracker?.RecordFailedAttempt(model.UserName);
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View(model);
         }
+
+        _loginTracker?.Reset(clientIp);
+        _loginTracker?.Reset(model.UserName);
 
         // カスタムロール（AppUserRole）を取得してクレームに追加
         var customRolesList = (await _tenantUsers.GetUserRolesAsync(user.UserName)).ToList();
@@ -88,7 +105,7 @@ public class AccountController : Controller
         
         var customRoles = customRolesList.AsReadOnly();
 
-        var defaultProjectName = !string.IsNullOrWhiteSpace(user.DefaultProjectName) ? user.DefaultProjectName : "security-demo";
+        var defaultProjectName = !string.IsNullOrWhiteSpace(user.DefaultProjectName) ? user.DefaultProjectName : "userhome";
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),

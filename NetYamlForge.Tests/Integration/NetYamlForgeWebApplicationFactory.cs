@@ -58,12 +58,15 @@ public sealed class NetYamlForgeWebApplicationFactory : WebApplicationFactory<Pr
         // UseStaticFiles 用に空の wwwroot を用意
         Directory.CreateDirectory(Path.Combine(TempContentRoot, "wwwroot"));
 
-        // サンプルプロジェクトを DB ファイル抜きでコピー
-        var sourceProjectDir = Path.Combine(appProjectDir, "projects", ProjectName);
+        // サンプルプロジェクト（テストフィクスチャ）を DB ファイル抜きでコピー
+        var testProjectDir = Path.Combine(appProjectDir, "..", "NetYamlForge.Tests", "TestProjects", ProjectName);
+        var sourceProjectDir = Directory.Exists(testProjectDir)
+            ? testProjectDir
+            : Path.Combine(appProjectDir, "projects", ProjectName);
         if (!Directory.Exists(sourceProjectDir))
         {
             throw new DirectoryNotFoundException(
-                $"サンプルプロジェクトが見つかりません: {sourceProjectDir}");
+                $"テスト用フィクスチャプロジェクトが見つかりません: {sourceProjectDir}");
         }
 
         var targetProjectDir = Path.Combine(TempContentRoot, "projects", ProjectName);
@@ -274,8 +277,7 @@ public sealed class UnpublishPostHandler : ICustomActionHandler
         while (dir != null)
         {
             var candidate = Path.Combine(dir.FullName, "NetYamlForge");
-            if (File.Exists(Path.Combine(candidate, "Program.cs")) &&
-                Directory.Exists(Path.Combine(candidate, "projects", ProjectName)))
+            if (File.Exists(Path.Combine(candidate, "Program.cs")))
             {
                 return candidate;
             }

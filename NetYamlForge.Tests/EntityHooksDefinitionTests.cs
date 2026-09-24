@@ -103,7 +103,10 @@ public class EntityHooksDefinitionTests
             }
             dir = dir.Parent;
         }
-        var path = Path.Combine(appDir ?? throw new DirectoryNotFoundException("NetYamlForge directory not found"), "projects", "security-demo", "entities", "note.yml");
+        var testPath = Path.Combine(appDir ?? throw new DirectoryNotFoundException("NetYamlForge directory not found"), "..", "NetYamlForge.Tests", "TestProjects", "security-demo", "entities", "note.yml");
+        var path = File.Exists(testPath)
+            ? testPath
+            : Path.Combine(appDir, "projects", "security-demo", "entities", "note.yml");
         var yaml = File.ReadAllText(path);
         var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
             .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.CamelCaseNamingConvention.Instance)

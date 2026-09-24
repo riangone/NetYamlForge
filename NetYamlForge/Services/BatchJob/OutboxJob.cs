@@ -16,4 +16,7 @@ public class OutboxJob
     public string? CompletedAt { get; set; }
     public string? ErrorMessage { get; set; }
     public string? ProjectName { get; set; }
+    public string? IdempotencyKey { get; set; }
+    public string? LockedBy { get; set; }
+    public string? LockExpiresAt { get; set; }
 }

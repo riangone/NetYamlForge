@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NetYamlForge.Models.Auth;
 using NetYamlForge.Services.Tenant;
+using NetYamlForge.Services.Api;
 
 namespace NetYamlForge.Controllers;
 
@@ -16,13 +17,16 @@ public class TenantAccountController : Controller
 {
     private readonly ITenantUserService _tenantUsers;
     private readonly ILogger<TenantAccountController> _logger;
+    private readonly IFailedLoginTracker? _loginTracker;
 
     public TenantAccountController(
         ITenantUserService tenantUsers,
-        ILogger<TenantAccountController> logger)
+        ILogger<TenantAccountController> logger,
+        IFailedLoginTracker? loginTracker = null)
     {
         _tenantUsers = tenantUsers;
         _logger = logger;
+        _loginTracker = loginTracker;
     }
 
     /// <summary>
@@ -51,15 +55,28 @@ public class TenantAccountController : Controller
             return View(model);
         }
 
+        var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP";
+        if (_loginTracker != null && (_loginTracker.IsLockedOut(clientIp) || _loginTracker.IsLockedOut(model.UserName)))
+        {
+            _logger.LogWarning("登录被拒绝（触发锁定机制）：{UserName}, IP: {IP}", model.UserName, clientIp);
+            ModelState.AddModelError(string.Empty, "账户或客户端IP已被锁定，请稍后再试。");
+            return View(model);
+        }
+
         // 验证用户凭据
         var user = await _tenantUsers.ValidateCredentialsAsync(model.UserName, model.Password);
         
         if (user == null)
         {
+            _loginTracker?.RecordFailedAttempt(clientIp);
+            _loginTracker?.RecordFailedAttempt(model.UserName);
             ModelState.AddModelError(string.Empty, "用户名或密码错误");
             _logger.LogInformation("登录失败：用户名或密码错误 - {UserName}", model.UserName);
             return View(model);
         }
+
+        _loginTracker?.Reset(clientIp);
+        _loginTracker?.Reset(model.UserName);
 
         // 获取用户可访问的项目
         var projects = await _tenantUsers.GetAccessibleProjectsAsync(user.Id);

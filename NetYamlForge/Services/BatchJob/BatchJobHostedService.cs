@@ -151,11 +151,29 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
     private readonly ILogger<BatchJobHostedService> _logger;
     private readonly ConcurrentDictionary<string, ScheduledJob> _scheduledJobs = new();
     private readonly ConcurrentDictionary<string, byte> _runningJobs = new();
+    private readonly string _instanceId = Guid.NewGuid().ToString("N");
+    private const string SchedulerLeaderLease = "batch_scheduler_leader";
 
     public BatchJobHostedService(IServiceProvider serviceProvider, ILogger<BatchJobHostedService> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var leaseService = scope.ServiceProvider.GetService<NetYamlForge.Services.Distributed.IDistributedLeaseService>();
+            if (leaseService != null)
+            {
+                await leaseService.ReleaseLeaseAsync(SchedulerLeaderLease, _instanceId, cancellationToken);
+            }
+        }
+        catch { }
+
+        await base.StopAsync(cancellationToken);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -222,6 +240,21 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
 
     private async Task CheckAndRunJobsAsync(CancellationToken cancellationToken)
     {
+        // 尝试抢占或续期调度器 Leader 分布式租约（时长 90 秒，周期 1 分钟）
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            var leaseService = scope.ServiceProvider.GetService<NetYamlForge.Services.Distributed.IDistributedLeaseService>();
+            if (leaseService != null)
+            {
+                var isLeader = await leaseService.TryAcquireLeaseAsync(SchedulerLeaderLease, _instanceId, TimeSpan.FromSeconds(90), cancellationToken);
+                if (!isLeader)
+                {
+                    _logger.LogDebug("当前节点不是批处理调度 Leader (Instance: {InstanceId})，跳过本轮扫描", _instanceId);
+                    return;
+                }
+            }
+        }
+
         var now = DateTime.UtcNow;
 
         foreach (var kvp in _scheduledJobs)
@@ -292,10 +325,13 @@ public class BatchJobHostedService : BackgroundService, IBatchJobScheduler
         
         try
         {
-            var result = await executor.ExecuteAsync(job, scheduledJob.ProjectName, cancellationToken);
+            var runTimeKey = scheduledJob.NextRunTime?.ToString("yyyyMMddHHmm") ?? DateTime.UtcNow.ToString("yyyyMMddHHmm");
+            var idempotencyKey = $"batch:{job.Id}:{runTimeKey}";
+
+            var result = await executor.ExecuteAsync(job, scheduledJob.ProjectName, idempotencyKey, cancellationToken);
             if (result.Success)
             {
-                _logger.LogInformation("ジョブのキュー登録に成功しました：{JobId}", job.Id);
+                _logger.LogInformation("ジョブのキュー登録に成功しました：{JobId} (IdempotencyKey: {Key})", job.Id, idempotencyKey);
             }
             else
             {

@@ -10,17 +10,21 @@ namespace NetYamlForge.Services.BatchJob;
 public interface IOutboxJobService
 {
     Task EnqueueAsync(string jobType, string payload, string? projectName, int maxAttempts = 3, DateTime? scheduledAt = null);
+    Task<bool> EnqueueWithIdempotencyAsync(string jobType, string payload, string? projectName, string idempotencyKey, int maxAttempts = 3, DateTime? scheduledAt = null);
     Task<List<OutboxJob>> GetPendingJobsAsync(int limit = 10);
     Task<bool> LockJobAsync(string jobId);
+    Task<bool> LockJobAsync(string jobId, string workerId, TimeSpan lockDuration);
     Task CompleteJobAsync(string jobId);
     Task FailJobAsync(string jobId, string errorMessage, DateTime? nextRunTime);
     Task RecoverInterruptedJobsAsync();
+    Task<int> RecoverStaleRunningJobsAsync(TimeSpan staleThreshold);
 }
 
 public class OutboxJobService : IOutboxJobService
 {
     private readonly string _systemDbConnectionString;
     private readonly ILogger<OutboxJobService> _logger;
+    private bool _columnsEnsured;
 
     public OutboxJobService(IConfiguration config, ILogger<OutboxJobService> logger)
     {
@@ -37,7 +41,38 @@ public class OutboxJobService : IOutboxJobService
 #pragma warning restore DCS003
         await conn.OpenAsync();
         await SqliteConnectionHardening.ApplyAsync(conn);
+
+        if (!_columnsEnsured)
+        {
+            await EnsureColumnsAsync(conn);
+            _columnsEnsured = true;
+        }
+
         return conn;
+    }
+
+    private static async Task EnsureColumnsAsync(IDbConnection conn)
+    {
+        await SqliteWriteGate.RunAsync(conn, async () =>
+        {
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN idempotency_key TEXT;");
+            }
+            catch { }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN locked_by TEXT;");
+            }
+            catch { }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN lock_expires_at TEXT;");
+            }
+            catch { }
+        });
     }
 
     public async Task EnqueueAsync(string jobType, string payload, string? projectName, int maxAttempts = 3, DateTime? scheduledAt = null)
@@ -65,6 +100,43 @@ public class OutboxJobService : IOutboxJobService
         _logger.LogInformation("Job {JobId} of type {JobType} enqueued. Scheduled at: {ScheduledAt}", jobId, jobType, schedTime);
     }
 
+    public async Task<bool> EnqueueWithIdempotencyAsync(string jobType, string payload, string? projectName, string idempotencyKey, int maxAttempts = 3, DateTime? scheduledAt = null)
+    {
+        var jobId = Guid.NewGuid().ToString("D");
+        var schedTime = scheduledAt ?? DateTime.UtcNow;
+
+        using var conn = await GetConnectionAsync();
+        return await SqliteWriteGate.RunAsync(conn, async () =>
+        {
+            var existing = await conn.QuerySingleOrDefaultAsync<OutboxJob>(@"
+                SELECT id as Id, status as Status FROM nyf_jobs WHERE idempotency_key = @Key",
+                new { Key = idempotencyKey });
+
+            if (existing != null)
+            {
+                _logger.LogInformation("Job with idempotency key '{Key}' already exists with status '{Status}'. Skipping enqueue.", idempotencyKey, existing.Status);
+                return false;
+            }
+
+            var affected = await conn.ExecuteAsync(@"
+                INSERT INTO nyf_jobs (id, job_type, payload, status, attempts, max_attempts, scheduled_at, project_name, idempotency_key)
+                VALUES (@Id, @JobType, @Payload, 'Pending', 0, @MaxAttempts, @ScheduledAt, @ProjectName, @IdempotencyKey)",
+                new
+                {
+                    Id = jobId,
+                    JobType = jobType,
+                    Payload = payload,
+                    MaxAttempts = maxAttempts,
+                    ScheduledAt = schedTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ProjectName = projectName,
+                    IdempotencyKey = idempotencyKey
+                });
+
+            _logger.LogInformation("Job {JobId} of type {JobType} enqueued with idempotency key '{Key}'. Scheduled at: {ScheduledAt}", jobId, jobType, idempotencyKey, schedTime);
+            return affected > 0;
+        });
+    }
+
     public async Task<List<OutboxJob>> GetPendingJobsAsync(int limit = 10)
     {
         var nowStr = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
@@ -73,28 +145,48 @@ public class OutboxJobService : IOutboxJobService
             SELECT id as Id, job_type as JobType, payload as Payload, status as Status, 
                    attempts as Attempts, max_attempts as MaxAttempts, scheduled_at as ScheduledAt,
                    started_at as StartedAt, completed_at as CompletedAt, error_message as ErrorMessage,
-                   project_name as ProjectName
+                   project_name as ProjectName, idempotency_key as IdempotencyKey,
+                   locked_by as LockedBy, lock_expires_at as LockExpiresAt
             FROM nyf_jobs
-            WHERE status = 'Pending' AND scheduled_at <= @Now
+            WHERE (status = 'Pending' AND scheduled_at <= @Now)
+               OR (status = 'Running' AND lock_expires_at IS NOT NULL AND lock_expires_at <= @Now AND attempts < max_attempts)
             ORDER BY scheduled_at ASC
             LIMIT @Limit",
             new { Now = nowStr, Limit = limit });
         return jobs.ToList();
     }
 
-    public async Task<bool> LockJobAsync(string jobId)
+    public Task<bool> LockJobAsync(string jobId)
+    {
+        return LockJobAsync(jobId, Environment.MachineName, TimeSpan.FromMinutes(10));
+    }
+
+    public async Task<bool> LockJobAsync(string jobId, string workerId, TimeSpan lockDuration)
     {
         using var conn = await GetConnectionAsync();
         return await SqliteWriteGate.RunAsync(conn, async () =>
         {
-            var nowStr = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var now = DateTime.UtcNow;
+            var expiresAt = now.Add(lockDuration);
+            var nowStr = now.ToString("yyyy-MM-dd HH:mm:ss");
+            var expiresStr = expiresAt.ToString("yyyy-MM-dd HH:mm:ss");
+
             var affected = await conn.ExecuteAsync(@"
                 UPDATE nyf_jobs
                 SET status = 'Running',
                     started_at = @Now,
+                    locked_by = @WorkerId,
+                    lock_expires_at = @LockExpiresAt,
                     attempts = attempts + 1
-                WHERE id = @Id AND status = 'Pending'",
-                new { Id = jobId, Now = nowStr });
+                WHERE id = @Id 
+                  AND (status = 'Pending' OR (status = 'Running' AND lock_expires_at IS NOT NULL AND lock_expires_at <= @Now))",
+                new 
+                { 
+                    Id = jobId, 
+                    WorkerId = workerId, 
+                    LockExpiresAt = expiresStr, 
+                    Now = nowStr 
+                });
             return affected > 0;
         });
     }
@@ -108,7 +200,8 @@ public class OutboxJobService : IOutboxJobService
             await conn.ExecuteAsync(@"
                 UPDATE nyf_jobs
                 SET status = 'Completed',
-                    completed_at = @Now
+                    completed_at = @Now,
+                    lock_expires_at = NULL
                 WHERE id = @Id",
                 new { Id = jobId, Now = nowStr });
         });
@@ -128,7 +221,9 @@ public class OutboxJobService : IOutboxJobService
                     UPDATE nyf_jobs
                     SET status = 'Pending',
                         scheduled_at = @NextRunTime,
-                        error_message = @Error
+                        error_message = @Error,
+                        locked_by = NULL,
+                        lock_expires_at = NULL
                     WHERE id = @Id",
                     new
                     {
@@ -145,7 +240,8 @@ public class OutboxJobService : IOutboxJobService
                     UPDATE nyf_jobs
                     SET status = 'Failed',
                         completed_at = @Now,
-                        error_message = @Error
+                        error_message = @Error,
+                        lock_expires_at = NULL
                     WHERE id = @Id",
                     new
                     {
@@ -167,12 +263,39 @@ public class OutboxJobService : IOutboxJobService
             var affected = await conn.ExecuteAsync(@"
                 UPDATE nyf_jobs
                 SET status = 'Pending',
-                    error_message = 'Interrupted by process restart'
+                    error_message = 'Interrupted by process restart',
+                    locked_by = NULL,
+                    lock_expires_at = NULL
                 WHERE status = 'Running'");
             if (affected > 0)
             {
                 _logger.LogInformation("Recovered {Count} interrupted running job(s) to Pending status.", affected);
             }
+        });
+    }
+
+    public async Task<int> RecoverStaleRunningJobsAsync(TimeSpan staleThreshold)
+    {
+        using var conn = await GetConnectionAsync();
+        return await SqliteWriteGate.RunAsync(conn, async () =>
+        {
+            var thresholdTime = DateTime.UtcNow.Subtract(staleThreshold).ToString("yyyy-MM-dd HH:mm:ss");
+            var nowStr = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
+            var affected = await conn.ExecuteAsync(@"
+                UPDATE nyf_jobs
+                SET status = 'Pending',
+                    error_message = 'Recovered from stale/expired worker lock',
+                    locked_by = NULL,
+                    lock_expires_at = NULL
+                WHERE status = 'Running'
+                  AND ((lock_expires_at IS NOT NULL AND lock_expires_at <= @Now)
+                       OR (started_at IS NOT NULL AND started_at <= @Threshold))",
+                new { Now = nowStr, Threshold = thresholdTime });
+            if (affected > 0)
+            {
+                _logger.LogInformation("Recovered {Count} stale running job(s) to Pending status.", affected);
+            }
+            return affected;
         });
     }
 }

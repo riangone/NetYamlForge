@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
 using NetYamlForge.Services.AI.SlotFilling;
+using NetYamlForge.Exceptions;
 
 namespace NetYamlForge.Services.AI;
 
@@ -59,12 +60,8 @@ public class SlotFillingManager : ISlotFillingManager
         if (_projectScope != null && _projectScope.IsSet)
             return _projectScope.Current.Name;
         
-        var defaultPid = _options.DefaultProjectId;
-        if (string.IsNullOrWhiteSpace(defaultPid))
-        {
-            throw new InvalidOperationException("Project ID is not specified and no DefaultProjectId is configured in SlotFillingOptions.");
-        }
-        return defaultPid;
+        throw new TenantContextMissingException(
+            "Tenant context is missing: projectId was not specified and ProjectScope is not set (fail-closed guardrail).");
     }
 
     private string GetSessionKey(string conversationId, string scenario, string? projectId)
@@ -238,7 +235,7 @@ public class SlotFillingManager : ISlotFillingManager
         var resolvedProjectId = GetResolvedProjectId(projectId);
         var config = _aiScenarioYamlLoader.GetConfig(resolvedProjectId);
 
-        if (config.Scenarios.TryGetValue(scenario, out var definition))
+        if (config?.Scenarios != null && config.Scenarios.TryGetValue(scenario, out var definition))
         {
             foreach (var slot in definition.RequiredSlots.Concat(definition.OptionalSlots))
             {

@@ -7,6 +7,12 @@ entities:
     paging:
       pageSize: 20
       mode: numbered
+    actions:
+      run_pipeline:
+        label: "🚀 运行协同流水线"
+        scope: row
+        confirm: "确定要对此任务启动 Architect -> Developer -> Tester 三阶段协同流水线吗？"
+        handler: run_pipeline_handler
     layout:
       forms:
         columns: 2
@@ -40,4 +46,9 @@ entities:
       created_at: { type: string, label: '创建时间', editable: true }
       updated_at: { type: string, label: '更新时间', editable: true }
     filters: {}
-    links: {}
+    links:
+      task_logs:
+        label: "执行日志"
+        targetEntity: agent_task_log
+        filter:
+          task_id: id

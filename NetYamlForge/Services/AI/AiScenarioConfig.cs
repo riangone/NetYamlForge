@@ -9,6 +9,7 @@ namespace NetYamlForge.Services.AI;
 public class AiScenarioConfig
 {
     public Dictionary<string, ScenarioConfig> Scenarios { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, IntentConfig> Intents { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> AllowedEntities { get; set; } = new();
     public List<string> AllowedActions { get; set; } = new();
 
@@ -20,6 +21,19 @@ public class AiScenarioConfig
 
     /// <summary>标注用プロンプト（プロジェクト固有の上書き）。</summary>
     public string? AnnotationPrompt { get; set; }
+}
+
+/// <summary>
+/// 声明式意图定义（Intent），支持直接将自然语言请求映射到指定 Scenario 或 Tool 规则
+/// </summary>
+public class IntentConfig
+{
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string? TargetScenario { get; set; }
+    public List<string> RequiredSlots { get; set; } = new();
+    public List<string> AllowedTools { get; set; } = new();
+    public double ConfidenceThreshold { get; set; } = 0.7;
 }
 
 /// <summary>

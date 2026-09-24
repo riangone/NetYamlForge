@@ -55,7 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddEntityHooks();
         services.AddYamlHotReload();
         services.AddEmailServices(configuration);
-        services.AddApiServices();
+        services.AddApiServices(configuration);
         services.AddForgeTelemetry(configuration);
         
         // AI Prompt 配置配置化
@@ -141,8 +141,15 @@ public static class ServiceCollectionExtensions
             options.Enabled = false;
         });
 
-        // 注册连接管理器（Singleton，管理所有项目的连接池）
-        services.AddSingleton<IConnectionManager, ConnectionManager>();
+        // 注册连接管理器（Singleton，管理所有项目的连接门面与原生池统计）
+        services.AddSingleton<IConnectionManager>(sp => new ConnectionManager(
+            sp.GetRequiredService<ProjectManager>(),
+            sp.GetRequiredService<ILogger<ConnectionManager>>(),
+            sp.GetRequiredService<IServiceScopeFactory>(),
+            sp.GetRequiredService<ILoggerFactory>(),
+            sp.GetRequiredService<IHttpContextAccessor>(),
+            sp.GetService<Microsoft.Extensions.Options.IOptions<ConnectionPoolOptions>>()?.Value
+        ));
         
         // 注册 HttpContextAccessor（用于访问预加载的连接）
         services.AddHttpContextAccessor();
@@ -294,6 +301,7 @@ public static class ServiceCollectionExtensions
 
         // Agent Studio: 多 Agent 自助演进编排
         services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRandomRoleBinder, NetYamlForge.Services.AI.AgentStudio.RandomRoleBinder>();
+        services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRoleDefinitionProvider, NetYamlForge.Services.AI.AgentStudio.RoleDefinitionProvider>();
         services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRolePromptBuilder, NetYamlForge.Services.AI.AgentStudio.RolePromptBuilder>();
         services.AddScoped<NetYamlForge.Services.AI.AgentStudio.IAgentOrchestrationService, NetYamlForge.Services.AI.AgentStudio.AgentOrchestrationService>();
 
@@ -328,6 +336,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAiToolOrchestrator, AiToolOrchestrator>();
         services.AddSingleton<PromptVersionResolver>();
         services.AddSingleton<IAiScenarioYamlLoader, AiScenarioYamlLoader>();
+        services.AddSingleton<IIntentRouterService, IntentRouterService>();
         services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.ISlotSessionStore, NetYamlForge.Services.AI.SlotFilling.InMemorySlotSessionStore>();
         services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.IConversationFsmStore, NetYamlForge.Services.AI.SlotFilling.InMemoryConversationFsmStore>();
         services.AddSingleton<NetYamlForge.Services.AI.SlotFilling.ScenarioResolver>();
@@ -345,7 +354,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBatchJobServices(this IServiceCollection services)
     {
         services.AddSingleton<IBatchJobLoader, BatchJobLoader>();
+        services.AddScoped<NetYamlForge.Services.Database.IDbConnectionFactory, NetYamlForge.Services.Database.DbConnectionFactory>();
         services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
+        services.AddScoped<NetYamlForge.Services.Distributed.IDistributedLeaseService, NetYamlForge.Services.Distributed.DistributedLeaseService>();
         services.AddScoped<IOutboxJobService, OutboxJobService>();
         services.AddSingleton<BatchStepHandlerRegistry>();
         services.AddScoped<IRealBatchJobExecutor, RealBatchJobExecutor>();
@@ -462,10 +473,20 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// APIサービスを登録します。
+    /// APIサービスおよびレート制限・防爆破サービスを登録します。
     /// </summary>
-    public static IServiceCollection AddApiServices(this IServiceCollection services)
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration? configuration = null)
     {
+        if (configuration != null)
+        {
+            services.Configure<NetYamlForge.Models.Config.RateLimitingOptions>(configuration.GetSection(NetYamlForge.Models.Config.RateLimitingOptions.SectionName));
+        }
+        else
+        {
+            services.Configure<NetYamlForge.Models.Config.RateLimitingOptions>(_ => { });
+        }
+
+        services.AddSingleton<NetYamlForge.Services.Api.IFailedLoginTracker, NetYamlForge.Services.Api.FailedLoginTracker>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityAccessGuard>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityQueryService>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityWriteService>();

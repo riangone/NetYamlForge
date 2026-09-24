@@ -80,6 +80,23 @@ public class McpServerIntegrationTests : IClassFixture<ApiTestWebApplicationFact
         Assert.Contains("update_entity_record", names);
         Assert.Contains("delete_entity_record", names);
         Assert.Contains("invoke_entity_action", names);
+        Assert.Contains("list_ai_scenarios", names);
+        Assert.Contains("list_ai_roles", names);
+        Assert.Contains("list_ai_intents", names);
+    }
+
+    [Fact]
+    public async Task ListAiRoles_ShouldReturnSystemRoles()
+    {
+        await using var client = await CreateMcpClientAsync("admin-api-token");
+
+        var result = await client.CallToolAsync("list_ai_roles", new Dictionary<string, object?>());
+        var content = GetStructuredContent(result);
+        Assert.True(content.GetProperty("ok").GetBoolean());
+
+        var data = content.GetProperty("data");
+        Assert.Equal(JsonValueKind.Array, data.ValueKind);
+        Assert.True(data.GetArrayLength() >= 3);
     }
 
     [Fact]

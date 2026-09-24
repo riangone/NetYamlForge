@@ -21,21 +21,20 @@ Last reviewed: 2026-09-11.
 | Path traversal / arbitrary directory read in directory-scan import jobs | `PathSafetyGuard.ValidateAgainstAllowList` — `source_path` (user-supplied, absolute) must resolve under an administrator-configured allow-list (`DirectoryImport:AllowedRoots` in `appsettings.json`); **default is deny-all**, not allow-all, when unconfigured | `NetYamlForge/Services/BatchJob/DirectoryImportExecutor.cs` |
 | SQL injection via the AI `query_data` tool | `SqlSafetyGuard` — identifier/expression allow-listing, parameterized values, operator allow-list (`=, !=, <, <=, >, >=, like`) | `NetYamlForge/Services/SqlSafetyGuard.cs`, `AiToolRegistryInitializer.cs` |
 | Multi-tenant DB isolation for system-level (non-tenant) batch jobs | System jobs run against `_system_jobs/`, a directory that is a sibling of `projects/`, not an ancestor — so a relative-path escape from a system job can never reach another tenant's `projects/<tenant>/` directory | `PathSafetyGuard.GetSystemJobBaseDir` |
+| AI session / tool scoping under context loss | `TenantContextMissingException` (Fail-Closed guardrail) — rejects execution when tenant context is missing; dual-binding cross-tenant validation in `AiToolOrchestrator` with security audit logging (`AI_SECURITY_VIOLATION`) | `NetYamlForge/Exceptions/TenantContextMissingException.cs`, `NetYamlForge/Services/AI/SlotFillingManager.cs`, `NetYamlForge/Services/AI/AiToolOrchestrator.cs` |
+| Production API rate limiting & brute force protection | `GlobalRateLimitingMiddleware` & `FailedLoginTracker` — sliding-window rate limiting on `/api/`, `/mcp`, `/Account/*`, `/TenantAccount/*` and IP/username-level brute-force lockout | `NetYamlForge/Services/Api/GlobalRateLimitingMiddleware.cs`, `NetYamlForge/Services/Api/FailedLoginTracker.cs`, `NetYamlForge/Controllers/AccountController.cs` |
 
 Every row above has unit and/or integration test coverage in
 `NetYamlForge.Tests/` (see `PathSafetyGuardTests.cs`,
-`SqlBatchStepHandlersSecurityTests.cs`, `DirectoryImportExecutorSecurityTests.cs`)
+`SqlBatchStepHandlersSecurityTests.cs`, `DirectoryImportExecutorSecurityTests.cs`,
+`AiSessionTenantIsolationSecurityTests.cs`, `RateLimitingAndBruteForceSecurityTests.cs`)
 that exercises the guardrail through the real call path (handler `ExecuteAsync`,
 not just the validator in isolation), including negative cases (traversal
 attempts, same-prefix deception, unconfigured allow-lists).
 
 ## Known gaps / actively tracked
 
-- **AI session / tool scoping under context loss**: if `ProjectScope` is empty
-  (e.g. CLI offline mode or an async background workflow), session state can
-  fall back to a `default` scope. This is a design gap, not yet closed — do not
-  rely on tool-call isolation across concurrent tenants in that code path.
-  Tracked in `docs/FRAMEWORK-SECURITY-REFACTOR-PLAN.md`.
+- **AI session / tool scoping under context loss** (RESOLVED): Closed via compile-time and runtime Fail-Closed guardrails (`TenantContextMissingException`). When `ProjectScope` is unset and `projectId` is not provided, calls are strictly rejected and logged with `AI_SECURITY_VIOLATION` audit events. See `AiSessionTenantIsolationSecurityTests.cs`.
 - Security review here is currently maintainer self-review plus automated
   tests, not third-party penetration testing. Treat this document as "here is
   what we checked," not an external audit attestation.

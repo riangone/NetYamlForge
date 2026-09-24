@@ -157,12 +157,50 @@ public static class SystemDatabaseInitializer
                     started_at TEXT,
                     completed_at TEXT,
                     error_message TEXT,
-                    project_name TEXT
+                    project_name TEXT,
+                    idempotency_key TEXT,
+                    locked_by TEXT,
+                    lock_expires_at TEXT
                 )
             ");
 
             await conn.ExecuteAsync(@"
                 CREATE INDEX IF NOT EXISTS IX_nyf_jobs_status_scheduled_at ON nyf_jobs(status, scheduled_at);
+            ");
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN idempotency_key TEXT;");
+            }
+            catch { }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN locked_by TEXT;");
+            }
+            catch { }
+
+            try
+            {
+                await conn.ExecuteAsync("ALTER TABLE nyf_jobs ADD COLUMN lock_expires_at TEXT;");
+            }
+            catch { }
+
+            try
+            {
+                await conn.ExecuteAsync("CREATE INDEX IF NOT EXISTS IX_nyf_jobs_idempotency_key ON nyf_jobs(idempotency_key);");
+            }
+            catch { }
+
+            // nyf_leases テーブル (Distributed Lease)
+            await conn.ExecuteAsync(@"
+                CREATE TABLE IF NOT EXISTS nyf_leases (
+                    lease_name TEXT PRIMARY KEY,
+                    holder_id TEXT NOT NULL,
+                    acquired_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS IX_nyf_leases_expires_at ON nyf_leases(expires_at);
             ");
 
             // デフォルト管理者ユーザーを作成（存在しない場合）
@@ -193,7 +231,7 @@ public static class SystemDatabaseInitializer
         {
             var passwordHash = HashPassword("Admin@123");
             await conn.ExecuteAsync(@"
-                INSERT INTO app_user (user_name, password_hash, display_name, email, user_type, is_admin, preferred_language, is_active, created_at, updated_at, api_token)
+                INSERT OR IGNORE INTO app_user (user_name, password_hash, display_name, email, user_type, is_admin, preferred_language, is_active, created_at, updated_at, api_token)
                 VALUES (@UserName, @PasswordHash, @DisplayName, @Email, @UserType, 1, 'ja-JP', 1, @CreatedAt, @UpdatedAt, @ApiToken)
             ", new
             {
@@ -324,12 +362,12 @@ public static class SystemDatabaseInitializer
 
         if (!isValidDefault)
         {
-            // 'security-demo' プロジェクトを優先的に検索（唯一の公式代表デモ）
+            // 'userhome' プロジェクトを優先的に検索
             var defaultProject = await conn.ExecuteScalarAsync<string>(
-                "SELECT name FROM projects WHERE name = 'security-demo' LIMIT 1"
+                "SELECT name FROM projects WHERE name = 'userhome' LIMIT 1"
             );
 
-            // 'security-demo' がない場合は最初に見つかったプロジェクトを使用
+            // 'userhome' がない場合は最初に見つかったプロジェクトを使用
             if (string.IsNullOrEmpty(defaultProject))
             {
                 defaultProject = await conn.ExecuteScalarAsync<string>(

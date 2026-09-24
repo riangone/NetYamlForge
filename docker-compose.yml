@@ -43,7 +43,6 @@ services:
   app:
     <<: *app-base
     volumes:
-      - security_demo_sqlite:/app/projects/security-demo/database
       - app_var_data:/app/var/data
       - app_var_run:/app/var/run
       - app_var_log:/app/var/log
@@ -207,7 +206,6 @@ services:
       "
 
 volumes:
-  security_demo_sqlite:
   postgres_data:
   mysql_data:
   sqlserver_data:

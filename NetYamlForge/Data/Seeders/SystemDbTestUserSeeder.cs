@@ -60,7 +60,7 @@ public class SystemDbTestUserSeeder
             {
                 // system.db にユーザーが存在するか確認
                 var existingUser = await systemConn.QueryFirstOrDefaultAsync<dynamic>(
-                    "SELECT id, owning_project FROM app_user WHERE user_name = @UserName",
+                    "SELECT id, owning_project FROM app_user WHERE user_name = @UserName COLLATE NOCASE",
                     new { UserName = (string)user.UserName });
 
                 if (existingUser != null)
@@ -88,6 +88,7 @@ public class SystemDbTestUserSeeder
                 var userId = await systemConn.ExecuteScalarAsync<int>(
                     @"INSERT INTO app_user (user_name, password_hash, display_name, user_type, default_project_name, owning_project, is_admin, preferred_language, is_active, created_at, updated_at)
                       VALUES (@UserName, @PasswordHash, @DisplayName, @UserType, @DefaultProjectName, @OwningProject, @IsAdmin, @PreferredLanguage, @IsActive, @CreatedAt, @UpdatedAt)
+                      ON CONFLICT(user_name) DO UPDATE SET updated_at = excluded.updated_at
                       RETURNING id",
                     new
                     {

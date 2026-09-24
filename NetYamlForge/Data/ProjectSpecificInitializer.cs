@@ -20,7 +20,6 @@ namespace NetYamlForge.Data;
 public class ProjectSpecificInitializer
 {
     private readonly CommonTestUserSeeder _commonTestUserSeeder = new();
-    private readonly AutoDealerTestUserSeeder _autoDealerTestUserSeeder = new();
     private readonly ProjectSpecificTestUserSeeder _projectSpecificTestUserSeeder = new();
 
     public async Task EnsureProjectSpecificColumnsAsync(
@@ -79,15 +78,8 @@ public class ProjectSpecificInitializer
             // 汎用フォールバック: database/init_seed.sql が存在すれば実行
             await RunInitSeedSqlIfExistsAsync(conn as SqliteConnection, projectName, logger, projectDir);
 
-            // auto-dealer-demo: デモユーザー作成 + テストユーザー作成
-            if (string.Equals(projectName, "auto-dealer-demo", StringComparison.OrdinalIgnoreCase))
-            {
-                await new AutoDealerDemoSeeder().EnsureDemoUsersAsync(conn, logger);
-                // 创建汽车销售项目的全面测试用户
-                await _autoDealerTestUserSeeder.EnsureAutoDealerTestUsersAsync(conn, logger);
-            }
             // framework: 框架管理测试用户
-            else if (string.Equals(projectName, "framework", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(projectName, "framework", StringComparison.OrdinalIgnoreCase))
             {
                 await _projectSpecificTestUserSeeder.EnsureProjectSpecificTestUsersAsync(conn, projectName, logger);
             }

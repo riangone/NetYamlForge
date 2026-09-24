@@ -399,6 +399,7 @@ app.UseAuthentication();
 app.UseRequestLocalization(localizationOptions);
 app.UseMiddleware<ProjectScopeMiddleware>(); // プロジェクト別アクセス制御（認証後に配置）
 app.UseMiddleware<NetYamlForge.Services.Tenant.TenantResolverMiddleware>();
+app.UseMiddleware<NetYamlForge.Services.Api.GlobalRateLimitingMiddleware>();
 app.UseMiddleware<NetYamlForge.Services.Api.DynamicRateLimitingMiddleware>();
 app.Use(async (context, next) =>
 {

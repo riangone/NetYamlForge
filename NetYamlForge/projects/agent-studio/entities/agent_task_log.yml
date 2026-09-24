@@ -25,7 +25,13 @@ entities:
       error_message: { type: string, label: '错误信息' }
       created_at: { type: string, label: '记录时间', sortable: true }
     forms:
-      task_id: { type: int, label: '任务 ID', editable: true }
+      task_id:
+        type: int
+        label: '任务 ID'
+        editable: true
+        foreignKey:
+          entity: agent_task
+          displayColumn: 'title'
       stage: { type: string, label: '执行阶段', editable: true }
       role: { type: string, label: '执行角色', editable: true }
       provider: { type: string, label: 'CLI 提供商', editable: true }
@@ -33,5 +39,7 @@ entities:
       log_content: { type: string, label: '日志输出', editable: true }
       error_message: { type: string, label: '错误信息', editable: true }
       created_at: { type: string, label: '记录时间', editable: true }
-    filters: {}
+    filters:
+      task_id: { type: int, label: '任务 ID' }
+      stage: { type: string, label: '执行阶段' }
     links: {}

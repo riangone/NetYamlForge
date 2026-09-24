@@ -3,6 +3,7 @@ using Dapper;
 using Microsoft.Extensions.Options;
 using NetYamlForge.Services;
 using NetYamlForge.Services.BatchJob;
+using NetYamlForge.Exceptions;
 
 namespace NetYamlForge.Services.AI;
 
@@ -35,12 +36,8 @@ public class AppointmentService : IAppointmentService
         if (_projectScope.IsSet)
             return _projectScope.Current.Name;
         
-        var defaultPid = _options.DefaultProjectId;
-        if (string.IsNullOrWhiteSpace(defaultPid))
-        {
-            throw new InvalidOperationException("Project ID is not specified and no DefaultProjectId is configured in AppointmentOptions.");
-        }
-        return defaultPid;
+        throw new TenantContextMissingException(
+            "Tenant context is missing: projectId was not specified and ProjectScope is not set (fail-closed guardrail).");
     }
 
     /// <inheritdoc />
