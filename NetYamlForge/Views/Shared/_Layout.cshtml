@@ -15,6 +15,16 @@
 <!DOCTYPE html>
 <html lang="@System.Globalization.CultureInfo.CurrentUICulture.Name" data-theme="@(ProjectScope?.Current?.Layout?.Theme ?? "corporate")">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y1P7PMMM6V"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-Y1P7PMMM6V');
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - NetYamlForge</title>
@@ -209,7 +219,7 @@
                 </div>
             </header>
 
-            <main class="p-4 lg:p-6">
+            <main class="p-3 sm:p-4 lg:p-6 w-full max-w-[1760px] mx-auto">
                 @if (TempData["SuccessMessage"] != null)
                 {
                     <div class="alert alert-success shadow-lg mb-4">

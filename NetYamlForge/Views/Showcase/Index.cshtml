@@ -5,7 +5,7 @@
     var pathBase = Url.Content("~/").TrimEnd('/');
 }
 
-<div class="space-y-8 max-w-7xl mx-auto pb-12">
+<div class="space-y-8 max-w-7xl 2xl:max-w-[1600px] mx-auto pb-12">
     @* ===== 1. Hero 区域 ===== *@
     <section class="relative overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 opacity-80 pointer-events-none"></div>
@@ -20,13 +20,13 @@
                         多场景样板间体验馆
                     </h1>
                     <p class="text-base sm:text-lg text-base-content/80 leading-relaxed font-normal max-w-2xl">
-                        从专为 <strong>AI Agent</strong> 设计的安全护栏沙箱，到承载 <strong>28 个关联实体的复杂 ERP 契约系统</strong> —— 见证声明式元数据驱动与现代 .NET 的全景生产力。
+                        声明式元数据驱动与内生安全护栏（Safe by Construction）—— 专为 <strong>AI Agent 协同演进</strong>打造的现代 .NET 极简应用开发平台。
                     </p>
                     <div class="flex flex-wrap gap-2 pt-1">
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🤖 Agent Studio 智能体自举演进</span>
                         <span class="badge badge-lg badge-outline gap-1.5 font-medium">🛡️ 编译期/运行期双重安全护栏</span>
-                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🤖 AHP 智能体握手协议</span>
-                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">📋 5分钟表单在线发布</span>
-                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">🏭 工业级 ERP & 深度 C# Hooks</span>
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">📦 声明式 YAML 实体全自动装配</span>
+                        <span class="badge badge-lg badge-outline gap-1.5 font-medium">⚡ 纯原生连接池与分布式租约</span>
                     </div>
                 </div>
 
@@ -55,15 +55,14 @@
         </div>
     </section>
 
-    @* ===== 2. 分类筛选 Tabs ===== *@
+    @* ===== 2. 分类筛选 Tabs (移动端平滑横向滑动，大屏自适应) ===== *@
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-base-300 pb-4">
-        <div class="tabs tabs-boxed bg-base-100 p-1.5 border border-base-300">
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "all" ? "tab-active font-bold" : "")" data-filter="all">全部场景 (@Model.Showcases.Count)</button>
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "security" ? "tab-active font-bold" : "")" data-filter="security">🛡️ 安全基线</button>
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "ai" ? "tab-active font-bold" : "")" data-filter="ai">🤖 前沿 AI</button>
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "forms" ? "tab-active font-bold" : "")" data-filter="forms">📋 动态表单</button>
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "erp" ? "tab-active font-bold" : "")" data-filter="erp">🏭 工业 ERP</button>
-            <button type="button" class="tab filter-tab @(Model.CurrentCategory == "workflow" ? "tab-active font-bold" : "")" data-filter="workflow">📑 流程与状态机</button>
+        <div class="tabs tabs-boxed bg-base-100 p-1 border border-base-300 flex-nowrap overflow-x-auto no-scrollbar touch-pan-x max-w-full">
+            <button type="button" class="tab filter-tab shrink-0 whitespace-nowrap @(Model.CurrentCategory == "all" ? "tab-active font-bold" : "")" data-filter="all">全部场景 (@Model.Showcases.Count)</button>
+            @foreach (var cat in Model.Showcases.Select(s => new { s.Category, s.CategoryLabel }).DistinctBy(x => x.Category))
+            {
+                <button type="button" class="tab filter-tab shrink-0 whitespace-nowrap @(Model.CurrentCategory == cat.Category ? "tab-active font-bold" : "")" data-filter="@cat.Category">@cat.CategoryLabel</button>
+            }
         </div>
 
         <div class="text-xs text-base-content/60 flex items-center gap-2">
@@ -71,8 +70,8 @@
         </div>
     </div>
 
-    @* ===== 3. 样板间卡片网格 ===== *@
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="showcases-container">
+    @* ===== 3. 样板间卡片网格 (大屏 3 列并发展示) ===== *@
+    <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6" id="showcases-container">
         @foreach (var item in Model.Showcases)
         {
             var primaryUrl = item.PrimaryActionUrl.StartsWith('/') ? pathBase + item.PrimaryActionUrl : item.PrimaryActionUrl;

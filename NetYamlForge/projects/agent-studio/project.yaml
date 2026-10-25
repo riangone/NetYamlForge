@@ -1,6 +1,6 @@
 name: agent-studio
 displayName: "🤖 Agent Studio (Self-Evolution)"
-version: "1.0.0"
+version: "1.1.0"
 description: "NetYamlForge 自举演进工作台 — 3 CLI 角色随机编排系统"
 
 database:
@@ -19,23 +19,28 @@ layout:
   dashboardTheme: workspace
 
   landingPageByRole:
-    viewer: /agent-studio/DynamicEntity/Index?entity=agent_task
-    editor: /agent-studio/DynamicEntity/Index?entity=agent_task
-    admin:  /agent-studio/DynamicEntity/Index?entity=agent_task
+    viewer: /agent-studio/Page/HomePage
+    editor: /agent-studio/Page/HomePage
+    admin:  /agent-studio/Page/HomePage
 
   navigation:
     showDashboard: true
-    showPages: false
+    showPages: true
     showEntities: true
     entities: [agent_task, agent_task_log]
     items:
-      - label: 演进任务列表
+      - label: 🚀 演进协同工作台 (主页)
+        url: /agent-studio/Page/HomePage
+        icon: Sparkles
+        section: 协同中心
+        roles: [viewer, editor, admin]
+      - label: 演进任务管理 (CRUD)
         url: /agent-studio/DynamicEntity/Index?entity=agent_task
         icon: List
-        section: 任务管理
+        section: 运维管理
         roles: [viewer, editor, admin]
-      - label: 角色执行日志
+      - label: 角色执行日志 (CRUD)
         url: /agent-studio/DynamicEntity/Index?entity=agent_task_log
         icon: Terminal
-        section: 任务管理
+        section: 运维管理
         roles: [viewer, editor, admin]

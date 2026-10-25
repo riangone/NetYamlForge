@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -13,12 +12,22 @@ public class DynamicRateLimitingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<DynamicRateLimitingMiddleware> _logger;
-    private static readonly ConcurrentDictionary<string, RateLimiter> _limiterCache = new();
+    private readonly IClientIpResolver _clientIpResolver;
+    private readonly IRateLimiterRegistry _limiterRegistry;
+    private readonly IStandardRateLimitResponses _rateLimitResponses;
 
-    public DynamicRateLimitingMiddleware(RequestDelegate next, ILogger<DynamicRateLimitingMiddleware> logger)
+    public DynamicRateLimitingMiddleware(
+        RequestDelegate next,
+        ILogger<DynamicRateLimitingMiddleware> logger,
+        IClientIpResolver clientIpResolver,
+        IRateLimiterRegistry limiterRegistry,
+        IStandardRateLimitResponses rateLimitResponses)
     {
         _next = next;
         _logger = logger;
+        _clientIpResolver = clientIpResolver;
+        _limiterRegistry = limiterRegistry;
+        _rateLimitResponses = rateLimitResponses;
     }
 
     public async Task InvokeAsync(HttpContext httpContext, IEntityMetadataProvider metadataProvider, TenantContext tenantContext)
@@ -43,45 +52,37 @@ public class DynamicRateLimitingMiddleware
         }
 
         var rateLimitConfig = meta.RateLimiting;
-        
-        string limitByVal = "Global";
-        if (string.Equals(rateLimitConfig.LimitBy, "IP", StringComparison.OrdinalIgnoreCase))
-        {
-            limitByVal = httpContext.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP";
-        }
-        else if (string.Equals(rateLimitConfig.LimitBy, "User", StringComparison.OrdinalIgnoreCase))
-        {
-            limitByVal = httpContext.User.Identity?.Name ?? "Anonymous";
-        }
-        else if (string.Equals(rateLimitConfig.LimitBy, "Tenant", StringComparison.OrdinalIgnoreCase))
-        {
-            limitByVal = tenantContext.TenantId ?? "DefaultTenant";
-        }
 
-        string partitionKey = $"{entityName}_{rateLimitConfig.LimitBy}_{limitByVal}";
-        var limiter = GetOrCreateLimiter(partitionKey, rateLimitConfig);
+        // value 統一走 IClientIpResolver（リバースプロキシ配下でも実 IP を解決）。
+        var ip = _clientIpResolver.GetClientIp(httpContext);
+        var user = RateLimitPartitioners.ResolveUser(httpContext, null);
+        var tenant = tenantContext.TenantId ?? "DefaultTenant";
+        string partitionKey = RateLimitPartitioners.BuildCompositeKey(entityName, rateLimitConfig.LimitBy, ip, user, tenant);
 
-        using var lease = await limiter.AcquireAsync(1);
+        var limiter = _limiterRegistry.GetOrCreate(partitionKey, () => new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = rateLimitConfig.PermitLimit,
+            Window = TimeSpan.FromSeconds(rateLimitConfig.WindowSeconds),
+            QueueLimit = rateLimitConfig.QueueLimit,
+            SegmentsPerWindow = 6
+        }));
+
+        // QueueLimit=0 設定時はキューへ入れず即時 429 拒否。
+        using var lease = limiter.AttemptAcquire(1);
         if (!lease.IsAcquired)
         {
+            var retryAfter = rateLimitConfig.WindowSeconds;
+            if (lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan leaseRetryAfter)
+                && leaseRetryAfter.TotalSeconds > 0)
+            {
+                retryAfter = Math.Max(1, (int)Math.Ceiling(leaseRetryAfter.TotalSeconds));
+            }
+
             _logger.LogWarning("Rate limit exceeded for key {Key}", partitionKey);
-            httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-            httpContext.Response.Headers["Retry-After"] = "60";
-            await httpContext.Response.WriteAsJsonAsync(new { error = "Too Many Requests", retryAfter = 60 });
+            await _rateLimitResponses.WriteAsync(httpContext, entityName, retryAfter, rateLimitConfig.PermitLimit, rateLimitConfig.WindowSeconds);
             return;
         }
 
         await _next(httpContext);
-    }
-
-    private RateLimiter GetOrCreateLimiter(string partitionKey, RateLimitingDefinition config)
-    {
-        return _limiterCache.GetOrAdd(partitionKey, _ => new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
-        {
-            PermitLimit = config.PermitLimit,
-            Window = TimeSpan.FromSeconds(config.WindowSeconds),
-            QueueLimit = config.QueueLimit,
-            SegmentsPerWindow = 6
-        }));
     }
 }

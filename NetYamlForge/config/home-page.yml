@@ -49,22 +49,22 @@ capabilities:
     badge: Extensibility
 
 solutions:
-  - name: 工业级 ERP 契约服务 (JPiere)
-    audience: 企业信息化 / 供应链团队
-    summary: 承载 28 个关联实体，覆盖合同生命周期、报价审批、订单跟踪与原生 C# 业务 Hooks。
-    status: Enterprise
-  - name: 安全护栏与运行时沙箱 (Security)
-    audience: 架构师 / AI Agent 开发者
-    summary: 编译期 AST 阻断非法 SQL 与未白名单 Join，运行期隔离路径穿越与 API 默认拒绝。
-    status: Reference
-  - name: 智能体互联协议 (AI Card / AHP)
-    audience: AI 工程师 / 开放网络极客
-    summary: 声明式 AI 身份管理、有限状态机守卫与动态 QR 令牌生命周期，实现 Agent 受控握手。
-    status: PoC
-  - name: 企业级动态表单 (FormForge)
-    audience: 内部 IT / 业务运营人员
-    summary: 零代码拖拽构建表单、字段级动态验证、内网外网双模填报与数据一键导出。
+  - name: 智能体自举演进中枢 (Agent Studio)
+    audience: AI 架构师 / 全栈开发者 / 自动化运维团队
+    summary: 驱动 Claude、Antigravity 与 OpenCode 三阶段闭环推演、规格落盘与热重载。
+    status: Official Live
+  - name: 现代高效待办工作台 (Todo Workspace)
+    audience: 敏捷团队 / 效率追求者 / 任务管理者
+    summary: 业务前台卡片流与底层 DynamicEntity 双轨解耦，四维指标看板与紧急预警。
     status: Production
+  - name: 标准博客与发布平台 (Modern Blog)
+    audience: 内容创作者 / 技术博主 / 运营团队
+    summary: 文章一览流与单篇沉浸式阅读独立解耦，Markdown HTML 内生安全消毒。
+    status: Production
+  - name: 全声明式知识库门户 (Wiki Hub)
+    audience: 企业架构师 / 技术文档工程师 / 规范管理者
+    summary: 零手写 Razor 视图，100% 声明式 YAML 积木装配（SectionMarkdown / Kanban）。
+    status: Zero-Razor
 
 quickActions:
   - label: 样板间体验中心
@@ -72,18 +72,22 @@ quickActions:
     style: btn-primary
     icon: 🎪
   - label: Agent Studio 工作台
-    url: "/agent-studio/Dashboard"
+    url: "/agent-studio/Page/HomePage"
     style: btn-outline
     icon: 🤖
-  - label: 智能体任务看板
-    url: "/agent-studio/DynamicEntity/Index?entity=agent_task"
+  - label: 待办协作工作台
+    url: "/todo-app/Page/HomePage"
     style: btn-ghost
-    icon: 🚀
+    icon: ⚡
+  - label: 知识库协作中心
+    url: "/wiki-app/Page/HomePage"
+    style: btn-ghost
+    icon: 📚
 
 projectsSectionTitle: 企业产品工作区
 projectsSectionLead: 选择一个工作区进入对应产品的运营与管理界面。
 capabilitiesSectionTitle: 核心能力
-solutionsSectionTitle: 行业方案矩阵
+solutionsSectionTitle: 自举落地应用矩阵
 quickActionsSectionTitle: 快捷操作
 openWorkspaceLabel: 进入工作区
 emptyProjectsMessage: 未找到可用项目，请检查 projects/ 目录配置。
@@ -93,22 +97,22 @@ projectProfiles:
     icon: 🤖
     tagline: 声明式 AI 智能体演进工作台与多角色编排
     tags: [Agent, MultiRole, AI, SelfEvolution]
+  todo-app:
+    icon: ⚡
+    tagline: 现代高效待办工作台与双轨卡片流协作
+    tags: [Todo, Kanban, Productivity, DualTrack]
+  blog-app:
+    icon: 📰
+    tagline: 标准博客系统、沉浸式阅读与安全发布平台
+    tags: [Blog, Markdown, Publisher, Sanitized]
+  wiki-app:
+    icon: 📚
+    tagline: 零 Razor 纯声明式知识库与架构文档中心
+    tags: [Wiki, ZeroRazor, Declarative, Docs]
   userhome:
     icon: 👤
     tagline: 用户个人主页与项目管理
     tags: [User, Personal]
-  security-demo:
-    icon: 🛡️
-    tagline: 安全护栏与动态 CRUD 标杆（架构蓝图）
-    tags: [Security, Blueprint, Guardrails]
-  ai-card:
-    icon: 🤖
-    tagline: AI 名片与 Handshake 协议（架构蓝图）
-    tags: [AI, Blueprint, Handshake]
-  ai-doc-processor:
-    icon: 📑
-    tagline: AI 智能文档批处理（架构蓝图）
-    tags: [AI, Blueprint, Batch]
 
 defaultProjectProfile:
   icon: 🧱

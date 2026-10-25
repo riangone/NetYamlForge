@@ -304,6 +304,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRoleDefinitionProvider, NetYamlForge.Services.AI.AgentStudio.RoleDefinitionProvider>();
         services.AddSingleton<NetYamlForge.Services.AI.AgentStudio.IRolePromptBuilder, NetYamlForge.Services.AI.AgentStudio.RolePromptBuilder>();
         services.AddScoped<NetYamlForge.Services.AI.AgentStudio.IAgentOrchestrationService, NetYamlForge.Services.AI.AgentStudio.AgentOrchestrationService>();
+        services.AddScoped<NetYamlForge.Services.AI.AgentStudio.Manifestation.IManifestationSelfHealingService, NetYamlForge.Services.AI.AgentStudio.Manifestation.ManifestationSelfHealingService>();
+        services.AddScoped<NetYamlForge.Services.AI.AgentStudio.Manifestation.IAppManifestationService, NetYamlForge.Services.AI.AgentStudio.Manifestation.AppManifestationService>();
 
         var embedProvider = configuration.GetValue<string>("EmbeddingProvider")?.ToLowerInvariant()
             ?? Environment.GetEnvironmentVariable("EMBEDDING_PROVIDER")?.ToLowerInvariant()
@@ -487,6 +489,10 @@ public static class ServiceCollectionExtensions
         }
 
         services.AddSingleton<NetYamlForge.Services.Api.IFailedLoginTracker, NetYamlForge.Services.Api.FailedLoginTracker>();
+        services.AddSingleton<NetYamlForge.Services.Api.IClientIpResolver, NetYamlForge.Services.Api.ClientIpResolver>();
+        services.AddSingleton<NetYamlForge.Services.Api.IRateLimiterRegistry, NetYamlForge.Services.Api.RateLimiterRegistry>();
+        services.AddHostedService(sp => (NetYamlForge.Services.Api.RateLimiterRegistry)sp.GetRequiredService<NetYamlForge.Services.Api.IRateLimiterRegistry>());
+        services.AddSingleton<NetYamlForge.Services.Api.IStandardRateLimitResponses, NetYamlForge.Services.Api.StandardRateLimitResponses>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityAccessGuard>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityQueryService>();
         services.AddScoped<NetYamlForge.Services.Api.ApiEntityWriteService>();

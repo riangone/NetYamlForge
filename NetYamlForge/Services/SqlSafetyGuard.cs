@@ -54,4 +54,21 @@ public static class SqlSafetyGuard
         if (string.IsNullOrWhiteSpace(value)) return;
         SqlExpressionParser.Validate(value, context);
     }
+
+    private static readonly Regex UnsafeDdlDirectiveRegex = new(
+        @"\b(ATTACH\s+(?:DATABASE\s+)?|DETACH\s+(?:DATABASE\s+)?|PRAGMA\s+(?:load_extension|writable_schema|temp_store_directory|data_store_directory))\b",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    /// <summary>スキーマ初期化 DDL スクリプトの安全性を検証（ATTACH、DETACH、危険な PRAGMA を拒否）</summary>
+    public static void EnsureSafeSchemaSql(string? sql, string context)
+    {
+        if (string.IsNullOrWhiteSpace(sql)) return;
+
+        var match = UnsafeDdlDirectiveRegex.Match(sql);
+        if (match.Success)
+        {
+            throw new InvalidOperationException(
+                $"Unsafe SQL directive detected in '{context}': '{match.Value.Trim()}'. Cross-database attachment and dangerous PRAGMA directives are prohibited.");
+        }
+    }
 }

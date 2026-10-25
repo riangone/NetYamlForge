@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -250,12 +251,56 @@ public class CliChainService : ICliChainService
     // Process execution
     // ──────────────────────────────────────────────────────────
 
+    private static string ResolveCommandPath(string fileName)
+    {
+        if (Path.IsPathRooted(fileName) && File.Exists(fileName)) return fileName;
+
+        var envPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+        var paths = envPath.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        var home = Environment.GetEnvironmentVariable("HOME") ?? "/home/ubuntu";
+        var wellKnownDirs = new[]
+        {
+            Path.Combine(home, ".local", "bin"),
+            Path.Combine(home, ".dotnet", "tools"),
+            Path.Combine(home, ".dotnet"),
+            Path.Combine(home, ".gemini", "antigravity-cli", "bin"),
+            "/usr/local/bin",
+            "/usr/bin",
+            "/bin"
+        };
+
+        foreach (var dir in wellKnownDirs)
+        {
+            if (!paths.Contains(dir, StringComparer.OrdinalIgnoreCase) && Directory.Exists(dir))
+            {
+                paths.Add(dir);
+            }
+        }
+
+        foreach (var dir in paths)
+        {
+            try
+            {
+                var candidate = Path.Combine(dir, fileName);
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+            catch { }
+        }
+
+        return fileName;
+    }
+
     private static async Task<(string? Output, string? Error)> RunProcessAsync(
         string fileName, string arguments, TimeSpan timeout, CancellationToken cancellationToken)
     {
+        var resolvedFileName = ResolveCommandPath(fileName);
         var startInfo = new ProcessStartInfo
         {
-            FileName = fileName,
+            FileName = resolvedFileName,
             Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -263,6 +308,12 @@ public class CliChainService : ICliChainService
             UseShellExecute = false,
             CreateNoWindow = true
         };
+
+        var home = Environment.GetEnvironmentVariable("HOME") ?? "/home/ubuntu";
+        var extraPaths = $"{Path.Combine(home, ".local", "bin")}:{Path.Combine(home, ".dotnet")}:{Path.Combine(home, ".gemini", "antigravity-cli", "bin")}:/usr/local/bin:/usr/bin:/bin";
+        var currentPath = Environment.GetEnvironmentVariable("PATH") ?? "";
+        startInfo.EnvironmentVariables["PATH"] = $"{extraPaths}:{currentPath}";
+        startInfo.EnvironmentVariables["HOME"] = home;
 
         using var process = new Process { StartInfo = startInfo };
         var outputBuilder = new StringBuilder();

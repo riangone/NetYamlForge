@@ -34,6 +34,29 @@ public class AgentOrchestrationService : IAgentOrchestrationService
     {
         var logs = new List<AgentExecutionLogEntry>();
         var allocation = _roleBinder.Shuffle(request.CustomProviders);
+
+        if (!string.IsNullOrWhiteSpace(request.PreferredArchitect) ||
+            !string.IsNullOrWhiteSpace(request.PreferredDeveloper) ||
+            !string.IsNullOrWhiteSpace(request.PreferredTester))
+        {
+            var arch = !string.IsNullOrWhiteSpace(request.PreferredArchitect) ? request.PreferredArchitect.Trim().ToLowerInvariant() : allocation.Architect.Provider;
+            var dev = !string.IsNullOrWhiteSpace(request.PreferredDeveloper) ? request.PreferredDeveloper.Trim().ToLowerInvariant() : allocation.Developer.Provider;
+            var test = !string.IsNullOrWhiteSpace(request.PreferredTester) ? request.PreferredTester.Trim().ToLowerInvariant() : allocation.Tester.Provider;
+
+            if (!string.IsNullOrWhiteSpace(request.PreferredArchitect))
+            {
+                if (dev == arch) dev = allocation.Architect.Provider != arch ? allocation.Architect.Provider : "antigravity";
+                if (test == arch) test = allocation.Tester.Provider != arch ? allocation.Tester.Provider : "opencode";
+                if (dev == test) test = "opencode";
+            }
+
+            allocation = new AgentTaskAllocation(
+                Architect: new RoleAssignment(RandomRoleBinder.RoleArchitect, arch),
+                Developer: new RoleAssignment(RandomRoleBinder.RoleDeveloper, dev),
+                Tester: new RoleAssignment(RandomRoleBinder.RoleTester, test)
+            );
+        }
+
         var timeoutSec = request.TimeoutSeconds ?? 300;
 
         _logger.LogInformation(

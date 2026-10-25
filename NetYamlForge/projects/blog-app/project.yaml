@@ -1,0 +1,51 @@
+name: blog-app
+displayName: "Blog App"
+version: "1.0.0"
+description: "NetYamlForge 独立博客与内容发布平台"
+
+database:
+  type: sqlite
+  path: database/blog-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  theme: synthwave
+  dashboardTheme: workspace
+
+  landingPageByRole:
+    viewer: /blog-app/Page/HomePage
+    editor: /blog-app/Page/HomePage
+    admin:  /blog-app/Page/HomePage
+
+  navigation:
+    showDashboard: true
+    showPages: false
+    showEntities: false
+    entities: [blog_post, blog_category]
+    items:
+      - label: 博客前台 (业务门户)
+        url: /blog-app/Page/HomePage
+        icon: Newspaper
+        section: 业务中心
+        roles: [viewer, editor, admin]
+      - label: 内容统计看板
+        url: /blog-app/Dashboard
+        icon: LayoutDashboard
+        section: 业务中心
+        roles: [viewer, editor, admin]
+      - label: 文章运维管理 (后台 CRUD)
+        url: /blog-app/DynamicEntity/Index?entity=blog_post
+        icon: FileText
+        section: 内容运维
+        roles: [editor, admin]
+      - label: 分类运维管理 (后台 CRUD)
+        url: /blog-app/DynamicEntity/Index?entity=blog_category
+        icon: Folder
+        section: 内容运维
+        roles: [editor, admin]

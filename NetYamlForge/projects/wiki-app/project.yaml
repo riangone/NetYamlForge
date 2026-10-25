@@ -1,0 +1,24 @@
+name: wiki-app
+displayName: "知识库协作中心 (Wiki Hub)"
+version: "1.0.0"
+description: "全声明式多区块知识库与技术文档门户，开箱即用 Markdown 渲染"
+icon: "📚"
+defaultRoute: "/wiki-app/Page/HomePage"
+
+database:
+  type: sqlite
+  path: database/wiki-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  pages: true
+  dynamicEntity: true
+
+layout:
+  theme: corporate
+  dashboardTheme: workspace
+  landingPageByRole:
+    admin: "/wiki-app/Page/HomePage"
+    editor: "/wiki-app/Page/HomePage"
+    viewer: "/wiki-app/Page/HomePage"

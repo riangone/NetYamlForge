@@ -1,0 +1,65 @@
+entities:
+  todo:
+    table: todo
+    key: id
+    displayName: Todo
+    softDelete: false
+    api: enabled
+    paging:
+      pageSize: 15
+      mode: numbered
+    actions:
+      toggle_complete:
+        label: 切换完成状态
+        labelKey: todo.actions.toggle_complete
+        scope: row
+        confirm: 确定要切换该待办事项的完成状态吗？
+        confirmKey: todo.actions.toggle_complete_confirm
+        handler: todo_toggle_complete
+    hooks:
+      beforeCreate: todo_validate
+      beforeUpdate: todo_validate
+    columns:
+      id:           { type: int, identity: true, label: ID, sortable: true }
+      title:        { type: string, required: true, label: 标题, searchable: true, sortable: true }
+      description:  { type: textarea, label: 描述, searchable: true }
+      is_completed: { type: boolean, label: 完成, sortable: true }
+      due_date:     { type: date, label: 截止日期, sortable: true }
+      priority:     { type: string, required: true, label: 优先级, searchable: true, sortable: true }
+      created_at:   { type: datetime, label: 创建时间, sortable: true }
+      updated_at:   { type: datetime, label: 更新时间, sortable: true }
+    forms:
+      title:
+        type: string
+        required: true
+        label: 标题
+        editable: true
+      description:
+        type: textarea
+        label: 描述
+        editable: true
+      is_completed:
+        type: boolean
+        label: 完成
+        editable: true
+      due_date:
+        type: date
+        label: 截止日期
+        editable: true
+      priority:
+        type: select
+        label: 优先级
+        editable: true
+        required: true
+        options: [low, medium, high]
+    filters:
+      priority:
+        type: toggle-group
+        label: 优先级
+        options: [low, medium, high]
+      is_completed:
+        type: bool-toggle
+        label: 完成状态
+      due_date:
+        type: date-range
+        label: 截止日期

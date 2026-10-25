@@ -1,0 +1,36 @@
+title: "企业表单审批流中心"
+description: "面向企业行政、财务与技术立项的多级智能审批工作台，支持状态流转、历史审计与一键决断"
+sections:
+  - id: approval_metrics
+    title: "审批流效能指标"
+    sourceType: custom
+    source: >-
+      SELECT '待我审批' as label, COUNT(*) as value, '⏳' as icon FROM approval_request WHERE status = 'pending'
+      UNION ALL
+      SELECT '已通过' as label, COUNT(*) as value, '✅' as icon FROM approval_request WHERE status = 'approved'
+      UNION ALL
+      SELECT '已驳回' as label, COUNT(*) as value, '🚫' as icon FROM approval_request WHERE status = 'rejected'
+      UNION ALL
+      SELECT '紧急单据' as label, COUNT(*) as value, '🔥' as icon FROM approval_request WHERE urgency = 'urgent' AND status = 'pending'
+    component: stat_cards
+    labelField: label
+    valueField: value
+    iconField: icon
+
+  - id: pending_stream
+    title: "待处理审批流"
+    description: "需要快速审核与决断的企业业务单据"
+    sourceType: custom
+    source: "SELECT id, title, category, applicant, department, amount, urgency, status, reason, created_at FROM approval_request WHERE status = 'pending' ORDER BY CASE WHEN urgency = 'urgent' THEN 1 WHEN urgency = 'high' THEN 2 ELSE 3 END, id DESC"
+    component: card_list
+    titleField: title
+    subtitleField: department
+    descriptionField: reason
+    pageSize: 6
+
+  - id: all_requests
+    title: "全量单据流水"
+    sourceType: table
+    source: approval_request
+    component: table
+    pageSize: 10

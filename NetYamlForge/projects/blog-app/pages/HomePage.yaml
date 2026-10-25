@@ -1,0 +1,34 @@
+title: "博客探索门户 (Blog Portal)"
+description: "技术博客、架构思考与前沿工程洞察"
+sections:
+  - id: blog_stats
+    title: "内容指标概览"
+    sourceType: custom
+    source: "SELECT '已发布文章' AS label, COUNT(*) AS value, '📚' AS icon, '' AS delta, '' AS sub_value FROM blog_post WHERE status = 'published' UNION ALL SELECT '总阅读量', COALESCE(SUM(view_count), 0), '👀', '', '' FROM blog_post UNION ALL SELECT '分类总数', COUNT(*), '🏷️', '', '' FROM blog_category UNION ALL SELECT '草稿箱', COUNT(*), '✏️', '', '' FROM blog_post WHERE status = 'draft'"
+    component: stat_cards
+
+  - id: categories
+    title: "文章分类"
+    sourceType: custom
+    source: "SELECT c.id, c.name, c.slug, c.description, (SELECT COUNT(*) FROM blog_post WHERE category_id = c.id AND status = 'published') AS post_count FROM blog_category c ORDER BY c.sort_order ASC"
+    component: badge_list
+
+  - id: published_articles
+    title: "精选与最新文章 (业务前台)"
+    sourceType: custom
+    source: "SELECT p.id, p.title, p.slug, p.summary, c.name AS category_name, c.slug AS category_slug, p.author, p.view_count, p.published_at FROM blog_post p LEFT JOIN blog_category c ON p.category_id = c.id WHERE p.status = 'published' ORDER BY p.id DESC"
+    component: card_list
+    columns:
+      id: { label: "ID", type: int }
+      title: { label: "文章标题", type: string }
+      category_name: { label: "分类", type: string }
+      author: { label: "作者", type: string }
+      view_count: { label: "阅读量", type: int }
+      published_at: { label: "发布时间", type: datetime }
+      summary: { label: "摘要", type: string }
+
+  - id: trending_posts
+    title: "热门排行榜"
+    sourceType: custom
+    source: "SELECT p.id, p.title, p.view_count, c.name AS category_name FROM blog_post p LEFT JOIN blog_category c ON p.category_id = c.id WHERE p.status = 'published' ORDER BY p.view_count DESC, p.id DESC LIMIT 5"
+    component: card_list

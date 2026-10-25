@@ -1,0 +1,14 @@
+entities:
+  business_channel:
+    table: business_channel
+    key: id
+    displayName: "业务渠道"
+    columns:
+      id:            { type: int, identity: true, label: 编号, sortable: true }
+      channel_name:  { type: string, required: true, label: 渠道与业务线, searchable: true }
+      category:      { type: string, required: true, label: 类别 }
+      revenue:       { type: decimal, required: true, label: 营收贡献, sortable: true }
+      conversions:   { type: int, required: true, label: 转化单数, sortable: true }
+      roi_multiple:  { type: decimal, required: true, label: ROI倍数, sortable: true }
+      summary:       { type: textarea, label: 业务简述 }
+      created_at:    { type: datetime, required: true, label: 创建时间, sortable: true }

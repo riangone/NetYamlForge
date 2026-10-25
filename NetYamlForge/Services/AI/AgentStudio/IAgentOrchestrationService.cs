@@ -8,7 +8,10 @@ public record AgentTaskExecutionRequest(
     string Description,
     string? ProjectName = null,
     IReadOnlyList<string>? CustomProviders = null,
-    int? TimeoutSeconds = null
+    int? TimeoutSeconds = null,
+    string? PreferredArchitect = null,
+    string? PreferredDeveloper = null,
+    string? PreferredTester = null
 );
 
 /// <summary>

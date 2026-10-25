@@ -1,0 +1,46 @@
+name: todo-app
+displayName: "Todo App"
+version: "1.0.0"
+description: "NetYamlForge 轻量级待办应用"
+
+database:
+  type: sqlite
+  path: database/todo-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  theme: synthwave
+  dashboardTheme: workspace
+
+  landingPageByRole:
+    viewer: /todo-app/Page/HomePage
+    editor: /todo-app/Page/HomePage
+    admin:  /todo-app/Page/HomePage
+
+  navigation:
+    showDashboard: true
+    showPages: false
+    showEntities: false
+    entities: [todo]
+    items:
+      - label: 待办主页 (业务前台)
+        url: /todo-app/Page/HomePage
+        icon: Home
+        section: 业务中心
+        roles: [viewer, editor, admin]
+      - label: 待办看板
+        url: /todo-app/Dashboard
+        icon: LayoutDashboard
+        section: 业务中心
+        roles: [viewer, editor, admin]
+      - label: 待办数据管理 (后台 CRUD)
+        url: /todo-app/DynamicEntity/Index?entity=todo
+        icon: Settings
+        section: 运维管理
+        roles: [editor, admin]

@@ -1,0 +1,14 @@
+stats:
+  - { label: 全部待办, entity: todo, aggregate: count, filter: "", icon: "📝", color: badge-primary }
+  - { label: 已完成,   entity: todo, aggregate: count, filter: "is_completed = 1", icon: "✅", color: badge-success }
+  - { label: 待处理,   entity: todo, aggregate: count, filter: "is_completed = 0", icon: "⏳", color: badge-warning }
+charts:
+  - title: 待办优先级分布
+    type: doughnut
+    entity: todo
+    valueAggregate: count
+    groupExpression: priority
+    orderBy: value
+    orderDir: desc
+    limit: 3
+    colors: [ "rgba(16,185,129,0.8)", "rgba(245,158,11,0.8)", "rgba(239,68,68,0.8)" ]

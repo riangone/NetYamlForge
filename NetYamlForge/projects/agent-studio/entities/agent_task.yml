@@ -13,6 +13,11 @@ entities:
         scope: row
         confirm: "确定要对此任务启动 Architect -> Developer -> Tester 三阶段协同流水线吗？"
         handler: run_pipeline_handler
+      manifest_app:
+        label: "📦 物理交付并热挂载"
+        scope: row
+        confirm: "确定要将此任务的产物解析并物理落地到 projects/ 目录、执行安全校验并热挂载吗？"
+        handler: manifest_app_handler
     layout:
       forms:
         columns: 2

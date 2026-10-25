@@ -17,7 +17,7 @@ public class ShowcaseIntegrationTests : IClassFixture<ApiTestWebApplicationFacto
     }
 
     [Fact]
-    public async Task GetShowcaseIndex_Anonymous_ShouldReturnOk_WithAllPillars()
+    public async Task GetShowcaseIndex_Anonymous_ShouldReturnOk_WithAgentStudio()
     {
         using var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
         {
@@ -31,21 +31,22 @@ public class ShowcaseIntegrationTests : IClassFixture<ApiTestWebApplicationFacto
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var html = await response.Content.ReadAsStringAsync();
 
-        // 验证四大核心样板间全部展现
-        Assert.Contains("Security Guardrails", html);
-        Assert.Contains("AI Card", html);
-        Assert.Contains("FormForge", html);
-        Assert.Contains("JPiere Contract Service", html);
+        // 验证四大核心自举演进样板间全面展现
+        Assert.Contains("Agent Studio", html);
+        Assert.Contains("Todo Workspace", html);
+        Assert.Contains("Modern Blog", html);
+        Assert.Contains("Wiki Hub", html);
 
         // 验证宣发推广卡片文案存在
         Assert.Contains("NetYamlForge", html);
     }
 
     [Theory]
-    [InlineData("security-demo", "AST Guardrail")]
-    [InlineData("ai-card", "AHP Protocol")]
-    [InlineData("form-forge", "Form Builder")]
-    [InlineData("jpiere-cs", "Enterprise ERP")]
+    [InlineData("agent-studio", "Agent Studio")]
+    [InlineData("agent-studio", "MCP Protocol")]
+    [InlineData("todo-app", "Todo App")]
+    [InlineData("blog-app", "Blog App")]
+    [InlineData("wiki-app", "Wiki Hub")]
     public async Task GetShowcaseSpec_ShouldReturnJsonMetadata_AndCodeSnippet(string projectId, string expectedTag)
     {
         using var client = _factory.CreateClient();

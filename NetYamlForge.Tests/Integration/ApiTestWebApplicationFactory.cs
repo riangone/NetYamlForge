@@ -44,6 +44,16 @@ public sealed class ApiTestWebApplicationFactory : WebApplicationFactory<Program
         Directory.CreateDirectory(Path.Combine(TempContentRoot, "projects", ProjectName, "database"));
 
         using (File.Create(TenantDbPath)) { }
+
+        var sourceSystemDb = Path.Combine(appProjectDir, "system.db");
+        if (!File.Exists(sourceSystemDb))
+        {
+            sourceSystemDb = Path.Combine(appProjectDir, "var", "data", "system.db");
+        }
+        if (File.Exists(sourceSystemDb))
+        {
+            File.Copy(sourceSystemDb, Path.Combine(TempContentRoot, "system_test.db"), overwrite: true);
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

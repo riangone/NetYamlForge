@@ -17,6 +17,7 @@ public class ProjectManager
     private readonly IProjectHookLoader _projectHookLoader;
     private readonly IProjectBusinessLogicRegistry _projectBusinessLogicRegistry;
     private readonly IProjectActionRegistry _projectActionRegistry;
+    private string? _contentRootPath;
 
     protected ProjectManager()
     {
@@ -45,6 +46,7 @@ public class ProjectManager
 
     public virtual async Task InitializeAsync(IWebHostEnvironment env)
     {
+        _contentRootPath = env.ContentRootPath;
         var projectsRoot = Path.Combine(env.ContentRootPath, "projects");
         if (!Directory.Exists(projectsRoot))
         {
@@ -220,9 +222,10 @@ public class ProjectManager
         const string sqliteOptions = ";Pooling=False";
         if (!string.IsNullOrWhiteSpace(config.Database.Path))
         {
-            var dbPath = Path.IsPathRooted(config.Database.Path)
-                ? config.Database.Path
-                : Path.GetFullPath(Path.Combine(projectDir, config.Database.Path));
+            var dbPath = PathSafetyGuard.NormalizeAndValidatePath(
+                config.Database.Path,
+                projectDir,
+                $"Project '{config.Name}' database.path");
             return $"Data Source={dbPath}{sqliteOptions}";
         }
 
@@ -261,4 +264,41 @@ public class ProjectManager
         _projects.TryGetValue(name, out info);
 
     public virtual IReadOnlyCollection<ProjectInfo> GetAll() => _projects.Values;
+
+    /// <summary>
+    /// 動的にプロジェクトを再読み込みまたは新規登録します。
+    /// </summary>
+    public virtual async Task<bool> ReloadProjectAsync(string projectName)
+    {
+        var root = _contentRootPath;
+        if (string.IsNullOrWhiteSpace(root))
+        {
+            root = Directory.GetCurrentDirectory();
+            if (!Directory.Exists(Path.Combine(root, "projects")) && Directory.Exists(Path.Combine(root, "NetYamlForge", "projects")))
+            {
+                root = Path.Combine(root, "NetYamlForge");
+            }
+        }
+        var projectsRoot = Path.Combine(root, "projects");
+        var projectDir = Path.Combine(projectsRoot, projectName);
+        var yamlPath = Path.Combine(projectDir, "project.yaml");
+        if (!Directory.Exists(projectDir) || !File.Exists(yamlPath))
+        {
+            _logger.LogWarning("プロジェクトの再読み込みに失敗しました（ディレクトリまたは project.yaml が不在）：{Dir}", projectDir);
+            return false;
+        }
+
+        try
+        {
+            await _projectHookLoader.UnloadProjectAssemblyAsync(projectName);
+            await LoadProjectAsync(projectDir, yamlPath);
+            _logger.LogInformation("プロジェクトの動的再読み込み/登録が完了しました：{Project}", projectName);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "プロジェクト '{Project}' の再読み込み中にエラーが発生しました", projectName);
+            return false;
+        }
+    }
 }

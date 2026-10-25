@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading.RateLimiting;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,12 +11,15 @@ namespace NetYamlForge.Services.Api;
 
 public class GlobalRateLimitingMiddleware
 {
+    private const string ApiTokenScheme = "ApiToken";
+
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalRateLimitingMiddleware> _logger;
     private readonly RateLimitingOptions _options;
     private readonly IFailedLoginTracker _loginTracker;
-    private static readonly ConcurrentDictionary<string, RateLimiter> _apiLimiters = new();
-    private static readonly ConcurrentDictionary<string, RateLimiter> _authLimiters = new();
+    private readonly IClientIpResolver _clientIpResolver;
+    private readonly IRateLimiterRegistry _limiterRegistry;
+    private readonly IStandardRateLimitResponses _rateLimitResponses;
 
     private static readonly string[] AuthPaths = new[]
     {
@@ -32,11 +35,33 @@ public class GlobalRateLimitingMiddleware
         ILogger<GlobalRateLimitingMiddleware> logger,
         IOptions<RateLimitingOptions> options,
         IFailedLoginTracker loginTracker)
+        : this(
+            next,
+            logger,
+            options,
+            loginTracker,
+            new ClientIpResolver(options),
+            new RateLimiterRegistry(options, Microsoft.Extensions.Logging.Abstractions.NullLogger<RateLimiterRegistry>.Instance),
+            new StandardRateLimitResponses(Microsoft.Extensions.Logging.Abstractions.NullLogger<StandardRateLimitResponses>.Instance))
+    {
+    }
+
+    public GlobalRateLimitingMiddleware(
+        RequestDelegate next,
+        ILogger<GlobalRateLimitingMiddleware> logger,
+        IOptions<RateLimitingOptions> options,
+        IFailedLoginTracker loginTracker,
+        IClientIpResolver clientIpResolver,
+        IRateLimiterRegistry limiterRegistry,
+        IStandardRateLimitResponses rateLimitResponses)
     {
         _next = next;
         _logger = logger;
         _options = options.Value;
         _loginTracker = loginTracker;
+        _clientIpResolver = clientIpResolver;
+        _limiterRegistry = limiterRegistry;
+        _rateLimitResponses = rateLimitResponses;
     }
 
     public async Task InvokeAsync(HttpContext httpContext)
@@ -51,17 +76,33 @@ public class GlobalRateLimitingMiddleware
 
         if (IsApiEndpoint(path) && _options.Api.Enabled)
         {
-            if (await TryEnforceRateLimit(httpContext, _options.Api, _apiLimiters, "api"))
+            // UseAuthorization より前に ApiToken を事前認証し、複合キー（IP|User）に
+            // ユーザー身元を反映できるようにする。
+            await PreAuthenticateApiTokenAsync(httpContext);
+
+            if (await TryEnforceRateLimit(httpContext, _options.Api, "API", null))
                 return;
         }
         else if (IsAuthEndpoint(path))
         {
+            string? formUsername = null;
+
+            if (HttpMethods.IsPost(httpContext.Request.Method)
+                && (_options.BruteForce.Enabled || _options.Auth.Enabled))
+            {
+                formUsername = await ReadUsernameFromFormAsync(httpContext);
+            }
+
             if (_options.BruteForce.Enabled)
             {
-                var clientIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP";
-                if (_loginTracker.IsLockedOut(clientIp))
+                var clientIp = _clientIpResolver.GetClientIp(httpContext);
+                if (_loginTracker.IsLockedOut(clientIp)
+                    || (formUsername != null && _loginTracker.IsLockedOut(formUsername)))
                 {
-                    _logger.LogWarning("Global rate limit / brute force lockout: Client IP {ClientIp} is locked out", clientIp);
+                    _logger.LogWarning(
+                        "Global rate limit / brute force lockout: Client IP {ClientIp} or user {Username} is locked out",
+                        clientIp, formUsername);
+
                     httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                     httpContext.Response.Headers["Retry-After"] = _options.BruteForce.LockoutSeconds.ToString();
                     await httpContext.Response.WriteAsJsonAsync(new
@@ -76,7 +117,7 @@ public class GlobalRateLimitingMiddleware
 
             if (_options.Auth.Enabled)
             {
-                if (await TryEnforceRateLimit(httpContext, _options.Auth, _authLimiters, "auth"))
+                if (await TryEnforceRateLimit(httpContext, _options.Auth, "Auth", formUsername))
                     return;
             }
         }
@@ -84,13 +125,20 @@ public class GlobalRateLimitingMiddleware
         await _next(httpContext);
     }
 
-    private bool IsApiEndpoint(string path)
+    private static bool IsApiEndpoint(string path)
     {
-        return path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase)
-            || path.StartsWith("/mcp", StringComparison.OrdinalIgnoreCase);
+        if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase)
+            || path.Equals("/api", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("/mcp", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return path.Contains("/api/", StringComparison.OrdinalIgnoreCase)
+            || path.Contains("/entities/", StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsAuthEndpoint(string path)
+    private static bool IsAuthEndpoint(string path)
     {
         foreach (var authPath in AuthPaths)
         {
@@ -100,14 +148,66 @@ public class GlobalRateLimitingMiddleware
         return false;
     }
 
+    /// <summary>
+    /// トークン系ヘッダー/クエリを持つ API リクエストについて ApiToken スキームを事前認証し、
+    /// 成功時はプリンシパルを HttpContext.User に設定します。
+    /// これにより PartitionPageKey が "Anonymous" に退化するのを防ぎます。
+    /// </summary>
+    private async Task PreAuthenticateApiTokenAsync(HttpContext httpContext)
+    {
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            return;
+        }
+
+        if (!HasApiTokenSource(httpContext.Request))
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await httpContext.AuthenticateAsync(ApiTokenScheme);
+            if (result.Succeeded && result.Principal != null)
+            {
+                httpContext.User = result.Principal;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Pre-authentication via ApiToken scheme failed");
+        }
+    }
+
+    private static bool HasApiTokenSource(HttpRequest request)
+    {
+        var authHeader = request.Headers["Authorization"].FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(authHeader)
+            && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Headers["X-Api-Token"].FirstOrDefault())
+            || !string.IsNullOrWhiteSpace(request.Headers["X-Api-Key"].FirstOrDefault()))
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(request.Query["api_token"].FirstOrDefault());
+    }
+
     private async Task<bool> TryEnforceRateLimit(
         HttpContext httpContext,
         RateLimitRule rule,
-        ConcurrentDictionary<string, RateLimiter> limiterCache,
-        string ruleGroup)
+        string group,
+        string? formUsername)
     {
-        string partitionKey = BuildPartitionKey(httpContext, rule, ruleGroup);
-        var limiter = limiterCache.GetOrAdd(partitionKey, _ => new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
+        var ip = _clientIpResolver.GetClientIp(httpContext);
+        var user = RateLimitPartitioners.ResolveUser(httpContext, formUsername);
+        string partitionKey = RateLimitPartitioners.BuildCompositeKey(group, rule.LimitBy, ip, user);
+
+        var limiter = _limiterRegistry.GetOrCreate(partitionKey, () => new SlidingWindowRateLimiter(new SlidingWindowRateLimiterOptions
         {
             PermitLimit = rule.PermitLimit,
             Window = TimeSpan.FromSeconds(rule.WindowSeconds),
@@ -115,46 +215,41 @@ public class GlobalRateLimitingMiddleware
             SegmentsPerWindow = 6
         }));
 
-        using var lease = await limiter.AcquireAsync(1);
+        // QueueLimit=0 のためキューへ入らず、許容値を超えていれば即座に拒否される。
+        using var lease = limiter.AttemptAcquire(1);
         if (!lease.IsAcquired)
         {
             var retryAfter = rule.WindowSeconds;
-            _logger.LogWarning("Global rate limit exceeded for {Group} key {Key}", ruleGroup, partitionKey);
-
-            httpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-            httpContext.Response.Headers["Retry-After"] = retryAfter.ToString();
-            httpContext.Response.Headers["X-RateLimit-Limit"] = rule.PermitLimit.ToString();
-            httpContext.Response.Headers["X-RateLimit-Remaining"] = "0";
-            httpContext.Response.Headers["X-RateLimit-Window"] = rule.WindowSeconds.ToString();
-            await httpContext.Response.WriteAsJsonAsync(new
+            if (lease.TryGetMetadata(MetadataName.RetryAfter, out TimeSpan leaseRetryAfter)
+                && leaseRetryAfter.TotalSeconds > 0)
             {
-                error = "Too Many Requests",
-                retryAfter = retryAfter,
-                ruleGroup = ruleGroup
-            });
+                retryAfter = Math.Max(1, (int)Math.Ceiling(leaseRetryAfter.TotalSeconds));
+            }
+
+            _logger.LogWarning("Global rate limit exceeded for {Group} key {Key}", group, partitionKey);
+            await _rateLimitResponses.WriteAsync(httpContext, group, retryAfter, rule.PermitLimit, rule.WindowSeconds);
             return true;
         }
 
         return false;
     }
 
-    private string BuildPartitionKey(HttpContext httpContext, RateLimitRule rule, string ruleGroup)
+    private async Task<string?> ReadUsernameFromFormAsync(HttpContext httpContext)
     {
-        string limitByVal;
-
-        if (string.Equals(rule.LimitBy, "IP", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            limitByVal = httpContext.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP";
+            httpContext.Request.EnableBuffering();
+            var form = await httpContext.Request.ReadFormAsync();
+            httpContext.Request.Body.Position = 0;
+            return form[_options.BruteForce.UsernameFormKey].FirstOrDefault();
         }
-        else if (string.Equals(rule.LimitBy, "User", StringComparison.OrdinalIgnoreCase))
+        catch (InvalidOperationException)
         {
-            limitByVal = httpContext.User.Identity?.Name ?? "Anonymous";
+            return null;
         }
-        else
+        catch (BadHttpRequestException)
         {
-            limitByVal = "Global";
+            return null;
         }
-
-        return $"{ruleGroup}_{rule.LimitBy}_{limitByVal}";
     }
 }

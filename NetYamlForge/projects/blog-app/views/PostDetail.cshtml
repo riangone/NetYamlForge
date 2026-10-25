@@ -1,0 +1,326 @@
+@using NetYamlForge.Models
+@using System.Text.RegularExpressions
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = ViewData["Project"] as string ?? "blog-app";
+    var pageDef = ViewData["PageDef"] as PageDefinition;
+    ViewData["ActivePage"] = "Page";
+
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+
+    var postData = Model.TryGetValue("current_post", out var cp) ? cp.Rows.FirstOrDefault() : null;
+    var recentPosts = Model.TryGetValue("recent_posts", out var rp) ? rp.Rows.ToList() : new();
+
+    var id = postData?.TryGetValue("id", out var idVal) == true ? idVal?.ToString() ?? "0" : "0";
+    var title = postData?.TryGetValue("title", out var tVal) == true ? tVal?.ToString() ?? "文章未找到" : "文章未找到";
+    var summary = postData?.TryGetValue("summary", out var sVal) == true ? sVal?.ToString() ?? "" : "";
+    var content = postData?.TryGetValue("content", out var cVal) == true ? cVal?.ToString() ?? "" : "";
+    var catName = postData?.TryGetValue("category_name", out var cnVal) == true ? cnVal?.ToString() ?? "技术探索" : "技术探索";
+    var author = postData?.TryGetValue("author", out var aVal) == true ? aVal?.ToString() ?? "Claude Architect" : "Claude Architect";
+    var status = postData?.TryGetValue("status", out var stVal) == true ? stVal?.ToString() ?? "published" : "published";
+    var views = postData?.TryGetValue("view_count", out var vVal) == true ? vVal?.ToString() ?? "0" : "0";
+    var pubAt = postData?.TryGetValue("published_at", out var pVal) == true ? pVal?.ToString() ?? "" : "";
+    if (DateTime.TryParse(pubAt, out var dt))
+    {
+        pubAt = dt.ToString("yyyy年MM月dd日");
+    }
+
+    ViewData["Title"] = $"{title} - 博客正文";
+
+    string FormatMarkdown(string rawText)
+    {
+        if (string.IsNullOrWhiteSpace(rawText)) return "";
+        var text = System.Net.WebUtility.HtmlEncode(rawText);
+        // 成对粗体替换 **text** -> <strong>text</strong>
+        text = Regex.Replace(text, @"\*\*([^*]+)\*\*", "<strong>$1</strong>");
+        // 成对行内代码 `code` -> <code>code</code>
+        text = Regex.Replace(text, @"`([^`]+)`", "<code class=\"px-1.5 py-0.5 rounded bg-base-200 text-primary font-mono text-xs\">$1</code>");
+        return text;
+    }
+}
+
+<!-- 顶部固定沉浸式阅读进度指示条 (随滚动实时延伸) -->
+<div class="fixed top-0 left-0 right-0 h-1 bg-base-300/30 z-50 pointer-events-none">
+    <div id="readingProgressBar" class="h-full bg-gradient-to-r from-primary via-secondary to-accent w-0 transition-all duration-150"></div>
+</div>
+
+<div class="container mx-auto px-3 sm:px-4 lg:px-6 max-w-4xl 2xl:max-w-5xl py-4 sm:py-8">
+    <!-- 顶部导航与面包屑 -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <a href="@Url.Content($"~/{currentProject}/Page/HomePage")" 
+           class="btn btn-sm btn-ghost gap-2 border border-base-300 hover:border-primary rounded-xl">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            <span class="font-bold">返回博客一览</span>
+        </a>
+
+        <div class="breadcrumbs text-xs opacity-70">
+            <ul>
+                <li><a href="@Url.Content($"~/{currentProject}/Page/HomePage")" class="hover:underline">博客主页</a></li>
+                <li><span class="badge badge-sm badge-ghost">@catName</span></li>
+                <li class="font-bold text-base-content line-clamp-1 max-w-[220px]">@title</li>
+            </ul>
+        </div>
+    </div>
+
+    @if (postData == null)
+    {
+        <div class="card bg-base-100 border border-base-300 py-16 text-center shadow-sm rounded-3xl">
+            <div class="text-4xl mb-3">🔍</div>
+            <h2 class="text-2xl font-bold mb-2">抱歉，未找到指定的文章</h2>
+            <p class="text-sm opacity-60 mb-6">该文章可能已被移除或尚处于草稿状态。</p>
+            <div>
+                <a href="@Url.Content($"~/{currentProject}/Page/HomePage")" class="btn btn-primary btn-sm rounded-xl">
+                    返回文章列表
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- 文章独立详情卡片 -->
+        <article class="bg-base-100 rounded-3xl border border-base-200 shadow-sm p-4 sm:p-8 md:p-12 mb-8 sm:mb-10 overflow-hidden">
+            <!-- 头部元信息 -->
+            <header class="mb-8 pb-8 border-b border-base-200">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="badge badge-primary badge-outline text-xs font-bold px-3 py-2">🏷️ @catName</span>
+                    @if (status == "published")
+                    {
+                        <span class="badge badge-success badge-sm text-xs text-white font-medium">已发布</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-warning badge-sm text-xs font-medium">草稿</span>
+                    }
+                </div>
+
+                <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-6">
+                    @title
+                </h1>
+
+                <!-- 作者与统计元数据横条 -->
+                <div class="flex flex-wrap items-center justify-between gap-4 text-xs md:text-sm opacity-75">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-primary/20 text-primary font-bold flex items-center justify-center text-base shadow-inner">
+                            @author.Substring(0, 1).ToUpperInvariant()
+                        </div>
+                        <div>
+                            <div class="font-bold text-base-content text-sm">@author</div>
+                            @if (!string.IsNullOrWhiteSpace(pubAt))
+                            {
+                                <div class="text-xs opacity-60 mt-0.5">发布于 @pubAt</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <span class="flex items-center gap-1 font-mono">
+                            <span>👀</span> @views 次阅读
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span>⏱️</span> 约 @(Math.Max(1, content.Length / 250)) 分钟阅读
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 导语 / 核心摘要 -->
+            @if (!string.IsNullOrWhiteSpace(summary))
+            {
+                <div class="p-6 rounded-2xl bg-base-200/60 border-l-4 border-primary text-base md:text-lg italic opacity-90 mb-10 leading-relaxed shadow-inner">
+                    <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">引言导读</div>
+                    @summary
+                </div>
+            }
+
+            <!-- 正文 Markdown 排版 -->
+            <div class="blog-content prose prose-lg max-w-none leading-relaxed text-base-content font-normal space-y-6">
+                @{
+                    var normalizedContent = content.Replace("\\r\\n", "\n").Replace("\\n", "\n").Replace("\r\n", "\n");
+                    var paragraphs = normalizedContent.Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries);
+                }
+                @foreach (var p in paragraphs)
+                {
+                    var trimmed = p.Trim();
+                    if (trimmed.StartsWith("# "))
+                    {
+                        <h2 class="text-2xl md:text-3xl font-extrabold mt-8 mb-4 border-b border-base-200 pb-2 text-base-content flex items-center gap-2">
+                            <span>📌</span>
+                            <span>@trimmed.Substring(2)</span>
+                        </h2>
+                    }
+                    else if (trimmed.StartsWith("## "))
+                    {
+                        <h3 class="text-xl md:text-2xl font-bold mt-6 mb-3 text-base-content flex items-center gap-2">
+                            <span class="text-primary font-black">#</span>
+                            <span>@trimmed.Substring(3)</span>
+                        </h3>
+                    }
+                    else if (trimmed.StartsWith("### "))
+                    {
+                        <h4 class="text-lg md:text-xl font-bold mt-4 mb-2 text-base-content">
+                            @trimmed.Substring(4)
+                        </h4>
+                    }
+                    else if (trimmed.StartsWith("> "))
+                    {
+                        <blockquote class="border-l-4 border-secondary pl-5 py-3 italic opacity-85 my-5 bg-base-200/50 rounded-r-xl leading-relaxed">
+                            @Html.Raw(FormatMarkdown(trimmed.Substring(2)))
+                        </blockquote>
+                    }
+                    else if (trimmed.StartsWith("- ") || trimmed.StartsWith("* "))
+                    {
+                        <ul class="list-disc list-inside space-y-2 my-4 pl-3 text-base md:text-lg">
+                            @foreach (var line in trimmed.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                var bullet = line.Trim();
+                                if (bullet.StartsWith("- ") || bullet.StartsWith("* "))
+                                {
+                                    <li class="leading-relaxed">
+                                        @Html.Raw(FormatMarkdown(bullet.Substring(2)))
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-base md:text-lg leading-relaxed text-base-content/90">
+                            @Html.Raw(FormatMarkdown(trimmed))
+                        </p>
+                    }
+                }
+            </div>
+
+            <!-- 文章互动区 (点赞、分享与运维入口) -->
+            <footer class="mt-12 pt-8 border-t border-base-200">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <!-- 点赞与分享 -->
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="likePost()" id="likeBtn" 
+                                class="btn btn-sm btn-outline gap-1.5 rounded-xl hover:border-error hover:text-error transition-all">
+                            <span id="heartIcon">❤️</span>
+                            <span class="font-bold">赞赏启发</span>
+                            <span class="badge badge-sm badge-ghost ml-1 font-mono" id="likeCount">16</span>
+                        </button>
+
+                        <button type="button" onclick="copyShareUrl()" 
+                                class="btn btn-sm btn-ghost gap-1.5 border border-base-300 rounded-xl hover:border-primary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                            <span>分享文章</span>
+                        </button>
+                    </div>
+
+                    <!-- 管理运维入口 -->
+                    <div class="flex items-center gap-2">
+                        <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Edit?entity=blog_post&id={id}&returnUrl={Url.Content($"~/{currentProject}/Page/PostDetail?id={id}")}")" 
+                           class="btn btn-sm btn-ghost gap-1.5 border border-base-300 hover:border-primary rounded-xl">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            <span>编辑文章 (后台 CRUD)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 复制成功 Toast 浮层提示 -->
+                <div id="shareToast" class="alert alert-success shadow-lg mt-4 py-2 px-4 rounded-2xl hidden">
+                    <span class="text-xs font-bold text-white">✨ 文章链接已复制到剪贴板，快分享给同行好友吧！</span>
+                </div>
+            </footer>
+        </article>
+
+        <!-- 作者专栏卡片 (Author Profile) -->
+        <div class="card bg-base-100 border border-base-200 p-6 rounded-3xl shadow-sm mb-10 flex flex-col sm:flex-row items-center gap-5">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-secondary text-primary-content font-black text-2xl flex items-center justify-center shrink-0 shadow-md">
+                @author.Substring(0, 1).ToUpperInvariant()
+            </div>
+            <div class="flex-1 text-center sm:text-left">
+                <div class="flex items-center justify-center sm:justify-start gap-2">
+                    <h4 class="font-bold text-base">@author</h4>
+                    <span class="badge badge-primary badge-sm text-xs font-semibold">架构师专栏</span>
+                </div>
+                <p class="text-xs opacity-70 mt-1 leading-relaxed">
+                    NetYamlForge 核心系统架构师。专注领域建模、声明式 Web 框架设计以及多模型多 Agent 的协同演进技术。
+                </p>
+            </div>
+            <a href="@Url.Content($"~/{currentProject}/Page/HomePage")" class="btn btn-sm btn-outline rounded-xl shrink-0">
+                探索更多文章
+            </a>
+        </div>
+
+        <!-- 推荐阅读板块 (Related Posts) -->
+        @if (recentPosts.Count > 0)
+        {
+            <div class="mt-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <span>📚</span>
+                        <span>推荐阅读与更多精彩</span>
+                    </h3>
+                    <a href="@Url.Content($"~/{currentProject}/Page/HomePage")" class="text-xs text-primary font-bold hover:underline">
+                        查看博客一览 →
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach (var r in recentPosts.Where(rp => rp.TryGetValue("id", out var rId) && rId?.ToString() != id).Take(4))
+                    {
+                        var rId = r.TryGetValue("id", out var rIdVal) ? rIdVal?.ToString() ?? "0" : "0";
+                        var rTitle = r.TryGetValue("title", out var rTVal) ? rTVal?.ToString() ?? "" : "";
+                        var rCat = r.TryGetValue("category_name", out var rCVal) ? rCVal?.ToString() ?? "技术" : "技术";
+                        var rViews = r.TryGetValue("view_count", out var rVVal) ? rVVal?.ToString() ?? "0" : "0";
+
+                        <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={rId}")" 
+                           class="card bg-base-100 border border-base-200 p-5 shadow-sm hover:border-primary/50 hover:shadow-md transition-all rounded-2xl flex flex-row items-center justify-between gap-3 group">
+                            <div>
+                                <span class="badge badge-ghost badge-xs mb-1.5">@rCat</span>
+                                <div class="font-bold text-sm group-hover:text-primary transition-colors line-clamp-1">
+                                    @rTitle
+                                </div>
+                            </div>
+                            <span class="text-xs opacity-50 shrink-0 font-mono">👀 @rViews</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<script>
+    let liked = false;
+    function likePost() {
+        if (!liked) {
+            const countEl = document.getElementById('likeCount');
+            if (countEl) {
+                countEl.innerText = parseInt(countEl.innerText || '0') + 1;
+            }
+            const heart = document.getElementById('heartIcon');
+            if (heart) heart.innerText = '💖';
+            liked = true;
+        }
+    }
+
+    function copyShareUrl() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            const toast = document.getElementById('shareToast');
+            if (toast) {
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3500);
+            }
+        }
+    }
+
+    // 实时阅读进度指示
+    window.addEventListener('scroll', () => {
+        const docElem = document.documentElement;
+        const totalHeight = docElem.scrollHeight - docElem.clientHeight;
+        const progress = totalHeight > 0 ? (docElem.scrollTop / totalHeight) * 100 : 0;
+        const bar = document.getElementById('readingProgressBar');
+        if (bar) {
+            bar.style.width = Math.min(100, Math.max(0, progress)) + '%';
+        }
+    });
+</script>

@@ -1,0 +1,400 @@
+@using NetYamlForge.Models
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = ViewData["Project"] as string ?? "blog-app";
+    var pageDef = ViewData["PageDef"] as PageDefinition;
+    ViewData["Title"] = pageDef?.Title ?? "博客探索门户 (Blog Portal)";
+    ViewData["ActivePage"] = "Page";
+
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+
+    var statsRows = Model.TryGetValue("blog_stats", out var sd) ? sd.Rows.ToList() : new();
+    var catRows = Model.TryGetValue("categories", out var cd) ? cd.Rows.ToList() : new();
+    var postRows = Model.TryGetValue("published_articles", out var pd) ? pd.Rows.ToList() : new();
+    var trendingRows = Model.TryGetValue("trending_posts", out var trd) ? trd.Rows.ToList() : new();
+
+    string GetStat(string label)
+    {
+        var item = statsRows.FirstOrDefault(r => r.TryGetValue("label", out var l) && l?.ToString() == label);
+        return item != null && item.TryGetValue("value", out var v) ? v?.ToString() ?? "0" : "0";
+    }
+
+    var publishedCount = GetStat("已发布文章");
+    var totalViews = GetStat("总阅读量");
+    var totalCategories = GetStat("分类总数");
+
+    var featuredPost = postRows.FirstOrDefault();
+    var regularPosts = postRows.Skip(1).ToList();
+}
+
+<div class="container mx-auto px-3 sm:px-4 lg:px-6 2xl:max-w-[1536px] py-4 sm:py-8">
+    <!-- 博客主页 Hero 顶栏与焦点头条 -->
+    <div class="rounded-3xl bg-gradient-to-br from-primary/15 via-base-100 to-secondary/10 border border-base-300/80 p-6 md:p-10 mb-10 shadow-sm relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+            <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-3">
+                    <span>✨</span>
+                    <span>NetYamlForge 架构与思想空间</span>
+                </div>
+                <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-3">
+                    技术探索、架构哲学与前沿工程洞察
+                </h1>
+                <p class="text-sm md:text-base opacity-75 leading-relaxed mb-6">
+                    记录声明式架构演进、多 Agent 跨模型自主协同以及以人为本的现代 Web 交互设计思考。
+                </p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Create?entity=blog_post&returnUrl={Url.Content($"~/{currentProject}/Page/HomePage")}")" 
+                       class="btn btn-primary btn-sm gap-2 shadow-sm font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>撰写新文章</span>
+                    </a>
+                    <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=blog_post")" 
+                       class="btn btn-outline btn-sm gap-2 hover:border-primary">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>文章运维后台</span>
+                    </a>
+                    <a href="@Url.Content($"~/{currentProject}/Dashboard")" 
+                       class="btn btn-ghost btn-sm gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span>内容看板</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 数据徽章栏 -->
+            <div class="grid grid-cols-3 gap-3 bg-base-100/80 backdrop-blur-md p-4 rounded-2xl border border-base-300/60 shadow-sm shrink-0">
+                <div class="text-center px-3">
+                    <div class="text-2xl md:text-3xl font-black text-primary">@publishedCount</div>
+                    <div class="text-xs opacity-60 font-semibold mt-1">精选文章</div>
+                </div>
+                <div class="text-center px-3 border-x border-base-300">
+                    <div class="text-2xl md:text-3xl font-black text-secondary">@totalViews</div>
+                    <div class="text-xs opacity-60 font-semibold mt-1">累计阅读</div>
+                </div>
+                <div class="text-center px-3">
+                    <div class="text-2xl md:text-3xl font-black text-accent">@totalCategories</div>
+                    <div class="text-xs opacity-60 font-semibold mt-1">深度专栏</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 置顶头条文章横幅 (Featured Hero Post) -->
+        @if (featuredPost != null)
+        {
+            var fId = featuredPost.TryGetValue("id", out var fIdV) ? fIdV?.ToString() ?? "0" : "0";
+            var fTitle = featuredPost.TryGetValue("title", out var fTV) ? fTV?.ToString() ?? "" : "";
+            var fSummary = featuredPost.TryGetValue("summary", out var fSV) ? fSV?.ToString() ?? "" : "";
+            var fCat = featuredPost.TryGetValue("category_name", out var fCV) ? fCV?.ToString() ?? "技术精选" : "技术精选";
+            var fAuthor = featuredPost.TryGetValue("author", out var fAV) ? fAV?.ToString() ?? "Claude Architect" : "Claude Architect";
+            var fViews = featuredPost.TryGetValue("view_count", out var fVV) ? fVV?.ToString() ?? "0" : "0";
+            var fPubAt = featuredPost.TryGetValue("published_at", out var fPV) ? fPV?.ToString() ?? "" : "";
+            if (DateTime.TryParse(fPubAt, out var dt))
+            {
+                fPubAt = dt.ToString("yyyy年MM月dd日");
+            }
+
+            <div class="mt-8 pt-6 border-t border-base-300/80">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="badge badge-accent badge-sm font-bold text-xs uppercase tracking-wide">🔥 头条置顶 / FEATURED</span>
+                    <span class="badge badge-primary badge-outline badge-sm text-xs font-semibold">@fCat</span>
+                </div>
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="max-w-3xl">
+                        <h2 class="text-xl md:text-2xl font-black hover:text-primary transition-colors">
+                            <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={fId}")">
+                                @fTitle
+                            </a>
+                        </h2>
+                        <p class="text-sm opacity-70 mt-1.5 line-clamp-2 leading-relaxed">
+                            @fSummary
+                        </p>
+                        <div class="flex items-center gap-4 text-xs opacity-60 mt-3">
+                            <span class="font-medium">✍️ @fAuthor</span>
+                            <span>📅 @fPubAt</span>
+                            <span>👀 @fViews 次阅读</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={fId}")" 
+                           class="btn btn-primary btn-sm px-5 gap-1.5 shadow-md font-bold whitespace-nowrap">
+                            <span>立即阅读全文</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- 分类与搜索过滤栏 (竖屏平滑横滑，大屏全景呈现) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <!-- 分类选择胶囊 (移动端支持横向滑动，大屏自适应) -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar touch-pan-x flex-nowrap shrink-0 max-w-full pb-1">
+            <button class="btn btn-sm blog-cat-btn btn-primary rounded-xl shrink-0 whitespace-nowrap safe-touch-btn" data-cat="all" onclick="filterCategory('all')">
+                全部文章 (@postRows.Count)
+            </button>
+            @foreach (var cat in catRows)
+            {
+                var name = cat.TryGetValue("name", out var n) ? n?.ToString() ?? "" : "";
+                var pCount = cat.TryGetValue("post_count", out var pc) ? pc?.ToString() ?? "0" : "0";
+                <button class="btn btn-sm btn-ghost border border-base-300 blog-cat-btn hover:border-primary rounded-xl shrink-0 whitespace-nowrap safe-touch-btn" 
+                        data-cat="@name.ToLowerInvariant()" onclick="filterCategory('@name.ToLowerInvariant()')">
+                    @name
+                    <span class="badge badge-sm badge-ghost ml-1 font-mono">@pCount</span>
+                </button>
+            }
+        </div>
+
+        <!-- 搜索输入框 -->
+        <div class="relative w-full md:w-80 shrink-0">
+            <input type="text" id="blogSearchInput" oninput="searchPosts()" placeholder="检索文章标题、核心概念或摘要..." 
+                   class="input input-sm input-bordered w-full pl-9 focus:input-primary rounded-xl shadow-inner" />
+            <svg class="w-4 h-4 absolute left-3 top-2.5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+    </div>
+
+    <!-- 主体双栏内容区域 (文章网格 + 侧边栏，大屏 3 列网格并发) -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
+        <!-- 左侧文章卡片网格 (占 3 列，超大屏下升级为 3 列瀑布流) -->
+        <div class="lg:col-span-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5 sm:gap-6" id="blogPostsContainer">
+                @if (postRows.Count == 0)
+                {
+                    <div class="col-span-full card bg-base-100 border border-dashed border-base-300 py-16 text-center rounded-3xl shadow-sm">
+                        <div class="text-4xl mb-3">📰</div>
+                        <div class="font-bold text-xl">暂无已发布文章</div>
+                        <p class="text-sm opacity-60 mt-1">进入后台或点击上方按钮，发布第一篇精彩内容吧！</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var post in postRows)
+                    {
+                        var id = post.TryGetValue("id", out var idVal) ? idVal?.ToString() ?? "0" : "0";
+                        var title = post.TryGetValue("title", out var tVal) ? tVal?.ToString() ?? "" : "";
+                        var summary = post.TryGetValue("summary", out var sVal) ? sVal?.ToString() ?? "" : "";
+                        var catName = post.TryGetValue("category_name", out var cnVal) ? cnVal?.ToString() ?? "技术随笔" : "技术随笔";
+                        var author = post.TryGetValue("author", out var aVal) ? aVal?.ToString() ?? "Admin" : "Admin";
+                        var views = post.TryGetValue("view_count", out var vVal) ? vVal?.ToString() ?? "0" : "0";
+                        var pubAt = post.TryGetValue("published_at", out var pVal) ? pVal?.ToString() ?? "" : "";
+                        if (DateTime.TryParse(pubAt, out var dt))
+                        {
+                            pubAt = dt.ToString("yyyy-MM-dd");
+                        }
+
+                        // 依据分类选择渐变色与图标
+                        var gradientBg = "from-primary/20 via-primary/5 to-transparent";
+                        var catIcon = "💡";
+                        if (catName.Contains("架构"))
+                        {
+                            gradientBg = "from-info/25 via-info/5 to-transparent";
+                            catIcon = "📐";
+                        }
+                        else if (catName.Contains("Agent") || catName.Contains("AI"))
+                        {
+                            gradientBg = "from-secondary/25 via-secondary/5 to-transparent";
+                            catIcon = "🤖";
+                        }
+                        else if (catName.Contains("实践") || catName.Contains("NetYamlForge"))
+                        {
+                            gradientBg = "from-accent/25 via-accent/5 to-transparent";
+                            catIcon = "⚡";
+                        }
+
+                        <div class="card bg-base-100 border border-base-200 shadow-sm hover:shadow-xl hover:border-primary/50 transition-all duration-300 rounded-3xl flex flex-col justify-between blog-post-card group overflow-hidden"
+                             data-id="@id"
+                             data-category="@catName.ToLowerInvariant()"
+                             data-title="@title.ToLowerInvariant()"
+                             data-summary="@summary.ToLowerInvariant()">
+                            
+                            <!-- 卡片顶部装饰横条 -->
+                            <div class="h-28 bg-gradient-to-r @gradientBg p-5 flex items-start justify-between border-b border-base-200/60 relative">
+                                <span class="badge badge-primary badge-outline text-xs font-bold px-3 py-1 shadow-sm bg-base-100/90 backdrop-blur-sm">
+                                    @catIcon @catName
+                                </span>
+                                @if (!string.IsNullOrWhiteSpace(pubAt))
+                                {
+                                    <span class="text-xs opacity-60 font-mono font-medium">📅 @pubAt</span>
+                                }
+                            </div>
+
+                            <div class="card-body p-6 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <!-- 标题 (可点击直达单篇 Post 页面) -->
+                                    <h3 class="card-title text-xl font-bold group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-3">
+                                        <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={id}")" class="hover:underline">
+                                            @title
+                                        </a>
+                                    </h3>
+
+                                    <!-- 摘要正文 -->
+                                    @if (!string.IsNullOrWhiteSpace(summary))
+                                    {
+                                        <p class="text-sm opacity-70 line-clamp-3 leading-relaxed mb-4">
+                                            @summary
+                                        </p>
+                                    }
+                                </div>
+
+                                <!-- 卡片底部信息 -->
+                                <div class="pt-4 border-t border-base-200/80 flex items-center justify-between text-xs opacity-80 mt-2">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">
+                                            @author.Substring(0, 1).ToUpperInvariant()
+                                        </div>
+                                        <span class="font-medium text-base-content/80">@author</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-mono">👀 @views</span>
+                                        <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={id}")" 
+                                           class="text-primary font-bold hover:underline inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                                            <span>阅读</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- 搜索无匹配 -->
+            <div id="noBlogMatchCard" class="card bg-base-100 border border-dashed border-base-300 py-12 text-center hidden mt-6 rounded-3xl">
+                <div class="text-3xl mb-2">🔍</div>
+                <div class="font-bold text-base">未检索到相关博客文章</div>
+                <p class="text-xs opacity-50 mt-1">请尝试更换检索关键词或点击切换分类标签。</p>
+            </div>
+        </div>
+
+        <!-- 右侧精选侧边栏 (占 1 列) -->
+        <div class="space-y-6">
+            <!-- 专栏作者与理念介绍 -->
+            <div class="card bg-base-100 border border-base-200 p-6 rounded-3xl shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-primary text-primary-content flex items-center justify-center text-xl font-bold shadow-md">
+                        🧠
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-base">NetYamlForge 专栏</h4>
+                        <div class="text-xs opacity-60">Architect & Engineering</div>
+                    </div>
+                </div>
+                <p class="text-xs opacity-75 leading-relaxed mb-4">
+                    聚焦极简声明式架构、高效领域建模与多智能体（Claude / Antigravity / OpenCode）自动流水线实践。
+                </p>
+                <div class="pt-3 border-t border-base-200/80 flex items-center justify-between text-xs">
+                    <span class="opacity-60">持续更新中</span>
+                    <a href="@Url.Content($"~/{currentProject}/Dashboard")" class="text-primary font-bold hover:underline">
+                        查看洞察看板 →
+                    </a>
+                </div>
+            </div>
+
+            <!-- 热门文章阅读排行 (Trending) -->
+            <div class="card bg-base-100 border border-base-200 p-6 rounded-3xl shadow-sm">
+                <h4 class="font-bold text-base flex items-center gap-2 mb-4">
+                    <span class="text-warning">🔥</span>
+                    <span>热门阅读排行榜</span>
+                </h4>
+                <div class="space-y-3">
+                    @{
+                        var rank = 1;
+                        foreach (var tr in trendingRows)
+                        {
+                            var trId = tr.TryGetValue("id", out var trIdV) ? trIdV?.ToString() ?? "0" : "0";
+                            var trTitle = tr.TryGetValue("title", out var trTV) ? trTV?.ToString() ?? "" : "";
+                            var trViews = tr.TryGetValue("view_count", out var trVV) ? trVV?.ToString() ?? "0" : "0";
+
+                            <a href="@Url.Content($"~/{currentProject}/Page/PostDetail?id={trId}")" 
+                               class="flex items-start gap-3 p-2 rounded-xl hover:bg-base-200/60 transition-colors group">
+                                <span class="w-5 h-5 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 @(rank <= 3 ? "bg-primary text-primary-content" : "bg-base-200 text-base-content/60") font-mono">
+                                    @rank
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                        @trTitle
+                                    </div>
+                                    <div class="text-[11px] opacity-50 mt-1 font-mono">
+                                        👀 @trViews 次阅读
+                                    </div>
+                                </div>
+                            </a>
+                            rank++;
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- 快速管理通道 -->
+            <div class="card bg-gradient-to-br from-base-200/60 to-base-100 border border-base-200 p-6 rounded-3xl shadow-sm">
+                <h4 class="font-bold text-sm mb-3">🛠️ 内容运维通道</h4>
+                <div class="flex flex-col gap-2">
+                    <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=blog_post")" 
+                       class="btn btn-sm btn-outline justify-start gap-2 text-xs">
+                        <span>📝</span> 文章全量管理 (CRUD)
+                    </a>
+                    <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=blog_category")" 
+                       class="btn btn-sm btn-outline justify-start gap-2 text-xs">
+                        <span>🏷️</span> 分类与标签管理
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeCategory = 'all';
+
+    function filterCategory(cat) {
+        activeCategory = cat;
+        document.querySelectorAll('.blog-cat-btn').forEach(btn => {
+            if (btn.dataset.cat === cat) {
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-ghost');
+            } else {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-ghost');
+            }
+        });
+        filterPosts();
+    }
+
+    function searchPosts() {
+        filterPosts();
+    }
+
+    function filterPosts() {
+        const query = (document.getElementById('blogSearchInput')?.value || '').trim().toLowerCase();
+        const cards = document.querySelectorAll('.blog-post-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cat = card.dataset.category || '';
+            const title = card.dataset.title || '';
+            const summary = card.dataset.summary || '';
+
+            let matchCat = (activeCategory === 'all' || cat === activeCategory);
+            let matchQuery = true;
+            if (query) {
+                matchQuery = title.includes(query) || summary.includes(query);
+            }
+
+            if (matchCat && matchQuery) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        const noMatch = document.getElementById('noBlogMatchCard');
+        if (noMatch) {
+            noMatch.style.display = (visibleCount === 0 && cards.length > 0) ? 'block' : 'none';
+        }
+    }
+</script>

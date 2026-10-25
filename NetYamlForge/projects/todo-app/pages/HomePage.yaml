@@ -1,0 +1,21 @@
+title: "待办工作台 (Todo Workspace)"
+description: "清晰规划每一天，专注高效执行每一项业务与技术目标"
+sections:
+  - id: todo_stats
+    title: "待办指标总览"
+    sourceType: custom
+    source: "SELECT '全部待办' AS label, COUNT(*) AS value, '📝' AS icon, '' AS delta, '' AS sub_value FROM todo UNION ALL SELECT '已完成待办', COUNT(*), '✅', '', '' FROM todo WHERE is_completed = 1 UNION ALL SELECT '待处理任务', COUNT(*), '⏳', '', '' FROM todo WHERE is_completed = 0 UNION ALL SELECT '高优待办', COUNT(*), '🔥', '', '' FROM todo WHERE priority = 'high' AND is_completed = 0 UNION ALL SELECT '今日截止', COUNT(*), '📅', '', '' FROM todo WHERE date(due_date) = date('now') AND is_completed = 0"
+    component: stat_cards
+
+  - id: active_todos
+    title: "待办任务清单"
+    sourceType: custom
+    source: "SELECT id, title, description, priority, due_date, is_completed, created_at, updated_at FROM todo ORDER BY is_completed ASC, CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END ASC, due_date ASC, id DESC"
+    component: table
+    columns:
+      id: { label: "ID", type: int, sortable: true }
+      title: { label: "任务标题", type: string, searchable: true, sortable: true }
+      priority: { label: "优先级", type: string, sortable: true }
+      due_date: { label: "截止日期", type: date, sortable: true }
+      is_completed: { label: "完成状态", type: bool, sortable: true }
+      description: { label: "详细描述", type: string }

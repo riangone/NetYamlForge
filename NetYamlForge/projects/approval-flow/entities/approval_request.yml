@@ -1,0 +1,29 @@
+entities:
+  approval_request:
+    table: approval_request
+    key: id
+    displayName: "审批申请单"
+    actions:
+      approve_request:
+        label: "审批通过"
+        handler: approve_request_handler
+      reject_request:
+        label: "驳回申请"
+        handler: reject_request_handler
+      withdraw_request:
+        label: "撤回单据"
+        handler: withdraw_request_handler
+    columns:
+      id:          { type: int, identity: true, label: 编号, sortable: true }
+      title:       { type: string, required: true, label: 申请事项, searchable: true, sortable: true }
+      category:    { type: string, required: true, label: 类别, searchable: true }
+      applicant:   { type: string, required: true, label: 申请人, searchable: true }
+      department:  { type: string, required: true, label: 所属部门 }
+      amount:      { type: decimal, label: 金额或天数, sortable: true }
+      urgency:     { type: string, label: 紧急程度 }
+      status:      { type: string, label: 当前状态, sortable: true }
+      reason:      { type: textarea, label: 事由说明 }
+      approver:    { type: string, label: 审批人 }
+      comment:     { type: textarea, label: 审批意见 }
+      created_at:  { type: datetime, required: true, label: 创建时间, sortable: true }
+      updated_at:  { type: datetime, required: true, label: 更新时间, sortable: true }

@@ -1,0 +1,20 @@
+entities:
+  wiki_doc:
+    table: wiki_doc
+    key: id
+    displayName: "知识库文档"
+    softDelete: false
+    api: enabled
+    paging:
+      pageSize: 10
+      mode: numbered
+    columns:
+      id:           { type: int, identity: true, label: ID, sortable: true }
+      title:        { type: string, required: true, label: 标题, searchable: true, sortable: true }
+      category:     { type: string, required: true, label: 分类, sortable: true }
+      author:       { type: string, label: 作者 }
+      summary:      { type: textarea, label: 摘要 }
+      content:      { type: textarea, required: true, label: Markdown正文 }
+      is_published: { type: int, default: 1, label: 是否发布 }
+      views_count:  { type: int, default: 0, label: 阅读次数 }
+      created_at:   { type: datetime, label: 创建时间 }

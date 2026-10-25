@@ -250,3 +250,38 @@ button.accept-policy {
     display: none;
   }
 }
+
+/* ===== 竖屏与大屏深度优化实用工具类 ===== */
+
+/* 1. 隐藏滚动条但保留流畅手势滑动 (用于移动端 Tabs、胶囊栏、横向泳道) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 2. 移动端触控优化 */
+.touch-pan-x {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+.safe-touch-btn {
+  min-height: 38px;
+  touch-action: manipulation;
+}
+
+/* 3. 博客文章沉浸式阅读进度指示条 */
+#readingProgressBar {
+  transition: width 0.1s ease-out;
+}
+
+/* 4. 超大屏自适应网格微调 */
+@media (min-width: 1536px) {
+  .ultra-wide-container {
+    max-width: 1680px !important;
+  }
+}
+

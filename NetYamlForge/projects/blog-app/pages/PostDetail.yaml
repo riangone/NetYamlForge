@@ -1,0 +1,14 @@
+title: "文章详情"
+description: "博客文章阅读与详情展示"
+sections:
+  - id: current_post
+    title: "文章正文"
+    sourceType: custom
+    source: "SELECT p.id, p.title, p.slug, p.summary, p.content, c.name AS category_name, p.author, p.status, p.view_count, p.published_at, p.created_at, p.updated_at FROM blog_post p LEFT JOIN blog_category c ON p.category_id = c.id WHERE p.id = @id OR (@id IS NULL AND p.id = (SELECT id FROM blog_post WHERE status = 'published' ORDER BY id DESC LIMIT 1))"
+    component: detail_card
+
+  - id: recent_posts
+    title: "推荐阅读"
+    sourceType: custom
+    source: "SELECT p.id, p.title, c.name AS category_name, p.author, p.published_at, p.view_count FROM blog_post p LEFT JOIN blog_category c ON p.category_id = c.id WHERE p.status = 'published' ORDER BY p.id DESC LIMIT 5"
+    component: card_list

@@ -1,0 +1,11 @@
+translations:
+  todo.actions.toggle_complete:
+    en-US: Toggle Complete
+    zh-CN: 切换完成状态
+    ja-JP: 完了状態切替
+    ko-KR: 완료 상태 전환
+  todo.actions.toggle_complete_confirm:
+    en-US: Are you sure you want to toggle completion status?
+    zh-CN: 确定要切换该待办事项的完成状态吗？
+    ja-JP: このTODOの完了状態を切り替えてもよろしいですか？
+    ko-KR: 이 할 일의 완료 상태를 전환하시겠습니까?

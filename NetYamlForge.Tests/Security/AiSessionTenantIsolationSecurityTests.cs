@@ -44,7 +44,11 @@ public class AiSessionTenantIsolationSecurityTests
         masterConn.Execute("CREATE TABLE IF NOT EXISTS ai_conversations (conversation_id TEXT PRIMARY KEY, context_data TEXT, updated_at TEXT);");
 
         var dbFactoryMock = new Mock<IDbConnectionFactory>();
-        dbFactoryMock.Setup(f => f.CreateConnection(It.IsAny<string>())).Returns(() => new SqliteConnection(connStr));
+        dbFactoryMock.Setup(f => f.CreateConnection(It.IsAny<string>())).Returns(() =>
+        {
+            GC.KeepAlive(masterConn);
+            return new SqliteConnection(connStr);
+        });
 #pragma warning restore DCS003
 
         var serviceProviderMock = new Mock<IServiceProvider>();

@@ -26,6 +26,7 @@ using Dapper;
 using NetYamlForge.Services.Connection;
 using NetYamlForge.Services.Hooks;
 using NetYamlForge.Services.AI.AgentStudio;
+using NetYamlForge.Services.AI.AgentStudio.Manifestation;
 
 namespace NetYamlForge.Projects.AgentStudio.Hooks;
 
@@ -96,9 +97,12 @@ public sealed class RunPipelineHandler : ICustomActionHandler
         var title = task.Title;
         var description = task.Description ?? "";
         var projectName = ctx.Project;
+        var archCli = task.ArchitectCli;
+        var devCli = task.DeveloperCli;
+        var testCli = task.TesterCli;
         var stoppingToken = _appLifetime.ApplicationStopping;
 
-        _ = Task.Run(() => RunPipelineInBackgroundAsync(taskId, title, description, projectName, stoppingToken));
+        _ = Task.Run(() => RunPipelineInBackgroundAsync(taskId, title, description, projectName, archCli, devCli, testCli, stoppingToken));
 
         return ActionHandlerResult.Success();
     }
@@ -113,6 +117,9 @@ public sealed class RunPipelineHandler : ICustomActionHandler
         string title,
         string description,
         string projectName,
+        string? preferredArch,
+        string? preferredDev,
+        string? preferredTest,
         CancellationToken stoppingToken)
     {
         using var scope = _scopeFactory.CreateScope();
@@ -122,7 +129,10 @@ public sealed class RunPipelineHandler : ICustomActionHandler
             Title: title,
             Description: description,
             ProjectName: projectName,
-            TimeoutSeconds: 300
+            TimeoutSeconds: 300,
+            PreferredArchitect: preferredArch,
+            PreferredDeveloper: preferredDev,
+            PreferredTester: preferredTest
         );
 
         // 阶段完成回调：每完成一个阶段立即写库，UI 可即时观察到该阶段输出与状态流转
@@ -308,5 +318,53 @@ public sealed class RunPipelineHandler : ICustomActionHandler
         {
             _logger.LogCritical(writeEx, "[AgentStudio] Failed to persist pipeline result for Task {TaskId}", taskId);
         }
+    }
+}
+
+/// <summary>
+/// 物理交付动作处理器 (CustomActionHandler): 将 agent_task 中的智能体产物落地并挂载
+/// </summary>
+public sealed class ManifestAppHandler : ICustomActionHandler
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<ManifestAppHandler> _logger;
+
+    public string Name => "manifest_app_handler";
+
+    public ManifestAppHandler(
+        IServiceScopeFactory scopeFactory,
+        ILogger<ManifestAppHandler> logger)
+    {
+        _scopeFactory = scopeFactory;
+        _logger = logger;
+    }
+
+    public async Task<ActionHandlerResult> ExecuteAsync(CustomActionContext ctx, IDbConnection db, IDbTransaction? tx)
+    {
+        if (!int.TryParse(ctx.RecordId, out int taskId))
+        {
+            return ActionHandlerResult.Failure("无效的任务 ID (RecordId)");
+        }
+
+        _logger.LogInformation("[AgentStudio] Triggered physical manifestation for Task {TaskId}", taskId);
+
+        using var scope = _scopeFactory.CreateScope();
+        var manifestationService = scope.ServiceProvider.GetRequiredService<IAppManifestationService>();
+
+        var request = new ManifestationRequest(
+            TaskId: taskId,
+            ForceOverwrite: true,
+            AutoScaffoldHooks: true,
+            ReloadInMemory: true
+        );
+
+        var result = await manifestationService.ManifestAppAsync(request, CancellationToken.None);
+
+        if (!result.Success)
+        {
+            return ActionHandlerResult.Failure(result.Error ?? "物理交付失败");
+        }
+
+        return ActionHandlerResult.Success();
     }
 }

@@ -1,0 +1,26 @@
+title: "Agent Studio 协同演进工作台"
+description: "NetYamlForge 多智能体闭环架构中枢 (Architect · Developer · Tester)"
+sections:
+  - id: overview_stats
+    title: "演进指标概览"
+    sourceType: custom
+    source: "SELECT '全部演进任务' AS label, COUNT(*) AS value, '📋' AS icon, 'badge-primary' AS color, '总任务积累' AS description FROM agent_task UNION ALL SELECT '进行中/排队' AS label, COUNT(*), '⚡', 'badge-warning', '推演中任务' FROM agent_task WHERE status NOT IN ('Completed', 'Failed') UNION ALL SELECT '已成功交付' AS label, COUNT(*), '✅', 'badge-success', '全闭环落地' FROM agent_task WHERE status = 'Completed' UNION ALL SELECT '阶段执行日志' AS label, COUNT(*), '📜', 'badge-info', 'AI 协同流水记录' FROM agent_task_log"
+    component: stat_cards
+
+  - id: provider_stats
+    title: "智能体协同分布"
+    sourceType: custom
+    source: "SELECT provider, COUNT(*) AS exec_count, SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) AS success_count FROM agent_task_log WHERE provider IS NOT NULL AND provider != '' GROUP BY provider ORDER BY exec_count DESC"
+    component: badge_list
+
+  - id: all_tasks
+    title: "演进任务全景"
+    sourceType: custom
+    source: "SELECT id, title, description, status, architect_cli, developer_cli, tester_cli, architect_output, developer_output, tester_output, created_at, updated_at FROM agent_task ORDER BY id DESC"
+    component: card_list
+
+  - id: recent_logs
+    title: "协同活动日志"
+    sourceType: custom
+    source: "SELECT l.id, l.task_id, COALESCE(t.title, '未命名任务') AS task_title, l.stage, l.role, l.provider, l.success, l.log_content, l.error_message, l.created_at FROM agent_task_log l LEFT JOIN agent_task t ON l.task_id = t.id ORDER BY l.id DESC LIMIT 30"
+    component: card_list

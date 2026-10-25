@@ -1,0 +1,13 @@
+name: approval-flow
+displayName: "企业表单审批流中心"
+database:
+  type: sqlite
+  path: database/approval-flow.db
+layout:
+  title: "企业表单审批中心"
+  landingPageByRole:
+    admin: "/approval-flow/Page/HomePage"
+    user: "/approval-flow/Page/HomePage"
+features:
+  pages: true
+  dashboard: true

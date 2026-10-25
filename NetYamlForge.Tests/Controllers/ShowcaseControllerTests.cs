@@ -48,26 +48,27 @@ public class ShowcaseControllerTests
         Assert.NotNull(result);
         var model = Assert.IsType<ShowcaseIndexViewModel>(result.Model);
         Assert.NotEmpty(model.Showcases);
-        Assert.True(model.Showcases.Count >= 4);
+        Assert.True(model.Showcases.Count >= 1);
 
-        // 验证四大核心柱石项目存在
-        Assert.Contains(model.Showcases, s => s.Id == "security-demo");
-        Assert.Contains(model.Showcases, s => s.Id == "ai-card");
-        Assert.Contains(model.Showcases, s => s.Id == "form-forge");
-        Assert.Contains(model.Showcases, s => s.Id == "jpiere-cs");
+        // 验证核心自举演进落地项目均存在
+        Assert.Contains(model.Showcases, s => s.Id == "agent-studio");
+        Assert.Contains(model.Showcases, s => s.Id == "todo-app");
+        Assert.Contains(model.Showcases, s => s.Id == "blog-app");
+        Assert.Contains(model.Showcases, s => s.Id == "wiki-app");
 
         // 验证宣发文案生成
         Assert.Contains("NetYamlForge", model.PromotionalCopyMarkdown);
-        Assert.Contains("Security Guardrails", model.PromotionalCopyMarkdown);
-        Assert.Contains("JPiere", model.PromotionalCopyMarkdown);
+        Assert.Contains("Agent Studio", model.PromotionalCopyMarkdown);
+        Assert.Contains("Todo Workspace", model.PromotionalCopyMarkdown);
+        Assert.Contains("Modern Blog", model.PromotionalCopyMarkdown);
+        Assert.Contains("Wiki Hub", model.PromotionalCopyMarkdown);
     }
 
     [Theory]
-    [InlineData("security", "security-demo")]
-    [InlineData("ai", "ai-card")]
-    [InlineData("forms", "form-forge")]
-    [InlineData("erp", "jpiere-cs")]
-    [InlineData("workflow", "ai-doc-processor")]
+    [InlineData("ai", "agent-studio")]
+    [InlineData("productivity", "todo-app")]
+    [InlineData("content", "blog-app")]
+    [InlineData("knowledge", "wiki-app")]
     public void Index_FiltersByCategory_Correctly(string category, string expectedProjectId)
     {
         // Act
@@ -81,34 +82,23 @@ public class ShowcaseControllerTests
         Assert.Contains(model.Showcases, s => s.Id == expectedProjectId);
     }
 
-    [Fact]
-    public void GetSpec_ReturnsSuccessJson_WithCodeSnippet_ForSecurityDemo()
+    [Theory]
+    [InlineData("agent-studio", "Agent Studio")]
+    [InlineData("todo-app", "Todo App")]
+    [InlineData("blog-app", "Blog App")]
+    [InlineData("wiki-app", "Wiki Hub")]
+    public void GetSpec_ReturnsSuccessJson_WithCodeSnippet_ForLiveApps(string projectId, string expectedTag)
     {
         // Act
-        var result = _controller.GetSpec("security-demo") as JsonResult;
+        var result = _controller.GetSpec(projectId) as JsonResult;
 
         // Assert
         Assert.NotNull(result);
         dynamic data = result.Value!;
         Assert.True(data.success);
-        Assert.Equal("security-demo", data.Id);
-        Assert.Contains("AST Guardrail", (IEnumerable<string>)data.TechTags);
+        Assert.Equal(projectId, data.Id);
+        Assert.Contains(expectedTag, (IEnumerable<string>)data.TechTags);
         Assert.False(string.IsNullOrWhiteSpace(data.CodeSnippet));
-    }
-
-    [Fact]
-    public void GetSpec_ReturnsSuccessJson_WithCodeSnippet_ForJPiereCs()
-    {
-        // Act
-        var result = _controller.GetSpec("jpiere-cs") as JsonResult;
-
-        // Assert
-        Assert.NotNull(result);
-        dynamic data = result.Value!;
-        Assert.True(data.success);
-        Assert.Equal("jpiere-cs", data.Id);
-        Assert.Contains("Enterprise ERP", (IEnumerable<string>)data.TechTags);
-        Assert.Contains("c_contract", data.CodeSnippet);
     }
 
     [Fact]

@@ -1,0 +1,13 @@
+name: analytics-dashboard
+displayName: "企业经营分析与决策看板"
+database:
+  type: sqlite
+  path: database/analytics-dashboard.db
+layout:
+  title: "经营决策看板"
+  landingPageByRole:
+    admin: "/analytics-dashboard/Page/HomePage"
+    user: "/analytics-dashboard/Page/HomePage"
+features:
+  pages: true
+  dashboard: true

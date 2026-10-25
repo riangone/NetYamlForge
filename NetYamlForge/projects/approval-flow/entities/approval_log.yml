@@ -1,0 +1,12 @@
+entities:
+  approval_log:
+    table: approval_log
+    key: id
+    displayName: "审批流转日志"
+    columns:
+      id:          { type: int, identity: true, label: 流水号, sortable: true }
+      request_id:  { type: int, required: true, label: 单据编号, sortable: true }
+      operator:    { type: string, required: true, label: 操作人, searchable: true }
+      action:      { type: string, required: true, label: 操作动作 }
+      comment:     { type: textarea, label: 意见备注 }
+      created_at:  { type: datetime, required: true, label: 操作时间, sortable: true }

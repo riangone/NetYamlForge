@@ -1,0 +1,39 @@
+title: "知识库与技术文档协作中心"
+description: "基于 NetYamlForge 声明式积木构建的现代文档中心，原生支持 Markdown 与指标聚合"
+sections:
+  - id: wiki_metrics
+    title: "知识库全局指标"
+    sourceType: custom
+    source: >-
+      SELECT '全部文档' as label, COUNT(*) as value, '📚' as icon FROM wiki_doc
+      UNION ALL
+      SELECT '已发布' as label, SUM(CASE WHEN is_published = 1 THEN 1 ELSE 0 END) as value, '✅' as icon FROM wiki_doc
+      UNION ALL
+      SELECT '技术架构' as label, SUM(CASE WHEN category = '技术架构' THEN 1 ELSE 0 END) as value, '🏗️' as icon FROM wiki_doc
+      UNION ALL
+      SELECT '总浏览量' as label, COALESCE(SUM(views_count), 0) as value, '🔥' as icon FROM wiki_doc
+    component: stat_cards
+    labelField: label
+    valueField: value
+    iconField: icon
+
+  - id: doc_feed
+    title: "精选文档阅读"
+    description: "基于增强型声明式 Markdown 积木渲染的文档正文与指引"
+    sourceType: custom
+    source: "SELECT id, title, category, author, content, created_at FROM wiki_doc WHERE is_published = 1 ORDER BY id ASC"
+    component: markdown
+    titleField: title
+    subtitleField: category
+    dateField: created_at
+    contentField: content
+
+  - id: doc_overview
+    title: "文档目录索引"
+    sourceType: custom
+    source: "SELECT id, title, category, author, summary, views_count, created_at FROM wiki_doc ORDER BY id DESC"
+    component: card_list
+    titleField: title
+    subtitleField: category
+    descriptionField: summary
+    pageSize: 6

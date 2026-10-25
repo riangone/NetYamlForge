@@ -1,0 +1,78 @@
+entities:
+  blog_post:
+    table: blog_post
+    key: id
+    displayName: 文章管理
+    softDelete: false
+    api: enabled
+    paging:
+      pageSize: 15
+      mode: numbered
+    actions:
+      toggle_publish:
+        label: 切换发布状态
+        scope: row
+        confirm: 确定要切换该文章的发布状态吗？
+        handler: blog_post_toggle_publish
+    hooks:
+      beforeCreate: blog_post_validate
+      beforeUpdate: blog_post_validate
+    columns:
+      id:           { type: int, identity: true, label: ID, sortable: true }
+      title:        { type: string, required: true, label: 标题, searchable: true, sortable: true }
+      slug:         { type: string, required: true, label: 别名, searchable: true }
+      category_id:  { type: int, label: 分类ID, sortable: true }
+      author:       { type: string, label: 作者, searchable: true, sortable: true }
+      status:       { type: string, required: true, label: 状态, searchable: true, sortable: true }
+      view_count:   { type: int, label: 浏览量, sortable: true }
+      summary:      { type: textarea, label: 摘要, searchable: true }
+      content:      { type: textarea, required: true, label: 正文内容 }
+      published_at: { type: datetime, label: 发布时间, sortable: true }
+      created_at:   { type: datetime, label: 创建时间, sortable: true }
+      updated_at:   { type: datetime, label: 更新时间, sortable: true }
+    forms:
+      title:
+        type: string
+        required: true
+        label: 标题
+        editable: true
+      slug:
+        type: string
+        required: true
+        label: 别名
+        editable: true
+      category_id:
+        type: int
+        label: 分类ID
+        editable: true
+      author:
+        type: string
+        label: 作者
+        editable: true
+      status:
+        type: select
+        label: 状态
+        editable: true
+        required: true
+        options: [draft, published, archived]
+      summary:
+        type: textarea
+        label: 摘要
+        editable: true
+      content:
+        type: textarea
+        label: 正文内容
+        required: true
+        editable: true
+      published_at:
+        type: datetime
+        label: 发布时间
+        editable: true
+    filters:
+      status:
+        type: toggle-group
+        label: 状态
+        options: [draft, published, archived]
+      category_id:
+        type: dropdown
+        label: 分类

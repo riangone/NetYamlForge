@@ -28,6 +28,7 @@ roles:
       - "Keep your implementation focused strictly on the specified task."
       - "Avoid broad recursive repository indexing. Only inspect files directly relevant to this task."
       - "Provide your complete output in your response without hanging or waiting for user confirmation."
+      - "When producing project files, specify each file target path clearly (e.g. ```yaml:projects/{projectName}/project.yaml or ### File: projects/{projectName}/entities/{entity}.yml) so the Manifestation Engine can directly materialize it."
 
   Tester:
     description: "QA & Test Engineer"

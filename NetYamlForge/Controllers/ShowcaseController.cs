@@ -103,7 +103,7 @@ public class ShowcaseController : Controller
                 BadgeClass = "badge-success",
                 Icon = "🤖",
                 Tagline = "3 CLI 角色（Architect / Developer / Tester）闭环协作与自举演进工作台",
-                Description = "NetYamlForge 阶段 2 核心落地的声明式 AI 协作引擎。基于 roles.yaml 动态元数据驱动与 Model Context Protocol (MCP) 端点，实现端到端的角色提示词装配、协同流水线调度与执行日志追踪。",
+                Description = "NetYamlForge 核心落地的声明式 AI 协作引擎。基于 roles.yaml 动态元数据驱动与 Model Context Protocol (MCP) 端点，实现端到端的角色提示词装配、协同流水线调度与执行日志追踪。",
                 TargetAudience = "AI 架构师、全栈工程师、Agent 开发者、自动化研发运维团队",
                 ArchitectInsight = "摒弃代码中生硬的 switch-case 角色分支，将角色职责与交互准则全面 YAML 元数据化。配合 MCP 开放接口与确定性租户数据隔离，让 AI 协作既具备无限扩展性，又绝对 Safe by Construction。",
                 Highlights = new List<string>
@@ -114,10 +114,10 @@ public class ShowcaseController : Controller
                     "Fail-Closed 租户熔断隔离：多租户会话与上下文强绑定，杜绝数据串话穿透"
                 },
                 TechTags = new List<string> { "Agent Studio", "Declarative Roles", "MCP Protocol", "Self-Evolution", "Fail-Closed" },
-                PrimaryActionUrl = "/agent-studio/Dashboard",
-                PrimaryActionLabel = "进入 Agent Studio 看板",
+                PrimaryActionUrl = "/agent-studio/Page/HomePage",
+                PrimaryActionLabel = "进入 Agent Studio 工作台",
                 SecondaryActionUrl = "/agent-studio/DynamicEntity/Index?entity=agent_task",
-                SecondaryActionLabel = "🚀 协作任务工作台",
+                SecondaryActionLabel = "🚀 协作任务管理",
                 CodeSnippetTitle = "roles.yaml (声明式 AI 角色与协作规范定义)",
                 CodeLanguage = "yaml",
                 CodeSnippet = @"roles:
@@ -143,290 +143,280 @@ public class ShowcaseController : Controller
                 IsBlueprintOnly = false
             },
 
-            // 1. 安全与架构基准标杆 (Architecture Blueprint)
+            // 1. 现代高效待办工作台 (Todo Workspace)
             new()
             {
-                Id = "security-demo",
-                Title = "🛡️ Security Guardrails (安全护栏标杆)",
-                Category = "security",
-                CategoryLabel = "安全与架构基线",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "🛡️",
-                Tagline = "专为 AI Agent 生成代码打造的编译期与运行期安全底座",
-                Description = "作为 NetYamlForge 框架重构后的核心官方标杆，完整演示了动态 CRUD 管道、聚合看板与默认拒绝策略。内置 AST 校验器，能在启动解析期直接阻断 AI 编写的恶意 SQL 与危险外键 Join，运行期彻底隔离路径穿越。（注：物理 Demo 已归档至 NetYamlForge.Tests/TestProjects 作为自动化回归基线）",
-                TargetAudience = "技术总监、系统架构师、安全工程师、关注 AI Agent 落地生产环境的开发者",
-                ArchitectInsight = "AI 生成的代码存在天然的不可控漏洞。NetYamlForge 不依赖黑盒提示词约束，而是在元数据加载期通过 AST 强校验直接熔断威胁，使开发者和 Agent 能在确定性安全的沙箱内敏捷协作。",
+                Id = "todo-app",
+                Title = "⚡ Todo Workspace (现代高效待办工作台)",
+                Category = "productivity",
+                CategoryLabel = "效率与协同",
+                Badge = "Live App",
+                BadgeClass = "badge-primary",
+                Icon = "⚡",
+                Tagline = "多维卡片流、行内极速添加、紧急预警与双轨解耦待办工作台",
+                Description = "基于 NetYamlForge 声明式架构与 Claude 架构师协同自举落地的现代化任务协作平台。告别单调冰冷的数据表格，提供四维指标看板、可视化百分比完成度进度条、毫秒级模糊检索与圆形一键勾选微交互。",
+                TargetAudience = "个人开发者、敏捷研发团队、项目主管、GTD 效率追求者",
+                ArchitectInsight = "采用前台业务门户（HomePage）与底层元数据运维（DynamicEntity）彻底解耦的双轨模式。前台专注于极致的用户人机工效与响应式微交互，后台提供零成本的完整字段审计与数据管理，兼顾审美与工程严谨性。",
                 Highlights = new List<string>
                 {
-                    "元数据解析期 AST 阻断：非白名单 Join 类型与恶意列标识符直接报错拦截",
-                    "运行时路径遍历防御：强制项目基目录规范化隔离，阻断 ../ 逃逸",
-                    "Default-Deny 默认拒绝原则：实体默认不对外暴露 REST / MCP API，需显式标注授权",
-                    "内置红蓝对抗沙箱：规范定义已归档至集成测试套件作为确定性断言标准"
+                    "四维指标看板与动态完成率进度条：实时掌控全局与紧急高优任务进展",
+                    "行内极速创建卡片（Inline Fast Creator）：支持回车快捷建档与优先级智能选择",
+                    "截止日期状态动态预警：自动高亮 ⚠️ 已逾期（红底警示）与 ⏳ 今日截止（黄底提醒）",
+                    "双轨分离架构：前台现代化卡片流交互 + 后台 DynamicEntity 完整运维审计"
                 },
-                TechTags = new List<string> { "AST Guardrail", "SqlSafetyGuard", "PathSafetyGuard", "Default-Deny", "MCP Tool" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "note.yml (声明式定义与生命周期 Hooks 挂载)",
+                TechTags = new List<string> { "Todo App", "Kanban & Cards", "Dual-Track UI", "Productivity", "Real-Time Filter" },
+                PrimaryActionUrl = "/todo-app/Page/HomePage",
+                PrimaryActionLabel = "进入待办工作台",
+                SecondaryActionUrl = "/todo-app/DynamicEntity/Index?entity=todo",
+                SecondaryActionLabel = "📋 待办数据管理",
+                CodeSnippetTitle = "project.yaml (待办工作台布局与导航声明)",
                 CodeLanguage = "yaml",
-                CodeSnippet = @"entities:
-  note:
-    table: 'Note'
-    key: 'Id'
-    displayName: 'Note'
-    api: enabled    # 显式声明 api: enabled，允许通过 REST / MCP 访问
-    hooks:
-      - generate_slug       # Title 自动转 slug
-      - sanitize_content     # XSS 防护过滤
-      - set_published_at     # 发布状态自动落时间戳
-      - audit_log            # 变更记录审计日志
-    columns:
-      Id: { type: int, identity: true, label: 'ID' }
-      Title: { type: string, required: true, label: 'Title', searchable: true }
-      Slug: { type: string, label: 'Slug', searchable: true }
-      Content: { type: string, label: 'Content' }
-      Status: { type: string, label: 'Status', searchable: true }",
-                IsBlueprintOnly = true
-            },
+                CodeSnippet = @"name: todo-app
+displayName: ""Todo App""
+version: ""1.0.0""
+description: ""NetYamlForge 轻量级待办应用""
 
-            // 2. 前沿 AI 智能体协议 (Architecture Blueprint)
-            new()
-            {
-                Id = "ai-card",
-                Title = "🤖 AI Card & Handshake Protocol (AHP 协议)",
-                Category = "ai",
-                CategoryLabel = "前沿 AI 智能体",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "🤖",
-                Tagline = "基于声明式元数据与状态机 Hook 构建的 AI 时代智能名片与握手交互协议",
-                Description = "演示人类与 AI、AI 与外部 Agent 之间的受控数字化连接。通过动态 QR 令牌生命周期、声明式身份管理、有限状态机拦截与自动多轮协商，实现去中心化的 Agent 身份互认。",
-                TargetAudience = "AI 应用开发者、Agent 互联极客、智能助理开发团队、协议研究者",
-                ArchitectInsight = "Agent-to-Agent 交互必须有明确的权限边界与会话状态转移保护。借助 NetYamlForge 的状态机 Hook 与生命周期守护，开发者用极低的代码成本即可构建生产级安全的智能体互联协议栈。",
-                Highlights = new List<string>
-                {
-                    "有限状态机 Hook 守护：强制 pending → connected → completed 严格转移",
-                    "动态 QR 令牌生命周期：支持过期自动失效与后台定期清理任务 (BatchJob)",
-                    "双模接入兼容：普通用户浏览器交互 + AI Agent 标准 JSON 握手对话",
-                    "完整业务实体：覆盖 ai_identity、ai_profile、handshake_session"
-                },
-                TechTags = new List<string> { "AHP Protocol", "State Machine Hook", "Dynamic QR", "AI Chat", "Session Guard" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "HandshakeStateGuardHook.cs (状态机安全流转守卫)",
-                CodeLanguage = "csharp",
-                CodeSnippet = @"public sealed class HandshakeStateGuardHook : IEntityHook
-{
-    public string Name => ""handshake_state_guard"";
-
-    // 严密的状态机迁移矩阵，防止会话状态被越权或反向篡改
-    private static readonly Dictionary<string, HashSet<string>> ValidTransitions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        [""pending""]   = new() { ""connected"", ""expired"", ""rejected"", ""revoked"" },
-        [""connected""] = new() { ""completed"", ""expired"", ""rejected"", ""revoked"" },
-        [""completed""] = new() { ""revoked"" },
-        [""expired""]   = new() { },
-        [""rejected""]  = new() { },
-        [""revoked""]   = new() { },
-    };
-    // ... 状态转移校验与 updated_at 自动维护
-}",
-                IsBlueprintOnly = true
-            },
-
-            // 3. 企业级动态表单 (Architecture Blueprint)
-            new()
-            {
-                Id = "form-forge",
-                Title = "📋 FormForge (企业级动态表单构建器)",
-                Category = "forms",
-                CategoryLabel = "企业级动态表单",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "📋",
-                Tagline = "零手写代码快速发布表单、字段级动态验证、自适应响应与数据收集",
-                Description = "解决企业内部高频出现的信息采集、工单申报、调研问卷与用户反馈回流需求。内置可视化的表单拖拽设计器与动态数据持久化引擎，支持外网公开填报。",
-                TargetAudience = "企业中后台全栈开发、内部工具工程师、业务运营与企业信息化 IT 部门",
-                ArchitectInsight = "企业中后台 60% 以上的增删改查都是表单收集。FormForge 将表单模型 Schema 化，结合 NetYamlForge 动态存储与权限管理，让业务表单从需求提出到上线缩短到 5 分钟以内。",
-                Highlights = new List<string>
-                {
-                    "动态可视化构建：支持单选多选、下拉、文本、日期与多行文本灵活排版",
-                    "公开填报通道 (Public Fill)：支持匿名外部分享填报与企业内网认证模式",
-                    "数据聚合与导出：填报结果自动关联，支持一键导出结构化 CSV"
-                },
-                TechTags = new List<string> { "Dynamic Schema", "Form Builder", "Public Fill", "Data Collection" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "project.yaml (FormForge 声明式模块配置)",
-                CodeLanguage = "yaml",
-                CodeSnippet = @"name: form-forge
-displayName: ""FormForge""
-description: ""Form builder — create, publish, and collect responses""
 database:
   type: sqlite
-  path: database/form-forge.db
+  path: database/todo-app.db
+
 features:
+  multiLanguage: true
   userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
 layout:
-  navigation:
-    items:
-      - label: ""My Forms""
-        url: /form-forge/FormForge
-        icon: 📋
-      - label: ""Create Form""
-        url: /form-forge/FormForge/Create
-        icon: ➕",
-                IsBlueprintOnly = true
+  theme: synthwave
+  dashboardTheme: workspace
+  landingPageByRole:
+    viewer: /todo-app/Page/HomePage
+    editor: /todo-app/Page/HomePage
+    admin:  /todo-app/Page/HomePage",
+                IsBlueprintOnly = false
             },
 
-            // 4. 工业级 ERP 业务集成 (Architecture Blueprint)
+            // 2. 标准博客系统与内容发布平台 (Modern Blog & Publisher)
             new()
             {
-                Id = "jpiere-cs",
-                Title = "🏭 JPiere Contract Service (企业级契约与 ERP 系统)",
-                Category = "erp",
-                CategoryLabel = "工业级企业业务",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "🏭",
-                Tagline = "企业核心业务的合同、报价与供应链协同系统，证明深水区业务承载力",
-                Description = "基于开源 ERP/CRM JPiere 业务理念构建的契约服务。承载多达 28 个工业级关联实体，覆盖合同生命周期、报价审批、订单跟踪、采购核对与日记账核算，深度集成 C# 业务 Hooks。",
-                TargetAudience = ".NET 企业级架构师、大型企业信息化团队、供应链系统与核心 ERP 开发者",
-                ArchitectInsight = "低代码框架常被质疑无法承接复杂 ERP 的深度业务规则。JPiere 样板间证明：NetYamlForge 既能用 YAML 快速组织 28 个实体的级联关系，又通过原生 C# Hooks 允许无上限的深度工业逻辑扩展。",
+                Id = "blog-app",
+                Title = "📰 Modern Blog (标准博客与发布平台)",
+                Category = "content",
+                CategoryLabel = "内容与发布",
+                Badge = "Live App",
+                BadgeClass = "badge-secondary",
+                Icon = "📰",
+                Tagline = "标准一览流、Markdown 详情沉浸阅读、分类聚合与独立发布系统",
+                Description = "遵循现代人机交互规范重塑的标准博客系统。提供优雅的文章一览卡片流、单篇独立沉浸阅读详情页、智能字数预估、多标签分类聚合以及全生命周期文章草稿与发布管控。",
+                TargetAudience = "技术博主、独立创作者、产品布道师、内容运营团队",
+                ArchitectInsight = "实现标准博客系统的经典动线解耦：一览流（Archive Index）负责高密度信息检索与分类导航，单篇阅读页（Post Detail）负责无干扰沉浸阅读。内置安全 Markdown HTML 消毒防护，坚决杜绝富文本 XSS 漏洞。",
                 Highlights = new List<string>
                 {
-                    "28 个工业级关联实体：合同、报价、订单、发票、凭证、库存调拨等完整业务网",
-                    "多角色工作台分流：一般员工视角（MyPage）与合同专员视角（ContractDetail）",
-                    "复杂 C# 业务 Hooks：合同状态流转审批、金额税率校验与自动化待办流转",
-                    "企业级审计与追踪：严格记录操作人、变动轨迹与状态时间线"
+                    "双动线人机交互：优雅的文章一览流与单篇沉浸式独立阅读详情页完全解耦",
+                    "沉浸式阅读体验：智能字数统计、预计阅读分钟数、作者签名与发布时间戳",
+                    "分类与标签智能索引：支持多分类胶囊切换与草稿/已发布状态可视化标识",
+                    "内生安全消毒：Markdown 渲染管线内置 HTML 净化，杜绝富文本 XSS 注入风险"
                 },
-                TechTags = new List<string> { "Enterprise ERP", "28 Entities", "Complex Hooks", "Approval Flow", "Audit Log" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "contract.yml (合同核心实体定义与外键关联)",
+                TechTags = new List<string> { "Blog App", "Markdown Reader", "Content Publisher", "XSS Sanitized", "Responsive" },
+                PrimaryActionUrl = "/blog-app/Page/HomePage",
+                PrimaryActionLabel = "浏览博客主页",
+                SecondaryActionUrl = "/blog-app/DynamicEntity/Index?entity=blog_post",
+                SecondaryActionLabel = "✍️ 文章内容运维",
+                CodeSnippetTitle = "project.yaml (博客发布门户与分类实体定义)",
+                CodeLanguage = "yaml",
+                CodeSnippet = @"name: blog-app
+displayName: ""Blog App""
+version: ""1.0.0""
+description: ""NetYamlForge 独立博客与内容发布平台""
+
+database:
+  type: sqlite
+  path: database/blog-app.db
+
+features:
+  multiLanguage: true
+  userAuthentication: true
+  dashboard: true
+  pages: true
+  api: true
+
+layout:
+  theme: synthwave
+  dashboardTheme: workspace
+  landingPageByRole:
+    viewer: /blog-app/Page/HomePage
+    editor: /blog-app/Page/HomePage
+    admin:  /blog-app/Page/HomePage",
+                IsBlueprintOnly = false
+            },
+
+            // 3. 知识库协作中心 (Wiki Hub)
+            new()
+            {
+                Id = "wiki-app",
+                Title = "📚 Wiki Hub (全声明式知识库协作门户)",
+                Category = "knowledge",
+                CategoryLabel = "知识与文档",
+                Badge = "Zero-Razor Live",
+                BadgeClass = "badge-accent",
+                Icon = "📚",
+                Tagline = "零手写 Razor、全 YAML 积木装配、沉浸式架构文档流与实时指标看板",
+                Description = "NetYamlForge 声明式积木生态扩展的里程碑应用。不编写任何一行 C# 或 Razor 视图代码，完全依赖通用声明式组件（_SectionMarkdown、_SectionKanban、stat_cards）与元数据定义拼装而成的企业级知识库门户。",
+                TargetAudience = "企业架构师、技术文档工程师、研发管理人员、开源项目维护者",
+                ArchitectInsight = "体现自举演进引擎的核心哲学：通过将可复用 UI 积木沉淀至框架内核，将 AI 生成代码的表面积压缩至极限。零 Razor 视图意味着零编译风险与零注入通道，达成真正意义上的 Safe by Construction。",
+                Highlights = new List<string>
+                {
+                    "零手写 Razor 视图：100% 由 YAML 元数据与组件积木拼装驱动，无编译包袱",
+                    "通用 Markdown 积木：自动绑定 titleField、dateField 与 contentField 正文解析",
+                    "全景指标看板：实时聚合呈现全部文档数、已发布量与架构最佳实践热度",
+                    "自举沙箱交付：由 AppManifestationService 引擎全自动安全落盘与热挂载"
+                },
+                TechTags = new List<string> { "Wiki Hub", "Zero-Razor", "Declarative Blocks", "Markdown Pipeline", "Safe by Construction" },
+                PrimaryActionUrl = "/wiki-app/Page/HomePage",
+                PrimaryActionLabel = "查阅知识库主页",
+                SecondaryActionUrl = "/wiki-app/DynamicEntity/Index?entity=wiki_document",
+                SecondaryActionLabel = "📑 知识文档库",
+                CodeSnippetTitle = "pages/HomePage.yaml (全声明式多区块知识库装配规格)",
+                CodeLanguage = "yaml",
+                CodeSnippet = @"page:
+  title: ""NetYamlForge 架构设计与知识库协作中心""
+  description: ""沉浸式阅读架构演进规范、最佳实践与多智能体协同蓝图""
+  layout: ""default""
+
+sections:
+  - id: stats
+    type: stat_cards
+    title: ""知识库全景指标""
+  - id: intro_doc
+    type: markdown
+    title: ""架构全景与核心规范""
+  - id: articles_overview
+    type: card_list
+    title: ""架构文章与规范速查""",
+                IsBlueprintOnly = false
+            },
+
+            // 4. 企业级表单审批流中心 (Approval Flow)
+            new()
+            {
+                Id = "approval-flow",
+                Title = "📋 Approval Flow (企业表单审批流中心)",
+                Category = "enterprise",
+                CategoryLabel = "企业级应用",
+                Badge = "Enterprise Live",
+                BadgeClass = "badge-warning",
+                Icon = "📋",
+                Tagline = "行政差旅/财务报销/设备采购多级审批流、状态流转与历史流转审计",
+                Description = "基于 Agent Studio 自举孵化的企业级多级流程审批工作台。涵盖费用报销、设备采购、带薪休假等场景，提供完整的状态机流转（待审批/已通过/驳回/撤回）、审计历史追踪与自定义 Hook 动作闭环。",
+                TargetAudience = "企业行政财务人员、部门主管、中大型团队协同管理者",
+                ArchitectInsight = "将企业级复杂工作流建模为'声明式表单 + 自定义动作处理器（ICustomActionHandler）+ 审计日志'三位一体。动作处理器在事务内严格原子执行状态跃迁与操作流水回写，天然防脏读与重复决断。",
+                Highlights = new List<string>
+                {
+                    "多级业务流转闭环：审批通过、驳回、自主撤回完整动作处理器物理实装",
+                    "流转历史审计日志：自动向 approval_log 回写操作人、决断动作与审计意见",
+                    "声明式效能大屏：一览展示待我审批、已通过、已驳回及紧急单据实时指标",
+                    "高优紧急程度预警：支持 normal / high / urgent 多维权重排序与警示凸显"
+                },
+                TechTags = new List<string> { "Approval Flow", "Custom Action Handlers", "Audit Trail", "Workflow", "Enterprise" },
+                PrimaryActionUrl = "/approval-flow/Page/HomePage",
+                PrimaryActionLabel = "进入审批流中心",
+                SecondaryActionUrl = "/approval-flow/DynamicEntity/Index?entity=approval_request",
+                SecondaryActionLabel = "📑 审批单据管理",
+                CodeSnippetTitle = "entities/approval_request.yml (审批实体与动作处理器声明)",
                 CodeLanguage = "yaml",
                 CodeSnippet = @"entities:
-  contract:
-    table: 'c_contract'
-    key: 'c_contract_id'
-    displayName: 'Contract'
-    columns:
-      c_contract_id: { type: int, identity: true, label: 'ID' }
-      documentno: { type: string, required: true, label: 'Contract No', searchable: true }
-      c_bpartner_id: { type: int, label: 'Partner', foreignKey: { entity: business_partner, displayColumn: name } }
-      totalamt: { type: decimal, label: 'Total Amount' }
-      docstatus: { type: string, label: 'Status' } # Drafted, InProgress, Completed",
-                IsBlueprintOnly = true
+  approval_request:
+    table: approval_request
+    key: id
+    displayName: ""审批申请单""
+    actions:
+      approve_request:
+        label: ""审批通过""
+        handler: approve_request_handler
+      reject_request:
+        label: ""驳回申请""
+        handler: reject_request_handler
+      withdraw_request:
+        label: ""撤回单据""
+        handler: withdraw_request_handler",
+                IsBlueprintOnly = false
             },
 
-            // 5. 智能文档流水线 (Architecture Blueprint)
+            // 5. 企业经营指标与决策看板 (Analytics Dashboard)
             new()
             {
-                Id = "ai-doc-processor",
-                Title = "📑 AI Doc Processor (智能文档批处理流水线)",
-                Category = "workflow",
-                CategoryLabel = "流程与批处理",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "📑",
-                Tagline = "非结构化多格式文档的自动化批处理、智能解析与结构化流水线",
-                Description = "展示 NetYamlForge 在面对大量非结构化文件（PDF、Word、图片）时的批处理与流水线编排能力。通过 Document Task 实体追踪任务状态与 AI 提取结果。",
-                TargetAudience = "企业内容管理 (ECM) 团队、法务/财务文档自动化处理工程师",
-                ArchitectInsight = "将耗时、异步的文档处理任务抽象为声明式实体，天然获得了状态监控、重试日志与 REST/MCP 调用能力，无需额外搭建臃肿的工作流系统。",
+                Id = "analytics-dashboard",
+                Title = "📊 Analytics Dashboard (经营指标决策看板)",
+                Category = "enterprise",
+                CategoryLabel = "企业级应用",
+                Badge = "Analytics Live",
+                BadgeClass = "badge-info",
+                Icon = "📊",
+                Tagline = "经营指标实时聚合、商业营收漏斗、渠道 ROI 与平台基础设施大屏",
+                Description = "为企业核心决策层打造的全景数据监控与洞察工作台。无缝聚合季度 GMV、活跃客户规模、多渠道营收贡献与高 ROI 增长引擎，支持纯声明式卡片流与全量明细矩阵联动分析。",
+                TargetAudience = "管理层、业务负责人、运营数据分析师、投资人",
+                ArchitectInsight = "结合 NetYamlForge 声明式积木的 stat_cards 与 card_list，通过 SQL 动态聚合实现亚毫秒级的经营大屏渲染。数据结构灵活可扩展，无需硬编码图表组件即可迅速洞察关键商业指标。",
                 Highlights = new List<string>
                 {
-                    "多阶段处理流水线：Upload → Extract → Classify → Completed",
-                    "BatchJob 自动调度：支持按 Cron 定期执行超时任务归档与重试",
-                    "结构化提取与审计：文档摘要、关键信息直接沉淀至实体数据库"
+                    "全景商业指标大屏：季度 GMV、租户增长率、付费转化率及平台响应延迟",
+                    "主力业务线与增长引擎：渠道营收规模、客户转化单数与 ROI 投资回报倍数对比",
+                    "纯声明式积木驱动：通过 SQL 统计聚合与 card_list 组合，开发交付零延迟",
+                    "经营明细数据表格：无缝下钻至业务渠道与核心指标完整生命周期"
                 },
-                TechTags = new List<string> { "Document Task", "BatchJob", "Structured Extraction" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "document_task.yml (批处理实体定义)",
+                TechTags = new List<string> { "Analytics Dashboard", "BI Metrics", "Declarative Cards", "ROI Funnel", "Enterprise" },
+                PrimaryActionUrl = "/analytics-dashboard/Page/HomePage",
+                PrimaryActionLabel = "查看经营大屏",
+                SecondaryActionUrl = "/analytics-dashboard/DynamicEntity/Index?entity=kpi_metric",
+                SecondaryActionLabel = "📈 经营指标明细",
+                CodeSnippetTitle = "pages/HomePage.yaml (经营看板声明式积木装配)",
                 CodeLanguage = "yaml",
-                CodeSnippet = @"entities:
-  document_task:
-    table: 'document_task'
-    key: 'id'
-    displayName: 'Document Task'
-    columns:
-      id: { type: int, identity: true, label: 'ID' }
-      task_name: { type: string, required: true, label: 'Task Name' }
-      status: { type: string, label: 'Status' } # pending, processing, completed, failed
-      extracted_json: { type: string, label: 'Extracted Data' }",
-                IsBlueprintOnly = true
-            },
-
-            // 6. 复杂交互与状态机游戏 (Architecture Blueprint)
-            new()
-            {
-                Id = "dungeon-forge",
-                Title = "⚔️ Dungeon Forge (文字地下城探索)",
-                Category = "workflow",
-                CategoryLabel = "交互状态机",
-                Badge = "Architecture Blueprint",
-                BadgeClass = "badge-neutral",
-                Icon = "⚔️",
-                Tagline = "展示高频状态流转、战斗计算与 AI DM 叙事引导的复杂互动状态机",
-                Description = "文字交互式地下城探索，展示框架承载高频交互、回合制战斗规则与 AI 叙事编排的弹性能力。证明框架不仅能做静态中后台，也能承接富有动态趣味的交互系统。",
-                TargetAudience = "游戏逻辑开发者、交互状态机探索者、LLM 叙事与动态决策爱好者",
-                ArchitectInsight = "游戏逻辑拥有最具代表性的复合状态迁移与规则判定。NetYamlForge 能轻松承载其背包、属性与战斗决策，展现了极强的通用性。",
-                Highlights = new List<string>
-                {
-                    "多实体回合制状态引擎：角色、怪物、物品、地图事件动态协同",
-                    "AI 地下城主 (DM) 叙事：结合上下文动态生成环境描述与战斗战报",
-                    "模块化 MVC 路由：无缝嵌入自定义前端交互与实时 WebSocket/API"
-                },
-                TechTags = new List<string> { "State Engine", "Interactive Storytelling", "Custom Controller" },
-                PrimaryActionUrl = "",
-                PrimaryActionLabel = "",
-                SecondaryActionUrl = null,
-                SecondaryActionLabel = null,
-                CodeSnippetTitle = "DungeonExploreController.cs (自定义交互控制器挂载)",
-                CodeLanguage = "csharp",
-                CodeSnippet = @"[Route(""{project}/Dungeon"")]
-public class DungeonExploreController(ProjectScope scope) : BaseProjectController
-{
-    [HttpGet(""Explore"")]
-    public IActionResult Explore()
-    {
-        // 渲染富交互地下城探索视图，数据通过 /api/{project}/dungeon/* 实时通讯
-        return View($""~/projects/{scope.Current.Name}/views/Dungeon/Explore.cshtml"");
-    }
-}",
-                IsBlueprintOnly = true
+                CodeSnippet = @"title: ""企业经营分析与决策看板""
+sections:
+  - id: gmv_overview
+    title: ""核心战略指标""
+    source: ""SELECT metric_name as label, current_value as value, icon FROM kpi_metric""
+    component: stat_cards
+  - id: channel_cards
+    title: ""主力业务线与增长引擎""
+    source: ""SELECT id, channel_name, category, revenue, roi_multiple FROM business_channel""
+    component: card_list",
+                IsBlueprintOnly = false
             }
         };
     }
 
     private static string GeneratePromotionalCopy()
     {
-        return @"### 🚀 NetYamlForge 平台样板间宣发矩阵
+        return @"### 🚀 NetYamlForge 全场景自举演进应用矩阵
 
-> **「声明式 YAML + 安全护栏 + 原生 C# Hooks」—— 专为 AI Agent 时代设计的现代 .NET 应用运行时**
+> **「声明式 YAML + 内生安全护栏 + 异构多智能体协同」—— 专为 AI 时代设计的现代 .NET 应用运行时**
 
-1. **🤖 Agent Studio (自举演进工作台 · 运行中)**
+1. **🤖 Agent Studio (智能体自举演进工作台)**
    - 3 角色（Architect / Developer / Tester）闭环协作！基于 roles.yaml 声明式定义与 MCP 标准端点，打造透明可控的 AI 自主编程工作台。
-2. **🛡️ Security Guardrails (安全标杆 · 架构蓝图)**
-   - 告别 AI 生成代码的 SQL 注入与路径穿越风险！元数据 AST 编译期熔断 + Default-Deny 默认拒绝，为 Agent 提供生产级安全网。
-3. **🤖 AI Handshake Protocol (AHP 智能体名片 · 架构蓝图)**
-   - AI 时代的数字化身份与名片！有限状态机守卫 + 动态 QR 令牌生命周期，实现 Agent 与人类的受控握手。
-4. **📋 FormForge (动态表单引擎 · 架构蓝图)**
-   - 纯配置驱动的表单设计器！5 分钟完成信息采集、问卷调研与对外发布，内网外网双模填报。
-5. **🏭 JPiere Contract Service (工业级 ERP 业务 · 架构蓝图)**
-   - 28 个关联实体协同！涵盖合同、报价、审批流与日记账，证明框架承接深水区企业级业务的卓越弹性。
+   - 访问地址：`/agent-studio/Page/HomePage`
 
-体验地址：https://nyf.0101.click/showcase
+2. **⚡ Todo Workspace (现代高效待办工作台)**
+   - 业务前台与底层元数据双轨解耦！四维指标看板、行内极速创建卡片、逾期动态预警与毫秒级模糊检索。
+   - 访问地址：`/todo-app/Page/HomePage`
+
+3. **📰 Modern Blog (标准博客与发布平台)**
+   - 优雅一览流 + 沉浸式阅读详情页双动线解耦，智能字数统计与阅读时长预估，内置 Markdown HTML 消毒安全防线。
+   - 访问地址：`/blog-app/Page/HomePage`
+
+4. **📚 Wiki Hub (全声明式知识库协作门户)**
+   - 零手写 Razor 视图，100% 声明式 YAML 积木装配（SectionKanban / SectionMarkdown / StatCards），天生内生安全（Safe by Construction）。
+   - 访问地址：`/wiki-app/Page/HomePage`
+
+5. **📋 Approval Flow (企业表单审批流中心)**
+   - 行政差旅/财务报销/设备采购多级审批工作台，完整实现 approve / reject / withdraw 动作处理器与审计流水。
+   - 访问地址：`/approval-flow/Page/HomePage`
+
+6. **📊 Analytics Dashboard (经营指标决策看板)**
+   - 全景商业指标大屏，涵盖季度 GMV、增长率、漏斗转化与多渠道 ROI，纯声明式秒级敏捷交付。
+   - 访问地址：`/analytics-dashboard/Page/HomePage`
+
+🎪 全场景样板间体验馆：https://nyf.0101.click/showcase
 ";
     }
 }

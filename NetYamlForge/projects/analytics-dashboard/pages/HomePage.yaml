@@ -1,0 +1,29 @@
+title: "企业经营分析与决策看板"
+description: "全景经营 KPI 监控中心，涵盖商业营收、客户规模、转化漏斗与平台基础设施效能"
+sections:
+  - id: gmv_overview
+    title: "核心战略指标"
+    sourceType: custom
+    source: "SELECT metric_name as label, current_value as value, icon FROM kpi_metric ORDER BY id ASC"
+    component: stat_cards
+    labelField: label
+    valueField: value
+    iconField: icon
+
+  - id: channel_cards
+    title: "主力业务线与增长引擎"
+    description: "高营收贡献与高 ROI 渠道分布"
+    sourceType: custom
+    source: "SELECT id, channel_name, category, revenue, conversions, roi_multiple, summary FROM business_channel ORDER BY revenue DESC"
+    component: card_list
+    titleField: channel_name
+    subtitleField: category
+    descriptionField: summary
+    pageSize: 6
+
+  - id: all_channels
+    title: "经营明细与转化总览"
+    sourceType: table
+    source: business_channel
+    component: table
+    pageSize: 10

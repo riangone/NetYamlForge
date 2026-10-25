@@ -1,0 +1,840 @@
+@using NetYamlForge.Models
+@using System.Text.RegularExpressions
+@using System.Text.Json
+@model Dictionary<string, (IEnumerable<Dictionary<string, object>> Rows, int Total)>
+@{
+    var currentProject = ViewData["Project"] as string ?? "agent-studio";
+    var pageDef = ViewData["PageDef"] as PageDefinition;
+    ViewData["Title"] = pageDef?.Title ?? "Agent Studio 协同演进工作台";
+    ViewData["ActivePage"] = "Page";
+
+    if (ViewBag.LayoutPath != null)
+    {
+        Layout = ViewBag.LayoutPath;
+    }
+
+    var statsRows = Model.TryGetValue("overview_stats", out var sd) ? sd.Rows.ToList() : new();
+    var providerRows = Model.TryGetValue("provider_stats", out var prd) ? prd.Rows.ToList() : new();
+    var taskRows = Model.TryGetValue("all_tasks", out var td) ? td.Rows.ToList() : new();
+    var logRows = Model.TryGetValue("recent_logs", out var ld) ? ld.Rows.ToList() : new();
+
+    string GetStat(string label)
+    {
+        var item = statsRows.FirstOrDefault(r => r.TryGetValue("label", out var l) && l?.ToString() == label);
+        return item != null && item.TryGetValue("value", out var v) ? v?.ToString() ?? "0" : "0";
+    }
+
+    var allTasksCount = int.TryParse(GetStat("全部演进任务"), out var atc) ? atc : taskRows.Count;
+    var runningTasksCount = int.TryParse(GetStat("进行中/排队"), out var rtc) ? rtc : 0;
+    var completedTasksCount = int.TryParse(GetStat("已成功交付"), out var ctc) ? ctc : 0;
+    var logsCount = int.TryParse(GetStat("阶段执行日志"), out var lgc) ? lgc : logRows.Count;
+
+    var completionRate = allTasksCount > 0 ? (int)Math.Round((double)completedTasksCount / allTasksCount * 100) : 0;
+}
+
+<div class="container mx-auto px-3 sm:px-4 lg:px-6 2xl:max-w-[1600px] 3xl:max-w-[1720px] py-4 sm:py-8 font-sans">
+
+    <!-- 顶部 Hero 欢迎与快捷动作条 -->
+    <div class="rounded-3xl bg-gradient-to-br from-primary/15 via-base-100 to-secondary/10 border border-base-300/80 p-4 sm:p-6 md:p-10 mb-6 sm:mb-8 shadow-sm relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+            <div class="max-w-3xl">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold mb-3">
+                    <span class="animate-pulse">✨</span>
+                    <span>NetYamlForge 自举演进中枢 · 多智能体闭环架构</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-base-content mb-3 flex items-center gap-3">
+                    <span>🤖 Agent Studio 演进工作台</span>
+                </h1>
+                <p class="text-base-content/80 text-sm sm:text-base leading-relaxed">
+                    专为 NetYamlForge 演进任务设计的高效查阅与指挥中枢。驱动 <strong>Claude</strong>（架构师）、<strong>Antigravity</strong>（开发者）与 <strong>OpenCode</strong>（测试者）三阶段闭环推演与物理落盘。
+                </p>
+            </div>
+
+            <!-- 动作导航按钮组 -->
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="#quickCreateSection" class="btn btn-primary btn-sm gap-2 shadow-sm font-bold">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>新建演进任务</span>
+                </a>
+                <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=agent_task")" 
+                   class="btn btn-sm btn-outline border-base-300 hover:border-primary gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    <span>任务数据管理</span>
+                </a>
+                <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=agent_task_log")" 
+                   class="btn btn-sm btn-outline border-base-300 hover:border-primary gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <span>角色执行日志</span>
+                </a>
+                <button onclick="window.location.reload()" class="btn btn-sm btn-ghost border border-base-200 gap-1.5" title="刷新状态">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 核心指标 KPI 看板与协同阵列 -->
+    <div class="card bg-base-100 shadow-md border border-base-200 mb-8 overflow-hidden">
+        <div class="card-body p-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- 全部任务 -->
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-base-200/50 border border-base-300/40">
+                    <div class="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center text-2xl font-bold shrink-0">
+                        📋
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider opacity-60">全部演进任务</div>
+                        <div class="text-2xl font-black mt-0.5">@allTasksCount</div>
+                    </div>
+                </div>
+
+                <!-- 运行中/待处理 -->
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-base-200/50 border border-base-300/40">
+                    <div class="w-12 h-12 rounded-xl bg-warning/15 text-warning flex items-center justify-center text-2xl font-bold shrink-0">
+                        ⚡
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider opacity-60">进行中 / 推演中</div>
+                        <div class="text-2xl font-black mt-0.5 text-warning">@runningTasksCount</div>
+                    </div>
+                </div>
+
+                <!-- 已成功交付 -->
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-base-200/50 border border-base-300/40">
+                    <div class="w-12 h-12 rounded-xl bg-success/15 text-success flex items-center justify-center text-2xl font-bold shrink-0">
+                        ✅
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider opacity-60">已成功交付</div>
+                        <div class="text-2xl font-black mt-0.5 text-success">@completedTasksCount</div>
+                    </div>
+                </div>
+
+                <!-- 协同日志数 -->
+                <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-base-200/50 border border-base-300/40">
+                    <div class="w-12 h-12 rounded-xl bg-info/15 text-info flex items-center justify-center text-2xl font-bold shrink-0">
+                        📜
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold uppercase tracking-wider opacity-60">阶段执行流水</div>
+                        <div class="text-2xl font-black mt-0.5 text-info">@logsCount</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 完成率进度条与 AI 参与分布 -->
+            <div class="pt-4 border-t border-base-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex-1 max-w-md">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="font-bold">流水线交付达成率</span>
+                        <span class="font-bold text-primary">@completionRate%</span>
+                    </div>
+                    <div class="w-full bg-base-300/70 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-gradient-to-r from-primary to-success h-2.5 rounded-full transition-all duration-500 ease-out" 
+                             style="width: @(Math.Max(5, completionRate))%"></div>
+                    </div>
+                </div>
+
+                <!-- 各 AI 协同活跃度 -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <span class="opacity-60 font-semibold mr-1">协同智能体阵列:</span>
+                    @if (providerRows.Count == 0)
+                    {
+                        <span class="badge badge-sm badge-ghost">Claude · Antigravity · OpenCode</span>
+                    }
+                    else
+                    {
+                        @foreach (var p in providerRows)
+                        {
+                            var pName = p.TryGetValue("provider", out var pv) ? pv?.ToString() ?? "unknown" : "unknown";
+                            var pCount = p.TryGetValue("exec_count", out var ev) ? ev?.ToString() ?? "0" : "0";
+                            <span class="badge badge-sm badge-outline gap-1 font-mono">
+                                <span>🤖 @pName:</span>
+                                <span class="font-bold text-primary">@pCount 次</span>
+                            </span>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 快速立项任务面板 (Quick Task Launchpad) -->
+    <div id="quickCreateSection" class="card bg-base-100 shadow-md border border-base-200 mb-8 overflow-hidden">
+        <div class="card-body p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base sm:text-lg font-bold flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-xl bg-primary text-primary-content flex items-center justify-center text-sm font-black shadow-sm">＋</span>
+                    <span>新建演进任务 (Fast Task Launchpad)</span>
+                </h2>
+                <div class="text-xs opacity-60 hidden sm:block">
+                    录入后可直接点击「🚀 启动协同流水线」进行三阶段闭环自举
+                </div>
+            </div>
+
+            <form method="post" action="@Url.Content($"~/{currentProject}/DynamicEntity/Create?entity=agent_task&mode=page")" class="space-y-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Url.Content($"~/{currentProject}/Page/HomePage")" />
+                <input type="hidden" name="status" value="Draft" />
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <div class="md:col-span-8">
+                        <label class="block text-xs font-bold mb-1 opacity-70">任务名称 (Title)</label>
+                        <input type="text" name="title" required placeholder="如：构建智能知识库系统、升级待办分类标签功能..." 
+                               class="input input-bordered w-full focus:input-primary shadow-inner" />
+                    </div>
+
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-bold mb-1 opacity-70">快捷 CLI 角色编排预设</label>
+                        <select id="presetSelector" onchange="applyRolePreset(this.value)" class="select select-bordered w-full">
+                            <option value="recommended">🌟 推荐配置 (Claude + Antigravity + OpenCode)</option>
+                            <option value="claude-heavy">🏛️ Claude 架构主导 (Claude + Claude + OpenCode)</option>
+                            <option value="opencode-all">⚡ 全 OpenCode 极速推演</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 需求描述 -->
+                <div>
+                    <label class="block text-xs font-bold mb-1 opacity-70">详细需求描述与业务规格目标</label>
+                    <textarea name="description" rows="2" placeholder="在此输入需要自举演进的具体业务目标、数据实体设计要求与期望用户界面交互细节..." 
+                              class="textarea textarea-bordered w-full focus:textarea-primary text-sm"></textarea>
+                </div>
+
+                <!-- 三阶段 AI 绑定与提交 -->
+                <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-base-200">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1 max-w-xl">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-0.5">Stage 1: 架构师</span>
+                            <select name="architect_cli" id="archCliSelect" class="select select-sm select-bordered w-full font-mono text-xs">
+                                <option value="claude" selected>claude</option>
+                                <option value="antigravity">antigravity</option>
+                                <option value="opencode">opencode</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-0.5">Stage 2: 开发者</span>
+                            <select name="developer_cli" id="devCliSelect" class="select select-sm select-bordered w-full font-mono text-xs">
+                                <option value="antigravity" selected>antigravity</option>
+                                <option value="claude">claude</option>
+                                <option value="opencode">opencode</option>
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider opacity-60 block mb-0.5">Stage 3: 测试者</span>
+                            <select name="tester_cli" id="testCliSelect" class="select select-sm select-bordered w-full font-mono text-xs">
+                                <option value="opencode" selected>opencode</option>
+                                <option value="claude">claude</option>
+                                <option value="antigravity">antigravity</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary px-6 shadow-md gap-2 font-bold shrink-0 safe-touch-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>立项并保存任务</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 演进任务全景展示区 (Task Pipeline Cards) -->
+    <div class="mb-10">
+        <!-- 过滤与搜索控制栏 -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-xl font-black text-base-content flex items-center gap-2.5">
+                    <span>🚀 演进任务全景看板</span>
+                    <span class="badge badge-sm badge-primary font-bold">@taskRows.Count 项</span>
+                </h2>
+                <p class="text-xs opacity-60 mt-0.5">点击下方各阶段按钮即可直接检视架构设计 (RFC)、开发交付产物与测试报告</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- 状态筛选胶囊 (移动端支持平滑横滑) -->
+                <div class="join bg-base-200/80 p-0.5 rounded-xl border border-base-300 flex-nowrap overflow-x-auto no-scrollbar touch-pan-x max-w-full">
+                    <button type="button" onclick="filterTasks('all')" class="join-item btn btn-xs btn-ghost filter-btn active-filter font-bold whitespace-nowrap" data-status="all">
+                        全部 (@taskRows.Count)
+                    </button>
+                    <button type="button" onclick="filterTasks('Completed')" class="join-item btn btn-xs btn-ghost filter-btn whitespace-nowrap" data-status="Completed">
+                        ✅ 已完成 (@completedTasksCount)
+                    </button>
+                    <button type="button" onclick="filterTasks('Draft')" class="join-item btn btn-xs btn-ghost filter-btn whitespace-nowrap" data-status="Draft">
+                        📝 草稿
+                    </button>
+                    <button type="button" onclick="filterTasks('Running')" class="join-item btn btn-xs btn-ghost filter-btn whitespace-nowrap" data-status="Running">
+                        ⚡ 运行中
+                    </button>
+                </div>
+
+                <!-- 搜索框 -->
+                <div class="relative w-full sm:w-56">
+                    <input type="text" id="taskSearchInput" oninput="searchTasks()" placeholder="搜索任务名称或产物..." 
+                           class="input input-sm input-bordered w-full pl-8 focus:input-primary rounded-xl" />
+                    <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务卡片列表 -->
+        <div class="space-y-4" id="taskCardsContainer">
+            @if (taskRows.Count == 0)
+            {
+                <div class="card bg-base-100 border border-dashed border-base-300 py-16 text-center shadow-sm rounded-3xl">
+                    <div class="text-5xl mb-3">🛸</div>
+                    <div class="font-bold text-xl">当前尚未录入演进任务</div>
+                    <p class="text-sm opacity-60 mt-1.5">在上方快速立项面板录入您的第一个自举演进任务吧！</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var row in taskRows)
+                {
+                    var id = row.TryGetValue("id", out var idVal) ? idVal?.ToString() ?? "0" : "0";
+                    var title = row.TryGetValue("title", out var titleVal) ? titleVal?.ToString() ?? "未命名任务" : "未命名任务";
+                    var desc = row.TryGetValue("description", out var descVal) ? descVal?.ToString() ?? "" : "";
+                    var status = row.TryGetValue("status", out var stVal) ? stVal?.ToString() ?? "Draft" : "Draft";
+                    var archCli = row.TryGetValue("architect_cli", out var acVal) ? acVal?.ToString() ?? "claude" : "claude";
+                    var devCli = row.TryGetValue("developer_cli", out var dcVal) ? dcVal?.ToString() ?? "antigravity" : "antigravity";
+                    var testCli = row.TryGetValue("tester_cli", out var tcVal) ? tcVal?.ToString() ?? "opencode" : "opencode";
+
+                    var archOut = row.TryGetValue("architect_output", out var aoVal) ? aoVal?.ToString() ?? "" : "";
+                    var devOut = row.TryGetValue("developer_output", out var doVal) ? doVal?.ToString() ?? "" : "";
+                    var testOut = row.TryGetValue("tester_output", out var toVal) ? toVal?.ToString() ?? "" : "";
+
+                    var createdAt = row.TryGetValue("created_at", out var caVal) ? caVal?.ToString() ?? "" : "";
+
+                    var hasArch = !string.IsNullOrWhiteSpace(archOut);
+                    var hasDev = !string.IsNullOrWhiteSpace(devOut);
+                    var hasTest = !string.IsNullOrWhiteSpace(testOut);
+
+                    var statusBadgeClass = status switch
+                    {
+                        "Manifested (Active)" => "badge-accent text-accent-content font-bold",
+                        "Completed" => "badge-success text-success-content font-bold",
+                        "Running" => "badge-warning text-warning-content animate-pulse font-bold",
+                        "Failed" => "badge-error text-error-content font-bold",
+                        _ => "badge-info text-info-content font-bold"
+                    };
+
+                    <div class="card bg-base-100 shadow-sm border border-base-200 hover:border-primary/40 hover:shadow-md transition-all rounded-3xl task-item"
+                         data-id="@id"
+                         data-status="@status"
+                         data-title="@title.ToLowerInvariant()"
+                         data-desc="@desc.ToLowerInvariant()">
+                        <div class="card-body p-5 sm:p-6">
+                            <!-- 卡片顶栏：ID、标题、状态徽章与时间 -->
+                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                                <div class="flex items-start gap-3">
+                                    <span class="badge badge-lg bg-base-200 border-base-300 font-mono font-bold text-xs mt-0.5">#@id</span>
+                                    <div>
+                                        <h3 class="text-base sm:text-lg font-black text-base-content leading-snug">
+                                            @title
+                                        </h3>
+                                        @if (!string.IsNullOrWhiteSpace(createdAt))
+                                        {
+                                            <div class="text-[11px] opacity-50 mt-0.5 flex items-center gap-1 font-mono">
+                                                <span>🕒 创建于: @createdAt</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                                    <span class="badge @statusBadgeClass text-xs py-2 px-3">
+                                        @if (status == "Completed") { <span>✅ 已交付 (Completed)</span> }
+                                        else if (status == "Running") { <span>⚡ 协同推演中 (Running)</span> }
+                                        else if (status == "Failed") { <span>❌ 执行异常 (Failed)</span> }
+                                        else { <span>📝 草稿就绪 (Draft)</span> }
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 需求描述 -->
+                            @if (!string.IsNullOrWhiteSpace(desc))
+                            {
+                                <div class="p-3 rounded-2xl bg-base-200/40 border border-base-300/40 text-xs sm:text-sm text-base-content/80 mb-4 leading-relaxed">
+                                    <span class="font-bold text-base-content/90 mr-1">需求规格:</span>@desc
+                                </div>
+                            }
+
+                            <!-- 三阶段协同流水线指示器 (Pipeline Stepper Flow) -->
+                            <div class="rounded-2xl bg-base-200/50 border border-base-300/50 p-3 sm:p-4 mb-4">
+                                <div class="text-[11px] font-bold uppercase tracking-wider opacity-60 mb-2.5 flex items-center justify-between">
+                                    <span>协同流水线编排进度</span>
+                                    <span class="font-mono text-primary font-bold">三阶段闭环体系</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                                    <!-- Stage 1: Architect -->
+                                    <div class="p-2.5 rounded-xl @(hasArch ? "bg-primary/10 border border-primary/30" : "bg-base-100 border border-base-200") flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">🏛️</span>
+                                            <div>
+                                                <div class="text-xs font-bold">Stage 1: 架构设计 (RFC)</div>
+                                                <div class="text-[10px] opacity-60 font-mono">Role: Architect · @archCli</div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            @if (hasArch)
+                                            {
+                                                <span class="badge badge-xs badge-success gap-1 font-bold">✔ 已完成</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-xs badge-ghost opacity-60">待输出</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Stage 2: Developer -->
+                                    <div class="p-2.5 rounded-xl @(hasDev ? "bg-secondary/10 border border-secondary/30" : "bg-base-100 border border-base-200") flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">💻</span>
+                                            <div>
+                                                <div class="text-xs font-bold">Stage 2: 开发实现规范</div>
+                                                <div class="text-[10px] opacity-60 font-mono">Role: Developer · @devCli</div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            @if (hasDev)
+                                            {
+                                                <span class="badge badge-xs badge-success gap-1 font-bold">✔ 已完成</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-xs badge-ghost opacity-60">待输出</span>
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Stage 3: Tester -->
+                                    <div class="p-2.5 rounded-xl @(hasTest ? "bg-accent/10 border border-accent/30" : "bg-base-100 border border-base-200") flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-base">🧪</span>
+                                            <div>
+                                                <div class="text-xs font-bold">Stage 3: 测试验收结论</div>
+                                                <div class="text-[10px] opacity-60 font-mono">Role: Tester · @testCli</div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            @if (hasTest)
+                                            {
+                                                <span class="badge badge-xs badge-success gap-1 font-bold">✔ 已完成</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-xs badge-ghost opacity-60">待输出</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 底部工具条：产物查阅按钮组与操作按钮 -->
+                            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-base-200">
+                                <!-- 产物查阅按钮组 -->
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" 
+                                            onclick="openArtifactModal(@id, '@title.Replace("'", "\\'")', 'arch')" 
+                                            class="btn btn-xs @(hasArch ? "btn-outline border-primary/50 text-primary hover:bg-primary hover:text-white" : "btn-ghost opacity-40 cursor-not-allowed") gap-1">
+                                        <span>🏛️ 架构设计 (RFC)</span>
+                                        @if (hasArch) { <span class="badge badge-xs badge-primary">查看</span> }
+                                    </button>
+
+                                    <button type="button" 
+                                            onclick="openArtifactModal(@id, '@title.Replace("'", "\\'")', 'dev')" 
+                                            class="btn btn-xs @(hasDev ? "btn-outline border-secondary/50 text-secondary hover:bg-secondary hover:text-white" : "btn-ghost opacity-40 cursor-not-allowed") gap-1">
+                                        <span>💻 开发交付产物</span>
+                                        @if (hasDev) { <span class="badge badge-xs badge-secondary">查看</span> }
+                                    </button>
+
+                                    <button type="button" 
+                                            onclick="openArtifactModal(@id, '@title.Replace("'", "\\'")', 'test')" 
+                                            class="btn btn-xs @(hasTest ? "btn-outline border-accent/50 text-accent hover:bg-accent hover:text-white" : "btn-ghost opacity-40 cursor-not-allowed") gap-1">
+                                        <span>🧪 测试验收报告</span>
+                                        @if (hasTest) { <span class="badge badge-xs badge-accent">查看</span> }
+                                    </button>
+
+                                    <!-- 隐藏的数据节点，供弹窗读取 -->
+                                    <div id="task_data_@(id)" class="hidden"
+                                         data-title="@title"
+                                         data-arch-cli="@archCli"
+                                         data-dev-cli="@devCli"
+                                         data-test-cli="@testCli"
+                                         data-arch-out="@archOut"
+                                         data-dev-out="@devOut"
+                                         data-test-out="@testOut">
+                                    </div>
+                                </div>
+
+                                <!-- 流水线操作与管理 -->
+                                <div class="flex items-center gap-2 ml-auto">
+                                    @{
+                                        string? liveAppUrl = null;
+                                        string? liveAppName = null;
+                                        if (title.Contains("Todo", StringComparison.OrdinalIgnoreCase) || title.Contains("待办", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            liveAppUrl = "/todo-app/Page/HomePage";
+                                            liveAppName = "待办工作台";
+                                        }
+                                        else if (title.Contains("Blog", StringComparison.OrdinalIgnoreCase) || title.Contains("博客", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            liveAppUrl = "/blog-app/Page/HomePage";
+                                            liveAppName = "博客主页";
+                                        }
+                                        else if (title.Contains("Wiki", StringComparison.OrdinalIgnoreCase) || title.Contains("知识库", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            liveAppUrl = "/wiki-app/Page/HomePage";
+                                            liveAppName = "知识库门户";
+                                        }
+                                    }
+                                    @if (!string.IsNullOrEmpty(liveAppUrl))
+                                    {
+                                        <a href="@Url.Content($"~{liveAppUrl}")" target="_blank" 
+                                           class="btn btn-xs btn-accent gap-1 font-bold shadow-sm" title="在新窗口中直达已成功自举上线的业务应用">
+                                            <span>🌐 体验 @liveAppName</span>
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+                                    }
+
+                                    @if (status != "Completed" || true)
+                                    {
+                                        <form method="post" action="@Url.Content($"~/{currentProject}/DynamicEntity/InvokeAction")" 
+                                              onsubmit="return confirm('确定要启动此任务的 Architect -> Developer -> Tester 三阶段自动化协同流水线吗？\n\n阶段 1: @archCli\n阶段 2: @devCli\n阶段 3: @testCli');" 
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="entity" value="agent_task" />
+                                            <input type="hidden" name="actionKey" value="run_pipeline" />
+                                            <input type="hidden" name="id" value="@id" />
+                                            <input type="hidden" name="returnUrl" value="@Url.Content($"~/{currentProject}/Page/HomePage")" />
+                                            <button type="submit" class="btn btn-xs btn-primary gap-1 font-bold shadow-sm">
+                                                <span>🚀 启动协同流水线</span>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(devOut) || status?.Contains("Completed") == true || status?.Contains("Manifested") == true)
+                                    {
+                                        <form method="post" action="@Url.Content($"~/{currentProject}/DynamicEntity/InvokeAction")" 
+                                              onsubmit="return confirm('确定要将此任务的规格产物物理落地到 projects/ 目录、执行脚手架一致性校验并热挂载吗？\n\n任务: @title.Replace("'", "\\'")');" 
+                                              class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="entity" value="agent_task" />
+                                            <input type="hidden" name="actionKey" value="manifest_app" />
+                                            <input type="hidden" name="id" value="@id" />
+                                            <input type="hidden" name="returnUrl" value="@Url.Content($"~/{currentProject}/Page/HomePage")" />
+                                            <button type="submit" class="btn btn-xs btn-secondary gap-1 font-bold shadow-sm" title="一键将智能体产物落地并挂载到系统">
+                                                <span>📦 物理交付热挂载</span>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Detail?entity=agent_task&id={id}")" 
+                                       class="btn btn-xs btn-ghost border border-base-300 hover:border-primary" title="进入标准 CRUD 详情页">
+                                        <span>底层详情</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- 实时智能体协同执行日志流 (Live Agent Activity Stream) -->
+    <div class="card bg-base-100 shadow-md border border-base-200 overflow-hidden mb-12">
+        <div class="card-body p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-base-200">
+                <div>
+                    <h3 class="text-lg font-black text-base-content flex items-center gap-2">
+                        <span>📜 实时多智能体协同流水记录</span>
+                        <span class="badge badge-sm badge-info font-bold">近 30 条</span>
+                    </h3>
+                    <p class="text-xs opacity-60 mt-0.5">跨角色（Claude / Antigravity / OpenCode）的实时执行轨迹与状态验证</p>
+                </div>
+                <a href="@Url.Content($"~/{currentProject}/DynamicEntity/Index?entity=agent_task_log")" 
+                   class="btn btn-xs btn-outline border-base-300 hover:border-primary gap-1">
+                    <span>查阅全量日志表格</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            </div>
+
+            @if (logRows.Count == 0)
+            {
+                <div class="text-center py-8 opacity-60 text-sm">暂无协同流水记录</div>
+            }
+            else
+            {
+                <div class="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+                    @foreach (var log in logRows)
+                    {
+                        var logId = log.TryGetValue("id", out var lId) ? lId?.ToString() ?? "0" : "0";
+                        var taskId = log.TryGetValue("task_id", out var tId) ? tId?.ToString() ?? "0" : "0";
+                        var taskTitle = log.TryGetValue("task_title", out var tt) ? tt?.ToString() ?? "未命名任务" : "未命名任务";
+                        var stage = log.TryGetValue("stage", out var stg) ? stg?.ToString() ?? "Stage" : "Stage";
+                        var role = log.TryGetValue("role", out var rle) ? rle?.ToString() ?? "Agent" : "Agent";
+                        var provider = log.TryGetValue("provider", out var prv) ? prv?.ToString() ?? "cli" : "cli";
+                        var success = log.TryGetValue("success", out var suc) && (suc?.ToString() == "1" || suc?.ToString()?.ToLower() == "true");
+                        var content = log.TryGetValue("log_content", out var lc) ? lc?.ToString() ?? "" : "";
+                        var errMsg = log.TryGetValue("error_message", out var em) ? em?.ToString() ?? "" : "";
+                        var logTime = log.TryGetValue("created_at", out var lt) ? lt?.ToString() ?? "" : "";
+
+                        <div class="p-3 rounded-2xl bg-base-200/40 border border-base-300/40 hover:border-primary/30 transition-all text-xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="badge badge-xs @(success ? "badge-success text-success-content" : "badge-error text-error-content") font-bold">
+                                        @(success ? "SUCCESS" : "FAILED")
+                                    </span>
+                                    <span class="font-bold text-base-content">@stage</span>
+                                    <span class="badge badge-xs badge-outline font-mono">@role @@ @provider</span>
+                                    <span class="opacity-50 text-[10px]">关联任务: #@taskId @taskTitle</span>
+                                </div>
+                                <span class="font-mono text-[10px] opacity-40">@logTime</span>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(content))
+                            {
+                                <div class="font-mono text-[11px] p-2 rounded-xl bg-base-300/60 text-base-content/90 overflow-x-auto whitespace-pre-wrap">@content</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(errMsg))
+                            {
+                                <div class="font-mono text-[11px] p-2 rounded-xl bg-error/15 text-error mt-1 whitespace-pre-wrap">@errMsg</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 智能体核心产物透视查阅器模态框 (Artifact Inspector Modal) -->
+<!-- ========================================== -->
+<dialog id="artifactInspectorModal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box w-11/12 max-w-5xl 2xl:max-w-6xl max-h-[90vh] flex flex-col p-4 sm:p-6 rounded-3xl border border-base-300">
+        <!-- 弹窗顶栏 -->
+        <div class="flex items-start justify-between gap-4 pb-4 border-b border-base-200">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="badge badge-sm badge-primary font-bold">AI 智能体产物透视器</span>
+                    <span id="modalTaskIdBadge" class="badge badge-sm badge-ghost font-mono">#0</span>
+                </div>
+                <h3 id="modalTaskTitle" class="text-lg sm:text-xl font-black text-base-content">任务名称</h3>
+            </div>
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost">✕</button>
+            </form>
+        </div>
+
+        <!-- 产物标签页切换 (Tabs，竖屏支持横向滑动，大屏自适应) -->
+        <div class="tabs tabs-boxed bg-base-200/80 p-1 rounded-2xl my-3 sm:my-4 self-start flex-nowrap overflow-x-auto no-scrollbar touch-pan-x max-w-full">
+            <button type="button" onclick="switchArtifactTab('arch')" id="tabBtnArch" class="tab tab-xs sm:tab-sm font-bold active-tab shrink-0 whitespace-nowrap">
+                🏛️ Stage 1: 架构设计 (RFC)
+            </button>
+            <button type="button" onclick="switchArtifactTab('dev')" id="tabBtnDev" class="tab tab-xs sm:tab-sm font-bold shrink-0 whitespace-nowrap">
+                💻 Stage 2: 开发实现交付
+            </button>
+            <button type="button" onclick="switchArtifactTab('test')" id="tabBtnTest" class="tab tab-xs sm:tab-sm font-bold shrink-0 whitespace-nowrap">
+                🧪 Stage 3: 测试验收结论
+            </button>
+        </div>
+
+        <!-- 产物内容呈现区 -->
+        <div class="flex-1 overflow-y-auto pr-1">
+            <div class="flex items-center justify-between text-xs opacity-60 mb-2 px-1">
+                <span id="modalProviderMeta" class="font-mono">负责智能体: Claude</span>
+                <button type="button" onclick="copyCurrentArtifact()" class="btn btn-xs btn-ghost gap-1 hover:text-primary">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    <span>复制文本</span>
+                </button>
+            </div>
+
+            <!-- 渲染容器 -->
+            <div id="modalArtifactContent" class="p-5 rounded-2xl bg-base-200/50 border border-base-300/50 font-sans text-sm leading-relaxed min-h-[300px]">
+                正在载入产物...
+            </div>
+        </div>
+
+        <!-- 弹窗底栏 -->
+        <div class="modal-action pt-4 border-t border-base-200">
+            <form method="dialog" class="flex items-center gap-2">
+                <button class="btn btn-sm btn-ghost">关闭预览</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<script>
+    // 快速角色编排预设切换
+    function applyRolePreset(val) {
+        const arch = document.getElementById('archCliSelect');
+        const dev = document.getElementById('devCliSelect');
+        const test = document.getElementById('testCliSelect');
+        if (val === 'recommended') {
+            arch.value = 'claude';
+            dev.value = 'antigravity';
+            test.value = 'opencode';
+        } else if (val === 'claude-heavy') {
+            arch.value = 'claude';
+            dev.value = 'claude';
+            test.value = 'opencode';
+        } else if (val === 'opencode-all') {
+            arch.value = 'opencode';
+            dev.value = 'opencode';
+            test.value = 'opencode';
+        }
+    }
+
+    // 任务状态过滤
+    function filterTasks(status) {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('btn-primary', 'text-white');
+            b.classList.add('btn-ghost');
+        });
+        const activeBtn = document.querySelector(`.filter-btn[data-status="${status}"]`);
+        if (activeBtn) {
+            activeBtn.classList.remove('btn-ghost');
+            activeBtn.classList.add('btn-primary', 'text-white');
+        }
+
+        const cards = document.querySelectorAll('.task-item');
+        cards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            if (status === 'all' || cardStatus === status) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // 任务实时模糊检索
+    function searchTasks() {
+        const query = (document.getElementById('taskSearchInput').value || '').trim().toLowerCase();
+        const cards = document.querySelectorAll('.task-item');
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title') || '';
+            const desc = card.getAttribute('data-desc') || '';
+            if (!query || title.includes(query) || desc.includes(query)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // 产物检视模态框逻辑
+    let currentTaskData = null;
+    let currentTab = 'arch';
+
+    function openArtifactModal(id, title, defaultTab) {
+        const dataNode = document.getElementById('task_data_' + id);
+        if (!dataNode) return;
+
+        currentTaskData = {
+            id: id,
+            title: dataNode.getAttribute('data-title'),
+            archCli: dataNode.getAttribute('data-arch-cli'),
+            devCli: dataNode.getAttribute('data-dev-cli'),
+            testCli: dataNode.getAttribute('data-test-cli'),
+            archOut: dataNode.getAttribute('data-arch-out') || '',
+            devOut: dataNode.getAttribute('data-dev-out') || '',
+            testOut: dataNode.getAttribute('data-test-out') || ''
+        };
+
+        document.getElementById('modalTaskIdBadge').innerText = '#' + id;
+        document.getElementById('modalTaskTitle').innerText = currentTaskData.title;
+
+        switchArtifactTab(defaultTab || 'arch');
+        document.getElementById('artifactInspectorModal').showModal();
+    }
+
+    function switchArtifactTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('tab-active', 'bg-primary', 'text-white'));
+        
+        const activeBtn = document.getElementById(tab === 'arch' ? 'tabBtnArch' : tab === 'dev' ? 'tabBtnDev' : 'tabBtnTest');
+        if (activeBtn) {
+            activeBtn.classList.add('tab-active', 'bg-primary', 'text-white');
+        }
+
+        if (!currentTaskData) return;
+
+        let rawContent = '';
+        let providerInfo = '';
+
+        if (tab === 'arch') {
+            rawContent = currentTaskData.archOut;
+            providerInfo = 'Stage 1: 架构设计 (RFC) · 负责智能体: ' + currentTaskData.archCli;
+        } else if (tab === 'dev') {
+            rawContent = currentTaskData.devOut;
+            providerInfo = 'Stage 2: 开发实现交付 · 负责智能体: ' + currentTaskData.devCli;
+        } else {
+            rawContent = currentTaskData.testOut;
+            providerInfo = 'Stage 3: 测试验收结论 · 负责智能体: ' + currentTaskData.testCli;
+        }
+
+        document.getElementById('modalProviderMeta').innerText = providerInfo;
+        const container = document.getElementById('modalArtifactContent');
+
+        if (!rawContent || !rawContent.trim()) {
+            container.innerHTML = '<div class="text-center py-16 opacity-50 italic">（该阶段尚未生成产物或正在等待流水线执行）</div>';
+        } else {
+            container.innerHTML = parseMarkdownToHtml(rawContent);
+        }
+    }
+
+    // 前端轻量 Markdown 格式化器
+    function parseMarkdownToHtml(raw) {
+        if (!raw) return '';
+        let escaped = raw
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // 代码块 ```lang ... ```
+        escaped = escaped.replace(/```([\w-]*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            return '<div class="my-3 rounded-2xl bg-base-300/80 p-4 border border-base-content/10 font-mono text-xs overflow-x-auto"><div class="text-[10px] uppercase font-bold opacity-40 mb-1">' + (lang || 'code') + '</div><pre><code>' + code + '</code></pre></div>';
+        });
+
+        // 标题
+        escaped = escaped.replace(/^### (.*$)/gim, '<h4 class="text-base font-bold text-primary mt-4 mb-2">$1</h4>');
+        escaped = escaped.replace(/^## (.*$)/gim, '<h3 class="text-lg font-bold text-base-content mt-5 mb-2.5 pb-1 border-b border-base-300">$1</h3>');
+        escaped = escaped.replace(/^# (.*$)/gim, '<h2 class="text-xl font-black text-base-content mt-6 mb-3 pb-2 border-b-2 border-primary/30">$1</h2>');
+
+        // 粗体
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-base-content">$1</strong>');
+
+        // 行内代码
+        escaped = escaped.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-base-300 text-primary font-mono text-xs font-semibold">$1</code>');
+
+        // 列表
+        escaped = escaped.replace(/^\s*[-*]\s+(.*$)/gim, '<div class="flex items-start gap-2 my-1"><span class="text-primary font-bold">•</span><span>$1</span></div>');
+
+        // 换行
+        escaped = escaped.replace(/\n/g, '<br/>');
+
+        return escaped;
+    }
+
+    function copyCurrentArtifact() {
+        if (!currentTaskData) return;
+        let text = '';
+        if (currentTab === 'arch') text = currentTaskData.archOut;
+        else if (currentTab === 'dev') text = currentTaskData.devOut;
+        else text = currentTaskData.testOut;
+
+        if (navigator.clipboard && text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('产物内容已成功复制到剪贴板！');
+            });
+        }
+    }
+</script>

@@ -1,0 +1,27 @@
+title: "博客数据与运营监控看板"
+description: "Blog App 实时统计与运营分析"
+
+metrics:
+  - id: total_posts
+    label: "文章总数"
+    source: "SELECT COUNT(*) FROM blog_post"
+    icon: "FileText"
+    format: "number"
+
+  - id: published_posts
+    label: "已发布文章"
+    source: "SELECT COUNT(*) FROM blog_post WHERE status = 'published'"
+    icon: "BookOpen"
+    format: "number"
+
+  - id: total_views
+    label: "全站累计阅读"
+    source: "SELECT COALESCE(SUM(view_count), 0) FROM blog_post"
+    icon: "Eye"
+    format: "number"
+
+  - id: category_count
+    label: "分类专栏"
+    source: "SELECT COUNT(*) FROM blog_category"
+    icon: "Folder"
+    format: "number"
